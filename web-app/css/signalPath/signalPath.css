@@ -1,0 +1,272 @@
+html, body {
+	height: 100%;
+/* 	background-color: black; */
+}
+
+button.active {
+	background-color: #FFFF66;	
+}
+
+#container {
+	margin:0;
+	min-height:100%;
+}
+
+#controls {
+	position: fixed;
+	background-color: white;
+	float:left;
+	width: 200px;
+	z-index: 100;
+	padding: 10px;
+	border: 3px black solid;
+}
+
+#canvas {
+	position:absolute;
+	top: 50px;
+	left: 240px;
+}
+
+#moduleTree {
+	max-height: 300px;
+	overflow:auto;	
+}
+
+.controlgroup {
+	padding: 10px;
+	margin-bottom: 10px;
+	border: 1px black solid;
+}
+
+.component {
+	position: absolute; 
+	border: 3px black solid;
+	padding: 5px;
+	z-index: 5;
+	background-color: white;
+	opacity: 0.95;
+}
+.component input {
+	width: 50px;
+}
+
+.module {
+	min-width: 150px;
+}
+
+.moduleheader {
+	width: 100%;
+	height: 20px;
+/* 	background-color: red; */
+}
+
+.modulename {
+/* 	float: left; */
+	font-weight: bold;
+}
+
+.modulebutton {
+	float: right;
+/* 	font-weight: bold; */
+/* 	padding: 2px; */
+	border: 1px black solid;
+}
+
+.modulebutton.disconnect {
+	color: red;
+	background-color: white;
+}
+
+.modulebutton.delete {
+	color: white;
+	background-color: red;
+}
+
+.disabled {
+	background-color: #dcdcdc; 
+	border: #3532ff 1px solid; 
+	color: #000000; 
+	cursor: default; 
+	display:none; 
+}
+
+table.paramTable {
+	width: 100%;
+}
+
+table.paramTable td input {
+	width: 50px;
+}
+
+table.ioTable {
+/* 	display: inline-block; */
+}
+
+table tr td.positive {
+	color:white;
+	background-color: blue;
+}
+
+table tr td.negative {
+	color:white;
+	background-color: red;
+}
+
+table tr td.executed {
+	color: green;
+}
+
+/* table tr.buy td { */
+/* 	background-color: #e8eaff; */
+/* } */
+
+/* table tr.sell td { */
+/* 	background-color: #ffe8e8; */
+/* } */
+
+td.input {
+	text-align: right;
+}
+td.output {	
+	text-align: left;
+}
+
+.parameter {
+	border: 1px white solid;
+	background-color: white;
+}
+
+div.input {
+	
+}
+
+div.output {
+	
+}
+
+div.exportable {
+	background-color: #FFFF66;	
+}
+div.export {
+	color: #dd982D;
+/* 	background-color: #FFB84D;	 */
+}
+
+.Double {
+	color: black;
+}
+
+.TradeEvent {
+	color: magenta;
+}
+
+.OrderBookEvent {
+	color: red;
+}
+
+.NOII {
+	color: 	blue;
+}
+
+.connected {
+	background-color: red;
+}
+
+.connectionHolder {
+ 		width: 0px;
+ 		height: 0px;
+		position: absolute;
+		display: block;
+		right: 0;
+		bottom: 0;
+		background-color: #bcd5e6;
+		text-align: center;
+}
+
+.moduleSwitch {
+	font-size: 7px;
+	text-align: center;
+	border: 1px solid black;
+/* 	width: 13px; */
+	height: 13px;
+	float: right;
+	cursor: pointer;
+}
+
+.ioSwitch {
+	font-size: 7px;
+	text-align: center;
+	border: 1px solid black;
+	width: 13px;
+	height: 13px;
+	cursor: pointer;
+}
+
+.ioSwitchInput {
+	float: left; 	
+}
+
+.ioSwitchOutput {
+	float: right; 	
+}
+
+.ioSwitchTrue {
+	background-color: green;
+	color: white;
+}
+
+.ioSwitchFalse {
+	background-color: red;
+	color: black;
+}
+
+.option .optionTitle {
+	width: 100px;
+	display: inline-block;
+}
+
+._jsPlumb_endpoint {
+	z-index:10;
+	background-color: white;
+}
+
+.connectionHolder._jsPlumb_endpoint {
+	cursor:move;
+}
+
+._jsPlumb_connector {
+	z-index:1;
+}
+
+.menuItemGroup {
+	margin-left: 150px;
+}
+
+.csvDownload {
+	display: block;
+}
+
+.csvDownload img {
+	vertical-align:middle; 	
+}
+
+/**
+ * jQuery UI stuff
+ **/
+ .ui-autocomplete-loading { background: white url('../../images/spinner_16x16.gif') right center no-repeat; }
+ 
+ /**
+  * PanicButtons
+  */
+  table.panic tbody tr.blocked {
+  	background-color: red;
+  }
+  
+  table.panic tbody tr.blocked td {
+  	background-color: red;
+  }
+  
+  .panicButtons {
+  	width: 200px;
+  }

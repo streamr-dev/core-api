@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Highstock Example</title>
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript">
+$(function() {
+	$.getJSON('http://www.highcharts.com/samples/data/from-sql.php?callback=?', function(data) {
+		
+		// create the chart
+		window.chart = new Highcharts.StockChart({
+			chart : {
+				renderTo : 'container',
+				zoomType: 'x'
+			},
+
+			navigator : {
+				series : {
+					data : data
+				}
+			},
+
+			rangeSelector : {
+				selected : 5 // All
+			},
+			
+			tooltip: {
+				//xDateFormat: '%Y-%m-%d %H:%M:%S'
+			},
+			
+			xAxis : {
+				events : {
+					setExtremes : onSetExtremes
+				},
+				ordinal: true
+			},
+
+			series : [{
+				//type: 'candlestick',
+				name : query.stockQuote,
+				data : data,
+				dataGrouping : {
+					enabled : false
+				},
+				marker: {
+					enabled: true,
+					radius: 2
+				}
+			}]
+		});
+	});
+});
+
+/**
+ * The initial data to load
+ */
+var query = {
+	groupBy: 'month'
+};
+
+/**
+ * Load new data depending on the selected min and max
+ */
+function onSetExtremes(e) {
+	var url,
+		currentExtremes = e.target.getExtremes(),
+		range = e.max - e.min;
+	
+	// cancel if we're reloading the same range
+	if (e.min === currentExtremes.min && e.max === currentExtremes.max) {
+		return false;
+	}
+	
+	chart.showLoading('Loading data from server...');
+	$.getJSON('http://www.highcharts.com/samples/data/from-sql.php?start='+ Math.round(e.min) +
+			'&end='+ Math.round(e.max) +'&callback=?', function(data) {
+		chart.series[0].setData(data);
+		chart.hideLoading();
+	});
+	
+	// Stop set extremes. When the new data arrives from the server, the x axis will 
+	// reflect data min and max automatically. 
+	return false;
+}
+
+/**
+ * Helper function to build the URL for the YAHOO query based on a configuration object
+ */
+function buildURL(cfg) {
+
+	var n, 
+		options = [], 
+		s = "http://www.highcharts.com/samples/data/from-sql.php?";
+
+	for(n in cfg) {
+		options.push(n + "=" + cfg[n]);
+	}
+	s += options.join("&");
+	s += "&callback=?";
+	console.log(s)
+	return s;
+
+}
+		</script>
+	</head>
+	<body>
+<script type="text/javascript" src="../../js/highstock.js"></script>
+
+<div id="container" style="height: 500px"></div>
+
+<div class="info">In this example Highcharts' data grouping is turned off. Instead, new data 
+	with a suitable resolution is loaded from the server every time the
+	extremes of the x axis change.</div>
+
+
+
+To do lazy-loading
+
+- Range selector only running when choosing a smaller range. When choosing wider, it is limited to dataMin and dataMax
+- When dragging the scrollbar, it jumps back until new data is loaded
+- minRange has no effect
+- loading data after Sep 30 is impossible though there is data on the server
+- range selector inputs not reflecting actual data
+- Show "loading" on the container before the dataset is first loaded. Move chart.loading up to namespace to allow it in a container before chart
+is initiated?
+
+	</body>
+</html>

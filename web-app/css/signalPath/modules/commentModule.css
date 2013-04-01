@@ -1,0 +1,12 @@
+div.comment {
+	background-color: #FFFA8B;
+	width: 150px;
+	min-width: 100px;
+	height: 100px;
+	min-height: 50px;
+}
+
+textarea.comment {
+	background-color: white;
+	resize: none;
+}

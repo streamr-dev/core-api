@@ -1,0 +1,39 @@
+.chart {
+/* 	position: absolute; comes from .component*/
+	min-width: 450px;
+	min-height: 300px;
+	width: 800px;
+	height: 500px;
+	background-color: white;
+	border: 3px black solid;
+	z-index: 4;
+}
+
+.chartDrawArea {
+	display: inline-block;
+/* 	position: relative; */
+/* 	left: 40px; */
+	width: 650px;
+	height: 400px;
+}
+
+.chart table {
+/* 	position: absolute; */
+/* 	top: 30px; */
+/* 	left: 0; */
+	width: auto;
+/* 	border: 0; */
+/* 	background-color: blue; */
+}
+
+.chart .ioTable {
+	float: left;	
+}
+
+.chart-resize-helper {
+	border: 2px dotted black;
+}
+
+.seriesLink {
+	margin-left: 10px;
+}
