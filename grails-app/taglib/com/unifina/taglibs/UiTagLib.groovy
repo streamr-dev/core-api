@@ -8,7 +8,7 @@ class UiTagLib {
 	static namespace = "ui"
 	
 	/**
-	* Renders a dropdown list of the currently logged in user's risk profiles.
+	* Renders a jQuery ui datepicker.
 	*
 	* @attr name REQUIRED the field name/id
 	* @attr value a Date object that represents the initial value

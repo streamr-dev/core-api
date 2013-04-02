@@ -27,7 +27,8 @@ modules = {
 	jstree {
 		dependsOn 'jquery'
 		resource url:'js/jsTree/jquery.jstree.js'
-		resource url:'js/jsTree/themes/default/style.css'
+		// If you change the theme, check SignalPathTagLib too
+		resource url:'js/jsTree/themes/classic/style.css'
 	}
 	atmosphere {
 		dependsOn 'jquery'

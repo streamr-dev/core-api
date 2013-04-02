@@ -1,0 +1,46 @@
+<plugin name='unifina-core' version='0.1' grailsVersion='2.2.0 &gt; *'>
+  <author>Henri Pihkala</author>
+  <authorEmail>henri.pihkala@unifina.com</authorEmail>
+  <title>Unifina Core Plugin</title>
+  <documentation>http://www.unifina.com</documentation>
+  <type>UnifinaCoreGrailsPlugin</type>
+  <resources>
+    <resource>UnifinaCorePluginResources</resource>
+    <resource>com.unifina.security.LoginController</resource>
+    <resource>com.unifina.security.LogoutController</resource>
+    <resource>com.unifina.ItchFile</resource>
+    <resource>com.unifina.data.Feed</resource>
+    <resource>com.unifina.data.Stream</resource>
+    <resource>com.unifina.security.SecRole</resource>
+    <resource>com.unifina.security.SecUser</resource>
+    <resource>com.unifina.security.SecUserSecRole</resource>
+    <resource>com.unifina.signalpath.Module</resource>
+    <resource>com.unifina.signalpath.ModuleCategory</resource>
+    <resource>com.unifina.signalpath.SavedSignalPath</resource>
+    <resource>com.unifina.FeedService</resource>
+    <resource>com.unifina.ModuleService</resource>
+    <resource>com.unifina.SignalPathService</resource>
+    <resource>com.unifina.taglibs.UiTagLib</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://grails.org/plugins' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+  </repositories>
+  <dependencies>
+    <runtime>
+      <dependency group='mysql' name='mysql-connector-java' version='5.1.16' />
+      <dependency group='org.apache.mina' name='mina-core' version='1.1.7' />
+    </runtime>
+  </dependencies>
+  <plugins>
+    <runtime>
+      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
+      <plugin group='org.grails.plugins' name='filterpane' version='2.0.1.1' />
+    </runtime>
+    <build>
+      <plugin group='org.grails.plugins' name='tomcat' version='2.2.0' />
+    </build>
+  </plugins>
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>

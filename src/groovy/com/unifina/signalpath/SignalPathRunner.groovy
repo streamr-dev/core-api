@@ -71,7 +71,7 @@ public class SignalPathRunner extends Thread {
 			globals.init()
 
 			if (globals.signalPathContext.csv) {
-				globals.signalPathContext.csvOptions = [timeFormat:Integer.parseInt(globals.signalPathContext.csvOptions.csvTimeFormat), filterEmpty:(signalPathContext.csvOptions.filterEmpty ? true:false)]
+				globals.signalPathContext.csvOptions = [timeFormat:Integer.parseInt(globals.signalPathContext.csvOptions.csvTimeFormat), filterEmpty:(globals.signalPathContext.csvOptions.filterEmpty ? true:false)]
 				globals.signalPathContext.speed = 0
 			}
 

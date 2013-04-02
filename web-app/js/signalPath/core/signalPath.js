@@ -1,3 +1,18 @@
+/**
+ * Triggered events:
+ * 
+ * signalPathNew ()
+ * signalPathLoad (saveData, signalPathData, signalPathContext)
+ * signalPathSave (saveData)
+ * signalPathStart
+ * signalPathStop
+ * 
+ * Options:
+ * 
+ * canvas: id of the canvas div
+ * signalPathContext: function() that returns the signalPathContext object 
+ */
+
 var SignalPath = (function () { 
 
     var detectedTransport = null;
@@ -18,14 +33,26 @@ var SignalPath = (function () {
 	
     var webRoot = "";
     
+    // set in init()
+    var canvas;
+    var options = {
+    		canvas: "canvas",
+    		signalPathContext: function() {
+    			return {};
+    		}
+    };
+    
 	// Public
 	var my = {} 
 	
     // TODO: remove if not needed anymore!
     my.replacedIds = {};
 	
-	my.init = function () { 
-//		createModuleTree();
+	my.init = function (opts) {
+		jQuery.extend(true, options, opts);
+		
+		canvas = $("#"+options.canvas);
+		
 		newSignalPath();
 
 		jsPlumb.init();
@@ -35,7 +62,7 @@ var SignalPath = (function () {
 				lineWidth:3,
 				strokeStyle: "#456" //('rgba(200,0,0,100)'
 		};
-		jsPlumb.Defaults.Container = $("#canvas");
+		jsPlumb.Defaults.Container = canvas;
 		jsPlumb.Defaults.Overlays = [["Arrow", {direction:-1}]];
 		
 		jQuery.atmosphere.logLevel = 'error';
@@ -59,6 +86,9 @@ var SignalPath = (function () {
 			return true;
 		}
 		else return false;
+	}
+	my.getCanvas = function() {
+		return canvas;
 	}
 	
 	function loadJSON(data) {
@@ -203,7 +233,6 @@ var SignalPath = (function () {
 			data.hash = modules.length; //hash++;
 		}
 		
-		var canvas = $("#canvas");
 		var mod = eval("SignalPath."+data.jsModule+"(data,canvas)");
 		
 		// Resize the modules array if necessary
@@ -258,7 +287,9 @@ var SignalPath = (function () {
 	/**
 	 * SaveData should contain (optionally): url, name, (params)
 	 */
-	function saveSignalPath(sd,signalPathContext,callback) {
+	function saveSignalPath(sd,callback) {
+		
+		var signalPathContext = options.signalPathContext();
 		
 		if (sd==null)
 			sd = saveData;
@@ -286,6 +317,8 @@ var SignalPath = (function () {
 
 					if (callback)
 						callback(saveData);
+					
+					$(my).trigger('signalPathSave', [saveData]);
 				}
 				else {
 					alert(data.message);
@@ -312,12 +345,13 @@ var SignalPath = (function () {
 		saveData = {
 				isSaved : false
 		}
+		
+		$(my).trigger('signalPathNew');
 	}
 	my.newSignalPath = newSignalPath;
 	
 	/**
-	 * Options should at least include options.url OR options.json
-	 * May also include options.saveUrl
+	 * Options must at least include options.url OR options.json
 	 */
 	function loadSignalPath(options,callback) {
 		var params = options.params || {};
@@ -342,13 +376,18 @@ var SignalPath = (function () {
 		}
 		
 		$.extend(saveData,options.saveData);
+		$.extend(saveData,data.saveData);
 		
 		// TODO: remove backwards compatibility
 		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext);
+		
+		$(my).trigger('signalPathLoad', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
 	}
 	
-	function run(signalPathContext) {
-
+	function run(additionalContext) {
+		var signalPathContext = options.signalPathContext();
+		jQuery.extend(true,signalPathContext,additionalContext);
+		
 		var result = signalPathToJSON(signalPathContext);
 		
 //		if (csv) {
@@ -401,7 +440,7 @@ var SignalPath = (function () {
 		if (newSession)
 			payloadCounter = 0;
 		
-		$("#spinner").show();
+//		$("#spinner").show();
 		
 		sessionId = sId;
 		
@@ -420,6 +459,8 @@ var SignalPath = (function () {
 
 		request.onMessage = handleResponse;
 		subSocket = socket.subscribe(request);
+		
+		$(my).trigger('signalPathStart');
 	}
 //	my.subscribeToSession = subscribeToSession;
 	
@@ -591,7 +632,8 @@ var SignalPath = (function () {
 //		else $.atmosphere.close();
 		
 		sessionId = null;
-		$("#spinner").hide();
+		$(my).trigger('signalPathStop');
+//		$("#spinner").hide();
 	}
 	
 	function abort() {

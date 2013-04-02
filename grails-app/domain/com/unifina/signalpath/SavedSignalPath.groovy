@@ -9,17 +9,19 @@ class SavedSignalPath {
 	String name
 	String json
 	
-	int exportedStringParameters
-	int exportedBooleanParameters
-	int exportedIntegerParameters
-	int exportedDoubleParameters
-	int exportedSignalPathParameters
-	int exportedTimeSeriesInputs
-	int exportedTradesInputs
-	int exportedOrderbookInputs
-	int exportedTimeSeriesOutputs
-	int exportedTradesOutputs
-	int exportedOrderbookOutputs
+	Boolean hasExports
+	
+//	int exportedStringParameters
+//	int exportedBooleanParameters
+//	int exportedIntegerParameters
+//	int exportedDoubleParameters
+//	int exportedSignalPathParameters
+//	int exportedTimeSeriesInputs
+//	int exportedTradesInputs
+//	int exportedOrderbookInputs
+//	int exportedTimeSeriesOutputs
+//	int exportedTradesOutputs
+//	int exportedOrderbookOutputs
 	
 	Date dateCreated
 	Date lastUpdated

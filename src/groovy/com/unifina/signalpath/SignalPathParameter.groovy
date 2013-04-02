@@ -24,19 +24,7 @@ class SignalPathParameter extends Parameter<SavedSignalPath> {
 	
 	def getCriteria() {
 		return {
-			or {
-				gt("exportedStringParameters",0)
-				gt("exportedBooleanParameters",0)
-				gt("exportedIntegerParameters",0)
-				gt("exportedDoubleParameters",0)
-				gt("exportedSignalPathParameters",0)
-				gt("exportedTimeSeriesInputs",0)
-				gt("exportedTradesInputs",0)
-				gt("exportedOrderbookInputs",0)
-				gt("exportedTimeSeriesOutputs",0)
-				gt("exportedTradesOutputs",0)
-				gt("exportedOrderbookOutputs",0)
-			}
+			eq("hasExports",true)
 		}
 	}
 	

@@ -29,8 +29,8 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.21'
 		compile('log4j:log4j:1.2.16')
-		runtime('org.apache.commons:commons-math:2.2')
-		runtime('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
+		compile('org.apache.commons:commons-math:2.2')
+		compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
     }
 
     plugins {
