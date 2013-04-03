@@ -26,4 +26,7 @@ class FeedService {
 		return Stream.findByName(name)
 	}
 	
+	Feed getFeed(Long id) {
+		return Feed.get(id)
+	}
 }

@@ -1,0 +1,19 @@
+#loadBrowser {
+	display:none;
+	position:absolute;
+/* 	width: 400px; */
+/* 	height: 800px; */
+	max-height: 800px;
+	overflow: auto;
+	z-index: 1000;
+}
+
+#loadBrowser table tr.selectable:hover {
+	background-color: #fff;
+	cursor: pointer;
+}
+
+#loadBrowser table td.selectable:hover {
+	background-color: #fff;
+	cursor: pointer;
+}

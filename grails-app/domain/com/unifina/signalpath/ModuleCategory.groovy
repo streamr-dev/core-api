@@ -3,6 +3,7 @@ package com.unifina.signalpath
 class ModuleCategory implements Comparable {
 	String name
 	int sortOrder
+	String modulePackage
 	
 	SortedSet modules
 	SortedSet subcategories
@@ -12,6 +13,7 @@ class ModuleCategory implements Comparable {
 	
 	static constraints = {
 		parent(nullable:true)
+		modulePackage(nullable:true)
 	}
 	
 	int compareTo(o) {

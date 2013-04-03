@@ -181,7 +181,7 @@ class SignalPathTagLib {
 		
 		def str = """
 	jQuery('#$id').click(function() {
-		jQuery('#browserId').jstree("refresh");
+		jQuery('#$browserId').jstree("refresh");
 	});
 		"""
 		
@@ -275,7 +275,7 @@ class SignalPathTagLib {
 	def spinner = {attrs,body->
 		def id = attrs.id
 		
-		out << "<div id='$id' class='spinner' style='display:none'>${body()}</div>"
+		out << "<div id='$id' style='display:none'>${body()}</div>"
 		
 		writeScriptHeader(out)
 		def str = """
@@ -331,7 +331,7 @@ class SignalPathTagLib {
 	 */
 	def loadBrowser = {attrs,body->
 		def id = attrs.id
-		def tabs = attrs.tabs ?: [[controller:"savedSignalPath",action:"loadBrowser"]]
+		def tabs = attrs.tabs ?: [[controller:"savedSignalPath",action:"loadBrowser",name:"Archive"]]
 		
 		out << "<div id='$id'>"
 		out << "<div class='loadTabs'>"
@@ -344,6 +344,18 @@ class SignalPathTagLib {
 		out << "</ul>"
 		out << "</div>"
 		out << "</div>"
+		
+		writeScriptHeader(out)
+		out << """
+		jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
+			var lb = jQuery("#$id");
+			if (lb.is(":visible")) {
+				lb.hide();
+				jQuery("#$id .loadTabs").tabs("destroy");
+			}
+		});
+		"""
+		writeScriptFooter(out)
 	}
 	
 	/**
@@ -365,11 +377,15 @@ class SignalPathTagLib {
 				else alert('No savedata - use Save As');
 			});
 
-			jQuery('SignalPath').on('signalPathLoad signalPathSave', function() {
-				if (SignalPath.isSaved())
-					jQuery('#$id').removeAttr('disabled');
+			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
+				jQuery('#$id').removeAttr("disabled");
+				jQuery('#$id').html("Save to "+saveData.target);
 			});
 
+			jQuery(SignalPath).on('signalPathSave', function(event,saveData) {
+				jQuery('#$id').removeAttr("disabled");
+				jQuery('#$id').html("Save to "+saveData.target);
+			});
 		"""
 		out << str
 		writeScriptFooter(out)

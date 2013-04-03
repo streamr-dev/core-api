@@ -37,7 +37,51 @@ class UnifinaCoreGrailsPlugin {
 //    def scm = [ url: "http://svn.codehaus.org/grails-plugins/" ]
 
     def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
+		def servletElement = xml.'servlet'
+		
+		def lastServlet = servletElement[servletElement.size() - 1]
+		lastServlet + {
+			'servlet' {
+				'description'("AtmosphereServlet")
+				'servlet-name'("AtmosphereServlet")
+				'servlet-class'("org.atmosphere.cpr.AtmosphereServlet")
+				'init-param' {
+					'param-name'("org.atmosphere.useWebSocket")
+					'param-value'("false")
+				}
+				'init-param' {
+					'param-name'("org.atmosphere.useNative")
+					'param-value'("true")
+				}
+				'init-param' {
+					'param-name'("org.atmosphere.cpr.AtmosphereInterceptor.disableDefaults")
+					'param-value'("true")
+				}
+				'init-param' {
+					'param-name'("org.atmosphere.cpr.AtmosphereHandler")
+					'param-value'("com.unifina.atmosphere.AtmosphereHandlerPubSub")
+				}
+				'init-param' {
+					'param-name'("org.atmosphere.cpr.broadcasterCacheClass")
+					'param-value'("com.unifina.atmosphere.CounterBroadcasterCache")
+				}
+				'init-param' {
+					'param-name'("org.atmosphere.cpr.broadcasterClass")
+					'param-value'("com.unifina.atmosphere.MySimpleBroadcaster")
+				}
+				'load-on-startup'("0")
+			}
+		}
+		
+		def mappingElement = xml.'servlet-mapping'
+		
+		def lastMapping = mappingElement[mappingElement.size() - 1]
+		lastMapping + {
+			'servlet-mapping' {
+				'servlet-name'("AtmosphereServlet")
+				'url-pattern'("/atmosphere/*")
+			}
+		}
     }
 
     def doWithSpring = {

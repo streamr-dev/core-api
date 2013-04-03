@@ -8,6 +8,7 @@ class Module implements Comparable {
 	String jsModule
 	String type
 	Boolean hide
+	String modulePackage
 	
 	SortedSet params
 	static belongsTo = [category: ModuleCategory]
@@ -18,6 +19,7 @@ class Module implements Comparable {
 		jsModule()
 		type()
 		hide(nullable:true)
+		modulePackage(nullable:true)
     }
 	
 	String toString() {

@@ -24,5 +24,7 @@ public interface IReturnChannel {
 	
 	public SignalPath getSignalPath();
 	
+	public void destroy();
+	
 //	public void setTransportReady(boolean ready, boolean setToFalseOnBroadcast);
 }

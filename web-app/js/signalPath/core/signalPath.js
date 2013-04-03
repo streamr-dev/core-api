@@ -10,7 +10,10 @@
  * Options:
  * 
  * canvas: id of the canvas div
- * signalPathContext: function() that returns the signalPathContext object 
+ * signalPathContext: function() that returns the signalPathContext object
+ * runUrl: url where to POST the run command
+ * abortUrl: url where to POST the abort command
+ * atmosphereUrl: url for atmosphere, the sessionId will be appended to this url
  */
 
 var SignalPath = (function () { 
@@ -39,7 +42,10 @@ var SignalPath = (function () {
     		canvas: "canvas",
     		signalPathContext: function() {
     			return {};
-    		}
+    		},
+    		runUrl: "runSignalPath",
+    		abortUrl: "abort",
+    		atmosphereUrl: project_webroot+"atmosphere/",
     };
     
 	// Public
@@ -408,7 +414,7 @@ var SignalPath = (function () {
 		
 		$.ajax({
 			type: 'POST',
-			url: 'runSignalPath', 
+			url: options.runUrl, 
 			data: {
 				signalPathContext: JSON.stringify(result.signalPathContext),
 				signalPathData: JSON.stringify(result.signalPathData)
@@ -445,7 +451,7 @@ var SignalPath = (function () {
 		sessionId = sId;
 		
 		var request = { 
-				url : project_webroot+"atmosphere/" + sId,
+				url : options.atmosphereUrl+sId,
 				transport: 'long-polling',
 				fallbackTransport: 'long-polling',
 				executeCallbackBeforeReconnect : true,
@@ -640,7 +646,7 @@ var SignalPath = (function () {
 
 		$.ajax({
 			type: 'POST',
-			url: 'abort', 
+			url: options.abortUrl, 
 			data: {
 				sessionId: sessionId,
 				runnerId: runnerId
