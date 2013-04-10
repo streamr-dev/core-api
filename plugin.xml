@@ -8,6 +8,8 @@
     <resource>UnifinaCorePluginResources</resource>
     <resource>com.unifina.security.LoginController</resource>
     <resource>com.unifina.security.LogoutController</resource>
+    <resource>com.unifina.signalpath.ModuleController</resource>
+    <resource>com.unifina.signalpath.SavedSignalPathController</resource>
     <resource>com.unifina.ItchFile</resource>
     <resource>com.unifina.data.Feed</resource>
     <resource>com.unifina.data.Stream</resource>
@@ -20,6 +22,7 @@
     <resource>com.unifina.FeedService</resource>
     <resource>com.unifina.ModuleService</resource>
     <resource>com.unifina.SignalPathService</resource>
+    <resource>com.unifina.taglibs.SignalPathTagLib</resource>
     <resource>com.unifina.taglibs.UiTagLib</resource>
   </resources>
   <repositories>
@@ -34,8 +37,8 @@
   </dependencies>
   <plugins>
     <runtime>
-      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
       <plugin group='org.grails.plugins' name='filterpane' version='2.0.1.1' />
+      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
     </runtime>
     <build>
       <plugin group='org.grails.plugins' name='tomcat' version='2.2.0' />

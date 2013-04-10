@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.unifina.FeedService;
 import com.unifina.data.Feed;
 import com.unifina.data.IFeed;
@@ -11,7 +13,6 @@ import com.unifina.data.IRequireFeed;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.utils.Globals;
-import org.apache.log4j.Logger;
 
 /**
  * DataSource is a class global to the current run context. It handles
@@ -30,6 +31,7 @@ public abstract class DataSource {
 //	protected List<ITimeListener> timeListeners = []
 //	protected List<IDayListener> dateListeners = []
 	protected List<IStartListener> startListeners = new ArrayList<>();
+	protected List<IStopListener> stopListeners = new ArrayList<>();
 	protected boolean isHistoricalFeed = true;
 
 	protected Globals globals;
@@ -96,6 +98,10 @@ public abstract class DataSource {
 		startListeners.add(startListener);
 	}
 	
+	public void addStopListener(IStopListener stopListener) {
+		stopListeners.add(stopListener);
+	}
+	
 	public IFeed connectFeed(Feed domain) {
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		if (feedService == null)
@@ -138,6 +144,9 @@ public abstract class DataSource {
 			log.error("Exception thrown while stopping feed",e);
 			throw new RuntimeException("Error while stopping feed",e);
 		}
+		
+		for (IStopListener it : stopListeners)
+			it.onStop();
 	}
 	
 	protected abstract void doStopFeed() throws Exception;
