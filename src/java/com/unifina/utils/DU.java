@@ -35,4 +35,10 @@ public class DU {
 		return clean(priceInTicks * tick);
 	}
 	
+	public static double roundTo(double price, double tick) {
+		double timesInOne = 1/tick;
+		double rounded = Math.round(price*timesInOne) / timesInOne;
+		return rounded;
+	}
+	
 }

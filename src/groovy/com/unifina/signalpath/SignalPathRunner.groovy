@@ -121,6 +121,7 @@ public class SignalPathRunner extends Thread {
 //		abort()
 		servletContext["signalPathRunners"].remove(runnerId)
 		signalPaths.each {it.destroy()}
+		globals.destroy()
 	}
 	
 	public void abort() {

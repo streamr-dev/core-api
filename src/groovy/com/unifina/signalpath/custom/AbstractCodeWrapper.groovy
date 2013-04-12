@@ -76,8 +76,14 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 				// Replace [CLASSNAME] with a generated one
 				String className = "CustomModule"+new Date().getTime()
 
-				GroovyClassLoader gcl = new GroovyClassLoader()
-				Class clazz = gcl.parseClass(makeImportString()+header.replace("[[CLASSNAME]]",className) + code + footer);
+				// Avoid using the Thread context classloader
+//				ClassLoader parentClassLoader = this.class.getClassLoader()
+//				GroovyClassLoader gcl = new GroovyClassLoader(parentClassLoader)
+				
+				// Load the class using the classloader of the Globals class so that the classes loaded
+				// for this SignalPath run can be unloaded when the run finishes.
+				String code = makeImportString()+header.replace("[[CLASSNAME]]",className) + code + footer;
+				Class clazz = globals.groovyClassLoader.parseClass(code)
 				instance = clazz.newInstance();
 				instance.init()
 

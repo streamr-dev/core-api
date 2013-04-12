@@ -27,6 +27,7 @@ class SavedSignalPathController {
 		
 		result.saveData = createSaveData(ssp) 
 		
+		globals.destroy()
 		render result as JSON
 	}
 
@@ -39,9 +40,9 @@ class SavedSignalPathController {
 		
 		ssp.properties = params
 
+		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
+		
 		try {
-			Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
-			
 			// Make sure the name is set
 			Map json = JSON.parse(params.json)
 			json.signalPathData.name = params.name
@@ -65,6 +66,9 @@ class SavedSignalPathController {
 			e = GrailsUtil.deepSanitize(e)
 			Map r = [error:true, message:"SIGNALPATH NOT SAVED:\n"+e.message]
 			render r as JSON
+		}
+		finally {
+			globals.destroy()
 		}
 	}
 	

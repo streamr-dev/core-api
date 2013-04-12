@@ -3,13 +3,14 @@ package com.unifina.utils
 import java.text.SimpleDateFormat
 
 import com.unifina.datasource.DataSource
+import com.unifina.datasource.IStopListener;
 import com.unifina.security.SecUser
 import com.unifina.signalpath.AbstractSignalPathModule
 
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-class Globals {
+public class Globals {
 	
 	private static final Logger log = Logger.getLogger(Globals.class)
 	
@@ -29,6 +30,7 @@ class Globals {
 	SecUser user
 	
 	TimezoneConverter tzConverter
+	GroovyClassLoader groovyClassLoader
 	
 	private DataSource dataSource = null
 	public boolean abort = false
@@ -43,6 +45,7 @@ class Globals {
 		this.signalPathContext = signalPathContext;
 		this.grailsApplication = grailsApplication;
 		this.user = user
+		this.groovyClassLoader = new GroovyClassLoader(this.getClass().getClassLoader())
 	}
 	
 	public void onModuleCreated(AbstractSignalPathModule module) {
@@ -125,7 +128,10 @@ class Globals {
 	}
 	
 	public void destroy() {
-		
+		for (Class c : groovyClassLoader.getLoadedClasses()){
+			GroovySystem.getMetaClassRegistry().removeMetaClass(c);
+//			log.info("destroy(): removed from MetaClassRegistry: $c")
+		}
 	}
 	
 	public DataSource getDataSource() {

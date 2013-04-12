@@ -6,6 +6,16 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
 import com.unifina.security.SecUser
 
+/**
+ * This class provides methods to create the Globals instance that serves
+ * as a holder/context for a certain SignalPath run. The returned object must
+ * be explicitly destroyed when it is no longer needed. The default Globals objects
+ * destroys itself on the DataSource stop event, but if you do not run the DataSource
+ * (saving, loading etc.) you must destroy the Globals object explicitly.
+ * 
+ * @author Henri
+ *
+ */
 class GlobalsFactory {
 	
 	private static final Logger log = Logger.getLogger(GlobalsFactory.class)

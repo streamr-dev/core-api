@@ -78,13 +78,15 @@ class ModuleController {
 //				m.loadModel(Long.parseLong(params.rapidModelId))
 //				iMap["model"] = [rapidModelId:params.rapidModelId]
 //			}
-
 			render iMap as JSON
 		} catch (Exception e) {
 			e = GrailsUtil.deepSanitize(e)
 			e.printStackTrace(System.out)
 			Map r = [error:true, message:e.message]
 			render r as JSON
+		}
+		finally {
+			globals.destroy()
 		}
 	}
 	

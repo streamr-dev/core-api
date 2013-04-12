@@ -12,7 +12,10 @@ class ModuleService {
 
 	@CompileStatic
     public AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
-		AbstractSignalPathModule m = (AbstractSignalPathModule) new GroovyClassLoader().loadClass(mod.implementingClass).newInstance()
+		// Load the class using the classloader of the Globals class so that the classes loaded
+		// for this SignalPath run can be unloaded when the run finishes.
+		AbstractSignalPathModule m = (AbstractSignalPathModule) globals.groovyClassLoader.loadClass(mod.implementingClass).newInstance()
+//		AbstractSignalPathModule m = (AbstractSignalPathModule) new GroovyClassLoader().loadClass(mod.implementingClass).newInstance()
 		m.globals = globals
 		m.init()
 		m.setName(mod.name)
