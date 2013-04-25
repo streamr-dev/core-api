@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 // OPTIMIZED
@@ -16,10 +15,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class FileFeedCache extends Thread implements IFeedCache<String> {
 	
 	ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
-	ArrayList<Catchup<String>> catchups = new ArrayList<>();
 	
 	boolean quit = false;
-	boolean catchingUp = false;
 	
 	Path file = null;
 	BufferedWriter writer = null;
