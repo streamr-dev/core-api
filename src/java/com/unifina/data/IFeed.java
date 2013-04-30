@@ -3,7 +3,14 @@ package com.unifina.data;
 import java.util.TimeZone;
 
 
-
+/**
+ * A lightweight feed implementation interface. In most cases you will
+ * want to extend AbstractMessageHub and AbstractFeedProxy instead of directly
+ * implementing this interface. For implementing historical feeds implementing 
+ * this interface is fine.
+ * @author Henri
+ *
+ */
 public interface IFeed {
 	
 	public boolean subscribe(Object object) throws Exception;

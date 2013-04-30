@@ -2,9 +2,9 @@ package com.unifina.feed;
 
 public class Message {
 	public int counter;
-	public String message;
+	public Object message;
 	
-	public Message(int counter, String message) {
+	public Message(int counter, Object message) {
 		this.counter = counter;
 		this.message = message;
 	}
