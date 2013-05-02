@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.log4j.Logger;
+
 // OPTIMIZED
 
 public class FileFeedCache extends Thread implements IFeedCache<String> {
@@ -21,7 +23,10 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 	Path file = null;
 	BufferedWriter writer = null;
 	
-	private int size = 0;
+	private int queuedSize = 0;
+	private int flushedSize = 0;
+	
+	private static final Logger log = Logger.getLogger(FileFeedCache.class);
 	
 	public FileFeedCache(Path file) throws IOException {
 		this.file = file;
@@ -34,11 +39,11 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 			Files.createDirectory(file.getParent());
 		
 		if (Files.exists(file)) {
-			System.out.println(file+" exists, calculating number of lines..");
+			log.info(file+" exists, calculating number of lines..");
 			BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.ISO_8859_1);
 			while (reader.readLine()!=null)
-				size++;
-			System.out.println(file+" contains "+size+" cached messages.");
+				flushedSize++;
+			log.info(file+" contains "+flushedSize+" cached messages.");
 		}
 		
 		setPriority(NORM_PRIORITY-1);
@@ -68,14 +73,10 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 		quit = true;
 	}
 	
-	int enqueueCounter=0;
-	
 	@Override
 	public void cache(Object msg) {
 		queue.add(msg.toString());
-		
-//		if (enqueueCounter++ % 1000 == 0)
-//			System.out.println("Cache queue size is "+queue.size());
+		queuedSize++;
 	}
 
 	@Override
@@ -90,7 +91,7 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 
 	@Override
 	public int getCacheSize() {
-		return size;
+		return flushedSize;
 	}
 
 	@Override
@@ -104,13 +105,12 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 					if (line==null) break;
 
 					writer.write(line+"\n");
-					size++;
+					flushedSize++;
 				}
 				writer.flush();
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("Failed to flush queue: ",e);
 			}
-//			System.out.println("Queue flushed. Cache now contains "+expected+" messages.");
 		}
 	}
 }

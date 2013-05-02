@@ -6,11 +6,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.log4j.Logger;
+
 public class FileCatchup implements Catchup<String> {
 
 	BufferedReader reader;
 	FileFeedCache cache;
 	int counter = 0;
+	
+	private static final Logger log = Logger.getLogger(FileCatchup.class);
 	
 	public FileCatchup(Path file, FileFeedCache cache) throws IOException {
 		reader = Files.newBufferedReader(file, StandardCharsets.ISO_8859_1);
@@ -38,9 +42,14 @@ public class FileCatchup implements Catchup<String> {
 			
 			return line;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error in getNext()",e);
 			return null;
 		}
 	}
 
+	@Override
+	public int getNextCounter() {
+		return counter;
+	}
+	
 }
