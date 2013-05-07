@@ -142,7 +142,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 		if (catchupState==CatchupState.CATCHUP) {
 			realtimeWaitQueue.add(msg);
 			realtimeWaitQueueCounter.add(counter);
-			log.info("receive: Message added to wait queue: "+counter);
+//			log.info("receive: Message added to wait queue: "+counter);
 		}
 		else {
 			// ProcessAndQueue a message with the correct counter
@@ -278,7 +278,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 			line = catchup.getNext();
 
 			if (line==null) {
-				log.info("getNextEvents: Catchup is ready! Message "+catchupCounter+" does not exist. Expected: "+expected);
+//				log.info("getNextEvents: Catchup is ready! Message "+catchupCounter+" does not exist. Expected: "+expected);
 				return null;
 			}
 			
@@ -294,7 +294,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 			// Remove overlap in the wait queue
 			Integer cc = realtimeWaitQueueCounter.peek();
 			if (cc!=null && cc==catchupCounter) {
-				log.info("getNextEvents: Removing duplicate from wait queue: "+cc);
+//				log.info("getNextEvents: Removing duplicate from wait queue: "+cc);
 				realtimeWaitQueueCounter.poll();
 				realtimeWaitQueue.poll();
 			}

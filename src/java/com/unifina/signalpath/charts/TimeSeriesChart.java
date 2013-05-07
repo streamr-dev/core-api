@@ -17,8 +17,6 @@ public class TimeSeriesChart extends Chart {
 	
 	TimeSeriesInput[] myInputs;
 	
-	TimeOfDayUtil todUtil = null;
-	
 	boolean overnightBreak = true;
 	
 	@Override
