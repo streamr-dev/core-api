@@ -1,5 +1,7 @@
 package com.unifina.feed;
 
+import grails.converters.JSON;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -8,13 +10,21 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;
+import org.codehaus.groovy.grails.web.json.JSONObject;
 
 // OPTIMIZED
 
 public class FileFeedCache extends Thread implements IFeedCache<String> {
+	
+	private SimpleDateFormat dirFormat = new SimpleDateFormat("yyyyMMdd");
+	private SimpleDateFormat fileFormat = new SimpleDateFormat("MM-dd");
 	
 	ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
 	
@@ -28,8 +38,19 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 	
 	private static final Logger log = Logger.getLogger(FileFeedCache.class);
 	
-	public FileFeedCache(Path file) throws IOException {
-		this.file = file;
+	public FileFeedCache(String cacheConfig, Map<String,Object> globalConfig) throws IOException {
+		
+		if (!globalConfig.containsKey("unifina.fileFeedCache.recordDir"))
+			throw new RuntimeException("Global config does not contain key unifina.feed.recordDir");
+		
+		JSONObject cc = (JSONObject) JSON.parse(cacheConfig);
+		
+		String recordPath = globalConfig.get("unifina.fileFeedCache.recordDir").toString();
+		String filePrefix = cc.containsKey("filePrefix") ? cc.get("filePrefix").toString() : "";
+		String fileSuffix = cc.containsKey("fileSuffix") ? cc.get("fileSuffix").toString() : "";
+		
+		Date today = new Date();
+		this.file = Paths.get(recordPath, dirFormat.format(today), filePrefix+fileFormat.format(today)+fileSuffix); //"-ITCH.txt");		
 		
 		/**
 		 * If file exists, calculate how many messages have been received already
@@ -49,6 +70,7 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 		setPriority(NORM_PRIORITY-1);
 		writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.toFile(),true)), 1024 * 1024 * 30);
 		setName("FileFeedCache");
+		start();
 	}
 	
 	@Override

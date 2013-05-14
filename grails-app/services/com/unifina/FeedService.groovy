@@ -3,6 +3,8 @@ package com.unifina
 import com.unifina.data.Feed
 import com.unifina.data.IFeed
 import com.unifina.data.Stream
+import com.unifina.feed.FeedFactory
+import com.unifina.feed.MessageRecipient
 import com.unifina.utils.Globals
 
 class FeedService {
@@ -28,5 +30,13 @@ class FeedService {
 	
 	Feed getFeed(Long id) {
 		return Feed.get(id)
+	}
+	
+	Feed getFeedByRealtimeClass(String className) {
+		return Feed.findByRealtimeFeed(className)
+	}
+	
+	MessageRecipient getMessageRecipient(Feed domain) {
+		return FeedFactory.getInstance(domain)
 	}
 }

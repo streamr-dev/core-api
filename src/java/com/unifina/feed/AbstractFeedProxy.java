@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;
 
+import com.unifina.FeedService;
+import com.unifina.data.Feed;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventQueue;
 import com.unifina.data.IEventRecipient;
@@ -42,7 +44,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
 	
 	protected List<Class> validSubscribeTypes;
-	protected AbstractMessageHub<T> hub;
+	protected MessageHub<T> hub;
 	
 	private Catchup catchup = null;
 	enum CatchupState { CATCHUP, CATCHUP_UNSYNC_READY, CATCHUP_READY };
@@ -57,12 +59,19 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 	private Integer firstWaitQueue = null;
 	private Integer firstRealQueue = null;
 	
+	protected Globals globals;
+	
 	public AbstractFeedProxy(Globals globals) {
+		this.globals = globals;
 		hub = getMessageHub();
 		validSubscribeTypes = getValidSubscribeTypes();
 	}
 	
-	protected abstract AbstractMessageHub<T> getMessageHub();
+	protected MessageHub<T> getMessageHub() {
+		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
+		Feed feed = feedService.getFeedByRealtimeClass(this.getClass().getName());
+		return (MessageHub<T>) feedService.getMessageRecipient(feed);
+	}
 	
 	/**
 	 * This should return a list of classes that are valid parameters
@@ -218,7 +227,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 				}
 				else {
 					log.info("handleGap: Message processed from catchup: "+counter);
-					T msg = hub.preprocess(next);
+					T msg = hub.getParser().parse(next);
 					processAndQueue(counter, msg, false);
 				}
 			}
@@ -282,7 +291,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 				return null;
 			}
 			
-			msg = hub.preprocess(line);
+			msg = hub.getParser().parse(line);
 			
 			if (catchupCounter!=expected)
 				throw new IllegalStateException("Gap in catchup! Counter: "+catchupCounter+", expected: "+expected);
@@ -306,12 +315,12 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 	
 	@Override
 	public void startFeed() throws Exception {
-		getMessageHub().addProxy(this);
+		hub.addProxy(this);
 	}
 	
 	@Override
 	public void stopFeed() throws Exception {
-		getMessageHub().removeProxy(this);
+		hub.removeProxy(this);
 		log.info("Unsubscribed from hub: "+this);
 	}
 	
@@ -334,7 +343,7 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 	@Override
 	public boolean startCatchup() {
 		log.info("Starting catchup");
-		catchup = getMessageHub().startCatchup(this);
+		catchup = hub.startCatchup(this);
 		
 		if (catchup==null) {
 			return false;

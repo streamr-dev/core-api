@@ -6,8 +6,8 @@ public class FeedEvent implements Comparable<FeedEvent> {
 	public Date timestamp;
 	public Object content;
 	public IEventRecipient recipient;
-	public IFeedEventParser parser;
 	public IFeed feed;
+	public IHistoricalEventSource historicalSource;
 	
 	public long queueTicket = 0;
 	
@@ -20,6 +20,6 @@ public class FeedEvent implements Comparable<FeedEvent> {
 	
 	@Override
 	public String toString() {
-		return timestamp + " - "+"parser: "+parser+", content: "+content;
+		return timestamp + " - "+"parser: "+historicalSource+", content: "+content;
 	}
 }

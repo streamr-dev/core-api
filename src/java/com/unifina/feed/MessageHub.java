@@ -13,28 +13,34 @@ import org.apache.log4j.Logger;
  *
  * @param <T>
  */
-public abstract class AbstractMessageHub<T> extends Thread implements MessageRecipient {
+public class MessageHub<T> extends Thread implements MessageRecipient {
 
 	protected MessageSource source;
+	protected MessageParser<T> parser;
 	protected IFeedCache cache;
 	
 	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
 	protected ArrayList<AbstractFeedProxy<T>> proxies = new ArrayList<>();
 	
 	private boolean quit = false;
-	private static final Logger log = Logger.getLogger(AbstractMessageHub.class);
+	private static final Logger log = Logger.getLogger(MessageHub.class);
 	
-	protected AbstractMessageHub(MessageSource source, IFeedCache cache) {
+	protected MessageHub(MessageSource source, MessageParser<T> parser, IFeedCache cache) {
 		this.source = source;
 		this.cache = cache;
+		this.parser = parser;
 		
 		source.setExpectedCounter(cache.getCacheSize()+1);
 		source.setRecipient(this);
 		
 		setName("MsgHub_"+source.getClass().getSimpleName());
+		start();
 	}
 	
-	public abstract T preprocess(Object msg);
+//	public abstract T preprocess(Object msg);
+	public MessageParser<T> getParser() {
+		return parser;
+	}
 	
 	@Override
 	public void run() {
@@ -50,7 +56,7 @@ public abstract class AbstractMessageHub<T> extends Thread implements MessageRec
 			
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				T msg = preprocess(m.message);
+				T msg = parser.parse(m.message);
 
 				// TODO: also filter here to avoid filtering in each proxy?
 

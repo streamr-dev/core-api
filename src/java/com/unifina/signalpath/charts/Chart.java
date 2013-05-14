@@ -69,6 +69,7 @@ public abstract class Chart extends AbstractSignalPathModule {
 				return;
 			
 			recordCsvString();
+			csvWriter.newLine();
 		}
 		else record();
 	}
