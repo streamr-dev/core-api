@@ -20,10 +20,6 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 	
 	Double currentOut = null;
 	
-	public TimeOfDay() {
-		originatingModule = true;
-	}
-	
 	@Override
 	public void init() {
 		addInput(startTime);
@@ -58,13 +54,11 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 			if (currentOut==null || currentOut==0) {
 				out.send(1D);
 				currentOut = 1.0;
-				basicPropagator.propagate();
 			}	
 		}
 		else if (currentOut==null || currentOut==1) {
 			out.send(0D);
 			currentOut = 0.0;
-			basicPropagator.propagate();
 		}
 	}
 

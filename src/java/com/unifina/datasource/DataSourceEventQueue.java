@@ -6,6 +6,7 @@ import java.util.Queue;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventQueue;
+import com.unifina.feed.MasterClock;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.utils.Globals;
 
@@ -17,7 +18,8 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	protected Globals globals;
 	protected boolean abort = false;
 	
-	private ArrayList<ITimeListener> timeListeners = new ArrayList<>();
+	private MasterClock masterClock;
+//	private ArrayList<ITimeListener> timeListeners = new ArrayList<>();
 	private ArrayList<IDayListener> dayListeners = new ArrayList<>();
 	
 	private long lastReportedSec = 0;
@@ -29,7 +31,7 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	protected long queueTicket = 0;
 	
 	private int dlCount;
-	private int tlCount;
+//	private int tlCount;
 	private int i;
 	
 	/**
@@ -37,8 +39,9 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	 */
 	protected boolean sync = false;
 	
-	public DataSourceEventQueue(Globals globals) {
+	public DataSourceEventQueue(Globals globals, DataSource dataSource) {
 		this.globals = globals;
+		masterClock = new MasterClock(globals,dataSource);
 		queue = initQueue();
 	}
 	
@@ -46,8 +49,9 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	
 	@Override
 	public void addTimeListener(ITimeListener timeListener) {
-		if (!timeListeners.contains(timeListener))
-			timeListeners.add(timeListener);
+		masterClock.register(timeListener);
+//		if (!timeListeners.contains(timeListener))
+//			timeListeners.add(timeListener);
 	}
 
 	@Override
@@ -78,7 +82,14 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	}
 	
 	protected void reportTime(long time) {
-		while (lastReportedSec+1000<=time) {
+		/**
+		 * With event-based clock in backtest, the time between events can be multiple seconds.
+		 * However each second should be reported. New events may appear in the queue between
+		 * reporting each second, we must check for this!
+		 */
+		int initialQueueSize = queue.size();
+		
+		while (lastReportedSec+1000<=time && queue.size()==initialQueueSize) {
 			lastReportedSec += 1000;
 			Date d = new Date(lastReportedSec);
 			globals.time = d;
@@ -100,12 +111,9 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 				lastReportedDay = julianDay;
 			}
 			
-			// Don't use iterators to prevent ConcurrentModificationException in case new timelisteners are added
-			// Take note of the size and only loop the currently existing ones.
-			tlCount = timeListeners.size();
-			
-			for (i=0;i<tlCount;i++)
-				timeListeners.get(i).setTime(d);
+			FeedEvent timeEvent = new FeedEvent();
+			timeEvent.timestamp = d;
+			masterClock.receive(timeEvent);
 		}
 	}
 	

@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
-import com.unifina.datasource.ITimeListener;
 import com.unifina.utils.Globals;
 
 /**
@@ -37,11 +36,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	ArrayList<Output> outputs = new ArrayList<Output>();
 	Map<String,Output> outputsByName = new HashMap<String,Output>();
 
-	protected boolean originatingModule = false;
+//	protected boolean originatingModule = false;
 	
-	protected Propagator basicPropagator;
-	private Propagator[] specialPropagators;
-	private Output[][] specialPropagatorDefinitions;
+//	protected Propagator basicPropagator;
+//	private Propagator[] specialPropagators;
+//	private Output[][] specialPropagatorDefinitions;
 	
 	private boolean wasReady = false;
 	
@@ -49,6 +48,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	private int inputCount = 0;
 	
 	boolean sendPending = false;
+	
+	// If this is set to true, this module will be a leaf in all Propagator trees
+	protected boolean propagationSink = false;
 	
 	Module domainObject;
 	
@@ -75,7 +77,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 	
 	public AbstractSignalPathModule() {
-		originatingModule = (this instanceof ITimeListener);
+//		originatingModule = (this instanceof ITimeListener);
 	}
 	
 	/**
@@ -225,17 +227,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * the module exists in!
 	 */
 	public void connectionsReady() {
-		// Build a dirty list if necessary
-		if (originatingModule) {
-			findFeedbackConnections();
-			basicPropagator = new Propagator(getOutputs());
-			specialPropagatorDefinitions = getSpecialPropagatorDefinitions();
-			
-			specialPropagators = new Propagator[specialPropagatorDefinitions.length];
-			for (int i=0;i<specialPropagatorDefinitions.length;i++) {
-				specialPropagators[i] = new Propagator(specialPropagatorDefinitions[i]);
-			}
-		}
+//		if (originatingModule) {
+//			findFeedbackConnections();
+//			basicPropagator = new Propagator(getOutputs());
+//			specialPropagatorDefinitions = getSpecialPropagatorDefinitions();
+//			
+//			specialPropagators = new Propagator[specialPropagatorDefinitions.length];
+//			for (int i=0;i<specialPropagatorDefinitions.length;i++) {
+//				specialPropagators[i] = new Propagator(specialPropagatorDefinitions[i]);
+//			}
+//		}
 		
 		initialize();
 		
@@ -326,13 +327,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}
 	}
 
-	public Propagator getBasicPropagator() {
-		return basicPropagator;
-	}
-	
-	public Propagator getSpecialPropagator(int index) {	
-		return specialPropagators[index];
-	}
+//	public Propagator getBasicPropagator() {
+//		return basicPropagator;
+//	}
+//	
+//	public Propagator getSpecialPropagator(int index) {	
+//		return specialPropagators[index];
+//	}
 
 	public void trySendOutput() {
 		if (sendPending && allInputsReady()) {

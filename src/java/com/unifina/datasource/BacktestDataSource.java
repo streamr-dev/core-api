@@ -19,7 +19,7 @@ public class BacktestDataSource extends DataSource {
 
 	@Override
 	protected DataSourceEventQueue initEventQueue() {
-		return new BacktestEventQueue(globals);
+		return new BacktestEventQueue(globals, this);
 	}
 	
 	@Override

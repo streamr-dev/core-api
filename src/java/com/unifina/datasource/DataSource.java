@@ -8,8 +8,10 @@ import org.apache.log4j.Logger;
 
 import com.unifina.FeedService;
 import com.unifina.data.Feed;
+import com.unifina.data.IEventRecipient;
 import com.unifina.data.IFeed;
 import com.unifina.data.IRequireFeed;
+import com.unifina.feed.AbstractEventRecipient;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.utils.Globals;
@@ -79,14 +81,23 @@ public abstract class DataSource {
 			registered = true;
 		}
 		
-		if (!registered) 
-			throw new IllegalArgumentException("I don't know what to do with "+o+"!");
+//		if (!registered) 
+//			throw new IllegalArgumentException("I don't know what to do with "+o+"!");
 	}
 	
 	protected IFeed registerModule(IRequireFeed o) {
-		IFeed feed = connectFeed(o.getFeed());
+		IFeed feed = createFeed(o.getFeed());
 		try {
 			feed.subscribe(o);
+			
+//			// TODO: should this wiring be implemented more generally?
+//			IEventRecipient rcpt = feed.getEventRecipient(o);
+//			if (rcpt!=null) {
+//				register(rcpt);
+//				if (rcpt instanceof AbstractEventRecipient) {
+//					((AbstractEventRecipient) rcpt).register(o);
+//				}
+//			}
 		} catch (Exception e) {
 			log.error("Failed to subscribe "+o+" to feed "+feed,e);
 			throw new RuntimeException("Failed to subscribe "+o+" to feed "+feed,e);
@@ -102,7 +113,7 @@ public abstract class DataSource {
 		stopListeners.add(stopListener);
 	}
 	
-	public IFeed connectFeed(Feed domain) {
+	public IFeed createFeed(Feed domain) {
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		if (feedService == null)
 			feedService = new FeedService();

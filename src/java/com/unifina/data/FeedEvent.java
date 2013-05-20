@@ -11,6 +11,16 @@ public class FeedEvent implements Comparable<FeedEvent> {
 	
 	public long queueTicket = 0;
 	
+	public FeedEvent() {
+		
+	}
+	
+	public FeedEvent(Object content, Date timestamp, IEventRecipient recipient) {
+		this.content = content;
+		this.timestamp = timestamp;
+		this.recipient = recipient;
+	}
+	
 	@Override
 	public int compareTo(FeedEvent e) {
 		int t = timestamp.compareTo(e.timestamp);

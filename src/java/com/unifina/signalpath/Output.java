@@ -44,8 +44,17 @@ public abstract class Output<T> extends Endpoint<T> {
 	}
 	
 	public void addPropagator(Propagator p) {
-		propagators.add(p);
-		cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
+		if (!propagators.contains(p)) {
+			propagators.add(p);
+			cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
+		}
+	}
+	
+	public void removePropagator(Propagator p) {
+		if (propagators.contains(p)) {
+			propagators.remove(p);
+			cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
+		}
 	}
 	
 	public void connect(Input<T> input) {

@@ -7,14 +7,15 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.utils.Globals;
 import com.unifina.utils.TimeOfDayUtil;
 
 public class BacktestEventQueue extends DataSourceEventQueue {
 	
-	public BacktestEventQueue(Globals globals) {
-		super(globals);
+	public BacktestEventQueue(Globals globals, DataSource dataSource) {
+		super(globals, dataSource);
 	}
 
 	private ArrayList<IFeed> feeds = new ArrayList<>();

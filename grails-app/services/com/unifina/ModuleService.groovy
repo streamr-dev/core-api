@@ -32,16 +32,16 @@ class ModuleService {
 			m.configure(config)
 		}
 
-		if (m instanceof ISharedInstance && globals) {
-			AbstractSignalPathModule shared = globals.sharedInstances.get(m.getSharedInstanceID())
-			if (shared==null) {
-				globals.sharedInstances.put(m.getSharedInstanceID(),m)
-			}
-			else {
-				// Return the shared instance and don't call Globals#onModuleCreated()
-				return shared
-			}
-		}
+//		if (m instanceof ISharedInstance && globals) {
+//			AbstractSignalPathModule shared = globals.sharedInstances.get(m.getSharedInstanceID())
+//			if (shared==null) {
+//				globals.sharedInstances.put(m.getSharedInstanceID(),m)
+//			}
+//			else {
+//				// Return the shared instance and don't call Globals#onModuleCreated()
+//				return shared
+//			}
+//		}
 
 		globals?.onModuleCreated(m)
 		return m

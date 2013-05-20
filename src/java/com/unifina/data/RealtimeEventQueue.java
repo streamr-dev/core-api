@@ -5,6 +5,7 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 
+import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.utils.Globals;
 
@@ -17,8 +18,8 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	
 	private static final Logger log = Logger.getLogger(RealtimeEventQueue.class);
 	
-	public RealtimeEventQueue(Globals globals) {
-		super(globals);
+	public RealtimeEventQueue(Globals globals, DataSource dataSource) {
+		super(globals,dataSource);
 	}
 
 	

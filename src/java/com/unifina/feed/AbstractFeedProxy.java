@@ -1,7 +1,5 @@
 package com.unifina.feed;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -10,9 +8,6 @@ import org.apache.log4j.Logger;
 import com.unifina.FeedService;
 import com.unifina.data.Feed;
 import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventQueue;
-import com.unifina.data.IEventRecipient;
-import com.unifina.data.IFeed;
 import com.unifina.utils.Globals;
 
 
@@ -30,20 +25,10 @@ import com.unifina.utils.Globals;
  * @author Henri
  *
  */
-public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICatchupFeed {
-	
-	// The FeedEvents are pushed
-	private IEventQueue eventQueue;
+public abstract class AbstractFeedProxy<T> extends AbstractFeed implements ICatchupFeed {
 	
 	private int expected = 0;
-//	private int catchupCounter = 0;
 	
-	protected TimeZone tz;
-
-	protected HashMap<Object,Object> subscriptionsByKey = new HashMap<>();
-	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
-	
-	protected List<Class> validSubscribeTypes;
 	protected MessageHub<T> hub;
 	
 	private Catchup catchup = null;
@@ -59,84 +44,15 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 	private Integer firstWaitQueue = null;
 	private Integer firstRealQueue = null;
 	
-	protected Globals globals;
-	
 	public AbstractFeedProxy(Globals globals) {
-		this.globals = globals;
+		super(globals);
 		hub = getMessageHub();
-		validSubscribeTypes = getValidSubscribeTypes();
 	}
 	
 	protected MessageHub<T> getMessageHub() {
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		Feed feed = feedService.getFeedByRealtimeClass(this.getClass().getName());
 		return (MessageHub<T>) feedService.getMessageRecipient(feed);
-	}
-	
-	/**
-	 * This should return a list of classes that are valid parameters
-	 * for a call to subscribe(Object)
-	 * @return
-	 */
-	protected abstract List<Class> getValidSubscribeTypes();
-	
-	/**
-	 * Returns an Object that will be used to lookup the subscriber
-	 * and the event recipient.
-	 * @param subscriber
-	 * @return
-	 */
-	protected abstract Object getSubscriptionKey(Object subscriber);
-	
-	/**
-	 * Creates an IEventRecipient that should be set on FeedEvents 
-	 * created for this subscription. 
-	 * @param sub
-	 * @return
-	 */
-	protected abstract IEventRecipient createEventRecipientForSubscription(Object sub);
-	
-	public boolean isSubscribed(Object item) {
-		return canSubscribe(item) && subscriptionsByKey.containsKey(getSubscriptionKey(item));
-	}
-	
-	public boolean canSubscribe(Object item) {
-		boolean valid = false;
-		for (Class c : validSubscribeTypes) {
-			if (c.isAssignableFrom(item.getClass())) {
-				valid = true;
-				break;
-			}
-		}
-		return valid;
-	}
-	
-	/**
-	 * Creates a new subscription on this feed and creates an event handler for
-	 * this subscription. Returns true if the subscription was successful,
-	 * false if the object was already subscribed. Throws an IllegalArgumentException
-	 * if the subscription is of the wrong type.
-	 */
-	public boolean subscribe(Object sub) {
-		if (!canSubscribe(sub)) {
-			throw new IllegalArgumentException("This feed can only subscribe items of the following classes: "+validSubscribeTypes);
-		}
-		
-		Object key = getSubscriptionKey(sub);
-		
-		if (!isSubscribed(sub)) {
-			subscriptionsByKey.put(key,sub);
-			eventRecipientsByKey.put(key, createEventRecipientForSubscription(sub));
-		}
-		else {
-			Object subscribed = subscriptionsByKey.get(key); 
-			// Check that the subscribed object is the same object!
-			if (subscribed!=sub)
-				throw new IllegalStateException("Feed subscriptions with the same key are not same objects! Subscribed: "+subscribed+", New: "+sub);
-			else return false;
-		}
-		
-		return true;
 	}
 	
 	/**
@@ -327,17 +243,6 @@ public abstract class AbstractFeedProxy<T> extends Thread implements IFeed, ICat
 	@Override
 	public boolean equals(Object obj) {
 		return obj.getClass().equals(this.getClass());
-	}
-	
-
-	@Override
-	public void setTimeZone(TimeZone tz) {
-		this.tz = tz;
-	}
-	
-	@Override
-	public void setEventQueue(IEventQueue queue) {
-		this.eventQueue = queue;
 	}
 	
 	@Override

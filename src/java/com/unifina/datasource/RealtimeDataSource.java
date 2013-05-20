@@ -34,7 +34,7 @@ public class RealtimeDataSource extends DataSource {
 
 	@Override
 	protected DataSourceEventQueue initEventQueue() {
-		return new RealtimeEventQueue(globals);
+		return new RealtimeEventQueue(globals, this);
 	}
 	
 	@Override

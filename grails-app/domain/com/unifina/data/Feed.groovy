@@ -15,9 +15,9 @@ class Feed {
 	String parserClass
 	String messageSourceClass
 	String messageSourceConfig
-	
+
 	Module module
-	
-    static constraints = {
-    }
+
+	static constraints = {
+	}
 }
