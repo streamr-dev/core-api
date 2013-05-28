@@ -31,7 +31,7 @@ public abstract class Chart extends AbstractSignalPathModule {
 		csv = true;
 		csvWriter = new CSVWriter(null, globals.getGrailsApplication().getConfig(), globals.getSignalPathContext(), globals.getUserTimeZone());
 	}
-	
+
 	@Override
 	public void init() {
 		canClearState = false;

@@ -34,8 +34,8 @@ public class CSVWriter {
 	public CSVWriter(File file, ConfigObject config, Map<String,Object> signalPathContext, TimeZone timeZone) {
 		this(file, 
 			(String) MapTraversal.getProperty(config,"unifina.csv.separator"),
-			(Integer) MapTraversal.getProperty(signalPathContext,"csvOptions.timeFormat"),
-			(Boolean) MapTraversal.getProperty(signalPathContext,"csvOptions.lastOfDayOnly"),
+			MapTraversal.getInteger(signalPathContext,"csvOptions.timeFormat"),
+			MapTraversal.getBoolean(signalPathContext,"csvOptions.lastOfDayOnly"),
 			timeZone
 		);
 	}
@@ -91,6 +91,7 @@ public class CSVWriter {
 				throw new RuntimeException("Exception writing to CSV",e);
 			}
 		}
+		lastLineToday = null;
 	}
 	
 	public void setTimeZone(TimeZone tz) {
