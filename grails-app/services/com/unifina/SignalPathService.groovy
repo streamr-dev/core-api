@@ -38,7 +38,7 @@ class SignalPathService {
 	 */
 	public Map reconstruct(Map json, Globals globals) {
 		
-		// TODO: remove backwards compatibilidy
+		// TODO: remove backwards compatibility
 		Map signalPathData = json.signalPathData ? json.signalPathData : json
 		
 		SignalPath sp = jsonToSignalPath(signalPathData,true,globals,true)

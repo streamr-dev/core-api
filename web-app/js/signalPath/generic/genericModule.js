@@ -1,8 +1,24 @@
 SignalPath.ParamRenderers = {
 		"default": {
 			create: function(module,data) {
-				var input = $("<input type='text' value='"+data.value+"'>");
-				return input;
+				if (data.possibleValues) {
+					var select = $("<select class='parameterInput'></select>");
+					$(data.possibleValues).each(function(i,val) {
+						var option = $("<option></option>");
+						option.attr("value",val.value);
+						option.append(val.name);
+						
+						if (data.value==val.value)
+							option.attr("selected","selected");
+						
+						select.append(option);
+					});
+					return select;
+				}
+				else {
+					var input = $("<input class='parameterInput' type='text' value='"+data.value+"'>");
+					return input;
+				}
 			},
 			getValue: function(module,data,input) {
 				return $(input).val();
@@ -13,7 +29,7 @@ SignalPath.ParamRenderers = {
 				var span = $("<span></span>");
 				
 				// Show search if no value is selected
-				var search = $("<input type='text' style='"+(data.value ? "display:none" : "")+"' class='streamSearch' value='"+(data.streamName || "")+"'>");
+				var search = $("<input class='parameterInput' type='text' style='"+(data.value ? "display:none" : "")+"' class='streamSearch' value='"+(data.streamName || "")+"'>");
 				span.append(search);
 				
 				// Show symbol if it exists
@@ -65,6 +81,12 @@ SignalPath.ParamRenderers = {
 		}
 }
 
+SignalPath.getParamRenderer = function(data) {
+	var key = (data.type ? data.type : "default");
+	var renderer = (key in SignalPath.ParamRenderers ? SignalPath.ParamRenderers[key] : SignalPath.ParamRenderers["default"]);
+	return renderer;
+};
+
 // Bind connection and disconnection events
 jsPlumb.bind("jsPlumbConnection",function(connection) {
 	$(connection.source).trigger("spConnect", connection.target);
@@ -87,34 +109,30 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	
 	// PRIVATE FUNCTIONS
 	function getParamRenderer(data) {
-		var key = (data.type ? data.type : "default");
-		var renderer = (key in SignalPath.ParamRenderers ? SignalPath.ParamRenderers[key] : SignalPath.ParamRenderers["default"]);
-		return renderer;
+		return SignalPath.getParamRenderer(data);
 	}
 	
 	function createParamInput(data) {
 		var result = null;
 		
-		if (data.possibleValues) {
-			var select = $("<select></select>");
-			$(data.possibleValues).each(function(i,val) {
-				var option = $("<option></option>");
-				option.attr("value",val.value);
-				option.append(val.name);
-				
-				if (data.value==val.value)
-					option.attr("selected","selected");
-				
-				select.append(option);
-			});
-			result = select;
-		}
-		else {
+//		if (data.possibleValues) {
+//			var select = $("<select></select>");
+//			$(data.possibleValues).each(function(i,val) {
+//				var option = $("<option></option>");
+//				option.attr("value",val.value);
+//				option.append(val.name);
+//				
+//				if (data.value==val.value)
+//					option.attr("selected","selected");
+//				
+//				select.append(option);
+//			});
+//			result = select;
+//		}
+//		else {
 			var renderer = getParamRenderer(data);
 			result = renderer.create(that,data);
-//			var input = $("<input type='text' value='"+data.value+"'>");
-//			result = input;
-		}
+//		}
 		
 		if (data.updateOnChange) {
 			$(result).change(function() {
@@ -842,7 +860,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	that.onDisconnect = my.onDisconnect;
 	
 	*/
-		
+	
 	return that;
 }
 

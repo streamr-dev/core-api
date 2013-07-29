@@ -55,6 +55,7 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 	
 	public void doStart() throws Exception {
 		feedStartTime = System.currentTimeMillis();
+		eventCounter = 0;
 		
 		// Insert first event from each feed into the queue
 		for (IFeed feed : feeds) {

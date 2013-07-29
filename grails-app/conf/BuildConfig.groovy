@@ -40,6 +40,8 @@ grails.project.dependency.resolution = {
             export = false
         }
 			  
+		runtime ":hibernate:$grailsVersion"
+			  
 		runtime ":spring-security-core:1.2.7"
 		runtime ":jquery:1.8.3"
 		runtime ":jquery-ui:1.8.24"
