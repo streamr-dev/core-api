@@ -31,14 +31,14 @@
   </repositories>
   <dependencies>
     <runtime>
-      <dependency group='mysql' name='mysql-connector-java' version='5.1.16' />
       <dependency group='org.apache.mina' name='mina-core' version='1.1.7' />
+      <dependency group='mysql' name='mysql-connector-java' version='5.1.16' />
     </runtime>
   </dependencies>
   <plugins>
     <runtime>
-      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
       <plugin group='org.grails.plugins' name='filterpane' version='2.0.1.1' />
+      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
     </runtime>
     <build>
       <plugin group='org.grails.plugins' name='tomcat' version='2.2.0' />
