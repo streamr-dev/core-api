@@ -135,8 +135,11 @@ public abstract class DataSource {
 	}
 	
 	public void startFeed() {
-		for (IStartListener it : startListeners)
-			it.onStart(); 
+		for (int i=0;i<startListeners.size();i++)
+			startListeners.get(i).onStart();
+		// Possible ConcurrentModificationException
+//		for (IStartListener it : startListeners)
+//			it.onStart(); 
 
 		try {
 			doStartFeed();

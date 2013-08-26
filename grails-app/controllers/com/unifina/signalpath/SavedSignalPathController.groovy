@@ -4,13 +4,16 @@ import grails.converters.JSON
 import grails.util.GrailsUtil
 
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory;
+import com.unifina.utils.GlobalsFactory
 
 class SavedSignalPathController {
 	
 	def signalPathService
 	def springSecurityService
 	def grailsApplication
+	
+	def unifinaSecurityService
+	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(SavedSignalPath.get(params.id))},only:['load', 'save']]
 	
 	def createSaveData(SavedSignalPath ssp) {
 		return [url:createLink(controller:"savedSignalPath",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
