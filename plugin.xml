@@ -18,6 +18,8 @@
     <resource>com.unifina.security.SecUserSecRole</resource>
     <resource>com.unifina.signalpath.Module</resource>
     <resource>com.unifina.signalpath.ModuleCategory</resource>
+    <resource>com.unifina.signalpath.ModulePackage</resource>
+    <resource>com.unifina.signalpath.ModulePackageUser</resource>
     <resource>com.unifina.signalpath.SavedSignalPath</resource>
     <resource>com.unifina.FeedService</resource>
     <resource>com.unifina.ModuleService</resource>
@@ -32,8 +34,8 @@
   </repositories>
   <dependencies>
     <runtime>
-      <dependency group='org.apache.mina' name='mina-core' version='1.1.7' />
       <dependency group='mysql' name='mysql-connector-java' version='5.1.16' />
+      <dependency group='org.apache.mina' name='mina-core' version='1.1.7' />
     </runtime>
   </dependencies>
   <plugins>

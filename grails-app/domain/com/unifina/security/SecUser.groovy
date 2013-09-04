@@ -1,5 +1,8 @@
 package com.unifina.security
 
+import com.unifina.signalpath.ModulePackage
+import com.unifina.signalpath.ModulePackageUser
+
 class SecUser {
 
 	static transients = ["springSecurityService"]
@@ -31,6 +34,11 @@ class SecUser {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 
+	// Added by Unifina
+	Set<ModulePackage> getModulePackages() {
+		ModulePackageUser.findAllByUser(this).collect { it.modulePackage } as Set
+	}
+	
 	def beforeInsert() {
 		encodePassword()
 	}

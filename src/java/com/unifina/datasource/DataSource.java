@@ -1,6 +1,7 @@
 package com.unifina.datasource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,10 +9,8 @@ import org.apache.log4j.Logger;
 
 import com.unifina.FeedService;
 import com.unifina.data.Feed;
-import com.unifina.data.IEventRecipient;
 import com.unifina.data.IFeed;
 import com.unifina.data.IRequireFeed;
-import com.unifina.feed.AbstractEventRecipient;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.utils.Globals;
@@ -132,6 +131,10 @@ public abstract class DataSource {
 		}
 		
 		return feed;
+	}
+	
+	public Collection<IFeed> getFeeds() {
+		return feedByClass.values();
 	}
 	
 	public void startFeed() {

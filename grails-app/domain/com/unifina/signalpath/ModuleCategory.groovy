@@ -3,10 +3,11 @@ package com.unifina.signalpath
 class ModuleCategory implements Comparable {
 	String name
 	int sortOrder
-	String modulePackage
+	ModulePackage modulePackage
 	
 	SortedSet modules
 	SortedSet subcategories
+	
 	static hasMany = [modules:Module, subcategories:ModuleCategory]
 	
 	static belongsTo = [parent:ModuleCategory]

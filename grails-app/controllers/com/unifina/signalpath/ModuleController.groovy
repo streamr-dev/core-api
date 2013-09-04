@@ -10,40 +10,55 @@ class ModuleController {
 	
 	def moduleService
 	def grailsApplication
+	def springSecurityService
 	
 	def jsonSearchModule() {
-		List<Module> mods = Module.findAllByHideIsNullAndNameLike("%"+params.term+"%")
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
+		List<Module> mods = Module.createCriteria().list {
+			isNull("hide")
+			like("name","%"+params.term+"%")
+			'in'("modulePackage",allowedPackages)
+		}
+//		List<Module> mods = Module.findAllByHideIsNullAndNameLike()
 		render mods as JSON
 	} 
 	
 	def jsonGetModules() {
-		List<Module> mods = Module.findAllByHideIsNull()
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
+		List<Module> mods = Module.createCriteria().list {
+			isNull("hide")
+			'in'("modulePackage",allowedPackages)
+		}
+//		List<Module> mods = Module.findAllByHideIsNull()
 		render mods as JSON
 	}
 	
 	def jsonGetModuleTree() {
 		def categories = ModuleCategory.findAllByParentIsNull([sort:"sortOrder"])
+
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
+		
 		def result = []
-		categories.each {category->
-			def item = moduleTreeRecurse(category)
+		categories.findAll{allowedPackages.contains(it.modulePackage)}.each {category->
+			def item = moduleTreeRecurse(category,allowedPackages)
 			result.add(item)
 		}
 		render result as JSON
 	}
 
-	def moduleTreeRecurse(ModuleCategory category) {
+	private Map moduleTreeRecurse(ModuleCategory category, Set<ModulePackage> allowedPackages) {
 		def item = [:]
 		item.data = category.name
 		item.metadata = [canAdd:false, id:category.id]
 		item.children = []
 
-		category.subcategories.each {subcat->
-			def subItem = moduleTreeRecurse(subcat)
+		category.subcategories.findAll{allowedPackages.contains(it.modulePackage)}.each {subcat->
+			def subItem = moduleTreeRecurse(subcat,allowedPackages)
 			item.children.add(subItem)
 		}
 
-		category.modules.each {module->
-			if (module.hide==null || !module.hide) {
+		category.modules.each {Module module->
+			if (allowedPackages.contains(module.modulePackage) && (module.hide==null || !module.hide)) {
 				def moduleItem = [:]
 				moduleItem.data = module.name
 				moduleItem.metadata = [canAdd:true, id:module.id]
@@ -56,10 +71,14 @@ class ModuleController {
 
 	def jsonGetModule() {
 		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
-//		globals.target.createModule = true
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
 		
 		try {
-			def domainObject = Module.get(params.id)
+			Module domainObject = Module.get(params.id)
+			if (!allowedPackages.contains(domainObject.modulePackage)) {
+				throw new Exception("User does not have access to module $domainObject.name")
+			}
+			
 			def conf = (params.configuration ? JSON.parse(params.configuration) : [:])
 
 			AbstractSignalPathModule m = moduleService.getModuleInstance(domainObject,conf,null,globals)

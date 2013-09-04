@@ -1,31 +1,28 @@
 package com.unifina.signalpath
 
-import java.util.Map;
-
-import groovy.transform.CompileStatic
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
 
 
 class SignalPathParameter extends Parameter<SavedSignalPath> {
-
-	Closure criteria
 	
 	public SignalPathParameter(AbstractSignalPathModule owner, String name) {
 		super(owner, name, null, "SignalPath");
-		def proj = {
-			projections {
-				property 'id', 'id'
-				property 'name', 'name'
-			}
-		}
-
-		// Combine closures
-		criteria = proj << getCriteria()
 	}
 	
 	def getCriteria() {
-		return {
-			eq("hasExports",true)
+		def springSecurityService = owner.globals?.grailsApplication?.mainContext?.getBean("springSecurityService")
+		def user = springSecurityService?.currentUser
+		
+		if (user) {
+			return {
+				eq("hasExports",true)
+				eq("user",user)
+			}
 		}
+		else return null
 	}
 	
 	public Map<String,Object> getConfiguration() {
@@ -36,7 +33,19 @@ class SignalPathParameter extends Parameter<SavedSignalPath> {
 			config.put("defaultValue", getValue().getId());
 		}
 
-		Collection signalPaths = SavedSignalPath.createCriteria().list(criteria)
+		Collection signalPaths
+		def crit = getCriteria()
+		if (crit!=null) {
+			def proj = {
+				projections {
+					property 'id', 'id'
+					property 'name', 'name'
+				}
+			}
+			signalPaths = SavedSignalPath.createCriteria().list(proj << crit)
+		}
+		else signalPaths = []
+
 		config.put("possibleValues",signalPaths.collect {[value:it[0], name:it[1]]})
 		return config
 	}

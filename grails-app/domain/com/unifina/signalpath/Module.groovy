@@ -8,7 +8,7 @@ class Module implements Comparable {
 	String jsModule
 	String type
 	Boolean hide
-	String modulePackage
+	ModulePackage modulePackage
 	
 	SortedSet params
 	static belongsTo = [category: ModuleCategory]
