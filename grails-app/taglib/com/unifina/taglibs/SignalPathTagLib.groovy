@@ -328,15 +328,24 @@ class SignalPathTagLib {
 	 *
 	 * @attr id REQUIRED id of the browser
 	 * @attr tabs a list of maps with keys: controller, action, params where the content of the tab must be available. The default values has one tab with controller: savedSignalPath, action: loadBrowser, and no params.
+	 * @attr visible should the browser be instantly visible
 	 */
 	def loadBrowser = {attrs,body->
 		def id = attrs.id
 		def tabs = attrs.tabs ?: [[controller:"savedSignalPath",action:"loadBrowser",name:"Archive"]]
+		def visible = attrs.visible ?: false
+		def command = attrs.command ?: "SignalPath.loadSignalPath({url: url})"
 		
 		out << "<div id='$id'>"
 		out << "<div class='loadTabs'>"
 		out << "<ul>"
 		tabs.each {
+			// Inject the javascript command into params
+			if (!it.params)
+				it.params = [command:command]
+			else if (it.params && !it.params.command)
+				it.params.command = command
+			
 			out << "<li>"
 			out << "<a href='${createLink(controller:it.controller,action:it.action,params:it.params)}'>$it.name</a>"
 			out << "</li>"
@@ -347,14 +356,19 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		out << """
-		jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
-			var lb = jQuery("#$id");
-			if (lb.is(":visible")) {
-				lb.hide();
-				jQuery("#$id .loadTabs").tabs("destroy");
-			}
-		});
+		if (typeof(SignalPath)!="undefined") {
+			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
+				var lb = jQuery("#$id");
+				if (lb.is(":visible")) {
+					lb.hide();
+					jQuery("#$id .loadTabs").tabs("destroy");
+				}
+			});
+		}
 		"""
+		if (visible) {
+			out << "jQuery('#$id').tabs().show();"
+		}
 		writeScriptFooter(out)
 	}
 	
@@ -466,6 +480,69 @@ class SignalPathTagLib {
 	});
 		"""
 		out << str
+		writeScriptFooter(out)
+	}
+	
+	/**
+	 * Fetches SP parameters as JSON from given URL and renders them as a table.
+	 *
+	 * @attr url REQUIRED where to get the JSON from
+	 * @attr parentId REQUIRED where in the DOM to add the table
+	 * @attr id id of the table, default: 'parameterTable'
+	 * @attr columns Column names in the table. Must have at least 2 columns! Default: ["Parameter","Value"]
+	 * @attr populateColumnFunction If there are more than 2 columns, this javascript function name will be called with arguments (param,row,input)
+	 * @attr onComplete javascript to run after the ajax request
+	 */
+	def paramTable = {attrs,body->
+		def id = attrs.id ?: "parameterTable"
+		def columns = attrs.columns ?: ["Parameter","Value"]
+		
+		writeScriptHeader(out)
+		
+		out << """
+		jQuery.ajaxSettings.traditional = true;
+		jQuery.getJSON("$attrs.url", function(data) {
+		"""
+		
+		// Create the table
+		out << """
+			var table = jQuery("<table id='$id'><thead><tr></tr></thead><tbody></tbody></table>");
+			jQuery("#$attrs.parentId").append(table);
+
+			var inputs = jQuery([]);
+			table.data("inputs",inputs);
+
+			var tblHead = table.find("thead tr");
+			var tblBody = table.find("tbody");
+		"""
+		
+		// Create headers
+		columns.each {
+			out << "tblHead.append('<th>$it</th>');"
+		}
+		
+		out << """
+			jQuery(data.parameters).each(function(i,it) {
+				var row = jQuery("<tr></tr>");
+				tblBody.append(row);
+				
+				var name = jQuery("<td>"+(it.displayName!=null ? it.displayName : it.name)+"</td>");
+				row.append(name);
+				
+				var inputTd = jQuery("<td></td>");
+				row.append(inputTd);
+				var input = SignalPath.getParamRenderer(it).create(null,it);
+				inputTd.append(input);
+				input.data("parameterData",it);
+				inputs.push(input);
+
+				${attrs.populateColumnFunction ? "${attrs.populateColumnFunction}(it,row,input);" : ""}
+			});
+
+			${attrs.onComplete ? "${attrs.onComplete};" : ""}
+		});
+		"""
+		
 		writeScriptFooter(out)
 	}
 }

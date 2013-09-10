@@ -22,6 +22,9 @@ SignalPath.ParamRenderers = {
 			},
 			getValue: function(module,data,input) {
 				return $(input).val();
+			},
+			getValueName: function(module,data,input) {
+				return $(input).val();
 			}
 		},
 		"Stream": {
@@ -51,7 +54,14 @@ SignalPath.ParamRenderers = {
 					return function(event,ui) {
 						if (ui.item) {
 							$(id).val(ui.item.id);
-							SignalPath.updateModule(mod);
+							$(sym).find("a").html(ui.item.name);
+
+							if (mod!=null)
+								SignalPath.updateModule(mod);
+							else {
+								$(sch).hide();
+								$(sym).show();
+							}
 						}
 						else {
 							$(sch).hide();
@@ -62,7 +72,7 @@ SignalPath.ParamRenderers = {
 				
 				$(search).autocomplete({
 					// TODO: generalize to Streams
-					source: "jsonGetOrderBook",
+					source: project_webroot+"signalPath/jsonGetOrderBook",
 					minLength: 2,
 					select: onSel
 				}).data("autocomplete")._renderItem = function(ul,item) {
@@ -77,6 +87,10 @@ SignalPath.ParamRenderers = {
 			getValue: function(module,data,input) {
 				var hidden = $(input).find("input.streamId");
 				return hidden.val();
+			},
+			getValueName: function(module,data,input) {
+				var text = $(input).find("span.streamName a").text();
+				return text;
 			}
 		}
 }

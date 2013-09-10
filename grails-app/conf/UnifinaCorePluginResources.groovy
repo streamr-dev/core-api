@@ -38,8 +38,11 @@ modules = {
 		dependsOn 'jquery'
 		resource url:'js/hotkeys/jquery.hotkeys.js'
 	}
+	'signalpath-loadBrowser' {
+		resource url:'css/signalPath/widgets/loadBrowser.css'
+	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror'
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, signalpath-loadBrowser'
 		resource url:'js/signalPath/core/signalPath.js'
 		resource url:'js/timezones/detect_timezone.js'
 		resource url:'js/signalPath/generic/emptyModule.js'
@@ -53,6 +56,5 @@ modules = {
 		resource url:'js/signalPath/specific/commentModule.js'
 		resource url:'css/signalPath/modules/commentModule.css'
 		resource url:'css/signalPath/signalPath.css'
-		resource url:'css/signalPath/widgets/loadBrowser.css'
 	}
 }

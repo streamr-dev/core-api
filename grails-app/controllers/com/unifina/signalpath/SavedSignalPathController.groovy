@@ -82,6 +82,7 @@ class SavedSignalPathController {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
+			tmp.command = params.command
 			tmp.url = createLink(controller:"savedSignalPath",action:"load",params:[id:it[0]])
 //			tmp.saveData = [url:createLink(controller:"savedSignalPath",action:"save",params:[id:it[0]]), target: "Archive id "+it[0]]
 			result.signalPaths.add(tmp)  
