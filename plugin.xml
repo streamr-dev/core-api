@@ -34,9 +34,9 @@
   </repositories>
   <dependencies>
     <runtime>
-      <dependency group='org.apache.mina' name='mina-core' version='1.1.7' />
-      <dependency group='commons-net' name='commons-net' version='3.3' />
       <dependency group='mysql' name='mysql-connector-java' version='5.1.16' />
+      <dependency group='commons-net' name='commons-net' version='3.3' />
+      <dependency group='org.apache.mina' name='mina-core' version='1.1.7' />
     </runtime>
   </dependencies>
   <plugins>
