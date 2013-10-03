@@ -282,6 +282,10 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements ICatc
 		// TODO Auto-generated method stub
 		
 	}
+
+	public int getPriority() {
+		return 0;
+	}
 	
 }
 

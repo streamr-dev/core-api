@@ -1,6 +1,8 @@
 package com.unifina.feed;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -21,6 +23,14 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	
 	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
 	protected ArrayList<AbstractFeedProxy<T>> proxies = new ArrayList<>();
+	
+	protected AbstractFeedProxy<T>[] proxiesByPriority = new AbstractFeedProxy[0];
+	protected Comparator<AbstractFeedProxy<T>> proxyPriorityComparator = new Comparator<AbstractFeedProxy<T>>() {
+		@Override
+		public int compare(AbstractFeedProxy<T> o1, AbstractFeedProxy<T> o2) {
+			return Integer.compare(o1.getPriority(), o2.getPriority());
+		}
+	};
 	
 	private boolean quit = false;
 	private static final Logger log = Logger.getLogger(MessageHub.class);
@@ -63,7 +73,7 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 				// Distribute preprocessed message to feed proxies
 
 				// TODO: possible ConcurrentModificationException?
-				for (AbstractFeedProxy<T> p : proxies) {
+				for (AbstractFeedProxy<T> p : proxiesByPriority) {
 					p.receive(m.counter, msg);
 				}
 			} catch (Exception e) {
@@ -94,16 +104,23 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addProxy(AbstractFeedProxy<T> p) {
 		synchronized(proxies) {
-			if (!proxies.contains(p))
+			if (!proxies.contains(p)) {
 				proxies.add(p);
+				proxiesByPriority = proxies.toArray(new AbstractFeedProxy[proxies.size()]);
+				Arrays.sort(proxiesByPriority, proxyPriorityComparator);
+			}
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void removeProxy(AbstractFeedProxy<T> p) {
 		synchronized(proxies) {
 			proxies.remove(p);
+			proxiesByPriority = proxies.toArray(new AbstractFeedProxy[proxies.size()]);
+			Arrays.sort(proxiesByPriority, proxyPriorityComparator);
 		}
 	}
 
