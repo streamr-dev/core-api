@@ -96,8 +96,8 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 	}
 	
 	@Override
-	public void cache(Object msg) {
-		queue.add(msg.toString());
+	public void receive(Message msg) {
+		queue.add(msg.getRawMessage().toString());
 		queuedSize++;
 	}
 
@@ -134,5 +134,28 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 				log.error("Failed to flush queue: ",e);
 			}
 		}
+	}
+
+	@Override
+	public void sessionBroken() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sessionRestored() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sessionTerminated() {
+		// TODO Auto-generated method stub
+		// quit()?
+	}
+
+	@Override
+	public int getReceivePriority() {
+		return 100;
 	}
 }

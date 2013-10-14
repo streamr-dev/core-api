@@ -22,13 +22,13 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	protected IFeedCache cache;
 	
 	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
-	protected ArrayList<AbstractFeedProxy<T>> proxies = new ArrayList<>();
+	protected ArrayList<MessageRecipient> proxies = new ArrayList<>();
 	
-	protected AbstractFeedProxy<T>[] proxiesByPriority = new AbstractFeedProxy[0];
-	protected Comparator<AbstractFeedProxy<T>> proxyPriorityComparator = new Comparator<AbstractFeedProxy<T>>() {
+	protected MessageRecipient[] proxiesByPriority = new MessageRecipient[0];
+	protected Comparator<MessageRecipient> proxyPriorityComparator = new Comparator<MessageRecipient>() {
 		@Override
-		public int compare(AbstractFeedProxy<T> o1, AbstractFeedProxy<T> o2) {
-			return Integer.compare(o1.getPriority(), o2.getPriority());
+		public int compare(MessageRecipient o1, MessageRecipient o2) {
+			return Integer.compare(o1.getReceivePriority(), o2.getReceivePriority());
 		}
 	};
 	
@@ -42,9 +42,11 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 		
 		source.setExpectedCounter(cache.getCacheSize()+1);
 		source.setRecipient(this);
+		if (cache!=null)
+			addRecipient(cache);
 		
 		setName("MsgHub_"+source.getClass().getSimpleName());
-		start();
+//		start(); not safe to start Thread in constructor! Started in FeedFactory
 	}
 	
 //	public abstract T preprocess(Object msg);
@@ -64,27 +66,21 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 				throw new RuntimeException(e);
 			}
 			
+			Message parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				T msg = parser.parse(m.message);
-
-				// TODO: also filter here to avoid filtering in each proxy?
-
-				// Distribute preprocessed message to feed proxies
-
-				// TODO: possible ConcurrentModificationException?
-				for (AbstractFeedProxy<T> p : proxiesByPriority) {
-					p.receive(m.counter, msg);
+				parsedMessage = new Message(m.counter, parser.parse(m.message), m.message);
+			} catch (Exception e) {
+				log.error("Failed to parse message "+m.message.toString(),e);
+			}
+			
+			if (parsedMessage!=null) try {
+				// Distribute preprocessed message to recipients
+				for (MessageRecipient p : proxiesByPriority) {
+					p.receive(parsedMessage);
 				}
 			} catch (Exception e) {
 				log.error("Failed to handle message!",e);
-			}
-			
-			try {
-				// Deliver message to cache
-				cache.cache(m.message);
-			} catch (Exception e) {
-				log.error("Failed to save message to cache!",e);
 			}
 		}
 	}
@@ -105,29 +101,29 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void addProxy(AbstractFeedProxy<T> p) {
+	public void addRecipient(MessageRecipient p) {
 		synchronized(proxies) {
 			if (!proxies.contains(p)) {
 				proxies.add(p);
-				proxiesByPriority = proxies.toArray(new AbstractFeedProxy[proxies.size()]);
+				proxiesByPriority = proxies.toArray(new MessageRecipient[proxies.size()]);
 				Arrays.sort(proxiesByPriority, proxyPriorityComparator);
 			}
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void removeProxy(AbstractFeedProxy<T> p) {
+	public void removeRecipient(MessageRecipient p) {
 		synchronized(proxies) {
 			proxies.remove(p);
-			proxiesByPriority = proxies.toArray(new AbstractFeedProxy[proxies.size()]);
+			proxiesByPriority = proxies.toArray(new MessageRecipient[proxies.size()]);
 			Arrays.sort(proxiesByPriority, proxyPriorityComparator);
 		}
 	}
 
-	public void swapProxy(AbstractFeedProxy<T> remove, AbstractFeedProxy<T> add) {
+	public void swapRecipient(MessageRecipient remove, MessageRecipient add) {
 		synchronized(proxies) {
-			removeProxy(remove);
-			addProxy(add);
+			removeRecipient(remove);
+			addRecipient(add);
 		}
 	}
 	
@@ -138,10 +134,10 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	 * @param proxy
 	 * @return
 	 */
-	public Catchup startCatchup(AbstractFeedProxy<T> proxy) {
+	public Catchup startCatchup(MessageRecipient proxy) {
 		synchronized(proxies) {
 			Catchup catchup = cache.getCatchup();
-			addProxy(proxy);
+			addRecipient(proxy);
 			return catchup;
 		}
 	}
@@ -157,18 +153,23 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	// Escalate session state to proxies
 	
 	public void sessionBroken() {
-		for (AbstractFeedProxy<T> p : proxies)
+		for (MessageRecipient p : proxiesByPriority)
 			p.sessionBroken();
 	}
 
 	public void sessionRestored() {
-		for (AbstractFeedProxy<T> p : proxies)
+		for (MessageRecipient p : proxiesByPriority)
 			p.sessionRestored();
 	}
 
 	public void sessionTerminated() {
-		for (AbstractFeedProxy<T> p : proxies)
+		for (MessageRecipient p : proxiesByPriority)
 			p.sessionTerminated();
+	}
+
+	@Override
+	public int getReceivePriority() {
+		return 0;
 	}
 
 }

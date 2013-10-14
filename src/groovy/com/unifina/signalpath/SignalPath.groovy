@@ -392,7 +392,7 @@ class SignalPath extends AbstractSignalPathModule {
 							}
 						}
 					}
-					log.warn("Module had non-ready inputs: $notReady")
+					log.debug("Module had non-ready inputs: $notReady")
 				}
 				
 			}

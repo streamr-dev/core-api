@@ -42,7 +42,7 @@ modules = {
 		resource url:'css/signalPath/widgets/loadBrowser.css'
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, signalpath-loadBrowser'
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, signalpath-loadBrowser'
 		resource url:'js/signalPath/core/signalPath.js'
 		resource url:'js/timezones/detect_timezone.js'
 		resource url:'js/signalPath/generic/emptyModule.js'

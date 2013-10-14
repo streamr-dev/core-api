@@ -1,6 +1,5 @@
 package com.unifina.feed;
 
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;
@@ -25,7 +24,7 @@ import com.unifina.utils.Globals;
  * @author Henri
  *
  */
-public abstract class AbstractFeedProxy<T> extends AbstractFeed implements ICatchupFeed {
+public abstract class AbstractFeedProxy<T> extends AbstractFeed implements MessageRecipient, ICatchupFeed {
 	
 	private int expected = 0;
 	
@@ -62,34 +61,36 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements ICatc
 	 * @param counter
 	 * @param msg
 	 */
-	public void receive(int counter, T msg) {
+	@Override
+	public void receive(Message parsedMsg) {
+		T msg = (T) parsedMsg.message;
 		// If still waiting for catchup to end, produce to the wait queue
 		if (catchupState==CatchupState.CATCHUP) {
 			realtimeWaitQueue.add(msg);
-			realtimeWaitQueueCounter.add(counter);
+			realtimeWaitQueueCounter.add(parsedMsg.counter);
 //			log.info("receive: Message added to wait queue: "+counter);
 		}
 		else {
 			// ProcessAndQueue a message with the correct counter
-			if (counter==expected) {
-				processAndQueue(counter, msg, checkEventAge);
+			if (parsedMsg.counter==expected) {
+				processAndQueue(parsedMsg.counter, msg, checkEventAge);
 			}
 			// If there is a gap, try to handle it
-			else if (counter > expected) {
+			else if (parsedMsg.counter > expected) {
 				// If the gap was handled successfully, processAndQueue the current message
-				if (handleGap(counter)) {
-					processAndQueue(counter, msg, checkEventAge);
+				if (handleGap(parsedMsg.counter)) {
+					processAndQueue(parsedMsg.counter, msg, checkEventAge);
 				}
 				// Else place the message into the wait queue for future processing
 				else {
-					log.warn("receive: Failed to handle the gap, placing msg into wait queue: "+counter+", expected: "+expected);
+					log.warn("receive: Failed to handle the gap, placing msg into wait queue: "+parsedMsg.counter+", expected: "+expected);
 					realtimeWaitQueue.add(msg);
-					realtimeWaitQueueCounter.add(counter);
+					realtimeWaitQueueCounter.add(parsedMsg.counter);
 				}
 			}
 			// Discard old messages
-			else if (counter < expected) {
-				log.warn("Discarding duplicate message: "+counter+", expected: "+expected);
+			else if (parsedMsg.counter < expected) {
+				log.warn("Discarding duplicate message: "+parsedMsg.counter+", expected: "+expected);
 				return;
 			}
 		}
@@ -231,12 +232,12 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements ICatc
 	
 	@Override
 	public void startFeed() throws Exception {
-		hub.addProxy(this);
+		hub.addRecipient(this);
 	}
 	
 	@Override
 	public void stopFeed() throws Exception {
-		hub.removeProxy(this);
+		hub.removeRecipient(this);
 		log.info("Unsubscribed from hub: "+this);
 	}
 	
@@ -283,7 +284,8 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements ICatc
 		
 	}
 
-	public int getPriority() {
+	@Override
+	public int getReceivePriority() {
 		return 0;
 	}
 	

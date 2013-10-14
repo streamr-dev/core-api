@@ -37,7 +37,8 @@ SignalPath.CustomModule = function(data,canvas,my) {
 						$( this ).dialog( "close" );
 					}
 				}
-			});
+			}).dialog("widget").draggable("option","containment","none");
+			
 		}
 		if (debug==null) {
 			debug = $("<div class='debugWindow' style='display:none'></div>");

@@ -61,10 +61,9 @@ public class FeedFactory {
 	}
 	
 	private static MessageRecipient createMessageRecipient(Feed feed, MessageSource source, MessageParser parser, IFeedCache cache) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return new MessageHub(source,parser,cache);
-//		Class messageRecipientClass = FeedFactory.class.getClassLoader().loadClass(feed.getRealtimeFeed());
-//		Constructor messageRecipientConstructor = messageRecipientClass.getConstructor(MessageSource.class, MessageParser.class, IFeedCache.class);
-//		return (MessageRecipient) messageRecipientConstructor.newInstance(source, parser, cache);
+		MessageHub hub = new MessageHub(source,parser,cache);
+		hub.start();
+		return hub;
 	}
 	
 	synchronized static MessageRecipient getInstance(Feed feed) {
