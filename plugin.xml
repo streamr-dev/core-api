@@ -45,7 +45,7 @@
       <plugin group='org.grails.plugins' name='famfamfam' version='1.0.1' />
     </compile>
     <runtime>
-      <plugin group='org.grails.plugins' name='filterpane' version='2.0.1.1' />
+      <plugin group='org.grails.plugins' name='filterpane' version='2.2.3' />
       <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
     </runtime>
     <build>
