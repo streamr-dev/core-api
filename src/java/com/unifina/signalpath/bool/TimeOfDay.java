@@ -1,6 +1,5 @@
 package com.unifina.signalpath.bool;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.unifina.datasource.ITimeListener;
