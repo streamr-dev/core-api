@@ -3,6 +3,9 @@ package com.unifina.signalpath.charts;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -71,7 +74,14 @@ public abstract class Chart extends AbstractSignalPathModule {
 			recordCsvString();
 			csvWriter.newLine();
 		}
-		else record();
+		else {
+			if (todUtil!=null && !todUtil.hasBaseDate())
+				todUtil.setBaseDate(globals.time);
+			
+			if (todUtil==null || todUtil.isInRange(globals.time)) {
+				record();
+			}
+		}
 	}
 
 	protected abstract void record();
@@ -105,6 +115,48 @@ public abstract class Chart extends AbstractSignalPathModule {
 			File file = csvWriter.finish();
 			if (parentSignalPath!=null && parentSignalPath.returnChannel!=null) {
 				parentSignalPath.returnChannel.sendPayload(hash, new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()));
+			}
+		}
+	}
+	
+	@Override
+	public Map<String,Object> getConfiguration() {
+		Map<String,Object> config = super.getConfiguration();
+		
+		Map optionsMap = (Map) config.get("options");
+		if (optionsMap==null) {
+			optionsMap = new LinkedHashMap<>();
+			config.put("options",optionsMap);
+		}
+
+		LinkedHashMap<String, Object> ignoreBefore = new LinkedHashMap<>();
+		optionsMap.put("ignoreBefore",ignoreBefore);
+		
+		ignoreBefore.put("value",todUtil==null ? "05:00:00" : todUtil.getStartString());
+		ignoreBefore.put("type","string");
+		
+		LinkedHashMap<String, Object> ignoreAfter = new LinkedHashMap<>();
+		optionsMap.put("ignoreAfter",ignoreAfter);
+		
+		ignoreAfter.put("value",todUtil==null ? "22:00:00" : todUtil.getEndString());
+		ignoreAfter.put("type","string");
+		
+		return config;
+	}
+	
+	@Override
+	public void onConfiguration(Map config) {
+		super.onConfiguration(config);
+		
+		Map options = (Map)config.get("options");
+		
+		// New
+		if (options!=null) {
+			// Ignore before/after
+			if (MapTraversal.getProperty(options, "ignoreBefore.value")!=null) {
+				String begin = MapTraversal.getProperty(options, "ignoreBefore.value").toString();
+				String end = MapTraversal.getProperty(options, "ignoreAfter.value").toString();
+				todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
 			}
 		}
 	}

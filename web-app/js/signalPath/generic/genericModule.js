@@ -102,11 +102,11 @@ SignalPath.getParamRenderer = function(data) {
 };
 
 // Bind connection and disconnection events
-jsPlumb.bind("jsPlumbConnection",function(connection) {
+jsPlumb.bind("connection",function(connection) {
 	$(connection.source).trigger("spConnect", connection.target);
 	$(connection.target).trigger("spConnect", connection.source);
 });
-jsPlumb.bind("jsPlumbConnectionDetached",function(connection) {
+jsPlumb.bind("connectionDetached",function(connection) {
 	$(connection.source).trigger("spDisconnect", connection.target);
 	$(connection.target).trigger("spDisconnect", connection.source);
 });

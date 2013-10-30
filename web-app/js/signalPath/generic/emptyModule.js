@@ -17,7 +17,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		drag: function() {
 			my.onDrag();
 		},
-		handle: '.moduleheader'
+		//handle: '.moduleheader'
 	}
 	
 	that.getDragOptions = function() {

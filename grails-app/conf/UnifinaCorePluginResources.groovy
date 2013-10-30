@@ -22,7 +22,7 @@ modules = {
 	jsplumb {
 		dependsOn 'jquery'
 		dependsOn 'jquery-ui'
-		resource url:'js/jsPlumb/jquery.jsPlumb-1.3.13-all.js'
+		resource url:'js/jsPlumb/jquery.jsPlumb-1.5.3-min.js'
 	}
 	jstree {
 		dependsOn 'jquery'

@@ -158,7 +158,10 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		destroyChart();
 
 		$(area).show();
-
+		
+		// Dragging in the chartDrawArea must not move the module
+		my.div.draggable("option", "cancel", ".chartDrawArea");
+		
 		if (yAxis==null)
 			yAxis = { title: {
 				text: null

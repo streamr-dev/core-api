@@ -129,10 +129,10 @@ public class TimeSeriesChart extends Chart {
 	
 	@Override
 	protected void record() {
-		if (todUtil!=null && !todUtil.hasBaseDate())
-			todUtil.setBaseDate(globals.time);
+//		if (todUtil!=null && !todUtil.hasBaseDate())
+//			todUtil.setBaseDate(globals.time);
 		
-		if (todUtil==null || todUtil.isInRange(globals.time)) {
+//		if (todUtil==null || todUtil.isInRange(globals.time)) {
 			for (Input i : drivingInputs) {
 				RecordedTimeSeriesInput input = (RecordedTimeSeriesInput) i;
 				if (!Double.isNaN(input.value) && hasRc) {
@@ -144,7 +144,7 @@ public class TimeSeriesChart extends Chart {
 					parentSignalPath.returnChannel.sendPayload(hash, msg);
 				}
 			}
-		}
+//		}
 	}
 
 	@Override
@@ -179,26 +179,13 @@ public class TimeSeriesChart extends Chart {
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
-		LinkedHashMap<String, Object> optionsMap = new LinkedHashMap<>();
-		config.put("options",optionsMap);
+		Map optionsMap = (Map) config.get("options");
 
 		LinkedHashMap<String, Object> inputMap = new LinkedHashMap<>();
 		optionsMap.put("inputs",inputMap);
 		
 		inputMap.put("value",inputCount);
 		inputMap.put("type","int");
-		
-		LinkedHashMap<String, Object> ignoreBefore = new LinkedHashMap<>();
-		optionsMap.put("ignoreBefore",ignoreBefore);
-		
-		ignoreBefore.put("value",todUtil==null ? "05:00:00" : todUtil.getStartString());
-		ignoreBefore.put("type","string");
-		
-		LinkedHashMap<String, Object> ignoreAfter = new LinkedHashMap<>();
-		optionsMap.put("ignoreAfter",ignoreAfter);
-		
-		ignoreAfter.put("value",todUtil==null ? "22:00:00" : todUtil.getEndString());
-		ignoreAfter.put("type","string");
 		
 		LinkedHashMap<String, Object> overnightBreakOption = new LinkedHashMap<>();
 		optionsMap.put("overnightBreak",overnightBreakOption);
@@ -219,13 +206,6 @@ public class TimeSeriesChart extends Chart {
 		if (options!=null) {
 			// Add a DoubleParameter for each AR param
 			inputCount = (int) MapTraversal.getProperty(options, "inputs.value");
-			
-			// Ignore before/after
-			if (MapTraversal.getProperty(options, "ignoreBefore.value")!=null) {
-				String begin = MapTraversal.getProperty(options, "ignoreBefore.value").toString();
-				String end = MapTraversal.getProperty(options, "ignoreAfter.value").toString();
-				todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
-			}
 			
 			if (MapTraversal.getProperty(options, "overnightBreak.value")!=null) {
 				overnightBreak = Boolean.parseBoolean(MapTraversal.getProperty(options, "overnightBreak.value").toString());
