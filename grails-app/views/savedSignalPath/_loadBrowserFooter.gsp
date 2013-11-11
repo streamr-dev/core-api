@@ -1,0 +1,3 @@
+		<div id="${id}" class="loadBrowserFooter">
+				Loading...
+		</div>

@@ -1,25 +1,23 @@
 html, body {
 	height: 100%;
-/* 	background-color: black; */
 }
 
-button.active {
-	background-color: #FFFF66;	
-}
+/* button.active { */
+/* 	background-color: #FFFF66;	 */
+/* } */
 
 #container {
 	margin:0;
 	min-height:100%;
+/* 	background-color: gray; */
 }
 
 #controls {
 	position: fixed;
-	background-color: white;
 	float:left;
 	width: 200px;
 	z-index: 100;
 	padding: 10px;
-	border: 3px black solid;
 }
 
 #canvas {
@@ -36,25 +34,27 @@ button.active {
 .controlgroup {
 	padding: 10px;
 	margin-bottom: 10px;
-	border: 1px black solid;
 }
 
 .component {
 	position: absolute; 
-	border: 3px #474747 solid;
-	padding: 5px;
+	padding: 7px;
 	z-index: 5;
-	background-color: white;
-	opacity: 0.95;
 }
 
 .component:hover {
 	cursor:move;
-	border: 3px black solid;
+/* 	border-color: black; */
 }
 
 .component input {
 	width: 50px;
+}
+
+.component a:link, a:visited, a:hover {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .module {
@@ -64,6 +64,17 @@ button.active {
 	width: 100%;
 	height: 20px;
 /* 	background-color: red; */
+	margin-bottom: 3px;
+}
+
+.modulebody {
+	padding: 5px;
+}
+
+.modulefooter {
+	overflow: hidden;
+	width: 100%;
+	margin-top: 3px;
 }
 
 .modulename {
@@ -75,32 +86,34 @@ button.active {
 	float: right;
 /* 	font-weight: bold; */
 /* 	padding: 2px; */
-	border: 1px black solid;
+/* 	border: 1px black solid; */
 	cursor:pointer;
 }
 
 .modulebutton:hover {
-	background-color: #FFFFEB;
+/* 	background-color: #FFFFEB; */
 }
 
 .modulebutton.delete {
-	color: white;
-	background-color: red;
+/* 	color: white; */
+/* 	background-color: red; */
 }
 .modulebutton.delete:hover {
-	background-color: #FF8A8A;
+/* 	background-color: #FF8A8A; */
 }
 
 .disabled {
-	background-color: #dcdcdc; 
-	border: #3532ff 1px solid; 
-	color: #000000; 
-	cursor: default; 
+/* 	background-color: #dcdcdc;  */
+/* 	border: #3532ff 1px solid;  */
+/* 	color: #000000;  */
+/* 	cursor: default;  */
 	display:none; 
 }
 
 table.paramTable {
 	width: 100%;
+	border: none;
+	padding: 0px;
 }
 
 table.paramTable td input {
@@ -109,20 +122,9 @@ table.paramTable td input {
 
 table.ioTable {
 /* 	display: inline-block; */
-}
-
-table tr td.positive {
-	color:white;
-	background-color: blue;
-}
-
-table tr td.negative {
-	color:white;
-	background-color: red;
-}
-
-table tr td.executed {
-	color: green;
+	border: none;
+	width: 100%;
+	padding: 0px;
 }
 
 /* table tr.buy td { */
@@ -141,105 +143,81 @@ td.output {
 }
 
 .parameter {
-	border: 1px white solid;
-	background-color: white;
+/* 	border: 1px white solid; */
+/* 	background-color: white; */
 }
 
 div.input {
-	
+
 }
 
 div.output {
-	
+
 }
 
-div.exportable {
-	background-color: #FFFF66;	
-}
-div.export {
-	color: #dd982D;
-/* 	background-color: #FFB84D;	 */
-}
+/* .connected { */
+/* 	background-color: red; */
+/* } */
 
-.Double {
-	color: black;
-}
-
-.TradeEvent {
-	color: magenta;
-}
-
-.OrderBookEvent {
-	color: red;
-}
-
-.NOII {
-	color: 	blue;
-}
-
-.connected {
-	background-color: red;
-}
-
-.connectionHolder {
- 		width: 0px;
- 		height: 0px;
-		position: absolute;
-		display: block;
-		right: 0;
-		bottom: 0;
-		background-color: #bcd5e6;
-		text-align: center;
-}
+/* .connectionHolder { */
+/*  		width: 0px; */
+/*  		height: 0px; */
+/* 		position: absolute; */
+/* 		display: block; */
+/* 		right: 0; */
+/* 		bottom: 0; */
+/* 		background-color: #bcd5e6; */
+/* 		text-align: center; */
+/* } */
 
 .moduleSwitch {
 	font-size: 7px;
 	text-align: center;
-	border: 1px solid black;
-/* 	width: 13px; */
-	height: 13px;
+/* 	height: 13px; */
 	float: right;
+	cursor: pointer;
+	padding: 2px;
+}
+
+.clearState {
+
+}
+
+div.input:hover, div.output:hover {
 	cursor: pointer;
 }
 
 .ioname {
-	cursor: pointer;
+	display: inline-block;
 }
-.ioname:hover {
-	background-color: #FFFFEB;
+
+div.input .ioname {
+	float: right;
+}
+
+div.output .ioname {
+	float: left;
+}
+
+.switchContainer {
+	display: inline-block;
+}
+
+div.input .switchContainer {
+	float: left;
+}
+
+div.output .switchContainer {
+	float: right;
 }
 
 .ioSwitch {
+	display: inline-block;
 	font-size: 7px;
 	text-align: center;
-	border: 1px solid black;
 	width: 13px;
 	height: 13px;
 	cursor: pointer;
-}
-
-.ioSwitchInput {
-	float: left; 	
-}
-
-.ioSwitchOutput {
-	float: right; 	
-}
-
-.ioSwitchTrue {
-	background-color: green;
-	color: white;
-}
-.ioSwitchTrue:hover {
-	background-color: #46CF48;
-}
-
-.ioSwitchFalse {
-	background-color: red;
-	color: black;
-}
-.ioSwitchFalse:hover {
-	background-color: #FF8A8A;
 }
 
 .option .optionTitle {
@@ -249,7 +227,7 @@ div.export {
 
 ._jsPlumb_endpoint {
 	z-index:10;
-	background-color: white;
+/* 	background-color: white; */
 }
 
 .connectionHolder._jsPlumb_endpoint {
@@ -272,10 +250,17 @@ div.export {
 	vertical-align:middle; 	
 }
 
+.ui-menu {
+	z-index:200;
+}
+
 /**
  * jQuery UI stuff
  **/
  .ui-autocomplete-loading { background: white url('../../images/spinner_16x16.gif') right center no-repeat; }
+ .ui-button-text-only .ui-button-text {
+	padding: 0.2em 0.7em;
+ }
  
  /**
   * PanicButtons
@@ -291,3 +276,5 @@ div.export {
   .panicButtons {
   	width: 200px;
   }
+  
+

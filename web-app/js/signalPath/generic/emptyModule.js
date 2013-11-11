@@ -26,7 +26,8 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	
 	function createDiv() {
 		my.div = $("<div id='"+my.id+"' class='component "+my.type+"'></div>");
-	
+		my.div.data("me",my);
+		
 		// Set absolute position
 		my.div.css("position","absolute");
 		
@@ -54,7 +55,8 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		my.title = $("<span class='modulename'>"+my.jsonData.name+"</span>");
 		my.header.append(my.title);
 	
-		var deleteLink = $("<span class='delete modulebutton ui-corner-all ui-icon ui-icon-closethick'></span>");
+//		var deleteLink = $("<span class='delete modulebutton ui-corner-all ui-icon ui-icon-closethick'></span>");
+		var deleteLink = createModuleButton("delete ui-icon ui-icon-closethick")
 	
 		deleteLink.click(function() {
 			that.close();
@@ -99,7 +101,8 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 				    }}]
 			});
 			
-			var editOptions = $("<span class='options modulebutton ui-corner-all ui-icon ui-icon-wrench'></span>");
+//			var editOptions = $("<span class='options modulebutton ui-corner-all ui-icon ui-icon-wrench'></span>");
+			var editOptions = createModuleButton("options ui-icon ui-icon-wrench");
 			
 			editOptions.click(function() {
 				// Location
@@ -110,7 +113,8 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		
 		if (my.jsonData.canRefresh) {
 			// If the module can refresh, add a refresh button
-			var refresh = $("<span class='refresh modulebutton ui-corner-all ui-icon ui-icon-refresh'></span>");
+//			var refresh = $("<span class='refresh modulebutton ui-corner-all ui-icon ui-icon-refresh'></span>");
+			var refresh = createModuleButton("refresh ui-icon ui-icon-refresh");
 		
 			refresh.click(function() {
 				SignalPath.updateModule(that);
@@ -125,6 +129,13 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		return my.div;
 	}
 	my.createDiv = createDiv;
+	
+	function createModuleButton(additionalClasses) {
+		var button = $("<span class='modulebutton ui-corner-all ui-state-default "+(additionalClasses ? additionalClasses : "")+"'></span>");
+		button.hover(function() {$(this).addClass("ui-state-highlight");}, function() {$(this).removeClass("ui-state-highlight")});
+		return button;
+	}
+	my.createModuleButton = createModuleButton;
 	
 	/**
 	 * Functions for rendering and parsing options

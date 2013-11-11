@@ -69,14 +69,15 @@ SignalPath.CustomModule = function(data,canvas,my) {
 				editor = CodeMirror.fromTextArea(textArea, {
 					lineNumbers: true,
 					matchBrackets: true,
-					mode: "text/x-groovy"
+					mode: "text/x-groovy",
+					theme: "vibrant-ink"
 				});
 			}
 			setTimeout(function(){editor.refresh(); editor.focus();}, 20);
 		});
 		
-		module.append(editButton);
-	
+		module.find(".modulefooter").prepend(editButton);
+		editButton.button();
 	}
 	
 	function updateJson() {

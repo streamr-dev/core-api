@@ -4,6 +4,10 @@ modules = {
 		resource url:'js/touchpunch/jquery.ui.touch-punch.min.js', disposition: 'head'
 		//		resource url:'js/touchpunch/jquery.ui.touch-punch.js', disposition: 'head'
 	}
+	"jquery.ui-contextmenu" {
+		dependsOn 'jquery-ui'
+		resource url:'js/jquery.ui-contextmenu/jquery.ui-contextmenu.js'
+	}
 	tablesorter {
 		dependsOn 'jquery'
 		resource url:'js/tablesorter/jquery.tablesorter.min.js'
@@ -22,7 +26,7 @@ modules = {
 	jsplumb {
 		dependsOn 'jquery'
 		dependsOn 'jquery-ui'
-		resource url:'js/jsPlumb/jquery.jsPlumb-1.5.3-min.js'
+		resource url:'js/jsPlumb/jquery.jsPlumb-1.5.3.js'
 	}
 	jstree {
 		dependsOn 'jquery'
@@ -38,11 +42,31 @@ modules = {
 		dependsOn 'jquery'
 		resource url:'js/hotkeys/jquery.hotkeys.js'
 	}
+	pnotify {
+		dependsOn 'jquery, jquery-ui'
+		resource url:'js/pnotify-1.2.0/jquery.pnotify.min.js'
+		resource url:'js/pnotify-1.2.0/jquery.pnotify.default.css'
+	}
+	chosen {
+		dependsOn 'jquery'
+		resource url:'js/chosen-1.0.0/chosen.jquery.min.js'
+		resource url:'js/chosen-1.0.0/chosen.min.css'
+		resource url:'js/chosen-1.0.0/chosen-sprite.png'
+		resource url:'js/chosen-1.0.0/chosen-sprite@2x.png'
+	}
+//	waypoints {
+//		dependsOn 'jquery'
+//		resource url:'js/waypoints-2.0.3/waypoints.min.js'
+//	}
+	jscroll {
+		dependsOn 'jquery'
+		resource url:'js/jscroll-2.1.1/jquery.jscroll.min.js'
+	}
 	'signalpath-loadBrowser' {
 		resource url:'css/signalPath/widgets/loadBrowser.css'
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, signalpath-loadBrowser'
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, chosen, jquery.ui-contextmenu, signalpath-loadBrowser'
 		resource url:'js/signalPath/core/signalPath.js'
 		resource url:'js/timezones/detect_timezone.js'
 		resource url:'js/signalPath/generic/emptyModule.js'
@@ -55,6 +79,23 @@ modules = {
 		resource url:'js/signalPath/specific/tableModule.js'
 		resource url:'js/signalPath/specific/commentModule.js'
 		resource url:'css/signalPath/modules/commentModule.css'
+	}
+	'signalpath-theme' {
+		dependsOn 'signalpath-core'
 		resource url:'css/signalPath/signalPath.css'
+		
+		resource url:'css/signalPath/themes/light/light.css'
+		resource url:'css/signalPath/themes/light/light.js'
+		resource url:'css/signalPath/themes/light/jquery-ui-theme/jquery-ui-1.10.3.custom.min.css'
+		
+//		resource url:'css/signalPath/themes/dark/dark.css'
+//		resource url:'css/signalPath/themes/dark/dark.js'
+//		resource url:'css/signalPath/themes/dark/jquery-ui-theme/jquery-ui.min.css'
+//		resource url:'css/signalPath/themes/dark/jquery-ui-theme/jquery.ui.theme.css'
+	}
+	overrides {
+		'jquery-ui' {
+			resource id:'js', url:'js/jquery-ui-1.9.2/jquery-ui.js', nominify: true, disposition: 'head'
+		}
 	}
 }

@@ -36,37 +36,42 @@ SignalPath.ChartModule = function(data,canvas,my) {
 	function createDiv() {
 		superCreateDiv();
 		
-		// Bind yAxis selection possibility to TimeSeries inputs
+		// Change context menu on Double inputs
 		if (!my.jsonData.disableAxisSelection) {
-			my.div.find("div.input.Double").each(function(i,input) {
-				if (!$(input).hasClass("parameter")) {
-
-					// Unbind anything
-					$(input).click(
-							(function(input,my) {
-								return function() {
-									var n = $(input).find("span.ioname").text();
-
-									// Find input from json data
-									var jsonInput = null;
-									$(my.jsonData.inputs).each(function(i,jsI) {
-										if (jsI.name==n)
-											jsonInput=jsI;
-									});
-
-									var currentInput = "0";
-									if (jsonInput!=null && jsonInput.yAxis!=null) {
-										currentInput = jsonInput.yAxis;
-									}
-									var yAxis = prompt("Axis number for "+n+":",currentInput);
-									if (yAxis != null)
-										jsonInput.yAxis = parseInt(yAxis);
-								}
-							})(input,my)
-					);
-				}
-			});
+			my.div.find("div.input.Double").removeClass("default-context-menu").addClass("chart-context-menu");
 		}
+		
+		// Bind yAxis selection possibility to TimeSeries inputs
+//		if (!my.jsonData.disableAxisSelection) {
+//			my.div.find("div.input.Double").each(function(i,input) {
+//				if (!$(input).hasClass("parameter")) {
+//
+//					// Unbind anything
+//					$(input).click(
+//							(function(input,my) {
+//								return function() {
+//									var n = $(input).find("span.ioname").text();
+//
+//									// Find input from json data
+//									var jsonInput = null;
+//									$(my.jsonData.inputs).each(function(i,jsI) {
+//										if (jsI.name==n)
+//											jsonInput=jsI;
+//									});
+//
+//									var currentInput = "0";
+//									if (jsonInput!=null && jsonInput.yAxis!=null) {
+//										currentInput = jsonInput.yAxis;
+//									}
+//									var yAxis = prompt("Axis number for "+n+":",currentInput);
+//									if (yAxis != null)
+//										jsonInput.yAxis = parseInt(yAxis);
+//								}
+//							})(input,my)
+//					);
+//				}
+//			});
+//		}
 		
 		initArea();
 		
@@ -131,6 +136,24 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		}
 	}
 	
+	var superGetContextMenu = my.getContextMenu;
+	my.getContextMenu = function(div) {
+		var menu = superGetContextMenu(div);
+		menu.push({title: "Set Y-axis", cmd: "yaxis"});
+		return menu;
+	};
+	
+	var superHandleContextMenuSelection = my.handleContextMenuSelection;
+	my.handleContextMenuSelection = function(div,data,selection,event) {
+		if (selection=="yaxis") {
+			var n = $(div).find(".ioname").text();
+			var yAxis = prompt("Axis number for "+n+":",data.yAxis);
+			if (yAxis != null)
+				data.yAxis = parseInt(yAxis);
+		}
+		else superHandleContextMenuSelection(div,data,selection,event);
+	};
+	
 	function createRangeButtons(buttonDiv,config) {
 		for (var i=0;i<config.length;i++) {
 			var c = config[i];
@@ -141,6 +164,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 					redrawChart();
 				};
 			})(c.range));
+			button.button();
 			buttonDiv.append(button);
 		}
 	}
@@ -162,11 +186,17 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		// Dragging in the chartDrawArea must not move the module
 		my.div.draggable("option", "cancel", ".chartDrawArea");
 		
-		if (yAxis==null)
-			yAxis = { title: {
-				text: null
-			}
-		};
+		if (yAxis==null) {
+			yAxis = { 
+//				title: {
+//					text: null
+//				}
+			};
+		}
+		else if ($.isArray(yAxis)) {
+			for (var i=0;i<yAxis.length;i++)
+				yAxis[i] = $.extend({}, SignalPath.defaultChartOptions.yAxis || {}, yAxis[i]);
+		}
 
 		Highcharts.setOptions({
 			global: {
@@ -189,6 +219,8 @@ SignalPath.ChartModule = function(data,canvas,my) {
 //					}
 //			}
 //		}
+		
+		
 		
 		var opts = {
 				chart: {
@@ -275,6 +307,8 @@ SignalPath.ChartModule = function(data,canvas,my) {
 				series: series
 		};
 
+		opts = $.extend(true, {}, SignalPath.defaultChartOptions || {}, opts);
+		
 		// Create the chart	
 		chart = new Highcharts.StockChart(opts);
 		

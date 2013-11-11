@@ -76,18 +76,25 @@ class SavedSignalPathController {
 	}
 	
 	def loadBrowser() {
-		def ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser])
+		def result = [browserId:params.browserId, headers:["Id","Name"], contentUrl:createLink(controller:"savedSignalPath",action:"loadBrowserContent",params:[browserId:params.browserId])]
+		render(template:"loadBrowser",model:result)
+	}
+	
+	def loadBrowserContent() {
+		def max = params.int("max") ?: 100
+		def offset = params.int("offset") ?: 0
+		
+		def ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
 		def result = [signalPaths:[]]
 		ssp.each {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
-			tmp.command = params.command
 			tmp.url = createLink(controller:"savedSignalPath",action:"load",params:[id:it[0]])
-//			tmp.saveData = [url:createLink(controller:"savedSignalPath",action:"save",params:[id:it[0]]), target: "Archive id "+it[0]]
-			result.signalPaths.add(tmp)  
+			result.signalPaths.add(tmp)
 		}
 		return result
 	}
+
 	
 }

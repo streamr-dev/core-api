@@ -62,15 +62,6 @@ var SignalPath = (function () {
 		newSignalPath();
 
 		jsPlumb.init();
-		jsPlumb.Defaults.EndpointStyle = { radius: 10, strokeStyle:'#666' };
-		jsPlumb.Defaults.Connector = [ "Bezier", { curviness: 50 } ];
-		jsPlumb.Defaults.PaintStyle = {
-				lineWidth:3,
-				strokeStyle: "#456" //('rgba(200,0,0,100)'
-		};
-		jsPlumb.Defaults.Container = canvas;
-		jsPlumb.Defaults.Overlays = [["Arrow", {direction:-1}]];
-		
 		jQuery.atmosphere.logLevel = 'error';
 	};
 	my.unload = function() {
@@ -103,6 +94,8 @@ var SignalPath = (function () {
 		
 		var connectedInputs = [];
 
+		jsPlumb.setSuspendDrawing(true);
+		
 		// Backwards compatibility
 		if (!data.signalPathData) {
 			$(data.orderBooks).each(function(i,ob) {
@@ -161,6 +154,7 @@ var SignalPath = (function () {
 				jsPlumb.connect({source:inputEndpoint, target:outputEndpoint});
 		});
 
+		jsPlumb.setSuspendDrawing(false,true);
 	}
 	my.loadJSON = loadJSON;
 	
@@ -209,7 +203,9 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
+					jsPlumb.setSuspendDrawing(true);
 					createModuleFromJSON(data);
+					jsPlumb.setSuspendDrawing(false,true);
 				}
 				else {
 					alert(data.message);
@@ -351,6 +347,18 @@ var SignalPath = (function () {
 		saveData = {
 				isSaved : false
 		}
+		
+		jsPlumb.reset();
+		
+		// Bind connection and disconnection events
+		jsPlumb.bind("connection",function(connection) {
+			$(connection.source).trigger("spConnect", connection.target);
+			$(connection.target).trigger("spConnect", connection.source);
+		});
+		jsPlumb.bind("connectionDetached",function(connection) {
+			$(connection.source).trigger("spDisconnect", connection.target);
+			$(connection.target).trigger("spDisconnect", connection.source);
+		});
 		
 		$(my).trigger('signalPathNew');
 	}

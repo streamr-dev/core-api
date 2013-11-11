@@ -123,10 +123,10 @@ class SignalPathTagLib {
 		.bind("select_node.jstree", function (event, data) {
 			// `data.rslt.obj` is the jquery extended node that was clicked
 				if (data.rslt.obj.data("canAdd")) {
-					jQuery('#$buttonId').removeAttr("disabled");
+					jQuery('#$buttonId').button("enable");
 				}
 				else {
-					jQuery('#$buttonId').attr("disabled","disabled");
+					jQuery('#$buttonId').button("disable");
 					data.inst.open_node(data.rslt.obj);
 				}
 	    });
@@ -143,14 +143,15 @@ class SignalPathTagLib {
 	/**
 	 * Renders a module add button. The body of the element will become the button text.
 	 *
-	 * @attr id REQUIRED id of the button
+	 * @attr buttonId REQUIRED id of the button
 	 * @attr browserId REQUIRED id of the module browser
 	 */
 	def moduleAddButton = {attrs,body->
-		def id = attrs.id
+		def id = attrs.buttonId
 		def browserId = attrs.browserId
+		attrs.disabled = true
 		
-		out << "<button id='$id' disabled='disabled'>${body()}</button>"
+		out << button(attrs,body)
 		
 		writeScriptHeader(out)
 		
@@ -158,7 +159,7 @@ class SignalPathTagLib {
 	jQuery('#$id').click(function() {
 		var id = jQuery('#$browserId').jstree("get_selected").data("id");
 		SignalPath.addModule(id, {});
-	}).attr("disabled","disabled");
+	});
 		"""
 		out << str
 		
@@ -168,14 +169,15 @@ class SignalPathTagLib {
 	/**
 	 * Renders a module tree refresh button. The body of the element will become the button text.
 	 *
-	 * @attr id REQUIRED id of the button
+	 * @attr buttonId REQUIRED id of the button
 	 * @attr browserId REQUIRED id of the module browser
 	 */
 	def moduleRefreshButton = {attrs,body->
-		def id = attrs.id
+		def id = attrs.buttonId
 		def browserId = attrs.browserId
 		
-		out << "<button id='$id'>${body()}</button>"
+		out << button(attrs,body)
+//		out << "<button id='$id'>${body()}</button>"
 		
 		writeScriptHeader(out)
 		
@@ -193,12 +195,13 @@ class SignalPathTagLib {
 	/**
 	 * Renders a module run button that calls SignalPath.run(). The body of the element will become the button text.
 	 *
-	 * @attr id REQUIRED id of the button
+	 * @attr buttonId REQUIRED id of the button
 	 */
 	def runButton = {attrs,body->
-		def id = attrs.id
+		def id = attrs.buttonId
 		
-		out << "<button id='$id'>${body()}</button>"
+//		out << "<button id='$id'>${body()}</button>"
+		out << button(attrs,body)
 		
 		writeScriptHeader(out)
 		
@@ -216,12 +219,13 @@ class SignalPathTagLib {
 	/**
 	 * Renders an abort button. The body of the element will become the button text.
 	 *
-	 * @attr id REQUIRED id of the button
+	 * @attr buttonId REQUIRED id of the button
 	 */
 	def abortButton = {attrs,body->
-		def id = attrs.id
+		def id = attrs.buttonId
 		
-		out << "<button id='$id' disabled='disabled'>${body()}</button>"
+		attrs.disabled = true
+		out << button(attrs,body)
 		
 		writeScriptHeader(out)
 		
@@ -230,10 +234,10 @@ class SignalPathTagLib {
 			SignalPath.abort();
 		});
 		jQuery(SignalPath).on('signalPathStart', function() {
-			jQuery('#$id').removeAttr('disabled');
+			jQuery('#$id').button('enable');
 		});
 		jQuery(SignalPath).on('signalPathStop', function() {
-			jQuery('#$id').attr('disabled','disabled');
+			jQuery('#$id').button('disable');
 		});
 		"""
 		
@@ -245,14 +249,15 @@ class SignalPathTagLib {
 	/**
 	 * Renders a button to add a specific module. The body of the element will become the button text.
 	 *
-	 * @attr id REQUIRED id of the button
+	 * @attr buttonId REQUIRED id of the button
 	 * @attr moduleId REQUIRED id of the module
 	 */
 	def addModuleShortcutButton = {attrs,body->
-		def id = attrs.id
+		def id = attrs.buttonId
 		def moduleId = attrs.moduleId
 		
-		out << "<button id='$id'>${body()}</button>"
+		out << button(attrs,body)
+//		out << "<button id='$id'>${body()}</button>"
 		
 		writeScriptHeader(out)
 		
@@ -270,12 +275,12 @@ class SignalPathTagLib {
 	/**
 	 * Renders a spinner that will be shown when the signalpath is running.
 	 *
-	 * @attr id REQUIRED id of the button
+	 * @attr id REQUIRED id of the spinner div
 	 */
 	def spinner = {attrs,body->
 		def id = attrs.id
 		
-		out << "<div id='$id' style='display:none'>${body()}</div>"
+		out << "<span id='$id' style='display:none'>${body()}</span>"
 		
 		writeScriptHeader(out)
 		def str = """
@@ -293,6 +298,33 @@ class SignalPathTagLib {
 	}
 	
 	/**
+	 * @attr buttonId REQUIRED id of the button to be created
+	 * @attr style CSS style for the button
+	 */
+	def button = {attrs, body->
+		def buttonId = attrs.buttonId
+		
+//		String iconClass
+//		if (body() && attrs.icon)
+//			iconClass = "ui-button-text-icon-primary"
+//		else if (body())
+//			iconClass = "ui-button-text-only"
+//		else if (attrs.icon)
+//			iconClass = "ui-button-icon-only"
+//	
+//		out << "<button id='$buttonId' class='ui-button ui-widget ui-state-default ui-corner-all $iconClass ${attrs.class ?: ""} ${attrs.disabled ? "ui-state-disabled" : ""}' style='${attrs.style ?: ""}' ${attrs.title ? "title='attrs.title'" : ''} ${attrs.disabled ? "disabled='disabled'" : ""} role='button' aria-disabled='${attrs.disabled ? "true" : "false"}'>"
+//		if (attrs.icon)
+//			out << "<span class='ui-button-icon-primary ui-icon $attrs.icon'></span>"
+//		if (body())
+//			out << "<span class='ui-button-text'>${body()}</span>"
+//		out << "</button>"
+		
+		out << "<button id='$buttonId' class='${attrs.class ?: ""} ${attrs.disabled ? "ui-state-disabled" : ""}' style='${attrs.style ?: ""}' ${attrs.title ? "title='attrs.title'" : ''} ${attrs.disabled ? "disabled='disabled'" : ""} role='button'>"
+		out << body()
+		out << "</button>"
+	}
+	
+	/**
 	 * Renders a button that will open a signalpath load browser
 	 *
 	 * @attr buttonId REQUIRED id of the button to be created
@@ -302,7 +334,7 @@ class SignalPathTagLib {
 		def buttonId = attrs.buttonId
 		def browserId = attrs.browserId
 		
-		out << "<button id='$buttonId'>${body()}</button>"
+		out << button(attrs,body)
 		
 		writeScriptHeader(out)
 		def str = """
@@ -310,7 +342,7 @@ class SignalPathTagLib {
 		var lb = jQuery("#$browserId");
 		if (lb.is(":visible")) {
 			lb.hide();
-			jQuery("#$browserId .loadTabs").tabs("destroy");
+			jQuery("#$browserId").tabs("destroy");
 		}
 		else {
 			jQuery("#$browserId").tabs();
@@ -342,9 +374,9 @@ class SignalPathTagLib {
 		tabs.each {
 			// Inject the javascript command into params
 			if (!it.params)
-				it.params = [command:command]
-			else if (it.params && !it.params.command)
-				it.params.command = command
+				it.params = [browserId:it.browserId]
+			else if (it.params)
+				it.params.browserId = it.browserId
 			
 			out << "<li>"
 			out << "<a href='${createLink(controller:it.controller,action:it.action,params:it.params)}'>$it.name</a>"
@@ -355,13 +387,14 @@ class SignalPathTagLib {
 		out << "</div>"
 		
 		writeScriptHeader(out)
+		
 		out << """
 		if (typeof(SignalPath)!="undefined") {
 			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
 				var lb = jQuery("#$id");
 				if (lb.is(":visible")) {
 					lb.hide();
-					jQuery("#$id .loadTabs").tabs("destroy");
+					jQuery("#$id").tabs("destroy");
 				}
 			});
 		}
@@ -375,12 +408,12 @@ class SignalPathTagLib {
 	/**
 	 * Renders a button that will save the current signalpath.
 	 *
-	 * @attr id REQUIRED id of the button to be created
+	 * @attr buttonId REQUIRED id of the button to be created
 	 */
 	def saveButton = {attrs,body->
-		def id = attrs.id
-		
-		out << "<button id='$id' disabled='disabled'>${body()}</button>"
+		def id = attrs.buttonId
+		attrs.disabled = true
+		out << button(attrs,body)
 		
 		writeScriptHeader(out)
 		def str = """
@@ -392,13 +425,13 @@ class SignalPathTagLib {
 			});
 
 			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
-				jQuery('#$id').removeAttr("disabled");
-				jQuery('#$id').html("Save to "+saveData.target);
+				jQuery('#$id').button("enable");
+				jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
 			});
 
 			jQuery(SignalPath).on('signalPathSave', function(event,saveData) {
-				jQuery('#$id').removeAttr("disabled");
-				jQuery('#$id').html("Save to "+saveData.target);
+				jQuery('#$id').button("enable");
+				jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
 			});
 		"""
 		out << str
@@ -408,7 +441,7 @@ class SignalPathTagLib {
 	/**
 	 * Renders a button that will open a save as dialog for the current signalpath.
 	 *
-	 * @attr id REQUIRED id of the button to be created
+	 * @attr buttonId REQUIRED id of the button to be created
 	 * @attr dialogId REQUIRED id of the dialog to be created
 	 * @attr url default: create url from controller and action names
 	 * @attr controller default: "savedSignalPath"
@@ -420,7 +453,7 @@ class SignalPathTagLib {
 	 * @attr title default: ""
 	 */
 	def saveAsButton = {attrs,body->
-		def id = attrs.id
+		def id = attrs.buttonId
 		def dialogId = attrs.dialogId
 		def controller = attrs.controller ?: "savedSignalPath"
 		def action = attrs.action ?: "save"
@@ -429,7 +462,8 @@ class SignalPathTagLib {
 		def style = attrs.style ?: ""
 		def title = attrs.title ?: ""
 		
-		out << "<button id='$id' class='$cls' style='$style' title='$title'>${body()}</button>"
+		out << button(attrs,body)
+//		out << "<button id='$id' class='$cls' style='$style' title='$title'>${body()}</button>"
 
 		def url = attrs.url ?: createLink(controller:controller,action:action)
 		def dialogTitle = "Save to $targetName as.."

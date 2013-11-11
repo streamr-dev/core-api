@@ -3,17 +3,20 @@
 	position:absolute;
 /* 	width: 400px; */
 /* 	height: 800px; */
-	max-height: 800px;
-	overflow: auto;
+/* 	max-height: 800px; */
+/* 	overflow: auto; */
 	z-index: 1000;
 }
 
+.loadBrowserTableWrapper {
+	max-height: 600px;
+	overflow: auto;
+}
+
 #loadBrowser table tr.selectable:hover {
-	background-color: #fff;
 	cursor: pointer;
 }
 
 #loadBrowser table td.selectable:hover {
-	background-color: #fff;
 	cursor: pointer;
 }

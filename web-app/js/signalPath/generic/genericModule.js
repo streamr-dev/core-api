@@ -2,7 +2,7 @@ SignalPath.ParamRenderers = {
 		"default": {
 			create: function(module,data) {
 				if (data.possibleValues) {
-					var select = $("<select class='parameterInput'></select>");
+					var select = $("<select class='parameterInput' style='visibility:hidden'></select>");
 					$(data.possibleValues).each(function(i,val) {
 						var option = $("<option></option>");
 						option.attr("value",val.value);
@@ -13,6 +13,13 @@ SignalPath.ParamRenderers = {
 						
 						select.append(option);
 					});
+					
+					select.on("spIOReady",(function(s) {
+						return function() {
+							s.chosen({width:"180px", search_contains:true}).css('visibility', 'visible');
+						};
+					})(select));
+					
 					return select;
 				}
 				else {
@@ -101,16 +108,6 @@ SignalPath.getParamRenderer = function(data) {
 	return renderer;
 };
 
-// Bind connection and disconnection events
-jsPlumb.bind("connection",function(connection) {
-	$(connection.source).trigger("spConnect", connection.target);
-	$(connection.target).trigger("spConnect", connection.source);
-});
-jsPlumb.bind("connectionDetached",function(connection) {
-	$(connection.source).trigger("spDisconnect", connection.target);
-	$(connection.target).trigger("spDisconnect", connection.source);
-});
-
 SignalPath.GenericModule = function(data, canvas, my) {
 	my = my || {};
 	
@@ -181,16 +178,19 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		});
 	}
 	
-	function createModuleSettings() {
+	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
 		
+		var div = $("<div class='modulefooter'></div>");
+		my.div.append(div);
+		
 		if (my.jsonData.canClearState==null || my.jsonData.canClearState) {
-			var clear = $("<span class='moduleSwitch clearState'>CLEAR</span>");
+			var clear = $("<div class='moduleSwitch clearState'>CLEAR</div>");
 			if (my.jsonData.clearState==null)
 				my.jsonData.clearState = true;
 
 			clear.addClass(my.jsonData.clearState ? "ioSwitchTrue" : "ioSwitchFalse");
-			my.body.append(clear);
+			div.append(clear);
 			clear.click(function() {
 				if (my.jsonData.clearState) {
 					my.jsonData.clearState = false;
@@ -205,6 +205,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			});
 		}
 	}
+	my.createModuleFooter = createModuleFooter;
 	
 	function generateId() {
 		var id = "myId_"+my.hash+"_"+new Date().getTime();
@@ -308,12 +309,15 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		// Driving input. Default true.
 		
+		var switchDiv = $("<div class='switchContainer'></div>");
+		div.append(switchDiv);
+		
 		if (data.canBeDrivingInput==null || data.canBeDrivingInput) {
-			var driving = $("<span class='ioSwitch ioSwitchInput drivingInput'>DR</span>");
+			var driving = $("<div class='ioSwitch ioSwitchInput drivingInput'>DR</div>");
 			if (data.drivingInput==null)
 				data.drivingInput = (div.hasClass("parameter") ? false : true);
 			driving.addClass(data.drivingInput ? "ioSwitchTrue" : "ioSwitchFalse");
-			div.append(driving);
+			switchDiv.append(driving);
 			driving.click(function() {
 				if (data.drivingInput) {
 					data.drivingInput = false;
@@ -330,8 +334,8 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		// Initial value. Default null/off. Only valid for TimeSeries type
 		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
-			var iv = $("<span class='ioSwitch ioSwitchInput initialValue'></span>");
-			div.append(iv);
+			var iv = $("<div class='ioSwitch ioSwitchInput initialValue'></div>");
+			switchDiv.append(iv);
 			
 			var updateIv = function() {
 				if (data.initialValue==null) {
@@ -372,11 +376,11 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		// Feedback connection. Default false. Switchable for TimeSeries types.
 		
 		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var fb = $("<span class='ioSwitch ioSwitchInput feedback'>FB</span>");
+			var fb = $("<div class='ioSwitch ioSwitchInput feedback'>FB</div>");
 			if (data.feedback==null)
 				data.feedback = false;
 			fb.addClass(data.feedback ? "ioSwitchTrue" : "ioSwitchFalse");
-			div.append(fb);
+			switchDiv.append(fb);
 			fb.click(function() {
 				if (data.feedback) {
 					data.feedback = false;
@@ -390,46 +394,20 @@ SignalPath.GenericModule = function(data, canvas, my) {
 				}
 			});
 		}
-		
-		addExportToggle(div,data,"ioSwitchInput")
-	}
-	
-	function addExportToggle(div,data,cls) {
-		// Export toggle
-		var ex = $("<span class='ioSwitch "+cls+" export' style='display:none'>EX</span>");
-
-		ex.addClass(data.export ? "ioSwitchTrue" : "ioSwitchFalse");
-		if (data.export)
-			div.addClass("export");
-		
-		div.append(ex);
-		ex.click(function() {
-			if (data.export) {
-				data.export = false;
-				ex.removeClass("ioSwitchTrue");
-				ex.addClass("ioSwitchFalse");
-
-				div.removeClass("export");
-			}
-			else {
-				data.export = true;
-				ex.addClass("ioSwitchTrue");
-				ex.removeClass("ioSwitchFalse");
-				
-				div.addClass("export");
-			}
-		});		
 	}
 	
 	function createOutputSettings(div,data) {
 		
+		var switchDiv = $("<div class='switchContainer'></div>");
+		div.append(switchDiv);
+		
 		// NoRepeat. Default true. Add only for TimeSeries type
 		if (data.type=="Double" && (data.canBeNoRepeat==null || data.canBeNoRepeat)) {
-			var noRepeat = $("<span class='ioSwitch ioSwitchOutput noRepeat'>NR</span>");
+			var noRepeat = $("<div class='ioSwitch ioSwitchOutput noRepeat'>NR</div>");
 			if (data.noRepeat==null)
 				data.noRepeat = true;
 			noRepeat.addClass(data.noRepeat ? "ioSwitchTrue" : "ioSwitchFalse");
-			div.append(noRepeat);
+			switchDiv.append(noRepeat);
 			noRepeat.click(function() {
 				if (data.noRepeat) {
 					data.noRepeat = false;
@@ -443,38 +421,36 @@ SignalPath.GenericModule = function(data, canvas, my) {
 				}
 			});
 		}
-		
-		addExportToggle(div,data,"ioSwitchOutput");
 	}
 	
-	function bindNameChange(ioname,data) {
-		ioname.click(
-				(function(data,ioname) {
-					return function() {
-						var n = $(ioname).text();
+	function rename(iodiv,data) {
+		var n = $(iodiv).find(".ioname").text();
 
-//						// Find input from json data
-//						var jsonInput = null;
-//						$(my.jsonData.inputs).each(function(i,jsI) {
-//							if (jsI.name==n)
-//								jsonInput=jsI;
-//						});
+		var displayName = prompt("Display name for "+data.name+":",n);
+		if (displayName != null) {
+			if (displayName != "" && displayName != data.name) {
+				data.displayName = displayName;
+			}
+			else {
+				delete data.displayName;
+				displayName = data.name;
+			}
 
-						var displayName = prompt("Display name for "+data.name+":",n);
-						if (displayName != null) {
-							if (displayName != "" && displayName != data.name) {
-								data.displayName = displayName;
-							}
-							else {
-								delete data.displayName;
-								displayName = data.name;
-							}
-
-							ioname.html(displayName);
-						}
-					}
-				})(data,ioname)
-		);
+			$(iodiv).find(".ioname").html(displayName);
+		}
+		jsPlumb.recalculateOffsets(my.div.attr('id'));
+		jsPlumb.repaint(my.div.attr('id'));
+	}
+	
+	function toggleExport(iodiv,data) {
+		if (data.export) {
+			iodiv.removeClass("export");
+			data.export = false;
+		}
+		else {
+			iodiv.addClass("export");
+			data.export = true;
+		}
 	}
 	
 	// PROTECTED FUNCTIONS
@@ -517,7 +493,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		$(oldInputConnections).each(function(i,item) {
 			// Find an input by that name
 			var found = null;
-			$(my.div).find("div.input span.ioname").each(function(j,ioname) {
+			$(my.div).find("div.input div.ioname").each(function(j,ioname) {
 				if ($(ioname).text()==item.name)
 					found = $(ioname).parent();
 			});
@@ -529,7 +505,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		$(oldOutputConnections).each(function(i,item) {
 			// Find an input by that name
 			var found = null;
-			$(my.div).find("div.output span.ioname").each(function(j,ioname) {
+			$(my.div).find("div.output div.ioname").each(function(j,ioname) {
 				if ($(ioname).text()==item.name)
 					found = $(ioname).parent();
 			});
@@ -538,8 +514,10 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			}
 		});
 		
-		jsPlumb.repaint($(my.div).find("div.input"));
-		jsPlumb.repaint($(my.div).find("div.output"));
+		if ($(my.div).find("div.input").length>0)
+			jsPlumb.repaint($(my.div).find("div.input"));
+		if ($(my.div).find("div.output").length>0)
+			jsPlumb.repaint($(my.div).find("div.output"));
 	}
 	that.updateFrom = updateFrom;
 	
@@ -553,7 +531,8 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		jsPlumb.draggable($(my.div).attr("id"), my.dragOptions);
 		
 		// Disconnect button
-		var disconnectLink = $("<span class='disconnect modulebutton ui-corner-all ui-icon ui-icon-cancel'></span>");
+//		var disconnectLink = $("<span class='disconnect modulebutton ui-corner-all ui-icon ui-icon-cancel'></span>");
+		var disconnectLink = my.createModuleButton("disconnect ui-icon ui-icon-cancel");
 		disconnectLink.click(function() {
 			my.disconnect();
 		});
@@ -590,7 +569,11 @@ SignalPath.GenericModule = function(data, canvas, my) {
 
 //		my.positionConnections();
 
-		createModuleSettings();
+		createModuleFooter();
+		
+		my.div.on( "dragstart", function(event, ui) {
+			jsPlumb.recalculateOffsets(my.div.attr('id'));
+		});
 		
 		my.title.dblclick(autoConnectInputs);
 	}
@@ -612,9 +595,13 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		$(my.div).find("div.input").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
+			// This call should not be necessary but there may be a bug in jsPlumb
+			jsPlumb.dragManager.elementRemoved($(div).attr('id'));
 		});
 		$(my.div).find("div.output").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
+			// This call should not be necessary but there may be a bug in jsPlumb
+			jsPlumb.dragManager.elementRemoved($(div).attr('id'));
 		});
 		
 		superClose();
@@ -623,7 +610,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	
 	function getInput(name) {
 		$(my.div).find("div.input").each(function(i,input) {
-			var n = $(input).find("span.ioname").text();
+			var n = $(input).find("div.ioname").text();
 			if (n==name) {
 				return input;
 			}
@@ -633,7 +620,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	
 	function getOutput(name) {
 		$(my.div).find("div.output").each(function(i,output) {
-			var n = $(input).find("span.ioname").text();
+			var n = $(input).find("div.ioname").text();
 			if (n==name) {
 				return output;
 			}
@@ -647,11 +634,11 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		var param = $("<div class='parameter input "+p.type+"'></div>");
 		param.data("name",p.name);
 		
-		var ioname = $("<span class='ioname'>"+(p.displayName ? p.displayName : p.name)+"</span>");
+		var ioname = $("<div class='ioname'>"+(p.displayName ? p.displayName : p.name)+"</div>");
 		param.append(ioname);
 		
-		if (my.enableIONameChange) 
-			bindNameChange(ioname,p);
+//		if (my.enableIONameChange) 
+//			bindNameChange(ioname,p);
 		
 		var input = createParamInput(p);
 		var inputTd = $("<td></td>");
@@ -686,6 +673,20 @@ SignalPath.GenericModule = function(data, canvas, my) {
 //			param.addClass("export");
 		
 		createInputSettings(param,p);
+		
+		// Bind context menu listeners
+		if (!my.disableContextMenu) {
+			param.addClass("context-menu");
+		}
+		
+		param.on('spContextMenuSelection', (function(d,j) {
+			return function(event,selection) {
+				my.handleContextMenuSelection(d,j,selection,event);
+			};
+		})(param,p));
+		
+		param.trigger("spIOReady");
+		input.trigger("spIOReady");
 	}
 	my.addParameter = addParameter;
 	
@@ -704,11 +705,9 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		div.data("name",data.name);
 		my.div.data(type+"."+data.name,div);
 		
-		var ioname = $("<span class='ioname'>"+(data.displayName ? data.displayName : data.name)+"</span>");
+		var ioname = $("<div class='ioname'>"+(data.displayName ? data.displayName : data.name)+"</span>");
 		div.append(ioname);
-		
-		if (my.enableIONameChange)
-			bindNameChange(ioname,data);
+//			bindNameChange(ioname,data);
 		
 		td.append(div);
 		
@@ -736,6 +735,19 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		if (type=="input")
 			createInputSettings(div,data);
 		else createOutputSettings(div,data);
+		
+		// Bind context menu listeners
+		if (!my.disableContextMenu) {
+			div.addClass("context-menu");
+		}
+		
+		div.on('spContextMenuSelection', (function(d,j) {
+			return function(event,selection) {
+				my.handleContextMenuSelection(d,j,selection,event);
+			};
+		})(div,data));
+		
+		div.trigger("spIOReady");
 		
 		return div;
 	}
@@ -791,7 +803,26 @@ SignalPath.GenericModule = function(data, canvas, my) {
 //		superRedraw();
 //	}
 //	that.redraw = redraw;
-		
+
+	function getContextMenu(div) {
+		return [
+		        {title: "Rename", cmd: "rename"},
+		        {title: "Toggle export", cmd: "export"}
+		]
+	}
+	my.getContextMenu = getContextMenu;
+	
+	function handleContextMenuSelection(div,data,selection,event) {
+		if (selection=="rename") {
+			rename(div,data);
+		}
+		else if (selection=="export") {
+			toggleExport(div,data);
+		}
+	}
+	my.handleContextMenuSelection = handleContextMenuSelection;
+
+	
 	var superToJSON = that.toJSON;
 	function toJSON() {
 		my.jsonData = superToJSON();
@@ -878,3 +909,21 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	return that;
 }
 
+$(document).contextmenu({
+    delegate: ".context-menu",
+    menu: [],
+    show: 100,
+    select: function(event, ui) {
+    	var target = $(document).data("contextMenuTarget"); 
+    	target.trigger("spContextMenuSelection",ui.cmd);
+    },
+	beforeOpen: function(event, ui) {
+		var parent = $(ui.target).parents("div.component");
+
+		// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
+		$(document).data("contextMenuTarget",$(ui.target));
+		
+		var my = parent.data("me");
+		$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
+	}
+});
