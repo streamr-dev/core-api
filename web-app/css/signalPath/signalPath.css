@@ -52,7 +52,6 @@ html, body {
 }
 
 .component a:link, a:visited, a:hover {
-    color: white;
     font-weight: bold;
     text-decoration: none;
 }

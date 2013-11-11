@@ -19,6 +19,10 @@
 	box-shadow: 0 2px 1px #aaa;
 }
  
+ .component a:link, a:visited, a:hover {
+/*     color: white; */
+}
+ 
  .modulebody {
 /* 	border: 1px solid #ccc; */
 	border-radius: 8px;
