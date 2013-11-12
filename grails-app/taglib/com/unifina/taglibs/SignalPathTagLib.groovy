@@ -374,9 +374,11 @@ class SignalPathTagLib {
 		tabs.each {
 			// Inject the javascript command into params
 			if (!it.params)
-				it.params = [browserId:it.browserId]
-			else if (it.params)
+				it.params = [browserId:it.browserId,command:command]
+			else if (it.params) {
 				it.params.browserId = it.browserId
+				it.params.command = command
+			}
 			
 			out << "<li>"
 			out << "<a href='${createLink(controller:it.controller,action:it.action,params:it.params)}'>$it.name</a>"
@@ -567,6 +569,7 @@ class SignalPathTagLib {
 				row.append(inputTd);
 				var input = SignalPath.getParamRenderer(it).create(null,it);
 				inputTd.append(input);
+				jQuery(input).trigger("spIOReady");
 				input.data("parameterData",it);
 				inputs.push(input);
 

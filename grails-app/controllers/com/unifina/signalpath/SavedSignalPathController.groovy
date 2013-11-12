@@ -76,7 +76,7 @@ class SavedSignalPathController {
 	}
 	
 	def loadBrowser() {
-		def result = [browserId:params.browserId, headers:["Id","Name"], contentUrl:createLink(controller:"savedSignalPath",action:"loadBrowserContent",params:[browserId:params.browserId])]
+		def result = [browserId:params.browserId, headers:["Id","Name"], contentUrl:createLink(controller:"savedSignalPath",action:"loadBrowserContent",params:[browserId:params.browserId,command:params.command])]
 		render(template:"loadBrowser",model:result)
 	}
 	
@@ -91,6 +91,7 @@ class SavedSignalPathController {
 			tmp.id = it[0]
 			tmp.name = it[1]
 			tmp.url = createLink(controller:"savedSignalPath",action:"load",params:[id:it[0]])
+			tmp.command = params.command
 			result.signalPaths.add(tmp)
 		}
 		return result

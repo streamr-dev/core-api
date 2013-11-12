@@ -58,6 +58,7 @@ var SignalPath = (function () {
 		jQuery.extend(true, options, opts);
 		
 		canvas = $("#"+options.canvas);
+		jsPlumb.Defaults.Container = canvas;
 		
 		newSignalPath();
 
