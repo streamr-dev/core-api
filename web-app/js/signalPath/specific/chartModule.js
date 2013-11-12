@@ -258,6 +258,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 //				
 				legend: {
 					enabled: true,
+					maxHeight: 100,
 					y: 40
 				},
 				
@@ -433,6 +434,15 @@ SignalPath.ChartModule = function(data,canvas,my) {
 			yAxis = d.yAxis || [];
 			
 			var x=0;
+			// Init axis opposite valus
+			for (var i=0;i<yAxis.length;i++) {
+				if (yAxis[i].opposite==null) {
+					yAxis[i].opposite = (x%2==0);
+					x++;
+				}
+			}
+			
+			x=0;
 			var left = 0;
 			var right = 0;
 			$(d.series).each(function (i,s) {

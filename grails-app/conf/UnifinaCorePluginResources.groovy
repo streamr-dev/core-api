@@ -16,7 +16,7 @@ modules = {
 		resource url:'js/highcharts-2.3.3/highcharts.src.js'
 	}
 	highstock {
-		resource url:'js/highstock/js/highstock.src.js'
+		resource url:'js/highstock-1.3.7/js/highstock.js'
 	}
 	codemirror {
 		resource url:'js/codemirror/codemirror.js'

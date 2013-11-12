@@ -9,6 +9,10 @@
 	z-index: 4;
 }
 
+.chartRangeButtons {
+	margin-bottom: 3px;
+}
+
 .chartDrawArea {
 	display: inline-block;
 /* 	position: relative; */
