@@ -51,9 +51,7 @@ grails.project.dependency.resolution = {
 		runtime ":jquery:1.8.3"
 		runtime ":jquery-ui:1.8.24"
 		runtime ":resources:1.1.6"
-		if (Environment.current != Environment.DEVELOPMENT) {
-			runtime ":cached-resources:1.0"
-			runtime ":zipped-resources:1.0"
-		}
+		runtime ":cached-resources:1.0"
+		runtime ":zipped-resources:1.0"
     }
 }
