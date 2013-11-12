@@ -54,14 +54,6 @@ modules = {
 		resource url:'js/chosen-1.0.0/chosen-sprite.png'
 		resource url:'js/chosen-1.0.0/chosen-sprite@2x.png'
 	}
-//	waypoints {
-//		dependsOn 'jquery'
-//		resource url:'js/waypoints-2.0.3/waypoints.min.js'
-//	}
-	jscroll {
-		dependsOn 'jquery'
-		resource url:'js/jscroll-2.1.1/jquery.jscroll.min.js'
-	}
 	'signalpath-loadBrowser' {
 		resource url:'css/signalPath/widgets/loadBrowser.css'
 	}
