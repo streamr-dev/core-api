@@ -48,6 +48,9 @@ public class StreamParameter extends Parameter<Stream> {
 	
 	@Override
 	Stream parseValue(String s) {
+		if (s==null || s.equals("null"))
+			return null;
+		
 		FeedService fs = (FeedService) owner.globals.getGrailsApplication().getMainContext().getBean("feedService");
 		
 		Stream result; 

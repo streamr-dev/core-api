@@ -442,15 +442,19 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		jsPlumb.repaint(my.div.attr('id'));
 	}
 	
-	function toggleExport(iodiv,data) {
-		if (data.export) {
-			iodiv.removeClass("export");
-			data.export = false;
-		}
-		else {
+	function setExport(iodiv,data,value) {
+		if (value) {
 			iodiv.addClass("export");
 			data.export = true;
 		}
+		else {
+			iodiv.removeClass("export");
+			data.export = false;
+		}
+	}
+	
+	function toggleExport(iodiv,data) {
+		setExport(iodiv,data,!data.export);
 	}
 	
 	// PROTECTED FUNCTIONS
@@ -669,6 +673,9 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			})(param));
 		}
 
+		if (p.export)
+			setExport(ioname,p,true);
+		
 //		if (p.export)
 //			param.addClass("export");
 		
@@ -714,6 +721,9 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		// Link json data to the div
 		div.data("json",data);
 
+		if (data.export)
+			setExport(ioname,data,true);
+		
 //		if (data.export)
 //			div.addClass("export");
 		

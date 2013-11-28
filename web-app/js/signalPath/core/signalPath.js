@@ -43,6 +43,9 @@ var SignalPath = (function () {
     		signalPathContext: function() {
     			return {};
     		},
+    		errorHandler: function(msg) {
+    			alert(msg);
+    		},
     		runUrl: "runSignalPath",
     		abortUrl: "abort",
     		atmosphereUrl: project_webroot+"atmosphere/",
@@ -180,11 +183,11 @@ var SignalPath = (function () {
 						callback();
 				}
 				else {
-					alert(data.message);
+					options.errorHandler(data.message);
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				alert(errorThrown);
+				options.errorHandler(errorThrown);
 			}
 		});
 	}
@@ -209,11 +212,11 @@ var SignalPath = (function () {
 					jsPlumb.setSuspendDrawing(false,true);
 				}
 				else {
-					alert(data.message);
+					options.errorHandler(data.message);
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				alert(errorThrown);
+				options.errorHandler(errorThrown);
 			}
 		});
 		
@@ -227,7 +230,7 @@ var SignalPath = (function () {
 	
 	function createModuleFromJSON(data) {
 		if (data.error) {
-			alert(data.message);
+			options.errorHandler(data.message);
 			return;
 		}
 		
@@ -324,11 +327,11 @@ var SignalPath = (function () {
 					$(my).trigger('signalPathSave', [saveData]);
 				}
 				else {
-					alert(data.message);
+					options.errorHandler(data.message);
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				alert(errorThrown);
+				options.errorHandler(errorThrown);
 			}
 		});
 	}
@@ -368,15 +371,17 @@ var SignalPath = (function () {
 	/**
 	 * Options must at least include options.url OR options.json
 	 */
-	function loadSignalPath(options,callback) {
-		var params = options.params || {};
+	function loadSignalPath(opt,callback) {
+		var params = opt.params || {};
 		
-		if (options.json) {
-			_load(options.json,options,callback);
+		if (opt.json) {
+			_load(opt.json,opt,callback);
 		}
-		if (options.url) {
-			$.getJSON(options.url, params, function(data) {
-				_load(data,options,callback);
+		if (opt.url) {
+			$.getJSON(opt.url, params, function(data) {
+				if (data.error)
+					options.errorHandler(data.message);
+				else _load(data,opt,callback);
 			});
 		}
 	}
@@ -432,7 +437,7 @@ var SignalPath = (function () {
 			success: function(data) {
 //				$("#spinner").hide();
 				if (data.error) {
-					alert("Error:\n"+data.error);
+					options.errorHandler("Error:\n"+data.error);
 				}
 				else {
 					runnerId = data.runnerId;
@@ -441,7 +446,7 @@ var SignalPath = (function () {
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
 //				$("#spinner").hide();
-				alert(textStatus+"\n"+errorThrown);
+				options.errorHandler(textStatus+"\n"+errorThrown);
 			}
 		});
 //		}
@@ -583,7 +588,7 @@ var SignalPath = (function () {
 //		try {
 
 //		if (messages.length > 500)
-//		alert("Here we go!");
+//		options.errorHandler("Here we go!");
 
 		var clear = null;
 		
@@ -597,7 +602,7 @@ var SignalPath = (function () {
 		// Update ack counter
 		if (message.counter > payloadCounter) {
 //			abort();
-//			alert("Counter: "+message.counter+", expected: "+payloadCounter);
+//			options.errorHandler("Counter: "+message.counter+", expected: "+payloadCounter);
 			console.log("Messages SKIPPED! Counter: "+message.counter+", expected: "+payloadCounter);
 //			if (!rerequest(sessionId,payloadCounter,message.counter-1)) {
 //				console.log("WARN: Rerequest failed. Skipping messages!");
@@ -627,7 +632,7 @@ var SignalPath = (function () {
 			}
 			else if (message.type=="E") {
 				closeSubscription();
-				alert(message.error);
+				options.errorHandler(message.error);
 			}
 //		}
 
@@ -635,7 +640,7 @@ var SignalPath = (function () {
 		
 //		} 
 //		catch (e) {
-//		alert(e);
+//		options.errorHandler(e);
 //		}
 	}
 	
@@ -663,11 +668,11 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (data.error) {
-					alert("Error:\n"+data.error);
+					options.errorHandler("Error:\n"+data.error);
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				alert(textStatus+"\n"+errorThrown);
+				options.errorHandler(textStatus+"\n"+errorThrown);
 			}
 		});
 

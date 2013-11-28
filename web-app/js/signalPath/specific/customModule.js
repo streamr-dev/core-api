@@ -1,3 +1,12 @@
+SignalPath.CustomModuleOptions = {
+	codeMirrorOptions: {
+		lineNumbers: true,
+		matchBrackets: true,
+		mode: "text/x-groovy",
+		theme: "default"
+	}
+};
+
 SignalPath.CustomModule = function(data,canvas,my) {
 	my = my || {};
 	var that = SignalPath.GenericModule(data,canvas,my)
@@ -66,12 +75,7 @@ SignalPath.CustomModule = function(data,canvas,my) {
 			$(dialog).dialog("open");
 			if (editor==null) {
 				var textArea = $(dialog).find("textarea").get(0);
-				editor = CodeMirror.fromTextArea(textArea, {
-					lineNumbers: true,
-					matchBrackets: true,
-					mode: "text/x-groovy",
-					theme: "vibrant-ink"
-				});
+				editor = CodeMirror.fromTextArea(textArea, SignalPath.CustomModuleOptions.codeMirrorOptions);
 			}
 			setTimeout(function(){editor.refresh(); editor.focus();}, 20);
 		});

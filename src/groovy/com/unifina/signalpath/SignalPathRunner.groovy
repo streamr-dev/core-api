@@ -65,6 +65,8 @@ public class SignalPathRunner extends Thread {
 	@Override
 	public void run() {
 		
+		Exception reportException = null
+		
 		// Run
 		try {
 			globals.dataSource = signalPathService.createDataSource(globals.signalPathContext, globals)
@@ -98,6 +100,7 @@ public class SignalPathRunner extends Thread {
 		} catch (Exception e) {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Error while running SignalPaths!",e)
+			reportException = e
 		}
 
 		// Cleanup
@@ -108,6 +111,10 @@ public class SignalPathRunner extends Thread {
 			log.error("Error while destroying SignalPathRunner!",e)
 		}
 
+		if (reportException) {
+			returnChannels.each{it.sendError(reportException.message+(reportException.cause!=null ? "<br>Caused by: $reportException.cause" : ""))}
+		}
+		
 		returnChannels.each {it.sendDone()}
 
 		log.info("SignalPathRunner is ready.")
