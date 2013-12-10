@@ -22,8 +22,12 @@ html, body {
 
 #canvas {
 	position:absolute;
-	top: 50px;
+/* 	top: 50px; */
 	left: 240px;
+}
+
+.signalpath-canvas {
+	position: relative;
 }
 
 #moduleTree {
