@@ -42,6 +42,13 @@ modules = {
 		dependsOn 'jquery'
 		resource url:'js/hotkeys/jquery.hotkeys.js'
 	}
+	joyride {
+		dependsOn 'jquery'
+		resource url:'js/joyride-2.1/joyride-2.1.css'
+		resource url:'js/joyride-2.1/modernizr.mq.js'
+		resource url:'js/joyride-2.1/jquery.cookie.js'
+		resource url:'js/joyride-2.1/jquery.joyride-2.1.js'
+	}
 	pnotify {
 		dependsOn 'jquery, jquery-ui'
 		resource url:'js/pnotify-1.2.0/jquery.pnotify.min.js'

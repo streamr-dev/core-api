@@ -52,7 +52,8 @@ var SignalPath = (function () {
     };
     
 	// Public
-	var my = {} 
+	var my = {};
+	my.options = options;
 	
     // TODO: remove if not needed anymore!
     my.replacedIds = {};
@@ -408,15 +409,13 @@ var SignalPath = (function () {
 		var signalPathContext = options.signalPathContext();
 		jQuery.extend(true,signalPathContext,additionalContext);
 		
-		var result = signalPathToJSON(signalPathContext);
+		// Abort first if this signalpath is currently running
+		if (isRunning())
+			abort();
 		
-//		if (csv) {
-//			var form = $('#csvForm');
-//			$('#csvFormData').val(JSON.stringify(result.signalPathData));
-//			$('#csvFormContextData').val(JSON.stringify(result.signalPathContext));
-//			form.submit();
-//		}
-//		else {
+		var result = signalPathToJSON(signalPathContext);
+
+		// TODO: move to module clean()
 		$(".warning").remove();
 
 		// Clean modules before running
@@ -435,7 +434,6 @@ var SignalPath = (function () {
 			},
 			dataType: 'json',
 			success: function(data) {
-//				$("#spinner").hide();
 				if (data.error) {
 					options.errorHandler("Error:\n"+data.error);
 				}
@@ -445,11 +443,9 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-//				$("#spinner").hide();
 				options.errorHandler(textStatus+"\n"+errorThrown);
 			}
 		});
-//		}
 	}
 	my.run = run;
 	
@@ -655,6 +651,11 @@ var SignalPath = (function () {
 		$(my).trigger('signalPathStop');
 //		$("#spinner").hide();
 	}
+	
+	function isRunning() {
+		return sessionId!=null;
+	}
+	my.isRunning = isRunning;
 	
 	function abort() {
 

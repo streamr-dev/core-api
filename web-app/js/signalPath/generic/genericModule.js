@@ -227,6 +227,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		        if(arr1[i]==arr2[j])
 		            return true;
 
+		SignalPath.options.errorHandler("These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+".");
 		return false;
 	}
 	
