@@ -231,6 +231,24 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		return false;
 	}
 	
+	function checkConnectionDirection(info) {
+		// Check that the source of this connection is an input and the target is an output.
+		// If they are the other way around, create a reversed connection and return false for this connection.
+		
+		var source = $("#"+info.sourceId);
+		var target = $("#"+info.targetId);
+		
+		if (source.hasClass("input") && target.hasClass("output"))
+			return true;
+		else if (source.hasClass("output") && target.hasClass("input")) {
+			// Reverse the connection
+			jsPlumb.connect({source:target.data("endpoint"), target:source.data("endpoint")});
+			return false;
+		}
+		// Don't allow input-input or output-output connections
+		else return false;
+	}
+	
 	function addEndpoint(json,connDiv,id) {
 		
 		// Generate custom id for the div if using the new jsPlumb ids
@@ -248,16 +266,28 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		var isInput = connDiv.hasClass('input');
 	
 //		my.positionConnections();
+		
+		// For connections
+		// TODO: define overlay in theme?
+		var overlays = [["Arrow", {direction:(isInput ? -1 : 1), paintStyle: {cssClass:"arrow"}}]];
+		
 		var ep = jsPlumb.addEndpoint(connDiv, {
-				isSource:isInput, 
-				isTarget:isOutput,
+				isSource:true,//isInput, 
+				isTarget:true,//isOutput,
 				dragOptions: {},
 				dropOptions: {},
 				anchor: (isInput ? [0, 0.5, -1, 0, -15, 0] : [1, 0.5, 1, 0, 15, 0]),
 				maxConnections: (isInput?1:-1),
-				beforeDrop: checkConnection
+				beforeDrop: function(info) {
+					return checkConnection(info) && checkConnectionDirection(info);
+				},
+				connectorOverlays: overlays
 //				scope:scope
 			});
+		ep.bind("click", function(endpoint) {
+			console.log(endpoint);
+		});
+		
 		$(connDiv).data("endpoint",ep);
 		$(connDiv).data("acceptedTypes", (json.acceptedTypes!=null ? json.acceptedTypes : [json.type]));
 		

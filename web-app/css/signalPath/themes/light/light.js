@@ -45,4 +45,4 @@ jsPlumb.Defaults.PaintStyle = {
 		lineWidth:3,
 		strokeStyle: "#aaa" //('rgba(200,0,0,100)'
 };
-jsPlumb.Defaults.Overlays = [["Arrow", {direction:-1, paintStyle: {cssClass:"arrow"}}]];
+//jsPlumb.Defaults.Overlays = [["Arrow", {direction:-1, paintStyle: {cssClass:"arrow"}}]];

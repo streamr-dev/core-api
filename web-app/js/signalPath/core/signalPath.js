@@ -361,8 +361,10 @@ var SignalPath = (function () {
 			$(connection.target).trigger("spConnect", connection.source);
 		});
 		jsPlumb.bind("connectionDetached",function(connection) {
-			$(connection.source).trigger("spDisconnect", connection.target);
-			$(connection.target).trigger("spDisconnect", connection.source);
+			if (!connection.connection.pending) {
+				$(connection.source).trigger("spDisconnect", connection.target);
+				$(connection.target).trigger("spDisconnect", connection.source);
+			}
 		});
 		
 		$(my).trigger('signalPathNew');
