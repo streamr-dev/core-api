@@ -753,7 +753,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		div.data("json",data);
 
 		if (data.export)
-			setExport(ioname,data,true);
+			setExport(div,data,true);
 		
 //		if (data.export)
 //			div.addClass("export");
