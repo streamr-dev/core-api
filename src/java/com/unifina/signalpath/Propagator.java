@@ -20,6 +20,7 @@ public class Propagator {
 	ArrayList<Output> connectedOutputs = new ArrayList<>();
 	
 	AbstractSignalPathModule[] modArr;
+	private boolean modArrDirty = true;
 	
 	public boolean sendPending = false;
 	private boolean alwaysPropagate = false;
@@ -32,11 +33,14 @@ public class Propagator {
 	
 	public void addModule(AbstractSignalPathModule module) {
 		boolean newModule = originSet.add(module);
-		if (newModule) origins.add(module);
+		if (newModule) { 
+			origins.add(module);
+			modArrDirty = true;
+		}
 	}
 	
 	public void initialize() {
-		if (modArr==null) {
+		if (modArrDirty) {
 			ArrayList<Output> outputs = new ArrayList<>();
 			for (AbstractSignalPathModule m : origins)
 				for (Output o : m.getOutputs())
@@ -217,13 +221,13 @@ public class Propagator {
 		
 		// Convert to array for speed
 		modArr = modules.toArray(new AbstractSignalPathModule[modules.size()]);
-		
+		modArrDirty = false;
 //		log.info("Propagator created for "+origin+": "+modules);
 	}
 	
 	public void propagate() {
 		// Lazy initialize if not explicitly called yet
-		if (modArr==null)
+		if (modArrDirty)
 			initialize();
 		
 		if (sendPending || alwaysPropagate) {
