@@ -2,7 +2,7 @@ package com.unifina.signalpath.statistics;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math.stat.regression.SimpleRegression;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.IntegerParameter;

@@ -18,7 +18,7 @@ public class Covariance extends AbstractSignalPathModule {
 	SlidingDoubleArray xValues;
 	SlidingDoubleArray yValues;
 	
-	org.apache.commons.math.stat.correlation.Covariance cov = new org.apache.commons.math.stat.correlation.Covariance();
+	org.apache.commons.math3.stat.correlation.Covariance cov = new org.apache.commons.math3.stat.correlation.Covariance();
 	
 
 	@Override

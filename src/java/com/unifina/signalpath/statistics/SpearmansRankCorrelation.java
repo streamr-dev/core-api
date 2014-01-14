@@ -1,6 +1,6 @@
 package com.unifina.signalpath.statistics;
 
-import org.apache.commons.math.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.IntegerParameter;

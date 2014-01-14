@@ -1,8 +1,8 @@
 package com.unifina.signalpath.statistics;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math.stat.descriptive.StorelessUnivariateStatistic;
-import org.apache.commons.math.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.IntegerParameter;
