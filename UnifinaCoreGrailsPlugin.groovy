@@ -1,3 +1,10 @@
+import java.security.Policy
+import java.security.Security
+
+import com.unifina.security.MyPolicy
+import com.unifina.security.MySecurityManager
+import com.unifina.security.PackageAccessHelper
+
 class UnifinaCoreGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -94,6 +101,11 @@ class UnifinaCoreGrailsPlugin {
 
     def doWithApplicationContext = { applicationContext ->
         // TODO Implement post initialization spring config (optional)
+		if (!System.securityManager) {
+			Security.setProperty("package.access", PackageAccessHelper.getRestrictedPackages().join(","))
+			Policy.setPolicy(new MyPolicy())
+			System.securityManager = new MySecurityManager();
+		}
     }
 
     def onChange = { event ->

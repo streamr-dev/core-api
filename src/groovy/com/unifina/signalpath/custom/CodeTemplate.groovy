@@ -25,4 +25,8 @@ abstract class CodeTemplate extends GroovySignalPathModule {
 			parentSignalPath.returnChannel.sendPayload(hash, [type:"debug", msg:s, t:t])
 		}
 	}
+	
+	void println(String s) {
+		debug(s)
+	}
 }

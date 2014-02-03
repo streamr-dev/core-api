@@ -461,6 +461,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Integer getHash() {
 		return hash;
 	}
+
+	public void setHash(Integer hash) {
+		this.hash = hash;
+	}
 	
 	/**
 	 * This method will be called when execution of the SignalPath ends.
@@ -540,4 +544,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 //		clear();
 	}
 	
+	protected class UIWarningMessage extends HashMap<String,String> {
+		public UIWarningMessage(String msg) {
+			super();
+			this.put("type","warning");
+			this.put("msg",msg);
+		}
+	}
 }

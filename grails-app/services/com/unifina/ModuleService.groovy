@@ -12,9 +12,13 @@ class ModuleService {
 
 	@CompileStatic
     public AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
+		// TODO: check that the owning user has the privileges to access this module
+		
 		// Load the class using the classloader of the Globals class so that the classes loaded
 		// for this SignalPath run can be unloaded when the run finishes.
-		AbstractSignalPathModule m = (AbstractSignalPathModule) globals.groovyClassLoader.loadClass(mod.implementingClass).newInstance()
+		ClassLoader cl = this.getClass().getClassLoader()
+		AbstractSignalPathModule m = (AbstractSignalPathModule) cl.loadClass(mod.implementingClass).newInstance()
+//		AbstractSignalPathModule m = (AbstractSignalPathModule) globals.classLoader.loadClass(mod.implementingClass).newInstance()
 //		AbstractSignalPathModule m = (AbstractSignalPathModule) new GroovyClassLoader().loadClass(mod.implementingClass).newInstance()
 		m.globals = globals
 		m.init()
@@ -52,4 +56,8 @@ class ModuleService {
 		return getModuleInstance(m, config, parent, globals)
 	}
 	
+	public AbstractSignalPathModule getModuleInstance(Number id, Map config, SignalPath parent, Globals globals) {
+		Module m = Module.get(id)
+		return getModuleInstance(m, config, parent, globals)
+	}
 }

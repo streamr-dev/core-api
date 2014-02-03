@@ -19,9 +19,12 @@ modules = {
 		resource url:'js/highstock-1.3.7/js/highstock.js'
 	}
 	codemirror {
-		resource url:'js/codemirror/codemirror.js'
-		resource url:'js/codemirror/groovy.js'
-		resource url:'js/codemirror/codemirror.css'
+//		resource url:'js/codemirror-3.21/codemirror.js'
+		resource url:'js/codemirror-3.21/codemirror-compressed.js'
+		resource url:'js/codemirror-3.21/codemirror.css'
+//		resource url:'js/codemirror/codemirror.js'
+//		resource url:'js/codemirror/groovy.js'
+//		resource url:'js/codemirror/codemirror.css'
 	}
 	jsplumb {
 		dependsOn 'jquery'

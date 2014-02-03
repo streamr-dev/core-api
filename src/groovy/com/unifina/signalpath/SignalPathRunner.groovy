@@ -36,7 +36,7 @@ public class SignalPathRunner extends Thread {
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
 		this.servletContext = globals.grailsApplication.mainContext.getBean("servletContext")
 		this.signalPathData = signalPathData
-
+//		setContextClassLoader(globals.classLoader)
 		
 		runnerId = "s-"+new Date().getTime()
 		

@@ -12,8 +12,8 @@ import com.unifina.data.Feed;
 import com.unifina.data.IFeed;
 import com.unifina.data.IRequireFeed;
 import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.SignalPath;
 import com.unifina.utils.Globals;
+import com.unifina.signalpath.SignalPath;
 
 /**
  * DataSource is a class global to the current run context. It handles

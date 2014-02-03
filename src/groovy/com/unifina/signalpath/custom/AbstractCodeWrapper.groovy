@@ -1,11 +1,9 @@
 package com.unifina.signalpath.custom
 
-import java.util.List;
-import java.util.Map;
-
+import com.unifina.ModuleService
+import com.unifina.security.UserClassLoader;
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
-import com.unifina.utils.TimezoneConverter
 
 abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 
@@ -77,7 +75,7 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 
 			try {
 				// Replace [CLASSNAME] with a generated one
-				String className = "CustomModule"+new Date().getTime()
+				String className = "CustomModule"+System.currentTimeMillis()+Math.abs(code.hashCode())
 
 				// Avoid using the Thread context classloader
 //				ClassLoader parentClassLoader = this.class.getClassLoader()
@@ -86,7 +84,12 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 				// Load the class using the classloader of the Globals class so that the classes loaded
 				// for this SignalPath run can be unloaded when the run finishes.
 				String code = makeImportString()+header.replace("[[CLASSNAME]]",className) + code + footer;
-				Class clazz = globals.groovyClassLoader.parseClass(code)
+				Class clazz = new UserClassLoader(ModuleService.class.getClassLoader()).parseClass(code,className+".groovy")
+				
+				// Register the created class so that it will be cleaned when Globals is destroyed
+				globals.registerDynamicClass(clazz);
+				
+				// Create & init instance
 				instance = clazz.newInstance();
 				instance.init()
 

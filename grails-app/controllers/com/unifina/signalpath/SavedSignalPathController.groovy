@@ -22,22 +22,23 @@ class SavedSignalPathController {
 	def load() {
 		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
 		
-		try {
-			def ssp = SavedSignalPath.get(Integer.parseInt(params.id))		
-			Map json = JSON.parse(ssp.json);
-	
-			// Reconstruct to bring the path up to date
-			json.signalPathData.name = ssp.name
-			Map result = signalPathService.reconstruct(json,globals)
-			
-			result.saveData = createSaveData(ssp) 
+		def ssp = SavedSignalPath.get(Integer.parseInt(params.id))
+		Map json = JSON.parse(ssp.json);
 
-			render result as JSON
-		} catch (Exception e) {
+		// Reconstruct to bring the path up to date
+		json.signalPathData.name = ssp.name
+		
+		Map result = json
+		
+		try {
+			result = signalPathService.reconstruct(json,globals)
+		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
-			Map r = [error:true, message:e.message]
-			render r as JSON
+			result.error = true
+			result.message = "Failed to load properly! There may be a problem with this SignalPath. The error was: $e.message"
 		} finally {
+			result.saveData = createSaveData(ssp)
+			render result as JSON
 			globals.destroy()
 		}
 	}

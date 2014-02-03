@@ -8,6 +8,7 @@
     <resource>UnifinaCorePluginResources</resource>
     <resource>com.unifina.security.LoginController</resource>
     <resource>com.unifina.security.LogoutController</resource>
+    <resource>com.unifina.security.SecurityManagerController</resource>
     <resource>com.unifina.signalpath.ModuleController</resource>
     <resource>com.unifina.signalpath.SavedSignalPathController</resource>
     <resource>com.unifina.ItchFile</resource>

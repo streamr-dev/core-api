@@ -1,16 +1,20 @@
 package com.unifina.signalpath
 
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory;
-
 import grails.converters.JSON
 import grails.util.GrailsUtil
+
+import org.apache.log4j.Logger
+
+import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
 
 class ModuleController {
 	
 	def moduleService
 	def grailsApplication
 	def springSecurityService
+	
+	private static final Logger log = Logger.getLogger(ModuleController)
 	
 	def jsonSearchModule() {
 		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
@@ -99,9 +103,24 @@ class ModuleController {
 //			}
 			render iMap as JSON
 		} catch (Exception e) {
+			def moduleExceptions = []
+			def me = e
+			
+			// Find a possible ModuleException in the cause hierarchy
+			while (me!=null) {
+				if (me instanceof ModuleException) {
+					moduleExceptions = ((ModuleException)me).getModuleExceptions().collect {
+						[hash:it.hash, payload:it.msg]
+					}
+					break
+				}
+				else me = e.cause
+			}
+		 
 			e = GrailsUtil.deepSanitize(e)
-			e.printStackTrace(System.out)
-			Map r = [error:true, message:e.message]
+			log.error("Exception while creating module!",e)
+//			e.printStackTrace(System.out)
+			Map r = [error:true, message:e.message, moduleErrors:moduleExceptions]
 			render r as JSON
 		}
 		finally {

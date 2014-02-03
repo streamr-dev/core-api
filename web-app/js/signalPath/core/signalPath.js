@@ -184,6 +184,12 @@ var SignalPath = (function () {
 						callback();
 				}
 				else {
+					// TODO: generalize
+					if (data.moduleErrors) {
+						for (var i=0;i<data.moduleErrors.length;i++) {
+							modules[data.moduleErrors[i].hash].receiveResponse(data.moduleErrors[i].payload);
+						}
+					}
 					options.errorHandler(data.message);
 				}
 			},
@@ -382,8 +388,12 @@ var SignalPath = (function () {
 		}
 		if (opt.url) {
 			$.getJSON(opt.url, params, function(data) {
-				if (data.error)
+				if (data.error) {
 					options.errorHandler(data.message);
+					if (data.signalPathData) {
+						_load(data,opt,callback);
+					}
+				}
 				else _load(data,opt,callback);
 			});
 		}

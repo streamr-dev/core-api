@@ -22,6 +22,10 @@ class [[CLASSNAME]] extends GroovySignalPathModule {
 		}
 	}
 
+	void println(String s) {
+		debug(s)
+	}
+
 """ }
 	
 	String getDefaultCode() {return """
