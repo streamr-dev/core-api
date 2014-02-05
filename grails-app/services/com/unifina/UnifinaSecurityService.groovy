@@ -1,6 +1,8 @@
 package com.unifina
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
+
+import com.unifina.security.SecUser
 
 class UnifinaSecurityService {
 	
@@ -26,4 +28,10 @@ class UnifinaSecurityService {
 		return true
 	}
 	
+	SecUser checkDataToken(String username, String dataToken) {
+		SecUser user = SecUser.findByUsernameAndDataToken(username,dataToken)
+		if (!user)
+			throw new RuntimeException("Invalid username or token")
+		else return user
+	}
 }
