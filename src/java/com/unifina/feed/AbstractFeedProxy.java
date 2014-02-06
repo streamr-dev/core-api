@@ -4,9 +4,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.FeedService;
-import com.unifina.data.Feed;
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.data.Feed;
+import com.unifina.service.FeedService;
 import com.unifina.utils.Globals;
 
 

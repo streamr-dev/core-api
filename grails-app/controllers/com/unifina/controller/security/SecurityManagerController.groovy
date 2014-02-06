@@ -1,4 +1,6 @@
-package com.unifina.security
+package com.unifina.controller.security
+
+import com.unifina.security.ProfilingSecurityManager;
 
 import grails.plugins.springsecurity.Secured
 

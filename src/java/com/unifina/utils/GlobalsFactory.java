@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
-import com.unifina.security.SecUser;
+import com.unifina.domain.security.SecUser;
 
 /**
  * This class provides methods to create the Globals instance that serves

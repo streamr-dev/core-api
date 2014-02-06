@@ -1,4 +1,4 @@
-package com.unifina
+package com.unifina.service
 
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
@@ -8,7 +8,7 @@ import org.apache.log4j.Logger
 
 import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
-import com.unifina.security.SecUser
+import com.unifina.domain.security.SecUser;
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals

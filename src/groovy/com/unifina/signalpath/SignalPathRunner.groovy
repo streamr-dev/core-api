@@ -7,8 +7,8 @@ import javax.servlet.ServletContext
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-import com.unifina.SignalPathService
-import com.unifina.security.SecUser
+import com.unifina.domain.security.SecUser;
+import com.unifina.service.SignalPathService;
 import com.unifina.utils.Globals
 
 public class SignalPathRunner extends Thread {

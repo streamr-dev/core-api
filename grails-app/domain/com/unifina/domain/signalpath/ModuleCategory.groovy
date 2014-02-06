@@ -1,4 +1,4 @@
-package com.unifina.signalpath
+package com.unifina.domain.signalpath
 
 class ModuleCategory implements Comparable {
 	String name

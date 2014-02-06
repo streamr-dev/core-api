@@ -1,4 +1,4 @@
-package com.unifina.security
+package com.unifina.controller.security
 import grails.converters.JSON
 
 import javax.servlet.http.HttpServletResponse

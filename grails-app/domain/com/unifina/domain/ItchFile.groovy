@@ -1,6 +1,6 @@
-package com.unifina
+package com.unifina.domain
 
-import com.unifina.data.Feed
+import com.unifina.domain.data.Feed;
 
 // Rename to FeedFile or something like that
 class ItchFile {

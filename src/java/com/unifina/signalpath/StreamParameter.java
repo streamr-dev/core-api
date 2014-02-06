@@ -2,8 +2,8 @@ package com.unifina.signalpath;
 
 import java.util.Map;
 
-import com.unifina.FeedService;
-import com.unifina.data.Stream;
+import com.unifina.domain.data.Stream;
+import com.unifina.service.FeedService;
 
 // This class can also receive Strings for backwards compatibility 
 public class StreamParameter extends Parameter<Stream> {

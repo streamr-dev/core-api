@@ -1,7 +1,7 @@
-package com.unifina.security
+package com.unifina.domain.security
 
-import com.unifina.signalpath.ModulePackage
-import com.unifina.signalpath.ModulePackageUser
+import com.unifina.domain.signalpath.ModulePackage;
+import com.unifina.domain.signalpath.ModulePackageUser;
 
 class SecUser {
 

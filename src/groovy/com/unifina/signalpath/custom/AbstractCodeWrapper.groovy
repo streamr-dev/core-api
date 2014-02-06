@@ -1,7 +1,7 @@
 package com.unifina.signalpath.custom
 
-import com.unifina.ModuleService
 import com.unifina.security.UserClassLoader;
+import com.unifina.service.ModuleService;
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
 

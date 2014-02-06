@@ -1,8 +1,8 @@
-package com.unifina
+package com.unifina.service
 
-import com.unifina.data.Feed
 import com.unifina.data.IFeed
-import com.unifina.data.Stream
+import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.Stream;
 import com.unifina.feed.FeedFactory
 import com.unifina.feed.FeedNotFoundException
 import com.unifina.feed.MessageRecipient

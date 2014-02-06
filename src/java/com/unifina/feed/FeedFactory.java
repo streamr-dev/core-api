@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.data.Feed;
+import com.unifina.domain.data.Feed;
 
 public class FeedFactory {
 

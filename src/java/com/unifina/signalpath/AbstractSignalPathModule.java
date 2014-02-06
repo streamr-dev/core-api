@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
+import com.unifina.domain.signalpath.Module;
 import com.unifina.utils.Globals;
 
 /**

@@ -1,10 +1,10 @@
-package com.unifina.signalpath
+package com.unifina.domain.signalpath
 
 import java.io.Serializable;
 
 import org.apache.commons.lang.builder.HashCodeBuilder
 
-import com.unifina.security.SecUser
+import com.unifina.domain.security.SecUser;
 
 class ModulePackageUser implements Serializable {
 	SecUser user

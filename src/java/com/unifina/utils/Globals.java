@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.datasource.DataSource;
-import com.unifina.security.SecUser;
+import com.unifina.domain.security.SecUser;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;

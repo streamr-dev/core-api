@@ -1,8 +1,8 @@
-package com.unifina
+package com.unifina.service
 
 import org.apache.log4j.Logger
 
-import com.unifina.security.SecUser
+import com.unifina.domain.security.SecUser;
 
 class UnifinaSecurityService {
 	

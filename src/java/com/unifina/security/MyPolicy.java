@@ -1,5 +1,6 @@
 package com.unifina.security;
 
+import java.io.FilePermission;
 import java.lang.reflect.ReflectPermission;
 import java.security.AllPermission;
 import java.security.CodeSource;
@@ -27,6 +28,7 @@ public class MyPolicy extends Policy {
 		groovy = new Permissions();
 		groovy.add(new RuntimePermission("accessDeclaredMembers"));
 		groovy.add(new PropertyPermission("grails.full.stacktrace","read")); // Needed to get proper error msgs?
+		groovy.add(new FilePermission(System.getProperty("catalina.home")+"/webapps/-", "read"));
 		
 		// Only seems to be needed when running in run-app
 		if (System.getProperty("unifina.unsafe")!=null) {

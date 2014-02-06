@@ -1,7 +1,7 @@
 package com.unifina.feed;
 
-import com.unifina.ItchFile;
-import com.unifina.data.Stream;
+import com.unifina.domain.ItchFile;
+import com.unifina.domain.data.Stream;
 
 public interface IFeedPreprocessor {
 	

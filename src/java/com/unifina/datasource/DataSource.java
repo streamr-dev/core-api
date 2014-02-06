@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.FeedService;
-import com.unifina.data.Feed;
 import com.unifina.data.IFeed;
 import com.unifina.data.IRequireFeed;
+import com.unifina.domain.data.Feed;
+import com.unifina.service.FeedService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.utils.Globals;
 import com.unifina.signalpath.SignalPath;

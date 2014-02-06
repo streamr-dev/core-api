@@ -1,4 +1,4 @@
-package com.unifina.data
+package com.unifina.domain.data
 
 class Stream implements Comparable {
 	Long id

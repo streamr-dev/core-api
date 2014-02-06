@@ -1,4 +1,4 @@
-package com.unifina.security
+package com.unifina.domain.security
 
 class SecRole {
 

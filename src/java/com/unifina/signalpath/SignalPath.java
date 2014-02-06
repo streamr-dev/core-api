@@ -12,7 +12,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import com.unifina.ModuleService;
+import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
 
 public class SignalPath extends AbstractSignalPathModule {

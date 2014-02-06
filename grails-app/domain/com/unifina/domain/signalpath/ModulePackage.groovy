@@ -1,4 +1,4 @@
-package com.unifina.signalpath
+package com.unifina.domain.signalpath
 
 import java.util.SortedSet;
 

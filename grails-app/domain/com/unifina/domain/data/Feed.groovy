@@ -1,6 +1,6 @@
-package com.unifina.data
+package com.unifina.domain.data
 
-import com.unifina.signalpath.Module
+import com.unifina.domain.signalpath.Module;
 
 class Feed {
 
