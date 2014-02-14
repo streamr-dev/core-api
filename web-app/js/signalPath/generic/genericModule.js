@@ -566,12 +566,11 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		jsPlumb.draggable($(my.div).attr("id"), my.dragOptions);
 		
 		// Disconnect button
-//		var disconnectLink = $("<span class='disconnect modulebutton ui-corner-all ui-icon ui-icon-cancel'></span>");
-		var disconnectLink = my.createModuleButton("disconnect ui-icon ui-icon-cancel");
-		disconnectLink.click(function() {
-			my.disconnect();
-		});
-		my.header.append(disconnectLink);
+//		var disconnectLink = my.createModuleButton("disconnect ui-icon ui-icon-cancel");
+//		disconnectLink.click(function() {
+//			my.disconnect();
+//		});
+//		my.header.append(disconnectLink);
 		
 		// Module parameter table
 		if (my.jsonData.params && my.jsonData.params.length > 0) {
@@ -845,24 +844,53 @@ SignalPath.GenericModule = function(data, canvas, my) {
 //	}
 //	that.redraw = redraw;
 
+	var superGetContextMenu = my.getContextMenu;
 	function getContextMenu(div) {
-		return [
-		        {title: "Rename", cmd: "rename"},
-		        {title: "Toggle export", cmd: "export"}
-		]
+		var menu = superGetContextMenu();
+		
+		menu.push({title: "Disconnect all", cmd: "disconnect"});
+		
+		if (div.hasClass("ioname")) {
+			menu.push({title: "Rename I/O", cmd: "rename"});
+			menu.push({title: "Toggle export", cmd: "export"});
+		}
+		return menu;
 	}
 	my.getContextMenu = getContextMenu;
 	
-	function handleContextMenuSelection(div,data,selection,event) {
-		if (selection=="rename") {
+	var superHandleContextMenuSelection = my.handleContextMenuSelection;
+	my.handleContextMenuSelection = function(div,data,selection,event) {
+		if (selection=="disconnect") {
+			my.disconnect();
+			event.stopPropagation();
+		}
+		else if (selection=="rename") {
 			rename(div,data);
+			event.stopPropagation();
 		}
 		else if (selection=="export") {
 			toggleExport(div,data);
+			event.stopPropagation();
 		}
+		else superHandleContextMenuSelection(div,data,selection,event);
 	}
-	my.handleContextMenuSelection = handleContextMenuSelection;
-
+	
+	var superPrepareCloneData = my.prepareCloneData;
+	my.prepareCloneData = function(cloneData) {
+		superPrepareCloneData(cloneData);
+		
+		$(cloneData.params).each(function(i,param) {
+			param.endpointId = null;
+		});
+		
+		$(cloneData.inputs).each(function(i,input) {
+			input.endpointId = null;
+		});
+		
+		$(cloneData.outputs).each(function(i,output) {
+			output.id = null;
+		});
+	}
 	
 	var superToJSON = that.toJSON;
 	function toJSON() {
@@ -949,22 +977,3 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	
 	return that;
 }
-
-$(document).contextmenu({
-    delegate: ".context-menu",
-    menu: [],
-    show: 100,
-    select: function(event, ui) {
-    	var target = $(document).data("contextMenuTarget"); 
-    	target.trigger("spContextMenuSelection",ui.cmd);
-    },
-	beforeOpen: function(event, ui) {
-		var parent = $(ui.target).parents("div.component");
-
-		// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
-		$(document).data("contextMenuTarget",$(ui.target));
-		
-		var my = parent.data("me");
-		$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
-	}
-});

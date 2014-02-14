@@ -17,7 +17,7 @@ public abstract class AbstractFeed implements IFeed {
 	protected IEventQueue eventQueue;
 	
 //	protected HashMap<Object,List<Object>> subscriptionsByKey = new HashMap<>();
-	protected Set<Object> subscriptions = new HashSet<Object>();
+	protected Set<Object> subscribers = new HashSet<Object>();
 	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
 	protected List<Class> validSubscribeTypes;
 	
@@ -26,7 +26,7 @@ public abstract class AbstractFeed implements IFeed {
 	
 	public AbstractFeed(Globals globals) {
 		this.globals = globals;
-		validSubscribeTypes = getValidSubscribeTypes();
+		validSubscribeTypes = getValidSubscriberClasses();
 	}
 	
 	
@@ -35,7 +35,7 @@ public abstract class AbstractFeed implements IFeed {
 	 * for a call to subscribe(Object)
 	 * @return
 	 */
-	protected abstract List<Class> getValidSubscribeTypes();
+	protected abstract List<Class> getValidSubscriberClasses();
 	
 	/**
 	 * Returns an Object that will be used to lookup the subscriber
@@ -43,18 +43,18 @@ public abstract class AbstractFeed implements IFeed {
 	 * @param subscriber
 	 * @return
 	 */
-	protected abstract Object getSubscriptionKey(Object subscriber);
+	protected abstract Object getEventRecipientKey(Object subscriber);
 	
 	/**
 	 * Creates an IEventRecipient that should be set on FeedEvents 
-	 * created for this subscription. 
-	 * @param sub
+	 * created for this subscriber. 
+	 * @param subscriber
 	 * @return
 	 */
-	protected abstract IEventRecipient createEventRecipient(Object subscription);
+	protected abstract IEventRecipient createEventRecipient(Object subscriber);
 	
 	public boolean isSubscribed(Object item) {
-		return subscriptions.contains(item);
+		return subscribers.contains(item);
 //		return canSubscribe(item) && (!subscriptionsByKey.containsKey(getSubscriptionKey(item)) || subscriptionsByKey.get(getSubscriptionKey(item))!=item);
 	}
 	
@@ -76,21 +76,21 @@ public abstract class AbstractFeed implements IFeed {
 	 * false if the object was already subscribed. Throws an IllegalArgumentException
 	 * if the subscription is of the wrong type.
 	 */
-	public boolean subscribe(Object sub) {
-		if (!canSubscribe(sub)) {
+	public boolean subscribe(Object subscriber) {
+		if (!canSubscribe(subscriber)) {
 			throw new IllegalArgumentException("This feed can only subscribe items of the following classes: "+validSubscribeTypes);
 		}
 
 		// Don't subscribe the same object twice
-		if (!isSubscribed(sub)) {
+		if (!isSubscribed(subscriber)) {
 
-			subscriptions.add(sub);
+			subscribers.add(subscriber);
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
 			IEventRecipient recipient;
-			Object key = getSubscriptionKey(sub);
+			Object key = getEventRecipientKey(subscriber);
 			if (!eventRecipientsByKey.containsKey(key)) {
-				recipient = createEventRecipient(sub);
+				recipient = createEventRecipient(subscriber);
 				eventRecipientsByKey.put(key, recipient);
 				globals.getDataSource().register(recipient);
 			}
@@ -98,7 +98,7 @@ public abstract class AbstractFeed implements IFeed {
 			
 			// Register the subscription with the event recipient
 			if (recipient instanceof AbstractEventRecipient) {
-				((AbstractEventRecipient)recipient).register(sub);
+				((AbstractEventRecipient)recipient).register(subscriber);
 			}
 			
 		}

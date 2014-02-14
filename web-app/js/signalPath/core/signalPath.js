@@ -272,7 +272,10 @@ var SignalPath = (function () {
 			if (oldClose)
 				oldClose();
 		}
+		
+		return mod;
 	}
+	my.createModuleFromJSON = createModuleFromJSON;
 	
 	function signalPathToJSON(signalPathContext) {
 		var result = {

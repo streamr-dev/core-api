@@ -139,7 +139,9 @@ SignalPath.ChartModule = function(data,canvas,my) {
 	var superGetContextMenu = my.getContextMenu;
 	my.getContextMenu = function(div) {
 		var menu = superGetContextMenu(div);
-		menu.push({title: "Set Y-axis", cmd: "yaxis"});
+		if (div.hasClass("ioname")) {
+			menu.push({title: "Set Y-axis", cmd: "yaxis"});
+		}
 		return menu;
 	};
 	
@@ -150,6 +152,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 			var yAxis = prompt("Axis number for "+n+":",data.yAxis);
 			if (yAxis != null)
 				data.yAxis = parseInt(yAxis);
+			event.stopPropagation();
 		}
 		else superHandleContextMenuSelection(div,data,selection,event);
 	};

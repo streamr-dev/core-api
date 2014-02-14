@@ -25,7 +25,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	}
 	
 	function createDiv() {
-		my.div = $("<div id='"+my.id+"' class='component "+my.type+"'></div>");
+		my.div = $("<div id='"+my.id+"' class='component context-menu "+my.type+"'></div>");
 		my.div.data("me",my);
 		
 		// Set absolute position
@@ -126,6 +126,12 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		canvas.append(my.div);
 		my.div.draggable(my.dragOptions);
 		
+		my.div.on('spContextMenuSelection', (function(d,j) {
+			return function(event,selection) {
+				my.handleContextMenuSelection(d,j,selection,event);
+			};
+		})(my.div,my.jsonData));
+		
 		return my.div;
 	}
 	my.createDiv = createDiv;
@@ -136,6 +142,21 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		return button;
 	}
 	my.createModuleButton = createModuleButton;
+	
+	function getContextMenu(div) {
+		return [
+		        {title: "Clone module", cmd: "clone"},
+		]
+	}
+	my.getContextMenu = getContextMenu;
+	
+	function handleContextMenuSelection(div,data,selection,event) {
+		if (selection=="clone") {
+			my.clone();
+			event.stopPropagation();
+		}
+	}
+	my.handleContextMenuSelection = handleContextMenuSelection;
 	
 	/**
 	 * Functions for rendering and parsing options
@@ -274,8 +295,41 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	}
 	that.updateFrom = updateFrom;
 	
+	function clone() {
+		// Deep copy my data
+		var cloneData = jQuery.extend(true, {}, my.jsonData);
+		my.prepareCloneData(cloneData);
+		return SignalPath.createModuleFromJSON(cloneData);
+	}
+	my.clone = clone;
+	
+	function prepareCloneData(cloneData) {
+		// Set hash to null so that a new id will be assigned
+		cloneData.hash = null;
+	}
+	my.prepareCloneData = prepareCloneData;
 	
 	my.onDrag = function() {}
 	
 	return that;
 }
+
+$(document).contextmenu({
+    delegate: ".context-menu",
+    menu: [],
+    show: 100,
+    select: function(event, ui) {
+    	var target = $(document).data("contextMenuTarget"); 
+    	if (ui.cmd) {
+    		target.trigger("spContextMenuSelection",ui.cmd);
+    	}
+    },
+	beforeOpen: function(event, ui) {
+		var parent = $(ui.target).parents("div.component");
+		var my = parent.data("me");
+		
+		// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
+		$(document).data("contextMenuTarget",$(ui.target));
+		$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
+	}
+});

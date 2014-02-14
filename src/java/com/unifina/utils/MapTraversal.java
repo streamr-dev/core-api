@@ -1,5 +1,8 @@
 package com.unifina.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 public class MapTraversal {
@@ -63,5 +66,18 @@ public class MapTraversal {
 		else if (raw instanceof Boolean)
 			return (Boolean) raw;
 		else return Boolean.parseBoolean(raw.toString());
+	}
+	
+	public static Date getDate(Map map, String name, SimpleDateFormat df) {
+		Object raw = getProperty(map,name);
+		if (raw==null) return null;
+		else if (raw instanceof Date)
+			return (Date) raw;
+		else
+			try {
+				return df.parse(raw.toString());
+			} catch (ParseException e) {
+				throw new RuntimeException(e);
+			}
 	}
 }

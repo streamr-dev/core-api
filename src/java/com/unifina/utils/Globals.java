@@ -49,6 +49,9 @@ public class Globals {
 	
 	private List<Class> dynamicClasses = new ArrayList<>();
 	
+	protected Date startDate = null;
+	protected Date endDate = null;
+	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
 		if (signalPathContext==null)
 			throw new NullPointerException("signalPathContext can not be null!");
@@ -125,15 +128,12 @@ public class Globals {
 	}
 	
 	public void init() {
-		// Set time to midnight UTC of the current date
-		if (signalPathContext.get("beginDate")!=null) {
-			try {
-				time = dateFormat.parse(signalPathContext.get("beginDate").toString());
-			} catch (ParseException e) {
-				throw new RuntimeException("Invalid begin date: "+signalPathContext.get("beginDate"));
-			}
-		}
-		else {
+		startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormat);
+		endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormat);
+		time = startDate;
+		
+		// Set time to midnight UTC of the current date if nothing specified
+		if (startDate==null) {
 			Calendar cal = new GregorianCalendar();
 			cal.setTime(new Date());
 			cal.set(Calendar.HOUR_OF_DAY,0);
@@ -148,11 +148,11 @@ public class Globals {
 	}
 	
 	public Date getStartDate() {
-		return (Date)signalPathContext.get("startDate");
+		return startDate;
 	}
 	
 	public Date getEndDate() {
-		return (Date)signalPathContext.get("endDate");
+		return endDate;
 	}
 	
 	public TimezoneConverter getTzConverter() {
