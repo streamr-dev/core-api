@@ -1,113 +1,3 @@
-SignalPath.ParamRenderers = {
-		"default": {
-			create: function(module,data) {
-				if (data.possibleValues) {
-					var select = $("<select class='parameterInput' style='visibility:hidden'></select>");
-					$(data.possibleValues).each(function(i,val) {
-						var option = $("<option></option>");
-						option.attr("value",val.value);
-						option.append(val.name);
-						
-						if (data.value==val.value)
-							option.attr("selected","selected");
-						
-						select.append(option);
-					});
-					
-					select.on("spIOReady",(function(s) {
-						return function() {
-							s.chosen({width:"180px", search_contains:true}).css('visibility', 'visible');
-						};
-					})(select));
-					
-					return select;
-				}
-				else {
-					var input = $("<input class='parameterInput' type='text' value='"+data.value+"'>");
-					return input;
-				}
-			},
-			getValue: function(module,data,input) {
-				return $(input).val();
-			},
-			getValueName: function(module,data,input) {
-				return $(input).val();
-			}
-		},
-		"Stream": {
-			create: function(module,data) {
-				var span = $("<span></span>");
-				
-				// Show search if no value is selected
-				var search = $("<input class='parameterInput' type='text' style='"+(data.value ? "display:none" : "")+"' class='streamSearch' value='"+(data.streamName || "")+"'>");
-				span.append(search);
-				
-				// Show symbol if it exists
-				var symbol = $("<span class='streamName' style='"+(data.value ? "" : "display:none")+"'><a href='#'>"+data.streamName+"</a></span>");
-				var id = $("<input type='hidden' class='streamId' value='"+data.value+"'>");
-					
-				span.append(symbol);
-				span.append(id);
-					
-				symbol.click((function(sym,sch) {
-					return function() {
-						$(sym).hide();
-						$(sch).show();
-						return false;
-					}
-				})(symbol,search));
-					
-				var onSel = (function(sym,sch,id,mod) {
-					return function(event,ui) {
-						if (ui.item) {
-							$(id).val(ui.item.id);
-							$(sym).find("a").html(ui.item.name);
-
-							if (mod!=null)
-								SignalPath.updateModule(mod);
-							else {
-								$(sch).hide();
-								$(sym).show();
-							}
-						}
-						else {
-							$(sch).hide();
-							$(sym).show();
-						}
-					}
-				})(symbol,search,id,module);
-				
-				$(search).autocomplete({
-					// TODO: generalize to Streams
-					source: project_webroot+"signalPath/jsonGetOrderBook",
-					minLength: 2,
-					select: onSel
-				}).data("autocomplete")._renderItem = function(ul,item) {
-					return $("<li></li>")
-						.data("item.autocomplete",item)
-						.append("<a>"+item.name+"</a>")
-						.appendTo(ul);
-				};
-					
-				return span;
-			},
-			getValue: function(module,data,input) {
-				var hidden = $(input).find("input.streamId");
-				return hidden.val();
-			},
-			getValueName: function(module,data,input) {
-				var text = $(input).find("span.streamName a").text();
-				return text;
-			}
-		}
-}
-
-SignalPath.getParamRenderer = function(data) {
-	var key = (data.type ? data.type : "default");
-	var renderer = (key in SignalPath.ParamRenderers ? SignalPath.ParamRenderers[key] : SignalPath.ParamRenderers["default"]);
-	return renderer;
-};
-
 SignalPath.GenericModule = function(data, canvas, my) {
 	my = my || {};
 	
@@ -118,66 +8,37 @@ SignalPath.GenericModule = function(data, canvas, my) {
 
 	my.enableIONameChange = true;
 	
-	// PRIVATE FUNCTIONS
-	function getParamRenderer(data) {
-		return SignalPath.getParamRenderer(data);
-	}
+	my.inputsByName = {};
+	my.params = [];
+	my.inputs = [];
+	my.outputsByName = {};
+	my.outputs = [];
 	
-	function createParamInput(data) {
-		var result = null;
-		
-//		if (data.possibleValues) {
-//			var select = $("<select></select>");
-//			$(data.possibleValues).each(function(i,val) {
-//				var option = $("<option></option>");
-//				option.attr("value",val.value);
-//				option.append(val.name);
-//				
-//				if (data.value==val.value)
-//					option.attr("selected","selected");
-//				
-//				select.append(option);
-//			});
-//			result = select;
-//		}
-//		else {
-			var renderer = getParamRenderer(data);
-			result = renderer.create(that,data);
-//		}
-		
-		if (data.updateOnChange) {
-			$(result).change(function() {
-				SignalPath.updateModule(that);
-			});
-		}
-		
-		return result;
-	}
-	
-	function autoConnectInputs() {
-		var outputs = $("div.output");
-		var oIdx = 0;
-		$(my.div).find("div.input").each(function(i,input) {
-			// Skip parameters
-			if (!$(input).hasClass("parameter")) {
-				// Is this input connected?
-				var connections = jsPlumb.getConnections({source:input.attr("id"), scope:"*"});
-				if (connections.length==0) {
-					// Find an unconnected output
-					while (oIdx<outputs.length) {
-						var output = outputs[oIdx];
-						var connections = jsPlumb.getConnections({target:output.attr("id"), scope:"*"});
-						if (connections.length==0) {
-							jsPlumb.connect({source:input, target:output});
-							break;
-						}
-						oIdx++;
-					}
-				}
-			}
-		});
-	}
-	
+	// TODO: this must be updated to work someday
+//	function autoConnectInputs() {
+//		var outputs = $("div.output");
+//		var oIdx = 0;
+//		$(my.div).find("div.input").each(function(i,input) {
+//			// Skip parameters
+//			if (!$(input).hasClass("parameter")) {
+//				// Is this input connected?
+//				var connections = jsPlumb.getConnections({source:input.attr("id"), scope:"*"});
+//				if (connections.length==0) {
+//					// Find an unconnected output
+//					while (oIdx<outputs.length) {
+//						var output = outputs[oIdx];
+//						var connections = jsPlumb.getConnections({target:output.attr("id"), scope:"*"});
+//						if (connections.length==0) {
+//							jsPlumb.connect({source:input, target:output});
+//							break;
+//						}
+//						oIdx++;
+//					}
+//				}
+//			}
+//		});
+//	}
+
 	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
 		
@@ -207,294 +68,57 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	}
 	my.createModuleFooter = createModuleFooter;
 	
-	// DEPRECATED
-	function generateId() {
-		var id = "myId_"+my.hash+"_"+new Date().getTime();
-		
-		// Check for clashes
-		while ($("#"+id).length>0)
-			id += "_";
-				
-		return id;
-	}
-	
-	function checkConnection(connection) {
-		// Endpoints must contain at least one acceptedType in common
-		var arr1 = $("#"+connection.sourceId).data("acceptedTypes");
-		var arr2 = $("#"+connection.targetId).data("acceptedTypes");
-		
-		for(var i = 0; i<arr1.length; i++)
-		    for(var j=0; j<arr2.length; j++)
-		        if(arr1[i]==arr2[j])
-		            return true;
+	// TODO: this must be updated to work someday
+//	function autoConnectOutputByExample(output) {
+//		var connections = jsPlumb.getConnections({target:output.attr("id")});
+//		
+//		if (connections.length>0) {
+//			var targets = [];
+//			
+//			$(connections).each(function(j,connection) {
+//				var moduleName = connection.endpoints[0].element.parents(".component").find(".modulename").text();
+//				var inputName = connection.endpoints[0].element.children(".ioname").text();
+//				targets.push({
+//					output: output,
+//					moduleName: moduleName,
+//					inputName: inputName
+//				});
+//			});
+//			
+//			$(targets).each(function(j,target) {
+//				// Get all module names
+//				var modules = $(".component");
+//				$(modules).each(function(i,module) {
+//					var moduleName = $(module).find(".modulename").text();
+//					// If the module name is a match, look for an input with the correct name
+//					if (moduleName==target.moduleName) {
+//						var inputs = $(module).find("div.input");
+//						$(inputs).each(function(k,input) {
+//							var inputName = $(input).find(".ioname").text();
+//							var connections = jsPlumb.getConnections({source:input.attr("id")});
+//							if (inputName==target.inputName && connections.length==0)
+//								jsPlumb.connect({source:input, target:target.output});
+//						});
+//					}
+//				});
+//			});
+//		}
+//	}
 
-		SignalPath.options.errorHandler("These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+".");
-		return false;
-	}
-	my.checkConnection = checkConnection;
-	
-	function checkConnectionDirection(info) {
-		// Check that the source of this connection is an input and the target is an output.
-		// If they are the other way around, create a reversed connection and return false for this connection.
-		
-		var source = $("#"+info.sourceId);
-		var target = $("#"+info.targetId);
-		
-		if (source.hasClass("input") && target.hasClass("output"))
-			return true;
-		else if (source.hasClass("output") && target.hasClass("input")) {
-			// Reverse the connection
-			jsPlumb.connect({source:target.data("endpoint"), target:source.data("endpoint")});
-			return false;
-		}
-		// Don't allow input-input or output-output connections
-		else return false;
-	}
-	my.checkConnectionDirection = checkConnectionDirection;
-	
-	// DEPRECATED
-	function addEndpoint(json,connDiv,id) {
-		
-		// Generate custom id for the div if using the new jsPlumb ids
-		if (!id || id.length<20) {
-			var oldId = id;
-			id = generateId();
-			
-			if (oldId)
-				SignalPath.replacedIds[oldId] = id;
-		}
-		
-		connDiv.attr("id",id);
-		
-		var isOutput = connDiv.hasClass('output');
-		var isInput = connDiv.hasClass('input');
-	
-//		my.positionConnections();
-		
-		// For connections
-		// TODO: define overlay in theme?
-		var overlays = [["Arrow", {direction:(isInput ? -1 : 1), paintStyle: {cssClass:"arrow"}}]];
-		
-		var ep = jsPlumb.addEndpoint(connDiv, {
-				isSource:true,//isInput, 
-				isTarget:true,//isOutput,
-				dragOptions: {},
-				dropOptions: {},
-				anchor: (isInput ? [0, 0.5, -1, 0, -15, 0] : [1, 0.5, 1, 0, 15, 0]),
-				maxConnections: (isInput?1:-1),
-				beforeDrop: function(info) {
-					return checkConnection(info) && checkConnectionDirection(info);
-				},
-				connectorOverlays: overlays
-//				scope:scope
-			});
-		ep.bind("click", function(endpoint) {
-			console.log(endpoint);
+	// Helper function for updateFrom and clone
+	function collectRemoteEndpoints(endpoints,list) {
+		$(endpoints).each(function(i,endpoint) {
+			var name = endpoint.getName();
+			var connectedEndpoints = endpoint.getConnectedEndpoints(); 
+			if (connectedEndpoints.length>0) {
+				$(connectedEndpoints).each(function(j,ce) {
+					list.push({
+						name: name,
+						endpoint: ce
+					});
+				});
+			}
 		});
-		
-		$(connDiv).data("endpoint",ep);
-		$(connDiv).data("acceptedTypes", (json.acceptedTypes!=null ? json.acceptedTypes : [json.type]));
-		
-		if (isOutput) {
-			$(connDiv).dblclick(function() {
-				autoConnectOutputByExample(connDiv);
-			});
-		}
-		
-		return ep;
-	}
-	
-	function autoConnectOutputByExample(output) {
-		var connections = jsPlumb.getConnections({target:output.attr("id")});
-		
-		if (connections.length>0) {
-			var targets = [];
-			
-			$(connections).each(function(j,connection) {
-				var moduleName = connection.endpoints[0].element.parents(".component").find(".modulename").text();
-				var inputName = connection.endpoints[0].element.children(".ioname").text();
-				targets.push({
-					output: output,
-					moduleName: moduleName,
-					inputName: inputName
-				});
-			});
-			
-			$(targets).each(function(j,target) {
-				// Get all module names
-				var modules = $(".component");
-				$(modules).each(function(i,module) {
-					var moduleName = $(module).find(".modulename").text();
-					// If the module name is a match, look for an input with the correct name
-					if (moduleName==target.moduleName) {
-						var inputs = $(module).find("div.input");
-						$(inputs).each(function(k,input) {
-							var inputName = $(input).find(".ioname").text();
-							var connections = jsPlumb.getConnections({source:input.attr("id")});
-							if (inputName==target.inputName && connections.length==0)
-								jsPlumb.connect({source:input, target:target.output});
-						});
-					}
-				});
-			});
-		}
-	}
-	
-	// DEPRECATED: moved to Endpoint.js
-	function createInputSettings(div,data) {
-		
-		// Driving input. Default true.
-		
-		var switchDiv = $("<div class='switchContainer'></div>");
-		div.append(switchDiv);
-		
-		if (data.canBeDrivingInput==null || data.canBeDrivingInput) {
-			var driving = $("<div class='ioSwitch ioSwitchInput drivingInput'>DR</div>");
-			if (data.drivingInput==null)
-				data.drivingInput = (div.hasClass("parameter") ? false : true);
-			driving.addClass(data.drivingInput ? "ioSwitchTrue" : "ioSwitchFalse");
-			switchDiv.append(driving);
-			driving.click(function() {
-				if (data.drivingInput) {
-					data.drivingInput = false;
-					driving.removeClass("ioSwitchTrue");
-					driving.addClass("ioSwitchFalse");
-				}
-				else {
-					data.drivingInput = true;
-					driving.addClass("ioSwitchTrue");
-					driving.removeClass("ioSwitchFalse");
-				}
-			});
-		}
-		
-		// Initial value. Default null/off. Only valid for TimeSeries type
-		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
-			var iv = $("<div class='ioSwitch ioSwitchInput initialValue'></div>");
-			switchDiv.append(iv);
-			
-			var updateIv = function() {
-				if (data.initialValue==null) {
-					iv.html("IV");
-					iv.removeClass("ioSwitchTrue");
-					iv.addClass("ioSwitchFalse");
-				}
-				else if (data.initialValue==0) {
-					iv.html("0");
-					iv.addClass("ioSwitchTrue");
-					iv.removeClass("ioSwitchFalse");
-				}
-				else if (data.initialValue==1) {
-					iv.html("1");
-					iv.addClass("ioSwitchTrue");
-					iv.removeClass("ioSwitchFalse");
-				}
-			}
-			
-			updateIv();
-			
-			iv.click(function() {
-				if (data.initialValue==1) {
-					data.initialValue = null;
-					updateIv();
-				}
-				else if (data.initialValue==null) {
-					data.initialValue = 0;
-					updateIv();
-				}
-				else if (data.initialValue==0) {
-					data.initialValue = 1;
-					updateIv();
-				}
-			});
-		}
-		
-		// Feedback connection. Default false. Switchable for TimeSeries types.
-		
-		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var fb = $("<div class='ioSwitch ioSwitchInput feedback'>FB</div>");
-			if (data.feedback==null)
-				data.feedback = false;
-			fb.addClass(data.feedback ? "ioSwitchTrue" : "ioSwitchFalse");
-			switchDiv.append(fb);
-			fb.click(function() {
-				if (data.feedback) {
-					data.feedback = false;
-					fb.removeClass("ioSwitchTrue");
-					fb.addClass("ioSwitchFalse");
-				}
-				else {
-					data.feedback = true;
-					fb.addClass("ioSwitchTrue");
-					fb.removeClass("ioSwitchFalse");
-				}
-			});
-		}
-	}
-	
-	// DEPRECATED: moved to Endpoint.js
-	function createOutputSettings(div,data) {
-		
-		var switchDiv = $("<div class='switchContainer'></div>");
-		div.append(switchDiv);
-		
-		// NoRepeat. Default true. Add only for TimeSeries type
-		if (data.type=="Double" && (data.canBeNoRepeat==null || data.canBeNoRepeat)) {
-			var noRepeat = $("<div class='ioSwitch ioSwitchOutput noRepeat'>NR</div>");
-			if (data.noRepeat==null)
-				data.noRepeat = true;
-			noRepeat.addClass(data.noRepeat ? "ioSwitchTrue" : "ioSwitchFalse");
-			switchDiv.append(noRepeat);
-			noRepeat.click(function() {
-				if (data.noRepeat) {
-					data.noRepeat = false;
-					noRepeat.removeClass("ioSwitchTrue");
-					noRepeat.addClass("ioSwitchFalse");
-				}
-				else {
-					data.noRepeat = true;
-					noRepeat.addClass("ioSwitchTrue");
-					noRepeat.removeClass("ioSwitchFalse");
-				}
-			});
-		}
-	}
-	
-	// DEPRECATED: moved to Endpoint.js
-	function rename(iodiv,data) {
-		var n = $(iodiv).find(".ioname").text();
-
-		var displayName = prompt("Display name for "+data.name+":",n);
-		if (displayName != null) {
-			if (displayName != "" && displayName != data.name) {
-				data.displayName = displayName;
-			}
-			else {
-				delete data.displayName;
-				displayName = data.name;
-			}
-
-			$(iodiv).find(".ioname").html(displayName);
-		}
-		jsPlumb.recalculateOffsets(my.div.attr('id'));
-		jsPlumb.repaint(my.div.attr('id'));
-	}
-	
-	// DEPRECATED: moved to Endpoint.js
-	function setExport(iodiv,data,value) {
-		if (value) {
-			iodiv.addClass("export");
-			data.export = true;
-		}
-		else {
-			iodiv.removeClass("export");
-			data.export = false;
-		}
-	}
-	
-	// DEPRECATED: moved to Endpoint.js
-	function toggleExport(iodiv,data) {
-		setExport(iodiv,data,!data.export);
 	}
 	
 	// PROTECTED FUNCTIONS
@@ -504,57 +128,33 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		var oldInputConnections = [];
 		var oldOutputConnections = [];
 		
-		$(my.div).find("div.input").each(function(i,input) {
-			var ioName = $(input).find(".ioname").text();
-			var connections = jsPlumb.getConnections({source:$(input).attr("id"), scope:"*"});
-			if (connections.length>0) {
-				$(connections).each(function(j,c) {
-					oldInputConnections.push({
-						name: ioName,
-						endpoint: c.endpoints[1] // target endpoint
-					});
-				});
-			}
-		});
-		
-		$(my.div).find("div.output").each(function(i,output) {
-			var ioName = $(output).find(".ioname").text();
-			var connections = jsPlumb.getConnections({target:$(output).attr("id"), scope:"*"});
-			if (connections.length>0) {
-				$(connections).each(function(j,c) {
-					oldOutputConnections.push({
-						name: ioName,
-						endpoint: c.endpoints[0] // source endpoint
-					});
-				});
-			}
-		});
+		collectRemoteEndpoints(my.params, oldInputConnections);
+		collectRemoteEndpoints(my.inputs, oldInputConnections);
+		collectRemoteEndpoints(my.outputs, oldOutputConnections);
+
+		// Reset the lookups
+		my.inputsByName = {};
+		my.params = [];
+		my.inputs = [];
+		my.outputsByName = {};
+		my.outputs = [];
 		
 		superUpdateFrom(data);
-
 		
 		// Reconnect io by name
 		$(oldInputConnections).each(function(i,item) {
 			// Find an input by that name
-			var found = null;
-			$(my.div).find("div.input div.ioname").each(function(j,ioname) {
-				if ($(ioname).text()==item.name)
-					found = $(ioname).parent();
-			});
-			if (found) {
-				jsPlumb.connect({source:found.data("endpoint"), target:item.endpoint});
+			var input = getInput(item.name);
+			if (input!=null) {
+				input.connect(item.endpoint);
 			}
 		});
 		
 		$(oldOutputConnections).each(function(i,item) {
 			// Find an input by that name
-			var found = null;
-			$(my.div).find("div.output div.ioname").each(function(j,ioname) {
-				if ($(ioname).text()==item.name)
-					found = $(ioname).parent();
-			});
-			if (found) {
-				jsPlumb.connect({source:item.endpoint, target:found.data("endpoint")});
+			var output = getOutput(item.name);
+			if (output!=null) {
+				output.connect(item.endpoint);
 			}
 		});
 		
@@ -573,13 +173,6 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		// This circumvents a bug in jsPlumb that causes the endpoints to not be repositioned after dragging.
 		$(my.div).draggable("destroy");
 		jsPlumb.draggable($(my.div).attr("id"), my.dragOptions);
-		
-		// Disconnect button
-//		var disconnectLink = my.createModuleButton("disconnect ui-icon ui-icon-cancel");
-//		disconnectLink.click(function() {
-//			my.disconnect();
-//		});
-//		my.header.append(disconnectLink);
 		
 		// Module parameter table
 		if (my.jsonData.params && my.jsonData.params.length > 0) {
@@ -601,16 +194,6 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		$(my.jsonData.outputs).each(function(i,data) {
 			my.addOutput(data);
 		});
-		
-		// Bind connection and disconnection events
-//		jsPlumb.bind("jsPlumbConnection",function(connection) {
-//			my.onConnect(connection.source, connection.target);
-//		});
-//		jsPlumb.bind("jsPlumbConnectionDetached",function(connection) {
-//			my.onDisconnect(connection.source);
-//		});
-
-//		my.positionConnections();
 
 		createModuleFooter();
 		
@@ -618,7 +201,12 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			jsPlumb.recalculateOffsets(my.div.attr('id'));
 		});
 		
-		my.title.dblclick(autoConnectInputs);
+		$(SignalPath).on("_signalPathLoadModulesReady", function() {
+			my.refreshConnections();
+		});
+		
+		// TODO: re-enable, function must be brought up to date
+		//my.title.dblclick(autoConnectInputs);
 	}
 	my.createDiv = createDiv;
 	
@@ -651,92 +239,55 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	}
 	that.close = close;
 	
+	function getParameters() {
+		return my.params;
+	}
+	that.getParameters = getParameters;
+	
+	function getInputs() {
+		return my.inputs;
+	}
+	that.getInputs = getInputs;
+	
+	function getOutputs() {
+		return my.outputs;
+	}
+	that.getOutputs = getOutputs;
+	
+	/**
+	 * Returns an Input object
+	 */
 	function getInput(name) {
-		$(my.div).find("div.input").each(function(i,input) {
-			var n = $(input).find("div.ioname").text();
-			if (n==name) {
-				return input;
-			}
-		});
+		return inputsByName[name];
 	}
-	my.getInput = getInput;
+	that.getInput = getInput;
 	
+	/**
+	 * Returns an Output object
+	 */
 	function getOutput(name) {
-		$(my.div).find("div.output").each(function(i,output) {
-			var n = $(input).find("div.ioname").text();
-			if (n==name) {
-				return output;
-			}
-		});
+		return outputsByName[name];
 	}
-	my.getOutput = getOutput;
+	that.getOutput = getOutput;
 	
-	function addParameter(p) {
+	function addParameter(data) {
+		// Create room for the parameter in paramTable
 		var row = $("<tr></tr>");
-		var paramTd = $("<td></td>");
-		var param = $("<div class='parameter input "+p.type+"'></div>");
-		param.data("name",p.name);
-		
-		var ioname = $("<div class='ioname'>"+(p.displayName ? p.displayName : p.name)+"</div>");
-		param.append(ioname);
-		
-//		if (my.enableIONameChange) 
-//			bindNameChange(ioname,p);
-		
-		var input = createParamInput(p);
-		var inputTd = $("<td></td>");
-
-		param.data("input",input);
-		my.div.data("param."+p.name,param);
-
-		paramTd.append(param);
-		row.append(paramTd);
-
-		inputTd.append(input);
-		row.append(inputTd);
 		my.paramTable.append(row);
 		
-		if (p.canConnect==null || p.canConnect) {
-			addEndpoint(p,param,p.endpointId);
-
-			param.bind("spConnect", (function(me) {
-				return function(output) {
-					me.data("input").attr("disabled","disabled").addClass("disabled");
-				}
-			})(param));
-			
-			param.bind("spDisconnect", (function(me) {
-				return function(output) {
-					me.data("input").removeAttr("disabled").removeClass("disabled");
-				}
-			})(param));
-		}
-
-		if (p.export)
-			setExport(ioname,p,true);
+		var paramTd = $("<td></td>");
+		row.append(paramTd);
 		
-//		if (p.export)
-//			param.addClass("export");
+		var endpoint = SignalPath.Parameter(data, paramTd, my);
+		endpoint.createDiv();
+		my.params.push(endpoint);
+		my.inputsByName[endpoint.getName()] = endpoint;
 		
-		createInputSettings(param,p);
-		
-		// Bind context menu listeners
-		if (!my.disableContextMenu) {
-			param.addClass("context-menu");
-		}
-		
-		param.on('spContextMenuSelection', (function(d,j) {
-			return function(event,selection) {
-				my.handleContextMenuSelection(d,j,selection,event);
-			};
-		})(param,p));
-		
-		param.trigger("spIOReady");
-		input.trigger("spIOReady");
+		return endpoint;
 	}
 	my.addParameter = addParameter;
 	
-	function addIO(data,type) {
+	function createRoomForIO(type) {
 		// Find first empty input in the my.ioTable
 		var td = my.ioTable.find("td."+type+":empty:first");
 		// Add row if no suitable row found
@@ -745,114 +296,30 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			my.ioTable.append(newRow);
 			td = newRow.find("td."+type+":first");
 		}
-
-		// DEPRECATED: From here downwards implemented in Endpoint
-		// Create connection div
-		var div = $("<div class='"+type+" "+data.type+"'></div>");
-		div.data("name",data.name);
-		my.div.data(type+"."+data.name,div);
-		
-		var ioname = $("<div class='ioname'>"+(data.displayName ? data.displayName : data.name)+"</span>");
-		div.append(ioname);
-//			bindNameChange(ioname,data);
-		
-		td.append(div);
-		
-		// Link json data to the div
-		div.data("json",data);
-
-		if (data.export)
-			setExport(div,data,true);
-		
-//		if (data.export)
-//			div.addClass("export");
-		
-		addEndpoint(data, div, type=="input" ? data.endpointId : data.id);
-		
-		// Ensure that the jsonData contains this input name KEEP THIS
-		var found = false;
-		var arr = (type=="input" ? my.jsonData.inputs : my.jsonData.outputs);
-		for (var i=0;i<arr.length;i++) {
-			if (arr[i].name == data.name) {
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-			arr.push(data);
-
-		// Create io settings
-		if (type=="input")
-			createInputSettings(div,data);
-		else createOutputSettings(div,data);
-		
-		// Bind context menu listeners
-		if (!my.disableContextMenu) {
-			div.addClass("context-menu");
-		}
-		
-		div.on('spContextMenuSelection', (function(d,j) {
-			return function(event,selection) {
-				my.handleContextMenuSelection(d,j,selection,event);
-			};
-		})(div,data));
-		
-		div.trigger("spIOReady");
-		
-		return div;
+		return td;
 	}
-	my.addIO = addIO;
 	
 	my.addInput = function(data) {
-		var div = my.addIO(data,"input");
-		
-		if (!data.suppressWarnings) {
-			div.data("endpoint").setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
+		var td = createRoomForIO("input");
 
-			// Add/remove a warning class to unconnected inputs
-			div.bind("spConnect", (function(me) {
-				return function(output) {
-					div.data("endpoint").setStyle(jsPlumb.Defaults.EndpointStyle);
-				}
-			})(div));
-
-			div.bind("spDisconnect", (function(me) {
-				return function(output) {
-					div.data("endpoint").setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
-				}
-			})(div));
-		}
+		var endpoint = SignalPath.Input(data, td, my);
+		endpoint.createDiv();
+		my.inputs.push(endpoint);
+		my.inputsByName[endpoint.getName()] = endpoint;
 		
-		return div;
+		return endpoint;
 	}
 
 	my.addOutput = function(data) {
-		return my.addIO(data,"output");
+		var td = createRoomForIO("output");
+
+		var endpoint = SignalPath.Output(data, td, my);
+		endpoint.createDiv();
+		my.outputs.push(endpoint);
+		my.outputsByName[endpoint.getName()] = endpoint;
+		
+		return endpoint;
 	}
-	
-//	var superOnDrag = my.onDrag;
-//	function onDrag() {
-//		superOnDrag();
-//		my.positionConnections();
-//	}
-//	my.onDrag = onDrag;
-	
-//	my.onConnect = function(div,sourceDiv) {
-//		if (div.hasClass("parameter"))
-//			div.data("input").attr("disabled","disabled").addClass("disabled");
-//	}
-//
-//	my.onDisconnect = function(div) {
-//		if (div.hasClass("parameter"))
-//			div.data("input").removeAttr("disabled").removeClass("disabled");
-//	}
-	
-//	var superRedraw = that.redraw;
-//	function redraw() {
-////		my.positionConnections();
-//		superRedraw();
-//	}
-//	that.redraw = redraw;
 
 	var superGetContextMenu = my.getContextMenu;
 	function getContextMenu(div) {
@@ -860,10 +327,6 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		menu.push({title: "Disconnect all", cmd: "disconnect"});
 		
-		if (div.hasClass("ioname")) {
-			menu.push({title: "Rename I/O", cmd: "rename"});
-			menu.push({title: "Toggle export", cmd: "export"});
-		}
 		return menu;
 	}
 	my.getContextMenu = getContextMenu;
@@ -882,100 +345,69 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		superPrepareCloneData(cloneData);
 		
 		$(cloneData.params).each(function(i,param) {
-			param.endpointId = null;
+			param.id = null;
 		});
 		
 		$(cloneData.inputs).each(function(i,input) {
-			input.endpointId = null;
+			input.id = null;
 		});
 		
+		// Outputs of cloned modules can never be connected, as every input can only take one connection!
 		$(cloneData.outputs).each(function(i,output) {
 			output.id = null;
+			output.connected = false;
+			delete output.targets;
 		});
 	}
+	
+	var super_clone = my.clone;
+	my.clone = function() {
+		var module = super_clone();
+		module.refreshConnections();
+	}
+	
+	function refreshConnections() {
+		$(getParameters()).each(function(i,endpoint) {
+			endpoint.refreshConnections();
+		});
+		$(getInputs()).each(function(i,endpoint) {
+			endpoint.refreshConnections();
+		});
+		$(getOutputs()).each(function(i,endpoint) {
+			endpoint.refreshConnections();
+		});
+	}
+	that.refreshConnections = refreshConnections;
 	
 	var superToJSON = that.toJSON;
 	function toJSON() {
 		my.jsonData = superToJSON();
 
-		// Update parameter values
-		$(my.jsonData.params).each(function(i,param) {
-			var paramDiv = my.div.data("param."+param.name);
-			var input = paramDiv.data("input");
-			var value = getParamRenderer(param).getValue(that,param,input);
-			param.value = value;
-
-			if (input.attr("disabled")) {
-				param.connected = true;
-				var connection = jsPlumb.getConnections({source:paramDiv.attr("id"), scope:"*"})[0];
-				param.endpointId = connection.sourceId;
-				param.sourceId = connection.targetId;
-			}
-			else param.connected = false;
-
-//			if (paramDiv.hasClass("export"))
-//				param.export = true;
-//			else param.export = false;
+		// Get parameter JSON
+		my.jsonData.params = [];
+		$(my.params).each(function(i,endpoint) {
+			my.jsonData.params.push(endpoint.toJSON());
 		});
 
-		// Update inputs and outputs
-		$(my.jsonData.inputs).each(function(i,input) {
-			var inputDiv = my.div.data("input."+input.name);
-
-			var connection = jsPlumb.getConnections({source:inputDiv.attr("id"), scope:"*"})[0];
-
-			if (connection) {
-				input.connected = true;
-				input.endpointId = connection.sourceId;
-				input.sourceId = connection.targetId;
-			}
-			else input.connected = false;
-
-//			if (inputDiv.hasClass("export"))
-//				input.export = true;
-//			else input.export = false;
+		// Get input JSON
+		my.jsonData.inputs = [];
+		$(my.inputs).each(function(i,endpoint) {
+			my.jsonData.inputs.push(endpoint.toJSON());
 		});
-
-		$(my.jsonData.outputs).each(function(i,output) {
-			var outputDiv = my.div.data("output."+output.name);
-
-			var connections = jsPlumb.getConnections({target:outputDiv.attr("id"), scope:"*"});
-
-			if (connections.length>0) {
-				output.connected = true;
-				output.id = outputDiv.attr("id");
-				output.targets = [];
-				$(connections).each(function(j,connection) {
-					output.targets.push(connection.sourceId);
-				});
-			}
-			else output.connected = false;
-
-//			if (outputDiv.hasClass("export"))
-//				output.export = true;
-//			else output.export = false;
-
-		});
+		
+		// Get output JSON
+		my.jsonData.outputs = [];
+		$(my.outputs).each(function(i,endpoint) {
+			my.jsonData.outputs.push(endpoint.toJSON());
+		});		
 
 		return my.jsonData;
 	}
 	that.toJSON = toJSON;
 	
-	/*
-	 * SHOULD NOT (NEED TO) DECLARE NEW PUBLIC METHODS IN SUBCLASSES OF EmptyModule
-	that.positionConnections = my.positionConnections;
-	
-	that.addIO = my.addIO;
-	
-	that.addInput = my.addInput;
-	
-	that.addOutput = my.addOutput;
-	
-	that.onConnect = my.onConnect;
-		
-	that.onDisconnect = my.onDisconnect;
-	
-	*/
+	// Everything added to the public interface can be accessed from the
+	// private interface too
+	$.extend(my,that);
 	
 	return that;
 }

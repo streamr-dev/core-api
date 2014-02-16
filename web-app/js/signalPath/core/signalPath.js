@@ -1,11 +1,14 @@
 /**
- * Triggered events:
+ * Triggered events (on SignalPath instance):
  * 
  * signalPathNew ()
  * signalPathLoad (saveData, signalPathData, signalPathContext)
  * signalPathSave (saveData)
  * signalPathStart
  * signalPathStop
+ * 
+ * Events for internal use:
+ * _signalPathLoadModulesReady
  * 
  * Options:
  * 
@@ -97,67 +100,69 @@ var SignalPath = (function () {
 		// Reset signal path
 		newSignalPath();
 		
-		var connectedInputs = [];
+//		var connectedInputs = [];
 
 		jsPlumb.setSuspendDrawing(true);
 		
 		// Backwards compatibility
-		if (!data.signalPathData) {
-			$(data.orderBooks).each(function(i,ob) {
-				createModuleFromJSON(ob);
-				$(ob.params).each(function(i,conn) {
-					if (conn.connected)
-						connectedInputs.push(conn);
-				});
-				$(ob.inputs).each(function(i,conn) {
-					if (conn.connected)
-						connectedInputs.push(conn);
-				});
-			});
-			$(data.charts).each(function(i,c) {
-				createModuleFromJSON(c);
-				$(c.params).each(function(i,conn) {
-					if (conn.connected)
-						connectedInputs.push(conn);
-				});
-				$(c.inputs).each(function(i,conn) {
-					if (conn.connected)
-						connectedInputs.push(conn);
-				});
-			});
-
-		}
+//		if (!data.signalPathData) {
+//			$(data.orderBooks).each(function(i,ob) {
+//				createModuleFromJSON(ob);
+//				$(ob.params).each(function(i,conn) {
+//					if (conn.connected)
+//						connectedInputs.push(conn);
+//				});
+//				$(ob.inputs).each(function(i,conn) {
+//					if (conn.connected)
+//						connectedInputs.push(conn);
+//				});
+//			});
+//			$(data.charts).each(function(i,c) {
+//				createModuleFromJSON(c);
+//				$(c.params).each(function(i,conn) {
+//					if (conn.connected)
+//						connectedInputs.push(conn);
+//				});
+//				$(c.inputs).each(function(i,conn) {
+//					if (conn.connected)
+//						connectedInputs.push(conn);
+//				});
+//			});
+//
+//		}
 		
 		// Instantiate modules TODO: remove backwards compatibility
 		$(data.signalPathData ? data.signalPathData.modules : data.modules).each(function(i,mod) {
 			createModuleFromJSON(mod);
-			$(mod.params).each(function(i,conn) {
-				if (conn.connected)
-					connectedInputs.push(conn);
-			});
-			$(mod.inputs).each(function(i,conn) {
-				if (conn.connected)
-					connectedInputs.push(conn);
-			});
+//			$(mod.params).each(function(i,conn) {
+//				if (conn.connected)
+//					connectedInputs.push(conn);
+//			});
+//			$(mod.inputs).each(function(i,conn) {
+//				if (conn.connected)
+//					connectedInputs.push(conn);
+//			});
 		});
 
+		$(my).trigger("_signalPathLoadModulesReady");
+		
 		// Programmatically connect all connected inputs and outputs
-		$(connectedInputs).each(function(i,input) {
-			// TODO: remove fix when not needed anymore
-			var endpointId = (my.replacedIds[input.endpointId] == null ? input.endpointId : my.replacedIds[input.endpointId]);
-			var sourceId = (my.replacedIds[input.sourceId] == null ? input.sourceId : my.replacedIds[input.sourceId]);
-			
-			var inputEndpoint = $("#"+endpointId).data("endpoint");
-			if (inputEndpoint==null)
-				console.log("Warning: input endpoint "+endpointId+" was null!");
-			
-			var outputEndpoint = $("#"+sourceId).data("endpoint");
-			if (outputEndpoint==null)
-				console.log("Warning: output endpoint "+endpointId+" was null!");
-			
-			if (inputEndpoint!=null && outputEndpoint!=null)
-				jsPlumb.connect({source:inputEndpoint, target:outputEndpoint});
-		});
+//		$(connectedInputs).each(function(i,input) {
+//			// TODO: remove fix when not needed anymore
+//			var endpointId = (my.replacedIds[input.endpointId] == null ? input.endpointId : my.replacedIds[input.endpointId]);
+//			var sourceId = (my.replacedIds[input.sourceId] == null ? input.sourceId : my.replacedIds[input.sourceId]);
+//			
+//			var inputEndpoint = $("#"+endpointId).data("endpoint");
+//			if (inputEndpoint==null)
+//				console.log("Warning: input endpoint "+endpointId+" was null!");
+//			
+//			var outputEndpoint = $("#"+sourceId).data("endpoint");
+//			if (outputEndpoint==null)
+//				console.log("Warning: output endpoint "+endpointId+" was null!");
+//			
+//			if (inputEndpoint!=null && outputEndpoint!=null)
+//				jsPlumb.connect({source:inputEndpoint, target:outputEndpoint});
+//		});
 
 		jsPlumb.setSuspendDrawing(false,true);
 	}
@@ -366,13 +371,13 @@ var SignalPath = (function () {
 		
 		// Bind connection and disconnection events
 		jsPlumb.bind("connection",function(connection) {
-			$(connection.source).trigger("spConnect", connection.target);
-			$(connection.target).trigger("spConnect", connection.source);
+			$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
+			$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
 		});
 		jsPlumb.bind("connectionDetached",function(connection) {
 			if (!connection.connection.pending) {
-				$(connection.source).trigger("spDisconnect", connection.target);
-				$(connection.target).trigger("spDisconnect", connection.source);
+				$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
+				$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
 			}
 		});
 		

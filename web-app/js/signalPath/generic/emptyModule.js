@@ -26,7 +26,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	
 	function createDiv() {
 		my.div = $("<div id='"+my.id+"' class='component context-menu "+my.type+"'></div>");
-		my.div.data("me",my);
+		my.div.data("spObject",my);
 		
 		// Set absolute position
 		my.div.css("position","absolute");
@@ -297,7 +297,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	
 	function clone() {
 		// Deep copy my data
-		var cloneData = jQuery.extend(true, {}, my.jsonData);
+		var cloneData = jQuery.extend(true, {}, my.toJSON());
 		my.prepareCloneData(cloneData);
 		return SignalPath.createModuleFromJSON(cloneData);
 	}
@@ -310,6 +310,10 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	my.prepareCloneData = prepareCloneData;
 	
 	my.onDrag = function() {}
+	
+	// Everything added to the public interface can be accessed from the
+	// private interface too
+	$.extend(my,that);
 	
 	return that;
 }
@@ -325,11 +329,18 @@ $(document).contextmenu({
     	}
     },
 	beforeOpen: function(event, ui) {
-		var parent = $(ui.target).parents("div.component");
-		var my = parent.data("me");
+		var target = $(ui.target);
 		
-		// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
-		$(document).data("contextMenuTarget",$(ui.target));
-		$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
+		// Try to find an SP object in the hierarchy that has a context menu
+		while (target!=null && (target.data("spObject")==null || target.data("spObject").getContextMenu==null))
+			target = target.parent();
+			
+		if (target!=null) {
+			var my = target.data("spObject");
+			
+			// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
+			$(document).data("contextMenuTarget",target);
+			$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
+		}
 	}
 });

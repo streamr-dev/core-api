@@ -1,28 +1,42 @@
-SignalPath.Input = function(json, type, parentDiv, module, my) {
+SignalPath.Input = function(json, parentDiv, module, type, my) {
 	my = my || {};
-	my = new Endpoint(json,type,parentDiv,module,my);
+	my = SignalPath.Endpoint(json, parentDiv, module, type || "input", my);
 	
 	var super_createDiv = my.createDiv;
-	my.createDiv = function(data, type, parentDiv, module) {
-		var result = super_createDiv(data,type,parentDiv,module);
+	my.createDiv = function() {
+		var div = super_createDiv();
 
+		div.bind("spConnect", (function(me) {
+			return function(event, output) {
+				me.json.connected = true;
+				me.json.sourceId = output.getId();
+			}
+		})(my));
+		
+		div.bind("spDisconnect", (function(me) {
+			return function(event, output) {
+				me.json.connected = false;
+				delete me.json.sourceId;
+			}
+		})(my));
+		
 		// Add/remove a warning class to unconnected inputs
-		if (!data.suppressWarnings) {
-			div.data("endpoint").setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
+		if (!my.json.suppressWarnings) {
+			my.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
 
 			div.bind("spConnect", (function(me) {
-				return function(output) {
-					div.data("endpoint").setStyle(jsPlumb.Defaults.EndpointStyle);
+				return function(event, output) {
+					me.jsPlumbEndpoint.setStyle(jsPlumb.Defaults.EndpointStyle);
 				}
-			})(div));
+			})(my));
 
 			div.bind("spDisconnect", (function(me) {
-				return function(output) {
-					div.data("endpoint").setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
+				return function(event, output) {
+					me.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
 				}
-			})(div));
+			})(my));
 		}
-		return result;
+		return div;
 	}
 	
 	var super_createSettings = my.createSettings;
@@ -127,6 +141,47 @@ SignalPath.Input = function(json, type, parentDiv, module, my) {
 		opts.anchor = [0, 0.5, -1, 0, -15, 0];
 		
 		return opts;
+	}
+	
+	my.connect = function(endpoint) {
+		jsPlumb.connect({source: my.jsPlumbEndpoint, target:endpoint.jsPlumbEndpoint});
+	}
+	
+	my.getConnectedEndpoints = function() {
+		var result = [];
+		var connections = jsPlumb.getConnections({source:my.getId(), scope:"*"});
+		$(connections).each(function(j,connection) {
+			result.push($(connection.target).data("spObject"));
+		});
+		return result;
+	}
+	
+	my.refreshConnections = function() {
+		if (my.json.sourceId!=null) {
+			var connectedEndpoints = my.getConnectedEndpoints();
+			if (connectedEndpoints.length==0) {
+				var endpoint = $("#"+my.json.sourceId).data("spObject");
+				if (endpoint!=null)
+					my.connect(endpoint);
+				else console.log("Warning: input "+my.getId()+" should be connected to "+my.json.sourceId+", but the output was not found!");
+			}
+			else if (connectedEndpoints.length==1 && connectedEndpoints[0].getId()!=my.json.sourceId) {
+				console.log("Warning: input "+my.getId()+" should be connected to "+my.json.sourceId+", but is connected to "+connectedEndpoints[0].getId()+" instead!");
+			}
+		}
+	}
+	
+	my.toJSON = function() {
+//		var connectedEndpoints = my.getConnectedEndpoints();
+//
+//		if (connectedEndpoints.length>0) {
+//			my.json.connected = true;
+//			my.json.id = my.getId();
+//			my.json.sourceId = connectedEndpoints[0].getId();
+//		}
+//		else my.json.connected = false;
+
+		return my.json;
 	}
 	
 	return my;
