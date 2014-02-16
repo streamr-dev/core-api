@@ -207,6 +207,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	}
 	my.createModuleFooter = createModuleFooter;
 	
+	// DEPRECATED
 	function generateId() {
 		var id = "myId_"+my.hash+"_"+new Date().getTime();
 		
@@ -230,6 +231,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		SignalPath.options.errorHandler("These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+".");
 		return false;
 	}
+	my.checkConnection = checkConnection;
 	
 	function checkConnectionDirection(info) {
 		// Check that the source of this connection is an input and the target is an output.
@@ -248,7 +250,9 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		// Don't allow input-input or output-output connections
 		else return false;
 	}
+	my.checkConnectionDirection = checkConnectionDirection;
 	
+	// DEPRECATED
 	function addEndpoint(json,connDiv,id) {
 		
 		// Generate custom id for the div if using the new jsPlumb ids
@@ -336,6 +340,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		}
 	}
 	
+	// DEPRECATED: moved to Endpoint.js
 	function createInputSettings(div,data) {
 		
 		// Driving input. Default true.
@@ -427,6 +432,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		}
 	}
 	
+	// DEPRECATED: moved to Endpoint.js
 	function createOutputSettings(div,data) {
 		
 		var switchDiv = $("<div class='switchContainer'></div>");
@@ -454,6 +460,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		}
 	}
 	
+	// DEPRECATED: moved to Endpoint.js
 	function rename(iodiv,data) {
 		var n = $(iodiv).find(".ioname").text();
 
@@ -473,6 +480,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		jsPlumb.repaint(my.div.attr('id'));
 	}
 	
+	// DEPRECATED: moved to Endpoint.js
 	function setExport(iodiv,data,value) {
 		if (value) {
 			iodiv.addClass("export");
@@ -484,6 +492,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		}
 	}
 	
+	// DEPRECATED: moved to Endpoint.js
 	function toggleExport(iodiv,data) {
 		setExport(iodiv,data,!data.export);
 	}
@@ -737,6 +746,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			td = newRow.find("td."+type+":first");
 		}
 
+		// DEPRECATED: From here downwards implemented in Endpoint
 		// Create connection div
 		var div = $("<div class='"+type+" "+data.type+"'></div>");
 		div.data("name",data.name);
@@ -759,7 +769,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		addEndpoint(data, div, type=="input" ? data.endpointId : data.id);
 		
-		// Ensure that the jsonData contains this input name
+		// Ensure that the jsonData contains this input name KEEP THIS
 		var found = false;
 		var arr = (type=="input" ? my.jsonData.inputs : my.jsonData.outputs);
 		for (var i=0;i<arr.length;i++) {
@@ -862,14 +872,6 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	my.handleContextMenuSelection = function(div,data,selection,event) {
 		if (selection=="disconnect") {
 			my.disconnect();
-			event.stopPropagation();
-		}
-		else if (selection=="rename") {
-			rename(div,data);
-			event.stopPropagation();
-		}
-		else if (selection=="export") {
-			toggleExport(div,data);
 			event.stopPropagation();
 		}
 		else superHandleContextMenuSelection(div,data,selection,event);
