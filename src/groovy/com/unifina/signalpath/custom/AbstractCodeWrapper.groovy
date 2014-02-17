@@ -1,7 +1,7 @@
 package com.unifina.signalpath.custom
 
-import com.unifina.security.UserClassLoader;
-import com.unifina.service.ModuleService;
+import com.unifina.security.UserClassLoader
+import com.unifina.service.ModuleService
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
 
@@ -75,7 +75,7 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 
 			try {
 				// Replace [CLASSNAME] with a generated one
-				String className = "CustomModule"+System.currentTimeMillis()+Math.abs(code.hashCode())
+				String className = "CustomModule"+UUID.randomUUID().toString().replace("-","_")//(System.currentTimeMillis()+Math.abs(code.hashCode()))
 
 				// Avoid using the Thread context classloader
 //				ClassLoader parentClassLoader = this.class.getClassLoader()

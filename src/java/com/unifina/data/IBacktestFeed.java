@@ -27,6 +27,7 @@ public interface IBacktestFeed extends IFeed {
 	 */
 	public List<Date[]> getBacktestUnits(Object backtest) throws Exception;
 	
-	public void setBeginDate(Date date);
-	public void setEndDate(Date date);
+	// beginDate and endDate should be read from Globals
+//	public void setBeginDate(Date date);
+//	public void setEndDate(Date date);
 }
