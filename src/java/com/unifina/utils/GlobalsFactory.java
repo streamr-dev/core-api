@@ -21,7 +21,7 @@ import com.unifina.domain.security.SecUser;
  * @author Henri
  *
  */
-class GlobalsFactory {
+public class GlobalsFactory {
 	
 	private static final Logger log = Logger.getLogger(GlobalsFactory.class);
 	

@@ -53,16 +53,13 @@ SignalPath.CustomModule = function(data,canvas,my) {
 						mode:  "groovy"
 					}));
 				},
-				close: function() {
-					$(dialog).dialog("destroy");
-					$(dialog).remove();
-					dialog = null;
-				}
+				close: that.onDelete
 			}).dialog("widget").draggable("option","containment","none");
+			
+			$(SignalPath).on("signalPathNew", that.onDelete);
+			$(SignalPath).on("signalPathLoad", that.onDelete);
 		}
-	}
-	
-	function addStuffToDiv() {
+		
 		if (debug==null) {
 			debug = $("<div class='debugWindow' style='display:none'></div>");
 			debugTextArea = $("<div id='debugText' style='width:100%; height:95%; background-color:white; overflow:auto'></div>");
@@ -84,6 +81,9 @@ SignalPath.CustomModule = function(data,canvas,my) {
 			});
 		}
 
+	}
+	
+	function addStuffToDiv() {
 		var editButton = $("<button>Edit code</button>");
 		editButton.click(createCodeWindow);
 		
@@ -106,7 +106,7 @@ SignalPath.CustomModule = function(data,canvas,my) {
 	that.receiveResponse = function(payload) {
 		superReceiveResponse(payload);
 		
-		if (payload.type=="debug") {
+		if (payload.type=="debug" && debug != null) {
 			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
 //			debugTextArea.scrollTop(
 //					debugTextArea[0].scrollHeight - debugTextArea.height()
@@ -140,11 +140,14 @@ SignalPath.CustomModule = function(data,canvas,my) {
 			$(dialog).dialog("close");
 			$(dialog).dialog("destroy");
 			$(dialog).remove();
+			dialog = null;
 		}
 		if (debug!=null) {
 			$(debug).dialog("close");
 			$(debug).dialog("destroy");
 			$(debug).remove();
+			debug = null;
+			debugTextArea = null;
 		}
 	}
 	
