@@ -17,7 +17,13 @@ html, body {
 	float:left;
 	width: 200px;
 	z-index: 100;
-	padding: 10px;
+	padding: 0px 10px 10px 10px;
+}
+
+#topButtons {
+	margin-left: 220px;
+	margin-top: 10px;
+	margin-right: 10px;
 }
 
 #canvas {
@@ -242,7 +248,7 @@ div.output .switchContainer {
 }
 
 .menuItemGroup {
-	margin-left: 150px;
+/* 	margin-left: 150px; */
 }
 
 .csvDownload {

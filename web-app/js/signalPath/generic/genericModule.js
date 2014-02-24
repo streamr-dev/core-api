@@ -258,7 +258,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	 * Returns an Input object
 	 */
 	function getInput(name) {
-		return inputsByName[name];
+		return my.inputsByName[name];
 	}
 	that.getInput = getInput;
 	
