@@ -120,7 +120,7 @@ class ModuleController {
 					}
 					break
 				}
-				else me = e.cause
+				else me = me.cause
 			}
 		 
 			e = GrailsUtil.deepSanitize(e)

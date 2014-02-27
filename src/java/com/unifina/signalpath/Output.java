@@ -3,7 +3,7 @@ package com.unifina.signalpath;
 import java.util.ArrayList;
 
 
-public abstract class Output<T> extends Endpoint<T> {
+public class Output<T> extends Endpoint<T> {
 	
 	private ArrayList<Input<T>> targets = new ArrayList<>();
 	// For super fast looping use an array instead of a List Iterator

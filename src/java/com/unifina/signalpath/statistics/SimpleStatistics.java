@@ -12,6 +12,7 @@ import com.unifina.signalpath.TimeSeriesOutput;
 public class SimpleStatistics extends AbstractSignalPathModule {
 
 	IntegerParameter windowLength = new IntegerParameter(this,"windowLength",60);
+	IntegerParameter minSamples = new IntegerParameter(this,"minSamples",1);
 	
 	TimeSeriesInput input = new TimeSeriesInput(this,"in");
 	
@@ -73,6 +74,7 @@ public class SimpleStatistics extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(windowLength);
+		addInput(minSamples);
 		addInput(input);
 		
 		addOutput(min);
@@ -135,46 +137,50 @@ public class SimpleStatistics extends AbstractSignalPathModule {
 		
 		if (storeless) {
 			storelessStats.addValue(input.value);
-			if (min.isConnected())
-				min.send(storelessStats.getMin());
-			if (max.isConnected())
-				max.send(storelessStats.getMax());
-			if (mean.isConnected())
-				mean.send(storelessStats.getMean());
-			if (geomMean.isConnected())
-				geomMean.send(storelessStats.getGeometricMean());
-			if (count.isConnected())
-				count.send(new Double(storelessStats.getN()));
-			if (sum.isConnected())
-				sum.send(storelessStats.getSum());
-			if (sumOfSquares.isConnected())
-				sumOfSquares.send(storelessStats.getSumsq());
-			if (stdDev.isConnected())
-				stdDev.send(storelessStats.getStandardDeviation());
-			if (variance.isConnected())
-				variance.send(storelessStats.getVariance());
+			if (storelessStats.getN()>=minSamples.value) {
+				if (min.isConnected())
+					min.send(storelessStats.getMin());
+				if (max.isConnected())
+					max.send(storelessStats.getMax());
+				if (mean.isConnected())
+					mean.send(storelessStats.getMean());
+				if (geomMean.isConnected())
+					geomMean.send(storelessStats.getGeometricMean());
+				if (count.isConnected())
+					count.send(new Double(storelessStats.getN()));
+				if (sum.isConnected())
+					sum.send(storelessStats.getSum());
+				if (sumOfSquares.isConnected())
+					sumOfSquares.send(storelessStats.getSumsq());
+				if (stdDev.isConnected())
+					stdDev.send(storelessStats.getStandardDeviation());
+				if (variance.isConnected())
+					variance.send(storelessStats.getVariance());
+			}
 		}
 		else {
 			stats.addValue(input.value);
 
-			if (min.isConnected())
-				min.send(stats.getMin());
-			if (max.isConnected())
-				max.send(stats.getMax());
-			if (mean.isConnected())
-				mean.send(stats.getMean());
-			if (geomMean.isConnected())
-				geomMean.send(stats.getGeometricMean());
-			if (count.isConnected())
-				count.send(new Double(stats.getN()));
-			if (sum.isConnected())
-				sum.send(stats.getSum());
-			if (sumOfSquares.isConnected())
-				sumOfSquares.send(stats.getSumsq());
-			if (stdDev.isConnected())
-				stdDev.send(stats.getStandardDeviation());
-			if (variance.isConnected())
-				variance.send(stats.getVariance());
+			if (stats.getN()>=minSamples.value) {
+				if (min.isConnected())
+					min.send(stats.getMin());
+				if (max.isConnected())
+					max.send(stats.getMax());
+				if (mean.isConnected())
+					mean.send(stats.getMean());
+				if (geomMean.isConnected())
+					geomMean.send(stats.getGeometricMean());
+				if (count.isConnected())
+					count.send(new Double(stats.getN()));
+				if (sum.isConnected())
+					sum.send(stats.getSum());
+				if (sumOfSquares.isConnected())
+					sumOfSquares.send(stats.getSumsq());
+				if (stdDev.isConnected())
+					stdDev.send(stats.getStandardDeviation());
+				if (variance.isConnected())
+					variance.send(stats.getVariance());
+			}
 		}
 	}
 

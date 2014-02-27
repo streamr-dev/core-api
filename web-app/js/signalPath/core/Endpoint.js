@@ -183,12 +183,13 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	
 	function checkConnection(connection) {
 		// Endpoints must contain at least one acceptedType in common
+		// "Object" types can be connected to anything
 		var arr1 = $("#"+connection.sourceId).data("acceptedTypes");
 		var arr2 = $("#"+connection.targetId).data("acceptedTypes");
 		
 		for(var i = 0; i<arr1.length; i++)
 		    for(var j=0; j<arr2.length; j++)
-		        if(arr1[i]==arr2[j])
+		        if(arr1[i]==arr2[j] || arr1[i]=="Object" || arr2[j]=="Object")
 		            return true;
 
 		SignalPath.options.errorHandler("These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+".");

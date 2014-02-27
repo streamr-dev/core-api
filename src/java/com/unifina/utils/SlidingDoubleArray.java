@@ -2,33 +2,41 @@ package com.unifina.utils;
 
 public class SlidingDoubleArray {
 	
-	int size;
+	int maxSize;
 	
 	double[] values;
 	int index = 0;
 	
 	public SlidingDoubleArray(int size) {
-		this.size = size;
+		this.maxSize = size;
 		values = new double[size];
 	}
 	
 	public void add(double value) {
-		if (index < size)
+		if (index < maxSize)
 			values[index++] = value;
 		else {
 			// Shift all values to the left by one
-			System.arraycopy(values, 1, values, 0, size-1);
+			System.arraycopy(values, 1, values, 0, maxSize-1);
 			// Overwrite last value
-			values[size-1] = value;
+			values[maxSize-1] = value;
 		}
 	}
 	
 	public double[] getValues() {
-		return values;
+		// If the window is not yet full, must make a copy
+		if (index==0)
+			return new double[0];
+		else if (index < maxSize) {
+			double[] result = new double[index];
+			System.arraycopy(values, 0, result, 0, index);
+			return result;
+		}
+		else return values;
 	}
 	
 	public int maxSize() {
-		return size;
+		return maxSize;
 	}
 	
 	public int size() {
@@ -36,22 +44,33 @@ public class SlidingDoubleArray {
 	}
 	
 	public boolean isFull() {
-		return size == index;
+		return maxSize == index;
 	}
 	
 	public void changeSize(int size) {
-		if (this.size==size)
+		if (this.maxSize==size)
 			return;
-		else if (size < this.size) {
+		// Resize down
+		else if (size < this.maxSize) {
 			double[] newValues = new double[size];
-			System.arraycopy(values,this.size-size,newValues,0,size);
-			this.size = size;
+			System.arraycopy(values,Math.min(this.maxSize,index)-Math.min(size,index),newValues,0,size);
+			values = newValues;
+			this.maxSize = size;
+			this.index = Math.min(index, size);
 		}
+		// Resize up
 		else {
 			double[] newValues = new double[size];
-			System.arraycopy(values,0,newValues,size-this.size,size);
-			this.size = size;
+			System.arraycopy(values,0,newValues,0,this.maxSize);
+			values = newValues;
+			this.maxSize = size;
+			// index stays the same
 		}
+	}
+	
+	public void clear() {
+		index = 0;
+		values = new double[maxSize]; // not necessary but just in case
 	}
 	
 }

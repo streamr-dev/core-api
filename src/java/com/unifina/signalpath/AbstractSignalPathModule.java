@@ -91,10 +91,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * This method is for local initialization of the module. It
 	 * gets called after the module is set up, ie. after the connections
 	 * have been made. The default implementation does nothing.
-	 * 
-	 * Can be called multiple times for modules implementing
-	 * the ISharedInstance interface, once for each SignalPath
-	 * the module exists in!
 	 */
 	public void initialize() {
 		

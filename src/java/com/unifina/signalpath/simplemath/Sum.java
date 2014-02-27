@@ -10,15 +10,18 @@ import com.unifina.signalpath.TimeSeriesOutput;
 public class Sum extends AbstractSignalPathModule {
 
 	IntegerParameter windowLength = new IntegerParameter(this,"windowLength",0);
+	IntegerParameter minSamples = new IntegerParameter(this,"minSamples",1);
 	TimeSeriesInput input = new TimeSeriesInput(this,"in");
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
 
 	LinkedList<Double> values = new LinkedList<>();
 	double sum = 0;
+	int count = 0;
 	
 	@Override
 	public void init() {
 		addInput(windowLength);
+		addInput(minSamples);
 		addInput(input);
 		addOutput(out);
 	}
@@ -34,14 +37,17 @@ public class Sum extends AbstractSignalPathModule {
 		}
 		
 		sum += input.value;
+		count++;
 
-		out.send(sum);
+		if (count>=minSamples.value)
+			out.send(sum);
 	}
 
 	@Override
 	public void clearState() {
 		values.clear();
 		sum = 0;
+		count = 0;
 	}
 	
 }

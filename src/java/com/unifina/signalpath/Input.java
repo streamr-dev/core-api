@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 
-public abstract class Input<T> extends Endpoint<T> {
+public class Input<T> extends Endpoint<T> {
 
 	public T value;
 	
