@@ -132,12 +132,50 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 			};
 		})(my.div,my.jsonData));
 		
+		my.div.click(function(event) {
+			$(".component.focus").each(function(i,c) {
+				var ob = $(c).data("spObject");
+				if (ob != my)
+					ob.removeFocus();
+			});
+			my.div.removeClass("hoverFocus");
+			addFocus();
+			event.stopPropagation();
+		});
+		
+		my.div.hover(function() {
+			if (!my.div.hasClass("focus")) {
+				my.div.addClass("hoverFocus");
+				addFocus();
+			}
+		}, function() {
+			if (my.div.hasClass("hoverFocus")) {
+				my.div.removeClass("hoverFocus");
+				removeFocus();
+			}
+		});
+		
+		// A module is focused by default when it is created
+		my.addFocus();
+		
 		return my.div;
 	}
 	my.createDiv = createDiv;
 	
+	function removeFocus() {
+		$(my.div).removeClass("focus");
+		$(my.div).find(".showOnFocus").fadeTo(100,0);
+	}
+	my.removeFocus = removeFocus;
+	
+	function addFocus() {
+		$(my.div).addClass("focus");
+		$(my.div).find(".showOnFocus").fadeTo(100,1);
+	}
+	my.addFocus = addFocus;
+	
 	function createModuleButton(additionalClasses) {
-		var button = $("<span class='modulebutton ui-corner-all ui-state-default "+(additionalClasses ? additionalClasses : "")+"'></span>");
+		var button = $("<span class='modulebutton ui-corner-all ui-state-default showOnFocus "+(additionalClasses ? additionalClasses : "")+"'></span>");
 		button.hover(function() {$(this).addClass("ui-state-highlight");}, function() {$(this).removeClass("ui-state-highlight")});
 		return button;
 	}
@@ -343,4 +381,18 @@ $(document).contextmenu({
 			$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
 		}
 	}
+});
+
+// Remove module focus when clicking anywhere else on screen
+$("body").click(function() {
+	$(".component.focus").each(function(i,c) {
+		$(c).data("spObject").removeFocus();
+	});
+});
+
+// Modules are non-focused on load
+$(SignalPath).on("signalPathLoad",function() {
+	 $(".component").each(function(i,c) {
+		 $(c).data("spObject").removeFocus();
+	 });
 });

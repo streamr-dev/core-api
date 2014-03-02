@@ -46,7 +46,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		my.div.append(div);
 		
 		if (my.jsonData.canClearState==null || my.jsonData.canClearState) {
-			var clear = $("<div class='moduleSwitch clearState'>CLEAR</div>");
+			var clear = $("<div class='moduleSwitch clearState showOnFocus'>CLEAR</div>");
 			if (my.jsonData.clearState==null)
 				my.jsonData.clearState = true;
 

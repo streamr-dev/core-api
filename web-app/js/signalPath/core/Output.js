@@ -6,7 +6,7 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 	my.createSettings = function(div,data) {
 		super_createSettings(div,data);
 		
-		var switchDiv = $("<div class='switchContainer'></div>");
+		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
 		
 		// NoRepeat. Default true. Add only for TimeSeries type
@@ -30,10 +30,10 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 			});
 		}
 
-		// TODO: optimization: in load phase it is not necessary to check these
 		div.bind("spConnect", (function(me) {
 			return function(event, input) {
 				me.json.connected = true;
+				me.div.addClass("connected");
 				if (me.json.targets==null) {
 					me.json.targets = [input.getId()];
 				}
@@ -52,8 +52,10 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 				}
 				
 				// if targets is empty, set connected to false
-				if (me.json.targets.length==0)
+				if (me.json.targets.length==0) {
 					me.json.connected = false;
+					me.div.removeClass("connected");
+				}
 			}
 		})(my));
 	}

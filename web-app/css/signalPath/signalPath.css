@@ -17,19 +17,26 @@ html, body {
 	float:left;
 	width: 200px;
 	z-index: 100;
-	padding: 0px 10px 10px 10px;
+	padding: 10px;
 }
 
 #topButtons {
+	position: fixed;
 	margin-left: 220px;
 	margin-top: 10px;
 	margin-right: 10px;
+	margin-bottom: 10px;
+	z-index: 100;
+}
+
+#topButtons button {
+	z-index: 101;
 }
 
 #canvas {
 	position:absolute;
-/* 	top: 50px; */
-	left: 240px;
+	top: 85px;
+	left: 220px;
 }
 
 .signalpath-canvas {
@@ -286,4 +293,19 @@ div.output .switchContainer {
   	width: 200px;
   }
   
-
+  button.arrow {
+	padding-right: 1.5em;
+  }
+  
+  button.arrow:after {  
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 1em;
+	margin-top: -3px;
+	height: 0;
+	width: 0;
+	/* order of following 3 rules important for fallbacks to work */
+	border: 5px solid transparent;
+	border-top-color: #1c94c4;
+  }

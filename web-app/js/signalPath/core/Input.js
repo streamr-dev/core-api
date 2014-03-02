@@ -10,6 +10,7 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 			return function(event, output) {
 				me.json.connected = true;
 				me.json.sourceId = output.getId();
+				me.div.addClass("connected");
 			}
 		})(my));
 		
@@ -17,6 +18,7 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 			return function(event, output) {
 				me.json.connected = false;
 				delete me.json.sourceId;
+				me.div.removeClass("connected");
 			}
 		})(my));
 		
@@ -45,7 +47,7 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 		
 		// Driving input. Default true.
 		
-		var switchDiv = $("<div class='switchContainer'></div>");
+		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
 		
 		if (data.canBeDrivingInput==null || data.canBeDrivingInput) {
