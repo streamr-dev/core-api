@@ -19,6 +19,10 @@
 	box-shadow: 0 2px 1px #aaa;
 }
  
+ .component.dashboard.dashboardEnabled:hover {
+ 	background-color: white;
+ }
+ 
 .component.focus {
 	opacity: 1.0;
 	box-shadow: 0 2px 1px rgba(255,153,0,0.3);

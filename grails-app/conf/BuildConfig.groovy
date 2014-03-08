@@ -34,6 +34,10 @@ grails.project.dependency.resolution = {
 //		compile('org.apache.commons:commons-math:2.2')
 		runtime('org.apache.commons:commons-math3:3.2')
 		compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
+		compile('org.apache.kafka:kafka_2.8.2:0.8.0') {
+			excludes "slf4j-simple"
+		}
+		compile('com.mashape.unirest:unirest-java:1.3.3')
     }
 
     plugins {

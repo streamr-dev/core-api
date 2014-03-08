@@ -141,15 +141,21 @@ class SignalPathService {
 	}
 	
 	void setLiveRunner(SecUser user, SignalPathRunner runner) {
-//		def servletContext = grailsApplication.mainContext.getBean("servletContext")
+		setLiveRunner("live-$user.id",runner)
+	}
+	
+	void setLiveRunner(String sessionId, SignalPathRunner runner) {
 		if (runner==null)
-			servletContext.removeAttribute("live-$user.id")
-		else servletContext["live-$user.id"] = runner
+			servletContext.removeAttribute(sessionId)
+		else servletContext[sessionId] = runner
 	}
 	
 	SignalPathRunner getLiveRunner(SecUser user) {
-//		def servletContext = grailsApplication.mainContext.getBean("servletContext")
-		return servletContext["live-$user.id"]
+		return getLiveRunner("live-$user.id")
+	}
+	
+	SignalPathRunner getLiveRunner(String sessionId) {
+		return servletContext[sessionId]
 	}
 	
 	List getUpdateableParameters(Map signalPathData, Closure c=null) {

@@ -77,6 +77,14 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 //	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 	
+	/**
+	 * This propagator is created and used if an UI event triggers 
+	 * this module to send output. This can happen, for example, if
+	 * a Parameter is marked as driving and then the Parameter is changed
+	 * at runtime.
+	 */
+	private Propagator uiEventPropagator = null;
+	
 	public AbstractSignalPathModule() {
 //		originatingModule = (this instanceof ITimeListener);
 	}
@@ -521,7 +529,40 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param message
 	 */
 	protected void handleUIMessage(Map message) {
-		
+		// By default all modules support runtime parameter changes
+		if (message.get("type")!=null && message.get("type").toString().equals("paramChange")) {
+			Parameter param = (Parameter) getInput(message.get("param").toString());
+			try {
+				Object value = param.parseValue(message.get("value").toString());
+				param.receive(value);
+				
+				if (isSendPending()) {
+					if (uiEventPropagator==null) {
+						uiEventPropagator = new Propagator();
+						uiEventPropagator.addModule(this);
+					}
+					trySendOutput();
+					if (wasReady) {
+						uiEventPropagator.propagate();
+					}
+				}
+				 
+				HashMap<String,Object> response = new HashMap<String,Object>();
+				response.put("type","paramChangeResponse");
+				response.put("param", param.getName());
+				response.put("value", value);
+				response.put("success", true);
+				parentSignalPath.getReturnChannel().sendPayload(hash, response);
+			} catch (Exception e) {
+				log.error("Error making runtime change!",e);
+				HashMap<String,Object> response = new HashMap<String,Object>();
+				response.put("type","paramChangeResponse");
+				response.put("param", param.getName());
+				response.put("success", false);
+				response.put("error", e.toString());
+				parentSignalPath.getReturnChannel().sendPayload(hash, response);
+			}
+		}
 	}
 
 	void checkDirtyAndReadyCounters() {

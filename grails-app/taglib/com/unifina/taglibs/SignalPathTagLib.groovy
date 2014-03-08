@@ -356,6 +356,27 @@ class SignalPathTagLib {
 	}
 	
 	/**
+	 * Renders a dropdown choice of workspace modes
+	 * 
+	 * @attr id REQURED id of the select
+	 * @attr optionValues a list of values for the workspaces
+	 * @attr optionNames a list of names corresponding to optionValues
+	 */
+	def workspaceDropdown = {attrs,body->
+		def optionValues = attrs.optionValues ?: ['normal','dashboard']
+		def optionNames = attrs.optionNames ?: ['Normal view','Dashboard view']
+		
+		out << "<select id='$attrs.id' style='${attrs.style ?: ""}'>"
+		for (int i=0;i<optionValues.size();i++)
+			out << "<option value='${optionValues[i]}'>${optionNames[i]}</option>"
+		out << "</select>"
+		
+		writeScriptHeader(out)
+		out << "jQuery('#${attrs.id}').change(function() { SignalPath.setWorkspace(jQuery(this).val()); });"
+		writeScriptFooter(out)
+	}
+	
+	/**
 	 * Renders a button that will open a signalpath load browser
 	 *
 	 * @attr id REQUIRED id of the browser

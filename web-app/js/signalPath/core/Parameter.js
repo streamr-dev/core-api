@@ -136,6 +136,14 @@ SignalPath.Parameter = function(json, parentDiv, module, type, my) {
 			}
 		})(my));
 		
+		// Changes to parameters can be made at runtime
+		my.input.change(function() {
+			if (SignalPath.isRunning() && confirm("Make a runtime change to '"+my.getDisplayName()+"'?")) {
+				var value = getParamRenderer(my.json).getValue(my.module, my.json, my.input);
+				SignalPath.sendUIAction(module.getHash(), {type:"paramChange", param:my.getName(), value:value}, function(resp) {});
+			}
+		});
+		
 		// Trigger the spIOReady event on the input as well
 		my.input.trigger("spIOReady");
 		

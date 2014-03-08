@@ -56,8 +56,13 @@ public class RealtimeDataSource extends DataSource {
 
 		processCatchups(catchupFeeds);
 		
-		for (ICatchupFeed it : catchupFeeds)
-			it.endCatchup();
+		// Let all catchup feeds know that catchup has ended,
+		// even if their startCatchup() returned false and thus
+		// they are not in catchupFeeds
+		for (IFeed it : feedByClass.values()) {
+			if (it instanceof ICatchupFeed)
+				((ICatchupFeed)it).endCatchup();
+		}
 		
 		eventQueue.queue = originalQueue;
 		

@@ -16,7 +16,8 @@ modules = {
 		resource url:'js/highcharts-2.3.3/highcharts.src.js'
 	}
 	highstock {
-		resource url:'js/highstock-1.3.7/js/highstock.js'
+		resource url:'js/highstock-1.3.9/js/highstock.js'
+		resource url:'js/highstock-1.3.9/js/highcharts-more.js'
 	}
 	codemirror {
 //		resource url:'js/codemirror-3.21/codemirror.js'
@@ -26,6 +27,12 @@ modules = {
 //		resource url:'js/codemirror/groovy.js'
 //		resource url:'js/codemirror/codemirror.css'
 	}
+	superfish {
+		dependsOn 'jquery'
+		resource url:'js/superfish/js/superfish.min.js'
+		resource url:'js/superfish/css/superfish.css'
+	}
+
 	jsplumb {
 		dependsOn 'jquery'
 		dependsOn 'jquery-ui'
@@ -81,6 +88,7 @@ modules = {
 //		resource url:'js/signalPath/specific/rapidModelModule.js'
 		resource url:'js/signalPath/specific/chartModule.js'
 		resource url:'css/signalPath/modules/chartModule.css'
+		resource url:'js/signalPath/specific/gaugeModule.js'
 		resource url:'js/signalPath/specific/customModule.js'
 		resource url:'js/signalPath/specific/tableModule.js'
 		resource url:'js/signalPath/specific/commentModule.js'

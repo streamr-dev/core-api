@@ -34,7 +34,7 @@ public class BooleanParameter extends Parameter<Boolean> {
 	}
 
 	@Override
-	Boolean parseValue(String s) {
+	public Boolean parseValue(String s) {
 		return Boolean.parseBoolean(s);
 	}
 	

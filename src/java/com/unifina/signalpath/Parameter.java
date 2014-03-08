@@ -111,7 +111,7 @@ public abstract class Parameter<T> extends Input<T> {
 	 * @param s
 	 * @return
 	 */
-	abstract T parseValue(String s);
+	public abstract T parseValue(String s);
 	
 	@Override
 	public boolean hasValue() {

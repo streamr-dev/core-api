@@ -23,32 +23,40 @@ class ModuleController {
 	private static final Logger log = Logger.getLogger(ModuleController)
 	
 	def jsonSearchModule() {
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
-		List<Module> mods = Module.createCriteria().list {
-			isNull("hide")
-			like("name","%"+params.term+"%")
-			'in'("modulePackage",allowedPackages)
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
+		List<Module> mods = []
+		
+		if (!allowedPackages.isEmpty()) {
+			mods = Module.createCriteria().list {
+				isNull("hide")
+				like("name","%"+params.term+"%")
+				'in'("modulePackage",allowedPackages)
+			}
 		}
-//		List<Module> mods = Module.findAllByHideIsNullAndNameLike()
+
 		render mods as JSON
 	} 
 	
 	def jsonGetModules() {
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
-		List<Module> mods = Module.createCriteria().list {
-			isNull("hide")
-			'in'("modulePackage",allowedPackages)
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
+		List<Module> mods = []
+		
+		if (!allowedPackages.isEmpty()) {
+			mods = Module.createCriteria().list {
+				isNull("hide")
+				'in'("modulePackage",allowedPackages)
+			}
 		}
-//		List<Module> mods = Module.findAllByHideIsNull()
+
 		render mods as JSON
 	}
 	
 	def jsonGetModuleTree() {
 		def categories = ModuleCategory.findAllByParentIsNull([sort:"sortOrder"])
 
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
 		
-		def result = []
+		def result = []	
 		categories.findAll{allowedPackages.contains(it.modulePackage)}.each {category->
 			def item = moduleTreeRecurse(category,allowedPackages)
 			result.add(item)
@@ -81,7 +89,7 @@ class ModuleController {
 
 	def jsonGetModule() {
 		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser.modulePackages
+		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
 		
 		try {
 			Module domainObject = Module.get(params.id)

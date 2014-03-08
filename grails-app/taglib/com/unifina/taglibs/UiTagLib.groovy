@@ -3,7 +3,7 @@ package com.unifina.taglibs
 import java.text.SimpleDateFormat;
 
 
-class UiTagLib {
+public class UiTagLib {
 	
 	static namespace = "ui"
 	
@@ -35,6 +35,14 @@ class UiTagLib {
 			</script>
 		"""
 		out << str
+	}
+	
+	def flashMessage = {attrs, body->
+		if (flash.message) {
+			out << "<div class='message'>"
+			out << flash.message
+			out << "</div>"
+		}
 	}
 
 }

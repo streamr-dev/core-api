@@ -8,7 +8,7 @@ public class DoubleParameter extends Parameter<Double> {
 	}
 	
 	@Override
-	Double parseValue(String s) {
+	public Double parseValue(String s) {
 		return Double.parseDouble(s);
 	}
 	

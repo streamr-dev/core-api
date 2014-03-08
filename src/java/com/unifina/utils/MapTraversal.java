@@ -3,6 +3,7 @@ package com.unifina.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class MapTraversal {
@@ -79,5 +80,13 @@ public class MapTraversal {
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
 			}
+	}
+	
+	public static Map getMap(Map map, String name) {
+		return (Map) getProperty(map,name);
+	}
+	
+	public static Object[] getArray(Map map, String name) {
+		return (Object[]) getProperty(map,name);
 	}
 }

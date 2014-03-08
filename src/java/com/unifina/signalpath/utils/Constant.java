@@ -23,13 +23,12 @@ public class Constant extends AbstractSignalPathModule implements Pullable<Doubl
 	@Override
 	public void init() {
 		addInput(constant);
+		constant.setDrivingInput(true);
 		addOutput(out);
 	}
 	
 	@Override
 	public void initialize() {
-//		out.send(constant.getValue());
-//		basicPropagator.propagate();
 		for (Input i : out.getTargets()) {
 			// TODO: remove type checks when input upgrade is done
 			if (i instanceof TimeSeriesInput)
@@ -38,12 +37,12 @@ public class Constant extends AbstractSignalPathModule implements Pullable<Doubl
 				((IntegerParameter) i).receive(constant.getValue().intValue());
 			else if (i instanceof DoubleParameter)
 				((DoubleParameter) i).receive(constant.getValue());
-		}
+		}		
 	}
 	
 	@Override
 	public void sendOutput() {
-		
+		out.send(constant.getValue());	
 	}
 
 	@Override
@@ -55,5 +54,5 @@ public class Constant extends AbstractSignalPathModule implements Pullable<Doubl
 	public Double pullValue(Output output) {
 		return constant.getValue();
 	}
-
+	
 }

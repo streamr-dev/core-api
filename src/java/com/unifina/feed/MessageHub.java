@@ -15,10 +15,10 @@ import org.apache.log4j.Logger;
  *
  * @param <T>
  */
-public class MessageHub<T> extends Thread implements MessageRecipient {
+public class MessageHub<R,T> extends Thread implements MessageRecipient {
 
 	protected MessageSource source;
-	protected MessageParser<T> parser;
+	protected MessageParser<R,T> parser;
 	protected IFeedCache cache;
 	
 	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
@@ -35,12 +35,14 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	private boolean quit = false;
 	private static final Logger log = Logger.getLogger(MessageHub.class);
 	
-	protected MessageHub(MessageSource source, MessageParser<T> parser, IFeedCache cache) {
+	protected MessageHub(MessageSource source, MessageParser<R,T> parser, IFeedCache cache) {
 		this.source = source;
 		this.cache = cache;
 		this.parser = parser;
 		
-		source.setExpectedCounter(cache.getCacheSize()+1);
+		if (cache!=null)
+			source.setExpectedCounter(cache.getCacheSize()+1);
+		
 		source.setRecipient(this);
 		if (cache!=null)
 			addRecipient(cache);
@@ -50,7 +52,7 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	}
 	
 //	public abstract T preprocess(Object msg);
-	public MessageParser<T> getParser() {
+	public MessageParser<R,T> getParser() {
 		return parser;
 	}
 	
@@ -69,7 +71,8 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 			Message parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				parsedMessage = new Message(m.counter, parser.parse(m.message), m.message);
+				parsedMessage = new Message(m.counter, parser.parse((R) m.message), m.message);
+				parsedMessage.checkCounter = m.checkCounter; 				// TODO: make cleaner
 			} catch (Exception e) {
 				log.error("Failed to parse message "+m.message.toString(),e);
 			}
@@ -135,11 +138,14 @@ public class MessageHub<T> extends Thread implements MessageRecipient {
 	 * @return
 	 */
 	public Catchup startCatchup(MessageRecipient proxy) {
-		synchronized(proxies) {
-			Catchup catchup = cache.getCatchup();
-			addRecipient(proxy);
-			return catchup;
+		if (cache!=null) {
+			synchronized(proxies) {
+				Catchup catchup = cache.getCatchup();
+				addRecipient(proxy);
+				return catchup;
+			}
 		}
+		else return null;
 	}
 	
 	public IFeedCache getCache() {

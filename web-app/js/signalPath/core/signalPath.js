@@ -6,6 +6,7 @@
  * signalPathSave (saveData)
  * signalPathStart
  * signalPathStop
+ * signalPathWorkspaceChange (mode)
  * 
  * Events for internal use:
  * _signalPathLoadModulesReady
@@ -39,6 +40,8 @@ var SignalPath = (function () {
 	
     var webRoot = "";
     
+    var workspace = "normal";
+    
     // set in init()
     var canvas;
     var options = {
@@ -47,6 +50,9 @@ var SignalPath = (function () {
     			return {};
     		},
     		errorHandler: function(msg) {
+    			alert(msg);
+    		},
+    		notificationHandler: function(msg) {
     			alert(msg);
     		},
     		runUrl: "runSignalPath",
@@ -650,6 +656,9 @@ var SignalPath = (function () {
 				closeSubscription();
 				options.errorHandler(message.error);
 			}
+			else if (message.type=="N") {
+				options.notificationHandler(message.msg);
+			}
 //		}
 
 		return clear;
@@ -701,5 +710,46 @@ var SignalPath = (function () {
 	}
 	my.abort = abort;
 	
+	function setWorkspace(name) {
+		var oldWorkspace = workspace;
+		workspace = name;
+		
+		if (name=="dashboard") {
+			$(my).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
+		}
+		else {
+			$(my).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
+			
+			jsPlumb.repaintEverything();
+		}
+	}
+	my.setWorkspace = setWorkspace;
+	
+	function getWorkspace() {
+		return workspace;
+	}
+	my.getWorkspace = getWorkspace;
+	
 	return my; 
 }());
+
+$(SignalPath).on("signalPathWorkspaceChange", function(event, name, old) {
+	
+	if (name=="dashboard") {
+		$(jsPlumb.getAllConnections()).each(function(i,o) {
+			o.setVisible(false); 
+		});
+		jsPlumb.selectEndpoints({scope:"*"}).each(function(ep) { 
+			ep.setVisible(false); 
+		});
+	}
+	else {
+		jsPlumb.selectEndpoints({scope:"*"}).each(function(ep) { 
+			ep.setVisible(true); 
+		});
+		
+		$(jsPlumb.getAllConnections()).each(function(i,o) {
+			o.setVisible(true); 
+		});
+	}
+});

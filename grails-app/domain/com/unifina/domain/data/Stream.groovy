@@ -4,7 +4,11 @@ class Stream implements Comparable {
 	Long id
 	String name
 	Feed feed
+	String streamConfig
 	
+	static constraints = {
+		streamConfig(nullable:true)
+	}
 	
 	static mapping = {
 		id generator:'assigned'

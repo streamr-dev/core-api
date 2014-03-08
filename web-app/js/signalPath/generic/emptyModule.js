@@ -33,13 +33,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		
 		// Read position and width/height if saved
 		if (my.jsonData.layout) {
-			my.div.css('top',my.jsonData.layout.position.top);
-			my.div.css('left',my.jsonData.layout.position.left);
-			
-			if (my.jsonData.layout.width)
-				my.div.css('width',my.jsonData.layout.width);
-			if (my.jsonData.layout.height)
-				my.div.css('height',my.jsonData.layout.height);
+			loadPosition(SignalPath.getWorkspace());
 		} 
 		// Else add to default position in viewport
 		else {
@@ -158,9 +152,66 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		// A module is focused by default when it is created
 		my.addFocus();
 		
+		// Move modules on workspace change
+		$(SignalPath).on("signalPathWorkspaceChange", function(event, workspace, oldWorkspace) {
+			writePosition(oldWorkspace);
+			loadPosition(workspace, true);
+		});
+		
 		return my.div;
 	}
 	my.createDiv = createDiv;
+	
+	function writePosition(workspace) {
+		my.jsonData.layout = jQuery.extend(my.jsonData.layout || {}, {
+			position: {
+				top: $(my.div).css('top'),
+				left: $(my.div).css('left')
+			}
+		});
+		
+		// Currently only save workspace position for dashboard modules
+		if (my.div.hasClass("dashboard")) {
+			if (my.jsonData.layout.workspaces==null)
+				my.jsonData.layout.workspaces = {};
+			
+			my.jsonData.layout.workspaces[workspace] = {
+				position: {
+					top: $(my.div).css('top'),
+					left: $(my.div).css('left')
+				}
+			}
+		}
+	}
+	my.writePosition = writePosition;
+	
+	function loadPosition(workspace, animate) {
+		var item = my.jsonData.layout;
+		
+		// Width and height do not change in different workspaces
+		if (item.width)
+			my.div.css('width',item.width);
+		if (item.height)
+			my.div.css('height',item.height);
+		
+		// If workspace supplied then try to read position from there
+		if (workspace!=null && item.workspaces!=null && item.workspaces[workspace]!=null)
+			item = item.workspaces[workspace];
+		
+		// don't animate on transition to normal workspace, as jsPlumb won't keep up
+		// TODO: maybe fix that some day
+		if (animate && workspace=="dashboard") {
+			my.div.animate({
+			    top: item.position.top,
+			    left: item.position.left
+			  }, 200);
+		}
+		else {
+			my.div.css('top',item.position.top);
+			my.div.css('left',item.position.left);
+		}
+	}
+	my.loadPosition = loadPosition;
 	
 	function removeFocus() {
 		$(my.div).removeClass("focus");
@@ -278,13 +329,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	that.onClose = function() {};
 	
 	function toJSON() {
-		my.jsonData.layout = jQuery.extend(my.jsonData.layout || {}, {
-			position: {
-				top: $(my.div).css('top'),
-				left: $(my.div).css('left')
-			}
-		});
-		
+		writePosition(SignalPath.getWorkspace());
 		return my.jsonData;
 	}
 	that.toJSON = toJSON;
@@ -395,4 +440,16 @@ $(SignalPath).on("signalPathLoad",function() {
 	 $(".component").each(function(i,c) {
 		 $(c).data("spObject").removeFocus();
 	 });
+});
+
+$(SignalPath).on("signalPathWorkspaceChange", function(event, name, old) {
+	if (name=="dashboard") {
+		// Hide components that do not have the dashboard class
+		$(".component:not(.dashboard)").hide();
+		$(".component.dashboard").addClass("dashboardEnabled");
+	}
+	else {
+		$(".component").show();
+		$(".component.dashboard").removeClass("dashboardEnabled");
+	}
 });

@@ -230,7 +230,8 @@ SignalPath.ChartModule = function(data,canvas,my) {
 					animation: false,
 					renderTo: area.attr("id"),
 					panning: true,
-					spacingBottom: 40
+					spacingBottom: 40,
+					backgroundColor: null
 				},
 
 				credits: {
@@ -367,12 +368,17 @@ SignalPath.ChartModule = function(data,canvas,my) {
 			
 			if (chart==null) {
 				if (seriesMeta[d.s].data==null) {
-					seriesMeta[d.s].data = [{x:d.x, y:d.y}];
+					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//					seriesMeta[d.s].data = [{x:d.x, y:d.y}];
+					seriesMeta[d.s].data = [[d.x, d.y]];
 				}
 				// Init the chart when any of the series gets it's 2nd data point
 				else if (seriesMeta[d.s].data.length>=1) {
 					// Add one more point to prevent coming here again
-					seriesMeta[d.s].data.push({x:d.x, y:d.y});
+					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//					seriesMeta[d.s].data.push({x:d.x, y:d.y});
+					seriesMeta[d.s].data.push([d.x, d.y]);
+
 
 					// Init all other series to have at least two points
 					for (var i=0;i<seriesMeta.length;i++) {
@@ -380,12 +386,17 @@ SignalPath.ChartModule = function(data,canvas,my) {
 							// Add null points if no data received yet
 							if (seriesMeta[i].data==null) {
 								seriesMeta[i].data = [];
-								seriesMeta[i].data.push({x:seriesMeta[d.s].data[0].x, y:null});
-								seriesMeta[i].data.push({x:d.x,y:null});
+								// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//								seriesMeta[i].data.push({x:seriesMeta[d.s].data[0].x, y:null});
+								seriesMeta[i].data.push([seriesMeta[d.s].data[0][0], null]);
+//								seriesMeta[i].data.push({x:d.x,y:null});
+								seriesMeta[i].data.push([d.x,null]);
 							}
 							// If one point received, repeat first value
 							else if (seriesMeta[i].data.length==1) {
-								seriesMeta[i].data.push({x:d.x, y:seriesMeta[i].data[0].y});
+								// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//								seriesMeta[i].data.push({x:d.x, y:seriesMeta[i].data[0].y});
+								seriesMeta[i].data.push([d.x, seriesMeta[i].data[0][1]]);
 							}
 						}
 					}
@@ -399,14 +410,18 @@ SignalPath.ChartModule = function(data,canvas,my) {
 //				if (d.y!=null) {
 				
 				if (d.s<chart.series.length) {
-					chart.series[d.s].addPoint({x:d.x, y:d.y},false,false,false);
+					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//					chart.series[d.s].addPoint({x:d.x, y:d.y},false,false,false);
+					chart.series[d.s].addPoint([d.x, d.y],false,false,false);
 				}
 				// Are there pending series adds in seriesMeta?
 				else {
 					if (seriesMeta[d.s].data==null)
 						seriesMeta[d.s].data = [];
 					
-					seriesMeta[d.s].data.push({x:d.x, y:d.y});
+					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//					seriesMeta[d.s].data.push({x:d.x, y:d.y});
+					seriesMeta[d.s].data.push([d.x, d.y]);
 					
 					for (var i=chart.series.length;i<seriesMeta.length;i++) {
 						// Unfortunately we need to add series in order
@@ -517,7 +532,9 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		else if (d.type=="b") {
 			if (chart && chart.series) {
 				for (var i=0;i<chart.series.length;i++) {
-					chart.series[d.s].addPoint({x:maxTime+1, y:null},false,false,false);
+					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
+//					chart.series[d.s].addPoint({x:maxTime+1, y:null},false,false,false);
+					chart.series[d.s].addPoint([maxTime01, null],false,false,false);
 				}
 			}
 		}

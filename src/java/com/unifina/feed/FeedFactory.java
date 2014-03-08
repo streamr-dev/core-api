@@ -44,9 +44,15 @@ public class FeedFactory {
 	}
 	
 	private static IFeedCache createCache(Feed feed, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
-		Class cacheClass = FeedFactory.class.getClassLoader().loadClass(feed.getCacheClass());
-		Constructor cacheConstructor = cacheClass.getConstructor(String.class, Map.class);
-		return (IFeedCache) cacheConstructor.newInstance(feed.getCacheConfig(), config);
+		if (feed.getCacheClass()!=null) {
+			Class cacheClass = FeedFactory.class.getClassLoader().loadClass(feed.getCacheClass());
+			Constructor cacheConstructor = cacheClass.getConstructor(String.class, Map.class);
+			return (IFeedCache) cacheConstructor.newInstance(feed.getCacheConfig(), config);
+		}
+		else {
+			log.warn("Feed cache class not defined for feed "+feed.getId());
+			return null;
+		}
 	}
 	
 	private static MessageParser createParser(Feed feed) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {

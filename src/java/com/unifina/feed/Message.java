@@ -1,16 +1,17 @@
 package com.unifina.feed;
 
 public class Message {
-	public int counter;
+	public long counter;
 	public Object message;
 	public Object rawMessage;
+	public boolean checkCounter = true;
 	
-	public Message(int counter, Object message) {
+	public Message(long counter, Object message) {
 		this.counter = counter;
 		this.message = message;
 	}
 	
-	public Message(int counter, Object message, Object rawMessage) {
+	public Message(long counter, Object message, Object rawMessage) {
 		this.counter = counter;
 		this.message = message;
 		this.rawMessage = rawMessage;

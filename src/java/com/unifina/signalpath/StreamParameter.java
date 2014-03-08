@@ -47,7 +47,7 @@ public class StreamParameter extends Parameter<Stream> {
 	}
 	
 	@Override
-	Stream parseValue(String s) {
+	public Stream parseValue(String s) {
 		if (s==null || s.equals("null"))
 			return null;
 		

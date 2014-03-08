@@ -25,7 +25,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		div.attr("id",my.json.id);
 		
 		// Name holder
-		var ioname = $("<div class='ioname'>"+(my.json.displayName ? my.json.displayName : my.json.name)+"</span>");
+		var ioname = $("<div class='ioname'>"+my.getDisplayName()+"</span>");
 		div.append(ioname);
 		
 		// Add to parent
@@ -180,6 +180,10 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	}
 	my.getName = getName;
 
+	function getDisplayName() {
+		return (my.json.displayName ? my.json.displayName : my.json.name);
+	}
+	my.getDisplayName = getDisplayName;
 	
 	function checkConnection(connection) {
 		// Endpoints must contain at least one acceptedType in common

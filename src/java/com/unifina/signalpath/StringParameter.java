@@ -8,7 +8,7 @@ public class StringParameter extends Parameter<String> {
 	}
 
 	@Override
-	String parseValue(String s) {
+	public String parseValue(String s) {
 		return s;
 	}
 

@@ -6,18 +6,31 @@ class Feed {
 
 	Long id
 	String backtestFeed // TODO: rename?
-	String realtimeFeed // com.unifina.feed.MessageHub if not extended
+	String realtimeFeed
+	String feedConfig
+	
 	String timezone
 	String preprocessor
+	
+	@Deprecated
 	String directory
+	
 	String cacheClass
 	String cacheConfig
 	String parserClass
 	String messageSourceClass
 	String messageSourceConfig
-
+	
 	Module module
 
 	static constraints = {
+		backtestFeed(nullable:true)
+		realtimeFeed(nullable:true)
+		preprocessor(nullable:true)
+		directory(nullable:true)
+		cacheClass(nullable:true)
+		feedConfig(nullable:true)
+		cacheConfig(nullable:true)
+		messageSourceConfig(nullable:true)
 	}
 }

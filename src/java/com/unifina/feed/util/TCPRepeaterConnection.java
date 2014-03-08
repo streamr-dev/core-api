@@ -31,7 +31,7 @@ public class TCPRepeaterConnection extends Thread implements MessageRecipient {
 	
 	private static final Logger log = Logger.getLogger(TCPRepeaterConnection.class);
 	
-	int counter = 1;
+	long counter = 1;
 	Timer secTimer = new Timer();
 	
 	// Allow 10 seconds of silence in the beginning
@@ -103,7 +103,7 @@ public class TCPRepeaterConnection extends Thread implements MessageRecipient {
 		byte[] msgBytes = msg.message.toString().getBytes();
 		ByteBuffer buf = ByteBuffer.allocate(8+msgBytes.length);
 		buf.order(ByteOrder.LITTLE_ENDIAN);
-		buf.putInt(msg.counter);
+		buf.putInt((int)msg.counter);
 		buf.putInt(msgBytes.length);
 		buf.put(msgBytes);
 		out.write(buf.array());

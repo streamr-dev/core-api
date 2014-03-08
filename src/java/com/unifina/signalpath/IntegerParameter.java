@@ -16,7 +16,7 @@ public class IntegerParameter extends Parameter<Integer> {
 	}
 	
 	@Override
-	Integer parseValue(String s) {
+	public Integer parseValue(String s) {
 		return Integer.parseInt(s);
 	}
 	

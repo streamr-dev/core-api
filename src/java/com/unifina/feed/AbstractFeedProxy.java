@@ -24,34 +24,34 @@ import com.unifina.utils.Globals;
  * @author Henri
  *
  */
-public abstract class AbstractFeedProxy<T> extends AbstractFeed implements MessageRecipient, ICatchupFeed {
+public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements MessageRecipient, ICatchupFeed {
 	
 	private int expected = 0;
 	
-	protected MessageHub<T> hub;
+	protected MessageHub<R,T> hub;
 	
 	private Catchup catchup = null;
 	enum CatchupState { CATCHUP, CATCHUP_UNSYNC_READY, CATCHUP_READY };
 	private CatchupState catchupState = CatchupState.CATCHUP; // start in catchup state
 	
 	private ConcurrentLinkedQueue<T> realtimeWaitQueue = new ConcurrentLinkedQueue<>();
-	private ConcurrentLinkedQueue<Integer> realtimeWaitQueueCounter = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<Long> realtimeWaitQueueCounter = new ConcurrentLinkedQueue<>();
 	
 	private static final Logger log = Logger.getLogger(AbstractFeedProxy.class);
 	private static final boolean checkEventAge = true;
 	
-	private Integer firstWaitQueue = null;
-	private Integer firstRealQueue = null;
+	private Long firstWaitQueue = null;
+	private Long firstRealQueue = null;
 	
 	public AbstractFeedProxy(Globals globals) {
 		super(globals);
 		hub = getMessageHub();
 	}
 	
-	protected MessageHub<T> getMessageHub() {
+	protected MessageHub<R,T> getMessageHub() {
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		Feed feed = feedService.getFeedByRealtimeClass(this.getClass().getName());
-		return (MessageHub<T>) feedService.getMessageRecipient(feed);
+		return (MessageHub<R,T>) feedService.getMessageRecipient(feed);
 	}
 	
 	/**
@@ -72,8 +72,8 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 		}
 		else {
 			// ProcessAndQueue a message with the correct counter
-			if (parsedMsg.counter==expected) {
-				processAndQueue(parsedMsg.counter, msg, checkEventAge);
+			if (parsedMsg.counter==expected || !parsedMsg.checkCounter) {
+				processAndQueue(parsedMsg.checkCounter ? parsedMsg.counter : expected, msg, checkEventAge);
 			}
 			// If there is a gap, try to handle it
 			else if (parsedMsg.counter > expected) {
@@ -103,7 +103,7 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 	 * @param counterTarget
 	 * @return true if the gap was fixed, false if not
 	 */
-	private boolean handleGap(int counterTarget) {
+	private boolean handleGap(long counterTarget) {
 		log.info("handleGap: Trying to process events from the wait queue. Counter: "+counterTarget+", expected: "+expected+".");
 		log.info("Wait queue contains "+realtimeWaitQueue.size()+" messages, first one has counter "+realtimeWaitQueueCounter.peek());
 		
@@ -111,21 +111,21 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 			
 			// Purge any already-processed messages from the wait queue
 			while (!realtimeWaitQueue.isEmpty() && realtimeWaitQueueCounter.peek()<expected) {
-				Integer waitCounter = realtimeWaitQueueCounter.poll();
+				Long waitCounter = realtimeWaitQueueCounter.poll();
 				realtimeWaitQueue.poll();
 				log.warn("handleGap: old message purged from wait queue: "+waitCounter+", expected: "+expected);
 			}
 			
 			// Is the correct counter in the wait queue?
 			if (!realtimeWaitQueue.isEmpty() && realtimeWaitQueueCounter.peek()==expected) {
-				Integer waitCounter = realtimeWaitQueueCounter.poll();
+				Long waitCounter = realtimeWaitQueueCounter.poll();
 				T waitMsg = realtimeWaitQueue.poll();
 				processAndQueue(waitCounter, waitMsg, false);
 				log.info("handleGap: Message processed from wait queue: "+waitCounter);
 			}
 			
 			// If not, try to find the expected message in catchup
-			else {
+			else if (catchup!=null) {
 				// If the catchup lags behind, fast-forward it
 				while (catchup.getNextCounter()<expected) {
 					Object next = catchup.getNext();
@@ -144,7 +144,7 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 				}
 				else {
 					log.info("handleGap: Message processed from catchup: "+counter);
-					T msg = hub.getParser().parse(next);
+					T msg = hub.getParser().parse((R)next);
 					processAndQueue(counter, msg, false);
 				}
 			}
@@ -156,7 +156,7 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 		return true;
 	}
 	
-	private void processAndQueue(int counter, T msg, boolean checkAge) {
+	private void processAndQueue(long counter, T msg, boolean checkAge) {
 		if (counter!=expected)
 			throw new IllegalArgumentException("Tried to process messages in invalid order! Counter: "+counter+", expected: "+expected);
 		else {
@@ -208,7 +208,7 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 				return null;
 			}
 			
-			msg = hub.getParser().parse(line);
+			msg = hub.getParser().parse((R)line);
 			
 			if (catchupCounter!=expected)
 				throw new IllegalStateException("Gap in catchup! Counter: "+catchupCounter+", expected: "+expected);
@@ -218,7 +218,7 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 			}
 
 			// Remove overlap in the wait queue
-			Integer cc = realtimeWaitQueueCounter.peek();
+			Long cc = realtimeWaitQueueCounter.peek();
 			if (cc!=null && cc==catchupCounter) {
 //				log.info("getNextEvents: Removing duplicate from wait queue: "+cc);
 				realtimeWaitQueueCounter.poll();
@@ -262,7 +262,7 @@ public abstract class AbstractFeedProxy<T> extends AbstractFeed implements Messa
 
 	@Override
 	public void endCatchup() {
-		if (catchup==null)
+		if (catchupState!=CatchupState.CATCHUP)
 			throw new IllegalStateException("Catchup is not started!");
 		
 		log.info("endCatchup called");

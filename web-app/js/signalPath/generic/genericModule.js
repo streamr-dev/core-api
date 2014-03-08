@@ -379,6 +379,14 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	}
 	that.refreshConnections = refreshConnections;
 	
+	var super_receiveResponse = my.receiveResponse
+	my.receiveResponse = function(payload) {
+		super_receiveResponse(payload);
+		if (payload.type=="paramChangeResponse") {
+			// TODO handle param change response
+		}
+	}
+	
 	var superToJSON = that.toJSON;
 	function toJSON() {
 		my.jsonData = superToJSON();

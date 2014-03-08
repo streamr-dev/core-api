@@ -133,6 +133,12 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 	}
 	
 	@Override
+	public synchronized void sendNotification(String msg) {
+		queue.add(new NotificationMessage(msg));
+		notify();
+	}
+	
+	@Override
 	public synchronized void sendPayload(int hash, Object p) {
 		queue.add(new PayloadMessage(hash, p));
 //		broadcast(new PayloadMessage(payloadCounter++, hash, p));
@@ -225,6 +231,13 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		public ErrorMessage(String error) {
 			this.put("type","E");
 			this.put("error",error);
+		}
+	}
+	
+	class NotificationMessage extends SignalPathMessage {
+		public NotificationMessage(String msg) {
+			this.put("type","N");
+			this.put("msg",msg);
 		}
 	}
 	

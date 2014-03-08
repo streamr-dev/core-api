@@ -22,3 +22,11 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
+
+// Example config for Kafka
+unifina.kafka.metadata.broker.list = "192.168.10.81:9092"
+unifina.kafka.producer.type = "async"
+unifina.kafka.serializer.class = "kafka.serializer.StringEncoder"
+unifina.kafka.request.required.acks = "1"
+unifina.kafka.zookeeper.connect = "192.168.10.81:2181"
+unifina.kafka.group.id = "unifina"

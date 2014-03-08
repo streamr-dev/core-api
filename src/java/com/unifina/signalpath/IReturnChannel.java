@@ -20,6 +20,8 @@ public interface IReturnChannel {
 	
 	public void sendDone();
 	
+	public void sendNotification(String msg);
+	
 	public void sendError(String errorMsg);
 	
 	public SignalPath getSignalPath();
