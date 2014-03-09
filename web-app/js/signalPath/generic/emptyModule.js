@@ -166,7 +166,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		my.jsonData.layout = jQuery.extend(my.jsonData.layout || {}, {
 			position: {
 				top: $(my.div).css('top'),
-				left: $(my.div).css('left')
+				left: $(my.div).css('left'),
 			}
 		});
 		
@@ -174,6 +174,9 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		if (my.div.hasClass("dashboard")) {
 			if (my.jsonData.layout.workspaces==null)
 				my.jsonData.layout.workspaces = {};
+			
+			if (workspace=="dashboard" && $(my.div).css('top')==my.jsonData.layout.workspaces.normal.top)
+				console.log("Here we are!");
 			
 			my.jsonData.layout.workspaces[workspace] = {
 				position: {
@@ -259,7 +262,9 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 			div.append(title);
 			div.append(value);
 			
-			value.append("<input type='text' value='"+option.value+"'>");
+			var input = $("<input type='text'>");
+			input.attr("value",option.value);
+			value.append(input);
 		}
 		else if (option.type=="boolean") {
 			var title = $("<span class='optionTitle'>"+key+"</span>");

@@ -49,11 +49,11 @@ var SignalPath = (function () {
     		signalPathContext: function() {
     			return {};
     		},
-    		errorHandler: function(msg) {
-    			alert(msg);
+    		errorHandler: function(data) {
+    			alert(data.msg);
     		},
-    		notificationHandler: function(msg) {
-    			alert(msg);
+    		notificationHandler: function(data) {
+    			alert(data.msg);
     		},
     		runUrl: "runSignalPath",
     		abortUrl: "abort",
@@ -201,11 +201,11 @@ var SignalPath = (function () {
 							modules[data.moduleErrors[i].hash].receiveResponse(data.moduleErrors[i].payload);
 						}
 					}
-					options.errorHandler(data.message);
+					options.errorHandler({msg: data.message});
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler(errorThrown);
+				options.errorHandler({msg:errorThrown});
 			}
 		});
 	}
@@ -230,11 +230,11 @@ var SignalPath = (function () {
 					jsPlumb.setSuspendDrawing(false,true);
 				}
 				else {
-					options.errorHandler(data.message);
+					options.errorHandler({msg:data.message});
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler(errorThrown);
+				options.errorHandler({msg:errorThrown});
 			}
 		});
 		
@@ -248,7 +248,7 @@ var SignalPath = (function () {
 	
 	function createModuleFromJSON(data) {
 		if (data.error) {
-			options.errorHandler(data.message);
+			options.errorHandler({msg:data.message});
 			return;
 		}
 		
@@ -290,6 +290,7 @@ var SignalPath = (function () {
 	
 	function signalPathToJSON(signalPathContext) {
 		var result = {
+				workspace: getWorkspace(),
 				signalPathContext: signalPathContext,
 				signalPathData: {
 					modules: []
@@ -348,11 +349,11 @@ var SignalPath = (function () {
 					$(my).trigger('signalPathSave', [saveData]);
 				}
 				else {
-					options.errorHandler(data.message);
+					options.errorHandler({msg:data.message});
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler(errorThrown);
+				options.errorHandler({msg:errorThrown});
 			}
 		});
 	}
@@ -403,7 +404,7 @@ var SignalPath = (function () {
 		if (opt.url) {
 			$.getJSON(opt.url, params, function(data) {
 				if (data.error) {
-					options.errorHandler(data.message);
+					options.errorHandler({msg:data.message});
 					if (data.signalPathData) {
 						_load(data,opt,callback);
 					}
@@ -427,6 +428,9 @@ var SignalPath = (function () {
 		
 		// TODO: remove backwards compatibility
 		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext);
+		
+		if (data.workspace!=null && data.workspace!="normal")
+			setWorkspace(data.workspace);
 		
 		$(my).trigger('signalPathLoad', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
 	}
@@ -461,7 +465,7 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (data.error) {
-					options.errorHandler("Error:\n"+data.error);
+					options.errorHandler({msg:"Error:\n"+data.error});
 				}
 				else {
 					runnerId = data.runnerId;
@@ -469,7 +473,7 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler(textStatus+"\n"+errorThrown);
+				options.errorHandler({msg:textStatus+"\n"+errorThrown});
 			}
 		});
 	}
@@ -609,12 +613,7 @@ var SignalPath = (function () {
 	function processMessage(message) {
 //		try {
 
-//		if (messages.length > 500)
-//		options.errorHandler("Here we go!");
-
 		var clear = null;
-		
-//		console.log("Msg: "+message.counter);
 		
 		// A message that has been purged from cache is the empty javascript object
 		if (message.counter==null) {
@@ -654,10 +653,10 @@ var SignalPath = (function () {
 			}
 			else if (message.type=="E") {
 				closeSubscription();
-				options.errorHandler(message.error);
+				options.errorHandler({msg:message.error});
 			}
 			else if (message.type=="N") {
-				options.notificationHandler(message.msg);
+				options.notificationHandler(message);
 			}
 //		}
 
@@ -698,11 +697,11 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (data.error) {
-					options.errorHandler("Error:\n"+data.error);
+					options.errorHandler({msg:"Error:\n"+data.error});
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler(textStatus+"\n"+errorThrown);
+				options.errorHandler({msg:textStatus+"\n"+errorThrown});
 			}
 		});
 

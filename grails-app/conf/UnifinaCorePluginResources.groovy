@@ -61,7 +61,8 @@ modules = {
 	}
 	pnotify {
 		dependsOn 'jquery, jquery-ui'
-		resource url:'js/pnotify-1.2.0/jquery.pnotify.min.js'
+//		resource url:'js/pnotify-1.2.0/jquery.pnotify.min.js'
+		resource url:'js/pnotify-1.2.0/jquery.pnotify.1.2.2-snapshot.js'
 		resource url:'js/pnotify-1.2.0/jquery.pnotify.default.css'
 	}
 	chosen {

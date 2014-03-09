@@ -19,12 +19,13 @@ public class Gauge extends AbstractSignalPathModule {
 	boolean initSent = false;
 	IReturnChannel rc = null;
 	
-	Double reportedMin = null;
-	Double reportedMax = null;
+//	Double reportedMin = null;
+//	Double reportedMax = null;
 	
 	String title = "";
 	boolean labels = true;
 	String labelFormatter = "";
+	String labelStyle = "";
 	
 	@Override
 	public void init() {
@@ -57,15 +58,15 @@ public class Gauge extends AbstractSignalPathModule {
 				HashMap<String,Object> msg = new HashMap<>();
 				msg.put("type", "u");
 				msg.put("v",value.value);
-				if (reportedMin==null || reportedMin!=min.getValue()) {
-					msg.put("min", min.getValue());
-					reportedMin = min.getValue();
-				}
-				if (reportedMax==null || reportedMax!=max.getValue()) {
-					msg.put("max", max.getValue());
-					reportedMax = max.getValue();
-				}
-				rc.sendPayload(hash, msg);
+//				if (reportedMin==null || reportedMin!=min.getValue()) {
+//					msg.put("min", min.getValue());
+//					reportedMin = min.getValue();
+//				}
+//				if (reportedMax==null || reportedMax!=max.getValue()) {
+//					msg.put("max", max.getValue());
+//					reportedMax = max.getValue();
+//				}
+				rc.sendReplacingPayload(hash, msg, this);
 			}
 		}
 	}
@@ -98,6 +99,11 @@ public class Gauge extends AbstractSignalPathModule {
 		options.put("labelFormatter",labelFormatterOption);
 		labelFormatterOption.put("value",labelFormatter);
 		labelFormatterOption.put("type","string");
+
+		LinkedHashMap<String,Object> labelStyleOption = new LinkedHashMap<>();
+		options.put("labelStyle",labelStyleOption);
+		labelStyleOption.put("value",labelStyle);
+		labelStyleOption.put("type","string");
 		
 		return config;
 	}
@@ -117,6 +123,9 @@ public class Gauge extends AbstractSignalPathModule {
 			}
 			if (MapTraversal.getProperty(options, "labelFormatter.value")!=null) {
 				labelFormatter = MapTraversal.getString(options, "labelFormatter.value");
+			}
+			if (MapTraversal.getProperty(options, "labelStyle.value")!=null) {
+				labelStyle = MapTraversal.getString(options, "labelStyle.value");
 			}
 		}
 	}

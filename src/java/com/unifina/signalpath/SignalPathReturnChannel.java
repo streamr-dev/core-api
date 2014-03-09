@@ -145,6 +145,15 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		notify();
 	}
 
+	public synchronized void sendRawMessage(Map<String,Object> map, Object cacheId) {
+		SignalPathMessage msg = new SignalPathMessage();
+		for (String s : map.keySet())
+			msg.put(s,map.get(s));
+		msg.cacheId = cacheId;
+		queue.add(msg);
+		notify();
+	}
+	
 	@Override
 	public synchronized void sendReplacingPayload(int hash, Object p, Object identifier) {
 		queue.add(new PayloadMessage(hash, p, identifier));
@@ -231,6 +240,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		public ErrorMessage(String error) {
 			this.put("type","E");
 			this.put("error",error);
+			this.cacheId = "error";
 		}
 	}
 	
@@ -238,6 +248,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		public NotificationMessage(String msg) {
 			this.put("type","N");
 			this.put("msg",msg);
+			this.cacheId = "notification";
 		}
 	}
 	

@@ -33,6 +33,7 @@ class SignalPathService {
 	
 	/**
 	 * Rebuilds a saved representation of a SignalPath along with its context.
+	 * Potentially modifies the map given as parameter.
 	 * @param json
 	 * @return
 	 */
@@ -52,12 +53,14 @@ class SignalPathService {
 				context["timeOfDayFilter"] = json.timeOfDayFilter
 		}
 		
-		Map result = [
-			signalPathContext: context,
-			signalPathData: signalPathToJson(sp)
-		]
+		json.signalPathContext = context
+		json.signalPathData = signalPathToJson(sp)
+//		Map result = [
+//			signalPathContext: context,
+//			signalPathData: signalPathToJson(sp)
+//		]
 		
-		return result
+		return json
 	}
 	
 	public byte[] compress(String s) {

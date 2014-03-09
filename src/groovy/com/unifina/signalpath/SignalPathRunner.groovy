@@ -30,8 +30,6 @@ public class SignalPathRunner extends Thread {
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
 	
 	public SignalPathRunner(List<Map> signalPathData, Globals globals) {
-		super("SignalPathRunner")
-
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
 		this.servletContext = globals.grailsApplication.mainContext.getBean("servletContext")
@@ -66,6 +64,7 @@ public class SignalPathRunner extends Thread {
 	public void run() {
 		
 		Exception reportException = null
+		setName("SignalPathRunner");
 		
 		// Run
 		try {

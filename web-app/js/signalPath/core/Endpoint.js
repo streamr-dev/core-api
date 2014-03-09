@@ -196,7 +196,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		        if(arr1[i]==arr2[j] || arr1[i]=="Object" || arr2[j]=="Object")
 		            return true;
 
-		SignalPath.options.errorHandler("These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+".");
+		SignalPath.options.errorHandler({msg:"These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+"."});
 		return false;
 	}
 	my.checkConnection = checkConnection;

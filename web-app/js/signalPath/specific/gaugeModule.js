@@ -113,9 +113,10 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		        tickPosition: 'outside',
 		        labels: {
 		        	enabled: my.jsonData.options.labels.value,
-		        	formatter: (my.jsonData.options.labelFormatter.value!="" ? eval(my.jsonData.options.labelFormatter.value) : function() { return this.value; }),
+		        	formatter: (my.jsonData.options.labelFormatter.value!="" ? new Function(my.jsonData.options.labelFormatter.value) : function() { return this.value; }),
 		        	rotation: 'auto',
-		        	distance: 20
+		        	distance: 20,
+		        	style: (my.jsonData.options.labelStyle.value!="" ? eval("("+my.jsonData.options.labelStyle.value+")") : null),
 		        },
 		        plotBands: [{
 		            color: {

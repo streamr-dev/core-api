@@ -373,6 +373,7 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		out << "jQuery('#${attrs.id}').change(function() { SignalPath.setWorkspace(jQuery(this).val()); });"
+		out << "jQuery(SignalPath).on('signalPathWorkspaceChange', function(event, workspace) { jQuery('#${attrs.id}').val(workspace); });"
 		writeScriptFooter(out)
 	}
 	
