@@ -58,6 +58,7 @@ var SignalPath = (function () {
     		runUrl: "runSignalPath",
     		abortUrl: "abort",
     		atmosphereUrl: project_webroot+"atmosphere/",
+    		allowRuntimeChanges: true,
     };
     
 	// Public
