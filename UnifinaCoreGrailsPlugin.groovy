@@ -52,6 +52,8 @@ class UnifinaCoreGrailsPlugin {
 				'description'("AtmosphereServlet")
 				'servlet-name'("AtmosphereServlet")
 				'servlet-class'("org.atmosphere.cpr.AtmosphereServlet")
+				'async-supported'("true") // ADDED
+				
 				'init-param' {
 					'param-name'("org.atmosphere.useWebSocket")
 					'param-value'("false")
@@ -76,6 +78,18 @@ class UnifinaCoreGrailsPlugin {
 					'param-name'("org.atmosphere.cpr.broadcasterClass")
 					'param-value'("com.unifina.atmosphere.MySimpleBroadcaster")
 				}
+				// ADDED
+//				'init-param' {
+//					'param-name'("org.atmosphere.cpr.asyncSupport")
+//					'param-value'("javax.servlet.AsyncListener")
+//				}
+				// ADDED
+				'init-param' {
+					'param-name'("org.atmosphere.useBlocking")
+					'param-value'("false")
+				}
+				
+				
 				'load-on-startup'("0")
 			}
 		}

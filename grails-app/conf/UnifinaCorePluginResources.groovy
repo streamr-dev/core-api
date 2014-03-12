@@ -94,6 +94,7 @@ modules = {
 		resource url:'js/signalPath/specific/tableModule.js'
 		resource url:'js/signalPath/specific/commentModule.js'
 		resource url:'css/signalPath/modules/commentModule.css'
+		resource url:'js/signalPath/specific/labelModule.js'
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'

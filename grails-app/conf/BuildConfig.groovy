@@ -1,5 +1,8 @@
 import grails.util.Environment
 
+grails.servlet.version = "3.0"
+grails.tomcat.nio = true
+
 grails.project.target.level = 1.7
 grails.project.source.level = 1.7
 

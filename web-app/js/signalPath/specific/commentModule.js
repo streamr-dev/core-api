@@ -18,7 +18,7 @@ SignalPath.CommentModule = function(data,canvas,my) {
 		
 		my.body.append(textarea);
 		
-		my.div.resizable({
+		my.initResizable({
 			resize: function(event,ui) {
 				resizeTextarea(ui.size.width, ui.size.height);
 			}
@@ -33,9 +33,7 @@ SignalPath.CommentModule = function(data,canvas,my) {
 	var superToJSON = that.toJSON;
 	function toJSON() {
 		var result = superToJSON();
-		result.text = textarea.val();
-		result.layout.width = $(my.div).css('width');
-		result.layout.height = $(my.div).css('height');		
+		result.text = textarea.val();	
 		return result;
 	}
 	that.toJSON = toJSON;

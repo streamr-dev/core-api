@@ -5,6 +5,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	my.header = null;
 	my.title = null;
 	my.body = null;
+	my.resizable = false;
 	
 	my.jsonData = data;
 	my.hash = my.jsonData.hash;
@@ -216,6 +217,16 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	}
 	my.loadPosition = loadPosition;
 	
+	function initResizable(options) {
+		var defaultOptions = {
+			helper: "chart-resize-helper",
+		}
+		options = $.extend({},defaultOptions,options || {});
+		my.div.resizable(options);
+		my.resizable = true;
+	}
+	my.initResizable = initResizable;
+	
 	function removeFocus() {
 		$(my.div).removeClass("focus");
 		$(my.div).find(".showOnFocus").fadeTo(100,0);
@@ -335,6 +346,10 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	
 	function toJSON() {
 		writePosition(SignalPath.getWorkspace());
+		if (my.resizable) {
+			my.jsonData.layout.width = $(my.div).css('width');
+			my.jsonData.layout.height = $(my.div).css('height');	
+		}
 		return my.jsonData;
 	}
 	that.toJSON = toJSON;

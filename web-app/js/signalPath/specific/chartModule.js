@@ -75,10 +75,9 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		
 		initArea();
 		
-		my.div.resizable({
+		my.initResizable({
 			minWidth: parseInt(my.div.css("min-width").replace("px","")),
 			minHeight: parseInt(my.div.css("min-height").replace("px","")),
-			helper: "chart-resize-helper",
 			stop: function(event,ui) {
 				resizeChart(ui.size.width, ui.size.height);
 			}
@@ -626,15 +625,6 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		
 		superUpdateFrom(data);
 	}
-	
-	var superToJSON = that.toJSON;
-	function toJSON() {
-		var result = superToJSON();
-		result.layout.width = $(my.div).css('width');
-		result.layout.height = $(my.div).css('height');		
-		return result;
-	}
-	that.toJSON = toJSON;
 	
 	return that;
 }

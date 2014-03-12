@@ -14,6 +14,7 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.utils.Globals;
+import com.unifina.utils.MapTraversal;
 
 /**
  * The usual init procedure:
@@ -580,6 +581,22 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public void onDay(Date day) {
 		// Clear on day change (but not on the first one)
 //		clear();
+	}
+	
+	public Map<String,Object> addOption(Map<String,Object> config, String name, String type, Object value) {
+		if (config.get("options")==null)
+			config.put("options", new HashMap<String,Object>());
+		
+		Map<String, Object> options = (Map<String, Object>) config.get("options");
+		Map<String, Object> item = new HashMap<>();
+		options.put(name, item);
+		item.put("type",type);
+		item.put("value",value);
+		return item;
+	}
+	
+	public Object getOption(Map<String,Object> config, String name) {
+		return MapTraversal.getProperty(config, "options."+name+".value");
 	}
 	
 	protected class UIWarningMessage extends HashMap<String,String> {
