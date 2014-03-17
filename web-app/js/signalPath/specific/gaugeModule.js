@@ -94,7 +94,8 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		        text: my.jsonData.options.title.value,
 		        floating: true,
 		        verticalAlign: 'bottom',
-		        y: 30
+		        y: 35,
+		        style: (my.jsonData.options.titleStyle.value!="" ? eval("("+my.jsonData.options.titleStyle.value+")") : null),
 		    },
 		    
 		    pane: [{

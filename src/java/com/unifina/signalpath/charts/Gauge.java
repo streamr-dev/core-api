@@ -23,6 +23,7 @@ public class Gauge extends AbstractSignalPathModule {
 //	Double reportedMax = null;
 	
 	String title = "";
+	String titleStyle = "";
 	boolean labels = true;
 	String labelFormatter = "";
 	String labelStyle = "";
@@ -79,31 +80,12 @@ public class Gauge extends AbstractSignalPathModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
-		Map<String,Object> options = (Map<String,Object>) config.get("options");
-		if (options==null) {
-			options = new LinkedHashMap<>();
-			config.put("options",options);
-		}
-		
-		LinkedHashMap<String, Object> titleOption = new LinkedHashMap<>();
-		options.put("title",titleOption);
-		titleOption.put("value",title);
-		titleOption.put("type","string");
-		 
-		LinkedHashMap<String,Object> labelsOption = new LinkedHashMap<>();
-		options.put("labels",labelsOption);
-		labelsOption.put("value",labels);
-		labelsOption.put("type","boolean");
-		
-		LinkedHashMap<String,Object> labelFormatterOption = new LinkedHashMap<>();
-		options.put("labelFormatter",labelFormatterOption);
-		labelFormatterOption.put("value",labelFormatter);
-		labelFormatterOption.put("type","string");
 
-		LinkedHashMap<String,Object> labelStyleOption = new LinkedHashMap<>();
-		options.put("labelStyle",labelStyleOption);
-		labelStyleOption.put("value",labelStyle);
-		labelStyleOption.put("type","string");
+		addOption(config, "title", "string", title);
+		addOption(config, "titleStyle", "string", titleStyle);
+		addOption(config, "labels", "boolean", labels);
+		addOption(config, "labelFormatter", "string", labelFormatter);
+		addOption(config, "labelStyle", "string", labelStyle);
 		
 		return config;
 	}
@@ -118,6 +100,8 @@ public class Gauge extends AbstractSignalPathModule {
 			if (MapTraversal.getProperty(options, "title.value")!=null) {
 				title = MapTraversal.getString(options, "title.value");
 			}
+			if (getOption(config, "titleStyle")!=null)
+				titleStyle = getOption(config, "titleStyle").toString();
 			if (MapTraversal.getProperty(options, "labels.value")!=null) {
 				labels = MapTraversal.getBoolean(options, "labels.value");
 			}
