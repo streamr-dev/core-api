@@ -47,9 +47,9 @@
       <plugin group='org.grails.plugins' name='cache' version='1.0.1' />
     </compile>
     <runtime>
-      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
       <plugin group='org.grails.plugins' name='resources' version='1.1.6' />
       <plugin group='org.grails.plugins' name='database-migration' version='1.2.1' />
+      <plugin group='org.grails.plugins' name='hibernate' version='2.2.0' />
       <plugin group='org.grails.plugins' name='jquery' version='1.8.3' />
     </runtime>
     <build>
