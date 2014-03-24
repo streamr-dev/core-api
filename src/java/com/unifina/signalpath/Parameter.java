@@ -91,7 +91,7 @@ public abstract class Parameter<T> extends Input<T> {
 		
  
 		if (config.containsKey("value")) {
-			T val = parseValue(config.get("value").toString());
+			T val = parseValue(config.get("value")==null ? null : config.get("value").toString());
 			
 			// If unconnected, use the value contained in JSON
 			if (!conn) {

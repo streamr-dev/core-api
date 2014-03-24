@@ -21,9 +21,13 @@ public class PassThrough extends AbstractSignalPathModule {
 		if (input.isConnected() && output.getTargets().length>0) {
 			String type = input.getSource().getTypeName();
 			
-			for (Input i : output.getTargets())
-				if (!type.equals(i.getTypeName()))
-					throw new RuntimeException("PassThrough: input is connected to type "+type+", connection to "+(i.getDisplayName()!=null ? i.getDisplayName() : i.getName())+" is of wrong type ("+i.getTypeName()+")!");
+			// TODO: For now, skip the complex situation in which two Object 
+			// endpoints are connected, for example two PassThroughs chained
+			if (!type.equals("Object")) {
+				for (Input i : output.getTargets())
+					if (!i.getTypeName().equals("Object") && !type.equals(i.getTypeName()))
+						throw new RuntimeException("PassThrough: input is connected to type "+type+", connection to "+(i.getDisplayName()!=null ? i.getDisplayName() : i.getName())+" is of wrong type ("+i.getTypeName()+")!");
+			}
 		}
 	}
 	

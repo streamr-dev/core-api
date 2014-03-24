@@ -422,6 +422,17 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 					i.setConfiguration(modConf);
 			}
 		}
+		// There may be new Parameters added since the creation of the config map.
+		// These need to receive the default value in order to be marked ready.
+		for (Input i : getInputs()) {
+			if (i instanceof Parameter) {
+				Parameter p = (Parameter) i;
+				if (!p.isConfigured()) {
+					p.setConfiguration(p.getConfiguration());
+				}
+			}
+		}
+		
 		if (config.get("inputs")!=null) {
 			for (Map modConf : (List<Map>)config.get("inputs")) {
 				Input i = getInput((String)modConf.get("name"));
