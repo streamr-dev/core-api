@@ -1,0 +1,106 @@
+package com.unifina.feed;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.util.ArrayList;
+
+import com.unifina.domain.data.FeedFile;
+import com.unifina.domain.data.Stream;
+import com.unifina.service.FeedFileService;
+import com.unifina.service.FeedFileService.StreamResponse;
+
+/**
+ * When you implement subclasses of this file, call the createTempFile(filename) to 
+ * create temporary files!
+ * @author Henri
+ *
+ */
+public abstract class AbstractFeedPreprocessor {
+
+	ArrayList<File> tempFiles = new ArrayList<>();
+	File tempDir;
+	File tempFeedFile;
+
+	public AbstractFeedPreprocessor() {
+		
+	}
+	
+	public AbstractFeedPreprocessor(File tempDir) {
+		this.tempDir = tempDir;
+	}
+	
+	public void preprocess(FeedFile feedFile, FeedFileService feedFileService) {
+		InputStream inputStream = null;
+		try {
+			StreamResponse response = feedFileService.getFeed(feedFile);
+			if (!response.getSuccess())
+				throw new FileNotFoundException("FeedFile not found: "+feedFile.getName());
+			
+			// Create temporary local directory
+			if (tempDir==null)
+				tempDir = Files.createTempDirectory(feedFile.getName()).toFile();
+			
+			if (!response.getIsFile()) {
+				// If the file is not on local machine, first copy it to temp directory to avoid long http request
+				tempFeedFile = new File(tempDir, feedFile.getName());
+
+				FileOutputStream fileOut = new FileOutputStream(tempFeedFile);
+				FileChannel fileChannel = fileOut.getChannel();
+
+				ReadableByteChannel inChannel = Channels.newChannel(response.getInputStream());
+				fileChannel.transferFrom(inChannel, 0L, Long.MAX_VALUE);
+				inChannel.close(); // closes the InputStream too
+				fileChannel.close();
+				fileOut.close();
+				inputStream = new FileInputStream(tempFeedFile);
+				// TODO: HOW DO WE KNOW IF THE FILE IS COMPRESSED OR NOT?
+			}
+			// TODO: HOW DO WE KNOW IF THE FILE IS COMPRESSED OR NOT?
+			else inputStream = response.getInputStream();
+			
+			// Preprocess the stream
+			preprocess(inputStream, feedFile.getName());
+			
+			for (File f : tempFiles)
+				feedFileService.submitPreprocessedFile(f, feedFile);
+			
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (inputStream!=null)
+				try { inputStream.close(); } catch (IOException e) {}
+			
+			// Clean up
+			for (File f : tempFiles)
+				f.delete();
+			
+			if (tempFeedFile!=null)
+				tempFeedFile.delete();
+		}
+		
+	}
+	
+	/**
+	 * Call this method from subclasses to create the preprocessed files!
+	 * @param filename
+	 * @return
+	 */
+	protected File createTempFile(String filename) {
+		File file = new File(tempDir, filename);
+		tempFiles.add(file);
+		return file;
+	}
+	
+	protected abstract void preprocess(InputStream inputStream, String name) ;
+
+	public abstract String getPreprocessedFileName(String name, Stream stream, boolean compressed);
+
+}

@@ -1,18 +1,16 @@
-package com.unifina.domain
+package com.unifina.domain.data
 
-import com.unifina.domain.data.Feed;
 
-// Rename to FeedFile or something like that
-class ItchFile {
+class FeedFile {
 
 	String name
 	
-	@Deprecated
-	String path
+//	@Deprecated
+//	String path
 	Date day
 	
-	@Deprecated
-	boolean orderBookDirectoryLoaded
+//	@Deprecated
+//	boolean orderBookDirectoryLoaded
 	
 	boolean processed
 	Feed feed

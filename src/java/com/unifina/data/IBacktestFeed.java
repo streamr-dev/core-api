@@ -8,6 +8,8 @@ import java.util.List;
  * @author Henri
  *
  */
+// TODO: remove this class completely and just use AbstractHistoricalFeed
+@Deprecated
 public interface IBacktestFeed extends IFeed {
 
 	/**
@@ -22,12 +24,11 @@ public interface IBacktestFeed extends IFeed {
 	/**
 	 * Should return a list of date pairs, where date[0] represents unit
 	 * start datetime and date[1] represents unit end datetime.
-	 * @param backtest Backtest for which the units are for.
+
+	 * @param beginDate Earliest unit start datetime than can be returned
+	 * @param endDate Latest unit end datetime that can be returned
 	 * @return
 	 */
-	public List<Date[]> getBacktestUnits(Object backtest) throws Exception;
-	
-	// beginDate and endDate should be read from Globals
-//	public void setBeginDate(Date date);
-//	public void setEndDate(Date date);
+	public List<Date[]> getUnitsBetween(Date beginDate, Date endDate) throws Exception;
+
 }

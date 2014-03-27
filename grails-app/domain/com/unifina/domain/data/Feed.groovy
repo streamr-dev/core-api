@@ -13,7 +13,7 @@ class Feed {
 	String preprocessor
 	
 	@Deprecated
-	String directory
+	String directory // use feedConfig instead
 	
 	String cacheClass
 	String cacheConfig

@@ -1,13 +1,14 @@
 package com.unifina.data;
 
 import java.util.Date;
+import java.util.Iterator;
 
 public class FeedEvent implements Comparable<FeedEvent> {
 	public Date timestamp;
 	public Object content;
 	public IEventRecipient recipient;
 	public IFeed feed;
-	public IHistoricalEventSource historicalSource;
+	public Iterator<FeedEvent> iterator;
 	
 	public long queueTicket = 0;
 	
@@ -30,6 +31,6 @@ public class FeedEvent implements Comparable<FeedEvent> {
 	
 	@Override
 	public String toString() {
-		return timestamp + " - "+"parser: "+historicalSource+", content: "+content;
+		return timestamp + " - "+"iterator: "+iterator+", content: "+content;
 	}
 }
