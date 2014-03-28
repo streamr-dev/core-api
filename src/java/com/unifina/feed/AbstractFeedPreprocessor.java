@@ -11,6 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.zip.GZIPInputStream;
 
 import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
@@ -61,10 +62,12 @@ public abstract class AbstractFeedPreprocessor {
 				fileChannel.close();
 				fileOut.close();
 				inputStream = new FileInputStream(tempFeedFile);
-				// TODO: HOW DO WE KNOW IF THE FILE IS COMPRESSED OR NOT?
 			}
-			// TODO: HOW DO WE KNOW IF THE FILE IS COMPRESSED OR NOT?
 			else inputStream = response.getInputStream();
+			
+			// Uncompress on the fly if the stream is flagged as compressed
+			if (response.getIsCompressed())
+				inputStream = new GZIPInputStream(inputStream);
 			
 			// Preprocess the stream
 			preprocess(inputStream, feedFile.getName());

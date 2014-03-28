@@ -71,7 +71,8 @@ class FeedFileService {
 		return this.getClass().getClassLoader().loadClass(feed.getPreprocessor()).newInstance()
 	}
 	
-	private String makeCacheFileName(Feed feed, Date day, String filename) {
+	private String makeCacheFileName(Feed feed, Date day, String filename, boolean compressed) {
+		filename = getCompressedName(filename, compressed)
 		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd")
 		String cacheDir = grailsApplication.config.unifina.feed.cachedir
 		String separator = System.getProperty("file.separator")
@@ -116,28 +117,31 @@ class FeedFileService {
 	}
 	
 	@CompileStatic
-	private InputStream getInputStream(Feed feed, Date day, String filename, boolean preferCompressed) {
-		// First try compressed version if requested
-		InputStream inputStream
-		
-		// Try compressed if preferred
-		if (preferCompressed) {
-			URL url = makeStreamUrl(feed, day, (filename.endsWith(".gz") ? filename : filename+".gz"))
-			InputStream is = openURLConnection(url)
-			if (is!=null)
-				return is
-		}
-		
-		// Try uncompressed
-		URL url = makeStreamUrl(feed, day, filename.replace(".gz", ""))
+	private static String getCompressedName(String filename, boolean compressed) {
+		// Append .gz to filename if requested compressed
+		if (compressed)
+			filename = (filename.endsWith(".gz") ? filename : filename+".gz")
+		else filename = filename.replace(".gz", "")
+	}
+	
+	@CompileStatic
+	private InputStream getInputStream(Feed feed, Date day, String filename, boolean compressed) {
+		filename = getCompressedName(filename, compressed)
+		URL url = makeStreamUrl(feed, day, filename)
 		return openURLConnection(url)
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {
+		// First try compressed
 		InputStream is = getInputStream(feedFile.feed, feedFile.day, feedFile.name, true)
 		if (is!=null)
-			return new StreamResponse(inputStream:is, feed:feedFile.feed, day:feedFile.getDay(), success:true, isFile:false)
-		else return new StreamResponse(success:false)
+			return new StreamResponse(inputStream:is, feed:feedFile.feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:true)
+
+		is = getInputStream(feedFile.feed, feedFile.day, feedFile.name, false)
+		if (is!=null)
+			return new StreamResponse(inputStream:is, feed:feedFile.feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:false)
+			
+		return new StreamResponse(success:false)
 	}
 	
 	StreamResponse getStream(Stream stream, Date beginDate, Date endDate, int piece) {
@@ -153,48 +157,67 @@ class FeedFileService {
 		
 		// Instantiate preprocessor and get the preprocessed file name
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(feed)
-		String streamFileName = preprocessor.getPreprocessedFileName(feedFile, stream)
+		
+		// streamFileName is the uncompressed name (without .gz suffix)
+		String streamFileName = preprocessor.getPreprocessedFileName(feedFile.getName(), stream, false)
 		
 		Boolean useCache = grailsApplication.config.unifina.feed.useCache
 		
 		if (!useCache) {
-			// First try gzipped version
+			// First try compressed version
 			InputStream is = getInputStream(feed, feedFile.day, streamFileName, true)
 			if (is!=null)
-				return new StreamResponse(inputStream:is, stream:stream, feed:feed, day:feedFile.getDay(), success:true, isFile:false)
-			else return new StreamResponse(success:false)
+				return new StreamResponse(inputStream:is, stream:stream, feed:feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:true)
+			
+			is = getInputStream(feed, feedFile.day, streamFileName, false)
+			if (is!=null)
+				return new StreamResponse(inputStream:is, stream:stream, feed:feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:false)
+		
+			return new StreamResponse(success:false)
 		}
 		else {
-			// Exists in cache?
-			String cachedFileName = makeCacheFileName(feed, feedFile.day, streamFileName)
-			File cachedFile = new File(cachedFileName)
+			// Exists in cache compressed?
+			File cachedFile = new File(makeCacheFileName(feed, feedFile.day, streamFileName, true))
 			if (cachedFile.canRead()) {
-				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true)
+				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:true)
+			}
+			// Exists in cache uncompressed?
+			cachedFile = new File(makeCacheFileName(feed, feedFile.day, streamFileName, false))
+			if (cachedFile.canRead()) {
+				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:false)
+			}			
+
+			// Try to get compressed from server
+			boolean compressed = true
+			InputStream is = getInputStream(feed, feedFile.day, streamFileName, compressed)
+			if (is==null) {
+				// Try again uncompressed
+				compressed = false
+				is = getInputStream(feed, feedFile.day, streamFileName, compressed)
+			}
+			
+			if (is!=null) {
+				// Write to disk before processing, then process from disk
+				// Keep the same compressed state
+				String cachedFileName = makeCacheFileName(feed, feedFile.day, streamFileName, compressed)
+				Path path = Paths.get(cachedFileName);
+				Files.createDirectories(path.getParent())
+
+				FileOutputStream fileOut = new FileOutputStream(cachedFile)
+				FileChannel fileChannel = fileOut.getChannel()
+
+				Channel inChannel = Channels.newChannel(is)
+				fileChannel.transferFrom(inChannel, 0L, Long.MAX_VALUE)
+				inChannel.close() // closes the InputStream too
+				fileChannel.close()
+				fileOut.close()
+
+				if (!cachedFile.canRead())
+					throw new RuntimeException("Can not read the cached file: $cachedFileName")
+				else return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:compressed)
 			}
 			else {
-				InputStream is = getInputStream(feed, feedFile.day, streamFileName, true)
-
-				if (is!=null) {
-					// Write to disk before processing, then process from disk
-					Path path = Paths.get(cachedFileName);
-					Files.createDirectories(path.getParent())
-
-					FileOutputStream fileOut = new FileOutputStream(cachedFile)
-					FileChannel fileChannel = fileOut.getChannel()
-
-					Channel inChannel = Channels.newChannel(is)
-					fileChannel.transferFrom(inChannel, 0L, Long.MAX_VALUE)
-					inChannel.close() // closes the InputStream too
-					fileChannel.close()
-					fileOut.close()
-
-					if (!cachedFile.canRead())
-						throw new RuntimeException("Can not read the cached file: $cachedFileName")
-					else return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true)
-				}
-				else {
-					return new StreamResponse(success:false)
-				}
+				return new StreamResponse(success:false)
 			}
 		}
 	}
@@ -237,6 +260,7 @@ class FeedFileService {
 		Date day
 		Boolean success
 		Boolean isFile
+		Boolean isCompressed
 		Long fileSize
 	}
 	

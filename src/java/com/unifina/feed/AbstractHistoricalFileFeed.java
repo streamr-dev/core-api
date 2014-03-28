@@ -256,6 +256,9 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 		@Override
 		public FeedEvent next() {
 			Object content = contentIterator.next();
+			if (content==null)
+				return null;
+			
 			FeedEvent fe = new FeedEvent(content, feed.getTimestamp(content, contentIterator), recipient);
 			fe.feed = feed;
 			fe.iterator = this;
