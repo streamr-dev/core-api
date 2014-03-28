@@ -11,6 +11,9 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import com.unifina.domain.data.FeedFile;
@@ -27,8 +30,12 @@ import com.unifina.service.FeedFileService.StreamResponse;
 public abstract class AbstractFeedPreprocessor {
 
 	ArrayList<File> tempFiles = new ArrayList<>();
+	ArrayList<Stream> foundStreams = new ArrayList<>();
+	Set<String> foundNames = new HashSet<>();
+	
 	File tempDir;
 	File tempFeedFile;
+	FeedFile feedFile;
 
 	public AbstractFeedPreprocessor() {
 		
@@ -38,7 +45,9 @@ public abstract class AbstractFeedPreprocessor {
 		this.tempDir = tempDir;
 	}
 	
+	// Not thread safe!
 	public void preprocess(FeedFile feedFile, FeedFileService feedFileService) {
+		this.feedFile = feedFile;
 		InputStream inputStream = null;
 		try {
 			StreamResponse response = feedFileService.getFeed(feedFile);
@@ -100,6 +109,30 @@ public abstract class AbstractFeedPreprocessor {
 		File file = new File(tempDir, filename);
 		tempFiles.add(file);
 		return file;
+	}
+	
+	/**
+	 * This method can be called from the subclass when a Stream is detected
+	 * by the preprocessor. The list of Streams can be later retrieved via
+	 * getFoundStreams().
+	 * 
+	 * The subclass should set the fields of the Stream object (the Feed is set
+	 * by the parent implementation).
+	 * @param stream
+	 */
+	protected void streamFound(Stream stream) {
+		stream.setFeed(feedFile.getFeed());
+		if (!foundNames.contains(stream.getName())) {
+			foundNames.add(stream.getName());
+			foundStreams.add(stream);
+		}
+	}
+	
+	/**
+	 * Returns the list of Streams found while preprocessing the FeedFile.
+	 */
+	public List<Stream> getFoundStreams() {
+		return foundStreams;
 	}
 	
 	protected abstract void preprocess(InputStream inputStream, String name) ;

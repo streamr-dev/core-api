@@ -65,6 +65,12 @@ class FeedFileService {
 	void preprocess(FeedFile file) {
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(file.feed)
 		preprocessor.preprocess(file)
+		// Check for new Streams
+		List<Stream> streams = preprocessor.getFoundStreams()
+		streams.each {Stream s->
+			if (!Stream.findByFeedAndLocalId(file.feed, s.localId))
+				s.save(failOnError:true)
+		}
 	}
 	
 	AbstractFeedPreprocessor getPreprocessor(Feed feed) {

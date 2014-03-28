@@ -5,14 +5,16 @@ class Stream implements Comparable {
 	String name
 	Feed feed
 	String streamConfig
+	// An id local to the Feed
+	String localId
 	
 	static constraints = {
 		streamConfig(nullable:true)
 	}
 	
 	static mapping = {
-//		id generator:'assigned'
 		name index:"name_idx"
+		localId index: 'localId_idx'
 		feed lazy:false
 	}
 	
