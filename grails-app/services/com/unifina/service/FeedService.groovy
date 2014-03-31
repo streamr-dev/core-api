@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.data.IFeed
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.AbstractFeedPreprocessor;
 import com.unifina.feed.FeedFactory
 import com.unifina.feed.FeedNotFoundException
 import com.unifina.feed.MessageRecipient
@@ -21,6 +22,12 @@ class FeedService {
 		feed.setTimeZone(TimeZone.getTimeZone(domain.timezone))
 		return feed
     }
+	
+	AbstractFeedPreprocessor instantiatePreprocessor(Feed feed) {
+		String className = feed.getPreprocessor()
+		AbstractFeedPreprocessor pp = this.getClass().getClassLoader().loadClass(className).newInstance()
+		return pp
+	}
 	
 	Stream getStream(Long id) {
 		Stream result = Stream.get(id)

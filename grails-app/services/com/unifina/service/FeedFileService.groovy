@@ -11,16 +11,21 @@ import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.zip.GZIPInputStream
 
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.feed.AbstractFeedPreprocessor
+import com.unifina.feed.file.FileStorageAdapter
+import com.unifina.feed.file.HTTPFileStorageAdapter;
 
 class FeedFileService {
 
 	GrailsApplication grailsApplication
+	
+	private static final Logger log = Logger.getLogger(FeedFileService.class)
 	
 //    boolean checkAccess(SecUser user,String dataToken,Date day,OrderBookDirectory ob) {
 //		/**
@@ -38,28 +43,14 @@ class FeedFileService {
 //		return true
 //    }
 	
-	/**
-	 * Returns the filename of the itch file corresponding to the parameters.
-	 * If the file is not found or is not readable, this method returns null. 
-	 * @param obName
-	 * @param obId
-	 * @param itchPath
-	 * @return
-	 */
-//	@Deprecated
-//	String getItchFileName(String obName, long obId, String itchPath) {
-//		String filename = ItchPreprocessor.getSplitFileName(itchPath, obName, obId)
-//		if (Files.isReadable(Paths.get(filename)))
-//			return filename
-//		else return null
-//	}
-	
-	@Deprecated
-	void writeItchToStream(String filename, OutputStream out) {
-		FileChannel fileChannel = FileChannel.open(Paths.get(filename))
-		Channel outChannel = Channels.newChannel(out)
-		fileChannel.transferTo(0, Long.MAX_VALUE, outChannel)
-		fileChannel.close()
+	FeedFile getFeedFile(Long id) {
+		FeedFile.get(id)
+	}
+
+	public void setPreprocessed(FeedFile feedFile) {
+		feedFile = feedFile.merge()
+		feedFile.processed = true
+		feedFile.save(failOnError:true)
 	}
 	
 	void preprocess(FeedFile file) {
@@ -85,41 +76,9 @@ class FeedFileService {
 		return "${cacheDir}${separator}${feed.directory}${separator}${df.format(day)}${separator}${filename}"
 	}
 	
-	private URL makeStreamUrl(Feed feed, Date day, String filename) {
+	private String getCanonicalName(Feed feed, Date day, String filename) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd")
-		String enc = "${grailsApplication.config.unifina.data.serverPrefix}${URLEncoder.encode(feed.directory,'UTF-8')}/${df.format(day)}/${URLEncoder.encode(filename,'UTF-8')}"
-		return new URL(enc);
-	}
-	
-	/**
-	 * Gets a connection from the specified URL and returns its InputStream.
-	 * If the contentType contains "gzip" returns a GZIPInputStream, otherwise
-	 * the raw InputStream.
-	 * 
-	 * If the return code is 404, returns null. For return codes other than 200 and 404
-	 * throws a RuntimeExcepion.
-	 * @param url
-	 * @return
-	 */
-	@CompileStatic
-	private InputStream openURLConnection(URL url) {
-		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection()
-		
-		// Server may return compressed or uncompressed, this is communicated in contentType
-		if (urlConnection.responseCode==200) {
-			if (urlConnection.contentType.contains("gzip"))
-				return new GZIPInputStream(urlConnection.getInputStream())
-			else return urlConnection.getInputStream()
-		}
-		else if (urlConnection.responseCode==404) {
-			// Compressed data possibly not available, return null to signal that this didn' work
-			try {
-				urlConnection.getInputStream().close()
-			} catch (Exception e) {}
-			
-			return null
-		}
-		else throw new RuntimeException("Unhandled status code from data server: $urlConnection.responseCode")
+		return "${feed.directory}/${df.format(day)}/${filename}"
 	}
 	
 	@CompileStatic
@@ -133,8 +92,15 @@ class FeedFileService {
 	@CompileStatic
 	private InputStream getInputStream(Feed feed, Date day, String filename, boolean compressed) {
 		filename = getCompressedName(filename, compressed)
-		URL url = makeStreamUrl(feed, day, filename)
-		return openURLConnection(url)
+		String canonicalName = getCanonicalName(feed, day, filename)
+		return getFileStorageAdapter().retrieve(canonicalName)
+	}
+	
+	public FileStorageAdapter getFileStorageAdapter() {
+		if (!grailsApplication.config.unifina.feed.fileStorageAdapter)
+			throw new RuntimeException("File storage adapter is not configured!")
+			
+		return this.getClass().getClassLoader().loadClass(grailsApplication.config.unifina.feed.fileStorageAdapter).newInstance(grailsApplication.config)
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {
@@ -228,8 +194,24 @@ class FeedFileService {
 		}
 	}
 	
-	public void submitPreprocessedFile(File f, FeedFile feedFile) {
-		log.warn("submitPreprocessedFile not implemented! Ignoring file: $f")
+	public void storeFile(File f, FeedFile feedFile) {
+		getFileStorageAdapter().store(f, getCanonicalName(feedFile.feed, feedFile.day, f.name))
+	}
+	
+	public void checkStreamExists(Stream example, FeedFile feedFile) {
+		// Does it exist in the DB?
+		Stream db = Stream.findByFeedAndLocalId(feedFile.feed, example.localId)
+		if (!db) {
+			log.info("New Stream found from FeedFile $feedFile: $example")
+			db = example
+		}
+		
+		if (db.firstHistoricalDay==null || db.firstHistoricalDay.after(feedFile.day))
+			db.firstHistoricalDay = feedFile.day
+		if (db.lastHistoricalDay==null || db.lastHistoricalDay.before(feedFile.day))
+			db.lastHistoricalDay = feedFile.day
+
+		db.save(failOnError:true)
 	}
 	
 	/**
@@ -269,5 +251,6 @@ class FeedFileService {
 		Boolean isCompressed
 		Long fileSize
 	}
+
 	
 }

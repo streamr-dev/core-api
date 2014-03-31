@@ -8,8 +8,13 @@ class Stream implements Comparable {
 	// An id local to the Feed
 	String localId
 	
+	Date firstHistoricalDay
+	Date lastHistoricalDay
+	
 	static constraints = {
 		streamConfig(nullable:true)
+		firstHistoricalDay(nullable:true)
+		lastHistoricalDay(nullable:true)
 	}
 	
 	static mapping = {

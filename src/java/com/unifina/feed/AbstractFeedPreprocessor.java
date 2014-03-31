@@ -45,44 +45,53 @@ public abstract class AbstractFeedPreprocessor {
 		this.tempDir = tempDir;
 	}
 	
-	// Not thread safe!
-	public void preprocess(FeedFile feedFile, FeedFileService feedFileService) {
+	/**
+	 * Processes the FeedFile from a custom InputStream.
+	 * This method is not thread safe.
+	 * @param feedFile
+	 * @param feedFileService
+	 */
+	public void preprocess(FeedFile feedFile, FeedFileService feedFileService, InputStream inputStream, boolean isCompressed, boolean saveToDiskFirst) {
 		this.feedFile = feedFile;
-		InputStream inputStream = null;
+
 		try {
-			StreamResponse response = feedFileService.getFeed(feedFile);
-			if (!response.getSuccess())
-				throw new FileNotFoundException("FeedFile not found: "+feedFile.getName());
-			
 			// Create temporary local directory
 			if (tempDir==null)
 				tempDir = Files.createTempDirectory(feedFile.getName()).toFile();
 			
-			if (!response.getIsFile()) {
+			if (saveToDiskFirst) {
 				// If the file is not on local machine, first copy it to temp directory to avoid long http request
 				tempFeedFile = new File(tempDir, feedFile.getName());
 
 				FileOutputStream fileOut = new FileOutputStream(tempFeedFile);
 				FileChannel fileChannel = fileOut.getChannel();
 
-				ReadableByteChannel inChannel = Channels.newChannel(response.getInputStream());
+				ReadableByteChannel inChannel = Channels.newChannel(inputStream);
 				fileChannel.transferFrom(inChannel, 0L, Long.MAX_VALUE);
 				inChannel.close(); // closes the InputStream too
 				fileChannel.close();
 				fileOut.close();
 				inputStream = new FileInputStream(tempFeedFile);
 			}
-			else inputStream = response.getInputStream();
 			
-			// Uncompress on the fly if the stream is flagged as compressed
-			if (response.getIsCompressed())
+			// Decompress on the fly if the source is compressed
+			if (isCompressed)
 				inputStream = new GZIPInputStream(inputStream);
 			
 			// Preprocess the stream
 			preprocess(inputStream, feedFile.getName());
 			
+			// Submit the preprocessed files
 			for (File f : tempFiles)
-				feedFileService.submitPreprocessedFile(f, feedFile);
+				feedFileService.storeFile(f, feedFile);
+			
+			// Declare the found streams
+			for (Stream s : foundStreams) {
+				feedFileService.checkStreamExists(s, feedFile);
+			}
+			
+			// Mark the file as preprocessed
+			feedFileService.setPreprocessed(feedFile);
 			
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -97,7 +106,27 @@ public abstract class AbstractFeedPreprocessor {
 			if (tempFeedFile!=null)
 				tempFeedFile.delete();
 		}
+	}
+	
+	/**
+	 * Requests the FeedFile InputStream from the data server.
+	 * This method is not thread safe.
+	 * @param feedFile
+	 * @param feedFileService
+	 */
+	public void preprocess(FeedFile feedFile, FeedFileService feedFileService) {
+		InputStream inputStream = null;
 		
+		try {
+			StreamResponse response = feedFileService.getFeed(feedFile);
+			if (!response.getSuccess())
+				throw new FileNotFoundException("FeedFile not found: "+feedFile.getName());
+			
+			inputStream = response.getInputStream();
+			preprocess(feedFile, feedFileService, inputStream, response.getIsCompressed(), !response.getIsFile());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**
@@ -133,6 +162,10 @@ public abstract class AbstractFeedPreprocessor {
 	 */
 	public List<Stream> getFoundStreams() {
 		return foundStreams;
+	}
+	
+	public List<File> getPreprocessedFiles() {
+		return tempFiles;
 	}
 	
 	protected abstract void preprocess(InputStream inputStream, String name) ;

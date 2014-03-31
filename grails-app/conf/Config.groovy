@@ -30,3 +30,5 @@ unifina.kafka.serializer.class = "kafka.serializer.StringEncoder"
 unifina.kafka.request.required.acks = "1"
 unifina.kafka.zookeeper.connect = "192.168.10.81:2181"
 unifina.kafka.group.id = "unifina"
+
+unifina.feed.fileStorageAdapter = "com.unifina.feed.file.HTTPFileStorageAdapter"
