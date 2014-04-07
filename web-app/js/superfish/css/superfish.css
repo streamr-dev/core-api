@@ -75,6 +75,7 @@
 	/* only transition out, not in */
 	-webkit-transition: none;
 	transition: none;
+	z-index: 1000;
 }
 
 /*** arrows (for all except IE7) **/
