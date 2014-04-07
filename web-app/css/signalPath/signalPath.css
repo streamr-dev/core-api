@@ -64,6 +64,10 @@ html, body {
 	z-index: 5;
 }
 
+.component.holdFocus {
+	z-index: 15;
+}
+
 .component:hover {
 	cursor:move;
 /* 	border-color: black; */
@@ -249,6 +253,10 @@ div.output .switchContainer {
 ._jsPlumb_endpoint {
 	z-index:10;
 /* 	background-color: white; */
+}
+
+._jsPlumb_endpoint.holdFocus {
+	z-index:20;
 }
 
 .connectionHolder._jsPlumb_endpoint {
