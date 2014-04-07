@@ -8,7 +8,8 @@ public class [[CLASSNAME]] extends DebugAwareModule {
 	
 	@Override
 	protected String getHeader() {
-		return "public class [[CLASSNAME]] extends DebugAwareModule {\n";
+		return "public class [[CLASSNAME]] extends DebugAwareModule {\n" +
+				"public [[CLASSNAME]]() { super(); }\n";
 	}
 
 /*

@@ -33,7 +33,6 @@ class TaskWorker extends Thread {
 	String lastKnownStatus
 	Throwable lastError
 	int workerId
-//	BacktestRunner runner
 	
 	SecUser priorityUser
 
@@ -45,8 +44,6 @@ class TaskWorker extends Thread {
 		this.grailsApplication = grailsApplication
 		taskService = (TaskService) grailsApplication.mainContext.getBean("taskService")
 		sessionFactory = (SessionFactory) grailsApplication.mainContext.getBean("sessionFactory")
-		
-//		runner = new BacktestRunner(grailsApplication)
 		
 		this.workerId = id	
 		this.priorityUser = priorityUser
@@ -145,25 +142,16 @@ class TaskWorker extends Thread {
 					stateCode = 1
 						
 					lastKnownTaskId = task.id
-//					lastKnownBacktestId = task.backtest.id
 					log.info("Running task $task.id...")
 					
 					// On successful completion of unit, mark the unit as completed
 					AbstractTask impl = taskService.getTaskInstance(task)
 					taskService.setStatus(task, impl)
 					lastKnownStatus = task.status
-					if (impl.run()) {
+					if (task.skip || impl.run()) {
 						taskService.setComplete(task)
-//						Task.withTransaction() {
-//							task = task.merge()
-//							task.complete = true
-//							task.save(flush:true)
-//							log.info("Task $task.id complete.")
-//							
-//							// Also check to see if this was the last incomplete unit in the Backtest
-//							backtestService.tryToFinishUp(task.backtest)
-//						}
-						impl.onComplete()
+						boolean groupComplete = taskService.deleteGroupIfComplete(task.taskGroupId)
+						impl.onComplete(groupComplete)
 					}
 				}
 			} catch (Exception e) {

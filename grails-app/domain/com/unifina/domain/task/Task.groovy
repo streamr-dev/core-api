@@ -7,6 +7,8 @@ class Task {
 	
 	boolean available
 	boolean complete
+	
+	Boolean skip
 		
 	String serverIp
 	SecUser user
@@ -47,6 +49,7 @@ class Task {
 		user(nullable:true)
 		status(nullable:true)
 		error(nullable:true, maxSize: 1000)
+		skip(nullable:true)
 	}
 	
 }

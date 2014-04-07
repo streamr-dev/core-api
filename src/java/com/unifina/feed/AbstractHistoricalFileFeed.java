@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
 
@@ -176,6 +177,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 				response.getInputStream().close();
 			
 			response = ((FeedFileService)globals.getGrailsApplication().getMainContext().getBean("feedFileService")).getStream(getStream(recipient), globals.getStartDate(), globals.getEndDate(), cnt);
+			
 			streams.put(recipient, response);
 			
 			// Null signals end of processing
@@ -187,7 +189,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 				if (response.getSuccess() && (response.getFileSize()==null || response.getFileSize()>0)) {
 //					BufferedReader reader;
 					InputStream inputStream;
-				    
+					
 				    // If not streaming from local file or if the file is large, don't memory map the file
 				    if (!response.getIsFile() || response.getFileSize()>10*1024*1024) {
 				    	int bufferBytes = (response.getFileSize()!=null ? Math.min(response.getFileSize().intValue(), 8196) : 8196);
@@ -204,6 +206,13 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 
 					    inputStream = new ByteArrayInputStream(buffer);				    	
 				    }
+				    
+					// Decompress on the fly if the stream is compressed
+					if (response.getIsCompressed())
+						inputStream = new GZIPInputStream(inputStream);
+					
+					// Set the final InputStream back to the response object so that the correct stream will be closed
+					response.setInputStream(inputStream);
 					return createIterator(response.getDay(), inputStream, recipient);
 				}
 				else {

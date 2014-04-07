@@ -16,7 +16,9 @@
         
 	<r:script>
 		$(document).ready(function () {
-			$('#top_banner .topnav ul').superfish({delay:400});
+			$('#top_banner .topnav ul').superfish({
+				delay:400
+			}).supposition();
 		});
 	</r:script>
 	

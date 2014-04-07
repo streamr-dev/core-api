@@ -138,7 +138,7 @@ public abstract class Chart extends AbstractSignalPathModule {
 		LinkedHashMap<String, Object> ignoreAfter = new LinkedHashMap<>();
 		optionsMap.put("ignoreAfter",ignoreAfter);
 		
-		ignoreAfter.put("value",todUtil==null ? "22:00:00" : todUtil.getEndString());
+		ignoreAfter.put("value",todUtil==null ? "23:59:59" : todUtil.getEndString());
 		ignoreAfter.put("type","string");
 		
 		return config;

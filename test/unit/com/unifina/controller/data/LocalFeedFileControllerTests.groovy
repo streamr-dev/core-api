@@ -9,8 +9,8 @@ import java.nio.file.Path
 import org.junit.*
 
 
-@TestFor(FeedFileController)
-class FeedFileControllerTests {
+@TestFor(LocalFeedFileController)
+class LocalFeedFileControllerTests {
 
 	Path tempDir
 	

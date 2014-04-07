@@ -86,9 +86,10 @@ public abstract class AbstractFeedPreprocessor {
 				feedFileService.storeFile(f, feedFile);
 			
 			// Declare the found streams
-			for (Stream s : foundStreams) {
-				feedFileService.checkStreamExists(s, feedFile);
-			}
+			feedFileService.saveOrUpdateStreams(foundStreams, feedFile);
+//			for (Stream s : foundStreams) {
+//				feedFileService.saveOrUpdateStream(s, feedFile);
+//			}
 			
 			// Mark the file as preprocessed
 			feedFileService.setPreprocessed(feedFile);

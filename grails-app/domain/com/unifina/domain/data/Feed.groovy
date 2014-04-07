@@ -5,6 +5,7 @@ import com.unifina.domain.signalpath.Module;
 class Feed {
 
 	Long id
+	String name
 	String backtestFeed // TODO: rename?
 	String realtimeFeed
 	String feedConfig
@@ -20,6 +21,8 @@ class Feed {
 	String parserClass
 	String messageSourceClass
 	String messageSourceConfig
+	String discoveryUtilClass
+	String discoveryUtilConfig
 	
 	Module module
 
@@ -32,5 +35,7 @@ class Feed {
 		feedConfig(nullable:true)
 		cacheConfig(nullable:true)
 		messageSourceConfig(nullable:true)
+		discoveryUtilClass(nullable:true)
+		discoveryUtilConfig(nullable:true)
 	}
 }

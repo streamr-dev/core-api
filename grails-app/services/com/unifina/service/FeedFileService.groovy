@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 import java.nio.channels.Channel
@@ -9,7 +10,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
-import java.util.zip.GZIPInputStream
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -17,15 +17,21 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
+import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedPreprocessor
+import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.feed.file.FileStorageAdapter
-import com.unifina.feed.file.HTTPFileStorageAdapter;
+import com.unifina.task.FeedFileCreateAndPreprocessTask
+import com.unifina.task.FeedFilePreprocessTask
+import com.unifina.utils.TimeOfDayUtil
 
 class FeedFileService {
 
 	GrailsApplication grailsApplication
 	
 	private static final Logger log = Logger.getLogger(FeedFileService.class)
+	
+	TaskService taskService
 	
 //    boolean checkAccess(SecUser user,String dataToken,Date day,OrderBookDirectory ob) {
 //		/**
@@ -46,11 +52,49 @@ class FeedFileService {
 	FeedFile getFeedFile(Long id) {
 		FeedFile.get(id)
 	}
+	
+	FeedFile getFeedFile(Date day, Feed feed) {
+		return FeedFile.findByDayAndFeed(TimeOfDayUtil.getMidnight(day), feed)
+	}
 
 	public void setPreprocessed(FeedFile feedFile) {
 		feedFile = feedFile.merge()
 		feedFile.processed = true
+		feedFile.processing = false
 		feedFile.save(failOnError:true)
+	}
+	
+	/**
+	 * Creates and saves a task to preprocess the given FeedFile
+	 * (if it is not yet processed).
+	 * @param feedFile
+	 * @return
+	 */
+	public createPreprocessTask(FeedFile feedFile) {
+		if (!feedFile.processed) {
+			Task task = new Task(FeedFilePreprocessTask.class.getName(), (FeedFilePreprocessTask.getConfig(feedFile) as JSON).toString(), "preprocess", taskService.createTaskGroupId())
+			task.save(flush:true, failOnError:true)
+			
+			feedFile.processTaskCreated = true
+			feedFile.save(flush:true, failOnError:true)
+			return task
+		}
+		else return null
+	}
+	
+	/**
+	 * Creates and saves a task to preprocess the given FeedFile
+	 * (if it is not yet processed).
+	 * @param feedFile
+	 * @return
+	 */
+	public createCreateAndPreprocessTask(URL url, Date day, Feed feed) {
+		if (!FeedFile.findByDayAndFeed(TimeOfDayUtil.getMidnight(day), feed)) {
+			Task task = new Task(FeedFileCreateAndPreprocessTask.class.getName(), (FeedFileCreateAndPreprocessTask.getConfig(url,day,feed) as JSON).toString(), "preprocess", taskService.createTaskGroupId())
+			task.save(flush:true, failOnError:true)
+			return task
+		}
+		else return null
 	}
 	
 	void preprocess(FeedFile file) {
@@ -66,6 +110,12 @@ class FeedFileService {
 	
 	AbstractFeedPreprocessor getPreprocessor(Feed feed) {
 		return this.getClass().getClassLoader().loadClass(feed.getPreprocessor()).newInstance()
+	}
+	
+	AbstractFeedFileDiscoveryUtil getDiscoveryUtil(Feed feed) {
+		if (feed.discoveryUtilClass)
+			return this.getClass().getClassLoader().loadClass(feed.discoveryUtilClass).newInstance(grailsApplication, feed, (feed.discoveryUtilConfig ? JSON.parse(feed.discoveryUtilConfig) : [:]))
+		else return null
 	}
 	
 	private String makeCacheFileName(Feed feed, Date day, String filename, boolean compressed) {
@@ -104,6 +154,7 @@ class FeedFileService {
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {
+		feedFile = feedFile.merge()
 		// First try compressed
 		InputStream is = getInputStream(feedFile.feed, feedFile.day, feedFile.name, true)
 		if (is!=null)
@@ -198,20 +249,49 @@ class FeedFileService {
 		getFileStorageAdapter().store(f, getCanonicalName(feedFile.feed, feedFile.day, f.name))
 	}
 	
-	public void checkStreamExists(Stream example, FeedFile feedFile) {
-		// Does it exist in the DB?
-		Stream db = Stream.findByFeedAndLocalId(feedFile.feed, example.localId)
-		if (!db) {
-			log.info("New Stream found from FeedFile $feedFile: $example")
-			db = example
-		}
+	// Too slow to do this one by one
+//	public void saveOrUpdateStream(Stream example, FeedFile feedFile) {
+//		// Does it exist in the DB?
+//		Stream db = Stream.findByFeedAndLocalId(feedFile.feed, example.localId)
+//		if (!db) {
+//			log.info("New Stream found from FeedFile $feedFile: $example")
+//			db = example
+//		}
+//		
+//		if (db.firstHistoricalDay==null || db.firstHistoricalDay.after(feedFile.day))
+//			db.firstHistoricalDay = feedFile.day
+//		if (db.lastHistoricalDay==null || db.lastHistoricalDay.before(feedFile.day))
+//			db.lastHistoricalDay = feedFile.day
+//
+//		db.save(failOnError:true)
+//	}
+	
+	
+	
+	public void saveOrUpdateStreams(ArrayList<Stream> foundStreams,
+			FeedFile feedFile) {
+		long time = System.currentTimeMillis()
 		
-		if (db.firstHistoricalDay==null || db.firstHistoricalDay.after(feedFile.day))
-			db.firstHistoricalDay = feedFile.day
-		if (db.lastHistoricalDay==null || db.lastHistoricalDay.before(feedFile.day))
-			db.lastHistoricalDay = feedFile.day
-
-		db.save(failOnError:true)
+		// Update the existing streams
+		List<Stream> existing = Stream.findAllByFeedAndLocalIdInList(feedFile.feed, foundStreams.collect {it.localId})
+		List existingIds = existing.collect {it.id}
+		Stream.executeUpdate("update Stream s set s.firstHistoricalDay = :day where s.id in (:existingIds) and (s.firstHistoricalDay is null OR s.firstHistoricalDay > :day)", [day:feedFile.day, existingIds:existingIds])
+		Stream.executeUpdate("update Stream s set s.lastHistoricalDay = :day where s.id in (:existingIds) and (s.lastHistoricalDay is null OR s.lastHistoricalDay < :day)", [day:feedFile.day, existingIds:existingIds])
+		
+		log.info("Checkpoint "+(System.currentTimeMillis()-time)+" ms")
+		
+		// Save the non-existing streams
+		Set existingSet = new HashSet()
+		existing.each {existingSet.add(it.localId)}
+		foundStreams.each {Stream s->
+			if (!existingSet.contains(s.localId)) {
+				log.info("New Stream found from FeedFile $feedFile: $s")
+				s.firstHistoricalDay = feedFile.day
+				s.lastHistoricalDay = feedFile.day
+				s.save(failOnError:true)
+			}
+		}
+		log.info("Total "+(System.currentTimeMillis()-time)+" ms")
 	}
 	
 	/**

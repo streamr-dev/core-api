@@ -1,5 +1,6 @@
 package com.unifina.task;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -36,8 +37,14 @@ public class FeedFilePreprocessTask extends AbstractTask {
 	}
 
 	@Override
-	public void onComplete() {
+	public void onComplete(boolean taskGroupComplete) {
 		
 	}
 
+	public static Map<String,Object> getConfig(FeedFile feedFile) {
+		Map<String,Object> map = new LinkedHashMap<>(1);
+		map.put("feedFileId", feedFile.getId());
+		return map;
+	}
+	
 }

@@ -25,31 +25,60 @@ class TaskService {
 		return t
     }
 	
+	/**
+	 * Deletes the Tasks from database if the whole group is marked complete.
+	 * @param task
+	 * @return
+	 */
+	boolean deleteGroupIfComplete(String taskGroupId) {
+		int unitCount = Task.countByTaskGroupId(taskGroupId)
+		int readyCount = Task.countByTaskGroupIdAndComplete(taskGroupId,true)
+		
+		if (unitCount==0 || readyCount < unitCount)
+			return false
+		else {
+			log.info("Task group $taskGroupId is complete!")
+
+			// Clean completed Tasks from the queue
+			Task.executeUpdate("delete Task t where t.taskGroupId = ?",[taskGroupId])
+			return true
+		}
+	}
+	
 	void setComplete(Task task) {
-		Task.withTransaction() {
+//		Task.withTransaction() {
 			task = task.attach()
 			task.refresh()
 			task.complete = true
 			task.save(flush:true)
 			log.info("Task $task.id complete.")
+//		}
+	}
+	
+	void skipTask(Task task) {
+		task = task.attach()
+		if (!task.complete) {
+			task.skip = true
+			task.available = true
+			task.save(flush:true, failOnError:true)
 		}
 	}
 	
 	void setStatus(Task task, AbstractTask taskImpl) {
-		Task.withTransaction() {
+//		Task.withTransaction() {
 			task = task.attach()
 			task.refresh()
 			task.status = taskImpl.toString()
 			task.save(flush:true)
-		}
+//		}
 	}
 	
 	void setError(Task task, Throwable throwable) {
-		Task.withTransaction() {
+//		Task.withTransaction() {
 			task = task.attach()
 			task.refresh()
 			task.error = throwable.toString()
 			task.save(flush:true)
-		}
+//		}
 	}
 }

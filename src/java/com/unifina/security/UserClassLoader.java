@@ -12,6 +12,7 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
+import java.util.HashSet;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilationUnit;
@@ -27,6 +28,8 @@ import org.codehaus.groovy.control.SourceUnit;
 public class UserClassLoader extends GroovyClassLoader {
 	
 	private static final String codeBase = "/groovy/untrusted";
+	
+	private final HashSet<String> parsedClasses = new HashSet<>();
 	
 	public UserClassLoader(ClassLoader parent) {
 		super(parent);
@@ -52,7 +55,9 @@ public class UserClassLoader extends GroovyClassLoader {
             }
         });
         gcs.setCachable(false);
-        return parseClass(gcs);
+        Class c = parseClass(gcs);
+        parsedClasses.add(c.getName());
+        return c;
     }
     
     @Override
@@ -64,6 +69,7 @@ public class UserClassLoader extends GroovyClassLoader {
         });
         return new ModuleClassCollector(loader, unit, su);
     }
+    
     
     public class ModuleClassCollector extends GroovyClassLoader.ClassCollector {
 		protected ModuleClassCollector(InnerLoader cl, CompilationUnit unit, SourceUnit su) {
@@ -149,6 +155,7 @@ public class UserClassLoader extends GroovyClassLoader {
 				throws CompilationFailedException {
 			throw new SecurityException("Parsing a class is forbidden.");
 		}
+		
     }
     
 }

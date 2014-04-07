@@ -8,9 +8,13 @@ import com.unifina.utils.Globals
 class CustomCodeWrapper extends AbstractCodeWrapper {
 	
 	String getHeader() {return """
-class [[CLASSNAME]] extends GroovySignalPathModule {
+public class [[CLASSNAME]] extends GroovySignalPathModule {
 
 	private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+
+	public [[CLASSNAME]]() {
+		super();
+	}
 
 	void debug(String s) {
 		if (parentSignalPath?.returnChannel) {

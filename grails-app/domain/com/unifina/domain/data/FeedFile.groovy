@@ -3,16 +3,12 @@ package com.unifina.domain.data
 
 class FeedFile {
 
+	Long id
 	String name
-	
-//	@Deprecated
-//	String path
 	Date day
-	
-//	@Deprecated
-//	boolean orderBookDirectoryLoaded
-	
 	boolean processed
+	Boolean processing
+	Boolean processTaskCreated
 	Feed feed
 	
 	static mapping = {
@@ -21,8 +17,9 @@ class FeedFile {
 	
     static constraints = {
 		feed(unique: ['day'])
+		processing(nullable:true)
+		processTaskCreated(nullable:true)
     }
-	
 	
 	String toString() {
 		return name

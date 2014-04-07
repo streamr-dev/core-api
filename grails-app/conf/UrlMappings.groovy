@@ -1,7 +1,8 @@
 class UrlMappings {
 
 	static mappings = {
-		"/feedFile/$feedDir/$day/$file"(controller:"feedFile",action:"index")
+		// Remember to change UnifinaCorePluginUrlMappings!!!
+		"/localFeedFile/$feedDir/$day/$file"(controller:"localFeedFile",action:"index")
 		
 		"/$controller/$action?/$id?"{
 			constraints {

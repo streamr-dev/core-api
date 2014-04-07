@@ -31,6 +31,7 @@ modules = {
 		dependsOn 'jquery'
 		resource url:'js/superfish/js/superfish.min.js'
 		resource url:'js/superfish/css/superfish.css'
+		resource url:'js/superfish/js/supposition.js'
 	}
 
 	jsplumb {

@@ -1,5 +1,7 @@
 package com.unifina.signalpath.custom
 
+import org.apache.log4j.Logger
+
 import com.unifina.security.UserClassLoader
 import com.unifina.service.ModuleService
 import com.unifina.signalpath.AbstractSignalPathModule
@@ -9,6 +11,8 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 
 	AbstractSignalPathModule instance = null
 	String code = null
+	
+	private static final Logger log = Logger.getLogger(AbstractCodeWrapper.class)
 	
 	@Override
 	public void init() {
@@ -93,6 +97,13 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 				instance = clazz.newInstance();
 				instance.init()
 
+				ClassLoader parentCl = MetaClass.class.getClassLoader()
+				log.warn("MetaClass classloader: $parentCl, parallel: "+(parentCl.getClassLoadingLock(className+"MetaClass") instanceof ClassLoader ? "false" : "true"))
+				while (parentCl.getParent()!=null) {
+					parentCl = parentCl.getParent()
+					log.warn("Parent classloader: $parentCl, parallelLockMap: "+parentCl.parallelLockMap!=null ? "exists" : "does not exist")
+				}
+				
 				instance.inputs.each {
 					addInput(it)
 				}

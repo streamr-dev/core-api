@@ -20,6 +20,6 @@ public abstract class AbstractTask {
 
 	public abstract boolean run();
 	
-	public abstract void onComplete();
+	public abstract void onComplete(boolean taskGroupComplete);
 	
 }

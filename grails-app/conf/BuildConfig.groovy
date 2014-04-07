@@ -61,5 +61,6 @@ grails.project.dependency.resolution = {
 		runtime ":resources:1.1.6"
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
+		build ':yui-war-minify:1.5'
     }
 }
