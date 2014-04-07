@@ -127,31 +127,28 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 			};
 		})(my.div,my.jsonData));
 		
-		my.div.click(function(event) {
+		my.div.on("click dragstart", function(event) {
 			$(".component.focus").each(function(i,c) {
 				var ob = $(c).data("spObject");
 				if (ob != my)
 					ob.removeFocus();
 			});
-			my.div.removeClass("hoverFocus");
-			addFocus();
+			my.addFocus(true);
 			event.stopPropagation();
 		});
 		
 		my.div.hover(function() {
 			if (!my.div.hasClass("focus")) {
-				my.div.addClass("hoverFocus");
-				addFocus();
+				my.addFocus(false);
 			}
 		}, function() {
-			if (my.div.hasClass("hoverFocus")) {
-				my.div.removeClass("hoverFocus");
-				removeFocus();
+			if (!my.div.hasClass("holdFocus")) {
+				my.removeFocus();
 			}
 		});
 		
 		// A module is focused by default when it is created
-		my.addFocus();
+		my.addFocus(true);
 		
 		// Move modules on workspace change
 		$(SignalPath).on("signalPathWorkspaceChange", function(event, workspace, oldWorkspace) {
@@ -229,12 +226,18 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	
 	function removeFocus() {
 		$(my.div).removeClass("focus");
+		$(my.div).removeClass("hoverFocus");
+		$(my.div).removeClass("holdFocus");
 		$(my.div).find(".showOnFocus").fadeTo(100,0);
 	}
 	my.removeFocus = removeFocus;
 	
-	function addFocus() {
+	function addFocus(hold) {
 		$(my.div).addClass("focus");
+		
+		if (hold) $(my.div).addClass("holdFocus");
+		else $(my.div).addClass("hoverFocus");
+		
 		$(my.div).find(".showOnFocus").fadeTo(100,1);
 	}
 	my.addFocus = addFocus;
@@ -319,6 +322,11 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		return my.hash;
 	}
 	that.getHash = getHash;
+	
+	function getModuleId() {
+		return my.jsonData.id;
+	}
+	my.getModuleId = getModuleId;
 	
 	function getDiv() {
 		if (my.div==null) {

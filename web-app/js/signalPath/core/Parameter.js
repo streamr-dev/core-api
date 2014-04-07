@@ -78,8 +78,21 @@ SignalPath.ParamRenderers = {
 				})(symbol,search,id,module);
 				
 				$(search).autocomplete({
-					// TODO: generalize to Streams
-					source: project_webroot+"signalPath/jsonGetOrderBook",
+					source: function(request, callback) {
+						$.ajax({
+							url: project_webroot+"stream/search", 
+							data: {
+								term: request.term,
+								module: module.getModuleId()
+							},
+							dataType: 'json',
+							success: callback,
+							error: function(jqXHR, textStatus, errorThrown) {
+								SignalPath.options.errorHandler({msg: errorThrown});
+								callback([]);
+							}
+						});
+					},
 					minLength: 2,
 					select: onSel
 				}).data("autocomplete")._renderItem = function(ul,item) {

@@ -31,7 +31,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		// Add to parent
 		my.parentDiv.append(div);
 
-		if (my.json.export)
+		if (my.json["export"])
 			setExport(div,my.json,true);
 		
 		// Don't create jsPlumb endpoint if my.json.canConnect is false (default: true)
@@ -64,17 +64,17 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	function setExport(iodiv,data,value) {
 		if (value) {
 			iodiv.addClass("export");
-			data.export = true;
+			data["export"] = true;
 		}
 		else {
 			iodiv.removeClass("export");
-			data.export = false;
+			data["export"] = false;
 		}
 	}
 	my.setExport = setExport;
 	
 	function toggleExport(iodiv,data) {
-		my.setExport(iodiv,data,!data.export);
+		my.setExport(iodiv,data,!data["export"]);
 	}
 	my.toggleExport = toggleExport;
 	

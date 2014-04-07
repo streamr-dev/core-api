@@ -207,6 +207,10 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		// TODO: re-enable, function must be brought up to date
 		//my.title.dblclick(autoConnectInputs);
+		
+		// A module is focused by default when it is created
+		// Repeat the command here as focusing changes z-index of endpoints
+		my.addFocus(true);
 	}
 	my.createDiv = createDiv;
 	
@@ -238,6 +242,38 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		superClose();
 	}
 	that.close = close;
+	
+	var super_addFocus = my.addFocus;
+	my.addFocus = function(hold) {
+		super_addFocus(hold);
+		
+		if (hold) {
+			$.each(getParameters(), function(i, endpoint) {
+				endpoint.jsPlumbEndpoint.addClass("holdFocus");
+			});
+			$.each(getInputs(), function(i, endpoint) {
+				endpoint.jsPlumbEndpoint.addClass("holdFocus");
+			});
+			$.each(getOutputs(), function(i, endpoint) {
+				endpoint.jsPlumbEndpoint.addClass("holdFocus");
+			});
+		}
+	}
+	
+	var super_removeFocus = my.removeFocus;
+	my.removeFocus = function() {
+		super_removeFocus();
+		
+		$.each(getParameters(), function(i, endpoint) {
+			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
+		});
+		$.each(getInputs(), function(i, endpoint) {
+			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
+		});
+		$.each(getOutputs(), function(i, endpoint) {
+			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
+		});
+	}
 	
 	function getParameters() {
 		return my.params;
