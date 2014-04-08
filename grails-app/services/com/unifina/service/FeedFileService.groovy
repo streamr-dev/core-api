@@ -268,7 +268,7 @@ class FeedFileService {
 	
 	
 	
-	public void saveOrUpdateStreams(ArrayList<Stream> foundStreams,
+	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
 		long time = System.currentTimeMillis()
 		

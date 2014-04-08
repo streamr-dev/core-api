@@ -67,7 +67,7 @@ public class LineDatabase {
 		BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.ISO_8859_1);
 		while ((l = reader.readLine())!=null) {
 			flushedSize++;
-			lengthCount += l.length()+1;
+			lengthCount += l.length()+2; // TODO: possible to have 1 byte or 2 byte line change
 			if (flushedSize % indexInterval == 0) {
 				index.add(lengthCount);
 			}
@@ -85,7 +85,7 @@ public class LineDatabase {
 	
 	public synchronized void addLine(String line) throws IOException {
 		writer.write(line);
-		writer.write("\n");
+		writer.write("\r\n");
 		linesPendingFlush++;
 		writtenLineLength += line.length()+1;
 		if ((flushedSize+linesPendingFlush) % indexInterval == 0) {

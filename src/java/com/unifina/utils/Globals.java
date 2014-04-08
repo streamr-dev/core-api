@@ -80,19 +80,23 @@ public class Globals {
 	
 	// TODO: risky to keep these here, should be out of sight of user code
 	public GrailsApplication getGrailsApplication() {
-		AccessController.checkPermission(new GrailsApplicationPermission());
+		if (System.getSecurityManager()!=null)
+			AccessController.checkPermission(new GrailsApplicationPermission());
+		
 		return grailsApplication;
 	}
 	
 	// TODO: risky to keep these here, should be out of sight of user code
 	public SecUser getUser() {
-		AccessController.checkPermission(new UserPermission());
+		if (System.getSecurityManager()!=null)
+			AccessController.checkPermission(new UserPermission());
 		return user;
 	}
 	
 	// TODO: risky to keep these here, should be out of sight of user code
 	public void setUser(SecUser user) {
-		AccessController.checkPermission(new UserPermission());
+		if (System.getSecurityManager()!=null)
+			AccessController.checkPermission(new UserPermission());
 		this.user = user;
 	}
 	

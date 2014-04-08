@@ -38,7 +38,7 @@ public class GlobalsFactory {
 				user = (SecUser) ((SpringSecurityService)grailsApplication.getMainContext().getBean("springSecurityService")).getCurrentUser();
 			} catch (Exception e) {
 				log.warn("create: springSecurityService is not defined, current user is null!");
-				return null;
+//				return null; // Commented out, this was perhaps not intended?
 			}
 			Constructor<Globals> c = clazz.getConstructor(Map.class, GrailsApplication.class, SecUser.class);
 			return c.newInstance(signalPathContext,grailsApplication,user);

@@ -29,8 +29,8 @@ import com.unifina.service.FeedFileService.StreamResponse;
  */
 public abstract class AbstractFeedPreprocessor {
 
-	ArrayList<File> tempFiles = new ArrayList<>();
-	ArrayList<Stream> foundStreams = new ArrayList<>();
+	List<File> tempFiles = new ArrayList<>();
+	List<Stream> foundStreams = new ArrayList<>();
 	Set<String> foundNames = new HashSet<>();
 	
 	File tempDir;
