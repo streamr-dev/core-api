@@ -86,6 +86,10 @@ public class MapTraversal {
 		return (Map) getProperty(map,name);
 	}
 	
+	public static List getList(Map map, String name) {
+		return (List) getProperty(map,name);
+	}
+	
 	public static Object[] getArray(Map map, String name) {
 		return (Object[]) getProperty(map,name);
 	}
