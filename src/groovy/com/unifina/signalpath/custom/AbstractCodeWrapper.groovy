@@ -97,12 +97,12 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 				instance = clazz.newInstance();
 				instance.init()
 
-				ClassLoader parentCl = MetaClass.class.getClassLoader()
-				log.warn("MetaClass classloader: $parentCl, parallel: "+(parentCl.getClassLoadingLock(className+"MetaClass") instanceof ClassLoader ? "false" : "true"))
-				while (parentCl.getParent()!=null) {
-					parentCl = parentCl.getParent()
-					log.warn("Parent classloader: $parentCl, parallelLockMap: "+parentCl.parallelLockMap!=null ? "exists" : "does not exist")
-				}
+//				ClassLoader parentCl = MetaClass.class.getClassLoader()
+//				log.warn("MetaClass classloader: $parentCl, parallel: "+(parentCl.getClassLoadingLock(className+"MetaClass") instanceof ClassLoader ? "false" : "true"))
+//				while (parentCl.getParent()!=null) {
+//					parentCl = parentCl.getParent()
+//					log.warn("Parent classloader: $parentCl, parallelLockMap: "+parentCl.parallelLockMap!=null ? "exists" : "does not exist")
+//				}
 				
 				instance.inputs.each {
 					addInput(it)
