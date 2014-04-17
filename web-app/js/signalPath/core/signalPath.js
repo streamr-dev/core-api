@@ -289,10 +289,26 @@ var SignalPath = (function () {
 	}
 	my.createModuleFromJSON = createModuleFromJSON;
 	
+	function getModules() {
+		var result = [];
+		for (var i=0;i<modules.length;i++) {
+			if (modules[i]==null)
+				continue;
+			else result.push(modules[i]);
+		}
+		return result;
+	}
+	my.getModules = getModules;
+	
+	function getModuleById(id) {
+		return modules[id];
+	}
+	my.getModuleById = getModuleById;
+	
 	function signalPathToJSON(signalPathContext) {
 		var result = {
 				workspace: getWorkspace(),
-				signalPathContext: signalPathContext,
+				signalPathContext: (signalPathContext ? signalPathContext : options.signalPathContext()),
 				signalPathData: {
 					modules: []
 				}
@@ -361,6 +377,9 @@ var SignalPath = (function () {
 	my.saveSignalPath = saveSignalPath;
 	
 	function newSignalPath() {
+		if (isRunning())
+			abort();
+		
 		if (modules) {
 			$(modules).each(function(i,mod) {
 				if (mod!=null)

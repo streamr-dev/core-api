@@ -19,10 +19,10 @@ class StreamController {
 				if (params.feed) {
 					eq("feed", Feed.load(params.feed))
 				}
-				if (params.module) {
-					createAlias( "feed", "feed" )
-					eq("feed.module", Module.load(params.module))
-				}
+//				if (params.module) {
+//					createAlias( "feed", "feed" )
+//					eq("feed.module", Module.load(params.module))
+//				}
 				like("name","%"+params.term+"%")
 				'in'("feed",allowedFeeds)
 				maxResults(10)

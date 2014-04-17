@@ -449,8 +449,10 @@ class SignalPathTagLib {
 			});
 
 			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
-				jQuery('#$id').button("enable");
-				jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
+				if (saveData.isSaved) {
+					jQuery('#$id').button("enable");
+					jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
+				}
 			});
 
 			jQuery(SignalPath).on('signalPathSave', function(event,saveData) {

@@ -302,7 +302,7 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	 * Returns an Output object
 	 */
 	function getOutput(name) {
-		return outputsByName[name];
+		return my.outputsByName[name];
 	}
 	that.getOutput = getOutput;
 	

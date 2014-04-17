@@ -361,3 +361,7 @@ div.output .switchContainer {
 .ui-pnotify-title {
 	font-weight: bold;
 }
+
+.joyride-fixed {
+	position: fixed !important;
+}
