@@ -55,7 +55,7 @@ var SignalPath = (function () {
     		notificationHandler: function(data) {
     			alert(data.msg);
     		},
-    		runUrl: "runSignalPath",
+    		runUrl: "run",
     		abortUrl: "abort",
     		atmosphereUrl: project_webroot+"atmosphere/",
     		allowRuntimeChanges: true,

@@ -26,7 +26,7 @@ public class SignalPath extends AbstractSignalPathModule {
 		}
 	};
 	
-	SignalPathParameter sp = new SignalPathParameter(this,"signalPath") {
+	SignalPathParameter sp = new SignalPathParameter(this,"streamlet") {
 		@Override
 		public Map<String,Object> getConfiguration() {
 			Map<String,Object> config = super.getConfiguration();
@@ -69,6 +69,14 @@ public class SignalPath extends AbstractSignalPathModule {
 		
 		// Backwards compatibility, TODO: remove this constructor eventually
 		initFromRepresentation(iData);
+	}
+	
+	// TODO: remove backwards compatibility eventually
+	@Override
+	public Input getInput(String name) {
+		if (name.equals("signalPath"))
+			name = "streamlet";
+		return super.getInput(name);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -318,12 +326,7 @@ public class SignalPath extends AbstractSignalPathModule {
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-//		if (config.containsKey("representation"))
-//			initFromRepresentation(config.representation)
 		if (sp.value!=null) {
-//			def spData = config.params.find { it.name=="signalPath" }
-//			sp.configuration = spData
-			
 			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())).getJSONObject("signalPathData"));
 		}
 	}

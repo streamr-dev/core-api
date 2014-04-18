@@ -1,10 +1,19 @@
 package com.unifina.signalpath.custom
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger
+import org.codehaus.groovy.control.ErrorCollector
+import org.codehaus.groovy.control.MultipleCompilationErrorsException
+import org.codehaus.groovy.syntax.SyntaxException
 
 import com.unifina.security.UserClassLoader
 import com.unifina.service.ModuleService
 import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.signalpath.ModuleException;
+import com.unifina.signalpath.ModuleExceptionMessage;
 import com.unifina.utils.Globals
 
 abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
@@ -117,11 +126,34 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 				instance.hash = hash
 				instance.parentSignalPath = parentSignalPath
 			}
+			catch (MultipleCompilationErrorsException e) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("Compilation errors:\n");
+				
+				List<ModuleExceptionMessage> msgs = new ArrayList<>();
+				ErrorCollector ec = e.getErrorCollector()
+				for (int i=0; i<ec.getErrorCount();i++) {
+					if (ec.getSyntaxError(i)!=null) {
+						SyntaxException se = ec.getSyntaxError(i)
+						
+						long line = se.getLine()-StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
+						
+						sb.append("Line ");
+						sb.append(Long.toString(line));
+						sb.append(": ");
+						sb.append(se.getMessage());
+						sb.append("\n");
+						
+						CompilationErrorMessage msg = new CompilationErrorMessage();
+						msg.addError(line, se.getMessage());
+						msgs.add(new ModuleExceptionMessage(hash,msg));
+					}
+				}
+				throw new ModuleException(sb.toString(),null,msgs);
+			}
 			catch (Exception e) {
 				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found
-//				if (!globals.target.save) {
-					throw e
-//				}
+				throw e
 			}
 		}
 	}

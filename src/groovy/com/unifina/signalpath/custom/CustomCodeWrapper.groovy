@@ -32,8 +32,10 @@ public class [[CLASSNAME]] extends GroovySignalPathModule {
 
 """ }
 	
-	String getDefaultCode() {return """
-// Define inputs and outputs here
+	String getDefaultCode() {return """// Define inputs and outputs here
+// def param = new IntegerParameter(this, "param", 0)
+// def input = new TimeSeriesInput(this, "in")
+// def output = new TimeSeriesOutput(this, "out")
 
 void initialize() {
 	// Initialize local variables

@@ -11,7 +11,7 @@ import com.unifina.domain.signalpath.SavedSignalPath;
 class SignalPathParameter extends Parameter<SavedSignalPath> {
 	
 	public SignalPathParameter(AbstractSignalPathModule owner, String name) {
-		super(owner, name, null, "SignalPath");
+		super(owner, name, null, "Streamlet");
 	}
 	
 	def getCriteria() {

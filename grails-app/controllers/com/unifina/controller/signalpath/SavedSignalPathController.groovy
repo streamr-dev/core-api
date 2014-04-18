@@ -37,7 +37,7 @@ class SavedSignalPathController {
 		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
 			result.error = true
-			result.message = "Failed to load properly! There may be a problem with this SignalPath. The error was: $e.message"
+			result.message = "Failed to load properly! There may be a problem with this Streamlet. The error was: $e.message"
 		} finally {
 			result.saveData = createSaveData(ssp)
 			render result as JSON
@@ -78,7 +78,7 @@ class SavedSignalPathController {
 			render res as JSON
 		} catch (Exception e) {
 			e = GrailsUtil.deepSanitize(e)
-			Map r = [error:true, message:"SIGNALPATH NOT SAVED:\n"+e.message]
+			Map r = [error:true, message:"STREAMLET NOT SAVED:\n"+e.message]
 			render r as JSON
 		}
 		finally {
