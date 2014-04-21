@@ -3,11 +3,11 @@ package com.unifina.math
 import grails.test.*
 
 class WTFilterTests extends GrailsUnitTestCase {
-    protected void setUp() {
+    void setUp() {
         super.setUp()
     }
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

@@ -1,6 +1,7 @@
 package com.unifina.utils;
 
 import grails.plugins.springsecurity.SpringSecurityService;
+import grails.util.Environment;
 
 import java.lang.reflect.Constructor;
 import java.util.Map;
@@ -37,8 +38,10 @@ public class GlobalsFactory {
 			try {
 				user = (SecUser) ((SpringSecurityService)grailsApplication.getMainContext().getBean("springSecurityService")).getCurrentUser();
 			} catch (Exception e) {
-				log.warn("create: springSecurityService is not defined, current user is null!");
-//				return null; // Commented out, this was perhaps not intended?
+				if (Environment.getCurrent()!=Environment.TEST) {
+					log.warn("create: springSecurityService is not defined, current user is null!");
+	//				return null; // Commented out, this was perhaps not intended?
+				}
 			}
 			Constructor<Globals> c = clazz.getConstructor(Map.class, GrailsApplication.class, SecUser.class);
 			return c.newInstance(signalPathContext,grailsApplication,user);

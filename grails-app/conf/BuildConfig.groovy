@@ -10,6 +10,8 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
+//grails.project.dependency.resolver = "maven" // or ivy
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -17,7 +19,7 @@ grails.project.dependency.resolution = {
         // excludes 'ehcache'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
-    legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
+//    legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
     repositories {
         grailsCentral()
         // uncomment the below to enable remote dependency resolution
@@ -44,16 +46,19 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build(":tomcat:$grailsVersion",
-              ":release:2.2.0",
-              ":rest-client-builder:1.0.3") {
+		// plugins for the build system only
+		
+        build(":tomcat:7.0.42",
+			 ":release:3.0.1"//,
+              /*":rest-client-builder:2.0.1"*/) {
             export = false
         }
-		
+
+	    // plugins needed at runtime but not for compilation
+		runtime ':hibernate:3.6.10.2'
+			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
 		compile ":cache-headers:1.1.5"
-			  
-		runtime ":hibernate:$grailsVersion"
 			  
 		runtime ":spring-security-core:1.2.7"
 		runtime ":jquery:1.8.3"
