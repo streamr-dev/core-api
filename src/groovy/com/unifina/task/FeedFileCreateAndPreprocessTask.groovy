@@ -53,38 +53,26 @@ class FeedFileCreateAndPreprocessTask extends AbstractTask {
 			return false
 		}
 		
-		// If the FeedFile entry already exists, check that the file really is accessible
-		StreamResponse response = null
+		// If the FeedFile entry already exists, delete it
 		if (feedFile) {
-			response = feedFileService.getFeed(feedFile);
+			log.info("Unprocessed FeedFile already exists. Deleting it and creating a new entry...")
+			feedFile.delete()
 		}
 		
-		if (feedFile && response.success) {
-			log.warn("FeedFile already exists: $feedFile. NOT downloading from $url")
-			preprocessor.preprocess(feedFile, feedFileService)
-		}
-		else {
-			if (!feedFile) {
-				FeedFile.withTransaction {
-					// The FeedFile needs to be created
-					feedFile = new FeedFile()
-					feedFile.name = url.toString().substring(url.toString().lastIndexOf("/")+1)
-					feedFile.day = day
-					feedFile.processed = false
-					feedFile.processing = true
-					feedFile.processTaskCreated = true
-					feedFile.feed = feed
-					feedFile.save(flush:true, failOnError:true)
-				}
-			}
-			
-			// Open the URL connection and preprocess on the fly
-			URLConnection urlConnection = url.openConnection();
-			preprocessor.preprocess(feedFile, feedFileService, urlConnection.getInputStream(), url.toString().endsWith(".gz"), false);
+		FeedFile.withTransaction {
+			feedFile = new FeedFile()
+			feedFile.name = url.toString().substring(url.toString().lastIndexOf("/")+1)
+			feedFile.day = day
+			feedFile.processed = false
+			feedFile.processing = true
+			feedFile.processTaskCreated = true
+			feedFile.feed = feed
+			feedFile.save(flush:true, failOnError:true)
 		}
 		
-		if (response?.inputStream)
-			response.inputStream.close()
+		// Open the URL connection and preprocess on the fly
+		URLConnection urlConnection = url.openConnection();
+		preprocessor.preprocess(feedFile, feedFileService, urlConnection.getInputStream(), url.toString().endsWith(".gz"), false);
 			
 		return true;
 	}

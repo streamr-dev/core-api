@@ -154,7 +154,7 @@ class FeedFileService {
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {
-		feedFile = feedFile.merge()
+		feedFile = FeedFile.get(feedFile.id)
 		// First try compressed
 		InputStream is = getInputStream(feedFile.feed, feedFile.day, feedFile.name, true)
 		if (is!=null)
@@ -246,6 +246,7 @@ class FeedFileService {
 	}
 	
 	public void storeFile(File f, FeedFile feedFile) {
+		feedFile = FeedFile.get(feedFile.id)
 		getFileStorageAdapter().store(f, getCanonicalName(feedFile.feed, feedFile.day, f.name))
 	}
 	
@@ -271,6 +272,8 @@ class FeedFileService {
 	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
 		long time = System.currentTimeMillis()
+		
+		feedFile = FeedFile.get(feedFile.id)
 		
 		// Update the existing streams
 		List<Stream> existing = Stream.findAllByFeedAndLocalIdInList(feedFile.feed, foundStreams.collect {it.localId})

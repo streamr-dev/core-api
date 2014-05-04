@@ -67,7 +67,7 @@ public class HTTPFileStorageAdapter extends FileStorageAdapter {
 	}
 	
 	@Override
-	public InputStream retrieve(String canonicalPath) throws IOException {
+	protected InputStream tryRetrieve(String canonicalPath) throws IOException {
 		URL url = makeURL(canonicalPath);
 //		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 		
@@ -97,7 +97,7 @@ public class HTTPFileStorageAdapter extends FileStorageAdapter {
 	}
 
 	@Override
-	public void store(File file, String canonicalPath) throws IOException {
+	protected void tryStore(File file, String canonicalPath) throws IOException {
 		URL url = makeURL(canonicalPath);
 		
 		CloseableHttpClient client = null;
