@@ -65,6 +65,7 @@ class FeedFileCreateAndPreprocessTask extends AbstractTask {
 			
 			feedFile.beginDate = remoteFile.getBeginDate()
 			feedFile.endDate = remoteFile.getEndDate()
+			// TODO: remove deprecated
 			feedFile.day = remoteFile.getBeginDate()
 			
 			feedFile.processed = false
