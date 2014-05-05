@@ -7,12 +7,14 @@ class Stream implements Comparable {
 	String streamConfig
 	// An id local to the Feed
 	String localId
+	String description
 	
 	Date firstHistoricalDay
 	Date lastHistoricalDay
 	
 	static constraints = {
 		streamConfig(nullable:true)
+		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
 	}
