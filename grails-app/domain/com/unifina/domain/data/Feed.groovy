@@ -13,8 +13,7 @@ class Feed {
 	String timezone
 	String preprocessor
 	
-	@Deprecated
-	String directory // use feedConfig instead
+	String directory
 	
 	String cacheClass
 	String cacheConfig

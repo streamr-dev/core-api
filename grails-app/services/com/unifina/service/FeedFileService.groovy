@@ -21,6 +21,7 @@ import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedPreprocessor
 import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.feed.file.FileStorageAdapter
+import com.unifina.feed.file.RemoteFeedFile
 import com.unifina.task.FeedFileCreateAndPreprocessTask
 import com.unifina.task.FeedFilePreprocessTask
 import com.unifina.utils.TimeOfDayUtil
@@ -53,9 +54,18 @@ class FeedFileService {
 		FeedFile.get(id)
 	}
 	
-	FeedFile getFeedFile(Date day, Feed feed) {
-		return FeedFile.findByDayAndFeed(TimeOfDayUtil.getMidnight(day), feed)
+	FeedFile getFeedFile(RemoteFeedFile file) {
+		return FeedFile.withCriteria(uniqueResult:true) {
+			eq("feed",file.getFeed())
+			eq("beginDate",file.getBeginDate())
+			eq("endDate",file.getEndDate())
+			eq("name",file.getName())
+		}
 	}
+	
+//	FeedFile getFeedFile(Date day, Feed feed) {
+//		return FeedFile.findByDayAndFeed(TimeOfDayUtil.getMidnight(day), feed)
+//	}
 
 	public void setPreprocessed(FeedFile feedFile) {
 		feedFile = feedFile.merge()
@@ -85,12 +95,12 @@ class FeedFileService {
 	/**
 	 * Creates and saves a task to preprocess the given FeedFile
 	 * (if it is not yet processed).
-	 * @param feedFile
+	 * @param file
 	 * @return
 	 */
-	public createCreateAndPreprocessTask(URL url, Date day, Feed feed) {
-		if (!FeedFile.findByDayAndFeed(TimeOfDayUtil.getMidnight(day), feed)) {
-			Task task = new Task(FeedFileCreateAndPreprocessTask.class.getName(), (FeedFileCreateAndPreprocessTask.getConfig(url,day,feed) as JSON).toString(), "preprocess", taskService.createTaskGroupId())
+	public createCreateAndPreprocessTask(RemoteFeedFile file) {
+		if (!getFeedFile(file)) {
+			Task task = new Task(FeedFileCreateAndPreprocessTask.class.getName(), (file.getConfig() as JSON).toString(), "preprocess", taskService.createTaskGroupId())
 			task.save(flush:true, failOnError:true)
 			return task
 		}
@@ -310,16 +320,19 @@ class FeedFileService {
 		
 		List<FeedFile> files = c {
 //			and {
-				between("day",beginDate,endDate)
-//				'in'("feed",feeds)
+				or {
+					between("beginDate",beginDate,endDate)
+					between("endDate",beginDate,endDate)
+				}
+//				'in'("feed",feeds) // FIXME: why doesn't this work?
 //			}
 			order("day","asc")
 		} 
 		
-		List result = files.collect {
+		List result = files.collect {FeedFile ff->
 			Date[] d = new Date[2]
-			d[0] = it.day
-			d[1] = new Date(it.day.time + 24*60*60*1000 - 1)
+			d[0] = ff.beginDate
+			d[1] = ff.endDate
 			return d
 		}
 	}

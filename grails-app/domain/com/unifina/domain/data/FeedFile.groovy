@@ -5,7 +5,10 @@ class FeedFile {
 
 	Long id
 	String name
+	@Deprecated 
 	Date day
+	Date beginDate
+	Date endDate
 	boolean processed
 	Boolean processing
 	Boolean processTaskCreated

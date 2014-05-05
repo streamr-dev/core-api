@@ -1,7 +1,5 @@
 package com.unifina.feed.file;
 
-import java.net.URL;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,12 +24,12 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	
 	public int discover() {
 		connect();
-		List<Date> days = discoverDays();
+		List<RemoteFeedFile> files = discoverFiles();
 		int counter = 0;
-		for (Date day : days) {
-			if (feedFileService.getFeedFile(day, feed)==null) {
-				// New day found!
-				handleNewDay(day);
+		for (RemoteFeedFile file : files) {
+			if (feedFileService.getFeedFile(file)==null) {
+				// New file found!
+				handleNewFile(file);
 				counter++;
 			}
 		}
@@ -39,13 +37,12 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 		return counter;
 	}
 	
-	protected void handleNewDay(Date day) {
-		feedFileService.createCreateAndPreprocessTask(getURL(day), day, feed);
+	protected void handleNewFile(RemoteFeedFile file) {
+		feedFileService.createCreateAndPreprocessTask(file);
 	}
 
 	protected abstract void connect();
-	protected abstract List<Date> discoverDays();
-	protected abstract URL getURL(Date day);
+	protected abstract List<RemoteFeedFile> discoverFiles();
+//	protected abstract URL getURL(Date day);
 	protected abstract void disconnect();
-	
 }
