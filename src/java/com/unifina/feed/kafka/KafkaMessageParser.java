@@ -2,21 +2,22 @@ package com.unifina.feed.kafka;
 
 import grails.converters.JSON;
 
+import java.util.Date;
 import java.util.Map;
 
-import kafka.serializer.StringDecoder;
-
 import com.unifina.feed.MessageParser;
+import com.unifina.kafkaclient.UnifinaKafkaMessage;
 
-public class KafkaMessageParser implements MessageParser<RawKafkaMessage, KafkaMessage> {
-
-	StringDecoder dec = new StringDecoder(null);
+public class KafkaMessageParser implements MessageParser<UnifinaKafkaMessage, KafkaMessage> {
 	
 	@Override
-	public KafkaMessage parse(RawKafkaMessage raw) {
-		String s = dec.fromBytes(raw.content);
-		Map json = (Map) JSON.parse(s);
-		return new KafkaMessage(raw.topic, raw.receiveTime, raw.receiveTime, json);
+	public KafkaMessage parse(UnifinaKafkaMessage raw) {
+		if (raw.getContentType()==UnifinaKafkaMessage.CONTENT_TYPE_JSON) {
+			String s = raw.toString();
+			Map json = (Map) JSON.parse(s);
+			return new KafkaMessage(raw.getChannel(), new Date(raw.getTimestamp()), new Date(), json);
+		}
+		else throw new RuntimeException("Unknown content type: "+raw.getContentType());
 	}
 
 }

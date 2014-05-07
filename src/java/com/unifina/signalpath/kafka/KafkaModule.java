@@ -13,6 +13,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.StreamParameter;
 import com.unifina.signalpath.StringOutput;
+import com.unifina.signalpath.TimeSeriesOutput;
 
 public class KafkaModule extends AbstractSignalPathModule implements IRequireFeed {
 
@@ -48,9 +49,16 @@ public class KafkaModule extends AbstractSignalPathModule implements IRequireFee
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
+			
 			// TODO: add other types
-			if (type.equalsIgnoreCase("string")) {
+			if (type.equalsIgnoreCase("double")) {
+				addOutput(new TimeSeriesOutput(this,name));
+			}
+			else if (type.equalsIgnoreCase("string")) {
 				addOutput(new StringOutput(this,name));
+			}
+			else if (type.equalsIgnoreCase("boolean")) {
+				
 			}
 		}
 	}

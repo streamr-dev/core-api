@@ -8,26 +8,29 @@ import kafka.producer.ProducerConfig
 
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
+import com.unifina.kafkaclient.UnifinaKafkaMessage;
+import com.unifina.kafkaclient.UnifinaKafkaProducer
+
 @CompileStatic
 class KafkaService {
 
-	Producer producer = null
+	UnifinaKafkaProducer producer = null
 	GrailsApplication grailsApplication
 	
-    void sendMessage(String channelId, Object key, String message) {
+    void sendMessage(String channelId, Object key, String message, boolean isJson=true) {
 		if (producer == null) {
-			kafka.serializer.DefaultEncoder
 			Properties props = ((ConfigObject)grailsApplication.config["unifina"]["kafka"]).toProperties()
 			ProducerConfig producerConfig = new ProducerConfig(props)
-			producer = new Producer<String,String>(producerConfig)
+			producer = new UnifinaKafkaProducer(props)
 		}
 
-		KeyedMessage data = new KeyedMessage(channelId, key, message);
-		producer.send(data);
+		if (isJson)
+			producer.sendJSON(channelId, key.toString(), System.currentTimeMillis(), message)
+		else producer.sendString(channelId, key.toString(), System.currentTimeMillis(), message)
     }
 	
 	void sendMessage(String channelId, Object key, Map message) {
 		String str = (message as JSON).toString();
-		sendMessage(channelId, key, str);
+		sendMessage(channelId, key, str, true);
 	}
 }

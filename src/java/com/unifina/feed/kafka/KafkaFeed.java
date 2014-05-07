@@ -7,10 +7,11 @@ import scala.actors.threadpool.Arrays;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.feed.AbstractFeedProxy;
+import com.unifina.kafkaclient.UnifinaKafkaMessage;
 import com.unifina.signalpath.kafka.KafkaModule;
 import com.unifina.utils.Globals;
 
-public class KafkaFeed extends AbstractFeedProxy<RawKafkaMessage, KafkaMessage> {
+public class KafkaFeed extends AbstractFeedProxy<UnifinaKafkaMessage, KafkaMessage> {
 	
 	public KafkaFeed(Globals globals) {
 		super(globals);
