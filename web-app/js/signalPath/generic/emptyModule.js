@@ -214,6 +214,18 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 	}
 	my.loadPosition = loadPosition;
 	
+	function setLayoutData(layout) {
+		my.jsonData.layout = layout;
+		my.loadPosition(SignalPath.getWorkspace(),false);
+	}
+	that.setLayoutData = setLayoutData;
+	
+	function getLayoutData() {
+		my.writePosition(SignalPath.getWorkspace());
+		return my.jsonData.layout;
+	}
+	that.getLayoutData = getLayoutData;
+	
 	function initResizable(options) {
 		var defaultOptions = {
 			helper: "chart-resize-helper",

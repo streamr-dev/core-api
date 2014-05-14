@@ -8,6 +8,8 @@ import com.unifina.service.FeedService;
 // This class can also receive Strings for backwards compatibility 
 public class StreamParameter extends Parameter<Stream> {
 	
+	private boolean checkModuleId = false;
+	
 	public StreamParameter(AbstractSignalPathModule owner, String name) {
 		super(owner,name,null,"Stream");
 	}
@@ -42,6 +44,10 @@ public class StreamParameter extends Parameter<Stream> {
 			config.put("value",value.getId());
 			config.put("streamName", value.getName());
 			config.put("feed",value.getFeed().getId());
+			if (checkModuleId) {
+				config.put("checkModuleId",true);
+//				config.put("moduleId", value.getFeed().getModule().getId());
+			}
 		}
 		return config;
 	}
@@ -60,6 +66,19 @@ public class StreamParameter extends Parameter<Stream> {
 		} catch (NumberFormatException e) {}
 		
 		return fs.getStream(s);
+	}
+
+	public boolean getCheckModuleId() {
+		return checkModuleId;
+	}
+
+	/**
+	 * Warns in the UI if such a stream is selected that the current module is
+	 * not the implementing module for that stream. Set this to true on source modules.
+	 * @param checkModuleId
+	 */
+	public void setCheckModuleId(boolean checkModuleId) {
+		this.checkModuleId = checkModuleId;
 	}
 	
 }

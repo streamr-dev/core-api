@@ -14,6 +14,59 @@ class SignalPathTagLib {
 	}
 
 	/**
+	 * Renders a stream search element.
+	 *
+	 * @attr id REQUIRED id and name of the input
+	 * @attr controller defaults to "stream"
+	 * @attr action defaults to "search"
+	 */
+	def streamSearch = {attrs, body->
+		def id = attrs.id
+
+		String url = g.createLink(controller:(attrs.controller ?: "stream"), action:(attrs.action ?: "search"))
+
+		out << "<input type='text' name='$id' id='$id'/>"
+		
+		writeScriptHeader(out)
+		def str = """
+			\$('#$id').autocomplete({
+				source: function(request, callback) {
+					\$.ajax({
+						url: "$url", 
+						data: {
+							term: request.term
+						},
+						dataType: 'json',
+						success: callback,
+						error: function(jqXHR, textStatus, errorThrown) {
+							SignalPath.options.errorHandler({msg: errorThrown});
+							callback([]);
+						}
+					});
+				},
+				minLength: 1,
+				select: function(event,ui) {
+					if (ui.item) {
+						SignalPath.addModule(ui.item.module,{params:[{name:"stream", value:ui.item.id}]});
+						\$('#$id').val("");
+					}
+					else {
+						// Nothing selected
+					}
+				}
+			}).data("autocomplete")._renderItem = function(ul,item) {
+				return \$("<li></li>")
+					.data("item.autocomplete",item)
+					.append("<a>"+item.name+"</a>")
+					.appendTo(ul);
+			};
+		 """
+
+		out << str
+		writeScriptFooter(out)
+	}
+	
+	/**
 	 * Renders a module search element.
 	 *
 	 * @attr id REQUIRED id and name of the input

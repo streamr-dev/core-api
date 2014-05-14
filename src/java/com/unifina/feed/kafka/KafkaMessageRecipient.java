@@ -3,6 +3,7 @@ package com.unifina.feed.kafka;
 import java.util.Map;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractEventRecipient;
 import com.unifina.signalpath.Output;
 import com.unifina.signalpath.kafka.KafkaModule;
@@ -10,8 +11,13 @@ import com.unifina.utils.Globals;
 
 public class KafkaMessageRecipient extends AbstractEventRecipient<KafkaModule> {
 
-	public KafkaMessageRecipient(Globals globals) {
+	private Stream stream;
+	private String topic;
+
+	public KafkaMessageRecipient(Globals globals, Stream stream, String topic) {
 		super(globals);
+		this.stream = stream;
+		this.topic = topic;
 	}
 
 	@Override
@@ -25,6 +31,14 @@ public class KafkaMessageRecipient extends AbstractEventRecipient<KafkaModule> {
 					o.send(msg.get(o.getName()));
 			}
 		}
+	}
+
+	public Stream getStream() {
+		return stream;
+	}
+	
+	public String getTopic() {
+		return topic;
 	}
 
 }

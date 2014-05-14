@@ -533,7 +533,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 				for (var i=0;i<chart.series.length;i++) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
 //					chart.series[d.s].addPoint({x:maxTime+1, y:null},false,false,false);
-					chart.series[d.s].addPoint([maxTime01, null],false,false,false);
+					chart.series[d.s].addPoint([maxTime+1, null],false,false,false);
 				}
 			}
 		}

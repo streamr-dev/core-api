@@ -217,7 +217,21 @@ var SignalPath = (function () {
 		return (saveData.isSaved ? saveData : null);
 	}
 	
-	function addModule(id,configuration) { 
+	function replaceModule(module,id,configuration) {
+		addModule(id,configuration,function(newModule) {
+			var hash = newModule.getHash();
+			modules[hash] = null;
+			
+			newModule.setLayoutData(module.getLayoutData());
+			// TODO: replace connections
+			module.close();
+			modules[module.getHash()] = newModule;
+			newModule.redraw();
+		});
+	}
+	my.replaceModule = replaceModule;
+	
+	function addModule(id,configuration,callback) { 
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',
@@ -227,8 +241,10 @@ var SignalPath = (function () {
 			success: function(data) {
 				if (!data.error) {
 					jsPlumb.setSuspendDrawing(true);
-					createModuleFromJSON(data);
+					var module = createModuleFromJSON(data);
 					jsPlumb.setSuspendDrawing(false,true);
+					if (callback)
+						callback(module);
 				}
 				else {
 					options.errorHandler({msg:data.message});

@@ -40,7 +40,8 @@ public class KafkaFeed extends AbstractFeedProxy<UnifinaKafkaMessage, KafkaMessa
 
 	@Override
 	protected IEventRecipient createEventRecipient(Object subscriber) {
-		return new KafkaMessageRecipient(globals);
+		KafkaModule m = (KafkaModule)subscriber;
+		return new KafkaMessageRecipient(globals,m.getStream(),m.getTopic());
 	}
 
 }

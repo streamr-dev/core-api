@@ -57,17 +57,27 @@ SignalPath.ParamRenderers = {
 					}
 				})(symbol,search));
 					
-				var onSel = (function(sym,sch,id,mod) {
+				var onSel = (function(sym,sch,id,mod,d) {
 					return function(event,ui) {
 						if (ui.item) {
-							$(id).val(ui.item.id);
-							$(sym).find("a").html(ui.item.name);
-
-							if (mod!=null)
-								SignalPath.updateModule(mod);
+							// If the current module corresponds to the selected feed module and the new one
+							// does not, the module needs to be replaced
+							if (d.checkModuleId && mod.getModuleId() != ui.item.module) {
+								if (confirm("This stream is implemented by a different module. Replace current module? This will break current connections.")) {
+									SignalPath.replaceModule(mod, ui.item.module,{params:[{name:"stream", value:ui.item.id}]});
+								}
+							}
+							// Handle same module implementation
 							else {
-								$(sch).hide();
-								$(sym).show();
+								$(id).val(ui.item.id);
+								$(sym).find("a").html(ui.item.name);
+	
+								if (mod!=null)
+									SignalPath.updateModule(mod);
+								else {
+									$(sch).hide();
+									$(sym).show();
+								}
 							}
 						}
 						else {
@@ -75,7 +85,7 @@ SignalPath.ParamRenderers = {
 							$(sym).show();
 						}
 					}
-				})(symbol,search,id,module);
+				})(symbol,search,id,module,data);
 				
 				$(search).autocomplete({
 					source: function(request, callback) {
@@ -83,7 +93,7 @@ SignalPath.ParamRenderers = {
 							url: project_webroot+"stream/search", 
 							data: {
 								term: request.term,
-								module: module.getModuleId()
+//								module: module.getModuleId()
 							},
 							dataType: 'json',
 							success: callback,

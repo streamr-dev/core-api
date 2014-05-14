@@ -54,18 +54,18 @@ class FeedFileService {
 		FeedFile.get(id)
 	}
 	
-	FeedFile getFeedFile(RemoteFeedFile file) {
+	FeedFile getFeedFile(Feed feed, Date beginDate, Date endDate, String name) {
 		return FeedFile.withCriteria(uniqueResult:true) {
-			eq("feed",file.getFeed())
-			eq("beginDate",file.getBeginDate())
-			eq("endDate",file.getEndDate())
-			eq("name",file.getName())
+			eq("feed",feed)
+			eq("beginDate",beginDate)
+			eq("endDate",endDate)
+			eq("name",name)
 		}
 	}
 	
-//	FeedFile getFeedFile(Date day, Feed feed) {
-//		return FeedFile.findByDayAndFeed(TimeOfDayUtil.getMidnight(day), feed)
-//	}
+	FeedFile getFeedFile(RemoteFeedFile file) {
+		return getFeedFile(file.feed, file.beginDate, file.endDate, file.name)
+	}
 
 	public void setPreprocessed(FeedFile feedFile) {
 		feedFile = feedFile.merge()
@@ -119,7 +119,9 @@ class FeedFileService {
 	}
 	
 	AbstractFeedPreprocessor getPreprocessor(Feed feed) {
-		return this.getClass().getClassLoader().loadClass(feed.getPreprocessor()).newInstance()
+		if (feed.getPreprocessor())
+			return this.getClass().getClassLoader().loadClass(feed.getPreprocessor()).newInstance()
+		else return null
 	}
 	
 	AbstractFeedFileDiscoveryUtil getDiscoveryUtil(Feed feed) {
@@ -192,7 +194,7 @@ class FeedFileService {
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(feed)
 		
 		// streamFileName is the uncompressed name (without .gz suffix)
-		String streamFileName = preprocessor.getPreprocessedFileName(feedFile.getName(), stream, false)
+		String streamFileName = (preprocessor ? preprocessor.getPreprocessedFileName(feedFile.getName(), stream, false) : feedFile.getName())
 		
 		Boolean useCache = grailsApplication.config.unifina.feed.useCache
 		

@@ -17,12 +17,13 @@ import com.unifina.signalpath.TimeSeriesOutput;
 
 public class KafkaModule extends AbstractSignalPathModule implements IRequireFeed {
 
-	StreamParameter topic = new StreamParameter(this,"topic");
-	JSONObject kafkaConfig = null;
+	StreamParameter topic = new StreamParameter(this,"stream");
+	JSONObject streamConfig = null;
 	
 	@Override
 	public void init() {
 		addInput(topic);
+		topic.setCheckModuleId(true);
 	}
 
 	@Override
@@ -42,9 +43,9 @@ public class KafkaModule extends AbstractSignalPathModule implements IRequireFee
 		Stream stream = topic.value;
 		if (stream.getStreamConfig()==null)
 			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
-		kafkaConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
+		streamConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
 
-		JSONArray fields = kafkaConfig.getJSONArray("fields");
+		JSONArray fields = streamConfig.getJSONArray("fields");
 		for (Object o : fields) {
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
@@ -63,8 +64,12 @@ public class KafkaModule extends AbstractSignalPathModule implements IRequireFee
 		}
 	}
 	
+	public Stream getStream() {
+		return topic.getValue();
+	}
+	
 	public String getTopic() {
-		return kafkaConfig.get("topic").toString();
+		return streamConfig.get("topic").toString();
 	}
 
 	@Override
