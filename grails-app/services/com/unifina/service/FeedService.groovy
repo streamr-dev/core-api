@@ -12,13 +12,15 @@ import com.unifina.utils.Globals
 
 class FeedService {
 
+	def grailsApplication
+	
 	String getFeedClass(Feed domain, boolean historical) {
 		return historical ? domain.backtestFeed : domain.realtimeFeed
 	}
 	
     IFeed instantiateFeed(Feed domain, boolean historical, Globals globals) {
 		String className = getFeedClass(domain,historical)
-		IFeed feed = this.getClass().getClassLoader().loadClass(className).newInstance(globals)
+		IFeed feed = this.getClass().getClassLoader().loadClass(className).newInstance(globals,domain)
 		feed.setTimeZone(TimeZone.getTimeZone(domain.timezone))
 		return feed
     }
@@ -43,6 +45,13 @@ class FeedService {
 		else return result
 	}
 	
+	Stream getStreamByFeedAndLocalId(Feed feed, String localId) {
+		Stream result = Stream.findByFeedAndLocalId(feed, localId)
+		if (!result)
+			throw new StreamNotFoundException("Feed: $feed.name, LocalId: $localId")
+		else return result
+	}
+	
 	Feed getFeed(Long id) {
 		Feed result = Feed.get(id)
 		if (!result)
@@ -58,6 +67,6 @@ class FeedService {
 	}
 	
 	MessageRecipient getMessageRecipient(Feed domain) {
-		return FeedFactory.getInstance(domain)
+		return FeedFactory.getInstance(domain, grailsApplication.config)
 	}
 }

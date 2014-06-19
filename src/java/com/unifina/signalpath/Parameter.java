@@ -2,6 +2,8 @@ package com.unifina.signalpath;
 
 import java.util.Map;
 
+import com.unifina.signalpath.AbstractSignalPathModule.UIWarningMessage;
+
 /**
  * Parameters are Inputs that always have a value. The user can enter that value in the UI
  * and a textual representation of that value must be available. Parameters can be connected
@@ -15,6 +17,8 @@ import java.util.Map;
 public abstract class Parameter<T> extends Input<T> {
 
 	protected T defaultValue;
+	
+	public boolean canBeEmpty = true;
 	
 	public Parameter(AbstractSignalPathModule owner, String name, T defaultValue, String typeName) {
 		super(owner, name, typeName);
@@ -46,11 +50,31 @@ public abstract class Parameter<T> extends Input<T> {
 		else if (isConnected() && source.owner instanceof Pullable<?>) {
 			Object pulledObject =((Pullable<?>)source.owner).pullValue(source); 
 			value = handlePulledObject(pulledObject);
+			checkEmpty(value);
 			return value;
 		}
-		else return defaultValue;
+		else {
+			checkEmpty(defaultValue);
+			return defaultValue;
+		}
 	}
 	
+	protected void checkEmpty(T v) {
+		// Also check the existence of a DataSource, because an empty
+		// but required parameter is only a problem when actually running
+		// the path (not when creating, loading or saving)
+		if (!canBeEmpty && owner.globals!=null && owner.globals.getDataSource()!=null && isEmpty(v)) {
+			if (owner.parentSignalPath!=null && owner.parentSignalPath.getReturnChannel()!=null)
+				owner.parentSignalPath.getReturnChannel().sendPayload(owner.hash, owner.new UIWarningMessage("Parameter "+getDisplayName()+" does not have a value!"));
+			
+			throw new IllegalArgumentException("Parameter "+(getDisplayName()==null ? getName() : getDisplayName())+" does not have a value!");
+		}
+	}
+	
+	protected boolean isEmpty(T value) {
+		return value == null;
+	}
+
 	/**
 	 * If the pulled object is not necessarily an instance of T, this method
 	 * should be overridden in a subclass to handle that situation (for example,

@@ -43,8 +43,8 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	private Long firstWaitQueue = null;
 	private Long firstRealQueue = null;
 	
-	public AbstractFeedProxy(Globals globals) {
-		super(globals);
+	public AbstractFeedProxy(Globals globals, Feed domainObject) {
+		super(globals, domainObject);
 		hub = getMessageHub();
 	}
 	
@@ -52,6 +52,12 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		Feed feed = feedService.getFeedByRealtimeClass(this.getClass().getName());
 		return (MessageHub<R,T>) feedService.getMessageRecipient(feed);
+	}
+	
+	@Override
+	public boolean subscribe(Object subscriber) {
+		hub.subscribe(subscriber);
+		return super.subscribe(subscriber);
 	}
 	
 	/**

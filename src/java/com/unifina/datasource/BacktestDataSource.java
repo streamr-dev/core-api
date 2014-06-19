@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 import com.unifina.data.BacktestEventQueue;
 import com.unifina.data.IFeed;
-import com.unifina.data.IRequireFeed;
+import com.unifina.data.IStreamRequirement;
 import com.unifina.utils.Globals;
 
 public class BacktestDataSource extends DataSource {
@@ -23,7 +23,7 @@ public class BacktestDataSource extends DataSource {
 	}
 	
 	@Override
-	protected IFeed registerModule(IRequireFeed o) {
+	protected IFeed registerModule(IStreamRequirement o) {
 		IFeed feed = super.registerModule(o);
 		
 		if (eventQueue instanceof BacktestEventQueue)

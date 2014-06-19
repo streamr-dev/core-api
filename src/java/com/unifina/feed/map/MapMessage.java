@@ -1,4 +1,4 @@
-package com.unifina.feed.kafka;
+package com.unifina.feed.map;
 
 import java.util.Date;
 import java.util.Map;

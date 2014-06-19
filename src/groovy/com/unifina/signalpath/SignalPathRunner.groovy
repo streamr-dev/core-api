@@ -5,10 +5,8 @@ import grails.util.GrailsUtil
 import javax.servlet.ServletContext
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
 
-import com.unifina.domain.security.SecUser;
-import com.unifina.service.SignalPathService;
+import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
 
 public class SignalPathRunner extends Thread {
@@ -63,7 +61,7 @@ public class SignalPathRunner extends Thread {
 	@Override
 	public void run() {
 		
-		Exception reportException = null
+		Throwable reportException = null
 		setName("SignalPathRunner");
 		
 		// Run
@@ -79,15 +77,15 @@ public class SignalPathRunner extends Thread {
 			// Instantiate SignalPaths from JSON
 			for (int i=0;i<signalPathData.size();i++) {
 				try {
-					SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,true)
-					signalPath.returnChannel = returnChannels[i]
-					returnChannels[i].signalPath = signalPath
+					SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,returnChannels[i],true)
+//					signalPath.returnChannel = returnChannels[i] // set in SignalPath constructor
+//					returnChannels[i].signalPath = signalPath // set in SignalPath constructor
 					//				signalPath.connectionsReady()
 					signalPaths.add(signalPath)
 				} catch (Exception e) {
 					e = GrailsUtil.deepSanitize(e)
 					log.error("Error while instantiating SignalPaths!",e)
-					returnChannels[i].sendError(e.toString())
+					returnChannels[i].sendError(e.getMessage() ?: e.toString())
 				}
 			}
 
@@ -95,8 +93,9 @@ public class SignalPathRunner extends Thread {
 				it.connectionsReady()
 
 			ready = true
-			signalPathService.runSignalPaths(signalPaths)
-		} catch (Exception e) {
+			if (!signalPaths.isEmpty())
+				signalPathService.runSignalPaths(signalPaths)
+		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Error while running SignalPaths!",e)
 			reportException = e
@@ -111,7 +110,14 @@ public class SignalPathRunner extends Thread {
 		}
 
 		if (reportException) {
-			returnChannels.each{it.sendError(reportException.message+(reportException.cause!=null ? "<br>Caused by: $reportException.cause" : ""))}
+			StringBuilder sb = new StringBuilder(reportException.message)
+			while (reportException.cause!=null) {
+				reportException = reportException.cause
+				sb.append("<br><br>")
+				sb.append("Caused by: ")
+				sb.append(reportException.message)
+			}
+			returnChannels.each{it.sendError(sb.toString())}
 		}
 		
 		returnChannels.each {it.sendDone()}
@@ -138,7 +144,9 @@ public class SignalPathRunner extends Thread {
 		destroy()
 		
 		// Interrupt whatever this thread is doing
-		this.interrupt()
+		// Commented out because I witnessed a deadlock leading to this call, revisit later if necessary
+		// This thread should exit anyway on the next event, so no big deal if not interrupted
+		//this.interrupt()
 	}
 	
 }

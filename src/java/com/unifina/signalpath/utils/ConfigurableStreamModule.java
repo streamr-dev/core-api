@@ -1,4 +1,4 @@
-package com.unifina.signalpath.kafka;
+package com.unifina.signalpath.utils;
 
 import grails.converters.JSON;
 
@@ -7,23 +7,34 @@ import java.util.Map;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import com.unifina.data.IRequireFeed;
-import com.unifina.domain.data.Feed;
+import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.StreamParameter;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
-public class KafkaModule extends AbstractSignalPathModule implements IRequireFeed {
+/**
+ * This module creates inputs and outputs on configuration time
+ * with regard to a streamConfig given in the database.
+ * 
+ * The streamConfig must be a JSON message with a key "fields": a list of
+ * (name,type) pairs.
+ * 
+ * The sreamConfig can also define a key "name", which is used as the module name.
+ * 
+ * This module works well with the MapMessageEventRecipient event recipient class.
+ * @author Henri
+ */
+public class ConfigurableStreamModule extends AbstractSignalPathModule implements IStreamRequirement {
 
-	StreamParameter topic = new StreamParameter(this,"stream");
-	JSONObject streamConfig = null;
+	protected StreamParameter streamParameter = new StreamParameter(this,"stream");
+	protected JSONObject streamConfig = null;
 	
 	@Override
 	public void init() {
-		addInput(topic);
-		topic.setCheckModuleId(true);
+		addInput(streamParameter);
+		streamParameter.setCheckModuleId(true);
 	}
 
 	@Override
@@ -40,7 +51,7 @@ public class KafkaModule extends AbstractSignalPathModule implements IRequireFee
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		
-		Stream stream = topic.value;
+		Stream stream = streamParameter.value;
 		if (stream.getStreamConfig()==null)
 			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
 		streamConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
@@ -62,19 +73,14 @@ public class KafkaModule extends AbstractSignalPathModule implements IRequireFee
 				
 			}
 		}
+		
+		if (streamConfig.containsKey("name"))
+			this.setName(streamConfig.get("name").toString());
 	}
 	
-	public Stream getStream() {
-		return topic.getValue();
-	}
-	
-	public String getTopic() {
-		return streamConfig.get("topic").toString();
-	}
-
 	@Override
-	public Feed getFeed() {
-		return topic.getValue().getFeed();
+	public Stream getStream() {
+		return streamParameter.getValue();
 	}
 	
 }

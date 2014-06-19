@@ -60,8 +60,11 @@ public class SignalPath extends AbstractSignalPathModule {
 		canRefresh = true;
 	}
 	
-	public SignalPath(Map iData, boolean isRoot, Globals globals) {
+	public SignalPath(Map iData, SignalPathReturnChannel returnChannel, boolean isRoot, Globals globals) {
 		super();
+		this.returnChannel = returnChannel;
+		if (returnChannel!=null)
+			returnChannel.signalPath = this;
 		this.isRoot = isRoot;
 		this.globals = globals;
 		initPriority = 10;

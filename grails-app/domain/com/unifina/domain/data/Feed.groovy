@@ -23,7 +23,12 @@ class Feed {
 	String discoveryUtilClass
 	String discoveryUtilConfig
 	
+	String eventRecipientClass
+	String keyProviderClass
+	
 	Module module
+	
+	Boolean startOnDemand
 
 	static constraints = {
 		backtestFeed(nullable:true)
@@ -36,5 +41,16 @@ class Feed {
 		messageSourceConfig(nullable:true)
 		discoveryUtilClass(nullable:true)
 		discoveryUtilConfig(nullable:true)
+		startOnDemand(nullable:true)
+	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode()
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Feed && obj.id == this.id
 	}
 }

@@ -35,4 +35,15 @@ class Stream implements Comparable {
 		if (!(arg0 instanceof Stream)) return 0
 		else return arg0.name.compareTo(this.name)
 	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode()
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Stream && obj.id == this.id
+	}
+	
 }

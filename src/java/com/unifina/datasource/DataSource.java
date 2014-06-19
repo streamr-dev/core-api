@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.IFeed;
-import com.unifina.data.IRequireFeed;
+import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.service.FeedService;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -58,7 +58,7 @@ public abstract class DataSource {
 	 * @return
 	 */
 	public boolean canRegister(Object o) {
-		return (o instanceof IRequireFeed || o instanceof ITimeListener || o instanceof IDayListener);
+		return (o instanceof IStreamRequirement || o instanceof ITimeListener || o instanceof IDayListener);
 	}
 	
 	/**
@@ -67,8 +67,8 @@ public abstract class DataSource {
 	 */
 	public void register(Object o) {
 		boolean registered = false;
-		if (o instanceof IRequireFeed) {
-			registerModule((IRequireFeed)o);
+		if (o instanceof IStreamRequirement) {
+			registerModule((IStreamRequirement)o);
 			registered = true;
 		}
 		if (o instanceof ITimeListener) {
@@ -84,8 +84,8 @@ public abstract class DataSource {
 //			throw new IllegalArgumentException("I don't know what to do with "+o+"!");
 	}
 	
-	protected IFeed registerModule(IRequireFeed o) {
-		IFeed feed = createFeed(o.getFeed());
+	protected IFeed registerModule(IStreamRequirement o) {
+		IFeed feed = createFeed(o.getStream().getFeed());
 		try {
 			feed.subscribe(o);
 			
@@ -147,8 +147,8 @@ public abstract class DataSource {
 		try {
 			doStartFeed();
 		} catch (Exception e) {
-			log.error("Exception thrown while starting feed",e);
-			throw new RuntimeException("Error while starting feed",e);
+			log.error("Exception thrown while running feed",e);
+			throw new RuntimeException("Error while running feed",e);
 		}
 	}
 	

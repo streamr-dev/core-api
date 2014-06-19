@@ -41,13 +41,14 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	
 	protected PriorityQueue<FeedEvent> queue = new PriorityQueue<>();
 	
-	public AbstractHistoricalFileFeed(Globals globals) {
-		super(globals);
+	public AbstractHistoricalFileFeed(Globals globals, Feed domainObject) {
+		super(globals, domainObject);
 	}
 
 	@Override
 	protected IEventRecipient createEventRecipient(Object subscriber) {
-		IEventRecipient r = doCreateEventRecipient(subscriber);
+		IEventRecipient r = super.createEventRecipient(subscriber);
+//		doCreateEventRecipient(subscriber);
 		eventRecipients.add(r);
 		counts.put(r,0);
 		return r;
@@ -58,7 +59,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	 * @param subscriber
 	 * @return
 	 */
-	protected abstract IEventRecipient doCreateEventRecipient(Object subscriber);
+//	protected abstract IEventRecipient doCreateEventRecipient(Object subscriber);
 	
 	/**
 	 * Extracts a Date from the specified event content.

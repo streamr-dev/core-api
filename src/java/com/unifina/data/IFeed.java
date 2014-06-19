@@ -5,12 +5,15 @@ import java.util.TimeZone;
 
 /**
  * A lightweight feed implementation interface. In most cases you will
- * want to extend AbstractMessageHub and AbstractFeedProxy instead of directly
+ * want to extend AbstractFeed ir AbstractHistoricalFeed instead of directly
  * implementing this interface. For implementing historical feeds implementing 
  * this interface is fine.
+ * 
+ * Deprecation: Just use AbstractFeed as top of the hierarchy
  * @author Henri
  *
  */
+@Deprecated
 public interface IFeed {
 	
 	public boolean subscribe(Object object) throws Exception;

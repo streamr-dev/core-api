@@ -1,23 +1,24 @@
 package com.unifina.feed.kafka;
 
+import grails.converters.JSON;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
-
-import scala.actors.threadpool.Arrays;
+import java.util.Map;
 
 import com.unifina.data.IEventRecipient;
+import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractHistoricalFileFeed;
-import com.unifina.signalpath.kafka.KafkaModule;
+import com.unifina.feed.StreamEventRecipient;
 import com.unifina.utils.Globals;
 
 public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 
-	public KafkaHistoricalFeed(Globals globals) {
-		super(globals);
+	public KafkaHistoricalFeed(Globals globals, Feed domainObject) {
+		super(globals, domainObject);
 	}
 
 	@Override
@@ -28,33 +29,18 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 
 	@Override
 	protected Stream getStream(IEventRecipient recipient) {
-		return ((KafkaMessageRecipient)recipient).getStream();
+		return ((StreamEventRecipient)recipient).getStream();
 	}
 
 	@Override
 	protected Iterator<Object> createContentIterator(Date day,
 			InputStream inputStream, IEventRecipient recipient) {
 		try {
-			return new KafkaHistoricalIterator(inputStream,((KafkaMessageRecipient)recipient).getTopic());
+			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
+			return new KafkaHistoricalIterator(inputStream,streamConfig.get("topic").toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-	
-	@Override
-	protected List<Class> getValidSubscriberClasses() {
-		return Arrays.asList(new Class[] {KafkaModule.class});
-	}
-	
-	@Override
-	protected Object getEventRecipientKey(Object subscriber) {
-		return ((KafkaModule)subscriber).getTopic();
-	}
-
-	@Override
-	protected IEventRecipient doCreateEventRecipient(Object subscriber) {
-		KafkaModule m = (KafkaModule)subscriber;
-		return new KafkaMessageRecipient(globals,m.getStream(),m.getTopic());
 	}
 
 }

@@ -3,6 +3,7 @@ package com.unifina.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,5 +93,21 @@ public class MapTraversal {
 	
 	public static Object[] getArray(Map map, String name) {
 		return (Object[]) getProperty(map,name);
+	}
+	
+	public static Map<String,Object> flatten(Map<String,Object> map) {
+		Map<String,Object> result = new LinkedHashMap<>();
+		return flattenRecursive(map, "", result);
+	}
+	
+	private static Map<String,Object> flattenRecursive(Map<String,Object> map, String prefix, Map<String,Object> result) {
+		for (String s : map.keySet()) {
+			Object value = map.get(s);
+			if (!(value instanceof Map)) {
+				result.put(prefix+s,value);
+			}
+			else flattenRecursive((Map)value, prefix+s+".", result);
+		}
+		return result;
 	}
 }

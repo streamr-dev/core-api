@@ -125,7 +125,8 @@ public class KafkaCollectTask extends AbstractTask {
 			}
 			
 			Stream.withTransaction {
-				stream.attach()
+				// Use pessimistic locking for updating the Stream
+				stream = Stream.lock(stream.id)
 				if (stream.firstHistoricalDay==null || stream.firstHistoricalDay.time > beginTime)
 					stream.firstHistoricalDay = new Date(beginTime)
 				if (stream.lastHistoricalDay==null || stream.lastHistoricalDay.time < endTime)

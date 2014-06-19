@@ -178,4 +178,8 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 		return 0;
 	}
 
+	public void subscribe(Object subscriber) {
+		source.subscribe(subscriber);
+	}
+
 }

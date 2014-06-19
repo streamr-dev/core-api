@@ -11,5 +11,10 @@ public class StringParameter extends Parameter<String> {
 	public String parseValue(String s) {
 		return s;
 	}
+	
+	@Override
+	protected boolean isEmpty(String value) {
+		return super.isEmpty(value) || value.equals("");
+	}
 
 }

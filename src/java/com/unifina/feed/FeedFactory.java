@@ -62,8 +62,8 @@ public class FeedFactory {
 	
 	private static MessageSource createMessageSource(Feed feed, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
 		Class messageSourceClass = FeedFactory.class.getClassLoader().loadClass(feed.getMessageSourceClass());
-		Constructor messageSourceConstructor = messageSourceClass.getConstructor(String.class, Map.class);
-		return (MessageSource) messageSourceConstructor.newInstance(feed.getMessageSourceConfig(), config);
+		Constructor messageSourceConstructor = messageSourceClass.getConstructor(Feed.class, Map.class);
+		return (MessageSource) messageSourceConstructor.newInstance(feed, config);
 	}
 	
 	private static MessageRecipient createMessageRecipient(Feed feed, MessageSource source, MessageParser parser, IFeedCache cache) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -72,10 +72,15 @@ public class FeedFactory {
 		return hub;
 	}
 	
-	synchronized static MessageRecipient getInstance(Feed feed) {
-		if (!instanceByFeed.containsKey(feed.getId()))
-			throw new IllegalStateException("Singleton instance not started!");
-		else return instanceByFeed.get(feed.getId());
+	synchronized static MessageRecipient getInstance(Feed feed, Map<String,Object> config) throws InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IllegalArgumentException {
+		if (!instanceByFeed.containsKey(feed.getId())) {
+			 if (feed.getStartOnDemand()==null || !feed.getStartOnDemand())
+				 throw new IllegalStateException("Feed instance not started (and startOnDemand is false)!");
+			 
+			 return FeedFactory.startInstance(feed, config);
+		}
+			
+		return instanceByFeed.get(feed.getId());
 	}
 
 }

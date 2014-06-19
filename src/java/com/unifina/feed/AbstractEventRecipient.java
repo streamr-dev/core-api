@@ -2,6 +2,7 @@ package com.unifina.feed;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
@@ -51,7 +52,7 @@ public abstract class AbstractEventRecipient<T> implements IEventRecipient, ISta
 	
 	public void register(Object module) {
 		if (!getParameterizedClass().isAssignableFrom(module.getClass()))
-			throw new IllegalArgumentException("Can not register module: "+module);
+			throw new IllegalArgumentException("Can not register module of type: "+module.getClass()+", required type: "+getParameterizedClass()+". Module: "+module);
 		else if (!modules.contains(module)) {
 			modules.add((T)module);
 			moduleSize = modules.size();
@@ -71,6 +72,10 @@ public abstract class AbstractEventRecipient<T> implements IEventRecipient, ISta
 
 	public Propagator getPropagator() {
 		return propagator;
+	}
+	
+	public List<T> getModules() {
+		return modules;
 	}
 	
 	/**

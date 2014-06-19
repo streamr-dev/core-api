@@ -3,6 +3,8 @@ package com.unifina.feed.kafka;
 import java.util.Date;
 import java.util.Map;
 
+import com.unifina.feed.map.MapMessage;
+
 public class KafkaMessage extends MapMessage {
 	
 	public String topic;
