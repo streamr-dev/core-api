@@ -58,6 +58,7 @@ class UnifinaCoreGrailsPlugin {
 					'param-name'("org.atmosphere.useWebSocket")
 					'param-value'("false")
 				}
+//				The below asyncSupport can be removed when atmosphere is upgraded to most recent 2.x version
 				'init-param' {
 					'param-name'("org.atmosphere.cpr.asyncSupport")
 					'param-value'("com.unifina.atmosphere.FixedTomcat7CometSupport")
