@@ -63,14 +63,6 @@ public class AtmosphereHandlerPubSub extends AbstractReflectorAtmosphereHandler 
             } else {
                 r.suspend(240000);
             }
-        } else if ("POST".equalsIgnoreCase(method)) {
-            Broadcaster b = lookupBroadcaster(req.getPathInfo());
-
-            String message = req.getReader().readLine();
-
-            if (message != null && message.indexOf("message") != -1) {
-                b.broadcast(message.substring("message=".length()));
-            }
         }
     }
 
