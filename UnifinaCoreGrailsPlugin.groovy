@@ -59,6 +59,10 @@ class UnifinaCoreGrailsPlugin {
 					'param-value'("false")
 				}
 				'init-param' {
+					'param-name'("org.atmosphere.cpr.asyncSupport")
+					'param-value'("com.unifina.atmosphere.FixedTomcat7CometSupport")
+				}
+				'init-param' {
 					'param-name'("org.atmosphere.useNative")
 					'param-value'("true")
 				}
