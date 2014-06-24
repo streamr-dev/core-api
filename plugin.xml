@@ -9,6 +9,7 @@
     <resource>UnifinaCorePluginUrlMappings</resource>
     <resource>com.unifina.controller.data.LocalFeedFileController</resource>
     <resource>com.unifina.controller.data.StreamController</resource>
+    <resource>com.unifina.controller.kafka.KafkaController</resource>
     <resource>com.unifina.controller.security.LoginController</resource>
     <resource>com.unifina.controller.security.LogoutController</resource>
     <resource>com.unifina.controller.security.SecurityManagerController</resource>
