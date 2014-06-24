@@ -15,20 +15,38 @@
  * 
  * canvas: id of the canvas div
  * signalPathContext: function() that returns the signalPathContext object
+ * errorHandler: function(data) that shows an error message. data can be a string or object, in which case data.msg is shown.
+ * notificationHandler: function(data) that shows a notification message. data can be a string or object, in which case data.msg is shown.
  * runUrl: url where to POST the run command
  * abortUrl: url where to POST the abort command
  * atmosphereUrl: url for atmosphere, the sessionId will be appended to this url
+ * allowRuntimeChanges: boolean for whether runtime parameter changes are allowed
  */
 
 var SignalPath = (function () { 
 
+    var options = {
+    		canvas: "canvas",
+    		signalPathContext: function() {
+    			return {};
+    		},
+    		errorHandler: function(data) {
+    			alert((typeof data == "string" ? data : data.msg));
+    		},
+    		notificationHandler: function(data) {
+    			alert((typeof data == "string" ? data : data.msg));
+    		},
+    		runUrl: "run",
+    		abortUrl: "abort",
+    		atmosphereUrl: project_webroot+"atmosphere/",
+    		allowRuntimeChanges: true,
+    };
+	
     var detectedTransport = null;
     var socket = $.atmosphere;
     var subSocket;
 	
-	// Private
 	var modules;
-//	var hash;
 	var saveData;
 
 	var sessionId = null;
@@ -44,22 +62,6 @@ var SignalPath = (function () {
     
     // set in init()
     var canvas;
-    var options = {
-    		canvas: "canvas",
-    		signalPathContext: function() {
-    			return {};
-    		},
-    		errorHandler: function(data) {
-    			alert(data.msg);
-    		},
-    		notificationHandler: function(data) {
-    			alert(data.msg);
-    		},
-    		runUrl: "run",
-    		abortUrl: "abort",
-    		atmosphereUrl: project_webroot+"atmosphere/",
-    		allowRuntimeChanges: true,
-    };
     
 	// Public
 	var my = {};
@@ -106,70 +108,15 @@ var SignalPath = (function () {
 	function loadJSON(data) {
 		// Reset signal path
 		newSignalPath();
-		
-//		var connectedInputs = [];
 
 		jsPlumb.setSuspendDrawing(true);
-		
-		// Backwards compatibility
-//		if (!data.signalPathData) {
-//			$(data.orderBooks).each(function(i,ob) {
-//				createModuleFromJSON(ob);
-//				$(ob.params).each(function(i,conn) {
-//					if (conn.connected)
-//						connectedInputs.push(conn);
-//				});
-//				$(ob.inputs).each(function(i,conn) {
-//					if (conn.connected)
-//						connectedInputs.push(conn);
-//				});
-//			});
-//			$(data.charts).each(function(i,c) {
-//				createModuleFromJSON(c);
-//				$(c.params).each(function(i,conn) {
-//					if (conn.connected)
-//						connectedInputs.push(conn);
-//				});
-//				$(c.inputs).each(function(i,conn) {
-//					if (conn.connected)
-//						connectedInputs.push(conn);
-//				});
-//			});
-//
-//		}
 		
 		// Instantiate modules TODO: remove backwards compatibility
 		$(data.signalPathData ? data.signalPathData.modules : data.modules).each(function(i,mod) {
 			createModuleFromJSON(mod);
-//			$(mod.params).each(function(i,conn) {
-//				if (conn.connected)
-//					connectedInputs.push(conn);
-//			});
-//			$(mod.inputs).each(function(i,conn) {
-//				if (conn.connected)
-//					connectedInputs.push(conn);
-//			});
 		});
 
 		$(my).trigger("_signalPathLoadModulesReady");
-		
-		// Programmatically connect all connected inputs and outputs
-//		$(connectedInputs).each(function(i,input) {
-//			// TODO: remove fix when not needed anymore
-//			var endpointId = (my.replacedIds[input.endpointId] == null ? input.endpointId : my.replacedIds[input.endpointId]);
-//			var sourceId = (my.replacedIds[input.sourceId] == null ? input.sourceId : my.replacedIds[input.sourceId]);
-//			
-//			var inputEndpoint = $("#"+endpointId).data("endpoint");
-//			if (inputEndpoint==null)
-//				console.log("Warning: input endpoint "+endpointId+" was null!");
-//			
-//			var outputEndpoint = $("#"+sourceId).data("endpoint");
-//			if (outputEndpoint==null)
-//				console.log("Warning: output endpoint "+endpointId+" was null!");
-//			
-//			if (inputEndpoint!=null && outputEndpoint!=null)
-//				jsPlumb.connect({source:inputEndpoint, target:outputEndpoint});
-//		});
 
 		jsPlumb.setSuspendDrawing(false,true);
 	}
@@ -186,10 +133,7 @@ var SignalPath = (function () {
 				if (!data.error) {
 					module.updateFrom(data);
 					
-					var div = module.getDiv();
-//					$('#canvas').append(div);
-//					$(div).draggable(module.getDragOptions());
-					
+					var div = module.getDiv();					
 					modules[module.getHash()] = module;
 					module.redraw(); // Just in case
 					if (callback)
@@ -254,12 +198,6 @@ var SignalPath = (function () {
 				options.errorHandler({msg:errorThrown});
 			}
 		});
-		
-		
-//		$.getJSON(project_webroot+"module/jsonGetModule", {id: id, configuration: JSON.stringify(configuration)}, 
-//			function(data) {
-//				createModuleFromJSON(data);
-//			});
 	}
 	my.addModule = addModule;
 	
@@ -284,12 +222,7 @@ var SignalPath = (function () {
 		
 		var div = mod.getDiv();
 		
-		// Add the module to the canvas UPDATE: added in mod.createDiv()
-//		$('#canvas').append(div);
 		mod.redraw(); // Just in case
-		
-		// Made draggable in mod.createDiv()
-//		$(div).draggable(mod.getDragOptions());
 		
 		var oldClose = mod.onClose;
 		
@@ -404,7 +337,6 @@ var SignalPath = (function () {
 		}
 		
 		modules = [];
-//		hash = 0;
 		
 		saveData = {
 				isSaved : false
@@ -522,8 +454,6 @@ var SignalPath = (function () {
 		if (newSession)
 			payloadCounter = 0;
 		
-//		$("#spinner").show();
-		
 		sessionId = sId;
 		
 		var request = { 
@@ -544,34 +474,11 @@ var SignalPath = (function () {
 		
 		$(my).trigger('signalPathStart');
 	}
-//	my.subscribeToSession = subscribeToSession;
 	
 	function reconnect(sId) {
-//		if (rerequest(sId,0,-1))
 		subscribeToSession(sId,false);
 	}
 	my.reconnect = reconnect;
-	
-//	function rerequest(sId,start,end) {
-//		var returnVal;
-//		
-//		// Synchronous request
-//		jQuery.ajax({
-//			url:    'resend',
-//			data: {sessionId:sId, runnerId:runnerId, start:start, end:end},
-//			dataType: 'json',
-//			success: function(result) {
-//				if (result.success) {
-//					processMessageBatch(result.messages);
-//					returnVal = true; 
-//				}
-//				else returnVal = false;
-//			},
-//			async:   false
-//		});
-//		
-//		return returnVal;
-//	}
 	
 	function handleResponse(response) {
 		detectedTransport = response.transport;
@@ -601,29 +508,7 @@ var SignalPath = (function () {
         		}
         		if (msgObj != null)
         			processMessageBatch(msgObj.messages);
-        		
-//            	var messages = data.split("##");
-            	
-//            	for (var i=0;i<messages.length;i++) {
-//            		var msgObj = null;
-//
-//            		try {
-//            			var msgObj = jQuery.parseJSON(messages[i]);
-//            		} catch (e) {
-//            			// Atmosphere sends commented out data to WebKit based browsers
-//            			// Atmosphere bug sometimes allows incomplete responses to reach the client
-//            			console.log(e);
-//            		}
-//            		if (msgObj != null) {
-//            			var hash = processMessage(msgObj);
-//        				if (hash != null && $.inArray(hash, clear)==-1)
-//        					clear.push(hash);
-//            		}
-//            	}
-//            	
-//        		for (var i=0;i<clear.length;i++) {
-//        			modules[clear[i]].endOfResponses();
-//        		}
+
             }
         }
 	}
@@ -647,8 +532,6 @@ var SignalPath = (function () {
 	}
 	
 	function processMessage(message) {
-//		try {
-
 		var clear = null;
 		
 		// A message that has been purged from cache is the empty javascript object
@@ -658,62 +541,43 @@ var SignalPath = (function () {
 		}
 		// Update ack counter
 		if (message.counter > payloadCounter) {
-//			abort();
-//			options.errorHandler("Counter: "+message.counter+", expected: "+payloadCounter);
 			console.log("Messages SKIPPED! Counter: "+message.counter+", expected: "+payloadCounter);
-//			if (!rerequest(sessionId,payloadCounter,message.counter-1)) {
-//				console.log("WARN: Rerequest failed. Skipping messages!");
-//				payloadCounter = message.counter;
-//			}
 		}
 		else if (message.counter < payloadCounter) {
 			console.log("Already received message: "+message.counter+", expecting: "+payloadCounter);
 			return null; // ok?
 		}
-//		console.log("Counter: "+message.counter);
 		payloadCounter = message.counter + 1;
 		
-//		for (var i=0;i<messages.length;i++) {
-			if (message.type=="P") {
-				var hash = message.hash;
-				try {
-					modules[hash].receiveResponse(message.payload);
-				} catch (err) {
-					console.log(err.stack);
-				}
-				clear = hash;
+		if (message.type=="P") {
+			var hash = message.hash;
+			try {
+				modules[hash].receiveResponse(message.payload);
+			} catch (err) {
+				console.log(err.stack);
 			}
-			else if (message.type=="D") {
-				abort();
-//				closeSubscription();
-			}
-			else if (message.type=="E") {
-				closeSubscription();
-				options.errorHandler({msg:message.error});
-			}
-			else if (message.type=="N") {
-				options.notificationHandler(message);
-			}
-//		}
+			clear = hash;
+		}
+		else if (message.type=="D") {
+			abort();
+		}
+		else if (message.type=="E") {
+			closeSubscription();
+			options.errorHandler({msg:message.error});
+		}
+		else if (message.type=="N") {
+			options.notificationHandler(message);
+		}
 
 		return clear;
 		
-//		} 
-//		catch (e) {
-//		options.errorHandler(e);
-//		}
 	}
 	
 	function closeSubscription() {
 		socket.unsubscribe();
 		
-//		if ($.atmosphere.unsubscribe)
-//			$.atmosphere.unsubscribe();
-//		else $.atmosphere.close();
-		
 		sessionId = null;
 		$(my).trigger('signalPathStop');
-//		$("#spinner").hide();
 	}
 	
 	function isRunning() {
