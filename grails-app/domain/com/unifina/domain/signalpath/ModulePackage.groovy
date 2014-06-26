@@ -1,8 +1,12 @@
 package com.unifina.domain.signalpath
 
-import java.util.SortedSet;
+import com.unifina.domain.security.SecUser
 
 class ModulePackage {
 	String name
-//	static hasMany = [modules:Module]
+	SecUser user
+	
+	static constraints = {
+
+	}
 }

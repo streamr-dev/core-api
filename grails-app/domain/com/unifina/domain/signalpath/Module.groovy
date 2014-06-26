@@ -9,6 +9,7 @@ class Module implements Comparable {
 	String type
 	Boolean hide
 	ModulePackage modulePackage
+	String jsonHelp
 	
 	SortedSet params
 	static belongsTo = [category: ModuleCategory]
@@ -20,7 +21,12 @@ class Module implements Comparable {
 		type()
 		hide(nullable:true)
 		modulePackage(nullable:true)
+		jsonHelp(nullable:true)
     }
+	
+	static mapping = {
+		jsonHelp type: 'text'
+	}
 	
 	String toString() {
 		return name

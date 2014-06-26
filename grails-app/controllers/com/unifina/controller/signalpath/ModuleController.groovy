@@ -19,6 +19,7 @@ class ModuleController {
 	def moduleService
 	def grailsApplication
 	def springSecurityService
+	def unifinaSecurityService
 	
 	private static final Logger log = Logger.getLogger(ModuleController)
 	
@@ -30,7 +31,12 @@ class ModuleController {
 			mods = Module.createCriteria().list {
 				isNull("hide")
 				like("name","%"+params.term+"%")
-				'in'("modulePackage",allowedPackages)
+				or {
+					'in'("modulePackage",allowedPackages)
+					modulePackage {
+						eq("user",springSecurityService.currentUser)
+					}
+				}
 			}
 		}
 
@@ -44,7 +50,12 @@ class ModuleController {
 		if (!allowedPackages.isEmpty()) {
 			mods = Module.createCriteria().list {
 				isNull("hide")
-				'in'("modulePackage",allowedPackages)
+				or {
+					'in'("modulePackage",allowedPackages)
+					modulePackage {
+						eq("user",springSecurityService.currentUser)
+					}
+				}
 			}
 		}
 
@@ -55,6 +66,7 @@ class ModuleController {
 		def categories = ModuleCategory.findAllByParentIsNull([sort:"sortOrder"])
 
 		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
+		allowedPackages.addAll(ModulePackage.findAllByUser(springSecurityService.currentUser))
 		
 		def result = []	
 		categories.findAll{allowedPackages.contains(it.modulePackage)}.each {category->
@@ -89,12 +101,11 @@ class ModuleController {
 
 	def jsonGetModule() {
 		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
 		
 		try {
 			Module domainObject = Module.get(params.id)
-			if (!allowedPackages.contains(domainObject.modulePackage)) {
-				throw new Exception("User does not have access to module $domainObject.name")
+			if (!unifinaSecurityService.canAccess(domainObject)) {
+				throw new Exception("User $springSecurityService.currentUser does not have access to module $domainObject.name")
 			}
 			
 			def conf = (params.configuration ? JSON.parse(params.configuration) : [:])
@@ -161,4 +172,38 @@ class ModuleController {
 		
 		render r as JSON
 	}
+	
+	def jsonGetModuleHelp() {
+		Module module = Module.get(params.id)
+		if (!unifinaSecurityService.canAccess(module)) {
+			throw new Exception("User $springSecurityService.currentUser does not have access to module $module.name")
+		}
+		else {
+			response.setContentType("application/json")
+			render module.jsonHelp ?: "{}"
+		}
+	}
+	
+	def jsonSetModuleHelp() {
+		// Needs to be owner
+		Module module = Module.get(params.id)
+		if (module.modulePackage.user!=springSecurityService.currentUser) {
+			render ([success:false, error: "Access denied, only owner can edit module help"])
+		}
+		else {
+			module.jsonHelp = params.jsonHelp
+			module.save(failOnError:true)
+			render ([success:true] as JSON)
+		}
+	}
+	
+	def editHelp() {
+		// Needs to be owner
+		Module module = Module.get(params.long("id"))
+		if (module.modulePackage.user!=springSecurityService.currentUser) {
+			throw new Exception("User $springSecurityService.currentUser can not edit help of module $module.name")
+		}
+		[module:module]
+	}
+	
 }
