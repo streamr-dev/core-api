@@ -365,3 +365,7 @@ div.output .switchContainer {
 .joyride-fixed {
 	position: fixed !important;
 }
+
+.tooltip table {
+	border: 0;
+}

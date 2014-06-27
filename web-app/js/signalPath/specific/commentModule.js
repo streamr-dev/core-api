@@ -1,6 +1,6 @@
-SignalPath.CommentModule = function(data,canvas,my) {
-	my = my || {};
-	var that = SignalPath.EmptyModule(data,canvas,my)
+SignalPath.CommentModule = function(data,canvas,prot) {
+	prot = prot || {};
+	var pub = SignalPath.EmptyModule(data,canvas,prot)
 
 	var textarea;
 	
@@ -9,34 +9,34 @@ SignalPath.CommentModule = function(data,canvas,my) {
 		textarea.css("height",moduleHeight - 40);
 	}
 	
-	var superCreateDiv = my.createDiv;
+	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
 		
 		textarea = $("<textarea class='comment'></textarea>");
-		textarea.html(my.jsonData.text || "");
+		textarea.html(prot.jsonData.text || "");
 		
-		my.body.append(textarea);
+		prot.body.append(textarea);
 		
-		my.initResizable({
+		prot.initResizable({
 			resize: function(event,ui) {
 				resizeTextarea(ui.size.width, ui.size.height);
 			}
 		});
 		
-		resizeTextarea(my.div.width(),my.div.height());
+		resizeTextarea(prot.div.width(),prot.div.height());
 	}
-	my.createDiv = createDiv;
+	prot.createDiv = createDiv;
 	
 	
 	
-	var superToJSON = that.toJSON;
+	var superToJSON = pub.toJSON;
 	function toJSON() {
 		var result = superToJSON();
 		result.text = textarea.val();	
 		return result;
 	}
-	that.toJSON = toJSON;
+	pub.toJSON = toJSON;
 	
-	return that;
+	return pub;
 }

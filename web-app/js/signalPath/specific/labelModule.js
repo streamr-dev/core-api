@@ -1,29 +1,29 @@
-SignalPath.LabelModule = function(data,canvas,my) {
-	my = my || {};
-	var that = SignalPath.GenericModule(data,canvas,my)
+SignalPath.LabelModule = function(data,canvas,prot) {
+	prot = prot || {};
+	var pub = SignalPath.GenericModule(data,canvas,prot)
 
 	var label;
 	
-	var super_createDiv = my.createDiv;
-	my.createDiv = function() {
+	var super_createDiv = prot.createDiv;
+	prot.createDiv = function() {
 		super_createDiv();
-		label = $("<div class='modulelabel' style='"+my.jsonData.options.style.value+"'>"+my.jsonData.params[0].value+"</div>");
-		my.body.append(label);
+		label = $("<div class='modulelabel' style='"+prot.jsonData.options.style.value+"'>"+prot.jsonData.params[0].value+"</div>");
+		prot.body.append(label);
 		
-		my.div.find("input").keyup(function() {
+		prot.div.find("input").keyup(function() {
 			label.html($(this).val());
 		});
 		
-		my.initResizable();
+		prot.initResizable();
 	}
 	
-	var super_receiveResponse = my.receiveResponse
-	my.receiveResponse = function(payload) {
+	var super_receiveResponse = prot.receiveResponse
+	prot.receiveResponse = function(payload) {
 		super_receiveResponse(payload);
 		if (payload.type=="u") {
 			label.html(payload.val);
 		}
 	}
 	
-	return that;
+	return pub;
 }

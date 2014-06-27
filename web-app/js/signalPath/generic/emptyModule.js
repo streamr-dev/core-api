@@ -1,95 +1,104 @@
-SignalPath.EmptyModule = function(data, canvas, my) {
-	my = my || {};
+SignalPath.EmptyModule = function(data, canvas, prot) {
+	prot = prot || {};
 
-	my.div = null;
-	my.header = null;
-	my.title = null;
-	my.body = null;
-	my.resizable = false;
+	prot.div = null;
+	prot.header = null;
+	prot.title = null;
+	prot.body = null;
+	prot.resizable = false;
 	
-	my.jsonData = data;
-	my.hash = my.jsonData.hash;
-	my.type = my.jsonData.type;
-	my.id = "module_"+my.hash;
+	prot.jsonData = data;
+	prot.hash = prot.jsonData.hash;
+	prot.type = prot.jsonData.type;
+	prot.id = "module_"+prot.hash;
 
-	var that = {};
+	var pub = {};
 	
-	my.dragOptions = {
+	prot.dragOptions = {
 		drag: function() {
-			my.onDrag();
+			prot.onDrag();
 		},
 		//handle: '.moduleheader'
 	}
 	
-	that.getDragOptions = function() {
-		return my.dragOptions;
+	pub.getDragOptions = function() {
+		return prot.dragOptions;
 	}
 	
 	function createDiv() {
-		my.div = $("<div id='"+my.id+"' class='component context-menu "+my.type+"'></div>");
-		my.div.data("spObject",my);
+		prot.div = $("<div id='"+prot.id+"' class='component context-menu "+prot.type+"'></div>");
+		prot.div.data("spObject",prot);
 		
 		// Set absolute position
-		my.div.css("position","absolute");
+		prot.div.css("position","absolute");
 		
 		// Read position and width/height if saved
-		if (my.jsonData.layout) {
+		if (prot.jsonData.layout) {
 			loadPosition(SignalPath.getWorkspace());
 		} 
 		// Else add to default position in viewport
 		else {
-			my.div.css('top',$(window).scrollTop());
-			my.div.css('left',$(window).scrollLeft());
+			prot.div.css('top',$(window).scrollTop());
+			prot.div.css('left',$(window).scrollLeft());
 		}
 		
 		// Module header
-		my.header = $("<div class='moduleheader'></div>");
-		my.div.append(my.header);
+		prot.header = $("<div class='moduleheader'></div>");
+		prot.div.append(prot.header);
 		
 		// Create title
-		my.title = $("<span class='modulename'>"+my.jsonData.name+"</span>");
-		my.header.append(my.title);
+		prot.title = $("<span class='modulename'>"+prot.jsonData.name+"</span>");
+		prot.header.append(prot.title);
 	
-//		var deleteLink = $("<span class='delete modulebutton ui-corner-all ui-icon ui-icon-closethick'></span>");
+		// Close button
 		var deleteLink = createModuleButton("delete ui-icon ui-icon-closethick")
-	
 		deleteLink.click(function() {
-			that.close();
+			pub.close();
 		});
-		my.header.append(deleteLink);
+		prot.header.append(deleteLink);
 	
-//		module.append("<br/>");
+		// Help button
+		var helpLink = createModuleButton("help ui-icon ui-icon-help");
+		helpLink.tooltip({
+			items: ".help",
+			hide: 0,
+			tooltipClass: "tooltip",
+			content: function() {
+				return prot.getHelp();
+			}
+		});
+		prot.header.append(helpLink);
 	
-		my.body = $("<div class='modulebody'></div>");
-		my.div.append(my.body);
+		prot.body = $("<div class='modulebody'></div>");
+		prot.div.append(prot.body);
 		
 		// If there are options, create options editor
-		if (my.jsonData.options != null) {
-			my.optionEditor = $("<div class='optionEditor'></div>");
-			my.body.append(my.optionEditor);
+		if (prot.jsonData.options != null) {
+			prot.optionEditor = $("<div class='optionEditor'></div>");
+			prot.body.append(prot.optionEditor);
 			
 			// Create options
-			for (var key in my.jsonData.options) {
-				if (my.jsonData.options.hasOwnProperty(key)) {
+			for (var key in prot.jsonData.options) {
+				if (prot.jsonData.options.hasOwnProperty(key)) {
 					// Create the option div
-					var div = my.createOption(key, my.jsonData.options[key]);
-					my.optionEditor.append(div);
+					var div = prot.createOption(key, prot.jsonData.options[key]);
+					prot.optionEditor.append(div);
 					// Store reference to the JSON option
-					$(div).data("option",my.jsonData.options[key]);
+					$(div).data("option",prot.jsonData.options[key]);
 				}
 			}
 			
-			my.optionEditor.dialog({
+			prot.optionEditor.dialog({
 				autoOpen: false,
-				title: "Options: "+my.title.text(),
+				title: "Options: "+prot.title.text(),
 				buttons: [{text: "Ok", click: function() {
 						$(this).dialog("close"); 
-						$(my.optionEditor).find(".option").each(function(i,div) {
+						$(prot.optionEditor).find(".option").each(function(i,div) {
 							// Get reference to the JSON option
-							my.updateOption($(div).data("option"), div);
+							prot.updateOption($(div).data("option"), div);
 						});
 						
-						my.onOptionsUpdated();
+						prot.onOptionsUpdated();
 					}},
 				    {text: "Cancel", click: function() {
 				    	$(this).dialog("close");
@@ -101,54 +110,54 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 			
 			editOptions.click(function() {
 				// Location
-				my.optionEditor.dialog("open");
+				prot.optionEditor.dialog("open");
 			});
-			my.header.append(editOptions);
+			prot.header.append(editOptions);
 		}
 		
-		if (my.jsonData.canRefresh) {
+		if (prot.jsonData.canRefresh) {
 			// If the module can refresh, add a refresh button
 //			var refresh = $("<span class='refresh modulebutton ui-corner-all ui-icon ui-icon-refresh'></span>");
 			var refresh = createModuleButton("refresh ui-icon ui-icon-refresh");
 		
 			refresh.click(function() {
-				SignalPath.updateModule(that);
+				SignalPath.updateModule(pub);
 			});
-			my.header.append(refresh);
+			prot.header.append(refresh);
 		}
 		
 		// Must add to canvas before setting draggable
-		canvas.append(my.div);
-		my.div.draggable(my.dragOptions);
+		canvas.append(prot.div);
+		prot.div.draggable(prot.dragOptions);
 		
-		my.div.on('spContextMenuSelection', (function(d,j) {
+		prot.div.on('spContextMenuSelection', (function(d,j) {
 			return function(event,selection) {
-				my.handleContextMenuSelection(d,j,selection,event);
+				prot.handleContextMenuSelection(d,j,selection,event);
 			};
-		})(my.div,my.jsonData));
+		})(prot.div,prot.jsonData));
 		
-		my.div.on("click dragstart", function(event) {
+		prot.div.on("click dragstart", function(event) {
 			$(".component.focus").each(function(i,c) {
 				var ob = $(c).data("spObject");
-				if (ob != my)
+				if (ob != prot)
 					ob.removeFocus();
 			});
-			my.addFocus(true);
+			prot.addFocus(true);
 			event.stopPropagation();
 		});
 		
-		my.div.hover(function() {
-			if (!my.div.hasClass("focus")) {
-				my.addFocus(false);
+		prot.div.hover(function() {
+			if (!prot.div.hasClass("focus")) {
+				prot.addFocus(false);
 			}
 		}, function() {
-			if (!my.div.hasClass("holdFocus")) {
-				my.removeFocus();
+			if (!prot.div.hasClass("holdFocus")) {
+				prot.removeFocus();
 			}
 		});
 		
 		// A module is focused by default when it is created
-		my.addFocus(true);
+		prot.addFocus(true);
 		
 		// Move modules on workspace change
 		$(SignalPath).on("signalPathWorkspaceChange", function(event, workspace, oldWorkspace) {
@@ -156,44 +165,44 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 			loadPosition(workspace, true);
 		});
 		
-		return my.div;
+		return prot.div;
 	}
-	my.createDiv = createDiv;
+	prot.createDiv = createDiv;
 	
 	function writePosition(workspace) {
-		my.jsonData.layout = jQuery.extend(my.jsonData.layout || {}, {
+		prot.jsonData.layout = jQuery.extend(prot.jsonData.layout || {}, {
 			position: {
-				top: $(my.div).css('top'),
-				left: $(my.div).css('left'),
+				top: $(prot.div).css('top'),
+				left: $(prot.div).css('left'),
 			}
 		});
 		
 		// Currently only save workspace position for dashboard modules
-		if (my.div.hasClass("dashboard")) {
-			if (my.jsonData.layout.workspaces==null)
-				my.jsonData.layout.workspaces = {};
+		if (prot.div.hasClass("dashboard")) {
+			if (prot.jsonData.layout.workspaces==null)
+				prot.jsonData.layout.workspaces = {};
 			
-			if (workspace=="dashboard" && $(my.div).css('top')==my.jsonData.layout.workspaces.normal.top)
+			if (workspace=="dashboard" && $(prot.div).css('top')==prot.jsonData.layout.workspaces.normal.top)
 				console.log("Here we are!");
 			
-			my.jsonData.layout.workspaces[workspace] = {
+			prot.jsonData.layout.workspaces[workspace] = {
 				position: {
-					top: $(my.div).css('top'),
-					left: $(my.div).css('left')
+					top: $(prot.div).css('top'),
+					left: $(prot.div).css('left')
 				}
 			}
 		}
 	}
-	my.writePosition = writePosition;
+	prot.writePosition = writePosition;
 	
 	function loadPosition(workspace, animate) {
-		var item = my.jsonData.layout;
+		var item = prot.jsonData.layout;
 		
 		// Width and height do not change in different workspaces
 		if (item.width)
-			my.div.css('width',item.width);
+			prot.div.css('width',item.width);
 		if (item.height)
-			my.div.css('height',item.height);
+			prot.div.css('height',item.height);
 		
 		// If workspace supplied then try to read position from there
 		if (workspace!=null && item.workspaces!=null && item.workspaces[workspace]!=null)
@@ -202,79 +211,107 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		// don't animate on transition to normal workspace, as jsPlumb won't keep up
 		// TODO: maybe fix that some day
 		if (animate && workspace=="dashboard") {
-			my.div.animate({
+			prot.div.animate({
 			    top: item.position.top,
 			    left: item.position.left
 			  }, 200);
 		}
 		else {
-			my.div.css('top',item.position.top);
-			my.div.css('left',item.position.left);
+			prot.div.css('top',item.position.top);
+			prot.div.css('left',item.position.left);
 		}
 	}
-	my.loadPosition = loadPosition;
+	prot.loadPosition = loadPosition;
 	
 	function setLayoutData(layout) {
-		my.jsonData.layout = layout;
-		my.loadPosition(SignalPath.getWorkspace(),false);
+		prot.jsonData.layout = layout;
+		prot.loadPosition(SignalPath.getWorkspace(),false);
 	}
-	that.setLayoutData = setLayoutData;
+	pub.setLayoutData = setLayoutData;
 	
 	function getLayoutData() {
-		my.writePosition(SignalPath.getWorkspace());
-		return my.jsonData.layout;
+		prot.writePosition(SignalPath.getWorkspace());
+		return prot.jsonData.layout;
 	}
-	that.getLayoutData = getLayoutData;
+	pub.getLayoutData = getLayoutData;
+	
+	function getHelp() {
+		var result = null;
+    	$.ajax({
+		    type: 'GET',
+		    url: prot.signalPath.options.getModuleHelpUrl,
+		    dataType: 'json',
+		    success: function(data) {
+		    	if (!data.helpText) {
+		    		result = "No help is available for this module.";
+		    	}
+		    	else result = prot.renderHelp(data);
+			},
+		    error: function() {
+		    	result = "An error occurred while loading module help.";
+		    },
+		    data: {id:prot.jsonData.id},
+		    async: false
+		});
+    	return result;
+	}
+	prot.getHelp = getHelp;
+	
+	function renderHelp(data) {
+		var result = "<p>"+data.helpText+"</p>";
+		return result;
+	}
+	prot.renderHelp = renderHelp;
 	
 	function initResizable(options) {
 		var defaultOptions = {
 			helper: "chart-resize-helper",
 		}
 		options = $.extend({},defaultOptions,options || {});
-		my.div.resizable(options);
-		my.resizable = true;
+		prot.div.resizable(options);
+		prot.resizable = true;
 	}
-	my.initResizable = initResizable;
+	prot.initResizable = initResizable;
 	
 	function removeFocus() {
-		$(my.div).removeClass("focus");
-		$(my.div).removeClass("hoverFocus");
-		$(my.div).removeClass("holdFocus");
-		$(my.div).find(".showOnFocus").fadeTo(100,0);
+		$(prot.div).removeClass("focus");
+		$(prot.div).removeClass("hoverFocus");
+		$(prot.div).removeClass("holdFocus");
+		$(prot.div).find(".showOnFocus").fadeTo(100,0);
 	}
-	my.removeFocus = removeFocus;
+	prot.removeFocus = removeFocus;
 	
 	function addFocus(hold) {
-		$(my.div).addClass("focus");
+		$(prot.div).addClass("focus");
 		
-		if (hold) $(my.div).addClass("holdFocus");
-		else $(my.div).addClass("hoverFocus");
+		if (hold) $(prot.div).addClass("holdFocus");
+		else $(prot.div).addClass("hoverFocus");
 		
-		$(my.div).find(".showOnFocus").fadeTo(100,1);
+		$(prot.div).find(".showOnFocus").fadeTo(100,1);
 	}
-	my.addFocus = addFocus;
+	prot.addFocus = addFocus;
 	
 	function createModuleButton(additionalClasses) {
 		var button = $("<span class='modulebutton ui-corner-all ui-state-default showOnFocus "+(additionalClasses ? additionalClasses : "")+"'></span>");
 		button.hover(function() {$(this).addClass("ui-state-highlight");}, function() {$(this).removeClass("ui-state-highlight")});
 		return button;
 	}
-	my.createModuleButton = createModuleButton;
+	prot.createModuleButton = createModuleButton;
 	
 	function getContextMenu(div) {
 		return [
 		        {title: "Clone module", cmd: "clone"},
 		]
 	}
-	my.getContextMenu = getContextMenu;
+	prot.getContextMenu = getContextMenu;
 	
 	function handleContextMenuSelection(div,data,selection,event) {
 		if (selection=="clone") {
-			my.clone();
+			prot.clone();
 			event.stopPropagation();
 		}
 	}
-	my.handleContextMenuSelection = handleContextMenuSelection;
+	prot.handleContextMenuSelection = handleContextMenuSelection;
 	
 	/**
 	 * Functions for rendering and parsing options
@@ -303,7 +340,7 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 		}
 		return div;
 	}
-	my.createOption = createOption;
+	prot.createOption = createOption;
 	
 	function updateOption(option, div) {
 		if (option.type=="int") {
@@ -319,60 +356,60 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 			option.value = ($(div).find("select").val()=="true");
 		}
 	}
-	my.updateOption = updateOption;
+	prot.updateOption = updateOption;
 	
 	/**
 	 * Called when options are updated
 	 */
 	function onOptionsUpdated() {
 		// Reload the module
-		SignalPath.updateModule(that);
+		SignalPath.updateModule(pub);
 	}
-	my.onOptionsUpdated = onOptionsUpdated;
+	prot.onOptionsUpdated = onOptionsUpdated;
 	
 	function getHash() {
-		return my.hash;
+		return prot.hash;
 	}
-	that.getHash = getHash;
+	pub.getHash = getHash;
 	
 	function getModuleId() {
-		return my.jsonData.id;
+		return prot.jsonData.id;
 	}
-	my.getModuleId = getModuleId;
+	prot.getModuleId = getModuleId;
 	
 	function getDiv() {
-		if (my.div==null) {
-			my.createDiv();
+		if (prot.div==null) {
+			prot.createDiv();
 		}
-		return my.div;
+		return prot.div;
 	}
-	that.getDiv = getDiv;
+	pub.getDiv = getDiv;
 	
-//	that.getType = function() {
-//		return my.type;
+//	pub.getType = function() {
+//		return prot.type;
 //	}
 	
 	function close() {
-		$(my.div).remove();
-		that.onClose();
+		$(prot.div).remove();
+		pub.onClose();
 	}
-	that.close = close;
+	pub.close = close;
 	
-	that.redraw = function() {}
+	pub.redraw = function() {}
 	
-	that.clean = function() {}
+	pub.clean = function() {}
 	
-	that.onClose = function() {};
+	pub.onClose = function() {};
 	
 	function toJSON() {
 		writePosition(SignalPath.getWorkspace());
-		if (my.resizable) {
-			my.jsonData.layout.width = $(my.div).css('width');
-			my.jsonData.layout.height = $(my.div).css('height');	
+		if (prot.resizable) {
+			prot.jsonData.layout.width = $(prot.div).css('width');
+			prot.jsonData.layout.height = $(prot.div).css('height');	
 		}
-		return my.jsonData;
+		return prot.jsonData;
 	}
-	that.toJSON = toJSON;
+	pub.toJSON = toJSON;
 	
 	function receiveResponse(payload) {
 		if (payload.type=="warning") {
@@ -382,63 +419,63 @@ SignalPath.EmptyModule = function(data, canvas, my) {
 					alert(msg);
 				}
 			})(payload.msg));
-			my.div.append(warning);
+			prot.div.append(warning);
 		}
-//		else console.log("EmptyModule.receiveResponse called, hash: "+my.hash+", title: "+my.jsonData.name+", message: "+JSON.stringify(payload));
+//		else console.log("EmptyModule.receiveResponse called, hash: "+prot.hash+", title: "+prot.jsonData.name+", message: "+JSON.stringify(payload));
 	}
-	that.receiveResponse = receiveResponse;
+	pub.receiveResponse = receiveResponse;
 	
-	that.endOfResponses = function() {}
+	pub.endOfResponses = function() {}
 	
 	function updateFrom(data) {
 		// Overwrite jsonData
-		my.jsonData = data;
+		prot.jsonData = data;
 		// But keep the hash
-		my.jsonData.hash = my.hash;
+		prot.jsonData.hash = prot.hash;
 		
 		// Recreate module
-		var top = $(my.div).css("top");
-		var left = $(my.div).css("left");
+		var top = $(prot.div).css("top");
+		var left = $(prot.div).css("left");
 		
 		// Kill close handlers
-		var oldCloseHandler = that.onClose;
-		that.onClose = function() {};
+		var oldCloseHandler = pub.onClose;
+		pub.onClose = function() {};
 		
-		that.close();
+		pub.close();
 		
 		// Recreate the div
-		my.createDiv();
+		prot.createDiv();
 		
 		// Reposition the div
-		$(my.div).css("top",top);
-		$(my.div).css("left",left);
+		$(prot.div).css("top",top);
+		$(prot.div).css("left",left);
 		
 		// Reset the close handlers
-		that.onClose = oldCloseHandler;
+		pub.onClose = oldCloseHandler;
 	}
-	that.updateFrom = updateFrom;
+	pub.updateFrom = updateFrom;
 	
 	function clone() {
 		// Deep copy my data
-		var cloneData = jQuery.extend(true, {}, my.toJSON());
-		my.prepareCloneData(cloneData);
+		var cloneData = jQuery.extend(true, {}, prot.toJSON());
+		prot.prepareCloneData(cloneData);
 		return SignalPath.createModuleFromJSON(cloneData);
 	}
-	my.clone = clone;
+	prot.clone = clone;
 	
 	function prepareCloneData(cloneData) {
 		// Set hash to null so that a new id will be assigned
 		cloneData.hash = null;
 	}
-	my.prepareCloneData = prepareCloneData;
+	prot.prepareCloneData = prepareCloneData;
 	
-	my.onDrag = function() {}
+	prot.onDrag = function() {}
 	
 	// Everything added to the public interface can be accessed from the
-	// private interface too
-	$.extend(my,that);
+	// protected interface too
+	$.extend(prot,pub);
 	
-	return that;
+	return pub;
 }
 
 $(document).contextmenu({
@@ -459,11 +496,11 @@ $(document).contextmenu({
 			target = target.parent();
 			
 		if (target!=null) {
-			var my = target.data("spObject");
+			var prot = target.data("spObject");
 			
 			// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
 			$(document).data("contextMenuTarget",target);
-			$(document).contextmenu("replaceMenu", my.getContextMenu(ui.target));
+			$(document).contextmenu("replaceMenu", prot.getContextMenu(ui.target));
 		}
 	}
 });

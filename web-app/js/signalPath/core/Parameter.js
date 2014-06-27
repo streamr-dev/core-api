@@ -132,18 +132,18 @@ SignalPath.getParamRenderer = function(data) {
 };
 
 
-SignalPath.Parameter = function(json, parentDiv, module, type, my) {
-	my = my || {};
-	my = SignalPath.Input(json, parentDiv, module, type || "parameter input", my);
+SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
+	pub = pub || {};
+	pub = SignalPath.Input(json, parentDiv, module, type || "parameter input", pub);
 	
-	var super_createDiv = my.createDiv;
-	my.createDiv = function() {
+	var super_createDiv = pub.createDiv;
+	pub.createDiv = function() {
 		var div = super_createDiv();
 
 		// Create the parameter input form
-		my.input = createParamInput();
+		pub.input = createParamInput();
 		var inputTd = $("<td></td>");
-		inputTd.append(my.input);
+		inputTd.append(pub.input);
 		parentDiv.parent().append(inputTd);
 		
 		// Assign disabled class to input when the parameter is connected
@@ -151,53 +151,53 @@ SignalPath.Parameter = function(json, parentDiv, module, type, my) {
 			return function(output) {
 				me.input.attr("disabled","disabled").addClass("disabled");
 			}
-		})(my));
+		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(output) {
 				me.input.removeAttr("disabled").removeClass("disabled");
 			}
-		})(my));
+		})(pub));
 		
 		// Changes to parameters can be made at runtime
-		my.input.change(function() {
-			if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges && confirm("Make a runtime change to '"+my.getDisplayName()+"'?")) {
-				var value = getParamRenderer(my.json).getValue(my.module, my.json, my.input);
-				SignalPath.sendUIAction(module.getHash(), {type:"paramChange", param:my.getName(), value:value}, function(resp) {});
+		pub.input.change(function() {
+			if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges && confirm("Make a runtime change to '"+pub.getDisplayName()+"'?")) {
+				var value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+				SignalPath.sendUIAction(module.getHash(), {type:"paramChange", param:pub.getName(), value:value}, function(resp) {});
 			}
 		});
 		
 		// Trigger the spIOReady event on the input as well
-		my.input.trigger("spIOReady");
+		pub.input.trigger("spIOReady");
 		
 		return div;
 	}
 	
 	// PRIVATE FUNCTIONS
 	function getParamRenderer() {
-		return SignalPath.getParamRenderer(my.json);
+		return SignalPath.getParamRenderer(pub.json);
 	}
 	
 	function createParamInput() {
 		var result = null;
 
-		var renderer = getParamRenderer(my.json);
-		result = renderer.create(my.module, my.json);
+		var renderer = getParamRenderer(pub.json);
+		result = renderer.create(pub.module, pub.json);
 		
-		if (my.json.updateOnChange) {
+		if (pub.json.updateOnChange) {
 			$(result).change(function() {
-				SignalPath.updateModule(my.module);
+				SignalPath.updateModule(pub.module);
 			});
 		}
 		
 		return result;
 	}
 	
-	var super_toJSON = my.toJSON;
-	my.toJSON = function() {
-		my.json.value = getParamRenderer(my.json).getValue(my.module, my.json, my.input);
+	var super_toJSON = pub.toJSON;
+	pub.toJSON = function() {
+		pub.json.value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
 		return super_toJSON();
 	}
 	
-	return my;
+	return pub;
 }

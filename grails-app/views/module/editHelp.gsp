@@ -73,17 +73,23 @@
         	var paramTable = $("#params"),
 				inputTable = $("#inputs"),
 				outputTable = $("#outputs"),
-				result = {params:{}, inputs:{}, outputs:{}};
+				result = {params:{}, paramNames:[], inputs:{}, inputNames:[], outputs:{}, outputNames:[]};
 			
 			result.helpText = $("#moduleHelp").val();
 			paramTable.find("tr").each(function(i,row) {
-				result.params[$(row).find("td.name").text()] = $(row).find("td.value input").val();
+				var name = $(row).find("td.name").text();
+				result.paramNames.push(name);
+				result.params[name] = $(row).find("td.value input").val();
 			});
 			inputTable.find("tr").each(function(i,row) {
-				result.inputs[$(row).find("td.name").text()] = $(row).find("td.value input").val();
+				var name = $(row).find("td.name").text();
+				result.inputNames.push(name);
+				result.inputs[name] = $(row).find("td.value input").val();
 			});
 			outputTable.find("tr").each(function(i,row) {
-				result.outputs[$(row).find("td.name").text()] = $(row).find("td.value input").val();
+				var name = $(row).find("td.name").text();
+				result.outputNames.push(name);
+				result.outputs[name] = $(row).find("td.value input").val();
 			});
 			return result;
         }

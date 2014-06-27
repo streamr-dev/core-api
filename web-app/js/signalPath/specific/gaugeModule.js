@@ -1,6 +1,6 @@
-SignalPath.GaugeModule = function(data,canvas,my) {
-	my = my || {};
-	var that = SignalPath.GenericModule(data,canvas,my)
+SignalPath.GaugeModule = function(data,canvas,prot) {
+	prot = prot || {};
+	var pub = SignalPath.GenericModule(data,canvas,prot)
 	
 	var area = null;	
 	var chart = null;
@@ -21,40 +21,40 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		}
 	}
 	
-	var superCreateDiv = my.createDiv;
+	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
 		
 		initArea();
 		
-		my.initResizable({
-			minWidth: parseInt(my.div.css("min-width").replace("px","")),
-			minHeight: parseInt(my.div.css("min-height").replace("px","")),
+		prot.initResizable({
+			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
+			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
 			stop: function(event,ui) {
 				resizeChart(ui.size.width, ui.size.height);
 			}
 		});
 	}
-	my.createDiv = createDiv;	
+	prot.createDiv = createDiv;	
 	
 	function getChart() {
 		return chart;
 	}
-	my.getChart = getChart;
+	prot.getChart = getChart;
 	
 	function initArea() {
-		my.body.find(".ioTable").css("width","0px");
-		my.body.find(".paramTable").css("width","0px");
+		prot.body.find(".ioTable").css("width","0px");
+		prot.body.find(".paramTable").css("width","0px");
 		
 		// Find the chart draw area
-		area = my.body.find(".chartDrawArea");
+		area = prot.body.find(".chartDrawArea");
 		if (area==null || area.length==0) {
 			// Create the chart area
 			var areaId = "chartArea_"+(new Date()).getTime();
 			area = $("<div id='"+areaId+"' class='chartDrawArea'></div>");
-			my.body.append(area);
+			prot.body.append(area);
 			
-			resizeChart(my.div.width(),my.div.height());
+			resizeChart(prot.div.width(),prot.div.height());
 		}
 	}
 	
@@ -72,7 +72,7 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		$(area).show();
 		
 		// Dragging in the chartDrawArea must not move the module
-//		my.div.draggable("option", "cancel", ".chartDrawArea");
+//		prot.div.draggable("option", "cancel", ".chartDrawArea");
 		
 		_min = min;
 		_max = max;
@@ -91,11 +91,11 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		    },
 		
 		    title: {
-		        text: my.jsonData.options.title.value,
+		        text: prot.jsonData.options.title.value,
 		        floating: true,
 		        verticalAlign: 'bottom',
 		        y: 35,
-		        style: (my.jsonData.options.titleStyle.value!="" ? eval("("+my.jsonData.options.titleStyle.value+")") : null),
+		        style: (prot.jsonData.options.titleStyle.value!="" ? eval("("+prot.jsonData.options.titleStyle.value+")") : null),
 		    },
 		    
 		    pane: [{
@@ -112,11 +112,11 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		        minorTickPosition: 'outside',
 		        tickPosition: 'outside',
 		        labels: {
-		        	enabled: my.jsonData.options.labels.value,
-		        	formatter: (my.jsonData.options.labelFormatter.value!="" ? new Function(my.jsonData.options.labelFormatter.value) : function() { return this.value; }),
+		        	enabled: prot.jsonData.options.labels.value,
+		        	formatter: (prot.jsonData.options.labelFormatter.value!="" ? new Function(prot.jsonData.options.labelFormatter.value) : function() { return this.value; }),
 		        	rotation: 'auto',
 		        	distance: 20,
-		        	style: (my.jsonData.options.labelStyle.value!="" ? eval("("+my.jsonData.options.labelStyle.value+")") : null),
+		        	style: (prot.jsonData.options.labelStyle.value!="" ? eval("("+prot.jsonData.options.labelStyle.value+")") : null),
 		        },
 		        plotBands: [{
 		            color: {
@@ -205,7 +205,7 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 
 	}
 	
-	that.receiveResponse = function(d) {
+	pub.receiveResponse = function(d) {
 		
 		if (area==null)
 			initArea();
@@ -241,7 +241,7 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		}
 	}
 	
-	that.endOfResponses = function() {
+	pub.endOfResponses = function() {
 		if (chart != null) {
 			redrawChart();
 		}
@@ -251,19 +251,19 @@ SignalPath.GaugeModule = function(data,canvas,my) {
 		chart.redraw();
 	}
 	
-	var superClean = that.clean;
-	that.clean = function() {
+	var superClean = pub.clean;
+	pub.clean = function() {
 		superClean();
 		destroyChart();
 	}
 	
-	var superUpdateFrom = that.updateFrom;
-	that.updateFrom = function(data) {
+	var superUpdateFrom = pub.updateFrom;
+	pub.updateFrom = function(data) {
 		destroyChart();
 		area = null;
 		
 		superUpdateFrom(data);
 	}
 	
-	return that;
+	return pub;
 }

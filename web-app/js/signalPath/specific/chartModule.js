@@ -1,8 +1,8 @@
-SignalPath.ChartModule = function(data,canvas,my) {
-	my = my || {};
-	var that = SignalPath.GenericModule(data,canvas,my)
+SignalPath.ChartModule = function(data,canvas,prot) {
+	prot = prot || {};
+	var pub = SignalPath.GenericModule(data,canvas,prot)
 
-	my.enableIONameChange = false;
+	prot.enableIONameChange = false;
 	
 	var area = null;
 	
@@ -32,29 +32,29 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		}
 	}
 	
-	var superCreateDiv = my.createDiv;
+	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
 		
 		// Change context menu on Double inputs
-		if (!my.jsonData.disableAxisSelection) {
-			my.div.find("div.input.Double").removeClass("default-context-menu").addClass("chart-context-menu");
+		if (!prot.jsonData.disableAxisSelection) {
+			prot.div.find("div.input.Double").removeClass("default-context-menu").addClass("chart-context-menu");
 		}
 		
 		// Bind yAxis selection possibility to TimeSeries inputs
-//		if (!my.jsonData.disableAxisSelection) {
-//			my.div.find("div.input.Double").each(function(i,input) {
+//		if (!prot.jsonData.disableAxisSelection) {
+//			prot.div.find("div.input.Double").each(function(i,input) {
 //				if (!$(input).hasClass("parameter")) {
 //
 //					// Unbind anything
 //					$(input).click(
-//							(function(input,my) {
+//							(function(input,prot) {
 //								return function() {
 //									var n = $(input).find("span.ioname").text();
 //
 //									// Find input from json data
 //									var jsonInput = null;
-//									$(my.jsonData.inputs).each(function(i,jsI) {
+//									$(prot.jsonData.inputs).each(function(i,jsI) {
 //										if (jsI.name==n)
 //											jsonInput=jsI;
 //									});
@@ -67,7 +67,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 //									if (yAxis != null)
 //										jsonInput.yAxis = parseInt(yAxis);
 //								}
-//							})(input,my)
+//							})(input,prot)
 //					);
 //				}
 //			});
@@ -75,32 +75,32 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		
 		initArea();
 		
-		my.initResizable({
-			minWidth: parseInt(my.div.css("min-width").replace("px","")),
-			minHeight: parseInt(my.div.css("min-height").replace("px","")),
+		prot.initResizable({
+			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
+			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
 			stop: function(event,ui) {
 				resizeChart(ui.size.width, ui.size.height);
 			}
 		});
 	}
-	my.createDiv = createDiv;	
+	prot.createDiv = createDiv;	
 	
 	function getChart() {
 		return chart;
 	}
-	my.getChart = getChart;
+	prot.getChart = getChart;
 	
 	function initArea() {
-		my.body.find(".ioTable").css("width","0px");
+		prot.body.find(".ioTable").css("width","0px");
 		
 		// Find the chart draw area
-		area = my.body.find(".chartDrawArea");
+		area = prot.body.find(".chartDrawArea");
 		if (area==null || area.length==0) {
 			// Add the range buttons
 			var buttonDiv = $("<div class='chartRangeButtons'></div>");
 			var buttonConfig = [{name:"1s",range:1*1000},{name:"15s",range:15*1000},{name:"1m",range:60*1000},{name:"15m",range:15*60*1000},{name:"30m",range:30*60*1000},{name:"1h",range:60*60*1000},{name:"2h",range:2*60*60*1000},{name:"4h",range:4*60*60*1000},{name:"1d",range:12*60*60*1000},{name:"All",range:null}];
 			createRangeButtons(buttonDiv,buttonConfig);
-			my.body.append(buttonDiv);
+			prot.body.append(buttonDiv);
 			
 			// Add the series hide/show links
 			var hideLink = $("<a class='seriesLink' href='#'>hide all</a>");
@@ -129,14 +129,14 @@ SignalPath.ChartModule = function(data,canvas,my) {
 			// Create the chart area
 			var areaId = "chartArea_"+(new Date()).getTime();
 			area = $("<div id='"+areaId+"' class='chartDrawArea'></div>");
-			my.body.append(area);
+			prot.body.append(area);
 			
-			resizeChart(my.div.width(),my.div.height());
+			resizeChart(prot.div.width(),prot.div.height());
 		}
 	}
 	
-	var superGetContextMenu = my.getContextMenu;
-	my.getContextMenu = function(div) {
+	var superGetContextMenu = prot.getContextMenu;
+	prot.getContextMenu = function(div) {
 		var menu = superGetContextMenu(div);
 		if (div.hasClass("ioname")) {
 			menu.push({title: "Set Y-axis", cmd: "yaxis"});
@@ -144,8 +144,8 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		return menu;
 	};
 	
-	var superHandleContextMenuSelection = my.handleContextMenuSelection;
-	my.handleContextMenuSelection = function(div,data,selection,event) {
+	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
+	prot.handleContextMenuSelection = function(div,data,selection,event) {
 		if (selection=="yaxis") {
 			var n = $(div).find(".ioname").text();
 			var yAxis = prompt("Axis number for "+n+":",data.yAxis);
@@ -174,7 +174,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 	function destroyChart() {
 		if (chart!=null) {
 			chart.destroy();
-			my.body.find("button.yAxis").remove();
+			prot.body.find("button.yAxis").remove();
 			chart=null;
 		}
 	}
@@ -186,7 +186,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		$(area).show();
 		
 		// Dragging in the chartDrawArea must not move the module
-		my.div.draggable("option", "cancel", ".chartDrawArea");
+		prot.div.draggable("option", "cancel", ".chartDrawArea");
 		
 		if (yAxis==null) {
 			yAxis = { 
@@ -352,7 +352,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 //		}
 	}
 	
-	that.receiveResponse = function(d) {
+	pub.receiveResponse = function(d) {
 //		handlingMessages = true;
 		
 		if (area==null)
@@ -502,7 +502,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 			destroyChart();
 			
 			// Remove csv buttons
-			my.body.find("div.csvDownload").remove();
+			prot.body.find("div.csvDownload").remove();
 		}
 		
 		
@@ -544,7 +544,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 			var link = $("<a href='"+d.link+"'></a>");
 			link.append("<img src='../images/download.png'/>&nbsp;"+d.filename);
 			div.append(link);
-			my.body.append(div);
+			prot.body.append(div);
 			div.effect("highlight",{},2000);
 			
 			link.click(function(event) {
@@ -565,7 +565,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		
 	}
 	
-	that.endOfResponses = function() {
+	pub.endOfResponses = function() {
 //		handlingMessages = false;
 		
 		if (chart != null) {
@@ -600,8 +600,8 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		chart.redraw();
 	}
 	
-	var superClean = that.clean;
-	that.clean = function() {
+	var superClean = pub.clean;
+	pub.clean = function() {
 		superClean();
 		destroyChart();
 
@@ -610,11 +610,11 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		minTime = null;
 		maxTime = null;
 		
-		my.body.find("div.csvDownload").remove();
+		prot.body.find("div.csvDownload").remove();
 	}
 	
-	var superUpdateFrom = that.updateFrom;
-	that.updateFrom = function(data) {
+	var superUpdateFrom = pub.updateFrom;
+	pub.updateFrom = function(data) {
 		destroyChart();
 		area = null;
 		
@@ -626,7 +626,7 @@ SignalPath.ChartModule = function(data,canvas,my) {
 		superUpdateFrom(data);
 	}
 	
-	return that;
+	return pub;
 }
 
 SignalPath.HighStocksModule = SignalPath.ChartModule;

@@ -1,6 +1,6 @@
-SignalPath.TableModule = function(data,canvas,my) {
-	my = my || {};
-	var that = SignalPath.GenericModule(data,canvas,my)
+SignalPath.TableModule = function(data,canvas,prot) {
+	prot = prot || {};
+	var pub = SignalPath.GenericModule(data,canvas,prot)
 
 	var area = null;
 
@@ -13,7 +13,7 @@ SignalPath.TableModule = function(data,canvas,my) {
 	/**
 	 * Initialization
 	 */
-	var superCreateDiv = my.createDiv;
+	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
 		
@@ -39,7 +39,7 @@ SignalPath.TableModule = function(data,canvas,my) {
 		table.append(tableBody);
 		
 		tableContainer.append(table);
-		my.body.append(tableContainer);
+		prot.body.append(tableContainer);
 		
 		
 		rowCount = d.rows;
@@ -57,9 +57,9 @@ SignalPath.TableModule = function(data,canvas,my) {
 			}
 		}
 	}
-	my.createDiv = createDiv;
+	prot.createDiv = createDiv;
 	
-	that.receiveResponse = function(d) {
+	pub.receiveResponse = function(d) {
 		// New row message
 		if (d.nr) {
 			// Remove last row if table full
@@ -82,12 +82,12 @@ SignalPath.TableModule = function(data,canvas,my) {
 		}
 	}
 	
-	var superClean = that.clean;
-	that.clean = function() {
+	var superClean = pub.clean;
+	pub.clean = function() {
 		superClean();
 		// Remove all rows
 		tableBody.find("tr").remove();
 	}
 	
-	return that;
+	return pub;
 }

@@ -9,11 +9,11 @@ SignalPath.CustomModuleOptions = {
 	}
 };
 
-SignalPath.CustomModule = function(data,canvas,my) {
-	my = my || {};
-	var that = SignalPath.GenericModule(data,canvas,my)
+SignalPath.CustomModule = function(data,canvas,prot) {
+	prot = prot || {};
+	var pub = SignalPath.GenericModule(data,canvas,prot)
 
-	var module = that.getDiv();
+	var module = pub.getDiv();
 	
 	var dialog = null;
 	var debug = null;
@@ -38,8 +38,8 @@ SignalPath.CustomModule = function(data,canvas,my) {
 					"Apply": function() {
 						editor.clearGutter("breakpoints");
 						updateJson();
-						SignalPath.updateModule(that, function() {
-							module = that.getDiv();
+						SignalPath.updateModule(pub, function() {
+							module = pub.getDiv();
 							addStuffToDiv();
 						});
 					},
@@ -49,15 +49,15 @@ SignalPath.CustomModule = function(data,canvas,my) {
 				},
 				open: function() {
 					editor = CodeMirror(dialog[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
-						value: my.jsonData.code,
+						value: prot.jsonData.code,
 						mode:  "groovy"
 					}));
 				},
-				close: that.onDelete
+				close: pub.onDelete
 			}).dialog("widget").draggable("option","containment","none");
 			
-			$(SignalPath).on("signalPathNew", that.onDelete);
-			$(SignalPath).on("signalPathLoad", that.onDelete);
+			$(SignalPath).on("signalPathNew", pub.onDelete);
+			$(SignalPath).on("signalPathLoad", pub.onDelete);
 		}
 		
 		if (debug==null) {
@@ -92,18 +92,18 @@ SignalPath.CustomModule = function(data,canvas,my) {
 	}
 	
 	function updateJson() {
-		my.jsonData.code = editor.getValue();
-//		if (my.jsonData.inputs!=null)
-//			delete my.jsonData.inputs;
-//		if (my.jsonData.outputs!=null)
-//			delete my.jsonData.outputs;
-//		if (my.jsonData.params!=null)
-//			delete my.jsonData.params;
+		prot.jsonData.code = editor.getValue();
+//		if (prot.jsonData.inputs!=null)
+//			delete prot.jsonData.inputs;
+//		if (prot.jsonData.outputs!=null)
+//			delete prot.jsonData.outputs;
+//		if (prot.jsonData.params!=null)
+//			delete prot.jsonData.params;
 	}
 	
-	var superReceiveResponse = that.receiveResponse;
+	var superReceiveResponse = pub.receiveResponse;
 	
-	that.receiveResponse = function(payload) {
+	pub.receiveResponse = function(payload) {
 		superReceiveResponse(payload);
 		
 		if (payload.type=="debug" && debug != null) {
@@ -127,14 +127,14 @@ SignalPath.CustomModule = function(data,canvas,my) {
 		return marker;
 	}
 	
-	that.endOfResponses = function() {
+	pub.endOfResponses = function() {
 		
 	}
 	
-	var thatDeleteOld = that.onDelete;
-	that.onDelete = function() {
-		if (thatDeleteOld)
-			thatDeleteOld();
+	var super_onDelete = pub.onDelete;
+	pub.onDelete = function() {
+		if (super_onDelete)
+			super_onDelete();
 		
 		if (dialog!=null) {
 			$(dialog).dialog("close");
@@ -151,5 +151,5 @@ SignalPath.CustomModule = function(data,canvas,my) {
 		}
 	}
 	
-	return that;
+	return pub;
 }

@@ -1,65 +1,65 @@
-SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
-	my = my || {};
+SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
+	pub = pub || {};
 	
-	my.json = json;
-	my.parentDiv = parentDiv;
-	my.module = module;
-	my.type = type;
+	pub.json = json;
+	pub.parentDiv = parentDiv;
+	pub.module = module;
+	pub.type = type;
 	
 	function createDiv() {
 		
 		// Create connection div
-		var div = $("<div class='"+my.type+" "+my.json.type+"'></div>");
-		div.data("spObject",my);
-		my.div = div;
+		var div = $("<div class='endpoint "+pub.type+" "+pub.json.type+"'></div>");
+		div.data("spObject",pub);
+		pub.div = div;
 		
 		// Create id if not yet created
-		if (!my.json.id || my.json.id.length<20) {
-			var oldId = my.json.id;
-			my.json.id = generateId();
+		if (!pub.json.id || pub.json.id.length<20) {
+			var oldId = pub.json.id;
+			pub.json.id = generateId();
 			
 			if (oldId)
-				SignalPath.replacedIds[oldId] = my.json.id;
+				SignalPath.replacedIds[oldId] = pub.json.id;
 		}
 		
-		div.attr("id",my.json.id);
+		div.attr("id",pub.json.id);
 		
 		// Name holder
-		var ioname = $("<div class='ioname'>"+my.getDisplayName()+"</span>");
+		var ioname = $("<div class='ioname'>"+pub.getDisplayName()+"</span>");
 		div.append(ioname);
 		
 		// Add to parent
-		my.parentDiv.append(div);
+		pub.parentDiv.append(div);
 
-		if (my.json["export"])
-			setExport(div,my.json,true);
+		if (pub.json["export"])
+			setExport(div,pub.json,true);
 		
-		// Don't create jsPlumb endpoint if my.json.canConnect is false (default: true)
-		if (my.json.canConnect==null || my.json.canConnect) {
+		// Don't create jsPlumb endpoint if pub.json.canConnect is false (default: true)
+		if (pub.json.canConnect==null || pub.json.canConnect) {
 			// TODO: endpointId is for backwards compatibility
-			var id = (my.json.endpointId != null ? my.json.endpointId : my.json.id);
-			my.jsPlumbEndpoint = createJSPlumbEndpoint(my.json, div, id);
+			var id = (pub.json.endpointId != null ? pub.json.endpointId : pub.json.id);
+			pub.jsPlumbEndpoint = createJSPlumbEndpoint(pub.json, div, id);
 		}
 		
 		// Create io settings
-		my.createSettings(div,my.json);
+		pub.createSettings(div,pub.json);
 		
 		// Bind context menu listeners
-		if (!my.disableContextMenu) {
+		if (!pub.disableContextMenu) {
 			div.addClass("context-menu");
 		}
 		
 		div.on('spContextMenuSelection', (function(d,j) {
 			return function(event,selection) {
-				my.handleContextMenuSelection(d,j,selection,event);
+				pub.handleContextMenuSelection(d,j,selection,event);
 			};
-		})(div,my.json));
+		})(div,pub.json));
 		
 		div.trigger("spIOReady");
 		
 		return div;
 	}
-	my.createDiv = createDiv;
+	pub.createDiv = createDiv;
 	
 	function setExport(iodiv,data,value) {
 		if (value) {
@@ -71,15 +71,15 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 			data["export"] = false;
 		}
 	}
-	my.setExport = setExport;
+	pub.setExport = setExport;
 	
 	function toggleExport(iodiv,data) {
-		my.setExport(iodiv,data,!data["export"]);
+		pub.setExport(iodiv,data,!data["export"]);
 	}
-	my.toggleExport = toggleExport;
+	pub.toggleExport = toggleExport;
 	
 	function generateId() {
-		var id = "myId_"+my.module.hash+"_"+new Date().getTime();
+		var id = "myId_"+pub.module.hash+"_"+new Date().getTime();
 		
 		// Check for clashes
 		while ($("#"+id).length>0)
@@ -89,9 +89,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	}	
 
 	function getId() {
-		return my.json.id;
+		return pub.json.id;
 	}
-	my.getId = getId;
+	pub.getId = getId;
 	
 	function getJSPlumbEndpointOptions(json,connDiv) {
 		return {
@@ -100,12 +100,12 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 			dragOptions: {},
 			dropOptions: {},
 			beforeDrop: function(info) {
-				return my.checkConnection(info) && my.checkConnectionDirection(info);
+				return pub.checkConnection(info) && pub.checkConnectionDirection(info);
 			},
 			connectorOverlays: [["Arrow", {direction:1, paintStyle: {cssClass:"arrow"}}]],
 		};
 	}
-	my.getJSPlumbEndpointOptions = getJSPlumbEndpointOptions;
+	pub.getJSPlumbEndpointOptions = getJSPlumbEndpointOptions;
 	
 	function createJSPlumbEndpoint(json,connDiv,id) {
 		var isOutput = connDiv.hasClass('output');
@@ -115,22 +115,16 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		// TODO: define overlay in theme?
 		var overlays = [["Arrow", {direction:(isInput ? -1 : 1), paintStyle: {cssClass:"arrow"}}]];
 		
-		var ep = jsPlumb.addEndpoint(connDiv, my.getJSPlumbEndpointOptions(json.connDiv));
+		var ep = jsPlumb.addEndpoint(connDiv, pub.getJSPlumbEndpointOptions(json.connDiv));
 //		ep.bind("click", function(endpoint) {
 //			console.log(endpoint);
 //		});
 		
 		$(connDiv).data("acceptedTypes", (json.acceptedTypes!=null ? json.acceptedTypes : [json.type]));
 		
-		if (isOutput) {
-			$(connDiv).dblclick(function() {
-				autoConnectOutputByExample(connDiv);
-			});
-		}
-		
 		return ep;
 	}
-	my.createJSPlumbEndpoint = createJSPlumbEndpoint;
+	pub.createJSPlumbEndpoint = createJSPlumbEndpoint;
 	
 	function rename(iodiv,data) {
 		var n = $(iodiv).find(".ioname").text();
@@ -152,7 +146,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	}
 	
 	function getContextMenu(div) {
-		var menu = my.module.getContextMenu(div);
+		var menu = pub.module.getContextMenu(div);
 		
 //		if (div.hasClass("ioname")) {
 		menu.push({title: "Rename", cmd: "rename"});
@@ -160,7 +154,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 //		}
 		return menu;
 	}
-	my.getContextMenu = getContextMenu;
+	pub.getContextMenu = getContextMenu;
 	
 	function handleContextMenuSelection(div,data,selection,event) {
 		if (selection=="rename") {
@@ -173,17 +167,17 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		}
 		else module.handleContextMenuSelection(div,data,selection,event);
 	}
-	my.handleContextMenuSelection = handleContextMenuSelection;
+	pub.handleContextMenuSelection = handleContextMenuSelection;
 	
 	function getName() {
-		return my.json.name;
+		return pub.json.name;
 	}
-	my.getName = getName;
+	pub.getName = getName;
 
 	function getDisplayName() {
-		return (my.json.displayName ? my.json.displayName : my.json.name);
+		return (pub.json.displayName ? pub.json.displayName : pub.json.name);
 	}
-	my.getDisplayName = getDisplayName;
+	pub.getDisplayName = getDisplayName;
 	
 	function checkConnection(connection) {
 		// Endpoints must contain at least one acceptedType in common
@@ -199,7 +193,12 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		SignalPath.options.errorHandler({msg:"These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+"."});
 		return false;
 	}
-	my.checkConnection = checkConnection;
+	pub.checkConnection = checkConnection;
+	
+	function getAcceptedTypes() {
+		return json.acceptedTypes;
+	}
+	pub.getAcceptedTypes = getAcceptedTypes;
 	
 	function checkConnectionDirection(info) {
 		// Check that the source of this connection is an input and the target is an output.
@@ -218,9 +217,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 		// Don't allow input-input or output-output connections
 		else return false;
 	}
-	my.checkConnectionDirection = checkConnectionDirection;
+	pub.checkConnectionDirection = checkConnectionDirection;
 	
-	my.createSettings = function(div,data) {
+	pub.createSettings = function(div,data) {
 
 	}
 	
@@ -228,13 +227,13 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	function connect(endpoint) {
 		throw new Exception("connect() called in Endpoint");
 	}
-	my.connect = connect;
+	pub.connect = connect;
 	
 	// abstract, must be overridden
 	function getConnectedEndpoints() {
 		throw new Exception("getConnectedEndpoints() called in Endpoint");
 	}
-	my.getConnectedEndpoints = getConnectedEndpoints;
+	pub.getConnectedEndpoints = getConnectedEndpoints;
 
 	// abstract, must be overridden
 	function refreshConnections() {
@@ -245,7 +244,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, my) {
 	function toJSON() {
 		throw new Exception("toJSON() called in Endpoint");
 	}
-	my.toJSON = toJSON;
+	pub.toJSON = toJSON;
 	
-	return my;
+	return pub;
 }

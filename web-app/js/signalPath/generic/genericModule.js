@@ -1,110 +1,48 @@
-SignalPath.GenericModule = function(data, canvas, my) {
-	my = my || {};
+SignalPath.GenericModule = function(data, canvas, prot) {
+	prot = prot || {};
 	
-	var that = SignalPath.EmptyModule(data, canvas, my);
+	var pub = SignalPath.EmptyModule(data, canvas, prot);
 
-	my.paramTable = null;
-	my.ioTable = null;
+	prot.paramTable = null;
+	prot.ioTable = null;
 
-	my.enableIONameChange = true;
+	prot.enableIONameChange = true;
 	
-	my.inputsByName = {};
-	my.params = [];
-	my.inputs = [];
-	my.outputsByName = {};
-	my.outputs = [];
-	
-	// TODO: this must be updated to work someday
-//	function autoConnectInputs() {
-//		var outputs = $("div.output");
-//		var oIdx = 0;
-//		$(my.div).find("div.input").each(function(i,input) {
-//			// Skip parameters
-//			if (!$(input).hasClass("parameter")) {
-//				// Is this input connected?
-//				var connections = jsPlumb.getConnections({source:input.attr("id"), scope:"*"});
-//				if (connections.length==0) {
-//					// Find an unconnected output
-//					while (oIdx<outputs.length) {
-//						var output = outputs[oIdx];
-//						var connections = jsPlumb.getConnections({target:output.attr("id"), scope:"*"});
-//						if (connections.length==0) {
-//							jsPlumb.connect({source:input, target:output});
-//							break;
-//						}
-//						oIdx++;
-//					}
-//				}
-//			}
-//		});
-//	}
+	prot.inputsByName = {};
+	prot.params = [];
+	prot.inputs = [];
+	prot.outputsByName = {};
+	prot.outputs = [];
 
 	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
 		
 		var div = $("<div class='modulefooter'></div>");
-		my.div.append(div);
+		prot.div.append(div);
 		
-		if (my.jsonData.canClearState==null || my.jsonData.canClearState) {
+		if (prot.jsonData.canClearState==null || prot.jsonData.canClearState) {
 			var clear = $("<div class='moduleSwitch clearState showOnFocus'>CLEAR</div>");
-			if (my.jsonData.clearState==null)
-				my.jsonData.clearState = true;
+			if (prot.jsonData.clearState==null)
+				prot.jsonData.clearState = true;
 
-			clear.addClass(my.jsonData.clearState ? "ioSwitchTrue" : "ioSwitchFalse");
+			clear.addClass(prot.jsonData.clearState ? "ioSwitchTrue" : "ioSwitchFalse");
 			div.append(clear);
 			clear.click(function() {
-				if (my.jsonData.clearState) {
-					my.jsonData.clearState = false;
+				if (prot.jsonData.clearState) {
+					prot.jsonData.clearState = false;
 					clear.removeClass("ioSwitchTrue");
 					clear.addClass("ioSwitchFalse");
 				}
 				else {
-					my.jsonData.clearState = true;
+					prot.jsonData.clearState = true;
 					clear.addClass("ioSwitchTrue");
 					clear.removeClass("ioSwitchFalse");
 				}
 			});
 		}
 	}
-	my.createModuleFooter = createModuleFooter;
+	prot.createModuleFooter = createModuleFooter;
 	
-	// TODO: this must be updated to work someday
-//	function autoConnectOutputByExample(output) {
-//		var connections = jsPlumb.getConnections({target:output.attr("id")});
-//		
-//		if (connections.length>0) {
-//			var targets = [];
-//			
-//			$(connections).each(function(j,connection) {
-//				var moduleName = connection.endpoints[0].element.parents(".component").find(".modulename").text();
-//				var inputName = connection.endpoints[0].element.children(".ioname").text();
-//				targets.push({
-//					output: output,
-//					moduleName: moduleName,
-//					inputName: inputName
-//				});
-//			});
-//			
-//			$(targets).each(function(j,target) {
-//				// Get all module names
-//				var modules = $(".component");
-//				$(modules).each(function(i,module) {
-//					var moduleName = $(module).find(".modulename").text();
-//					// If the module name is a match, look for an input with the correct name
-//					if (moduleName==target.moduleName) {
-//						var inputs = $(module).find("div.input");
-//						$(inputs).each(function(k,input) {
-//							var inputName = $(input).find(".ioname").text();
-//							var connections = jsPlumb.getConnections({source:input.attr("id")});
-//							if (inputName==target.inputName && connections.length==0)
-//								jsPlumb.connect({source:input, target:target.output});
-//						});
-//					}
-//				});
-//			});
-//		}
-//	}
-
 	// Helper function for updateFrom and clone
 	function collectRemoteEndpoints(endpoints,list) {
 		$(endpoints).each(function(i,endpoint) {
@@ -123,21 +61,21 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	
 	// PROTECTED FUNCTIONS
 	
-	var superUpdateFrom = that.updateFrom;
+	var superUpdateFrom = pub.updateFrom;
 	function updateFrom(data) {
 		var oldInputConnections = [];
 		var oldOutputConnections = [];
 		
-		collectRemoteEndpoints(my.params, oldInputConnections);
-		collectRemoteEndpoints(my.inputs, oldInputConnections);
-		collectRemoteEndpoints(my.outputs, oldOutputConnections);
+		collectRemoteEndpoints(prot.params, oldInputConnections);
+		collectRemoteEndpoints(prot.inputs, oldInputConnections);
+		collectRemoteEndpoints(prot.outputs, oldOutputConnections);
 
 		// Reset the lookups
-		my.inputsByName = {};
-		my.params = [];
-		my.inputs = [];
-		my.outputsByName = {};
-		my.outputs = [];
+		prot.inputsByName = {};
+		prot.params = [];
+		prot.inputs = [];
+		prot.outputsByName = {};
+		prot.outputs = [];
 		
 		superUpdateFrom(data);
 		
@@ -158,82 +96,79 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			}
 		});
 		
-		if ($(my.div).find("div.input").length>0)
-			jsPlumb.repaint($(my.div).find("div.input"));
-		if ($(my.div).find("div.output").length>0)
-			jsPlumb.repaint($(my.div).find("div.output"));
+		if ($(prot.div).find("div.input").length>0)
+			jsPlumb.repaint($(prot.div).find("div.input"));
+		if ($(prot.div).find("div.output").length>0)
+			jsPlumb.repaint($(prot.div).find("div.output"));
 	}
-	that.updateFrom = updateFrom;
+	pub.updateFrom = updateFrom;
 	
-	var superCreateDiv = my.createDiv;
+	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
 		
 		// Destroy the jQuery draggable and replace it via jsPlumb.
 		// This circumvents a bug in jsPlumb that causes the endpoints to not be repositioned after dragging.
-		$(my.div).draggable("destroy");
-		jsPlumb.draggable($(my.div).attr("id"), my.dragOptions);
+		$(prot.div).draggable("destroy");
+		jsPlumb.draggable($(prot.div).attr("id"), prot.dragOptions);
 		
 		// Module parameter table
-		if (my.jsonData.params && my.jsonData.params.length > 0) {
-			my.paramTable = $("<table class='paramTable'></table>");
-			my.body.append(my.paramTable);
-			$.each(my.jsonData.params, function(i,p) {
-				my.addParameter(p);
+		if (prot.jsonData.params && prot.jsonData.params.length > 0) {
+			prot.paramTable = $("<table class='paramTable'></table>");
+			prot.body.append(prot.paramTable);
+			$.each(prot.jsonData.params, function(i,p) {
+				prot.addParameter(p);
 			});
 		}
 
 		// module inputs and outputs
-		my.ioTable = $("<table class='ioTable'></table>");
-		my.body.append(my.ioTable);
+		prot.ioTable = $("<table class='ioTable'></table>");
+		prot.body.append(prot.ioTable);
 		
-		$(my.jsonData.inputs).each(function(i,data) {
-			my.addInput(data);
+		$(prot.jsonData.inputs).each(function(i,data) {
+			prot.addInput(data);
 		});
 
-		$(my.jsonData.outputs).each(function(i,data) {
-			my.addOutput(data);
+		$(prot.jsonData.outputs).each(function(i,data) {
+			prot.addOutput(data);
 		});
 
 		createModuleFooter();
 		
-		my.div.on( "dragstart", function(event, ui) {
-			jsPlumb.recalculateOffsets(my.div.attr('id'));
+		prot.div.on( "dragstart", function(event, ui) {
+			jsPlumb.recalculateOffsets(prot.div.attr('id'));
 		});
 		
 		$(SignalPath).on("_signalPathLoadModulesReady", function() {
-			my.refreshConnections();
+			prot.refreshConnections();
 		});
-		
-		// TODO: re-enable, function must be brought up to date
-		//my.title.dblclick(autoConnectInputs);
 		
 		// A module is focused by default when it is created
 		// Repeat the command here as focusing changes z-index of endpoints
-		my.addFocus(true);
+		prot.addFocus(true);
 	}
-	my.createDiv = createDiv;
+	prot.createDiv = createDiv;
 	
 	function disconnect() {
-		$(my.div).find("div.input").each(function(i,div) {
+		$(prot.div).find("div.input").each(function(i,div) {
 			jsPlumb.detachAllConnections(div);
 		});
-		$(my.div).find("div.output").each(function(i,div) {
+		$(prot.div).find("div.output").each(function(i,div) {
 			jsPlumb.detachAllConnections(div);
 		});
 	}
-	my.disconnect = disconnect;
+	prot.disconnect = disconnect;
 	
-	var superClose = that.close;
+	var superClose = pub.close;
 	function close() {
 		disconnect();
 		
-		$(my.div).find("div.input").each(function(i,div) {
+		$(prot.div).find("div.input").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
 			// This call should not be necessary but there may be a bug in jsPlumb
 			jsPlumb.dragManager.elementRemoved($(div).attr('id'));
 		});
-		$(my.div).find("div.output").each(function(i,div) {
+		$(prot.div).find("div.output").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
 			// This call should not be necessary but there may be a bug in jsPlumb
 			jsPlumb.dragManager.elementRemoved($(div).attr('id'));
@@ -241,10 +176,10 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		superClose();
 	}
-	that.close = close;
+	pub.close = close;
 	
-	var super_addFocus = my.addFocus;
-	my.addFocus = function(hold) {
+	var super_addFocus = prot.addFocus;
+	prot.addFocus = function(hold) {
 		super_addFocus(hold);
 		
 		if (hold) {
@@ -260,8 +195,35 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		}
 	}
 	
-	var super_removeFocus = my.removeFocus;
-	my.removeFocus = function() {
+	/**
+	 * Augment the module help text with endpoint-specific help tables
+	 */
+	var super_renderHelp = prot.renderHelp;
+	prot.renderHelp = function(data) {
+		var result = super_renderHelp(data);
+		
+    	var f = function(title,names,valMap) {
+    		var txt = "";
+    		if (names && names.length>0) {
+    			txt += "<h3>"+title+"</h3>";
+	    		var $t = $("<table></table>");
+	    		$(names).each(function(i,n) {
+	    			$t.append("<tr><td>"+n+"</td><td>"+valMap[n]+"</td></tr>");
+	    		});
+	    		txt += $t[0].outerHTML;
+    		}
+    		return txt;
+    	}
+    	
+    	result += f("Parameters", data.paramNames, data.params);
+    	result += f("Inputs", data.inputNames, data.inputs);
+    	result += f("Outputs", data.outputNames, data.outputs);
+    	
+    	return result;
+	}
+	
+	var super_removeFocus = prot.removeFocus;
+	prot.removeFocus = function() {
 		super_removeFocus();
 		
 		$.each(getParameters(), function(i, endpoint) {
@@ -276,88 +238,88 @@ SignalPath.GenericModule = function(data, canvas, my) {
 	}
 	
 	function getParameters() {
-		return my.params;
+		return prot.params;
 	}
-	that.getParameters = getParameters;
+	pub.getParameters = getParameters;
 	
 	function getInputs() {
-		return my.inputs;
+		return prot.inputs;
 	}
-	that.getInputs = getInputs;
+	pub.getInputs = getInputs;
 	
 	function getOutputs() {
-		return my.outputs;
+		return prot.outputs;
 	}
-	that.getOutputs = getOutputs;
+	pub.getOutputs = getOutputs;
 	
 	/**
 	 * Returns an Input object
 	 */
 	function getInput(name) {
-		return my.inputsByName[name];
+		return prot.inputsByName[name];
 	}
-	that.getInput = getInput;
+	pub.getInput = getInput;
 	
 	/**
 	 * Returns an Output object
 	 */
 	function getOutput(name) {
-		return my.outputsByName[name];
+		return prot.outputsByName[name];
 	}
-	that.getOutput = getOutput;
+	pub.getOutput = getOutput;
 	
 	function addParameter(data) {
 		// Create room for the parameter in paramTable
 		var row = $("<tr></tr>");
-		my.paramTable.append(row);
+		prot.paramTable.append(row);
 		
 		var paramTd = $("<td></td>");
 		row.append(paramTd);
 		
-		var endpoint = SignalPath.Parameter(data, paramTd, my);
+		var endpoint = SignalPath.Parameter(data, paramTd, prot);
 		endpoint.createDiv();
-		my.params.push(endpoint);
-		my.inputsByName[endpoint.getName()] = endpoint;
+		prot.params.push(endpoint);
+		prot.inputsByName[endpoint.getName()] = endpoint;
 		
 		return endpoint;
 	}
-	my.addParameter = addParameter;
+	prot.addParameter = addParameter;
 	
 	function createRoomForIO(type) {
-		// Find first empty input in the my.ioTable
-		var td = my.ioTable.find("td."+type+":empty:first");
+		// Find first empty input in the prot.ioTable
+		var td = prot.ioTable.find("td."+type+":empty:first");
 		// Add row if no suitable row found
 		if (td==null || td.length == 0) {
 			var newRow = $("<tr><td class='input'></td><td class='output'></td>");
-			my.ioTable.append(newRow);
+			prot.ioTable.append(newRow);
 			td = newRow.find("td."+type+":first");
 		}
 		return td;
 	}
 	
-	my.addInput = function(data) {
+	prot.addInput = function(data) {
 		var td = createRoomForIO("input");
 
-		var endpoint = SignalPath.Input(data, td, my);
+		var endpoint = SignalPath.Input(data, td, prot);
 		endpoint.createDiv();
-		my.inputs.push(endpoint);
-		my.inputsByName[endpoint.getName()] = endpoint;
+		prot.inputs.push(endpoint);
+		prot.inputsByName[endpoint.getName()] = endpoint;
 		
 		return endpoint;
 	}
 
-	my.addOutput = function(data) {
+	prot.addOutput = function(data) {
 		var td = createRoomForIO("output");
 
-		var endpoint = SignalPath.Output(data, td, my);
+		var endpoint = SignalPath.Output(data, td, prot);
 		endpoint.createDiv();
-		my.outputs.push(endpoint);
-		my.outputsByName[endpoint.getName()] = endpoint;
+		prot.outputs.push(endpoint);
+		prot.outputsByName[endpoint.getName()] = endpoint;
 		
 		return endpoint;
 	}
 
-	var superGetContextMenu = my.getContextMenu;
+	var superGetContextMenu = prot.getContextMenu;
 	function getContextMenu(div) {
 		var menu = superGetContextMenu();
 		
@@ -365,19 +327,19 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		
 		return menu;
 	}
-	my.getContextMenu = getContextMenu;
+	prot.getContextMenu = getContextMenu;
 	
-	var superHandleContextMenuSelection = my.handleContextMenuSelection;
-	my.handleContextMenuSelection = function(div,data,selection,event) {
+	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
+	prot.handleContextMenuSelection = function(div,data,selection,event) {
 		if (selection=="disconnect") {
-			my.disconnect();
+			prot.disconnect();
 			event.stopPropagation();
 		}
 		else superHandleContextMenuSelection(div,data,selection,event);
 	}
 	
-	var superPrepareCloneData = my.prepareCloneData;
-	my.prepareCloneData = function(cloneData) {
+	var superPrepareCloneData = prot.prepareCloneData;
+	prot.prepareCloneData = function(cloneData) {
 		superPrepareCloneData(cloneData);
 		
 		$(cloneData.params).each(function(i,param) {
@@ -396,8 +358,8 @@ SignalPath.GenericModule = function(data, canvas, my) {
 		});
 	}
 	
-	var super_clone = my.clone;
-	my.clone = function() {
+	var super_clone = prot.clone;
+	prot.clone = function() {
 		var module = super_clone();
 		module.refreshConnections();
 	}
@@ -413,45 +375,68 @@ SignalPath.GenericModule = function(data, canvas, my) {
 			endpoint.refreshConnections();
 		});
 	}
-	that.refreshConnections = refreshConnections;
+	pub.refreshConnections = refreshConnections;
 	
-	var super_receiveResponse = my.receiveResponse
-	my.receiveResponse = function(payload) {
+	var super_receiveResponse = prot.receiveResponse
+	prot.receiveResponse = function(payload) {
 		super_receiveResponse(payload);
 		if (payload.type=="paramChangeResponse") {
 			// TODO handle param change response
 		}
 	}
 	
-	var superToJSON = that.toJSON;
+	var superToJSON = pub.toJSON;
 	function toJSON() {
-		my.jsonData = superToJSON();
+		prot.jsonData = superToJSON();
 
 		// Get parameter JSON
-		my.jsonData.params = [];
-		$(my.params).each(function(i,endpoint) {
-			my.jsonData.params.push(endpoint.toJSON());
+		prot.jsonData.params = [];
+		$(prot.params).each(function(i,endpoint) {
+			prot.jsonData.params.push(endpoint.toJSON());
 		});
 
 		// Get input JSON
-		my.jsonData.inputs = [];
-		$(my.inputs).each(function(i,endpoint) {
-			my.jsonData.inputs.push(endpoint.toJSON());
+		prot.jsonData.inputs = [];
+		$(prot.inputs).each(function(i,endpoint) {
+			prot.jsonData.inputs.push(endpoint.toJSON());
 		});
 		
 		// Get output JSON
-		my.jsonData.outputs = [];
-		$(my.outputs).each(function(i,endpoint) {
-			my.jsonData.outputs.push(endpoint.toJSON());
+		prot.jsonData.outputs = [];
+		$(prot.outputs).each(function(i,endpoint) {
+			prot.jsonData.outputs.push(endpoint.toJSON());
 		});		
 
-		return my.jsonData;
+		return prot.jsonData;
 	}
-	that.toJSON = toJSON;
+	pub.toJSON = toJSON;
 	
 	// Everything added to the public interface can be accessed from the
 	// private interface too
-	$.extend(my,that);
+	$.extend(prot,pub);
 	
-	return that;
+	return pub;
 }
+
+// Module ioSwitch tooltips
+$(document).tooltip({
+	items: ".ioSwitch",
+	hide: 0,
+	content: function() {
+		var $switch = $(this).data("spObject"),
+			stateId = $switch.getStateTextId();
+		
+		if ($(this).hasClass("drivingInput")) {
+			return "Driving input: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
+		}
+		else if ($(this).hasClass("initialValue")) {
+			return "Initial value: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
+		}
+		else if ($(this).hasClass("feedback")) {
+			return "Feedback connection: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
+		}
+		else if ($(this).hasClass("noRepeat")) {
+			return "No repeat: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
+		}
+	}
+});

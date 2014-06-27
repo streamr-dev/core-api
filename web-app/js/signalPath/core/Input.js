@@ -1,9 +1,9 @@
-SignalPath.Input = function(json, parentDiv, module, type, my) {
-	my = my || {};
-	my = SignalPath.Endpoint(json, parentDiv, module, type || "input", my);
+SignalPath.Input = function(json, parentDiv, module, type, pub) {
+	pub = pub || {};
+	pub = SignalPath.Endpoint(json, parentDiv, module, type || "input", pub);
 	
-	var super_createDiv = my.createDiv;
-	my.createDiv = function() {
+	var super_createDiv = pub.createDiv;
+	pub.createDiv = function() {
 		var div = super_createDiv();
 
 		div.bind("spConnect", (function(me) {
@@ -12,7 +12,7 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 				me.json.sourceId = output.getId();
 				me.div.addClass("connected");
 			}
-		})(my));
+		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, output) {
@@ -20,29 +20,29 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 				delete me.json.sourceId;
 				me.div.removeClass("connected");
 			}
-		})(my));
+		})(pub));
 		
 		// Add/remove a warning class to unconnected inputs
-		if (!my.json.suppressWarnings) {
-			my.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
+		if (!pub.json.suppressWarnings) {
+			pub.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
 
 			div.bind("spConnect", (function(me) {
 				return function(event, output) {
 					me.jsPlumbEndpoint.setStyle(jsPlumb.Defaults.EndpointStyle);
 				}
-			})(my));
+			})(pub));
 
 			div.bind("spDisconnect", (function(me) {
 				return function(event, output) {
 					me.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
 				}
-			})(my));
+			})(pub));
 		}
 		return div;
 	}
 	
-	var super_createSettings = my.createSettings;
-	my.createSettings = function(div,data) {
+	var super_createSettings = pub.createSettings;
+	pub.createSettings = function(div,data) {
 		super_createSettings(div,data);
 		
 		// Driving input. Default true.
@@ -51,62 +51,40 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 		div.append(switchDiv);
 		
 		if (data.canBeDrivingInput==null || data.canBeDrivingInput) {
-			var driving = $("<div class='ioSwitch ioSwitchInput drivingInput'>DR</div>");
-			if (data.drivingInput==null)
-				data.drivingInput = (div.hasClass("parameter") ? false : true);
-			driving.addClass(data.drivingInput ? "ioSwitchTrue" : "ioSwitchFalse");
-			switchDiv.append(driving);
-			driving.click(function() {
-				if (data.drivingInput) {
-					data.drivingInput = false;
-					driving.removeClass("ioSwitchTrue");
-					driving.addClass("ioSwitchFalse");
-				}
-				else {
-					data.drivingInput = true;
-					driving.addClass("ioSwitchTrue");
-					driving.removeClass("ioSwitchFalse");
-				}
+			var driving = new SignalPath.IOSwitch(switchDiv, "drivingInput", {
+				getValue: (function(d){
+					return function() { return d.drivingInput; };
+				})(data),
+				setValue: (function(d){
+					return function(value) { return d.drivingInput = value; };
+				})(data),
+				buttonText: function() { return "DR"; },
 			});
 		}
 		
 		// Initial value. Default null/off. Only valid for TimeSeries type
 		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
-			var iv = $("<div class='ioSwitch ioSwitchInput initialValue'></div>");
-			switchDiv.append(iv);
-			
-			var updateIv = function() {
-				if (data.initialValue==null) {
-					iv.html("IV");
-					iv.removeClass("ioSwitchTrue");
-					iv.addClass("ioSwitchFalse");
-				}
-				else if (data.initialValue==0) {
-					iv.html("0");
-					iv.addClass("ioSwitchTrue");
-					iv.removeClass("ioSwitchFalse");
-				}
-				else if (data.initialValue==1) {
-					iv.html("1");
-					iv.addClass("ioSwitchTrue");
-					iv.removeClass("ioSwitchFalse");
-				}
-			}
-			
-			updateIv();
-			
-			iv.click(function() {
-				if (data.initialValue==1) {
-					data.initialValue = null;
-					updateIv();
-				}
-				else if (data.initialValue==null) {
-					data.initialValue = 0;
-					updateIv();
-				}
-				else if (data.initialValue==0) {
-					data.initialValue = 1;
-					updateIv();
+			var iv = new SignalPath.IOSwitch(switchDiv, "initialValue", {
+				getValue: (function(d){
+					return function() { return d.initialValue; };
+				})(data),
+				setValue: (function(d){
+					return function(value) { return d.initialValue = value; };
+				})(data),
+				buttonText: function() { 
+					if (this.getValue()==null)
+						return "IV";
+					else return this.getValue().toString();
+				},
+				nextValue: function(currentValue) {
+					if (currentValue==null)
+						return 0;
+					else if (currentValue==0)
+						return 1;
+					else return null;
+				},
+				isActiveValue: function(currentValue) {
+					return currentValue != null;
 				}
 			});
 		}
@@ -114,28 +92,25 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 		// Feedback connection. Default false. Switchable for TimeSeries types.
 		
 		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var fb = $("<div class='ioSwitch ioSwitchInput feedback'>FB</div>");
-			if (data.feedback==null)
-				data.feedback = false;
-			fb.addClass(data.feedback ? "ioSwitchTrue" : "ioSwitchFalse");
-			switchDiv.append(fb);
-			fb.click(function() {
-				if (data.feedback) {
-					data.feedback = false;
-					fb.removeClass("ioSwitchTrue");
-					fb.addClass("ioSwitchFalse");
-				}
-				else {
-					data.feedback = true;
-					fb.addClass("ioSwitchTrue");
-					fb.removeClass("ioSwitchFalse");
-				}
+			var feedback = new SignalPath.IOSwitch(switchDiv, "feedback", {
+				getValue: (function(d){
+					return function() { return d.feedback; };
+				})(data),
+				setValue: (function(d){
+					return function(value) { return d.feedback = value; };
+				})(data),
+				buttonText: function() { return "FB"; },
 			});
 		}
 	}
 	
-	var super_getJSPlumbEndpointOptions = my.getJSPlumbEndpointOptions;
-	my.getJSPlumbEndpointOptions = function(json,connDiv) {
+	function getInitialValue() {
+		return pub.json.initialValue;
+	}
+	pub.getInitialValue = getInitialValue;
+	
+	var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
+	pub.getJSPlumbEndpointOptions = function(json,connDiv) {
 		var opts = super_getJSPlumbEndpointOptions(json,connDiv);
 		
 		opts.connectorOverlays[0][1].direction = -1;
@@ -145,46 +120,46 @@ SignalPath.Input = function(json, parentDiv, module, type, my) {
 		return opts;
 	}
 	
-	my.connect = function(endpoint) {
-		jsPlumb.connect({source: my.jsPlumbEndpoint, target:endpoint.jsPlumbEndpoint});
+	pub.connect = function(endpoint) {
+		jsPlumb.connect({source: pub.jsPlumbEndpoint, target:endpoint.jsPlumbEndpoint});
 	}
 	
-	my.getConnectedEndpoints = function() {
+	pub.getConnectedEndpoints = function() {
 		var result = [];
-		var connections = jsPlumb.getConnections({source:my.getId(), scope:"*"});
+		var connections = jsPlumb.getConnections({source:pub.getId(), scope:"*"});
 		$(connections).each(function(j,connection) {
 			result.push($(connection.target).data("spObject"));
 		});
 		return result;
 	}
 	
-	my.refreshConnections = function() {
-		if (my.json.sourceId!=null) {
-			var connectedEndpoints = my.getConnectedEndpoints();
+	pub.refreshConnections = function() {
+		if (pub.json.sourceId!=null) {
+			var connectedEndpoints = pub.getConnectedEndpoints();
 			if (connectedEndpoints.length==0) {
-				var endpoint = $("#"+my.json.sourceId).data("spObject");
+				var endpoint = $("#"+pub.json.sourceId).data("spObject");
 				if (endpoint!=null)
-					my.connect(endpoint);
-				else console.log("Warning: input "+my.getId()+" should be connected to "+my.json.sourceId+", but the output was not found!");
+					pub.connect(endpoint);
+				else console.log("Warning: input "+pub.getId()+" should be connected to "+pub.json.sourceId+", but the output was not found!");
 			}
-			else if (connectedEndpoints.length==1 && connectedEndpoints[0].getId()!=my.json.sourceId) {
-				console.log("Warning: input "+my.getId()+" should be connected to "+my.json.sourceId+", but is connected to "+connectedEndpoints[0].getId()+" instead!");
+			else if (connectedEndpoints.length==1 && connectedEndpoints[0].getId()!=pub.json.sourceId) {
+				console.log("Warning: input "+pub.getId()+" should be connected to "+pub.json.sourceId+", but is connected to "+connectedEndpoints[0].getId()+" instead!");
 			}
 		}
 	}
 	
-	my.toJSON = function() {
-//		var connectedEndpoints = my.getConnectedEndpoints();
+	pub.toJSON = function() {
+//		var connectedEndpoints = pub.getConnectedEndpoints();
 //
 //		if (connectedEndpoints.length>0) {
-//			my.json.connected = true;
-//			my.json.id = my.getId();
-//			my.json.sourceId = connectedEndpoints[0].getId();
+//			pub.json.connected = true;
+//			pub.json.id = pub.getId();
+//			pub.json.sourceId = connectedEndpoints[0].getId();
 //		}
-//		else my.json.connected = false;
+//		else pub.json.connected = false;
 
-		return my.json;
+		return pub.json;
 	}
 	
-	return my;
+	return pub;
 }

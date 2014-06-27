@@ -17,10 +17,13 @@
  * signalPathContext: function() that returns the signalPathContext object
  * errorHandler: function(data) that shows an error message. data can be a string or object, in which case data.msg is shown.
  * notificationHandler: function(data) that shows a notification message. data can be a string or object, in which case data.msg is shown.
+ * allowRuntimeChanges: boolean for whether runtime parameter changes are allowed
  * runUrl: url where to POST the run command
  * abortUrl: url where to POST the abort command
  * atmosphereUrl: url for atmosphere, the sessionId will be appended to this url
- * allowRuntimeChanges: boolean for whether runtime parameter changes are allowed
+ * getModuleUrl: url for module JSON
+ * uiActionUrl: url for POSTing module UI runtime changes
+ * 
  */
 
 var SignalPath = (function () { 
@@ -36,10 +39,13 @@ var SignalPath = (function () {
     		notificationHandler: function(data) {
     			alert((typeof data == "string" ? data : data.msg));
     		},
+    		allowRuntimeChanges: true,
     		runUrl: "run",
     		abortUrl: "abort",
     		atmosphereUrl: project_webroot+"atmosphere/",
-    		allowRuntimeChanges: true,
+    		getModuleUrl: project_webroot+'module/jsonGetModule',
+    		getModuleHelpUrl: project_webroot+'module/jsonGetModuleHelp',
+    		uiActionUrl: project_webroot+"module/uiAction",
     };
 	
     var detectedTransport = null;
@@ -64,13 +70,13 @@ var SignalPath = (function () {
     var canvas;
     
 	// Public
-	var my = {};
-	my.options = options;
+	var pub = {};
+	pub.options = options;
 	
     // TODO: remove if not needed anymore!
-    my.replacedIds = {};
+    pub.replacedIds = {};
 	
-	my.init = function (opts) {
+	pub.init = function (opts) {
 		jQuery.extend(true, options, opts);
 		
 		canvas = $("#"+options.canvas);
@@ -81,14 +87,14 @@ var SignalPath = (function () {
 		jsPlumb.init();
 		jQuery.atmosphere.logLevel = 'error';
 	};
-	my.unload = function() {
+	pub.unload = function() {
 		jsPlumb.unload();
 	};
-	my.sendUIAction = function(hash,msg,callback) {
+	pub.sendUIAction = function(hash,msg,callback) {
 		if (sessionId!=null) {
 			$.ajax({
 				type: 'POST',
-				url: project_webroot+"module/uiAction",
+				url: options.uiActionUrl,
 				data: {
 					sessionId: sessionId,
 					hash: hash,
@@ -101,7 +107,7 @@ var SignalPath = (function () {
 		}
 		else return false;
 	}
-	my.getCanvas = function() {
+	pub.getCanvas = function() {
 		return canvas;
 	}
 	
@@ -116,17 +122,17 @@ var SignalPath = (function () {
 			createModuleFromJSON(mod);
 		});
 
-		$(my).trigger("_signalPathLoadModulesReady");
+		$(pub).trigger("_signalPathLoadModulesReady");
 
 		jsPlumb.setSuspendDrawing(false,true);
 	}
-	my.loadJSON = loadJSON;
+	pub.loadJSON = loadJSON;
 	
-	my.updateModule = function(module,callback) {
+	pub.updateModule = function(module,callback) {
 		
 		$.ajax({
 			type: 'POST',
-			url: project_webroot+'module/jsonGetModule', 
+			url: options.getModuleUrl, 
 			data: {id: module.toJSON().id, configuration: JSON.stringify(module.toJSON())}, 
 			dataType: 'json',
 			success: function(data) {
@@ -154,10 +160,10 @@ var SignalPath = (function () {
 			}
 		});
 	}
-	my.isSaved = function() {
+	pub.isSaved = function() {
 		return saveData.isSaved ? true : false;
 	}
-	my.getSaveData = function() {
+	pub.getSaveData = function() {
 		return (saveData.isSaved ? saveData : null);
 	}
 	
@@ -173,13 +179,13 @@ var SignalPath = (function () {
 			newModule.redraw();
 		});
 	}
-	my.replaceModule = replaceModule;
+	pub.replaceModule = replaceModule;
 	
 	function addModule(id,configuration,callback) { 
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',
-			url: project_webroot+'module/jsonGetModule', 
+			url: options.getModuleUrl, 
 			data: {id: id, configuration: JSON.stringify(configuration)}, 
 			dataType: 'json',
 			success: function(data) {
@@ -199,7 +205,7 @@ var SignalPath = (function () {
 			}
 		});
 	}
-	my.addModule = addModule;
+	pub.addModule = addModule;
 	
 	function createModuleFromJSON(data) {
 		if (data.error) {
@@ -212,7 +218,7 @@ var SignalPath = (function () {
 			data.hash = modules.length; //hash++;
 		}
 		
-		var mod = eval("SignalPath."+data.jsModule+"(data,canvas)");
+		var mod = eval("SignalPath."+data.jsModule+"(data,canvas,{signalPath:pub})");
 		
 		// Resize the modules array if necessary
 		while (modules.length < data.hash+1)
@@ -236,7 +242,7 @@ var SignalPath = (function () {
 		
 		return mod;
 	}
-	my.createModuleFromJSON = createModuleFromJSON;
+	pub.createModuleFromJSON = createModuleFromJSON;
 	
 	function getModules() {
 		var result = [];
@@ -247,12 +253,12 @@ var SignalPath = (function () {
 		}
 		return result;
 	}
-	my.getModules = getModules;
+	pub.getModules = getModules;
 	
 	function getModuleById(id) {
 		return modules[id];
 	}
-	my.getModuleById = getModuleById;
+	pub.getModuleById = getModuleById;
 	
 	function signalPathToJSON(signalPathContext) {
 		var result = {
@@ -276,7 +282,7 @@ var SignalPath = (function () {
 		
 		return result;
 	}
-	my.toJSON = signalPathToJSON;
+	pub.toJSON = signalPathToJSON;
 
 	/**
 	 * SaveData should contain (optionally): url, name, (params)
@@ -312,7 +318,7 @@ var SignalPath = (function () {
 					if (callback)
 						callback(saveData);
 					
-					$(my).trigger('signalPathSave', [saveData]);
+					$(pub).trigger('signalPathSave', [saveData]);
 				}
 				else {
 					options.errorHandler({msg:data.message});
@@ -323,7 +329,7 @@ var SignalPath = (function () {
 			}
 		});
 	}
-	my.saveSignalPath = saveSignalPath;
+	pub.saveSignalPath = saveSignalPath;
 	
 	function newSignalPath() {
 		if (isRunning())
@@ -356,9 +362,9 @@ var SignalPath = (function () {
 			}
 		});
 		
-		$(my).trigger('signalPathNew');
+		$(pub).trigger('signalPathNew');
 	}
-	my.newSignalPath = newSignalPath;
+	pub.newSignalPath = newSignalPath;
 	
 	/**
 	 * Options must at least include options.url OR options.json
@@ -381,7 +387,7 @@ var SignalPath = (function () {
 			});
 		}
 	}
-	my.loadSignalPath = loadSignalPath;
+	pub.loadSignalPath = loadSignalPath;
 	
 	function _load(data,options,callback) {
 		loadJSON(data);
@@ -400,7 +406,7 @@ var SignalPath = (function () {
 		if (data.workspace!=null && data.workspace!="normal")
 			setWorkspace(data.workspace);
 		
-		$(my).trigger('signalPathLoad', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
+		$(pub).trigger('signalPathLoad', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
 	}
 	
 	function run(additionalContext) {
@@ -445,7 +451,7 @@ var SignalPath = (function () {
 			}
 		});
 	}
-	my.run = run;
+	pub.run = run;
 	
 	function subscribeToSession(sId,newSession) {
 		if (sessionId != null)
@@ -472,13 +478,13 @@ var SignalPath = (function () {
 		request.onMessage = handleResponse;
 		subSocket = socket.subscribe(request);
 		
-		$(my).trigger('signalPathStart');
+		$(pub).trigger('signalPathStart');
 	}
 	
 	function reconnect(sId) {
 		subscribeToSession(sId,false);
 	}
-	my.reconnect = reconnect;
+	pub.reconnect = reconnect;
 	
 	function handleResponse(response) {
 		detectedTransport = response.transport;
@@ -577,13 +583,13 @@ var SignalPath = (function () {
 		socket.unsubscribe();
 		
 		sessionId = null;
-		$(my).trigger('signalPathStop');
+		$(pub).trigger('signalPathStop');
 	}
 	
 	function isRunning() {
 		return sessionId!=null;
 	}
-	my.isRunning = isRunning;
+	pub.isRunning = isRunning;
 	
 	function abort() {
 
@@ -607,29 +613,29 @@ var SignalPath = (function () {
 
 		closeSubscription();
 	}
-	my.abort = abort;
+	pub.abort = abort;
 	
 	function setWorkspace(name) {
 		var oldWorkspace = workspace;
 		workspace = name;
 		
 		if (name=="dashboard") {
-			$(my).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
+			$(pub).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
 		}
 		else {
-			$(my).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
+			$(pub).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
 			
 			jsPlumb.repaintEverything();
 		}
 	}
-	my.setWorkspace = setWorkspace;
+	pub.setWorkspace = setWorkspace;
 	
 	function getWorkspace() {
 		return workspace;
 	}
-	my.getWorkspace = getWorkspace;
+	pub.getWorkspace = getWorkspace;
 	
-	return my; 
+	return pub; 
 }());
 
 $(SignalPath).on("signalPathWorkspaceChange", function(event, name, old) {

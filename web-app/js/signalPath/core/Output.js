@@ -1,9 +1,9 @@
-SignalPath.Output = function(json, parentDiv, module, type, my) {
-	my = my || {};
-	my = SignalPath.Endpoint(json, parentDiv, module, type || "output", my);
+SignalPath.Output = function(json, parentDiv, module, type, pub) {
+	pub = pub || {};
+	pub = SignalPath.Endpoint(json, parentDiv, module, type || "output", pub);
 	
-	var super_createSettings = my.createSettings;
-	my.createSettings = function(div,data) {
+	var super_createSettings = pub.createSettings;
+	pub.createSettings = function(div,data) {
 		super_createSettings(div,data);
 		
 		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
@@ -11,22 +11,14 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 		
 		// NoRepeat. Default true. Add only for TimeSeries type
 		if (data.type=="Double" && (data.canBeNoRepeat==null || data.canBeNoRepeat)) {
-			var noRepeat = $("<div class='ioSwitch ioSwitchOutput noRepeat'>NR</div>");
-			if (data.noRepeat==null)
-				data.noRepeat = true;
-			noRepeat.addClass(data.noRepeat ? "ioSwitchTrue" : "ioSwitchFalse");
-			switchDiv.append(noRepeat);
-			noRepeat.click(function() {
-				if (data.noRepeat) {
-					data.noRepeat = false;
-					noRepeat.removeClass("ioSwitchTrue");
-					noRepeat.addClass("ioSwitchFalse");
-				}
-				else {
-					data.noRepeat = true;
-					noRepeat.addClass("ioSwitchTrue");
-					noRepeat.removeClass("ioSwitchFalse");
-				}
+			var noRepeat = new SignalPath.IOSwitch(switchDiv, "noRepeat", {
+				getValue: (function(d){
+					return function() { return d.noRepeat; };
+				})(data),
+				setValue: (function(d){
+					return function(value) { return d.noRepeat = value; };
+				})(data),
+				buttonText: function() { return "NR"; },
 			});
 		}
 
@@ -41,7 +33,7 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 					me.json.targets.push(input.getId());
 				}
 			}
-		})(my));
+		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, input) {
@@ -57,11 +49,11 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 					me.div.removeClass("connected");
 				}
 			}
-		})(my));
+		})(pub));
 	}
 	
-	var super_getJSPlumbEndpointOptions = my.getJSPlumbEndpointOptions;
-	my.getJSPlumbEndpointOptions = function(json,connDiv) {
+	var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
+	pub.getJSPlumbEndpointOptions = function(json,connDiv) {
 		var opts = super_getJSPlumbEndpointOptions(json,connDiv);
 		
 		opts.maxConnections = -1; // unlimited
@@ -70,37 +62,37 @@ SignalPath.Output = function(json, parentDiv, module, type, my) {
 		return opts;
 	}
 	
-	my.connect = function(endpoint) {
-		jsPlumb.connect({source: endpoint.jsPlumbEndpoint, target:my.jsPlumbEndpoint});
+	pub.connect = function(endpoint) {
+		jsPlumb.connect({source: endpoint.jsPlumbEndpoint, target:pub.jsPlumbEndpoint});
 	}
 	
-	my.getConnectedEndpoints = function() {
+	pub.getConnectedEndpoints = function() {
 		var result = [];
-		var connections = jsPlumb.getConnections({target:my.getId(), scope:"*"});
+		var connections = jsPlumb.getConnections({target:pub.getId(), scope:"*"});
 		$(connections).each(function(j,connection) {
 			result.push($(connection.source).data("spObject"));
 		});
 		return result;
 	}
 	
-	my.refreshConnections = function() {
-		if (my.json.targets!=null) {
-			$(my.json.targets).each(function(j,targetId) {
+	pub.refreshConnections = function() {
+		if (pub.json.targets!=null) {
+			$(pub.json.targets).each(function(j,targetId) {
 				// Does this connection already exist?
-				if (jsPlumb.getConnections({source:targetId, target:my.getId(), scope:"*"}).length == 0) {
+				if (jsPlumb.getConnections({source:targetId, target:pub.getId(), scope:"*"}).length == 0) {
 					// Get the endpoint
 					var input = $("#"+targetId).data("spObject");
 					if (input!=null)
-						my.connect(input);
-					else console.log("Warning: output "+my.getId()+" should be connected to "+targetId+", but the input was not found!");
+						pub.connect(input);
+					else console.log("Warning: output "+pub.getId()+" should be connected to "+targetId+", but the input was not found!");
 				}
 			});
 		}
 	}
 	
-	my.toJSON = function() {
-		return my.json;
+	pub.toJSON = function() {
+		return pub.json;
 	}
 	
-	return my;
+	return pub;
 }
