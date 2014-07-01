@@ -4,6 +4,7 @@ class Module implements Comparable {
 
 	Long id
 	String name
+	String alternativeNames
 	String implementingClass
 	String jsModule
 	String type
@@ -22,6 +23,7 @@ class Module implements Comparable {
 		hide(nullable:true)
 		modulePackage(nullable:true)
 		jsonHelp(nullable:true)
+		alternativeNames(nullable:true)
     }
 	
 	static mapping = {

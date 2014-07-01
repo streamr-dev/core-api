@@ -366,6 +366,14 @@ div.output .switchContainer {
 	position: fixed !important;
 }
 
+.tooltip {
+	max-width: 350px;
+}
+
+.tooltip h3 {
+	margin-top: 7px;
+}
+
 .tooltip table {
 	border: 0;
 }

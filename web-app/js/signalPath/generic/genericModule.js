@@ -202,6 +202,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.renderHelp = function(data) {
 		var result = super_renderHelp(data);
 		
+		// Helper function to add io-specific help table
     	var f = function(title,names,valMap) {
     		var txt = "";
     		if (names && names.length>0) {

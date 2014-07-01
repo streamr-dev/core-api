@@ -18,6 +18,8 @@ public class LinearRegressionXY extends AbstractSignalPathModule {
 	
 	TimeSeriesOutput slope = new TimeSeriesOutput(this,"slope");
 	TimeSeriesOutput intercept = new TimeSeriesOutput(this,"intercept");
+	TimeSeriesOutput error = new TimeSeriesOutput(this,"error");
+	TimeSeriesOutput rsq = new TimeSeriesOutput(this,"R^2");
 	
 	ArrayList<double[]> values;
 	SimpleRegression regression = new SimpleRegression();
@@ -29,6 +31,8 @@ public class LinearRegressionXY extends AbstractSignalPathModule {
 		addInput(y);
 		addOutput(slope);
 		addOutput(intercept);
+		addOutput(error);
+		addOutput(rsq);
 	}
 	
 	@Override
@@ -53,6 +57,8 @@ public class LinearRegressionXY extends AbstractSignalPathModule {
 			if (s != Double.NaN) {
 				slope.send(regression.getSlope());
 				intercept.send(regression.getIntercept());
+				error.send(regression.getMeanSquareError());
+				rsq.send(regression.getRSquare());
 			}
 		}
 	}

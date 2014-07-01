@@ -16,7 +16,8 @@ public class LinearRegression extends AbstractSignalPathModule {
 	TimeSeriesInput input = new TimeSeriesInput(this,"in");
 	
 	TimeSeriesOutput slope = new TimeSeriesOutput(this,"slope");
-	TimeSeriesOutput intercept = new TimeSeriesOutput(this,"intercept");
+	TimeSeriesOutput error = new TimeSeriesOutput(this,"error");
+	TimeSeriesOutput rsq = new TimeSeriesOutput(this,"R^2");
 	
 	ArrayList<double[]> values;
 	SimpleRegression regression = new SimpleRegression();
@@ -27,7 +28,8 @@ public class LinearRegression extends AbstractSignalPathModule {
 		addInput(windowLength);
 		addInput(input);
 		addOutput(slope);
-		addOutput(intercept);
+		addOutput(error);
+		addOutput(rsq);
 	}
 	
 	@Override
@@ -49,7 +51,8 @@ public class LinearRegression extends AbstractSignalPathModule {
 		
 		if (values.size()==windowLength.getValue()) {
 			slope.send(regression.getSlope());
-			intercept.send(regression.getIntercept());
+			error.send(regression.getMeanSquareError());
+			rsq.send(regression.getRSquare());
 		}
 	}
 	

@@ -2,17 +2,18 @@ package com.unifina.signalpath.statistics;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
+import org.apache.commons.math3.stat.descriptive.rank.Max;
 
-public class StandardDeviation extends DescriptiveStatisticsAdapter {
-	
+public class MaxSliding extends DescriptiveStatisticsAdapter {
+
 	@Override
 	protected StorelessUnivariateStatistic getStorelessStatistic() {
-		return new org.apache.commons.math3.stat.descriptive.moment.StandardDeviation(true);
+		return new Max();
 	}
 
 	@Override
 	protected Double getValue(DescriptiveStatistics stats) {
-		return stats.getStandardDeviation();
+		return stats.getMax();
 	}
 
 }

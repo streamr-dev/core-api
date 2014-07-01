@@ -78,18 +78,27 @@
 			result.helpText = $("#moduleHelp").val();
 			paramTable.find("tr").each(function(i,row) {
 				var name = $(row).find("td.name").text();
-				result.paramNames.push(name);
-				result.params[name] = $(row).find("td.value input").val();
+				var value = $(row).find("td.value input").val();
+				if (value!=null && value!="") {
+					result.paramNames.push(name);
+					result.params[name] = value;
+				}
 			});
 			inputTable.find("tr").each(function(i,row) {
 				var name = $(row).find("td.name").text();
-				result.inputNames.push(name);
-				result.inputs[name] = $(row).find("td.value input").val();
+				var value = $(row).find("td.value input").val();
+				if (value!=null && value!="") {
+					result.inputNames.push(name);
+					result.inputs[name] = value;
+				}
 			});
 			outputTable.find("tr").each(function(i,row) {
 				var name = $(row).find("td.name").text();
-				result.outputNames.push(name);
-				result.outputs[name] = $(row).find("td.value input").val();
+				var value = $(row).find("td.value input").val();
+				if (value!=null && value!="") {
+					result.outputNames.push(name);
+					result.outputs[name] = value;
+				}
 			});
 			return result;
         }
@@ -121,7 +130,7 @@
     </head>
     <body>
         <div class="body">
-            <h1>Module help editor: ${module.name}</h1>
+            <h1>Module help editor: ${module.name} (Package: ${module.modulePackage.name})</h1>
             
             <div id="message" class="message"></div>
             

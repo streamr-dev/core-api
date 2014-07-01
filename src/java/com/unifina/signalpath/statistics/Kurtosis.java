@@ -3,16 +3,16 @@ package com.unifina.signalpath.statistics;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
 
-public class StandardDeviation extends DescriptiveStatisticsAdapter {
-	
+public class Kurtosis extends DescriptiveStatisticsAdapter {
+
 	@Override
 	protected StorelessUnivariateStatistic getStorelessStatistic() {
-		return new org.apache.commons.math3.stat.descriptive.moment.StandardDeviation(true);
+		return new org.apache.commons.math3.stat.descriptive.moment.Kurtosis();
 	}
 
 	@Override
 	protected Double getValue(DescriptiveStatistics stats) {
-		return stats.getStandardDeviation();
+		return stats.getKurtosis();
 	}
 
 }

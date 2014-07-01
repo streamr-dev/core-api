@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+@Deprecated
 public abstract class DynamicInputSignalPathModule extends AbstractSignalPathModule {
 
 	@Override
