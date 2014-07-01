@@ -9,6 +9,7 @@ import com.unifina.signalpath.IntegerParameter;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
+@Deprecated
 public class SimpleStatistics extends AbstractSignalPathModule {
 
 	IntegerParameter windowLength = new IntegerParameter(this,"windowLength",60);
