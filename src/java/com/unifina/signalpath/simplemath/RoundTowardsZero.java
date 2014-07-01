@@ -5,6 +5,10 @@ import com.unifina.signalpath.IntegerParameter;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
+/**
+ * Replaced by RoundToStep
+ */
+@Deprecated
 public class RoundTowardsZero extends AbstractSignalPathModule {
 
 	IntegerParameter precision = new IntegerParameter(this,"precision",0);

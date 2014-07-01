@@ -115,7 +115,8 @@ public class TimeSeriesChart extends Chart {
 			((RecordedTimeSeriesInput)conn).yAxis = getInputs().length;
 		}
 
-		conn.canBeDrivingInput = true;
+		conn.setDrivingInput(true);
+		conn.canToggleDrivingInput = false;
 		conn.canHaveInitialValue = false;
 		conn.canBeFeedback = false;
 		conn.suppressWarnings = true;

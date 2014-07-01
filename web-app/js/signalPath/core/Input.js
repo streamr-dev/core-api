@@ -50,7 +50,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
 		
-		if (data.canBeDrivingInput==null || data.canBeDrivingInput) {
+		if (data.canToggleDrivingInput==null || data.canToggleDrivingInput) {
 			var driving = new SignalPath.IOSwitch(switchDiv, "drivingInput", {
 				getValue: (function(d){
 					return function() { return d.drivingInput; };

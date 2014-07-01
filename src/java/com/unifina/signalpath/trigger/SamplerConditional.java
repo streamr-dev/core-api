@@ -15,7 +15,7 @@ public class SamplerConditional extends AbstractSignalPathModule {
 	public void init() {
 		addInput(trigger);
 		addInput(value);
-		value.canBeDrivingInput = false;
+		value.canToggleDrivingInput = false;
 		value.setDrivingInput(false);
 		addOutput(out);
 	}

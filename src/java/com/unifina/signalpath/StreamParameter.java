@@ -12,6 +12,7 @@ public class StreamParameter extends Parameter<Stream> {
 	
 	public StreamParameter(AbstractSignalPathModule owner, String name) {
 		super(owner,name,null,"Stream");
+		this.canToggleDrivingInput = false;
 	}
 
 	@Override

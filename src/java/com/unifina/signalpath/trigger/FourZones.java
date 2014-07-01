@@ -36,7 +36,7 @@ public class FourZones extends AbstractSignalPathModule {
 	Integer armed = null;
 	
 	public FourZones() {
-		mode.canBeDrivingInput = false;
+		mode.canToggleDrivingInput = false;
 		mode.canBeFeedback = false;
 	}
 	

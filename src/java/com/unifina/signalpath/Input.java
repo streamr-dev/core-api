@@ -20,7 +20,7 @@ public class Input<T> extends Endpoint<T> {
 	public boolean canBeFeedback = true;
 	
 	boolean drivingInput = true;
-	public boolean canBeDrivingInput = true;
+	public boolean canToggleDrivingInput = true;
 	
 //	boolean clearState = true;
 
@@ -76,7 +76,7 @@ public class Input<T> extends Endpoint<T> {
 		Map<String,Object> config = super.getConfiguration();
 		
 		config.put("drivingInput", drivingInput);
-		config.put("canBeDrivingInput", canBeDrivingInput);
+		config.put("canToggleDrivingInput", canToggleDrivingInput);
 		config.put("acceptedTypes", getAcceptedTypes());
 		
 		return config;
@@ -87,7 +87,7 @@ public class Input<T> extends Endpoint<T> {
 		super.setConfiguration(config);
 		
 		if (config.containsKey("drivingInput"))
-			drivingInput = (canBeDrivingInput && Boolean.parseBoolean(config.get("drivingInput").toString()));
+			drivingInput = Boolean.parseBoolean(config.get("drivingInput").toString());
 	}
 	
 	/**
