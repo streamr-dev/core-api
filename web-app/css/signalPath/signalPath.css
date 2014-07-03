@@ -377,3 +377,8 @@ div.output .switchContainer {
 .tooltip table {
 	border: 0;
 }
+
+.tooltip .formula {
+	display: inline-block;
+	font-weight: bold;
+}
