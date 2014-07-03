@@ -1,15 +1,36 @@
 package com.unifina.signalpath.filtering;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import com.unifina.math.MODWT;
 import com.unifina.math.WTFilter;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.IntegerParameter;
+import com.unifina.signalpath.PossibleValue;
+import com.unifina.signalpath.StringParameter;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.SlidingDoubleArray;
 
 public class FastMODWT extends AbstractSignalPathModule {
 
+	StringParameter wavelet = new StringParameter(this, "wavelet", "d4") {
+		@Override
+		public Map<String,Object> getConfiguration() {
+			Map<String,Object> config = super.getConfiguration();
+			ArrayList<PossibleValue> possibleValues = new ArrayList<>();
+			config.put("possibleValues",possibleValues);
+			possibleValues.add(new PossibleValue("Haar","haar"));
+			possibleValues.add(new PossibleValue("Daub 4","d4"));
+			possibleValues.add(new PossibleValue("Daub 6","d6"));
+			possibleValues.add(new PossibleValue("Daub 8","d8"));
+			possibleValues.add(new PossibleValue("Daub 10","d10"));
+			possibleValues.add(new PossibleValue("Daub 20","d20"));
+			possibleValues.add(new PossibleValue("Daub 30","d30"));
+			return config;
+		}
+	};
 	IntegerParameter level = new IntegerParameter(this,"level",5);
 	
 	TimeSeriesInput input = new TimeSeriesInput(this,"in");
@@ -30,6 +51,7 @@ public class FastMODWT extends AbstractSignalPathModule {
 	
 	@Override
 	public void init() {
+		addInput(wavelet);
 		addInput(level);
 		addInput(input);
 		addOutput(details);
@@ -41,7 +63,7 @@ public class FastMODWT extends AbstractSignalPathModule {
 	public void initialize() {
 		super.initialize();
 		
-		filter = new WTFilter("d4",true,level.getValue());
+		filter = new WTFilter(wavelet.getValue(),true,level.getValue());
 		N = filter.getH().length;
 		
 		zeroV = new double[N];
