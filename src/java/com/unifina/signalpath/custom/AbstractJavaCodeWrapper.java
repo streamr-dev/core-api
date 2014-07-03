@@ -154,7 +154,6 @@ public abstract class AbstractJavaCodeWrapper extends AbstractSignalPathModule {
 			}
 		}
 	}
-	//TODO: Does the compiled class remain in the JVM, or can it be purged somehow? "ClassUnloader?"
 
 
 	

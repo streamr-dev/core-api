@@ -3,7 +3,9 @@ package com.unifina.signalpath.custom;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-public abstract class DebugAwareModule extends AutoInitSignalPathModule {
+import com.unifina.signalpath.AbstractSignalPathModule;
+
+public abstract class DebugAwareModule extends AbstractSignalPathModule {
 
 	protected final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
