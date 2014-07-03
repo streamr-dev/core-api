@@ -1,10 +1,10 @@
 package com.unifina.signalpath.bool;
 
-import com.unifina.signalpath.GroovySignalPathModule;
+import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
-public class IfThenElse extends GroovySignalPathModule {
+public class IfThenElse extends AbstractSignalPathModule {
 
 	TimeSeriesInput condition = new TimeSeriesInput(this,"if");
 	TimeSeriesInput th = new TimeSeriesInput(this,"then");
