@@ -1,6 +1,11 @@
 package com.unifina.signalpath;
 
+import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,12 +42,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	
 	ArrayList<Output> outputs = new ArrayList<Output>();
 	Map<String,Output> outputsByName = new HashMap<String,Output>();
-
-//	protected boolean originatingModule = false;
-	
-//	protected Propagator basicPropagator;
-//	private Propagator[] specialPropagators;
-//	private Output[][] specialPropagatorDefinitions;
 	
 	private boolean wasReady = false;
 	
@@ -75,7 +74,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private boolean initialized;
 	
-//	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 	
 	/**
@@ -87,14 +85,58 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	private Propagator uiEventPropagator = null;
 	
 	public AbstractSignalPathModule() {
-//		originatingModule = (this instanceof ITimeListener);
+
 	}
 	
 	/**
 	 * This is called immediately after instantiation, and it should
 	 * call addInput or addOutput for all inputs and outputs in the module.
+	 * The default implementation obtains the declared inputs and outputs via 
+	 * reflection. They are sorted in alphabetic order.  If you want to control
+	 * the order in which IO is shown on the module, then override this method
+	 * and call addInput() or addOutput() in the order you want.
 	 */
-	public abstract void init();
+	public void init() {
+		
+		/**
+		 * Execute in a privileged block so that also user defined
+		 * untrusted modules can benefit from auto-initialization of IO. 
+		 */
+        AccessController.doPrivileged(
+	        new PrivilegedAction<Object>() {
+	            public Object run() {
+	            	
+	            	// Get declared fields for examination
+	    			Field[] fields = AbstractSignalPathModule.this.getClass().getDeclaredFields();
+	    			
+	    			// Sort by field name
+	    			Arrays.sort(fields, new Comparator<Field>() {
+						@Override
+						public int compare(Field o1, Field o2) {
+							return o1.getName().compareTo(o2.getName());
+						}
+	    			});
+	    			
+	    			for (Field f : fields) {
+	    				try {
+	    					// This is required to avoid java.lang.IllegalAccessException and requires privileges
+	    					f.setAccessible(true);
+	    					Object obj = f.get(AbstractSignalPathModule.this);
+	    					if (Input.class.isInstance(obj))
+	    						addInput((Input)obj);
+	    					else if (Output.class.isInstance(obj))
+	    						addOutput((Output)obj);
+	    				} catch (Exception e) {
+	    					log.error("Could not get field: "+f+", class: "+AbstractSignalPathModule.this.getClass()+" due to exception: "+e);
+	    				} finally {
+	    					// Set the field back to non-accessible
+	    					f.setAccessible(false);
+	    				}
+	    			}
+					return null;
+	            }
+	        });
+	}
 	
 	/**
 	 * This method is for local initialization of the module. It
@@ -115,7 +157,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		
 		inputs.add(input);
 		inputsByName.put(name,input);
-//		inputCount++;
 		inputCount = inputs.size();
 		
 		// re-count because inputs already contained in the counters might be added
@@ -152,27 +193,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	
 	public void markReady(Input input) {
 		readyInputs++;
-		
-//		int count = 0;
-//		for (Input i : getInputs())
-//			if (i.isReady())
-//				count++;
-//		
-//		if (initialized && count != readyInputs)
-//			System.out.println("warning: "+this+" has an error in readyInputs");
-		
 	}
 	
 	public void cancelReady(Input input) {
 		readyInputs--;
-		
-//		int count = 0;
-//		for (Input i : getInputs())
-//			if (i.isReady())
-//				count++;
-//		
-//		if (initialized && count != readyInputs)
-//			System.out.println("warning: "+this+" has an error in readyInputs");
 	}
 	
 	public boolean allInputsReady() {
@@ -233,17 +257,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * the module exists in!
 	 */
 	public void connectionsReady() {
-//		if (originatingModule) {
-//			findFeedbackConnections();
-//			basicPropagator = new Propagator(getOutputs());
-//			specialPropagatorDefinitions = getSpecialPropagatorDefinitions();
-//			
-//			specialPropagators = new Propagator[specialPropagatorDefinitions.length];
-//			for (int i=0;i<specialPropagatorDefinitions.length;i++) {
-//				specialPropagators[i] = new Propagator(specialPropagatorDefinitions[i]);
-//			}
-//		}
-		
+
 		initialize();
 		
 		// Only report the initialization of this module once
@@ -284,7 +298,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				i.setFeedbackConnection(true);
 				System.out.println("Found feedback connection: "+traversedModules+" -> "+output+" -> "+i);
 				
-				// TODO: remove this exception if an algorithm can some day be found
+				// TODO: remove this exception if an automatic algorithm can be made to work
 				throw new IllegalStateException("Infinite cycle found! You must mark some input(s) as feedback! "+traversedModules+" -> "+output+" -> "+i);
 				
 				// TODO: The previous one was not a sufficient algorithm. One possibility is to keep track of
@@ -332,14 +346,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			
 		}
 	}
-
-//	public Propagator getBasicPropagator() {
-//		return basicPropagator;
-//	}
-//	
-//	public Propagator getSpecialPropagator(int index) {	
-//		return specialPropagators[index];
-//	}
 
 	public void trySendOutput() {
 		if (sendPending && allInputsReady()) {
@@ -590,8 +596,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	
 	@Override
 	public void onDay(Date day) {
-		// Clear on day change (but not on the first one)
-//		clear();
+
 	}
 	
 	public Map<String,Object> addOption(Map<String,Object> config, String name, String type, Object value) {
