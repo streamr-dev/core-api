@@ -104,8 +104,8 @@ class ModuleController {
 		
 		try {
 			Module domainObject = Module.get(params.id)
-			if (!unifinaSecurityService.canAccess(domainObject)) {
-				throw new Exception("User $springSecurityService.currentUser does not have access to module $domainObject.name")
+			if (domainObject.hide || !unifinaSecurityService.canAccess(domainObject)) {
+				throw new Exception("Access denied for user $springSecurityService.currentUser.username to requested module")
 			}
 			
 			def conf = (params.configuration ? JSON.parse(params.configuration) : [:])
