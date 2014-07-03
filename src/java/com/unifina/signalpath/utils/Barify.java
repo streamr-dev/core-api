@@ -20,7 +20,7 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	TimeSeriesOutput close = new TimeSeriesOutput(this,"close");
 	TimeSeriesOutput avg = new TimeSeriesOutput(this,"avg");
 	
-	Bar currentBar = new Bar(null,null,null,null,null,0,0); //[start:null, open:null, high:null, low:null, close:null, avgSum:0, avgEvents:0];
+	Bar currentBar = new Bar(null,null,null,null,null,0,0);
 	Bar previousBar = null;
 	
 	@Override
@@ -100,7 +100,6 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	}
 
 	class Bar {
-//		[start:null, open:null, high:null, low:null, close:null, avgSum:0, avgEvents:0]
 		public Date start;
 		public Double open;
 		public Double high;
