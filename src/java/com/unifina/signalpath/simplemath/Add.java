@@ -4,6 +4,8 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
+// Replaced by AddMulti
+@Deprecated
 public class Add extends AbstractSignalPathModule {
 
 	TimeSeriesInput a = new TimeSeriesInput(this,"A");

@@ -1,6 +1,5 @@
 package com.unifina.signalpath.simplemath;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +10,7 @@ import com.unifina.signalpath.TimeSeriesOutput;
 public class AddMulti extends AbstractSignalPathModule {
 
 	int inputCount = 2;
-	ArrayList<TimeSeriesInput> inputList = new ArrayList<>();
+	TimeSeriesInput[] inputArr = new TimeSeriesInput[0];
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"sum");
 	
 	@Override
@@ -25,9 +24,8 @@ public class AddMulti extends AbstractSignalPathModule {
 	
 	public void sendOutput() {
 		double sum = 0;
-		for (TimeSeriesInput i : inputList)
-			sum += i.value;
-		
+		for (int i=0;i<inputArr.length;i++)
+			sum += inputArr[i].value;
 		out.send(sum);
 	}
 	
@@ -56,10 +54,11 @@ public class AddMulti extends AbstractSignalPathModule {
 			inputCount = (int) ((Map)options.get("inputs")).get("value");
 		}
 		
+		inputArr = new TimeSeriesInput[inputCount];
 		for (int p=1;p<=inputCount;p++) {
 			TimeSeriesInput input = new TimeSeriesInput(this,"in"+p);
 			addInput(input);
-			inputList.add(input);
+			inputArr[p-1] = input;
 		}
 	}
 	
