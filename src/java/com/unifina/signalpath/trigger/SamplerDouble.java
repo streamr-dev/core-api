@@ -4,6 +4,8 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
+// No use anymore, can be replaced with two Samplers and Merge
+@Deprecated
 public class SamplerDouble extends AbstractSignalPathModule {
 	
 	TimeSeriesInput triggerA = new TimeSeriesInput(this,"trigA");
