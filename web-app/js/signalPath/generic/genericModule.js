@@ -199,27 +199,34 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	 * Augment the module help text with endpoint-specific help tables
 	 */
 	var super_renderHelp = prot.renderHelp;
-	prot.renderHelp = function(data) {
+	prot.renderHelp = function(data, extended) {
 		var result = super_renderHelp(data);
 		
-		// Helper function to add io-specific help table
-    	var f = function(title,names,valMap) {
-    		var txt = "";
-    		if (names && names.length>0) {
-    			txt += "<h3>"+title+"</h3>";
-	    		var $t = $("<table></table>");
-	    		$(names).each(function(i,n) {
-	    			$t.append("<tr><td>"+n+"</td><td>"+valMap[n]+"</td></tr>");
-	    		});
-	    		txt += $t[0].outerHTML;
-    		}
-    		return txt;
-    	}
+		// Add tip about clicking to show extended help
+		if (!extended && (data.paramNames.length>0 || data.inputNames.length>0 || data.outputNames.length>0)) {
+			result += "<p class='message'>Click the help button to show extended help.</p>";
+		}
+		else if (extended) {
+		
+			// Helper function to add io-specific help table
+	    	var f = function(title,names,valMap) {
+	    		var txt = "";
+	    		if (names && names.length>0) {
+	    			txt += "<h3>"+title+"</h3>";
+		    		var $t = $("<table></table>");
+		    		$(names).each(function(i,n) {
+		    			$t.append("<tr><td>"+n+"</td><td>"+valMap[n]+"</td></tr>");
+		    		});
+		    		txt += $t[0].outerHTML;
+	    		}
+	    		return txt;
+	    	}
+	    	
+	    	result += f("Parameters", data.paramNames, data.params);
+	    	result += f("Inputs", data.inputNames, data.inputs);
+	    	result += f("Outputs", data.outputNames, data.outputs);
     	
-    	result += f("Parameters", data.paramNames, data.params);
-    	result += f("Inputs", data.inputNames, data.inputs);
-    	result += f("Outputs", data.outputNames, data.outputs);
-    	
+		}
     	return result;
 	}
 	

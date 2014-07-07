@@ -13,7 +13,11 @@ public class Merge extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(inA);
+		inA.setDrivingInput(true);
+		inA.canToggleDrivingInput = false;
 		addInput(inB);
+		inB.setDrivingInput(true);
+		inB.canToggleDrivingInput = false;
 		addOutput(out);
 	}
 

@@ -57,15 +57,31 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		});
 		prot.header.append(deleteLink);
 	
-		// Help button
+		// Help button shows normal help on hover and "extended" help in a dialog on click
 		var helpLink = createModuleButton("help ui-icon ui-icon-help");
 		helpLink.tooltip({
 			items: ".help",
 			hide: 0,
-			tooltipClass: "tooltip",
+			tooltipClass: "tooltip modulehelp",
 			content: function() {
-				return prot.getHelp();
+				return prot.getHelp(false);
 			}
+		});
+		helpLink.click(function() {
+			var $dialogdiv = $("#helpdialog");
+			$dialogdiv = $("<div id='helpdialog' class='modulehelp'></div>");
+			$dialogdiv.html(prot.getHelp(true));
+			$dialogdiv.dialog({
+				autoOpen: true,
+				height: 400,
+				width: 400,
+				modal: true,
+				close: function() {
+					$dialogdiv.dialog("destroy");
+					$dialogdiv.remove();
+				},
+				title: prot.jsonData.name
+			});
 		});
 		prot.header.append(helpLink);
 	
@@ -235,7 +251,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	pub.getLayoutData = getLayoutData;
 	
-	function getHelp() {
+	function getHelp(extended) {
 		var result = null;
     	$.ajax({
 		    type: 'GET',
@@ -245,7 +261,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		    	if (!data.helpText) {
 		    		result = "No help is available for this module.";
 		    	}
-		    	else result = prot.renderHelp(data);
+		    	else result = prot.renderHelp(data,extended);
 			},
 		    error: function() {
 		    	result = "An error occurred while loading module help.";
@@ -257,7 +273,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.getHelp = getHelp;
 	
-	function renderHelp(data) {
+	function renderHelp(data,extended) {
 		var result = "<p>"+data.helpText+"</p>";
 		return result;
 	}

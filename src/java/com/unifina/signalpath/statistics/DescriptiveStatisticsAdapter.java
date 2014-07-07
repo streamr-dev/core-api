@@ -62,8 +62,11 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractSignalPathMod
 		}
 		else {
 			stats.addValue(input.value);
-			if (stats.getN()>=minSamples.getValue())
-				out.send(getValue(stats));
+			if (stats.getN()>=minSamples.getValue()) {
+				Double d = getValue(stats);
+				if (!d.equals(Double.NaN))
+					out.send(d);
+			}
 		}
 	}
 

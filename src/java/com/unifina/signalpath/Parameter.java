@@ -130,6 +130,10 @@ public abstract class Parameter<T> extends Input<T> {
 		}
 	}
 	
+	public void setDefaultValue(T value) {
+		this.defaultValue = value;
+	}
+	
 	/**
 	 * Must return the value of type <T> represented by the String value s. 
 	 * @param s

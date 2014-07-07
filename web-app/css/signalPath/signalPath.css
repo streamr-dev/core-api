@@ -370,15 +370,31 @@ div.output .switchContainer {
 	max-width: 350px;
 }
 
-.tooltip h3 {
+/**
+ * Module help styles
+ **/
+.modulehelp h3 {
 	margin-top: 7px;
 }
 
-.tooltip table {
+.modulehelp table {
 	border: 0;
 }
 
-.tooltip .formula {
+.modulehelp table tbody tr td:first-child {
+	font-weight: bolder;
+	width: 100px;
+}
+
+.modulehelp p {
+	margin-bottom: 1em;
+}
+
+.modulehelp .highlight {
+	font-weight: bolder;
+}
+
+.modulehelp .formula {
 	display: inline-block;
-	font-weight: bold;
+	font-weight: bolder;
 }
