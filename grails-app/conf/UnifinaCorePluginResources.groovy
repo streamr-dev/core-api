@@ -73,6 +73,9 @@ modules = {
 		resource url:'js/chosen-1.0.0/chosen-sprite.png'
 		resource url:'js/chosen-1.0.0/chosen-sprite@2x.png'
 	}
+	'global-error-handler' {
+		resource url:'js/globalErrorHandler.js'
+	}
 	'signalpath-loadBrowser' {
 		resource url:'css/signalPath/widgets/loadBrowser.css'
 	}

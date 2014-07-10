@@ -11,7 +11,7 @@
     
     <r:require module="jquery"/>
     <r:require module="jquery-ui-touchpunch"/>
-        
+	<r:require module="global-error-handler"/>
 	<r:require module="superfish" />
         
 	<r:script>
