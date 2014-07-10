@@ -15,6 +15,7 @@
     <resource>com.unifina.controller.security.SecurityManagerController</resource>
     <resource>com.unifina.controller.signalpath.ModuleController</resource>
     <resource>com.unifina.controller.signalpath.SavedSignalPathController</resource>
+    <resource>com.unifina.controller.task.TaskWorkerController</resource>
     <resource>com.unifina.domain.data.Feed</resource>
     <resource>com.unifina.domain.data.FeedFile</resource>
     <resource>com.unifina.domain.data.FeedUser</resource>
