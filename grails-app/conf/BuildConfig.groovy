@@ -33,8 +33,8 @@ grails.project.dependency.resolution = {
 		// Remote Grails repos
         grailsPlugins()
         grailsCentral()
-
     }
+
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
@@ -74,7 +74,7 @@ grails.project.dependency.resolution = {
 		runtime ":spring-security-core:1.2.7"
 		runtime ":jquery:1.8.3"
 		runtime ":jquery-ui:1.8.24"
-		runtime ":resources:1.1.6"
+		runtime ":resources:1.2.8"
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
 		build ':yui-war-minify:1.5'

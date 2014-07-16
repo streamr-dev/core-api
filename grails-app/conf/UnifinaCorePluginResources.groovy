@@ -1,120 +1,105 @@
 modules = {
-	"jquery-ui-touchpunch" {
-		dependsOn 'jquery-ui'
-		resource url:'js/touchpunch/jquery.ui.touch-punch.min.js', disposition: 'head'
-		//		resource url:'js/touchpunch/jquery.ui.touch-punch.js', disposition: 'head'
-	}
-	"jquery.ui-contextmenu" {
-		dependsOn 'jquery-ui'
-		resource url:'js/jquery.ui-contextmenu/jquery.ui-contextmenu.js'
-	}
 	tablesorter {
 		dependsOn 'jquery'
-		resource url:'js/tablesorter/jquery.tablesorter.min.js'
+		resource url:[dir:'js/tablesorter', file:'jquery.tablesorter.min.js', plugin: 'unifina-core']
 	}
 	highcharts {
-		resource url:'js/highcharts-2.3.3/highcharts.src.js'
+		resource url:[dir:'js/highcharts-2.3.3', file:'highcharts.src.js', plugin: 'unifina-core']
 	}
 	highstock {
-		resource url:'js/highstock-1.3.9/js/highstock.js'
-		resource url:'js/highstock-1.3.9/js/highcharts-more.js'
+		resource url:[dir:'js/highstock-1.3.9/js', file:'highstock.js', plugin: 'unifina-core']
+		resource url:[dir:'js/highstock-1.3.9/js', file:'highcharts-more.js', plugin: 'unifina-core']
+	}
+	bootstrap {
+		dependsOn 'jquery'
+		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
+		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap-theme.min.css', plugin: 'unifina-core']
+	}
+	'bootstrap-datepicker' {
+		dependsOn 'bootstrap'
+		resource url:[dir:'js/bootstrap-datepicker/js', file:'bootstrap-datepicker.js', plugin: 'unifina-core']
+		resource url:[dir:'js/bootstrap-datepicker/css', file:'datepicker.css', plugin: 'unifina-core']
 	}
 	codemirror {
-//		resource url:'js/codemirror-3.21/codemirror.js'
-		resource url:'js/codemirror-3.21/codemirror-compressed.js'
-		resource url:'js/codemirror-3.21/codemirror.css'
-//		resource url:'js/codemirror/codemirror.js'
-//		resource url:'js/codemirror/groovy.js'
-//		resource url:'js/codemirror/codemirror.css'
+//		resource url:[dir:'js/codemirror-3.21', file:'codemirror.js']
+		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
+		resource url:[dir:'js/codemirror-3.21', file:'codemirror.css', plugin: 'unifina-core']
+//		resource url:[dir:'js/codemirror', file:'codemirror.js']
+//		resource url:[dir:'js/codemirror', file:'groovy.js']
+//		resource url:[dir:'js/codemirror', file:'codemirror.css']
 	}
 	superfish {
 		dependsOn 'jquery'
-		resource url:'js/superfish/js/superfish.min.js'
-		resource url:'js/superfish/css/superfish.css'
-		resource url:'js/superfish/js/supposition.js'
+		resource url:[dir:'js/superfish/js', file:'superfish.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/superfish/css', file:'superfish.css', plugin: 'unifina-core']
+		resource url:[dir:'js/superfish/js', file:'supposition.js', plugin: 'unifina-core']
 	}
 
 	jsplumb {
-		dependsOn 'jquery'
-		dependsOn 'jquery-ui'
-		resource url:'js/jsPlumb/jquery.jsPlumb-1.5.3.js'
+		resource url:[dir:'js/jsPlumb', file:'dom.jsPlumb-1.6.2.js', plugin: 'unifina-core']
 	}
 	jstree {
 		dependsOn 'jquery'
-		resource url:'js/jsTree/jquery.jstree.js'
+		resource url:[dir:'js/jsTree', file:'jquery.jstree.js', plugin: 'unifina-core']
 		// If you change the theme, check SignalPathTagLib too
-		resource url:'js/jsTree/themes/classic/style.css'
+		resource url:[dir:'js/jsTree/themes/classic', file:'style.css', plugin: 'unifina-core']
 	}
 	atmosphere {
 		dependsOn 'jquery'
-		resource url:'js/atmosphere/jquery.atmosphere.js'
+		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
 	}
 	hotkeys {
 		dependsOn 'jquery'
-		resource url:'js/hotkeys/jquery.hotkeys.js'
+		resource url:[dir:'js/hotkeys', file:'jquery.hotkeys.js', plugin: 'unifina-core']
 	}
 	joyride {
 		dependsOn 'jquery'
-		resource url:'js/joyride-2.1/joyride-2.1.css'
-		resource url:'js/joyride-2.1/modernizr.mq.js'
-		resource url:'js/joyride-2.1/jquery.cookie.js'
-		resource url:'js/joyride-2.1/jquery.joyride-2.1.js'
+		resource url:[ dir: 'js/joyride-2.1', file: 'joyride-2.1.css', plugin: 'unifina-core']
+		resource url:[ dir: 'js/joyride-2.1', file: 'modernizr.mq.js', plugin: 'unifina-core']
+		resource url:[ dir: 'js/joyride-2.1', file: 'jquery.cookie.js', plugin: 'unifina-core']
+		resource url:[ dir: 'js/joyride-2.1', file: 'jquery.joyride-2.1.js', plugin: 'unifina-core']
 	}
 	pnotify {
-		dependsOn 'jquery, jquery-ui'
-//		resource url:'js/pnotify-1.2.0/jquery.pnotify.min.js'
-		resource url:'js/pnotify-1.2.0/jquery.pnotify.1.2.2-snapshot.js'
-		resource url:'js/pnotify-1.2.0/jquery.pnotify.default.css'
-	}
-	chosen {
 		dependsOn 'jquery'
-		resource url:'js/chosen-1.0.0/chosen.jquery.min.js'
-		resource url:'js/chosen-1.0.0/chosen.min.css'
-		resource url:'js/chosen-1.0.0/chosen-sprite.png'
-		resource url:'js/chosen-1.0.0/chosen-sprite@2x.png'
+//		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.min.js']
+		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
+		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
 	'global-error-handler' {
-		resource url:'js/globalErrorHandler.js'
+		resource url:[dir:'js', file:'globalErrorHandler.js', plugin: 'unifina-core']
 	}
 	'signalpath-loadBrowser' {
-		resource url:'css/signalPath/widgets/loadBrowser.css'
+		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, chosen, jquery.ui-contextmenu, signalpath-loadBrowser'
-		resource url:'js/signalPath/core/signalPath.js'
-		resource url:'js/timezones/detect_timezone.js'
-		resource url:'js/signalPath/generic/emptyModule.js'
-		resource url:'js/signalPath/generic/genericModule.js'
-		resource url:'js/signalPath/core/IOSwitch.js'
-		resource url:'js/signalPath/core/Endpoint.js'
-		resource url:'js/signalPath/core/Input.js'
-		resource url:'js/signalPath/core/Parameter.js'
-		resource url:'js/signalPath/core/Output.js'
-		resource url:'js/signalPath/specific/chartModule.js'
-		resource url:'css/signalPath/modules/chartModule.css'
-		resource url:'js/signalPath/specific/gaugeModule.js'
-		resource url:'js/signalPath/specific/customModule.js'
-		resource url:'js/signalPath/specific/tableModule.js'
-		resource url:'js/signalPath/specific/commentModule.js'
-		resource url:'css/signalPath/modules/commentModule.css'
-		resource url:'js/signalPath/specific/labelModule.js'
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, signalpath-loadBrowser'
+		resource url:[dir:'js/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
+		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/core', file:'Output.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
+		resource url:[dir:'js/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
-		resource url:'css/signalPath/signalPath.css'
+		resource url:[dir:'css/signalPath', file:'signalPath.css', plugin: 'unifina-core']
 		
-		resource url:'css/signalPath/themes/light/light.css'
-		resource url:'css/signalPath/themes/light/light.js'
-		resource url:'css/signalPath/themes/light/jquery-ui-theme/jquery-ui-1.10.3.custom.min.css'
+		resource url:[dir:'css/signalPath/themes/light', file:'light.css', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/themes/light', file:'light.js', plugin: 'unifina-core']
 		
-//		resource url:'css/signalPath/themes/dark/dark.css'
-//		resource url:'css/signalPath/themes/dark/dark.js'
-//		resource url:'css/signalPath/themes/dark/jquery-ui-theme/jquery-ui.min.css'
-//		resource url:'css/signalPath/themes/dark/jquery-ui-theme/jquery.ui.theme.css'
-	}
-	overrides {
-		'jquery-ui' {
-			resource id:'js', url:'js/jquery-ui-1.9.2/jquery-ui.js', nominify: true, disposition: 'head'
-		}
+//		resource url:[dir:'css/signalPath/themes/dark', file:'dark.css']
+//		resource url:[dir:'css/signalPath/themes/dark', file:'dark.js']
 	}
 }
