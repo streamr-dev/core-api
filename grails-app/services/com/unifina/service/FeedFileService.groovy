@@ -158,11 +158,14 @@ class FeedFileService {
 		return getFileStorageAdapter().retrieve(canonicalName)
 	}
 	
-	public FileStorageAdapter getFileStorageAdapter() {
-		if (!grailsApplication.config.unifina.feed.fileStorageAdapter)
-			throw new RuntimeException("File storage adapter is not configured!")
+	/**
+	 * Returns the default file storage adapter configured in Config.groovy as "unifina.feed.fileStorageAdapter"
+	 */
+	public FileStorageAdapter getFileStorageAdapter(String className = grailsApplication.config.unifina.feed.fileStorageAdapter) {
+		if (!className)
+			throw new RuntimeException("No default file storage adapter is configured and no classname was provided!")
 			
-		return this.getClass().getClassLoader().loadClass(grailsApplication.config.unifina.feed.fileStorageAdapter).newInstance(grailsApplication.config)
+		return this.getClass().getClassLoader().loadClass(className).newInstance(grailsApplication.config)
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {

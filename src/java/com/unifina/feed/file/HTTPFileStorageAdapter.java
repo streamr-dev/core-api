@@ -40,11 +40,11 @@ public class HTTPFileStorageAdapter extends FileStorageAdapter {
 			throw new RuntimeException("Server prefix is not configured for HTTPFileStorageAdapter!");
 	}
 
-	protected String encodeCanonicalPath(String canonicalPath) {
+	protected String encodeLocation(String location) {
 		// URL encode parts of the path
 		StringBuilder cp = new StringBuilder();
 		try {
-			for (String s : canonicalPath.split("/")) {
+			for (String s : location.split("/")) {
 				if (!s.equals("")) {
 					cp.append("/");
 					cp.append(URLEncoder.encode(s, "UTF-8"));
@@ -56,19 +56,19 @@ public class HTTPFileStorageAdapter extends FileStorageAdapter {
 		return cp.toString();
 	}
 	
-	protected URL makeURL(String canonicalPath) throws MalformedURLException {
-		canonicalPath = encodeCanonicalPath(canonicalPath);
+	protected URL makeURL(String location) throws MalformedURLException {
+		location = encodeLocation(location);
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(serverPrefix.endsWith("/") ? serverPrefix.substring(0, serverPrefix.length()-1)  : serverPrefix);
 		sb.append("/");
-		sb.append(canonicalPath.startsWith("/") ? canonicalPath.substring(1) : canonicalPath);
+		sb.append(location.startsWith("/") ? location.substring(1) : location);
 		return new URL(sb.toString());
 	}
 	
 	@Override
-	protected InputStream tryRetrieve(String canonicalPath) throws IOException {
-		URL url = makeURL(canonicalPath);
+	protected InputStream tryRetrieve(String location) throws IOException {
+		URL url = makeURL(location);
 //		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 		
 		CloseableHttpClient client = null;
@@ -97,8 +97,8 @@ public class HTTPFileStorageAdapter extends FileStorageAdapter {
 	}
 
 	@Override
-	protected void tryStore(File file, String canonicalPath) throws IOException {
-		URL url = makeURL(canonicalPath);
+	protected void tryStore(File file, String location) throws IOException {
+		URL url = makeURL(location);
 		
 		CloseableHttpClient client = null;
 		CloseableHttpResponse response = null;

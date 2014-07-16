@@ -40,7 +40,8 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.21'
 		compile('log4j:log4j:1.2.16')
-
+		
+		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
 		compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
@@ -54,6 +55,7 @@ grails.project.dependency.resolution = {
 		compile('com.mashape.unirest:unirest-java:1.3.3')
 		
 		runtime('com.amazonaws:aws-java-sdk:1.7.5')
+		
     }
 
     plugins {
