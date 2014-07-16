@@ -58,19 +58,19 @@ SignalPath.ParamRenderers = {
 				})(symbol,search));
 					
 				var onSel = (function(sym,sch,id,mod,d) {
-					return function(event,ui) {
-						if (ui.item) {
+					return function(event,item) {
+						if (item) {
 							// If the current module corresponds to the selected feed module and the new one
 							// does not, the module needs to be replaced
-							if (d.checkModuleId && mod.getModuleId() != ui.item.module) {
+							if (mod && d.checkModuleId && mod.getModuleId() != item.module) {
 								if (confirm("This stream is implemented by a different module. Replace current module? This will break current connections.")) {
-									SignalPath.replaceModule(mod, ui.item.module,{params:[{name:"stream", value:ui.item.id}]});
+									SignalPath.replaceModule(mod, item.module,{params:[{name:"stream", value:item.id}]});
 								}
 							}
 							// Handle same module implementation
 							else {
-								$(id).val(ui.item.id);
-								$(sym).find("a").html(ui.item.name);
+								$(id).val(item.id);
+								$(sym).find("a").html(item.name);
 	
 								if (mod!=null)
 									SignalPath.updateModule(mod);
@@ -87,14 +87,15 @@ SignalPath.ParamRenderers = {
 					}
 				})(symbol,search,id,module,data);
 				
-				$(search).autocomplete({
-					source: function(request, callback) {
+				$(search).typeahead({
+					minLength: 1,
+				}, {
+					name: 'streams',
+					displayKey: 'name',
+					source: function(q, callback) {
 						$.ajax({
 							url: project_webroot+"stream/search", 
-							data: {
-								term: request.term,
-//								module: module.getModuleId()
-							},
+							data: { term: q },
 							dataType: 'json',
 							success: callback,
 							error: function(jqXHR, textStatus, errorThrown) {
@@ -102,15 +103,16 @@ SignalPath.ParamRenderers = {
 								callback([]);
 							}
 						});
-					},
-					minLength: 2,
-					select: onSel
-				}).data("autocomplete")._renderItem = function(ul,item) {
+					}
+				})
+				.on('typeahead:selected', onSel)
+
+				/*.data("autocomplete")._renderItem = function(ul,item) {
 					return $("<li></li>")
 						.data("item.autocomplete",item)
 						.append("<a>"+item.name+"</a>")
 						.appendTo(ul);
-				};
+				};*/
 					
 				return span;
 			},
@@ -172,7 +174,7 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		
 		return div;
 	}
-	
+
 	// PRIVATE FUNCTIONS
 	function getParamRenderer() {
 		return SignalPath.getParamRenderer(pub.json);

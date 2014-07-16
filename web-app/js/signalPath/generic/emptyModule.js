@@ -144,6 +144,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
+		// jsPlumb.draggable($(prot.div).attr("id"), prot.dragOptions);
 		prot.div.draggable(prot.dragOptions);
 		
 		prot.div.on('spContextMenuSelection', (function(d,j) {

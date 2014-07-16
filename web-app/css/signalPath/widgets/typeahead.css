@@ -1,0 +1,17 @@
+.tt-dropdown-menu {
+	background-color: #ffffff;
+	border: 1px solid #cccccc;
+}
+
+.tt-suggestion p {
+	padding-left: 3px;
+	color: #333333;
+	margin: 0px;
+	white-space: nowrap;
+}
+
+.tt-dropdown-menu p:hover {
+	cursor: pointer;
+	color: white;
+	background-color: #333;
+}

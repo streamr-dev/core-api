@@ -78,7 +78,6 @@ html, body {
 }
 
 .component a:link, a:visited, a:hover {
-    font-weight: bold;
     text-decoration: none;
 }
 

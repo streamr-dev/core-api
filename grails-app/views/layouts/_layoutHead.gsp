@@ -10,7 +10,7 @@
     </script>
     
     <r:require module="jquery"/>
-    <r:require module="jquery-ui-touchpunch"/>
+    <r:require module="bootstrap"/>
 	<r:require module="global-error-handler"/>
 	<r:require module="superfish" />
         

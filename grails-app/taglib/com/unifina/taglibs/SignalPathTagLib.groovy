@@ -25,7 +25,7 @@ class SignalPathTagLib {
 
 		String url = g.createLink(controller:(attrs.controller ?: "stream"), action:(attrs.action ?: "search"))
 
-		out << "<input type='text' name='$id' id='$id'/>"
+		out << "<input type='text' name='$id' id='$id' class='form-control'/>"
 		
 		writeScriptHeader(out)
 		def str = """
@@ -77,31 +77,40 @@ class SignalPathTagLib {
 		def id = attrs.id
 
 		String url = g.createLink(controller:(attrs.controller ?: "module"), action:(attrs.action ?: "jsonGetModules"))
-
-		out << "<input type='text' name='$id' id='$id'/>"
+		out << "<input type='text' name='$id' id='$id' class='form-control'/>"
 		
 		writeScriptHeader(out)
 		def str = """
-					\$("#$id").autocomplete({
-		              minLength: 2,
-                      delay: 0,
-		              select: function(event,ui) {
-            			if (ui.item) {
-				          SignalPath.addModule(ui.item.id,{});
-                          \$('#$id').val("");
-			            }
-			            else {
-				          // Nothing selected
-			            }
-		              }
-	                }).data("autocomplete")._renderItem = function(ul,item) {
-		              return \$("<li></li>")
-		                .data("item.autocomplete",item)
-		                .append("<a>"+item.name+"</a>")
-		                .appendTo(ul);
-	               };
-		 """
+			var dataset = []
 
+			\$.get('$url', function(ds) {
+				dataset = ds
+			})
+
+			function typeAhead(q, cb) {
+				var re = new RegExp(q, 'i')
+				var matches = dataset.filter(function(mod) {
+					return re.test(mod.name)
+				})
+				cb(matches)
+			}
+
+			\$("#$id").typeahead({
+              minLength: 2,
+			}, {
+              name: 'modules',
+              displayKey: 'name',
+              source: typeAhead
+            })
+			
+			\$("#$id").on('typeahead:selected', function(e, mod) {
+				if (!mod)
+					return;
+
+				SignalPath.addModule(mod.id, {})
+				\$('#$id').val('')
+			})
+		 """
 		out << str
 		out << getModuleUpdateString(url,id)
 		writeScriptFooter(out)
@@ -173,21 +182,25 @@ class SignalPathTagLib {
 			
 			"plugins" : [ "json_data", "ui", "themes" ]
 		})
+		.bind('dblclick.jstree', function(e, data) {
+            var node = jQuery(e.target).closest("li")
+
+            if (!jQuery("#$id").jstree('is_leaf', node))
+            	return;
+
+            var id = node.data('id')
+			SignalPath.addModule(id, {})
+		})
 		.bind("select_node.jstree", function (event, data) {
-			// `data.rslt.obj` is the jquery extended node that was clicked
-				if (data.rslt.obj.data("canAdd")) {
-					jQuery('#$buttonId').button("enable");
-				}
-				else {
-					jQuery('#$buttonId').button("disable");
-					data.inst.open_node(data.rslt.obj);
-				}
-	    });
-	    //.bind("loaded.jstree", function() {
-		//	jQuery("#id ul").addClass("jstree-no-icons");
-		//});
-		// jQuery("#id").addClass("jstree-default jstree-no-icons");
-		 """
+            if (jQuery("#$id").jstree('is_leaf', data.rslt.obj)) {
+				jQuery('#$buttonId').attr('disabled', false)
+			}
+			else {
+				jQuery('#$buttonId').attr('disabled', true)
+				data.inst.open_node(data.rslt.obj)
+			}
+	    })
+		"""
 		out << str
 		writeScriptFooter(out)
 		
@@ -372,7 +385,7 @@ class SignalPathTagLib {
 //			out << "<span class='ui-button-text'>${body()}</span>"
 //		out << "</button>"
 		
-		out << "<button id='$buttonId' class='${attrs.class ?: ""} ${attrs.disabled ? "ui-state-disabled" : ""}' style='${attrs.style ?: ""}' ${attrs.title ? "title='attrs.title'" : ''} ${attrs.disabled ? "disabled='disabled'" : ""} role='button'>"
+		out << "<button id='$buttonId' class='btn ${attrs.class ?: "btn-default"}' style='${attrs.style ?: ""}' ${attrs.title ? "title='${attrs.title}'" : ''} ${attrs.disabled ? "disabled='disabled'" : ""} type='button'>"
 		out << body()
 		out << "</button>"
 	}
@@ -394,13 +407,10 @@ class SignalPathTagLib {
 	jQuery("#$buttonId").click(function() {
 		var lb = jQuery("#$browserId");
 		if (lb.is(":visible")) {
-			lb.hide();
-			jQuery("#$browserId").tabs("destroy");
+			lb.modal('hide');
 		}
 		else {
-			jQuery("#$browserId").tabs();
-			lb.show();
-			lb.position({my: "left top", at: "left bottom", of: "#$buttonId", collision:"none"});
+			lb.modal();
 		}
 	});
 		"""
@@ -431,7 +441,7 @@ class SignalPathTagLib {
 	}
 	
 	/**
-	 * Renders a button that will open a signalpath load browser
+	 * Renders the signalpath load browser
 	 *
 	 * @attr id REQUIRED id of the browser
 	 * @attr tabs a list of maps with keys: controller, action, params where the content of the tab must be available. The default values has one tab with controller: savedSignalPath, action: loadBrowser, and no params.
@@ -442,44 +452,57 @@ class SignalPathTagLib {
 		def tabs = attrs.tabs ?: [[controller:"savedSignalPath",action:"loadBrowser",name:"Archive"]]
 		def visible = attrs.visible ?: false
 		def command = attrs.command ?: "SignalPath.loadSignalPath({url: url})"
-		
-		out << "<div id='$id'>"
-		out << "<div class='loadTabs'>"
-		out << "<ul>"
+
+		out << "<ul class='nav nav-tabs' role='tablist'>"
+ 
+		// nav tabs
 		tabs.each {
 			// Inject the javascript command into params
 			if (!it.params)
-				it.params = [browserId:it.browserId,command:command]
+				it.params = [browserId:it.browserId, command:command]
 			else if (it.params) {
 				it.params.browserId = it.browserId
 				it.params.command = command
 			}
-			
-			out << "<li>"
-			out << "<a href='${createLink(controller:it.controller,action:it.action,params:it.params)}'>$it.name</a>"
-			out << "</li>"
+
+			out << "<li><a data-target='#loadBrowser_${it.browserId}' \
+						data-url='${createLink(controller:it.controller, action:it.action, params:it.params)}' \
+						data-toggle='tab' \
+						role='tab'>${it.name}\
+					</a></li>"
 		}
-		out << "</ul>"
-		out << "</div>"
-		out << "</div>"
-		
-		writeScriptHeader(out)
-		
+
+		out << '</ul>'
+
+		// tab panes
+		out << '<div class="tab-content">'
+		tabs.each {
+			out << "<div class=\"tab-pane\" id=\"loadBrowser_${it.browserId}\"></div>"
+		}
+		out << '</div>'
+
+		writeScriptHeader(out) 
+
 		out << """
-		if (typeof(SignalPath)!="undefined") {
-			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
-				var lb = jQuery("#$id");
-				if (lb.is(":visible")) {
-					lb.hide();
-					jQuery("#$id").tabs("destroy");
-				}
+			jQuery('#$id a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+				jQuery.get(jQuery(e.target).data('url'), function(content) {
+					console.log('render ', jQuery(e.target).data('url'), 'into',jQuery(e.target).data('target'))
+					jQuery(jQuery(e.target).data('target')).html(content);
+				});
 			});
-		}
-		"""
-		if (visible) {
-			out << "jQuery('#$id').tabs().show();"
-		}
-		writeScriptFooter(out)
+
+			jQuery('#$id a[data-toggle="tab"]:first').tab('show');
+
+			if (typeof(SignalPath)!=='undefined') {
+		 		jQuery(SignalPath).on('signalPathLoad', function(event, saveData) {
+		 			var lb = jQuery('#$id');
+		 			if (lb.is(':visible'))
+						lb.modal('hide');
+			 	});
+			 }
+		 """
+
+		 writeScriptFooter(out)
 	}
 	
 	/**
@@ -557,9 +580,7 @@ class SignalPathTagLib {
 
 		jQuery('#saveAsName').val(SignalPath.isSaved() ? SignalPath.getSaveData().name : "$name");
 
-		var callback = new function(saveData) {
-
-		}
+		var callback = function(saveData) {}
 
 		jQuery('#$dialogId').dialog({
 //			height: 100,
@@ -588,8 +609,6 @@ class SignalPathTagLib {
 				}
 			}
 		});
-
-
 	});
 		"""
 		out << str
@@ -619,7 +638,7 @@ class SignalPathTagLib {
 		
 		// Create the table
 		out << """
-			var table = jQuery("<table id='$id'><thead><tr></tr></thead><tbody></tbody></table>");
+			var table = jQuery("<table id='$id' class='table table-hover table-condensed'><thead><tr></tr></thead><tbody></tbody></table>");
 			jQuery("#$attrs.parentId").append(table);
 
 			var inputs = jQuery([]);
@@ -639,13 +658,14 @@ class SignalPathTagLib {
 				var row = jQuery("<tr></tr>");
 				tblBody.append(row);
 				
-				var name = jQuery("<td>"+(it.displayName!=null ? it.displayName : it.name)+"</td>");
+				var name = jQuery("<td class='col-sm-3'>"+(it.displayName!=null ? it.displayName : it.name)+"</td>");
 				row.append(name);
 				
-				var inputTd = jQuery("<td></td>");
+				var inputTd = jQuery("<td class='col-sm-3'></td>");
 				row.append(inputTd);
 				var input = SignalPath.getParamRenderer(it).create(null,it);
 				inputTd.append(input);
+				input.addClass("form-control")
 				jQuery(input).trigger("spIOReady");
 				input.data("parameterData",it);
 				inputs.push(input);

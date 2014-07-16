@@ -23,13 +23,15 @@ public class UiTagLib {
 		// If you want to disable weekends, add this to the datepicker options:
 		// beforeShowDay: \$.datepicker.noWeekends
 		
-		def str = """
-			<input type="text" name="$name" id="$id" value="$date"/>
+		def str = "<input type='text' name='$name' id='$id' value='$date' class='"+attrs.class+"'/>"
+		str += """
 			<script type="text/javascript">
 				\$(document).ready(function() {
 					\$("#${id}").datepicker({
-						dateFormat: "yy-mm-dd",
-						firstDay: 1
+						weekStart: 1,
+						format: 'yyyy-mm-dd'
+					}).on('changeDate', function() {
+						\$("#${id}").datepicker('hide');
 					});
 				});
 			</script>
@@ -45,4 +47,47 @@ public class UiTagLib {
 		}
 	}
 
+	def paginate = {attrs, body->
+		def offset = params.offset ? params.offset.toInteger() : 0
+		def max = attrs.max.toInteger()
+		def total = attrs.total.toInteger()
+		def page = offset / max + 1
+		def pages = total / max
+
+		out << "<ul class='pagination'>"
+
+		if (page > 1)
+			out << "<li>"
+		else
+			out << "<li class='disabled'>"
+
+		out << "<a href='#'>&laquo;</a></li>"
+
+		for (i in 1..pages+1) {
+			def ioff = (i - 1) * max
+			def ilink = createLink(controller: controllerName, action: actionName, params: [
+				offset: ioff,
+				max: max
+			])
+
+			if (ioff == offset)
+				out << "<li class='active'>"
+			else
+				out << "<li>"
+
+			out << "<a href='${ilink}'>$i</a></li>"
+		}
+
+		if (page <= pages)
+			out << "<li>"
+		else
+			out << "<li class='disabled'>"
+
+		out << "<a href='#'>&raquo;</a></li>"
+
+		out << "</ul>"
+	}
+
 }
+
+

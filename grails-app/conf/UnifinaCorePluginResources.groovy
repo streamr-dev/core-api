@@ -1,4 +1,9 @@
 modules = {
+	"jquery-ui-touchpunch" {
+		dependsOn 'jquery-ui'
+		resource url:[dir:'js/touchpunch/', file:'jquery.ui.touch-punch.min.js', disposition: 'head', plugin: 'unifina-core']
+		//		resource url:'js/touchpunch/jquery.ui.touch-punch.js', disposition: 'head'
+	}
 	tablesorter {
 		dependsOn 'jquery'
 		resource url:[dir:'js/tablesorter', file:'jquery.tablesorter.min.js', plugin: 'unifina-core']
@@ -21,6 +26,9 @@ modules = {
 		resource url:[dir:'js/bootstrap-datepicker/js', file:'bootstrap-datepicker.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-datepicker/css', file:'datepicker.css', plugin: 'unifina-core']
 	}
+	typeahead {
+		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
+	}
 	codemirror {
 //		resource url:[dir:'js/codemirror-3.21', file:'codemirror.js']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
@@ -37,7 +45,9 @@ modules = {
 	}
 
 	jsplumb {
-		resource url:[dir:'js/jsPlumb', file:'dom.jsPlumb-1.6.2.js', plugin: 'unifina-core']
+		dependsOn 'jquery'
+		dependsOn 'jquery-ui'
+		resource url:[dir:'js/jsPlumb/', file:'jquery.jsPlumb-1.5.3.js', plugin: 'unifina-core']
 	}
 	jstree {
 		dependsOn 'jquery'
@@ -66,14 +76,22 @@ modules = {
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
+	chosen {
+		dependsOn 'jquery'
+		resource url:[dir:'js/chosen-1.0.0/', file:'chosen.jquery.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/chosen-1.0.0/', file:'chosen.min.css', plugin: 'unifina-core']
+		resource url:[dir:'js/chosen-1.0.0/', file:'chosen-sprite.png', plugin: 'unifina-core']
+		resource url:[dir:'js/chosen-1.0.0/', file:'chosen-sprite@2x.png', plugin: 'unifina-core']
+	}
 	'global-error-handler' {
 		resource url:[dir:'js', file:'globalErrorHandler.js', plugin: 'unifina-core']
 	}
-	'signalpath-loadBrowser' {
+	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, signalpath-loadBrowser'
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, chosen, codemirror, tablesorter, signalpath-widgets'
 		resource url:[dir:'js/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
 		resource url:[dir:'js/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']

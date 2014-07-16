@@ -82,9 +82,10 @@ var SignalPath = (function () {
 		canvas = $("#"+options.canvas);
 		jsPlumb.Defaults.Container = canvas;
 		
-		newSignalPath();
+		jsPlumb.bind('ready', function() {
+			pub.newSignalPath();
+		});
 
-		jsPlumb.init();
 		jQuery.atmosphere.logLevel = 'error';
 	};
 	pub.unload = function() {
