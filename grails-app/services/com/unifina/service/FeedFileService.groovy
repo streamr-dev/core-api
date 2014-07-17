@@ -66,6 +66,22 @@ class FeedFileService {
 	FeedFile getFeedFile(RemoteFeedFile file) {
 		return getFeedFile(file.feed, file.beginDate, file.endDate, file.name)
 	}
+	
+	FeedFile createFeedFile(RemoteFeedFile remoteFile) {
+		FeedFile feedFile = new FeedFile()
+		feedFile.name = remoteFile.getName()
+		
+		feedFile.beginDate = remoteFile.getBeginDate()
+		feedFile.endDate = remoteFile.getEndDate()
+		// TODO: remove deprecated
+		feedFile.day = remoteFile.getBeginDate()
+		
+		feedFile.processed = false
+		feedFile.processing = true
+		feedFile.processTaskCreated = true
+		feedFile.feed = remoteFile.getFeed()
+		return feedFile
+	}
 
 	public void setPreprocessed(FeedFile feedFile) {
 		feedFile = feedFile.merge()
@@ -286,6 +302,13 @@ class FeedFileService {
 	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
+			
+		// If no streams were found (for example, file contained no data), just return
+		if (foundStreams.size()==0) {
+			log.warn("No streams found in FeedFile $feedFile.name.")
+			return
+		}
+			
 		long time = System.currentTimeMillis()
 		
 		feedFile = FeedFile.get(feedFile.id)

@@ -67,18 +67,7 @@ class FeedFileCreateAndPreprocessTask extends AbstractTask {
 		}
 		
 		FeedFile.withTransaction {
-			feedFile = new FeedFile()
-			feedFile.name = remoteFile.getName()
-			
-			feedFile.beginDate = remoteFile.getBeginDate()
-			feedFile.endDate = remoteFile.getEndDate()
-			// TODO: remove deprecated
-			feedFile.day = remoteFile.getBeginDate()
-			
-			feedFile.processed = false
-			feedFile.processing = true
-			feedFile.processTaskCreated = true
-			feedFile.feed = remoteFile.getFeed()
+			feedFile = feedFileService.createFeedFile(remoteFile)
 			feedFile.save(flush:true, failOnError:true)
 		}
 		
