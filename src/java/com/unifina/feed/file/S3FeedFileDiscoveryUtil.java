@@ -52,10 +52,16 @@ public abstract class S3FeedFileDiscoveryUtil extends AbstractFeedFileDiscoveryU
 		log.info("Listing files in S3 bucket "+bucketName+" with prefix "+prefix+"...");
 		List<String> result = new ArrayList<>();
 		
-		ObjectListing ls = s3Client.listObjects(bucketName, prefix);
-		for (S3ObjectSummary s : ls.getObjectSummaries()) {
-			result.add(s.getKey());
+		ObjectListing ls;
+		do {
+			ls = s3Client.listObjects(bucketName, prefix);
+			for (S3ObjectSummary s : ls.getObjectSummaries()) {
+				result.add(s.getKey());
+			}
+				
+			ls.setMarker(ls.getNextMarker());
 		}
+		while (ls.isTruncated());
 		
 		return result;
 	}
