@@ -66,6 +66,22 @@ class FeedFileService {
 	FeedFile getFeedFile(RemoteFeedFile file) {
 		return getFeedFile(file.feed, file.beginDate, file.endDate, file.name)
 	}
+	
+	FeedFile createFeedFile(RemoteFeedFile remoteFile) {
+		FeedFile feedFile = new FeedFile()
+		feedFile.name = remoteFile.getName()
+		
+		feedFile.beginDate = remoteFile.getBeginDate()
+		feedFile.endDate = remoteFile.getEndDate()
+		// TODO: remove deprecated
+		feedFile.day = remoteFile.getBeginDate()
+		
+		feedFile.processed = false
+		feedFile.processing = true
+		feedFile.processTaskCreated = true
+		feedFile.feed = remoteFile.getFeed()
+		return feedFile
+	}
 
 	public void setPreprocessed(FeedFile feedFile) {
 		feedFile = feedFile.merge()
@@ -158,11 +174,14 @@ class FeedFileService {
 		return getFileStorageAdapter().retrieve(canonicalName)
 	}
 	
-	public FileStorageAdapter getFileStorageAdapter() {
-		if (!grailsApplication.config.unifina.feed.fileStorageAdapter)
-			throw new RuntimeException("File storage adapter is not configured!")
+	/**
+	 * Returns the default file storage adapter configured in Config.groovy as "unifina.feed.fileStorageAdapter"
+	 */
+	public FileStorageAdapter getFileStorageAdapter(String className = grailsApplication.config.unifina.feed.fileStorageAdapter) {
+		if (!className)
+			throw new RuntimeException("No default file storage adapter is configured and no classname was provided!")
 			
-		return this.getClass().getClassLoader().loadClass(grailsApplication.config.unifina.feed.fileStorageAdapter).newInstance(grailsApplication.config)
+		return this.getClass().getClassLoader().loadClass(className).newInstance(grailsApplication.config)
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {
@@ -283,6 +302,13 @@ class FeedFileService {
 	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
+			
+		// If no streams were found (for example, file contained no data), just return
+		if (foundStreams.size()==0) {
+			log.warn("No streams found in FeedFile $feedFile.name.")
+			return
+		}
+			
 		long time = System.currentTimeMillis()
 		
 		feedFile = FeedFile.get(feedFile.id)

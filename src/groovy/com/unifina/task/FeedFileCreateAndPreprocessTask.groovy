@@ -1,5 +1,6 @@
 package com.unifina.task
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -7,6 +8,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedPreprocessor
+import com.unifina.feed.file.FileStorageAdapter
 import com.unifina.feed.file.RemoteFeedFile
 import com.unifina.service.FeedFileService
 import com.unifina.service.FeedService
@@ -31,9 +33,9 @@ class FeedFileCreateAndPreprocessTask extends AbstractTask {
 	
 	@Override
 	public boolean run() {
-		// Get InputStream from URL as specified in the config
-		if (!config.url)
-			throw new RuntimeException("Task config does not define the url!")
+		// Get InputStream from location specified in the config
+		if (!config.location)
+			throw new RuntimeException("Task config does not define the location!")
 		if (!config.beginDate)
 			throw new RuntimeException("Task config does not define the beginDate!")
 		if (!config.endDate)
@@ -43,7 +45,13 @@ class FeedFileCreateAndPreprocessTask extends AbstractTask {
 		if (!config.feedId)
 			throw new RuntimeException("Task config does not define the feedId!")
 			
-		RemoteFeedFile remoteFile = new RemoteFeedFile(config.name.toString(), new Date((long)config.beginDate), new Date((long)config.endDate), Feed.get(config.feedId), new URL(config.url))
+		FileStorageAdapter adapter = null
+		if (config.fileStorageAdapter) {
+			log.info("Creating FileStorageAdapter: $config.fileStorageAdapter")
+			adapter = feedFileService.getFileStorageAdapter(config.fileStorageAdapter)
+		}
+
+		RemoteFeedFile remoteFile = new RemoteFeedFile(config.name.toString(), new Date((long)config.beginDate), new Date((long)config.endDate), Feed.get(config.feedId), config.location, adapter?.getClass())
 		feedFile = feedFileService.getFeedFile(remoteFile)
 		preprocessor = feedService.instantiatePreprocessor(remoteFile.getFeed());
 		
@@ -59,25 +67,17 @@ class FeedFileCreateAndPreprocessTask extends AbstractTask {
 		}
 		
 		FeedFile.withTransaction {
-			feedFile = new FeedFile()
-			feedFile.name = remoteFile.getName()
-//			feedFile.name = url.toString().substring(url.toString().lastIndexOf("/")+1)
-			
-			feedFile.beginDate = remoteFile.getBeginDate()
-			feedFile.endDate = remoteFile.getEndDate()
-			// TODO: remove deprecated
-			feedFile.day = remoteFile.getBeginDate()
-			
-			feedFile.processed = false
-			feedFile.processing = true
-			feedFile.processTaskCreated = true
-			feedFile.feed = remoteFile.getFeed()
+			feedFile = feedFileService.createFeedFile(remoteFile)
 			feedFile.save(flush:true, failOnError:true)
 		}
 		
-		// Open the URL connection and preprocess on the fly
-		URLConnection urlConnection = remoteFile.getUrl().openConnection();
-		preprocessor.preprocess(feedFile, feedFileService, urlConnection.getInputStream(), remoteFile.getName().endsWith(".gz"), false);
+		/**
+		 * If the config defines a file storage adapter, use it to retrieve the InputStream.
+		 * Otherwise, try to use open the location as an URL.
+		 */
+		InputStream inputStream = (adapter ? adapter.retrieve(remoteFile.location) : new URL(remoteFile.location).openConnection().getInputStream())
+		
+		preprocessor.preprocess(feedFile, feedFileService, inputStream, remoteFile.getName().endsWith(".gz"), false);
 			
 		return true;
 	}
