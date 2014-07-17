@@ -28,7 +28,7 @@ public abstract class FileStorageAdapter {
 	
 	/**
 	 * Attempts to retrieve an InputStream from a resource
-	 * identified by canonicalPath. It will return null if the resource was
+	 * identified by location. It will return null if the resource was
 	 * not found or could not be retrieved after a number of retries.
 	 * @param location
 	 * @return
@@ -53,7 +53,7 @@ public abstract class FileStorageAdapter {
 	}
 	
 	/**
-	 * Attempts to store a File to the specified canonicalPath. Will throw an
+	 * Attempts to store a File to the specified location. Will throw an
 	 * IOException if not successful after a number of retries.
 	 * @param file
 	 * @param location
@@ -70,6 +70,6 @@ public abstract class FileStorageAdapter {
 		throw new IOException("Failed to store "+file+" to "+location+", attempts exhausted");
 	}
 	
-	protected abstract InputStream tryRetrieve(String canonicalPath) throws IOException;
-	protected abstract void tryStore(File file, String canonicalPath) throws IOException;
+	protected abstract InputStream tryRetrieve(String location) throws IOException;
+	protected abstract void tryStore(File file, String location) throws IOException;
 }

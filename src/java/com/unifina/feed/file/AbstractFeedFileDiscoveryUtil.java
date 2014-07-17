@@ -55,7 +55,7 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 		// List all files at location
 		List<String> files = listFiles();
 		
-		// Match URI against the pattern
+		// Match location against the pattern
 		List<String> matchedFiles = new ArrayList<>();
 		for (String location : files) {
 			if (pattern.matcher(location.toString()).find())
