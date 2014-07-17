@@ -11,6 +11,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.unifina.domain.data.Feed;
@@ -52,14 +53,19 @@ public abstract class S3FeedFileDiscoveryUtil extends AbstractFeedFileDiscoveryU
 		log.info("Listing files in S3 bucket "+bucketName+" with prefix "+prefix+"...");
 		List<String> result = new ArrayList<>();
 		
+		ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+		.withBucketName(bucketName)
+		.withPrefix(prefix);
+		
 		ObjectListing ls;
+		
 		do {
-			ls = s3Client.listObjects(bucketName, prefix);
+			ls = s3Client.listObjects(listObjectsRequest);
 			for (S3ObjectSummary s : ls.getObjectSummaries()) {
 				result.add(s.getKey());
 			}
 				
-			ls.setMarker(ls.getNextMarker());
+			listObjectsRequest.setMarker(ls.getNextMarker());
 		}
 		while (ls.isTruncated());
 		
