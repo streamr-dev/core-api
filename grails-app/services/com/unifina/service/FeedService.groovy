@@ -69,4 +69,8 @@ class FeedService {
 	MessageRecipient getMessageRecipient(Feed domain) {
 		return FeedFactory.getInstance(domain, grailsApplication.config)
 	}
+
+	List<Stream> getStreams(Feed feed) {
+		return Stream.findAllByFeed(feed)
+	}
 }

@@ -73,14 +73,12 @@ public abstract class S3FeedFileDiscoveryUtil extends AbstractFeedFileDiscoveryU
 	}
 	
 	/**
-	 * Specify the S3FileStorageAdapter in config. It is needed to retrieve
-	 * the file.
+	 * Files discovered by this class need to be accessed 
+	 * using the S3FileStorageAdapter.
 	 */
 	@Override
-	protected RemoteFeedFile createRemoteFeedFile(String location) {
-		RemoteFeedFile file = super.createRemoteFeedFile(location);
-		file.setFileStorageAdapter(S3FileStorageAdapter.class);
-		return file;
+	protected Class getFileStorageAdapterClass() {
+		return S3FileStorageAdapter.class;
 	}
 	
 }

@@ -71,18 +71,54 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 		return result;
 	}
 	
+	/**
+	 * By default
+	 * @param file
+	 */
 	protected void handleNewFile(RemoteFeedFile file) {
-		feedFileService.createCreateAndPreprocessTask(file);
+		feedFileService.createPreprocessTask(file, getDownload());
 	}
 	
 	protected RemoteFeedFile createRemoteFeedFile(String location) {
-		// Parse date from url
-		Date beginDate = getBeginDate(location);
-		Date endDate = getEndDate(location);
-		
-		return new RemoteFeedFile(FilenameUtils.getName(location), beginDate, endDate, feed, location, null);
+		return new RemoteFeedFile(
+				FilenameUtils.getName(location), 
+				getBeginDate(location), 
+				getEndDate(location), 
+				feed, 
+				location, 
+				isCompressed(location), 
+				getFileStorageAdapterClass());
 	}
 	
+	/**
+	 * Should return true if the file at the given location must be read
+	 * via a GZIPInputStream. Return false if it can be read as-is.
+	 * 
+	 * The default implementation returns true if the location string ends
+	 * with ".gz". You can override this behavior if necessary.
+	 */
+	protected boolean isCompressed(String location) {
+		return location.endsWith(".gz");
+	}
+	
+	/**
+	 * This method can be overridden to provide a FileStorageAdapter class
+	 * necessary to access the remote feed file. The default implementation
+	 * returns null.
+	 * @return
+	 */
+	protected Class getFileStorageAdapterClass() {
+		return null;
+	}
+	
+	/**
+	 * This method should return true if the file needs to be downloaded
+	 * to disk before preprocessing. The default implementation returns
+	 * false, ie. files are to be preprocessed on-the-fly.
+	 */
+	protected boolean getDownload() {
+		return false;
+	}
 	
 	/**
 	 * List all file locations in remote target
@@ -108,5 +144,4 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	 * Extract the end timestamp of data from the file at given location
 	 */
 	protected abstract Date getEndDate(String location);
-	
 }

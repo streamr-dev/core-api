@@ -20,6 +20,10 @@ import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.service.FeedFileService
 
+/**
+ * Collects data from Kafka for a given Stream, sends the file to
+ * file storage and writes a corresponding FeedFile entry.
+ */
 public class KafkaCollectTask extends AbstractTask {
 
 	private FeedFileService feedFileService;

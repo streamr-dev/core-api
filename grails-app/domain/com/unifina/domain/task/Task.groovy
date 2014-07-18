@@ -49,6 +49,7 @@ class Task {
 		user(nullable:true)
 		status(nullable:true)
 		error(nullable:true, maxSize: 1000)
+		config(maxSize: 1000)
 		skip(nullable:true)
 	}
 	
