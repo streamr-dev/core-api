@@ -59,14 +59,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 		// Help button shows normal help on hover and "extended" help in a dialog on click
 		var helpLink = createModuleButton("help ui-icon ui-icon-help");
-		helpLink.tooltip({
-			items: ".help",
-			hide: 0,
-			tooltipClass: "tooltip modulehelp",
-			content: function() {
-				return prot.getHelp(false);
-			}
-		});
 		helpLink.click(function() {
 			var $dialogdiv = $("#helpdialog");
 			$dialogdiv = $("<div id='helpdialog' class='modulehelp'></div>");
@@ -84,7 +76,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			});
 		});
 		prot.header.append(helpLink);
-	
+
 		prot.body = $("<div class='modulebody'></div>");
 		prot.div.append(prot.body);
 		
@@ -133,7 +125,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		if (prot.jsonData.canRefresh) {
 			// If the module can refresh, add a refresh button
-//			var refresh = $("<span class='refresh modulebutton ui-corner-all ui-icon ui-icon-refresh'></span>");
 			var refresh = createModuleButton("refresh ui-icon ui-icon-refresh");
 		
 			refresh.click(function() {
@@ -142,11 +133,24 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			prot.header.append(refresh);
 		}
 		
-		// Must add to canvas before setting draggable
+		// Must add to canvas before setting draggable and tooltip
 		canvas.append(prot.div);
-		// jsPlumb.draggable($(prot.div).attr("id"), prot.dragOptions);
 		prot.div.draggable(prot.dragOptions);
-		
+
+		helpLink.tooltip({
+			container: '#canvas',
+			viewport: {
+				selector: '#'+prot.id,
+				padding: 0
+			},
+			html: true,
+			title: 'Please wait while the tooltip is loading ... Please wait while the tooltip is loading ... Please wait while the tooltip is loading ...'
+		})
+
+		helpLink.on('shown.bs.tooltip', function() {
+			$('.tooltip-inner').html(prot.getHelp(false))
+		}); 
+
 		prot.div.on('spContextMenuSelection', (function(d,j) {
 			return function(event,selection) {
 				prot.handleContextMenuSelection(d,j,selection,event);

@@ -137,7 +137,6 @@ html, body {
 table.paramTable {
 	width: 100%;
 	border: none;
-	padding: 0px;
 }
 
 table.paramTable td input {
@@ -164,6 +163,7 @@ td.input {
 }
 td.output {	
 	text-align: left;
+	padding-left: 10px;
 }
 
 .parameter {
