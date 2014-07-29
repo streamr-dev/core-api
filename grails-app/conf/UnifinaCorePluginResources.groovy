@@ -22,6 +22,10 @@ modules = {
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap-theme.min.css', plugin: 'unifina-core']
 	}
+	bootbox {
+		dependsOn 'bootstrap'
+		resource url:[dir:'js/bootbox', file:'bootbox.js', plugin: 'unifina-core']
+	}
 	'bootstrap-datepicker' {
 		dependsOn 'bootstrap'
 		resource url:[dir:'js/bootstrap-datepicker/js', file:'bootstrap-datepicker.js', plugin: 'unifina-core']

@@ -59,6 +59,27 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 		// Help button shows normal help on hover and "extended" help in a dialog on click
 		var helpLink = createModuleButton("help ui-icon ui-icon-help");
+
+		helpLink.mouseenter(function() {
+			var htext = prot.getHelp(false)
+			// show tooltip after help text is loaded
+			helpLink.tooltip({
+				trigger: 'manual',
+				container: '#canvas',
+				viewport: {
+					selector: '#'+prot.id,
+					padding: 0
+				},
+				html: true,
+				title: htext,
+				template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp"></div></div>'
+			})
+
+			helpLink.tooltip('show')
+		}).mouseout(function() {
+			helpLink.tooltip('hide')
+		})
+
 		helpLink.click(function() {
 			var $dialogdiv = $("#helpdialog");
 			$dialogdiv = $("<div id='helpdialog' class='modulehelp'></div>");
@@ -133,23 +154,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			prot.header.append(refresh);
 		}
 		
-		// Must add to canvas before setting draggable and tooltip
+		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
 		prot.div.draggable(prot.dragOptions);
-
-		helpLink.tooltip({
-			container: '#canvas',
-			viewport: {
-				selector: '#'+prot.id,
-				padding: 0
-			},
-			html: true,
-			title: 'Please wait while the tooltip is loading ... Please wait while the tooltip is loading ... Please wait while the tooltip is loading ...'
-		})
-
-		helpLink.on('shown.bs.tooltip', function() {
-			$('.tooltip-inner').html(prot.getHelp(false))
-		}); 
 
 		prot.div.on('spContextMenuSelection', (function(d,j) {
 			return function(event,selection) {

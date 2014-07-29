@@ -365,8 +365,14 @@ div.output .switchContainer {
 	position: fixed !important;
 }
 
-.tooltip {
+.tooltip-inner {
 	max-width: 350px;
+	width: 350px; 
+	text-align: left;
+}
+
+.tooltip-inner .message {
+	background-color: #101020;
 }
 
 /**

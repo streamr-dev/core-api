@@ -574,40 +574,23 @@ class SignalPathTagLib {
 		writeScriptHeader(out)
 		def str = """
 	jQuery('#$id').click(function() {
-		if (jQuery('#$dialogId').length==0) {
-			jQuery('body').append('<div id="$dialogId" style="display:none">Name: <input id="saveAsName" type="text"></div>');
-		}
+		bootbox.prompt('$dialogTitle', function(saveAsName) {
+			if (!saveAsName)
+				return;
 
-		jQuery('#saveAsName').val(SignalPath.isSaved() ? SignalPath.getSaveData().name : "$name");
+			var saveData = {
+				url: "$url",
+				target: "$targetName as new",
+				name: saveAsName
+			};
+		
+			SignalPath.saveSignalPath(saveData, function(sd) {
+				if (sd.showUrl)
+					window.location = sd.showUrl;
+			});
 
-		var callback = function(saveData) {}
-
-		jQuery('#$dialogId').dialog({
-//			height: 100,
-//			width: 350,
-			modal: true,
-			title: "$dialogTitle",
-			buttons: {
-				"Save": function() {
-					var saveData = {
-						url: "$url",
-						target: "$targetName as new",
-						name: jQuery('#saveAsName').val()
-					};
-				
-					SignalPath.saveSignalPath(saveData, function(sd) {
-						if (sd.showUrl)
-							window.location = sd.showUrl;
-					});
-
-					jQuery(this).dialog("close");
-					jQuery(this).dialog("destroy");
-				},
-				Cancel: function() {
-					jQuery(this).dialog("close");
-					jQuery(this).dialog("destroy");
-				}
-			}
+			jQuery(this).dialog("close");
+			jQuery(this).dialog("destroy");
 		});
 	});
 		"""
