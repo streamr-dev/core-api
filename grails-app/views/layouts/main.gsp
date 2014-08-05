@@ -6,10 +6,6 @@
 
 		<g:render template="/layouts/topBanner"/>
 
-		<g:if env="lunda">
-			<g:render template="/layouts/productionWarning"/>
-		</g:if>
-
         <g:layoutBody />        
 		<r:layoutResources/>
     </body>
