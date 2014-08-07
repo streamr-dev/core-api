@@ -6,8 +6,6 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 		if (!tt)
 			return;
 
-		console.log('sett', tt.options)
-
 		tt.options.title =
 			pub.tooltip + ': <strong><span id="'+pub.getStateTextId()+'">'
 			+stateText+'</span></strong>'

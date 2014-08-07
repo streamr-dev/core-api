@@ -73,7 +73,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				html: true,
 				title: htext,
 				placement: 'auto top',
-				template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp"></div></div>'
+				template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 			})
 
 			helpLink.tooltip('show')
@@ -82,21 +82,14 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		})
 
 		helpLink.click(function() {
-			var $dialogdiv = $("#helpdialog");
-			$dialogdiv = $("<div id='helpdialog' class='modulehelp'></div>");
-			$dialogdiv.html(prot.getHelp(true));
-			$dialogdiv.dialog({
-				autoOpen: true,
-				height: 400,
-				width: 400,
-				modal: true,
-				close: function() {
-					$dialogdiv.dialog("destroy");
-					$dialogdiv.remove();
-				},
+			bootbox.dialog({
+				message: '<div class="modulehelp">'+ prot.getHelp(true)+'</div>',
+				onEscape: function() { return true },
+				animate: false,
 				title: prot.jsonData.name
-			});
-		});
+			})
+		})
+
 		prot.header.append(helpLink);
 
 		prot.body = $("<div class='modulebody'></div>");
@@ -105,7 +98,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		// If there are options, create options editor
 		if (prot.jsonData.options != null) {
 			prot.optionEditor = $("<div class='optionEditor'></div>");
-			prot.body.append(prot.optionEditor);
 			
 			// Create options
 			for (var key in prot.jsonData.options) {
@@ -118,31 +110,29 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				}
 			}
 			
-			prot.optionEditor.dialog({
-				autoOpen: false,
-				title: "Options: "+prot.title.text(),
-				buttons: [{text: "Ok", click: function() {
-						$(this).dialog("close"); 
-						$(prot.optionEditor).find(".option").each(function(i,div) {
-							// Get reference to the JSON option
-							prot.updateOption($(div).data("option"), div);
-						});
-						
-						prot.onOptionsUpdated();
-					}},
-				    {text: "Cancel", click: function() {
-				    	$(this).dialog("close");
-				    }}]
-			});
-			
-//			var editOptions = $("<span class='options modulebutton ui-corner-all ui-icon ui-icon-wrench'></span>");
 			var editOptions = createModuleButton("options ui-icon ui-icon-wrench");
 			
 			editOptions.click(function() {
-				// Location
-				prot.optionEditor.dialog("open");
-			});
-			prot.header.append(editOptions);
+				bootbox.dialog({
+					animate: false,
+					title: 'Options: '+prot.title.text(),
+					message: prot.optionEditor,
+					onEscape: function() { return true },
+					buttons: {
+						'OK': function() {
+							$(prot.optionEditor).find(".option").each(function(i, div) {
+								// Get reference to the JSON option
+								prot.updateOption($(div).data("option"), div)
+							})
+
+							prot.onOptionsUpdated()
+						},
+						'Cancel': function() {}
+					}
+				})
+			})
+
+			prot.header.append(editOptions)
 		}
 		
 		if (prot.jsonData.canRefresh) {

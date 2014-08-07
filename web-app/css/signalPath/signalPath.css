@@ -370,7 +370,7 @@ div.output .switchContainer {
 	white-space: nowrap;
 }
 
-.modulehelp {
+.modulehelp-tooltip {
 	width: 350px !important;
 	text-align: left;
 	white-space: normal;
