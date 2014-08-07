@@ -1,6 +1,18 @@
 SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 	var pub = pub || {};
 	
+	function _setTooltipTitle(stateText) {
+		var tt = pub.div.data('bs.tooltip')
+		if (!tt)
+			return;
+
+		console.log('sett', tt.options)
+
+		tt.options.title =
+			pub.tooltip + ': <strong><span id="'+pub.getStateTextId()+'">'
+			+stateText+'</span></strong>'
+	}
+
 	pub.div = $("<div class='ioSwitch'></div>");
 	pub.parentContainer = parentContainer;
 	
@@ -11,6 +23,7 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 		buttonText: function(currentValue) { return ""+currentValue; },
 		nextValue: function(currentValue) { return !currentValue; },
 		isActiveValue: function(currentValue) { return currentValue; },
+		tooltip: 'IOSwitch default tooltip',
 		stateText: function() {
 			var val = pub.getValue();
 			if (val===true)
@@ -37,7 +50,9 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 			}
 			// The value may be visible elsewhere (eg. a tooltip), update that too
 			$("#"+pub.getStateTextId()).html(pub.stateText());
-		},
+
+ 			_setTooltipTitle(pub.stateText())
+ 		},
 	}
 	
 	$.extend(pub, pub.defaultOptions, options);
@@ -47,9 +62,14 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 			pub.stateTextId = "ioSS_"+new Date().getTime();
 		return pub.stateTextId;
 	}
-	
+
 	pub.update();
 	pub.div.data("spObject",pub);
+	pub.div.tooltip({
+		container: '#canvas',
+		html: true
+	})
+	_setTooltipTitle(pub.stateText())
 	pub.div.click(function() {
 		pub.click();
 	});

@@ -22,6 +22,10 @@ modules = {
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap-theme.min.css', plugin: 'unifina-core']
 	}
+	'bootstrap-contextmenu' {
+		dependsOn 'bootstrap'
+		resource url:[dir:'js/bootstrap-contextmenu', file:'contextmenu.js', plugin: 'unifina-core']
+	}
 	bootbox {
 		dependsOn 'bootstrap'
 		resource url:[dir:'js/bootbox', file:'bootbox.js', plugin: 'unifina-core']

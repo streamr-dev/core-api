@@ -367,8 +367,13 @@ div.output .switchContainer {
 
 .tooltip-inner {
 	max-width: 350px;
-	width: 350px; 
+	white-space: nowrap;
+}
+
+.modulehelp {
+	width: 350px !important;
 	text-align: left;
+	white-space: normal;
 }
 
 .tooltip-inner .message {

@@ -59,6 +59,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return function(value) { return d.drivingInput = value; };
 				})(data),
 				buttonText: function() { return "DR"; },
+				tooltip: 'Driving input'
 			});
 		}
 		
@@ -76,6 +77,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 						return "IV";
 					else return this.getValue().toString();
 				},
+				tooltip: 'Initial value',
 				nextValue: function(currentValue) {
 					if (currentValue==null)
 						return 0;
@@ -100,6 +102,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return function(value) { return d.feedback = value; };
 				})(data),
 				buttonText: function() { return "FB"; },
+				tooltip: 'Feedback connection'
 			});
 		}
 	}

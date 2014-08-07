@@ -72,6 +72,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				},
 				html: true,
 				title: htext,
+				placement: 'auto top',
 				template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp"></div></div>'
 			})
 
@@ -326,7 +327,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.createModuleButton = createModuleButton;
 	
-	function getContextMenu(div) {
+	function getContextMenu() {
 		return [
 		        {title: "Clone module", cmd: "clone"},
 		]
@@ -506,32 +507,75 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	return pub;
 }
 
+
+$('body').contextMenu({
+    selector: '#contextMenu',
+
+    before: function(menu, target) {
+		// Try to find an SP object in the hierarchy that has a context menu
+		while (target.length && (!target.data('spObject') || !target.data('spObject').getContextMenu))
+			target = target.parent();
+
+		if (!target.length)
+			return false;
+
+		menu.data('spObject', target.data('spObject'))
+
+		var prot = menu.data('spObject');
+		var html = prot.getContextMenu(menu.data('target')).map(function(item) {
+			return '<li><a tabindex="-1" data-cmd="'
+				+item.cmd+'" href="#">'
+				+item.title+'</a></li>';
+		}).join('');
+    	menu.html(html)
+    },
+
+    onSelected: function(menu, item) {
+    	if (item.data('cmd') && menu.data('spObject'))
+    		menu.data('target').trigger('spContextMenuSelection', item.data('cmd'))
+    }
+});
+
+
+/*
 $(document).contextmenu({
-    delegate: ".context-menu",
-    menu: [],
-    show: 100,
-    select: function(event, ui) {
+    target: ".context-menu",
+    onItem: function(ui, event) {
     	var target = $(document).data("contextMenuTarget"); 
     	if (ui.cmd) {
-    		target.trigger("spContextMenuSelection",ui.cmd);
+    		target.trigger("spContextMenuSelection", ui.cmd);
     	}
     },
-	beforeOpen: function(event, ui) {
-		var target = $(ui.target);
-		
+
+	before: function(e, ui) {
+		var target = $(e.target);
+
+		if (target.parent()[0].tagName === 'BODY')
+			return;
+
+console.log('target',target, target.parent())
 		// Try to find an SP object in the hierarchy that has a context menu
-		while (target!=null && (target.data("spObject")==null || target.data("spObject").getContextMenu==null))
+		while (target.length && (!target.data('spObject') || !target.data('spObject').getContextMenu)) {
+			console.log('target', target, target.data('spObject'))
 			target = target.parent();
-			
+			console.log('parent', target, target.data('spObject'))
+		}
+
 		if (target!=null) {
 			var prot = target.data("spObject");
-			
+		
 			// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
-			$(document).data("contextMenuTarget",target);
-			$(document).contextmenu("replaceMenu", prot.getContextMenu(ui.target));
+			// $(document).data("contextMenuTarget",target);
+			// $(document).contextmenu("replaceMenu", prot.getContextMenu(ui.target));
+console.log('filling menu')
+			this.getMenu().empty().html(
+				prot.getContextMenu(ui.target)
+					.forEach(function(item) {
+						return '<li>'+item.title;
+			}))
 		}
 	}
-});
+});*/
 
 // Remove module focus when clicking anywhere else on screen
 $("body").click(function() {

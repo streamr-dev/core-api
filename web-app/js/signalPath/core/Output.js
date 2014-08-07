@@ -19,6 +19,7 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 					return function(value) { return d.noRepeat = value; };
 				})(data),
 				buttonText: function() { return "NR"; },
+				tooltip: 'No repeat'
 			});
 		}
 
