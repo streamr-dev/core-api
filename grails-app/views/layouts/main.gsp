@@ -2,11 +2,16 @@
 <html>
 	<g:render template="/layouts/layoutHead"/>
 	
-    <body class="${pageProperty( name:'body.class' )}">
+    <body class="${pageProperty( name:'body.theme' ) ?: 'selected-theme'} ${pageProperty( name:'body.class' )}">
 
-		<g:render template="/layouts/topBanner"/>
+		<div id="wrapper">
 
-        <g:layoutBody />        
+			<g:render template="/layouts/topBanner"/>
+	
+	        <g:layoutBody />
+        
+        </div>
+                
 		<r:layoutResources/>
     </body>
 </html>

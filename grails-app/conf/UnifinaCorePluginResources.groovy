@@ -20,7 +20,6 @@ modules = {
 		// resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
-		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap-theme.min.css', plugin: 'unifina-core']
 	}
 	bootbox {
 		dependsOn 'bootstrap'
@@ -118,11 +117,12 @@ modules = {
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
 		resource url:[dir:'css/signalPath', file:'signalPath.css', plugin: 'unifina-core']
-		
 		resource url:[dir:'css/signalPath/themes/light', file:'light.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/themes/light', file:'light.js', plugin: 'unifina-core']
-		
-//		resource url:[dir:'css/signalPath/themes/dark', file:'dark.css']
-//		resource url:[dir:'css/signalPath/themes/dark', file:'dark.js']
+	}
+	'main-theme' {
+		dependsOn 'bootstrap'
+		resource url: "http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
+		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
 	}
 }
