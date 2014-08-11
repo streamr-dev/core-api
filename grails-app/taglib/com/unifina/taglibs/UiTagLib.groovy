@@ -46,7 +46,32 @@ public class UiTagLib {
 			out << "</div>"
 		}
 	}
+	
+	def pageHeader = {attrs, body->
+		out << "<div class='page-header'>"
+		out << "<h1>${body()}</h1>"
+		out << "</div>"
+	}
 
+	def breadcrumb = {attrs, body->
+		out << "<div class='breadcrumb breadcrumb-page ${attrs.class ?: ""}'>"
+		out << body()
+		out << "</div>"
+	}
+	
+	def panel = {attrs, body->
+		out << "<div class='panel ${attrs.class ?: ''}'>"
+		if (attrs.title) {
+			out << "<div class='panel-heading'>"
+			out << "<span class='panel-title'>${attrs.title}</span>"
+			out << "</div>"
+		}
+		out << "<div class='panel-body'>"
+		out << body()
+		out << "</div>" // end panel body
+		out << "</div>" // end panel
+	}
+	
 	def paginate = {attrs, body->
 		def offset = params.offset ? params.offset.toInteger() : 0
 		def max = attrs.max.toInteger()

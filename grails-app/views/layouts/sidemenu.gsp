@@ -5,15 +5,13 @@
 
 	<g:render template="/layouts/layoutHead"/>
 	
-    <body class="no-main-menu ${pageProperty( name:'body.theme' ) ?: 'selected-theme'} ${pageProperty( name:'body.class' )}">
+    <body class="${pageProperty( name:'body.theme' ) ?: 'selected-theme'} ${pageProperty( name:'body.class' )}">
 
 		<div id="main-wrapper">
 
 			<g:render template="/layouts/topBanner"/>
 	
-			<div id="content-wrapper">
-	        	<g:layoutBody />
-	        </div>
+	        <g:layoutBody />
         
         </div>
                 

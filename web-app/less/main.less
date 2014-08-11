@@ -9,7 +9,6 @@
 // import the pixel-admin widget styles you need
 @import "./pixel-admin/pixel-admin-less/widgets/notifications.less";
 
-
 // Bootstrap variable overrides
 
 @font-size-base: 12px;
@@ -22,33 +21,23 @@
 @main-navbar-height: 38px;
 @main-navbar-right-padding: 0px;
 
-// Override: Show side ("main") menu related elements and padding only if body has .has-main-menu class.
-#wrapper {
-	&:extend(body.no-main-menu #main-wrapper);
-}
-
-#main-navbar #main-menu-toggle {
-	display:none;
-}
-
-#main-navbar .navbar-header {
-	padding-left: 0px;
-}
-
-body.has-main-menu {
-	#main-wrapper {
-		&:extend(body.mme #main-wrapper);
-	}
+// pixel-admin fixes and tweaks
+.panel-heading {
+	height: 40px;
 	
-	#main-navbar #main-menu-toggle {
-		display: block;
-	}
-	
-	#main-navbar .navbar-header {
-		padding-left: @main-menu-collapsed-width;
+	.panel-title {
+		float: left;
 	}
 }
 
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+	opacity: 0.5;
+}
+
+// Unifina general styles
+.toolbar {
+	margin-bottom: 15px;
+}
 
 // Unifina core page styles
 @import "./unifina/pages/build.less";

@@ -4907,8 +4907,7 @@ body.no-main-menu #main-menu-bg {
 body.no-main-menu #main-menu-toggle {
   display: none !important;
 }
-body.no-main-menu #main-wrapper,
-#wrapper {
+body.no-main-menu #main-wrapper {
   padding: 0 !important;
 }
 body.no-main-menu #content-wrapper {
@@ -16051,21 +16050,26 @@ div.dataTables_scrollFoot table {
   background: #f4f4f4;
   color: #333333;
 }
-#main-navbar #main-menu-toggle {
-  display: none;
+.panel-heading {
+  height: 40px;
 }
-#main-navbar .navbar-header {
-  padding-left: 0px;
+.panel-heading .panel-title {
+  float: left;
 }
-body.has-main-menu #main-navbar #main-menu-toggle {
-  display: block;
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
+  opacity: 0.5;
 }
-body.has-main-menu #main-navbar .navbar-header {
-  padding-left: 56px;
+.toolbar {
+  margin-bottom: 15px;
 }
 #main-menu-inner {
   margin-top: 38px;
 }
 #main-menu .menu-content {
   margin-top: 0px;
+}
+.form-group-period .input-group-addon {
+  width: 60px;
 }
