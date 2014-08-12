@@ -26,6 +26,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	
 	function createDiv() {
+		var buttons = []
+
 		prot.div = $("<div id='"+prot.id+"' class='component context-menu "+prot.type+"'></div>");
 		prot.div.data("spObject",prot);
 		
@@ -55,8 +57,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		deleteLink.click(function() {
 			pub.close();
 		});
-		prot.header.append(deleteLink);
-	
+
+		buttons.push(deleteLink);
+
 		// Help button shows normal help on hover and "extended" help in a dialog on click
 		var helpLink = createModuleButton("help ui-icon ui-icon-help");
 
@@ -90,7 +93,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			})
 		})
 
-		prot.header.append(helpLink);
+		buttons.push(helpLink);
 
 		prot.body = $("<div class='modulebody'></div>");
 		prot.div.append(prot.body);
@@ -132,7 +135,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				})
 			})
 
-			prot.header.append(editOptions)
+			buttons.push(editOptions)
 		}
 		
 		if (prot.jsonData.canRefresh) {
@@ -142,8 +145,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			refresh.click(function() {
 				SignalPath.updateModule(pub);
 			});
-			prot.header.append(refresh);
+			buttons.push(refresh);
 		}
+
+		prot.header.append(buttons.reverse())
 		
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
@@ -311,7 +316,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.addFocus = addFocus;
 	
 	function createModuleButton(additionalClasses) {
-		var button = $("<span class='modulebutton ui-corner-all ui-state-default showOnFocus "+(additionalClasses ? additionalClasses : "")+"'></span>");
+		var button = $("<div class='modulebutton'><span class='ui-corner-all ui-state-default showOnFocus "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
 		button.hover(function() {$(this).addClass("ui-state-highlight");}, function() {$(this).removeClass("ui-state-highlight")});
 		return button;
 	}
