@@ -1,22 +1,21 @@
 package com.unifina.signalpath.trigger;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.signalpath.Input;
+import com.unifina.signalpath.Output;
 
 public class Sampler extends AbstractSignalPathModule {
 
-	TimeSeriesInput trigger = new TimeSeriesInput(this,"trigger");
-	TimeSeriesInput value = new TimeSeriesInput(this,"value");
+	Input<Object> trigger = new Input<>(this,"trigger","Object");
+	Input<Object> value = new Input<>(this,"value","Object");
 	
-	TimeSeriesOutput out = new TimeSeriesOutput(this,"value");
+	Output<Object> out = new Output<Object>(this,"value","Object");
 	
 	@Override
 	public void init() {
 		addInput(trigger);
 		trigger.setDrivingInput(true);
 		trigger.canToggleDrivingInput = false;
-		trigger.canHaveInitialValue = false;
 		trigger.canBeFeedback = false;
 		
 		addInput(value);
