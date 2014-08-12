@@ -1,21 +1,15 @@
 .signalpath-canvas {
-/* 	background-color: #ededed; */
 	background-color: #eee;
-/* 	background-image: url(../../../images/metal.jpg); */
 }
 
 /**
  * Component styles
  **/
  .component {
-/* 	border-width: 1px; */
-/* 	border-color: #ddd; */
 	border-radius: 8px;
 	color: black;
 	background-color: white;
 	opacity: 0.95;
-/* 	box-shadow: inset 0px 1px 2px 0px #e6e6e6; */
-/* 	box-shadow: 0 0.5px 0 0 #ffffff inset, 0 1px 2px 0 #B3B3B3; */
 	box-shadow: 0 2px 1px #aaa;
 }
  
@@ -29,11 +23,10 @@
 }
  
  .component a:link, a:visited, a:hover {
-/*     color: white; */
+
 }
  
  .modulebody {
-/* 	border: 1px solid #ccc; */
 	border-radius: 8px;
 	box-shadow: inset 0px 0px 4px 0px #B3B3B3;
 }
@@ -47,7 +40,7 @@ div.input.connected, div.output.connected {
 }
 
 div.input:hover, div.output:hover {
-/* 	background-color: gray; */
+
 }
 
 .ioSwitch {
@@ -99,7 +92,6 @@ div.input:hover, div.output:hover {
 
 /* Connector style */
 ._jsPlumb_connector path:first-child {
-/* 	stroke: #ddd; */
  	stroke: #aaa;
 	stroke-width: 3;
 	fill: none;
@@ -131,7 +123,6 @@ div.exportable {
 }
 div.export {
 	color: #dd982D;
-/* 	background-color: #FFB84D;	 */
 }
 
 .chosen-container {
@@ -155,17 +146,6 @@ table tr td.negative {
 table tr td.executed {
 	color: green;
 }
-
-/**
- * Designer toolbar
- **/
- #controls {
-/* 	background-color: #ccc; */
-/* 	border: 3px black solid; */
-/* 	height: 100%; */
-/* 	background-color: #ddd; */
-	
-}
  
 .controlgroup {
 	border-width: 1px;
@@ -174,10 +154,6 @@ table tr td.executed {
 	color: black;
 	background-color: white;
 	box-shadow: 0 2px 1px #aaa;
-/* 	opacity: 0.90; */
-/* 	box-shadow: 0 0.5px 0 0 #ffffff inset, 0 1px 2px 0 #B3B3B3; */
-/* 	box-shadow: inset 0px 1px 2px 0px #e6e6e6; */
-/* 	box-shadow: 0 0.5px 0 0 #ffffff inset, 0 1px 2px 0 #B3B3B3; */
 }
 
 .loadBrowserTableWrapper table {

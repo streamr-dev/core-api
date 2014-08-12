@@ -1,6 +1,5 @@
 .signalpath-canvas {
 	background-color: gray;
-/* 	background-image: url(../../../images/metal.jpg); */
 }
 
 /**
@@ -112,7 +111,6 @@ div.exportable {
 }
 div.export {
 	color: #dd982D;
-/* 	background-color: #FFB84D;	 */
 }
 
 .chosen-container {
@@ -124,26 +122,15 @@ div.export {
  **/
 
 table tr td.positive {
-/* 	color:white; */
 	background-color: blue;
 }
 
 table tr td.negative {
-/* 	color:white; */
 	background-color: red;
 }
 
 table tr td.executed {
 	color: orange;
-}
-
-/**
- * Designer toolbar
- **/
- #controls {
-/* 	background-color: #ccc; */
-/* 	border: 3px black solid; */
-/* 	height: 100%; */
 }
  
 .controlgroup {
@@ -152,7 +139,5 @@ table tr td.executed {
 	border-radius: 8px;
 	color: black;
 	background-color: white;
-/* 	opacity: 0.90; */
 	box-shadow: inset 0px 1px 2px 0px #e6e6e6;
-/* 	box-shadow: 0 0.5px 0 0 #ffffff inset, 0 1px 2px 0 #B3B3B3; */
 }
