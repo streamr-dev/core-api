@@ -8,12 +8,13 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.IFeed;
+import com.unifina.data.IFeedRequirement;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.service.FeedService;
 import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.utils.Globals;
 import com.unifina.signalpath.SignalPath;
+import com.unifina.utils.Globals;
 
 /**
  * DataSource is a class global to the current run context. It handles
@@ -58,7 +59,7 @@ public abstract class DataSource {
 	 * @return
 	 */
 	public boolean canRegister(Object o) {
-		return (o instanceof IStreamRequirement || o instanceof ITimeListener || o instanceof IDayListener);
+		return (o instanceof IFeedRequirement || o instanceof IStreamRequirement || o instanceof ITimeListener || o instanceof IDayListener);
 	}
 	
 	/**
@@ -66,40 +67,29 @@ public abstract class DataSource {
 	 * @param object
 	 */
 	public void register(Object o) {
-		boolean registered = false;
 		if (o instanceof IStreamRequirement) {
-			registerModule((IStreamRequirement)o);
-			registered = true;
+			subscribeToFeed(o, ((IStreamRequirement) o).getStream().getFeed());
 		}
+		else if (o instanceof IFeedRequirement) {
+			subscribeToFeed(o, ((IFeedRequirement) o).getFeed());
+		}
+		
 		if (o instanceof ITimeListener) {
 			eventQueue.addTimeListener((ITimeListener) o);
-			registered = true;
 		}
 		if (o instanceof IDayListener) {
 			eventQueue.addDayListener((IDayListener) o);
-			registered = true;
 		}
-		
-//		if (!registered) 
-//			throw new IllegalArgumentException("I don't know what to do with "+o+"!");
+
 	}
-	
-	protected IFeed registerModule(IStreamRequirement o) {
-		IFeed feed = createFeed(o.getStream().getFeed());
+
+	protected IFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
+		IFeed feed = createFeed(feedDomain);
 		try {
-			feed.subscribe(o);
-			
-//			// TODO: should this wiring be implemented more generally?
-//			IEventRecipient rcpt = feed.getEventRecipient(o);
-//			if (rcpt!=null) {
-//				register(rcpt);
-//				if (rcpt instanceof AbstractEventRecipient) {
-//					((AbstractEventRecipient) rcpt).register(o);
-//				}
-//			}
+			feed.subscribe(subscriber);
 		} catch (Exception e) {
-			log.error("Failed to subscribe "+o+" to feed "+feed,e);
-			throw new RuntimeException("Failed to subscribe "+o+" to feed "+feed,e);
+			log.error("Failed to subscribe "+subscriber+" to feed "+feed,e);
+			throw new RuntimeException("Failed to subscribe "+subscriber+" to feed "+feed,e);
 		}
 		return feed;
 	}
