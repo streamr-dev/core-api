@@ -53,7 +53,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.header.append(prot.title);
 	
 		// Close button
-		var deleteLink = createModuleButton("delete ui-icon ui-icon-closethick")
+		var deleteLink = createModuleButton("delete fa-times")
 		deleteLink.click(function() {
 			pub.close();
 		});
@@ -61,7 +61,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		buttons.push(deleteLink);
 
 		// Help button shows normal help on hover and "extended" help in a dialog on click
-		var helpLink = createModuleButton("help ui-icon ui-icon-help");
+		var helpLink = createModuleButton("help fa-question");
 
 		helpLink.mouseenter(function() {
 			var htext = prot.getHelp(false)
@@ -113,7 +113,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				}
 			}
 			
-			var editOptions = createModuleButton("options ui-icon ui-icon-wrench");
+			var editOptions = createModuleButton("options fa-wrench");
 			
 			editOptions.click(function() {
 				bootbox.dialog({
@@ -140,7 +140,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		if (prot.jsonData.canRefresh) {
 			// If the module can refresh, add a refresh button
-			var refresh = createModuleButton("refresh ui-icon ui-icon-refresh");
+			var refresh = createModuleButton("refresh fa-refresh");
 		
 			refresh.click(function() {
 				SignalPath.updateModule(pub);
@@ -316,8 +316,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.addFocus = addFocus;
 	
 	function createModuleButton(additionalClasses) {
-		var button = $("<div class='modulebutton'><span class='ui-corner-all ui-state-default showOnFocus "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
-		button.hover(function() {$(this).addClass("ui-state-highlight");}, function() {$(this).removeClass("ui-state-highlight")});
+		var button = $("<div class='modulebutton'><a class='btn btn-default btn-xs showOnFocus' href='#' style='padding: 0px'><i class='fa fa-fw "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
 		return button;
 	}
 	prot.createModuleButton = createModuleButton;
@@ -437,7 +436,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function receiveResponse(payload) {
 		if (payload.type=="warning") {
-			var warning = $("<div class='warning ui-state-error'><span class='ui-corner-all ui-icon ui-icon-alert'></span></div>");
+			var warning = $("<div class='warning ui-state-error'><span class='fa fa-exclamation'></span></div>");
 			$(warning).click((function(msg) {
 				return function() {
 					alert(msg);
