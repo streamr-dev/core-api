@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import com.unifina.domain.signalpath.Module;
 import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
 
@@ -88,72 +89,20 @@ public class SignalPath extends AbstractSignalPathModule {
 		name = (iData.containsKey("name") && iData.get("name")!=null ? iData.get("name").toString() : name);
 		
 		List<InputConnection> inputs = new ArrayList<>();
-//		Map<String,InputConnection> inputs = new HashMap<>();
 		Map<String,Output> outputs = new HashMap<>();
 		
-		// TODO: remove backwards compatibility
-//		if (iData.orderBooks) {
-//			iData.orderBooks.each {json->
-//				// For backwards compatibility
-//				if (json.orderBookId==null) {
-//					json.orderBookId = json.id
-//					json.id = 68
-//				}
-//
-//				iData.modules.add(json)
-//
-//			}
-//		}
-
+		List<Map> modulesJSON = (List<Map>) iData.get("modules");
+		List<Module> moduleDomainObjects = moduleService.getModuleDomainObjects(modulesJSON);
 		
-		// TODO: remove backwards compatibility
-//		if (iData.charts) {
-//			iData.charts.each {json->
-//				if (json.id==null || json.id==0)
-//					json.id = 67
-//
-//				iData.modules.add(json)
-//			}
-//		}
+		if (moduleConfigs.size()!=moduleDomainObjects.size())
+			throw new IllegalStateException("A module does not exist anymore!");
 		
-//		for (Map json : (List<Map>) iData.get("modules")) {
-//			Integer id = (Integer)json.get("id");
-//			if (id==null || id==0)
-//				json.put("id",67);
-//			if (id > 1000 || id==-1) {
-//				json.put("orderBookId", id);
-//				json.put("id", 68);
-//			}
-//		}
-		
-//		// TODO: remove backwards compatibility
-//		iData.modules.each {json->
-//			if (json.id==null || json.id==0)
-//				json.id = 67
-//			if (json.id > 1000 || json.id==-1) {
-//				json.orderBookId = json.id
-//				json.id = 68
-//			}
-//		}
-
-		for (Map moduleConfig : (List<Map>) iData.get("modules")) {
-//		iData.modules.each {module->
+		for (int c=0; c<moduleConfigs.size();c++) {
 			
-//			Module moduleDomain = null;
-//			try {
-//				moduleDomain = (Module) Module.class.getMethod("get", Object.class).invoke(null, moduleConfig.get("id"));
-//			} catch (Exception e) {
-//				log.error("Could not get module "+moduleConfig.get("id"));
-//				throw new RuntimeException(e);
-//			}
-			AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance((Number)moduleConfig.get("id"),moduleConfig,this,globals);
-//			mod.parentSignalPath = this
+			Module moduleDomain = moduleDomainObjects.get(c);
+			Map moduleConfig = modulesJSON.get(c);
 			
-//			if (moduleImpl instanceof ITimeListener)
-//				timeListeners.add((ITimeListener)moduleImpl);
-
-//			mod.configuration = module
-
+			AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain,moduleConfig,this,globals);
 			
 			// Get parameter inputs and outputs if connected, or create constants if not connected
 			for (Map paramConfig : (List<Map>) moduleConfig.get("params")) {
@@ -180,17 +129,13 @@ public class SignalPath extends AbstractSignalPathModule {
 		
 		// Collect inputs and outputs with endpoints from modules
 		for (ModuleConfig mc : moduleConfigs) {
-//		modulesJSON.each {data->
 			AbstractSignalPathModule mod = mc.module;
 
 			for (Map inputConfig : (List<Map>) mc.config.get("inputs")) {
-//			json.inputs.each {input->
 				Input i = mod.getInput(inputConfig.get("name").toString());
 				if (i==null)
 					log.warn("No such input: "+inputConfig.get("name"));
-//					throw new RuntimeException("No such input: "+input.name)
 				else {
-//					i.configuration = input
 
 					if (inputConfig.containsKey("connected") && (boolean)inputConfig.get("connected"))
 						inputs.add(new InputConnection(i,inputConfig.get("sourceId").toString()));
@@ -201,13 +146,11 @@ public class SignalPath extends AbstractSignalPathModule {
 			}
 			
 			for (Map outputConfig : (List<Map>) mc.config.get("outputs")) {
-//			json.outputs.each {output->
+
 				Output o = mod.getOutput(outputConfig.get("name").toString());
 				if (o==null)
 					log.warn("No such output: "+outputConfig.get("name"));
-//					throw new RuntimeException("No such output: "+output.name)
 				else {
-//					o.configuration = output
 
 					if (outputConfig.containsKey("connected") && (boolean)outputConfig.get("connected") && outputConfig.get("id")!=null)
 						outputs.put(outputConfig.get("id").toString(), o);
@@ -221,7 +164,6 @@ public class SignalPath extends AbstractSignalPathModule {
 		
 		// Wire every connected input to its source output
 		for (InputConnection ic : inputs) {
-//		inputs.each {id,input->
 			Output o = outputs.get(ic.connectedTo);
 			if (o!=null)
 				o.connect(ic.input);
@@ -249,7 +191,6 @@ public class SignalPath extends AbstractSignalPathModule {
 
 					 it.name = it.name+counter;
 					 addInput(it);
-//					addInput(it,it.name+counter)
 				}
 			}
 			for (Output it : exportedOutputs) {
@@ -268,23 +209,12 @@ public class SignalPath extends AbstractSignalPathModule {
 
 					it.name = it.name+counter;
 					addOutput(it);
-//					addOutput(it,it.name+counter)
 				} 
 			}
 		}
 		
 		this.clearState = isDistributable();
 	}
-	
-//	@Deprecated
-//	public List getTimelisteners() {
-//		return modulesJSON.collect {return it.module}.findAll {it instanceof ITimeListener}
-//	}
-//	
-//	@Deprecated
-//	public List getRecorders() {
-//		return modulesJSON.findAll {it.module instanceof Chart}
-//	}
 	
 	public SignalPathReturnChannel getReturnChannel() {
 		return returnChannel;
@@ -307,17 +237,11 @@ public class SignalPath extends AbstractSignalPathModule {
 	public boolean isDistributable() {
 		boolean overnightState = false;
 		for (ModuleConfig mc : moduleConfigs) {
-//		modulesJSON.each {module->
 			AbstractSignalPathModule m = mc.module;
 			if (!m.clearState) {
 				overnightState = true;
 				break;
 			}
-//			Input[] inputs = m.getInputs()
-//			inputs.each {input->
-//				if (!input.clearState && input.isConnected())
-//					overnightState = true
-//			}
 		}
 		return !overnightState;
 	}
@@ -375,7 +299,6 @@ public class SignalPath extends AbstractSignalPathModule {
 		super.destroy();
 		
 		for (AbstractSignalPathModule it : mods) {
-//		mods.each {AbstractSignalPathModule it->
 			// Don't check modules that have less than 2 connected inputs
 			int connectedInputCount = 0;
 			for (Input i : it.getInputs()) {
