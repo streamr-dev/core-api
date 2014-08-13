@@ -92,15 +92,14 @@ public class SignalPath extends AbstractSignalPathModule {
 		Map<String,Output> outputs = new HashMap<>();
 		
 		List<Map> modulesJSON = (List<Map>) iData.get("modules");
-		List<Module> moduleDomainObjects = moduleService.getModuleDomainObjects(modulesJSON);
-		
-		if (moduleConfigs.size()!=moduleDomainObjects.size())
-			throw new IllegalStateException("A module does not exist anymore!");
+		HashMap<Long,Module> moduleDomainById = new HashMap<>();
+		for (Module m : moduleService.getModuleDomainObjects(modulesJSON))
+			moduleDomainById.put(m.getId(), m);
 		
 		for (int c=0; c<moduleConfigs.size();c++) {
 			
-			Module moduleDomain = moduleDomainObjects.get(c);
 			Map moduleConfig = modulesJSON.get(c);
+			Module moduleDomain = moduleDomainById.get(moduleConfig.get("id"));
 			
 			AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain,moduleConfig,this,globals);
 			
