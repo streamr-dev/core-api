@@ -66,7 +66,7 @@ class ModuleService {
 	public List<Module> getModuleDomainObjects(
 			List<Map> moduleConfigs) {
 		// Collect module ids
-		List ids = moduleConfigs.collect {it.id}
+		List ids = moduleConfigs.collect {(long) it.id}
 		return Module.findAllByIdInList(ids)
 	}
 }
