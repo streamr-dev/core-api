@@ -116,9 +116,6 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		var overlays = [["Arrow", {direction:(isInput ? -1 : 1), paintStyle: {cssClass:"arrow"}}]];
 		
 		var ep = jsPlumb.addEndpoint(connDiv, pub.getJSPlumbEndpointOptions(json.connDiv));
-//		ep.bind("click", function(endpoint) {
-//			console.log(endpoint);
-//		});
 		
 		$(connDiv).data("acceptedTypes", (json.acceptedTypes!=null ? json.acceptedTypes : [json.type]));
 		

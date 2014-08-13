@@ -1,5 +1,6 @@
 html, body {
 	height: 100%;
+	width: 100%;
 }
 
 /* button.active { */
@@ -42,6 +43,7 @@ html, body {
 	position:absolute;
 	top: 85px;
 	left: 220px;
+	width: 100%;
 }
 
 .signalpath-canvas {
@@ -110,7 +112,6 @@ html, body {
 .modulebutton {
 	width: 16px;
 	text-align: right;
-	vertical-align: middle;
 	display: table-cell;
 	cursor:pointer;
 }
@@ -137,6 +138,7 @@ html, body {
 
 table.paramTable {
 	width: 100%;
+	padding: 0px;
 	border: none;
 }
 
@@ -239,6 +241,7 @@ div.output .switchContainer {
 .ioSwitch {
 	display: inline-block;
 	font-size: 7px;
+	vertical-align: text-bottom;
 	text-align: center;
 	width: 13px;
 	height: 13px;
@@ -253,6 +256,7 @@ div.output .switchContainer {
 ._jsPlumb_endpoint {
 	z-index:10;
 /* 	background-color: white; */
+	margin-top: 10px;
 }
 
 ._jsPlumb_endpoint.holdFocus {
