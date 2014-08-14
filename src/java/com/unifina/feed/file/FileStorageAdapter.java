@@ -28,48 +28,48 @@ public abstract class FileStorageAdapter {
 	
 	/**
 	 * Attempts to retrieve an InputStream from a resource
-	 * identified by canonicalPath. It will return null if the resource was
+	 * identified by location. It will return null if the resource was
 	 * not found or could not be retrieved after a number of retries.
-	 * @param canonicalPath
+	 * @param location
 	 * @return
 	 */
-	public InputStream retrieve(String canonicalPath) {
+	public InputStream retrieve(String location) {
 		Exception ex = null;
 		for (int i=1;i<=retries;i++) {
 			InputStream is = null;
 			try {
-				is = tryRetrieve(canonicalPath);
+				is = tryRetrieve(location);
 				return is;
 			} catch (FileNotFoundException e) {
-				log.warn("Resource not found: "+canonicalPath+", returning null");
+				log.warn("Resource not found: "+location+", returning null");
 				return null;
 			} catch (Exception e) {
-				log.warn("Failed to retrieve "+canonicalPath+", attempt "+i);
+				log.warn("Failed to retrieve "+location+", attempt "+i);
 				ex = e;
 			}
 		}
-		log.error("Failed to retrieve "+canonicalPath+", giving up. Latest exception was: ",ex);
+		log.error("Failed to retrieve "+location+", giving up. Latest exception was: ",ex);
 		return null;
 	}
 	
 	/**
-	 * Attempts to store a File to the specified canonicalPath. Will throw an
+	 * Attempts to store a File to the specified location. Will throw an
 	 * IOException if not successful after a number of retries.
 	 * @param file
-	 * @param canonicalPath
+	 * @param location
 	 */
-	public void store(File file, String canonicalPath) throws IOException {
+	public void store(File file, String location) throws IOException {
 		for (int i=1;i<=retries;i++) {
 			try {
-				tryStore(file, canonicalPath);
+				tryStore(file, location);
 				return;
 			} catch (Exception e) {
-				log.error("Failed to store "+file+" to "+canonicalPath+", attempt "+i,e);
+				log.error("Failed to store "+file+" to "+location+", attempt "+i,e);
 			}
 		}
-		throw new IOException("Failed to store "+file+" to "+canonicalPath+", attempts exhausted");
+		throw new IOException("Failed to store "+file+" to "+location+", attempts exhausted");
 	}
 	
-	protected abstract InputStream tryRetrieve(String canonicalPath) throws IOException;
-	protected abstract void tryStore(File file, String canonicalPath) throws IOException;
+	protected abstract InputStream tryRetrieve(String location) throws IOException;
+	protected abstract void tryStore(File file, String location) throws IOException;
 }

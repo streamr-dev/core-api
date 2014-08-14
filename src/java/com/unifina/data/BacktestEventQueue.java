@@ -7,12 +7,16 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import org.apache.log4j.Logger;
+
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.utils.Globals;
 import com.unifina.utils.TimeOfDayUtil;
 
 public class BacktestEventQueue extends DataSourceEventQueue {
+	
+	private static final Logger log = Logger.getLogger(BacktestEventQueue.class);
 	
 	public BacktestEventQueue(Globals globals, DataSource dataSource) {
 		super(globals, dataSource);
@@ -23,14 +27,11 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 
 	long feedStartTime = 0;
 	int speed = 0;
-
-//	long timeSpentPolling = 0;
-//	long timeSpentQueuing = 0;
 	
 	@Override
 	protected Queue<FeedEvent> initQueue() {
 		// Not thread-safe! It should not matter because currently everything runs in a single thread.
-		return new /*MinCachePriorityQueue<>(); //*/PriorityQueue<>();
+		return new PriorityQueue<>();
 	}
 	
 	public IFeed getFeed(String feedClass) {
@@ -42,7 +43,6 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 			feeds.add(feed);
 			feedsByName.put(feed.getClass().getCanonicalName(), feed);
 		}
-//		else throw new IllegalStateException("The event loop already contains this feed!");
 	}
 		
 	public void abort() {
@@ -109,9 +109,7 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 		long simTimeMax = realTimeElapsed*speed;
 		
 		while (!queue.isEmpty() && !abort) {
-//			long startTime = System.nanoTime();
 			FeedEvent event = queue.poll();
-//			timeSpentPolling = System.nanoTime() - startTime;
 			
 			time = event.timestamp.getTime();
 			
@@ -119,10 +117,8 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 			if (speed != 0 && time > todBegin && time < todEnd) {
 				realTimeElapsed = System.currentTimeMillis() - realTimeStart;
 				simTimeMax = realTimeElapsed*speed + simTimeStart;
-//				println "minTime: "+df.format(new Date(minTime))+", simTimeMax: "+df.format(new Date(simTimeMax))
 				long diff = time - simTimeMax;
 				if (diff>0) {
-//					println "Sleeping for "+diff/speed
 					try {
 						Thread.sleep((int)(diff/speed));
 					} catch (InterruptedException e) {
@@ -142,7 +138,6 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 			eventCounter++;
 			
 			// If not processed, add to queue without updating the ticket (don't call enqueue(event))
-//			startTime = System.nanoTime();
 			if(!processed)
 				queue.add(event);
 			else if (event.feed instanceof IBacktestFeed) {
@@ -150,18 +145,17 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 				if (next!=null)
 					enqueue(next);
 			}
-//			timeSpentQueuing += System.nanoTime() - startTime;
 			
 		}
 		
 		long feedElapsedTime = System.currentTimeMillis() - feedStartTime;
 		
-		System.out.println("PERFORMANCE: Processed "+eventCounter+" events.");
-		System.out.println("PERFORMANCE: Processing took "+((timeSpentProcessing/eventCounter)/1000.0)+" microseconds per event.");
-//		System.out.println("PERFORMANCE: Polling the event queue took "+((timeSpentPolling/eventCounter)/1000.0)+" microseconds per event.");
-//		System.out.println("PERFORMANCE: Enqueuing took "+((timeSpentQueuing/eventCounter)/1000.0)+" microseconds per event.");
-		System.out.println("PERFORMANCE: Entire processing took "+feedElapsedTime+" milliseconds or "+((feedElapsedTime*1000)/eventCounter)+" microseconds per event.");
-		
+		log.debug("PERFORMANCE: Processed "+eventCounter+" events.");
+		if (eventCounter>0) {
+			log.debug("PERFORMANCE: Processing took "+((timeSpentProcessing/eventCounter)/1000.0)+" microseconds per event.");
+			log.debug("PERFORMANCE: Entire processing took "+feedElapsedTime+" milliseconds or "+((feedElapsedTime*1000)/eventCounter)+" microseconds per event.");
+		}
+
 	}
 
 	@Override
@@ -184,7 +178,6 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 		}
 
 		// Handle event
-//		DataSource.eventStartNanos = System.nanoTime();
 		event.recipient.receive(event);
 		return true;
 	}

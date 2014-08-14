@@ -2,7 +2,6 @@ package com.unifina.feed;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +18,7 @@ import java.util.zip.GZIPInputStream;
 import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedFileService;
-import com.unifina.service.FeedFileService.StreamResponse;
+import com.unifina.service.FeedService;
 
 /**
  * When you implement subclasses of this file, call the createTempFile(filename) to 
@@ -51,7 +50,7 @@ public abstract class AbstractFeedPreprocessor {
 	 * @param feedFile
 	 * @param feedFileService
 	 */
-	public void preprocess(FeedFile feedFile, FeedFileService feedFileService, InputStream inputStream, boolean isCompressed, boolean saveToDiskFirst) {
+	public void preprocess(FeedFile feedFile, FeedFileService feedFileService, FeedService feedService, InputStream inputStream, boolean isCompressed, boolean saveToDiskFirst) {
 		this.feedFile = feedFile;
 
 		try {
@@ -85,15 +84,6 @@ public abstract class AbstractFeedPreprocessor {
 			for (File f : tempFiles)
 				feedFileService.storeFile(f, feedFile);
 			
-			// Declare the found streams
-			feedFileService.saveOrUpdateStreams(foundStreams, feedFile);
-//			for (Stream s : foundStreams) {
-//				feedFileService.saveOrUpdateStream(s, feedFile);
-//			}
-			
-			// Mark the file as preprocessed
-			feedFileService.setPreprocessed(feedFile);
-			
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -106,27 +96,6 @@ public abstract class AbstractFeedPreprocessor {
 			
 			if (tempFeedFile!=null)
 				tempFeedFile.delete();
-		}
-	}
-	
-	/**
-	 * Requests the FeedFile InputStream from the data server.
-	 * This method is not thread safe.
-	 * @param feedFile
-	 * @param feedFileService
-	 */
-	public void preprocess(FeedFile feedFile, FeedFileService feedFileService) {
-		InputStream inputStream = null;
-		
-		try {
-			StreamResponse response = feedFileService.getFeed(feedFile);
-			if (!response.getSuccess())
-				throw new FileNotFoundException("FeedFile not found: "+feedFile.getName());
-			
-			inputStream = response.getInputStream();
-			preprocess(feedFile, feedFileService, inputStream, response.getIsCompressed(), !response.getIsFile());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 	

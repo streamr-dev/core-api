@@ -1,6 +1,5 @@
 package com.unifina.feed.file;
 
-import java.net.URL;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,50 +8,59 @@ import com.unifina.domain.data.Feed;
 
 public class RemoteFeedFile {
 
-	private String name;
-	private Date beginDate;
-	private Date endDate;
-	private URL url;
 	private Feed feed;
+	private Class fileStorageAdapter;
+	private Map<String, Object> map = new LinkedHashMap<String, Object>();
 	
-	public RemoteFeedFile(String name, Date beginDate, Date endDate, Feed feed, URL url) {
-		this.name = name;
-		this.beginDate = beginDate;
-		this.endDate = endDate;
-		this.feed = feed;
-		this.url = url;
+	public RemoteFeedFile(String name, Date beginDate, Date endDate, Feed feed, String location, boolean compressed, Class fileStorageAdapter) {
+		setName(name);
+		setLocation(location);
+		setBeginDate(beginDate);
+		setEndDate(endDate);
+		setFeed(feed);
+		setCompressed(compressed);
+		if (fileStorageAdapter!=null)
+			setFileStorageAdapter(fileStorageAdapter);
 	}
 
 	public String getName() {
-		return name;
+		return map.get("name").toString();
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		map.put("name", name);
 	}
 
 	public Date getBeginDate() {
-		return beginDate;
+		return new Date((Long) map.get("beginDate"));
 	}
 
 	public void setBeginDate(Date beginDate) {
-		this.beginDate = beginDate;
+		map.put("beginDate", beginDate.getTime());
 	}
 
 	public Date getEndDate() {
-		return endDate;
+		return new Date((Long) map.get("endDate"));
 	}
 
 	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
+		map.put("endDate", endDate.getTime());
 	}
 
-	public URL getUrl() {
-		return url;
+	public String getLocation() {
+		return map.get("location").toString();
 	}
 
-	public void setUrl(URL url) {
-		this.url = url;
+	public void setLocation(String location) {
+		map.put("location",location);
+	}
+	
+	public boolean getCompressed(boolean compressed) {
+		return (boolean) map.get("compressed");
+	}
+	
+	public void setCompressed(boolean compressed) {
+		map.put("compressed", compressed);
 	}
 
 	public Feed getFeed() {
@@ -61,16 +69,20 @@ public class RemoteFeedFile {
 
 	public void setFeed(Feed feed) {
 		this.feed = feed;
+		map.put("feedId", feed.getId());
 	}
 	
 	public Map<String,Object> getConfig() {
-		Map<String,Object> map = new LinkedHashMap<>();
-		map.put("name", getName());
-		map.put("url", getUrl().toString());
-		map.put("beginDate", getBeginDate().getTime());
-		map.put("endDate", getEndDate().getTime());
-		map.put("feedId", getFeed().getId());
 		return map;
+	}
+
+	public Class getFileStorageAdapter() {
+		return fileStorageAdapter;
+	}
+
+	public void setFileStorageAdapter(Class fileStorageAdapter) {
+		this.fileStorageAdapter = fileStorageAdapter;
+		map.put("fileStorageAdapter", fileStorageAdapter);
 	}
 
 }

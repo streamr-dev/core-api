@@ -25,7 +25,6 @@ public abstract class AbstractFeed implements IFeed {
 	
 	protected Set<Object> subscribers = new HashSet<Object>();
 	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
-//	protected List<Class> validSubscribeTypes;
 	
 	protected Globals globals;
 	protected TimeZone timeZone;
@@ -36,17 +35,8 @@ public abstract class AbstractFeed implements IFeed {
 	public AbstractFeed(Globals globals, Feed domainObject) {
 		this.globals = globals;
 		this.domainObject = domainObject;
-//		validSubscribeTypes = getValidSubscriberClasses();
 		keyProvider = createKeyProvider();
 	}
-	
-	/**
-	 * This should return a list of classes that are valid parameters
-	 * for a call to subscribe(Object)
-	 * @return
-	 */
-//	protected abstract List<Class> getValidSubscriberClasses();
-	
 
 	protected AbstractKeyProvider createKeyProvider() {
 		try {
@@ -89,20 +79,7 @@ public abstract class AbstractFeed implements IFeed {
 	
 	public boolean isSubscribed(Object item) {
 		return subscribers.contains(item);
-//		return canSubscribe(item) && (!subscriptionsByKey.containsKey(getSubscriptionKey(item)) || subscriptionsByKey.get(getSubscriptionKey(item))!=item);
-	}
-	
-//	public boolean canSubscribe(Object item) {
-//		boolean valid = false;
-//		for (Class c : validSubscribeTypes) {
-//			if (c.isAssignableFrom(item.getClass())) {
-//				valid = true;
-//				break;
-//			}
-//		}
-//		return valid;
-//	}
-	
+	}	
 	
 	/**
 	 * Creates a new subscription on this feed and creates an event handler for
@@ -111,9 +88,6 @@ public abstract class AbstractFeed implements IFeed {
 	 * if the subscription is of the wrong type.
 	 */
 	public boolean subscribe(Object subscriber) {
-//		if (!canSubscribe(subscriber)) {
-//			throw new IllegalArgumentException("This feed can only subscribe items of the following classes: "+validSubscribeTypes);
-//		}
 
 		// Don't subscribe the same object twice
 		if (!isSubscribed(subscriber)) {
@@ -138,18 +112,11 @@ public abstract class AbstractFeed implements IFeed {
 		}
 		return true;
 	}
-	
-//	@Override
-//	public IEventRecipient getEventRecipient(Object sub) {
-//		Object key = getSubscriptionKey(sub);
-//		return eventRecipientsByKey.get(key);
-//	}
 
 	@Override
 	public void setEventQueue(IEventQueue queue) {
 		this.eventQueue = queue;
 	}
-
 
 	@Override
 	public void setTimeZone(TimeZone tz) {

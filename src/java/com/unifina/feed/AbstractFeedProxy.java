@@ -38,7 +38,8 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	private ConcurrentLinkedQueue<Long> realtimeWaitQueueCounter = new ConcurrentLinkedQueue<>();
 	
 	private static final Logger log = Logger.getLogger(AbstractFeedProxy.class);
-	private static final boolean checkEventAge = true;
+	
+	protected boolean checkEventAge = true;
 	
 	private Long firstWaitQueue = null;
 	private Long firstRealQueue = null;
@@ -154,6 +155,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 					processAndQueue(counter, msg, false);
 				}
 			}
+			else throw new RuntimeException("Message checkCounter was true, there was a sequence gap and no catchup method is set!");
 		}
 
 		// Catchup complete
