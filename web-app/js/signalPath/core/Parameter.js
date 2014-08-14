@@ -151,13 +151,13 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		// Assign disabled class to input when the parameter is connected
 		div.bind("spConnect", (function(me) {
 			return function(output) {
-				me.input.attr("disabled","disabled").addClass("disabled");
+				me.input.attr("disabled","disabled");
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(output) {
-				me.input.removeAttr("disabled").removeClass("disabled");
+				me.input.removeAttr("disabled");
 			}
 		})(pub));
 		

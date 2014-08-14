@@ -426,25 +426,3 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	return pub;
 }
 
-// Module ioSwitch tooltips
-$(document).tooltip({
-	items: ".ioSwitch",
-	hide: 0,
-	content: function() {
-		var $switch = $(this).data("spObject"),
-			stateId = $switch.getStateTextId();
-		
-		if ($(this).hasClass("drivingInput")) {
-			return "Driving input: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
-		}
-		else if ($(this).hasClass("initialValue")) {
-			return "Initial value: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
-		}
-		else if ($(this).hasClass("feedback")) {
-			return "Feedback connection: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
-		}
-		else if ($(this).hasClass("noRepeat")) {
-			return "No repeat: <strong><span id='"+stateId+"'>"+$switch.stateText()+"</span></strong>";
-		}
-	}
-});

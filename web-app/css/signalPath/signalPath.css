@@ -1,5 +1,6 @@
 html, body {
 	height: 100%;
+	width: 100%;
 }
 
 /* button.active { */
@@ -42,6 +43,7 @@ html, body {
 	position:absolute;
 	top: 85px;
 	left: 220px;
+	width: 100%;
 }
 
 .signalpath-canvas {
@@ -87,8 +89,8 @@ html, body {
 .moduleheader {
 	width: 100%;
 	height: 20px;
-/* 	background-color: red; */
-	margin-bottom: 3px;
+	margin-bottom: 5px;
+	display: inline-table;
 }
 
 .modulebody {
@@ -102,15 +104,15 @@ html, body {
 }
 
 .modulename {
-/* 	float: left; */
+    display: table-cell;
 	font-weight: bold;
+	font-size: 12px;
 }
 
 .modulebutton {
-	float: right;
-/* 	font-weight: bold; */
-/* 	padding: 2px; */
-/* 	border: 1px black solid; */
+	width: 16px;
+	text-align: right;
+	display: table-cell;
 	cursor:pointer;
 }
 
@@ -136,6 +138,7 @@ html, body {
 
 table.paramTable {
 	width: 100%;
+	padding: 0px;
 	border: none;
 }
 
@@ -238,6 +241,7 @@ div.output .switchContainer {
 .ioSwitch {
 	display: inline-block;
 	font-size: 7px;
+	vertical-align: text-bottom;
 	text-align: center;
 	width: 13px;
 	height: 13px;
@@ -252,6 +256,7 @@ div.output .switchContainer {
 ._jsPlumb_endpoint {
 	z-index:10;
 /* 	background-color: white; */
+	margin-top: 10px;
 }
 
 ._jsPlumb_endpoint.holdFocus {
@@ -367,8 +372,13 @@ div.output .switchContainer {
 
 .tooltip-inner {
 	max-width: 350px;
-	width: 350px; 
+	white-space: nowrap;
+}
+
+.modulehelp-tooltip {
+	width: 350px !important;
 	text-align: left;
+	white-space: normal;
 }
 
 .tooltip-inner .message {

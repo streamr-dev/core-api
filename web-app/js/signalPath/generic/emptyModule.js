@@ -26,6 +26,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	
 	function createDiv() {
+		var buttons = []
+
 		prot.div = $("<div id='"+prot.id+"' class='component context-menu "+prot.type+"'></div>");
 		prot.div.data("spObject",prot);
 		
@@ -51,14 +53,15 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.header.append(prot.title);
 	
 		// Close button
-		var deleteLink = createModuleButton("delete ui-icon ui-icon-closethick")
+		var deleteLink = createModuleButton("delete fa-times")
 		deleteLink.click(function() {
 			pub.close();
 		});
-		prot.header.append(deleteLink);
-	
+
+		buttons.push(deleteLink);
+
 		// Help button shows normal help on hover and "extended" help in a dialog on click
-		var helpLink = createModuleButton("help ui-icon ui-icon-help");
+		var helpLink = createModuleButton("help fa-question");
 
 		helpLink.mouseenter(function() {
 			var htext = prot.getHelp(false)
@@ -72,7 +75,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				},
 				html: true,
 				title: htext,
-				template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp"></div></div>'
+				placement: 'auto top',
+				template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 			})
 
 			helpLink.tooltip('show')
@@ -81,22 +85,15 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		})
 
 		helpLink.click(function() {
-			var $dialogdiv = $("#helpdialog");
-			$dialogdiv = $("<div id='helpdialog' class='modulehelp'></div>");
-			$dialogdiv.html(prot.getHelp(true));
-			$dialogdiv.dialog({
-				autoOpen: true,
-				height: 400,
-				width: 400,
-				modal: true,
-				close: function() {
-					$dialogdiv.dialog("destroy");
-					$dialogdiv.remove();
-				},
+			bootbox.dialog({
+				message: '<div class="modulehelp">'+ prot.getHelp(true)+'</div>',
+				onEscape: function() { return true },
+				animate: false,
 				title: prot.jsonData.name
-			});
-		});
-		prot.header.append(helpLink);
+			})
+		})
+
+		buttons.push(helpLink);
 
 		prot.body = $("<div class='modulebody'></div>");
 		prot.div.append(prot.body);
@@ -104,7 +101,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		// If there are options, create options editor
 		if (prot.jsonData.options != null) {
 			prot.optionEditor = $("<div class='optionEditor'></div>");
-			prot.body.append(prot.optionEditor);
 			
 			// Create options
 			for (var key in prot.jsonData.options) {
@@ -117,42 +113,42 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				}
 			}
 			
-			prot.optionEditor.dialog({
-				autoOpen: false,
-				title: "Options: "+prot.title.text(),
-				buttons: [{text: "Ok", click: function() {
-						$(this).dialog("close"); 
-						$(prot.optionEditor).find(".option").each(function(i,div) {
-							// Get reference to the JSON option
-							prot.updateOption($(div).data("option"), div);
-						});
-						
-						prot.onOptionsUpdated();
-					}},
-				    {text: "Cancel", click: function() {
-				    	$(this).dialog("close");
-				    }}]
-			});
-			
-//			var editOptions = $("<span class='options modulebutton ui-corner-all ui-icon ui-icon-wrench'></span>");
-			var editOptions = createModuleButton("options ui-icon ui-icon-wrench");
+			var editOptions = createModuleButton("options fa-wrench");
 			
 			editOptions.click(function() {
-				// Location
-				prot.optionEditor.dialog("open");
-			});
-			prot.header.append(editOptions);
+				bootbox.dialog({
+					animate: false,
+					title: 'Options: '+prot.title.text(),
+					message: prot.optionEditor,
+					onEscape: function() { return true },
+					buttons: {
+						'OK': function() {
+							$(prot.optionEditor).find(".option").each(function(i, div) {
+								// Get reference to the JSON option
+								prot.updateOption($(div).data("option"), div)
+							})
+
+							prot.onOptionsUpdated()
+						},
+						'Cancel': function() {}
+					}
+				})
+			})
+
+			buttons.push(editOptions)
 		}
 		
 		if (prot.jsonData.canRefresh) {
 			// If the module can refresh, add a refresh button
-			var refresh = createModuleButton("refresh ui-icon ui-icon-refresh");
+			var refresh = createModuleButton("refresh fa-refresh");
 		
 			refresh.click(function() {
 				SignalPath.updateModule(pub);
 			});
-			prot.header.append(refresh);
+			buttons.push(refresh);
 		}
+
+		prot.header.append(buttons.reverse())
 		
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
@@ -320,13 +316,12 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.addFocus = addFocus;
 	
 	function createModuleButton(additionalClasses) {
-		var button = $("<span class='modulebutton ui-corner-all ui-state-default showOnFocus "+(additionalClasses ? additionalClasses : "")+"'></span>");
-		button.hover(function() {$(this).addClass("ui-state-highlight");}, function() {$(this).removeClass("ui-state-highlight")});
+		var button = $("<div class='modulebutton'><a class='btn btn-default btn-xs showOnFocus' href='#' style='padding: 0px'><i class='fa fa-fw "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
 		return button;
 	}
 	prot.createModuleButton = createModuleButton;
 	
-	function getContextMenu(div) {
+	function getContextMenu() {
 		return [
 		        {title: "Clone module", cmd: "clone"},
 		]
@@ -441,7 +436,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function receiveResponse(payload) {
 		if (payload.type=="warning") {
-			var warning = $("<div class='warning ui-state-error'><span class='ui-corner-all ui-icon ui-icon-alert'></span></div>");
+			var warning = $("<div class='warning ui-state-error'><span class='fa fa-exclamation'></span></div>");
 			$(warning).click((function(msg) {
 				return function() {
 					alert(msg);
@@ -506,32 +501,75 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	return pub;
 }
 
+
+$('body').contextMenu({
+    selector: '#contextMenu',
+
+    before: function(menu, target) {
+		// Try to find an SP object in the hierarchy that has a context menu
+		while (target.length && (!target.data('spObject') || !target.data('spObject').getContextMenu))
+			target = target.parent();
+
+		if (!target.length)
+			return false;
+
+		menu.data('spObject', target.data('spObject'))
+
+		var prot = menu.data('spObject');
+		var html = prot.getContextMenu(menu.data('target')).map(function(item) {
+			return '<li><a tabindex="-1" data-cmd="'
+				+item.cmd+'" href="#">'
+				+item.title+'</a></li>';
+		}).join('');
+    	menu.html(html)
+    },
+
+    onSelected: function(menu, item) {
+    	if (item.data('cmd') && menu.data('spObject'))
+    		menu.data('target').trigger('spContextMenuSelection', item.data('cmd'))
+    }
+});
+
+
+/*
 $(document).contextmenu({
-    delegate: ".context-menu",
-    menu: [],
-    show: 100,
-    select: function(event, ui) {
+    target: ".context-menu",
+    onItem: function(ui, event) {
     	var target = $(document).data("contextMenuTarget"); 
     	if (ui.cmd) {
-    		target.trigger("spContextMenuSelection",ui.cmd);
+    		target.trigger("spContextMenuSelection", ui.cmd);
     	}
     },
-	beforeOpen: function(event, ui) {
-		var target = $(ui.target);
-		
+
+	before: function(e, ui) {
+		var target = $(e.target);
+
+		if (target.parent()[0].tagName === 'BODY')
+			return;
+
+console.log('target',target, target.parent())
 		// Try to find an SP object in the hierarchy that has a context menu
-		while (target!=null && (target.data("spObject")==null || target.data("spObject").getContextMenu==null))
+		while (target.length && (!target.data('spObject') || !target.data('spObject').getContextMenu)) {
+			console.log('target', target, target.data('spObject'))
 			target = target.parent();
-			
+			console.log('parent', target, target.data('spObject'))
+		}
+
 		if (target!=null) {
 			var prot = target.data("spObject");
-			
+		
 			// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
-			$(document).data("contextMenuTarget",target);
-			$(document).contextmenu("replaceMenu", prot.getContextMenu(ui.target));
+			// $(document).data("contextMenuTarget",target);
+			// $(document).contextmenu("replaceMenu", prot.getContextMenu(ui.target));
+console.log('filling menu')
+			this.getMenu().empty().html(
+				prot.getContextMenu(ui.target)
+					.forEach(function(item) {
+						return '<li>'+item.title;
+			}))
 		}
 	}
-});
+});*/
 
 // Remove module focus when clicking anywhere else on screen
 $("body").click(function() {

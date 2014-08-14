@@ -7,3 +7,7 @@ if (typeof jQuery !== 'undefined') {
 		});
 	})(jQuery);
 }
+
+bootbox.setDefaults({
+	animate: false
+})
