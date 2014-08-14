@@ -99,6 +99,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			isTarget:true,
 			dragOptions: {},
 			dropOptions: {},
+			anchors: ['RightMiddle'],
 			beforeDrop: function(info) {
 				return pub.checkConnection(info) && pub.checkConnectionDirection(info);
 			},
