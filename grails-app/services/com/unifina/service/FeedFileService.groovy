@@ -22,7 +22,7 @@ import com.unifina.feed.AbstractFeedPreprocessor
 import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.feed.file.FileStorageAdapter
 import com.unifina.feed.file.RemoteFeedFile
-import com.unifina.task.FeedFileCreateAndPreprocessTask
+import com.unifina.task.FeedFilePreprocessTask
 import com.unifina.task.FeedFilePreprocessTask
 import com.unifina.utils.TimeOfDayUtil
 
@@ -54,17 +54,57 @@ class FeedFileService {
 		FeedFile.get(id)
 	}
 	
+	/**
+	 * Finds an existing FeedFile that matches the given criteria: 
+	 * feed, name and timespan set by beginDate and endDate. Feed and
+	 * name must exactly match, but it is enough for the FeedFile 
+	 * beginDate and endDate to overlap with the given beginDate to endDate.
+	 * 
+	 * @param feed
+	 * @param beginDate
+	 * @param endDate
+	 * @param name
+	 * @return
+	 */
 	FeedFile getFeedFile(Feed feed, Date beginDate, Date endDate, String name) {
 		return FeedFile.withCriteria(uniqueResult:true) {
 			eq("feed",feed)
-			eq("beginDate",beginDate)
-			eq("endDate",endDate)
+			or {
+				and {
+					ge("beginDate", beginDate)
+					lt("beginDate", endDate)
+				}
+				and {
+					gt("endDate", beginDate)
+					le("endDate", endDate)
+				}
+				and {
+					lt("beginDate", beginDate)
+					gt("endDate", endDate)
+				}
+			}
 			eq("name",name)
 		}
 	}
 	
 	FeedFile getFeedFile(RemoteFeedFile file) {
 		return getFeedFile(file.feed, file.beginDate, file.endDate, file.name)
+	}
+	
+	FeedFile createFeedFile(RemoteFeedFile remoteFile) {
+		FeedFile feedFile = new FeedFile()
+		feedFile.name = remoteFile.getName()
+		
+		feedFile.beginDate = remoteFile.getBeginDate()
+		feedFile.endDate = remoteFile.getEndDate()
+		// TODO: remove deprecated
+		feedFile.day = remoteFile.getBeginDate()
+		
+		feedFile.processed = false
+		feedFile.processing = true
+		feedFile.processTaskCreated = true
+		feedFile.feed = remoteFile.getFeed()
+		return feedFile
 	}
 
 	public void setPreprocessed(FeedFile feedFile) {
@@ -75,46 +115,19 @@ class FeedFileService {
 	}
 	
 	/**
-	 * Creates and saves a task to preprocess the given FeedFile
-	 * (if it is not yet processed).
-	 * @param feedFile
-	 * @return
+	 * Creates and saves a task to preprocess the given FeedFile.
+	 * If a FeedFile entry already exists for the given remote file,
+	 * a warning is logged and null is returned.
 	 */
-	public createPreprocessTask(FeedFile feedFile) {
-		if (!feedFile.processed) {
-			Task task = new Task(FeedFilePreprocessTask.class.getName(), (FeedFilePreprocessTask.getConfig(feedFile) as JSON).toString(), "preprocess", taskService.createTaskGroupId())
-			task.save(flush:true, failOnError:true)
-			
-			feedFile.processTaskCreated = true
-			feedFile.save(flush:true, failOnError:true)
-			return task
-		}
-		else return null
-	}
-	
-	/**
-	 * Creates and saves a task to preprocess the given FeedFile
-	 * (if it is not yet processed).
-	 * @param file
-	 * @return
-	 */
-	public createCreateAndPreprocessTask(RemoteFeedFile file) {
+	public createPreprocessTask(RemoteFeedFile file, boolean download) {
 		if (!getFeedFile(file)) {
-			Task task = new Task(FeedFileCreateAndPreprocessTask.class.getName(), (file.getConfig() as JSON).toString(), "preprocess", taskService.createTaskGroupId())
+			Task task = new Task(FeedFilePreprocessTask.class.getName(), (FeedFilePreprocessTask.getConfig(file, download) as JSON).toString(), "preprocess", taskService.createTaskGroupId())
 			task.save(flush:true, failOnError:true)
 			return task
 		}
-		else return null
-	}
-	
-	void preprocess(FeedFile file) {
-		AbstractFeedPreprocessor preprocessor = getPreprocessor(file.feed)
-		preprocessor.preprocess(file)
-		// Check for new Streams
-		List<Stream> streams = preprocessor.getFoundStreams()
-		streams.each {Stream s->
-			if (!Stream.findByFeedAndLocalId(file.feed, s.localId))
-				s.save(failOnError:true)
+		else {
+			log.warn("FeedFile already exists that matches the given RemoteFeedFile: $file. Returning null!")
+			return null
 		}
 	}
 	
@@ -158,11 +171,14 @@ class FeedFileService {
 		return getFileStorageAdapter().retrieve(canonicalName)
 	}
 	
-	public FileStorageAdapter getFileStorageAdapter() {
-		if (!grailsApplication.config.unifina.feed.fileStorageAdapter)
-			throw new RuntimeException("File storage adapter is not configured!")
+	/**
+	 * Returns the default file storage adapter configured in Config.groovy as "unifina.feed.fileStorageAdapter"
+	 */
+	public FileStorageAdapter getFileStorageAdapter(String className = grailsApplication.config.unifina.feed.fileStorageAdapter) {
+		if (!className)
+			throw new RuntimeException("No default file storage adapter is configured and no classname was provided!")
 			
-		return this.getClass().getClassLoader().loadClass(grailsApplication.config.unifina.feed.fileStorageAdapter).newInstance(grailsApplication.config)
+		return this.getClass().getClassLoader().loadClass(className).newInstance(grailsApplication.config)
 	}
 	
 	StreamResponse getFeed(FeedFile feedFile) {
@@ -283,6 +299,13 @@ class FeedFileService {
 	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
+			
+		// If no streams were found (for example, file contained no data), just return
+		if (foundStreams.size()==0) {
+			log.warn("No streams found in FeedFile $feedFile.name.")
+			return
+		}
+			
 		long time = System.currentTimeMillis()
 		
 		feedFile = FeedFile.get(feedFile.id)

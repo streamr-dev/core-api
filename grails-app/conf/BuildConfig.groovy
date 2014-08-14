@@ -10,7 +10,15 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
+def gebVersion = "0.9.3"
+def seleniumVersion = "2.41.0"
+
 //grails.project.dependency.resolver = "maven" // or ivy
+
+grails.project.fork = [
+    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false]
+]
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -40,7 +48,8 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.21'
 		compile('log4j:log4j:1.2.16')
-
+		
+		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
 		compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
@@ -54,6 +63,10 @@ grails.project.dependency.resolution = {
 		compile('com.mashape.unirest:unirest-java:1.3.3')
 		
 		runtime('com.amazonaws:aws-java-sdk:1.7.5')
+
+		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
+		test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
+		test "org.gebish:geb-spock:$gebVersion"
     }
 
     plugins {
@@ -78,5 +91,7 @@ grails.project.dependency.resolution = {
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
 		build ':yui-war-minify:1.5'
+
+		test ":geb:$gebVersion"
     }
 }

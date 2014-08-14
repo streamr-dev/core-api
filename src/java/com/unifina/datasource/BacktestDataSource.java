@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import com.unifina.data.BacktestEventQueue;
 import com.unifina.data.IFeed;
 import com.unifina.data.IStreamRequirement;
+import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 
 public class BacktestDataSource extends DataSource {
@@ -23,8 +24,8 @@ public class BacktestDataSource extends DataSource {
 	}
 	
 	@Override
-	protected IFeed registerModule(IStreamRequirement o) {
-		IFeed feed = super.registerModule(o);
+	protected IFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
+		IFeed feed = super.subscribeToFeed(subscriber, feedDomain);
 		
 		if (eventQueue instanceof BacktestEventQueue)
 			((BacktestEventQueue)eventQueue).addFeed(feed);

@@ -28,7 +28,7 @@ public class EventTable extends AbstractSignalPathModule {
 			rc = parentSignalPath.getReturnChannel();
 		}
 		
-		df = globals.timeFormat;
+		df = globals.dateTimeFormat;
 	}
 
 	@Override

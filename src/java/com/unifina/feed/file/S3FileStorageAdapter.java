@@ -32,16 +32,16 @@ public class S3FileStorageAdapter extends FileStorageAdapter {
 	}
 
 	@Override
-	protected InputStream tryRetrieve(String canonicalPath) throws IOException {
-		S3Object object = s3Client.getObject(new GetObjectRequest(bucketName, canonicalPath));
+	protected InputStream tryRetrieve(String location) throws IOException {
+		S3Object object = s3Client.getObject(new GetObjectRequest(bucketName, location));
 		InputStream objectData = object.getObjectContent();
 		return objectData;
 	}
 
 	@Override
-	protected void tryStore(File file, String canonicalPath) throws IOException {
+	protected void tryStore(File file, String location) throws IOException {
 		// Amazon S3 client retries internally, may log Exceptions to log file on each retry
-		s3Client.putObject(new PutObjectRequest(bucketName, canonicalPath, file));
+		s3Client.putObject(new PutObjectRequest(bucketName, location, file));
 	}
 
 }

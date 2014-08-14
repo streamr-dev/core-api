@@ -1,13 +1,14 @@
 package com.unifina.service
 
 import com.unifina.data.IFeed
-import com.unifina.domain.data.Feed;
-import com.unifina.domain.data.Stream;
-import com.unifina.feed.AbstractFeedPreprocessor;
+import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
+import com.unifina.feed.AbstractFeedPreprocessor
 import com.unifina.feed.FeedFactory
 import com.unifina.feed.FeedNotFoundException
 import com.unifina.feed.MessageRecipient
 import com.unifina.feed.StreamNotFoundException
+import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
 
 class FeedService {
@@ -66,7 +67,23 @@ class FeedService {
 		else return result
 	}
 	
+	Feed getFeedByModule(AbstractSignalPathModule m) {
+		Feed result = Feed.createCriteria().get() {
+			module {
+				eq("implementingClass", m.getClass().getName())
+			}
+		}
+		
+		if (!result)
+			throw new FeedNotFoundException("For module "+m)
+		else return result
+	}
+	
 	MessageRecipient getMessageRecipient(Feed domain) {
 		return FeedFactory.getInstance(domain, grailsApplication.config)
+	}
+
+	List<Stream> getStreams(Feed feed) {
+		return Stream.findAllByFeed(feed)
 	}
 }
