@@ -15,11 +15,11 @@ def seleniumVersion = "2.41.0"
 
 //grails.project.dependency.resolver = "maven" // or ivy
 
-grails.project.fork.run = false
-// grails.project.fork = [
-//     run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-//     test: false
-// ]
+// grails.project.fork.run = false
+grails.project.fork = [
+	run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+	test: false
+]
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
