@@ -17,7 +17,7 @@ def seleniumVersion = "2.41.0"
 
 grails.project.fork = [
     run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false]
+    test: false
 ]
 
 grails.project.dependency.resolution = {
