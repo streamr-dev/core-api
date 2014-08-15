@@ -16050,6 +16050,9 @@ div.dataTables_scrollFoot table {
   background: #f4f4f4;
   color: #333333;
 }
+#content-wrapper {
+  position: static;
+}
 .panel-heading {
   height: 40px;
 }
@@ -16063,6 +16066,12 @@ fieldset[disabled] .btn {
 }
 .toolbar {
   margin-bottom: 15px;
+}
+dl dd {
+  margin-bottom: 10px;
+}
+.alert i {
+  margin-right: 5px;
 }
 #main-menu-inner {
   margin-top: 38px;

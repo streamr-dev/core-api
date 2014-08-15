@@ -8,9 +8,6 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/tablesorter', file:'jquery.tablesorter.min.js', plugin: 'unifina-core']
 	}
-	highcharts {
-		resource url:[dir:'js/highcharts-2.3.3', file:'highcharts.src.js', plugin: 'unifina-core']
-	}
 	highstock {
 		resource url:[dir:'js/highstock-1.3.9/js', file:'highstock.js', plugin: 'unifina-core']
 		resource url:[dir:'js/highstock-1.3.9/js', file:'highcharts-more.js', plugin: 'unifina-core']

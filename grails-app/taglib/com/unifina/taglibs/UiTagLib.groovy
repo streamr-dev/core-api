@@ -41,8 +41,15 @@ public class UiTagLib {
 	
 	def flashMessage = {attrs, body->
 		if (flash.message) {
-			out << "<div class='message'>"
+			out << "<div class='alert alert-info'>"
+			out << "<i class='fa fa-exclamation-circle'></i>"
 			out << flash.message
+			out << "</div>"
+		}
+		if (flash.error) {
+			out << "<div class='alert alert-danger'>"
+			out << "<i class='fa fa-exclamation-triangle'></i>"
+			out << flash.error
 			out << "</div>"
 		}
 	}
@@ -53,12 +60,21 @@ public class UiTagLib {
 		out << "</div>"
 	}
 
+	/**
+	 * Renders a breadcrumb. Body of the tag should be <li> list items.
+	 * @attr class Classes added to the breadcrumb
+	 */
 	def breadcrumb = {attrs, body->
 		out << "<div class='breadcrumb breadcrumb-page ${attrs.class ?: ""}'>"
 		out << body()
 		out << "</div>"
 	}
 	
+	/**
+	 * Renders a Bootstrap panel.
+	 * @attr title Title of the panel
+	 * @attr class Classes added to the panel
+	 */
 	def panel = {attrs, body->
 		out << "<div class='panel ${attrs.class ?: ''}'>"
 		if (attrs.title) {
@@ -70,6 +86,25 @@ public class UiTagLib {
 		out << body()
 		out << "</div>" // end panel body
 		out << "</div>" // end panel
+	}
+	
+	/**
+	 * Renders a radio button
+	 *
+	 * @attr name REQUIRED the field name/id
+	 * @attr value REQUIRED Value of the selection
+	 * @attr checked Whether the radio button is selected
+	 * @attr class Classes to be added
+	 */
+	def radio = {attrs, body->
+		out << """
+			<div class="radio">
+				<label>
+					<input type="radio" name="${attrs.name}" value="${attrs.value}" ${attrs.checked ? "checked" : ""} class="${attrs.class}">
+					<span class="lbl">${body()}</span>
+				</label>
+			</div>
+		"""
 	}
 	
 	def paginate = {attrs, body->
