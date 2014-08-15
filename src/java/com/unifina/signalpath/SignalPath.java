@@ -99,7 +99,7 @@ public class SignalPath extends AbstractSignalPathModule {
 		
 		for (Map moduleConfig : modulesJSON) {
 			
-			Module moduleDomain = moduleDomainById.get(((Integer)moduleConfig.get("id")).longValue());
+			Module moduleDomain = moduleDomainById.get(((Number) moduleConfig.get("id")).longValue());
 			
 			AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain,moduleConfig,this,globals);
 			
