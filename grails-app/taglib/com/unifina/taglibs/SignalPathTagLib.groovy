@@ -152,35 +152,65 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		def str = """
-		jQuery("#$id").jstree({ 
+		jQuery("#$id").jstree({
 			"core": {
 				"animation": 100
 			},
-			
-			"themes": {
+
+			crrm: {
+				move: {
+					check_move: function(m) {
+						return false;
+					}
+				}
+			},
+
+			themes: {
 				// If you change the theme, check app resources too
 				theme: "classic",
 				url: "${g.resource(dir:"js/jsTree/themes/classic", file:"style.css")}",
 				"icons": false
 			},
 			
-			"ui": {
-				"select_limit": 1
+			ui: {
+				'select_limit': 1
 			},
 			
-			"json_data" : {
-				"ajax" : {
-					"url" : "$url",
+			json_data : {
+				ajax : {
+					url : "$url",
 				}
 			},
 			
-			"types": {
-				"default" : {
+			types: {
+				default: {
 				    draggable : false
 				}
 			},
-			
-			"plugins" : [ "json_data", "ui", "themes" ]
+
+			dnd: {
+				copy: false,
+				drop_target: '#container, #main-container, #canvas',
+				drop_finish: function(drop) {
+					console.log('drop finish', drop)
+					SignalPath.addModule(drop.o.data('id'), {
+						layout: {
+							position: {
+								top: drop.e.offsetY + 'px',
+								left: drop.e.offsetX + 'px'
+							}
+						}
+					})
+				},
+				drop_check: function(drop) {
+		            return jQuery("#$id").jstree('is_leaf', drop.o)
+				},
+				drag_check: function(d) {
+					return { after : false, before : false, inside : true };
+				}
+			},
+
+			plugins : [ 'json_data', 'ui', 'themes', 'dnd', 'crrm' ]
 		})
 		.bind('dblclick.jstree', function(e, data) {
             var node = jQuery(e.target).closest("li")
@@ -203,7 +233,6 @@ class SignalPathTagLib {
 		"""
 		out << str
 		writeScriptFooter(out)
-		
 	}
 	
 	/**
