@@ -23,7 +23,7 @@
 
 // pixel-admin fixes and tweaks
 #content-wrapper {
-	position: static;
+	display: flex;
 }
 
 .panel-heading {
@@ -53,3 +53,13 @@ dl dd {
 
 // Unifina core page styles
 @import "./unifina/pages/build.less";
+
+#main-navbar {
+	position: fixed;
+}
+
+#main-wrapper {
+	display: flex;
+	height: 100%;
+	width: 100%;
+}
