@@ -16096,6 +16096,6 @@ dl dd {
 #main-menu {
   overflow: visible;
 }
-#toolbar-buttons {
-  overflow: visible !important;
+.tt-cursor {
+  background-color: #ccc;
 }
