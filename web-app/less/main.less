@@ -1,0 +1,55 @@
+// Import base Bootstrap styling (pixel-admin theme)
+@import "./pixel-admin/pixel-admin.less";
+@import "./pixel-admin/pixel-admin-less/themes/default/default.less";
+
+.selected-theme {
+	.theme-default;
+}
+
+// import the pixel-admin widget styles you need
+@import "./pixel-admin/pixel-admin-less/widgets/notifications.less";
+
+// Bootstrap variable overrides
+
+@font-size-base: 12px;
+
+// pixel-admin variable overrides
+
+@fonts-path:  "../../fonts";
+@images-path: "../../images";
+
+@main-navbar-height: 38px;
+@main-navbar-right-padding: 0px;
+
+// pixel-admin fixes and tweaks
+#content-wrapper {
+	position: static;
+}
+
+.panel-heading {
+	height: 40px;
+	
+	.panel-title {
+		float: left;
+	}
+}
+
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+	opacity: 0.5;
+}
+
+// Unifina general styles
+.toolbar {
+	margin-bottom: 15px;
+}
+
+dl dd {
+	margin-bottom: 10px;
+}
+
+.alert i {
+	margin-right: 5px;
+}
+
+// Unifina core page styles
+@import "./unifina/pages/build.less";
