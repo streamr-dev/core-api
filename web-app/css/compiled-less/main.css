@@ -16050,9 +16050,6 @@ div.dataTables_scrollFoot table {
   background: #f4f4f4;
   color: #333333;
 }
-#content-wrapper {
-  display: flex;
-}
 .panel-heading {
   height: 40px;
 }
@@ -16092,9 +16089,11 @@ dl dd {
   position: fixed;
 }
 #main-wrapper {
-  display: flex;
   height: 100%;
   width: 100%;
+}
+#content-wrapper {
+  height: 100%;
 }
 #main-menu {
   overflow: visible;

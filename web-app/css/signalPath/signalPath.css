@@ -41,8 +41,9 @@ html, body {
 
 #canvas {
 	position: relative;
-	flex: 1 1 auto;
 	overflow: auto;
+	height: 100%;
+	width: 100%;
 }
 
 .signalpath-canvas {
