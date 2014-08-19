@@ -12,6 +12,9 @@
 
 .tt-dropdown-menu p:hover {
 	cursor: pointer;
-	color: white;
-	background-color: #333;
 }
+
+.tt-cursor {
+	background-color: #ccc;
+}
+
