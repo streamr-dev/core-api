@@ -32,7 +32,7 @@ class StreamController {
 				if (params.module) {
 					eq("feed.module", Module.load(params.module))
 				}
-				like("name","%"+params.term+"%")
+				like("name", params.term+"%")
 				'in'("feed",allowedFeeds)
 				maxResults(10)
 			}
