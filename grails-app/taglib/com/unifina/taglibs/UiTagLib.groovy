@@ -1,6 +1,10 @@
 package com.unifina.taglibs
 
-import java.text.SimpleDateFormat;
+import groovy.transform.CompileStatic
+
+import java.text.SimpleDateFormat
+
+import org.codehaus.groovy.runtime.InvokerHelper
 
 
 public class UiTagLib {
@@ -93,14 +97,37 @@ public class UiTagLib {
 	 *
 	 * @attr name REQUIRED the field name/id
 	 * @attr value REQUIRED Value of the selection
+	 * @attr id DOM id
 	 * @attr checked Whether the radio button is selected
 	 * @attr class Classes to be added
+	 * @attr inline Is this an inline radio button?
 	 */
 	def radio = {attrs, body->
 		out << """
-			<div class="radio">
+			<div class="${attrs.inline ? 'radio-inline' : 'radio'}">
 				<label>
-					<input type="radio" name="${attrs.name}" value="${attrs.value}" ${attrs.checked ? "checked" : ""} class="${attrs.class}">
+					<input type="radio" id="${attrs.id}" name="${attrs.name}" value="${attrs.value}" ${attrs.checked ? "checked" : ""} class="${attrs.class}">
+					<span class="lbl">${body()}</span>
+				</label>
+			</div>
+		"""
+	}
+	
+	/**
+	 * Renders a checkbox button
+	 *
+	 * @attr name REQUIRED the field name/id
+	 * @attr value REQUIRED Value of the selection
+	 * @attr id DOM id
+	 * @attr checked Whether the radio button is selected
+	 * @attr class Classes to be added
+	 * @attr inline Is this an inline checkbox?
+	 */
+	def checkbox = {attrs, body->
+		out << """
+			<div class="${attrs.inline ? 'checkbox-inline' : 'checkbox'}">
+				<label>
+					<input type="checkbox" id="${attrs.id}" name="${attrs.name}" value="${attrs.value}" ${attrs.checked ? "checked" : ""} class="${attrs.class}">
 					<span class="lbl">${body()}</span>
 				</label>
 			</div>

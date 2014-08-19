@@ -16073,6 +16073,9 @@ dl dd {
 .alert i {
   margin-right: 5px;
 }
+.nested-column-fix {
+  padding-left: 0;
+}
 #main-menu-inner {
   margin-top: 38px;
 }
