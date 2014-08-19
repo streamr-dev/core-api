@@ -533,6 +533,68 @@ class SignalPathTagLib {
 
 		 writeScriptFooter(out)
 	}
+
+	/**
+	 * Renders a button dropdown that will show 'save/save as' links
+	 */
+	def saveButtonDropdown = {attrs,body->
+		out << """
+			<div class="btn-group">
+				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					<span class="fa fa-save"></span>
+					<span class="caret"></span>
+				</button>
+
+				<ul class="dropdown-menu" role="menu">
+					<li class="disabled"><a href="#" id="saveButton">Save</a></li>
+					<li><a href="#" id="saveAsButton">Save as...</a></li>
+				</ul>
+			</div>
+		"""
+
+		writeScriptHeader(out)
+		def str = """
+			\$('#saveButton').click(function() {
+				if (SignalPath.isSaved()) {
+					SignalPath.saveSignalPath()
+				}
+				else alert('No savedata - use Save As')
+			})
+
+			\$(SignalPath).on('signalPathLoad', function(event,saveData) {
+				if (saveData.isSaved) {
+					\$('#saveButton').parent().removeClass('disabled')
+					\$('#saveButton').html('Save to '+saveData.target)
+				}
+			})
+
+			\$(SignalPath).on('signalPathSave', function(event,saveData) {
+				\$('#saveButton').parent().removeClass('disabled')
+				\$('#saveButton').html('Save to '+saveData.target)
+			})
+
+			// save as
+			\$('#saveAsButton').click(function() {
+				bootbox.prompt('Save to Archive as..', function(saveAsName) {
+					if (!saveAsName)
+						return;
+
+					var saveData = {
+						url: '${ createLink(controller: "savedSignalPath", action: "save") }',
+						target: "Archive as new",
+						name: saveAsName
+					}
+				
+					SignalPath.saveSignalPath(saveData, function(sd) {
+						if (sd.showUrl)
+							window.location = sd.showUrl
+					})
+				})
+			})
+		"""
+		out << str
+		writeScriptFooter(out)
+	}
 	
 	/**
 	 * Renders a button that will save the current signalpath.
@@ -594,7 +656,6 @@ class SignalPathTagLib {
 		def title = attrs.title ?: ""
 		
 		out << button(attrs,body)
-//		out << "<button id='$id' class='$cls' style='$style' title='$title'>${body()}</button>"
 
 		def url = attrs.url ?: createLink(controller:controller,action:action)
 		def dialogTitle = "Save to $targetName as.."
@@ -602,26 +663,26 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		def str = """
-	jQuery('#$id').click(function() {
-		bootbox.prompt('$dialogTitle', function(saveAsName) {
-			if (!saveAsName)
-				return;
+			jQuery('#$id').click(function() {
+				bootbox.prompt('$dialogTitle', function(saveAsName) {
+					if (!saveAsName)
+						return;
 
-			var saveData = {
-				url: "$url",
-				target: "$targetName as new",
-				name: saveAsName
-			};
-		
-			SignalPath.saveSignalPath(saveData, function(sd) {
-				if (sd.showUrl)
-					window.location = sd.showUrl;
+					var saveData = {
+						url: "$url",
+						target: "$targetName as new",
+						name: saveAsName
+					};
+				
+					SignalPath.saveSignalPath(saveData, function(sd) {
+						if (sd.showUrl)
+							window.location = sd.showUrl;
+					});
+
+					jQuery(this).dialog("close");
+					jQuery(this).dialog("destroy");
+				});
 			});
-
-			jQuery(this).dialog("close");
-			jQuery(this).dialog("destroy");
-		});
-	});
 		"""
 		out << str
 		writeScriptFooter(out)

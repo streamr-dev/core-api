@@ -16051,7 +16051,7 @@ div.dataTables_scrollFoot table {
   color: #333333;
 }
 #content-wrapper {
-  position: static;
+  display: flex;
 }
 .panel-heading {
   height: 40px;
@@ -16084,4 +16084,21 @@ dl dd {
 }
 .form-group-period .input-group-addon {
   width: 60px;
+}
+#main-menu {
+  position: fixed;
+}
+#main-navbar {
+  position: fixed;
+}
+#main-wrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+#main-menu {
+  overflow: visible;
+}
+.tt-cursor {
+  background-color: #ccc;
 }

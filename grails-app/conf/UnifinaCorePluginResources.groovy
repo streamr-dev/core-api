@@ -34,13 +34,13 @@ modules = {
 	typeahead {
 		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
 	}
+	'search-control' {
+		dependsOn 'typeahead'
+		resource url:[dir:'js/search-control', file:'search-control.js', plugin: 'unifina-core']
+	}
 	codemirror {
-//		resource url:[dir:'js/codemirror-3.21', file:'codemirror.js']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror.css', plugin: 'unifina-core']
-//		resource url:[dir:'js/codemirror', file:'codemirror.js']
-//		resource url:[dir:'js/codemirror', file:'groovy.js']
-//		resource url:[dir:'js/codemirror', file:'codemirror.css']
 	}
 	superfish {
 		dependsOn 'jquery'

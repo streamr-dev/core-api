@@ -12,13 +12,22 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.type = prot.jsonData.type;
 	prot.id = "module_"+prot.hash;
 
-	var pub = {};
-	
+	var pub = {}
+	var canvasEl = $('#canvas')
+	var cpos = canvasEl.offset()
+
 	prot.dragOptions = {
 		drag: function() {
 			prot.onDrag();
 		},
-		//handle: '.moduleheader'
+		drag: function(e, ui) {
+			var x = ui.offset.left + canvasEl.scrollLeft()
+			var y = ui.offset.top + canvasEl.scrollTop()
+
+			if (x < cpos.left || y < cpos.top) {
+				return false
+			}
+		}
 	}
 	
 	pub.getDragOptions = function() {
