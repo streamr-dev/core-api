@@ -93,6 +93,7 @@ grails.project.dependency.resolution = {
 		runtime ":zipped-resources:1.0"
 		build ':yui-war-minify:1.5'
 
+		test ":plastic-criteria:1.5"
 		test ":geb:$gebVersion"
     }
 }

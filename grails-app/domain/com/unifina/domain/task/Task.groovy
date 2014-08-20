@@ -16,7 +16,8 @@ class Task {
 	Date dateCreated
 	Date lastUpdated
 	
-	int complexity
+	int complexity = 0
+	int progress = 0
 	
 	String category
 	String config

@@ -50,6 +50,7 @@ class TaskService {
 			task = task.attach()
 			task.refresh()
 			task.complete = true
+			task.progress = 100
 			task.save(flush:true)
 			log.info("Task $task.id complete.")
 //		}
@@ -73,6 +74,10 @@ class TaskService {
 //		}
 	}
 	
+	void setProgress(Task task, int progress) {
+		Task.executeUpdate("update Task t set t.progresss = ? where t.id = ?", [progress, task.id])
+	}
+	
 	void setError(Task task, Throwable throwable) {
 //		Task.withTransaction() {
 			task = task.attach()
@@ -80,5 +85,44 @@ class TaskService {
 			task.error = throwable.toString()
 			task.save(flush:true)
 //		}
+	}
+	
+	/**
+	 * Gets the number of available tasks before the given task
+	 * @param taskGroupId
+	 * @return
+	 */
+	Integer getQueuePosition(Task task) {
+		return Task.executeQuery("select count(t.id) from Task t where t.id < ?)", [task.id])
+	}
+	
+	/**
+	 * Gets the number of available tasks before the first task of the given taskGroupId
+	 * @param taskGroupId
+	 * @return
+	 */
+	Integer getQueuePosition(String taskGroupId) {
+		return Task.executeQuery("select count(t.id) from Task t where available = true and t.id < (select min(me.id) from Task me where me.taskGroupId = ?)", [taskGroupId])
+	}
+	
+	/**
+	 * Returns the task group progress as integer percentage between 0 and 100
+	 * @param taskGroupId
+	 * @return
+	 */
+	Integer getTaskGroupProgress(String taskGroupId) {
+		List fields = Task.withCriteria(uniqueResult:true) {
+			projections {
+				sum("progress")
+				rowCount()
+			}
+			eq("taskGroupId",taskGroupId)
+		}
+		
+		double progress = fields[0]
+		double maxProgress = 100D*fields[1]
+		
+		return (int) 100*(progress/maxProgress)
+		
 	}
 }
