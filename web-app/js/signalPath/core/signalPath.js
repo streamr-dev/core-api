@@ -288,7 +288,14 @@ var SignalPath = (function () {
 	/**
 	 * SaveData should contain (optionally): url, name, (params)
 	 */
-	function saveSignalPath(sd,callback) {
+	function saveSignalPath(sd, callback) {
+    	function _cb() {
+	    	$('#modal-spinner').hide()
+    		if (callback)
+    			callback.apply(callback, arguments)
+    	}
+
+    	$('#modal-spinner').show()
 		
 		var signalPathContext = options.signalPathContext();
 		
@@ -316,8 +323,8 @@ var SignalPath = (function () {
 					$.extend(saveData, data);
 					saveData.isSaved = true;
 
-					if (callback)
-						callback(saveData);
+					if (_cb)
+						_cb(saveData);
 					
 					$(pub).trigger('signalPathSave', [saveData]);
 				}
@@ -370,21 +377,29 @@ var SignalPath = (function () {
 	/**
 	 * Options must at least include options.url OR options.json
 	 */
-	function loadSignalPath(opt,callback) {
+	function loadSignalPath(opt, callback) {
 		var params = opt.params || {};
+    
+    	function _cb() {
+	    	$('#modal-spinner').hide()
+    		if (callback)
+    			callback.apply(callback, arguments)
+    	}
+console.log('loadSignalPath')
+    	$('#modal-spinner').show()
 		
-		if (opt.json) {
-			_load(opt.json,opt,callback);
-		}
+		if (opt.json)
+			_load(opt.json, opt, _cb)
+
 		if (opt.url) {
 			$.getJSON(opt.url, params, function(data) {
 				if (data.error) {
 					options.errorHandler({msg:data.message});
 					if (data.signalPathData) {
-						_load(data,opt,callback);
+						_load(data, opt, _cb);
 					}
 				}
-				else _load(data,opt,callback);
+				else _load(data, opt, _cb);
 			});
 		}
 	}

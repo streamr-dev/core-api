@@ -394,7 +394,6 @@ class SignalPathTagLib {
 		out << """
 			jQuery('#$id a[data-toggle="tab"]').on('show.bs.tab', function (e) {
 				jQuery.get(jQuery(e.target).data('url'), function(content) {
-					console.log('render ', jQuery(e.target).data('url'), 'into',jQuery(e.target).data('target'))
 					jQuery(jQuery(e.target).data('target')).html(content);
 				});
 			});

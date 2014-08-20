@@ -30,6 +30,10 @@ $(document).ready(function() {
 			tbody.append(data);
 			var newLength = tbody.find("tr").length;
 
+			tbody.find('tr').click(function() {
+				$('.modal').modal('hide')
+			})
+
 			if (oldLength==newLength)
 				browser.data("complete",true);
 			

@@ -18,5 +18,7 @@
         </div>
                 
 		<r:layoutResources/>
+	
+		<g:render template="/layouts/spinner"/>
     </body>
 </html>
