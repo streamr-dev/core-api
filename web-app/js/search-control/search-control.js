@@ -4,7 +4,7 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 	function modulesTypeAhead(q, cb) {
 		var re = new RegExp(q, 'i')
 		var matches = modules.filter(function(mod) {
-			return re.test(mod.name)
+			return re.test(mod.name) || re.test(mod.alternativeNames)
 		})
 		cb(matches.slice(0, 5))
 	}
