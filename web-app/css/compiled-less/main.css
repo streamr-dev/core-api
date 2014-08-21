@@ -16115,10 +16115,5 @@ dl dd {
   position: absolute;
   z-index: 101;
   top: 50%;
-  left: 40%;
-}
-#modal-spinner img {
-  position: absolute;
-  top: 50%;
   left: 50%;
 }
