@@ -75,7 +75,7 @@ class TaskService {
 	}
 	
 	void setProgress(Task task, int progress) {
-		Task.executeUpdate("update Task t set t.progresss = ? where t.id = ?", [progress, task.id])
+		Task.executeUpdate("update Task t set t.progress = ? where t.id = ?", [progress, task.id])
 	}
 	
 	void setError(Task task, Throwable throwable) {
@@ -93,7 +93,8 @@ class TaskService {
 	 * @return
 	 */
 	Integer getQueuePosition(Task task) {
-		return Task.executeQuery("select count(t.id) from Task t where t.id < ?)", [task.id])
+		List result = Task.executeQuery("select count(t.id) from Task t where t.id < ?)", [task.id])
+		return result[0] ?: 0
 	}
 	
 	/**
@@ -101,8 +102,9 @@ class TaskService {
 	 * @param taskGroupId
 	 * @return
 	 */
-	Integer getQueuePosition(String taskGroupId) {
-		return Task.executeQuery("select count(t.id) from Task t where available = true and t.id < (select min(me.id) from Task me where me.taskGroupId = ?)", [taskGroupId])
+	Integer getGroupQueuePosition(String taskGroupId) {
+		List result = Task.executeQuery("select count(t.id) from Task t where available = true and t.id < (select min(me.id) from Task me where me.taskGroupId = ?)", [taskGroupId])
+		return result[0] ?: 0
 	}
 	
 	/**
