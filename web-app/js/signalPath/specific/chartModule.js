@@ -16,20 +16,20 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	
 	var seriesMeta = [];
 	
-//	var str = "";
-	
 	var range = null;
 	
-//	var handlingMessages = false;
-	
-	function resizeChart(moduleWidth,moduleHeight) {
-		if (area!=null) {
-			area.css("width",moduleWidth - 150);
-			area.css("height",moduleHeight - 100);
-			if (chart!=null) {
-				chart.setSize(moduleWidth - 150, moduleHeight - 100, false);
-			}
-		}
+	function resizeChart(moduleWidth, moduleHeight) {
+		if (!area)
+			return;
+
+		var w = moduleWidth - 70
+		var h = moduleHeight - 70
+
+		area.css('width', w)
+		area.css('height', h)
+
+		if (chart)
+			chart.setSize(w, h, false)
 	}
 	
 	var superCreateDiv = prot.createDiv;
@@ -40,39 +40,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		if (!prot.jsonData.disableAxisSelection) {
 			prot.div.find("div.input.Double").removeClass("default-context-menu").addClass("chart-context-menu");
 		}
-		
-		// Bind yAxis selection possibility to TimeSeries inputs
-//		if (!prot.jsonData.disableAxisSelection) {
-//			prot.div.find("div.input.Double").each(function(i,input) {
-//				if (!$(input).hasClass("parameter")) {
-//
-//					// Unbind anything
-//					$(input).click(
-//							(function(input,prot) {
-//								return function() {
-//									var n = $(input).find("span.ioname").text();
-//
-//									// Find input from json data
-//									var jsonInput = null;
-//									$(prot.jsonData.inputs).each(function(i,jsI) {
-//										if (jsI.name==n)
-//											jsonInput=jsI;
-//									});
-//
-//									var currentInput = "0";
-//									if (jsonInput!=null && jsonInput.yAxis!=null) {
-//										currentInput = jsonInput.yAxis;
-//									}
-//									var yAxis = prompt("Axis number for "+n+":",currentInput);
-//									if (yAxis != null)
-//										jsonInput.yAxis = parseInt(yAxis);
-//								}
-//							})(input,prot)
-//					);
-//				}
-//			});
-//		}
-		
+
 		initArea();
 		
 		prot.initResizable({
@@ -89,7 +57,19 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		return chart;
 	}
 	prot.getChart = getChart;
-	
+
+	function showHide(doShow) {
+		return function() {
+			if (!chart)
+				return;
+
+			chart.series.forEach(function(series) {
+				series.setVisible(doShow, false)
+			})
+			chart.redraw()
+		}
+	}
+
 	function initArea() {
 		prot.body.find(".ioTable").css("width","0px");
 		
@@ -97,52 +77,38 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		area = prot.body.find(".chartDrawArea");
 		if (area==null || area.length==0) {
 			// Add the range buttons
-			var buttonDiv = $("<div class='chartRangeButtons'></div>");
+			var buttonDiv = $("<div class='chartRangeButtons btn-group'></div>");
 			var buttonConfig = [{name:"1s",range:1*1000},{name:"15s",range:15*1000},{name:"1m",range:60*1000},{name:"15m",range:15*60*1000},{name:"30m",range:30*60*1000},{name:"1h",range:60*60*1000},{name:"2h",range:2*60*60*1000},{name:"4h",range:4*60*60*1000},{name:"1d",range:12*60*60*1000},{name:"All",range:null}];
 			createRangeButtons(buttonDiv,buttonConfig);
 			prot.body.append(buttonDiv);
-			
-			// Add the series hide/show links
-			var hideLink = $("<a class='seriesLink' href='#'>hide all</a>");
-			buttonDiv.append(hideLink);
-			hideLink.click(function() {
-				if (chart!=null) {
-					$.each(chart.series, function(index, series) {
-						series.setVisible(false,false);
-					});
-					chart.redraw();
-				}
-				return false;
-			});
-			var showLink = $("<a class='seriesLink' href='#'>show all</a>");
-			buttonDiv.append(showLink);
-			showLink.click(function() {
-				if (chart!=null) {
-					$.each(chart.series, function(index, series) {
-						series.setVisible(true,false);
-					});
-					chart.redraw();
-				}
-				return false;
-			});
+
+			prot.body.append('<div class="pull-right btn-group">' +
+				'<button class="btn btn-default btn-sm show-all-series" '+
+					'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
+				'<button class="btn btn-default btn-sm hide-all-series" '+
+					'title="Hide all series"><i class="fa fa-minus-circle"></i></button>'+
+			'</div>')
+
+			$('button.hide-all-series', prot.body).click(showHide(false))
+			$('button.show-all-series', prot.body).click(showHide(true))
 			
 			// Create the chart area
-			var areaId = "chartArea_"+(new Date()).getTime();
-			area = $("<div id='"+areaId+"' class='chartDrawArea'></div>");
-			prot.body.append(area);
+			var areaId = "chartArea_"+(new Date()).getTime()
+			area = $("<div id='"+areaId+"' class='chartDrawArea'></div>")
+			prot.body.append(area)
 			
-			resizeChart(prot.div.width(),prot.div.height());
+			resizeChart(prot.div.width(), prot.div.height())
 		}
 	}
 	
-	var superGetContextMenu = prot.getContextMenu;
+	var superGetContextMenu = prot.getContextMenu
 	prot.getContextMenu = function(div) {
-		var menu = superGetContextMenu(div);
+		var menu = superGetContextMenu(div)
 		if (div.hasClass("ioname")) {
-			menu.push({title: "Set Y-axis", cmd: "yaxis"});
+			menu.push({title: "Set Y-axis", cmd: "yaxis"})
 		}
 		return menu;
-	};
+	}
 	
 	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
 	prot.handleContextMenuSelection = function(div,data,selection,event) {
@@ -157,18 +123,16 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	};
 	
 	function createRangeButtons(buttonDiv,config) {
-		for (var i=0;i<config.length;i++) {
-			var c = config[i];
-			var button = $("<button>"+c.name+"</button>");
+		config.forEach(function(c) {
+			var button = $('<button class="btn btn-default btn-sm">'+c.name+"</button>")
 			button.click((function(r) {
 				return function() {
-					range = r;
-					redrawChart();
-				};
-			})(c.range));
-			button.button();
-			buttonDiv.append(button);
-		}
+					range = r
+					redrawChart()
+				}
+			})(c.range))
+			buttonDiv.append(button)
+		})
 	}
 	
 	function destroyChart() {
@@ -180,20 +144,15 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	}
 	
 	function initChart(title,series,yAxis) {
-		
 		destroyChart();
 
 		$(area).show();
-		
+
 		// Dragging in the chartDrawArea must not move the module
 		prot.div.draggable("option", "cancel", ".chartDrawArea");
 		
 		if (yAxis==null) {
-			yAxis = { 
-//				title: {
-//					text: null
-//				}
-			};
+			yAxis = {};
 		}
 		else if ($.isArray(yAxis)) {
 			for (var i=0;i<yAxis.length;i++)
@@ -206,23 +165,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			}
 		});
 
-//		if (!series.dataLabels) {
-//			series.dataLabels = {
-//					enabled: true,
-//					align: 'left',
-//					x: 5,
-//					y: 4,
-//					formatter: function() {
-//						if (this.point.x == this.series.data.length - 1) {
-//							return this.y;
-//						} else {
-//							return null;
-//						}
-//					}
-//			}
-//		}
-		
-		
 		
 		var opts = {
 				chart: {
@@ -230,83 +172,37 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					renderTo: area.attr("id"),
 					panning: true,
 					spacingBottom: 40,
-					backgroundColor: null
+					backgroundColor: null,
+					zoomType: 'x'
 				},
 
 				credits: {
 					enabled: false
 				},
-				
-//				title: {
-//					text: (title ? title : "")
-//				},
-//
+
 				xAxis: {
 					ordinal: false
-//					range: 60*1000
 				},
 
 				yAxis: yAxis, 
 
-//				plotOptions: {
-//					line: {
-//						marker: {
-//							enabled: false
-//						},
-////						dataGrouping: {
-////							
-////						}
-//					}
-//				},
-//				
 				legend: {
 					enabled: true,
-					maxHeight: 100,
-					y: 40
+					// maxHeight: 100,
+					// y: 40
 				},
 				
 				rangeSelector: {
 					enabled: false
-//					buttons: [{
-//						count: 1,
-//						type: 'minute',
-//						text: '1m',
-//						millis: 1*60*1000
-//					}, 
-//					{
-//						count: 15,
-//						type: 'minute',
-//						text: '15m',
-//						millis: 15*60*1000
-//					}, 
-//					{
-//						count: 60,
-//						type: 'minute',
-//						text: '1h',
-//						millis: 1*60*60*1000
-//					}, 
-//					{
-//						count: 1,
-//						type: 'day',
-//						text: '1d'
-//					}, 
-//					{
-//						type: 'all',
-//						text: 'All'
-//					}],
-//					inputEnabled: false,
-//					selected: 2
 				},
-//				
-//				exporting: {
-//					enabled: false
-//				},
-//				
+
 				navigator: {
 					enabled: false
 				},
 				
-//				scrollbar
+				scrollbar: {
+					enabled: true
+				},
 				
 				series: series
 		};
@@ -315,46 +211,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		
 		// Create the chart	
 		chart = new Highcharts.StockChart(opts);
-		
-		// Append a button for yAxis setup
-//		if (module.find("button.yAxis").length==0) {
-//			var btn = $("<button class='yAxisConfig'>yAxes</button>");
-//			module.append(btn);
-//			
-//			var yAxisDiv = $("<div class='yAxisConfig' style='display:none'></div");
-//			module.append(yAxisDiv);
-//			
-//			$(series).each(function(i,s) {
-//				yAxisDiv.append("<p>"+s.name+" - "+s.yAxis+"</p>");
-//			});
-//			var updateBtn = $("<button>Update</button>");
-//			yAxisDiv.append(updateBtn);
-//			
-//			btn.click(
-//					(function(div,c) {
-//						return function() {
-//							div.show();
-//						}
-//					})(yAxisDiv,chart)
-//			);
-//			
-//			updateBtn.click(
-//					(function(div,c) {
-//						return function() {
-//							div.hide();
-//							var newY = chart.yAxis;
-//							newY.splice(1,1);
-//							chart.series[1].yAxis = 0;
-//							initChart(chart.title,chart.series,newY);
-//						}
-//					})(yAxisDiv,chart)	
-//			);
-//		}
 	}
 	
 	pub.receiveResponse = function(d) {
-//		handlingMessages = true;
-		
 		if (area==null)
 			initArea();
 		
@@ -368,14 +227,12 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			if (chart==null) {
 				if (seriesMeta[d.s].data==null) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//					seriesMeta[d.s].data = [{x:d.x, y:d.y}];
 					seriesMeta[d.s].data = [[d.x, d.y]];
 				}
 				// Init the chart when any of the series gets it's 2nd data point
 				else if (seriesMeta[d.s].data.length>=1) {
 					// Add one more point to prevent coming here again
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//					seriesMeta[d.s].data.push({x:d.x, y:d.y});
 					seriesMeta[d.s].data.push([d.x, d.y]);
 
 
@@ -386,15 +243,12 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 							if (seriesMeta[i].data==null) {
 								seriesMeta[i].data = [];
 								// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//								seriesMeta[i].data.push({x:seriesMeta[d.s].data[0].x, y:null});
 								seriesMeta[i].data.push([seriesMeta[d.s].data[0][0], null]);
-//								seriesMeta[i].data.push({x:d.x,y:null});
 								seriesMeta[i].data.push([d.x,null]);
 							}
 							// If one point received, repeat first value
 							else if (seriesMeta[i].data.length==1) {
 								// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//								seriesMeta[i].data.push({x:d.x, y:seriesMeta[i].data[0].y});
 								seriesMeta[i].data.push([d.x, seriesMeta[i].data[0][1]]);
 							}
 						}
@@ -406,11 +260,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			// Chart has already been initialized
 			else {
 				// addPoint is slow?
-//				if (d.y!=null) {
-				
 				if (d.s<chart.series.length) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//					chart.series[d.s].addPoint({x:d.x, y:d.y},false,false,false);
 					chart.series[d.s].addPoint([d.x, d.y],false,false,false);
 				}
 				// Are there pending series adds in seriesMeta?
@@ -419,7 +270,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 						seriesMeta[d.s].data = [];
 					
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//					seriesMeta[d.s].data.push({x:d.x, y:d.y});
 					seriesMeta[d.s].data.push([d.x, d.y]);
 					
 					for (var i=chart.series.length;i<seriesMeta.length;i++) {
@@ -429,19 +279,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 						else break;
 					}
 				}
-				
-				
-				
-//					str += "chart.series[0].addPoint({x:"+d.x+",y:"+d.y+"},false,false,false);\n";
-//				}
-					
-				// Alternative: DOES NOT WORK WITH HIGHSTOCK
-//				var series = chart.series[d.s];
-//				var point = (new series.pointClass()).init(series, {x:d.x, y:d.y});
-//				series.data.push(point);
-//				series.isDirty = true;
-
-				// xAxis range can be set in millis
 			}
 		}
 		
@@ -465,9 +302,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			$(d.series).each(function (i,s) {
 				if (s.yAxis==null || s.yAxis+1>yAxis.length) {
 					yAxis.push({
-//						title: {
-//							text:s.name
-//						},
 						offset: ((x%2==0 ? left : right)+1)*30,
 						opposite: (x%2==0)	
 					});
@@ -532,7 +366,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			if (chart && chart.series) {
 				for (var i=0;i<chart.series.length;i++) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-//					chart.series[d.s].addPoint({x:maxTime+1, y:null},false,false,false);
 					chart.series[d.s].addPoint([maxTime+1, null],false,false,false);
 				}
 			}
@@ -566,20 +399,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	}
 	
 	pub.endOfResponses = function() {
-//		handlingMessages = false;
-		
 		if (chart != null) {
-			redrawChart(true);
-//			str += "chart.redraw();\n";
-			
-//			if (chart.series!=null && chart.series.length>0) {
-//				for (var i=0;i<chart.series.length;i++) {
-//					var extremes = chart.series[i].xAxis.getExtremes();
-//					console.info("i: "+i+", dataMax: "+extremes.dataMax+", dataMin: "+extremes.dataMin+", max: "+extremes.max+", min: "+extremes.min);
-//				}
-//			}
-			
-//			console.info(str);
+			redrawChart(true)
 		}
 	}
 	
@@ -591,9 +412,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			mx = Math.min(maxTime, minTime + range);
 		
 		var mn = (range==null ? minTime : Math.max(minTime,mx-range));
-		
-//		for (var i=0;i<chart.series.length;i++)
-//			chart.series[i].xAxis.setExtremes(mn,mx,false,false);
 		
 		chart.xAxis[0].setExtremes(mn,mx,false,false);
 		
