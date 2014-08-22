@@ -11,18 +11,6 @@ class SavedSignalPath {
 	
 	Boolean hasExports
 	
-//	int exportedStringParameters
-//	int exportedBooleanParameters
-//	int exportedIntegerParameters
-//	int exportedDoubleParameters
-//	int exportedSignalPathParameters
-//	int exportedTimeSeriesInputs
-//	int exportedTradesInputs
-//	int exportedOrderbookInputs
-//	int exportedTimeSeriesOutputs
-//	int exportedTradesOutputs
-//	int exportedOrderbookOutputs
-	
 	Date dateCreated
 	Date lastUpdated
 	

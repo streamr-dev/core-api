@@ -43,6 +43,8 @@ class Task {
 	static mapping = {
 		available index:'available_idx'
 		taskGroupId index:'task_group_id_idx'
+		complexity defaultValue: "0"
+		progress defaultValue: "0"
 	}
 	
 	static constraints = {

@@ -121,6 +121,9 @@ class TaskService {
 			eq("taskGroupId",taskGroupId)
 		}
 		
+		if (fields[0]==null || fields[1]==null)
+			return 100
+		
 		double progress = fields[0]
 		double maxProgress = 100D*fields[1]
 		
