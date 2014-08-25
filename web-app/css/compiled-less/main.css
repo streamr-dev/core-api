@@ -16085,18 +16085,12 @@ dl dd {
 #main-menu {
   position: fixed;
 }
-#main-navbar {
-  position: fixed;
-}
 #main-wrapper {
   height: 100%;
   width: 100%;
 }
 #content-wrapper {
   height: 100%;
-}
-#main-menu {
-  overflow: visible;
 }
 .tt-cursor {
   background-color: #ccc;

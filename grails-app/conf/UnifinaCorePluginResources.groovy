@@ -88,6 +88,10 @@ modules = {
 		resource url:[dir:'js/chosen-1.0.0/', file:'chosen-sprite.png', plugin: 'unifina-core']
 		resource url:[dir:'js/chosen-1.0.0/', file:'chosen-sprite@2x.png', plugin: 'unifina-core']
 	}
+	slimscroll {
+		dependsOn 'jquery'
+		resource url:[dir:'js/slimScroll-1.3.0/', file:'jquery.slimscroll.min.js', plugin: 'unifina-core']
+	}
 	'global-error-handler' {
 		resource url:[dir:'js', file:'globalErrorHandler.js', plugin: 'unifina-core']
 	}

@@ -5,7 +5,7 @@
 
 	<g:render template="/layouts/layoutHead"/>
 	
-    <body class="${pageProperty( name:'body.theme' ) ?: 'selected-theme'} ${pageProperty( name:'body.class' )}">
+    <body class="main-navbar-fixed ${pageProperty( name:'body.theme' ) ?: 'selected-theme'} ${pageProperty( name:'body.class' )}">
 
 		<div id="main-wrapper">
 
