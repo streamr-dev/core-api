@@ -12,7 +12,7 @@ class SignalPathTagLib {
 		out << '});'
 		out << '</script>'
 	}
-
+	
 	/**
 	 * Renders a module browser element.
 	 *
@@ -277,55 +277,11 @@ class SignalPathTagLib {
 	 */
 	def button = {attrs, body->
 		def buttonId = attrs.buttonId
-		
-//		String iconClass
-//		if (body() && attrs.icon)
-//			iconClass = "ui-button-text-icon-primary"
-//		else if (body())
-//			iconClass = "ui-button-text-only"
-//		else if (attrs.icon)
-//			iconClass = "ui-button-icon-only"
-//	
-//		out << "<button id='$buttonId' class='ui-button ui-widget ui-state-default ui-corner-all $iconClass ${attrs.class ?: ""} ${attrs.disabled ? "ui-state-disabled" : ""}' style='${attrs.style ?: ""}' ${attrs.title ? "title='attrs.title'" : ''} ${attrs.disabled ? "disabled='disabled'" : ""} role='button' aria-disabled='${attrs.disabled ? "true" : "false"}'>"
-//		if (attrs.icon)
-//			out << "<span class='ui-button-icon-primary ui-icon $attrs.icon'></span>"
-//		if (body())
-//			out << "<span class='ui-button-text'>${body()}</span>"
-//		out << "</button>"
-		
 		out << "<button id='$buttonId' class='btn ${attrs.class ?: "btn-default"}' style='${attrs.style ?: ""}' ${attrs.title ? "title='${attrs.title}'" : ''} ${attrs.disabled ? "disabled='disabled'" : ""} type='button'>"
 		out << body()
 		out << "</button>"
 	}
-	
-	/**
-	 * Renders a button that will open a signalpath load browser
-	 *
-	 * @attr buttonId REQUIRED id of the button to be created
-	 * @attr browserId REQUIRED id of the browser created with <sp:loadBrowser>
-	 */
-	def loadButton = {attrs,body->
-		def buttonId = attrs.buttonId
-		def browserId = attrs.browserId
 		
-		out << button(attrs,body)
-		
-		writeScriptHeader(out)
-		def str = """
-	jQuery("#$buttonId").click(function() {
-		var lb = jQuery("#$browserId");
-		if (lb.is(":visible")) {
-			lb.modal('hide');
-		}
-		else {
-			lb.modal();
-		}
-	});
-		"""
-		out << str
-		writeScriptFooter(out)
-	}
-	
 	/**
 	 * Renders a dropdown choice of workspace modes
 	 * 
@@ -346,70 +302,6 @@ class SignalPathTagLib {
 		out << "jQuery('#${attrs.id}').change(function() { SignalPath.setWorkspace(jQuery(this).val()); });"
 		out << "jQuery(SignalPath).on('signalPathWorkspaceChange', function(event, workspace) { jQuery('#${attrs.id}').val(workspace); });"
 		writeScriptFooter(out)
-	}
-	
-	/**
-	 * Renders the signalpath load browser
-	 *
-	 * @attr id REQUIRED id of the browser
-	 * @attr tabs a list of maps with keys: controller, action, params where the content of the tab must be available. The default values has one tab with controller: savedSignalPath, action: loadBrowser, and no params.
-	 * @attr visible should the browser be instantly visible
-	 */
-	def loadBrowser = {attrs,body->
-		def id = attrs.id
-		def tabs = attrs.tabs ?: [[controller:"savedSignalPath",action:"loadBrowser",name:"Archive"]]
-		def visible = attrs.visible ?: false
-		def command = attrs.command ?: "SignalPath.loadSignalPath({url: url})"
-
-		out << "<ul class='nav nav-tabs' role='tablist'>"
- 
-		// nav tabs
-		tabs.each {
-			// Inject the javascript command into params
-			if (!it.params)
-				it.params = [browserId:it.browserId, command:command]
-			else if (it.params) {
-				it.params.browserId = it.browserId
-				it.params.command = command
-			}
-
-			out << "<li><a data-target='#loadBrowser_${it.browserId}' \
-						data-url='${createLink(controller:it.controller, action:it.action, params:it.params)}' \
-						data-toggle='tab' \
-						role='tab'>${it.name}\
-					</a></li>"
-		}
-
-		out << '</ul>'
-
-		// tab panes
-		out << '<div class="tab-content">'
-		tabs.each {
-			out << "<div class=\"tab-pane\" id=\"loadBrowser_${it.browserId}\"></div>"
-		}
-		out << '</div>'
-
-		writeScriptHeader(out) 
-
-		out << """
-			jQuery('#$id a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-				jQuery.get(jQuery(e.target).data('url'), function(content) {
-					jQuery(jQuery(e.target).data('target')).html(content);
-				});
-			});
-
-			jQuery('#$id a[data-toggle="tab"]:first').tab('show');
-
-			if (typeof(SignalPath)!=='undefined') {
-		 		jQuery(SignalPath).on('signalPathLoad', function(event, saveData) {
-		 			var lb = jQuery('#$id');
-		 			if (lb.is(':visible'))
-						lb.modal('hide');
-			 	});
-			 }
-		 """
-
-		 writeScriptFooter(out)
 	}
 
 	/**

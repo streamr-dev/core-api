@@ -1,5 +1,5 @@
 <g:each in="${signalPaths}">
-	<tr class="selectable offsetRow" onClick="var url='${it.url}'; ${it.command}">
+	<tr class="selectable offsetRow" data-url="${it.url}">
 		<td>
 			${it.id}
 		</td>
