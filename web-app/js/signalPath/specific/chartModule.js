@@ -22,8 +22,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		if (!area)
 			return;
 
-		var w = moduleWidth - 70
-		var h = moduleHeight - 70
+		var w = moduleWidth - 100
+		var h = moduleHeight - 110
 
 		area.css('width', w)
 		area.css('height', h)
