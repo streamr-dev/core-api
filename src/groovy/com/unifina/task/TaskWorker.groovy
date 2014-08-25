@@ -132,6 +132,8 @@ class TaskWorker extends Thread {
 			
 			Task task
 			Throwable error
+			boolean taskGroupComplete = false
+			
 			try {
 				// Get a unit of work
 				task = getTask(priorityUser)
@@ -150,8 +152,8 @@ class TaskWorker extends Thread {
 					lastKnownStatus = task.status
 					if (task.skip || impl.run()) {
 						taskService.setComplete(task)
-						boolean groupComplete = taskService.deleteGroupIfComplete(task.taskGroupId)
-						impl.onComplete(groupComplete)
+						taskGroupComplete = taskService.deleteGroupIfComplete(task.taskGroupId)
+						impl.onComplete(taskGroupComplete)
 					}
 				}
 			} catch (Exception e) {
@@ -161,7 +163,7 @@ class TaskWorker extends Thread {
 			}
 			
 			// Try to report error
-			if (error) try {
+			if (error && !taskGroupComplete) try {
 				taskService.setError(task, error)
 			} catch (Exception e) {
 				log.error("Failed to write error to Task!", e)
