@@ -1,12 +1,14 @@
 /**
  * Triggered events (on SignalPath instance):
  * 
- * signalPathNew ()
- * signalPathLoad (saveData, signalPathData, signalPathContext)
- * signalPathSave (saveData)
- * signalPathStart
- * signalPathStop
- * signalPathWorkspaceChange (mode)
+ * new ()
+ * loading
+ * loaded (saveData, signalPathData, signalPathContext)
+ * saving
+ * saved (saveData)
+ * started
+ * stopped
+ * workspaceChanged (mode)
  * 
  * Events for internal use:
  * _signalPathLoadModulesReady
@@ -289,13 +291,7 @@ var SignalPath = (function () {
 	 * SaveData should contain (optionally): url, name, (params)
 	 */
 	function saveSignalPath(sd, callback) {
-    	function _cb() {
-	    	$('#modal-spinner').hide()
-    		if (callback)
-    			callback.apply(callback, arguments)
-    	}
-
-    	$('#modal-spinner').show()
+		$(pub).trigger('saving')
 		
 		var signalPathContext = options.signalPathContext();
 		
@@ -323,16 +319,17 @@ var SignalPath = (function () {
 					$.extend(saveData, data);
 					saveData.isSaved = true;
 
-					if (_cb)
-						_cb(saveData);
+					if (callback)
+						callback(saveData);
 					
-					$(pub).trigger('signalPathSave', [saveData]);
+					$(pub).trigger('saved', [saveData]);
 				}
 				else {
 					options.errorHandler({msg:data.message});
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
+				$(pub).trigger('error', errorThrown);
 				options.errorHandler({msg:errorThrown});
 			}
 		});
@@ -370,7 +367,7 @@ var SignalPath = (function () {
 			}
 		});
 		
-		$(pub).trigger('signalPathNew');
+		$(pub).trigger('new');
 	}
 	pub.newSignalPath = newSignalPath;
 	
@@ -379,27 +376,25 @@ var SignalPath = (function () {
 	 */
 	function loadSignalPath(opt, callback) {
 		var params = opt.params || {};
+
+		$(pub).trigger('loading')
     
-    	function _cb() {
-	    	$('#modal-spinner').hide()
-    		if (callback)
-    			callback.apply(callback, arguments)
-    	}
-console.log('loadSignalPath')
-    	$('#modal-spinner').show()
-		
 		if (opt.json)
-			_load(opt.json, opt, _cb)
+			_load(opt.json, opt, callback)
 
 		if (opt.url) {
 			$.getJSON(opt.url, params, function(data) {
 				if (data.error) {
+					$(pub).trigger('error', data.error)
+
 					options.errorHandler({msg:data.message});
+
 					if (data.signalPathData) {
-						_load(data, opt, _cb);
+						_load(data, opt, callback);
 					}
+				} else {
+					_load(data, opt, callback);
 				}
-				else _load(data, opt, _cb);
 			});
 		}
 	}
@@ -422,7 +417,7 @@ console.log('loadSignalPath')
 		if (data.workspace!=null && data.workspace!="normal")
 			setWorkspace(data.workspace);
 		
-		$(pub).trigger('signalPathLoad', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
+		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
 	}
 	
 	function run(additionalContext) {
@@ -494,7 +489,7 @@ console.log('loadSignalPath')
 		request.onMessage = handleResponse;
 		subSocket = socket.subscribe(request);
 		
-		$(pub).trigger('signalPathStart');
+		$(pub).trigger('started');
 	}
 	
 	function reconnect(sId) {
@@ -599,7 +594,7 @@ console.log('loadSignalPath')
 		socket.unsubscribe();
 		
 		sessionId = null;
-		$(pub).trigger('signalPathStop');
+		$(pub).trigger('stopped');
 	}
 	
 	function isRunning() {
@@ -636,10 +631,10 @@ console.log('loadSignalPath')
 		workspace = name;
 		
 		if (name=="dashboard") {
-			$(pub).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
+			$(pub).trigger("workspaceChanged", [name, oldWorkspace]);
 		}
 		else {
-			$(pub).trigger("signalPathWorkspaceChange", [name, oldWorkspace]);
+			$(pub).trigger("workspaceChanged", [name, oldWorkspace]);
 			
 			jsPlumb.repaintEverything();
 		}
@@ -654,7 +649,7 @@ console.log('loadSignalPath')
 	return pub; 
 }());
 
-$(SignalPath).on("signalPathWorkspaceChange", function(event, name, old) {
+$(SignalPath).on("workspaceChanged", function(event, name, old) {
 	
 	if (name=="dashboard") {
 		$(jsPlumb.getAllConnections()).each(function(i,o) {

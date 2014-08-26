@@ -207,10 +207,10 @@ class SignalPathTagLib {
 		jQuery('#$id').click(function() {
 			SignalPath.abort();
 		});
-		jQuery(SignalPath).on('signalPathStart', function() {
+		jQuery(SignalPath).on('started', function() {
 			jQuery('#$id').button('enable');
 		});
-		jQuery(SignalPath).on('signalPathStop', function() {
+		jQuery(SignalPath).on('stopped', function() {
 			jQuery('#$id').button('disable');
 		});
 		"""
@@ -258,10 +258,10 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		def str = """
-		jQuery(SignalPath).on('signalPathStart', function() {
+		jQuery(SignalPath).on('started', function() {
 			jQuery('#$id').show();
 		});
-		jQuery(SignalPath).on('signalPathStop', function() {
+		jQuery(SignalPath).on('stopped', function() {
 			jQuery('#$id').hide();
 		});
 		"""
@@ -300,7 +300,7 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		out << "jQuery('#${attrs.id}').change(function() { SignalPath.setWorkspace(jQuery(this).val()); });"
-		out << "jQuery(SignalPath).on('signalPathWorkspaceChange', function(event, workspace) { jQuery('#${attrs.id}').val(workspace); });"
+		out << "jQuery(SignalPath).on('workspaceChanged', function(event, workspace) { jQuery('#${attrs.id}').val(workspace); });"
 		writeScriptFooter(out)
 	}
 
@@ -331,14 +331,14 @@ class SignalPathTagLib {
 				else alert('No savedata - use Save As')
 			})
 
-			\$(SignalPath).on('signalPathLoad', function(event,saveData) {
+			\$(SignalPath).on('loaded', function(event,saveData) {
 				if (saveData.isSaved) {
 					\$('#saveButton').parent().removeClass('disabled')
 					\$('#saveButton').html('Save to '+saveData.target)
 				}
 			})
 
-			\$(SignalPath).on('signalPathSave', function(event,saveData) {
+			\$(SignalPath).on('saved', function(event,saveData) {
 				\$('#saveButton').parent().removeClass('disabled')
 				\$('#saveButton').html('Save to '+saveData.target)
 			})
@@ -385,14 +385,14 @@ class SignalPathTagLib {
 				else alert('No savedata - use Save As');
 			});
 
-			jQuery(SignalPath).on('signalPathLoad', function(event,saveData) {
+			jQuery(SignalPath).on('loaded', function(event,saveData) {
 				if (saveData.isSaved) {
 					jQuery('#$id').button("enable");
 					jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
 				}
 			});
 
-			jQuery(SignalPath).on('signalPathSave', function(event,saveData) {
+			jQuery(SignalPath).on('saved', function(event,saveData) {
 				jQuery('#$id').button("enable");
 				jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
 			});
