@@ -16282,6 +16282,9 @@ dl dd {
 .tt-cursor {
   background-color: #ccc;
 }
+table.sortable th {
+  cursor: pointer;
+}
 #main-menu-inner {
   margin-top: 38px;
 }
@@ -16302,6 +16305,7 @@ body.build-page #content-wrapper {
   padding-top: 38px;
   padding-left: 0px;
   padding-right: 0px;
+  padding-bottom: 0px;
 }
 #moduleTree {
   max-height: 200px;
