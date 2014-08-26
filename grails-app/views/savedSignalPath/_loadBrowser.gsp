@@ -1,4 +1,4 @@
-<div id="${browserId}" class="loadBrowserTableWrapper">
+<div id="${browserId}" class="loadBrowserTableWrapper signalpath-browser">
 	<table class="table table-condensed table-striped table-hover">
 		<thead>
 			<tr>
@@ -14,44 +14,6 @@
 
 <script>
 $(document).ready(function() {
-
-	var browser = $("#${browserId}");
-	
-	function appendContent() {
-		if (browser.data("requesting") || browser.data("complete"))
-			return;
-		else browser.data("requesting",true);
-
-		browser.append("<div class='loading'>Loading..</div>");
-		
-		$.get('${contentUrl}', {max:100, offset:browser.find("table tbody tr.offsetRow").length}, function(data) {
-			var tbody = browser.find("table tbody");
-			var oldLength = tbody.find("tr").length;
-			tbody.append(data);
-			var newLength = tbody.find("tr").length;
-
-			tbody.find('tr').click(function() {
-				$('.modal').modal('hide')
-			})
-
-			if (oldLength==newLength)
-				browser.data("complete",true);
-			
-			browser.data("requesting",false);
-			browser.find(".loading").remove();
-		});
-	}
-	
-	browser.scroll(function() {
-<%--		console.log("ScrollTop: "+browser.scrollTop());--%>
-<%--		console.log("Table height: "+browser.height());--%>
-<%--		console.log("Container height: "+browser.height());--%>
-	    if(browser.scrollTop() >= browser.find("table").height() - browser.height()) {
-		    appendContent();
-	    }
-	});
-
-	appendContent();
-	
-});
+	SignalPathBrowser.contentAppender($("#${browserId}"), '${contentUrl}')
+})
 </script>

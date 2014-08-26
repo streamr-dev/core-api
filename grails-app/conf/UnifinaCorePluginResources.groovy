@@ -34,9 +34,20 @@ modules = {
 	typeahead {
 		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
 	}
+	mustache {
+		resource url:[dir:'js/mustache-0.8.2', file:'mustache.js', plugin: 'unifina-core']
+	}
 	'search-control' {
 		dependsOn 'typeahead'
 		resource url:[dir:'js/search-control', file:'search-control.js', plugin: 'unifina-core']
+	}
+	'remote-tabs' {
+		dependsOn 'bootbox, mustache'
+		resource url:[dir:'js/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
+	}
+	'signalpath-browser' {
+		dependsOn 'remote-tabs'
+		resource url:[dir:'js/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
 	}
 	codemirror {
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
