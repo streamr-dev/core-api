@@ -193,7 +193,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.addFocus(true);
 		
 		// Move modules on workspace change
-		$(SignalPath).on("signalPathWorkspaceChange", function(event, workspace, oldWorkspace) {
+		$(SignalPath).on("workspaceChanged", function(event, workspace, oldWorkspace) {
 			writePosition(oldWorkspace);
 			loadPosition(workspace, true);
 		});
@@ -417,10 +417,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	pub.getDiv = getDiv;
 	
-//	pub.getType = function() {
-//		return prot.type;
-//	}
-	
 	function close() {
 		$(prot.div).remove();
 		pub.onClose();
@@ -539,47 +535,6 @@ $('body').contextMenu({
     }
 });
 
-
-/*
-$(document).contextmenu({
-    target: ".context-menu",
-    onItem: function(ui, event) {
-    	var target = $(document).data("contextMenuTarget"); 
-    	if (ui.cmd) {
-    		target.trigger("spContextMenuSelection", ui.cmd);
-    	}
-    },
-
-	before: function(e, ui) {
-		var target = $(e.target);
-
-		if (target.parent()[0].tagName === 'BODY')
-			return;
-
-console.log('target',target, target.parent())
-		// Try to find an SP object in the hierarchy that has a context menu
-		while (target.length && (!target.data('spObject') || !target.data('spObject').getContextMenu)) {
-			console.log('target', target, target.data('spObject'))
-			target = target.parent();
-			console.log('parent', target, target.data('spObject'))
-		}
-
-		if (target!=null) {
-			var prot = target.data("spObject");
-		
-			// This hack is a workaround: somehow the contextmenu plugin loses ui.target before calling select()
-			// $(document).data("contextMenuTarget",target);
-			// $(document).contextmenu("replaceMenu", prot.getContextMenu(ui.target));
-console.log('filling menu')
-			this.getMenu().empty().html(
-				prot.getContextMenu(ui.target)
-					.forEach(function(item) {
-						return '<li>'+item.title;
-			}))
-		}
-	}
-});*/
-
 // Remove module focus when clicking anywhere else on screen
 $("body").click(function() {
 	$(".component.focus").each(function(i,c) {
@@ -588,13 +543,13 @@ $("body").click(function() {
 });
 
 // Modules are non-focused on load
-$(SignalPath).on("signalPathLoad",function() {
+$(SignalPath).on("loaded",function() {
 	 $(".component").each(function(i,c) {
 		 $(c).data("spObject").removeFocus();
 	 });
 });
 
-$(SignalPath).on("signalPathWorkspaceChange", function(event, name, old) {
+$(SignalPath).on("workspaceChanged", function(event, name, old) {
 	if (name=="dashboard") {
 		// Hide components that do not have the dashboard class
 		$(".component:not(.dashboard)").hide();

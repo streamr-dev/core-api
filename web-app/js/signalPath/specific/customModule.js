@@ -56,8 +56,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 				close: pub.onDelete
 			}).dialog("widget").draggable("option","containment","none");
 			
-			$(SignalPath).on("signalPathNew", pub.onDelete);
-			$(SignalPath).on("signalPathLoad", pub.onDelete);
+			$(SignalPath).on("new", pub.onDelete);
+			$(SignalPath).on("loaded", pub.onDelete);
 		}
 		
 		if (debug==null) {
