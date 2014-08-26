@@ -2,7 +2,7 @@ SignalPath.ParamRenderers = {
 		"default": {
 			create: function(module,data) {
 				if (data.possibleValues) {
-					var select = $("<select class='parameterInput' style='visibility:hidden'></select>");
+					var select = $("<select class='parameterInput form-control'></select>");
 					$(data.possibleValues).each(function(i,val) {
 						var option = $("<option></option>");
 						option.attr("value",val.value);
@@ -14,16 +14,10 @@ SignalPath.ParamRenderers = {
 						select.append(option);
 					});
 					
-					select.on("spIOReady",(function(s) {
-						return function() {
-							s.chosen({width:"180px", search_contains:true}).css('visibility', 'visible');
-						};
-					})(select));
-					
 					return select;
 				}
 				else {
-					var input = $("<input class='parameterInput' type='text' value='"+data.value+"'>");
+					var input = $("<input class='parameterInput form-control' type='text' value='"+data.value+"'>");
 					return input;
 				}
 			},
@@ -39,7 +33,7 @@ SignalPath.ParamRenderers = {
 				var span = $("<span></span>");
 				
 				// Show search if no value is selected
-				var search = $("<input class='parameterInput' type='text' style='"+(data.value ? "display:none" : "")+"' class='streamSearch' value='"+(data.streamName || "")+"'>");
+				var search = $("<input type='text' style='"+(data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(data.streamName || "")+"'>");
 				span.append(search);
 				
 				// Show symbol if it exists

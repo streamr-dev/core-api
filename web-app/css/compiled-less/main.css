@@ -15991,6 +15991,341 @@ div.dataTables_scrollFoot table {
 .selected-theme .widget-rating .active a {
   color: #1d89cf;
 }
+.panel-heading {
+  height: 40px;
+}
+.panel-heading .panel-title {
+  float: left;
+}
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
+  opacity: 0.5;
+}
+.module .form-control {
+  height: 20px;
+  padding: 2px 5px;
+}
+#canvas {
+  position: relative;
+  font-size: 12px;
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+}
+.component {
+  position: absolute;
+  padding: 7px;
+  z-index: 5;
+}
+.component.holdFocus {
+  z-index: 15;
+}
+.component:hover {
+  cursor: move;
+}
+.component input {
+  width: 50px;
+}
+.component a:link,
+a:visited,
+a:hover {
+  text-decoration: none;
+}
+.module {
+  min-width: 150px;
+}
+.moduleheader {
+  width: 100%;
+  height: 18px;
+  display: inline-table;
+  margin-bottom: 5px;
+}
+.modulebody {
+  padding: 5px;
+}
+.modulefooter {
+  overflow: hidden;
+  width: 100%;
+  margin-top: 3px;
+}
+.modulename {
+  display: table-cell;
+  font-weight: bold;
+  font-size: 12px;
+}
+.modulebutton {
+  width: 16px;
+  text-align: right;
+  display: table-cell;
+  vertical-align: top;
+  cursor: pointer;
+}
+.disabled {
+  display: none;
+}
+table.paramTable {
+  width: 100%;
+  padding: 0px;
+  border: none;
+}
+table.paramTable td {
+  padding-right: 5px;
+}
+table.paramTable td input {
+  width: 50px;
+}
+table.ioTable td {
+  padding-right: 5px;
+}
+table.ioTable {
+  border: none;
+  width: 100%;
+  padding: 0px;
+}
+td.input {
+  text-align: right;
+}
+td.output {
+  text-align: left;
+  padding-left: 10px;
+}
+.moduleSwitch {
+  font-size: 7px;
+  text-align: center;
+  float: right;
+  cursor: pointer;
+  padding: 2px;
+}
+div.input:hover,
+div.output:hover {
+  cursor: pointer;
+}
+.ioname {
+  display: inline-block;
+  max-width: 100px;
+  white-space: pre-wrap;
+}
+.switchContainer {
+  display: inline-block;
+}
+div.input .switchContainer {
+  float: left;
+}
+div.output .switchContainer {
+  float: right;
+}
+.ioSwitch {
+  display: inline-block;
+  font-size: 7px;
+  vertical-align: text-bottom;
+  text-align: center;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+}
+.option .optionTitle {
+  width: 100px;
+  display: inline-block;
+}
+._jsPlumb_endpoint {
+  z-index: 10;
+}
+._jsPlumb_endpoint.holdFocus {
+  z-index: 20;
+}
+.connectionHolder._jsPlumb_endpoint {
+  cursor: move;
+}
+._jsPlumb_connector {
+  z-index: 1;
+}
+.csvDownload {
+  display: block;
+}
+.csvDownload img {
+  vertical-align: middle;
+}
+.ui-menu {
+  z-index: 200;
+}
+/**
+ * jQuery UI stuff
+ **/
+.ui-autocomplete-loading {
+  background: #ffffff url('../../images/spinner_16x16.gif') right center no-repeat;
+}
+.ui-button-text-only .ui-button-text {
+  padding: 0.2em 0.7em;
+}
+/**
+  * PanicButtons
+  */
+table.panic tbody tr.blocked {
+  background-color: red;
+}
+table.panic tbody tr.blocked td {
+  background-color: red;
+}
+.panicButtons {
+  width: 200px;
+}
+button.arrow {
+  padding-right: 1.5em;
+}
+button.arrow:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 1em;
+  margin-top: -3px;
+  height: 0;
+  width: 0;
+  /* order of following 3 rules important for fallbacks to work */
+  border: 5px solid transparent;
+  border-top-color: #1c94c4;
+}
+/**
+ * Dashboard mode
+ **/
+.dashboard.dashboardEnabled .ioTable,
+.dashboard.dashboardEnabled .paramTable {
+  display: none;
+}
+.component.dashboard.dashboardEnabled {
+  background-color: transparent;
+  box-shadow: none;
+}
+.component.dashboard.dashboardEnabled .modulebody {
+  box-shadow: none;
+}
+.component.dashboard.dashboardEnabled .moduleheader,
+.component.dashboard.dashboardEnabled .modulefooter,
+.component.dashboard.dashboardEnabled .ui-resizable-handle {
+  opacity: 0.0;
+}
+.component.dashboard.dashboardEnabled:hover .moduleheader,
+.component.dashboard.dashboardEnabled:hover .modulefooter,
+.component.dashboard.dashboardEnabled:hover .ui-resizable-handle {
+  opacity: 1.0;
+}
+.showOnHover {
+  opacity: 0.0;
+}
+.showOnHover:hover {
+  opacity: 1.0;
+}
+.ui-pnotify-title {
+  font-weight: bold;
+}
+.joyride-fixed {
+  position: fixed !important;
+}
+.tooltip-inner {
+  max-width: 350px;
+  white-space: nowrap;
+}
+.modulehelp-tooltip {
+  width: 350px !important;
+  text-align: left;
+  white-space: normal;
+}
+.tooltip-inner .message {
+  background-color: #101020;
+}
+/**
+ * Module help styles
+ **/
+.modulehelp h3 {
+  margin-top: 7px;
+}
+.modulehelp table {
+  border: 0;
+}
+.modulehelp table tbody tr td:first-child {
+  font-weight: bolder;
+  width: 100px;
+}
+.modulehelp p {
+  margin-bottom: 1em;
+}
+.modulehelp .highlight {
+  font-weight: bolder;
+}
+.modulehelp .formula {
+  display: inline-block;
+  font-weight: bolder;
+}
+html {
+  height: 100%;
+  width: 100%;
+}
+.toolbar {
+  margin-bottom: 15px;
+}
+dl dd {
+  margin-bottom: 10px;
+}
+.alert i {
+  margin-right: 5px;
+}
+.nested-column-fix {
+  padding-left: 0;
+}
+#main-wrapper {
+  height: 100%;
+  width: 100%;
+}
+#content-wrapper {
+  height: 100%;
+}
+.tt-cursor {
+  background-color: #ccc;
+}
+#main-menu-inner {
+  margin-top: 38px;
+}
+#main-menu .menu-content {
+  margin-top: 0px;
+}
+.form-group-period .input-group-addon {
+  width: 60px;
+}
+#main-menu {
+  position: fixed;
+}
+body.build-page {
+  height: 100%;
+  width: 100%;
+}
+body.build-page #content-wrapper {
+  padding-top: 38px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+#moduleTree {
+  max-height: 200px;
+  overflow: auto;
+}
+.remote-tabs-content {
+  outline: none;
+}
+#modal-spinner {
+  display: none;
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background-color: white;
+  opacity: 0.2;
+}
+#modal-spinner h1 {
+  position: absolute;
+  z-index: 101;
+  top: 50%;
+  left: 50%;
+}
 .widget-notifications .notification {
   position: relative;
   padding: 7px 12px;
@@ -16049,68 +16384,4 @@ div.dataTables_scrollFoot table {
 .widget-notifications .notifications-link:hover {
   background: #f4f4f4;
   color: #333333;
-}
-.panel-heading {
-  height: 40px;
-}
-.panel-heading .panel-title {
-  float: left;
-}
-.btn.disabled,
-.btn[disabled],
-fieldset[disabled] .btn {
-  opacity: 0.5;
-}
-.toolbar {
-  margin-bottom: 15px;
-}
-dl dd {
-  margin-bottom: 10px;
-}
-.alert i {
-  margin-right: 5px;
-}
-.nested-column-fix {
-  padding-left: 0;
-}
-#main-menu-inner {
-  margin-top: 38px;
-}
-#main-menu .menu-content {
-  margin-top: 0px;
-}
-.form-group-period .input-group-addon {
-  width: 60px;
-}
-#main-menu {
-  position: fixed;
-}
-#main-wrapper {
-  height: 100%;
-  width: 100%;
-}
-#content-wrapper {
-  height: 100%;
-}
-.tt-cursor {
-  background-color: #ccc;
-}
-#modal-spinner {
-  display: none;
-  position: absolute;
-  top: 0px;
-  width: 100%;
-  height: 100%;
-  z-index: 100;
-  background-color: white;
-  opacity: 0.2;
-}
-#modal-spinner h1 {
-  position: absolute;
-  z-index: 101;
-  top: 50%;
-  left: 50%;
-}
-.remote-tabs-content {
-  outline: none;
 }

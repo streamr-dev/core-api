@@ -13,18 +13,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.id = "module_"+prot.hash;
 
 	var pub = {}
-	var canvasEl = $('#canvas')
-	var cpos = canvasEl.offset()
+	var cpos = canvas.offset()
 
 	prot.dragOptions = {
 		drag: function() {
 			prot.onDrag();
 		},
 		drag: function(e, ui) {
-			var x = ui.offset.left + canvasEl.scrollLeft()
-			var y = ui.offset.top + canvasEl.scrollTop()
+			var x = ui.offset.left + canvas.scrollLeft()
+			var y = ui.offset.top + canvas.scrollTop()
 
-			if (x < cpos.left || y < cpos.top) {
+			if (x < cpos.left-100 || y < cpos.top-50) {
 				return false
 			}
 		}
@@ -49,8 +48,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		} 
 		// Else add to default position in viewport
 		else {
-			prot.div.css('top',$(window).scrollTop());
-			prot.div.css('left',$(window).scrollLeft());
+			prot.div.css('top',canvas.scrollTop() + 10);
+			prot.div.css('left',canvas.scrollLeft() + 10);
 		}
 		
 		// Module header

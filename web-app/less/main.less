@@ -1,91 +1,22 @@
+// This file should only contain imports!
+
 // Import base Bootstrap styling (pixel-admin theme)
-@import "./pixel-admin/pixel-admin.less";
-@import "./pixel-admin/pixel-admin-less/themes/default/default.less";
+@import "pixel-admin/pixel-admin.less";
+@import "pixel-admin/pixel-admin-less/themes/default/default.less";
 
-.selected-theme {
-	.theme-default;
-}
+// Import bootstrap/theme tweaks and extensions
+@import "theme-tweaks.less";
 
-// import the pixel-admin widget styles you need
-@import "./pixel-admin/pixel-admin-less/widgets/notifications.less";
+// Unifina signalPath styles
+@import "unifina/signalPath/signalPath.less";
 
-// Bootstrap variable overrides
+// Unifina common & page styles
+@import "common.less";
+@import "unifina/pages/build.less";
 
-@font-size-base: 12px;
+// Unifina widgets
+@import "unifina/widgets/modal.less";
+@import "unifina/widgets/modal-spinner.less";
 
-// pixel-admin variable overrides
-
-@fonts-path:  "../../fonts";
-@images-path: "../../images";
-
-@main-navbar-height: 38px;
-@main-navbar-right-padding: 0px;
-
-// pixel-admin fixes and tweaks
-
-.panel-heading {
-	height: 40px;
-	
-	.panel-title {
-		float: left;
-	}
-}
-
-.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
-	opacity: 0.5;
-}
-
-// Unifina general styles
-.toolbar {
-	margin-bottom: 15px;
-}
-
-dl dd {
-	margin-bottom: 10px;
-}
-
-.alert i {
-	margin-right: 5px;
-}
-
-.nested-column-fix {
-	padding-left: 0;
-}
-
-// Unifina core page styles
-@import "./unifina/pages/build.less";
-
-#main-wrapper {
-	height: 100%;
-	width: 100%;
-}
-
-#content-wrapper {
-	height: 100%;
-}
-
-.tt-cursor {
-	background-color: #ccc;
-}
-
-#modal-spinner {
-	display: none;
-	position: absolute;
-	top: 0px;
-	width: 100%;
-	height: 100%;
-	z-index: 100;
-	background-color: white;
-	opacity: 0.2;
-}
-
-#modal-spinner h1 {
-	position: absolute;
-	z-index: 101;
-	top: 50%;
-	left: 50%;
-}
-
-.remote-tabs-content {
-	outline: none;
-}
+// pixel-admin widgets
+@import "pixel-admin/pixel-admin-less/widgets/notifications.less";

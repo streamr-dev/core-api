@@ -508,7 +508,6 @@ class SignalPathTagLib {
 				row.append(inputTd);
 				var input = SignalPath.getParamRenderer(it).create(null,it);
 				inputTd.append(input);
-				input.addClass("form-control")
 				jQuery(input).trigger("spIOReady");
 				input.data("parameterData",it);
 				inputs.push(input);

@@ -1,43 +1,4 @@
-html, body {
-	height: 100%;
-	width: 100%;
-}
-
-/* button.active { */
-/* 	background-color: #FFFF66;	 */
-/* } */
-
-#container {
-	margin:0;
-	min-height:100%;
-/* 	background-color: gray; */
-}
-
-#controls {
-	position: fixed;
-	float:left;
-	width: 200px;
-	z-index: 100;
-	padding: 10px;
-}
-
-#topButtons {
-	position: fixed;
-	padding-left: 220px;
-	padding-right: 10px;
-	margin: 10px 0px;
-
-	z-index: 100;
-	width: 100%;
-	
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
-    box-sizing: border-box;         /* Opera/IE 8+ */
-}
-
-#topButtons button {
-	z-index: 101;
-}
+@import "parameters.less";
 
 #canvas {
 	position: relative;
@@ -45,20 +6,6 @@ html, body {
 	overflow: auto;
 	height: 100%;
 	width: 100%;
-}
-
-.signalpath-canvas {
-	position: relative;
-}
-
-#moduleTree {
-	max-height: 200px;
-	overflow:auto;	
-}
-
-.controlgroup {
-	padding: 10px;
-	margin-bottom: 10px;
 }
 
 .component {
@@ -73,7 +20,6 @@ html, body {
 
 .component:hover {
 	cursor:move;
-/* 	border-color: black; */
 }
 
 .component input {
@@ -118,23 +64,7 @@ html, body {
 	cursor: pointer;
 }
 
-.modulebutton:hover {
-/* 	background-color: #FFFFEB; */
-}
-
-.modulebutton.delete {
-/* 	color: white; */
-/* 	background-color: red; */
-}
-.modulebutton.delete:hover {
-/* 	background-color: #FF8A8A; */
-}
-
 .disabled {
-/* 	background-color: #dcdcdc;  */
-/* 	border: #3532ff 1px solid;  */
-/* 	color: #000000;  */
-/* 	cursor: default;  */
 	display:none; 
 }
 
@@ -157,19 +87,10 @@ table.ioTable td {
 }
 
 table.ioTable {
-/* 	display: inline-block; */
 	border: none;
 	width: 100%;
 	padding: 0px;
 }
-
-/* table tr.buy td { */
-/* 	background-color: #e8eaff; */
-/* } */
-
-/* table tr.sell td { */
-/* 	background-color: #ffe8e8; */
-/* } */
 
 td.input {
 	text-align: right;
@@ -180,29 +101,12 @@ td.output {
 }
 
 .parameter {
-/* 	border: 1px white solid; */
-/* 	background-color: white; */
+
 }
-
-/* .connected { */
-/* 	background-color: red; */
-/* } */
-
-/* .connectionHolder { */
-/*  		width: 0px; */
-/*  		height: 0px; */
-/* 		position: absolute; */
-/* 		display: block; */
-/* 		right: 0; */
-/* 		bottom: 0; */
-/* 		background-color: #bcd5e6; */
-/* 		text-align: center; */
-/* } */
 
 .moduleSwitch {
 	font-size: 7px;
 	text-align: center;
-/* 	height: 13px; */
 	float: right;
 	cursor: pointer;
 	padding: 2px;
@@ -251,7 +155,6 @@ div.output .switchContainer {
 
 ._jsPlumb_endpoint {
 	z-index:10;
-/* 	background-color: white; */
 }
 
 ._jsPlumb_endpoint.holdFocus {
@@ -264,10 +167,6 @@ div.output .switchContainer {
 
 ._jsPlumb_connector {
 	z-index:1;
-}
-
-.menuItemGroup {
-/* 	margin-left: 150px; */
 }
 
 .csvDownload {

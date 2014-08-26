@@ -1,0 +1,30 @@
+// Theme selection
+.selected-theme {
+	.theme-default;
+}
+
+// Bootstrap variable overrides
+
+@font-size-base: 12px;
+
+// pixel-admin variable overrides
+
+@fonts-path:  "../../fonts";
+@images-path: "../../images";
+
+@main-navbar-height: 38px;
+@main-navbar-right-padding: 0px;
+
+// pixel-admin fixes and tweaks
+
+.panel-heading {
+	height: 40px;
+	
+	.panel-title {
+		float: left;
+	}
+}
+
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+	opacity: 0.5;
+}
