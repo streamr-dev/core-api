@@ -11,6 +11,7 @@ function RemoteTabs(options) {
 	this._tabs = []
 
 	this._options = $.extend({
+		title: 'Load',
 		modal: true
 	}, options)
 
@@ -38,10 +39,9 @@ RemoteTabs.prototype.modal = function() {
 		onEscape: function() {
 			that.close()
 		},
-		title: 'Load',
+		title: this._options.title,
 		buttons: {
-			'Ok': function() {},
-			'Cancel': function() {},
+			'Close': function() {}
 		}
 	})
 
@@ -106,23 +106,6 @@ RemoteTabs.prototype.onSelect = function(fn) {
 }
 
 exports.RemoteTabs = RemoteTabs
-
-// ------------------------------------
-
-function SignalPathBrowser() {
-	RemoteTabs.call(this)
-}
-SignalPathBrowser.prototype = Object.create(RemoteTabs.prototype);
-SignalPathBrowser.prototype.onTabShown = function($tabBody) {
-	var that = this
-
-	$('.signalpath-browser', $tabBody).on('selected', function(e, url) {
-		that.close()
-		that._onSelect(url)
-	})
-}
-
-exports.SignalPathBrowser = SignalPathBrowser	
 
 })(window)
 

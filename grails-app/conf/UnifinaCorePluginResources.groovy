@@ -45,6 +45,10 @@ modules = {
 		dependsOn 'bootbox, mustache'
 		resource url:[dir:'js/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
 	}
+	'signalpath-browser' {
+		dependsOn 'remote-tabs'
+		resource url:[dir:'js/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
+	}
 	codemirror {
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror.css', plugin: 'unifina-core']
