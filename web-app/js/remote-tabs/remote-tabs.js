@@ -7,15 +7,22 @@ function _generateTabId() {
 /**
  * Widget to show remote url contents in tabs
  */
-function RemoteTabs(options) {
+function RemoteTabs() {
 	this._tabs = []
-
-	this._options = $.extend({
+	this._options = {
 		title: 'Load',
-		modal: true
-	}, options)
+		reloadTabContentWhenShown: false
+	}
+}
 
-	this._onSelect = function() {}
+RemoteTabs.prototype.title = function(title) {
+	this._options.title = title
+	return this
+}
+
+RemoteTabs.prototype.reloadTabContentWhenShown = function(doReload) {
+	this._options.reloadTabContentWhenShown = doReload
+	return this
 }
 
 RemoteTabs.prototype.tab = function(title, url) {
@@ -90,6 +97,11 @@ RemoteTabs.prototype._tabShow = function($a) {
 
 	var $tabBody = $(id, this.$el)
 
+	if ($tabBody.data('_tabShown') && !this._options.reloadTabContentWhenShown)
+		return;
+
+	$tabBody.data('_tabShown', true)
+
 	// console.log('_tabShow', id, url)
 
 	$.get(url, function(content) {
@@ -98,11 +110,6 @@ RemoteTabs.prototype._tabShow = function($a) {
 	})
 
 	return true
-}
-
-RemoteTabs.prototype.onSelect = function(fn) {
-	this._onSelect = fn
-	return this
 }
 
 exports.RemoteTabs = RemoteTabs

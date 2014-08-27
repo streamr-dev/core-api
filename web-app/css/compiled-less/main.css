@@ -16285,6 +16285,9 @@ dl dd {
 table.sortable th {
   cursor: pointer;
 }
+.selectable {
+  cursor: pointer;
+}
 #main-menu-inner {
   margin-top: 38px;
 }

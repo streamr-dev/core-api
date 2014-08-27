@@ -1,7 +1,7 @@
 <html>
 <head>
 	<r:require module="remote-tabs"/>
-	
+
 	<script id="remote-tabs-template" type="x-tmpl-mustache">
 		<div class="remote-tabs-content" tabindex="-1">
 			<ul class="nav nav-tabs" role="tablist">
