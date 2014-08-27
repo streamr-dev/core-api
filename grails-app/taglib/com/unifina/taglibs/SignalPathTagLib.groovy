@@ -179,17 +179,21 @@ class SignalPathTagLib {
 		def str = """
 			var running = false
 
+			function reset() {
+				running = false
+				jQuery('#$id').text('Run')
+			}
+
 			jQuery(SignalPath).on('started', function() {
 				running = true
 				jQuery('#$id').html('Abort <span class="fa fa-spin fa-spinner"></span>')
 			})
 
-			jQuery(SignalPath).on('stopped', function() {
-				running = false
-				jQuery('#$id').text('Run')
-			})
+			jQuery(SignalPath).on('error', reset)
+			jQuery(SignalPath).on('stopped', reset)
 
 			jQuery('#$id').click(function() {
+				console.log('click run/abort', running)
 				if (!running)
 					SignalPath.run()
 				else
