@@ -86,7 +86,7 @@ grails.project.dependency.resolution = {
 		compile ":cache-headers:1.1.5"
 			  
 		runtime ":spring-security-core:1.2.7"
-		runtime ":jquery:1.8.3"
+		runtime ":jquery:1.11.1"
 		runtime ":jquery-ui:1.8.24"
 		runtime ":resources:1.2.8"
 		runtime ":cached-resources:1.0"

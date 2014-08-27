@@ -1,4 +1,9 @@
 modules = {
+	// jquery-migrate can be removed when there are no longer dependencies on pre-1.9 jquery
+	"jquery-migrate" {
+		dependsOn 'jquery'
+		resource url:[dir:'js/jquery-migrate-1.2.1', file:'jquery-migrate-1.2.1.min.js', plugin: 'unifina-core']
+	}
 	"jquery-ui-touchpunch" {
 		dependsOn 'jquery-ui'
 		resource url:[dir:'js/touchpunch/', file:'jquery.ui.touch-punch.min.js', disposition: 'head', plugin: 'unifina-core']
@@ -73,7 +78,7 @@ modules = {
 		resource url:[dir:'js/jsTree/themes/classic', file:'style.css', plugin: 'unifina-core']
 	}
 	atmosphere {
-		dependsOn 'jquery'
+		dependsOn 'jquery, jquery-migrate'
 		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
 	}
 	hotkeys {
