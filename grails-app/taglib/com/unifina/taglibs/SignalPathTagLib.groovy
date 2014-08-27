@@ -71,7 +71,6 @@ class SignalPathTagLib {
 				copy: false,
 				drop_target: '#container, #main-container, #canvas',
 				drop_finish: function(drop) {
-					console.log('drop finish', drop)
 					SignalPath.addModule(drop.o.data('id'), {
 						layout: {
 							position: {
@@ -151,7 +150,6 @@ class SignalPathTagLib {
 		def browserId = attrs.browserId
 		
 		out << button(attrs,body)
-//		out << "<button id='$id'>${body()}</button>"
 		
 		writeScriptHeader(out)
 		
@@ -173,46 +171,30 @@ class SignalPathTagLib {
 	 */
 	def runButton = {attrs,body->
 		def id = attrs.buttonId
-		
-//		out << "<button id='$id'>${body()}</button>"
+
 		out << button(attrs,body)
 		
 		writeScriptHeader(out)
 		
 		def str = """
-	jQuery('#$id').click(function() {
-		SignalPath.run();
-	});
-		"""
-		
-		out << str
-		
-		writeScriptFooter(out)
-	}
-	
-	/**
-	 * Renders an abort button. The body of the element will become the button text.
-	 *
-	 * @attr buttonId REQUIRED id of the button
-	 */
-	def abortButton = {attrs,body->
-		def id = attrs.buttonId
-		
-		attrs.disabled = true
-		out << button(attrs,body)
-		
-		writeScriptHeader(out)
-		
-		def str = """
-		jQuery('#$id').click(function() {
-			SignalPath.abort();
-		});
-		jQuery(SignalPath).on('started', function() {
-			jQuery('#$id').button('enable');
-		});
-		jQuery(SignalPath).on('stopped', function() {
-			jQuery('#$id').button('disable');
-		});
+			var running = false
+
+			jQuery(SignalPath).on('started', function() {
+				running = true
+				jQuery('#$id').html('Abort <span class="fa fa-spin fa-spinner"></span>')
+			})
+
+			jQuery(SignalPath).on('stopped', function() {
+				running = false
+				jQuery('#$id').text('Run')
+			})
+
+			jQuery('#$id').click(function() {
+				if (!running)
+					SignalPath.run()
+				else
+					SignalPath.abort()
+			})
 		"""
 		
 		out << str
@@ -239,31 +221,6 @@ class SignalPathTagLib {
 	jQuery('#$id').click(function() {
 		SignalPath.addModule($moduleId,{});
 	});
-		"""
-		
-		out << str
-		
-		writeScriptFooter(out)
-	}
-	
-	/**
-	 * Renders a spinner that will be shown when the signalpath is running.
-	 *
-	 * @attr id REQUIRED id of the spinner div
-	 */
-	def spinner = {attrs,body->
-		def id = attrs.id
-		
-		out << "<span id='$id' style='display:none'>${body()}</span>"
-		
-		writeScriptHeader(out)
-		def str = """
-		jQuery(SignalPath).on('started', function() {
-			jQuery('#$id').show();
-		});
-		jQuery(SignalPath).on('stopped', function() {
-			jQuery('#$id').hide();
-		});
 		"""
 		
 		out << str
