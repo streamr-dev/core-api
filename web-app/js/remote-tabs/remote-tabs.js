@@ -42,6 +42,7 @@ RemoteTabs.prototype.modal = function() {
 	this.render()
 
 	this._dialog = bootbox.dialog({
+		animate: false,
 		message: this.$el,
 		onEscape: function() {
 			that.close()
