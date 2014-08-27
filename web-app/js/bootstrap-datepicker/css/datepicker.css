@@ -11,9 +11,6 @@
   left: 0;
   padding: 4px;
   margin-top: 1px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
   /*.dow {
     border-top: 1px solid #ddd !important;
   }*/
@@ -52,9 +49,6 @@
   text-align: center;
   width: 20px;
   height: 20px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
 }
 .datepicker td.day:hover {
   background: #eeeeee;
@@ -117,9 +111,6 @@
   float: left;
   margin: 2px;
   cursor: pointer;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
 }
 .datepicker td span:hover {
   background: #eeeeee;
