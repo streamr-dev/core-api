@@ -35,6 +35,7 @@ class StreamController {
 				like("name", params.term+"%")
 				'in'("feed",allowedFeeds)
 				maxResults(10)
+				order("id", "asc")
 			}
 		}
 		
