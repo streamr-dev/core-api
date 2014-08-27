@@ -46,7 +46,7 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 	})
 
 	$elem.on('typeahead:selected', function(e, mod) {
-		$elem.val('')
+		$elem.typeahead('val', '')
 
 		if (mod.module) { // is stream, specifies module
 			SignalPath.addModule(mod.module, { params: [{ name: 'stream', value: mod.id }] })
