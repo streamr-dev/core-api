@@ -193,7 +193,6 @@ class SignalPathTagLib {
 			jQuery(SignalPath).on('stopped', reset)
 
 			jQuery('#$id').click(function() {
-				console.log('click run/abort', running)
 				if (!running)
 					SignalPath.run()
 				else
