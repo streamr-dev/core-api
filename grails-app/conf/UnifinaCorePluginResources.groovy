@@ -121,6 +121,7 @@ modules = {
 		resource url:[dir:'js/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']

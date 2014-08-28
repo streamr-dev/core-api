@@ -60,8 +60,6 @@ public class EventTable extends AbstractSignalPathModule {
 		headers.add("event"); // TODO: generalize for many inputs
 		tableConfig.put("headers",headers);
 		tableConfig.put("rows",Integer.MAX_VALUE);
-		tableConfig.put("width","450px");
-		tableConfig.put("maxHeight","400px");
 		
 		return config;
 	}

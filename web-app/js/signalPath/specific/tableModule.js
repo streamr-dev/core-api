@@ -34,8 +34,6 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		table.append(tableHeader);
 		
 		tableBody = $("<tbody></tbody>");
-//		for (var i=0;i<100;i++)
-//			tableBody.append("<tr colspan='"+headers.length+"'></tr>;")
 		table.append(tableBody);
 		
 		tableContainer.append(table);
@@ -44,12 +42,10 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		
 		rowCount = d.rows;
 		if (d.width) {
-			$(tableContainer).css("width",d.width);
 			$(table).css("width","100%");
 			
 			if (d.maxHeight) {
 				$(tableContainer).css("overflow","hidden");
-//				$(tableHeader).css("width",d.width);
 				$(table).css("display","block");
 				$(table).css("width","100%");
 				$(table).css("max-height",d.maxHeight);
