@@ -16,7 +16,9 @@
 
 			<div class="tab-content">
 			{{#tabs}}
-				<div class="tab-pane {{active}}" id="{{id}}"></div>
+				<div class="tab-pane {{active}}" id="{{id}}">
+				<span class="fa fa-spin fa-lg fa-spinner"></span>
+				</div>
 			{{/tabs}}
 			</div>
 		</div>
