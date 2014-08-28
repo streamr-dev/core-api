@@ -5,6 +5,7 @@
   <documentation>http://www.unifina.com</documentation>
   <type>UnifinaCoreGrailsPlugin</type>
   <resources>
+    <resource>BootStrap</resource>
     <resource>UnifinaCorePluginResources</resource>
     <resource>UnifinaCorePluginUrlMappings</resource>
     <resource>com.unifina.controller.data.FeedFileController</resource>
