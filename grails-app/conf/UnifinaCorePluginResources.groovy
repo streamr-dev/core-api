@@ -43,18 +43,6 @@ modules = {
 	mustache {
 		resource url:[dir:'js/mustache-0.8.2', file:'mustache.js', plugin: 'unifina-core']
 	}
-	'search-control' {
-		dependsOn 'typeahead'
-		resource url:[dir:'js/search-control', file:'search-control.js', plugin: 'unifina-core']
-	}
-	'remote-tabs' {
-		dependsOn 'bootbox, mustache'
-		resource url:[dir:'js/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
-	}
-	'signalpath-browser' {
-		dependsOn 'remote-tabs'
-		resource url:[dir:'js/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
-	}
 	codemirror {
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror.css', plugin: 'unifina-core']
@@ -65,7 +53,6 @@ modules = {
 		resource url:[dir:'js/superfish/css', file:'superfish.css', plugin: 'unifina-core']
 		resource url:[dir:'js/superfish/js', file:'supposition.js', plugin: 'unifina-core']
 	}
-
 	jsplumb {
 		dependsOn 'jquery'
 		dependsOn 'jquery-ui'
@@ -102,33 +89,55 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/slimScroll-1.3.0/', file:'jquery.slimscroll.min.js', plugin: 'unifina-core']
 	}
+	"detect-timezone" {
+		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
+	}
+	
+	/**
+	 * In-house widgets and resources
+	 */
+	'search-control' {
+		dependsOn 'typeahead'
+		resource url:[dir:'js/unifina/search-control', file:'search-control.js', plugin: 'unifina-core']
+	}
+	'remote-tabs' {
+		dependsOn 'bootbox, mustache'
+		resource url:[dir:'js/unifina/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
+	}
+	'signalpath-browser' {
+		dependsOn 'remote-tabs'
+		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
+	}
+	toolbar {
+		dependsOn 'jquery'
+		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin: 'unifina-core']
+	}
 	'global-error-handler' {
-		resource url:[dir:'js', file:'globalErrorHandler.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina', file:'globalErrorHandler.js', plugin: 'unifina-core']
 	}
 	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, signalpath-widgets'
-		resource url:[dir:'js/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
-		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/core', file:'Input.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/core', file:'Output.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
+		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
-		resource url:[dir:'js/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
