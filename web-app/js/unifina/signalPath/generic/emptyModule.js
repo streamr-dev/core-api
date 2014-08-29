@@ -193,10 +193,12 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// Move modules on workspace change
 		$(SignalPath).on("workspaceChanged", function(event, workspace, oldWorkspace) {
-			writePosition(oldWorkspace);
-			loadPosition(workspace, true);
-		});
-		
+			writePosition(oldWorkspace)
+			loadPosition(workspace, true)
+		})
+
+		$(SignalPath).trigger('moduleAdded', prot.jsonData)
+
 		return prot.div;
 	}
 	prot.createDiv = createDiv;

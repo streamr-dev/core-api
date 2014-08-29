@@ -43,6 +43,10 @@ modules = {
 	mustache {
 		resource url:[dir:'js/mustache-0.8.2', file:'mustache.js', plugin: 'unifina-core']
 	}
+	shepherd {
+		resource url:[dir:'js/shepherd', file:'shepherd-theme-arrows.css', plugin: 'unifina-core']
+		resource url:[dir:'js/shepherd', file:'shepherd.js', plugin: 'unifina-core']
+	}
 	codemirror {
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror.css', plugin: 'unifina-core']
@@ -81,7 +85,6 @@ modules = {
 	}
 	pnotify {
 		dependsOn 'jquery'
-//		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.min.js']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
