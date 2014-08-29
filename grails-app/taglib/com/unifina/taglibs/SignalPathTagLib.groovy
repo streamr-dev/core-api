@@ -99,7 +99,7 @@ class SignalPathTagLib {
             var id = node.data('id')
 			SignalPath.addModule(id, {})
 		})
-		.bind("select_node.jstree", function (event, data) {
+		.bind('select_node.jstree', function (event, data) {
             if (jQuery("#$id").jstree('is_leaf', data.rslt.obj)) {
 				jQuery('#$buttonId').attr('disabled', false)
 			}

@@ -114,9 +114,12 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	prot.handleContextMenuSelection = function(div,data,selection,event) {
 		if (selection=="yaxis") {
 			var n = $(div).find(".ioname").text();
-			var yAxis = prompt("Axis number for "+n+":",data.yAxis);
+			var yAxis = prompt("Axis number for "+n+":", data.yAxis);
 			if (yAxis != null)
 				data.yAxis = parseInt(yAxis);
+
+			$(prot.div).trigger('yAxisChanged', n)
+
 			event.stopPropagation();
 		}
 		else superHandleContextMenuSelection(div,data,selection,event);

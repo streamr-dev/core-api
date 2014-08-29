@@ -6,16 +6,25 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
-    
+
     <script>
-		project_webroot = '<g:createLink uri="/" />'; 
+    	Streamr = {}
+		Streamr.projectWebroot = '<g:createLink uri="/" />'
+		window.project_webroot = Streamr.projectWebroot
+
+		Streamr.controller = '${controllerName}'
+		Streamr.action = '${actionName}'
+
     </script>
     
+    <r:require module="streamr"/>
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
 	<r:require module="superfish" />
-        
+
+	<r:require module='tour'/>
+
 	<r:script>
 		$(document).ready(function () {
 			$('#top_banner .topnav ul').superfish({

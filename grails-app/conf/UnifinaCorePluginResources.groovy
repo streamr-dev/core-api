@@ -36,6 +36,17 @@ modules = {
 		resource url:[dir:'js/bootstrap-datepicker/js', file:'bootstrap-datepicker.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-datepicker/css', file:'datepicker.css', plugin: 'unifina-core']
 	}
+	hopscotch {
+		resource url:[dir:'js/hopscotch', file:'hopscotch.css', plugin: 'unifina-core']
+		resource url:[dir:'js/hopscotch', file:'hopscotch.js', plugin: 'unifina-core']
+	}
+	streamr {
+		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
+	}
+	tour {
+		dependsOn 'hopscotch, signalpath-core'
+		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
+	}
 	typeahead {
 		dependsOn 'jquery'
 		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
@@ -120,7 +131,7 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
+		dependsOn 'streamr, jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
