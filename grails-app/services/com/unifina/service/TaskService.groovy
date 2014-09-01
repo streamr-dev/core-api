@@ -109,16 +109,16 @@ class TaskService {
 	
 	/**
 	 * Returns the task group progress as integer percentage between 0 and 100
-	 * @param taskGroupId
+	 * @param taskGroupIds
 	 * @return
 	 */
-	Integer getTaskGroupProgress(String taskGroupId) {
+	Integer getTaskGroupProgress(List<String> taskGroupIds) {
 		List fields = Task.withCriteria(uniqueResult:true) {
 			projections {
 				sum("progress")
 				rowCount()
 			}
-			eq("taskGroupId",taskGroupId)
+			inList("taskGroupId",taskGroupIds)
 		}
 		
 		if (fields[0]==null || fields[1]==null)
