@@ -14,6 +14,8 @@ public class Output<T> extends Endpoint<T> {
 	// For super fast looping use an array instead of a List Iterator
 	private Propagator[] cachedPropagators = new Propagator[0];
 	
+	protected T previousValue = null;
+	
 	private boolean connected = false;
 	private int i;
 	
@@ -29,6 +31,8 @@ public class Output<T> extends Endpoint<T> {
 		// TODO: null check can be removed?
 		if (value==null)
 			throw new NullPointerException("Sending a null value is not allowed!");
+
+		previousValue = value;
 		
 		if (connected) {
 			for (i=0;i<cachedPropagators.length;i++)
@@ -40,7 +44,7 @@ public class Output<T> extends Endpoint<T> {
 	}
 	
 	public void doClear() {
-		
+		previousValue = null;
 	}
 	
 	public void addPropagator(Propagator p) {
@@ -66,11 +70,15 @@ public class Output<T> extends Endpoint<T> {
 
 	@Override
 	public String toString() {
-		return "(out) "+super.toString();
+		return "(out) "+super.toString()+": "+previousValue;
 	}
 	
 	public boolean isConnected() {
 		return connected;
+	}
+	
+	public T getValue() {
+		return previousValue;
 	}
 	
 }

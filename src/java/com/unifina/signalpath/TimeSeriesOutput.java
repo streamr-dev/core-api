@@ -8,16 +8,9 @@ public class TimeSeriesOutput extends Output<Double> {
 
 	public boolean noRepeat = true;
 	public boolean canBeNoRepeat = true;
-	Double previousValue = null;
 	
 	public TimeSeriesOutput(AbstractSignalPathModule owner, String name) {
 		super(owner, name, "Double");
-	}
-
-	@Override
-	public void doClear() {
-		super.doClear();
-		previousValue = null;
 	}
 	
 	@Override
@@ -32,12 +25,7 @@ public class TimeSeriesOutput extends Output<Double> {
 	public void send(Double value) {
 		if (!noRepeat || previousValue==null || !value.equals(previousValue)) {
 			value = DU.clean(value);
-			
-			previousValue = value;
 			super.send(value);
-//			for (Input<Double> target : targets) {
-//				target.receive(value);
-//			}
 		}
 	}
 	
@@ -55,15 +43,6 @@ public class TimeSeriesOutput extends Output<Double> {
 		
 		if (config.containsKey("noRepeat"))
 			noRepeat = Boolean.parseBoolean(config.get("noRepeat").toString());
-	}
-	
-	@Override
-	public String toString() {
-		return super.toString()+": "+previousValue;
-	}
-	
-	public Double getValue() {
-		return previousValue;
 	}
 	
 }
