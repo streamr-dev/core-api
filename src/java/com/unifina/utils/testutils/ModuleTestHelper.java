@@ -7,6 +7,7 @@ import java.util.Map;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.Output;
+import com.unifina.utils.DU;
 
 /**
  * Utility class for unit testing AbstractSignalPathModules.
@@ -57,6 +58,10 @@ public class ModuleTestHelper {
 		
 	}
 	
+	public boolean test() {
+		return test(0);
+	}
+	
 	/**
 	 * Runs the test.
 	 * @param skip Number of values to NOT test. Input values will be given and module will be activated, but output will not be tested.
@@ -78,13 +83,15 @@ public class ModuleTestHelper {
 				for (OutputHolder h : outputHolders)  {
 					Object value = h.output.getValue();
 					Object target = h.values.get(i);
+					if (target instanceof Double)
+						target = DU.clean((Double)target);
 					
 					// Possible failures:
 					// - An output value exists when it should not
 					// - No output value exists when it should
 					// - Incorrect output value is produced
 					if (target==null && value!=null || value==null && target!=null || value!=null && !value.equals(target)) {
-						throwException(h, i);
+						throwException(h, i, value, target);
 					}
 				}
 			}
@@ -92,9 +99,7 @@ public class ModuleTestHelper {
 		return true;
 	}
 	
-	private void throwException(OutputHolder h, int i)  {
-		Object value = h.output.getValue();
-		Object target = h.values.get(i);
+	private void throwException(OutputHolder h, int i, Object value, Object target)  {
 		
 		StringBuilder sb = new StringBuilder("Incorrect value at output ")
 		.append(h.output.getName())
