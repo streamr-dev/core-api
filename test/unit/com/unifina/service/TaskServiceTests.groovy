@@ -102,11 +102,11 @@ class TaskServiceTests {
 		Task unit2 = new Task("DummyClass", configString, "test", taskGroupId)
 		unit2.save(flush:true, failOnError:true)
 		
-		assert service.getTaskGroupProgress(taskGroupId) == 25
+		assert service.getTaskGroupProgress([taskGroupId]) == 25
 		
 		service.setComplete(unit1)
-		assert service.getTaskGroupProgress(taskGroupId) == 50
+		assert service.getTaskGroupProgress([taskGroupId]) == 50
 		service.setComplete(unit2)
-		assert service.getTaskGroupProgress(taskGroupId) == 100
+		assert service.getTaskGroupProgress([taskGroupId]) == 100
 	}
 }
