@@ -113,21 +113,32 @@ class TaskService {
 	 * @return
 	 */
 	Integer getTaskGroupProgress(List<String> taskGroupIds) {
-		List fields = Task.withCriteria(uniqueResult:true) {
+		List rows = Task.withCriteria() {
 			projections {
+				groupProperty("taskGroupId")
 				sum("progress")
 				rowCount()
 			}
-			inList("taskGroupId",taskGroupIds)
+			'in'("taskGroupId",taskGroupIds)
 		}
 		
-		if (fields[0]==null || fields[1]==null)
+		if (rows.size()==0)
 			return 100
 		
-		double progress = fields[0]
-		double maxProgress = 100D*fields[1]
+		// How many of the given task groups had no tasks left?
+		Map resultsByTaskGroup = [:]
 		
-		return (int) 100*(progress/maxProgress)
+		rows.each {resultsByTaskGroup.put(it[0], it)}
+
+		double progressSum = taskGroupIds.sum {
+			def row = resultsByTaskGroup[it]
+			if (row==null)
+				return 1D
+			else return row[1]/(100D*row[2]) // sum(progress) / rowCount
+		}
+		double maxProgress = taskGroupIds.size()
+		
+		return 100D * progressSum / maxProgress
 		
 	}
 }
