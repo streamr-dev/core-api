@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
     
+	<%-- Used by Geb GrailsPage abstraction --%>
+    <meta name="pageId" content="${controllerName}.${actionName}" />
+    
     <script>
 		project_webroot = '<g:createLink uri="/" />'; 
     </script>
