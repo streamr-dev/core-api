@@ -33,9 +33,8 @@ public class UiTagLib {
 				\$(document).ready(function() {
 					\$("#${id}").datepicker({
 						weekStart: 1,
-						format: 'yyyy-mm-dd'
-					}).on('changeDate', function() {
-						\$("#${id}").datepicker('hide');
+						format: 'yyyy-mm-dd',
+						autoclose: true
 					});
 				});
 			</script>
