@@ -16098,7 +16098,7 @@ div.dataTables_scrollFoot table {
 fieldset[disabled] .btn {
   opacity: 0.5;
 }
-.module .form-control {
+.component .form-control {
   height: 20px;
   padding: 2px 5px;
 }

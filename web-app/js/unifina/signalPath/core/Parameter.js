@@ -82,6 +82,8 @@ SignalPath.ParamRenderers = {
 				})(symbol,search,id,module,data);
 				
 				$(search).typeahead({
+					highlight: true,
+					hint: false,
 					minLength: 1,
 				}, {
 					name: 'streams',
