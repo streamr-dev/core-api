@@ -27,13 +27,16 @@
 				.off('click')
 
 			$('li a', $menu)
-				.on('click mouseup', function(clickEvent) {
+				.on('click', function(clickEvent) {
 					hide()
 					options.onSelected($menu, $(clickEvent.target))
+					clickEvent.stopPropagation()
+					clickEvent.preventDefault()
+					return false
 				})
 
 			return false;
-		})
+		}) 
 
 		$(document).click(hide)
 
