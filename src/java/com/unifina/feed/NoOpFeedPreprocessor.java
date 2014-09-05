@@ -30,7 +30,7 @@ public class NoOpFeedPreprocessor extends AbstractFeedPreprocessor {
 	@Override
 	public String getPreprocessedFileName(String name, Stream stream,
 			boolean compressed) {
-		return null;
+		return name;
 	}
 
 	@Override
