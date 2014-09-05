@@ -130,6 +130,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 					message: prot.optionEditor,
 					onEscape: function() { return true },
 					buttons: {
+						'Cancel': function() {},
 						'OK': function() {
 							$(prot.optionEditor).find(".option").each(function(i, div) {
 								// Get reference to the JSON option
@@ -137,8 +138,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 							})
 
 							prot.onOptionsUpdated()
-						},
-						'Cancel': function() {}
+						}
 					}
 				})
 			})
