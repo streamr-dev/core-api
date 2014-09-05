@@ -63,7 +63,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * Module params
 	 */
 	protected boolean canClearState = true;
-	boolean clearState = true;
+	boolean clearState = false;
 	
 	protected boolean canRefresh = false;
 	
