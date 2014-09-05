@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.unifina.signalpath.Input;
+import com.unifina.signalpath.ModuleOption;
+import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.RecordedTimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.utils.MapTraversal;
@@ -17,7 +19,7 @@ public class TimeSeriesChart extends Chart {
 	
 	TimeSeriesInput[] myInputs;
 	
-	boolean overnightBreak = true;
+	Boolean overnightBreak = true;
 	
 	@Override
 	public void initialize() {
@@ -180,19 +182,10 @@ public class TimeSeriesChart extends Chart {
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
-		Map optionsMap = (Map) config.get("options");
 
-		LinkedHashMap<String, Object> inputMap = new LinkedHashMap<>();
-		optionsMap.put("inputs",inputMap);
-		
-		inputMap.put("value",inputCount);
-		inputMap.put("type","int");
-		
-		LinkedHashMap<String, Object> overnightBreakOption = new LinkedHashMap<>();
-		optionsMap.put("overnightBreak",overnightBreakOption);
-		
-		overnightBreakOption.put("value",overnightBreak);
-		overnightBreakOption.put("type","boolean");
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("inputs", inputCount, "int"));
+		options.add(new ModuleOption("overnightBreak", overnightBreak, "boolean"));
 		
 		return config;
 	}
@@ -201,19 +194,15 @@ public class TimeSeriesChart extends Chart {
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		
-		Map options = (Map)config.get("options");
+		ModuleOptions options = ModuleOptions.get(config);
 		
-		// New
-		if (options!=null) {
-			// Add a DoubleParameter for each AR param
-			inputCount = (int) MapTraversal.getProperty(options, "inputs.value");
-			
-			if (MapTraversal.getProperty(options, "overnightBreak.value")!=null) {
-				overnightBreak = Boolean.parseBoolean(MapTraversal.getProperty(options, "overnightBreak.value").toString());
-			}
-		}
+		if (options.getOption("inputs")!=null)
+			inputCount = options.getOption("inputs").getInt();
+		if (options.getOption("overnightBreak")!=null)
+			overnightBreak = options.getOption("overnightBreak").getBoolean();
+		
 		// Backwards compatibility
-		else if (config.containsKey("params")) {
+		if (config.containsKey("params")) {
 			List params = (List) config.get("params");
 			Map inputConfig = null;
 			for (Object p : params) {

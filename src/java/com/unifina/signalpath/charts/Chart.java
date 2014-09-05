@@ -10,6 +10,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.ModuleOption;
+import com.unifina.signalpath.ModuleOptions;
 import com.unifina.utils.CSVWriter;
 import com.unifina.utils.MapTraversal;
 import com.unifina.utils.TimeOfDayUtil;
@@ -23,7 +25,8 @@ public abstract class Chart extends AbstractSignalPathModule {
 	
 	protected boolean csv = false;
 	
-	TimeOfDayUtil todUtil = null;
+	protected boolean timeOfDayFilterEnabled = false;
+	protected TimeOfDayUtil todUtil = null;
 	protected CSVWriter csvWriter = null;
 	
 	private static final Logger log = Logger.getLogger(Chart.class);
@@ -38,13 +41,6 @@ public abstract class Chart extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		canClearState = false;
-		
-		if (MapTraversal.getProperty(globals.getSignalPathContext(), "timeOfDayFilter.timeOfDayStart")!=null) {
-			todUtil = new TimeOfDayUtil(
-					(String)MapTraversal.getProperty(globals.getSignalPathContext(),"timeOfDayFilter.timeOfDayStart"), 
-					(String)MapTraversal.getProperty(globals.getSignalPathContext(),"timeOfDayFilter.timeOfDayEnd"), 
-					globals.getUserTimeZone());
-		}
 		
 		if (globals.getSignalPathContext().containsKey("csv"))
 			initCsv();
@@ -68,17 +64,17 @@ public abstract class Chart extends AbstractSignalPathModule {
 			return;
 		else if (csv) {
 			// Time of day filter
-			if (todUtil!=null && !todUtil.isInRange(timestamp))
+			if (timeOfDayFilterEnabled && !todUtil.isInRange(timestamp))
 				return;
 			
 			recordCsvString();
 			csvWriter.newLine();
 		}
 		else {
-			if (todUtil!=null && !todUtil.hasBaseDate())
+			if (timeOfDayFilterEnabled && !todUtil.hasBaseDate())
 				todUtil.setBaseDate(globals.time);
 			
-			if (todUtil==null || todUtil.isInRange(globals.time)) {
+			if (!timeOfDayFilterEnabled || todUtil.isInRange(globals.time)) {
 				record();
 			}
 		}
@@ -123,23 +119,10 @@ public abstract class Chart extends AbstractSignalPathModule {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 		
-		Map optionsMap = (Map) config.get("options");
-		if (optionsMap==null) {
-			optionsMap = new LinkedHashMap<>();
-			config.put("options",optionsMap);
-		}
-
-		LinkedHashMap<String, Object> ignoreBefore = new LinkedHashMap<>();
-		optionsMap.put("ignoreBefore",ignoreBefore);
-		
-		ignoreBefore.put("value",todUtil==null ? "05:00:00" : todUtil.getStartString());
-		ignoreBefore.put("type","string");
-		
-		LinkedHashMap<String, Object> ignoreAfter = new LinkedHashMap<>();
-		optionsMap.put("ignoreAfter",ignoreAfter);
-		
-		ignoreAfter.put("value",todUtil==null ? "23:59:59" : todUtil.getEndString());
-		ignoreAfter.put("type","string");
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("ignoreEnabled", false, "boolean"));
+		options.add(new ModuleOption("ignoreBefore", todUtil==null ? "00:00:00" : todUtil.getStartString(), "string"));
+		options.add(new ModuleOption("ignoreAfter", todUtil==null ? "23:59:59" : todUtil.getEndString(), "string"));
 		
 		return config;
 	}
@@ -148,16 +131,14 @@ public abstract class Chart extends AbstractSignalPathModule {
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		
-		Map options = (Map)config.get("options");
+		ModuleOptions options = ModuleOptions.get(config);
 		
-		// New
-		if (options!=null) {
-			// Ignore before/after
-			if (MapTraversal.getProperty(options, "ignoreBefore.value")!=null) {
-				String begin = MapTraversal.getProperty(options, "ignoreBefore.value").toString();
-				String end = MapTraversal.getProperty(options, "ignoreAfter.value").toString();
-				todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
-			}
+		timeOfDayFilterEnabled = options.getOption("ignoreEnabled")!=null && options.getOption("ignoreEnabled").getBoolean();
+		
+		if (timeOfDayFilterEnabled && options.getOption("ignoreBefore")!=null) {
+			String begin = options.getOption("ignoreBefore").getString();
+			String end = options.getOption("ignoreAfter").getString();
+			todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
 		}
 	}
 }
