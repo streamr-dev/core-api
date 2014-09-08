@@ -36,8 +36,8 @@ class TaskWorker extends Thread {
 	
 	SecUser priorityUser
 	
-	Task task
-	AbstractTask impl
+	Task currentTask
+	AbstractTask currentTaskImpl
 
 	public static final Logger log = Logger.getLogger(TaskWorker.class)
 	
@@ -128,8 +128,8 @@ class TaskWorker extends Thread {
 	 * Aborts currently running task
 	 */
 	public void abort() {
-		log.info("Calling abort on task implementation: $impl")
-		impl?.abort();
+		log.info("Calling abort on task implementation: $currentTaskImpl")
+		currentTaskImpl?.abort();
 	}
 	
 	public int getWorkerId() {
@@ -146,40 +146,40 @@ class TaskWorker extends Thread {
 			
 			try {
 				// Get a unit of work
-				task = getTask(priorityUser)
+				currentTask = getTask(priorityUser)
 	
-				if (task) {
-					log.info("Found task $task.id")
+				if (currentTask) {
+					log.info("Found task $currentTask.id")
 	
 					stateCode = 1
 						
-					lastKnownTaskId = task.id
-					log.info("Running task $task.id...")
+					lastKnownTaskId = currentTask.id
+					log.info("Running task $currentTask.id...")
 					
 					// On successful completion of unit, mark the unit as completed
-					impl = taskService.getTaskInstance(task)
-					taskService.setStatus(task, impl)
-					lastKnownStatus = task.status
-					if (task.skip || impl.run()) {
-						taskService.setComplete(task)
-						taskGroupComplete = taskService.deleteGroupIfComplete(task.taskGroupId)
-						impl.onComplete(taskGroupComplete)
+					currentTaskImpl = taskService.getTaskInstance(currentTask)
+					taskService.setStatus(currentTask, currentTaskImpl)
+					lastKnownStatus = currentTask.status
+					if (currentTask.skip || currentTaskImpl.run()) {
+						taskService.setComplete(currentTask)
+						taskGroupComplete = taskService.deleteGroupIfComplete(currentTask.taskGroupId)
+						currentTaskImpl.onComplete(taskGroupComplete)
 					}
 				}
 			} catch (Exception e) {
-				log.error("Exception in TaskWorker! Tried to run task $task",e)
+				log.error("Exception in TaskWorker! Tried to run task $currentTask",e)
 				error = e
 				lastError = e
 			}
 			
 			// Try to report error
 			if (error && !taskGroupComplete) try {
-				taskService.setError(task, error)
+				taskService.setError(currentTask, error)
 			} catch (Exception e) {
 				log.error("Failed to write error to Task!", e)
 			}
 			
-			if (!task) {
+			if (!currentTask) {
 				stateCode = 0
 				if (i%60==0)
 					log.info("No tasks available.")

@@ -45,7 +45,7 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 			log.info("Abort message received for task $id")
 			// Is any of the local TaskWorkers running a Task by this id?
 			localTaskWorkers.each {TaskWorker tw->
-				if (tw.task?.id==id) {
+				if (tw.currentTask?.id==id) {
 					tw.abort()
 				}
 			}
