@@ -12,7 +12,7 @@ public class ExponentialMovingAverage implements IWindowedOperation {
 		alpha = calculateAlpha(length);
 	}
 	
-	public static double calculateAlpha(int length) {
+	public double calculateAlpha(int length) {
 		return 2.0 / (length + 1.0);
 	}
 	
