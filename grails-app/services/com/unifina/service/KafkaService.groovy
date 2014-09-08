@@ -69,17 +69,21 @@ class KafkaService {
 		List tasks = []
 		while (endDate.before(limit)) {
 			Map config = KafkaCollectTask.getConfig(stream, beginDate, endDate)
-			Task task = new Task()
-			task.available = true
-			task.complete = false
-			task.complexity = 0	
-			task.category = "kafka-collect"
-			task.config = (config as JSON).toString()
-			task.implementingClass = KafkaCollectTask.class.name
-			task.taskGroupId = UUID.randomUUID().toString()
-			task.save(failOnError:true)
+			String configString = (config as JSON)
 			
-			tasks << task
+			// Check that the task does not exist already
+			if (!Task.findByImplementingClassAndConfig(KafkaCollectTask.class.getName(), configString)) {
+				Task task = new Task()
+				task.available = true
+				task.complete = false
+				task.complexity = 0	
+				task.category = "kafka-collect"
+				task.config = (config as JSON).toString()
+				task.implementingClass = KafkaCollectTask.class.name
+				task.taskGroupId = UUID.randomUUID().toString()
+				task.save(failOnError:true)
+				tasks << task
+			}
 			beginDate += 1
 			endDate += 1
 		}

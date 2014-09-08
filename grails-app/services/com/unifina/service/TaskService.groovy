@@ -13,6 +13,7 @@ class TaskService {
 	private static final Logger log = Logger.getLogger(TaskService)
 	
 	GrailsApplication grailsApplication
+	def kafkaService
 
 	String createTaskGroupId() {
 		return UUID.randomUUID().toString()
@@ -56,11 +57,11 @@ class TaskService {
 //		}
 	}
 	
-	void skipTask(Task task) {
+	void skipTask(Task task, boolean available=true) {
 		task = task.attach()
 		if (!task.complete) {
 			task.skip = true
-			task.available = true
+			task.available = available
 			task.save(flush:true, failOnError:true)
 		}
 	}
@@ -140,5 +141,26 @@ class TaskService {
 		
 		return 100D * progressSum / maxProgress
 		
+	}
+	
+	void abortTask(Task task) {
+		skipTask(task,false)
+		kafkaService.sendMessage("unifina-tasks", task.id, [type:"abort",id:task.id])
+	}
+	
+	/**
+	 * Deletes all available Tasks in a task group and signals the unavailable
+	 * but incomplete Tasks to abort. Returns a list of the latter.
+	 * If the list is empty, then all Tasks in this group are either complete or 
+	 * have been deleted.
+	 * @param taskGroupId
+	 */
+	List<Task> abortTaskGroup(String taskGroupId) {
+		// Delete all remaining available tasks
+		Task.executeUpdate("delete Task t where t.taskGroupId = ? and available = true",[taskGroupId])
+		// Find and abort the rest
+		List<Task> tasks = Task.findAllByTaskGroupIdAndComplete(taskGroupId,false)
+		tasks.each { abortTask(it) }
+		return tasks
 	}
 }
