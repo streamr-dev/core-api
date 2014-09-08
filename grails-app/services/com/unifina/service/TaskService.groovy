@@ -145,7 +145,7 @@ class TaskService {
 	
 	void abortTask(Task task) {
 		skipTask(task,false)
-		kafkaService.sendMessage("unifina-tasks", task.id, [type:"abort",id:task.id])
+		kafkaService.sendMessage(grailsApplication.config.unifina.task.messageQueue, task.id, [type:"abort",id:task.id])
 	}
 	
 	/**

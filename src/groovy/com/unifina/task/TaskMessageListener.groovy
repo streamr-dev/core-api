@@ -30,7 +30,7 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 			properties.setProperty(s, kafkaConfig.get(s).toString());
 		
 		consumer = new UnifinaKafkaConsumer(properties);
-		consumer.subscribe("unifina-tasks",this,false)
+		consumer.subscribe(MapTraversal.getString(grailsApplication.config, "unifina.task.messageQueue"),this,false)
 	}
 
 	public void quit() {
