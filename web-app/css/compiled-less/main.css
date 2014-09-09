@@ -16098,6 +16098,12 @@ div.dataTables_scrollFoot table {
 fieldset[disabled] .btn {
   opacity: 0.5;
 }
+#main-menu .menu-content {
+  padding-top: 20px;
+  padding-bottom: 0px;
+  border-top: none;
+  overflow: visible;
+}
 .component .form-control {
   height: 20px;
   padding: 2px 5px;
@@ -16406,6 +16412,23 @@ table.sortable th {
 }
 #main-menu {
   position: fixed;
+}
+.load-save-group {
+  width: 100%;
+}
+.load-save-group > .btn,
+.load-save-group > .btn-group {
+  width: 50%;
+}
+.load-save-group > .btn-group > .btn {
+  width: 100%;
+}
+#run i.fa {
+  margin-right: 5px;
+}
+#run-group button.dropdown-toggle {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 body.build-page {
   height: 100%;

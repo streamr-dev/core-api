@@ -27,7 +27,8 @@ public class UiTagLib {
 		// If you want to disable weekends, add this to the datepicker options:
 		// beforeShowDay: \$.datepicker.noWeekends
 		
-		def str = "<input type='text' name='$name' id='$id' value='$date' class='"+attrs.class+"'/>"
+		def str = ""
+		
 		str += """
 			<script type="text/javascript">
 				\$(document).ready(function() {
@@ -39,6 +40,8 @@ public class UiTagLib {
 				});
 			</script>
 		"""
+		
+		str += "<input type='text' name='$name' id='$id' value='$date' class='"+attrs.class+"'/>"
 		out << str
 	}
 	

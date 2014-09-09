@@ -268,20 +268,7 @@ class SignalPathTagLib {
 	 * Renders a button dropdown that will show 'save/save as' links
 	 */
 	def saveButtonDropdown = {attrs,body->
-		out << """
-			<div class="btn-group">
-				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-					<span class="fa fa-save"></span>
-					<span class="caret"></span>
-				</button>
-
-				<ul class="dropdown-menu" role="menu">
-					<li class="disabled"><a href="#" id="saveButton">Save</a></li>
-					<li><a href="#" id="saveAsButton">Save as...</a></li>
-				</ul>
-			</div>
-		"""
-
+		
 		writeScriptHeader(out)
 		def str = """
 			\$('#saveButton').click(function() {
@@ -324,6 +311,22 @@ class SignalPathTagLib {
 		"""
 		out << str
 		writeScriptFooter(out)
+		
+		out << """
+			<div class="btn-group">
+				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					<i class="fa fa-save"></i>
+					Save
+					<span class="caret"></span>
+				</button>
+
+				<ul class="dropdown-menu" role="menu">
+					<li class="disabled"><a href="#" id="saveButton">Save</a></li>
+					<li><a href="#" id="saveAsButton">Save as..</a></li>
+				</ul>
+			</div>
+		"""
+
 	}
 	
 	/**
