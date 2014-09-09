@@ -16441,7 +16441,7 @@ body.build-page #content-wrapper {
   padding-bottom: 0px;
 }
 #moduleTree {
-  max-height: 200px;
+  max-height: 300px;
   overflow: auto;
 }
 .remote-tabs-content {
