@@ -88,7 +88,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			})
 
 			helpLink.tooltip('show')
-		}).mouseout(function() {
+		}).mouseleave(function() {
 			helpLink.tooltip('hide')
 		})
 
