@@ -34,7 +34,14 @@ class Module implements Comparable {
 		return name
 	}
 	
+	/**
+	 * Keep this consistent with equals
+	 * (return 0 if and only if there is an equals relationship as well)
+	 */
 	int compareTo(o) {
-		return this.name.compareTo(o.name)
+		int result = this.name.compareTo(o.name)
+		if (result==0)
+			result = this.id.compareTo(o.id)
+		return result
 	}
 }

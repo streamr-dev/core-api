@@ -108,31 +108,31 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// If there are options, create options editor
 		if (prot.jsonData.options != null) {
-			prot.optionEditor = $("<div class='optionEditor'></div>");
-			
-			// Create options
-			for (var key in prot.jsonData.options) {
-				if (prot.jsonData.options.hasOwnProperty(key)) {
-					// Create the option div
-					var div = prot.createOption(key, prot.jsonData.options[key]);
-					prot.optionEditor.append(div);
-					// Store reference to the JSON option
-					$(div).data("option",prot.jsonData.options[key]);
-				}
-			}
-			
 			var editOptions = createModuleButton("options fa-wrench");
 			
 			editOptions.click(function() {
+				var $optionEditor = $("<div class='optionEditor'></div>");
+				
+				// Create options
+				for (var key in prot.jsonData.options) {
+					if (prot.jsonData.options.hasOwnProperty(key)) {
+						// Create the option div
+						var div = prot.createOption(key, prot.jsonData.options[key]);
+						$optionEditor.append(div);
+						// Store reference to the JSON option
+						$(div).data("option",prot.jsonData.options[key]);
+					}
+				}
+				
 				bootbox.dialog({
 					animate: false,
 					title: 'Options: '+prot.title.text(),
-					message: prot.optionEditor,
+					message: $optionEditor,
 					onEscape: function() { return true },
 					buttons: {
 						'Cancel': function() {},
 						'OK': function() {
-							$(prot.optionEditor).find(".option").each(function(i, div) {
+							$optionEditor.find(".option").each(function(i, div) {
 								// Get reference to the JSON option
 								prot.updateOption($(div).data("option"), div)
 							})
