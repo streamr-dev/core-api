@@ -161,12 +161,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
 		prot.div.draggable(prot.dragOptions);
-
-		prot.div.on('spContextMenuSelection', (function(d,j) {
-			return function(event,selection) {
-				prot.handleContextMenuSelection(d,j,selection,event);
-			};
-		})(prot.div,prot.jsonData));
 		
 		prot.div.on("click dragstart", function(event) {
 			$(".component.focus").each(function(i,c) {
@@ -336,10 +330,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.getContextMenu = getContextMenu;
 	
-	function handleContextMenuSelection(div,data,selection,event) {
+	function handleContextMenuSelection(target,selection) {
 		if (selection=="clone") {
 			prot.clone();
-			event.stopPropagation();
 		}
 	}
 	prot.handleContextMenuSelection = handleContextMenuSelection;
@@ -530,7 +523,7 @@ $('body').contextMenu({
 
     onSelected: function(menu, item) {
     	if (item.data('cmd') && menu.data('spObject'))
-    		menu.data('target').trigger('spContextMenuSelection', item.data('cmd'))
+    		menu.data('spObject').handleContextMenuSelection(menu.data('spObject'), item.data('cmd'));
     }
 });
 

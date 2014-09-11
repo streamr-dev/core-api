@@ -338,12 +338,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.getContextMenu = getContextMenu;
 	
 	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
-	prot.handleContextMenuSelection = function(div,data,selection,event) {
+	prot.handleContextMenuSelection = function(target, selection) {
 		if (selection=="disconnect") {
 			prot.disconnect();
-			event.stopPropagation();
 		}
-		else superHandleContextMenuSelection(div,data,selection,event);
+		else superHandleContextMenuSelection(target, selection);
 	}
 	
 	var superPrepareCloneData = prot.prepareCloneData;

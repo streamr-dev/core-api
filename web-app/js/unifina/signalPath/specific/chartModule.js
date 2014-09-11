@@ -111,15 +111,14 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	}
 	
 	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
-	prot.handleContextMenuSelection = function(div,data,selection,event) {
+	prot.handleContextMenuSelection = function(target, selection) {
 		if (selection=="yaxis") {
-			var n = $(div).find(".ioname").text();
-			var yAxis = prompt("Axis number for "+n+":",data.yAxis);
+			var n = $(target.div).find(".ioname").text();
+			var yAxis = prompt("Axis number for "+n+":",target.json.yAxis);
 			if (yAxis != null)
-				data.yAxis = parseInt(yAxis);
-			event.stopPropagation();
+				target.json.yAxis = parseInt(yAxis);
 		}
-		else superHandleContextMenuSelection(div,data,selection,event);
+		else superHandleContextMenuSelection(target, selection);
 	};
 	
 	function createRangeButtons(buttonDiv,config) {
