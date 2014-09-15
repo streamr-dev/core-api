@@ -57,9 +57,10 @@ SignalPath.ParamRenderers = {
 							// If the current module corresponds to the selected feed module and the new one
 							// does not, the module needs to be replaced
 							if (mod && d.checkModuleId && mod.getModuleId() != item.module) {
-								if (confirm("This stream is implemented by a different module. Replace current module? This will break current connections.")) {
-									SignalPath.replaceModule(mod, item.module,{params:[{name:"stream", value:item.id}]});
-								}
+								bootbox.confirm("This stream is implemented by a different module. Replace current module? This will break current connections.", function(result) {
+									if (result)
+										SignalPath.replaceModule(mod, item.module,{params:[{name:"stream", value:item.id}]});
+								});
 							}
 							// Handle same module implementation
 							else {
