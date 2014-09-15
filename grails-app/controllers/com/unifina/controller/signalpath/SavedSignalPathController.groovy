@@ -115,6 +115,7 @@ class SavedSignalPathController {
 			tmp.name = it[1]
 			tmp.url = createLink(controller:"savedSignalPath",action:"load",params:[id:it[0]])
 			tmp.command = params.command
+			tmp.offset = offset++
 			result.signalPaths.add(tmp)
 		}
 		return result
