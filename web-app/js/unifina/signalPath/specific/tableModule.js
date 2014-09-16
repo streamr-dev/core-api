@@ -24,7 +24,7 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		var headers = d.headers;
 		
 		tableContainer = $("<div></div>");
-		table = $("<table class='table table-bordered table-striped'></table>");
+		table = $("<table class='table table-condensed table-striped'></table>");
 		
 		tableHeader = $("<thead></thead>");
 		
