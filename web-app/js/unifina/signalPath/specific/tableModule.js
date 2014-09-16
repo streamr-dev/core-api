@@ -23,8 +23,8 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		var d = data.tableConfig;
 		var headers = d.headers;
 		
-		tableContainer = $("<div></div>");
-		table = $("<table class='table table-condensed table-striped'></table>");
+		tableContainer = $("<div class='table-module-container'></div>");
+		table = $("<table class='table-module-content table table-condensed table-striped'></table>");
 		
 		tableHeader = $("<thead></thead>");
 		
@@ -41,17 +41,6 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		
 		
 		rowCount = d.rows;
-		if (d.width) {
-			$(table).css("width","100%");
-			
-			if (d.maxHeight) {
-				$(tableContainer).css("overflow","hidden");
-				$(table).css("display","block");
-				$(table).css("width","100%");
-				$(table).css("max-height",d.maxHeight);
-				$(table).css("overflow","auto");
-			}
-		}
 	}
 	prot.createDiv = createDiv;
 	
