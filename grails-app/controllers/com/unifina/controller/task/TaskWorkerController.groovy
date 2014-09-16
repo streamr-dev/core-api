@@ -1,6 +1,6 @@
 package com.unifina.controller.task
 
-import grails.plugins.springsecurity.Secured
+import grails.plugin.springsecurity.annotation.Secured
 
 import com.unifina.domain.security.SecUser
 import com.unifina.task.TaskWorker

@@ -1,7 +1,7 @@
 package com.unifina.controller.kafka
 
 import grails.converters.JSON
-import grails.plugins.springsecurity.Secured;
+import grails.plugin.springsecurity.annotation.Secured;
 
 import org.apache.log4j.Logger
 

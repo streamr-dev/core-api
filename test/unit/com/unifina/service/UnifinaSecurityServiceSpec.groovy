@@ -1,11 +1,11 @@
 package com.unifina.service
 
-import grails.plugins.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 
-import org.codehaus.groovy.grails.plugins.springsecurity.GormUserDetailsService
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.plugin.springsecurity.GormUserDetailsService
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
 import org.springframework.security.core.userdetails.cache.NullUserCache

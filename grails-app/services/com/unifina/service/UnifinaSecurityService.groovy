@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import grails.plugins.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import org.apache.log4j.Logger

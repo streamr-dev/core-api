@@ -1,5 +1,5 @@
 package com.unifina.controller.security
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.SpringSecurityUtils
 
 class LogoutController {
 
