@@ -9,6 +9,7 @@
  * started
  * stopped
  * workspaceChanged (mode)
+ * moduleAdded(jsonData, div)
  * 
  * Events for internal use:
  * _signalPathLoadModulesReady
