@@ -1,0 +1,88 @@
+.hopscotch-bubble {
+  border: 3px solid rgba(0,0,0,0.2);
+  border-radius: 6px;
+  background-color: white;
+}
+
+.hopscotch-bubble.popover {
+  display: block;
+  padding: 5px;
+}
+
+.hopscotch-bubble-content {
+  padding: 9px 14px;
+}
+
+.hopscotch-bubble-close {
+  margin: -1px;
+  margin-top: -6px;
+}
+
+.hopscotch-actions {
+  padding-bottom: 15px;
+}
+
+.hopscotch-bubble-close {
+  color: #eee;
+}
+
+
+
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+}
+div.hopscotch-bubble .hopscotch-bubble-arrow-container .hopscotch-bubble-arrow-border {
+  width: 0;
+  height: 0;
+}
+
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.up {
+  top: -20px;
+  left: 10px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.down {
+  bottom: -39px;
+  left: 10px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left {
+  top: 10px;
+  left: -20px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right {
+  top: 10px;
+  right: -39px;
+}
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.up .hopscotch-bubble-arrow-border {
+  border-bottom: 17px solid #000000;
+  border-bottom: 17px solid rgba(0, 0, 0, 0.2);
+  border-left: 17px solid transparent;
+  border-right: 17px solid transparent;
+}
+
+
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.down .hopscotch-bubble-arrow-border {
+  border-top: 17px solid #000000;
+  border-top: 17px solid rgba(0, 0, 0, 0.2);
+  border-left: 17px solid transparent;
+  border-right: 17px solid transparent;
+}
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.left .hopscotch-bubble-arrow-border {
+  border-right: 17px solid #000000;
+  border-right: 17px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 17px solid transparent;
+  border-top: 17px solid transparent;
+}
+div.hopscotch-bubble .hopscotch-bubble-arrow-container.right .hopscotch-bubble-arrow-border {
+  border-left: 17px solid #000000;
+  border-left: 17px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 17px solid transparent;
+  border-top: 17px solid transparent;
+}

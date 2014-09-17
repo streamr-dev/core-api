@@ -12,25 +12,22 @@
 
     <mixpanel:head/>
 
-    <script>
-		project_webroot = '<g:createLink uri="/" />'
-		Streamr = {}
+	<script>
+    	Streamr = {}
+		Streamr.projectWebroot = '<g:createLink uri="/" />'
+		Streamr.controller = '${controllerName}'
+		Streamr.action = '${actionName}'
 		Streamr.user = {}
     </script>
-
-	<sec:ifLoggedIn>
-		<script>
-			Streamr.user.id = '<sec:loggedInUserInfo field="id"/>'
-			Streamr.user.username = '<sec:loggedInUserInfo field="username"/>'
-
-			mixpanel.identify(Streamr.user.id)
-		</script>
-	</sec:ifLoggedIn>
-
+    
+    <r:require module="streamr"/>
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
-	
+	<r:require module="superfish" />
+
+	<r:require module='tour'/>
+
 	<r:layoutResources/>
 	<g:layoutHead />
 </head>

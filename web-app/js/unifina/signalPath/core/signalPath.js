@@ -9,6 +9,7 @@
  * started
  * stopped
  * workspaceChanged (mode)
+ * moduleAdded(jsonData, div)
  * 
  * Events for internal use:
  * _signalPathLoadModulesReady
@@ -44,10 +45,10 @@ var SignalPath = (function () {
     		allowRuntimeChanges: true,
     		runUrl: "run",
     		abortUrl: "abort",
-    		atmosphereUrl: project_webroot+"atmosphere/",
-    		getModuleUrl: project_webroot+'module/jsonGetModule',
-    		getModuleHelpUrl: project_webroot+'module/jsonGetModuleHelp',
-    		uiActionUrl: project_webroot+"module/uiAction",
+    		atmosphereUrl: Streamr.projectWebroot+"atmosphere/",
+    		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
+    		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
+    		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
     };
 	
     var detectedTransport = null;
