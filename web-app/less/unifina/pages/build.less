@@ -24,6 +24,29 @@
 	position: fixed
 }
 
+.load-save-group {
+	width: 100%;
+	& > .btn, & > .btn-group {
+		width: 50%;
+	}
+	& > .btn-group > .btn {
+		width: 100%;
+	}
+}
+
+#run {
+	i.fa {
+		margin-right: 5px;
+	}
+}
+
+#run-group {
+	button.dropdown-toggle {
+		padding-left: 0px;
+		padding-right: 0px; 
+	}
+}
+
 body.build-page {
 	height: 100%;
 	width: 100%;
@@ -37,6 +60,6 @@ body.build-page #content-wrapper {
 }
 
 #moduleTree {
-	max-height: 200px;
+	max-height: 300px;
 	overflow:auto;	
 }

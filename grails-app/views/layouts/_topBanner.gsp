@@ -20,6 +20,18 @@
 			<div class="topnav">
 				<g:render template="/layouts/topnav"/>
 			</div>
-		
 	</div>
+	
+	<r:script>
+		$(document).ready(function() {
+			$("#main-menu-toggle").click(function() {
+				if ($("body").hasClass("mmc")) {
+					$("body").removeClass("mmc")
+				}
+				else {
+					$("body").addClass("mmc")
+				}
+			})
+		})
+	</r:script>
 </div>

@@ -88,7 +88,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			})
 
 			helpLink.tooltip('show')
-		}).mouseout(function() {
+		}).mouseleave(function() {
 			helpLink.tooltip('hide')
 		})
 
@@ -108,37 +108,37 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// If there are options, create options editor
 		if (prot.jsonData.options != null) {
-			prot.optionEditor = $("<div class='optionEditor'></div>");
-			
-			// Create options
-			for (var key in prot.jsonData.options) {
-				if (prot.jsonData.options.hasOwnProperty(key)) {
-					// Create the option div
-					var div = prot.createOption(key, prot.jsonData.options[key]);
-					prot.optionEditor.append(div);
-					// Store reference to the JSON option
-					$(div).data("option",prot.jsonData.options[key]);
-				}
-			}
-			
 			var editOptions = createModuleButton("options fa-wrench");
 			
 			editOptions.click(function() {
+				var $optionEditor = $("<div class='optionEditor'></div>");
+				
+				// Create options
+				for (var key in prot.jsonData.options) {
+					if (prot.jsonData.options.hasOwnProperty(key)) {
+						// Create the option div
+						var div = prot.createOption(key, prot.jsonData.options[key]);
+						$optionEditor.append(div);
+						// Store reference to the JSON option
+						$(div).data("option",prot.jsonData.options[key]);
+					}
+				}
+				
 				bootbox.dialog({
 					animate: false,
 					title: 'Options: '+prot.title.text(),
-					message: prot.optionEditor,
+					message: $optionEditor,
 					onEscape: function() { return true },
 					buttons: {
+						'Cancel': function() {},
 						'OK': function() {
-							$(prot.optionEditor).find(".option").each(function(i, div) {
+							$optionEditor.find(".option").each(function(i, div) {
 								// Get reference to the JSON option
 								prot.updateOption($(div).data("option"), div)
 							})
 
 							prot.onOptionsUpdated()
-						},
-						'Cancel': function() {}
+						}
 					}
 				})
 			})
@@ -161,12 +161,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
 		prot.div.draggable(prot.dragOptions);
-
-		prot.div.on('spContextMenuSelection', (function(d,j) {
-			return function(event,selection) {
-				prot.handleContextMenuSelection(d,j,selection,event);
-			};
-		})(prot.div,prot.jsonData));
 		
 		prot.div.on("click dragstart", function(event) {
 			$(".component.focus").each(function(i,c) {
@@ -338,10 +332,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.getContextMenu = getContextMenu;
 	
-	function handleContextMenuSelection(div,data,selection,event) {
+	function handleContextMenuSelection(target,selection) {
 		if (selection=="clone") {
 			prot.clone();
-			event.stopPropagation();
 		}
 	}
 	prot.handleContextMenuSelection = handleContextMenuSelection;
@@ -532,7 +525,7 @@ $('body').contextMenu({
 
     onSelected: function(menu, item) {
     	if (item.data('cmd') && menu.data('spObject'))
-    		menu.data('target').trigger('spContextMenuSelection', item.data('cmd'))
+    		menu.data('spObject').handleContextMenuSelection(menu.data('spObject'), item.data('cmd'));
     }
 });
 

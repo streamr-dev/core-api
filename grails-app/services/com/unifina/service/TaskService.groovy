@@ -13,6 +13,7 @@ class TaskService {
 	private static final Logger log = Logger.getLogger(TaskService)
 	
 	GrailsApplication grailsApplication
+	def kafkaService
 
 	String createTaskGroupId() {
 		return UUID.randomUUID().toString()
@@ -56,11 +57,11 @@ class TaskService {
 //		}
 	}
 	
-	void skipTask(Task task) {
+	void skipTask(Task task, boolean available=true) {
 		task = task.attach()
 		if (!task.complete) {
 			task.skip = true
-			task.available = true
+			task.available = available
 			task.save(flush:true, failOnError:true)
 		}
 	}
@@ -109,25 +110,57 @@ class TaskService {
 	
 	/**
 	 * Returns the task group progress as integer percentage between 0 and 100
-	 * @param taskGroupId
+	 * @param taskGroupIds
 	 * @return
 	 */
-	Integer getTaskGroupProgress(String taskGroupId) {
-		List fields = Task.withCriteria(uniqueResult:true) {
+	Integer getTaskGroupProgress(List<String> taskGroupIds) {
+		List rows = Task.withCriteria() {
 			projections {
+				groupProperty("taskGroupId")
 				sum("progress")
 				rowCount()
 			}
-			eq("taskGroupId",taskGroupId)
+			'in'("taskGroupId",taskGroupIds)
 		}
 		
-		if (fields[0]==null || fields[1]==null)
+		if (rows.size()==0)
 			return 100
 		
-		double progress = fields[0]
-		double maxProgress = 100D*fields[1]
+		// How many of the given task groups had no tasks left?
+		Map resultsByTaskGroup = [:]
 		
-		return (int) 100*(progress/maxProgress)
+		rows.each {resultsByTaskGroup.put(it[0], it)}
+
+		double progressSum = taskGroupIds.sum {
+			def row = resultsByTaskGroup[it]
+			if (row==null)
+				return 1D
+			else return row[1]/(100D*row[2]) // sum(progress) / rowCount
+		}
+		double maxProgress = taskGroupIds.size()
 		
+		return 100D * progressSum / maxProgress
+		
+	}
+	
+	void abortTask(Task task) {
+		skipTask(task,false)
+		kafkaService.sendMessage(grailsApplication.config.unifina.task.messageQueue, task.id, [type:"abort",id:task.id])
+	}
+	
+	/**
+	 * Deletes all available Tasks in a task group and signals the unavailable
+	 * but incomplete Tasks to abort. Returns a list of the latter.
+	 * If the list is empty, then all Tasks in this group are either complete or 
+	 * have been deleted.
+	 * @param taskGroupId
+	 */
+	List<Task> abortTaskGroup(String taskGroupId) {
+		// Delete all remaining available tasks
+		Task.executeUpdate("delete Task t where t.taskGroupId = ? and available = true",[taskGroupId])
+		// Find and abort the rest
+		List<Task> tasks = Task.findAllByTaskGroupIdAndComplete(taskGroupId,false)
+		tasks.each { abortTask(it) }
+		return tasks
 	}
 }

@@ -268,20 +268,7 @@ class SignalPathTagLib {
 	 * Renders a button dropdown that will show 'save/save as' links
 	 */
 	def saveButtonDropdown = {attrs,body->
-		out << """
-			<div class="btn-group">
-				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-					<span class="fa fa-save"></span>
-					<span class="caret"></span>
-				</button>
-
-				<ul class="dropdown-menu" role="menu">
-					<li class="disabled"><a href="#" id="saveButton">Save</a></li>
-					<li><a href="#" id="saveAsButton">Save as...</a></li>
-				</ul>
-			</div>
-		"""
-
+		
 		writeScriptHeader(out)
 		def str = """
 			\$('#saveButton').click(function() {
@@ -321,9 +308,31 @@ class SignalPathTagLib {
 					})
 				})
 			})
+
+			
+			\$('#save-dropdown').on('show.bs.dropdown', function () {
+				var offset = \$('#save-dropdown-button').offset()
+				\$('#save-dropdown-menu').css("top", offset.top + \$("#save-dropdown-button").outerHeight())
+				\$('#save-dropdown-menu').css("left", offset.left)
+				\$('#save-dropdown-menu').show()
+			})
+			\$('#save-dropdown').on('hide.bs.dropdown', function () {
+				\$('#save-dropdown-menu').hide()
+			})
 		"""
 		out << str
 		writeScriptFooter(out)
+		
+		out << """
+			<div id="save-dropdown" class="btn-group">
+				<button id="save-dropdown-button" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					<i class="fa fa-save"></i>
+					Save
+					<span class="caret"></span>
+				</button>
+			</div>
+		"""
+
 	}
 	
 	/**

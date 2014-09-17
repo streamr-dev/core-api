@@ -27,19 +27,21 @@ public class UiTagLib {
 		// If you want to disable weekends, add this to the datepicker options:
 		// beforeShowDay: \$.datepicker.noWeekends
 		
-		def str = "<input type='text' name='$name' id='$id' value='$date' class='"+attrs.class+"'/>"
+		def str = ""
+		
 		str += """
 			<script type="text/javascript">
 				\$(document).ready(function() {
 					\$("#${id}").datepicker({
 						weekStart: 1,
-						format: 'yyyy-mm-dd'
-					}).on('changeDate', function() {
-						\$("#${id}").datepicker('hide');
+						format: 'yyyy-mm-dd',
+						autoclose: true
 					});
 				});
 			</script>
 		"""
+		
+		str += "<input type='text' name='$name' id='$id' value='$date' class='"+attrs.class+"'/>"
 		out << str
 	}
 	

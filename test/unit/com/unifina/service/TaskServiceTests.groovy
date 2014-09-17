@@ -102,11 +102,38 @@ class TaskServiceTests {
 		Task unit2 = new Task("DummyClass", configString, "test", taskGroupId)
 		unit2.save(flush:true, failOnError:true)
 		
-		assert service.getTaskGroupProgress(taskGroupId) == 25
+		assert service.getTaskGroupProgress([taskGroupId]) == 25
 		
 		service.setComplete(unit1)
-		assert service.getTaskGroupProgress(taskGroupId) == 50
+		assert service.getTaskGroupProgress([taskGroupId]) == 50
 		service.setComplete(unit2)
-		assert service.getTaskGroupProgress(taskGroupId) == 100
+		assert service.getTaskGroupProgress([taskGroupId]) == 100
 	}
+	
+	void testGetTaskGroupProgress2() {
+		mockCriteria([Task])
+		
+		String taskGroupId = "test"
+		String taskGroupId2 = "test2"
+		String configString = "{}"
+		
+		Task g1u1 = new Task("DummyClass", configString, "test", taskGroupId)
+		g1u1.progress = 100
+		g1u1.save(flush:true, failOnError:true)
+		
+		Task g1u2 = new Task("DummyClass", configString, "test", taskGroupId)
+		g1u2.save(flush:true, failOnError:true)
+		
+		Task g2u1 = new Task("DummyClass", configString, "test", taskGroupId2)
+		g2u1.progress = 50
+		g2u1.save(flush:true, failOnError:true)
+		
+		assert service.getTaskGroupProgress([taskGroupId, taskGroupId2]) == 50
+		
+		// Progress must be reported correctly after the task group is deleted
+		g1u1.delete()
+		g1u2.delete()
+		assert service.getTaskGroupProgress([taskGroupId, taskGroupId2]) == 75
+	}
+	
 }

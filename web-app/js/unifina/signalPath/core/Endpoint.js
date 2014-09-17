@@ -39,6 +39,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			// TODO: endpointId is for backwards compatibility
 			var id = (pub.json.endpointId != null ? pub.json.endpointId : pub.json.id);
 			pub.jsPlumbEndpoint = createJSPlumbEndpoint(pub.json, div, id);
+			pub.jsPlumbEndpoint
 		}
 		
 		// Create io settings
@@ -48,12 +49,6 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		if (!pub.disableContextMenu) {
 			div.addClass("context-menu");
 		}
-		
-		div.on('spContextMenuSelection', (function(d,j) {
-			return function(event,selection) {
-				pub.handleContextMenuSelection(d,j,selection,event);
-			};
-		})(div,pub.json));
 		
 		div.trigger("spIOReady");
 		
@@ -120,6 +115,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		
 		$(connDiv).data("acceptedTypes", (json.acceptedTypes!=null ? json.acceptedTypes : [json.type]));
 		
+		// Add reference to this object to the jsPlumb Endpoint canvas element
+		$(ep.canvas).data("spObject", pub);
+		
 		return ep;
 	}
 	pub.createJSPlumbEndpoint = createJSPlumbEndpoint;
@@ -154,16 +152,14 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	}
 	pub.getContextMenu = getContextMenu;
 	
-	function handleContextMenuSelection(div,data,selection,event) {
+	function handleContextMenuSelection(target, selection) {
 		if (selection=="rename") {
-			rename(div,data);
-			event.stopPropagation();
+			rename(pub.div,pub.json);
 		}
 		else if (selection=="export") {
-			toggleExport(div,data);
-			event.stopPropagation();
+			toggleExport(pub.div,pub.json);
 		}
-		else module.handleContextMenuSelection(div,data,selection,event);
+		else module.handleContextMenuSelection(target, selection);
 	}
 	pub.handleContextMenuSelection = handleContextMenuSelection;
 	
