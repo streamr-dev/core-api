@@ -17,28 +17,25 @@ class StreamController {
 		List<Map> streams = []
 
 		if (!allowedFeeds.isEmpty()) {
-			streams = Stream.createCriteria().list {
-				resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
-				projections {
-					property("id","id")
-					property("name","name")
-					property("module.id","module")
-				}
-				createAlias('feed', 'feed', CriteriaSpecification.LEFT_JOIN)
-				createAlias('feed.module', 'module', CriteriaSpecification.LEFT_JOIN)
+			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module) from Stream s "+
+				"left outer join s.feed "+
+				"left outer join s.feed.module "+
+				"where s.name like '"+params.term+"%' "
+				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+")"
+
 				if (params.feed) {
-					eq("feed", Feed.load(params.feed))
+					hql += " and s.feed.id="+Feed.load(params.feed).id
 				}
+
 				if (params.module) {
-					eq("feed.module", Module.load(params.module))
+					hql += " and s.feed.module.id="+Module.load(params.module).id
 				}
-				like("name", params.term+"%")
-				'in'("feed",allowedFeeds)
-				maxResults(10)
-				order("id", "asc")
-			}
-		}
+
+				hql += " order by length(s.name), s.id asc"
 		
+				streams = Stream.executeQuery(hql, [ max: 10 ])
+		}
+
 		render streams as JSON
 	}
 
