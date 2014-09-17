@@ -1,6 +1,7 @@
 package com.unifina.controller.data
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 import org.hibernate.criterion.CriteriaSpecification
 
@@ -8,6 +9,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Module
 
+@Secured(["ROLE_USER"])
 class StreamController {
 
 	def springSecurityService

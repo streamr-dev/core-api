@@ -4,7 +4,6 @@ import com.unifina.security.ProfilingSecurityManager;
 
 import grails.plugin.springsecurity.annotation.Secured
 
-
 @Secured(["ROLE_ADMIN"])
 class SecurityManagerController {
 	def index() {

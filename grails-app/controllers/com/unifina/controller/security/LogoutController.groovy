@@ -1,6 +1,8 @@
 package com.unifina.controller.security
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.annotation.Secured
 
+@Secured(["permitAll"])
 class LogoutController {
 
 	/**
