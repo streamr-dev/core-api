@@ -11,14 +11,20 @@
     <meta name="pageId" content="${controllerName}.${actionName}" />
     
     <script>
-		project_webroot = '<g:createLink uri="/" />'; 
+    	Streamr = {}
+		Streamr.projectWebroot = '<g:createLink uri="/" />'
+		Streamr.controller = '${controllerName}'
+		Streamr.action = '${actionName}'
     </script>
     
+    <r:require module="streamr"/>
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
 	<r:require module="superfish" />
-        
+
+	<r:require module='tour'/>
+
 	<r:script>
 		$(document).ready(function () {
 			$('#top_banner .topnav ul').superfish({

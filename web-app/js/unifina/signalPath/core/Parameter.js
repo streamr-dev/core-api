@@ -91,7 +91,7 @@ SignalPath.ParamRenderers = {
 					displayKey: 'name',
 					source: function(q, callback) {
 						$.ajax({
-							url: project_webroot+"stream/search", 
+							url: Streamr.projectWebroot+"stream/search", 
 							data: { term: q },
 							dataType: 'json',
 							success: callback,

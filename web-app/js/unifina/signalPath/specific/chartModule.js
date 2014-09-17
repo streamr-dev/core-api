@@ -1,3 +1,9 @@
+/**
+ * ChartModule events:
+ *
+ * yAxisChanged(inputName)
+ */
+
 SignalPath.ChartModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.GenericModule(data,canvas,prot)
@@ -117,6 +123,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			var yAxis = prompt("Axis number for "+n+":",target.json.yAxis);
 			if (yAxis != null)
 				target.json.yAxis = parseInt(yAxis);
+
+			$(prot.div).trigger('yAxisChanged', n)
 		}
 		else superHandleContextMenuSelection(target, selection);
 	};
