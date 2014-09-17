@@ -116,7 +116,7 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
+		dependsOn 'jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets, bootbox'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

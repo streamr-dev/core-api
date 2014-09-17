@@ -16192,6 +16192,10 @@ td.output {
   text-align: left;
   padding-left: 10px;
 }
+.modulebody .table th {
+  padding-left: 3px;
+  padding-right: 3px;
+}
 .moduleSwitch {
   font-size: 7px;
   text-align: center;
