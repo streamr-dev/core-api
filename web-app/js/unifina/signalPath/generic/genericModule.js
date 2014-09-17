@@ -276,14 +276,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	pub.getOutput = getOutput;
 	
-	/**
-	 * Returns an Endpoint by name
-	 */
-	function getEndpointByName(name) {
-		return prot.outputsByName[name] || prot.inputsByName[name]
-	}
-	pub.getEndpointByName = getEndpointByName
-
 	function addParameter(data) {
 		// Create room for the parameter in paramTable
 		var row = $("<tr></tr>");

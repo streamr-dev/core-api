@@ -186,7 +186,7 @@ Tour.prototype.waitForConnections = function(conns) {
 			var toEndpoint = to.split('.')[1]
 
 			var endpoint = $('.'+toModule).data('spObject')
-				.getEndpointByName(toEndpoint)
+				.getInput(toEndpoint)
 
 			endpoint.getConnectedEndpoints().forEach(function(ep) {
 				if (ep.module.div.hasClass(fromModule)
