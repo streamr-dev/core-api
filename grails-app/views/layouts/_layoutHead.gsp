@@ -9,33 +9,28 @@
     
 	<%-- Used by Geb GrailsPage abstraction --%>
     <meta name="pageId" content="${controllerName}.${actionName}" />
-    
+
+    <mixpanel:head/>
+
     <script>
-		project_webroot = '<g:createLink uri="/" />'; 
+		project_webroot = '<g:createLink uri="/" />'
+		Streamr = {}
+		Streamr.user = {}
     </script>
 
-	<!-- start Mixpanel -->
-	<script type="text/javascript">
-		(function(f,b){if(!b.__SV){var a,e,i,g;window.mixpanel=b;b._i=[];b.init=function(a,e,d){function f(b,h){var a=h.split(".");2==a.length&&(b=b[a[0]],h=a[1]);b[h]=function(){b.push([h].concat(Array.prototype.slice.call(arguments,0)))}}var c=b;"undefined"!==typeof d?c=b[d]=[]:d="mixpanel";c.people=c.people||[];c.toString=function(b){var a="mixpanel";"mixpanel"!==d&&(a+="."+d);b||(a+=" (stub)");return a};c.people.toString=function(){return c.toString(1)+".people (stub)"};i="disable track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config people.set people.set_once people.increment people.append people.track_charge people.clear_charges people.delete_user".split(" ");
-for(g=0;g<i.length;g++)f(c,i[g]);b._i.push([a,e,d])};b.__SV=1.2;a=f.createElement("script");a.type="text/javascript";a.async=!0;a.src="//cdn.mxpnl.com/libs/mixpanel-2.2.min.js";e=f.getElementsByTagName("script")[0];e.parentNode.insertBefore(a,e)}})(document,window.mixpanel||[]);
+	<sec:ifLoggedIn>
+		<script>
+			Streamr.user.id = '<sec:loggedInUserInfo field="id"/>'
+			Streamr.user.username = '<sec:loggedInUserInfo field="username"/>'
 
-	mixpanel.init("0c87281db078cadecb4c8fbdbed82daf");
-	</script>
-	<!-- end Mixpanel -->
+			mixpanel.identify(Streamr.user.id)
+		</script>
+	</sec:ifLoggedIn>
 
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
-	<r:require module="superfish" />
-        
-	<r:script>
-		$(document).ready(function () {
-			$('#top_banner .topnav ul').superfish({
-				delay:400
-			}).supposition();
-		});
-	</r:script>
 	
 	<r:layoutResources/>
-    <g:layoutHead />
+	<g:layoutHead />
 </head>

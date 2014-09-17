@@ -62,7 +62,9 @@ grails.project.dependency.resolution = {
 		}
 		
 		compile('com.mashape.unirest:unirest-java:1.3.3')
-		
+
+		compile 'com.mixpanel:mixpanel-java:1.1.3' // needed by the mixpanel plugin
+
 		runtime('com.amazonaws:aws-java-sdk:1.7.5')
 
 		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
@@ -92,6 +94,9 @@ grails.project.dependency.resolution = {
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
 		build ':yui-war-minify:1.5'
+
+		compile ":platform-core:1.0.0" // needed by the mixpanel plugin		
+		compile ":mixpanel:1.4"
 
 		test ":plastic-criteria:1.5"
 		test ":geb:$gebVersion"
