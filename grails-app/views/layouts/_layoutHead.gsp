@@ -13,11 +13,8 @@
     <script>
     	Streamr = {}
 		Streamr.projectWebroot = '<g:createLink uri="/" />'
-		window.project_webroot = Streamr.projectWebroot
-
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
-
     </script>
     
     <r:require module="streamr"/>

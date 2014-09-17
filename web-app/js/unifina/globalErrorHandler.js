@@ -1,6 +1,6 @@
 window.onerror = (function(oldHandler) {
 	return function myErrorHandler(errorMsg, url, lineNumber, column, errorObj) {
-	  var reportUrl = (project_webroot ? project_webroot : "/") + "javascriptError/logError";
+	  var reportUrl = (Streamr ? Streamr.projectWebroot : "/") + "javascriptError/logError";
 	  var data = {
 			  url: url,
 			  errorMsg: errorMsg,
@@ -9,7 +9,7 @@ window.onerror = (function(oldHandler) {
 			  stack: (errorObj!=null ? errorObj.stack : null)
 	  }
 	  
-	  var reported_successfully = false;
+	  var reportedSuccessfully = false;
 	  
 	  // Report the error to JavascriptErrorController
 	  if ($) {
@@ -18,13 +18,13 @@ window.onerror = (function(oldHandler) {
 			  url: reportUrl,
 			  data: data,
 			  success: function() {
-				  reported_successfully = true;
+				  reportedSuccessfully = true;
 			  },
 			  async: false
 			});
 	  }
 	  
-	  if (reported_successfully)
+	  if (reportedSuccessfully)
 		  alert("Oops! An error occurred on this page. The bug has been reported. Sorry!");
 	  else
 		  alert("Oops! An error occurred on this page. Please let us know!");
