@@ -5,11 +5,17 @@ public class ExponentialMovingAverage implements IWindowedOperation {
 	Double ema = null;
 	int length;
 	double alpha;
+	boolean smaInit;
 	
-	public ExponentialMovingAverage(int length) {
+	public ExponentialMovingAverage(int length, boolean smaInit) {
 		this.length = length;
 		sma = new MovingAverage(length);
 		alpha = calculateAlpha(length);
+		this.smaInit = smaInit;
+	}
+	
+	public ExponentialMovingAverage(int length) {
+		this(length, true);
 	}
 	
 	public double calculateAlpha(int length) {
@@ -30,6 +36,9 @@ public class ExponentialMovingAverage implements IWindowedOperation {
 	}
 	
 	public double add(double value) {
+		if (!smaInit && ema==null)
+			ema = value;
+		
 		if (ema==null) {
 			sma.add(value);
 			
