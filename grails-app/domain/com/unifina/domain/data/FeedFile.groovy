@@ -13,15 +13,16 @@ class FeedFile {
 	Boolean processing
 	Boolean processTaskCreated
 	Feed feed
+	Stream stream
 	
 	static mapping = {
 		version false
 	}
 	
     static constraints = {
-		feed(unique: ['day'])
 		processing(nullable:true)
 		processTaskCreated(nullable:true)
+		stream(nullable:true)
     }
 	
 	String toString() {

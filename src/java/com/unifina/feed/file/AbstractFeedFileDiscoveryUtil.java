@@ -10,6 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedFileService;
 
 /**
@@ -84,7 +85,8 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 				FilenameUtils.getName(location), 
 				getBeginDate(location), 
 				getEndDate(location), 
-				feed, 
+				feed,
+				getStreamId(location),
 				location, 
 				isCompressed(location), 
 				getFileStorageAdapterClass());
@@ -118,6 +120,17 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	 */
 	protected boolean getDownload() {
 		return false;
+	}
+	
+	/**
+	 * This method should return null if the found FeedFile is a bundle with multiple
+	 * streams in it. Otherwise, it should return the id of the Stream contained in 
+	 * the FeedFile.
+	 * 
+	 * The default implementation returns null.
+	 */
+	protected Long getStreamId(String location) {
+		return null;
 	}
 	
 	/**

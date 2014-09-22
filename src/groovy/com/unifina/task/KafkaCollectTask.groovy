@@ -15,6 +15,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.task.Task
+import com.unifina.feed.kafka.KafkaFeedFileName
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
@@ -46,15 +47,13 @@ public class KafkaCollectTask extends AbstractTask {
 		Map streamConfig = JSON.parse(stream.streamConfig)
 		String topic = streamConfig.topic
 		
-		SimpleDateFormat fdf = new SimpleDateFormat("yyyyMMdd")
-		String name = "kafka."+fdf.format(new Date(beginTime))+"."+stream.id+".gz"
+		String name = config.filename
 		
 		File dir = File.createTempDir(name, "")
 		File file = new File(dir, name)
 		GZIPOutputStream gzos = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(file)))
 		
 		final AtomicBoolean done = new AtomicBoolean(false);
-		final AtomicLong touched = new AtomicLong(System.currentTimeMillis());
 		
 		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
 		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
@@ -76,7 +75,6 @@ public class KafkaCollectTask extends AbstractTask {
 						byte[] length = lengthBuffer.putInt(rawMsg.length).array();
 						gzos.write(length)
 						gzos.write(rawMsg)
-						touched.set(System.currentTimeMillis())
 					} catch (IOException e) {
 						log.error("Error writing to file!",e)
 					}
@@ -85,8 +83,8 @@ public class KafkaCollectTask extends AbstractTask {
 		}, beginTime)
 		
 		// Wait for the Kafka consumption to finish (or timeout in case there are no messages after endDate!)
-		// FIXME: fix timeout hack when the consumer improves
-		while (!done.get() && System.currentTimeMillis()-touched.get() < 60000L) {
+		// It may be possible to change the timeout system into something better in the future
+		while (!done.get() && consumer.getTimeSinceLastEvent() < 60000L) {
 			Thread.sleep(1000L);
 		}
 		consumer.close()
@@ -116,6 +114,7 @@ public class KafkaCollectTask extends AbstractTask {
 				feedFile.processing = true
 				feedFile.processTaskCreated = false
 				feedFile.feed = stream.feed
+				feedFile.stream = stream
 				feedFile.save(flush:true, failOnError:true)
 			}
 			
@@ -150,8 +149,9 @@ public class KafkaCollectTask extends AbstractTask {
 	public void onComplete(boolean taskGroupComplete) {
 		
 	}
-
+	
 	public static Map<String,Object> getConfig(Stream stream, Date beginDate, Date endDate) {
-		return [streamId:stream.id, beginDate:beginDate.time, endDate:endDate.time]
+		String filename = new KafkaFeedFileName(stream, beginDate).toString()
+		return [streamId:stream.id, beginDate:beginDate.time, endDate:endDate.time, filename:filename]
 	}
 }

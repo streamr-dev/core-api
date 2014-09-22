@@ -34,22 +34,6 @@ class FeedFileService {
 	
 	TaskService taskService
 	
-//    boolean checkAccess(SecUser user,String dataToken,Date day,OrderBookDirectory ob) {
-//		/**
-//		 * Check that the data tokens match
-//		 */
-//		if (dataToken==null || !dataToken.equals(user.dataToken))
-//			return false
-//		
-//		/**
-//		 * Check that the user has a proper MarketSubscription
-//		 */
-//		if (user.subscriptions.find {it.market == ob.market && it.depth == ob.depth && useCase.type=="Historical"}==null)
-//			return false
-//		
-//		return true
-//    }
-	
 	FeedFile getFeedFile(Long id) {
 		FeedFile.get(id)
 	}
@@ -104,6 +88,7 @@ class FeedFileService {
 		feedFile.processing = true
 		feedFile.processTaskCreated = true
 		feedFile.feed = remoteFile.getFeed()
+		feedFile.stream = remoteFile.getStreamId() != null ? Stream.load(remoteFile.getStreamId()) : null
 		return feedFile
 	}
 
@@ -277,25 +262,6 @@ class FeedFileService {
 		feedFile = FeedFile.get(feedFile.id)
 		getFileStorageAdapter().store(f, getCanonicalName(feedFile.feed, feedFile.day, f.name))
 	}
-	
-	// Too slow to do this one by one
-//	public void saveOrUpdateStream(Stream example, FeedFile feedFile) {
-//		// Does it exist in the DB?
-//		Stream db = Stream.findByFeedAndLocalId(feedFile.feed, example.localId)
-//		if (!db) {
-//			log.info("New Stream found from FeedFile $feedFile: $example")
-//			db = example
-//		}
-//		
-//		if (db.firstHistoricalDay==null || db.firstHistoricalDay.after(feedFile.day))
-//			db.firstHistoricalDay = feedFile.day
-//		if (db.lastHistoricalDay==null || db.lastHistoricalDay.before(feedFile.day))
-//			db.lastHistoricalDay = feedFile.day
-//
-//		db.save(failOnError:true)
-//	}
-	
-	
 	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
