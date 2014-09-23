@@ -260,7 +260,9 @@ class FeedFileService {
 	
 	public void storeFile(File f, FeedFile feedFile) {
 		feedFile = FeedFile.get(feedFile.id)
-		getFileStorageAdapter().store(f, getCanonicalName(feedFile.feed, feedFile.day, f.name))
+		String canonicalName = getCanonicalName(feedFile.feed, feedFile.day, f.name)
+		log.info("Storing $f to $canonicalName")
+		getFileStorageAdapter().store(f, canonicalName)
 	}
 	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,

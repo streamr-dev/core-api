@@ -8,6 +8,7 @@ import java.nio.ByteOrder
 
 import kafka.producer.ProducerConfig
 
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.FeedFile
@@ -25,6 +26,8 @@ class KafkaService {
 
 	UnifinaKafkaProducer producer = null
 	GrailsApplication grailsApplication
+	
+	private static final Logger log = Logger.getLogger(KafkaService)
 
 	@CompileStatic
     void sendMessage(String channelId, Object key, String message, boolean isJson=true) {
@@ -46,23 +49,26 @@ class KafkaService {
 	}
 	
 	Date getFirstTimestamp(String topic) {
+		log.info("Querying first timestamp for topic $topic...")
 		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
 		Date firstTimestamp = null
 		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
-
 			@Override
 			public void handleMessage(UnifinaKafkaMessage msg) {
 				if (firstTimestamp==null)
 					firstTimestamp = new Date(msg.getTimestamp())
 			}
-		}, 0L)
+		}, true)
 		
 		// Wait for the Kafka consumption to finish (or timeout)!
-		long startTime = System.currentTimeMillis()
-		while (firstTimestamp==null && System.currentTimeMillis()-startTime < 60L*1000L) {
+		while (firstTimestamp==null && consumer.getTimeSinceLastEvent() < 60L*1000L) {
 			Thread.sleep(1000L);
 		}
 		consumer.close()
+		
+		if (firstTimestamp==null)
+			log.warn("Timed out while waiting for the first message of topic $topic")
+		
 		return firstTimestamp
 	}
 	
