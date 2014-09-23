@@ -6,10 +6,10 @@
  * loaded (saveData, signalPathData, signalPathContext)
  * saving
  * saved (saveData)
- * started
+ * started (signalPathData)
  * stopped
  * workspaceChanged (mode)
- * moduleAdded(jsonData, div)
+ * moduleAdded(signalPathData, div)
  * 
  * Events for internal use:
  * _signalPathLoadModulesReady
@@ -490,7 +490,7 @@ var SignalPath = (function () {
 		request.onMessage = handleResponse;
 		subSocket = socket.subscribe(request);
 		
-		$(pub).trigger('started');
+		$(pub).trigger('started', [ saveData ]);
 	}
 	
 	function reconnect(sId) {

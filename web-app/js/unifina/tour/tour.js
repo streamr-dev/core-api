@@ -94,6 +94,11 @@ Tour.prototype.next = function() {
 
 Tour.prototype._completed = function() {
 	console.log('Tour completed', this._tourNumber)
+
+	mixpanel.track('Tour completed', {
+		tourNumber: this._tourNumber
+	})
+
 	$.post(Streamr.createLink({ controller: 'TourUser', action: 'completed' }),
 		{ tourNumber: this._tourNumber })
 }
@@ -105,6 +110,12 @@ Tour.prototype.start = function(step) {
 		window.location = Streamr.createLink(this._controller, this._action) +
 			'?playTour=' + this._tourNumber
 		return false;
+	}
+
+	if (step === 0) {
+		mixpanel.track('Tour started', {
+			tourNumber: this._tourNumber
+		})
 	}
 
 	hopscotch.startTour({

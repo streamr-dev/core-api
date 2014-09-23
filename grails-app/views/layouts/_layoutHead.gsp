@@ -18,13 +18,27 @@
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
 		Streamr.user = {}
+
+		var _mixpanelTrack = mixpanel.track
+		mixpanel.track = function() {
+			console.log('mixpanel.track', arguments)
+			return _mixpanelTrack.apply(mixpanel, arguments)
+		}
+
+		<sec:ifLoggedIn>
+			Streamr.user.id = '<sec:loggedInUserInfo field="id"/>'
+			Streamr.user.username = '<sec:loggedInUserInfo field="username"/>'
+
+			console.log('mixpanel.identify', Streamr.user.id)
+
+			mixpanel.identify(Streamr.user.id)
+		</sec:ifLoggedIn>
     </script>
-    
+
     <r:require module="streamr"/>
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
-	<r:require module="superfish" />
 
 	<r:require module='tour'/>
 
