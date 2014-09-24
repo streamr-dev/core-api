@@ -16467,21 +16467,6 @@ body.build-page #content-wrapper {
   top: 50%;
   left: 50%;
 }
-.favorite-button {
-  width: 22px;
-  height: 22px;
-  padding: 0;
-}
-.favorite-button.active {
-  background: transparent url(../../images/star.png) no-repeat;
-}
-.favorite-button.inactive {
-  background: transparent url(../../images/star_inactive.png) no-repeat;
-}
-.favorite-button.inactive:hover {
-  opacity: 0.4;
-  background: transparent url(../../images/star.png) no-repeat;
-}
 .widget-notifications .notification {
   position: relative;
   padding: 7px 12px;
