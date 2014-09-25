@@ -25,7 +25,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		div.attr("id",pub.json.id);
 		
 		// Name holder
-		var ioname = $("<div class='ioname'>"+pub.getDisplayName()+"</span>");
+		var ioname = $("<div class='ioname'></span>");
+		ioname.append(pub.getDisplayName())
 		div.append(ioname);
 		
 		// Add to parent
@@ -49,6 +50,21 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		if (!pub.disableContextMenu) {
 			div.addClass("context-menu");
 		}
+		
+		// Bind basic connection event handlers
+		div.bind("spConnect", (function(me) {
+			return function(event, output) {
+				me.json.connected = true;
+				me.div.addClass("connected");
+			}
+		})(pub));
+		
+		div.bind("spDisconnect", (function(me) {
+			return function(event, output) {
+				me.json.connected = false;
+				me.div.removeClass("connected");
+			}
+		})(pub));
 		
 		div.trigger("spIOReady");
 		
@@ -216,6 +232,15 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 
 	}
 	
+	function isConnected() {
+		return json.connected
+	}
+	pub.isConnected = isConnected
+	
+	pub.toJSON = function() {
+		return pub.json;
+	}
+	
 	// abstract, must be overridden	
 	function connect(endpoint) {
 		throw new Exception("connect() called in Endpoint");
@@ -232,12 +257,6 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	function refreshConnections() {
 		throw new Exception("refreshConnections() called in Endpoint");
 	}
-	
-	// abstract, must be overridden
-	function toJSON() {
-		throw new Exception("toJSON() called in Endpoint");
-	}
-	pub.toJSON = toJSON;
 	
 	return pub;
 }

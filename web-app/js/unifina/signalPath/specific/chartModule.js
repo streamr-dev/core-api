@@ -442,16 +442,111 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 SignalPath.HighStocksModule = SignalPath.ChartModule;
 
 /**
- * ChartInput is an Input with context menu modifications:
- * - Rename option is now shown
- * - Y-axis selection option is added
+ * ChartInput is an Input with the following modifications:
+ * - Input name is now shown
+ * - Rename option is now shown in context menu
+ * - Y-axis selection option is added to context menu
  */
 SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 	pub = pub || {};
 	pub = SignalPath.Input(json, parentDiv, module, type, pub);
 	
+	var tooltipAxisId = new Date().getTime()
+	var $yAxisSelectorButton = $("<div class='y-axis-number btn btn-primary btn-xs' data-toggle='tooltip'>"+json.yAxis+"</div>")
+	
+	var super_createDiv = pub.createDiv
+	pub.createDiv = function() {
+		var div = super_createDiv()
+		div.bind("spConnect", function(event, output) {
+			div.find(".y-axis-number").show()
+			jsPlumb.repaint($(module.div).find("div.input"))
+		})
+		div.bind("spDisconnect", function(event, output) {
+			div.find(".y-axis-number").hide()
+			jsPlumb.repaint($(module.div).find("div.input"));
+		})
+		
+		pub.div.tooltip({
+			selector: '.y-axis-number',
+			container: '#'+SignalPath.options.canvas,
+			html: true
+		})
+		
+		$yAxisSelectorButton.click(function() {
+			json.yAxis = getNextYAxis()
+			updateButton()
+		})
+		updateButton()
+		
+		return div
+	}
+
+	function arrayFind(a, func) {
+		var result = []
+		a.forEach(function(e) {
+			if (func(e))
+				result.push(e)
+		})
+		return result
+	}
+	
+	function getNextYAxis(current) {
+		// Find unique yaxis numbers and count how many inputs we have at each
+		var inputs = module.getInputs()
+		var connectedInputs = arrayFind(inputs, function(input) {
+			return input.isConnected()
+		})
+		var yAxisCounts = {}
+		var yAxisUniqueIds = []
+		connectedInputs.forEach(function(input) {
+			if (yAxisCounts[input.json.yAxis.toString()]===undefined) {
+				yAxisCounts[input.json.yAxis.toString()] = 1
+				yAxisUniqueIds.push(input.json.yAxis)
+			}
+			else yAxisCounts[input.json.yAxis.toString()] = yAxisCounts[input.json.yAxis.toString()] + 1
+		})
+		
+		// Sort yaxis ids numerically in ascending order
+		yAxisUniqueIds.sort(function(a, b){return a-b})
+		
+		// Find the smallest free axis index
+		var smallestFreeAxis = 0
+		while (yAxisUniqueIds.indexOf(smallestFreeAxis)>=0)
+			smallestFreeAxis++
+		
+		// If this input is the only one with in the current number, we're at the "free" position
+		var atFree = (yAxisCounts[json.yAxis.toString()] === 1)
+		
+		// If we are at the "free" number, get the next valid number
+		if (atFree) {
+			return yAxisUniqueIds[(yAxisUniqueIds.indexOf(json.yAxis) + 1) % yAxisUniqueIds.length]
+		}
+		// Else if the next number if the smallest free number, return that
+		else if (json.yAxis+1 === smallestFreeAxis) {
+			return json.yAxis+1
+		}
+		// Else if we're at the end of the array, wrap to the lesser of (smallestFreeAxis, yAxisUniqueIds[0])
+		else if (yAxisUniqueIds.indexOf(json.yAxis) === yAxisUniqueIds.length-1) {
+			return Math.min(smallestFreeAxis, yAxisUniqueIds[0])
+		}
+		// Else just return the next number, regardless of free or not
+		else {
+			return json.yAxis + 1
+		}
+	}
+	
+	function updateButton() {
+		$yAxisSelectorButton.attr("data-original-title", "This input is drawn on y-axis <strong><span id='"+tooltipAxisId+"'>"+json.yAxis+"</span></strong>.")
+		$yAxisSelectorButton.html(json.yAxis)
+		$("#"+tooltipAxisId).html(json.yAxis)
+	}
+	
+	pub.getDisplayName = function(connected) {
+		return $yAxisSelectorButton
+	}
+	
 	var super_getContextMenu = pub.getContextMenu
-	function getContextMenu(div) {
+	pub.getContextMenu = function(div) {
 		var menu = []
 
 		// Chart inputs need not be renamed
@@ -459,16 +554,12 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 			if (o.title!=="Rename")
 				menu.push(o)
 		})
-		
-		// Y-axis can be set chart inputs
-		menu.push({title: "Set Y-axis", cmd: "yaxis"})
 
 		return menu;
 	}
-	pub.getContextMenu = getContextMenu;
 	
 	var super_handleContextMenuSelection = pub.handleContextMenuSelection
-	function handleContextMenuSelection(target, selection) {
+	pub.handleContextMenuSelection = function(target, selection) {
 		if (selection=="yaxis") {
 			var n = $(target.div).find(".ioname").text();
 			var yAxis = prompt("Axis number for "+n+":",target.json.yAxis);
@@ -479,7 +570,6 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 		}
 		else super_handleContextMenuSelection(target, selection);
 	}
-	pub.handleContextMenuSelection = handleContextMenuSelection;
 	
 	return pub;
 }

@@ -151,18 +151,5 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		}
 	}
 	
-	pub.toJSON = function() {
-//		var connectedEndpoints = pub.getConnectedEndpoints();
-//
-//		if (connectedEndpoints.length>0) {
-//			pub.json.connected = true;
-//			pub.json.id = pub.getId();
-//			pub.json.sourceId = connectedEndpoints[0].getId();
-//		}
-//		else pub.json.connected = false;
-
-		return pub.json;
-	}
-	
 	return pub;
 }
