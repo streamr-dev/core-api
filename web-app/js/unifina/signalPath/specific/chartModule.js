@@ -59,6 +59,13 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	}
 	prot.createDiv = createDiv;	
 	
+	// Create ChartInputs instead of ordinary Inputs
+	var super_addInput = prot.addInput
+	function addInput(data) {
+		return super_addInput(data, SignalPath.ChartInput)
+	}
+	prot.addInput = addInput
+	
 	function getChart() {
 		return chart;
 	}
@@ -106,28 +113,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			resizeChart(prot.div.width(), prot.div.height())
 		}
 	}
-	
-	var superGetContextMenu = prot.getContextMenu
-	prot.getContextMenu = function(div) {
-		var menu = superGetContextMenu(div)
-		if (div.hasClass("ioname")) {
-			menu.push({title: "Set Y-axis", cmd: "yaxis"})
-		}
-		return menu;
-	}
-	
-	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
-	prot.handleContextMenuSelection = function(target, selection) {
-		if (selection=="yaxis") {
-			var n = $(target.div).find(".ioname").text();
-			var yAxis = prompt("Axis number for "+n+":",target.json.yAxis);
-			if (yAxis != null)
-				target.json.yAxis = parseInt(yAxis);
-
-			$(prot.div).trigger('yAxisChanged', n)
-		}
-		else superHandleContextMenuSelection(target, selection);
-	};
 	
 	function createRangeButtons(buttonDiv,config) {
 		config.forEach(function(c) {
@@ -455,3 +440,46 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 }
 
 SignalPath.HighStocksModule = SignalPath.ChartModule;
+
+/**
+ * ChartInput is an Input with context menu modifications:
+ * - Rename option is now shown
+ * - Y-axis selection option is added
+ */
+SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
+	pub = pub || {};
+	pub = SignalPath.Input(json, parentDiv, module, type, pub);
+	
+	var super_getContextMenu = pub.getContextMenu
+	function getContextMenu(div) {
+		var menu = []
+
+		// Chart inputs need not be renamed
+		$(super_getContextMenu(div)).each(function(i,o) {
+			if (o.title!=="Rename")
+				menu.push(o)
+		})
+		
+		// Y-axis can be set chart inputs
+		menu.push({title: "Set Y-axis", cmd: "yaxis"})
+
+		return menu;
+	}
+	pub.getContextMenu = getContextMenu;
+	
+	var super_handleContextMenuSelection = pub.handleContextMenuSelection
+	function handleContextMenuSelection(target, selection) {
+		if (selection=="yaxis") {
+			var n = $(target.div).find(".ioname").text();
+			var yAxis = prompt("Axis number for "+n+":",target.json.yAxis);
+			if (yAxis != null)
+				target.json.yAxis = parseInt(yAxis);
+
+			$(module.div).trigger('yAxisChanged', n)
+		}
+		else super_handleContextMenuSelection(target, selection);
+	}
+	pub.handleContextMenuSelection = handleContextMenuSelection;
+	
+	return pub;
+}

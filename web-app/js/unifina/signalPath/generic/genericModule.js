@@ -305,10 +305,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return td;
 	}
 	
-	prot.addInput = function(data) {
+	prot.addInput = function(data, clazz) {
+		clazz = clazz || SignalPath.Input
+		
 		var td = createRoomForIO("input");
 
-		var endpoint = SignalPath.Input(data, td, prot);
+		var endpoint = clazz(data, td, prot);
 		endpoint.createDiv();
 		prot.inputs.push(endpoint);
 		prot.inputsByName[endpoint.getName()] = endpoint;
@@ -316,10 +318,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return endpoint;
 	}
 
-	prot.addOutput = function(data) {
+	prot.addOutput = function(data, clazz) {
+		clazz = clazz || SignalPath.Output
+		
 		var td = createRoomForIO("output");
 
-		var endpoint = SignalPath.Output(data, td, prot);
+		var endpoint = clazz(data, td, prot);
 		endpoint.createDiv();
 		prot.outputs.push(endpoint);
 		prot.outputsByName[endpoint.getName()] = endpoint;

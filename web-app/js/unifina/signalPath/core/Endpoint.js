@@ -144,10 +144,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	function getContextMenu(div) {
 		var menu = pub.module.getContextMenu(div);
 		
-//		if (div.hasClass("ioname")) {
 		menu.push({title: "Rename", cmd: "rename"});
 		menu.push({title: "Toggle export", cmd: "export"});
-//		}
+
 		return menu;
 	}
 	pub.getContextMenu = getContextMenu;
