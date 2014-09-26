@@ -7,6 +7,7 @@ import java.util.Map;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.Output;
+import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.DU;
 
 /**
@@ -36,10 +37,14 @@ public class ModuleTestHelper {
 
 		// Pair output values with actual outputs
 		for (String s : outputValuesByName.keySet()) {
-			Output<Object> output = module.getOutput(s);
+			Output output = module.getOutput(s);
 			if (output==null)
 				throw new IllegalArgumentException("No output found by name: "+s);
 			outputHolders.add(new OutputHolder(output, outputValuesByName.get(s)));
+			
+			// Set noRepeat on all TimeSeriesOutputs to false
+			if (output instanceof TimeSeriesOutput)
+				((TimeSeriesOutput)output).noRepeat = false;
 		}
 		
 		if (inputHolders.size()==0 || inputHolders.get(0).values.size()==0)
