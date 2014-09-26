@@ -81,7 +81,7 @@ public class ModuleTestHelper {
 			// Test outputs
 			if (i>=skip) {
 				for (OutputHolder h : outputHolders)  {
-					Object value = h.output.getValue();
+					Object value = h.targetInput.getValue();
 					Object target = h.values.get(i);
 					if (target instanceof Double)
 						target = DU.clean((Double)target);
@@ -132,11 +132,33 @@ public class ModuleTestHelper {
 	
 	class OutputHolder {
 		public Output<Object> output;
+		public Input<Object> targetInput;
 		public List<Object> values;
 		
 		public OutputHolder(Output<Object> output, List<Object> values) {
 			this.output = output;
 			this.values = values;
+			
+			// Create a dummy target module with one input
+			AbstractSignalPathModule module = new AbstractSignalPathModule() {
+				
+				Input<Object> input = new Input<Object>(this, "input", "Object");
+				
+				@Override
+				public void init() {
+					addInput(input);
+				}
+				
+				@Override
+				public void sendOutput() {}
+				
+				@Override
+				public void clearState() {}
+			};
+			module.init();
+			targetInput = module.getInput("input");
+			
+			output.connect(targetInput);
 		}
 		
 	}
