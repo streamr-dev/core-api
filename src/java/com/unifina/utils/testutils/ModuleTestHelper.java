@@ -77,8 +77,11 @@ public class ModuleTestHelper {
 		
 		for (int i=0; i<valueCount; i++) {
 			// Set input values
-			for (InputHolder h : inputHolders)
-				h.input.receive(h.values.get(i));
+			for (InputHolder h : inputHolders) {
+				Object val = h.values.get(i);
+				if (val!=null)
+					h.input.receive(val);
+			}
 			
 			// Activate module
 			module.sendOutput();
