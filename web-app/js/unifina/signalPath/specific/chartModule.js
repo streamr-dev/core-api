@@ -443,9 +443,10 @@ SignalPath.HighStocksModule = SignalPath.ChartModule;
 
 /**
  * ChartInput is an Input with the following modifications:
- * - Input name is now shown
- * - Rename option is now shown in context menu
- * - Y-axis selection option is added to context menu
+ * - Input name is not shown
+ * - Rename option is not shown in context menu
+ * - Y-axis indicator button is shown for connected inputs
+ * - Y-axis assignment can be cycled by clicking on the Y-axis indicator button 
  */
 SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 	pub = pub || {};
