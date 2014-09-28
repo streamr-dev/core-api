@@ -7,6 +7,7 @@ import java.util.Map;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.Output;
+import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.DU;
 
 /**
@@ -36,10 +37,14 @@ public class ModuleTestHelper {
 
 		// Pair output values with actual outputs
 		for (String s : outputValuesByName.keySet()) {
-			Output<Object> output = module.getOutput(s);
+			Output output = module.getOutput(s);
 			if (output==null)
 				throw new IllegalArgumentException("No output found by name: "+s);
 			outputHolders.add(new OutputHolder(output, outputValuesByName.get(s)));
+			
+			// Set noRepeat on all TimeSeriesOutputs to false
+			if (output instanceof TimeSeriesOutput)
+				((TimeSeriesOutput)output).noRepeat = false;
 		}
 		
 		if (inputHolders.size()==0 || inputHolders.get(0).values.size()==0)
@@ -72,8 +77,11 @@ public class ModuleTestHelper {
 		
 		for (int i=0; i<valueCount; i++) {
 			// Set input values
-			for (InputHolder h : inputHolders)
-				h.input.receive(h.values.get(i));
+			for (InputHolder h : inputHolders) {
+				Object val = h.values.get(i);
+				if (val!=null)
+					h.input.receive(val);
+			}
 			
 			// Activate module
 			module.sendOutput();
@@ -81,7 +89,7 @@ public class ModuleTestHelper {
 			// Test outputs
 			if (i>=skip) {
 				for (OutputHolder h : outputHolders)  {
-					Object value = h.output.getValue();
+					Object value = h.targetInput.getValue();
 					Object target = h.values.get(i);
 					if (target instanceof Double)
 						target = DU.clean((Double)target);
@@ -132,11 +140,33 @@ public class ModuleTestHelper {
 	
 	class OutputHolder {
 		public Output<Object> output;
+		public Input<Object> targetInput;
 		public List<Object> values;
 		
 		public OutputHolder(Output<Object> output, List<Object> values) {
 			this.output = output;
 			this.values = values;
+			
+			// Create a dummy target module with one input
+			AbstractSignalPathModule module = new AbstractSignalPathModule() {
+				
+				Input<Object> input = new Input<Object>(this, "input", "Object");
+				
+				@Override
+				public void init() {
+					addInput(input);
+				}
+				
+				@Override
+				public void sendOutput() {}
+				
+				@Override
+				public void clearState() {}
+			};
+			module.init();
+			targetInput = module.getInput("input");
+			
+			output.connect(targetInput);
 		}
 		
 	}

@@ -1,9 +1,3 @@
-/**
- * ChartModule events:
- *
- * yAxisChanged(inputName)
- */
-
 SignalPath.ChartModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.GenericModule(data,canvas,prot)
@@ -59,6 +53,30 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	}
 	prot.createDiv = createDiv;	
 	
+	// Create ChartInputs instead of ordinary Inputs
+	var super_addInput = prot.addInput
+	function addInput(data) {
+		var input = super_addInput(data, SignalPath.ChartInput)
+		input.div.on('yAxisChanged', function(event, name, yx) {
+			if (chart) {
+				var seriesIndex = pub.getInput(name).seriesIndex
+				if (seriesIndex !== null) {
+					
+					// Add a new yAxis to the chart if necessary
+					if (realYAxis[yx]===undefined) {
+						var newAxis = createYAxisOptions({}, chart.yAxis.length)
+						realYAxis[yx] = chart.yAxis.length
+						yAxis.push(newAxis)
+						chart.addAxis(newAxis, false)
+					}
+					
+					chart.series[seriesIndex].update({yAxis: realYAxis[yx]}, true)
+				}
+			}
+		})
+	}
+	prot.addInput = addInput
+	
 	function getChart() {
 		return chart;
 	}
@@ -107,28 +125,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 	}
 	
-	var superGetContextMenu = prot.getContextMenu
-	prot.getContextMenu = function(div) {
-		var menu = superGetContextMenu(div)
-		if (div.hasClass("ioname")) {
-			menu.push({title: "Set Y-axis", cmd: "yaxis"})
-		}
-		return menu;
-	}
-	
-	var superHandleContextMenuSelection = prot.handleContextMenuSelection;
-	prot.handleContextMenuSelection = function(target, selection) {
-		if (selection=="yaxis") {
-			var n = $(target.div).find(".ioname").text();
-			var yAxis = prompt("Axis number for "+n+":",target.json.yAxis);
-			if (yAxis != null)
-				target.json.yAxis = parseInt(yAxis);
-
-			$(prot.div).trigger('yAxisChanged', n)
-		}
-		else superHandleContextMenuSelection(target, selection);
-	};
-	
 	function createRangeButtons(buttonDiv,config) {
 		config.forEach(function(c) {
 			var button = $('<button class="btn btn-default btn-sm">'+c.name+"</button>")
@@ -150,6 +146,17 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 	}
 	
+	function createYAxisOptions(options, n) {
+		var result = $.extend({
+			opposite: (n%2==0),
+			offset: (Math.floor(n/2)+1)*30,
+			title: {
+				text: ""
+			}
+		}, SignalPath.defaultChartOptions.yAxis || {}, options)
+		return result
+	}
+	
 	function initChart(title,series,yAxis) {
 		destroyChart();
 
@@ -163,7 +170,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 		else if ($.isArray(yAxis)) {
 			for (var i=0;i<yAxis.length;i++)
-				yAxis[i] = $.extend({}, SignalPath.defaultChartOptions.yAxis || {}, yAxis[i]);
+				yAxis[i] = createYAxisOptions(yAxis[i], i);
 		}
 
 		Highcharts.setOptions({
@@ -172,7 +179,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			}
 		});
 
-		
 		var opts = {
 				chart: {
 					animation: false,
@@ -270,6 +276,10 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				if (d.s<chart.series.length) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
 					chart.series[d.s].addPoint([d.x, d.y],false,false,false);
+					if (seriesMeta[d.s].min > d.y)
+						seriesMeta[d.s].min = d.y
+					if (seriesMeta[d.s].max < d.y)
+						seriesMeta[d.s].max = d.y
 				}
 				// Are there pending series adds in seriesMeta?
 				else {
@@ -295,31 +305,15 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			yAxis = d.yAxis || [];
 			
 			var x=0;
-			// Init axis opposite valus
-			for (var i=0;i<yAxis.length;i++) {
-				if (yAxis[i].opposite==null) {
-					yAxis[i].opposite = (x%2==0);
-					x++;
-				}
-			}
-			
-			x=0;
-			var left = 0;
-			var right = 0;
+			var seenYAxisNumbers = []
+			// Remap the "user" yAxis assignments to actual Highcharts ones,
+			// which need to be ascending and without gaps
 			$(d.series).each(function (i,s) {
-				if (s.yAxis==null || s.yAxis+1>yAxis.length) {
-					yAxis.push({
-						offset: ((x%2==0 ? left : right)+1)*30,
-						opposite: (x%2==0)	
-					});
-					
-					if (x%2==0)
-						left++;
-					else right++;
-					
+				if (s.yAxis==null || $.inArray(s.yAxis, seenYAxisNumbers)<0) {
+					seenYAxisNumbers.push(s.yAxis)
+					yAxis.push({});
 					realYAxis[s.yAxis] = x;
 					s.yAxis = x;
-					
 					x++;
 				}
 				else {
@@ -336,6 +330,10 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			
 			// Delay adding the series to the chart until they get data points, Highstocks is buggy
 			seriesMeta = d.series;
+			seriesMeta.forEach(function(meta) {
+				meta.min = Infinity
+				meta.max = -Infinity
+			})
 
 			chartTitle = d.title;
 			
@@ -363,7 +361,10 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			if (chart==null || s.data==null || s.data.length<2) {
 				while (seriesMeta.length < s.idx + 1)
 					seriesMeta.push({});
+				
 				seriesMeta[s.idx] = s;
+				s.min = Infinity
+				s.max = -Infinity
 			}
 			else chart.addSeries(s,true,false);
 		}
@@ -451,7 +452,216 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		superUpdateFrom(data);
 	}
 	
+	/**
+	 * On start, bind connected inputs to series indices. We need
+	 * to know which input results in which series.
+	 */
+	$(SignalPath).on("started", function() {
+		// Reset all series indices
+		pub.getInputs().forEach(function(input) {
+			input.seriesIndex = null
+		})
+		var connectedInputs = pub.getInputs().filter(function(input) {
+			return input.isConnected()
+		})
+		for (var i=0; i<connectedInputs.length; i++) {
+			connectedInputs[i].seriesIndex = i
+		}
+	})
+	
+	/**
+	 * On SignalPath stopped, check that all series are shown properly in relation to chart yaxis range
+	 */
+	$(SignalPath).on("stopped", function() {
+		if (chart && chart.series.length > 1) {
+			// Find connected inputs
+			var connectedInputs = pub.getInputs().filter(function(input) {
+				return input.isConnected()
+			})
+			
+			for (var i=0; i<chart.series.length; i++) {
+				var yAxisRange = chart.series[i].yAxis.getExtremes().max - chart.series[i].yAxis.getExtremes().min
+				var seriesRange = seriesMeta[i].max - seriesMeta[i].min
+				
+				// If series range is less than 10% of axis range, show a tip
+				if (seriesRange/yAxisRange < 0.1) {
+					var $input = connectedInputs[i] 
+					$input.div.data("spObject").showYAxisWarning(chart.series[i].name)
+				}
+			}
+		}
+	})
+	
 	return pub;
 }
 
 SignalPath.HighStocksModule = SignalPath.ChartModule;
+
+/**
+ * ChartInput is an Input with the following modifications:
+ * - Input name is not shown
+ * - Rename option is not shown in context menu
+ * - Y-axis indicator button is shown for connected inputs
+ * - Y-axis assignment can be cycled by clicking on the Y-axis indicator button 
+ * 
+ * Events:
+ * - yAxisChanged(inputName, yAxis)
+ */
+SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
+	pub = pub || {};
+	pub = SignalPath.Input(json, parentDiv, module, type, pub);
+	
+	var btnDefaultClass = "btn-default"
+	var btnPopoverClass = "btn-warning"
+	var popoverClass = "popover-warning"
+	
+	var tooltipAxisId = generateId()
+
+	// Use 1-based index for display to the user
+	var displayedAxis = json.yAxis + 1
+	// Cycle Y-axis button
+	var $yAxisSelectorButton = $("<div class='y-axis-number btn "+btnDefaultClass+" btn-xs "+popoverClass+" popover-colorful'></div>")
+	
+	pub.seriesIndex = null
+	
+	var super_createDiv = pub.createDiv
+	pub.createDiv = function() {
+		var div = super_createDiv()
+		div.bind("spConnect", function(event, output) {
+			div.find(".y-axis-number").show()
+			jsPlumb.repaint($(module.div).find("div.input"))
+		})
+		div.bind("spDisconnect", function(event, output) {
+			div.find(".y-axis-number").hide()
+			jsPlumb.repaint($(module.div).find("div.input"));
+		})
+		
+		$yAxisSelectorButton.click(cycleYAxis)
+		pub.div.tooltip({
+			selector: ".y-axis-number",
+			html: true,
+			title: function() {
+				return "This input is drawn on y-axis <strong><span id='"+tooltipAxisId+"'>"+displayedAxis+"</span></strong>."
+			}
+		})
+		updateButton()
+		
+		return div
+	}
+	
+	function generateId() {
+		var result = "tooltip_content_"+new Date().getTime()
+		while ($("#"+result).size()>0)
+			result = "tooltip_content_"+new Date().getTime()
+		return result
+	}
+	
+	function getNextYAxis(current) {
+		// Find unique yaxis numbers and count how many inputs we have at each
+		var inputs = module.getInputs()
+		var connectedInputs = inputs.filter(function(input) {
+			return input.isConnected()
+		})
+		var yAxisCounts = {}
+		var yAxisUniqueIds = []
+		connectedInputs.forEach(function(input) {
+			if (yAxisCounts[input.json.yAxis.toString()]===undefined) {
+				yAxisCounts[input.json.yAxis.toString()] = 1
+				yAxisUniqueIds.push(input.json.yAxis)
+			}
+			else yAxisCounts[input.json.yAxis.toString()] = yAxisCounts[input.json.yAxis.toString()] + 1
+		})
+		
+		// Sort yaxis ids numerically in ascending order
+		yAxisUniqueIds.sort(function(a, b){return a-b})
+		
+		// Find the smallest free axis index
+		var smallestFreeAxis = 0
+		while (yAxisUniqueIds.indexOf(smallestFreeAxis)>=0)
+			smallestFreeAxis++
+		
+		// If this input is the only one with in the current number, we're at the "free" position
+		var atFree = (yAxisCounts[json.yAxis.toString()] === 1)
+		
+		// If we are at the "free" number, get the next valid number
+		if (atFree) {
+			return yAxisUniqueIds[(yAxisUniqueIds.indexOf(json.yAxis) + 1) % yAxisUniqueIds.length]
+		}
+		// Else if the next number if the smallest free number, return that
+		else if (json.yAxis+1 === smallestFreeAxis) {
+			return json.yAxis+1
+		}
+		// Else if we're at the end of the array, wrap to the lesser of (smallestFreeAxis, yAxisUniqueIds[0])
+		else if (yAxisUniqueIds.indexOf(json.yAxis) === yAxisUniqueIds.length-1) {
+			return Math.min(smallestFreeAxis, yAxisUniqueIds[0])
+		}
+		// Else just return the next number, regardless of free or not
+		else {
+			return json.yAxis + 1
+		}
+	}
+	
+	function updateButton() {
+		displayedAxis = json.yAxis + 1
+		$yAxisSelectorButton.html(displayedAxis)
+		$("#"+tooltipAxisId).html(displayedAxis)
+	}
+	
+	function cycleYAxis() {
+		var oldYAxis = json.yAxis
+		json.yAxis = getNextYAxis()
+		updateButton()
+		if (oldYAxis !== json.yAxis) {
+			$(pub.div).trigger('yAxisChanged', [pub.getName(), json.yAxis])
+		}
+	}
+	
+	pub.getDisplayName = function(connected) {
+		return $yAxisSelectorButton
+	}
+	
+	var super_getContextMenu = pub.getContextMenu
+	pub.getContextMenu = function(div) {
+		var menu = []
+		
+		// Add y-axis cycle option (does the same thing as left-clicking the button)
+		menu.push({title: "Cycle Y-axis", cmd: "yaxis"});
+
+		// Chart inputs need not be renamed
+		$(super_getContextMenu(div)).each(function(i,o) {
+			if (o.title!=="Rename")
+				menu.push(o)
+		})
+
+		return menu;
+	}
+	
+	var super_handleContextMenuSelection = pub.handleContextMenuSelection
+	pub.handleContextMenuSelection = function(target, selection) {
+		if (selection=="yaxis")
+			cycleYAxis()
+		else super_handleContextMenuSelection(target, selection);
+	}
+	
+	pub.showYAxisWarning = function(seriesName) {
+		$yAxisSelectorButton.popover({
+			content: "Series "+seriesName+" may not be showing properly. Use the Y-axis selection button to set its Y-axis.",
+			placement: "right",
+			trigger: "manual"
+		})
+		$yAxisSelectorButton.popover('show')
+		$yAxisSelectorButton.removeClass(btnDefaultClass).addClass(btnPopoverClass)
+		
+		var destroyFunc = (function(b) {
+			return function() { 
+				b.popover('destroy')
+				b.removeClass(btnPopoverClass).addClass(btnDefaultClass)
+			}
+		})($yAxisSelectorButton)
+		
+		$yAxisSelectorButton.siblings(".popover").click(destroyFunc)
+		setTimeout(destroyFunc, 8000)
+	}
+	
+	return pub;
+}

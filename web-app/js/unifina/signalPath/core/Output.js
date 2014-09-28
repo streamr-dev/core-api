@@ -91,9 +91,5 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 		}
 	}
 	
-	pub.toJSON = function() {
-		return pub.json;
-	}
-	
 	return pub;
 }

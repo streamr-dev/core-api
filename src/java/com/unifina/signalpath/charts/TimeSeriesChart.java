@@ -114,7 +114,8 @@ public class TimeSeriesChart extends Chart {
 			conn = new TimeSeriesInput(this,name);
 		else {
 			conn = new RecordedTimeSeriesInput(this,name);
-			((RecordedTimeSeriesInput)conn).yAxis = getInputs().length;
+			// Assign to yAxis 0 by default
+			((RecordedTimeSeriesInput)conn).yAxis = 0;
 		}
 
 		conn.setDrivingInput(true);

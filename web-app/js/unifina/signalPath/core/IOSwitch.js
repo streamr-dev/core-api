@@ -64,7 +64,7 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 	pub.update();
 	pub.div.data("spObject",pub);
 	pub.div.tooltip({
-		container: '#canvas',
+		container: '#'+SignalPath.options.canvas,
 		html: true
 	})
 	_setTooltipTitle(pub.stateText())
