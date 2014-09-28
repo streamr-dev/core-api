@@ -21,3 +21,4 @@ Streamr.createLink = function(optsOrController, action) {
 
 	return url
 }
+
