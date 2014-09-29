@@ -1,13 +1,15 @@
 package com.unifina.controller.signalpath
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
 
-import com.unifina.domain.signalpath.SavedSignalPath;
-import com.unifina.signalpath.SignalPath;
+import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
+@Secured(["ROLE_USER"])
 class SavedSignalPathController {
 	
 	def signalPathService

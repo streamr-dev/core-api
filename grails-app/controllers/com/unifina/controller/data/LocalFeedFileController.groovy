@@ -1,5 +1,7 @@
 package com.unifina.controller.data
 
+import grails.util.Environment
+
 import java.nio.channels.Channel
 import java.nio.channels.Channels
 import java.nio.channels.FileChannel
@@ -27,6 +29,10 @@ class LocalFeedFileController {
 	private static final Logger log = Logger.getLogger(LocalFeedFileController.class)
 	
 	def index() {
+		// Quick environment check
+		if (Environment.current!=Environment.DEVELOPMENT && Environment.current!=Environment.TEST)
+			throw new RuntimeException("LocalFeedFileController can only be used in dev or test environments!")
+		
 		if (grailsApplication.config.unifina.feed.datadir) {
 			if (!params.feedDir || !params.day || !params.file) {
 				response.contentType = "text/plain"

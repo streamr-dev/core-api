@@ -1,6 +1,6 @@
 package com.unifina.utils;
 
-import grails.plugins.springsecurity.SpringSecurityService;
+import grails.plugin.springsecurity.SpringSecurityService;
 import grails.util.Environment;
 
 import java.lang.reflect.Constructor;

@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import grails.plugins.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import org.apache.log4j.Logger
@@ -18,8 +18,10 @@ class UnifinaSecurityService {
 	private boolean checkUser(instance) {
 		if (instance.hasProperty("user") && instance.user?.id!=null) {
 			boolean result = instance.user.id == springSecurityService.getCurrentUser()?.id
-			if (!result)
-				log.warn("User $springSecurityService.currentUser?.id tried to access $instance owned by user $instance.user.id!")
+			if (!result) {
+				log.warn("User ${springSecurityService.currentUser?.id} tried to access $instance owned by user $instance.user.id!")
+				return false
+			}
 			return result
 		}
 		else return true
