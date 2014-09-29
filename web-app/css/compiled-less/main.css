@@ -16104,9 +16104,13 @@ fieldset[disabled] .btn {
   border-top: none;
   overflow: visible;
 }
-.component .form-control {
+.paramTable .form-control {
   height: 20px;
   padding: 2px 5px;
+  font-size: 12px;
+}
+.paramTable select.form-control {
+  padding-top: 1px;
 }
 #canvas {
   position: relative;

@@ -18,6 +18,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	
 	var range = null;
 	
+	// Dragging in the chart container or the controls must not move the module
+	prot.dragOptions.cancel = ".highcharts-container, .chart-series-buttons, .chart-range-selector"
+
 	function resizeChart(moduleWidth, moduleHeight) {
 		if (!area)
 			return;
@@ -100,13 +103,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		// Find the chart draw area
 		area = prot.body.find(".chartDrawArea");
 		if (area==null || area.length==0) {
-			// Add the range buttons
-			var buttonDiv = $("<div class='chartRangeButtons btn-group'></div>");
-			var buttonConfig = [{name:"1s",range:1*1000},{name:"15s",range:15*1000},{name:"1m",range:60*1000},{name:"15m",range:15*60*1000},{name:"30m",range:30*60*1000},{name:"1h",range:60*60*1000},{name:"2h",range:2*60*60*1000},{name:"4h",range:4*60*60*1000},{name:"1d",range:12*60*60*1000},{name:"All",range:null}];
-			createRangeButtons(buttonDiv,buttonConfig);
-			prot.body.append(buttonDiv);
 
-			prot.body.append('<div class="pull-right btn-group">' +
+			// Show/Hide all series buttons
+			prot.body.append('<div class="chart-series-buttons pull-right btn-group">' +
 				'<button class="btn btn-default btn-sm show-all-series" '+
 					'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
 				'<button class="btn btn-default btn-sm hide-all-series" '+
@@ -115,6 +114,42 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 
 			$('button.hide-all-series', prot.body).click(showHide(false))
 			$('button.show-all-series', prot.body).click(showHide(true))
+			
+			// Range selector
+			var $rangeDiv = $("<select class='chart-range-selector form-control pull-right' title='Range'></select>");
+			var buttonConfig = [{name:"1 sec",range:1*1000},
+			                    {name:"15 sec",range:15*1000},
+			                    {name:"1 min",range:60*1000},
+			                    {name:"15 min",range:15*60*1000},
+			                    {name:"30 min",range:30*60*1000},
+			                    {name:"1 h",range:60*60*1000},
+			                    {name:"2 h",range:2*60*60*1000},
+			                    {name:"4 h",range:4*60*60*1000},
+			                    {name:"12 h",range:12*60*60*1000},
+			                    {name:"day",range:24*60*60*1000},
+			                    {name:"week",range:7*24*60*60*1000},
+			                    {name:"month",range:30*24*60*60*1000},
+			                    {name:"All",range:""}]
+			
+			buttonConfig.reverse()
+			buttonConfig.forEach(function(c) {
+				var  $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
+				$rangeDiv.append($option)
+			})
+			
+			$rangeDiv.on('change', function() {
+				var r = $(this).val()
+				if (r) {
+					r = parseInt(r)
+				}
+				else r = null
+				
+				range = r
+				if (chart)
+					redrawChart()
+			})
+
+			prot.body.append($rangeDiv);
 			
 			// Create the chart area
 			var areaId = "chartArea_"+(new Date()).getTime()
@@ -161,9 +196,6 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		destroyChart();
 
 		$(area).show();
-
-		// Dragging in the chartDrawArea must not move the module
-		prot.div.draggable("option", "cancel", ".chartDrawArea");
 		
 		if (yAxis==null) {
 			yAxis = {};
