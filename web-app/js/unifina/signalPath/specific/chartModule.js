@@ -538,6 +538,7 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 		
 		$yAxisSelectorButton.click(cycleYAxis)
 		pub.div.tooltip({
+			container: "#"+SignalPath.options.canvas,
 			selector: ".y-axis-number",
 			html: true,
 			title: function() {
