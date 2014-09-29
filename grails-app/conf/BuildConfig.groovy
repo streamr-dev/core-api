@@ -57,7 +57,7 @@ grails.project.dependency.resolution = {
 		compile('org.apache.kafka:kafka_2.8.2:0.8.0') {
 			excludes "slf4j-simple"
 		}
-		compile('com.unifina:kafka-client:0.0.6') {
+		compile('com.unifina:kafka-client:0.0.9') {
 			excludes "slf4j-simple"
 		}
 		

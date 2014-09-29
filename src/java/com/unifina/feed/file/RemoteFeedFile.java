@@ -12,12 +12,13 @@ public class RemoteFeedFile {
 	private Class fileStorageAdapter;
 	private Map<String, Object> map = new LinkedHashMap<String, Object>();
 	
-	public RemoteFeedFile(String name, Date beginDate, Date endDate, Feed feed, String location, boolean compressed, Class fileStorageAdapter) {
+	public RemoteFeedFile(String name, Date beginDate, Date endDate, Feed feed, Long streamId, String location, boolean compressed, Class fileStorageAdapter) {
 		setName(name);
 		setLocation(location);
 		setBeginDate(beginDate);
 		setEndDate(endDate);
 		setFeed(feed);
+		setStream(streamId);
 		setCompressed(compressed);
 		if (fileStorageAdapter!=null)
 			setFileStorageAdapter(fileStorageAdapter);
@@ -70,6 +71,14 @@ public class RemoteFeedFile {
 	public void setFeed(Feed feed) {
 		this.feed = feed;
 		map.put("feedId", feed.getId());
+	}
+	
+	public Long getStreamId() {
+		return (Long) map.get("streamId");
+	}
+	
+	public void setStream(Long streamId) {
+		map.put("streamId", streamId);
 	}
 	
 	public Map<String,Object> getConfig() {

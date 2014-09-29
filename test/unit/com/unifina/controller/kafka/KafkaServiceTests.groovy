@@ -43,19 +43,30 @@ class KafkaServiceTests {
 	}
 
 	@Test
-	public void createCollectTasksFirst() {
-		// No feed files, should start from yesterday
-		def result = service.createCollectTasks(stream)
+	public void createCollectTasksWithNoEventsReceived() {
+		def mockedService = [getFirstTimestamp: {String topic-> return null }] as KafkaService
+		
+		// No first timestamp, no tasks created
+		def result = mockedService.createCollectTasks(stream)
+		assert result.size()==0
+	}
+	
+	@Test
+	public void createCollectTasksWithSomeEventsReceived() {
+		def beginDate = TimeOfDayUtil.getMidnight(new Date()-1)
+		def mockedService = [getFirstTimestamp: {String topic-> return beginDate }] as KafkaService
+		
+		// Events exist since yesterday, should create one task
+		List<Task> result = mockedService.createCollectTasks(stream)
 		assert result.size()==1
-		assert Task.count()==1
 		Map config = JSON.parse(result[0].config)
-		assert new Date(config.beginDate) == TimeOfDayUtil.getMidnight(new Date()-1)
+		assert config.beginDate == beginDate.time
 	}
 
 	@Test
-	public void createCollectTasksLater() {
+	public void createCollectTasksWithExistingFeedFiles() {
 		// Existing FeedFile(s)
-		FeedFile feedFile = new FeedFile(feed: feed, beginDate: TimeOfDayUtil.getMidnight(new Date()-10), endDate: new Date(TimeOfDayUtil.getMidnight(new Date()-9).time-1))
+		FeedFile feedFile = new FeedFile(feed: feed, stream:stream, beginDate: TimeOfDayUtil.getMidnight(new Date()-10), endDate: new Date(TimeOfDayUtil.getMidnight(new Date()-9).time-1))
 		feedFile.save(validate:false)
 		assert FeedFile.count()==1
 		
