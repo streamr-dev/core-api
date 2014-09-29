@@ -1,8 +1,11 @@
 package com.unifina.controller.tour
 
-import com.unifina.domain.tour.TourUser
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
+import com.unifina.domain.tour.TourUser
+
+@Secured(["ROLE_USER"])
 class TourUserController {
 
 	def springSecurityService
