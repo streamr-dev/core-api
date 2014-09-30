@@ -1,3 +1,8 @@
+/**
+ * Events on spObject and chart container div:
+ * - chartInitialized
+ */
+
 SignalPath.ChartModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.GenericModule(data,canvas,prot)
@@ -105,7 +110,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		if (area==null || area.length==0) {
 
 			// Show/Hide all series buttons
-			prot.body.append('<div class="chart-series-buttons pull-right btn-group">' +
+			prot.body.append('<div class="chart-series-buttons chart-show-on-run pull-right btn-group">' +
 				'<button class="btn btn-default btn-sm show-all-series" '+
 					'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
 				'<button class="btn btn-default btn-sm hide-all-series" '+
@@ -116,7 +121,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			$('button.show-all-series', prot.body).click(showHide(true))
 			
 			// Range selector
-			var $rangeDiv = $("<select class='chart-range-selector form-control pull-right' title='Range'></select>");
+			var $rangeDiv = $("<select class='chart-range-selector chart-show-on-run form-control pull-right' title='Range'></select>");
 			var buttonConfig = [{name:"1 sec",range:1*1000},
 			                    {name:"15 sec",range:15*1000},
 			                    {name:"1 min",range:60*1000},
@@ -150,6 +155,10 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			})
 
 			prot.body.append($rangeDiv);
+			
+			$(pub).on("chartInitialized", function() {
+				prot.div.find(".chart-show-on-run").show()
+			})
 			
 			// Create the chart area
 			var areaId = "chartArea_"+(new Date()).getTime()
@@ -242,11 +251,11 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				},
 
 				navigator: {
-					enabled: false
+					enabled: true
 				},
 				
 				scrollbar: {
-					enabled: true
+					enabled: false
 				},
 				
 				series: series
@@ -256,6 +265,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		
 		// Create the chart	
 		chart = new Highcharts.StockChart(opts);
+		$(pub).trigger("chartInitialized")
+		$(area).trigger("chartInitialized")
 	}
 	
 	pub.receiveResponse = function(d) {
@@ -511,7 +522,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				return input.isConnected()
 			})
 			
-			for (var i=0; i<chart.series.length; i++) {
+			for (var i=0; i<chart.series.length && i<seriesMeta.length; i++) {
 				var yAxisRange = chart.series[i].yAxis.getExtremes().max - chart.series[i].yAxis.getExtremes().min
 				var seriesRange = seriesMeta[i].max - seriesMeta[i].min
 				
