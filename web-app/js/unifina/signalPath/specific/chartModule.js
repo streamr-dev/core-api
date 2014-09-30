@@ -21,7 +21,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	
 	var seriesMeta = [];
 	
-	var range = null;
+	var navigatorSeries = null
+	var latestNavigatorTimestamp = null
+	var range = null
 	
 	// Dragging in the chart container or the controls must not move the module
 	prot.dragOptions.cancel = ".highcharts-container, .chart-series-buttons, .chart-range-selector"
@@ -72,13 +74,13 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					
 					// Add a new yAxis to the chart if necessary
 					if (realYAxis[yx]===undefined) {
-						var newAxis = createYAxisOptions({}, chart.yAxis.length)
+						var newAxis = createYAxisOptions({}, yAxis.length)
 						realYAxis[yx] = chart.yAxis.length
 						yAxis.push(newAxis)
 						chart.addAxis(newAxis, false)
 					}
 					
-					chart.series[seriesIndex].update({yAxis: realYAxis[yx]}, true)
+					seriesMeta[seriesIndex].impl.update({yAxis: realYAxis[yx]}, true)
 				}
 			}
 		})
@@ -95,8 +97,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			if (!chart)
 				return;
 
-			chart.series.forEach(function(series) {
-				series.setVisible(doShow, false)
+			seriesMeta.forEach(function(series) {
+				series.impl.setVisible(doShow, false)
 			})
 			chart.redraw()
 		}
@@ -219,7 +221,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				useUTC: true
 			}
 		});
-
+		
 		var opts = {
 				chart: {
 					animation: false,
@@ -251,7 +253,14 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				},
 
 				navigator: {
-					enabled: true
+					enabled: true,
+					series: $.extend(true, {type: 'line', step:true}, series[0])
+				},
+				
+				plotOptions: {
+					series: {
+						animation: false
+					}
 				},
 				
 				scrollbar: {
@@ -265,6 +274,15 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		
 		// Create the chart	
 		chart = new Highcharts.StockChart(opts);
+		
+		// Collect pointers to actual series objects into seriesMeta[i].impl
+		// This helps in indexkeeping, as the navigator series is appended
+		// to chart.series
+		navigatorSeries = chart.series[chart.series.length - 1]
+		for (var i=0; i<seriesMeta.length; i++) {
+			seriesMeta[i].impl = chart.series[i]
+		}
+		
 		$(pub).trigger("chartInitialized")
 		$(area).trigger("chartInitialized")
 	}
@@ -316,15 +334,21 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			// Chart has already been initialized
 			else {
 				// addPoint is slow?
-				if (d.s<chart.series.length) {
+				if (seriesMeta[d.s].impl) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-					chart.series[d.s].addPoint([d.x, d.y],false,false,false);
+					seriesMeta[d.s].impl.addPoint([d.x, d.y],false,false,false);
 					if (seriesMeta[d.s].min > d.y)
 						seriesMeta[d.s].min = d.y
 					if (seriesMeta[d.s].max < d.y)
 						seriesMeta[d.s].max = d.y
+						
+					// Only add new points to the navigator if they are at least ten minutes apart
+					if (d.s===0 && (!latestNavigatorTimestamp || d.x > latestNavigatorTimestamp + 60000)) {
+						navigatorSeries.addPoint([d.x, d.y],false,false,false);
+						latestNavigatorTimestamp = d.x
+					}
 				}
-				// Are there pending series adds in seriesMeta?
+				// Come here if there are series that are not yet added to the chart (requires at least 2 data points)
 				else {
 					if (seriesMeta[d.s].data==null)
 						seriesMeta[d.s].data = [];
@@ -332,11 +356,14 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
 					seriesMeta[d.s].data.push([d.x, d.y]);
 					
-					for (var i=chart.series.length;i<seriesMeta.length;i++) {
-						// Unfortunately we need to add series in order
-						if (seriesMeta[i].data!=null && seriesMeta[i].data.length>1)
-							chart.addSeries(seriesMeta[i],true,false);
-						else break;
+					// Find the first unadded series and see if it can be added
+					// (Unfortunately series need to be added in order to avoid problems with Highcharts)
+					for (var i=0;i<seriesMeta.length;i++) {
+						if (!seriesMeta[i].impl) {
+							if (seriesMeta[i].data!=null && seriesMeta[i].data.length>1)
+								seriesMeta[i].impl = chart.addSeries(seriesMeta[i],true,false);	
+							break
+						}
 					}
 				}
 			}
@@ -475,6 +502,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		destroyChart();
 
 		seriesMeta = [];
+		navigatorSeries = null
+		latestNavigatorTimestamp = null
 		realYAxis = [];
 		minTime = null;
 		maxTime = null;
@@ -516,20 +545,20 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	 * On SignalPath stopped, check that all series are shown properly in relation to chart yaxis range
 	 */
 	$(SignalPath).on("stopped", function() {
-		if (chart && chart.series.length > 1) {
+		if (chart && seriesMeta.length > 1) {
 			// Find connected inputs
 			var connectedInputs = pub.getInputs().filter(function(input) {
 				return input.isConnected()
 			})
 			
-			for (var i=0; i<chart.series.length && i<seriesMeta.length; i++) {
-				var yAxisRange = chart.series[i].yAxis.getExtremes().max - chart.series[i].yAxis.getExtremes().min
+			for (var i=0; i<seriesMeta.length; i++) {
+				var yAxisRange = seriesMeta[i].impl.yAxis.getExtremes().max - seriesMeta[i].impl.yAxis.getExtremes().min
 				var seriesRange = seriesMeta[i].max - seriesMeta[i].min
 				
 				// If series range is less than 10% of axis range, show a tip
 				if (seriesRange/yAxisRange < 0.1) {
 					var $input = connectedInputs[i] 
-					$input.div.data("spObject").showYAxisWarning(chart.series[i].name)
+					$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name)
 				}
 			}
 		}
