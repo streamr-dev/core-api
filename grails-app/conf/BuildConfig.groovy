@@ -68,6 +68,9 @@ grails.project.dependency.resolution = {
 		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
 		test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
 		test "org.gebish:geb-spock:$gebVersion"
+		
+		runtime('org.twitter4j:twitter4j-core:[4.0,)')
+		runtime('com.twitter:hbc-core:2.2.0')
     }
 
     plugins {
