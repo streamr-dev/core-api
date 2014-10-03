@@ -16366,7 +16366,8 @@ button.arrow:after {
   display: inline-block;
   font-weight: bolder;
 }
-html {
+html,
+.full-width-height {
   height: 100%;
   width: 100%;
 }
