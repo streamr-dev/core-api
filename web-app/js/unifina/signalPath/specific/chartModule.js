@@ -132,6 +132,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			                    {name:"1 h",range:60*60*1000},
 			                    {name:"2 h",range:2*60*60*1000},
 			                    {name:"4 h",range:4*60*60*1000},
+			                    {name:"8 h",range:8*60*60*1000},
 			                    {name:"12 h",range:12*60*60*1000},
 			                    {name:"day",range:24*60*60*1000},
 			                    {name:"week",range:7*24*60*60*1000},
