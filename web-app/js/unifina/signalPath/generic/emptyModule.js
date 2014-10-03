@@ -500,6 +500,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	return pub;
 }
 
+if ($("#contextMenu").length==0)
+	$("body").append('<ul id="contextMenu" class="dropdown-menu" role="menu" style="display:none" ></ul>')
 
 $('body').contextMenu({
     selector: '#contextMenu',
