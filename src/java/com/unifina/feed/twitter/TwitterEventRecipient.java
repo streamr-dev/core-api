@@ -1,29 +1,39 @@
 package com.unifina.feed.twitter;
 
-import twitter4j.Status;
+import java.util.Map;
 
 import com.unifina.data.FeedEvent;
-import com.unifina.feed.AbstractEventRecipient;
+import com.unifina.domain.data.Stream;
+import com.unifina.feed.StreamEventRecipient;
+import com.unifina.feed.kafka.KafkaMessage;
 import com.unifina.signalpath.twitter.TwitterModule;
 import com.unifina.utils.Globals;
+import com.unifina.utils.MapTraversal;
 
-public class TwitterEventRecipient extends AbstractEventRecipient<TwitterModule> {
+public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule> {
 
-	public TwitterEventRecipient(Globals globals) {
-		super(globals);
+	public TwitterEventRecipient(Globals globals, Stream stream) {
+		super(globals, stream);
 	}
 
 	@Override
 	protected void sendOutputFromModules(FeedEvent event) {
-		Status s = (Status) event.content;
+		Map msg = ((KafkaMessage) event.content).content;
+		
+		String tweet = (msg.containsKey("retweeted_status") ? MapTraversal.getString(msg, "retweeted_status.text") : MapTraversal.getString(msg, "text"));
+		String username = MapTraversal.getString(msg, "user.screen_name");
+		String name = MapTraversal.getString(msg, "user.name");
+		String language = MapTraversal.getString(msg, "lang");
+		Integer followers = MapTraversal.getInteger(msg, "user.followers_count");
+		
 		for (TwitterModule m : modules) {
-			m.tweet.send(s.getRetweetedStatus() != null ? s.getRetweetedStatus().getText() : s.getText());
-			m.username.send(s.getUser().getScreenName());
-			m.name.send(s.getUser().getName());
-			m.language.send(s.getLang());
-			m.followers.send(s.getUser().getFollowersCount());
-			m.isRetweet.send(s.getRetweetedStatus() != null ? 1D : 0D);
-			m.isReply.send(s.getInReplyToScreenName() != null ? 1D : 0D);
+			m.tweet.send(tweet);
+			m.username.send(username);
+			m.name.send(name);
+			m.language.send(language);
+			m.followers.send(followers);
+			m.isRetweet.send(msg.containsKey("retweeted_status") ? 1D : 0D);
+			m.isReply.send(msg.containsKey("in_reply_to_screen_name") ? 1D : 0D);
 		}
 	}
 	

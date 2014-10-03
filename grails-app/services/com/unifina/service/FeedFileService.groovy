@@ -185,7 +185,11 @@ class FeedFileService {
 		Feed feed = stream.getFeed()
 		
 		// Which feed file?
-		FeedFile feedFile = FeedFile.findByFeedAndDayBetween(feed, beginDate, endDate, [sort:'day', max:1, offset:piece])
+		FeedFile feedFile
+		if (feed.bundledFeedFiles)
+			feedFile = FeedFile.findByFeedAndDayBetween(feed, beginDate, endDate, [sort:'day', max:1, offset:piece])
+		else 
+			feedFile = FeedFile.findByStreamAndDayBetween(stream, beginDate, endDate, [sort:'day', max:1, offset:piece])
 		
 		// Null signals the end of data
 		if (feedFile==null)
