@@ -37,6 +37,9 @@ public class UiTagLib {
 						format: 'yyyy-mm-dd',
 						autoclose: true
 					});
+					\$("#${id}").on('change', function() {
+						\$(this).datepicker('update')
+					});
 				});
 			</script>
 		"""
