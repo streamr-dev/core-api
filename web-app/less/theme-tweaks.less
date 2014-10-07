@@ -64,13 +64,21 @@
 	.mme.mmc #main-menu-bg {
 		width: 0px;
 	}
+	
 	.mme #main-navbar .navbar-header {
 		padding-left: @main-menu-collapsed-width;
+	}
+	
+	.mmc #main-wrapper {
+		padding-left: 0px;
 	}
 }
 
 @media (min-width: @screen-small) and (max-width: @screen-tablet) {
 	#main-menu, #main-menu-bg {
 		width: 0px;
+	}
+	body.build-page:not(.mme) #main-wrapper {
+		padding-left: 0px;
 	}
 }

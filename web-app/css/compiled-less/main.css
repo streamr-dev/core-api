@@ -16124,11 +16124,17 @@ fieldset[disabled] .btn {
   .mme #main-navbar .navbar-header {
     padding-left: 56px;
   }
+  .mmc #main-wrapper {
+    padding-left: 0px;
+  }
 }
 @media (min-width: 480px) and (max-width: 768px) {
   #main-menu,
   #main-menu-bg {
     width: 0px;
+  }
+  body.build-page:not(.mme) #main-wrapper {
+    padding-left: 0px;
   }
 }
 .paramTable .form-control {
@@ -16470,6 +16476,9 @@ body.build-page #content-wrapper {
 #moduleTree {
   max-height: 300px;
   overflow: auto;
+}
+#main-menu .twitter-typeahead {
+  width: 100%;
 }
 .remote-tabs-content {
   outline: none;
