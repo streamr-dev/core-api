@@ -59,6 +59,7 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 		
 		opts.maxConnections = -1; // unlimited
 		opts.anchor = [1, 0.5, 1, 0, 15, 0];
+		opts.cssClass = (opts.cssClass || "") + " jsPlumb_output";
 		
 		return opts;
 	}

@@ -40,7 +40,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			// TODO: endpointId is for backwards compatibility
 			var id = (pub.json.endpointId != null ? pub.json.endpointId : pub.json.id);
 			pub.jsPlumbEndpoint = createJSPlumbEndpoint(pub.json, div, id);
-			pub.jsPlumbEndpoint
+			
+			if (pub.json.requiresConnection)
+				pub.addClass("warning")
 		}
 		
 		// Create io settings
@@ -56,6 +58,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			return function(event, output) {
 				me.json.connected = true;
 				me.div.addClass("connected");
+				if (me.json.requiresConnection)
+					me.removeClass("warning")
 			}
 		})(pub));
 		
@@ -63,6 +67,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			return function(event, output) {
 				me.json.connected = false;
 				me.div.removeClass("connected");
+				if (me.json.requiresConnection)
+					me.addClass("warning")
 			}
 		})(pub));
 		
@@ -71,6 +77,18 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		return div;
 	}
 	pub.createDiv = createDiv;
+	
+	function addClass(cls) {
+		pub.div.addClass(cls)
+		pub.jsPlumbEndpoint.addClass(cls)
+	}
+	pub.addClass = addClass
+	
+	function removeClass(cls) {
+		pub.div.removeClass(cls)
+		pub.jsPlumbEndpoint.removeClass(cls)
+	}
+	pub.removeClass = removeClass
 	
 	function setExport(iodiv,data,value) {
 		if (value) {
@@ -115,6 +133,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 				return pub.checkConnection(info) && pub.checkConnectionDirection(info);
 			},
 			connectorOverlays: [["Arrow", {direction:1, paintStyle: {cssClass:"arrow"}}]],
+			cssClass: (pub.json.requiresConnection ? "requiresConnection" : "")
 		};
 	}
 	pub.getJSPlumbEndpointOptions = getJSPlumbEndpointOptions;

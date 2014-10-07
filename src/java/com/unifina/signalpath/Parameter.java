@@ -2,8 +2,6 @@ package com.unifina.signalpath;
 
 import java.util.Map;
 
-import com.unifina.signalpath.AbstractSignalPathModule.UIWarningMessage;
-
 /**
  * Parameters are Inputs that always have a value. The user can enter that value in the UI
  * and a textual representation of that value must be available. Parameters can be connected
@@ -25,6 +23,7 @@ public abstract class Parameter<T> extends Input<T> {
 		
 		this.defaultValue = defaultValue;
 		drivingInput = false;
+		requiresConnection = false;
 	}
 	
 	@Override

@@ -4,6 +4,8 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
 
+import org.apache.log4j.Logger
+
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
@@ -18,6 +20,8 @@ class SavedSignalPathController {
 	
 	def unifinaSecurityService
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(SavedSignalPath.get(params.id))},only:['load', 'save']]
+	
+	private static final Logger log = Logger.getLogger(SavedSignalPathController)
 	
 	def createSaveData(SavedSignalPath ssp) {
 		return [url:createLink(controller:"savedSignalPath",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
@@ -38,6 +42,7 @@ class SavedSignalPathController {
 			result = signalPathService.reconstruct(json,globals)
 		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
+			log.error("Error loading Streamlet",e)
 			result.error = true
 			result.message = "Failed to load properly! There may be a problem with this Streamlet. The error was: $e.message"
 		} finally {

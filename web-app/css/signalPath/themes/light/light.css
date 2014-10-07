@@ -80,6 +80,10 @@ div.input:hover, div.output:hover {
 ._jsPlumb_hover circle, ._jsPlumb_endpoint_drop_allowed circle {
 	fill: #FFFFD9 !important;
 }
+._jsPlumb_endpoint.warning circle {
+	stroke: #FF6969;
+	fill: #f9eeee;
+}
 
 /* Overlay element style */
 ._jsPlumb_connector path {

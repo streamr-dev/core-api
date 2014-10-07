@@ -6,7 +6,6 @@ public class TimeSeriesInput extends Input<Double> {
 	
 	public boolean canHaveInitialValue = true;
 	public Double initialValue = null;
-	public boolean suppressWarnings = false;
 	
 	public TimeSeriesInput(AbstractSignalPathModule owner, String name) {
 		super(owner, name, "Double");
@@ -47,9 +46,6 @@ public class TimeSeriesInput extends Input<Double> {
 
 		config.put("feedback", isFeedbackConnection());
 		config.put("canBeFeedback", canBeFeedback);
-		
-		if (suppressWarnings)
-			config.put("suppressWarnings",suppressWarnings);
 		
 		return config;
 	}

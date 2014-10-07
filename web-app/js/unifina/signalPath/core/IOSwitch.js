@@ -1,3 +1,8 @@
+/**
+ * Events on object:
+ * - updated
+ */
+
 SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 	var pub = pub || {};
 	
@@ -50,6 +55,8 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 			$("#"+pub.getStateTextId()).html(pub.stateText());
 
  			_setTooltipTitle(pub.stateText())
+ 			
+ 			$(pub).trigger("updated")
  		},
 	}
 	
