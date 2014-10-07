@@ -423,4 +423,3 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	return pub;
 }
-

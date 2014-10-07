@@ -354,19 +354,7 @@ var SignalPath = (function () {
 				isSaved : false
 		}
 		
-		jsPlumb.reset();
-		
-		// Bind connection and disconnection events
-		jsPlumb.bind("connection",function(connection) {
-			$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
-			$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
-		});
-		jsPlumb.bind("connectionDetached",function(connection) {
-			if (!connection.connection.pending) {
-				$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
-				$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
-			}
-		});
+		jsPlumb.reset();		
 		
 		$(pub).trigger('new');
 	}
