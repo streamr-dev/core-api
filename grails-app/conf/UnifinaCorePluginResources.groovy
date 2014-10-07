@@ -4,10 +4,9 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/jquery-migrate-1.2.1', file:'jquery-migrate-1.2.1.min.js', plugin: 'unifina-core']
 	}
-	"jquery-ui-touchpunch" {
+	"touchpunch" {
 		dependsOn 'jquery-ui'
 		resource url:[dir:'js/touchpunch/', file:'jquery.ui.touch-punch.min.js', disposition: 'head', plugin: 'unifina-core']
-		//		resource url:'js/touchpunch/jquery.ui.touch-punch.js', disposition: 'head'
 	}
 	tablesorter {
 		dependsOn 'jquery'

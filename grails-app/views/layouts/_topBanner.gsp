@@ -25,11 +25,14 @@
 	<r:script>
 		$(document).ready(function() {
 			$("#main-menu-toggle").click(function() {
-				if ($("body").hasClass("mmc")) {
-					$("body").removeClass("mmc")
+				var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+				var cls = (width >= 768 ? "mmc" : "mme")
+			
+				if ($("body").hasClass(cls)) {
+					$("body").removeClass(cls)
 				}
 				else {
-					$("body").addClass("mmc")
+					$("body").addClass(cls)
 				}
 			})
 		})
