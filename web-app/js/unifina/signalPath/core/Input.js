@@ -39,7 +39,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		div.append(switchDiv);
 		
 		if (data.canToggleDrivingInput==null || data.canToggleDrivingInput) {
-			var driving = new SignalPath.IOSwitch(switchDiv, "drivingInput", {
+			var driving = new SignalPath.IOSwitch(switchDiv, "ioSwitch drivingInput", {
 				getValue: (function(d){
 					return function() { return d.drivingInput; };
 				})(data),
@@ -53,7 +53,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		
 		// Initial value. Default null/off. Only valid for TimeSeries type
 		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
-			var iv = new SignalPath.IOSwitch(switchDiv, "initialValue", {
+			var iv = new SignalPath.IOSwitch(switchDiv, "ioSwitch initialValue", {
 				getValue: (function(d){
 					return function() { return d.initialValue; };
 				})(data),
@@ -93,7 +93,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		// Feedback connection. Default false. Switchable for TimeSeries types.
 		
 		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var feedback = new SignalPath.IOSwitch(switchDiv, "feedback", {
+			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
 				getValue: (function(d){
 					return function() { return d.feedback; };
 				})(data),

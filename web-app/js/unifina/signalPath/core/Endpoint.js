@@ -51,6 +51,13 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		// Bind context menu listeners
 		if (!pub.disableContextMenu) {
 			div.addClass("context-menu");
+			
+			// When left-clicking on ioname, simulate right click
+			// This is the current way of enabling context menu on touch devices
+			ioname.click(function(e) {
+				e.type = "contextmenu"
+				$(ioname).trigger(e)
+			})
 		}
 		
 		// Bind basic connection event handlers

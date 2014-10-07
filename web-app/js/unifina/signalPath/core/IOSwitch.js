@@ -16,7 +16,7 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
 			+stateText+'</span></strong>'
 	}
 
-	pub.div = $("<div class='ioSwitch'></div>");
+	pub.div = $("<div></div>");
 	pub.parentContainer = parentContainer;
 	
 	pub.defaultOptions = {
@@ -60,7 +60,7 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
  		},
 	}
 	
-	$.extend(pub, pub.defaultOptions, options);
+	$.extend(pub, pub.defaultOptions, options)
 
 	pub.getStateTextId = function() {
 		if (!pub.stateTextId)
