@@ -177,6 +177,13 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		return SignalPath.getParamRenderer(pub.json);
 	}
 	
+	var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
+	pub.getJSPlumbEndpointOptions = function(json,connDiv) {
+		var opts = super_getJSPlumbEndpointOptions(json,connDiv);
+		opts.cssClass = (opts.cssClass || "") + " jsPlumb_parameter";
+		return opts;
+	}
+	
 	function createParamInput() {
 		var result = null;
 

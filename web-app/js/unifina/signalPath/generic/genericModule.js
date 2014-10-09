@@ -21,24 +21,19 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		prot.div.append(div);
 		
 		if (prot.jsonData.canClearState==null || prot.jsonData.canClearState) {
-			var clear = $("<div class='moduleSwitch clearState showOnFocus'>CLEAR</div>");
-			if (prot.jsonData.clearState==null)
-				prot.jsonData.clearState = true;
-
-			clear.addClass(prot.jsonData.clearState ? "ioSwitchTrue" : "ioSwitchFalse");
-			div.append(clear);
-			clear.click(function() {
-				if (prot.jsonData.clearState) {
-					prot.jsonData.clearState = false;
-					clear.removeClass("ioSwitchTrue");
-					clear.addClass("ioSwitchFalse");
-				}
-				else {
-					prot.jsonData.clearState = true;
-					clear.addClass("ioSwitchTrue");
-					clear.removeClass("ioSwitchFalse");
-				}
-			});
+			var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
+			div.append(container)
+			
+			var clear = new SignalPath.IOSwitch(container, "moduleSwitch clearState", {
+				getValue: (function(d){
+					return function() { return d.clearState; };
+				})(data),
+				setValue: (function(d){
+					return function(value) { return d.clearState = value; };
+				})(data),
+				buttonText: function() { return "CLEAR"; },
+				tooltip: 'Clear module state at end of day'
+			})
 		}
 	}
 	prot.createModuleFooter = createModuleFooter;
@@ -428,4 +423,3 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	return pub;
 }
-

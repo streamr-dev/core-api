@@ -403,23 +403,24 @@ class SignalPathTagLib {
 		writeScriptHeader(out)
 		def str = """
 			jQuery('#$id').click(function() {
-				bootbox.prompt('$dialogTitle', function(saveAsName) {
-					if (!saveAsName)
-						return;
-
-					var saveData = {
-						url: "$url",
-						target: "$targetName as new",
-						name: saveAsName
-					};
-				
-					SignalPath.saveSignalPath(saveData, function(sd) {
-						if (sd.showUrl)
-							window.location = sd.showUrl;
-					});
-
-					jQuery(this).dialog("close");
-					jQuery(this).dialog("destroy");
+				bootbox.prompt({
+					title: '$dialogTitle', 
+					callback: function(saveAsName) {
+						if (!saveAsName)
+							return;
+	
+						var saveData = {
+							url: "$url",
+							target: "$targetName as new",
+							name: saveAsName
+						};
+					
+						SignalPath.saveSignalPath(saveData, function(sd) {
+							if (sd.showUrl)
+								window.location = sd.showUrl;
+						});
+					},
+					className: 'save-as-name-dialog'
 				});
 			});
 		"""

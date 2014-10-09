@@ -16098,15 +16098,52 @@ div.dataTables_scrollFoot table {
 fieldset[disabled] .btn {
   opacity: 0.5;
 }
+#main-menu-inner {
+  margin-top: 38px;
+}
+#main-menu {
+  position: fixed;
+}
 #main-menu .menu-content {
+  margin-top: 0px;
   padding-top: 20px;
   padding-bottom: 0px;
   border-top: none;
   overflow: visible;
 }
-.component .form-control {
+#main-menu .input-group {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .mmc #main-menu,
+  .mmc #main-menu-bg,
+  .mme.mmc #main-menu,
+  .mme.mmc #main-menu-bg {
+    width: 0px;
+  }
+  .mme #main-navbar .navbar-header {
+    padding-left: 56px;
+  }
+  .mmc #main-wrapper {
+    padding-left: 0px;
+  }
+}
+@media (min-width: 480px) and (max-width: 768px) {
+  #main-menu,
+  #main-menu-bg {
+    width: 0px;
+  }
+  body.build-page:not(.mme) #main-wrapper {
+    padding-left: 0px;
+  }
+}
+.paramTable .form-control {
   height: 20px;
   padding: 2px 5px;
+  font-size: 12px;
+}
+.paramTable select.form-control {
+  padding-top: 1px;
 }
 #canvas {
   position: relative;
@@ -16368,7 +16405,8 @@ button.arrow:after {
   display: inline-block;
   font-weight: bolder;
 }
-html {
+html,
+.full-width-height {
   height: 100%;
   width: 100%;
 }
@@ -16411,17 +16449,8 @@ table.sortable th {
 .jstree a {
   color: #555 !important;
 }
-#main-menu-inner {
-  margin-top: 38px;
-}
-#main-menu .menu-content {
-  margin-top: 0px;
-}
 .form-group-period .input-group-addon {
   width: 60px;
-}
-#main-menu {
-  position: fixed;
 }
 .load-save-group {
   width: 100%;
@@ -16453,6 +16482,9 @@ body.build-page #content-wrapper {
 #moduleTree {
   max-height: 300px;
   overflow: auto;
+}
+#main-menu .twitter-typeahead {
+  width: 100%;
 }
 .remote-tabs-content {
   outline: none;

@@ -1,27 +1,33 @@
 package com.unifina.service
 
-import java.util.Date;
-
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
 import kafka.producer.ProducerConfig
 
-import org.apache.catalina.util.DateTool;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser;
 import com.unifina.domain.task.Task
+import com.unifina.kafkaclient.UnifinaKafkaConsumer
+import com.unifina.kafkaclient.UnifinaKafkaMessage
+import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.task.KafkaCollectTask
-import com.unifina.utils.TimeOfDayUtil;
+import com.unifina.utils.TimeOfDayUtil
 
 
 class KafkaService {
 
 	UnifinaKafkaProducer producer = null
 	GrailsApplication grailsApplication
+	
+	private static final Logger log = Logger.getLogger(KafkaService)
 
 	@CompileStatic
     void sendMessage(String channelId, Object key, String message, boolean isJson=true) {
@@ -42,10 +48,34 @@ class KafkaService {
 		sendMessage(channelId, key, str, true);
 	}
 	
+	Date getFirstTimestamp(String topic) {
+		log.info("Querying first timestamp for topic $topic...")
+		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
+		Date firstTimestamp = null
+		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
+			@Override
+			public void handleMessage(UnifinaKafkaMessage msg) {
+				if (firstTimestamp==null)
+					firstTimestamp = new Date(msg.getTimestamp())
+			}
+		}, true)
+		
+		// Wait for the Kafka consumption to finish (or timeout)!
+		while (firstTimestamp==null && consumer.getTimeSinceLastEvent() < 60L*1000L) {
+			Thread.sleep(1000L);
+		}
+		consumer.close()
+		
+		if (firstTimestamp==null)
+			log.warn("Timed out while waiting for the first message of topic $topic")
+		
+		return firstTimestamp
+	}
+	
 	List<Task> createCollectTasks(Stream stream) {
 		// The latest FeedFile indicates the last collected day
 		FeedFile latest = FeedFile.withCriteria(uniqueResult:true) {
-			eq("feed",stream.feed)
+			eq("stream",stream)
 			maxResults(1)
 			order("endDate", "desc")
 		}
@@ -56,10 +86,18 @@ class KafkaService {
 			beginDate = latest.beginDate+1
 			endDate = latest.endDate+1
 		}
-		// If never collected, use yesterday
-		// TODO: query from Kafka what is the first day?
+		// If never collected, query the first timestamp from Kafka
 		else {
-			beginDate = TimeOfDayUtil.getMidnight(new Date())-1
+			Map streamConfig = JSON.parse(stream.streamConfig)
+			String topic = streamConfig.topic
+
+			// If getFirstTimestamp(topic) returns null, there is nothing to be collected
+			beginDate = getFirstTimestamp(topic)
+			if (beginDate==null) {
+				log.warn("Could not determine first timestamp for stream $stream.name, not collecting")
+				return []
+			}
+			beginDate = TimeOfDayUtil.getMidnight(beginDate)
 			endDate = new Date((beginDate+1).time-1)
 		}
 	

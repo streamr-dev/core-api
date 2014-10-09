@@ -1,10 +1,13 @@
 package com.unifina.controller.data
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.service.FeedFileService
 
+@Secured(["ROLE_ADMIN"])
 class FeedFileController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

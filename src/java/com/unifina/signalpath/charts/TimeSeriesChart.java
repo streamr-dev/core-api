@@ -122,7 +122,7 @@ public class TimeSeriesChart extends Chart {
 		conn.canToggleDrivingInput = false;
 		conn.canHaveInitialValue = false;
 		conn.canBeFeedback = false;
-		conn.suppressWarnings = true;
+		conn.requiresConnection = false;
 		
 		// Add the input
 		if (getInput(name)==null)

@@ -77,8 +77,15 @@ div.input:hover, div.output:hover {
 	stroke: #ccc;
 	fill: #fff;
 }
-._jsPlumb_hover circle, ._jsPlumb_endpoint_drop_allowed circle {
+._jsPlumb_hover circle, 
+._jsPlumb_endpoint_drop_allowed circle,
+._jsPlumb_endpoint.highlight circle {
 	fill: #FFFFD9 !important;
+}
+
+._jsPlumb_endpoint.warning circle {
+	stroke: #FF6969;
+	fill: #f9eeee;
 }
 
 /* Overlay element style */

@@ -1,7 +1,10 @@
 package com.unifina.controller.util
 
+import grails.plugin.springsecurity.annotation.Secured
+
 import org.apache.log4j.Logger
 
+@Secured(["ROLE_USER"])
 class JavascriptErrorController {
 	
 	private static final Logger log = Logger.getLogger(JavascriptErrorController)

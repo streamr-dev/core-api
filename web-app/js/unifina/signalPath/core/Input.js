@@ -19,25 +19,13 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				me.json.connected = false;
 				delete me.json.sourceId;
 				me.div.removeClass("connected");
+				
+				if (!(pub.getInitialValue()===null || pub.getInitialValue()===undefined)) {
+					me.removeClass("warning")
+				}
 			}
 		})(pub));
 		
-		// Add/remove a warning class to unconnected inputs
-		if (!pub.json.suppressWarnings) {
-			pub.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
-
-			div.bind("spConnect", (function(me) {
-				return function(event, output) {
-					me.jsPlumbEndpoint.setStyle(jsPlumb.Defaults.EndpointStyle);
-				}
-			})(pub));
-
-			div.bind("spDisconnect", (function(me) {
-				return function(event, output) {
-					me.jsPlumbEndpoint.setStyle(jQuery.extend({},jsPlumb.Defaults.EndpointStyle,{strokeStyle:"red"}));
-				}
-			})(pub));
-		}
 		return div;
 	}
 	
@@ -51,7 +39,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		div.append(switchDiv);
 		
 		if (data.canToggleDrivingInput==null || data.canToggleDrivingInput) {
-			var driving = new SignalPath.IOSwitch(switchDiv, "drivingInput", {
+			var driving = new SignalPath.IOSwitch(switchDiv, "ioSwitch drivingInput", {
 				getValue: (function(d){
 					return function() { return d.drivingInput; };
 				})(data),
@@ -65,7 +53,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		
 		// Initial value. Default null/off. Only valid for TimeSeries type
 		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
-			var iv = new SignalPath.IOSwitch(switchDiv, "initialValue", {
+			var iv = new SignalPath.IOSwitch(switchDiv, "ioSwitch initialValue", {
 				getValue: (function(d){
 					return function() { return d.initialValue; };
 				})(data),
@@ -87,14 +75,25 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				},
 				isActiveValue: function(currentValue) {
 					return currentValue != null;
-				}
+				},
 			});
-		}
+			
+			// Remove requiresConnection class on update if input has initial value
+			if (pub.json.requiresConnection) {
+				$(iv).on("updated", function(e) {
+					if (iv.isActiveValue(iv.getValue()))
+						pub.removeClass("warning")
+					else if (!pub.isConnected())
+						pub.addClass("warning")
+				})
+				iv.update()
+			}
+		} 
 		
 		// Feedback connection. Default false. Switchable for TimeSeries types.
 		
 		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var feedback = new SignalPath.IOSwitch(switchDiv, "feedback", {
+			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
 				getValue: (function(d){
 					return function() { return d.feedback; };
 				})(data),
@@ -119,6 +118,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		opts.connectorOverlays[0][1].direction = -1;
 		opts.maxConnections = 1;
 		opts.anchor = [0, 0.5, -1, 0, -15, 0];
+		opts.cssClass = (opts.cssClass || "") + " jsPlumb_input";
 		
 		return opts;
 	}

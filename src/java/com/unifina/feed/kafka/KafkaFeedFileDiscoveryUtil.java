@@ -1,7 +1,5 @@
 package com.unifina.feed.kafka;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -20,12 +18,7 @@ public class KafkaFeedFileDiscoveryUtil extends S3FeedFileDiscoveryUtil {
 
 	@Override
 	protected Date getBeginDate(String location) {
-		SimpleDateFormat fdf = new SimpleDateFormat("yyyyMMdd");
-		try {
-			return fdf.parse(FilenameUtils.getName(location).substring("kafka.".length(), "kafka.".length()+8));
-		} catch (ParseException e) {
-			throw new RuntimeException("Failed to parse date from Kafka recording at location: "+location);
-		}
+		return new KafkaFeedFileName(FilenameUtils.getName(location)).getBeginDate();
 	}
 
 	@Override
@@ -35,4 +28,9 @@ public class KafkaFeedFileDiscoveryUtil extends S3FeedFileDiscoveryUtil {
 		return new Date(beginDate.getTime() + 24*60*60*1000 - 1000);
 	}
 
+	@Override
+	protected Long getStreamId(String location) {
+		return new KafkaFeedFileName(FilenameUtils.getName(location)).getStreamId();
+	}
+	
 }

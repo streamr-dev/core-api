@@ -29,6 +29,7 @@ class Feed {
 	Module module
 	
 	Boolean startOnDemand
+	Boolean bundledFeedFiles
 
 	static constraints = {
 		backtestFeed(nullable:true)
@@ -42,6 +43,7 @@ class Feed {
 		discoveryUtilClass(nullable:true)
 		discoveryUtilConfig(nullable:true)
 		startOnDemand(nullable:true)
+		bundledFeedFiles(nullable:true)
 	}
 	
 	@Override

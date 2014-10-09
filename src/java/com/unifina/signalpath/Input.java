@@ -18,6 +18,7 @@ public class Input<T> extends Endpoint<T> {
 	 */
 	boolean feedbackConnection = false;
 	public boolean canBeFeedback = true;
+	public boolean requiresConnection = true;
 	
 	boolean drivingInput = true;
 	public boolean canToggleDrivingInput = true;
@@ -78,6 +79,7 @@ public class Input<T> extends Endpoint<T> {
 		config.put("drivingInput", drivingInput);
 		config.put("canToggleDrivingInput", canToggleDrivingInput);
 		config.put("acceptedTypes", getAcceptedTypes());
+		config.put("requiresConnection", requiresConnection);
 		
 		return config;
 	}

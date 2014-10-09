@@ -59,7 +59,7 @@ class UserClassLoaderTests {
   com.unifina.security.User user = springSecurityService.currentUser
   springSecurityService.reauthenticate("harponen")
   
-  //Class ssu = this.class.classLoader.loadClass("org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils")
+  //Class ssu = this.class.classLoader.loadClass("grails.plugin.springsecurity.SpringSecurityUtils")
   //ssu.getMethod("reloadSecurityConfig").invoke(new Object[0])
   debug(springSecurityService.currentUser.toString())
   

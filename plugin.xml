@@ -18,6 +18,7 @@
     <resource>com.unifina.controller.signalpath.ModuleController</resource>
     <resource>com.unifina.controller.signalpath.SavedSignalPathController</resource>
     <resource>com.unifina.controller.task.TaskWorkerController</resource>
+    <resource>com.unifina.controller.tour.TourUserController</resource>
     <resource>com.unifina.controller.util.JavascriptErrorController</resource>
     <resource>com.unifina.domain.data.Feed</resource>
     <resource>com.unifina.domain.data.FeedFile</resource>
@@ -32,6 +33,7 @@
     <resource>com.unifina.domain.signalpath.ModulePackageUser</resource>
     <resource>com.unifina.domain.signalpath.SavedSignalPath</resource>
     <resource>com.unifina.domain.task.Task</resource>
+    <resource>com.unifina.domain.tour.TourUser</resource>
     <resource>com.unifina.service.FeedFileService</resource>
     <resource>com.unifina.service.FeedService</resource>
     <resource>com.unifina.service.KafkaService</resource>

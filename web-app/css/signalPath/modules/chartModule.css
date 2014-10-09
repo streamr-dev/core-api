@@ -6,8 +6,17 @@
 	z-index: 4;
 }
 
-.chartRangeButtons {
+.chart-range-selector {
+	width: auto;
+	height: 25px;
+	line-height: 25px;
+	padding: 2px 8px;
 	margin-bottom: 3px;
+	margin-right: 5px;
+}
+
+.chart-show-on-run {
+	display:none;
 }
 
 .chartDrawArea {

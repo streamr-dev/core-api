@@ -40,7 +40,9 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			// TODO: endpointId is for backwards compatibility
 			var id = (pub.json.endpointId != null ? pub.json.endpointId : pub.json.id);
 			pub.jsPlumbEndpoint = createJSPlumbEndpoint(pub.json, div, id);
-			pub.jsPlumbEndpoint
+			
+			if (pub.json.requiresConnection)
+				pub.addClass("warning")
 		}
 		
 		// Create io settings
@@ -49,6 +51,13 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		// Bind context menu listeners
 		if (!pub.disableContextMenu) {
 			div.addClass("context-menu");
+			
+			// When left-clicking on ioname, simulate right click
+			// This is the current way of enabling context menu on touch devices
+			ioname.click(function(e) {
+				e.type = "contextmenu"
+				$(ioname).trigger(e)
+			})
 		}
 		
 		// Bind basic connection event handlers
@@ -56,6 +65,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			return function(event, output) {
 				me.json.connected = true;
 				me.div.addClass("connected");
+				if (me.json.requiresConnection)
+					me.removeClass("warning")
 			}
 		})(pub));
 		
@@ -63,6 +74,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			return function(event, output) {
 				me.json.connected = false;
 				me.div.removeClass("connected");
+				if (me.json.requiresConnection)
+					me.addClass("warning")
 			}
 		})(pub));
 		
@@ -71,6 +84,18 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		return div;
 	}
 	pub.createDiv = createDiv;
+	
+	function addClass(cls) {
+		pub.div.addClass(cls)
+		pub.jsPlumbEndpoint.addClass(cls)
+	}
+	pub.addClass = addClass
+	
+	function removeClass(cls) {
+		pub.div.removeClass(cls)
+		pub.jsPlumbEndpoint.removeClass(cls)
+	}
+	pub.removeClass = removeClass
 	
 	function setExport(iodiv,data,value) {
 		if (value) {
@@ -115,6 +140,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 				return pub.checkConnection(info) && pub.checkConnectionDirection(info);
 			},
 			connectorOverlays: [["Arrow", {direction:1, paintStyle: {cssClass:"arrow"}}]],
+			cssClass: (pub.json.requiresConnection ? "requiresConnection" : "")
 		};
 	}
 	pub.getJSPlumbEndpointOptions = getJSPlumbEndpointOptions;
@@ -129,7 +155,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		
 		var ep = jsPlumb.addEndpoint(connDiv, pub.getJSPlumbEndpointOptions(json.connDiv));
 		
-		$(connDiv).data("acceptedTypes", (json.acceptedTypes!=null ? json.acceptedTypes : [json.type]));
+		$(connDiv).data("acceptedTypes", getAcceptedTypes());
 		
 		// Add reference to this object to the jsPlumb Endpoint canvas element
 		$(ep.canvas).data("spObject", pub);
@@ -188,24 +214,36 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	}
 	pub.getDisplayName = getDisplayName;
 	
+	function checkTypeArrays(arr1, arr2) {
+		for(var i = 0; i<arr1.length; i++)
+		    for(var j=0; j<arr2.length; j++)
+		        if(arr1[i]==arr2[j] || arr1[i]=="Object" || arr2[j]=="Object")
+		            return true
+		return false
+	}
+	
 	function checkConnection(connection) {
 		// Endpoints must contain at least one acceptedType in common
 		// "Object" types can be connected to anything
 		var arr1 = $("#"+connection.sourceId).data("acceptedTypes");
 		var arr2 = $("#"+connection.targetId).data("acceptedTypes");
 		
-		for(var i = 0; i<arr1.length; i++)
-		    for(var j=0; j<arr2.length; j++)
-		        if(arr1[i]==arr2[j] || arr1[i]=="Object" || arr2[j]=="Object")
-		            return true;
-
-		SignalPath.options.errorHandler({msg:"These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+"."});
-		return false;
+		if (checkTypeArrays(arr1,arr2)) {
+			return true
+		}
+		else {
+			SignalPath.options.errorHandler({msg:"These endpoints can not be connected! Accepted types at source: "+arr1+". Accepted types at target: "+arr2+"."});
+			return false;
+		}
 	}
 	pub.checkConnection = checkConnection;
 	
+	function acceptsTypes(other) {
+		return checkTypeArrays(getAcceptedTypes(), other)
+	}
+	
 	function getAcceptedTypes() {
-		return json.acceptedTypes;
+		return (json.acceptedTypes!=null ? json.acceptedTypes : [json.type])
 	}
 	pub.getAcceptedTypes = getAcceptedTypes;
 	
@@ -260,3 +298,43 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	
 	return pub;
 }
+
+$(SignalPath).on("new", function() {
+	
+	// Bind connection and disconnection events
+	jsPlumb.bind("connection",function(connection) {
+		$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
+		$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
+	});
+	jsPlumb.bind("connectionDetached",function(connection) {
+		if (!connection.connection.pending) {
+			$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
+			$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
+		}
+	});
+	
+	jsPlumb.bind("connectionDrag", function(conn) {
+		// Highlight valid targets
+		var $epDiv = $("#"+conn.sourceId)
+		var ep = $epDiv.data("spObject")
+		var inputOrOutput = ($epDiv.hasClass("input") && conn.pending || $epDiv.hasClass("output") && !conn.pending ? "output" : "input")
+		var acceptedTypes = ep.getAcceptedTypes()
+		$(acceptedTypes).each(function(i, type) {
+			var $validTargets = (type === "Object" ? $(".endpoint."+inputOrOutput) : $(".endpoint."+inputOrOutput+"."+type+","+".endpoint."+inputOrOutput+".Object"))
+
+			$validTargets.each(function(j,target) {
+				var spObject = $(target).data("spObject")
+				if (!spObject.jsPlumbEndpoint.isFull())
+					spObject.addClass("highlight")
+			})
+		})
+	})
+	
+	jsPlumb.bind("connectionDragStop", function(conn) {
+		// Un-highlight
+		$(".endpoint.highlight").each(function(i,target) {
+			$(target).data("spObject").removeClass("highlight")
+		})
+	})
+	
+})

@@ -5,8 +5,6 @@ import grails.converters.JSON
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.text.SimpleDateFormat
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import java.util.zip.GZIPOutputStream
 
 import org.apache.log4j.Logger
@@ -15,6 +13,8 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.task.Task
+import com.unifina.feed.kafka.KafkaFeedFileName
+import com.unifina.kafkaclient.UnifinaKafkaChannelConsumer
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
@@ -43,55 +43,55 @@ public class KafkaCollectTask extends AbstractTask {
 		
 		final long beginTime = (config.beginDate instanceof String ? df.parse(config.beginDate).time : config.beginDate)
 		final long endTime = (config.endDate instanceof String ? df.parse(config.endDate).time : config.endDate)
+		String beginTimeAsString = new Date(beginTime).toString()
 		Map streamConfig = JSON.parse(stream.streamConfig)
 		String topic = streamConfig.topic
 		
-		SimpleDateFormat fdf = new SimpleDateFormat("yyyyMMdd")
-		String name = "kafka."+fdf.format(new Date(beginTime))+"."+stream.id+".gz"
+		String name = config.filename
 		
 		File dir = File.createTempDir(name, "")
 		File file = new File(dir, name)
 		GZIPOutputStream gzos = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(file)))
 		
-		final AtomicBoolean done = new AtomicBoolean(false);
-		final AtomicLong touched = new AtomicLong(System.currentTimeMillis());
+		int counter = 0
 		
 		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
-		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
+		UnifinaKafkaChannelConsumer channelConsumer = consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
 			ByteBuffer lengthBuffer;
 			
 			@Override
 			public void handleMessage(UnifinaKafkaMessage msg) {
-				if (done.get())
-					return
-				else if (msg.getTimestamp()>=endTime) {
-					done.set(true)
-					return
-				}
-				else {
-					try {
-						byte[] rawMsg = msg.toBytes()
-						lengthBuffer = ByteBuffer.allocate(4);
-						lengthBuffer.order(ByteOrder.BIG_ENDIAN);
-						byte[] length = lengthBuffer.putInt(rawMsg.length).array();
-						gzos.write(length)
-						gzos.write(rawMsg)
-						touched.set(System.currentTimeMillis())
-					} catch (IOException e) {
-						log.error("Error writing to file!",e)
-					}
+				try {
+					counter++
+					byte[] rawMsg = msg.toBytes()
+					lengthBuffer = ByteBuffer.allocate(4);
+					lengthBuffer.order(ByteOrder.BIG_ENDIAN);
+					byte[] length = lengthBuffer.putInt(rawMsg.length).array();
+					gzos.write(length)
+					gzos.write(rawMsg)
+				} catch (IOException e) {
+					log.error("Error writing to file!",e)
 				}
 			}
-		}, beginTime)
+		}, beginTime, endTime)
 		
 		// Wait for the Kafka consumption to finish (or timeout in case there are no messages after endDate!)
-		// FIXME: fix timeout hack when the consumer improves
-		while (!done.get() && System.currentTimeMillis()-touched.get() < 60000L) {
+		// It may be possible to change the timeout system into something better in the future
+		while (!channelConsumer.isClosed() && consumer.getTimeSinceLastEvent() < 120*1000L) {
 			Thread.sleep(1000L);
+			
+			if (consumer.getLatestMessage()==null)
+				log.info("Waiting to start seeking topic $topic...")
+			else if (counter==0)
+				log.info("Seeking $topic, currently at ${new Date(consumer.getLatestMessage().getTimestamp())}, beginTime is ${beginTimeAsString}")
+			else
+				log.info("Recorded $counter messages for $topic, now at ${new Date(consumer.getLatestMessage().getTimestamp())}")
 		}
 		consumer.close()
 		gzos.finish()
 		gzos.close()
+		
+		log.info("Done, found $counter messages for $topic.")
 		
 		// Check that the FeedFile does not exist
 		FeedFile feedFile = feedFileService.getFeedFile(stream.feed, new Date(beginTime), new Date(endTime), name)
@@ -116,6 +116,7 @@ public class KafkaCollectTask extends AbstractTask {
 				feedFile.processing = true
 				feedFile.processTaskCreated = false
 				feedFile.feed = stream.feed
+				feedFile.stream = stream
 				feedFile.save(flush:true, failOnError:true)
 			}
 			
@@ -150,8 +151,9 @@ public class KafkaCollectTask extends AbstractTask {
 	public void onComplete(boolean taskGroupComplete) {
 		
 	}
-
+	
 	public static Map<String,Object> getConfig(Stream stream, Date beginDate, Date endDate) {
-		return [streamId:stream.id, beginDate:beginDate.time, endDate:endDate.time]
+		String filename = new KafkaFeedFileName(stream, beginDate).toString()
+		return [streamId:stream.id, beginDate:beginDate.time, endDate:endDate.time, filename:filename]
 	}
 }

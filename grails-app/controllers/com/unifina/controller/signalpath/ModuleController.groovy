@@ -1,19 +1,21 @@
 package com.unifina.controller.signalpath
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
 
 import org.apache.log4j.Logger
 
-import com.unifina.domain.signalpath.Module;
-import com.unifina.domain.signalpath.ModuleCategory;
-import com.unifina.domain.signalpath.ModulePackage;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.IReturnChannel;
-import com.unifina.signalpath.ModuleException;
+import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.ModuleCategory
+import com.unifina.domain.signalpath.ModulePackage
+import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.signalpath.IReturnChannel
+import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
+@Secured(["ROLE_USER"])
 class ModuleController {
 	
 	def moduleService

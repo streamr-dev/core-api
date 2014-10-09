@@ -57,7 +57,7 @@ grails.project.dependency.resolution = {
 		compile('org.apache.kafka:kafka_2.8.2:0.8.0') {
 			excludes "slf4j-simple"
 		}
-		compile('com.unifina:kafka-client:0.0.6') {
+		compile('com.unifina:kafka-client:0.0.9') {
 			excludes "slf4j-simple"
 		}
 		
@@ -68,6 +68,9 @@ grails.project.dependency.resolution = {
 		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
 		test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
 		test "org.gebish:geb-spock:$gebVersion"
+		
+		runtime('org.twitter4j:twitter4j-core:[4.0,)')
+		runtime('com.twitter:hbc-core:2.2.0')
     }
 
     plugins {
@@ -85,9 +88,9 @@ grails.project.dependency.resolution = {
 		// Required by cached-resources but transitive dependency declaration is missing	  
 		compile ":cache-headers:1.1.5"
 			  
-		runtime ":spring-security-core:1.2.7"
+		runtime ":spring-security-core:2.0-RC4"
 		runtime ":jquery:1.11.1"
-		runtime ":jquery-ui:1.8.24"
+		runtime ":jquery-ui:1.10.3"
 		runtime ":resources:1.2.8"
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
