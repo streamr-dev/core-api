@@ -1,0 +1,17 @@
+{
+  "name": "unifina-core",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha web-app/js/unifina/test"
+  },
+  "author": "",
+  "license": "Unifina",
+  "devDependencies": {
+    "mocha": "^1.21.4"
+  }
+}

@@ -2295,8 +2295,15 @@ __p += '<div class="hopscotch-bubble-container" style="width: '+
 				((__t = ( i18n.prevBtn )) == null ? '' : __t) +
 				'</button>';
 		}
+
+		if (buttons.showCTA) {
+			__p += '<button class="btn btn-primary btn-xs hopscotch-nav-button pull-right next hopscotch-cta">' +
+				((__t = ( buttons.ctaLabel )) == null ? '' : __t) +
+				'</button>';
+		}
+
 		if (buttons.showNext) {
-			__p += '<button class="btn btn-success btn-xs hopscotch-nav-button pull-right next hopscotch-next">' +
+			__p += '<button class="btn btn-primary btn-xs hopscotch-nav-button pull-right next hopscotch-next">' +
 				((__t = ( i18n.nextBtn )) == null ? '' : __t) +
 				'</button>';
 		}
