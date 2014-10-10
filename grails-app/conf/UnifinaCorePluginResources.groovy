@@ -125,7 +125,9 @@ modules = {
 		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin: 'unifina-core']
 	}
 	'global-error-handler' {
-		resource url:[dir:'js/unifina', file:'globalErrorHandler.js', plugin: 'unifina-core']
+		dependsOn 'jquery, bootbox'
+		resource url:[dir:'js/unifina', file:'globalJavascriptExceptionHandler.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina', file:'globalAjaxSessionExpirationHandler.js', plugin: 'unifina-core']
 	}
 	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']

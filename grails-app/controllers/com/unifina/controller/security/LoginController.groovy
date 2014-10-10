@@ -133,4 +133,10 @@ class LoginController {
 	def ajaxDenied = {
 		render([error: 'access denied'] as JSON)
 	}
+	
+	def loginForm() {
+		def config = SpringSecurityUtils.securityConfig
+		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
+		render(template:"form", model: [postUrl: postUrl, rememberMeParameter: config.rememberMe.parameter])
+	}
 }
