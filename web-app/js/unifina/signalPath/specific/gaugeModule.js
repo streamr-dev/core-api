@@ -95,7 +95,7 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 		        floating: true,
 		        verticalAlign: 'bottom',
 		        y: 35,
-		        style: (prot.jsonData.options.titleStyle.value!="" ? eval("("+prot.jsonData.options.titleStyle.value+")") : null),
+		        style: (prot.jsonData.options.titleStyle.value!="" ? eval("("+prot.jsonData.options.titleStyle.value+")") : null)
 		    },
 		    
 		    pane: [{
@@ -116,7 +116,7 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 		        	formatter: (prot.jsonData.options.labelFormatter.value!="" ? new Function(prot.jsonData.options.labelFormatter.value) : function() { return this.value; }),
 		        	rotation: 'auto',
 		        	distance: 20,
-		        	style: (prot.jsonData.options.labelStyle.value!="" ? eval("("+prot.jsonData.options.labelStyle.value+")") : null),
+		        	style: (prot.jsonData.options.labelStyle.value!="" ? eval("("+prot.jsonData.options.labelStyle.value+")") : null)
 		        },
 		        plotBands: [{
 		            color: {
@@ -131,7 +131,7 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 		        	innerRadius: '100%',
 		        	outerRadius: '105%'
 		        }],
-		        pane: 0,
+		        pane: 0
 		    }],
 		    
 		    plotOptions: {
@@ -169,7 +169,7 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 			        startAngle: -100,
 			        endAngle: 100,
 			        background: null,
-			        center: ['50%', '65%'],
+			        center: ['50%', '65%']
 			    },
 			    yAxis: {
 			        min: min,

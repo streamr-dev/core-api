@@ -57,7 +57,7 @@ SignalPath.IOSwitch = function(parentContainer, clazz, options) {
  			_setTooltipTitle(pub.stateText())
  			
  			$(pub).trigger("updated")
- 		},
+ 		}
 	}
 	
 	$.extend(pub, pub.defaultOptions, options)

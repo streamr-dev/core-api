@@ -12,7 +12,7 @@
     
     <script>
     	Streamr = {}
-		Streamr.projectWebroot = '<g:createLink uri="/" />'
+		Streamr.projectWebroot = '${createLink(uri:"/")}'
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
     </script>
@@ -21,17 +21,8 @@
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
-	<r:require module="superfish" />
 
 	<r:require module='tour'/>
-
-	<r:script>
-		$(document).ready(function () {
-			$('#top_banner .topnav ul').superfish({
-				delay:400
-			}).supposition();
-		});
-	</r:script>
 	
 	<r:layoutResources/>
     <g:layoutHead />

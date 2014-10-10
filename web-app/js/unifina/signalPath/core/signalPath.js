@@ -48,7 +48,7 @@ var SignalPath = (function () {
     		atmosphereUrl: Streamr.projectWebroot+"atmosphere/",
     		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
     		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-    		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
+    		uiActionUrl: Streamr.projectWebroot+"module/uiAction"
     };
 	
     var detectedTransport = null;

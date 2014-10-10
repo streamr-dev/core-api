@@ -203,7 +203,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.jsonData.layout = jQuery.extend(prot.jsonData.layout || {}, {
 			position: {
 				top: prot.div.css('top'),
-				left: prot.div.css('left'),
+				left: prot.div.css('left')
 			}
 		});
 		
@@ -295,7 +295,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function initResizable(options) {
 		var defaultOptions = {
-			helper: "chart-resize-helper",
+			helper: "chart-resize-helper"
 		}
 		options = $.extend({},defaultOptions,options || {});
 		prot.div.resizable(options);
@@ -329,7 +329,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function getContextMenu() {
 		return [
-		        {title: "Clone module", cmd: "clone"},
+		        {title: "Clone module", cmd: "clone"}
 		]
 	}
 	prot.getContextMenu = getContextMenu;

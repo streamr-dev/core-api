@@ -75,7 +75,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				},
 				isActiveValue: function(currentValue) {
 					return currentValue != null;
-				},
+				}
 			});
 			
 			// Remove requiresConnection class on update if input has initial value

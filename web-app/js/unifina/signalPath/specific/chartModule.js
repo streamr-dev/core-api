@@ -244,9 +244,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				yAxis: yAxis, 
 
 				legend: {
-					enabled: true,
-					// maxHeight: 100,
-					// y: 40
+					enabled: true
 				},
 				
 				rangeSelector: {

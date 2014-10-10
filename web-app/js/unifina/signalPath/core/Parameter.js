@@ -85,7 +85,7 @@ SignalPath.ParamRenderers = {
 				$(search).typeahead({
 					highlight: true,
 					hint: false,
-					minLength: 1,
+					minLength: 1
 				}, {
 					name: 'streams',
 					displayKey: 'name',
@@ -103,13 +103,6 @@ SignalPath.ParamRenderers = {
 					}
 				})
 				.on('typeahead:selected', onSel)
-
-				/*.data("autocomplete")._renderItem = function(ul,item) {
-					return $("<li></li>")
-						.data("item.autocomplete",item)
-						.append("<a>"+item.name+"</a>")
-						.appendTo(ul);
-				};*/
 					
 				return span;
 			},

@@ -85,8 +85,8 @@ Tour.loadTour = function(tourNumber, cb) {
 }
 
 Tour.list = function(cb) {
-	$.get(tourUrlRoot + 'index.json', function(resp) {
-		cb(JSON.parse(resp))
+	$.getJSON(tourUrlRoot + 'index.json', function(resp) {
+		cb(resp)
 	})
 }
 
