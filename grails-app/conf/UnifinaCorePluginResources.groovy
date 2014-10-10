@@ -59,12 +59,6 @@ modules = {
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror-compressed.js', plugin: 'unifina-core']
 		resource url:[dir:'js/codemirror-3.21', file:'codemirror.css', plugin: 'unifina-core']
 	}
-	superfish {
-		dependsOn 'jquery'
-		resource url:[dir:'js/superfish/js', file:'superfish.min.js', plugin: 'unifina-core']
-		resource url:[dir:'js/superfish/css', file:'superfish.css', plugin: 'unifina-core']
-		resource url:[dir:'js/superfish/js', file:'supposition.js', plugin: 'unifina-core']
-	}
 	jsplumb {
 		dependsOn 'jquery'
 		dependsOn 'jquery-ui'
