@@ -491,6 +491,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.hash = null;
 		cloneData.layout.position.left = parseInt(cloneData.layout.position.left, 10) + 30 + 'px'
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
+		if (cloneData.layout.workspaces && cloneData.layout.workspaces[SignalPath.getWorkspace()]) {
+			cloneData.layout.workspaces[SignalPath.getWorkspace()].position.left = cloneData.layout.position.left
+			cloneData.layout.workspaces[SignalPath.getWorkspace()].position.top = cloneData.layout.position.top
+		}
 	}
 	prot.prepareCloneData = prepareCloneData;
 	

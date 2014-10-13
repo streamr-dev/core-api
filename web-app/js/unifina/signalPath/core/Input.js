@@ -60,23 +60,34 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				setValue: (function(d){
 					return function(value) { return d.initialValue = value; };
 				})(data),
-				buttonText: function() { 
-					if (this.getValue()==null)
-						return "IV";
-					else return this.getValue().toString();
-				},
+				buttonText: function(currentValue) { return "IV" },
 				tooltip: 'Initial value',
-				nextValue: function(currentValue) {
-					if (currentValue==null)
-						return 0;
-					else if (currentValue==0)
-						return 1;
-					else return null;
-				},
 				isActiveValue: function(currentValue) {
 					return currentValue != null;
 				}
 			});
+			
+			// Override click handler
+			iv.click = function() {
+				if (iv.getValue()==null) {
+					bootbox.prompt({
+						title: "Initial Value:", 
+						callback: function(result) {                
+							if (result != null) {                                             
+								iv.setValue(parseFloat(result))
+								iv.update();
+								iv.div.html(iv.buttonText());
+							}
+						},
+						className: 'initial-value-dialog'
+					})
+				}
+				else {
+					iv.setValue(null);
+					iv.update();
+					iv.div.html(iv.buttonText());
+				}
+			}
 			
 			// Remove requiresConnection class on update if input has initial value
 			if (pub.json.requiresConnection) {
