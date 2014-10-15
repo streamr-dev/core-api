@@ -26,7 +26,6 @@ class TourUserControllerTests {
 	]
 
 	void setUp() {
-		springSecurityService.currentUser.springSecurityService = springSecurityService
 		springSecurityService.currentUser.save(validate: false, failOnError: true)
 	}
 
