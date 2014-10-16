@@ -99,7 +99,14 @@ SignalPath.ParamRenderers = {
 								SignalPath.options.errorHandler({msg: errorThrown});
 								callback([]);
 							}
-						});
+						})
+					},
+					templates: {
+						suggestion: function(item) {
+							if (item.description)
+								return"<p>"+item.name+"<br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
+							else return "<p>"+item.name+"</p>"
+						}
 					}
 				})
 				.on('typeahead:selected', onSel)

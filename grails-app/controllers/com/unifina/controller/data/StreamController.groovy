@@ -19,11 +19,11 @@ class StreamController {
 		List<Map> streams = []
 
 		if (!allowedFeeds.isEmpty()) {
-			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module) from Stream s "+
+			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+
 				"left outer join s.feed "+
 				"left outer join s.feed.module "+
-				"where s.name like '"+params.term+"%' "
-				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+")"
+				"where (s.name like '"+params.term+"%' or s.description like '"+params.term+"%') "
+				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "
 
 				if (params.feed) {
 					hql += " and s.feed.id="+Feed.load(params.feed).id

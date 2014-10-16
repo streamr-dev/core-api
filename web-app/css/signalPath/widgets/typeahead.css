@@ -8,6 +8,7 @@
 	color: #333333;
 	margin: 0px;
 	white-space: nowrap;
+	line-height: 83%;
 }
 
 .tt-dropdown-menu p:hover {
@@ -18,3 +19,11 @@
 	background-color: #ccc;
 }
 
+.tt-suggestion-description {
+	font-size: 9px;
+}
+
+.tt-dataset-header {
+	padding-left: 5px;
+	font-weight: bold;
+}

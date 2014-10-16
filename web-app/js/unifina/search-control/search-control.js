@@ -16,6 +16,7 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 	}
 
 	var modules = []
+	var emptyTemplate = 'No streams or modules found.'
 
 	$.get(modulesUrl, function(ds) {
 		modules = ds
@@ -34,14 +35,19 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 		displayKey: 'name',
 		source: modulesTypeAhead,
 		templates: {
-			header: '<strong>Modules</strong>'
+			header: '<span class="tt-dataset-header">Modules</span>'
 		}
 	}, {
 		name: 'streams',
 		displayKey: 'name',
 		source: streamsTypeAhead,
 		templates: {
-			header: '<strong>Streams</strong>'
+			header: '<span class="tt-dataset-header">Streams</span>',
+			suggestion: function(item) {
+				if (item.description)
+					return"<p>"+item.name+"<br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
+				else return "<p>"+item.name+"</p>"
+			}
 		}
 	})
 
