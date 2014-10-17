@@ -594,6 +594,7 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 	var $yAxisSelectorButton = $("<div class='y-axis-number btn "+btnDefaultClass+" btn-xs "+popoverClass+" popover-colorful'></div>")
 	
 	pub.seriesIndex = null
+	pub.disableContextMenu = true
 	
 	var super_createDiv = pub.createDiv
 	pub.createDiv = function() {
