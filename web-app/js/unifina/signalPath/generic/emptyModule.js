@@ -17,14 +17,14 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.id = "module_"+prot.hash;
 
 	var pub = {}
-	var cpos = canvas.offset()
 	var $prot = $(prot)
 
 	prot.dragOptions = {
 		drag: function(e, ui) {
+			var cpos = canvas.offset()
 			var x = ui.offset.left + canvas.scrollLeft()
 			var y = ui.offset.top + canvas.scrollTop()
-
+			
 			if (x < cpos.left-100 || y < cpos.top-50) {
 				return false
 			}
