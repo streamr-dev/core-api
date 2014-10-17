@@ -69,6 +69,7 @@ modules = {
 		resource url:[dir:'js/jsTree', file:'jquery.jstree.js', plugin: 'unifina-core']
 		// If you change the theme, check SignalPathTagLib too
 		resource url:[dir:'js/jsTree/themes/classic', file:'style.css', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/widgets', file:'jstree-overrides.css', plugin: 'unifina-core']
 	}
 	atmosphere {
 		dependsOn 'jquery, jquery-migrate'
