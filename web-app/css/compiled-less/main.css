@@ -16452,6 +16452,15 @@ body.build-page #content-wrapper {
   max-height: 300px;
   overflow: auto;
 }
+.btn-sign-up {
+  display: none;
+}
+.show-sign-up .btn-sign-up {
+  display: inline-block;
+}
+.show-sign-up .btn-sign-in {
+  display: none;
+}
 .remote-tabs-content {
   outline: none;
 }
