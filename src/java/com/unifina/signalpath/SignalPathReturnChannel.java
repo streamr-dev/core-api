@@ -1,74 +1,40 @@
 package com.unifina.signalpath;
 
-import grails.converters.JSON;
-
 import java.util.ArrayDeque;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.lang.UnhandledException;
 import org.apache.log4j.Logger;
-import org.atmosphere.cpr.Broadcaster;
-import org.atmosphere.cpr.BroadcasterFactory;
-import org.atmosphere.cpr.BroadcasterLifeCyclePolicy.ATMOSPHERE_RESOURCE_POLICY;
-import org.atmosphere.cpr.BroadcasterLifeCyclePolicy.Builder;
-import org.atmosphere.cpr.BroadcasterLifeCyclePolicyListener;
-import org.codehaus.groovy.grails.web.pages.FastStringWriter;
 
-import com.unifina.atmosphere.CounterBroadcasterCache;
+import com.unifina.push.AtmospherePushChannel;
+import com.unifina.push.PushChannel;
 
-public class SignalPathReturnChannel extends Thread implements IReturnChannel, BroadcasterLifeCyclePolicyListener {
-
-//    private static final ExecutorService broadcastExecutorService = Executors.newCachedThreadPool();
-//    private static final ExecutorService broadcastAsyncExecutorService = Executors.newCachedThreadPool();
+public class SignalPathReturnChannel extends Thread implements IReturnChannel {
 	
-	int payloadCounter = 0;
-	
-	public Broadcaster bc;
-	
-	ServletContext sc;
-	String sessionId;
-	String channel;
-	
-	SignalPath signalPath;
-	
-	boolean destroyOnEmpty = false;
-	boolean destroyOnIdle = false;
+	private ServletContext sc;
+	private String sessionId;
+	private SignalPath signalPath;
 	
 	int MAX_MSG = Integer.MAX_VALUE;
-	
-	private final static String EOM = ",";
-	
-	CounterBroadcasterCache cache;
 	
 	private static final Logger log = Logger.getLogger(SignalPathReturnChannel.class);
 	
 	Map<String,SignalPathReturnChannel> returnChannels;
 	
-	JSONWithEOMAppender json = new JSONWithEOMAppender();
-	
 	ArrayDeque<SignalPathMessage> queue = new ArrayDeque<>();
 
 	private boolean abort = false;
 	
+	private PushChannel pushChannel;
+	
 	public SignalPathReturnChannel(String sessionId, String channel, ServletContext sc) {
 		this.sessionId = sessionId;
-		this.channel = channel;
 		this.sc = sc;
-		
-		bc = BroadcasterFactory.getDefault().lookup(sessionId, true);
-		
-//		bc.getBroadcasterConfig().setExecutorService(broadcastExecutorService, true);
-//		bc.getBroadcasterConfig().setAsyncWriteService(broadcastAsyncExecutorService, true);
-		
-		bc.setBroadcasterLifeCyclePolicy(new Builder().policy(ATMOSPHERE_RESOURCE_POLICY.IDLE_DESTROY).idleTime(60*12, TimeUnit.MINUTES).build());
-		bc.addBroadcasterLifeCyclePolicyListener(this);
 
-		cache = (CounterBroadcasterCache) bc.getBroadcasterConfig().getBroadcasterCache();
+		pushChannel = new AtmospherePushChannel(channel);
 		
 		// Associate session with return channel
 		returnChannels = (Map<String,SignalPathReturnChannel>) sc.getAttribute("returnChannels");
@@ -104,14 +70,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 	
 	private void broadcast(SignalPathMessage msg) {
 		try {
-			// Don't increment payloadCounter until after successful json conversion
-			int c = payloadCounter;
-			msg.setCounter(c);
-			String s = msg.toJSONString();
-			payloadCounter++;
-			
-			cache.add(s, c, msg.cacheId);
-			bc.broadcast(s);
+			pushChannel.push(msg);
 		} catch (Exception e) {
 			log.error("Error broadcasting message: "+msg, e);
 		}
@@ -121,14 +80,12 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 	@Override
 	public synchronized void sendDone() {
 		queue.add(new DoneMessage());
-//		broadcast(new DoneMessage(payloadCounter++));
 		notify();
 	}
 
 	@Override
 	public synchronized void sendError(String err) {
 		queue.add(new ErrorMessage(err));
-//		broadcast(new ErrorMessage(payloadCounter++, err));
 		notify();
 	}
 	
@@ -141,7 +98,6 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 	@Override
 	public synchronized void sendPayload(int hash, Object p) {
 		queue.add(new PayloadMessage(hash, p));
-//		broadcast(new PayloadMessage(payloadCounter++, hash, p));
 		notify();
 	}
 
@@ -157,13 +113,11 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 	@Override
 	public synchronized void sendReplacingPayload(int hash, Object p, Object identifier) {
 		queue.add(new PayloadMessage(hash, p, identifier));
-//		broadcast(new PayloadMessage(payloadCounter++, hash, p, identifier));
 		notify();
 	}
 	
 	public synchronized void destroy() {
-		bc.destroy();
-		
+		pushChannel.destroy();
 		abort = true;
 		interrupt();
 		notify();
@@ -175,42 +129,19 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 
 		log.info("Remaining return channels:");
 		for (SignalPathReturnChannel c : returnChannels.values())
-			log.info(c.sessionId+" broadcaster destroyed: "+c.bc.isDestroyed());
-	}
-	
-	/**
-	 * Broadcaster lifecycle listener implementation: clean up this class when the broadcaster is destroyed
-	 */
-	public void onEmpty() {
-		if (destroyOnEmpty)
-			destroy();
-	}
-	public void onIdle() {}
-	public void onDestroy() {
-		cleanUp();
+			log.info(c.sessionId+" broadcaster destroyed: "+c.getPushChannel().isDestroyed());
 	}
 	
 	@Override
 	public String toString() {
 		return "SignalPathReturnChannel: "+sessionId;
 	}
-
-	class JSONWithEOMAppender extends JSON {
-	    @Override
-	    public String toString() {
-	        FastStringWriter writer = new FastStringWriter();
-	        try {
-	            render(writer);
-	            writer.write(EOM);
-	        }
-	        catch (Exception e) {
-	            throw new UnhandledException(e);
-	        }
-	        return writer.toString();
-	    }
+	
+	public PushChannel getPushChannel() {
+		return pushChannel;
 	}
 	
-	class SignalPathMessage extends LinkedHashMap<String,Object>{
+	public class SignalPathMessage extends LinkedHashMap<String,Object>{
 		public Object cacheId = null;
 		public int counter;
 		
@@ -221,11 +152,6 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		public void setCounter(int counter) {
 			this.counter = counter;
 			this.put("counter",counter);
-		}
-		
-		public String toJSONString() {
-			json.setTarget(this);
-			return json.toString();
 		}
 
 	}
