@@ -9,7 +9,7 @@
 		<div class="signin-header">
 			<r:img dir="images" file="unifina_logo_black.png" alt="" style="margin-top: -4px;"/>
 			<g:link controller="register" action="signup" class="btn btn-primary btn-sign-up">Sign Up</g:link>
-			<g:link controller="register" action="signup" class="btn btn-primary btn-sign-in">Sign In</g:link>
+			<g:link controller="login" class="btn btn-primary btn-sign-in">Sign In</g:link>
 		</div> <!-- / .header -->
 		<g:layoutBody />
 		<r:layoutResources/>	
