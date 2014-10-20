@@ -5,7 +5,9 @@
 	<!-- Form -->
 	<form action='${postUrl}' method='POST' id='loginForm' autocomplete='off' class="panel">
 	
-		<p class='login-failed-message text-danger' ${flash.message ? "" : "style='display:none'"}>${flash.message}</p>
+		<g:if test='${flash.message}'>
+			<p class='text-danger'>${flash.message}</p>
+		</g:if>
 	
 		<div class="form-group">
 			<input type="text" name="j_username" id="username" class="form-control input-lg" placeholder="Username">
@@ -13,8 +15,7 @@
 
 		<div class="form-group signin-password">
 			<input type="password" name="j_password" id="password" class="form-control input-lg" placeholder="Password">
-<%--		Enable when you have the functionality --%>
-<%--			<a href="#" class="forgot">Forgot?</a>--%>
+			<g:link controller="register" action="forgotPassword" class="forgot">Forgot?</g:link>
 		</div> <!-- / Password -->
 
 		<div class="form-actions">
