@@ -5,9 +5,7 @@
 	<!-- Form -->
 	<form action='${postUrl}' method='POST' id='loginForm' autocomplete='off' class="panel">
 	
-		<g:if test='${flash.message}'>
-			<p class='text-danger'>${flash.message}</p>
-		</g:if>
+		<p class='text-danger login-failed-message' ${flash.message ? "" : "style='display:none'"}>${flash.message}</p>
 	
 		<div class="form-group">
 			<input type="text" name="j_username" id="username" class="form-control input-lg" placeholder="Username">
