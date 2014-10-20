@@ -6,11 +6,6 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 
 class SecUser {
-
-	static transients = ["springSecurityService"]
-//	transient springSecurityService
-	def springSecurityService
-
 	String username
 	String password
 	boolean enabled
@@ -44,19 +39,5 @@ class SecUser {
 	// Added by Unifina
 	Set<Feed> getFeeds() {
 		FeedUser.findAllByUser(this).collect { it.feed } as Set
-	}
-	
-	def beforeInsert() {
-		encodePassword()
-	}
-
-	def beforeUpdate() {
-		if (isDirty('password')) {
-			encodePassword()
-		}
-	}
-
-	protected void encodePassword() {
-		password = springSecurityService.encodePassword(password)
 	}
 }

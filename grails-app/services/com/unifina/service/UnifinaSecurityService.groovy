@@ -8,7 +8,9 @@ import org.apache.log4j.Logger
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser;
+import com.unifina.domain.signalpath.ModulePackageUser
+
+import java.util.UUID
 
 class UnifinaSecurityService {
 	
@@ -26,7 +28,7 @@ class UnifinaSecurityService {
 		}
 		else return true
 	}
-	
+
 	@CompileStatic
 	boolean canAccess(Object instance) {
 		if (instance) {
@@ -57,6 +59,10 @@ class UnifinaSecurityService {
 		if (!user)
 			throw new RuntimeException("Invalid username or token")
 		else return user
+	}
+
+	String createDataToken() {
+		return UUID.randomUUID();
 	}
 
 }

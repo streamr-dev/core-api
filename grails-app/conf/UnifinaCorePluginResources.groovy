@@ -98,6 +98,7 @@ modules = {
 	}
 	"detect-timezone" {
 		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
+		resource url:[dir:'js/timezones', file:'list_timezones.js', plugin: 'unifina-core']
 	}
 	
 	/**
