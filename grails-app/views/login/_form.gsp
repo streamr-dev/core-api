@@ -8,7 +8,7 @@
 		<p class='text-danger login-failed-message' ${flash.message ? "" : "style='display:none'"}>${flash.message}</p>
 	
 		<div class="form-group">
-			<input type="text" name="j_username" id="username" class="form-control input-lg" placeholder="Username">
+			<input type="text" name="j_username" id="username" class="form-control input-lg" placeholder="${message(code:"secuser.username.label", default:"Username")}">
 		</div> <!-- / Username -->
 
 		<div class="form-group signin-password">
