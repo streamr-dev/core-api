@@ -91,10 +91,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			}
 		});
 		
-		if ($(prot.div).find("div.input").length>0)
-			jsPlumb.repaint($(prot.div).find("div.input"));
-		if ($(prot.div).find("div.output").length>0)
-			jsPlumb.repaint($(prot.div).find("div.output"));
+		pub.redraw()
 	}
 	pub.updateFrom = updateFrom;
 	
@@ -389,6 +386,18 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		if (payload.type=="paramChangeResponse") {
 			// TODO handle param change response
 		}
+	}
+	
+	var super_redraw = pub.redraw
+	pub.redraw = function() {
+		super_redraw()
+		
+		jsPlumb.recalculateOffsets(prot.div.attr('id'));
+		
+		if ($(prot.div).find("div.input").length>0)
+			jsPlumb.repaint($(prot.div).find("div.input"));
+		if ($(prot.div).find("div.output").length>0)
+			jsPlumb.repaint($(prot.div).find("div.output"));
 	}
 	
 	var superToJSON = pub.toJSON;
