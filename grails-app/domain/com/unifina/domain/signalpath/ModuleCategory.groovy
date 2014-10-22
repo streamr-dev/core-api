@@ -8,6 +8,8 @@ class ModuleCategory implements Comparable {
 	SortedSet modules
 	SortedSet subcategories
 	
+	Boolean hide
+	
 	static hasMany = [modules:Module, subcategories:ModuleCategory]
 	
 	static belongsTo = [parent:ModuleCategory]
@@ -15,6 +17,7 @@ class ModuleCategory implements Comparable {
 	static constraints = {
 		parent(nullable:true)
 		modulePackage(nullable:true)
+		hide(nullable:true)
 	}
 	
 	int compareTo(o) {
