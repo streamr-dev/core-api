@@ -21,7 +21,7 @@ SignalPath.TableModule = function(data,canvas,prot) {
 			initTable(prot.jsonData.tableConfig.headers)
 		}
 		
-		if (prot.jsonData.options.maxRows)
+		if (prot.jsonData.options && prot.jsonData.options.maxRows)
 			rowCount = prot.jsonData.options.maxRows.value
 	}
 	prot.createDiv = createDiv;
@@ -33,7 +33,7 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		tableContainer = $("<div class='table-module-container'></div>");
 		prot.body.append(tableContainer);
 		
-		table = $("<table class='table-module-content table table-condensed table-striped'></table>");
+		table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
 		tableContainer.append(table);
 		
 		tableHeader = $("<thead></thead>");
@@ -76,10 +76,9 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	pub.clean = function() {
 		superClean();
 		
-		// Remove table
-		if (tableContainer) {
-			tableContainer.remove()
-			tableContainer = null
+		// Clean rows
+		if (tableBody) {
+			tableBody.empty()
 		}
 	}
 	
