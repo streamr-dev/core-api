@@ -25,8 +25,6 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 
 		div.bind("spConnect", (function(me) {
 			return function(event, input) {
-				me.json.connected = true;
-				me.div.addClass("connected");
 				if (me.json.targets==null) {
 					me.json.targets = [input.getId()];
 				}
@@ -38,16 +36,9 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, input) {
-				// delete input from me.json.targets
 				var i = me.json.targets.indexOf(input.getId());
 				if (i != -1) {
 					me.json.targets.splice(i, 1);
-				}
-				
-				// if targets is empty, set connected to false
-				if (me.json.targets.length==0) {
-					me.json.connected = false;
-					me.div.removeClass("connected");
 				}
 			}
 		})(pub));

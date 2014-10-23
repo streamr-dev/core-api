@@ -63,19 +63,27 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		// Bind basic connection event handlers
 		div.bind("spConnect", (function(me) {
 			return function(event, output) {
-				me.json.connected = true;
-				me.div.addClass("connected");
-				if (me.json.requiresConnection)
-					me.removeClass("warning")
+				me.json.connected = me.isConnected()
+				if (me.json.connected) {
+					me.div.addClass("connected");
+				}
+				
+				if (me.hasWarning())
+					me.addClass("warning")
+				else me.removeClass("warning")
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, output) {
-				me.json.connected = false;
-				me.div.removeClass("connected");
-				if (me.json.requiresConnection)
+				me.json.connected = me.isConnected()
+				if (!me.json.connected) {
+					me.div.removeClass("connected");
+				}
+				
+				if (me.hasWarning())
 					me.addClass("warning")
+				else me.removeClass("warning")
 			}
 		})(pub));
 		
@@ -84,6 +92,10 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		return div;
 	}
 	pub.createDiv = createDiv;
+	
+	pub.hasWarning = function() {
+		return pub.json.requiresConnection && !pub.isConnected()
+	}
 	
 	function addClass(cls) {
 		pub.div.addClass(cls)
@@ -271,7 +283,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	}
 	
 	function isConnected() {
-		return json.connected
+		return pub.jsPlumbEndpoint && pub.jsPlumbEndpoint.connections.length > 0
 	}
 	pub.isConnected = isConnected
 	

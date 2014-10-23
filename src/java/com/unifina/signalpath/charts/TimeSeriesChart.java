@@ -101,12 +101,6 @@ public class TimeSeriesChart extends Chart {
 
 	}
 	
-	@Override
-	public void addDefaultInputs() {
-		// see onConfiguration()
-//		addInput(inputNumber)
-	}
-	
 	public TimeSeriesInput getInputConnection(String name) {
 
 		TimeSeriesInput conn;
@@ -133,22 +127,16 @@ public class TimeSeriesChart extends Chart {
 	
 	@Override
 	protected void record() {
-//		if (todUtil!=null && !todUtil.hasBaseDate())
-//			todUtil.setBaseDate(globals.time);
-		
-//		if (todUtil==null || todUtil.isInRange(globals.time)) {
-			for (Input i : drivingInputs) {
-				RecordedTimeSeriesInput input = (RecordedTimeSeriesInput) i;
-				if (!Double.isNaN(input.value) && hasRc) {
-					PointMessage msg = new PointMessage(
-							input.seriesIndex, 
-							globals.getTzConverter().getFakeLocalTime(globals.time.getTime()),
-							input.value);
-					//[type:"p", s:input.seriesIndex, x:globals.tzConverter.getFakeLocalTime(globals.time.getTime()), y:input.value]
-					parentSignalPath.returnChannel.sendPayload(hash, msg);
-				}
+		for (Input i : drivingInputs) {
+			RecordedTimeSeriesInput input = (RecordedTimeSeriesInput) i;
+			if (!Double.isNaN(input.value) && hasRc) {
+				PointMessage msg = new PointMessage(
+						input.seriesIndex, 
+						globals.getTzConverter().getFakeLocalTime(globals.time.getTime()),
+						input.value);
+				parentSignalPath.returnChannel.sendPayload(hash, msg);
 			}
-//		}
+		}
 	}
 
 	@Override
@@ -166,9 +154,6 @@ public class TimeSeriesChart extends Chart {
 	@Override
 	public void clearState() {
 		super.clearState();
-		
-//		if (todUtil!=null)
-//			todUtil.clearBaseDate();
 		
 		if (!csv && hasRc && overnightBreak) {
 			for (Input it : getInputs()) {
@@ -218,6 +203,11 @@ public class TimeSeriesChart extends Chart {
 		for (int i=1;i<=inputCount;i++) {
 			getInputConnection("in"+i);
 		}
+	}
+
+	@Override
+	protected void addDefaultInputs() {
+		// inputs added in onConfiguration()
 	}
 	
 }

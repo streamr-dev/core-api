@@ -8,12 +8,20 @@ import java.util.Map;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.IReturnChannel;
 import com.unifina.signalpath.Input;
+import com.unifina.signalpath.ModuleOption;
+import com.unifina.signalpath.ModuleOptions;
+import com.unifina.signalpath.RecordedTimeSeriesInput;
+import com.unifina.signalpath.TimeSeriesInput;
+import com.unifina.signalpath.charts.InitMessage;
 
 
 public class EventTable extends AbstractSignalPathModule {
 	
 	private IReturnChannel rc;
 	private SimpleDateFormat df;
+	
+	int inputCount = 1;
+	int maxRows = 0;
 	
 	public EventTable() {
 		super();
@@ -28,6 +36,12 @@ public class EventTable extends AbstractSignalPathModule {
 			rc = parentSignalPath.getReturnChannel();
 		}
 		
+		if (rc!=null) {
+			Map<String,Object> hdrMsg = new HashMap<String,Object>();
+			hdrMsg.put("hdr", getHeaderDefinition());
+			parentSignalPath.returnChannel.sendPayload(hash, hdrMsg);
+		}
+		
 		df = globals.dateTimeFormat;
 	}
 
@@ -38,8 +52,13 @@ public class EventTable extends AbstractSignalPathModule {
 			ArrayList<Object> nr = new ArrayList<>(2);
 			msg.put("nr", nr);
 			nr.add(df.format(globals.time));
-			for (Input i : getInputs())
-				nr.add(i.getValue().toString());
+			
+			for (Input i : getInputs()) {
+				if (i.hasValue())
+					nr.add(i.getValue().toString());
+				else nr.add(null);
+			}
+			
 			rc.sendPayload(hash,msg);
 		}
 	}
@@ -48,18 +67,55 @@ public class EventTable extends AbstractSignalPathModule {
 	public void clearState() {
 	}
 
-	@Override
-	public Map<String,Object> getConfiguration() {
-		Map<String,Object> config = super.getConfiguration();
+	public Input<Object> createAndAddInput(String name) {
+
+		Input<Object> conn = new Input<Object>(this,name,"Object");
+
+		conn.setDrivingInput(true);
+		conn.canToggleDrivingInput = false;
+		conn.canBeFeedback = false;
+		conn.requiresConnection = false;
 		
-		Map<String,Object> tableConfig = new HashMap<>();
-		config.put("tableConfig",tableConfig);
+		// Add the input
+		if (getInput(name)==null)
+			addInput(conn);
+			
+		return conn;
+	}
+	
+	@Override
+	public boolean allInputsReady() {
+		return true;
+	}
+	
+	protected Map<String,Object> getHeaderDefinition() {
+		// Table config
+		Map<String,Object> headerDef = new HashMap<>();
 		
 		ArrayList headers = new ArrayList<>();
 		headers.add("timestamp");
-		headers.add("event"); // TODO: generalize for many inputs
-		tableConfig.put("headers",headers);
-		tableConfig.put("rows",Integer.MAX_VALUE);
+		for (Input<Object> i : getInputs()) {
+			String name;
+			if (i.isConnected())
+				name = (i.getSource().getDisplayName()!=null ? i.getSource().getDisplayName() : i.getSource().getName());
+			else name = i.getName();
+			
+			headers.add(name);
+		}
+		headerDef.put("headers",headers);
+		return headerDef;
+	}
+	
+	@Override
+	public Map<String,Object> getConfiguration() {
+		Map<String,Object> config = super.getConfiguration();
+
+		// Module options
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("inputs", inputCount, "int"));
+		options.add(new ModuleOption("maxRows", maxRows, "int"));
+		
+		config.put("tableConfig", getHeaderDefinition());
 		
 		return config;
 	}
@@ -68,14 +124,22 @@ public class EventTable extends AbstractSignalPathModule {
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		
-		// TODO: generalize for many inputs
-		addInput(new Input<Object>(this,"event","Object"));
+		ModuleOptions options = ModuleOptions.get(config);
+		
+		if (options.getOption("inputs")!=null)
+			inputCount = options.getOption("inputs").getInt();
+		
+		if (options.getOption("maxRows")!=null)
+			maxRows = options.getOption("maxRows").getInt();
+		
+		for (int i=1;i<=inputCount;i++) {
+			createAndAddInput("input"+i);
+		}
 	}
 	
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
-		
+
 	}
 	
 }
