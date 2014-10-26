@@ -8,6 +8,9 @@ global.window = {
 }
 
 global.Streamr = {
+	tracking: {
+		track: function() {}
+	},
 	createLink: function(opt) {
 		if (opt.uri)
 			return '/'+opt.uri
@@ -80,10 +83,11 @@ describe('Tour', function() {
 		Tour.continueTour()
 	})
 
-	it('should continue the tour set in the cookie, but from the beginning', function(done) {
+	it('should continue non-multipage tour as set in the cookie, but from the beginning', function(done) {
 		Tour.loadTour = function(tn, cb) {
 			assert.equal(tn, 12)
 			cb({
+				_steps: { 33: {} },
 				start: function(step) {
 					assert.equal(step, 0)
 					done()
@@ -98,10 +102,31 @@ describe('Tour', function() {
 		Tour.continueTour()
 	})
 
+	it('should continue multipage tour as set in the cookie, from correct step', function(done) {
+		Tour.loadTour = function(tn, cb) {
+			assert.equal(tn, 12)
+			cb({
+				_steps: { 33: {
+					multipage: true
+				} },
+				start: function(step) {
+					assert.equal(step, 34)
+					done()
+				}
+			})
+		}
+
+		global.hopscotch.getState = function() {
+			return '12:34'
+		}
+
+		Tour.continueTour()
+	})
+
 	it('should play the tour given in the url', function(done) {
-		global.window.location.search = '?playTour=34'
+		global.window.location.search = '?playTour=14'
 		Tour.loadTour = function(tn) {
-			assert.equal(tn, 34)
+			assert.equal(tn, 14)
 			done()
 		}
 		Tour.continueTour()
@@ -272,5 +297,18 @@ describe('Tour', function() {
 		})
 	})
 
+
+	describe('reporting steps', function() {
+		beforeEach(function() {
+			global.Streamr.tracking = {
+				track: function() {}
+			}
+		})
+
+		it('should report step progress to tracking', function(done) {
+			global.Streamr.tracking.track = done;
+			Tour.load
+		})
+	})
 })
 

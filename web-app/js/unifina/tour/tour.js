@@ -36,6 +36,12 @@ Tour.continueTour = function() {
 		var currentTour = parseInt(state.split(':')[0], 10) || 0
 		var currentStep = parseInt(state.split(':')[1], 10) || 0
 		return Tour.loadTour(currentTour, function(tour) {
+			// only if the previous step is multipage, should we continue the tour
+			if (currentStep > 0 && !tour._steps[currentStep-1].multipage) {
+				console.log('Tour resetting to step 0')
+				currentStep = 0
+			}
+
 			tour.start(currentStep)
 		})
 	}
@@ -58,6 +64,11 @@ Tour.playTour = function(tourNumber, currentStep) {
 	hopscotch.endTour()
 
 	Tour.loadTour(tourNumber, function(tour) {
+		Streamr.tracking.track('Play tour', {
+			tour: tourNumber,
+			step: currentStep
+		})
+
 		tour.start(currentStep || 0)
 	})
 }
