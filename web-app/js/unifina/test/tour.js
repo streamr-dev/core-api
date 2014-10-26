@@ -301,7 +301,6 @@ describe('Tour', function() {
 		})
 	})
 
-
 	describe('tracking', function() {
 		beforeEach(function() {
 			global.Streamr.tracking = {
