@@ -64,11 +64,6 @@ Tour.playTour = function(tourNumber, currentStep) {
 	hopscotch.endTour()
 
 	Tour.loadTour(tourNumber, function(tour) {
-		Streamr.tracking.track('Play tour', {
-			tour: tourNumber,
-			step: currentStep
-		})
-
 		tour.start(currentStep || 0)
 	})
 }
@@ -119,6 +114,9 @@ Tour.prototype.next = function() {
 
 Tour.prototype._completed = function() {
 	console.log('Tour completed', this._tourNumber)
+	Streamr.tracking.track('Tour completed', {
+		tour: this._tourNumber
+	})
 	this._markAsCompleted()
 }
 
@@ -129,6 +127,10 @@ Tour.prototype._markAsCompleted = function() {
 
 Tour.prototype._closed = function() {
 	console.log('Tour closed', this._tourNumber)
+	Streamr.tracking.track('Tour closed', {
+		tour: this._tourNumber,
+		step: hopscotch.getCurrStepNum()
+	})
 	return this._markAsCompleted()
 }
 
@@ -142,6 +144,13 @@ Tour.prototype.start = function(step) {
 	}
 
 	window.tour = this // for debugging, may be removed
+
+	if (step === 0) {
+		Streamr.tracking.track('Tour start', {
+			tour: this._tourNumber,
+			step: step
+		})
+	}
 
 	this._beforeStart(function() {
 		hopscotch.startTour({
@@ -181,6 +190,7 @@ Tour.prototype.offerNextTour = function(text) {
 }
 
 Tour.prototype.step = function(content, target, opts, onShow) {
+	var that = this
 	var options = opts || {}
 
 	if (typeof(opts) === 'function') {
@@ -206,6 +216,11 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 		placement: 'right',
 		showNextButton: (!onShow && !options.nextOnTargetClick),
 		onShow: function() {
+			Streamr.tracking.track('Tour step', {
+				tour: that._tourNumber,
+				step: hopscotch.getCurrStepNum()
+			})
+
 			if (!onShow)
 				return;
 

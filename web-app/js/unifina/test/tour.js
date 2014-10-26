@@ -66,8 +66,12 @@ describe('Tour', function() {
 		global.$.get = function(_url, cb) {
 			cb([])
 		}
+		global.$.post = function() {}
 
 		global.hopscotch = {
+			nextStep: function() {},
+			getCurrStepNum: function() { return -1 },
+			startTour: function() {},
 			endTour: function() {},
 			getState: function() {}
 		}
@@ -298,16 +302,55 @@ describe('Tour', function() {
 	})
 
 
-	describe('reporting steps', function() {
+	describe('tracking', function() {
 		beforeEach(function() {
 			global.Streamr.tracking = {
 				track: function() {}
 			}
 		})
 
-		it('should report step progress to tracking', function(done) {
-			global.Streamr.tracking.track = done;
-			Tour.load
+		it('should report tour start', function(done) {
+			tour._tourNumber = 5
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 5)
+				assert.equal(data.step, 0)
+				assert.equal(kind, 'Tour start')
+				done()
+			}
+			tour.start(0)
+		})
+
+		it('should report step completion', function(done) {
+			tour._tourNumber = 6
+			tour.step('foo', 'bar')
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 6)
+				assert.equal(data.step, -1)
+				assert.equal(kind, 'Tour step')
+				done()
+			}
+			tour._steps[0].onShow()
+		})
+
+		it('should report tour closing', function(done) {
+			tour._tourNumber = 4
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 4)
+				assert.equal(data.step, -1)
+				assert.equal(kind, 'Tour closed')
+				done()
+			}
+			tour._closed()
+		})
+
+		it('should report tour completion', function(done) {
+			tour._tourNumber = 7
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 7)
+				assert.equal(kind, 'Tour completed')
+				done()
+			}
+			tour._completed()
 		})
 	})
 })
