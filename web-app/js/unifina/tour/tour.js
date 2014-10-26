@@ -1,6 +1,6 @@
 (function(exports) {
 
-var tourUrlRoot = Streamr.createLink({ uri: 'js/tours/' })
+var tourUrlRoot = Streamr.createLink({ uri: 'static/js/tours/' })
 var pageTours = []
 
 var urlRe = /[\?\&]playTour=([0-9]*)/
@@ -87,7 +87,8 @@ Tour.loadTour = function(tourNumber, cb) {
 		return tour
 	}
 
-	$('<script src="'+url+'">').appendTo('head')
+	//Use jQuery instead of appending script tag to head due to caching issues
+	$.getScript(url)
 }
 
 Tour.list = function(cb) {
