@@ -62,7 +62,7 @@ grails.project.dependency.resolution = {
 		}
 		
 		compile('com.mashape.unirest:unirest-java:1.3.3')
-		
+
 		runtime('com.amazonaws:aws-java-sdk:1.7.5')
 
 		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"

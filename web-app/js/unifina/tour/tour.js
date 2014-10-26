@@ -36,6 +36,12 @@ Tour.continueTour = function() {
 		var currentTour = parseInt(state.split(':')[0], 10) || 0
 		var currentStep = parseInt(state.split(':')[1], 10) || 0
 		return Tour.loadTour(currentTour, function(tour) {
+			// only if the previous step is multipage, should we continue the tour
+			if (currentStep > 0 && !tour._steps[currentStep-1].multipage) {
+				console.log('Tour resetting to step 0')
+				currentStep = 0
+			}
+
 			tour.start(currentStep)
 		})
 	}
@@ -109,6 +115,9 @@ Tour.prototype.next = function() {
 
 Tour.prototype._completed = function() {
 	console.log('Tour completed', this._tourNumber)
+	Streamr.tracking.track('Tour completed', {
+		tour: this._tourNumber
+	})
 	this._markAsCompleted()
 }
 
@@ -119,6 +128,10 @@ Tour.prototype._markAsCompleted = function() {
 
 Tour.prototype._closed = function() {
 	console.log('Tour closed', this._tourNumber)
+	Streamr.tracking.track('Tour closed', {
+		tour: this._tourNumber,
+		step: hopscotch.getCurrStepNum()
+	})
 	return this._markAsCompleted()
 }
 
@@ -132,6 +145,13 @@ Tour.prototype.start = function(step) {
 	}
 
 	window.tour = this // for debugging, may be removed
+
+	if (step === 0) {
+		Streamr.tracking.track('Tour start', {
+			tour: this._tourNumber,
+			step: step
+		})
+	}
 
 	this._beforeStart(function() {
 		hopscotch.startTour({
@@ -171,6 +191,7 @@ Tour.prototype.offerNextTour = function(text) {
 }
 
 Tour.prototype.step = function(content, target, opts, onShow) {
+	var that = this
 	var options = opts || {}
 
 	if (typeof(opts) === 'function') {
@@ -196,6 +217,11 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 		placement: 'right',
 		showNextButton: (!onShow && !options.nextOnTargetClick),
 		onShow: function() {
+			Streamr.tracking.track('Tour step', {
+				tour: that._tourNumber,
+				step: hopscotch.getCurrStepNum()
+			})
+
 			if (!onShow)
 				return;
 

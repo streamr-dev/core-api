@@ -8,6 +8,9 @@ global.window = {
 }
 
 global.Streamr = {
+	tracking: {
+		track: function() {}
+	},
 	createLink: function(opt) {
 		if (opt.uri)
 			return '/'+opt.uri
@@ -63,8 +66,12 @@ describe('Tour', function() {
 		global.$.get = function(_url, cb) {
 			cb([])
 		}
+		global.$.post = function() {}
 
 		global.hopscotch = {
+			nextStep: function() {},
+			getCurrStepNum: function() { return -1 },
+			startTour: function() {},
 			endTour: function() {},
 			getState: function() {}
 		}
@@ -80,10 +87,11 @@ describe('Tour', function() {
 		Tour.continueTour()
 	})
 
-	it('should continue the tour set in the cookie, but from the beginning', function(done) {
+	it('should continue non-multipage tour as set in the cookie, but from the beginning', function(done) {
 		Tour.loadTour = function(tn, cb) {
 			assert.equal(tn, 12)
 			cb({
+				_steps: { 33: {} },
 				start: function(step) {
 					assert.equal(step, 0)
 					done()
@@ -98,10 +106,31 @@ describe('Tour', function() {
 		Tour.continueTour()
 	})
 
+	it('should continue multipage tour as set in the cookie, from correct step', function(done) {
+		Tour.loadTour = function(tn, cb) {
+			assert.equal(tn, 12)
+			cb({
+				_steps: { 33: {
+					multipage: true
+				} },
+				start: function(step) {
+					assert.equal(step, 34)
+					done()
+				}
+			})
+		}
+
+		global.hopscotch.getState = function() {
+			return '12:34'
+		}
+
+		Tour.continueTour()
+	})
+
 	it('should play the tour given in the url', function(done) {
-		global.window.location.search = '?playTour=34'
+		global.window.location.search = '?playTour=14'
 		Tour.loadTour = function(tn) {
-			assert.equal(tn, 34)
+			assert.equal(tn, 14)
 			done()
 		}
 		Tour.continueTour()
@@ -272,5 +301,56 @@ describe('Tour', function() {
 		})
 	})
 
+	describe('tracking', function() {
+		beforeEach(function() {
+			global.Streamr.tracking = {
+				track: function() {}
+			}
+		})
+
+		it('should report tour start', function(done) {
+			tour._tourNumber = 5
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 5)
+				assert.equal(data.step, 0)
+				assert.equal(kind, 'Tour start')
+				done()
+			}
+			tour.start(0)
+		})
+
+		it('should report step completion', function(done) {
+			tour._tourNumber = 6
+			tour.step('foo', 'bar')
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 6)
+				assert.equal(data.step, -1)
+				assert.equal(kind, 'Tour step')
+				done()
+			}
+			tour._steps[0].onShow()
+		})
+
+		it('should report tour closing', function(done) {
+			tour._tourNumber = 4
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 4)
+				assert.equal(data.step, -1)
+				assert.equal(kind, 'Tour closed')
+				done()
+			}
+			tour._closed()
+		})
+
+		it('should report tour completion', function(done) {
+			tour._tourNumber = 7
+			global.Streamr.tracking.track = function(kind, data) {
+				assert.equal(data.tour, 7)
+				assert.equal(kind, 'Tour completed')
+				done()
+			}
+			tour._completed()
+		})
+	})
 })
 
