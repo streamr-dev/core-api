@@ -2,7 +2,8 @@
 
 var tourUrlRoot = Streamr.createLink({ uri: 'static/js/tours/' })
 var tourIdPrefix = Streamr.user
-var pageTours = []
+var startableTours = []
+var continuableTours = []
 
 var urlRe = /[\?\&]playTour=([0-9]*)/
 
@@ -19,21 +20,35 @@ function Tour() {
 	}
 }
 
-Tour.hasTour = function(tourNumber) {
-	pageTours.push(tourNumber)
+
+
+Tour.startableTours = function(tourNumbers) {
+	startableTours = tourNumbers
 }
 
-Tour.continueTour = function() {
+Tour.continuableTours = function(tourNumbers) {
+	continuableTours = tourNumbers
+}
+
+/**
+ * Selects and starts a tour:
+ * - If a tour is specified in the URL, play it
+ * - Else if a tour state is saved for this user and continuable from current page, continue
+ * - Else if a tour is startable from current page, start it if the user has not completed it yet
+ */
+Tour.autoStart = function() {
 	var urlParam = window.location.search.match(urlRe)
 	if (urlParam) {
 		return Tour.playTour(parseInt(urlParam[1], 10))
 	}
 
 	var state = hopscotch.getState()
-
+	
+	console.log("startableTours: "+startableTours+", continuableTours: "+continuableTours)
 	console.log('Tour state', state)
 
-	if (state) {
+	// Try continue
+	if (state && continuableTours.length>0) {
 		var prefix = state.split("#")[0]
 		
 		if (prefix !== tourIdPrefix) {
@@ -43,22 +58,29 @@ Tour.continueTour = function() {
 			state = state.split("#")[1]
 			var currentTour = parseInt(state.split(':')[0], 10) || 0
 			var currentStep = parseInt(state.split(':')[1], 10) || 0
-			return Tour.loadTour(currentTour, function(tour) {
-				tour.start(currentStep)
-			})
+			
+			if (continuableTours.indexOf(currentTour) !== -1 && currentStep>0) {
+				return Tour.loadTour(currentTour, function(tour) {
+					tour.start(currentStep)
+				})				
+			}
+			else console.log("Can not continue tour on this page: "+state)
 		}
 	}
 
-	loadUserCompletedTours(function(completedTours) {
-		console.log('Tour.completedTours', completedTours)
-
-		pageTours.some(function(tourNumber) {
-			if (completedTours.indexOf(tourNumber) === -1) {
-				Tour.playTour(tourNumber)
-				return false
-			}
+	// Try start
+	if (startableTours.length>0) {
+		loadUserCompletedTours(function(completedTours) {
+			console.log('Tour.completedTours', completedTours)
+	
+			startableTours.some(function(tourNumber) {
+				if (completedTours.indexOf(tourNumber) === -1) {
+					Tour.playTour(tourNumber)
+					return false
+				}
+			})
 		})
-	})
+	}
 }
 
 Tour.playTour = function(tourNumber, currentStep) {
@@ -152,7 +174,6 @@ Tour.prototype.start = function(step) {
 			onEnd: function() {
 				that._completed()
 			},
-			showPrevButton: true
 		}, step)
 	})
 }
@@ -203,6 +224,7 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 		target: target,
 		zindex: 3000,
 		placement: 'right',
+		showBackButton: false, // Back button disabled at least until CORE-227 is fixed
 		showNextButton: (!onShow && !options.nextOnTargetClick),
 		onShow: function() {
 			if (!onShow)

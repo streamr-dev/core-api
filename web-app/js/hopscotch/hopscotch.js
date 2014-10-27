@@ -1027,14 +1027,15 @@
         arrowWidth:     defaultOpts.arrowWidth,
         placement:      defaultOpts.placement,
         showNumber:     true,
-        isTourBubble:   true
+        isTourBubble:   true,
+        animated: false
       };
       initOpt = (typeof initOpt === undefinedStr ? {} : initOpt);
       utils.extend(opt, initOpt);
       this.opt = opt;
 
       //Apply classes to bubble. Add "animated" for fade css animation
-      el.className = 'hopscotch-bubble popover '+opt.placement+' in';
+      el.className = 'hopscotch-bubble popover '+opt.placement+(opt.animated ? ' animated' : '')+' in';
 
       if (!opt.isTourBubble) {
         utils.addClass(el, 'hopscotch-callout no-number');
@@ -2291,19 +2292,19 @@ __p += '<div class="hopscotch-bubble-container" style="width: '+
 
 	__p += '<div class="hopscotch-actions">';
 		if (buttons.showPrev) {
-			__p += '<button class="btn btn-primary btn-xs hopscotch-nav-button pull-left prev hopscotch-prev">' +
+			__p += '<button class="btn btn-default btn-sm hopscotch-nav-button pull-left prev hopscotch-prev">' +
 				((__t = ( i18n.prevBtn )) == null ? '' : __t) +
 				'</button>';
 		}
 
 		if (buttons.showCTA) {
-			__p += '<button class="btn btn-primary btn-xs hopscotch-nav-button pull-right next hopscotch-cta">' +
+			__p += '<button class="btn btn-primary btn-sm hopscotch-nav-button pull-right next hopscotch-cta">' +
 				((__t = ( buttons.ctaLabel )) == null ? '' : __t) +
 				'</button>';
 		}
 
 		if (buttons.showNext) {
-			__p += '<button class="btn btn-primary btn-xs hopscotch-nav-button pull-right next hopscotch-next">' +
+			__p += '<button class="btn btn-primary btn-sm hopscotch-nav-button pull-right next hopscotch-next">' +
 				((__t = ( i18n.nextBtn )) == null ? '' : __t) +
 				'</button>';
 		}
