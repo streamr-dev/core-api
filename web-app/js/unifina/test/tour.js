@@ -8,6 +8,8 @@ global.window = {
 }
 
 global.Streamr = {
+	user: "test",
+	
 	createLink: function(opt) {
 		if (opt.uri)
 			return '/'+opt.uri
@@ -92,7 +94,7 @@ describe('Tour', function() {
 		}
 
 		global.hopscotch.getState = function() {
-			return '12:34'
+			return Streamr.user+'#12:34'
 		}
 
 		Tour.continueTour()

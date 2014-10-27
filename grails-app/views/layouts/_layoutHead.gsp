@@ -15,7 +15,14 @@
 		Streamr.projectWebroot = '${createLink(uri:"/")}'
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
+		<sec:ifLoggedIn>
+		Streamr.user = "<sec:username />"
+		</sec:ifLoggedIn>
     </script>
+
+	<sec:ifLoggedIn>
+		<sec:loggedInUserInfo field="id"/>
+	</sec:ifLoggedIn>
     
     <r:require module="streamr"/>
     <r:require module="jquery"/>

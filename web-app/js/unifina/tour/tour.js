@@ -1,6 +1,7 @@
 (function(exports) {
 
 var tourUrlRoot = Streamr.createLink({ uri: 'static/js/tours/' })
+var tourIdPrefix = Streamr.user
 var pageTours = []
 
 var urlRe = /[\?\&]playTour=([0-9]*)/
@@ -33,11 +34,19 @@ Tour.continueTour = function() {
 	console.log('Tour state', state)
 
 	if (state) {
-		var currentTour = parseInt(state.split(':')[0], 10) || 0
-		var currentStep = parseInt(state.split(':')[1], 10) || 0
-		return Tour.loadTour(currentTour, function(tour) {
-			tour.start(currentStep)
-		})
+		var prefix = state.split("#")[0]
+		
+		if (prefix !== tourIdPrefix) {
+			console.log("Tour prefix does not match, not continuing. State: "+state+", Prefix: "+tourIdPrefix)
+		}
+		else {
+			state = state.split("#")[1]
+			var currentTour = parseInt(state.split(':')[0], 10) || 0
+			var currentStep = parseInt(state.split(':')[1], 10) || 0
+			return Tour.loadTour(currentTour, function(tour) {
+				tour.start(currentStep)
+			})
+		}
 	}
 
 	loadUserCompletedTours(function(completedTours) {
@@ -136,7 +145,7 @@ Tour.prototype.start = function(step) {
 	this._beforeStart(function() {
 		hopscotch.startTour({
 			steps: that._steps,
-			id: that._tourNumber,
+			id: tourIdPrefix+"#"+that._tourNumber,
 			onClose: function() {
 				that._closed()
 			},
