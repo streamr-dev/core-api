@@ -227,12 +227,23 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 		showBackButton: false, // Back button disabled at least until CORE-227 is fixed
 		showNextButton: (!onShow && !options.nextOnTargetClick),
 		onShow: function() {
+			// Un-reference old targets and remove drag handlers
+			$(".tour-current-target").closest(".ui-draggable").off("drag.tourbubbleupdate")
+			$(".tour-current-target").removeClass("tour-current-target")
+			
+			// Add the target class and drag handler to current target
+			$(target).addClass("tour-current-target")
+			$(target).closest(".ui-draggable").on("drag.tourbubbleupdate", function() {
+				hopscotch.refreshBubblePosition()
+			})
+			
 			if (!onShow)
 				return;
 
 			// call onShow in next tick, as elements may not have been drawn yet
 			setTimeout(onShow, 0)
 		}
+		
 	}, options))
 
 	return this
