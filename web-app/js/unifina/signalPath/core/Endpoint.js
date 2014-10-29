@@ -324,6 +324,15 @@ $(SignalPath).on("new", function() {
 			$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
 		}
 	});
+	// "connection" event is also fired on connection move, so need to report just the disconnect part
+	jsPlumb.bind("connectionMoved",function(info, originalEvent) {
+		// info.index: 0 if source was moved, 1 if target was moved
+		var originalElement = (info.index ? info.originalTargetEndpoint.element : info.originalSourceEndpoint.element)
+		var theOtherElement = (info.index ? info.originalSourceEndpoint.element : info.originalTargetEndpoint.element)
+		
+		$(originalElement).trigger("spDisconnect", $(theOtherElement).data("spObject"));
+		$(theOtherElement).trigger("spDisconnect", $(originalElement).data("spObject"));
+	});
 	
 	jsPlumb.bind("connectionDrag", function(conn) {
 		// Highlight valid targets
