@@ -399,12 +399,13 @@ Tour.prototype.waitForStream = function(selector, streamName) {
 			_cb = cb
 
 		var $module = $($(selector).data('spObject'))
-		$module.on('updated', function(e, data) {
+		$module.on('updated.tour', function(e, data) {
 			data.params.some(function(param) {
 				if (!param.streamName)
 					return;
 
 				if (param.streamName === streamName) {
+					$module.off('updated.tour')
 					_cb()
 					return true
 				}
