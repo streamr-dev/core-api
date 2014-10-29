@@ -227,13 +227,18 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 		showBackButton: false, // Back button disabled at least until CORE-227 is fixed
 		showNextButton: (!onShow && !options.nextOnTargetClick),
 		onShow: function() {
+			var tgt = target
+			
+			if (typeof(target) === 'function')
+				tgt = target()
+			
 			// Un-reference old targets and remove drag handlers
-			$(".tour-current-target").closest(".ui-draggable").off("drag.tourbubbleupdate")
+			$(".tour-current-target").closest(".ui-draggable").off("drag.tour")
 			$(".tour-current-target").removeClass("tour-current-target")
 			
 			// Add the target class and drag handler to current target
-			$(target).addClass("tour-current-target")
-			$(target).closest(".ui-draggable").on("drag.tourbubbleupdate", function() {
+			$(tgt).addClass("tour-current-target")
+			$(tgt).closest(".ui-draggable").on("drag.tour", function() {
 				hopscotch.refreshBubblePosition()
 			})
 			
@@ -314,12 +319,12 @@ Tour.prototype.waitForModuleAdded = function(moduleName) {
 
 			that.bindModule(moduleName, div)
 
-			$(SignalPath).off('moduleAdded', listener)
+			$(SignalPath).off('moduleAdded.tour', listener)
 
 			_cb()
 		}
 
-		$(SignalPath).on('moduleAdded', listener)
+		$(SignalPath).on('moduleAdded.tour', listener)
 	}
 }
 
@@ -334,12 +339,12 @@ Tour.prototype.waitForInput = function(selector, content) {
 
 		function _listener() {
 			if ($sel.val() === content) {
-				$sel.off('change', _listener)
+				$sel.off('change.tour keypress.tour paste.tour focus.tour textInput.tour input.tour', _listener)
 				_cb()
 			}
 		}
 
-		$sel.on('change', _listener)
+		$sel.on('change.tour keypress.tour paste.tour focus.tour textInput.tour input.tour', _listener)
 	}
 }
 
@@ -352,6 +357,38 @@ Tour.prototype.waitForEvent = function(selector, eventName) {
 
 		$(selector).one(eventName, _cb)
 	}
+}
+
+Tour.prototype.waitForConditionOnEvent = function(selector, eventName, checkFunction) {
+	var _cb = this.next.bind(this)
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		$(selector).on(eventName+".tour", function(event) {
+			if (checkFunction(event)) {
+				$(selector).off(eventName+".tour")
+				_cb()
+			}
+		})
+	}
+}
+
+Tour.prototype.waitForYAxis = function(sourceSelector, sourceOutputName, chartSelector, targetYAxis) {
+	return this.waitForConditionOnEvent(chartSelector, 'yAxisChanged', function(event) {
+		// Get the correct y-axis change button 
+		var eps = $(sourceSelector).data("spObject").getOutput(sourceOutputName).getConnectedEndpoints()
+		var yAxisButton
+		eps.forEach(function(it) {
+			if (it.div.parents(chartSelector).length && it.div.find(".y-axis-number").length)
+				yAxisButton = it.div.find(".y-axis-number")
+		})
+		
+		if (yAxisButton)
+			return yAxisButton.text() == targetYAxis
+		else return true // don't get stuck
+	})
 }
 
 Tour.prototype.waitForStream = function(selector, streamName) {

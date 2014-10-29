@@ -549,15 +549,20 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			var connectedInputs = pub.getInputs().filter(function(input) {
 				return input.isConnected()
 			})
-			
+
+			// If series range is less than 10% of axis range, show a tip
+			var popover = true
 			for (var i=0; i<seriesMeta.length; i++) {
 				var yAxisRange = seriesMeta[i].impl.yAxis.getExtremes().max - seriesMeta[i].impl.yAxis.getExtremes().min
 				var seriesRange = seriesMeta[i].max - seriesMeta[i].min
 				
-				// If series range is less than 10% of axis range, show a tip
 				if (seriesRange/yAxisRange < 0.1) {
 					var $input = connectedInputs[i] 
-					$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name)
+					$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name, popover)
+					
+					// Show only one popover
+					if (popover)
+						popover = false
 				}
 			}
 		}
@@ -716,13 +721,17 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 		else super_handleContextMenuSelection(target, selection);
 	}
 	
-	pub.showYAxisWarning = function(seriesName) {
-		$yAxisSelectorButton.popover({
-			content: "Series "+seriesName+" may not be showing properly. Use the Y-axis selection button to set its Y-axis.",
-			placement: "right",
-			trigger: "manual"
-		})
-		$yAxisSelectorButton.popover('show')
+	pub.showYAxisWarning = function(seriesName, popover) {
+		
+		if (popover) {
+			$yAxisSelectorButton.popover({
+				content: "Some series may not be showing properly. Use these buttons to cycle Y-axis assignments.",
+				placement: "right",
+				trigger: "manual"
+			})
+			$yAxisSelectorButton.popover('show')
+		}
+		
 		$yAxisSelectorButton.removeClass(btnDefaultClass).addClass(btnPopoverClass)
 		
 		var destroyFunc = (function(b) {

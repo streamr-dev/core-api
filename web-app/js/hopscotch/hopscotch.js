@@ -427,6 +427,12 @@
         }
         return null;
       }
+      // Allow target to be a function that returns the target.
+      // Evaluate it the first time it's encountered.
+      else if (typeof step.target === 'function') {
+    	  step.target = utils.getStepTargetHelper(step.target())
+    	  return step.target
+      }
 
       // Assume that the step.target is a DOM element
       return step.target;
