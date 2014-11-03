@@ -239,7 +239,12 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 			// Add the target class and drag handler to current target
 			$(tgt).addClass("tour-current-target")
 			$(tgt).closest(".ui-draggable").on("drag.tour", function() {
-				hopscotch.refreshBubblePosition()
+				if (hopscotch.getState())
+					hopscotch.refreshBubblePosition()
+				// If there's no bubble, don't try to update it anymore
+				else {
+					$(tgt).closest(".ui-draggable").off("drag.tour")
+				}
 			})
 			
 			if (!onShow)
