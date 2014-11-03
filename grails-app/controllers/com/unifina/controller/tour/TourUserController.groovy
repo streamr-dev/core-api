@@ -20,6 +20,14 @@ class TourUserController {
 		tu.save(flush: true, failOnError: true)
 		render ""
 	}
+	
+	def reset() {
+		TourUser tu = TourUser.findByUserAndTourNumber(springSecurityService.currentUser, params.int("id"))
+		if (tu) {
+			tu.delete(flush:true, failOnError:true)
+		}
+		render ""
+	}
 
 	def list() {
 		def result = []
