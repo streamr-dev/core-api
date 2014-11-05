@@ -5,10 +5,6 @@ var tourIdPrefix = Streamr.user
 var startableTours = []
 var continuableTours = []
 
-hopscotch.listen('error', function(e) {
-	console.log("Hopscotch error")
-})
-
 var urlRe = /[\?\&]playTour=([0-9]*)/
 
 function loadUserCompletedTours(cb) {
@@ -22,6 +18,10 @@ function Tour() {
 	this._beforeStart = function(cb) {
 		cb()
 	}
+
+	hopscotch.listen('error', function(e) {
+		console.log("Hopscotch error")
+	})
 }
 
 

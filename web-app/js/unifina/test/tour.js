@@ -44,6 +44,13 @@ describe('Tour', function() {
 	var tour
 
 	beforeEach(function() {
+
+		global.hopscotch = {
+			endTour: function() {},
+			getState: function() {},
+			listen: function() {}
+		}
+		
 		tour = new Tour()
 
 		var $objects = {}
@@ -64,11 +71,6 @@ describe('Tour', function() {
 		}
 		global.$.get = function(_url, cb) {
 			cb([])
-		}
-
-		global.hopscotch = {
-			endTour: function() {},
-			getState: function() {}
 		}
 		
 		Tour.startableTours([])
