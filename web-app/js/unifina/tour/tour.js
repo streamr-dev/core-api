@@ -5,6 +5,10 @@ var tourIdPrefix = Streamr.user
 var startableTours = []
 var continuableTours = []
 
+hopscotch.listen('error', function(e) {
+	console.log("Hopscotch error")
+})
+
 var urlRe = /[\?\&]playTour=([0-9]*)/
 
 function loadUserCompletedTours(cb) {
@@ -232,25 +236,30 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 			if (typeof(target) === 'function')
 				tgt = target()
 			
-			// Un-reference old targets and remove drag handlers
-			$(".tour-current-target").closest(".ui-draggable").off("drag.tour")
+			// Remove drag/scroll handlers for previous target
+			$(".tour-current-target").closest(".draggable").off("drag.tour")
+			$(".tour-current-target").closest(".scrollable").off("scroll.tour")
 			$(".tour-current-target").removeClass("tour-current-target")
 			
 			// Add the target class and drag handler to current target
 			$(tgt).addClass("tour-current-target")
-			$(tgt).closest(".ui-draggable").on("drag.tour", function() {
+
+			$(tgt).closest(".draggable").on("drag.tour", function() {
 				if (hopscotch.getState())
 					hopscotch.refreshBubblePosition()
-				// If there's no bubble, don't try to update it anymore
-				else {
-					$(tgt).closest(".ui-draggable").off("drag.tour")
-				}
+				else $(tgt).closest(".draggable").off("drag.tour")
+			})
+			$(tgt).closest(".scrollable").on("scroll.tour", function() {
+				if (hopscotch.getState())
+					hopscotch.refreshBubblePosition()
+				else $(tgt).closest(".scrollable").off("scroll.tour")
 			})
 			
 			if (!onShow)
 				return;
 
 			// call onShow in next tick, as elements may not have been drawn yet
+			console.log("Step shown: "+hopscotch.getState())
 			setTimeout(onShow, 0)
 		}
 		
@@ -472,7 +481,7 @@ Tour.prototype.waitForConnections = function(conns) {
 
 	function setListeners(onOff) {
 		parsedConns.forEach(function(c) {
-			$('.'+c.toModule)[onOff ? 'on' : 'off']('spConnect', checkConnections)
+			$('.'+c.toModule)[onOff ? 'on' : 'off']('spConnect.tour', checkConnections)
 		})
 	}
 

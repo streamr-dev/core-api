@@ -99,11 +99,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	function createDiv() {
 		superCreateDiv();
 		
-		// Destroy the jQuery draggable and replace it via jsPlumb.
-		// This circumvents a bug in jsPlumb that causes the endpoints to not be repositioned after dragging.
-		$(prot.div).draggable("destroy");
-		jsPlumb.draggable($(prot.div).attr("id"), prot.dragOptions);
-		
 		// Module parameter table
 		if (prot.jsonData.params && prot.jsonData.params.length > 0) {
 			prot.paramTable = $("<table class='paramTable'></table>");
@@ -129,6 +124,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		
 		prot.div.on( "dragstart", function(event, ui) {
 			jsPlumb.recalculateOffsets(prot.div.attr('id'));
+		});
+		
+		// Update endpoint positions explicitly. You can try the jsPlumb drag handler, but weird things may happen!
+		var endpoints = prot.div.find(".endpoint")
+		prot.div.on("drag", function(event, ui) {
+			jsPlumb.repaint(endpoints);
 		});
 		
 		$(SignalPath).on("_signalPathLoadModulesReady", function() {

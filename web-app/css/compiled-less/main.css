@@ -16472,6 +16472,7 @@ table.sortable th {
   padding-right: 0px;
 }
 body.build-page {
+  overflow: hidden;
   height: 100%;
   width: 100%;
 }
