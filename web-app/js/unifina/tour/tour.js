@@ -259,7 +259,6 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 				return;
 
 			// call onShow in next tick, as elements may not have been drawn yet
-			console.log("Step shown: "+hopscotch.getState())
 			setTimeout(onShow, 0)
 		}
 		

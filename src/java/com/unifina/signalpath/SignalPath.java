@@ -245,7 +245,7 @@ public class SignalPath extends AbstractSignalPathModule {
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-		if (sp.value!=null) {
+		if (sp!=null && sp.value!=null) {
 			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())).getJSONObject("signalPathData"));
 		}
 	}
