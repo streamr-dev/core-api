@@ -47,7 +47,6 @@ public class StreamParameter extends Parameter<Stream> {
 			config.put("feed",value.getFeed().getId());
 			if (checkModuleId) {
 				config.put("checkModuleId",true);
-//				config.put("moduleId", value.getFeed().getModule().getId());
 			}
 		}
 		return config;

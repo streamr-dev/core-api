@@ -412,18 +412,19 @@ Tour.prototype.waitForStream = function(selector, streamName) {
 		if (cb)
 			_cb = cb
 
-		var $module = $($(selector).data('spObject'))
-		$module.on('updated.tour', function(e, data) {
-			data.params.some(function(param) {
-				if (!param.streamName)
-					return;
+		var $el = $(selector).find(".stream-parameter-wrapper")
+		$el.on('change.tour', function(e) {
+			var ep = $el.closest("tr").find(".endpoint.Stream").data("spObject")
+			var param = ep.toJSON()
 
-				if (param.streamName === streamName) {
-					$module.off('updated.tour')
-					_cb()
-					return true
-				}
-			})
+			if (!param.streamName)
+				return;
+
+			if (param.streamName === streamName) {
+				$el.off('change.tour')
+				_cb()
+				return true
+			}
 		})
 	}
 }

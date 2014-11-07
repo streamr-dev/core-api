@@ -9,7 +9,7 @@
 			
 				<!-- Logo -->
 				<a href="${createLink(uri: '/')}" class="navbar-brand">
-					<g:img dir="images" file="unifina_logo_black.png" plugin="unifina-core"/>
+					<g:render template="/layouts/logo"/>
 				</a>
 
 				<!-- Main navbar toggle -->

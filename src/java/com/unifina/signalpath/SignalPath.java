@@ -27,14 +27,7 @@ public class SignalPath extends AbstractSignalPathModule {
 		}
 	};
 	
-	SignalPathParameter sp = new SignalPathParameter(this,"streamlet") {
-		@Override
-		public Map<String,Object> getConfiguration() {
-			Map<String,Object> config = super.getConfiguration();
-			config.put("updateOnChange", true);
-			return config;
-		}
-	};
+	SignalPathParameter sp;
 	
 //	List orderBooks = []
 	List<ModuleConfig> moduleConfigs = new ArrayList<>();
@@ -290,6 +283,8 @@ public class SignalPath extends AbstractSignalPathModule {
 	
 	@Override
 	public void init() {
+		sp = new SignalPathParameter(this,"streamlet");
+		sp.setUpdateOnChange(true);
 		addInput(sp);
 	}
 	

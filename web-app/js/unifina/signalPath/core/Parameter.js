@@ -30,7 +30,7 @@ SignalPath.ParamRenderers = {
 		},
 		"Stream": {
 			create: function(module,data) {
-				var span = $("<span></span>");
+				var span = $("<span class='stream-parameter-wrapper'></span>");
 				
 				// Show search if no value is selected
 				var search = $("<input type='text' style='"+(data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(data.streamName || "")+"'>");
@@ -64,15 +64,15 @@ SignalPath.ParamRenderers = {
 							}
 							// Handle same module implementation
 							else {
-								$(id).val(item.id);
-								$(sym).find("a").html(item.name);
-	
-								if (mod!=null)
-									SignalPath.updateModule(mod);
-								else {
-									$(sch).hide();
-									$(sym).show();
-								}
+								$(id).val(item.id)
+								$(sym).find("a").html(item.name)
+								
+								d.streamName = item.name
+								
+								$(sch).hide()
+								$(sym).show()
+								
+								$(id).trigger('change')
 							}
 						}
 						else {
