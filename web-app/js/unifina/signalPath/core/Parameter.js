@@ -104,8 +104,8 @@ SignalPath.ParamRenderers = {
 					templates: {
 						suggestion: function(item) {
 							if (item.description)
-								return"<p>"+item.name+"<br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
-							else return "<p>"+item.name+"</p>"
+								return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
+							else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
 						}
 					}
 				})
