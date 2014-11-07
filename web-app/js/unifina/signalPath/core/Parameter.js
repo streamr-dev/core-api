@@ -191,8 +191,12 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		result = renderer.create(pub.module, pub.json);
 		
 		if (pub.json.updateOnChange) {
+			var oldVal = pub.json.value
 			$(result).change(function() {
-				SignalPath.updateModule(pub.module);
+				var newVal = pub.toJSON().value
+				if (newVal != oldVal) { // on purpose instead of !==
+					SignalPath.updateModule(pub.module)
+				}
 			});
 		}
 		
