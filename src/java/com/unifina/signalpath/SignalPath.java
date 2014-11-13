@@ -71,8 +71,8 @@ public class SignalPath extends AbstractSignalPathModule {
 	// TODO: remove backwards compatibility eventually
 	@Override
 	public Input getInput(String name) {
-		if (name.equals("signalPath"))
-			name = "streamlet";
+		if (name.equals("signalPath") || name.equals("streamlet"))
+			name = "canvas";
 		return super.getInput(name);
 	}
 	
@@ -283,7 +283,7 @@ public class SignalPath extends AbstractSignalPathModule {
 	
 	@Override
 	public void init() {
-		sp = new SignalPathParameter(this,"streamlet");
+		sp = new SignalPathParameter(this,"canvas");
 		sp.setUpdateOnChange(true);
 		addInput(sp);
 	}
