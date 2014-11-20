@@ -18,7 +18,8 @@ public class RemoteFeedFile {
 		setBeginDate(beginDate);
 		setEndDate(endDate);
 		setFeed(feed);
-		setStream(streamId);
+		if (streamId!=null)
+			setStream(streamId);
 		setCompressed(compressed);
 		if (fileStorageAdapter!=null)
 			setFileStorageAdapter(fileStorageAdapter);
@@ -78,7 +79,9 @@ public class RemoteFeedFile {
 	}
 	
 	public void setStream(Long streamId) {
-		map.put("streamId", streamId);
+		if (streamId!=null)
+			map.put("streamId", streamId);
+		else map.remove("streamId");
 	}
 	
 	public Map<String,Object> getConfig() {
