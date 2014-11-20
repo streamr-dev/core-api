@@ -1,6 +1,8 @@
 package com.unifina.signalpath;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class Endpoint<T> {
@@ -13,6 +15,7 @@ public abstract class Endpoint<T> {
 	private boolean configured = false;
 	
 	protected boolean canConnect = true;
+	protected List<String> aliases = null;
 	
 	public Endpoint(AbstractSignalPathModule owner, String name, String typeName) {
 		this.owner = owner;
@@ -88,5 +91,22 @@ public abstract class Endpoint<T> {
 		return configured;
 	}
 	
+	/**
+	 * Adds other names that this input can be found by.
+	 * Aliases must be added before calling {@link AbstractSignalPathModule#addInput(Input)} 
+	 * or {@link AbstractSignalPathModule#addOutput(Output)}.
+	 * @param name
+	 */
+	public void addAlias(String name) {
+		if (aliases==null)
+			aliases = new ArrayList<String>(1);
+		aliases.add(name);
+	}
+	
+	public List<String> getAliases() {
+		if (aliases==null)
+			return new ArrayList<String>(0);
+		else return aliases;
+	}
 	
 }

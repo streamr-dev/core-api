@@ -47,7 +47,7 @@ class SignalPathTagLib {
 			themes: {
 				// If you change the theme, check app resources too
 				theme: "classic",
-				url: "${g.resource(dir:"js/jsTree/themes/classic", file:"style.css")}",
+				url: "${g.resource(dir:"js/jsTree/themes/classic", file:"style.css", plugin:"unifina-core")}",
 				"icons": false
 			},
 			

@@ -468,7 +468,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 							elemIF.style.display = "none"; 
 							document.body.appendChild(elemIF);
 						}
-						else alert("The file is already gone from the server. Please re-run your signal path!")
+						else alert("The file is already gone from the server. Please re-run your canvas!")
 					}})(div));
 			});
 		}
