@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.log4j.Logger;
+
 import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedFileService;
@@ -35,6 +37,8 @@ public abstract class AbstractFeedPreprocessor {
 	File tempDir;
 	File tempFeedFile;
 	FeedFile feedFile;
+	
+	private static final Logger log = Logger.getLogger(AbstractFeedPreprocessor.class);
 
 	public AbstractFeedPreprocessor() {
 		
@@ -62,6 +66,8 @@ public abstract class AbstractFeedPreprocessor {
 				// If the file is not on local machine, first copy it to temp directory to avoid long http request
 				tempFeedFile = new File(tempDir, feedFile.getName());
 
+				log.info("Saving feed file to "+tempFeedFile+" for processing...");
+				
 				FileOutputStream fileOut = new FileOutputStream(tempFeedFile);
 				FileChannel fileChannel = fileOut.getChannel();
 
@@ -72,15 +78,23 @@ public abstract class AbstractFeedPreprocessor {
 				fileOut.close();
 				inputStream = new FileInputStream(tempFeedFile);
 			}
+			else {
+				log.info("Preprocessing feed file on the fly: "+feedFile.getName());
+			}
 			
 			// Decompress on the fly if the source is compressed
-			if (isCompressed)
+			if (isCompressed) {
 				inputStream = new GZIPInputStream(inputStream);
+				log.info("Handling input stream as GZipped: "+feedFile.getName());
+			}
+			else log.info("Handling input stream as uncompressed: "+feedFile.getName());
 			
 			// Preprocess the stream
+			log.info("Preprocessing "+feedFile.getName()+"...");
 			preprocess(inputStream, feedFile.getName());
 			
 			// Submit the preprocessed files
+			log.info("Storing "+tempFiles.size()+" files from "+feedFile.getName());
 			for (File f : tempFiles)
 				feedFileService.storeFile(f, feedFile);
 			
@@ -91,11 +105,14 @@ public abstract class AbstractFeedPreprocessor {
 				try { inputStream.close(); } catch (IOException e) {}
 			
 			// Clean up
+			log.info("Cleaning up "+tempFiles.size()+" temporary files from "+feedFile.getName());
 			for (File f : tempFiles)
 				f.delete();
 			
-			if (tempFeedFile!=null)
+			if (tempFeedFile!=null) {
+				log.info("Deleting temporary feed file: "+tempFeedFile);
 				tempFeedFile.delete();
+			}
 		}
 	}
 	
