@@ -16,9 +16,11 @@ class SecUser {
 	String dataToken
 	
 	// Added by Unifina
+	String name
 	String timezone
 	
 	static constraints = {
+		name blank: false
 		username blank: false, unique: true
 		password blank: false
 	}
