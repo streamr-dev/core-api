@@ -129,8 +129,12 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
+	'streamr-client' {
+		dependsOn 'jquery, atmosphere'
+		resource url:[dir:'js/unifina/streamr-client', file:'streamr-client.js', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
-		dependsOn 'streamr, jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
+		dependsOn 'streamr, streamr-client, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

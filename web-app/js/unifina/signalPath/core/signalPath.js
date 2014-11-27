@@ -45,15 +45,12 @@ var SignalPath = (function () {
     		allowRuntimeChanges: true,
     		runUrl: "run",
     		abortUrl: "abort",
-    		atmosphereUrl: Streamr.projectWebroot+"atmosphere/",
     		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
     		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
     		uiActionUrl: Streamr.projectWebroot+"module/uiAction"
     };
-	
-    var detectedTransport = null;
-    var socket = $.atmosphere;
-    var subSocket;
+    
+    var connection;
 	
 	var modules;
 	var saveData;
@@ -61,10 +58,6 @@ var SignalPath = (function () {
 	var sessionId = null;
 	var runnerId = null;
 
-	var payloadCounter = 0;	
-
-    var atmosphereEndTag = "<!-- EOD -->";
-	
     var webRoot = "";
     
     var workspace = "normal";
@@ -88,8 +81,8 @@ var SignalPath = (function () {
 		jsPlumb.bind('ready', function() {
 			pub.newSignalPath();
 		});
-
-		jQuery.atmosphere.logLevel = 'error';
+		
+	    connection = new StreamrClient(options.connectionOptions)
 	};
 	pub.unload = function() {
 		jsPlumb.unload();
@@ -457,27 +450,10 @@ var SignalPath = (function () {
 		if (sessionId != null)
 			abort();
 		
-		if (newSession)
-			payloadCounter = 0;
-		
 		sessionId = sId;
-		
-		var request = { 
-				url : options.atmosphereUrl+sId,
-				transport: 'long-polling',
-				fallbackTransport: 'long-polling',
-				executeCallbackBeforeReconnect : true,
-				maxRequest: Number.MAX_VALUE,
-				headers: {
-					"X-C": function() {
-						return payloadCounter;
-					}
-				}
-		};
+		connection.subscribe(sId, handleResponse)
+		connection.connect(newSession)
 
-		request.onMessage = handleResponse;
-		subSocket = socket.subscribe(request);
-		
 		$(pub).trigger('started');
 	}
 	
