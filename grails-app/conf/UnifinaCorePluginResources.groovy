@@ -8,6 +8,12 @@ modules = {
 		dependsOn 'jquery-ui'
 		resource url:[dir:'js/touchpunch/', file:'jquery.ui.touch-punch.min.js', disposition: 'head', plugin: 'unifina-core']
 	}
+	"password-meter" {
+		dependsOn 'jquery'
+		resource url:[dir:'js/unifina/password-meter', file:'password-meter.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/widgets', file:'password-meter.css', plugin: 'unifina-core']
+		resource url:[dir:'js/zxcvbn', file:'zxcvbn-async.min.js', plugin: 'unifina-core']
+	}
 	tablesorter {
 		dependsOn 'jquery'
 		resource url:[dir:'js/tablesorter', file:'jquery.tablesorter.min.js', plugin: 'unifina-core']
