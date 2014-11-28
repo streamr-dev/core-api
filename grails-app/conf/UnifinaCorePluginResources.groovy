@@ -131,7 +131,7 @@ modules = {
 	}
 	'streamr-client' {
 		dependsOn 'jquery, atmosphere'
-		resource url:[dir:'js/unifina/streamr-client', file:'streamr-client.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-client', file:'streamr-atmosphere-client.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		dependsOn 'streamr, streamr-client, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'

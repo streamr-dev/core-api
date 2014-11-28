@@ -20,7 +20,7 @@ StreamrClient.prototype.subscribe = function(streamId, callback) {
 	var _this = this
 	this.streams[streamId] = {
 		handler: function(response) {
-			_this.handleMessage(response, callback)
+			_this.handleResponse(response, streamId, callback)
 		},
 		counter: 0,
 		socket: null
@@ -33,7 +33,13 @@ StreamrClient.prototype.isConnected = function() {
 	return this.connected
 }
 
+StreamrClient.prototype.reconnect = function() {
+	return this.connect(true)
+}
+
 StreamrClient.prototype.connect = function(reconnect) {
+	var _this = this
+	
 	if (this.connected)
 		this.disconnect()
 	
@@ -51,12 +57,13 @@ StreamrClient.prototype.connect = function(reconnect) {
 			maxRequest: Number.MAX_VALUE,
 			headers: {
 				"X-C": function() {
-					return this.streams[streamId].counter
+					return _this.streams[streamId].counter
 				}
-			}
+			},
+			onMessage: this.streams[streamId].handler
 		}
 		
-		request.onMessage = this.streams[streamId].handler
+		this.streams[streamId].request = request
 		this.streams[streamId].socket = $.atmosphere.subscribe(request)
 	}
 		
@@ -64,11 +71,11 @@ StreamrClient.prototype.connect = function(reconnect) {
 }
 
 StreamrClient.prototype.disconnect = function() {
-	// ...
+	$.atmosphere.unsubscribe()
 	this.connected = false
 }
 
-StreamrClient.prototype.handleMessage =	function(response, callback) {
+StreamrClient.prototype.handleResponse = function(response, streamId, callback) {
 	this.detectedTransport = response.transport;
 	
 	if (response.status == 200) {
@@ -94,9 +101,34 @@ StreamrClient.prototype.handleMessage =	function(response, callback) {
     			// Atmosphere bug sometimes allows incomplete responses to reach the client
     			console.log(e);
     		}
-
-    		if (msgObj != null)
-    			callback(msgObj.messages);
+    		
+    		var stream = this.streams[streamId]
+    		
+    		if (msgObj != null) {
+    			for (var i=0;i<msgObj.messages.length;i++) {
+    				var message = msgObj.messages[i]
+    				
+    				// If no counter is present, this is the purged empty message that 
+    				// should not be processed but must increment counter
+    				if (message.counter==null) {
+    					stream.counter++;
+    					continue
+    				}
+    				
+    				// Update ack counter
+    				if (message.counter > stream.counter) {
+    					throw "Messages SKIPPED! Counter: "+message.counter+", expected: "+stream.counter
+    				}
+    				else if (message.counter < stream.counter) {
+    					console.log("Already received message: "+message.counter+", expecting: "+stream.counter);
+    					continue // ok?
+    				}
+    				
+    				stream.counter = message.counter + 1;
+    				
+        			callback(message);
+    			}
+    		}
 
         }
     }

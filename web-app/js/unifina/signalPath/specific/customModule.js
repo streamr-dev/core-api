@@ -127,10 +127,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		return marker;
 	}
 	
-	pub.endOfResponses = function() {
-		
-	}
-	
 	var super_onDelete = pub.onDelete;
 	pub.onDelete = function() {
 		if (super_onDelete)

@@ -24,7 +24,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	var navigatorSeries = null
 	var latestNavigatorTimestamp = null
 	var range = null
-	
+		
 	// Dragging in the chart container or the controls must not move the module
 	prot.dragOptions.cancel = ".highcharts-container, .chart-series-buttons, .chart-range-selector"
 
@@ -282,6 +282,19 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			seriesMeta[i].impl = chart.series[i]
 		}
 		
+		var running = true
+		var redrawFunc = function() {
+			redrawChart(true)
+			if (running)
+				window.requestAnimationFrame(redrawFunc)
+		}
+		window.requestAnimationFrame(redrawFunc);
+		
+		$(SignalPath).on("stopped", function() {
+			running = false
+			redrawChart(true)
+		})
+		
 		$(pub).trigger("chartInitialized")
 		$(area).trigger("chartInitialized")
 	}
@@ -346,6 +359,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 						navigatorSeries.addPoint([d.x, d.y],false,false,false);
 						latestNavigatorTimestamp = d.x
 					}
+
 				}
 				// Come here if there are series that are not yet added to the chart (requires at least 2 data points)
 				else {
@@ -360,7 +374,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					for (var i=0;i<seriesMeta.length;i++) {
 						if (!seriesMeta[i].impl) {
 							if (seriesMeta[i].data!=null && seriesMeta[i].data.length>1)
-								seriesMeta[i].impl = chart.addSeries(seriesMeta[i],true,false);	
+								seriesMeta[i].impl = chart.addSeries(seriesMeta[i],false,false);	
 							break
 						}
 					}
@@ -435,7 +449,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				s.min = Infinity
 				s.max = -Infinity
 			}
-			else chart.addSeries(s,true,false);
+			else chart.addSeries(s,false,false);
 		}
 		
 		// Day break
@@ -475,24 +489,20 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		
 	}
 	
-	pub.endOfResponses = function() {
-		if (chart != null) {
-			redrawChart(true)
-		}
-	}
-	
 	function redrawChart(scrollToEnd) {
-		var extremes = chart.xAxis[0].getExtremes();
-		
-		var mx = (range==null || scrollToEnd ? maxTime : extremes.max);
-		if (mx - minTime < range)
-			mx = Math.min(maxTime, minTime + range);
-		
-		var mn = (range==null ? minTime : Math.max(minTime,mx-range));
-		
-		chart.xAxis[0].setExtremes(mn,mx,false,false);
-		
-		chart.redraw();
+		if (chart) {
+			var extremes = chart.xAxis[0].getExtremes();
+			
+			var mx = (range==null || scrollToEnd ? maxTime : extremes.max);
+			if (mx - minTime < range)
+				mx = Math.min(maxTime, minTime + range);
+			
+			var mn = (range==null ? minTime : Math.max(minTime,mx-range));
+			
+			chart.xAxis[0].setExtremes(mn,mx,false,false);
+			
+			chart.redraw();
+		}
 	}
 	
 	var superClean = pub.clean;

@@ -23,31 +23,31 @@
  * allowRuntimeChanges: boolean for whether runtime parameter changes are allowed
  * runUrl: url where to POST the run command
  * abortUrl: url where to POST the abort command
- * atmosphereUrl: url for atmosphere, the sessionId will be appended to this url
  * getModuleUrl: url for module JSON
  * uiActionUrl: url for POSTing module UI runtime changes
- * 
+ * connectionOptions: option object passed to StreamrClient
  */
 
 var SignalPath = (function () { 
 
     var options = {
-    		canvas: "canvas",
-    		signalPathContext: function() {
-    			return {};
-    		},
-    		errorHandler: function(data) {
-    			alert((typeof data == "string" ? data : data.msg));
-    		},
-    		notificationHandler: function(data) {
-    			alert((typeof data == "string" ? data : data.msg));
-    		},
-    		allowRuntimeChanges: true,
-    		runUrl: "run",
-    		abortUrl: "abort",
-    		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
-    		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-    		uiActionUrl: Streamr.projectWebroot+"module/uiAction"
+		canvas: "canvas",
+		signalPathContext: function() {
+			return {};
+		},
+		errorHandler: function(data) {
+			alert((typeof data == "string" ? data : data.msg));
+		},
+		notificationHandler: function(data) {
+			alert((typeof data == "string" ? data : data.msg));
+		},
+		allowRuntimeChanges: true,
+		runUrl: "run",
+		abortUrl: "abort",
+		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
+		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
+		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
+		connectionOptions: {}
     };
     
     var connection;
@@ -451,7 +451,7 @@ var SignalPath = (function () {
 			abort();
 		
 		sessionId = sId;
-		connection.subscribe(sId, handleResponse)
+		connection.subscribe(sId, processMessage)
 		connection.connect(newSession)
 
 		$(pub).trigger('started');
@@ -462,75 +462,7 @@ var SignalPath = (function () {
 	}
 	pub.reconnect = reconnect;
 	
-	function handleResponse(response) {
-		detectedTransport = response.transport;
-		
-		if (response.status == 200) {
-            var data = response.responseBody;
-            
-            // Check for the non-js comments that atmosphere may write
-
-            var end = data.indexOf(atmosphereEndTag);
-            if (end != -1) {
-            	data = data.substring(end+atmosphereEndTag.length, data.length);
-            }
-            
-            if (data.length > 0) {
-            	var jsonString = '{"messages":['+(data.substring(0,data.length-1))+']}';
-            	
-        		var clear = [];
-        		var msgObj = null;
-
-        		try {
-        			msgObj = jQuery.parseJSON(jsonString);
-        		} catch (e) {
-        			// Atmosphere sends commented out data to WebKit based browsers
-        			// Atmosphere bug sometimes allows incomplete responses to reach the client
-        			console.log(e);
-        		}
-        		if (msgObj != null)
-        			processMessageBatch(msgObj.messages);
-
-            }
-        }
-	}
-	
-	function processMessageBatch(messages) {
-		var clear = [];
-		
-		for (var i=0;i<messages.length;i++) {
-			var hash = processMessage(messages[i]);
-			if (hash != null && $.inArray(hash, clear)==-1)
-				clear.push(hash);
-		}
-		
-		for (var i=0;i<clear.length;i++) {
-			try {
-				modules[clear[i]].endOfResponses();
-			} catch (err) {
-				console.log(err.stack);
-			}
-		}
-	}
-	
 	function processMessage(message) {
-		var clear = null;
-		
-		// A message that has been purged from cache is the empty javascript object
-		if (message.counter==null) {
-			payloadCounter++;
-			return null;
-		}
-		// Update ack counter
-		if (message.counter > payloadCounter) {
-			console.log("Messages SKIPPED! Counter: "+message.counter+", expected: "+payloadCounter);
-		}
-		else if (message.counter < payloadCounter) {
-			console.log("Already received message: "+message.counter+", expecting: "+payloadCounter);
-			return null; // ok?
-		}
-		payloadCounter = message.counter + 1;
-		
 		if (message.type=="P") {
 			var hash = message.hash;
 			try {
@@ -550,13 +482,10 @@ var SignalPath = (function () {
 		else if (message.type=="N") {
 			options.notificationHandler(message);
 		}
-
-		return clear;
-		
 	}
 	
 	function closeSubscription() {
-		socket.unsubscribe();
+		connection.disconnect()
 		
 		sessionId = null;
 		$(pub).trigger('stopped');
