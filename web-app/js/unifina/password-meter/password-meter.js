@@ -1,14 +1,29 @@
-function PasswordMeter(passwordId, meterId, hiddenInputId, minLength, userInputFunc) {
+function PasswordMeter(passwordId, minLength, userInputFunc) {
 	var pwd_classes = ["veryweak", "weak", "medium", "strong", "strong"]
-	var pwd_names = ["Please use a stronger password", "Please use a stronger password", "Medium", "Strong", "Strong"]
+	var pwd_names = ["Please use a stronger password", "Weak", "Medium", "Strong", "Strong"]
+
+	var $input = $("#"+passwordId)
 	
-	var $pwd_input = $("#"+passwordId)
-	var $el = $("#"+meterId)
-	var $pwd_text = $el.find("p")
-	var $pwd_meter = $el.find("div")
-	var $pwd_strength = $("#"+hiddenInputId)
+	// Some CSS mods to make sure the meter and text become visible
+	$input.parent().css("z-index", 0)
+	$input.parent().css("position","relative")
 	
-	$pwd_input.keyup(function() {
+	if ($input.parent().prev(".form-group").length)
+		$input.parent().css("margin-top", "25px")
+		
+	$input.css("background-color", "transparent")
+	
+	// Create and insert the meter elements into the dom
+	var $wrapper = $('<div class="strength_meter"/>')
+	var $meter = $('<div class="input-lg"/>')
+	var $text = $('<p/>')
+	var $strength = $('<input type="hidden" name="pwdStrength" id="pwdStrength" value="0"/>')
+	
+	$wrapper.append($meter)
+	$meter.append($text)
+	$input.after($strength).after($wrapper)
+	
+	$input.keyup(function() {
 		if (zxcvbn) {
 			var password = $(this).val()
 			var userInputs = (userInputFunc ? userInputFunc() : [])	
@@ -18,13 +33,13 @@ function PasswordMeter(passwordId, meterId, hiddenInputId, minLength, userInputF
 			var cls = pwd_classes[score]
 			
 			pwd_classes.forEach(function(it) {
-				$pwd_text.removeClass(it)
-				$pwd_meter.removeClass(it)
+				$text.removeClass(it)
+				$meter.removeClass(it)
 			})
 			
-			$pwd_text.html(text).addClass(cls)
-			$pwd_meter.addClass(cls)
-			$pwd_strength.val(score)
+			$text.html(text).addClass(cls)
+			$meter.addClass(cls)
+			$strength.val(score)
 		}
 	});	
 }

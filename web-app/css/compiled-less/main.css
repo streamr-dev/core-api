@@ -16498,15 +16498,6 @@ body.build-page #content-wrapper {
 .show-sign-up .btn-sign-in {
   display: none;
 }
-body.page-signin-alt .panel {
-  z-index: 0;
-}
-body.page-signin-alt #name {
-  margin-bottom: 10px;
-}
-#password {
-  background: transparent;
-}
 .remote-tabs-content {
   outline: none;
 }
