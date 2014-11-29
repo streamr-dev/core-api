@@ -56,7 +56,7 @@ class UnifinaCoreGrailsPlugin {
 				
 				'init-param' {
 					'param-name'("org.atmosphere.useWebSocket")
-					'param-value'("false")
+					'param-value'("true")
 				}
 //				The below asyncSupport can be removed when atmosphere is upgraded to most recent 2.x version
 				'init-param' {
