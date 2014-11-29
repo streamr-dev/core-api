@@ -51,7 +51,7 @@ StreamrClient.prototype.connect = function(reconnect) {
 		
 		var request = { 
 			url : this.options.atmosphereUrl+streamId,
-			transport: 'websocket',
+			transport: 'long-polling',
 			fallbackTransport: 'long-polling',
 			executeCallbackBeforeReconnect : true,
 			maxRequest: Number.MAX_VALUE,
