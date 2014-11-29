@@ -102,9 +102,12 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/slimScroll-1.3.0/', file:'jquery.slimscroll.min.js', plugin: 'unifina-core']
 	}
-	"detect-timezone" {
+	'detect-timezone' {
 		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
 		resource url:[dir:'js/timezones', file:'list_timezones.js', plugin: 'unifina-core']
+	}
+	'raf-polyfill' {
+		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
 	
 	/**
@@ -135,8 +138,12 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
+	'streamr-client' {
+		dependsOn 'jquery, atmosphere'
+		resource url:[dir:'js/unifina/streamr-client', file:'streamr-atmosphere-client.js', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
-		dependsOn 'streamr, jsplumb, jstree, highstock, atmosphere, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, signalpath-widgets'
+		dependsOn 'streamr, streamr-client, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

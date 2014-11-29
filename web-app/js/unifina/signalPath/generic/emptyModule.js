@@ -470,8 +470,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	pub.receiveResponse = receiveResponse;
 	
-	pub.endOfResponses = function() {}
-	
 	function updateFrom(data) {
 		// Overwrite jsonData
 		prot.jsonData = data;
