@@ -43,7 +43,7 @@ public class SignalPathRunner extends Thread {
 		
 		signalPathData.eachWithIndex {data, i->
 			final String sessionId = runnerId+"-$i"
-			final String channel = "/atmosphere/"+sessionId
+			final String channel = sessionId
 			
 			SignalPathReturnChannel returnChannel = new SignalPathReturnChannel(sessionId, channel, servletContext)
 			returnChannels << returnChannel

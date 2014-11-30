@@ -2,7 +2,6 @@ package com.unifina.push;
 
 import grails.converters.JSON;
 
-import java.util.List;
 import java.util.Map;
 
 public class PushChannelMessage {
@@ -18,18 +17,25 @@ public class PushChannelMessage {
 	}
 	
 	public String toJSON(JSON json) {
-		StringBuilder sb = new StringBuilder()
-		.append("[").append(counter).append(",")
-		.append("\"").append(topic).append("\"").append(",");
+//		StringBuilder sb = new StringBuilder()
+//		.append("[").append(counter).append(",")
+//		.append("\"").append(topic).append("\"").append(",");
+//		
+//		if (content instanceof Map || content instanceof List) {
+//			json.setTarget(content);
+//			sb.append(json.toString());
+//		}
+//		else throw new IllegalArgumentException("content must be a Map!");
+//			
+//		sb.append("]");
+//		return sb.toString();
 		
-		if (content instanceof Map || content instanceof List) {
+		if (content instanceof Map) {
+			((Map)content).put("counter", counter);
 			json.setTarget(content);
-			sb.append(json.toString());
+			return json.toString();
 		}
 		else throw new IllegalArgumentException("content must be a Map!");
-			
-		sb.append("]");
-		return sb.toString();
 	}
 
 	public int getCounter() {

@@ -58,7 +58,7 @@ public class SignalPath extends AbstractSignalPathModule {
 		super();
 		this.returnChannel = returnChannel;
 		if (returnChannel!=null)
-			returnChannel.signalPath = this;
+			returnChannel.setSignalPath(this);
 		this.isRoot = isRoot;
 		this.globals = globals;
 		initPriority = 10;

@@ -1,6 +1,6 @@
 package com.unifina.signalpath;
 
-
+@Deprecated // Unnecessary, replace with SignalPathReturnChannel or whatever replaces it
 public interface IReturnChannel {
 	/**
 	 * Sends a payload via the return channel

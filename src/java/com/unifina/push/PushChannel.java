@@ -1,12 +1,17 @@
 package com.unifina.push;
 
+import org.apache.log4j.Logger;
+
 public abstract class PushChannel {
 	private int counter = 0;
 	private String channel;
 	private boolean destroyed = false;
 	
+	public static final Logger log = Logger.getLogger(PushChannel.class);
+	
 	public PushChannel(String channel) {
 		this.channel = channel;
+		log.info("Created: "+channel);
 	}
 	
 	public void push(Object content) {
@@ -21,6 +26,7 @@ public abstract class PushChannel {
 	}
 	
 	public void destroy() {
+		log.info("destroy() called: "+channel);
 		destroyed = true;
 	}
 	

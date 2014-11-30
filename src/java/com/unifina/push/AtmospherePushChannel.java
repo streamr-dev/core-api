@@ -5,6 +5,7 @@ import grails.converters.JSON;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.UnhandledException;
+import org.apache.log4j.Logger;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
 import org.atmosphere.cpr.BroadcasterLifeCyclePolicy.ATMOSPHERE_RESOURCE_POLICY;
@@ -26,6 +27,8 @@ public class AtmospherePushChannel extends PushChannel implements BroadcasterLif
 	private boolean destroyOnEmpty = false;
 	private boolean destroyOnIdle = false;
 	
+	private static final Logger log = Logger.getLogger(AtmospherePushChannel.class);
+	
 	public AtmospherePushChannel(String channel) {
 		super(channel);
 		
@@ -35,7 +38,6 @@ public class AtmospherePushChannel extends PushChannel implements BroadcasterLif
 		bc.addBroadcasterLifeCyclePolicyListener(this);
 
 		cache = (CounterBroadcasterCache) bc.getBroadcasterConfig().getBroadcasterCache();
-		
 	}
 
 	public Broadcaster getBroadcaster() {
@@ -45,7 +47,7 @@ public class AtmospherePushChannel extends PushChannel implements BroadcasterLif
 	@Override
 	protected void doPush(PushChannelMessage msg) {
 		String s = msg.toJSON(json);
-		cache.add(s, msg.getCounter(), (msg.getContent() instanceof SignalPathReturnChannel.SignalPathMessage ? ((SignalPathMessage)msg.getContent()).cacheId : null));
+		cache.add(s, msg.getCounter(), (msg.getContent() instanceof SignalPathReturnChannel.SignalPathMessage ? ((SignalPathReturnChannel.SignalPathMessage) msg.getContent()).cacheId : null));
 		bc.broadcast(s);
 	}
 	
@@ -59,11 +61,14 @@ public class AtmospherePushChannel extends PushChannel implements BroadcasterLif
 	}
 	
 	@Override
-	public void onIdle() {}
+	public void onIdle() {
+		if (destroyOnIdle)
+			destroy();
+	}
 	
 	@Override
 	public void onDestroy() {
-		cleanUp();
+		log.info("Atmosphere Broadcaster for "+getChannel()+" destroyed.");
 	}
 	
 	class JSONWithEOMAppender extends JSON {

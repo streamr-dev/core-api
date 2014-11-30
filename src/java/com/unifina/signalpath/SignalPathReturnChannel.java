@@ -197,4 +197,8 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel {
 	public SignalPath getSignalPath() {
 		return signalPath;
 	}
+
+	public void setSignalPath(SignalPath signalPath) {
+		this.signalPath = signalPath;
+	}
 }
