@@ -17,6 +17,7 @@ public abstract class Parameter<T> extends Input<T> {
 	protected T defaultValue;
 	
 	public boolean canBeEmpty = true;
+	private boolean updateOnChange = false;
 	
 	public Parameter(AbstractSignalPathModule owner, String name, T defaultValue, String typeName) {
 		super(owner, name, typeName);
@@ -101,6 +102,10 @@ public abstract class Parameter<T> extends Input<T> {
 		else 
 			config.put("value",defaultValue);
 		
+		if (updateOnChange) {
+			config.put("updateOnChange", true);
+		}
+		
 		return config;
 	}
 	
@@ -146,6 +151,14 @@ public abstract class Parameter<T> extends Input<T> {
 		if (defaultValue!=null)
 			return true;
 		else return super.hasValue();
+	}
+	
+	public boolean getUpdateOnChange() {
+		return updateOnChange;
+	}
+
+	public void setUpdateOnChange(boolean updateOnChange) {
+		this.updateOnChange = updateOnChange;
 	}
 	
 }

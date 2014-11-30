@@ -35,7 +35,10 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 		displayKey: 'name',
 		source: modulesTypeAhead,
 		templates: {
-			header: '<span class="tt-dataset-header">Modules</span>'
+			header: '<span class="tt-dataset-header">Modules</span>',
+			suggestion: function(item) {
+				return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
+			}
 		}
 	}, {
 		name: 'streams',
@@ -45,8 +48,8 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 			header: '<span class="tt-dataset-header">Streams</span>',
 			suggestion: function(item) {
 				if (item.description)
-					return"<p>"+item.name+"<br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
-				else return "<p>"+item.name+"</p>"
+					return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
+				else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
 			}
 		}
 	})

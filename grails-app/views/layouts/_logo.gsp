@@ -1,0 +1,1 @@
+<g:img dir="images" file="logo.png" plugin="unifina-core" />

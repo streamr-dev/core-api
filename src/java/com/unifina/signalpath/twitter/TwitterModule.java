@@ -1,15 +1,10 @@
 package com.unifina.signalpath.twitter;
 
-import com.unifina.data.IStreamRequirement;
-import com.unifina.domain.data.Stream;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.StreamParameter;
+import com.unifina.signalpath.AbstractStreamSourceModule;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
-public class TwitterModule extends AbstractSignalPathModule implements IStreamRequirement {
-
-	public StreamParameter stream = new StreamParameter(this, "stream");
+public class TwitterModule extends AbstractStreamSourceModule {
 	
 	public StringOutput tweet = new StringOutput(this, "tweet");
 	public StringOutput username = new StringOutput(this, "username");
@@ -21,7 +16,7 @@ public class TwitterModule extends AbstractSignalPathModule implements IStreamRe
 	
 	@Override
 	public void init() {
-		addInput(stream);
+		super.init();
 		
 		addOutput(tweet);
 		addOutput(username);
@@ -44,11 +39,6 @@ public class TwitterModule extends AbstractSignalPathModule implements IStreamRe
 	@Override
 	public void clearState() {
 
-	}
-
-	@Override
-	public Stream getStream() {
-		return stream.getValue();
 	}
 
 }

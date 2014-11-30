@@ -13,6 +13,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.inputs = [];
 	prot.outputsByName = {};
 	prot.outputs = [];
+	
+	// Updated on dragstart, used on drag event to repaint jsPlumb connectors
+	var _cachedEndpoints = []
 
 	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
@@ -91,21 +94,13 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			}
 		});
 		
-		if ($(prot.div).find("div.input").length>0)
-			jsPlumb.repaint($(prot.div).find("div.input"));
-		if ($(prot.div).find("div.output").length>0)
-			jsPlumb.repaint($(prot.div).find("div.output"));
+		pub.redraw()
 	}
 	pub.updateFrom = updateFrom;
 	
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
-		
-		// Destroy the jQuery draggable and replace it via jsPlumb.
-		// This circumvents a bug in jsPlumb that causes the endpoints to not be repositioned after dragging.
-		$(prot.div).draggable("destroy");
-		jsPlumb.draggable($(prot.div).attr("id"), prot.dragOptions);
 		
 		// Module parameter table
 		if (prot.jsonData.params && prot.jsonData.params.length > 0) {
@@ -130,8 +125,15 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 
 		createModuleFooter();
 		
-		prot.div.on( "dragstart", function(event, ui) {
+		prot.div.on("dragstart", function(event, ui) {
 			jsPlumb.recalculateOffsets(prot.div.attr('id'));
+			_cachedEndpoints = prot.div.find(".endpoint")
+		});
+		
+		// Update endpoint positions explicitly. You could replace this with jsPlumb drag handling, but weird things may happen!
+		prot.div.on("drag", function(event, ui) {
+			if (_cachedEndpoints.length)
+				jsPlumb.repaint(_cachedEndpoints)
 		});
 		
 		$(SignalPath).on("_signalPathLoadModulesReady", function() {
@@ -389,6 +391,18 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		if (payload.type=="paramChangeResponse") {
 			// TODO handle param change response
 		}
+	}
+	
+	var super_redraw = pub.redraw
+	pub.redraw = function() {
+		super_redraw()
+		
+		jsPlumb.recalculateOffsets(prot.div.attr('id'));
+		
+		if ($(prot.div).find("div.input").length>0)
+			jsPlumb.repaint($(prot.div).find("div.input"));
+		if ($(prot.div).find("div.output").length>0)
+			jsPlumb.repaint($(prot.div).find("div.output"));
 	}
 	
 	var superToJSON = pub.toJSON;

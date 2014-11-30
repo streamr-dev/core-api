@@ -2,15 +2,16 @@ package com.unifina.feed.file;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.domain.data.Feed;
-import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedFileService;
 
 /**
@@ -27,6 +28,8 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	
 	Pattern pattern = null;
 	
+	public static final Logger log = Logger.getLogger(AbstractFeedFileDiscoveryUtil.class);
+	
 	public AbstractFeedFileDiscoveryUtil(GrailsApplication grailsApplication, Feed feed, Map<String,Object> config) {
 		this.grailsApplication = grailsApplication;
 		this.feed = feed;
@@ -41,8 +44,25 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 		connect();
 		List<RemoteFeedFile> files = discoverFiles();
 		int counter = 0;
+		
+		// Remove overlaps (currently just checks for existing beginDates)
+		if (!getAllowOverlap()) {
+			List<RemoteFeedFile> filtered = new ArrayList<>();
+			Map<Date, RemoteFeedFile> map = new LinkedHashMap<>();
+			for (RemoteFeedFile file : files) {
+				if (map.containsKey(file.getBeginDate())) {
+					log.warn("Discarding RemoteFeedFile "+file.getName()+" because its beginDate is the same as for "+map.get(file.getBeginDate()).getName());
+				}
+				else {
+					map.put(file.getBeginDate(), file);
+					filtered.add(file);
+				}
+			}
+			files = filtered;
+		}
+		
 		for (RemoteFeedFile file : files) {
-			if (feedFileService.getFeedFile(file)==null) {
+			if (feedFileService.getFeedFile(file, getAllowOverlap())==null) {
 				// New file found!
 				handleNewFile(file);
 				counter++;
@@ -82,7 +102,8 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	
 	protected RemoteFeedFile createRemoteFeedFile(String location) {
 		return new RemoteFeedFile(
-				FilenameUtils.getName(location), 
+				FilenameUtils.getName(location),
+				getFormat(location),
 				getBeginDate(location), 
 				getEndDate(location), 
 				feed,
@@ -131,6 +152,21 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	 */
 	protected Long getStreamId(String location) {
 		return null;
+	}
+	
+	/**
+	 * Format of the file, defaults to "default"
+	 */
+	protected String getFormat(String location) {
+		return "default";
+	}
+	
+	/**
+	 * Whether to allow time-overlapping files with different names to be found
+	 * or not. 
+	 */
+	protected boolean getAllowOverlap() {
+		return true;
 	}
 	
 	/**

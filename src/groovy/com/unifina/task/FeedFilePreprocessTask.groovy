@@ -1,5 +1,7 @@
 package com.unifina.task
 
+import java.util.Date;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -49,7 +51,16 @@ class FeedFilePreprocessTask extends AbstractTask {
 		}
 
 		// Instantiate the RemoteFeedFile from config.remoteFeedFile
-		RemoteFeedFile remoteFile = new RemoteFeedFile(config.remoteFile.name.toString(), new Date((long)config.remoteFile.beginDate), new Date((long)config.remoteFile.endDate), Feed.get(config.remoteFile.feedId), config.remoteFile.location, config.remoteFile.compressed, adapter?.getClass())
+		RemoteFeedFile remoteFile = new RemoteFeedFile(
+			config.remoteFile.name.toString(),
+			config.remoteFile.format.toString(),
+			new Date((long)config.remoteFile.beginDate), 
+			new Date((long)config.remoteFile.endDate), 
+			Feed.get(config.remoteFile.feedId),
+			config.remoteFile.streamId,
+			config.remoteFile.location, 
+			config.remoteFile.compressed, 
+			adapter?.getClass())
 		feedFile = feedFileService.getFeedFile(remoteFile)
 		
 		if (feedFile?.processed) {
@@ -75,7 +86,7 @@ class FeedFilePreprocessTask extends AbstractTask {
 		InputStream inputStream = (adapter ? adapter.retrieve(remoteFile.location) : new URL(remoteFile.location).openConnection().getInputStream())
 		
 		// Instantiate the preprocessor and start preprocessing
-		preprocessor = feedService.instantiatePreprocessor(remoteFile.getFeed());
+		preprocessor = feedFileService.getPreprocessor(remoteFile.getFeed(), remoteFile.getFormat());
 		preprocessor.preprocess(feedFile, feedFileService, feedService, inputStream, remoteFile.getName().endsWith(".gz"), false);
 
 		// Update the Streams detected in the file

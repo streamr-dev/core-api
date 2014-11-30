@@ -27,14 +27,7 @@ public class SignalPath extends AbstractSignalPathModule {
 		}
 	};
 	
-	SignalPathParameter sp = new SignalPathParameter(this,"streamlet") {
-		@Override
-		public Map<String,Object> getConfiguration() {
-			Map<String,Object> config = super.getConfiguration();
-			config.put("updateOnChange", true);
-			return config;
-		}
-	};
+	SignalPathParameter sp;
 	
 //	List orderBooks = []
 	List<ModuleConfig> moduleConfigs = new ArrayList<>();
@@ -78,8 +71,8 @@ public class SignalPath extends AbstractSignalPathModule {
 	// TODO: remove backwards compatibility eventually
 	@Override
 	public Input getInput(String name) {
-		if (name.equals("signalPath"))
-			name = "streamlet";
+		if (name.equals("signalPath") || name.equals("streamlet"))
+			name = "canvas";
 		return super.getInput(name);
 	}
 	
@@ -252,7 +245,7 @@ public class SignalPath extends AbstractSignalPathModule {
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-		if (sp.value!=null) {
+		if (sp!=null && sp.value!=null) {
 			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())).getJSONObject("signalPathData"));
 		}
 	}
@@ -290,6 +283,8 @@ public class SignalPath extends AbstractSignalPathModule {
 	
 	@Override
 	public void init() {
+		sp = new SignalPathParameter(this,"canvas");
+		sp.setUpdateOnChange(true);
 		addInput(sp);
 	}
 	

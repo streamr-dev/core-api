@@ -1,7 +1,9 @@
 (function(exports) {
 
-var tourUrlRoot = Streamr.createLink({ uri: 'js/tours/' })
-var pageTours = []
+var tourUrlRoot = Streamr.createLink({ uri: 'static/js/tours/' })
+var tourIdPrefix = Streamr.user
+var startableTours = []
+var continuableTours = []
 
 var urlRe = /[\?\&]playTour=([0-9]*)/
 
@@ -16,40 +18,73 @@ function Tour() {
 	this._beforeStart = function(cb) {
 		cb()
 	}
+
+	hopscotch.listen('error', function(e) {
+		console.log("Hopscotch error")
+	})
 }
 
-Tour.hasTour = function(tourNumber) {
-	pageTours.push(tourNumber)
+
+
+Tour.startableTours = function(tourNumbers) {
+	startableTours = tourNumbers
 }
 
-Tour.continueTour = function() {
+Tour.continuableTours = function(tourNumbers) {
+	continuableTours = tourNumbers
+}
+
+/**
+ * Selects and starts a tour:
+ * - If a tour is specified in the URL, play it
+ * - Else if a tour state is saved for this user and continuable from current page, continue
+ * - Else if a tour is startable from current page, start it if the user has not completed it yet
+ */
+Tour.autoStart = function() {
 	var urlParam = window.location.search.match(urlRe)
 	if (urlParam) {
 		return Tour.playTour(parseInt(urlParam[1], 10))
 	}
 
 	var state = hopscotch.getState()
-
+	
+	console.log("startableTours: "+startableTours+", continuableTours: "+continuableTours)
 	console.log('Tour state', state)
 
-	if (state) {
-		var currentTour = parseInt(state.split(':')[0], 10) || 0
-		var currentStep = parseInt(state.split(':')[1], 10) || 0
-		return Tour.loadTour(currentTour, function(tour) {
-			tour.start(currentStep)
-		})
+	// Try continue
+	if (state && continuableTours.length>0) {
+		var prefix = state.split("#")[0]
+		
+		if (prefix !== tourIdPrefix) {
+			console.log("Tour prefix does not match, not continuing. State: "+state+", Prefix: "+tourIdPrefix)
+		}
+		else {
+			state = state.split("#")[1]
+			var currentTour = parseInt(state.split(':')[0], 10) || 0
+			var currentStep = parseInt(state.split(':')[1], 10) || 0
+			
+			if (continuableTours.indexOf(currentTour) !== -1 && currentStep>0) {
+				return Tour.loadTour(currentTour, function(tour) {
+					tour.start(currentStep)
+				})				
+			}
+			else console.log("Can not continue tour on this page: "+state)
+		}
 	}
 
-	loadUserCompletedTours(function(completedTours) {
-		console.log('Tour.completedTours', completedTours)
-
-		pageTours.some(function(tourNumber) {
-			if (completedTours.indexOf(tourNumber) === -1) {
-				Tour.playTour(tourNumber)
-				return false
-			}
+	// Try start
+	if (startableTours.length>0) {
+		loadUserCompletedTours(function(completedTours) {
+			console.log('Tour.completedTours', completedTours)
+	
+			startableTours.some(function(tourNumber) {
+				if (completedTours.indexOf(tourNumber) === -1) {
+					Tour.playTour(tourNumber)
+					return false
+				}
+			})
 		})
-	})
+	}
 }
 
 Tour.playTour = function(tourNumber, currentStep) {
@@ -81,7 +116,8 @@ Tour.loadTour = function(tourNumber, cb) {
 		return tour
 	}
 
-	$('<script src="'+url+'">').appendTo('head')
+	//Use jQuery instead of appending script tag to head due to caching issues
+	$.getScript(url)
 }
 
 Tour.list = function(cb) {
@@ -135,14 +171,13 @@ Tour.prototype.start = function(step) {
 	this._beforeStart(function() {
 		hopscotch.startTour({
 			steps: that._steps,
-			id: that._tourNumber,
+			id: tourIdPrefix+"#"+that._tourNumber,
 			onClose: function() {
 				that._closed()
 			},
 			onEnd: function() {
 				that._completed()
 			},
-			showPrevButton: true
 		}, step)
 	})
 }
@@ -193,14 +228,40 @@ Tour.prototype.step = function(content, target, opts, onShow) {
 		target: target,
 		zindex: 3000,
 		placement: 'right',
+		showBackButton: false, // Back button disabled at least until CORE-227 is fixed
 		showNextButton: (!onShow && !options.nextOnTargetClick),
 		onShow: function() {
+			var tgt = target
+			
+			if (typeof(target) === 'function')
+				tgt = target()
+			
+			// Remove drag/scroll handlers for previous target
+			$(".tour-current-target").closest(".draggable").off("drag.tour")
+			$(".tour-current-target").closest(".scrollable").off("scroll.tour")
+			$(".tour-current-target").removeClass("tour-current-target")
+			
+			// Add the target class and drag handler to current target
+			$(tgt).addClass("tour-current-target")
+
+			$(tgt).closest(".draggable").on("drag.tour", function() {
+				if (hopscotch.getState())
+					hopscotch.refreshBubblePosition()
+				else $(tgt).closest(".draggable").off("drag.tour")
+			})
+			$(tgt).closest(".scrollable").on("scroll.tour", function() {
+				if (hopscotch.getState())
+					hopscotch.refreshBubblePosition()
+				else $(tgt).closest(".scrollable").off("scroll.tour")
+			})
+			
 			if (!onShow)
 				return;
 
 			// call onShow in next tick, as elements may not have been drawn yet
 			setTimeout(onShow, 0)
 		}
+		
 	}, options))
 
 	return this
@@ -271,12 +332,12 @@ Tour.prototype.waitForModuleAdded = function(moduleName) {
 
 			that.bindModule(moduleName, div)
 
-			$(SignalPath).off('moduleAdded', listener)
+			$(SignalPath).off('moduleAdded.tour', listener)
 
 			_cb()
 		}
 
-		$(SignalPath).on('moduleAdded', listener)
+		$(SignalPath).on('moduleAdded.tour', listener)
 	}
 }
 
@@ -291,12 +352,12 @@ Tour.prototype.waitForInput = function(selector, content) {
 
 		function _listener() {
 			if ($sel.val() === content) {
-				$sel.off('change', _listener)
+				$sel.off('change.tour keypress.tour paste.tour focus.tour textInput.tour input.tour', _listener)
 				_cb()
 			}
 		}
 
-		$sel.on('change', _listener)
+		$sel.on('change.tour keypress.tour paste.tour focus.tour textInput.tour input.tour', _listener)
 	}
 }
 
@@ -311,6 +372,38 @@ Tour.prototype.waitForEvent = function(selector, eventName) {
 	}
 }
 
+Tour.prototype.waitForConditionOnEvent = function(selector, eventName, checkFunction) {
+	var _cb = this.next.bind(this)
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		$(selector).on(eventName+".tour", function(event) {
+			if (checkFunction(event)) {
+				$(selector).off(eventName+".tour")
+				_cb()
+			}
+		})
+	}
+}
+
+Tour.prototype.waitForYAxis = function(sourceSelector, sourceOutputName, chartSelector, targetYAxis) {
+	return this.waitForConditionOnEvent(chartSelector, 'yAxisChanged', function(event) {
+		// Get the correct y-axis change button 
+		var eps = $(sourceSelector).data("spObject").getOutput(sourceOutputName).getConnectedEndpoints()
+		var yAxisButton
+		eps.forEach(function(it) {
+			if (it.div.parents(chartSelector).length && it.div.find(".y-axis-number").length)
+				yAxisButton = it.div.find(".y-axis-number")
+		})
+		
+		if (yAxisButton)
+			return yAxisButton.text() == targetYAxis
+		else return true // don't get stuck
+	})
+}
+
 Tour.prototype.waitForStream = function(selector, streamName) {
 	var _cb = this.next.bind(this)
 
@@ -318,17 +411,19 @@ Tour.prototype.waitForStream = function(selector, streamName) {
 		if (cb)
 			_cb = cb
 
-		var $module = $($(selector).data('spObject'))
-		$module.on('updated', function(e, data) {
-			data.params.some(function(param) {
-				if (!param.streamName)
-					return;
+		var $el = $(selector).find(".stream-parameter-wrapper")
+		$el.on('change.tour', function(e) {
+			var ep = $el.closest("tr").find(".endpoint.Stream").data("spObject")
+			var param = ep.toJSON()
 
-				if (param.streamName === streamName) {
-					_cb()
-					return true
-				}
-			})
+			if (!param.streamName)
+				return;
+
+			if (param.streamName === streamName) {
+				$el.off('change.tour')
+				_cb()
+				return true
+			}
 		})
 	}
 }
@@ -386,7 +481,7 @@ Tour.prototype.waitForConnections = function(conns) {
 
 	function setListeners(onOff) {
 		parsedConns.forEach(function(c) {
-			$('.'+c.toModule)[onOff ? 'on' : 'off']('spConnect', checkConnections)
+			$('.'+c.toModule)[onOff ? 'on' : 'off']('spConnect.tour', checkConnections)
 		})
 	}
 

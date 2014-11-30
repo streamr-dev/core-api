@@ -26,12 +26,6 @@ class FeedService {
 		return feed
     }
 	
-	AbstractFeedPreprocessor instantiatePreprocessor(Feed feed) {
-		String className = feed.getPreprocessor()
-		AbstractFeedPreprocessor pp = this.getClass().getClassLoader().loadClass(className).newInstance()
-		return pp
-	}
-	
 	Stream getStream(Long id) {
 		Stream result = Stream.get(id)
 		if (!result)

@@ -8,25 +8,23 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 
 		div.bind("spConnect", (function(me) {
 			return function(event, output) {
-				me.json.connected = true;
 				me.json.sourceId = output.getId();
-				me.div.addClass("connected");
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, output) {
-				me.json.connected = false;
 				delete me.json.sourceId;
-				me.div.removeClass("connected");
-				
-				if (!(pub.getInitialValue()===null || pub.getInitialValue()===undefined)) {
-					me.removeClass("warning")
-				}
 			}
 		})(pub));
 		
 		return div;
+	}
+	
+	var super_hasWarning = pub.hasWarning
+	pub.hasWarning = function() {
+		// No warning if has initialvalue
+		return (pub.getInitialValue()===null || pub.getInitialValue()===undefined) && super_hasWarning()
 	}
 	
 	var super_createSettings = pub.createSettings;

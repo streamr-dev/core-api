@@ -15,6 +15,9 @@
 		Streamr.projectWebroot = '${createLink(uri:"/")}'
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
+		<sec:ifLoggedIn>
+		Streamr.user = "<sec:username />"
+		</sec:ifLoggedIn>
     </script>
     
     <r:require module="streamr"/>

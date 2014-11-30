@@ -103,8 +103,8 @@ class TaskService {
 	 * @param taskGroupId
 	 * @return
 	 */
-	Integer getGroupQueuePosition(String taskGroupId) {
-		List result = Task.executeQuery("select count(t.id) from Task t where available = true and t.id < (select min(me.id) from Task me where me.taskGroupId = ?)", [taskGroupId])
+	Integer getGroupQueuePosition(List taskGroupIds) {
+		List result = Task.executeQuery("select count(t.id) from Task t where available = true and t.id < (select min(me.id) from Task me where me.taskGroupId in (:ids))", [ids:taskGroupIds])
 		return result[0] ?: 0
 	}
 	

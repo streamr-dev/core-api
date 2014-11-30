@@ -30,7 +30,7 @@ SignalPath.ParamRenderers = {
 		},
 		"Stream": {
 			create: function(module,data) {
-				var span = $("<span></span>");
+				var span = $("<span class='stream-parameter-wrapper'></span>");
 				
 				// Show search if no value is selected
 				var search = $("<input type='text' style='"+(data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(data.streamName || "")+"'>");
@@ -64,15 +64,15 @@ SignalPath.ParamRenderers = {
 							}
 							// Handle same module implementation
 							else {
-								$(id).val(item.id);
-								$(sym).find("a").html(item.name);
-	
-								if (mod!=null)
-									SignalPath.updateModule(mod);
-								else {
-									$(sch).hide();
-									$(sym).show();
-								}
+								$(id).val(item.id)
+								$(sym).find("a").html(item.name)
+								
+								d.streamName = item.name
+								
+								$(sch).hide()
+								$(sym).show()
+								
+								$(id).trigger('change')
 							}
 						}
 						else {
@@ -104,8 +104,8 @@ SignalPath.ParamRenderers = {
 					templates: {
 						suggestion: function(item) {
 							if (item.description)
-								return"<p>"+item.name+"<br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
-							else return "<p>"+item.name+"</p>"
+								return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
+							else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
 						}
 					}
 				})
@@ -191,8 +191,12 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		result = renderer.create(pub.module, pub.json);
 		
 		if (pub.json.updateOnChange) {
+			var oldVal = pub.json.value
 			$(result).change(function() {
-				SignalPath.updateModule(pub.module);
+				var newVal = pub.toJSON().value
+				if (newVal != oldVal) { // on purpose instead of !==
+					SignalPath.updateModule(pub.module)
+				}
 			});
 		}
 		

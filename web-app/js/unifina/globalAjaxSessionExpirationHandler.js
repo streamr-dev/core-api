@@ -18,11 +18,13 @@ function showLogin() {
 			})
 			
 			$("#loginForm").on("submit", function(event) {
-				var form = $("#loginForm")
+				var form = $("#loginForm")				
+				form.append("<input type='hidden' name='spring-security-redirect' value='"+Streamr.createLink("login","ajaxSuccess")+"'>")
+				
 				$.ajax({
 					type: "POST",
 					url: form.attr('action'),
-					data: form.serialize(),
+					data: form.serialize()+"&ajax=true",
 					async: false,
 					dataType: 'JSON',
 					success: function(response) {
@@ -34,12 +36,17 @@ function showLogin() {
 					},
 					error: function (response) {
 						var responseText = response.responseText || '[]'; 
-						var json = responseText.evalJSON(); 
-						if (json.error) { 
-							alert("json.error: "+json.error); 
-						} else { 
-							alert(responseText); 
-						} 
+						
+						try {
+							var json = responseText.evalJSON(); 
+							if (json.error) { 
+								alert("json.error: "+json.error); 
+							} else { 
+								alert(responseText); 
+							}
+						} catch(err) {
+							alert("Sorry, there was an internal error!")
+						}
 					}
 				})
 				event.preventDefault()

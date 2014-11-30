@@ -11,6 +11,7 @@ public class TimeOfDayUtil {
 	private String timeOfDayStart;
 	private String timeOfDayEnd;
 	private TimezoneConverter tc;
+	private static TimeZone utc = TimeZone.getTimeZone("UTC");
 	
 	long todayBegin = 0;
 	long todayEnd = 0;
@@ -44,6 +45,7 @@ public class TimeOfDayUtil {
 			String[] e = timeOfDayEnd.split(":");
 
 			Calendar todBegin = new GregorianCalendar();
+			todBegin.setTimeZone(utc);
 			todBegin.setTime(day);
 
 			todBegin.set(Calendar.HOUR_OF_DAY, s.length>0 ? Integer.parseInt(s[0]) : 0);
@@ -53,6 +55,7 @@ public class TimeOfDayUtil {
 
 
 			Calendar todEnd = new GregorianCalendar();
+			todEnd.setTimeZone(utc);
 			todEnd.setTime(day);
 			todEnd.set(Calendar.HOUR_OF_DAY, e.length>0 ? Integer.parseInt(e[0]) : 0);
 			todEnd.set(Calendar.MINUTE, e.length>1 ? Integer.parseInt(e[1]) : 0);
@@ -68,6 +71,7 @@ public class TimeOfDayUtil {
 		} catch (Exception exception) {
 			// No limit in case of exception
 			Calendar todBegin = new GregorianCalendar();
+			todBegin.setTimeZone(utc);
 			todBegin.setTime(day);
 
 			todBegin.set(Calendar.HOUR_OF_DAY, 0);
@@ -77,6 +81,7 @@ public class TimeOfDayUtil {
 
 
 			Calendar todEnd = new GregorianCalendar();
+			todEnd.setTimeZone(utc);
 			todEnd.setTime(day);
 			todEnd.set(Calendar.HOUR_OF_DAY, 23);
 			todEnd.set(Calendar.MINUTE, 59);
@@ -109,6 +114,7 @@ public class TimeOfDayUtil {
 	
 	public static Date getMidnight(Date day) {
 		Calendar cal = new GregorianCalendar();
+		cal.setTimeZone(utc);
 		cal.setTime(day);
 
 		cal.set(Calendar.HOUR_OF_DAY, 0);

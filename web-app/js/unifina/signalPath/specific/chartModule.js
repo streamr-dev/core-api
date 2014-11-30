@@ -24,7 +24,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	var navigatorSeries = null
 	var latestNavigatorTimestamp = null
 	var range = null
-	
+		
 	// Dragging in the chart container or the controls must not move the module
 	prot.dragOptions.cancel = ".highcharts-container, .chart-series-buttons, .chart-range-selector"
 
@@ -282,6 +282,19 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			seriesMeta[i].impl = chart.series[i]
 		}
 		
+		var running = true
+		var redrawFunc = function() {
+			redrawChart(true)
+			if (running)
+				window.requestAnimationFrame(redrawFunc)
+		}
+		window.requestAnimationFrame(redrawFunc);
+		
+		$(SignalPath).on("stopped", function() {
+			running = false
+			redrawChart(true)
+		})
+		
 		$(pub).trigger("chartInitialized")
 		$(area).trigger("chartInitialized")
 	}
@@ -346,6 +359,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 						navigatorSeries.addPoint([d.x, d.y],false,false,false);
 						latestNavigatorTimestamp = d.x
 					}
+
 				}
 				// Come here if there are series that are not yet added to the chart (requires at least 2 data points)
 				else {
@@ -360,7 +374,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					for (var i=0;i<seriesMeta.length;i++) {
 						if (!seriesMeta[i].impl) {
 							if (seriesMeta[i].data!=null && seriesMeta[i].data.length>1)
-								seriesMeta[i].impl = chart.addSeries(seriesMeta[i],true,false);	
+								seriesMeta[i].impl = chart.addSeries(seriesMeta[i],false,false);	
 							break
 						}
 					}
@@ -435,7 +449,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				s.min = Infinity
 				s.max = -Infinity
 			}
-			else chart.addSeries(s,true,false);
+			else chart.addSeries(s,false,false);
 		}
 		
 		// Day break
@@ -468,31 +482,27 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 							elemIF.style.display = "none"; 
 							document.body.appendChild(elemIF);
 						}
-						else alert("The file is already gone from the server. Please re-run your signal path!")
+						else alert("The file is already gone from the server. Please re-run your canvas!")
 					}})(div));
 			});
 		}
 		
 	}
 	
-	pub.endOfResponses = function() {
-		if (chart != null) {
-			redrawChart(true)
-		}
-	}
-	
 	function redrawChart(scrollToEnd) {
-		var extremes = chart.xAxis[0].getExtremes();
-		
-		var mx = (range==null || scrollToEnd ? maxTime : extremes.max);
-		if (mx - minTime < range)
-			mx = Math.min(maxTime, minTime + range);
-		
-		var mn = (range==null ? minTime : Math.max(minTime,mx-range));
-		
-		chart.xAxis[0].setExtremes(mn,mx,false,false);
-		
-		chart.redraw();
+		if (chart) {
+			var extremes = chart.xAxis[0].getExtremes();
+			
+			var mx = (range==null || scrollToEnd ? maxTime : extremes.max);
+			if (mx - minTime < range)
+				mx = Math.min(maxTime, minTime + range);
+			
+			var mn = (range==null ? minTime : Math.max(minTime,mx-range));
+			
+			chart.xAxis[0].setExtremes(mn,mx,false,false);
+			
+			chart.redraw();
+		}
 	}
 	
 	var superClean = pub.clean;
@@ -549,15 +559,20 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			var connectedInputs = pub.getInputs().filter(function(input) {
 				return input.isConnected()
 			})
-			
+
+			// If series range is less than 10% of axis range, show a tip
+			var popover = true
 			for (var i=0; i<seriesMeta.length; i++) {
 				var yAxisRange = seriesMeta[i].impl.yAxis.getExtremes().max - seriesMeta[i].impl.yAxis.getExtremes().min
 				var seriesRange = seriesMeta[i].max - seriesMeta[i].min
 				
-				// If series range is less than 10% of axis range, show a tip
 				if (seriesRange/yAxisRange < 0.1) {
 					var $input = connectedInputs[i] 
-					$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name)
+					$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name, popover)
+					
+					// Show only one popover
+					if (popover)
+						popover = false
 				}
 			}
 		}
@@ -716,13 +731,17 @@ SignalPath.ChartInput = function(json, parentDiv, module, type, pub) {
 		else super_handleContextMenuSelection(target, selection);
 	}
 	
-	pub.showYAxisWarning = function(seriesName) {
-		$yAxisSelectorButton.popover({
-			content: "Series "+seriesName+" may not be showing properly. Use the Y-axis selection button to set its Y-axis.",
-			placement: "right",
-			trigger: "manual"
-		})
-		$yAxisSelectorButton.popover('show')
+	pub.showYAxisWarning = function(seriesName, popover) {
+		
+		if (popover) {
+			$yAxisSelectorButton.popover({
+				content: "Some series may not be showing properly. Use these buttons to cycle Y-axis assignments.",
+				placement: "right",
+				trigger: "manual"
+			})
+			$yAxisSelectorButton.popover('show')
+		}
+		
 		$yAxisSelectorButton.removeClass(btnDefaultClass).addClass(btnPopoverClass)
 		
 		var destroyFunc = (function(b) {

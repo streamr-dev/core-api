@@ -43,7 +43,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 							addStuffToDiv();
 						});
 					},
-					Cancel: function() {
+					"Close": function() {
 						$( this ).dialog( "close" );
 					}
 				},
@@ -123,12 +123,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	function makeMarker() {
 		var marker = document.createElement("div");
 		marker.style.color = "#822";
-		marker.innerHTML = "●";
+		marker.innerHTML = "���";
 		return marker;
-	}
-	
-	pub.endOfResponses = function() {
-		
 	}
 	
 	var super_onDelete = pub.onDelete;

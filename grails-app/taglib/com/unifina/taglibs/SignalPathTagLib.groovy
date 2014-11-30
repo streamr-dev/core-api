@@ -47,7 +47,7 @@ class SignalPathTagLib {
 			themes: {
 				// If you change the theme, check app resources too
 				theme: "classic",
-				url: "${g.resource(dir:"js/jsTree/themes/classic", file:"style.css")}",
+				url: "${g.resource(dir:"js/jsTree/themes/classic", file:"style.css", plugin:"unifina-core")}",
 				"icons": false
 			},
 			
@@ -292,20 +292,24 @@ class SignalPathTagLib {
 
 			// save as
 			\$('#saveAsButton').click(function() {
-				bootbox.prompt('Save to Archive as..', function(saveAsName) {
-					if (!saveAsName)
-						return;
-
-					var saveData = {
-						url: '${ createLink(controller: "savedSignalPath", action: "save") }',
-						target: "Archive as new",
-						name: saveAsName
-					}
-				
-					SignalPath.saveSignalPath(saveData, function(sd) {
-						if (sd.showUrl)
-							window.location = sd.showUrl
-					})
+				bootbox.prompt({
+					title: 'Save to Archive as..', 
+					callback: function(saveAsName) {
+						if (!saveAsName)
+							return;
+	
+						var saveData = {
+							url: '${ createLink(controller: "savedSignalPath", action: "save") }',
+							target: "Archive as new",
+							name: saveAsName
+						}
+					
+						SignalPath.saveSignalPath(saveData, function(sd) {
+							if (sd.showUrl)
+								window.location = sd.showUrl
+						})
+					},
+					className: 'save-as-name-dialog' 
 				})
 			})
 

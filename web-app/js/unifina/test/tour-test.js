@@ -8,6 +8,8 @@ global.window = {
 }
 
 global.Streamr = {
+	user: "test",
+	
 	createLink: function(opt) {
 		if (opt.uri)
 			return '/'+opt.uri
@@ -42,6 +44,13 @@ describe('Tour', function() {
 	var tour
 
 	beforeEach(function() {
+
+		global.hopscotch = {
+			endTour: function() {},
+			getState: function() {},
+			listen: function() {}
+		}
+		
 		tour = new Tour()
 
 		var $objects = {}
@@ -63,11 +72,9 @@ describe('Tour', function() {
 		global.$.get = function(_url, cb) {
 			cb([])
 		}
-
-		global.hopscotch = {
-			endTour: function() {},
-			getState: function() {}
-		}
+		
+		Tour.startableTours([])
+		Tour.continuableTours([])
 	})
 
 	it('should load the tour defined on page', function(done) {
@@ -76,13 +83,33 @@ describe('Tour', function() {
 			done()
 		}
 
-		Tour.hasTour(123)
-		Tour.continueTour()
+		Tour.startableTours([123])
+		Tour.autoStart()
 	})
 
-	it('should continue the tour set in the cookie, but from the beginning', function(done) {
+	it('should continue the tour set in the cookie if continuable on this page', function(done) {
 		Tour.loadTour = function(tn, cb) {
 			assert.equal(tn, 12)
+			cb({
+				start: function(step) {
+					assert.equal(step, 34)
+					done()
+				}
+			})
+		}
+
+		global.hopscotch.getState = function() {
+			return Streamr.user+'#12:34'
+		}
+		
+		Tour.startableTours([123])
+		Tour.continuableTours([12])
+		Tour.autoStart()
+	})
+	
+	it('should not continue a non-continuable tour', function(done) {
+		Tour.loadTour = function(tn, cb) {
+			assert.equal(tn, 123)
 			cb({
 				start: function(step) {
 					assert.equal(step, 0)
@@ -92,10 +119,32 @@ describe('Tour', function() {
 		}
 
 		global.hopscotch.getState = function() {
-			return '12:34'
+			return Streamr.user+'#12:34'
+		}
+		
+		Tour.startableTours([123])
+		Tour.continuableTours([])
+		Tour.autoStart()
+	})
+	
+	it('should not continue another users tour', function(done) {
+		global.hopscotch.getState = function() {
+			return 'anotheruser#12:34'
+		}
+		
+		Tour.loadTour = function(tn, cb) {
+			assert.equal(tn, 123)
+			cb({
+				start: function(step) {
+					assert.equal(step, 0)
+					done()
+				}
+			})
 		}
 
-		Tour.continueTour()
+		Tour.startableTours([123])
+		Tour.continuableTours([12])
+		Tour.autoStart()
 	})
 
 	it('should play the tour given in the url', function(done) {
@@ -104,7 +153,20 @@ describe('Tour', function() {
 			assert.equal(tn, 34)
 			done()
 		}
-		Tour.continueTour()
+		
+		Tour.startableTours([34])
+		Tour.autoStart()
+	})
+	
+	it('should play the tour even if its not startable from page', function(done) {
+		global.window.location.search = '?playTour=34'
+			Tour.loadTour = function(tn) {
+			assert.equal(tn, 34)
+			done()
+		}
+		
+		Tour.startableTours([12])
+		Tour.autoStart()
 	})
 
 	describe('waiting for modules', function() {

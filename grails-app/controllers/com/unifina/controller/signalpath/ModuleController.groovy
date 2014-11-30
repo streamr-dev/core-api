@@ -65,7 +65,7 @@ class ModuleController {
 	}
 	
 	def jsonGetModuleTree() {
-		def categories = ModuleCategory.findAllByParentIsNull([sort:"sortOrder"])
+		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
 
 		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
 		allowedPackages.addAll(ModulePackage.findAllByUser(springSecurityService.currentUser))
@@ -106,7 +106,7 @@ class ModuleController {
 		
 		try {
 			Module domainObject = Module.get(params.id)
-			if (domainObject.hide || !unifinaSecurityService.canAccess(domainObject)) {
+			if (!unifinaSecurityService.canAccess(domainObject)) {
 				throw new Exception("Access denied for user $springSecurityService.currentUser.username to requested module")
 			}
 			
@@ -123,11 +123,6 @@ class ModuleController {
 			iMap.put("jsModule", domainObject.jsModule)
 			iMap.put("type", domainObject.type)
 
-			//		 TODO: yleista
-//			if (m instanceof com.unifina.signalpath.rapidminer.RapidMinerModel && params.rapidModelId) {
-//				m.loadModel(Long.parseLong(params.rapidModelId))
-//				iMap["model"] = [rapidModelId:params.rapidModelId]
-//			}
 			render iMap as JSON
 		} catch (Exception e) {
 			def moduleExceptions = []
@@ -146,7 +141,6 @@ class ModuleController {
 		 
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Exception while creating module!",e)
-//			e.printStackTrace(System.out)
 			Map r = [error:true, message:e.message, moduleErrors:moduleExceptions]
 			render r as JSON
 		}

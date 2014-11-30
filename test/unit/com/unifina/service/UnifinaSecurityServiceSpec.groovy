@@ -56,9 +56,6 @@ class UnifinaSecurityServiceSpec extends Specification {
 		// Users
 		me = new SecUser(username: "me", password: "foo")
 		anotherUser = new SecUser(username: "him", password: "bar")
-		// For some reason Spring beans are not autowired to domain classes in unit tests, do it manually
-		me.springSecurityService = grailsApplication.mainContext.getBean("springSecurityService")
-		anotherUser.springSecurityService = grailsApplication.mainContext.getBean("springSecurityService")
 		me.save(validate:false)
 		anotherUser.save(validate:false)
 		
