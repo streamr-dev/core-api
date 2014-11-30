@@ -71,6 +71,8 @@ grails.project.dependency.resolution = {
 		
 		runtime('org.twitter4j:twitter4j-core:[4.0,)')
 		runtime('com.twitter:hbc-core:2.2.0')
+		
+		runtime('com.github.nkzawa:socket.io-client:0.3.0')
     }
 
     plugins {

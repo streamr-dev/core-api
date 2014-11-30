@@ -9,8 +9,8 @@ import javax.servlet.ServletContext;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.push.AtmospherePushChannel;
 import com.unifina.push.PushChannel;
+import com.unifina.push.SocketIOPushChannel;
 
 public class SignalPathReturnChannel extends Thread implements IReturnChannel {
 	
@@ -34,7 +34,8 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel {
 		this.sessionId = sessionId;
 		this.sc = sc;
 
-		pushChannel = new AtmospherePushChannel(channel);
+		//pushChannel = new AtmospherePushChannel(channel);
+		pushChannel = new SocketIOPushChannel(channel);
 		
 		// Associate session with return channel
 		returnChannels = (Map<String,SignalPathReturnChannel>) sc.getAttribute("returnChannels");

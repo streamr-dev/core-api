@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 public abstract class PushChannel {
 	private int counter = 0;
-	private String channel;
+	protected String channel;
 	private boolean destroyed = false;
 	
 	public static final Logger log = Logger.getLogger(PushChannel.class);
