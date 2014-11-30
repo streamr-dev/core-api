@@ -113,6 +113,21 @@ describe('StreamrClient', function() {
 		})			
 	})
 	
+	it('should reset subscriptions on disconnect', function(done) {
+		client.subscribe("stream1", function(message) {})
+		client.connect()
+		client.disconnect()
+		client.subscribe("stream2", function(message) {})
+		var streams = client.connect()
+		var i=0
+		for (var s in streams) {
+			console.log(JSON.stringify(streams[s]))
+			i++
+		}
+		assert.equal(i,1)
+		done()
+	})
+	
 	it('should set the request and socket when connected', function(done) {
 		var subscription = client.subscribe("stream1", function(message) {})
 		client.connect()

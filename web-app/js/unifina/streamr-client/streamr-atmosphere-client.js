@@ -68,10 +68,12 @@ StreamrClient.prototype.connect = function(reconnect) {
 	}
 		
 	this.connected = true
+	return this.streams
 }
 
 StreamrClient.prototype.disconnect = function() {
 	$.atmosphere.unsubscribe()
+	this.streams = {}
 	this.connected = false
 }
 
