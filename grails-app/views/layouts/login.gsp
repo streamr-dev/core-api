@@ -3,7 +3,7 @@
 <!--[if IE 9]>         <html class="ie9 gt-ie8"> <![endif]-->
 <!--[if gt IE 9]><!--> <html class="gt-ie8 gt-ie9 not-ie"> <!--<![endif]-->
 
-	<g:render template="/layouts/layoutHead"/>
+	<g:render template="/layouts/layoutHead" model="[login:true]"/>
 	
     <body class="no-main-menu page-signin-alt ${pageProperty( name:'body.theme' ) ?: 'selected-theme'} ${pageProperty( name:'body.class' )}">
 		<div class="signin-header">

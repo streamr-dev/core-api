@@ -23,10 +23,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		var div = $("<div class='modulefooter'></div>");
 		prot.div.append(div);
 		
+		var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
+		div.append(container)
+		
 		if (prot.jsonData.canClearState==null || prot.jsonData.canClearState) {
-			var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
-			div.append(container)
-			
 			var clear = new SignalPath.IOSwitch(container, "moduleSwitch clearState", {
 				getValue: (function(d){
 					return function() { return d.clearState; };
@@ -38,6 +38,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				tooltip: 'Clear module state at end of day'
 			})
 		}
+		
+		return div
 	}
 	prot.createModuleFooter = createModuleFooter;
 	
@@ -123,7 +125,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			prot.addOutput(data);
 		});
 
-		createModuleFooter();
+		prot.createModuleFooter()
 		
 		prot.div.on("dragstart", function(event, ui) {
 			jsPlumb.recalculateOffsets(prot.div.attr('id'));
