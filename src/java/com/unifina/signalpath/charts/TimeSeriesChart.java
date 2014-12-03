@@ -1,21 +1,20 @@
 package com.unifina.signalpath.charts;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.RecordedTimeSeriesInput;
+import com.unifina.signalpath.TimeSeriesChartInput;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.utils.MapTraversal;
-import com.unifina.utils.TimeOfDayUtil;
 
 public class TimeSeriesChart extends Chart {
 	
 	int inputCount = 10;
+	boolean barify = true;
 	
 	TimeSeriesInput[] myInputs;
 	
@@ -32,7 +31,7 @@ public class TimeSeriesChart extends Chart {
 			ArrayList<Series> seriesData = new ArrayList<>();
 			
 			for (Input input : getInputs()) {
-				RecordedTimeSeriesInput it = (RecordedTimeSeriesInput) input;
+				TimeSeriesChartInput it = (TimeSeriesChartInput) input;
 				
 				it.setInitialValue(Double.NaN);
 				
@@ -107,9 +106,9 @@ public class TimeSeriesChart extends Chart {
 		if (csv)
 			conn = new TimeSeriesInput(this,name);
 		else {
-			conn = new RecordedTimeSeriesInput(this,name);
+			conn = new TimeSeriesChartInput(this,name);
 			// Assign to yAxis 0 by default
-			((RecordedTimeSeriesInput)conn).yAxis = 0;
+			((TimeSeriesChartInput)conn).yAxis = 0;
 		}
 
 		conn.setDrivingInput(true);
@@ -128,13 +127,17 @@ public class TimeSeriesChart extends Chart {
 	@Override
 	protected void record() {
 		for (Input i : drivingInputs) {
-			RecordedTimeSeriesInput input = (RecordedTimeSeriesInput) i;
-			if (!Double.isNaN(input.value) && hasRc) {
-				PointMessage msg = new PointMessage(
-						input.seriesIndex, 
-						globals.getTzConverter().getFakeLocalTime(globals.time.getTime()),
-						input.value);
-				parentSignalPath.returnChannel.sendPayload(hash, msg);
+			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
+			
+			if (!Double.isNaN(input.value) 
+					&& hasRc 
+					&& (!barify || globals.time.getTime() - input.previousTime > 60000L)) {
+					PointMessage msg = new PointMessage(
+							input.seriesIndex, 
+							globals.getTzConverter().getFakeLocalTime(globals.time.getTime()),
+							input.value);
+					parentSignalPath.returnChannel.sendPayload(hash, msg);
+					input.previousTime = globals.time.getTime();
 			}
 		}
 	}
@@ -157,9 +160,9 @@ public class TimeSeriesChart extends Chart {
 		
 		if (!csv && hasRc && overnightBreak) {
 			for (Input it : getInputs()) {
-				if (it instanceof RecordedTimeSeriesInput && it.isConnected()) {
+				if (it instanceof TimeSeriesChartInput && it.isConnected()) {
 					// Send day break
-					parentSignalPath.returnChannel.sendPayload(hash, new BreakMessage(((RecordedTimeSeriesInput)it).seriesIndex));
+					parentSignalPath.returnChannel.sendPayload(hash, new BreakMessage(((TimeSeriesChartInput)it).seriesIndex));
 				}
 			}
 		}
@@ -169,6 +172,8 @@ public class TimeSeriesChart extends Chart {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 
+		config.put("barify",barify);
+		
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("inputs", inputCount, "int"));
 		options.add(new ModuleOption("overnightBreak", overnightBreak, "boolean"));
@@ -179,6 +184,9 @@ public class TimeSeriesChart extends Chart {
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
+		
+		if (config.containsKey("barify"))
+			barify = Boolean.parseBoolean(config.get("barify").toString());
 		
 		ModuleOptions options = ModuleOptions.get(config);
 		

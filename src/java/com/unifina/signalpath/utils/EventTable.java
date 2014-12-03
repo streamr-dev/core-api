@@ -10,9 +10,6 @@ import com.unifina.signalpath.IReturnChannel;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.RecordedTimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.charts.InitMessage;
 
 
 public class EventTable extends AbstractSignalPathModule {

@@ -2,12 +2,13 @@ package com.unifina.signalpath;
 
 import java.util.Map;
 
-public class RecordedTimeSeriesInput extends TimeSeriesInput {
+public class TimeSeriesChartInput extends TimeSeriesInput {
 	public Integer seriesIndex;
 	public String seriesName;
 	public Integer yAxis = 0;
+	public Long previousTime = 0L;
 	
-	public RecordedTimeSeriesInput(AbstractSignalPathModule mod,String name) {
+	public TimeSeriesChartInput(AbstractSignalPathModule mod,String name) {
 		super(mod,name);
 	}
 	
