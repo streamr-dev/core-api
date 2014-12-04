@@ -19,9 +19,9 @@ public class CounterBroadcasterCache implements BroadcasterCache {
 	int cacheSize = 0;
 	private boolean removeConsumed = false;
 
-	private static final int MAX_CHUNK = 30000;
-	private static final int MAX_SIZE = 100; //2*MAX_CHUNK;
-	private static final long MAX_BLOCK_TIME = 5*1000;
+	private static final int MAX_CHUNK = 15000;
+	private static final int MAX_SIZE = 2*MAX_CHUNK;
+	private static final long MAX_BLOCK_TIME = 60*1000;
 	
 	private HashMap<Object,Integer> cacheIdMap = new HashMap<>();
 	static final String PURGED_STRING = "{},";

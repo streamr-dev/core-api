@@ -56,7 +56,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 
 	private boolean abort = false;
 	
-	public SignalPathReturnChannel(String sessionId, String channel, ServletContext sc) {
+	public SignalPathReturnChannel(String sessionId, String channel, ServletContext sc, boolean keepConsumedMessages) {
 		this.sessionId = sessionId;
 		this.channel = channel;
 		this.sc = sc;
@@ -70,9 +70,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		bc.addBroadcasterLifeCyclePolicyListener(this);
 
 		cache = (CounterBroadcasterCache) bc.getBroadcasterConfig().getBroadcasterCache();
-		
-		// TODO: if backtest, remove consumed messages
-		cache.setRemoveConsumed(true);
+		cache.setRemoveConsumed(!keepConsumedMessages);
 		
 		// Associate session with return channel
 		returnChannels = (Map<String,SignalPathReturnChannel>) sc.getAttribute("returnChannels");
