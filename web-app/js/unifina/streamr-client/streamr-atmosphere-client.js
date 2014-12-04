@@ -13,7 +13,7 @@ function StreamrClient(options) {
     this.atmosphereEndTag = "<!-- EOD -->"
     
 	$.atmosphere.logLevel = 'error'
-	$.extend(this.options, options)
+	$.extend(this.options, options || {})
 }
 
 StreamrClient.prototype.subscribe = function(streamId, callback) {

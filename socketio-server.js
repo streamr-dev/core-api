@@ -4,17 +4,21 @@ io.on('connection', function (socket) {
 	console.log("Client connected: "+socket.id)
 
 	socket.on('subscribe', function(data) {
-		data.channels.forEach(function(channel) {
-			console.log("Client "+socket.id+" subscribed to channel "+channel)
-			socket.join(channel)
-		})
+		if (data.channels) {
+			data.channels.forEach(function(channel) {
+				console.log("Client "+socket.id+" subscribed to channel "+channel)
+				socket.join(channel)
+			})
+		}
 	})
 
 	socket.on('unsubscribe', function(data) {
-		data.channels.forEach(function(channel) {
-			console.log("Client "+socket.id+" unsubscribed from channel "+channel)
-			socket.leave(channel)
-		})
+		if (data.channels) {
+			data.channels.forEach(function(channel) {
+				console.log("Client "+socket.id+" unsubscribed from channel "+channel)
+				socket.leave(channel)
+			})
+		}
 	})
 
 	socket.on('ui', function (data) {

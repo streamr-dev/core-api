@@ -81,6 +81,9 @@ modules = {
 		dependsOn 'jquery, jquery-migrate'
 		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
 	}
+	"socket-io" {
+		resource url:[dir:'js/socket.io-1.2.1', file:'socket.io-1.2.1.min.js', plugin: 'unifina-core']
+	}
 	hotkeys {
 		dependsOn 'jquery'
 		resource url:[dir:'js/hotkeys', file:'jquery.hotkeys.js', plugin: 'unifina-core']
@@ -139,8 +142,8 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
-		dependsOn 'jquery, atmosphere'
-		resource url:[dir:'js/unifina/streamr-client', file:'streamr-atmosphere-client.js', plugin: 'unifina-core']
+		dependsOn 'jquery, socket-io'
+		resource url:[dir:'js/unifina/streamr-client', file:'streamr-socketio-client.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		dependsOn 'streamr, streamr-client, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets'
