@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.ServletContext;
 
@@ -55,7 +56,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 
 	private boolean abort = false;
 	
-	public SignalPathReturnChannel(String sessionId, String channel, ServletContext sc) {
+	public SignalPathReturnChannel(String sessionId, String channel, ServletContext sc, boolean keepConsumedMessages) {
 		this.sessionId = sessionId;
 		this.channel = channel;
 		this.sc = sc;
@@ -69,6 +70,7 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 		bc.addBroadcasterLifeCyclePolicyListener(this);
 
 		cache = (CounterBroadcasterCache) bc.getBroadcasterConfig().getBroadcasterCache();
+		cache.setRemoveConsumed(!keepConsumedMessages);
 		
 		// Associate session with return channel
 		returnChannels = (Map<String,SignalPathReturnChannel>) sc.getAttribute("returnChannels");
@@ -112,7 +114,11 @@ public class SignalPathReturnChannel extends Thread implements IReturnChannel, B
 			
 			cache.add(s, c, msg.cacheId);
 			bc.broadcast(s);
-		} catch (Exception e) {
+		} catch (TimeoutException e) {
+			log.warn("Writing to cache timed out. Aborting...");
+			abort = true;
+		}
+		catch (Exception e) {
 			log.error("Error broadcasting message: "+msg, e);
 		}
 	}

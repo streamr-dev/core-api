@@ -45,7 +45,7 @@ public class SignalPathRunner extends Thread {
 			final String sessionId = runnerId+"-$i"
 			final String channel = "/atmosphere/"+sessionId
 			
-			SignalPathReturnChannel returnChannel = new SignalPathReturnChannel(sessionId, channel, servletContext)
+			SignalPathReturnChannel returnChannel = new SignalPathReturnChannel(sessionId, channel, servletContext, globals.signalPathContext.keepConsumedMessages ?: false)
 			returnChannels << returnChannel
 		}
 	}

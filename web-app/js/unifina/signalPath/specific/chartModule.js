@@ -70,6 +70,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		var $footer = super_createModuleFooter()
 		var $container = $footer.find(".moduleSwitchContainer")
 		
+		if (prot.jsonData.barify!==false)
+			prot.jsonData.barify = true
+		
 		var barify = new SignalPath.IOSwitch($container, "moduleSwitch", {
 			getValue: (function(d){
 				return function() { return d.barify; };
