@@ -3,21 +3,30 @@ package com.unifina.atmosphere;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
+import org.apache.log4j.Logger;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.BroadcasterCache;
 
 public class CounterBroadcasterCache implements BroadcasterCache {
 
-	ArrayList<Object> cache = new ArrayList<Object>();
+	ArrayListWithRemoveMany<Object> cache = new ArrayListWithRemoveMany<Object>();
 	
 	int counter = 0;
 	int missed = 0;
-//	private static final String COUNTER_KEY = "counter";
+	int removed = 0;
+	int cacheSize = 0;
+	private boolean removeConsumed = false;
+
 	private static final int MAX_CHUNK = 30000;
+	private static final int MAX_SIZE = 100; //2*MAX_CHUNK;
+	private static final long MAX_BLOCK_TIME = 5*1000;
 	
 	private HashMap<Object,Integer> cacheIdMap = new HashMap<>();
-	private static final String PURGED_STRING = "{},";
+	static final String PURGED_STRING = "{},";
+	
+	private static final Logger log = Logger.getLogger(CounterBroadcasterCache.class);
 	
 	@Override
 	public void start() {
@@ -38,19 +47,36 @@ public class CounterBroadcasterCache implements BroadcasterCache {
 		 */
 	}
 
-	public synchronized void add(String msg, int c, Object cacheId) {
+	public synchronized void add(String msg, int c, Object cacheId) throws TimeoutException {
+		// Block if the cache is full!
+		while (removeConsumed && cache.size()>=MAX_SIZE)
+			try {
+				log.warn("Cache full, waiting for consumption...");
+				wait(MAX_BLOCK_TIME);
+				if (cache.size()>=MAX_SIZE)
+					throw new TimeoutException("UI message consumption timed out! Connection lost?");
+			} catch (InterruptedException e) {
+				log.warn("Interrupted", e);
+			}
+		
 		// New message
-		if (cache.size()+missed==c) {
+		if (cacheSize==c) {
 			cache.add(msg);
+			cacheSize++;
 			
 			if (cacheId!=null) {
-				Integer previous = cacheIdMap.put(cacheId, cache.size()-1);
-				// If the key already existed in the cache, set the index to null to free up the object
-				if (previous!=null)
-					cache.set(previous, PURGED_STRING);
+				// Replace the value for this cacheId key
+				Integer previous = cacheIdMap.put(cacheId, cacheSize-1);
+				
+				// Free up the previous object if it stil exists in the cache
+				if (previous!=null) {
+					int idx = getCounterIndex(previous);
+					if (idx>=0)
+						cache.set(previous, PURGED_STRING);
+				}	
 			}
 		}
-		else if (cache.size()>c) {
+		else if (cacheSize>c) {
 			System.out.println("addToCache: old message, counter is "+c+", expected:"+cache.size());
 		}
 		else {
@@ -73,26 +99,63 @@ public class CounterBroadcasterCache implements BroadcasterCache {
 			}
 		}
 		
-		if (c-missed>=cache.size())
+		if (c>=cacheSize)
 			return null;
 		else {
+			int startCounter = c;
+			int endCounter = Math.min(startCounter+MAX_CHUNK, cacheSize-1);
+			
+			List<Object> result = getCounterRange(startCounter, endCounter);
+			if (removeConsumed) {
+				removeUpToCounter(endCounter);
+			}
+			
 			// TODO: fix hack: for small responses set content type to application/x-json because that mime type will not be compressed by tomcat
-			int startIndex = c-missed;
-			int endIndex = Math.min(c-missed+MAX_CHUNK,cache.size());
-			if (endIndex-startIndex < 100)
+			if (result.size()<100)
 				r.getResponse().setContentType("application/x-json");
 			
-			return new ArrayList<Object>(cache.subList(startIndex, endIndex));
+			return result;
 		}
 	}
-
-//	class CachedMessage {
-//		public int counter;
-//		public Object message;
-//		public CachedMessage(int counter, Object message) {
-//			this.counter = counter;
-//			this.message = message;
-//		}
-//	}
 	
+	public synchronized void removeUpToCounter(int counter) {
+		int idx = getCounterIndex(counter);
+		cache.removeUpToIndex(idx);
+		removed += idx+1;
+		
+		// add() may be blocking for space in the queue
+		notify();
+	}
+	
+	public synchronized Integer getCounterIndex(int counter) {
+		return counter - missed - removed;
+	}
+	
+	public synchronized List<Object> getCounterRange(int startCounter, int endCounter) {
+		int startIndex = getCounterIndex(startCounter);
+		int endIndex = getCounterIndex(endCounter);
+		if (startIndex < 0) {
+			log.warn("Counter "+startCounter+" maps to negative index "+startIndex);
+			startIndex = 0;
+		}
+		if (endIndex >= cache.size()) {
+			log.warn("Counter "+startCounter+" maps to an index larger than the cache head: "+endIndex+", cache size: "+cache.size());
+			endIndex = cache.size()-1;
+		}
+		return getRange(startIndex, endIndex);
+	}
+	
+	public synchronized List<Object> getRange(int startIndex, int endIndex) {
+		return new ArrayList<Object>(cache.subList(startIndex, endIndex+1));
+	}
+
+	public void setRemoveConsumed(boolean removeConsumed) {
+		this.removeConsumed = removeConsumed;
+	}
+	
+	class ArrayListWithRemoveMany<T> extends ArrayList<T> {
+		public void removeUpToIndex(int idx) {
+			removeRange(0, idx+1);
+		}
+	}
 }
