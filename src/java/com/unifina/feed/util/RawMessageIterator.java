@@ -34,6 +34,10 @@ public class RawMessageIterator implements Iterator<ByteBuffer> {
 	private int lengthBytes;
 	private LengthReader lengthReader;
 	
+	public RawMessageIterator(InputStream in) throws IOException {
+		this(in, 2, 65536, ByteOrder.BIG_ENDIAN);
+	}
+	
 	public RawMessageIterator(InputStream in, int lengthBytes, int bufferSize, ByteOrder order) throws IOException {
 		this.in = in;
 		this.lengthBytes = lengthBytes;

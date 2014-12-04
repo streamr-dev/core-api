@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractHistoricalFileFeed;
 import com.unifina.feed.StreamEventRecipient;
@@ -33,7 +34,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	}
 
 	@Override
-	protected Iterator<Object> createContentIterator(Date day,
+	protected Iterator<Object> createContentIterator(FeedFile feedFile, Date day,
 			InputStream inputStream, IEventRecipient recipient) {
 		try {
 			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));

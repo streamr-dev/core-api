@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedFileService;
 import com.unifina.utils.Globals;
@@ -146,8 +147,8 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 		
 	}
 
-	private FeedEventIterator createIterator(Date day, InputStream inputStream, IEventRecipient recipient) {
-		Iterator<Object> contentIterator = createContentIterator(day, inputStream, recipient);
+	private FeedEventIterator createIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient) {
+		Iterator<Object> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
 		return new FeedEventIterator(contentIterator, this, recipient);
 	}
 	
@@ -158,7 +159,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	 * @param recipient
 	 * @return
 	 */
-	protected abstract Iterator<Object> createContentIterator(Date day, InputStream inputStream, IEventRecipient recipient);
+	protected abstract Iterator<Object> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient);
 	
 	/**
 	 * Retrieves a StreamResponse from FileFeedService and creates a FeedEventIterator for the stream.
@@ -214,7 +215,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 					
 					// Set the final InputStream back to the response object so that the correct stream will be closed
 					response.setInputStream(inputStream);
-					return createIterator(response.getDay(), inputStream, recipient);
+					return createIterator(response.getFeedFile(), response.getDay(), inputStream, recipient);
 				}
 				else {
 					// Counter has been incremented, so loop to next piece

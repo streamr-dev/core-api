@@ -25,7 +25,9 @@
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
 
-	<r:require module='tour'/>
+	<g:if test="${!login}">
+		<r:require module='tour'/>
+	</g:if>
 	
 	<r:layoutResources/>
     <g:layoutHead />

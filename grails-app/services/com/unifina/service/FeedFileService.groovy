@@ -23,8 +23,6 @@ import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.feed.file.FileStorageAdapter
 import com.unifina.feed.file.RemoteFeedFile
 import com.unifina.task.FeedFilePreprocessTask
-import com.unifina.task.FeedFilePreprocessTask
-import com.unifina.utils.TimeOfDayUtil
 
 class FeedFileService {
 
@@ -50,7 +48,7 @@ class FeedFileService {
 	 * @param name
 	 * @return
 	 */
-	FeedFile getFeedFile(Feed feed, Date beginDate, Date endDate, String name) {
+	FeedFile getFeedFile(Feed feed, Date beginDate, Date endDate, String name, boolean matchName=true) {
 		return FeedFile.withCriteria(uniqueResult:true) {
 			eq("feed",feed)
 			or {
@@ -67,17 +65,19 @@ class FeedFileService {
 					gt("endDate", endDate)
 				}
 			}
-			eq("name",name)
+			if (matchName)
+				eq("name",name)
 		}
 	}
 	
-	FeedFile getFeedFile(RemoteFeedFile file) {
-		return getFeedFile(file.feed, file.beginDate, file.endDate, file.name)
+	FeedFile getFeedFile(RemoteFeedFile file, boolean matchName=true) {
+		return getFeedFile(file.feed, file.beginDate, file.endDate, file.name, matchName)
 	}
 	
 	FeedFile createFeedFile(RemoteFeedFile remoteFile) {
 		FeedFile feedFile = new FeedFile()
 		feedFile.name = remoteFile.getName()
+		feedFile.format = remoteFile.format
 		
 		feedFile.beginDate = remoteFile.getBeginDate()
 		feedFile.endDate = remoteFile.getEndDate()
@@ -116,9 +116,22 @@ class FeedFileService {
 		}
 	}
 	
-	AbstractFeedPreprocessor getPreprocessor(Feed feed) {
-		if (feed.getPreprocessor())
-			return this.getClass().getClassLoader().loadClass(feed.getPreprocessor()).newInstance()
+	AbstractFeedPreprocessor getPreprocessor(Feed feed, String format="default") {
+		if (feed.getPreprocessor()) {
+			String className
+			
+			// Try format-specific preprocessor definition
+			try {
+				def json = JSON.parse(feed.getPreprocessor())
+				className = json[format] ?: json["default"]
+			} catch (Exception e) {}
+			
+			if (!className) {
+				className = feed.getPreprocessor()
+			}
+			
+			return this.getClass().getClassLoader().loadClass(className).newInstance()
+		}
 		else return null
 	}
 	
@@ -171,11 +184,11 @@ class FeedFileService {
 		// First try compressed
 		InputStream is = getInputStream(feedFile.feed, feedFile.day, feedFile.name, true)
 		if (is!=null)
-			return new StreamResponse(inputStream:is, feed:feedFile.feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:true)
+			return new StreamResponse(inputStream:is, feed:feedFile.feed, feedFile:feedFile, day:feedFile.getDay(), success:true, isFile:false, isCompressed:true)
 
 		is = getInputStream(feedFile.feed, feedFile.day, feedFile.name, false)
 		if (is!=null)
-			return new StreamResponse(inputStream:is, feed:feedFile.feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:false)
+			return new StreamResponse(inputStream:is, feed:feedFile.feed, feedFile:feedFile, day:feedFile.getDay(), success:true, isFile:false, isCompressed:false)
 			
 		return new StreamResponse(success:false)
 	}
@@ -207,11 +220,11 @@ class FeedFileService {
 			// First try compressed version
 			InputStream is = getInputStream(feed, feedFile.day, streamFileName, true)
 			if (is!=null)
-				return new StreamResponse(inputStream:is, stream:stream, feed:feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:true)
+				return new StreamResponse(inputStream:is, stream:stream, feed:feed, feedFile:feedFile, day:feedFile.getDay(), success:true, isFile:false, isCompressed:true)
 			
 			is = getInputStream(feed, feedFile.day, streamFileName, false)
 			if (is!=null)
-				return new StreamResponse(inputStream:is, stream:stream, feed:feed, day:feedFile.getDay(), success:true, isFile:false, isCompressed:false)
+				return new StreamResponse(inputStream:is, stream:stream, feed:feed, feedFile:feedFile, day:feedFile.getDay(), success:true, isFile:false, isCompressed:false)
 		
 			return new StreamResponse(success:false)
 		}
@@ -219,12 +232,12 @@ class FeedFileService {
 			// Exists in cache compressed?
 			File cachedFile = new File(makeCacheFileName(feed, feedFile.day, streamFileName, true))
 			if (cachedFile.canRead()) {
-				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:true)
+				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, feedFile:feedFile, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:true)
 			}
 			// Exists in cache uncompressed?
 			cachedFile = new File(makeCacheFileName(feed, feedFile.day, streamFileName, false))
 			if (cachedFile.canRead()) {
-				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:false)
+				return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, feedFile:feedFile, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:false)
 			}			
 
 			// Try to get compressed from server
@@ -254,7 +267,7 @@ class FeedFileService {
 
 				if (!cachedFile.canRead())
 					throw new RuntimeException("Can not read the cached file: $cachedFileName")
-				else return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:compressed)
+				else return new StreamResponse(inputStream:new FileInputStream(cachedFile), stream:stream, feed:feed, feedFile:feedFile, day:feedFile.getDay(), success:true, fileSize: cachedFile.length(), isFile:true, isCompressed:compressed)
 			}
 			else {
 				return new StreamResponse(success:false)
@@ -337,6 +350,7 @@ class FeedFileService {
 	public class StreamResponse {
 		InputStream inputStream
 		Feed feed
+		FeedFile feedFile
 		Stream stream
 		Date day
 		Boolean success

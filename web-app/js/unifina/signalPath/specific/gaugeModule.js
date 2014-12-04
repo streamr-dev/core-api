@@ -202,6 +202,19 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 		
 		// Create the chart	
 //		chart = new Highcharts.Chart(opts);
+		
+		var running = true
+		var redrawFunc = function() {
+			redrawChart(true)
+			if (running)
+				window.requestAnimationFrame(redrawFunc)
+		}
+		window.requestAnimationFrame(redrawFunc);
+		
+		$(SignalPath).on("stopped", function() {
+			running = false
+			redrawChart(true)
+		})
 
 	}
 	
@@ -240,15 +253,10 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 			}
 		}
 	}
-	
-	pub.endOfResponses = function() {
-		if (chart != null) {
-			redrawChart();
-		}
-	}
-	
+
 	function redrawChart() {
-		chart.redraw();
+		if (chart)
+			chart.redraw();
 	}
 	
 	var superClean = pub.clean;

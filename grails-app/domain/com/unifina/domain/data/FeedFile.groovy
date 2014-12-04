@@ -14,6 +14,7 @@ class FeedFile {
 	Boolean processTaskCreated
 	Feed feed
 	Stream stream
+	String format
 	
 	static mapping = {
 		version false
@@ -23,6 +24,7 @@ class FeedFile {
 		processing(nullable:true)
 		processTaskCreated(nullable:true)
 		stream(nullable:true)
+		format(nullable:true)
     }
 	
 	String toString() {

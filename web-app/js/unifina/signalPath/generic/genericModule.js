@@ -13,6 +13,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.inputs = [];
 	prot.outputsByName = {};
 	prot.outputs = [];
+	
+	// Updated on dragstart, used on drag event to repaint jsPlumb connectors
+	var _cachedEndpoints = []
 
 	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
@@ -20,10 +23,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		var div = $("<div class='modulefooter'></div>");
 		prot.div.append(div);
 		
+		var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
+		div.append(container)
+		
 		if (prot.jsonData.canClearState==null || prot.jsonData.canClearState) {
-			var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
-			div.append(container)
-			
 			var clear = new SignalPath.IOSwitch(container, "moduleSwitch clearState", {
 				getValue: (function(d){
 					return function() { return d.clearState; };
@@ -35,6 +38,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				tooltip: 'Clear module state at end of day'
 			})
 		}
+		
+		return div
 	}
 	prot.createModuleFooter = createModuleFooter;
 	
@@ -120,16 +125,17 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			prot.addOutput(data);
 		});
 
-		createModuleFooter();
+		prot.createModuleFooter()
 		
-		prot.div.on( "dragstart", function(event, ui) {
+		prot.div.on("dragstart", function(event, ui) {
 			jsPlumb.recalculateOffsets(prot.div.attr('id'));
+			_cachedEndpoints = prot.div.find(".endpoint")
 		});
 		
-		// Update endpoint positions explicitly. You can try the jsPlumb drag handler, but weird things may happen!
-		var endpoints = prot.div.find(".endpoint")
+		// Update endpoint positions explicitly. You could replace this with jsPlumb drag handling, but weird things may happen!
 		prot.div.on("drag", function(event, ui) {
-			jsPlumb.repaint(endpoints);
+			if (_cachedEndpoints.length)
+				jsPlumb.repaint(_cachedEndpoints)
 		});
 		
 		$(SignalPath).on("_signalPathLoadModulesReady", function() {
