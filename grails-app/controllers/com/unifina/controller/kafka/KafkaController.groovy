@@ -1,10 +1,11 @@
 package com.unifina.controller.kafka
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured;
+import grails.plugin.springsecurity.annotation.Secured
 
 import org.apache.log4j.Logger
 
+import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.task.Task
 import com.unifina.feed.kafka.KafkaHistoricalFeed
@@ -23,10 +24,18 @@ class KafkaController {
 			feed {
 				eq("backtestFeed", KafkaHistoricalFeed.class.name)
 			}
+			
+			if (params.feed) {
+				eq("feed", Feed.load(params.long("feed")))
+			}
+			if (params.stream) {
+				eq("id", params.long("stream"))
+			}
 		}
 		List<Task> tasks = []
 		// Create collect tasks
 		streams.each {Stream stream->
+			log.info("Creating Kafka collect tasks for stream $stream.name")
 			tasks.addAll(kafkaService.createCollectTasks(stream))
 		}
 		
