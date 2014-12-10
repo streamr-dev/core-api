@@ -29,8 +29,14 @@ io.on('connection', function (socket) {
 	})
 
 	socket.on('ui', function (data) {
-	  console.log("UI message: "+JSON.stringify(data))
-	  io.sockets.in(data.channel).emit('ui', data);
+		var channel
+		if (typeof data == 'string' || data instanceof String) {
+			var idx = data.indexOf("\"channel\":")
+			channel = data.substring(idx+11, data.indexOf("\"",idx+11))
+		}
+		else channel = data.channel
+		
+		io.sockets.in(channel).emit('ui', data);
 	})
 	
 	socket.on('disconnect', function () {

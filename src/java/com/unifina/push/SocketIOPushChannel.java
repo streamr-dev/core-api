@@ -24,7 +24,9 @@ public class SocketIOPushChannel extends PushChannel {
 		
 		synchronized(this) {
 			try {
-				socket = IO.socket("http://localhost:8090");
+				IO.Options opts = new IO.Options();
+				opts.forceNew = true;
+				socket = IO.socket("http://localhost:8090", opts);
 			} catch (URISyntaxException e) {
 				throw new RuntimeException("Bad URL for socket.io server!");
 			}

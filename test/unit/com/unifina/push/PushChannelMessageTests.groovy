@@ -23,8 +23,12 @@ class PushChannelMessageTests {
 	}
 
 	void testToJSON() {
-		assert '[1,"channel",{"foo":"bar"}]' == new PushChannelMessage(1,"channel",[foo:"bar"]).toJSON(new JSON())
-		assert '[1,"channel",["foo","bar"]]' == new PushChannelMessage(1,"channel",["foo","bar"]).toJSON(new JSON())
+		String s
+		def m
+		s = new PushChannelMessage(1,"channel",[foo:"bar"]).toJSON(new JSON())
+		m = JSON.parse(s)
+		assert m.counter == 1
+		assert m.foo == "bar"
 	}
 	
 }

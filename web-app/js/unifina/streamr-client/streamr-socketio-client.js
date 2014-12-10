@@ -38,9 +38,13 @@ StreamrClient.prototype.connect = function(reconnect) {
 		this.disconnect()
 	
 	console.log("Connecting to "+this.options.socketIoUrl)
-	this.socket = io(this.options.socketIoUrl)
+	this.socket = io(this.options.socketIoUrl, {forceNew: true})
 	
 	this.socket.on('ui', function(data) {
+		if (typeof data == 'string' || data instanceof String) {
+			data = JSON.parse(data)
+		}
+		
 		// Look up the handler
 		_this.streams[data.channel].handler(data)
 	})
