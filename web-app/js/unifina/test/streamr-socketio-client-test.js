@@ -67,6 +67,20 @@ describe('StreamrClient', function() {
 		client.connect()
 		socket.trigger('connect')
 	})
+	
+	it('should emit a subscribe event when reconnected', function(done) {
+		var subscription = client.subscribe("stream1", function(message) {
+			assert.equal(message.counter, 0)
+			done()
+		})
+		socket.emit = function(e, data) {
+			if (e==='subscribe' && data.channels.length===1 && data.channels[0]==='stream1')
+				done()
+		}
+		
+		client.connect()
+		socket.trigger('reconnect')
+	})
 
 	it('should call the callback when a message is received', function(done) {
 		var subscription = client.subscribe("stream1", function(message) {

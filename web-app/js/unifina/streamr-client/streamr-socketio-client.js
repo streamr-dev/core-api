@@ -45,16 +45,19 @@ StreamrClient.prototype.connect = function(reconnect) {
 		_this.streams[data.channel].handler(data)
 	})
 	
-	// On connect, send subscription requests
-	this.socket.on('connect', function() {
+	var onConnect = function() {
 		console.log("Connected!")
 		
 		for (var streamId in _this.streams) {
 			console.log("Subscribing to "+streamId)
 			_this.socket.emit('subscribe', {channels: [streamId]})
 		}
-	})
-		
+	}
+	
+	// On connect/reconnect, send subscription requests
+	this.socket.on('connect', onConnect)
+	this.socket.on('reconnect', onConnect)
+
 	this.connected = true
 	return this.streams
 }

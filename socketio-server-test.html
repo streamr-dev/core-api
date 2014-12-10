@@ -1,0 +1,50 @@
+<html>
+<head>
+
+<script src="web-app/js/socket.io-1.2.1/socket.io-1.2.1.min.js"></script>
+<script>
+  var socket = io('http://localhost:8090');
+  socket.on('connect', function(){
+	  console.log("Connected! Subscribing..")
+	  subscribe()
+  });
+  socket.on('reconnect', function() {
+	  console.log("Reconnected! Subscribing..")
+	  subscribe()
+  })
+  socket.on('subscribe', function(data) {
+	  if (data.error) {
+		  console.log("Error subscribing to "+data.channel)
+	  }
+	  else console.log("Successfully subscribed to "+data.channel)
+  })
+  socket.on('event', function(data){
+	  console.log("Event: "+data)
+  });
+  socket.on('disconnect', function(){
+	  console.log("Disconnected!")
+  });
+  socket.on('ui', function(data) {
+	  console.log("UI message on channel "+data.channel+": "+data.msg)
+  })
+  
+  function subscribe() {
+	  socket.emit("subscribe", {channels: ["foo", "bar"]})
+  }
+  function unsubscribe() {
+	  socket.emit("unsubscribe", {channels: ["foo", "bar"]})
+  }
+  function send() {
+	  socket.emit("ui", {channel: "foo", msg: "test-foo"})
+	  socket.emit("ui", {channel: "bar", msg: "test-bar"})
+  }
+  
+</script>
+
+</head>
+<body>
+	<button onClick="subscribe()">Subscribe</button>
+	<button onClick="unsubscribe()">Unsubscribe</button>
+	<button onClick="send()">Send</button>
+</body>
+</html>
