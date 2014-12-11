@@ -3,7 +3,6 @@ package com.unifina.utils;
 import groovy.lang.GroovySystem;
 
 import java.security.AccessController;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.datasource.DataSource;
+import com.unifina.datasource.RealtimeDataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
@@ -184,6 +184,10 @@ public class Globals {
 		}
 //		classLoader.clearCache() // Just in case
 //		classLoader.close()
+	}
+	
+	public boolean isRealtime() {
+		return dataSource instanceof RealtimeDataSource;
 	}
 	
 	public DataSource getDataSource() {
