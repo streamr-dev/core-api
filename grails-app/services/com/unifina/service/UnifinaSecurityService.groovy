@@ -14,7 +14,7 @@ import java.util.UUID
 
 class UnifinaSecurityService {
 	
-	SpringSecurityService springSecurityService
+	def springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 	
 	private boolean checkUser(instance) {

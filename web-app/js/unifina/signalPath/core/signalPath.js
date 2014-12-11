@@ -385,10 +385,7 @@ var SignalPath = (function () {
 	function _load(data,options,callback) {
 		loadJSON(data);
 		
-		saveData = {
-			isSaved : true,
-			name: (data.signalPathData && data.signalPathData.name ? data.signalPathData.name : data.name)
-		}
+		saveData = {}
 		
 		$.extend(saveData,options.saveData);
 		$.extend(saveData,data.saveData);

@@ -19,12 +19,21 @@ class SavedSignalPathController {
 	def grailsApplication
 	
 	def unifinaSecurityService
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(SavedSignalPath.get(params.id))},only:['load', 'save']]
+	def beforeInterceptor = [action:{
+			SavedSignalPath ssp = SavedSignalPath.get(params.id)
+			
+			// Don't check access for loading examples
+			
+			if (actionName=="load" && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+				return true
+			else return unifinaSecurityService.canAccess(ssp)
+			
+		},only:['load', 'save']]
 	
 	private static final Logger log = Logger.getLogger(SavedSignalPathController)
 	
 	def createSaveData(SavedSignalPath ssp) {
-		return [url:createLink(controller:"savedSignalPath",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
+		return [isSaved:true, url:createLink(controller:"savedSignalPath",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
 	}
 	
 	def load() {
@@ -46,7 +55,10 @@ class SavedSignalPathController {
 			result.error = true
 			result.message = message(code:"signalpath.load.error", args:[e.message])
 		} finally {
-			result.saveData = createSaveData(ssp)
+			// Examples can not be saved in place by others than those who have real access to it
+			if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH || unifinaSecurityService.canAccess(ssp))
+				result.saveData = createSaveData(ssp)
+
 			render result as JSON
 			globals.destroy()
 		}

@@ -23,6 +23,7 @@ class SavedSignalPath {
 	
 	static mapping = {
 		json type: 'text'
+		type defaultValue: "0"
 	}
 
 	@Override
