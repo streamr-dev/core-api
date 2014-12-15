@@ -86,29 +86,32 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
 		
+		var delay=500, tooltipDelayTimer		
 		helpLink.mouseenter(function() {
-			var htext = prot.getHelp(false)
-			tooltipOptions.title = htext
-			// show tooltip after help text is loaded
-			helpLink.tooltip(tooltipOptions)
+			tooltipDelayTimer = setTimeout(function() {
+	 			var htext = prot.getHelp(false)
+				tooltipOptions.title = htext
+				// show tooltip after help text is loaded
+				helpLink.tooltip(tooltipOptions)
 
-			helpLink.on('shown.bs.tooltip', function(event, param) {
-				$tt = $(".tooltip")
-				if ($tt.length) {
-					var top = $tt.offset().top
-					console.log("Tooltip shown at "+top)
-					// Workaround for CORE-216: tooltip is shown under main navbar
-					if (top < 40 && $tt.hasClass("top")) {
-						console.log("Destroying and replacing tooltip")
-						helpLink.tooltip("destroy")
-						helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
-						helpLink.tooltip("show")
+				helpLink.on('shown.bs.tooltip', function(event, param) {
+					$tt = $(".tooltip")
+					if ($tt.length) {
+						var top = $tt.offset().top
+						console.log("Tooltip shown at "+top)
+						// Workaround for CORE-216: tooltip is shown under main navbar
+						if (top < 40 && $tt.hasClass("top")) {
+							console.log("Destroying and replacing tooltip")
+							helpLink.tooltip("destroy")
+							helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
+							helpLink.tooltip("show")
+						}
 					}
-				}
-			})
-			helpLink.tooltip('show')
-
+				})
+				helpLink.tooltip('show')
+			}, delay)
 		}).mouseleave(function() {
+			clearTimeout(tooltipDelayTimer)
 			helpLink.tooltip('destroy')
 		})
 

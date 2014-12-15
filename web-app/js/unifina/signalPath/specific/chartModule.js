@@ -63,6 +63,30 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	}
 	prot.createDiv = createDiv;	
 	
+
+	
+	var super_createModuleFooter = prot.createModuleFooter
+	prot.createModuleFooter = function() {
+		var $footer = super_createModuleFooter()
+		var $container = $footer.find(".moduleSwitchContainer")
+		
+		if (prot.jsonData.barify!==false)
+			prot.jsonData.barify = true
+		
+		var barify = new SignalPath.IOSwitch($container, "moduleSwitch", {
+			getValue: (function(d){
+				return function() { return d.barify; };
+			})(data),
+			setValue: (function(d){
+				return function(value) { return d.barify = value; };
+			})(data),
+			buttonText: function() { return "ECO"; },
+			tooltip: 'Max one point per minute per series'
+		})
+		
+		return $footer
+	}
+	
 	// Create ChartInputs instead of ordinary Inputs
 	var super_addInput = prot.addInput
 	function addInput(data) {
@@ -168,7 +192,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			area = $("<div id='"+areaId+"' class='chartDrawArea'></div>")
 			prot.body.append(area)
 			
-			resizeChart(prot.div.width(), prot.div.height())
+			resizeChart(prot.div.outerWidth(), prot.div.outerHeight())
 		}
 	}
 	
