@@ -20,14 +20,16 @@ class SavedSignalPathController {
 	
 	def unifinaSecurityService
 	def beforeInterceptor = [action:{
-			SavedSignalPath ssp = SavedSignalPath.get(params.id)
-			
-			// Don't check access for loading examples
-			
-			if (actionName=="load" && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
-				return true
-			else return unifinaSecurityService.canAccess(ssp)
-			
+			if (params.id != null) {
+				SavedSignalPath ssp = SavedSignalPath.get(params.id)
+				
+				// Don't check access for loading examples
+				
+				if (actionName=="load" && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+					return true
+				else return unifinaSecurityService.canAccess(ssp)
+			}
+			else return true
 		},only:['load', 'save']]
 	
 	private static final Logger log = Logger.getLogger(SavedSignalPathController)
@@ -88,7 +90,7 @@ class SavedSignalPathController {
 
 //			ssp.live = json.signalPathContext.live
 			ssp.user = springSecurityService.currentUser
-			ssp.save()
+			ssp.save(flush:true, failOnError:true)
 
 			if (ssp.id==null)
 				throw new Exception("Internal error: Returned id was null!")
@@ -97,6 +99,7 @@ class SavedSignalPathController {
 			render res as JSON
 		} catch (Exception e) {
 			e = GrailsUtil.deepSanitize(e)
+			log.error("Save failed",e)
 			Map r = [error:true, message:message(code:"signalpath.save.error", args:[e.message])]
 			render r as JSON
 		}

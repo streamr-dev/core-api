@@ -11,7 +11,7 @@ class SavedSignalPath {
 	SecUser user
 	String name
 	String json
-	Integer type
+	Integer type = TYPE_USER_SIGNAL_PATH
 	
 	Boolean hasExports
 	

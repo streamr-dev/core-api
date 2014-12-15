@@ -1,7 +1,6 @@
 package com.unifina.controller.signalpath
 
 import static org.junit.Assert.*
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.support.*
@@ -12,6 +11,8 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
+import com.unifina.signalpath.SignalPath
+import com.unifina.utils.Globals
 
 @TestFor(SavedSignalPathController)
 @Mock([SecUser, SavedSignalPath])
@@ -42,7 +43,15 @@ class SavedSignalPathControllerSpec extends Specification {
 		def springSecurityService = [currentUser: me, getCurrentUser: {me}]
 		controller.springSecurityService = springSecurityService
 		grailsApplication.mainContext.getBean("unifinaSecurityService").springSecurityService = springSecurityService
-		controller.signalPathService = [reconstruct: {json, globals -> return json}]
+		controller.signalPathService = [
+			reconstruct: {json, globals -> return json},
+			jsonToSignalPath: {Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot->
+				return new SignalPath()
+			},
+			signalPathToJson: {SignalPath sp->
+				return [:]
+			}
+		]
 	}
 	
 	void "must be able to load my own SignalPath"() {
@@ -84,11 +93,36 @@ class SavedSignalPathControllerSpec extends Specification {
 			params.id = "4"
 			request.method = "GET"
 			webRequest.actionName = "load"
-			if (controller.beforeInterceptor.action.doCall([actionUri:new URI("http://localhost/savedSignalPath/load")]))
+			if (controller.beforeInterceptor.action.doCall())
 				controller.load()
 		then:
 			response.json.signalPathData.name == "my example"
 			response.json.saveData.isSaved
+	}
+	
+	void "must be able to overwrite my own SignalPath"() {
+		when:
+			params.id = "1"
+			params.name = "new name"
+			params.json = ssp1.json
+			request.method = "POST"
+			webRequest.actionName = "save"
+			if (controller.beforeInterceptor.action.doCall())
+				controller.save()
+		then:
+			response.json.isSaved
+			SavedSignalPath.get(1).name == "new name"
+	}
+	
+	void "must not be able overwrite others' SignalPath"() {
+		when:
+			params.id = "3"
+			params.name = "new name"
+			params.json = ssp1.json
+			request.method = "POST"
+			webRequest.actionName = "save"
+		then:
+			!controller.beforeInterceptor.action.doCall()
 	}
 
 }
