@@ -4,10 +4,14 @@ import com.unifina.domain.security.SecUser;
 
 class SavedSignalPath {
 	
+	public static final Integer TYPE_USER_SIGNAL_PATH = 0
+	public static final Integer TYPE_EXAMPLE_SIGNAL_PATH = 1
+	
 	Long id
 	SecUser user
 	String name
 	String json
+	Integer type = TYPE_USER_SIGNAL_PATH
 	
 	Boolean hasExports
 	
@@ -19,6 +23,7 @@ class SavedSignalPath {
 	
 	static mapping = {
 		json type: 'text'
+		type defaultValue: "0"
 	}
 
 	@Override

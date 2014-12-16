@@ -36,6 +36,19 @@ RemoteTabs.prototype.tab = function(title, url) {
 	return this
 }
 
+RemoteTabs.prototype.show = function(name) {
+	// Find the index of the tab
+	var i;
+	for (i=0;i<this._tabs.length;i++) {
+		if (this._tabs[i].title===name)
+			break;
+	}
+	
+	if (i<this._tabs.length) {
+		$(this.$el.find("li a")[i]).tab("show")
+	}
+}
+
 RemoteTabs.prototype.modal = function() {
 	var that = this
 
