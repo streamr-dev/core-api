@@ -16,7 +16,7 @@
 			<div class="col-sm-12 col-md-8 col-md-offset-2">
 				<ui:panel title="${message(code:"feedback.label")}">
 					<div class="form-group">
-						<label for="exampleInputEmail1">Please send your feedback or question to us! We will contact you via email if necessary.</label> 
+						<label for="exampleInputEmail1">Please send your feedback or question to us! We will respond via email if necessary.</label> 
 						<textarea class="form-control" placeholder="Feedback" name="feedback"></textarea>
 					</div>
 					<g:submitButton name="submit" class="save btn btn-lg btn-primary"
