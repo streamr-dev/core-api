@@ -30,13 +30,11 @@ public class Constant extends AbstractSignalPathModule implements Pullable<Doubl
 	@Override
 	public void initialize() {
 		for (Input i : out.getTargets()) {
-			// TODO: remove type checks when input upgrade is done
 			if (i instanceof TimeSeriesInput)
 				((TimeSeriesInput)i).setInitialValue(constant.getValue());
 			else if (i instanceof IntegerParameter)
 				((IntegerParameter) i).receive(constant.getValue().intValue());
-			else if (i instanceof DoubleParameter)
-				((DoubleParameter) i).receive(constant.getValue());
+			else i.receive(constant.getValue());
 		}		
 	}
 	
