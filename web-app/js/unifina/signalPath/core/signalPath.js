@@ -120,7 +120,8 @@ var SignalPath = (function () {
 		});
 
 		$(pub).trigger("_signalPathLoadModulesReady");
-
+		
+		checkJsPlumbEndpoints()
 		jsPlumb.setSuspendDrawing(false,true);
 	}
 	pub.loadJSON = loadJSON;
@@ -178,6 +179,18 @@ var SignalPath = (function () {
 	}
 	pub.replaceModule = replaceModule;
 	
+	// Attempted workaround for CORE-283
+	function checkJsPlumbEndpoints() {
+		// Make sure that jsPlumb agrees with the DOM on which elements exist, otherwise the following call may fail
+		// There were some random problems with this due to unknown reason
+		jsPlumb.selectEndpoints().each(function(it) {
+			if ($("#"+it.elementId).length==0) {
+				console.log("WARN: deleting unexisting jsPlumb endpoint "+it.elementId+" to workaround jsPlumb bug")
+				jsPlumb.deleteEndpoint(it, true)
+			} 
+		})
+	}
+	
 	function addModule(id,configuration,callback) { 
 		// Get indicator JSON from server
 		$.ajax({
@@ -189,6 +202,7 @@ var SignalPath = (function () {
 				if (!data.error) {
 					jsPlumb.setSuspendDrawing(true);
 					var module = createModuleFromJSON(data);
+					checkJsPlumbEndpoints()
 					jsPlumb.setSuspendDrawing(false,true);
 					if (callback)
 						callback(module);
