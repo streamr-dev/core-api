@@ -139,7 +139,8 @@ Tour.prototype.setTourNumber = function(n) {
 }
 
 Tour.prototype.next = function() {
-	hopscotch.nextStep()
+	if (hopscotch.getCurrTour())
+		hopscotch.nextStep()
 }
 
 Tour.prototype._completed = function() {
@@ -154,6 +155,9 @@ Tour.prototype._markAsCompleted = function() {
 
 Tour.prototype._closed = function() {
 	console.log('Tour closed', this._tourNumber)
+	// Clean up any event handlers waiting for events for the current step
+	$('*').off('.tour')
+	$(SignalPath).off('.tour')
 	return this._markAsCompleted()
 }
 

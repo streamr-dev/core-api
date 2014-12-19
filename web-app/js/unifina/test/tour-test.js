@@ -46,6 +46,8 @@ describe('Tour', function() {
 	beforeEach(function() {
 
 		global.hopscotch = {
+			getCurrTour: function() {},
+			nextStep: function() {},
 			endTour: function() {},
 			getState: function() {},
 			listen: function() {}
@@ -167,6 +169,19 @@ describe('Tour', function() {
 		
 		Tour.startableTours([12])
 		Tour.autoStart()
+	})
+	
+	it('calling next() should call hopscotch.nextStep() if a tour is active', function(done) {
+		global.hopscotch.getCurrTour = function() { return tour }
+		global.hopscotch.nextStep = done
+		tour.next()
+	})
+	
+	it('should not call hopscotch next step if the tour has been closed', function(done) {
+		global.hopscotch.getCurrTour = function() { return null }
+		global.hopscotch.nextStep = function() { throw "Should not have called nextStep!" }
+		tour.next()
+		done()
 	})
 
 	describe('waiting for modules', function() {
