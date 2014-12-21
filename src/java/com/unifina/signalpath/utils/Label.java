@@ -3,10 +3,10 @@ package com.unifina.signalpath.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.StringParameter;
 
-public class Label extends AbstractSignalPathModule {
+public class Label extends ModuleWithUI {
 
 	StringParameter label = new StringParameter(this,"label","");
 	
@@ -21,11 +21,11 @@ public class Label extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if (parentSignalPath!=null && parentSignalPath.getReturnChannel()!=null) {
+		if (globals.getUiChannel()!=null) {
 			Map<String,Object> msg = new HashMap<>();
 			msg.put("type", "u");
 			msg.put("val", label.getValue());
-			parentSignalPath.getReturnChannel().sendReplacingPayload(hash, msg, this);
+			globals.getUiChannel().push(msg, uiChannelId);
 		}
 	}
 

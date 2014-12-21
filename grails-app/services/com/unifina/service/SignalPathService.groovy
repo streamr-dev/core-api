@@ -9,8 +9,8 @@ import org.apache.log4j.Logger
 import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.push.PushChannel
 import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.SignalPathReturnChannel
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 
@@ -21,8 +21,8 @@ class SignalPathService {
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
-	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, SignalPathReturnChannel returnChannel = null, boolean isRoot) {
-		SignalPath sp = new SignalPath(signalPathData,returnChannel,isRoot,globals)
+	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, PushChannel pushChannel = null, boolean isRoot) {
+		SignalPath sp = new SignalPath(signalPathData,pushChannel,isRoot,globals)
 		if (connectionsReady)
 			sp.connectionsReady()
 		return sp
@@ -56,10 +56,6 @@ class SignalPathService {
 		
 		json.signalPathContext = context
 		json.signalPathData = signalPathToJson(sp)
-//		Map result = [
-//			signalPathContext: context,
-//			signalPathData: signalPathToJson(sp)
-//		]
 		
 		return json
 	}

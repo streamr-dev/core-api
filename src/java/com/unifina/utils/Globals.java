@@ -3,7 +3,6 @@ package com.unifina.utils;
 import groovy.lang.GroovySystem;
 
 import java.security.AccessController;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,6 +18,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
+import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -51,6 +51,8 @@ public class Globals {
 	
 	protected Date startDate = null;
 	protected Date endDate = null;
+	
+	protected PushChannel uiChannel = null;
 	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
 		if (signalPathContext==null)
@@ -177,13 +179,11 @@ public class Globals {
 	}
 	
 	public void destroy() {
-//		for (Class c : classLoader.getLoadedClasses()){
 		for (Class c : dynamicClasses) {
 			GroovySystem.getMetaClassRegistry().removeMetaClass(c);
-//			log.info("destroy(): removed from MetaClassRegistry: $c")
 		}
-//		classLoader.clearCache() // Just in case
-//		classLoader.close()
+		if (uiChannel!=null)
+			uiChannel.destroy();
 	}
 	
 	public DataSource getDataSource() {
@@ -192,6 +192,14 @@ public class Globals {
 	
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	public PushChannel getUiChannel() {
+		return uiChannel;
+	}
+
+	public void setUiChannel(PushChannel uiChannel) {
+		this.uiChannel = uiChannel;
 	}
 
 }

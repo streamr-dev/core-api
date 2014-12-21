@@ -1,26 +1,23 @@
 package com.unifina.signalpath.charts;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.unifina.push.PushChannel;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.DoubleParameter;
-import com.unifina.signalpath.IReturnChannel;
+import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.utils.MapTraversal;
 
-public class Gauge extends AbstractSignalPathModule {
+public class Gauge extends ModuleWithUI {
 
 	DoubleParameter min = new DoubleParameter(this,"min",-1D);
 	DoubleParameter max = new DoubleParameter(this,"max",1D);
 	TimeSeriesInput value = new TimeSeriesInput(this,"value");
 	
 	boolean initSent = false;
-	IReturnChannel rc = null;
-	
-//	Double reportedMin = null;
-//	Double reportedMax = null;
+	PushChannel rc = null;
 	
 	String title = "";
 	String titleStyle = "";
@@ -38,8 +35,8 @@ public class Gauge extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		if (parentSignalPath!=null && parentSignalPath.getReturnChannel()!=null)
-			rc = parentSignalPath.getReturnChannel();
+		if (globals!=null && globals.getUiChannel()!=null)
+			rc = globals.getUiChannel();
 	}
 	
 	@Override
@@ -52,22 +49,14 @@ public class Gauge extends AbstractSignalPathModule {
 				msg.put("min", min.getValue());
 				msg.put("max", max.getValue());
 				msg.put("title", title);
-				rc.sendPayload(hash, msg);
+				rc.push(msg, uiChannelId);
 				initSent = true;
 			}
 			else {
 				HashMap<String,Object> msg = new HashMap<>();
 				msg.put("type", "u");
 				msg.put("v",value.value);
-//				if (reportedMin==null || reportedMin!=min.getValue()) {
-//					msg.put("min", min.getValue());
-//					reportedMin = min.getValue();
-//				}
-//				if (reportedMax==null || reportedMax!=max.getValue()) {
-//					msg.put("max", max.getValue());
-//					reportedMax = max.getValue();
-//				}
-				rc.sendReplacingPayload(hash, msg, this);
+				rc.push(msg, uiChannelId);
 			}
 		}
 	}

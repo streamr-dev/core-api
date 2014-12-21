@@ -387,14 +387,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	pub.refreshConnections = refreshConnections;
 	
-	var super_receiveResponse = prot.receiveResponse
-	prot.receiveResponse = function(payload) {
-		super_receiveResponse(payload);
-		if (payload.type=="paramChangeResponse") {
-			// TODO handle param change response
-		}
-	}
-	
 	var super_redraw = pub.redraw
 	pub.redraw = function() {
 		super_redraw()

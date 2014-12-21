@@ -5,16 +5,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.IReturnChannel;
+import com.unifina.push.PushChannel;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
+import com.unifina.signalpath.ModuleWithUI;
 
 
-public class EventTable extends AbstractSignalPathModule {
+public class EventTable extends ModuleWithUI {
 	
-	private IReturnChannel rc;
+	private PushChannel rc;
 	private SimpleDateFormat df;
 	
 	int inputCount = 1;
@@ -29,14 +29,14 @@ public class EventTable extends AbstractSignalPathModule {
 	public void initialize() {
 		super.initialize();
 
-		if (parentSignalPath!=null && parentSignalPath.getReturnChannel()!=null && !globals.getSignalPathContext().containsKey("csv")) {
-			rc = parentSignalPath.getReturnChannel();
+		if (globals.getUiChannel()!=null && !globals.getSignalPathContext().containsKey("csv")) {
+			rc = globals.getUiChannel();
 		}
 		
 		if (rc!=null) {
 			Map<String,Object> hdrMsg = new HashMap<String,Object>();
 			hdrMsg.put("hdr", getHeaderDefinition());
-			parentSignalPath.returnChannel.sendPayload(hash, hdrMsg);
+			globals.getUiChannel().push(hdrMsg, uiChannelId);
 		}
 		
 		df = globals.dateTimeFormat;
@@ -56,7 +56,7 @@ public class EventTable extends AbstractSignalPathModule {
 				else nr.add(null);
 			}
 			
-			rc.sendPayload(hash,msg);
+			rc.push(msg, uiChannelId);
 		}
 	}
 

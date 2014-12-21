@@ -6,14 +6,24 @@ import javax.servlet.ServletContext
 
 import org.apache.log4j.Logger
 
+import com.unifina.push.PushChannel
+import com.unifina.push.SocketIOPushChannel
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.SignalPath.DoneMessage
+import com.unifina.signalpath.SignalPath.ErrorMessage
 import com.unifina.utils.Globals
 
+
+/**
+ * A Thread that instantiates and runs a list of SignalPaths.
+ * Identified by a runnerId, by which this runner can be looked up from the
+ * servletContext["signalPathRunners"] map.
+ */
 public class SignalPathRunner extends Thread {
 	
 	private List<Map> signalPathData
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
-	private final List<SignalPathReturnChannel> returnChannels = Collections.synchronizedList([])
+	private PushChannel pushChannel;
 	
 	String runnerId
 	
@@ -32,7 +42,6 @@ public class SignalPathRunner extends Thread {
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
 		this.servletContext = globals.grailsApplication.mainContext.getBean("servletContext")
 		this.signalPathData = signalPathData
-//		setContextClassLoader(globals.classLoader)
 		
 		runnerId = "s-"+new Date().getTime()
 		
@@ -41,21 +50,21 @@ public class SignalPathRunner extends Thread {
 			
 		servletContext["signalPathRunners"].put(runnerId,this)
 		
-		signalPathData.eachWithIndex {data, i->
-			final String sessionId = runnerId+"-$i"
-			final String channel = sessionId
-			
-			SignalPathReturnChannel returnChannel = new SignalPathReturnChannel(sessionId, channel, servletContext)
-			returnChannels << returnChannel
+		pushChannel = new SocketIOPushChannel();
+	}
+	
+	public String getReturnChannel(int index) {
+		return signalPaths[index].uiChannelId
+	}
+	
+	public Map getModuleChannelMap(int signalPathIndex) {
+		Map result = [:]
+		signalPaths[signalPathIndex].modules.each {
+			if (it instanceof ModuleWithUI) {
+				result.put(it.hash.toString(), it.uiChannelId)
+			}
 		}
-	}
-	
-	public SignalPathReturnChannel getReturnChannel(int index) {
-		return returnChannels[index]
-	}
-	
-	public SignalPathReturnChannel getReturnChannel(String sessionId) {
-		return returnChannels.find {it.sessionId==sessionId}
+		return result
 	}
 	
 	@Override
@@ -70,22 +79,18 @@ public class SignalPathRunner extends Thread {
 			globals.init()
 
 			if (globals.signalPathContext.csv) {
-//				globals.signalPathContext.csvOptions = [timeFormat:Integer.parseInt(globals.signalPathContext.csvOptions.csvTimeFormat), filterEmpty:(globals.signalPathContext.csvOptions.filterEmpty ? true:false)]
 				globals.signalPathContext.speed = 0
 			}
 
 			// Instantiate SignalPaths from JSON
 			for (int i=0;i<signalPathData.size();i++) {
 				try {
-					SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,returnChannels[i],true)
-//					signalPath.returnChannel = returnChannels[i] // set in SignalPath constructor
-//					returnChannels[i].signalPath = signalPath // set in SignalPath constructor
-					//				signalPath.connectionsReady()
+					SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,pushChannel,true)
 					signalPaths.add(signalPath)
 				} catch (Exception e) {
 					e = GrailsUtil.deepSanitize(e)
 					log.error("Error while instantiating SignalPaths!",e)
-					returnChannels[i].sendError(e.getMessage() ?: e.toString())
+					pushChannel.push(new ErrorMessage(e.getMessage() ?: e.toString()), runnerId)
 				}
 			}
 
@@ -117,10 +122,14 @@ public class SignalPathRunner extends Thread {
 				sb.append("Caused by: ")
 				sb.append(reportException.message)
 			}
-			returnChannels.each{it.sendError(sb.toString())}
+			signalPaths.each {SignalPath sp->
+				pushChannel.push(new ErrorMessage(sb.toString()), sp.uiChannelId)
+			}
 		}
 		
-		returnChannels.each {it.sendDone()}
+		signalPaths.each {SignalPath sp->
+			pushChannel.push(new DoneMessage(), sp.uiChannelId)
+		}
 
 		log.info("SignalPathRunner is ready.")
 	}
@@ -129,8 +138,6 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	public void destroy() {
-		// Can't call abort, because the returnChannels might have pending messages
-//		abort()
 		servletContext["signalPathRunners"].remove(runnerId)
 		signalPaths.each {it.destroy()}
 		globals.destroy()
@@ -140,7 +147,6 @@ public class SignalPathRunner extends Thread {
 		log.info("Aborting SignalPathRunner..")
 		globals.abort = true
 		globals.dataSource?.stopFeed()
-		returnChannels.each {it.destroy()}
 		destroy()
 		
 		// Interrupt whatever this thread is doing

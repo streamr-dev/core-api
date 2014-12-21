@@ -7,12 +7,12 @@ import java.util.Map;
 public class PushChannelMessage {
 
 	private int counter;
-	private String topic;
+	private String channel;
 	private Object content;
 
-	public PushChannelMessage(int counter, String topic, Object content) {
+	public PushChannelMessage(int counter, String channel, Object content) {
 		this.counter = counter;
-		this.topic = topic;
+		this.channel = channel;
 		this.content = content;
 	}
 	
@@ -32,6 +32,7 @@ public class PushChannelMessage {
 		
 		if (content instanceof Map) {
 			((Map)content).put("counter", counter);
+			((Map)content).put("channel", channel);
 			json.setTarget(content);
 			return json.toString();
 		}
@@ -42,8 +43,8 @@ public class PushChannelMessage {
 		return counter;
 	}
 
-	public String getTopic() {
-		return topic;
+	public String getChannel() {
+		return channel;
 	}
 
 	public Object getContent() {

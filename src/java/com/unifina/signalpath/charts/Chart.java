@@ -3,20 +3,17 @@ package com.unifina.signalpath.charts;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
+import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.utils.CSVWriter;
-import com.unifina.utils.MapTraversal;
 import com.unifina.utils.TimeOfDayUtil;
 
-public abstract class Chart extends AbstractSignalPathModule {
+public abstract class Chart extends ModuleWithUI {
 
 	protected File f;
 	protected BufferedWriter outFile;
@@ -52,7 +49,7 @@ public abstract class Chart extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		hasRc = (parentSignalPath!=null && parentSignalPath.returnChannel!=null);
+		hasRc = (globals!=null && globals.getUiChannel()!=null);
 	}
 	
 	protected abstract void addDefaultInputs();
@@ -109,8 +106,8 @@ public abstract class Chart extends AbstractSignalPathModule {
 		super.destroy();
 		if (csv) {
 			File file = csvWriter.finish();
-			if (parentSignalPath!=null && parentSignalPath.returnChannel!=null) {
-				parentSignalPath.returnChannel.sendPayload(hash, new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()));
+			if (hasRc) {
+				globals.getUiChannel().push(new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()), uiChannelId);
 			}
 		}
 	}

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ import com.unifina.domain.signalpath.Module;
 import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
 
-public class SignalPath extends AbstractSignalPathModule {
+public class SignalPath extends ModuleWithUI {
 	
 	private static final Logger log = Logger.getLogger(SignalPath.class);
 	private static Comparator<AbstractSignalPathModule> initPriorityComparator = new Comparator<AbstractSignalPathModule>() {
@@ -29,17 +30,11 @@ public class SignalPath extends AbstractSignalPathModule {
 	
 	SignalPathParameter sp;
 	
-//	List orderBooks = []
 	List<ModuleConfig> moduleConfigs = new ArrayList<>();
 	List<AbstractSignalPathModule> mods = new ArrayList<>();
 	
-//	List recorders = new ArrayList();
-//	List<ITimeListener> timeListeners = new ArrayList<>();
-	
 	List<Input> exportedInputs = new ArrayList<Input>();
 	List<Output> exportedOutputs = new ArrayList<Output>();
-	
-	public SignalPathReturnChannel returnChannel;
 	
 	Map representation = null;
 	Map<Integer,AbstractSignalPathModule> modulesByHash = new HashMap<>();
@@ -54,11 +49,8 @@ public class SignalPath extends AbstractSignalPathModule {
 		canRefresh = true;
 	}
 	
-	public SignalPath(Map iData, SignalPathReturnChannel returnChannel, boolean isRoot, Globals globals) {
+	public SignalPath(Map iData, boolean isRoot, Globals globals) {
 		super();
-		this.returnChannel = returnChannel;
-		if (returnChannel!=null)
-			returnChannel.setSignalPath(this);
 		this.isRoot = isRoot;
 		this.globals = globals;
 		initPriority = 10;
@@ -208,10 +200,6 @@ public class SignalPath extends AbstractSignalPathModule {
 		this.clearState = isDistributable();
 	}
 	
-	public SignalPathReturnChannel getReturnChannel() {
-		return returnChannel;
-	}
-	
 	public List<AbstractSignalPathModule> getModules() {
 		return mods;
 	}
@@ -289,6 +277,14 @@ public class SignalPath extends AbstractSignalPathModule {
 	}
 	
 	@Override
+	public void initialize() {
+		super.initialize();
+		// Embedded SignalPaths inherit the uiChannelId of their parent
+		if (parentSignalPath!=null && parentSignalPath.getUiChannelId()!=null)
+			uiChannelId = parentSignalPath.getUiChannelId();
+	}
+	
+	@Override
 	public void destroy() {
 		super.destroy();
 		
@@ -313,8 +309,8 @@ public class SignalPath extends AbstractSignalPathModule {
 							notReady.append(input.toString());
 							notReady.append("\n");
 
-							if (parentSignalPath!=null && parentSignalPath.getReturnChannel()!=null) {
-								parentSignalPath.returnChannel.sendPayload(it.getHash(), new UIWarningMessage("Input was never ready: "+input.name));
+							if (globals.getUiChannel()!=null) {
+								globals.getUiChannel().push(parentSignalPath.new ModuleWarningMessage("Input was never ready: "+input.name, hash), uiChannelId);
 							}
 						}
 					}
@@ -362,5 +358,41 @@ public class SignalPath extends AbstractSignalPathModule {
 
 	public void setExportedOutputs(List<Output> exportedOutputs) {
 		this.exportedOutputs = exportedOutputs;
+	}
+	
+	public class SignalPathMessage extends LinkedHashMap<String,Object>{
+		public Object cacheId = null;
+		public SignalPathMessage() {
+		}
+	}
+	
+	public class DoneMessage extends LinkedHashMap<String,Object> {
+		public DoneMessage() {
+			this.put("type","D");
+		}
+	}
+	
+	public class ErrorMessage extends SignalPathMessage {
+		public ErrorMessage(String error) {
+			this.put("type","E");
+			this.put("error",error);
+			this.cacheId = "error";
+		}
+	}
+	
+	public class NotificationMessage extends SignalPathMessage {
+		public NotificationMessage(String msg) {
+			this.put("type","N");
+			this.put("msg",msg);
+			this.cacheId = "notification";
+		}
+	}
+	
+	public class ModuleWarningMessage extends SignalPathMessage {
+		public ModuleWarningMessage(String msg, int hash) {
+			this.put("type", "MW");
+			this.put("hash", "hash");
+			this.put("msg", msg);
+		}
 	}
 }

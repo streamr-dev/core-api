@@ -56,7 +56,7 @@ public class TimeSeriesChart extends Chart {
 			}
 
 			if (hasRc) {
-				parentSignalPath.returnChannel.sendPayload(hash, new InitMessage(seriesData, null));
+				globals.getUiChannel().push(new InitMessage(seriesData, null), uiChannelId);
 			}
 		}
 		else {
@@ -132,11 +132,14 @@ public class TimeSeriesChart extends Chart {
 			if (!Double.isNaN(input.value) 
 					&& hasRc 
 					&& (!barify || globals.time.getTime() - input.previousTime > 60000L)) {
+				
 					PointMessage msg = new PointMessage(
 							input.seriesIndex, 
 							globals.getTzConverter().getFakeLocalTime(globals.time.getTime()),
 							input.value);
-					parentSignalPath.returnChannel.sendPayload(hash, msg);
+					
+					globals.getUiChannel().push(msg, uiChannelId);
+					
 					input.previousTime = globals.time.getTime();
 			}
 		}
@@ -162,7 +165,7 @@ public class TimeSeriesChart extends Chart {
 			for (Input it : getInputs()) {
 				if (it instanceof TimeSeriesChartInput && it.isConnected()) {
 					// Send day break
-					parentSignalPath.returnChannel.sendPayload(hash, new BreakMessage(((TimeSeriesChartInput)it).seriesIndex));
+					globals.getUiChannel().push(new BreakMessage(((TimeSeriesChartInput)it).seriesIndex), uiChannelId);
 				}
 			}
 		}

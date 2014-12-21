@@ -3,14 +3,14 @@ package com.unifina.signalpath.custom;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.ModuleWithUI;
 
-public abstract class DebugAwareModule extends AbstractSignalPathModule {
+public abstract class DebugAwareModule extends ModuleWithUI {
 
 	protected final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 	protected void debug(String s) {
-		if (parentSignalPath!=null && parentSignalPath.returnChannel!=null) {
+		if (globals.getUiChannel()!=null) {
 			String t = null;
 			if (globals.time!=null)
 				t = df.format(globals.getTzConverter().getFakeLocalTime(globals.time));
@@ -19,7 +19,7 @@ public abstract class DebugAwareModule extends AbstractSignalPathModule {
 			msg.put("type","debug");
 			msg.put("msg",s);
 			msg.put("t",t);
-			parentSignalPath.returnChannel.sendPayload(hash, msg);
+			globals.getUiChannel().push(msg, uiChannelId);
 		}
 	}
 	

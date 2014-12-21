@@ -436,7 +436,7 @@ var SignalPath = (function () {
 				}
 				else {
 					runnerId = data.runnerId;
-					subscribeToSession(data.sessionId,true);
+					subscribe(data.channelMap,true);
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
@@ -446,12 +446,19 @@ var SignalPath = (function () {
 	}
 	pub.run = run;
 	
-	function subscribeToSession(sId,newSession) {
-		if (sessionId != null)
+	function subscribeToSession(channelMap,newSession) {
+		if (channelMap != null)
 			abort();
 		
-		sessionId = sId;
-		connection.subscribe(sId, processMessage)
+		// SignalPath channel wiring
+		sessionId = channelMap.signalPath;
+		connection.subscribe(sessionId, processMessage)
+		
+		// Module channel wiring
+		for (hash in Object.getOwnPropertyNames(channelMap.modules)) {
+			connection.subscribe(channelMap.modules[hash], modules[hash].receiveResponse)
+		}
+		
 		connection.connect(newSession)
 
 		$(pub).trigger('started');
@@ -471,6 +478,10 @@ var SignalPath = (function () {
 				console.log(err.stack);
 			}
 			clear = hash;
+		}
+		else if (message.type=="MW") {
+			var hash = message.hash;
+			modules[hash].addWarning(message.payload);
 		}
 		else if (message.type=="D") {
 			abort();
@@ -502,7 +513,6 @@ var SignalPath = (function () {
 			type: 'POST',
 			url: options.abortUrl, 
 			data: {
-				sessionId: sessionId,
 				runnerId: runnerId
 			},
 			dataType: 'json',

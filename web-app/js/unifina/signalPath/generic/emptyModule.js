@@ -459,18 +459,18 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	pub.toJSON = toJSON;
 	
-	function receiveResponse(payload) {
-		if (payload.type=="warning") {
-			var warning = $("<div class='warning ui-state-error'><span class='fa fa-exclamation'></span></div>");
-			$(warning).click((function(msg) {
-				return function() {
-					alert(msg);
-				}
-			})(payload.msg));
-			prot.div.append(warning);
-		}
-//		else console.log("EmptyModule.receiveResponse called, hash: "+prot.hash+", title: "+prot.jsonData.name+", message: "+JSON.stringify(payload));
+	function addWarning(content) {
+		var warning = $("<div class='warning ui-state-error'><span class='fa fa-exclamation'></span></div>");
+		$(warning).click((function(msg) {
+			return function() {
+				alert(msg);
+			}
+		})(content));
+		prot.div.append(warning);
 	}
+	pub.addWarning = addWarning
+	
+	function receiveResponse(payload) {}
 	pub.receiveResponse = receiveResponse;
 	
 	function updateFrom(data) {

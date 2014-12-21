@@ -1,36 +1,46 @@
 package com.unifina.push;
 
+import java.util.HashMap;
+
 import org.apache.log4j.Logger;
 
 public abstract class PushChannel {
-	private int counter = 0;
-	protected String channel;
+	
+	private HashMap<String,Counter> counterByChannel = new HashMap<>();
 	private boolean destroyed = false;
 	
 	public static final Logger log = Logger.getLogger(PushChannel.class);
 	
-	public PushChannel(String channel) {
-		this.channel = channel;
-		log.info("Created: "+channel);
+	public PushChannel() {
 	}
 	
-	public void push(Object content) {
-		PushChannelMessage msg = new PushChannelMessage(counter++, channel, content);
+	public void addChannel(String channel) {
+		counterByChannel.put(channel, new Counter(0));
+	}
+	
+	public void push(Object content, String channel) {
+		PushChannelMessage msg = new PushChannelMessage(counterByChannel.get(channel).getAndIncrement(), channel, content);
 		doPush(msg);
 	}
 	
 	protected abstract void doPush(PushChannelMessage msg);
 	
-	public String getChannel() {
-		return channel;
-	}
-	
 	public void destroy() {
-		log.info("destroy() called: "+channel);
+		log.info("destroy() called");
 		destroyed = true;
 	}
 	
 	public boolean isDestroyed() {
 		return destroyed;
+	}
+	
+	class Counter {
+		int counter;
+		public Counter(int counter) {
+			this.counter = counter;
+		}
+		public int getAndIncrement() {
+			return counter++;
+		}
 	}
 }

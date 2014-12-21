@@ -571,21 +571,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 						uiEventPropagator.propagate();
 					}
 				}
-				 
-				HashMap<String,Object> response = new HashMap<String,Object>();
-				response.put("type","paramChangeResponse");
-				response.put("param", param.getName());
-				response.put("value", value);
-				response.put("success", true);
-				parentSignalPath.getReturnChannel().sendPayload(hash, response);
 			} catch (Exception e) {
 				log.error("Error making runtime change!",e);
-				HashMap<String,Object> response = new HashMap<String,Object>();
-				response.put("type","paramChangeResponse");
-				response.put("param", param.getName());
-				response.put("success", false);
-				response.put("error", e.toString());
-				parentSignalPath.getReturnChannel().sendPayload(hash, response);
+				globals.getUiChannel().push(parentSignalPath.new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
 	}
@@ -621,12 +609,5 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Object getOption(Map<String,Object> config, String name) {
 		return MapTraversal.getProperty(config, "options."+name+".value");
 	}
-	
-	protected class UIWarningMessage extends HashMap<String,String> {
-		public UIWarningMessage(String msg) {
-			super();
-			this.put("type","warning");
-			this.put("msg",msg);
-		}
-	}
+
 }

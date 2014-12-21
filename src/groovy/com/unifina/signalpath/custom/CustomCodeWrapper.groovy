@@ -8,7 +8,7 @@ import com.unifina.utils.Globals
 class CustomCodeWrapper extends AbstractCodeWrapper {
 	
 	String getHeader() {return """
-public class [[CLASSNAME]] extends GroovySignalPathModule {
+public class [[CLASSNAME]] extends ModuleWithUI {
 
 	private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 
@@ -16,13 +16,18 @@ public class [[CLASSNAME]] extends GroovySignalPathModule {
 		super();
 	}
 
+	void initialize() {
+		super.initialize()
+		setup()
+	}
+
 	void debug(String s) {
-		if (parentSignalPath?.returnChannel) {
+		if (globals.getUiChannel()!=null) {
 			String t = null
 			if (globals.time!=null)
 				t = df.format(globals.tzConverter.getFakeLocalTime(globals.time))
 
-			parentSignalPath.returnChannel.sendPayload(hash, [type:"debug", msg:s, t:t])
+			globals.getUiChannel().push([type:"debug", msg:s, t:t], uiChannelId)
 		}
 	}
 
@@ -37,7 +42,7 @@ public class [[CLASSNAME]] extends GroovySignalPathModule {
 // def input = new TimeSeriesInput(this, "in")
 // def output = new TimeSeriesOutput(this, "out")
 
-void initialize() {
+void setup() {
 	// Initialize local variables
 }
 

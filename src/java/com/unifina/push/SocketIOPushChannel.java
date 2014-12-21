@@ -19,8 +19,8 @@ public class SocketIOPushChannel extends PushChannel {
 
 	private static final Logger log = Logger.getLogger(SocketIOPushChannel.class);
 	
-	public SocketIOPushChannel(String channel) {
-		super(channel);
+	public SocketIOPushChannel() {
+		super();
 		
 		synchronized(this) {
 			try {
@@ -35,7 +35,7 @@ public class SocketIOPushChannel extends PushChannel {
 			  @Override
 			  public void call(Object... args) {
 				  connected = true;
-				  log.info("Connected to socket.io for channel "+getChannel());
+				  log.info("Connected to socket.io");
 				  synchronized(SocketIOPushChannel.this) {
 					  SocketIOPushChannel.this.notify();
 				  }
@@ -44,7 +44,7 @@ public class SocketIOPushChannel extends PushChannel {
 			  @Override
 			  public void call(Object... args) {
 				  connected = false;
-				  log.info("Disconnected from socket.io for channel "+getChannel());
+				  log.info("Disconnected from socket.io");
 				  synchronized(SocketIOPushChannel.this) {
 					  SocketIOPushChannel.this.notify();
 				  }
@@ -76,7 +76,7 @@ public class SocketIOPushChannel extends PushChannel {
 	
 	@Override
 	protected void doPush(PushChannelMessage msg) {
-		((Map) msg.getContent()).put("channel", channel);
+		((Map) msg.getContent()).put("channel", msg.getChannel());
 		String str = msg.toJSON(json);
 		socket.emit("ui", str);
 	}

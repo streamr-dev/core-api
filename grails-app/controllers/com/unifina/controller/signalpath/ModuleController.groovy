@@ -10,7 +10,6 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.signalpath.AbstractSignalPathModule
-import com.unifina.signalpath.IReturnChannel
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
@@ -153,21 +152,21 @@ class ModuleController {
 	/**
 	 * Used to communicate back user actions in the UI
 	 */
-	def uiAction() {
-		String sessionId = params.sessionId
-		def msg = JSON.parse(params.msg)
-		def hash = params.int("hash")
-		
-		Map r
-		IReturnChannel channel = servletContext["returnChannels"]?.get(sessionId)
-		if (channel) {
-			channel.signalPath.getModule(hash).receiveUIMessage(msg)
-			r = [success:true, sessionId:sessionId, hash:hash, msg:msg]
-		}
-		else r = [success:false, sessionId:sessionId, hash:hash, msg:msg, error:"Session not found"]
-		
-		render r as JSON
-	}
+//	def uiAction() {
+//		String sessionId = params.sessionId
+//		def msg = JSON.parse(params.msg)
+//		def hash = params.int("hash")
+//		
+//		Map r
+//		IReturnChannel channel = servletContext["returnChannels"]?.get(sessionId)
+//		if (channel) {
+//			channel.signalPath.getModule(hash).receiveUIMessage(msg)
+//			r = [success:true, sessionId:sessionId, hash:hash, msg:msg]
+//		}
+//		else r = [success:false, sessionId:sessionId, hash:hash, msg:msg, error:"Session not found"]
+//		
+//		render r as JSON
+//	}
 	
 	def jsonGetModuleHelp() {
 		Module module = Module.get(params.id)
