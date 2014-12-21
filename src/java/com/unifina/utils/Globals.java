@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.datasource.DataSource;
+import com.unifina.datasource.RealtimeDataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
@@ -184,6 +185,10 @@ public class Globals {
 		}
 		if (uiChannel!=null)
 			uiChannel.destroy();
+	}
+	
+	public boolean isRealtime() {
+		return dataSource instanceof RealtimeDataSource;
 	}
 	
 	public DataSource getDataSource() {

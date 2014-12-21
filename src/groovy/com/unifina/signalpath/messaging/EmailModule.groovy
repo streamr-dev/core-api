@@ -1,0 +1,150 @@
+package com.unifina.signalpath.messaging
+
+import groovy.transform.CompileStatic
+
+import java.text.SimpleDateFormat
+
+import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.signalpath.Input
+import com.unifina.signalpath.ModuleOption
+import com.unifina.signalpath.ModuleOptions
+import com.unifina.signalpath.Parameter
+import com.unifina.signalpath.StringParameter
+
+class EmailModule extends AbstractSignalPathModule {
+
+	StringParameter sub = new StringParameter(this, "subject", "")
+	StringParameter message = new StringParameter(this, "message", "")
+
+	def mailService
+	String sender
+
+	int inputCount = 1
+
+	SimpleDateFormat df
+
+	Long prevTime = 0
+	Long prevWarnNotif
+
+	Long emailIntervall = 60000
+	boolean emailSent
+
+	@Override
+	public void init() {
+		addInput(sub)
+		addInput(message)
+		mailService = globals.grailsApplication.getMainContext().getBean("mailService")
+		sender = globals.grailsApplication.config.unifina.email.sender
+		df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()))
+		emailSent = true
+	}
+
+	@Override
+	public void sendOutput() {
+		//		Create String with the input values
+		String inputValues = ""
+		for(Input i : super.getInputs()){
+			if(!(i instanceof Parameter)){
+				inputValues += "${i.getDisplayName() ?: i.getName()}: ${i.getValue()}\n"
+			}
+		}
+
+		//		Check that the subject is not empty
+		String messageSubject
+		if(sub.getValue() == ""){
+			messageSubject = "no subject"
+		} else {
+			messageSubject = sub.getValue()
+		}
+
+		//		Create body for the email
+		String messageBody = """
+Message:
+${message.getValue()}
+
+Event Timestamp:
+${df.format(globals.time)}
+
+Input Values:
+$inputValues
+"""
+
+		//		Check that the module is running in current time. If not, do not send email, make just a notification
+
+		if (globals.isRealtime()) {
+			if(isNotTooOften(emailIntervall, getTime(), prevTime)){
+				emailSent = true
+				String messageTo = globals.getUser().getUsername()
+				mailService.sendMail {
+					from sender
+					to messageTo
+					subject messageSubject
+					body messageBody
+				}
+			} else {
+				if(emailSent){
+					parentSignalPath?.returnChannel?.sendNotification("Tried to send emails too often")
+					emailSent = false
+				}
+			}
+		}
+		else {
+			parentSignalPath?.returnChannel?.sendNotification(messageBody)
+		}
+
+
+	}
+	
+	public long getTime(){
+		return System.currentTimeMillis()
+	}
+
+	public Input<Object> createAndAddInput(String name) {
+
+		Input<Object> conn = new Input<Object>(this,name,"Object");
+
+		conn.setDrivingInput(true);
+
+		// Add the input
+		if (getInput(name)==null){
+			addInput(conn);
+		}
+
+		return conn;
+	}
+
+	@Override
+	public Map<String,Object> getConfiguration() {
+		Map<String,Object> config = super.getConfiguration();
+
+		// Module options
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("inputs", inputCount, "int"));
+
+		return config;
+	}
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+
+		ModuleOptions options = ModuleOptions.get(config);
+
+		if (options.getOption("inputs")!=null)
+			inputCount = options.getOption("inputs").getInt();
+
+		for (int i=1;i<=inputCount;i++) {
+			createAndAddInput("value"+i);
+		}
+	}
+
+	public boolean isNotTooOften(intervall, time1, time2){
+		return Math.abs(time1 - time2) > intervall
+	}
+
+	@Override
+	public void clearState() {
+	}
+
+}

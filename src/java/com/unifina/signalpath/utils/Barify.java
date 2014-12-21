@@ -19,6 +19,7 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 	TimeSeriesOutput low = new TimeSeriesOutput(this,"low");
 	TimeSeriesOutput close = new TimeSeriesOutput(this,"close");
 	TimeSeriesOutput avg = new TimeSeriesOutput(this,"avg");
+	TimeSeriesOutput sum = new TimeSeriesOutput(this,"sum");
 	
 	Bar currentBar = new Bar(null,null,null,null,null,0,0);
 	Bar previousBar = null;
@@ -33,8 +34,8 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 			if (value < currentBar.low)
 				currentBar.low = value;
 				
-			currentBar.avgSum += value;
-			currentBar.avgEvents++;
+			currentBar.sum += value;
+			currentBar.count++;
 		} else {
 			currentBar = new Bar(globals.time, input.value, input.value, input.value, input.value, 0, 0);
 		}
@@ -58,7 +59,8 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 		addOutput(close);
 		avg.noRepeat = false;
 		addOutput(avg);
-		
+		sum.noRepeat = false;
+		addOutput(sum);
 	}
 	
 	@Override
@@ -89,12 +91,11 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 				high.send(currentBar.high);
 				low.send(currentBar.low);
 				close.send(currentBar.close);
-				avg.send(currentBar.avgEvents>0 ? currentBar.avgSum/currentBar.avgEvents : currentBar.close);
+				sum.send(currentBar.sum);
+				avg.send(currentBar.count>0 ? currentBar.sum/currentBar.count : currentBar.close);
 				
 				previousBar = currentBar;
 				currentBar = new Bar(time, previousBar.close, previousBar.close, previousBar.close, previousBar.close, 0, 0);
-				
-//				basicPropagator.propagate();
 			}
 		}
 	}
@@ -105,18 +106,18 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 		public Double high;
 		public Double low;
 		public Double close;
-		public double avgSum;
-		public int avgEvents;
+		public double sum;
+		public int count;
 		
 		public Bar(Date start, Double open, Double high, Double low,
-				Double close, double avgSum, int avgEvents) {
+				Double close, double sum, int count) {
 			this.start = start;
 			this.open = open;
 			this.high = high;
 			this.low = low;
 			this.close = close;
-			this.avgSum = avgSum;
-			this.avgEvents = avgEvents;
+			this.sum = sum;
+			this.count = count;
 		}
 	}
 

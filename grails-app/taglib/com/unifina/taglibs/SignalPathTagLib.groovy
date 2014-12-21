@@ -283,6 +283,9 @@ class SignalPathTagLib {
 					\$('#saveButton').parent().removeClass('disabled')
 					\$('#saveButton').html('Save to '+saveData.target)
 				}
+				else {
+					\$('#saveButton').parent().addClass('disabled')
+				}
 			})
 
 			\$(SignalPath).on('saved', function(event,saveData) {

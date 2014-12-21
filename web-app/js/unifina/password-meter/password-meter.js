@@ -1,6 +1,6 @@
 function PasswordMeter(passwordId, minLength, userInputFunc) {
 	var pwd_classes = ["veryweak", "weak", "medium", "strong", "strong"]
-	var pwd_names = ["Please use a stronger password", "Weak", "Medium", "Strong", "Strong"]
+	var pwd_names = ["Please use a stronger password", "Barely acceptable", "Medium", "Strong", "Strong"]
 
 	var $input = $("#"+passwordId)
 	

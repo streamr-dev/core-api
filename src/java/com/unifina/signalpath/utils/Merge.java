@@ -25,14 +25,19 @@ public class Merge extends AbstractSignalPathModule {
 	public void initialize() {
 		// inA and inB must be of same type
 		if (inA.isConnected() && inB.isConnected() && out.getTargets().length>0) {
-			String type = inA.getSource().getTypeName();
-			if (!type.equals(inB.getSource().getTypeName()))
-				throw new RuntimeException("Merge: input types are not the same!");
+			String typeA = inA.getSource().getTypeName();
+			String typeB = inB.getSource().getTypeName();
 			
-			// output targest must be of same type as inA and inB
+			// Only check input types if neither one of them is Object
+			if (!typeA.equals("Object") && !typeB.equals("Object") && !typeA.equals(typeB))
+				throw new RuntimeException("Merge: input types are not the same! A: "+typeA+", B: "+typeB);
+			
+			// output targest must be of same type as inA and inB, unless one of them is Object
+			if (!typeA.equals("Object") && !typeB.equals("Object")) {
 			for (Input i : out.getTargets())
-				if (!type.equals(i.getTypeName()))
-					throw new RuntimeException("Merge: inputs are connected to type "+type+", connection to "+(i.getDisplayName()!=null ? i.getDisplayName() : i.getName())+" is of wrong type ("+i.getTypeName()+")!");
+				if (!typeA.equals(i.getTypeName()) && !i.getTypeName().equals("Object"))
+					throw new RuntimeException("Merge: inputs are connected to type "+typeA+", connection to "+(i.getDisplayName()!=null ? i.getDisplayName() : i.getName())+" is of wrong type "+i.getTypeName()+"!");
+			}
 		}
 	}
 	

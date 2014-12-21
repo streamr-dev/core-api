@@ -9,7 +9,8 @@
  * started
  * stopped
  * workspaceChanged (mode)
- * moduleAdded(jsonData, div)
+ * moduleAdded (jsonData, div)
+ * error (message)
  * 
  * Events for internal use:
  * _signalPathLoadModulesReady
@@ -120,7 +121,8 @@ var SignalPath = (function () {
 		});
 
 		$(pub).trigger("_signalPathLoadModulesReady");
-
+		
+		checkJsPlumbEndpoints()
 		jsPlumb.setSuspendDrawing(false,true);
 	}
 	pub.loadJSON = loadJSON;
@@ -149,11 +151,11 @@ var SignalPath = (function () {
 							modules[data.moduleErrors[i].hash].receiveResponse(data.moduleErrors[i].payload);
 						}
 					}
-					options.errorHandler({msg: data.message});
+					handleError(data.message)
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler({msg:errorThrown});
+				handleError(errorThrown)
 			}
 		});
 	}
@@ -178,6 +180,18 @@ var SignalPath = (function () {
 	}
 	pub.replaceModule = replaceModule;
 	
+	// Attempted workaround for CORE-283
+	function checkJsPlumbEndpoints() {
+		// Make sure that jsPlumb agrees with the DOM on which elements exist, otherwise the following call may fail
+		// There were some random problems with this due to unknown reason
+		jsPlumb.selectEndpoints().each(function(it) {
+			if ($("#"+it.elementId).length==0) {
+				console.log("WARN: deleting unexisting jsPlumb endpoint "+it.elementId+" to workaround jsPlumb bug")
+				jsPlumb.deleteEndpoint(it, true)
+			} 
+		})
+	}
+	
 	function addModule(id,configuration,callback) { 
 		// Get indicator JSON from server
 		$.ajax({
@@ -189,24 +203,30 @@ var SignalPath = (function () {
 				if (!data.error) {
 					jsPlumb.setSuspendDrawing(true);
 					var module = createModuleFromJSON(data);
+					checkJsPlumbEndpoints()
 					jsPlumb.setSuspendDrawing(false,true);
 					if (callback)
 						callback(module);
 				}
 				else {
-					options.errorHandler({msg:data.message});
+					handleError(data.message)
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler({msg:errorThrown});
+				handleError(errorThrown)
 			}
 		});
 	}
 	pub.addModule = addModule;
 	
+	function handleError(message) {
+		$(pub).trigger("error", [message])
+		options.errorHandler({msg:message})
+	}
+	
 	function createModuleFromJSON(data) {
 		if (data.error) {
-			options.errorHandler({msg:data.message});
+			handleError(data.message)
 			return;
 		}
 		
@@ -319,12 +339,11 @@ var SignalPath = (function () {
 					$(pub).trigger('saved', [saveData]);
 				}
 				else {
-					options.errorHandler({msg:data.message});
+					handleError(data.message)
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				$(pub).trigger('error', errorThrown);
-				options.errorHandler({msg:errorThrown});
+				handleError(errorThrown)
 			}
 		});
 	}
@@ -367,9 +386,7 @@ var SignalPath = (function () {
 		if (opt.url) {
 			$.getJSON(opt.url, params, function(data) {
 				if (data.error) {
-					$(pub).trigger('error', data.error)
-
-					options.errorHandler({msg:data.message});
+					handleError(data.message)
 
 					if (data.signalPathData) {
 						_load(data, opt, callback);
@@ -385,10 +402,7 @@ var SignalPath = (function () {
 	function _load(data,options,callback) {
 		loadJSON(data);
 		
-		saveData = {
-			isSaved : true,
-			name: (data.signalPathData && data.signalPathData.name ? data.signalPathData.name : data.name)
-		}
+		saveData = {}
 		
 		$.extend(saveData,options.saveData);
 		$.extend(saveData,data.saveData);
@@ -432,7 +446,7 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (data.error) {
-					options.errorHandler({msg:"Error:\n"+data.error});
+					handleError("Error:\n"+data.error)
 				}
 				else {
 					runnerId = data.runnerId;
@@ -440,7 +454,7 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler({msg:textStatus+"\n"+errorThrown});
+				handleError(textStatus+"\n"+errorThrown)
 			}
 		});
 	}
@@ -488,7 +502,7 @@ var SignalPath = (function () {
 		}
 		else if (message.type=="E") {
 			closeSubscription();
-			options.errorHandler({msg:message.error});
+			handleError(message.error)
 		}
 		else if (message.type=="N") {
 			options.notificationHandler(message);
@@ -518,11 +532,11 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (data.error) {
-					options.errorHandler({msg:"Error:\n"+data.error});
+					handleError("Error:\n"+data.error)
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				options.errorHandler({msg:textStatus+"\n"+errorThrown});
+				handleError(textStatus+"\n"+errorThrown)
 			}
 		});
 

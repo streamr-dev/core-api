@@ -17,6 +17,7 @@ public class FlexBarify extends AbstractSignalPathModule {
 	TimeSeriesOutput low = new TimeSeriesOutput(this,"low");
 	TimeSeriesOutput close = new TimeSeriesOutput(this,"close");
 	TimeSeriesOutput avg = new TimeSeriesOutput(this,"avg");
+	TimeSeriesOutput sum = new TimeSeriesOutput(this,"sum");
 	
 	Bar currentBar = new Bar(null,null,null,null,null,null,0,0);
 	Bar previousBar = null;
@@ -32,8 +33,8 @@ public class FlexBarify extends AbstractSignalPathModule {
 			if (input.value < currentBar.low)
 				currentBar.low = input.value;
 				
-			currentBar.avgSum += valueLength.value * input.value;
-			currentBar.avgEvents += valueLength.value;
+			currentBar.sum += valueLength.value * input.value;
+			currentBar.count += valueLength.value;
 		}
 	}
 	
@@ -55,6 +56,8 @@ public class FlexBarify extends AbstractSignalPathModule {
 		addOutput(close);
 		avg.noRepeat = false;
 		addOutput(avg);
+		sum.noRepeat = false;
+		addOutput(sum);
 	}
 	
 	@Override
@@ -83,7 +86,8 @@ public class FlexBarify extends AbstractSignalPathModule {
 				high.send(currentBar.high);
 				low.send(currentBar.low);
 				close.send(currentBar.close);
-				avg.send(currentBar.avgEvents>0 ? currentBar.avgSum/currentBar.avgEvents : currentBar.close);
+				sum.send(currentBar.sum);
+				avg.send(currentBar.count>0 ? currentBar.sum/currentBar.count : currentBar.close);
 
 				previousBar = currentBar;
 				
@@ -99,19 +103,19 @@ public class FlexBarify extends AbstractSignalPathModule {
 		public Double high;
 		public Double low;
 		public Double close;
-		public double avgSum;
-		public int avgEvents;
+		public double sum;
+		public int count;
 		
 		public Bar(Double start, Double current, Double open, Double high, Double low,
-				Double close, double avgSum, int avgEvents) {
+				Double close, double sum, int count) {
 			this.start = start;
 			this.current = current;
 			this.open = open;
 			this.high = high;
 			this.low = low;
 			this.close = close;
-			this.avgSum = avgSum;
-			this.avgEvents = avgEvents;
+			this.sum = sum;
+			this.count = count;
 		}
 	}
 

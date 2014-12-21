@@ -29,6 +29,8 @@
 		<r:require module='tour'/>
 	</g:if>
 	
+	<g:render template="/layouts/tracking"/>
+	
 	<r:layoutResources/>
     <g:layoutHead />
 </head>
