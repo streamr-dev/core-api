@@ -23,7 +23,6 @@ public class SignalPathRunner extends Thread {
 	
 	private List<Map> signalPathData
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
-	private PushChannel pushChannel;
 	
 	String runnerId
 	
@@ -49,8 +48,6 @@ public class SignalPathRunner extends Thread {
 			servletContext["signalPathRunners"] = [:]
 			
 		servletContext["signalPathRunners"].put(runnerId,this)
-		
-		pushChannel = new SocketIOPushChannel();
 	}
 	
 	public String getReturnChannel(int index) {
@@ -90,7 +87,7 @@ public class SignalPathRunner extends Thread {
 				} catch (Exception e) {
 					e = GrailsUtil.deepSanitize(e)
 					log.error("Error while instantiating SignalPaths!",e)
-					pushChannel.push(new ErrorMessage(e.getMessage() ?: e.toString()), runnerId)
+					globals?.uiChannel?.push(new ErrorMessage(e.getMessage() ?: e.toString()), runnerId)
 				}
 			}
 
@@ -123,12 +120,12 @@ public class SignalPathRunner extends Thread {
 				sb.append(reportException.message)
 			}
 			signalPaths.each {SignalPath sp->
-				pushChannel.push(new ErrorMessage(sb.toString()), sp.uiChannelId)
+				globals?.uiChannel?.push(new ErrorMessage(sb.toString()), sp.uiChannelId)
 			}
 		}
 		
 		signalPaths.each {SignalPath sp->
-			pushChannel.push(new DoneMessage(), sp.uiChannelId)
+			globals?.uiChannel?.push(new DoneMessage(), sp.uiChannelId)
 		}
 
 		log.info("SignalPathRunner is ready.")
