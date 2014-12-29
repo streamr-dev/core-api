@@ -8,10 +8,14 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 
 	protected String uiChannelId;
 	
+	public ModuleWithUI() {
+		super();
+		uiChannelId = UUID.randomUUID().toString();
+	}
+	
 	@Override
 	public void initialize() {
 		if (globals!=null && globals.getUiChannel()!=null) {
-			uiChannelId = UUID.randomUUID().toString();
 			globals.getUiChannel().addChannel(uiChannelId);
 		}
 	}

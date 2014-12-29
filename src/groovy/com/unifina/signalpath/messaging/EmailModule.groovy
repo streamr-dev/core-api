@@ -1,13 +1,12 @@
 package com.unifina.signalpath.messaging
 
-import groovy.transform.CompileStatic
-
 import java.text.SimpleDateFormat
 
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.Input
 import com.unifina.signalpath.ModuleOption
 import com.unifina.signalpath.ModuleOptions
+import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.Parameter
 import com.unifina.signalpath.StringParameter
 
@@ -84,13 +83,13 @@ $inputValues
 				}
 			} else {
 				if(emailSent){
-					parentSignalPath?.returnChannel?.sendNotification("Tried to send emails too often")
+					globals.uiChannel?.push(new NotificationMessage("Tried to send emails too often"), parentSignalPath.uiChannelId)
 					emailSent = false
 				}
 			}
 		}
 		else {
-			parentSignalPath?.returnChannel?.sendNotification(messageBody)
+			globals.uiChannel?.push(new NotificationMessage(messageBody), parentSignalPath.uiChannelId)
 		}
 
 

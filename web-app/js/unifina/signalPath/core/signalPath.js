@@ -55,9 +55,7 @@ var SignalPath = (function () {
 	
 	var modules;
 	var saveData;
-
-	var sessionId = null;
-	var runnerId = null;
+	var runData;
 
     var webRoot = "";
     
@@ -449,8 +447,7 @@ var SignalPath = (function () {
 					handleError("Error:\n"+data.error)
 				}
 				else {
-					runnerId = data.runnerId;
-					subscribe(data.channelMap,true);
+					subscribe(data,true);
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
@@ -460,26 +457,39 @@ var SignalPath = (function () {
 	}
 	pub.run = run;
 	
-	function subscribeToSession(channelMap,newSession) {
-		if (channelMap != null)
+	function subscribe(rd,newSession) {
+		if (runData != null)
 			abort();
 		
 		// SignalPath channel wiring
-		sessionId = channelMap.signalPath;
-		connection.subscribe(sessionId, processMessage)
+		runData = rd;
+		connection.subscribe(runData.channelMap.signalPath, processMessage)
 		
 		// Module channel wiring
-		for (hash in Object.getOwnPropertyNames(channelMap.modules)) {
-			connection.subscribe(channelMap.modules[hash], modules[hash].receiveResponse)
-		}
+		Object.getOwnPropertyNames(runData.channelMap.modules).forEach(function(hash) {
+			connection.subscribe(runData.channelMap.modules[hash], modules[hash].receiveResponse)
+		})
+		
+		// Start runner on subscription ack
+		$(connection).one('subscribed', function(e, channels) {
+			console.log("Subscribed, starting runner...")
+			$.ajax({
+				type: 'POST',
+				url: runData.startURL, 
+				dataType: 'json',
+				error: function(jqXHR,textStatus,errorThrown) {
+					handleError(textStatus+"\n"+errorThrown)
+				}
+			});
+		})
 		
 		connection.connect(newSession)
 
 		$(pub).trigger('started');
 	}
 	
-	function reconnect(sId) {
-		subscribeToSession(sId,false);
+	function reconnect() {
+		subscribe(runData,false);
 	}
 	pub.reconnect = reconnect;
 	
@@ -501,7 +511,7 @@ var SignalPath = (function () {
 			abort();
 		}
 		else if (message.type=="E") {
-			closeSubscription();
+			disconnect();
 			handleError(message.error)
 		}
 		else if (message.type=="N") {
@@ -509,15 +519,15 @@ var SignalPath = (function () {
 		}
 	}
 	
-	function closeSubscription() {
+	function disconnect() {
 		connection.disconnect()
 		
-		sessionId = null;
+		runData = null
 		$(pub).trigger('stopped');
 	}
 	
 	function isRunning() {
-		return sessionId!=null;
+		return runData!=null;
 	}
 	pub.isRunning = isRunning;
 	
@@ -527,7 +537,7 @@ var SignalPath = (function () {
 			type: 'POST',
 			url: options.abortUrl, 
 			data: {
-				runnerId: runnerId
+				runnerId: runData.runnerId
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -540,7 +550,7 @@ var SignalPath = (function () {
 			}
 		});
 
-		closeSubscription();
+		disconnect();
 	}
 	pub.abort = abort;
 	

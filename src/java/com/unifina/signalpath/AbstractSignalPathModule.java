@@ -573,7 +573,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				}
 			} catch (Exception e) {
 				log.error("Error making runtime change!",e);
-				globals.getUiChannel().push(parentSignalPath.new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
+				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
 	}

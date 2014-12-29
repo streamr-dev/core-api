@@ -49,13 +49,21 @@ StreamrClient.prototype.connect = function(reconnect) {
 		_this.streams[data.channel].handler(data)
 	})
 	
+	this.socket.on('subscribed', function(data) {
+		console.log("Subscribed to "+data.channels)
+		$(_this).trigger('subscribed', [data.channels])
+	})
+	
 	var onConnect = function() {
 		console.log("Connected!")
 		
+		var channels = []
 		for (var streamId in _this.streams) {
-			console.log("Subscribing to "+streamId)
-			_this.socket.emit('subscribe', {channels: [streamId]})
+			channels.push(streamId)
 		}
+		
+		console.log("Subscribing to "+channels)
+		_this.socket.emit('subscribe', {channels: channels})
 	}
 	
 	// On connect/reconnect, send subscription requests
@@ -84,6 +92,7 @@ StreamrClient.prototype.handleResponse = function(message, streamId, callback) {
 	
 	// Update ack counter
 	if (message.counter > stream.counter) {
+		this.disconnect()
 		throw "Messages SKIPPED! Counter: "+message.counter+", expected: "+stream.counter
 	}
 	else if (message.counter < stream.counter) {

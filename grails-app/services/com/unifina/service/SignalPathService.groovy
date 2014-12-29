@@ -21,8 +21,8 @@ class SignalPathService {
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
-	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, PushChannel pushChannel = null, boolean isRoot) {
-		SignalPath sp = new SignalPath(signalPathData,pushChannel,isRoot,globals)
+	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot) {
+		SignalPath sp = new SignalPath(signalPathData,isRoot,globals)
 		if (connectionsReady)
 			sp.connectionsReady()
 		return sp

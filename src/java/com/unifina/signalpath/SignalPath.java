@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -310,7 +309,7 @@ public class SignalPath extends ModuleWithUI {
 							notReady.append("\n");
 
 							if (globals.getUiChannel()!=null) {
-								globals.getUiChannel().push(parentSignalPath.new ModuleWarningMessage("Input was never ready: "+input.name, hash), uiChannelId);
+								globals.getUiChannel().push(new ModuleWarningMessage("Input was never ready: "+input.name, hash), uiChannelId);
 							}
 						}
 					}
@@ -359,40 +358,5 @@ public class SignalPath extends ModuleWithUI {
 	public void setExportedOutputs(List<Output> exportedOutputs) {
 		this.exportedOutputs = exportedOutputs;
 	}
-	
-	public class SignalPathMessage extends LinkedHashMap<String,Object>{
-		public Object cacheId = null;
-		public SignalPathMessage() {
-		}
-	}
-	
-	public class DoneMessage extends LinkedHashMap<String,Object> {
-		public DoneMessage() {
-			this.put("type","D");
-		}
-	}
-	
-	public class ErrorMessage extends SignalPathMessage {
-		public ErrorMessage(String error) {
-			this.put("type","E");
-			this.put("error",error);
-			this.cacheId = "error";
-		}
-	}
-	
-	public class NotificationMessage extends SignalPathMessage {
-		public NotificationMessage(String msg) {
-			this.put("type","N");
-			this.put("msg",msg);
-			this.cacheId = "notification";
-		}
-	}
-	
-	public class ModuleWarningMessage extends SignalPathMessage {
-		public ModuleWarningMessage(String msg, int hash) {
-			this.put("type", "MW");
-			this.put("hash", "hash");
-			this.put("msg", msg);
-		}
-	}
+
 }

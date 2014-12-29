@@ -1,5 +1,6 @@
 package com.unifina.push;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
@@ -8,6 +9,7 @@ public abstract class PushChannel {
 	
 	private HashMap<String,Counter> counterByChannel = new HashMap<>();
 	private boolean destroyed = false;
+	protected ArrayList<PushChannelEventListener> eventListeners = new ArrayList<>();
 	
 	public static final Logger log = Logger.getLogger(PushChannel.class);
 	
@@ -32,6 +34,11 @@ public abstract class PushChannel {
 	
 	public boolean isDestroyed() {
 		return destroyed;
+	}
+	
+	public void addEventListener(PushChannelEventListener l) {
+		if (!eventListeners.contains(l))
+			eventListeners.add(l);
 	}
 	
 	class Counter {

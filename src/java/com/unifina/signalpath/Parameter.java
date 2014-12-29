@@ -65,7 +65,7 @@ public abstract class Parameter<T> extends Input<T> {
 		// the path (not when creating, loading or saving)
 		if (!canBeEmpty && owner.globals!=null && owner.globals.getDataSource()!=null && isEmpty(v)) {
 			if (owner.globals.getUiChannel()!=null)
-				owner.globals.getUiChannel().push(owner.parentSignalPath.new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash), owner.parentSignalPath.getUiChannelId());
+				owner.globals.getUiChannel().push(new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash), owner.parentSignalPath.getUiChannelId());
 			
 			throw new IllegalArgumentException("Parameter "+(getOwner()!=null ? getOwner().getName()+"." : "")+(getDisplayName()==null ? getName() : getDisplayName())+" does not have a value!");
 		}

@@ -28,18 +28,22 @@ class KafkaService {
 	GrailsApplication grailsApplication
 	
 	private static final Logger log = Logger.getLogger(KafkaService)
-
+	
 	@CompileStatic
-    void sendMessage(String channelId, Object key, String message, boolean isJson=true) {
+	UnifinaKafkaProducer getProducer() {
 		if (producer == null) {
 			Properties props = ((ConfigObject)grailsApplication.config["unifina"]["kafka"]).toProperties()
 			ProducerConfig producerConfig = new ProducerConfig(props)
 			producer = new UnifinaKafkaProducer(props)
 		}
-
+		return producer
+	}
+	
+	@CompileStatic
+    void sendMessage(String channelId, Object key, String message, boolean isJson=true) {
 		if (isJson)
-			producer.sendJSON(channelId, key.toString(), System.currentTimeMillis(), message)
-		else producer.sendString(channelId, key.toString(), System.currentTimeMillis(), message)
+			getProducer().sendJSON(channelId, key.toString(), System.currentTimeMillis(), message)
+		else getProducer().sendString(channelId, key.toString(), System.currentTimeMillis(), message)
     }
 	
 	@CompileStatic

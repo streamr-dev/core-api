@@ -49,6 +49,14 @@ public class SocketIOPushChannel extends PushChannel {
 					  SocketIOPushChannel.this.notify();
 				  }
 			  }
+			}).on("client-disconnect", new Emitter.Listener() {
+			  @Override
+			  public void call(Object... args) {
+				  // This won't get called -- what channel should we subscribe to?
+				  log.info("Client disconnected!");
+				  for (PushChannelEventListener l : eventListeners)
+					  l.onClientDisconnected();
+			  }
 			});
 			
 			socket.connect();

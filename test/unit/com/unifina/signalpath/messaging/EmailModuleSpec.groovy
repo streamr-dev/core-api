@@ -9,8 +9,9 @@ import spock.lang.Specification
 
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.push.PushChannel
+import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.SignalPathReturnChannel
 import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
@@ -20,7 +21,7 @@ public class EmailModuleSpec extends Specification {
 	EmailModule module
 	MockMailService ms
 
-	def globals
+	Globals globals
 	boolean notificationSent = false
 
 	void setup() {
@@ -79,7 +80,7 @@ value2: test value
 	
 	void "module should send a notification for a non-realtime datasource"(){
 		module.parentSignalPath = new SignalPath()
-		module.parentSignalPath.returnChannel = Mock(SignalPathReturnChannel)
+		globals.uiChannel = Mock(PushChannel)
 		
 		when:
 			module.sub.receive("Test subject")
@@ -90,7 +91,7 @@ value2: test value
 		then: "email must not be sent"
 			!ms.mailSent
 		then: "notification must be sent"
-			1 * module.parentSignalPath.returnChannel.sendNotification("""
+			1 * globals.uiChannel.push(new NotificationMessage("""
 Message:
 Test message
 
@@ -101,7 +102,7 @@ Input Values:
 value1: 500
 value2: test value
 
-""")
+"""), module.parentSignalPath.uiChannelId)
 	}
 	
 	void "If trying to send emails too often send notification to warn about it"(){
@@ -118,7 +119,7 @@ value2: test value
 			}
 		}
 		module.parentSignalPath = new SignalPath()
-		module.parentSignalPath.returnChannel = Mock(SignalPathReturnChannel)
+		globals.uiChannel = Mock(PushChannel)
 		module.globals = globals
 		module.init()
 		module.inputCount = 2	
@@ -135,7 +136,7 @@ value2: test value
 			module.sendOutput()
 		then: "one notification should be sent"
 			!ms.mailSent	
-			1 * module.parentSignalPath.returnChannel.sendNotification("Tried to send emails too often")
+			1 * globals.uiChannel.push(new NotificationMessage("Tried to send emails too often"), module.parentSignalPath.uiChannelId)
 			
 		when: "sent third email after one minute"
 			module.setTime(70000)
@@ -146,7 +147,7 @@ value2: test value
 			module.sendOutput()
 		then: "an email should be sent again"
 			ms.mailSent
-			0 * module.parentSignalPath.returnChannel.sendNotification("Tried to send emails too often")
+			0 * globals.uiChannel.push(new NotificationMessage("Tried to send emails too often"), module.parentSignalPath.uiChannelId)
 	}
 
 

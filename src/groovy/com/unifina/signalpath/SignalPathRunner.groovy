@@ -6,11 +6,8 @@ import javax.servlet.ServletContext
 
 import org.apache.log4j.Logger
 
-import com.unifina.push.PushChannel
-import com.unifina.push.SocketIOPushChannel
+import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
-import com.unifina.signalpath.SignalPath.DoneMessage
-import com.unifina.signalpath.SignalPath.ErrorMessage
 import com.unifina.utils.Globals
 
 
@@ -48,16 +45,32 @@ public class SignalPathRunner extends Thread {
 			servletContext["signalPathRunners"] = [:]
 			
 		servletContext["signalPathRunners"].put(runnerId,this)
+		
+		/**
+		 * Instantiate the SignalPaths
+		 */
+		globals.dataSource = signalPathService.createDataSource(globals.signalPathContext, globals)
+		globals.init()
+
+		if (globals.signalPathContext.csv) {
+			globals.signalPathContext.speed = 0
+		}
+
+		// Instantiate SignalPaths from JSON
+		for (int i=0;i<signalPathData.size();i++) {
+			SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,true)
+			signalPaths.add(signalPath)
+		}
 	}
 	
-	public String getReturnChannel(int index) {
-		return signalPaths[index].uiChannelId
+	public List<SignalPath> getSignalPaths() {
+		return signalPaths
 	}
 	
 	public Map getModuleChannelMap(int signalPathIndex) {
 		Map result = [:]
 		signalPaths[signalPathIndex].modules.each {
-			if (it instanceof ModuleWithUI) {
+			if (it instanceof IHasPushChannel) {
 				result.put(it.hash.toString(), it.uiChannelId)
 			}
 		}
@@ -72,43 +85,17 @@ public class SignalPathRunner extends Thread {
 		
 		// Run
 		try {
-			globals.dataSource = signalPathService.createDataSource(globals.signalPathContext, globals)
-			globals.init()
-
-			if (globals.signalPathContext.csv) {
-				globals.signalPathContext.speed = 0
-			}
-
-			// Instantiate SignalPaths from JSON
-			for (int i=0;i<signalPathData.size();i++) {
-				try {
-					SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,pushChannel,true)
-					signalPaths.add(signalPath)
-				} catch (Exception e) {
-					e = GrailsUtil.deepSanitize(e)
-					log.error("Error while instantiating SignalPaths!",e)
-					globals?.uiChannel?.push(new ErrorMessage(e.getMessage() ?: e.toString()), runnerId)
-				}
-			}
-
 			for (SignalPath it : signalPaths)
 				it.connectionsReady()
-
+				
 			ready = true
+			
 			if (!signalPaths.isEmpty())
 				signalPathService.runSignalPaths(signalPaths)
 		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Error while running SignalPaths!",e)
 			reportException = e
-		}
-
-		// Cleanup
-		try {
-			destroy()
-		} catch (Exception e) {
-			e = GrailsUtil.deepSanitize(e)
-			log.error("Error while destroying SignalPathRunner!",e)
 		}
 
 		if (reportException) {
@@ -126,6 +113,14 @@ public class SignalPathRunner extends Thread {
 		
 		signalPaths.each {SignalPath sp->
 			globals?.uiChannel?.push(new DoneMessage(), sp.uiChannelId)
+		}
+		
+		// Cleanup
+		try {
+			destroy()
+		} catch (Exception e) {
+			e = GrailsUtil.deepSanitize(e)
+			log.error("Error while destroying SignalPathRunner!",e)
 		}
 
 		log.info("SignalPathRunner is ready.")
