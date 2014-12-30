@@ -467,7 +467,7 @@ var SignalPath = (function () {
 		
 		// Module channel wiring
 		Object.getOwnPropertyNames(runData.channelMap.modules).forEach(function(hash) {
-			connection.subscribe(runData.channelMap.modules[hash], modules[hash].receiveResponse)
+			connection.subscribe(runData.channelMap.modules[hash], modules[hash].receiveResponse, {resend:true})
 		})
 		
 		// Start runner on subscription ack

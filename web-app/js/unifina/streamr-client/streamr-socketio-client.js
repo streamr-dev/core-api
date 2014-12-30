@@ -11,12 +11,13 @@ function StreamrClient(options) {
 	$.extend(this.options, options || {})
 }
 
-StreamrClient.prototype.subscribe = function(streamId, callback) {
+StreamrClient.prototype.subscribe = function(streamId, callback, options) {
 	var _this = this
 	this.streams[streamId] = {
 		handler: function(response) {
 			_this.handleResponse(response, streamId, callback)
 		},
+		options: options,
 		counter: 0
 	}
 	
@@ -57,18 +58,17 @@ StreamrClient.prototype.connect = function(reconnect) {
 	var onConnect = function() {
 		console.log("Connected!")
 		
-		var channels = []
+		var subscriptions = []
 		for (var streamId in _this.streams) {
-			channels.push(streamId)
+			subscriptions.push({channel: streamId, options: _this.streams[streamId].options })
 		}
 		
-		console.log("Subscribing to "+channels)
-		_this.socket.emit('subscribe', {channels: channels})
+		console.log("Subscribing to "+JSON.stringify(subscriptions))
+		_this.socket.emit('subscribe', subscriptions)
 	}
 	
 	// On connect/reconnect, send subscription requests
 	this.socket.on('connect', onConnect)
-	this.socket.on('reconnect', onConnect)
 
 	this.connected = true
 	return this.streams

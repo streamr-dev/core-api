@@ -5,16 +5,21 @@
 	<script type="text/javascript" src="web-app/js/unifina/streamr-client/streamr-socketio-client.js"></script>
 
 	<script type="text/javascript">
+		var client
+
 		$(document).ready(function() {
-			var client = new StreamrClient()
-			client.subscribe("2a9f05cf-28c0-4b71-8537-f57bef7c6a8b", function(message) {
-				$("body").append(JSON.stringify(message)+"<br><br>")
-			})
+			client = new StreamrClient()
+			client.subscribe(
+				"3369c79b-b9ff-49e9-b38b-592adee53419", 
+				function(message) {
+					$("body").append(JSON.stringify(message)+"<br><br>")
+				},
+				{resend: true}
+			)
 			client.connect()
 		})
 	</script>
 </head>
 <body>
-
 </body>
 </html>
