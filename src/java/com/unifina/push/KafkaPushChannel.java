@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.unifina.kafkaclient.UnifinaKafkaUtils;
 import com.unifina.service.KafkaService;
 
 public class KafkaPushChannel extends PushChannel {
@@ -23,7 +24,13 @@ public class KafkaPushChannel extends PushChannel {
 	@Override
 	public void destroy() {
 		super.destroy();
-
+		
+		// Mark the topics for deletion
+		UnifinaKafkaUtils utils = kafkaService.createUtils();
+		for (String topic : getChannels()) {
+			utils.deleteTopic(topic);
+		}
+		utils.close();
 	}
 	
 	@Override

@@ -2,13 +2,9 @@ package com.unifina.service
 
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-
 import kafka.producer.ProducerConfig
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.FeedFile
@@ -18,6 +14,7 @@ import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.kafkaclient.UnifinaKafkaProducer
+import com.unifina.kafkaclient.UnifinaKafkaUtils
 import com.unifina.task.KafkaCollectTask
 import com.unifina.utils.TimeOfDayUtil
 
@@ -30,13 +27,23 @@ class KafkaService {
 	private static final Logger log = Logger.getLogger(KafkaService)
 	
 	@CompileStatic
+	private Properties getProperties() {
+		return ((ConfigObject)grailsApplication.config["unifina"]["kafka"]).toProperties()
+	}
+	
+	@CompileStatic
 	UnifinaKafkaProducer getProducer() {
 		if (producer == null) {
-			Properties props = ((ConfigObject)grailsApplication.config["unifina"]["kafka"]).toProperties()
+			Properties props = getProperties()
 			ProducerConfig producerConfig = new ProducerConfig(props)
 			producer = new UnifinaKafkaProducer(props)
 		}
 		return producer
+	}
+	
+	@CompileStatic 
+	UnifinaKafkaUtils createUtils() {
+		return new UnifinaKafkaUtils(getProperties())
 	}
 	
 	@CompileStatic
@@ -54,7 +61,7 @@ class KafkaService {
 	
 	Date getFirstTimestamp(String topic) {
 		log.info("Querying first timestamp for topic $topic...")
-		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
+		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(getProperties())
 		Date firstTimestamp = null
 		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
 			@Override
