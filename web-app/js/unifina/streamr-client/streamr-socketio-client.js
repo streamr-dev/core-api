@@ -69,6 +69,9 @@ StreamrClient.prototype.connect = function(reconnect) {
 	
 	// On connect/reconnect, send subscription requests
 	this.socket.on('connect', onConnect)
+	this.socket.on('disconnect', function() {
+		console.log("Disconnected.")
+	})
 
 	this.connected = true
 	return this.streams

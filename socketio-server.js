@@ -18,16 +18,25 @@ var offset = new kafka.Offset(client);
 
 // KAFKA HELPER FUNCTIONS
 
-function kafkaGetOffset(topic, earliest, cb) {
+function kafkaGetOffset(topic, earliest, cb, retryCount) {
 	offset.fetch([{topic:topic, time: (earliest ? -2 : -1)}], function (err, offsets) {
 		if (err) {
 			// If the topic does not exist, the fetch request may fail with LeaderNotAvailable.
-			// In that case use the offset 0.
+			// Retry up to 10 times with 100ms intervals
 			if (err=="LeaderNotAvailable") {
-				console.log("Topic "+topic+" might not exist, calling callback with offset 0.")
-				cb(0)
-			} 
+				retryCount = retryCount || 1
 				
+				if (retryCount <= 10) {
+					console.log("Got LeaderNotAvailable for "+topic+", retry "+retryCount+" in 100ms...")
+					setTimeout(function() {
+						kafkaGetOffset(topic, earliest, cb, retryCount+1)
+					})
+				}
+				else {
+					console.log("ERROR max retries reached, calling callback with offset 0")
+					cb(0)
+				}
+			}
 			else console.log("ERROR kafkaGetOffsets: "+err)
 		}
 		else {	
