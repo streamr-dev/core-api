@@ -54,6 +54,10 @@ StreamrClient.prototype.connect = function(reconnect) {
 		console.log("Subscribed to "+data.channels)
 		$(_this).trigger('subscribed', [data.channels])
 	})
+
+	this.socket.on('resent', function(data) {
+		console.log("Resend complete!")
+	})
 	
 	var onConnect = function() {
 		console.log("Connected!")

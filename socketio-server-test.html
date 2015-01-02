@@ -10,7 +10,7 @@
 		$(document).ready(function() {
 			client = new StreamrClient()
 			client.subscribe(
-				"19196ade-e9fa-464a-97a7-038324279c75", 
+				"webcomponent-test", 
 				function(message) {
 					$("body").append(JSON.stringify(message)+"<br><br>")
 				},
