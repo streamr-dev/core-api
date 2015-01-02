@@ -470,19 +470,6 @@ var SignalPath = (function () {
 			connection.subscribe(runData.channelMap.modules[hash], modules[hash].receiveResponse, {resend:true})
 		})
 		
-		// Start runner on subscription ack
-		$(connection).one('subscribed', function(e, channels) {
-			console.log("Subscribed, starting runner...")
-			$.ajax({
-				type: 'POST',
-				url: runData.startURL, 
-				dataType: 'json',
-				error: function(jqXHR,textStatus,errorThrown) {
-					handleError(textStatus+"\n"+errorThrown)
-				}
-			});
-		})
-		
 		connection.connect(newSession)
 
 		$(pub).trigger('started');

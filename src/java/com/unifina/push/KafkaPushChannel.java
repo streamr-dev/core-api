@@ -22,15 +22,23 @@ public class KafkaPushChannel extends PushChannel {
 	}
 
 	@Override
+	public void addChannel(String channel) {
+		super.addChannel(channel);
+		
+		// Explicitly create the topics
+		UnifinaKafkaUtils utils = kafkaService.getUtils();
+		utils.createTopic(channel, 1, 1);
+	}
+	
+	@Override
 	public void destroy() {
 		super.destroy();
 		
 		// Mark the topics for deletion
-		UnifinaKafkaUtils utils = kafkaService.createUtils();
+		UnifinaKafkaUtils utils = kafkaService.getUtils();
 		for (String topic : getChannels()) {
 			utils.deleteTopic(topic);
 		}
-		utils.close();
 	}
 	
 	@Override

@@ -21,8 +21,10 @@ import com.unifina.utils.TimeOfDayUtil
 
 class KafkaService {
 
-	UnifinaKafkaProducer producer = null
 	GrailsApplication grailsApplication
+	
+	UnifinaKafkaProducer producer = null
+	UnifinaKafkaUtils utils = null
 	
 	private static final Logger log = Logger.getLogger(KafkaService)
 	
@@ -42,8 +44,11 @@ class KafkaService {
 	}
 	
 	@CompileStatic 
-	UnifinaKafkaUtils createUtils() {
-		return new UnifinaKafkaUtils(getProperties())
+	UnifinaKafkaUtils getUtils() {
+		if (utils == null) {
+			utils = new UnifinaKafkaUtils(getProperties())
+		}
+		return utils
 	}
 	
 	@CompileStatic
