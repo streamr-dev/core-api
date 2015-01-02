@@ -79,6 +79,7 @@ function emitUiMessage(data, channel) {
 // KAFKA MSG HANDLERS
 
 consumer.on('message', function (message) {
+	console.log("Got message:" + JSON.stringify(message))
 	emitUiMessage(message.value, message.topic)
 });
 consumer.on('error', function (err) {

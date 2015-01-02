@@ -1,0 +1,49 @@
+
+<link rel="import" href="../../../js/polymer/polymer.html">
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="../../../js/socket.io-1.2.1/socket.io-1.2.1.js"></script>
+<script type="text/javascript" src="../../../js/unifina/streamr-client/streamr-socketio-client.js"></script>
+
+<polymer-element name="streamr-label" attributes="channel">
+	<template>
+		<style>
+			p {
+				font-size: 30px;
+			}
+		</style>
+		<p>Price: <span id="price">{{price}}</span></p>
+		<span>{{channel}}</span>
+		<content client="{{client}}"></content>
+
+	</template>
+	
+	
+	<script>
+	Polymer('streamr-label',{
+		ready: function() {
+			client = new StreamrClient()
+			price = this.price
+			console.log("This is now: "+this)
+			client.subscribe(
+				this.channel, 
+				function(message) {
+					console.log("And now it is: "+this)
+					console.log(message.y)
+				},
+				{resend: true}
+			)
+			client.connect()
+		},
+		
+
+		publish: {
+			channel: ''
+		}
+		
+
+
+	});
+	</script>
+</polymer-element>
+
+

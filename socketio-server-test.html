@@ -10,9 +10,10 @@
 		$(document).ready(function() {
 			client = new StreamrClient()
 			client.subscribe(
-				"3369c79b-b9ff-49e9-b38b-592adee53419", 
+				"webcomponent-test", 
 				function(message) {
-					$("body").append(JSON.stringify(message)+"<br><br>")
+//					$("body").append(JSON.stringify(message)+"<br><br>")
+					$("#price").html(message.y)
 				},
 				{resend: true}
 			)
@@ -21,5 +22,6 @@
 	</script>
 </head>
 <body>
+<p>Price: <span id="price"></span></p>
 </body>
 </html>
