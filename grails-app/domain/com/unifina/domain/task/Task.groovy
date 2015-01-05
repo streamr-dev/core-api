@@ -28,6 +28,8 @@ class Task {
 	String implementingClass
 	String taskGroupId
 	
+	Date runAfter
+	
 	public Task(String implementingClass, String config, String category, String taskGroupId, int complexity = 0, SecUser user = null) {
 		this.implementingClass = implementingClass
 		this.config = config
@@ -54,6 +56,7 @@ class Task {
 		error(nullable:true, maxSize: 1000)
 		config(maxSize: 1000)
 		skip(nullable:true)
+		runAfter(nullable:true)
 	}
 	
 }

@@ -9,6 +9,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.task.Task
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
@@ -16,6 +17,7 @@ import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.kafkaclient.UnifinaKafkaUtils
 import com.unifina.task.KafkaCollectTask
+import com.unifina.task.KafkaDeleteTopicTask
 import com.unifina.utils.TimeOfDayUtil
 
 
@@ -62,6 +64,33 @@ class KafkaService {
 	void sendMessage(String channelId, Object key, Map message) {
 		String str = (message as JSON).toString();
 		sendMessage(channelId, key, str, true);
+	}
+	
+	/**
+	 * Immediately marks topics for deletion. For delayed delete, see createDeleteTopicTask()
+	 * @param topics
+	 */
+	void deleteTopics(List topics) {
+		UnifinaKafkaUtils utils = getUtils();
+		for (String topic : topics) {
+			try {
+				utils.deleteTopic(topic);
+			} catch (Exception e) {
+				log.warn("Failed to delete topic "+topic+", due to: "+e.getMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Creates and saves a delayed Task for the deletion of topics
+	 * @param topics
+	 * @param delayMs
+	 */
+	void createDeleteTopicTask(List topics, long delayMs) {
+		Map config = KafkaDeleteTopicTask.getConfig(topics)
+		Task task = new Task(KafkaDeleteTopicTask.class.getName(), (config as JSON).toString(), "kafka-delete", UUID.randomUUID().toString())
+		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
+		task.save()
 	}
 	
 	Date getFirstTimestamp(String topic) {

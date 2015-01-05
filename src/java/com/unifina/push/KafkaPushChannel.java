@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.kafkaclient.UnifinaKafkaUtils;
 import com.unifina.service.KafkaService;
 
 public class KafkaPushChannel extends PushChannel {
@@ -25,15 +24,8 @@ public class KafkaPushChannel extends PushChannel {
 	public void destroy() {
 		super.destroy();
 		
-		// Mark the topics for deletion
-		UnifinaKafkaUtils utils = kafkaService.getUtils();
-		for (String topic : getChannels()) {
-			try {
-				utils.deleteTopic(topic);
-			} catch (Exception e) {
-				log.warn("Failed to delete topic "+topic+", due to: "+e.getMessage());
-			}
-		}
+		// Delayed-delete the topics in one hour
+		kafkaService.createDeleteTopicTask(getChannels(), 60*60*1000);
 	}
 	
 	@Override
