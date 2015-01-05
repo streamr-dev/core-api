@@ -166,8 +166,11 @@ io.on('connection', function (socket) {
 					}
 					var tryStartResend = function() {
 						if (from!=null && to!=null) {
-							// Both requests done, start resend
-							kafkaResend(sub.channel, from, to, handler, callback)
+							if (to >= 0) {
+								// Both requests done, start resend
+								kafkaResend(sub.channel, from, to, handler, callback)
+							}
+							else console.log("Nothing to resend on channel "+sub.channel)
 						}
 					}
 
@@ -179,7 +182,7 @@ io.on('connection', function (socket) {
 							tryStartResend()
 						})
 						kafkaGetOffset(sub.channel, false, function(offset) {
-							to = Math.max(offset - 1, 0)
+							to = offset - 1
 							tryStartResend()
 						})
 					}

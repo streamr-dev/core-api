@@ -20,15 +20,6 @@ public class KafkaPushChannel extends PushChannel {
 		super();
 		this.kafkaService = kafkaService;
 	}
-
-	@Override
-	public void addChannel(String channel) {
-		super.addChannel(channel);
-		
-		// Explicitly create the topics
-		UnifinaKafkaUtils utils = kafkaService.getUtils();
-		utils.createTopic(channel, 1, 1);
-	}
 	
 	@Override
 	public void destroy() {
@@ -37,7 +28,11 @@ public class KafkaPushChannel extends PushChannel {
 		// Mark the topics for deletion
 		UnifinaKafkaUtils utils = kafkaService.getUtils();
 		for (String topic : getChannels()) {
-			utils.deleteTopic(topic);
+			try {
+				utils.deleteTopic(topic);
+			} catch (Exception e) {
+				log.warn("Failed to delete topic "+topic+", due to: "+e.getMessage());
+			}
 		}
 	}
 	

@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import grails.transaction.Transactional
+
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
@@ -9,15 +11,25 @@ import org.apache.log4j.Logger
 import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.domain.security.SecUser
-import com.unifina.push.PushChannel
+import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.domain.signalpath.UiChannel
+import com.unifina.push.IHasPushChannel
+import com.unifina.push.KafkaPushChannel
+import com.unifina.push.PushChannelEventListener
+import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.NetworkInterfaceUtils
 
 class SignalPathService {
 
     static transactional = false
+	
 	def servletContext
+	def grailsApplication
+	def kafkaService
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
@@ -114,6 +126,70 @@ class SignalPathService {
 		return ds
 	}
 	
+	public List<RunningSignalPath> launch(List<Map> signalPathData, Map signalPathContext, SecUser user) {
+		
+		// Create Globals
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
+		globals.uiChannel = new KafkaPushChannel(kafkaService)
+		
+		// Create the runner thread
+		SignalPathRunner runner = new SignalPathRunner(signalPathData, globals)
+		String runnerId = runner.runnerId
+		
+		// Abort on client disconnect
+		globals.uiChannel.addEventListener(new PushChannelEventListener() {
+			public void onClientDisconnected() {
+				runner.abort()
+			}
+		})
+		
+		// Start the runner thread
+		runner.start()
+		
+		// Save reference to running SignalPaths to the database
+		return createRunningSignalPathReferences(runner, user)
+	}
+	
+	@Transactional
+	public List<RunningSignalPath> createRunningSignalPathReferences(SignalPathRunner runner, SecUser user) {
+		
+		return runner.getSignalPaths().collect {SignalPath sp->
+			RunningSignalPath rsp = new RunningSignalPath()
+			rsp.user = user
+			rsp.runner = runner.getRunnerId()
+			rsp.server = NetworkInterfaceUtils.getIPAddress()
+			rsp.json = signalPathToJson(sp)
+			
+			UiChannel rspUi = new UiChannel()
+			rspUi.id = sp.getUiChannelId()
+			rsp.addToUiChannels(rspUi)
+			
+			for (AbstractSignalPathModule it : sp.getModules()) {
+				if (it instanceof IHasPushChannel) {
+					UiChannel ui = new UiChannel()
+					ui.id = ((IHasPushChannel) it).getUiChannelId()
+					ui.hash = it.getHash().toString()
+					ui.module = it.getDomainObject()
+					
+					rsp.addToUiChannels(ui)
+				}
+			}
+			
+			rsp.save(flush:true, failOnError:true)
+			
+			return rsp
+		}
+	}
+	
+	@Transactional
+	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
+		List uiIds = UiChannel.executeQuery("select ui.id from UiChannel ui where ui.runningSignalPath.runner = ?", [runner.getRunnerId()])
+		if (!uiIds.isEmpty())
+			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiIds])
+			
+		RunningSignalPath.executeUpdate("delete from RunningSignalPath r where r.runner = ?", [runner.getRunnerId()])
+	}
+	
     def runSignalPaths(List<SignalPath> signalPaths) {
 		// Check that all the SignalPaths share the same Globals object
 		Globals globals = null
@@ -140,20 +216,24 @@ class SignalPathService {
 		signalPath.globals.dataSource.stopFeed()
 	}
 	
+	@Deprecated
 	void setLiveRunner(SecUser user, SignalPathRunner runner) {
 		setLiveRunner("live-$user.id",runner)
 	}
 	
+	@Deprecated
 	void setLiveRunner(String sessionId, SignalPathRunner runner) {
 		if (runner==null)
 			servletContext.removeAttribute(sessionId)
 		else servletContext[sessionId] = runner
 	}
 	
+	@Deprecated
 	SignalPathRunner getLiveRunner(SecUser user) {
 		return getLiveRunner("live-$user.id")
 	}
 	
+	@Deprecated
 	SignalPathRunner getLiveRunner(String sessionId) {
 		return servletContext[sessionId]
 	}

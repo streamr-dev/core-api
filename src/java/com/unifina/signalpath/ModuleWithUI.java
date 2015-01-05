@@ -14,10 +14,11 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	}
 	
 	@Override
-	public void initialize() {
+	public void connectionsReady() {
 		if (globals!=null && globals.getUiChannel()!=null) {
 			globals.getUiChannel().addChannel(uiChannelId);
 		}
+		super.connectionsReady();
 	}
 	
 	@Override
