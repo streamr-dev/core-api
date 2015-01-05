@@ -8,13 +8,22 @@
 <script src="../js/webcomponentsjs/webcomponents.min.js"></script>
 <link rel="import" href="../js/polymer/polymer.html">
 <link rel="import" href="components/streamr-label/streamr-label.html">
+<link rel="import" href="components/streamr-frame/streamr-frame.html">
+
+
+<script type="text/javascript" src="../../../js/socket.io-1.2.1/socket.io-1.2.1.js"></script>
+<script type="text/javascript" src="../../../js/unifina/streamr-client/streamr-socketio-client.js"></script>
+
+
 
 
 </head>
 
 <body>
-
-<streamr-label channel="webcomponent-test"></streamr-label>
+<script>
+	this.client = new StreamrClient()
+</script>
+<streamr-label channel="webcomponent-test" bah={{client}}></streamr-label>
 
 </body>
 </html>
