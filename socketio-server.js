@@ -119,6 +119,12 @@ function emitUiMessage(data, channel) {
 	io.sockets.in(channel).emit('ui', data);
 }
 
+// KAFKA CLIENT EVENT HANDLERS
+
+client.on('error', function(err) {
+	console.log("kafka client error: "+err)
+})
+
 // KAFKA MSG HANDLERS
 
 consumer.on('message', function (message) {
