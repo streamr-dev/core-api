@@ -4,7 +4,7 @@
 <script type="text/javascript" src="../../../js/socket.io-1.2.1/socket.io-1.2.1.js"></script>
 <script type="text/javascript" src="../../../js/unifina/streamr-client/streamr-socketio-client.js"></script>
 
-<polymer-element name="streamr-label" attributes="channel bah">
+<polymer-element name="streamr-label" attributes="channel streamrClient">
 	<template>
 		<style>
 			p {
@@ -20,7 +20,7 @@
 	(function() {
 	Polymer('streamr-label',{
 			ready: function() {
-			client = this.bah
+			client = this.streamrClient
 			var this1 = this
 			client.subscribe(
 				this.channel, 
@@ -31,11 +31,6 @@
 				{resend: true}
 			)
 			client.connect()
-		},
-		
-
-		publish: {
-			channel: '',
 		}
 		});
 	})();
