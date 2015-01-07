@@ -1,28 +1,30 @@
 
 <link rel="import" href="../../../js/polymer/polymer.html">
-<link rel="import" href="../streamr-label/streamr-label.html">
-
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
 <script type="text/javascript" src="../../../js/socket.io-1.2.1/socket.io-1.2.1.js"></script>
 <script type="text/javascript" src="../../../js/unifina/streamr-client/streamr-socketio-client.js"></script>
 
-<polymer-element name="streamr-client" attributes="channel">
-	<template>
-	</template>
+<polymer-element name="streamr-client" attributes="server">
 	<script>
 	(function(){
 		var streamrClient = new StreamrClient()
+
+		setTimeout(function() {
+			streamrClient.connect()
+		}, 2000)
+
 		Polymer('streamr-client', {
-			ready: function() {
+			// This function is executed multiple times, once for each element!
+			created: function() {
 				this.streamrClient = streamrClient
 			},
-			publish: {
-				channel: 'emptyChannel'			
+			// This function is executed multiple times, once for each element!
+			ready: function() {
+				if (this.server)
+					streamrClient.options.socketIoUrl = this.server
 			}
 		});
 	})();
 	</script>
 	
 </polymer-element>
-
-

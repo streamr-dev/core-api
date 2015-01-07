@@ -1,29 +1,19 @@
 <html>
 <head>
 
-<title>TESTI</title>
+	<title>TESTI</title>
 
-<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-
-<script src="../js/webcomponentsjs/webcomponents.min.js"></script>
-<link rel="import" href="../js/polymer/polymer.html">
-<link rel="import" href="components/streamr-label/streamr-label.html">
-<link rel="import" href="components/streamr-client/streamr-client.html">
-
-
-<script type="text/javascript" src="../../../js/socket.io-1.2.1/socket.io-1.2.1.js"></script>
-<script type="text/javascript" src="../../../js/unifina/streamr-client/streamr-socketio-client.js"></script>
-
-
+	<script src="../js/webcomponentsjs/webcomponents.min.js"></script>
+	<link rel="import" href="../js/polymer/polymer.html">
+	<link rel="import" href="components/streamr-label/streamr-label.html">
+	<link rel="import" href="components/streamr-client/streamr-client.html">
 
 
 </head>
 
 <body>
-<script>
-
-</script>
-<streamr-client id="bah" channel="webcomponent-test"></streamr-client>
-<streamr-label channel={{bah.channel}} streamrClient={{bah.streamrClient}}><p>{{$.bah.channel}}</p></streamr-label>
+	<streamr-client server="192.168.10.123:8090"></streamr-client>
+	<streamr-label channel="webcomponent-test"></streamr-label>
+	<streamr-label channel="webcomponent-test2"></streamr-label>
 </body>
 </html>
