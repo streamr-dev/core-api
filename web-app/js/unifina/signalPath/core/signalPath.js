@@ -231,7 +231,7 @@ var SignalPath = (function () {
 		
 		// Generate an internal index for the module and store a reference in a table
 		if (data.hash==null) {
-			data.hash = moduleHashCounter++
+			data.hash = moduleHashGenerator++
 		}
 		
 		var mod = eval("SignalPath."+data.jsModule+"(data,canvas,{signalPath:pub})");
@@ -464,11 +464,11 @@ var SignalPath = (function () {
 		runData.uiChannels.forEach(function(uiChannel) {
 			// Module channels reference the module by hash
 			if (uiChannel.hash!=null) {
-				connection.subscribe(uiChannel.id, getModuleById(uiChannel.hash).receiveResponse, {resend:true})
+				connection.subscribe(uiChannel.id, getModuleById(uiChannel.hash).receiveResponse, {resend_all:true})
 			}
 			// Other channels handled by this SignalPath
 			else {
-				connection.subscribe(uiChannel.id, processMessage, {resend:true})
+				connection.subscribe(uiChannel.id, processMessage, {resend_all:true})
 			}
 		})
 		

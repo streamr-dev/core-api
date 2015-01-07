@@ -17,7 +17,8 @@ StreamrClient.prototype.subscribe = function(streamId, callback, options) {
 		handler: function(response) {
 			_this.handleResponse(response, streamId, callback)
 		},
-		options: options,
+		options: options || {},
+		queue: [],
 		counter: 0
 	}
 	
@@ -56,7 +57,38 @@ StreamrClient.prototype.connect = function(reconnect) {
 	})
 
 	this.socket.on('resent', function(data) {
-		console.log("Resend complete!")
+		var stream = _this.streams[data.channel]
+		stream.resending = false
+		
+		console.log("Channel resend complete: "+data.channel)
+		
+		if (stream.queue.length) {
+			console.log("Attempting to process "+stream.queue.length+" queued messages for channel "+data.channel)
+			
+			var i
+			for (i=0;i<stream.queue.length;i++) {
+				// If the counter is correct, process the message
+				if (stream.queue[i].counter === stream.counter)
+					stream.handler(stream.queue[i])
+				// Ignore old messages in the queue
+				else if (stream.queue[i].counter < stream.counter)
+					continue
+				// Else stop looping
+				else if (stream.queue[i].counter > stream.counter)
+					break
+			}
+			
+			// All messages in queue were processed
+			if (i===stream.queue.length) {
+				stream.queue = []
+			}
+			// Some messages could not be processed, so compact the queue 
+			// and request another resend for the gap!
+			else {
+				stream.queue.splice(0, i)
+				_this.requestResend(data.channel, stream.counter, stream.queue[0].counter-1)
+			}
+		}
 	})
 	
 	var onConnect = function() {
@@ -64,7 +96,21 @@ StreamrClient.prototype.connect = function(reconnect) {
 		
 		var subscriptions = []
 		for (var streamId in _this.streams) {
-			subscriptions.push({channel: streamId, options: _this.streams[streamId].options })
+			var stream = _this.streams[streamId]
+			var sub = {channel: streamId, options: stream.options }
+			
+			// Change resend_all -> resend_from mode if messages have already been received
+			if (stream.counter && (stream.options.resend_all || stream.options.resend_from!=null)) {
+				delete sub.options.resend_all
+				sub.options.resend_from = stream.counter
+			}
+			
+			subscriptions.push(sub)
+			
+			if (stream.options.resend_all || stream.options.resend_from || stream.options.resend_last) {
+				console.log("Waiting for resend for channel "+streamId)
+				stream.resending = true
+			}
 		}
 		
 		console.log("Subscribing to "+JSON.stringify(subscriptions))
@@ -87,6 +133,14 @@ StreamrClient.prototype.disconnect = function() {
 	this.connected = false
 }
 
+StreamrClient.prototype.requestResend = function(streamId, from, to) {
+	var stream = this.streams[streamId]
+	stream.resending = true
+	
+	console.log("Requesting resend for "+streamId+" from "+from+" to "+to)
+	this.socket.emit('resend', {channel:streamId, from:from, to:to})
+}
+
 StreamrClient.prototype.handleResponse = function(message, streamId, callback) {
 	var stream = this.streams[streamId]
 	
@@ -99,17 +153,20 @@ StreamrClient.prototype.handleResponse = function(message, streamId, callback) {
 	
 	// Update ack counter
 	if (message.counter > stream.counter) {
-		this.disconnect()
-		throw "Messages SKIPPED! Counter: "+message.counter+", expected: "+stream.counter
+		stream.queue.push(message)
+		
+		if (!stream.resending) {
+			console.log("Gap detected, requesting resend for channel "+streamId)
+			this.requestResend(streamId, stream.counter, message.counter-1)
+		}
 	}
 	else if (message.counter < stream.counter) {
 		console.log("Already received message: "+message.counter+", expecting: "+stream.counter);
-		return // ok?
 	}
-	
-	stream.counter = message.counter + 1;
-	
-	callback(message);
+	else {
+		stream.counter = message.counter + 1;
+		callback(message);
+	}
 }
 
 exports.StreamrClient = StreamrClient

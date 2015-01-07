@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.unifina.kafkaclient.UnifinaKafkaUtils;
 import com.unifina.service.KafkaService;
 
 public class KafkaPushChannel extends PushChannel {
@@ -18,6 +19,15 @@ public class KafkaPushChannel extends PushChannel {
 	public KafkaPushChannel(KafkaService kafkaService) {
 		super();
 		this.kafkaService = kafkaService;
+	}
+	
+	@Override
+	public void addChannel(String channel) {
+		super.addChannel(channel);
+		
+		// Explicitly create the topics
+		UnifinaKafkaUtils utils = kafkaService.getUtils();
+		utils.createTopic(channel, 1, 1);
 	}
 	
 	@Override
