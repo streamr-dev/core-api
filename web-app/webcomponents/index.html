@@ -4,16 +4,24 @@
 	<title>TESTI</title>
 
 	<script src="../js/webcomponentsjs/webcomponents.min.js"></script>
-	<link rel="import" href="../js/polymer/polymer.html">
 	<link rel="import" href="components/streamr-label/streamr-label.html">
 	<link rel="import" href="components/streamr-client/streamr-client.html">
 
+	<style>
+		streamr-label {
+		    
+		    background-color: blue;
+		    font-size: 30px;
+
+		} 
+	</style>
 
 </head>
 
 <body>
+	<div>
 	<streamr-client server="192.168.10.123:8090"></streamr-client>
 	<streamr-label channel="webcomponent-test"></streamr-label>
-	<streamr-label channel="webcomponent-test2"></streamr-label>
+	</div>
 </body>
 </html>

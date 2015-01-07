@@ -3,16 +3,17 @@
 
 <polymer-element name="streamr-label" attributes="channel">
 	<template>
+	<style>
+		:host {
+			background-color: red;
+			font-size: 10px
+		}
+	</style>
+
+
 		<streamr-client id="bah"></streamr-client>
-		<style>
-			p {
-				font-size: 30px;
-			}
-		</style>
-		<p>Price: <span>{{price}}</span></p>
-		<span>{{channel}}</span>
+		<span class="streamr-label-value">{{value}}</span>
 	</template>
-	
 	
 	<script>
 		Polymer('streamr-label',{
@@ -23,7 +24,8 @@
 						_this.$.bah.streamrClient.subscribe(
 							_this.channel, 
 							function(message) {
-								_this.price = message.y
+								console.log(message.y)
+								_this.value = message.y
 							},
 							{resend: true}
 						)
@@ -34,7 +36,6 @@
 				}
 
 				trySubscribe()
-				console.log("label ready")
 			}
 		});
 	</script>
