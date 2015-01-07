@@ -2,6 +2,7 @@ package com.unifina.push;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -18,6 +19,10 @@ public abstract class PushChannel {
 	
 	public void addChannel(String channel) {
 		counterByChannel.put(channel, new Counter(0));
+	}
+	
+	public List<String> getChannels() {
+		return new ArrayList<>(counterByChannel.keySet());
 	}
 	
 	public void push(Object content, String channel) {

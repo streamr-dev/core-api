@@ -133,13 +133,16 @@ public class SignalPathRunner extends Thread {
 		servletContext["signalPathRunners"].remove(runnerId)
 		signalPaths.each {it.destroy()}
 		globals.destroy()
+		signalPathService.deleteRunningSignalPathReferences(this)
 	}
 	
 	public void abort() {
 		log.info("Aborting SignalPathRunner..")
 		globals.abort = true
 		globals.dataSource?.stopFeed()
-		destroy()
+		
+		// Will be called in run() before exiting
+//		destroy()
 		
 		// Interrupt whatever this thread is doing
 		// Commented out because I witnessed a deadlock leading to this call, revisit later if necessary

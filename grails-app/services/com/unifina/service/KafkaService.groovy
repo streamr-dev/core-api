@@ -2,41 +2,55 @@ package com.unifina.service
 
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-
 import kafka.producer.ProducerConfig
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.task.Task
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.kafkaclient.UnifinaKafkaProducer
+import com.unifina.kafkaclient.UnifinaKafkaUtils
 import com.unifina.task.KafkaCollectTask
+import com.unifina.task.KafkaDeleteTopicTask
 import com.unifina.utils.TimeOfDayUtil
 
 
 class KafkaService {
 
-	UnifinaKafkaProducer producer = null
 	GrailsApplication grailsApplication
+	
+	UnifinaKafkaProducer producer = null
+	UnifinaKafkaUtils utils = null
 	
 	private static final Logger log = Logger.getLogger(KafkaService)
 	
 	@CompileStatic
+	private Properties getProperties() {
+		return ((ConfigObject)grailsApplication.config["unifina"]["kafka"]).toProperties()
+	}
+	
+	@CompileStatic
 	UnifinaKafkaProducer getProducer() {
 		if (producer == null) {
-			Properties props = ((ConfigObject)grailsApplication.config["unifina"]["kafka"]).toProperties()
+			Properties props = getProperties()
 			ProducerConfig producerConfig = new ProducerConfig(props)
 			producer = new UnifinaKafkaProducer(props)
 		}
 		return producer
+	}
+	
+	@CompileStatic 
+	UnifinaKafkaUtils getUtils() {
+		if (utils == null) {
+			utils = new UnifinaKafkaUtils(getProperties())
+		}
+		return utils
 	}
 	
 	@CompileStatic
@@ -52,9 +66,36 @@ class KafkaService {
 		sendMessage(channelId, key, str, true);
 	}
 	
+	/**
+	 * Immediately marks topics for deletion. For delayed delete, see createDeleteTopicTask()
+	 * @param topics
+	 */
+	void deleteTopics(List topics) {
+		UnifinaKafkaUtils utils = getUtils();
+		for (String topic : topics) {
+			try {
+				utils.deleteTopic(topic);
+			} catch (Exception e) {
+				log.warn("Failed to delete topic "+topic+", due to: "+e.getMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Creates and saves a delayed Task for the deletion of topics
+	 * @param topics
+	 * @param delayMs
+	 */
+	void createDeleteTopicTask(List topics, long delayMs) {
+		Map config = KafkaDeleteTopicTask.getConfig(topics)
+		Task task = new Task(KafkaDeleteTopicTask.class.getName(), (config as JSON).toString(), "kafka-delete", UUID.randomUUID().toString())
+		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
+		task.save()
+	}
+	
 	Date getFirstTimestamp(String topic) {
 		log.info("Querying first timestamp for topic $topic...")
-		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
+		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(getProperties())
 		Date firstTimestamp = null
 		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
 			@Override

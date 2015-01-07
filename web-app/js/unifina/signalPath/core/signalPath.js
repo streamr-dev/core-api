@@ -53,7 +53,9 @@ var SignalPath = (function () {
     
     var connection;
 	
-	var modules;
+	var modules = {}
+	var moduleHashGenerator = 0
+	
 	var saveData;
 	var runData;
 
@@ -137,7 +139,7 @@ var SignalPath = (function () {
 					module.updateFrom(data);
 					
 					var div = module.getDiv();					
-					modules[module.getHash()] = module;
+					setModuleById(module.getHash(), module);
 					module.redraw(); // Just in case
 					if (callback)
 						callback();
@@ -146,7 +148,7 @@ var SignalPath = (function () {
 					// TODO: generalize
 					if (data.moduleErrors) {
 						for (var i=0;i<data.moduleErrors.length;i++) {
-							modules[data.moduleErrors[i].hash].receiveResponse(data.moduleErrors[i].payload);
+							getModuleById(data.moduleErrors[i].hash).receiveResponse(data.moduleErrors[i].payload);
 						}
 					}
 					handleError(data.message)
@@ -166,13 +168,12 @@ var SignalPath = (function () {
 	
 	function replaceModule(module,id,configuration) {
 		addModule(id,configuration,function(newModule) {
-			var hash = newModule.getHash();
-			modules[hash] = null;
+			deleteModuleById(newModule.getHash())
 			
 			newModule.setLayoutData(module.getLayoutData());
 			// TODO: replace connections
 			module.close();
-			modules[module.getHash()] = newModule;
+			setModuleById(module.getHash(), newModule)
 			newModule.redraw();
 		});
 	}
@@ -230,16 +231,12 @@ var SignalPath = (function () {
 		
 		// Generate an internal index for the module and store a reference in a table
 		if (data.hash==null) {
-			data.hash = modules.length; //hash++;
+			data.hash = moduleHashCounter++
 		}
 		
 		var mod = eval("SignalPath."+data.jsModule+"(data,canvas,{signalPath:pub})");
 		
-		// Resize the modules array if necessary
-		while (modules.length < data.hash+1)
-			modules.push(null);
-		
-		modules[mod.getHash()] = mod;
+		setModuleById(mod.getHash(), mod)
 		
 		var div = mod.getDiv();
 		
@@ -250,7 +247,7 @@ var SignalPath = (function () {
 		mod.onClose = function() {
 			// Remove hash entry
 			var hash = mod.getHash();
-			modules[hash] = null;
+			deleteModuleById(hash)
 			if (oldClose)
 				oldClose();
 		}
@@ -260,20 +257,26 @@ var SignalPath = (function () {
 	pub.createModuleFromJSON = createModuleFromJSON;
 	
 	function getModules() {
-		var result = [];
-		for (var i=0;i<modules.length;i++) {
-			if (modules[i]==null)
-				continue;
-			else result.push(modules[i]);
-		}
-		return result;
+		var result = []
+		Object.keys(modules).forEach(function(key) {
+			result.push(modules[key])
+		})
+		return result
 	}
 	pub.getModules = getModules;
 	
 	function getModuleById(id) {
-		return modules[id];
+		return modules[id.toString()];
 	}
 	pub.getModuleById = getModuleById;
+	
+	function setModuleById(id, module) {
+		modules[id.toString()] = module
+	}
+	
+	function deleteModuleById(id) {
+		delete modules[id.toString()]
+	}
 	
 	function signalPathToJSON(signalPathContext) {
 		var result = {
@@ -287,13 +290,10 @@ var SignalPath = (function () {
 		if (saveData && saveData.name)
 			result.signalPathData.name = saveData.name;
 		
-		for (var i=0;i<modules.length;i++) {
-			if (modules[i]==null)
-				continue;
-			
-			var json = modules[i].toJSON();
+		getModules().forEach(function(module) {
+			var json = module.toJSON()
 			result.signalPathData.modules.push(json);
-		}
+		})
 		
 		return result;
 	}
@@ -351,14 +351,12 @@ var SignalPath = (function () {
 		if (isRunning())
 			abort();
 		
-		if (modules) {
-			$(modules).each(function(i,mod) {
-				if (mod!=null)
-					mod.close();
-			});
-		}
+		getModules().forEach(function(module) {
+			module.close()
+		})
 		
-		modules = [];
+		modules = {};
+		moduleHashGenerator = 0;
 		
 		saveData = {
 				isSaved : false
@@ -428,11 +426,9 @@ var SignalPath = (function () {
 		$(".warning").remove();
 
 		// Clean modules before running
-		for (var i=0;i<modules.length;i++) {
-			if (modules[i]==null)
-				continue;
-			else modules[i].clean();
-		}
+		getModules().forEach(function(module) {
+			module.clean()
+		})
 		
 		$.ajax({
 			type: 'POST',
@@ -463,24 +459,17 @@ var SignalPath = (function () {
 		
 		// SignalPath channel wiring
 		runData = rd;
-		connection.subscribe(runData.channelMap.signalPath, processMessage)
 		
-		// Module channel wiring
-		Object.getOwnPropertyNames(runData.channelMap.modules).forEach(function(hash) {
-			connection.subscribe(runData.channelMap.modules[hash], modules[hash].receiveResponse, {resend:true})
-		})
-		
-		// Start runner on subscription ack
-		$(connection).one('subscribed', function(e, channels) {
-			console.log("Subscribed, starting runner...")
-			$.ajax({
-				type: 'POST',
-				url: runData.startURL, 
-				dataType: 'json',
-				error: function(jqXHR,textStatus,errorThrown) {
-					handleError(textStatus+"\n"+errorThrown)
-				}
-			});
+		// Channel wiring
+		runData.uiChannels.forEach(function(uiChannel) {
+			// Module channels reference the module by hash
+			if (uiChannel.hash!=null) {
+				connection.subscribe(uiChannel.id, getModuleById(uiChannel.hash).receiveResponse, {resend:true})
+			}
+			// Other channels handled by this SignalPath
+			else {
+				connection.subscribe(uiChannel.id, processMessage, {resend:true})
+			}
 		})
 		
 		connection.connect(newSession)
@@ -497,7 +486,7 @@ var SignalPath = (function () {
 		if (message.type=="P") {
 			var hash = message.hash;
 			try {
-				modules[hash].receiveResponse(message.payload);
+				getModuleById(hash).receiveResponse(message.payload);
 			} catch (err) {
 				console.log(err.stack);
 			}
@@ -505,7 +494,7 @@ var SignalPath = (function () {
 		}
 		else if (message.type=="MW") {
 			var hash = message.hash;
-			modules[hash].addWarning(message.payload);
+			getModuleById(hash).addWarning(message.payload);
 		}
 		else if (message.type=="D") {
 			abort();

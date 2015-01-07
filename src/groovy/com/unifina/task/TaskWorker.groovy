@@ -71,7 +71,7 @@ class TaskWorker extends Thread {
 						public void execute(Connection connection) throws SQLException {
 							Statement stmt = connection.createStatement()
 							stmt.executeUpdate("SET @update_id := 0")
-							stmt.executeUpdate("UPDATE task SET available=false, id = (SELECT @update_id := id), last_updated = current_timestamp WHERE user_id = $priorityUser.id AND available = true LIMIT 1")
+							stmt.executeUpdate("UPDATE task SET available=false, id = (SELECT @update_id := id), last_updated = current_timestamp WHERE user_id = $priorityUser.id AND available = true AND (run_after is null OR current_timestamp > run_after) LIMIT 1")
 							ResultSet rs = stmt.executeQuery("SELECT @update_id as uid")
 							rs.next()
 							id = rs.getLong("uid")	
@@ -90,7 +90,7 @@ class TaskWorker extends Thread {
 						public void execute(Connection connection) throws SQLException {
 							Statement stmt = connection.createStatement()
 							stmt.executeUpdate("SET @update_id := 0")
-							stmt.executeUpdate("UPDATE task SET available=false, id = (SELECT @update_id := id), last_updated = current_timestamp WHERE available = true LIMIT 1")
+							stmt.executeUpdate("UPDATE task SET available=false, id = (SELECT @update_id := id), last_updated = current_timestamp WHERE available = true AND (run_after is null OR current_timestamp > run_after) LIMIT 1")
 							ResultSet rs = stmt.executeQuery("SELECT @update_id as uid")
 							rs.next()
 							id = rs.getLong("uid")	

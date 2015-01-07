@@ -54,6 +54,10 @@ StreamrClient.prototype.connect = function(reconnect) {
 		console.log("Subscribed to "+data.channels)
 		$(_this).trigger('subscribed', [data.channels])
 	})
+
+	this.socket.on('resent', function(data) {
+		console.log("Resend complete!")
+	})
 	
 	var onConnect = function() {
 		console.log("Connected!")
@@ -69,6 +73,9 @@ StreamrClient.prototype.connect = function(reconnect) {
 	
 	// On connect/reconnect, send subscription requests
 	this.socket.on('connect', onConnect)
+	this.socket.on('disconnect', function() {
+		console.log("Disconnected.")
+	})
 
 	this.connected = true
 	return this.streams
