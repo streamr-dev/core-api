@@ -14,7 +14,7 @@
 				function(message) {
 					$("body").append(JSON.stringify(message)+"<br><br>")
 				},
-				{resend: true}
+				{resend_from: -1}
 			)
 			client.connect()
 		})

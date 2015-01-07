@@ -24,7 +24,7 @@ function kafkaGetOffset(topic, earliest, cb, retryCount) {
 		// or UnknownTopicOrPartition. It may also succeed but return an empty partition list.
 		// Retry up to 10 times with 500ms intervals
 		
-		if (err=="LeaderNotAvailable" || "UnknownTopicOrPartition" || offsets[topic]["0"]==null || !offsets[topic]["0"].length) {
+		if (err=="LeaderNotAvailable" || err=="UnknownTopicOrPartition" || offsets[topic]["0"]==null || !offsets[topic]["0"].length) {
 			retryCount = retryCount || 1
 			
 			if (retryCount <= 10) {
@@ -74,8 +74,9 @@ function kafkaUnsubscribe(topic) {
 	});
 }
 
+// TODO: support multiple-topic resend requests to save client/consumer resources
 function kafkaResend(topic, fromOffset, toOffset, handler, cb) {
-	if (toOffset<0) {
+	if (toOffset<0 || toOffset < fromOffset) {
 		console.log("Nothing to resend for topic "+topic)
 		cb()
 	}
@@ -166,60 +167,69 @@ io.on('connection', function (socket) {
 					socket.emit('subscribed', {channels:channels, error:err})						
 				}
 				
-				if (sub.options && sub.options.resend) {
-					var from = null
-					var	to = null
-					var handler = function(message) {
-						// Emit to client private channel
-						emitUiMessage(message, socket.id)
-					}
-					var callback = function() {
-						console.log("Resend complete! Emitting resent event")
-						
-						// The nothing-to-resend response does not contain from and to fields
-						if (to<0) 
-							socket.emit('resent', {channel: sub.channel})
-						else 
-							socket.emit('resent', {channel: sub.channel, from:from, to:to})
-					}
-					var tryStartResend = function() {
-						if (from!=null && to!=null) {
-							kafkaResend(sub.channel, from, to, handler, callback)
-						}
-					}
-
-					// Subscribe from beginning
-					if (sub.options.resend_all===true) {
-						console.log("Requested resend for all messages on channel "+sub.channel)
-						kafkaGetOffset(sub.channel, true, function(offset) {
-							from = offset
-							tryStartResend()
-						})
-						kafkaGetOffset(sub.channel, false, function(offset) {
-							to = offset - 1
-							tryStartResend()
-						})
-					}
-					// Subscribe from a given offset 
-					else if (sub.options.resend_from) {
-						console.log("Requested resend from "+sub.options.resend_from+" on channel "+sub.channel)
-						from = sub.options.resend_from
-						kafkaGetOffset(sub.channel, false, function(offset) {
-							to = offset - 1
-							tryStartResend()
-						})
-					}
-					// Subscribe from last N messages
-					else if (sub.options.resend_last) {
-						console.log("Requested the last "+sub.options.resend_last+" messages in channel "+sub.channel)
-						kafkaGetOffset(sub.channel, true, function(offset) {
-							from = Math.max(offset - sub.options.resend_last, 0)
-							to = offset - 1
-							tryStartResend()
-						})
+				// Resend on subcribe functionality
+				var from = null
+				var	to = null
+				var handler = function(message) {
+					// Emit to client private channel
+					emitUiMessage(message, socket.id)
+				}
+				var callback = function() {
+					console.log("Resend complete! Emitting resent event")
+					
+					// The nothing-to-resend response does not contain from and to fields
+					if (to<0) 
+						socket.emit('resent', {channel: sub.channel})
+					else 
+						socket.emit('resent', {channel: sub.channel, from:from, to:to})
+				}
+				var tryStartResend = function() {
+					if (from!=null && to!=null) {
+						socket.emit('expect', {channel: sub.channel, from:from})
+						kafkaResend(sub.channel, from, to, handler, callback)
 					}
 				}
+
+				// Subscribe from beginning
+				if (sub.options.resend_all===true) {
+					console.log("Requested resend for all messages on channel "+sub.channel)
+					kafkaGetOffset(sub.channel, true, function(minOffset) {
+						from = minOffset
+						tryStartResend()
+					})
+					kafkaGetOffset(sub.channel, false, function(maxOffset) {
+						to = maxOffset - 1
+						tryStartResend()
+					})
+				}
+				// Subscribe from a given offset 
+				else if (sub.options.resend_from!=null) {
+					console.log("Requested resend from "+sub.options.resend_from+" on channel "+sub.channel)
+
+					kafkaGetOffset(sub.channel, false, function(maxOffset) {
+						to = maxOffset - 1
+						
+						kafkaGetOffset(sub.channel, true, function(minOffset) {
+							from = Math.min(maxOffset, Math.max(minOffset, sub.options.resend_from))
+							tryStartResend()
+						})
+					})
+				}
+				// Subscribe from last N messages
+				else if (sub.options.resend_last) {
+					console.log("Requested the last "+sub.options.resend_last+" messages in channel "+sub.channel)
+					kafkaGetOffset(sub.channel, false, function(maxOffset) {
+						to = maxOffset - 1
+
+						// Now check the earliest offset
+						kafkaGetOffset(sub.channel, true, function(minOffset) {
+							from = Math.max(offset - sub.options.resend_last, minOffset)
+							tryStartResend()
+						})
+					})
+				}
 			})
+
 			channels.push(sub.channel)
 			kafkaSubscribe(sub.channel)
 		})

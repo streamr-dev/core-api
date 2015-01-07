@@ -329,6 +329,15 @@ describe('StreamrClient', function() {
 			
 			socket.trigger('connect')
 		})
+
+		it('should set the expected counter to what the expect message says', function(done) {
+			var sub = client.subscribe("stream1", function(message) {}, {resend_all:true})
+			client.connect()
+			socket.trigger('connect')
+			socket.trigger('expect', {channel: "stream1", from: 10})
+			assert.equal(sub.counter, 10)
+			done()
+		})
 	})	
 })
 

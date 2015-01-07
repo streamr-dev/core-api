@@ -13,11 +13,12 @@ function StreamrClient(options) {
 
 StreamrClient.prototype.subscribe = function(streamId, callback, options) {
 	var _this = this
+	options = options || []
 	this.streams[streamId] = {
 		handler: function(response) {
 			_this.handleResponse(response, streamId, callback)
 		},
-		options: options || {},
+		options: options,
 		queue: [],
 		counter: 0
 	}
@@ -56,6 +57,15 @@ StreamrClient.prototype.connect = function(reconnect) {
 		$(_this).trigger('subscribed', [data.channels])
 	})
 
+	// The expect event is sent by the server before a resend starts.
+	// It lets the client know what counter to expect next.
+	this.socket.on('expect', function(data) {
+		var stream = _this.streams[data.channel]
+		console.log(data.channel+" expecting "+data.from+" instead of "+stream.counter)
+		stream.counter = data.from
+	})
+
+	// 
 	this.socket.on('resent', function(data) {
 		var stream = _this.streams[data.channel]
 		stream.resending = false
