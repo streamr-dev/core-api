@@ -233,6 +233,10 @@ var SignalPath = (function () {
 		if (data.hash==null) {
 			data.hash = moduleHashGenerator++
 		}
+		// Else check that the moduleHashGenerator keeps up
+		else if (data.hash >= moduleHashGenerator) {
+			moduleHashGenerator = data.hash + 1
+		}
 		
 		var mod = eval("SignalPath."+data.jsModule+"(data,canvas,{signalPath:pub})");
 		
@@ -357,6 +361,8 @@ var SignalPath = (function () {
 		
 		modules = {};
 		moduleHashGenerator = 0;
+		
+		canvas.empty()
 		
 		saveData = {
 				isSaved : false

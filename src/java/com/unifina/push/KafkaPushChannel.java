@@ -2,11 +2,11 @@ package com.unifina.push;
 
 import grails.converters.JSON;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.kafkaclient.UnifinaKafkaUtils;
 import com.unifina.service.KafkaService;
 
 public class KafkaPushChannel extends PushChannel {
@@ -26,8 +26,9 @@ public class KafkaPushChannel extends PushChannel {
 		super.addChannel(channel);
 		
 		// Explicitly create the topics
-		UnifinaKafkaUtils utils = kafkaService.getUtils();
-		utils.createTopic(channel, 1, 1);
+		ArrayList<String> topics = new ArrayList<>(1);
+		topics.add(channel);
+		kafkaService.createTopics(topics);
 	}
 	
 	@Override

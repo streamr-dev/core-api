@@ -81,9 +81,14 @@ function kafkaResend(topic, fromOffset, toOffset, handler, cb) {
 		cb()
 	}
 	else {
+		var req = {
+			topic: topic,
+			offset: fromOffset
+		}
+
 		// Create a local client and consumer for each resend request
 		var client = new kafka.Client(argv.zookeeper);
-		var consumer = new kafka.Consumer(client, [], kafkaOptions);
+		var consumer = new kafka.Consumer(client, [req], kafkaOptions);
 	
 		consumer.on('message', function(message) {
 			if (message.offset >= fromOffset && message.offset <= toOffset) {
@@ -93,25 +98,14 @@ function kafkaResend(topic, fromOffset, toOffset, handler, cb) {
 					console.log("Resend ready, closing consumer...")
 					consumer.close()
 					client.close()
+					consumer.removeAllListeners('message')
 					cb()
 				}
 			}
 			else {
-				console.log("Received extra message during resend")
+				console.log("Received extra message "+message.offset+" during resend (fromOffset: "+fromOffset+", toOffset: "+toOffset+"): "+JSON.stringify(message))
 			}
 		})
-	
-		var req = {
-			topic: topic,
-			offset: fromOffset
-		}
-	
-		consumer.addTopics([req], function (err, added) {
-			if (err)
-				console.log("ERROR kafkaSubscribe: "+err)
-			else 
-				console.log("Resending topic: "+req.topic+" from offset "+fromOffset +" to "+toOffset)
-		}, true);
 	}
 }
 
@@ -172,7 +166,7 @@ function handleResendRequest(socket, req) {
 
 			// Now check the earliest offset
 			kafkaGetOffset(req.channel, true, function(minOffset) {
-				from = Math.max(offset - req.options.resend_last, minOffset)
+				from = Math.max(maxOffset - req.resend_last, minOffset)
 				tryStartResend()
 			})
 		})
@@ -254,6 +248,7 @@ io.on('connection', function (socket) {
 	})
 
 	socket.on('resend', function(req) {
+		console.log("Resend request: "+JSON.stringify(req))
 		handleResendRequest(socket, req)
 	})
 

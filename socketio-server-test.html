@@ -10,11 +10,11 @@
 		$(document).ready(function() {
 			client = new StreamrClient()
 			client.subscribe(
-				"webcomponent-test", 
+				"3f07bc34-610b-4f85-a3f5-81460e17b4c8", 
 				function(message) {
 					$("body").append(JSON.stringify(message)+"<br><br>")
 				},
-				{resend_from: -1}
+				{resend_last: 10}
 			)
 			client.connect()
 		})
