@@ -5,7 +5,6 @@
 	<template>
 	<style>
 		:host {
-			background-color: red;
 			font-size: 10px
 		}
 	</style>
@@ -13,6 +12,7 @@
 
 		<streamr-client id="bah"></streamr-client>
 		<span class="streamr-label-value">{{value}}</span>
+		<p>moi</p>
 	</template>
 	
 	<script>
@@ -36,7 +36,10 @@
 				}
 
 				trySubscribe()
-			}
+			},
+			parseDeclaration: function(elementElement) {
+    			return this.lightFromTemplate(this.fetchTemplate(elementElement))
+  			}
 		});
 	</script>
 </polymer-element>
