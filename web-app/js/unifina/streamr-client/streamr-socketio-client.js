@@ -13,16 +13,26 @@ function StreamrClient(options) {
 
 StreamrClient.prototype.subscribe = function(streamId, callback, options) {
 	var _this = this
-	options = options || []
-	this.streams[streamId] = {
-		handler: function(response) {
-			_this.handleResponse(response, streamId, callback)
-		},
-		options: options,
-		queue: [],
-		counter: 0
+	options = options || {}
+
+	// Register this stream if not already registered
+	if (!this.streams[streamId]) {
+		this.streams[streamId] = {
+			handler: function(response) {
+				_this.handleResponse(response, streamId, callback)
+			},
+			options: options,
+			queue: [],
+			counter: 0,
+			subscribed: false
+		}
 	}
-	
+
+	// If connected, emit a subscribe request
+	if (this.connected) {
+		this.requestSubscribe([streamId])
+	}
+
 	return this.streams[streamId]
 }
 
@@ -37,8 +47,10 @@ StreamrClient.prototype.reconnect = function() {
 StreamrClient.prototype.connect = function(reconnect) {
 	var _this = this
 	
-	if (this.connected)
-		this.disconnect()
+	if (this.connected) {
+		console.log("connect() called while already connected, doing nothing...")
+		return this.streams
+	}
 	
 	console.log("Connecting to "+this.options.socketIoUrl)
 	this.socket = io(this.options.socketIoUrl, {forceNew: true})
@@ -54,7 +66,9 @@ StreamrClient.prototype.connect = function(reconnect) {
 	
 	this.socket.on('subscribed', function(data) {
 		console.log("Subscribed to "+data.channels)
-		$(_this).trigger('subscribed', [data.channels])
+		data.channels.forEach(function(channel) {
+			_this.streams[channel].subscribed = true
+		})
 	})
 
 	// The expect event is sent by the server before a resend starts.
@@ -101,46 +115,63 @@ StreamrClient.prototype.connect = function(reconnect) {
 		}
 	})
 	
-	var onConnect = function() {
+	// On connect/reconnect, send pending subscription requests
+	this.socket.on('connect', function() {
 		console.log("Connected!")
+		_this.connected = true
 		
-		var subscriptions = []
+		var streamIds = []
 		for (var streamId in _this.streams) {
-			var stream = _this.streams[streamId]
-			var sub = {channel: streamId, options: stream.options }
-			
-			// Change resend_all -> resend_from mode if messages have already been received
-			if (stream.counter && (stream.options.resend_all || stream.options.resend_from!=null)) {
-				delete sub.options.resend_all
-				sub.options.resend_from = stream.counter
-			}
-			
-			subscriptions.push(sub)
-			
-			if (stream.options.resend_all || stream.options.resend_from || stream.options.resend_last) {
-				console.log("Waiting for resend for channel "+streamId)
-				stream.resending = true
+			if (!_this.streams[streamId].subscribed) {
+				streamIds.push(streamId)
 			}
 		}
-		
-		console.log("Subscribing to "+JSON.stringify(subscriptions))
-		_this.socket.emit('subscribe', subscriptions)
-	}
-	
-	// On connect/reconnect, send subscription requests
-	this.socket.on('connect', onConnect)
-	this.socket.on('disconnect', function() {
-		console.log("Disconnected.")
+
+		if (streamIds.length>0) 
+			_this.requestSubscribe(streamIds)
+		else console.log("No pending subscriptions on connect.")
 	})
 
-	this.connected = true
+	this.socket.on('disconnect', function() {
+		console.log("Disconnected.")
+		_this.connected = false
+		for (var streamId in _this.streams) {
+			_this.streams[streamId].subscribed = false
+		}
+	})
+
 	return this.streams
 }
 
 StreamrClient.prototype.disconnect = function() {
-	this.socket.disconnect()
 	this.streams = {}
-	this.connected = false
+	this.socket.disconnect()
+}
+
+StreamrClient.prototype.requestSubscribe = function(streamIds) {
+	var _this = this
+	var subscriptions = []
+
+	streamIds.forEach(function(streamId) {
+		var stream = _this.streams[streamId]
+		var sub = {channel: streamId, options: stream.options }
+
+		// Change resend_all -> resend_from mode if messages have already been received
+		if (stream.counter && (stream.options.resend_all || stream.options.resend_from!=null)) {
+			delete sub.options.resend_all
+			sub.options.resend_from = stream.counter
+		}
+
+		if (stream.options.resend_all || stream.options.resend_from || stream.options.resend_last) {
+			console.log("Waiting for resend for channel "+streamId)
+			stream.resending = true
+		}
+
+		subscriptions.push(sub)
+	})
+
+	console.log("Subscribing to "+JSON.stringify(subscriptions))
+	this.socket.emit('subscribe', subscriptions)
 }
 
 StreamrClient.prototype.requestResend = function(streamId, from, to) {
