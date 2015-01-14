@@ -112,7 +112,9 @@ modules = {
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
-	
+	webcomponents {
+		resource url:[dir:'js/webcomponentsjs', file:'webcomponents.min.js', plugin: 'unifina-core'], disposition:'head'
+	}
 	/**
 	 * In-house widgets and resources
 	 */
