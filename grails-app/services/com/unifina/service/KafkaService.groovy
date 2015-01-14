@@ -2,20 +2,27 @@ package com.unifina.service
 
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import kafka.admin.AdminUtils
+import kafka.javaapi.TopicMetadata
+import kafka.javaapi.TopicMetadataRequest
+import kafka.javaapi.TopicMetadataResponse
+import kafka.javaapi.consumer.SimpleConsumer
 import kafka.producer.ProducerConfig
+import kafka.utils.ZKStringSerializer
 
+import org.I0Itec.zkclient.ZkClient
+import org.I0Itec.zkclient.exception.ZkMarshallingError
+import org.I0Itec.zkclient.serialize.ZkSerializer
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.task.Task
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.kafkaclient.UnifinaKafkaUtils
 import com.unifina.task.KafkaCollectTask
 import com.unifina.task.KafkaDeleteTopicTask
 import com.unifina.utils.TimeOfDayUtil
@@ -26,7 +33,7 @@ class KafkaService {
 	GrailsApplication grailsApplication
 	
 	UnifinaKafkaProducer producer = null
-	UnifinaKafkaUtils utils = null
+	SimpleConsumer topicCreateConsumer = null
 	
 	private static final Logger log = Logger.getLogger(KafkaService)
 	
@@ -45,12 +52,27 @@ class KafkaService {
 		return producer
 	}
 	
-	@CompileStatic 
-	UnifinaKafkaUtils getUtils() {
-		if (utils == null) {
-			utils = new UnifinaKafkaUtils(getProperties())
+	@CompileStatic
+	private ZkClient createZkClient() {
+		// serializer must be explicitly given due to https://issues.apache.org/jira/browse/KAFKA-1737
+		return new ZkClient(getProperties().getProperty("zookeeper.connect"), 30000, 30000, new ZKSerializerImpl());
+	}
+	
+	/**
+	 * Creates a SimpleConsumer that is only used for sending FetchMetadataRequests
+	 * when topics are created.
+	 * @return
+	 */
+	@CompileStatic
+	private SimpleConsumer getTopicCreateConsumer() {
+		if (topicCreateConsumer==null) {
+			Properties props = getProperties()
+			String[] brokers = props.getProperty("metadata.broker.list").split(",")
+			
+			topicCreateConsumer = new SimpleConsumer(brokers[0].split(":")[0], Integer.parseInt(brokers[0].split(":")[1]), 2000, 1024*1024, "TopicCreateConsumer");
 		}
-		return utils
+		
+		return topicCreateConsumer
 	}
 	
 	@CompileStatic
@@ -67,18 +89,65 @@ class KafkaService {
 	}
 	
 	/**
+	 * Uses a FetchMetadataRequest to create topics. This requires
+	 * auto.create.topics.enable=true on the server. This is a workaround for
+	 * AdminUtils.createTopic not seeming to work properly on Kafka 0.8.1.1 and 0.8.2-beta.
+	 * @param topics
+	 */
+	@CompileStatic
+	void createTopics(List<String> topics) {
+		SimpleConsumer consumer = getTopicCreateConsumer();
+		
+		TopicMetadataRequest req = new TopicMetadataRequest(topics);
+		
+		int retry = 0;
+		boolean success = false;
+		while (retry++ < 20) {
+			
+			log.info("createTopics: sending TopicMetadataRequest for "+topics)
+			TopicMetadataResponse resp = consumer.send(req);
+			
+			boolean hadError = false
+			for (TopicMetadata tmd : resp.topicsMetadata()) {
+				if (tmd.errorCode()>0) {
+					hadError = true
+				}
+			}
+			
+			if (hadError) {
+				log.info("createTopics: Retrying topic metadata fetch for "+topics+", retry "+retry);
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {}
+			}
+			else {
+				success = true
+				break
+			}
+		}
+		
+		if (!success) {
+			throw new RuntimeException("Failed to create topics: "+topics)
+		}
+	}
+	
+	/**
 	 * Immediately marks topics for deletion. For delayed delete, see createDeleteTopicTask()
 	 * @param topics
 	 */
+	@CompileStatic
 	void deleteTopics(List topics) {
-		UnifinaKafkaUtils utils = getUtils();
+		ZkClient zkClient = createZkClient()
+		
 		for (String topic : topics) {
 			try {
-				utils.deleteTopic(topic);
+				AdminUtils.deleteTopic(zkClient, topic)
 			} catch (Exception e) {
 				log.warn("Failed to delete topic "+topic+", due to: "+e.getMessage());
 			}
 		}
+		
+		zkClient.close()
 	}
 	
 	/**
@@ -173,4 +242,19 @@ class KafkaService {
 		return tasks
 		
 	}
+	
+	@CompileStatic
+	class ZKSerializerImpl implements ZkSerializer {
+
+		@Override
+			public Object deserialize(byte[] b) throws ZkMarshallingError {
+			return ZKStringSerializer.deserialize(b);
+		}
+		@Override
+			public byte[] serialize(Object o) throws ZkMarshallingError {
+			return ZKStringSerializer.serialize(o);
+		}
+		
+	}
+		
 }

@@ -2,6 +2,7 @@ package com.unifina.push;
 
 import grails.converters.JSON;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -18,6 +19,16 @@ public class KafkaPushChannel extends PushChannel {
 	public KafkaPushChannel(KafkaService kafkaService) {
 		super();
 		this.kafkaService = kafkaService;
+	}
+	
+	@Override
+	public void addChannel(String channel) {
+		super.addChannel(channel);
+		
+		// Explicitly create the topics
+		ArrayList<String> topics = new ArrayList<>(1);
+		topics.add(channel);
+		kafkaService.createTopics(topics);
 	}
 	
 	@Override

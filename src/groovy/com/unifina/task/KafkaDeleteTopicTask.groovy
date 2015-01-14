@@ -40,6 +40,7 @@ public class KafkaDeleteTopicTask extends AbstractTask {
 	public boolean run() {
 		List topics = config.topics
 		kafkaService.deleteTopics(topics)
+		return true
 	}
 
 	@Override

@@ -20,23 +20,25 @@ var offset = new kafka.Offset(client);
 
 function kafkaGetOffset(topic, earliest, cb, retryCount) {
 	offset.fetch([{topic:topic, time: (earliest ? -2 : -1)}], function (err, offsets) {
-		if (err) {
-			// If the topic does not exist, the fetch request may fail with LeaderNotAvailable.
-			// Retry up to 10 times with 100ms intervals
-			if (err=="LeaderNotAvailable") {
-				retryCount = retryCount || 1
-				
-				if (retryCount <= 10) {
-					console.log("Got LeaderNotAvailable for "+topic+", retry "+retryCount+" in 100ms...")
-					setTimeout(function() {
-						kafkaGetOffset(topic, earliest, cb, retryCount+1)
-					})
-				}
-				else {
-					console.log("ERROR max retries reached, unable to fetch offset for "+topic)
-				}
+		// If the topic does not exist, the fetch request may fail with LeaderNotAvailable
+		// or UnknownTopicOrPartition. It may also succeed but return an empty partition list.
+		// Retry up to 10 times with 500ms intervals
+		
+		if (err=="LeaderNotAvailable" || err=="UnknownTopicOrPartition" || offsets[topic]["0"]==null || !offsets[topic]["0"].length) {
+			retryCount = retryCount || 1
+			
+			if (retryCount <= 10) {
+				console.log("Got LeaderNotAvailable for "+topic+", retry "+retryCount+" in 500ms...")
+				setTimeout(function() {
+					kafkaGetOffset(topic, earliest, cb, retryCount+1)
+				}, 500)
 			}
-			else console.log("ERROR kafkaGetOffsets: "+err)
+			else {
+				console.log("ERROR max retries reached, unable to fetch offset for "+topic)
+			}
+		}
+		else if (err) {
+			console.log("ERROR kafkaGetOffsets: "+err)
 		}
 		else {	
 			console.log((earliest ? "Earliest offset: " : "Latest offset: ")+JSON.stringify(offsets))
@@ -72,38 +74,103 @@ function kafkaUnsubscribe(topic) {
 	});
 }
 
+// TODO: support multiple-topic resend requests to save client/consumer resources
 function kafkaResend(topic, fromOffset, toOffset, handler, cb) {
-	// Create a local client and consumer for each resend request
-	var client = new kafka.Client(argv.zookeeper);
-	var consumer = new kafka.Consumer(client, [], kafkaOptions);
+	if (toOffset<0 || toOffset < fromOffset) {
+		console.log("Nothing to resend for topic "+topic)
+		cb()
+	}
+	else {
+		var req = {
+			topic: topic,
+			offset: fromOffset
+		}
 
-	consumer.on('message', function(message) {
-		if (message.offset >= fromOffset && message.offset <= toOffset) {
-			handler(message.value)
-
-			if (message.offset === toOffset) {
-				console.log("Resend offset limit reached, closing consumer...")
-				consumer.close()
-				client.close()
-				cb()
+		// Create a local client and consumer for each resend request
+		var client = new kafka.Client(argv.zookeeper);
+		var consumer = new kafka.Consumer(client, [req], kafkaOptions);
+	
+		consumer.on('message', function(message) {
+			if (message.offset >= fromOffset && message.offset <= toOffset) {
+				handler(message.value)
+	
+				if (message.offset === toOffset) {
+					console.log("Resend ready, closing consumer...")
+					consumer.close()
+					client.close()
+					consumer.removeAllListeners('message')
+					cb()
+				}
 			}
-		}
-		else {
-			console.log("Received extra message during resend")
-		}
-	})
+			else {
+				console.log("Received extra message "+message.offset+" during resend (fromOffset: "+fromOffset+", toOffset: "+toOffset+"): "+JSON.stringify(message))
+			}
+		})
+	}
+}
 
-	var req = {
-		topic: topic,
-		offset: fromOffset
+function handleResendRequest(socket, req) {
+	// Resend on subcribe functionality
+	var from = null
+	var	to = null
+	var handler = function(message) {
+		// Emit to client private channel
+		emitUiMessage(message, socket.id)
+	}
+	var callback = function() {
+		console.log("Resend complete! Emitting resent event")
+		
+		// The nothing-to-resend response does not contain from and to fields
+		if (to<0) 
+			socket.emit('resent', {channel: req.channel})
+		else 
+			socket.emit('resent', {channel: req.channel, from:from, to:to})
+	}
+	var tryStartResend = function() {
+		if (from!=null && to!=null) {
+			socket.emit('expect', {channel: req.channel, from:from})
+			kafkaResend(req.channel, from, to, handler, callback)
+		}
 	}
 
-	consumer.addTopics([req], function (err, added) {
-		if (err)
-			console.log("ERROR kafkaSubscribe: "+err)
-		else 
-			console.log("Resending topic: "+req.topic+" from offset "+fromOffset +" to "+toOffset)
-	}, true);
+	// Subscribe from beginning
+	if (req.resend_all===true) {
+		console.log("Requested resend for all messages on channel "+req.channel)
+		kafkaGetOffset(req.channel, true, function(minOffset) {
+			from = minOffset
+			tryStartResend()
+		})
+		kafkaGetOffset(req.channel, false, function(maxOffset) {
+			to = maxOffset - 1
+			tryStartResend()
+		})
+	}
+	// Subscribe from a given offset 
+	else if (req.resend_from!=null) {
+		console.log("Requested resend from "+req.resend_from+" on channel "+req.channel)
+
+		kafkaGetOffset(req.channel, false, function(maxOffset) {
+			to = maxOffset - 1
+			
+			kafkaGetOffset(req.channel, true, function(minOffset) {
+				from = Math.min(maxOffset, Math.max(minOffset, req.resend_from))
+				tryStartResend()
+			})
+		})
+	}
+	// Subscribe from last N messages
+	else if (req.resend_last) {
+		console.log("Requested the last "+req.resend_last+" messages in channel "+req.channel)
+		kafkaGetOffset(req.channel, false, function(maxOffset) {
+			to = maxOffset - 1
+
+			// Now check the earliest offset
+			kafkaGetOffset(req.channel, true, function(minOffset) {
+				from = Math.max(maxOffset - req.resend_last, minOffset)
+				tryStartResend()
+			})
+		})
+	}
 }
 
 function emitUiMessage(data, channel) {
@@ -118,6 +185,12 @@ function emitUiMessage(data, channel) {
 	
 	io.sockets.in(channel).emit('ui', data);
 }
+
+// KAFKA CLIENT EVENT HANDLERS
+
+client.on('error', function(err) {
+	console.log("kafka client error: "+err)
+})
 
 // KAFKA MSG HANDLERS
 
@@ -153,50 +226,11 @@ io.on('connection', function (socket) {
 					socket.emit('subscribed', {channels:channels, error:err})						
 				}
 				
-				if (sub.options && sub.options.resend) {
-					var from = null
-					var	to = null
-					var handler = function(message) {
-						// Emit to client private channel
-						console.log("Resend-emitting message "+JSON.stringify(message))
-						emitUiMessage(message, socket.id)
-					}
-					var callback = function() {
-						console.log("Resend complete! Emitting resent event")
-						socket.emit('resent', {channel: sub.channel, from:from, to:to})
-					}
-					var tryStartResend = function() {
-						if (from!=null && to!=null) {
-							if (to >= 0) {
-								// Both requests done, start resend
-								kafkaResend(sub.channel, from, to, handler, callback)
-							}
-							else console.log("Nothing to resend on channel "+sub.channel)
-						}
-					}
-
-					// Request either all the messages or a tail of N messages
-					if (sub.options.resend===true) {
-						console.log("Requested resend for all messages in channel "+sub.channel)
-						kafkaGetOffset(sub.channel, true, function(offset) {
-							from = offset
-							tryStartResend()
-						})
-						kafkaGetOffset(sub.channel, false, function(offset) {
-							to = offset - 1
-							tryStartResend()
-						})
-					}
-					else {
-						console.log("Requested the last "+sub.options.resend+" messages in channel "+sub.channel)
-						kafkaGetOffset(sub.channel, true, function(offset) {
-							from = Math.max(offset - sub.options.resend, 0)
-							to = offset - 1
-							tryStartResend()
-						})
-					}
-				}
+				var resendReq = sub.options
+				resendReq.channel = sub.channel
+				handleResendRequest(socket, resendReq)
 			})
+
 			channels.push(sub.channel)
 			kafkaSubscribe(sub.channel)
 		})
@@ -212,6 +246,11 @@ io.on('connection', function (socket) {
 				})
 			})
 		}
+	})
+
+	socket.on('resend', function(req) {
+		console.log("Resend request: "+JSON.stringify(req))
+		handleResendRequest(socket, req)
 	})
 
 	socket.on('ui', emitUiMessage)
