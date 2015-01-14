@@ -4,15 +4,11 @@
 	<title>TESTI</title>
 
 	<script src="../js/webcomponentsjs/webcomponents.min.js"></script>
-	<link rel="import" href="components/streamr-label/streamr-label.html">
-	<link rel="import" href="components/streamr-client/streamr-client.html">
+	<link rel="import" href="components/streamr-imports.html">
 
 	<style>
-		p {
+		.streamr-label-value {
 		    
-		    background-color: blue;
-		    font-size: 30px;
-
 		} 
 	</style>
 
@@ -21,7 +17,7 @@
 <body>
 	<div>
 	<streamr-client server="localhost:8090"></streamr-client>
-	<streamr-label channel="webcomponent-test"></streamr-label>
+	<streamr-label id="label" channel="webcomponent-test"></streamr-label>
 	</div>
 </body>
 </html>
