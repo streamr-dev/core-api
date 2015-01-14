@@ -9,10 +9,6 @@
 	(function(){
 		var streamrClient = new StreamrClient()
 
-		setTimeout(function() {
-			streamrClient.connect()
-		}, 2000)
-
 		Polymer('streamr-client', {
 			// This function is executed multiple times, once for each element!
 			created: function() {
@@ -20,8 +16,10 @@
 			},
 			// This function is executed multiple times, once for each element!
 			ready: function() {
-				if (this.server)
+				if (this.server) {
 					streamrClient.options.socketIoUrl = this.server
+					streamrClient.connect()
+				}
 			}
 		});
 	})();
