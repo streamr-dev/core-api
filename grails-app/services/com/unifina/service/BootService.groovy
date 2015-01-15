@@ -1,10 +1,8 @@
 package com.unifina.service
 
-import grails.util.Environment
-
-import org.apache.catalina.startup.HostConfig
 import org.springframework.web.context.support.WebApplicationContextUtils
 
+import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
 import com.unifina.task.TaskMessageListener
 import com.unifina.task.TaskWorker
