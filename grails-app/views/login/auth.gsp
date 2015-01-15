@@ -1,26 +1,16 @@
-<!doctype html>
 <html>
 	<head>
-		<title><g:message code='spring.security.ui.login.title'/></title>
-		<r:require module="bootstrap"/>
-		<r:layoutResources/>
+	    <meta name="layout" content="login" />
+	    <title><g:message code='spring.security.ui.login.title'/></title>
+	    
+		<r:script>
+			$(document).ready(function() {
+				$('#username').focus();
+			});
+		</r:script>
 	</head>
-	
-	<body>
-		<div class="container">
-			<div class="row">
-				<div class="col-xs-6">
-					<g:render template="form"/>
-				</div>
-			</div>
-		</div>
-	
-		<script>
-		$(document).ready(function() {
-			$('#username').focus();
-		});
-		</script>
-	
-		<r:layoutResources/>
+
+	<body class="show-sign-up">
+		<g:render template="/login/form" plugin="unifina-core"/>
 	</body>
 </html>
