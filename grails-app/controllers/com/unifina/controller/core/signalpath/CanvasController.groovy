@@ -9,9 +9,9 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
-import com.unifina.signalpath.IReturnChannel
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
@@ -44,7 +44,6 @@ class CanvasController {
 
 	def abort() {
 		String runnerId = params.runnerId
-		String sessionId = params.sessionId
 		
 		Map r
 		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(runnerId)
@@ -52,14 +51,7 @@ class CanvasController {
 			runner.abort()
 			r = [success:true, runnerId:runnerId, status:"Aborting"]
 		}
-		else {
-			IReturnChannel channel = servletContext["returnChannels"]?.get(sessionId)
-			if (channel) {
-				channel.destroy()
-				r = [success:true, sessionId:sessionId, status:"Session cleaned"]
-			}
-			else r = [success:false, runnerId:runnerId, status:"Runner already stopped"]
-		}
+		else r = [success:false, runnerId:runnerId, status:"Runner already stopped"]
 		
 		render r as JSON
 	}
@@ -81,13 +73,9 @@ class CanvasController {
 		
 		signalPathContext.keepConsumedMessages = false
 		
-		// Create SignalPathRunner
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		SignalPathRunner runner = new SignalPathRunner([iData], globals)
-		String runnerId = runner.runnerId
-		runner.start()
+		List<RunningSignalPath> rsps = signalPathService.launch([iData], signalPathContext, springSecurityService.currentUser)
 		
-		Map result = [success:true, sessionId:runner.getReturnChannel(0).sessionId, runnerId:runnerId]
+		Map result = [success:true, uiChannels:rsps[0].uiChannels.collect { [id:it.id, hash:it.hash] }, runnerId:rsps[0].runner]
 		render result as JSON
 	}
 	
