@@ -20,6 +20,9 @@
 
 		<r:script>
 
+// Make the loadBrowser global to allow apps that use this plugin to extend it by adding tabs
+var loadBrowser
+
 $('#moduleTree').bind('loaded.jstree', function() {
 	Tour.autoStart()
 })
@@ -29,26 +32,17 @@ $(document).ready(function() {
 	function getSignalPathContext() {
 		var tz = jstz();
 		
-		
-		// TODO: JATKA TÄSTÄ
-		
 		return {
 			beginDate: $("#beginDate").val(),
 			endDate: $("#endDate").val(),
 			speed: $("#speed").val(),
-			latency: $("#latency").val(),
 			timeOfDayFilter: {
 				timeOfDayStart: $("#timeOfDayStart").val(),
 				timeOfDayEnd: $("#timeOfDayEnd").val(),	
 				timeZone: tz.timezone_name,
 				timeZoneOffset: tz.utc_offset,
 				timeZoneDst: tz.uses_dst
-			},
-			marketSimulator: $("#marketSimulator").val(),
-			live: $("#live").hasClass("active"),
-			riskProfile: $("#riskProfile").val(),
-			commission: $("#commission").val(),
-			resetPortfolio: $("#resetPortfolio").attr("checked") ? true : false
+			}
 		}
 	}
 
@@ -92,20 +86,7 @@ $(document).ready(function() {
 			$("#timeOfDayEnd").val(signalPathContext.timeOfDayFilter.timeOfDayEnd).trigger("change")
 		}
 
-		$("#speed").val(signalPathContext.speed!=null ? signalPathContext.speed : 0).trigger("change")
-		
-		$("#marketSimulator").val(signalPathContext.marketSimulator!=null ? signalPathContext.marketSimulator : "com.unifina.backtest.AutoExecutionSimulator").trigger("change")
-		
-		$("#latency").val(signalPathContext.latency ? signalPathContext.latency : 0).trigger("change")
-		
-		$("#riskProfile").val(signalPathContext.riskProfile!=null ? signalPathContext.riskProfile : "null").trigger("change")
-		
-		if (signalPathContext.commission!=null) {
-			$("#commission").val(signalPathContext.commission).trigger("change")
-		}
-	
-		if (signalPathContext.resetPortfolio)
-			$("#resetPortfolio").attr("checked","checked").trigger("change")
+		$("#speed").val(signalPathContext.speed!=null ? signalPathContext.speed : 0).trigger("change")		
 	});
 	
 	$(SignalPath).on('workspaceChanged', function(event, mode) {
@@ -155,57 +136,27 @@ $(document).ready(function() {
       height: '100%'
     })
 
-	var loadBrowser = new SignalPathBrowser()
+	loadBrowser = new SignalPathBrowser()
 		.tab('Archive', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
 		.tab('Examples', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
-		.tab('Backtest', '${ createLink(controller: "accountSignalPath", \
-			action: "loadBrowser", params: [ accountType: "backtest", browserId: "backtestLoadBrowser" ]) }')
-		<sec:ifAllGranted roles="ROLE_LIVE">
-			.tab('Live', '${ createLink(controller: "accountSignalPath", \
-				action: "loadBrowser", params: [ accountType: "live", browserId: "liveLoadBrowser" ]) }')
-		</sec:ifAllGranted>
 		.onSelect(function(url) {
 			SignalPath.loadSignalPath({ url: url })
 		})
 
 	<%-- Show examples loader if requested --%>
 	<g:if test="${examples}">
-		loadBrowser.modal()
-		loadBrowser.show("Examples")
+		// Use a timeout to allow extensions to register their tabs before the loadBrowser is shown
+		setTimeout(function() {
+			loadBrowser.modal()
+			loadBrowser.show("Examples")
+		}, 0)
 	</g:if>
 
 	$('#loadSignalPath').click(function() {
 		loadBrowser.modal()
 	})
-
-
-	var accountBrowser = new SignalPathBrowser()
-		.title('Select account')
-		.tab('Backtest', '${ createLink(controller: "canvas", \
-			action: "accountBrowser", params: [ accountType: "backtest", \
-				browserId: "addToBacktestBrowser" ]) }')
-		<sec:ifAllGranted roles="ROLE_LIVE">
-			.tab('Live', '${ createLink(controller: "canvas", \
-				action: "accountBrowser", params: [ accountType: "live", \
-					browserId: "addToLiveBrowser" ]) }')
-		</sec:ifAllGranted>
-
-	$('#addToAccount').click(function() {
-		accountBrowser.modal()
-	})
-    
-	$('#toggleImportExport').click(function() {
-		if (!$(this).hasClass("active")) {
-			$(this).addClass("active");
-			$(".ioSwitch.export").show();
-		}
-		else {
-			$(this).removeClass("active");
-			$(".ioSwitch.export").hide();
-		}
-	});
 	
 	$(document).bind('keyup', 'alt+r', function() {
 		SignalPath.run();
@@ -288,7 +239,6 @@ $(document).unload(function () {
 							<span class="sr-only">Toggle Dropdown</span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li><a id="addToAccount" alt="Create Backtest" href="#">Create Backtest..</a></li>
 							<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
 						</ul>
 					</div>
@@ -370,36 +320,6 @@ $(document).unload(function () {
 	      </div>
 	      <div class="modal-body">
 				<div class="form-group">
-					<label>Execution Simulator</label>
-					<g:select id="marketSimulator" name="marketSimulator.id"
-						from="${com.unifina.domain.backtest.MarketSimulatorClass.list(sort:"isDefault",order:"desc")}"
-						optionKey="className"
-						optionValue="name"
-						class="form-control"/>
-				</div>
-	
-				<div class="form-group">
-					<label>Latency</label>
-					<div class="input-group">
-						<input type="number" name="latency" id="latency" step="1" min="0" value="${user.defaultLatency ?: 0}" size="2" class="form-control"/>
-						<span class="input-group-addon">milliseconds</span>
-					</div>
-				</div>
-			
-				<div class="form-group">
-					<label>Risk profile</label>
-					<trading:riskProfiles name="riskProfile" class="form-control"/>
-				</div>
-			
-				<div class="form-group">
-					<label>Commission</label>
-					<div class="input-group">
-						<input type="number" id="commission" name="commission" step="any" min="0" value="${user.defaultCommission}" size="2" class="form-control"/>
-						<span class="input-group-addon">basis points</span>
-					</div>
-				</div>
-				
-				<div class="form-group">
 					<label>Speed</label>
 					<select id="speed" class="form-control">
 						<option value="0">Full</option>
@@ -415,15 +335,7 @@ $(document).unload(function () {
 					<input id="timeOfDayStart" type="text" name="timeOfDayStart" value="00:00:00" class="form-control">
 					<input id="timeOfDayEnd" type="text" name="timeOfDayEnd" value="23:59:00" class="form-control">
 				</div>
-				
-				<div class="form-group">
-					<div class="checkbox">
-						<label>
-							<input type="checkbox" name="resetPortfolio" id="resetPortfolio" />
-							Reset portfolio overnight
-						</label>
-					</div>
-				</div>
+
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
@@ -438,6 +350,9 @@ $(document).unload(function () {
 	</ul>
 	
 	<g:render template="/feedback/fixedFeedback" plugin="unifina-core"/>
+
+	<!-- extension point for apps using the core plugin -->
+	<g:render template="/canvas/buildBodyExtensions"/>
 
 </body>
 </html>
