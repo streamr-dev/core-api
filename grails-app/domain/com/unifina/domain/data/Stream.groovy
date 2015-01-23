@@ -2,6 +2,9 @@ package com.unifina.domain.data
 
 class Stream implements Comparable {
 	Long id
+	String uuid
+	String apiKey
+	
 	String name
 	Feed feed
 	String streamConfig
@@ -17,11 +20,14 @@ class Stream implements Comparable {
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
+		uuid(nullable:true)
+		apiKey(nullable:true)
 	}
 	
 	static mapping = {
 		name index:"name_idx"
 		localId index: 'localId_idx'
+		uuid index: "uuid_idx"
 		feed lazy:false
 	}
 	
