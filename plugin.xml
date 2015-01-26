@@ -8,9 +8,12 @@
     <resource>BootStrap</resource>
     <resource>UnifinaCorePluginResources</resource>
     <resource>UnifinaCorePluginUrlMappings</resource>
+    <resource>spring.resources</resource>
+    <resource>com.unifina.controller.core.signalpath.CanvasController</resource>
     <resource>com.unifina.controller.data.FeedFileController</resource>
     <resource>com.unifina.controller.data.LocalFeedFileController</resource>
     <resource>com.unifina.controller.data.StreamController</resource>
+    <resource>com.unifina.controller.feedback.FeedbackController</resource>
     <resource>com.unifina.controller.kafka.KafkaController</resource>
     <resource>com.unifina.controller.security.LoginController</resource>
     <resource>com.unifina.controller.security.LogoutController</resource>
@@ -20,6 +23,7 @@
     <resource>com.unifina.controller.task.TaskWorkerController</resource>
     <resource>com.unifina.controller.tour.TourUserController</resource>
     <resource>com.unifina.controller.util.JavascriptErrorController</resource>
+    <resource>com.unifina.domain.config.HostConfig</resource>
     <resource>com.unifina.domain.data.Feed</resource>
     <resource>com.unifina.domain.data.FeedFile</resource>
     <resource>com.unifina.domain.data.FeedUser</resource>
@@ -34,6 +38,7 @@
     <resource>com.unifina.domain.signalpath.SavedSignalPath</resource>
     <resource>com.unifina.domain.task.Task</resource>
     <resource>com.unifina.domain.tour.TourUser</resource>
+    <resource>com.unifina.service.BootService</resource>
     <resource>com.unifina.service.FeedFileService</resource>
     <resource>com.unifina.service.FeedService</resource>
     <resource>com.unifina.service.KafkaService</resource>
