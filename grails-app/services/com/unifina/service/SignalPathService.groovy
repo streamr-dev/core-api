@@ -155,6 +155,7 @@ class SignalPathService {
 		
 		return runner.getSignalPaths().collect {SignalPath sp->
 			RunningSignalPath rsp = new RunningSignalPath()
+			rsp.name = sp.name
 			rsp.user = user
 			rsp.runner = runner.getRunnerId()
 			rsp.server = NetworkInterfaceUtils.getIPAddress()

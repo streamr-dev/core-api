@@ -79,6 +79,21 @@ class CanvasController {
 		render result as JSON
 	}
 	
+	def running() {
+		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
+			eq("user",springSecurityService.currentUser)
+			if (params.term) {
+				like("name","%${params.term}%")
+			}
+		}
+		[running: rsps]
+	}
+	
+	def show() {
+		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		// TODO: jatka tästä
+	}
+	
 	def reconstruct() {
 		Map signalPathContext = (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:])
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
