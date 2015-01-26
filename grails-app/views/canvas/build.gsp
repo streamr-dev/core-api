@@ -186,6 +186,7 @@ $(document).unload(function () {
 <g:render template="/templates/remote-tabs" plugin="unifina-core"/>
 
 <!-- extension point for apps using the core plugin -->
+<g:render template="/canvas/signalPathExtensions"/>
 <g:render template="/canvas/buildHeadExtensions"/>
 
 </head>

@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import grails.converters.JSON
 import grails.transaction.Transactional
 
 import java.nio.charset.StandardCharsets
@@ -159,7 +160,7 @@ class SignalPathService {
 			rsp.user = user
 			rsp.runner = runner.getRunnerId()
 			rsp.server = NetworkInterfaceUtils.getIPAddress()
-			rsp.json = signalPathToJson(sp)
+			rsp.json = (signalPathToJson(sp) as JSON)
 			
 			UiChannel rspUi = new UiChannel()
 			rspUi.id = sp.getUiChannelId()

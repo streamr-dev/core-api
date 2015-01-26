@@ -64,7 +64,9 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 			
 			// TODO: add other types
 			if (type.equalsIgnoreCase("double")) {
-				addOutput(new TimeSeriesOutput(this,name));
+				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
+				output.noRepeat = false;
+				addOutput(output);
 			}
 			else if (type.equalsIgnoreCase("string")) {
 				addOutput(new StringOutput(this,name));

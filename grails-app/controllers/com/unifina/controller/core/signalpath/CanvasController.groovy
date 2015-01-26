@@ -4,6 +4,8 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
 
+import java.security.AccessControlException
+
 import org.atmosphere.cpr.BroadcasterFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
@@ -12,6 +14,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
+import com.unifina.service.UnifinaSecurityService
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
@@ -24,6 +27,7 @@ class CanvasController {
 	GrailsApplication grailsApplication
 	SpringSecurityService springSecurityService
 	SignalPathService signalPathService
+	UnifinaSecurityService unifinaSecurityService
 	
 	def index() {
 		redirect(action: "build", params:params)
@@ -77,21 +81,6 @@ class CanvasController {
 		
 		Map result = [success:true, uiChannels:rsps[0].uiChannels.collect { [id:it.id, hash:it.hash] }, runnerId:rsps[0].runner]
 		render result as JSON
-	}
-	
-	def running() {
-		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
-			eq("user",springSecurityService.currentUser)
-			if (params.term) {
-				like("name","%${params.term}%")
-			}
-		}
-		[running: rsps]
-	}
-	
-	def show() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		// TODO: jatka tästä
 	}
 	
 	def reconstruct() {

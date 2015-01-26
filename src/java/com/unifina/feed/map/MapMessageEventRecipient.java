@@ -7,6 +7,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.StreamEventRecipient;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Output;
+import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.Globals;
 
 /**
@@ -30,8 +31,12 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 		for (AbstractSignalPathModule m : modules) {
 			// TODO: improve efficiency
 			for (Output o : m.getOutputs()) {
-				if (msg.containsKey(o.getName()))
-					o.send(msg.get(o.getName()));
+				if (msg.containsKey(o.getName())) {
+					Object val = msg.get(o.getName());
+					if (o instanceof TimeSeriesOutput)
+						o.send(((Number)val).doubleValue());
+					else o.send(val);
+				}
 			}
 		}
 	}
