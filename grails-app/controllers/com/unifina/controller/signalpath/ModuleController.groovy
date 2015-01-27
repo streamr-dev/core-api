@@ -69,27 +69,29 @@ class ModuleController {
 		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
 		allowedPackages.addAll(ModulePackage.findAllByUser(springSecurityService.currentUser))
 		
+		Set<Long> allowedPackageIds = allowedPackages.collect {it.id} as Set
+		
 		def result = []	
-		categories.findAll{allowedPackages.contains(it.modulePackage)}.each {category->
-			def item = moduleTreeRecurse(category,allowedPackages)
+		categories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {category->
+			def item = moduleTreeRecurse(category,allowedPackageIds)
 			result.add(item)
 		}
 		render result as JSON
 	}
 
-	private Map moduleTreeRecurse(ModuleCategory category, Set<ModulePackage> allowedPackages) {
+	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds) {
 		def item = [:]
 		item.data = category.name
 		item.metadata = [canAdd:false, id:category.id]
 		item.children = []
 
-		category.subcategories.findAll{allowedPackages.contains(it.modulePackage)}.each {subcat->
-			def subItem = moduleTreeRecurse(subcat,allowedPackages)
+		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
+			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
 			item.children.add(subItem)
 		}
 
 		category.modules.each {Module module->
-			if (allowedPackages.contains(module.modulePackage) && (module.hide==null || !module.hide)) {
+			if (allowedPackageIds.contains(module.modulePackage.id) && (module.hide==null || !module.hide)) {
 				def moduleItem = [:]
 				moduleItem.data = module.name
 				moduleItem.metadata = [canAdd:true, id:module.id]
