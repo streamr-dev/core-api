@@ -1,14 +1,15 @@
 package com.unifina.push;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 public abstract class PushChannel {
 	
-	private HashMap<String,Counter> counterByChannel = new HashMap<>();
+	Set<String> channels = new HashSet<>();
 	private boolean destroyed = false;
 	protected ArrayList<PushChannelEventListener> eventListeners = new ArrayList<>();
 	
@@ -18,15 +19,17 @@ public abstract class PushChannel {
 	}
 	
 	public void addChannel(String channel) {
-		counterByChannel.put(channel, new Counter(0));
+		channels.add(channel);
 	}
 	
 	public List<String> getChannels() {
-		return new ArrayList<>(counterByChannel.keySet());
+		List<String> result = new ArrayList<>(channels.size());
+		result.addAll(channels);
+		return result;
 	}
 	
 	public void push(Object content, String channel) {
-		PushChannelMessage msg = new PushChannelMessage(counterByChannel.get(channel).getAndIncrement(), channel, content);
+		PushChannelMessage msg = new PushChannelMessage(channel, content);
 		doPush(msg);
 	}
 	
