@@ -109,7 +109,7 @@ modules = {
 		resource url:[dir:'js/underscore', file:'underscore-min.js', plugin: 'unifina-core']
 	}
 	backbone {
-		dependsOn 'underscore'
+		dependsOn 'underscore,jquery'
 		resource url:[dir:'js/backbone', file:'backbone.js', plugin: 'unifina-core']
 	}
 	
