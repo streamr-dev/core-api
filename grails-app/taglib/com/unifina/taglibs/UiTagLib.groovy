@@ -98,6 +98,25 @@ public class UiTagLib {
 	}
 	
 	/**
+	 * Renders a labeled element.
+	 * @attr label REQUIRED The label
+	 * @attr for In forms, the name of the form input that this label is for
+	 * @attr class Classes to be added to the form-group element
+	 */
+	def labeled = {attrs, body->
+		out << """
+			<div class="form-group ${attrs.class ?: ''}">
+				<label ${attrs.for ? 'for="name"' : ''} class="control-label">
+					${attrs.label}
+				</label>
+			    <div>
+			    	${body()}
+			    </div>
+			</div>
+		"""
+	}
+	
+	/**
 	 * Renders a radio button
 	 *
 	 * @attr name REQUIRED the field name/id

@@ -47,13 +47,6 @@ modules = {
 		resource url:[dir:'js/hopscotch', file:'hopscotch.css', plugin: 'unifina-core']
 		resource url:[dir:'js/hopscotch', file:'hopscotch.js', plugin: 'unifina-core']
 	}
-	streamr {
-		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
-	}
-	tour {
-		dependsOn 'hopscotch, signalpath-core'
-		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
-	}
 	typeahead {
 		dependsOn 'jquery'
 		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
@@ -112,10 +105,28 @@ modules = {
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
+	underscore {
+		resource url:[dir:'js/underscore', file:'underscore-min.js', plugin: 'unifina-core']
+	}
+	backbone {
+		dependsOn 'underscore'
+		resource url:[dir:'js/backbone', file:'backbone.js', plugin: 'unifina-core']
+	}
 	
 	/**
 	 * In-house widgets and resources
 	 */
+	streamr {
+		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
+	}
+	tour {
+		dependsOn 'hopscotch, signalpath-core'
+		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
+	}
+	'stream-fields' {
+		dependsOn 'jquery, backbone'
+		resource url:[dir:'js/unifina/stream-fields', file:'stream-fields.js', plugin: 'unifina-core']
+	}
 	'search-control' {
 		dependsOn 'typeahead'
 		resource url:[dir:'js/unifina/search-control', file:'search-control.js', plugin: 'unifina-core']
@@ -143,7 +154,7 @@ modules = {
 	}
 	'streamr-client' {
 		dependsOn 'jquery, socket-io'
-		resource url:[dir:'js/unifina/streamr-client', file:'streamr-socketio-client.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		dependsOn 'streamr, streamr-client, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets'

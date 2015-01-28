@@ -32,8 +32,9 @@
 				<table class="table table-striped table-bordered table-hover table-condensed table-responsive">
 				    <thead>
 				        <tr>
-				        	<th><g:message code="runningSignalPath.id.label" default="Id"/></th>
-				        	<th><g:message code="runningSignalPath.name.label" default="Name"/></th>
+				        	<th><g:message code="runningSignalPath.id.label" /></th>
+				        	<th><g:message code="runningSignalPath.name.label" /></th>
+				        	<th><g:message code="runningSignalPath.created.label" /></th>
 				        </tr>
 				    </thead>
 				    <tbody>
@@ -41,6 +42,7 @@
 					        <tr>					        
 					            <td><g:link action="show" id="${rsp.id}">${fieldValue(bean: rsp, field: "id")}</g:link></td>					        
 					            <td>${fieldValue(bean: rsp, field: "name")}</td>
+					            <td><g:formatDate timeZone="${user.timezone}"/></td>
 							</tr>
 						</g:each>
 					</tbody>

@@ -1,5 +1,8 @@
 package com.unifina.feed.map;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.unifina.data.FeedEvent;
@@ -20,19 +23,43 @@ import com.unifina.utils.Globals;
  */
 public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule> {
 
+	Map<String, List<Output>> outputsByName = null;
+	
 	public MapMessageEventRecipient(Globals globals, Stream stream) {
 		super(globals, stream);
 	}
 
-	@Override
-	protected void sendOutputFromModules(FeedEvent event) {
-		Map msg = ((MapMessage) event.content).content;
+	private void initCacheMap() {
+		outputsByName = new LinkedHashMap<>();
 		
 		for (AbstractSignalPathModule m : modules) {
-			// TODO: improve efficiency
 			for (Output o : m.getOutputs()) {
-				if (msg.containsKey(o.getName())) {
-					Object val = msg.get(o.getName());
+				if (!outputsByName.containsKey(o.getName())) {
+					outputsByName.put(o.getName(), new ArrayList<Output>());
+				}
+				
+				outputsByName.get(o.getName()).add(o);
+			}
+		}
+	}
+	
+	@Override
+	protected void sendOutputFromModules(FeedEvent event) {
+		if (outputsByName==null)
+			initCacheMap();
+		
+		Map msg = ((MapMessage) event.content).content;
+		
+		for (String name : outputsByName.keySet()) {
+			if (msg.containsKey(name)) {
+				Object val = msg.get(name);
+				
+				// Convert boolean to 1/0
+				if (val instanceof Boolean)
+					val = (((Boolean)val) ? 1D : 0D);
+				
+				for (Output o : outputsByName.get(name)) {
+					// Convert all numbers to doubles
 					if (o instanceof TimeSeriesOutput)
 						o.send(((Number)val).doubleValue());
 					else o.send(val);

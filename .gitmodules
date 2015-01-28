@@ -1,0 +1,6 @@
+[submodule "plugins/streamr-socketio-server"]
+	path = plugins/streamr-socketio-server
+	url = git@github.com:Unifina/streamr-socketio-server.git
+[submodule "web-app/js/unifina/streamr-socketio-client"]
+	path = web-app/js/unifina/streamr-socketio-client
+	url = git@github.com:Unifina/streamr-client.git

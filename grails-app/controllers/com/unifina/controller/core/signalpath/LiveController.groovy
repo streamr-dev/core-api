@@ -22,7 +22,7 @@ class LiveController {
 				like("name","%${params.term}%")
 			}
 		}
-		[running: rsps]
+		[running: rsps, user:springSecurityService.currentUser]
 	}
 	
 	def show() {
