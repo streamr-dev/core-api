@@ -5,6 +5,7 @@ import com.unifina.domain.security.SecUser
 class RunningSignalPath {
 	SecUser user
 	
+	String name
 	String runner
 	String server
 	String json

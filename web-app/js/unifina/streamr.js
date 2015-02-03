@@ -1,12 +1,13 @@
 // the Streamr global object is initialized in _layoutHead.gsp.
 
-Streamr.createLink = function(optsOrController, action) {
+Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController
 
 	if (action) {
 		opts = {
 			controller: optsOrController,
-			action: action
+			action: action,
+			id: id
 		}
 	}
 
@@ -18,6 +19,10 @@ Streamr.createLink = function(optsOrController, action) {
 
 	if (opts.action)
 		url += '/' + opts.action
+
+	if (opts.id!==undefined) {
+		url += '/' + opts.id
+	}
 
 	return url
 }

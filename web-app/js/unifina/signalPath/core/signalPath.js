@@ -482,6 +482,7 @@ var SignalPath = (function () {
 
 		$(pub).trigger('started');
 	}
+	pub.subscribe = subscribe
 	
 	function reconnect() {
 		subscribe(runData,false);

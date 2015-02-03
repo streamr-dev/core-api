@@ -1,7 +1,13 @@
 package com.unifina.domain.data
 
+import com.unifina.domain.security.SecUser
+
 class Stream implements Comparable {
 	Long id
+	String uuid
+	String apiKey
+	SecUser user
+	
 	String name
 	Feed feed
 	String streamConfig
@@ -13,15 +19,21 @@ class Stream implements Comparable {
 	Date lastHistoricalDay
 	
 	static constraints = {
+		name(blank:false)
+		
 		streamConfig(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
+		uuid(nullable:true)
+		apiKey(nullable:true)
+		user(nullable:true)
 	}
 	
 	static mapping = {
 		name index:"name_idx"
 		localId index: 'localId_idx'
+		uuid index: "uuid_idx"
 		feed lazy:false
 	}
 	

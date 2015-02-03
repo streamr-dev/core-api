@@ -3,7 +3,6 @@ package com.unifina.push;
 import grails.converters.JSON;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -41,7 +40,6 @@ public class KafkaPushChannel extends PushChannel {
 	
 	@Override
 	protected void doPush(PushChannelMessage msg) {
-		((Map) msg.getContent()).put("channel", msg.getChannel());
 		String str = msg.toJSON(json);
 		kafkaService.getProducer().sendRaw(msg.getChannel(), "ui", str.getBytes());
 	}

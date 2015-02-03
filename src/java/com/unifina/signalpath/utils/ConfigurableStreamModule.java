@@ -57,20 +57,25 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 		streamConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
+		
 		for (Object o : fields) {
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
 			
 			// TODO: add other types
-			if (type.equalsIgnoreCase("double")) {
-				addOutput(new TimeSeriesOutput(this,name));
+			if (type.equalsIgnoreCase("number")) {
+				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
+				output.noRepeat = false;
+				addOutput(output);
 			}
 			else if (type.equalsIgnoreCase("string")) {
 				addOutput(new StringOutput(this,name));
 			}
 			else if (type.equalsIgnoreCase("boolean")) {
-				
+				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
+				output.noRepeat = false;
+				addOutput(output);
 			}
 		}
 		

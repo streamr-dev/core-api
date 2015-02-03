@@ -1,8 +1,7 @@
 package com.unifina.signalpath;
 
-import java.util.UUID;
-
 import com.unifina.push.IHasPushChannel;
+import com.unifina.utils.IdGenerator;
 
 public abstract class ModuleWithUI extends AbstractSignalPathModule implements IHasPushChannel {
 
@@ -10,9 +9,9 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	
 	public ModuleWithUI() {
 		super();
-		uiChannelId = UUID.randomUUID().toString();
+		uiChannelId = IdGenerator.get();
 	}
-	
+
 	@Override
 	public void connectionsReady() {
 		if (globals!=null && globals.getUiChannel()!=null) {
