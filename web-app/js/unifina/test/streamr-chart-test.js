@@ -170,6 +170,61 @@ describe('streamr-chart', function() {
 			assert.equal(chart.seriesMeta[1].data.length, 2)
 		})
 
+		it('should add null to the other series when the other gets two points and it only has one', function() {
+			var now = Date.now()
+
+			chart.handleMessage({
+				type: 'p',
+				x: now,
+				y: 10,
+				s: 0
+			})
+
+			chart.handleMessage({
+				type: 'p',
+				x: now,
+				y: 20,
+				s: 1
+			})
+
+			chart.handleMessage({
+				type: 'p',
+				x: now+1000,
+				y: 11,
+				s: 0
+			})
+
+			assert.equal(chart.seriesMeta[1].data.length, 2)
+			assert.equal(chart.seriesMeta[1].data[0][0], now)
+			assert.equal(chart.seriesMeta[1].data[0][1], 20)
+			assert.equal(chart.seriesMeta[1].data[1][0], now+1000)
+			assert.equal(chart.seriesMeta[1].data[1][1], null)
+		})
+
+		it('should add two nulls to the other series when the other gets two points and it has none', function() {
+			var now = Date.now()
+
+			chart.handleMessage({
+				type: 'p',
+				x: now,
+				y: 10,
+				s: 0
+			})
+
+			chart.handleMessage({
+				type: 'p',
+				x: now+1000,
+				y: 11,
+				s: 0
+			})
+
+			assert.equal(chart.seriesMeta[1].data.length, 2)
+			assert.equal(chart.seriesMeta[1].data[0][0], now)
+			assert.equal(chart.seriesMeta[1].data[0][1], null)
+			assert.equal(chart.seriesMeta[1].data[1][0], now+1000)
+			assert.equal(chart.seriesMeta[1].data[1][1], null)
+		})
+
 		it('should trigger the updated event and redraw the chart', function(done) {
 			var now = Date.now()
 

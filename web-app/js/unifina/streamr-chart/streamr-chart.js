@@ -79,7 +79,7 @@ function StreamrChart(parent, defaults) {
 		}
 		else r = null
 		
-		range = r
+		_this.range = r
 		if (_this.chart)
 			_this.redraw()
 	})
@@ -185,7 +185,7 @@ StreamrChart.prototype.initialize = function(title, series, yAxis) {
 		}
 	})
 	
-	$(area).trigger("initialized")
+	$(this).trigger("initialized")
 }
 
 StreamrChart.prototype.redraw = function(scrollToEnd) {
@@ -261,7 +261,8 @@ StreamrChart.prototype.destroy = function() {
 	this.minTime = null;
 	this.maxTime = null;
 
-	this.$parent.find("div.csvDownload").remove();
+	this.$parent.find(".chart-show-on-run").hide()
+	this.$parent.find("div.csvDownload").remove()
 	$(this).trigger('destroyed')
 }
 
@@ -308,12 +309,12 @@ StreamrChart.prototype.handleMessage = function(d) {
 					if (i!=d.s) {
 						// Add null points if no data received yet
 						if (seriesMeta[i].data==null) {
-							this.pushDataToMetaSeries(seriesMeta[i], [seriesMeta[d.s].data[0][0], null])
-							this.pushDataToMetaSeries(seriesMeta[i], [d.x,null])
+							this.pushDataToMetaSeries(seriesMeta[i], {x:seriesMeta[d.s].data[0][0], y:null})
+							this.pushDataToMetaSeries(seriesMeta[i], {x:d.x, y:null})
 						}
 						// If one point received, repeat first value
 						else if (seriesMeta[i].data.length==1) {
-							this.pushDataToMetaSeries(seriesMeta[i], [d.x, seriesMeta[i].data[0][1]])
+							this.pushDataToMetaSeries(seriesMeta[i], {x:d.x, y:null})
 						}
 					}
 				}
