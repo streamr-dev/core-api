@@ -7,13 +7,16 @@
  * - destroyed
  */
 
-function StreamrChart(parent, defaults) {
+function StreamrChart(parent, options) {
 	var _this = this
 
 	this.$parent = $(parent)
-	this.defaults = defaults || {
 
-	}
+	this.options = $.extend({
+		rangeDropdown: true,
+		showHideButtons: true
+	}, options || {})
+
 	this.chart = null
 
 	this.seriesMeta = []
@@ -28,64 +31,68 @@ function StreamrChart(parent, defaults) {
 	this.maxTime = null;
 
 	// Show/Hide all series buttons
-	this.$parent.append('<div class="chart-series-buttons chart-show-on-run pull-right btn-group">' +
-		'<button class="btn btn-default btn-sm show-all-series" '+
-			'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
-		'<button class="btn btn-default btn-sm hide-all-series" '+
-			'title="Hide all series"><i class="fa fa-minus-circle"></i></button>'+
-	'</div>')
+	if (this.options.showHideButtons) {
+		this.$parent.append('<div class="chart-series-buttons chart-show-on-run pull-right btn-group">' +
+			'<button class="btn btn-default btn-sm show-all-series" '+
+				'title="Show all series"><i class="fa fa-plus-circle"></i></button>'+
+			'<button class="btn btn-default btn-sm hide-all-series" '+
+				'title="Hide all series"><i class="fa fa-minus-circle"></i></button>'+
+		'</div>')
 
-	var showHide = function(doShow) {
-		return function() {
-			if (!_this.chart)
-				return;
+		var showHide = function(doShow) {
+			return function() {
+				if (!_this.chart)
+					return;
 
-			_this.seriesMeta.forEach(function(series) {
-				series.impl.setVisible(doShow, false)
-			})
-			_this.chart.redraw()
+				_this.seriesMeta.forEach(function(series) {
+					series.impl.setVisible(doShow, false)
+				})
+				_this.chart.redraw()
+			}
 		}
+		$('button.hide-all-series', this.$parent).click(showHide(false))
+		$('button.show-all-series', this.$parent).click(showHide(true))
 	}
-	$('button.hide-all-series', this.$parent).click(showHide(false))
-	$('button.show-all-series', this.$parent).click(showHide(true))
-	
-	// Range selector
-	var $rangeDiv = $("<select class='chart-range-selector chart-show-on-run form-control pull-right' title='Range'></select>");
-	var rangeConfig = [{name:"1 sec",range:1*1000},
-	                    {name:"15 sec",range:15*1000},
-	                    {name:"1 min",range:60*1000},
-	                    {name:"15 min",range:15*60*1000},
-	                    {name:"30 min",range:30*60*1000},
-	                    {name:"1 h",range:60*60*1000},
-	                    {name:"2 h",range:2*60*60*1000},
-	                    {name:"4 h",range:4*60*60*1000},
-	                    {name:"8 h",range:8*60*60*1000},
-	                    {name:"12 h",range:12*60*60*1000},
-	                    {name:"day",range:24*60*60*1000},
-	                    {name:"week",range:7*24*60*60*1000},
-	                    {name:"month",range:30*24*60*60*1000},
-	                    {name:"All",range:""}]
-	
-	rangeConfig.reverse()
-	rangeConfig.forEach(function(c) {
-		var $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
-		$rangeDiv.append($option)
-	})
-	
-	$rangeDiv.on('change', function() {
-		var r = $(this).val()
-		if (r) {
-			r = parseInt(r)
-		}
-		else r = null
-		
-		_this.range = r
-		if (_this.chart)
-			_this.redraw()
-	})
 
-	this.$parent.append($rangeDiv);
-	
+	// Range dropdown
+	if (this.options.rangeDropdown) {
+		var $rangeDiv = $("<select class='chart-range-selector chart-show-on-run form-control pull-right' title='Range'></select>");
+		var rangeConfig = [{name:"1 sec",range:1*1000},
+		                    {name:"15 sec",range:15*1000},
+		                    {name:"1 min",range:60*1000},
+		                    {name:"15 min",range:15*60*1000},
+		                    {name:"30 min",range:30*60*1000},
+		                    {name:"1 h",range:60*60*1000},
+		                    {name:"2 h",range:2*60*60*1000},
+		                    {name:"4 h",range:4*60*60*1000},
+		                    {name:"8 h",range:8*60*60*1000},
+		                    {name:"12 h",range:12*60*60*1000},
+		                    {name:"day",range:24*60*60*1000},
+		                    {name:"week",range:7*24*60*60*1000},
+		                    {name:"month",range:30*24*60*60*1000},
+		                    {name:"All",range:""}]
+		
+		rangeConfig.reverse()
+		rangeConfig.forEach(function(c) {
+			var $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
+			$rangeDiv.append($option)
+		})
+		
+		$rangeDiv.on('change', function() {
+			var r = $(this).val()
+			if (r) {
+				r = parseInt(r)
+			}
+			else r = null
+			
+			_this.range = r
+			if (_this.chart)
+				_this.redraw()
+		})
+
+		this.$parent.append($rangeDiv);
+	}
+
 	$(this).on("initialized", function() {
 		_this.$parent.find(".chart-show-on-run").show()
 	})
@@ -120,7 +127,7 @@ StreamrChart.prototype.initialize = function(title, series, yAxis) {
 	var opts = {
 		chart: {
 			animation: false,
-			renderTo: this.$area.attr("id"),
+			renderTo: this.$area[0],
 			panning: true,
 			spacingBottom: 40,
 			backgroundColor: null,
@@ -163,7 +170,7 @@ StreamrChart.prototype.initialize = function(title, series, yAxis) {
 		series: series
 	};
 
-	opts = $.extend(true, {}, this.defaults, opts);
+	opts = $.extend(true, {}, this.options, opts);
 	
 	// Create the chart	
 	this.chart = new Highcharts.StockChart(opts);
@@ -243,7 +250,7 @@ StreamrChart.prototype.createYAxisOptions = function(options, n) {
 		title: {
 			text: ""
 		}
-	}, this.defaults.yAxis || {}, options)
+	}, this.options.yAxis || {}, options)
 	return result
 }
 

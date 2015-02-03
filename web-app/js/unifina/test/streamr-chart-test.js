@@ -52,6 +52,26 @@ describe('streamr-chart', function() {
 		assert($parent.find("#"+chart.$area.attr('id')).length)
 	})
 
+	describe('chart options', function() {
+		it('should add range selector by default', function() {
+			assert($parent.find(".chart-range-selector").length)
+		})
+		it('rangeDropdown: false should not add range selector', function() {
+			$parent = $('<div></div>')
+			chart = new StreamrChart($parent, {rangeDropdown:false})
+			assert.equal($parent.find(".chart-range-selector").length, 0)
+		})
+
+		it('should add show/hide series buttons by default', function() {
+			assert($parent.find(".chart-series-buttons").length)
+		})
+		it('showHideButtons: false should not add show/hide buttons', function() {
+			$parent = $('<div></div>')
+			chart = new StreamrChart($parent, {showHideButtons:false})
+			assert.equal($parent.find(".chart-series-buttons").length, 0)
+		})
+	})
+
 	describe('init message', function() {
 		it('should establish the seriesMeta and yAxis objects', function() {
 			chart.handleMessage({
