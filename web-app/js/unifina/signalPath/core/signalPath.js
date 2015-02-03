@@ -65,6 +65,7 @@ var SignalPath = (function () {
     
     // set in init()
     var canvas;
+    var name;
     
 	// Public
 	var pub = {};
@@ -291,8 +292,7 @@ var SignalPath = (function () {
 				}
 		}
 		
-		if (saveData && saveData.name)
-			result.signalPathData.name = saveData.name;
+		result.signalPathData.name = getName();
 		
 		getModules().forEach(function(module) {
 			var json = module.toJSON()
@@ -303,6 +303,19 @@ var SignalPath = (function () {
 	}
 	pub.toJSON = signalPathToJSON;
 
+	function getName() {
+		return name;
+	}
+	pub.getName = getName
+	
+	function setName(n) {
+		name = n
+		
+		if (saveData)
+			saveData.name = n
+	}
+	pub.setName = setName
+	
 	/**
 	 * SaveData should contain (optionally): url, name, (params)
 	 */
@@ -316,9 +329,11 @@ var SignalPath = (function () {
 		else 
 			saveData = sd;
 		
+		setName(sd.name)
+		
 		var result = signalPathToJSON(signalPathContext);
 		var params = {
-			name: sd.name,
+			name: getName(),
 			json: JSON.stringify(result)	
 		};
 		
@@ -408,6 +423,7 @@ var SignalPath = (function () {
 		
 		$.extend(saveData,options.saveData);
 		$.extend(saveData,data.saveData);
+		setName(saveData.name)
 		
 		// TODO: remove backwards compatibility
 		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext);
@@ -418,7 +434,10 @@ var SignalPath = (function () {
 		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
 	}
 	
-	function run(additionalContext) {
+	function run(additionalContext, subscribeOnSuccess, callback) {
+		if (subscribeOnSuccess===undefined)
+			subscribeOnSuccess = true
+		
 		var signalPathContext = options.signalPathContext();
 		jQuery.extend(true,signalPathContext,additionalContext);
 		
@@ -448,9 +467,12 @@ var SignalPath = (function () {
 				if (data.error) {
 					handleError("Error:\n"+data.error)
 				}
-				else {
+				else if (subscribeOnSuccess) {
 					subscribe(data,true);
 				}
+				
+				if (callback)
+					callback(data)
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
 				handleError(textStatus+"\n"+errorThrown)

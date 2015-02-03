@@ -174,6 +174,30 @@ $(document).ready(function() {
 		
 		SignalPath.run(ctx);
 	});
+	
+	$('#runLiveModalButton').click(function() {
+		if (SignalPath.getName())
+			$('#runLiveName').val(SignalPath.getName())
+	})
+	
+	$('#runLiveButton').click(function() {
+		var name = $('#runLiveName').val()
+		SignalPath.setName(name)
+		
+		var ctx = {
+			live: true
+		}
+		
+		SignalPath.run(ctx, false, function(data) {
+			var url_root = '${createLink(controller:"live", action:"show")}'
+			
+			$.pnotify({
+				type: 'info',
+	        	text: "Live Canvas launced: <a href='"+url_root+"/"+data.ids[0]+"'>"+name+"</a>",
+	        	delay: 4000
+    		});
+		});
+	})
 })
 
 $(document).unload(function () {
@@ -240,6 +264,7 @@ $(document).unload(function () {
 							<span class="sr-only">Toggle Dropdown</span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
+							<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
 							<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
 						</ul>
 					</div>
@@ -273,6 +298,28 @@ $(document).unload(function () {
 	</div>
 
 	<div id="main-menu-bg"></div>
+	
+	<div id="runLiveModal" class="modal fade">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	        <h4 class="modal-title">Launch Live Options</h4>
+	      </div>
+	      <div class="modal-body">
+				<div class="form-group">
+					<label>Name</label>
+					
+					<input type="text" name="name" id="runLiveName" class="form-control">
+				</div>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	        <button id="runLiveButton" class="btn btn-primary" data-dismiss="modal">Launch</button>
+	      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 
 	<div id="csvModal" class="modal fade">
 	  <div class="modal-dialog">

@@ -11,6 +11,7 @@ import org.apache.log4j.Logger
 
 import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
+import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
@@ -115,16 +116,10 @@ class SignalPathService {
 		// Read the DataSource class from signalPathContext
 
 		// Return the historical DataSource by default
-		if (signalPathContext.dataSource==null)
+		if (signalPathContext.live==null || !signalPathContext.live)
 			return new BacktestDataSource(globals)
-			
-		String dataSourceClass = signalPathContext.dataSource
-
-		// Instantiate DataSource dynamically
-		def dsObject = this.getClass().getClassLoader().loadClass(dataSourceClass).newInstance(globals)
-		DataSource ds = (DataSource)dsObject
-
-		return ds
+		else return new RealtimeDataSource(globals)
+		
 	}
 	
 	public List<RunningSignalPath> launch(List<Map> signalPathData, Map signalPathContext, SecUser user) {
