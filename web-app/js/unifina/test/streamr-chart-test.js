@@ -1,17 +1,19 @@
 var assert = require('assert')
 var $ = require('jquery')(require("jsdom").jsdom().parentWindow);
-global.$ = $
 var StreamrChart = require('../streamr-chart/streamr-chart').StreamrChart
-
-global.window = {
-	requestAnimationFrame: function(cb) {
-		setTimeout(cb,0)
-	}
-}
 
 describe('streamr-chart', function() {
 	var chart
 	var $parent
+
+	before(function() {
+		global.$ = $
+		global.window = {
+			requestAnimationFrame: function(cb) {
+				setTimeout(cb,0)
+			}
+		}
+	})
 
 	beforeEach(function() {
 		$parent = $('<div></div>')

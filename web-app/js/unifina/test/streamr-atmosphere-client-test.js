@@ -1,18 +1,14 @@
-
 var assert = require('assert')
-
-global.window = {
-
-}
-
-global.Streamr = {
-
-}
 
 var StreamrClient = require('../streamr-atmosphere-client/streamr-atmosphere-client').StreamrClient
 
 describe('StreamrClient', function() {
 	var client
+
+	before(function() {
+		global.window = {}
+		global.Streamr = {}
+	})
 
 	beforeEach(function() {
 		
