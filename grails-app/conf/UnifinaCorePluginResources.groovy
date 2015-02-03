@@ -167,6 +167,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-chart', file:'streamr-chart.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']

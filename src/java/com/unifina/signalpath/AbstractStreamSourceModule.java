@@ -16,6 +16,8 @@ public abstract class AbstractStreamSourceModule extends AbstractSignalPathModul
 		streamParameter = new StreamParameter(this, getStreamParameterName());
 		streamParameter.setCheckModuleId(true);
 		streamParameter.setUpdateOnChange(true);
+		streamParameter.drivingInput = false;
+		streamParameter.canToggleDrivingInput = false;
 		addInput(streamParameter);
 	}
 	
