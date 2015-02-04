@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <title><g:message code="dashboard.show.label"/></title>
+    <title><g:message code="dashboard.list.label"/></title>
 
 </head>
 

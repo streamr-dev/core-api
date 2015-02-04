@@ -18,13 +18,21 @@ class DashboardController {
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Dashboard.get(params.long("id")))},
 		except:['list', 'create', 'save']]
 	
+	static defaultAction = "list"
+	
 	def list() {
 		def dashboards = Dashboard.findAllByUser(springSecurityService.currentUser)
 		return [dashboards:dashboards]
 	}
 	
 	def create() {
-		def runningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
+		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
+		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
+			UiChannel found = rsp.uiChannels.find {UiChannel ui->
+				ui.module
+			}
+			return found!=null
+		}
 		Dashboard dashboard = new Dashboard()
 		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
 	}
@@ -53,13 +61,14 @@ class DashboardController {
 	}
 	
 	def edit() {
-		def runningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
-		Dashboard dashboard = Dashboard.get(params.id)
-		if (!dashboard) {
-			flash.error = "Dashboard $params.id does not exist!"
-			redirect(action:'list')
+		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
+		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
+			UiChannel found = rsp.uiChannels.find {UiChannel ui->
+				ui.module
+			}
+			return found!=null
 		}
-		
+		Dashboard dashboard = new Dashboard()
 		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
 	}
 	
