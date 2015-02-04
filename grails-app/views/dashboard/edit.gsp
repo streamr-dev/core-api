@@ -7,6 +7,7 @@
 <body class="edit-dashboard">
 	
 	<g:form action="update">
+		<g:hiddenField name="id" value="${dashboard.id}"/>
 		<g:render template="form"/>
 		<g:submitButton class="btn btn-primary" name="submit" value="Update"/>
 	</g:form>

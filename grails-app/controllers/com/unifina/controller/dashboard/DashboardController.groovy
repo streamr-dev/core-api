@@ -67,4 +67,67 @@ class DashboardController {
 		Dashboard dashboard = Dashboard.get(params.id)
 		return [serverUrl: grailsApplication.config.streamr.ui.server, dashboard:dashboard]
 	}
+	
+	def delete = {
+		def dashboardInstance = Dashboard.get(params.id)
+		if (dashboardInstance) {
+			try {
+				dashboardInstance.delete(flush: true)
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+				redirect(action: "list")
+			}
+			catch (org.springframework.dao.DataIntegrityViolationException e) {
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+				redirect(action: "show", id: params.id)
+			}
+		}
+		else {
+			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+			redirect(action: "list")
+		}
+	}
+	
+	def update() {
+		Dashboard dashboard = Dashboard.get(params.id)
+		dashboard.name = params.name
+		
+		List uiChannels = UiChannel.findAllByIdInList(params.list("uiChannels"))
+
+		Collection added = uiChannels.findAll {UiChannel ui->
+			DashboardItem found = dashboard.items.find {DashboardItem item-> 
+				item.uiChannel.id == ui.id
+			}
+			return found==null
+		}
+		
+		Collection removed = dashboard.items.findAll {DashboardItem item->
+			UiChannel found = uiChannels.find {UiChannel ui->
+				item.uiChannel.id == ui.id				
+			}
+			return found==null
+		}
+			
+		added.each {UiChannel uiChannel->
+			if (!unifinaSecurityService.canAccess(uiChannel))
+				throw new AccessControlException("Access to $uiChannel denied for user $springSecurityService.currentUser")
+			
+			DashboardItem item = new DashboardItem()
+			item.uiChannel = uiChannel
+			
+			dashboard.addToItems(item)
+		}
+		
+		removed.each {DashboardItem item->			
+			dashboard.removeFromItems(item)
+		}
+		
+		// Set the titles of all DashboardItems
+		dashboard.items.each {DashboardItem item->
+			item.title = params["title_"+item.uiChannel.id]
+		}
+		
+		dashboard.save(flush:true, failOnError:true)
+		
+		redirect(action: "show", id: dashboard.id)
+	}
 }

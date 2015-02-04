@@ -39,7 +39,7 @@
 					            <td><g:link action="show" id="${dashboard.id}">${fieldValue(bean: dashboard, field: "id")}</g:link></td>
 					            <td>${dashboard.name}</td>					        
 					           	<td>${dashboard.dateCreated.format("yyyy-MM-dd")}</td>
-					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>			            	
+					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>		            	
 							</tr>
 						</g:each>
 					</tbody>
