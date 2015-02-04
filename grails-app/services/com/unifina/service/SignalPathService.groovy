@@ -167,6 +167,7 @@ class SignalPathService {
 					ui.id = ((IHasPushChannel) it).getUiChannelId()
 					ui.hash = it.getHash().toString()
 					ui.module = it.getDomainObject()
+					ui.name = ((IHasPushChannel) it).getUiChannelName()
 					
 					rsp.addToUiChannels(ui)
 				}

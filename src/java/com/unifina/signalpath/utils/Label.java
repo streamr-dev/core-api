@@ -48,4 +48,12 @@ public class Label extends ModuleWithUI {
 			style = getOption(config,"style").toString();
 	}
 	
+	@Override
+	public String getUiChannelName() {
+		if (label.isConnected()) {
+			return super.getUiChannelName() + " ("+label.getSource().getLongName()+")";
+		}
+		else return super.getUiChannelName();
+	}
+	
 }

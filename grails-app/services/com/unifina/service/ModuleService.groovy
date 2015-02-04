@@ -25,6 +25,7 @@ class ModuleService {
 		m.globals = globals
 		m.init()
 		m.setName(mod.name)
+		m.setDomainObject(mod);
 		
 		if (parent!=null)
 			m.parentSignalPath = parent

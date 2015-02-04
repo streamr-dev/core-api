@@ -3,6 +3,7 @@ package com.unifina.domain.signalpath
 class UiChannel {
 	String id
 	String hash
+	String name
 	
 	Module module
 	
@@ -15,5 +16,6 @@ class UiChannel {
 	static constraints = {
 		hash nullable: true
 		module nullable:true
+		name nullable:true
 	}
 }
