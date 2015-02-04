@@ -34,4 +34,26 @@ public class Label extends ModuleWithUI {
 
 	}
 	
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String,Object> config = super.getConfiguration();
+		addOption(config,"style","string",style);
+		return config;
+	}
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+		if (getOption(config,"style")!=null)
+			style = getOption(config,"style").toString();
+	}
+	
+	@Override
+	public String getUiChannelName() {
+		if (label.isConnected()) {
+			return super.getUiChannelName() + " ("+label.getSource().getLongName()+")";
+		}
+		else return super.getUiChannelName();
+	}
+	
 }

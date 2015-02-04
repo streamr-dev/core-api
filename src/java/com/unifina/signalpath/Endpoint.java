@@ -51,6 +51,10 @@ public abstract class Endpoint<T> {
 		return typeName;
 	}
 	
+	public String getLongName() {
+		return (getOwner()!=null ? getOwner().getName()+"." : "") + (getDisplayName()!=null ? getDisplayName() : getName());
+	}
+	
 	public abstract boolean isConnected();
 	
 	public Map<String,Object> resetConfiguration() {
