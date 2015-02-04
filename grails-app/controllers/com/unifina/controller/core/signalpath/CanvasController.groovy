@@ -75,11 +75,9 @@ class CanvasController {
 			signalPathContext = JSON.parse(params.signalPathContext)
 		}
 		
-		signalPathContext.keepConsumedMessages = false
-		
 		List<RunningSignalPath> rsps = signalPathService.launch([iData], signalPathContext, springSecurityService.currentUser)
 		
-		Map result = [success:true, uiChannels:rsps[0].uiChannels.collect { [id:it.id, hash:it.hash] }, runnerId:rsps[0].runner]
+		Map result = [success:true, ids:rsps.collect{it.id}, uiChannels:rsps[0].uiChannels.collect { [id:it.id, hash:it.hash] }, runnerId:rsps[0].runner]
 		render result as JSON
 	}
 	

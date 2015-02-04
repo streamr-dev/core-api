@@ -1,28 +1,6 @@
 
 var assert = require('assert')
 
-global.window = {
-	location: {
-		search: ''
-	}
-}
-
-global.Streamr = {
-	user: "test",
-	
-	createLink: function(opt) {
-		if (opt.uri)
-			return '/'+opt.uri
-
-		var ctrl = arguments[0]
-
-		if (opt.controller)
-			ctrl = opt.controller[0].toLowerCase() + opt.controller.slice(1)
-
-		return '/'+ctrl+'/'+opt.action
-	}
-}
-
 function Eventor() {
 	var listeners = []
 	return {
@@ -38,10 +16,36 @@ function Eventor() {
 	}
 }
 
-var Tour = require('../tour/tour').Tour
+var Tour
 
 describe('Tour', function() {
 	var tour
+
+	before(function() {
+		global.window = {
+			location: {
+				search: ''
+			}
+		}
+
+		global.Streamr = {
+			user: "test",
+			
+			createLink: function(opt) {
+				if (opt.uri)
+					return '/'+opt.uri
+
+				var ctrl = arguments[0]
+
+				if (opt.controller)
+					ctrl = opt.controller[0].toLowerCase() + opt.controller.slice(1)
+
+				return '/'+ctrl+'/'+opt.action
+			}
+		}
+
+		Tour = require('../tour/tour').Tour
+	})
 
 	beforeEach(function() {
 
