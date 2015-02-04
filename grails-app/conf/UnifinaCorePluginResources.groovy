@@ -123,7 +123,7 @@ modules = {
 		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
 	}
 	tour {
-		dependsOn 'hopscotch, signalpath-core'
+		dependsOn 'hopscotch, streamr'
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'stream-fields' {
