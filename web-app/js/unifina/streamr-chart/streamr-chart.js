@@ -437,11 +437,8 @@ StreamrChart.prototype.handleMessage = function(d) {
 	
 	// Day break
 	else if (d.type=="b") {
-		if (chart && chart.series) {
-			for (var i=0;i<chart.series.length;i++) {
-				// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-				chart.series[d.s].addPoint([this.maxTime+1, null],false,false,false);
-			}
+		if (chart && chart.series && chart.series[d.s]) {
+			chart.series[d.s].addPoint([this.maxTime+1, null],false,false,false);
 		}
 	}
 	
