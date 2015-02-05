@@ -75,6 +75,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		prot.body.find(".ioTable").css("width","0px");
 		chart = new StreamrChart(prot.body, SignalPath.defaultChartOptions)
 		chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
+		$(chart).on('destroyed', function() {
+			prot.body.find("div.csvDownload").remove()
+		})
 	}
 	
 	function destroyChart() {
@@ -85,6 +88,30 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	
 	pub.receiveResponse = function(d) {
 		chart.handleMessage(d)
+		// Show csv download link
+		if (d.type==="csv") {
+			var div = $("<span class='csvDownload'></span>");
+			var link = $("<a href='"+d.link+"'></a>");
+			link.append("<img src='../images/download.png'/>&nbsp;"+d.filename);
+			div.append(link);
+			prot.body.append(div);
+			div.effect("highlight",{},2000);
+			
+			link.click(function(event) {
+				event.preventDefault();
+				$.getJSON(Streamr.createLink("canvas", "existsCsv"), {filename:d.filename}, (function(div) {
+					return function(resp) {
+						if (resp.success) {
+							$(div).remove();
+							var elemIF = document.createElement("iframe"); 
+							elemIF.src = "downloadCsv?filename="+resp.filename; 
+							elemIF.style.display = "none"; 
+							document.body.appendChild(elemIF);
+						}
+						else alert("The file is already gone from the server. Please re-run your canvas!")
+					}})(div));
+			});
+		}
 	}
 	
 	var superClean = pub.clean;

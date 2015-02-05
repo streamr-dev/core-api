@@ -269,7 +269,6 @@ StreamrChart.prototype.destroy = function() {
 	this.maxTime = null;
 
 	this.$parent.find(".chart-show-on-run").hide()
-	this.$parent.find("div.csvDownload").remove()
 	$(this).trigger('destroyed')
 }
 
@@ -441,34 +440,9 @@ StreamrChart.prototype.handleMessage = function(d) {
 		if (chart && chart.series) {
 			for (var i=0;i<chart.series.length;i++) {
 				// Changed to array format to avoid turboThreshold errors http://www.highcharts.com/errors/20
-				chart.series[d.s].addPoint([maxTime+1, null],false,false,false);
+				chart.series[d.s].addPoint([this.maxTime+1, null],false,false,false);
 			}
 		}
-	}
-	
-	// CSV file download link
-	else if (d.type=="csv") {
-		var div = $("<span class='csvDownload'></span>");
-		var link = $("<a href='"+d.link+"'></a>");
-		link.append("<img src='../images/download.png'/>&nbsp;"+d.filename);
-		div.append(link);
-		this.$parent.append(div);
-		div.effect("highlight",{},2000);
-		
-		link.click(function(event) {
-			event.preventDefault();
-			$.getJSON("existsCsv", {filename:d.filename}, (function(div) {
-				return function(resp) {
-					if (resp.success) {
-						$(div).remove();
-						var elemIF = document.createElement("iframe"); 
-						elemIF.src = "downloadCsv?filename="+resp.filename; 
-						elemIF.style.display = "none"; 
-						document.body.appendChild(elemIF);
-					}
-					else alert("The file is already gone from the server. Please re-run your canvas!")
-				}})(div));
-		});
 	}
 	
 	$(this).trigger('updated')

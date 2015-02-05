@@ -78,11 +78,13 @@ describe('streamr-chart', function() {
 				type: 'init',
 				series: [{
 					name: 'test',
-					yAxis: 0
+					yAxis: 0,
+					idx: 0
 				},
 				{
 					name: 'test2',
-					yAxis: 1
+					yAxis: 1,
+					idx: 1
 				}]
 			})
 
@@ -95,11 +97,13 @@ describe('streamr-chart', function() {
 				type: 'init',
 				series: [{
 					name: 'test',
-					yAxis: 0
+					yAxis: 0,
+					idx: 0
 				},
 				{
 					name: 'test2',
-					yAxis: 3
+					yAxis: 3,
+					idx: 1
 				}]
 			})
 
@@ -116,11 +120,13 @@ describe('streamr-chart', function() {
 				type: 'init',
 				series: [{
 					name: 'test',
-					yAxis: 0
+					yAxis: 0,
+					idx: 0
 				},
 				{
 					name: 'test2',
-					yAxis: 1
+					yAxis: 1,
+					idx: 1
 				}]
 			})
 		})
@@ -275,4 +281,96 @@ describe('streamr-chart', function() {
 		})
 
 	})
+
+	describe('day break message', function() {
+		it('should add a null value at the end of the series', function(done) {
+			// Init
+			chart.handleMessage({
+				type: 'init',
+				series: [{
+					name: 'test',
+					yAxis: 0,
+					idx: 0
+				}]
+			})
+
+			for (var i=0; i<5; i++) {
+				chart.handleMessage({
+					type: 'p',
+					x: i,
+					y: i,
+					s: 0
+				})
+			}
+
+			chart.chart.series[0].addPoint = function(data) {
+				assert.equal(data[1], null)
+				done()
+			}
+
+			chart.handleMessage({
+				type: 'b',
+				s: 0
+			})
+		})
+	})
+
+	describe('series message', function() {
+		it('should add a new series to the chart', function(done) {
+			// Init
+			chart.handleMessage({
+				type: 'init',
+				series: [{
+					name: 'test',
+					yAxis: 0,
+					idx: 0
+				}]
+			})
+			// Some data
+			for (var i=0; i<5; i++) {
+				chart.handleMessage({
+					type: 'p',
+					x: i,
+					y: i,
+					s: 0
+				})
+			}
+
+			chart.chart.addSeries = function(series) {
+				throw "Series added too early!"
+			}
+
+			// Add another series to same yAxis
+			chart.handleMessage({
+				type: 's',
+				series: {
+					name: 'new',
+					yAxis: 0,
+					idx: 1
+				}
+			})
+
+			assert.equal(chart.seriesMeta.length, 2)
+
+			// Should not be added before getting the second data point
+			chart.handleMessage({
+				type: 'p',
+				x: 10,
+				y: 10,
+				s: 1
+			})
+			chart.chart.addSeries = function(series) {
+				assert.equal(series.data.length, 2)
+				done()
+			}
+			chart.handleMessage({
+				type: 'p',
+				x: 10,
+				y: 10,
+				s: 1
+			})
+
+		})
+	})
+
 })
