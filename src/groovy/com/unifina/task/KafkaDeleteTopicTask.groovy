@@ -18,7 +18,7 @@ import com.unifina.kafkaclient.UnifinaKafkaChannelConsumer
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
-import com.unifina.kafkaclient.UnifinaKafkaUtils;
+//import com.unifina.kafkaclient.UnifinaKafkaUtils;
 import com.unifina.service.KafkaService
 
 /**

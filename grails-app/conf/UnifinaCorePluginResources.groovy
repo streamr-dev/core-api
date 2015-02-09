@@ -105,6 +105,9 @@ modules = {
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
+	webcomponents {
+		resource url:[dir:'js/webcomponentsjs', file:'webcomponents.min.js', plugin: 'unifina-core'], disposition:'head'
+	}
 	underscore {
 		resource url:[dir:'js/underscore', file:'underscore-min.js', plugin: 'unifina-core']
 	}
@@ -120,7 +123,7 @@ modules = {
 		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
 	}
 	tour {
-		dependsOn 'hopscotch, signalpath-core'
+		dependsOn 'hopscotch, streamr'
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'stream-fields' {

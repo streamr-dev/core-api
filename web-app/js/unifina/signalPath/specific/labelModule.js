@@ -7,22 +7,12 @@ SignalPath.LabelModule = function(data,canvas,prot) {
 	var super_createDiv = prot.createDiv;
 	prot.createDiv = function() {
 		super_createDiv();
-		label = $("<div class='modulelabel' style='"+prot.jsonData.options.style.value+"'>"+prot.jsonData.params[0].value+"</div>");
+		label = $("<div class='modulelabel'></div>");
 		prot.body.append(label);
-		
-		prot.div.find("input").keyup(function() {
-			label.html($(this).val());
-		});
-		
-		prot.initResizable();
 	}
 	
-	var super_receiveResponse = prot.receiveResponse
-	prot.receiveResponse = function(payload) {
-		super_receiveResponse(payload);
-		if (payload.type=="u") {
-			label.html(payload.val);
-		}
+	pub.receiveResponse = function(payload) {
+		label.html(payload.value);
 	}
 	
 	return pub;
