@@ -7,7 +7,6 @@ import java.security.AccessControlException
 
 import com.unifina.domain.signalpath.RunningSignalPath
 
-@Secured("ROLE_USER")
 class LiveController {
 	
 	def springSecurityService
@@ -15,6 +14,7 @@ class LiveController {
 	
 	static defaultAction = "list"
 	
+	@Secured("ROLE_USER")
 	def list() {
 		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
 			eq("user",springSecurityService.currentUser)
@@ -25,6 +25,7 @@ class LiveController {
 		[running: rsps, user:springSecurityService.currentUser]
 	}
 	
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def show() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		if (!unifinaSecurityService.canAccess(rsp))
@@ -33,6 +34,7 @@ class LiveController {
 		[rsp:rsp]
 	}
 	
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def getJson() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		if (!unifinaSecurityService.canAccess(rsp)) {

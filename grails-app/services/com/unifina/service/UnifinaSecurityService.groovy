@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import org.apache.log4j.Logger
@@ -9,8 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
-
-import java.util.UUID
+import com.unifina.domain.signalpath.RunningSignalPath
 
 class UnifinaSecurityService {
 	
@@ -47,6 +45,11 @@ class UnifinaSecurityService {
 	@CompileStatic
 	boolean canAccess(ModulePackage modulePackage) {
 		return checkModulePackageAccess(modulePackage) || checkUser(modulePackage)
+	}
+	
+	@CompileStatic 
+	boolean canAccess(RunningSignalPath rsp) {
+		return rsp.shared || checkUser(rsp)
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage) {

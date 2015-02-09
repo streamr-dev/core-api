@@ -13,7 +13,13 @@ class RunningSignalPath {
 	Date dateCreated
 	Date lastUpdated
 	
+	Boolean shared
+	
 	static hasMany = [uiChannels: UiChannel]
+	
+	static constraints = {
+		shared(nullable:true)
+	}
 	
 	static mapping = {
 		json type: 'text'

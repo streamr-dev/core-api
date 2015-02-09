@@ -1,8 +1,11 @@
-<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-<link rel="import" href="../../../js/polymer/polymer.html">
-<script src="../../../js/highstock-2.0.3/highstock.js"></script>
-<script src="../../../js/unifina/streamr-chart/streamr-chart.js"></script>
+<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
 
+<r:require module="jquery"/>
+<r:require module="highstock"/>
+<r:require module="streamr-chart"/>
+
+<r:layoutResources disposition="head"/>
+<r:layoutResources disposition="defer"/>
 
 <polymer-element name="streamr-chart" attributes="channel rangeDropdown showHideButtons">
 	<template>

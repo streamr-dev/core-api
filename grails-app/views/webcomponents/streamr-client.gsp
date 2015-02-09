@@ -1,8 +1,11 @@
+<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
 
-<link rel="import" href="../../../js/polymer/polymer.html">
-<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-<script type="text/javascript" src="../../../js/unifina/streamr-socketio-client/streamr-client.js"></script>
-<script type="text/javascript" src="../../../js/socket.io-1.2.1/socket.io-1.2.1.min.js"></script>
+<r:require module="jquery"/>
+<r:require module="socket-io"/>
+<r:require module="streamr-client"/>
+
+<r:layoutResources disposition="head"/>
+<r:layoutResources disposition="defer"/>
 
 <polymer-element name="streamr-client" attributes="server">
 	<script>

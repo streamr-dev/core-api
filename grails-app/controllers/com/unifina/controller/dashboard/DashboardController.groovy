@@ -61,6 +61,8 @@ class DashboardController {
 	}
 	
 	def edit() {
+		Dashboard dashboard = Dashboard.get(params.id)
+		
 		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
 		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
 			UiChannel found = rsp.uiChannels.find {UiChannel ui->
@@ -68,7 +70,7 @@ class DashboardController {
 			}
 			return found!=null
 		}
-		Dashboard dashboard = new Dashboard()
+
 		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
 	}
 	

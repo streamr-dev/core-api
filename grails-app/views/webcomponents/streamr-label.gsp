@@ -1,5 +1,7 @@
+<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
 
-<link rel="import" href="../../../js/polymer/polymer.html">
+<r:layoutResources disposition="head"/>
+<r:layoutResources disposition="defer"/>
 
 <polymer-element name="streamr-label" attributes="channel">
 	<template>

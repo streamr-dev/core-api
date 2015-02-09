@@ -4,6 +4,8 @@
     <title><g:message code="dashboard.show.label" args="[dashboard.name]"/></title>
 
 	<r:require module="webcomponents"/>
+	<link rel="import" href="${createLink(uri:"/webcomponents/index.html", plugin:"unifina-core")}">
+	
 	<r:require module="toolbar"/>
 
 	<r:script>
@@ -11,8 +13,6 @@
 		 	new Toolbar($("#toolbar"))
 		 })
 	</r:script>
-
-	<link rel="import" href="${resource(dir:"webcomponents/components", file:"streamr-imports.html", plugin:"unifina-core")}"/>
 </head>
 
 <body class="dashboard">

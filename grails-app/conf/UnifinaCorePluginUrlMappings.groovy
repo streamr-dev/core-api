@@ -14,5 +14,10 @@ class UnifinaCorePluginUrlMappings {
 		
 		"/login/$action?"(controller: "login")
 		"/logout/$action?"(controller: "logout")
+		
+		"/webcomponents/index.html"(view:"/webcomponents/index")
+		"/webcomponents/streamr-client.html"(view:"/webcomponents/streamr-client")
+		"/webcomponents/streamr-label.html"(view:"/webcomponents/streamr-label")
+		"/webcomponents/streamr-chart.html"(view:"/webcomponents/streamr-chart")
 	}
 }

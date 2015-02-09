@@ -21,12 +21,12 @@
 			<g:if test="${uiChannel.hash!=null && uiChannel.module}">
 				<div class="form-group">
 					<div class="col-md-6">
-					<label class="control-label">
-						<g:checkBox name="uiChannels" value="${uiChannel.name}" checked="${checked?.contains(uiChannel.id)}"/> 
-						${uiChannel.id}<br>
-					</label>
-					
-						<g:textField class="form-control input-md"name="title_${uiChannel.id}" placeholder="Name" value="${dashboard?.items?.find{uiChannel.id==it.uiChannel.id}?.title}"/>
+						<label class="control-label">
+							<g:checkBox name="uiChannels" value="${uiChannel.id}" checked="${checked?.contains(uiChannel.id)}"/> 
+							${uiChannel.name ?: uiChannel.id}<br>
+						</label>
+						
+						<g:textField class="form-control input-md"name="title_${uiChannel.id}" placeholder="Title" value="${dashboard?.items?.find{uiChannel.id==it.uiChannel.id}?.title}"/>
 					</div>
 				</div>
 			</g:if>
