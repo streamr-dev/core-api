@@ -27,6 +27,7 @@
  * getModuleUrl: url for module JSON
  * uiActionUrl: url for POSTing module UI runtime changes
  * connectionOptions: option object passed to StreamrClient
+ * zoom: zoom level, default 1
  */
 
 var SignalPath = (function () { 
@@ -48,7 +49,8 @@ var SignalPath = (function () {
 		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
 		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
-		connectionOptions: {}
+		connectionOptions: {},
+		zoom: 1
     };
     
     var connection;
@@ -85,6 +87,7 @@ var SignalPath = (function () {
 		});
 		
 	    connection = new StreamrClient(options.connectionOptions)
+	    pub.setZoom(opts.zoom)
 	};
 	pub.unload = function() {
 		jsPlumb.unload();
@@ -591,6 +594,21 @@ var SignalPath = (function () {
 		return workspace;
 	}
 	pub.getWorkspace = getWorkspace;
+	
+	function getZoom() {
+		return canvas.css("zoom") != null ? canvas.css("zoom") : 1 
+	}
+	pub.getZoom = getZoom
+	
+	function setZoom(zoom, animate) {
+		if (animate===undefined)
+			animate = true
+		
+		if (animate)
+			canvas.animate({ zoom: zoom }, 300);
+		else (canvas.css("zoom", zoom))
+	}
+	pub.setZoom = setZoom
 	
 	return pub; 
 }());

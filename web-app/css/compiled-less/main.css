@@ -12700,7 +12700,7 @@ body .ui-tooltip {
   float: right;
   width: 20px;
   height: 150px;
-  background: white url("../../images/plugins/jquery.minicolors.png") 0 0;
+  background: #ffffff url("../../images/plugins/jquery.minicolors.png") 0 0;
   cursor: row-resize;
   margin: 1px 1px 1px 0;
 }
@@ -13600,8 +13600,8 @@ div.dataTables_scrollFoot table {
   position: absolute;
   display: none;
   z-index: 1;
-  border: 2px dashed lightskyblue;
-  color: lightskyblue;
+  border: 2px dashed #87cefa;
+  color: #87cefa;
   background-color: white;
   opacity: 0.95;
   pointer-event: none;
@@ -16304,7 +16304,7 @@ div.output .switchContainer {
  * jQuery UI stuff
  **/
 .ui-autocomplete-loading {
-  background: white url('../../images/spinner_16x16.gif') right center no-repeat;
+  background: #ffffff url('../../images/spinner_16x16.gif') right center no-repeat;
 }
 .ui-button-text-only .ui-button-text {
   padding: 0.2em 0.7em;
@@ -16450,6 +16450,15 @@ table.sortable th {
 }
 .jstree a {
   color: #555 !important;
+}
+body.embedded {
+  background-color: transparent;
+}
+body.embedded #main-navbar {
+  display: none;
+}
+body.embedded #content-wrapper {
+  padding: 0;
 }
 .form-group-period .input-group-addon {
   width: 60px;

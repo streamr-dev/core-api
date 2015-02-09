@@ -8,7 +8,8 @@ class UnifinaCorePluginUrlMappings {
 			}
 		}
 
-		"/"(controller:"canvas")
+		// Root should be mapped in app, not in plugin, because plugin url mappings can't currently be overridden
+		
 		"500"(view:'/error')
 		
 		"/login/$action?"(controller: "login")

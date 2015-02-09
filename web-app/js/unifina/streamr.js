@@ -1,4 +1,6 @@
-// the Streamr global object is initialized in _layoutHead.gsp.
+// the Streamr global object is normally initialized in _layoutHead.gsp.
+if (!Streamr)
+	var Streamr = {}
 
 Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="layout" content="main" />
-<title><g:message code="live.view.title"/></title>
+<title><g:message code="runningSignalPath.show.label" args="[rsp.name]"/></title>
 
 <r:require module="signalpath-theme"/>
 <g:render template="/canvas/signalPathExtensions"/>
@@ -11,7 +11,8 @@
 <r:script>
 			$(document).ready(function() {
 				SignalPath.init({
-					canvas: "canvas"
+					canvas: "canvas",
+					zoom: ${params.zoom ?: 1}
 				});
 				
 				$.getJSON('${createLink(action:"getJson")}', {id: ${rsp.id}}, function(data) {
