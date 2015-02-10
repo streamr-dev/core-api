@@ -71,7 +71,7 @@ class DashboardController {
 			return found!=null
 		}
 
-		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
+		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard, serverUrl: grailsApplication.config.streamr.ui.server, dashboard:dashboard]
 	}
 	
 	def show() {

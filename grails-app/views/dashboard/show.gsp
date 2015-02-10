@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <title><g:message code="dashboard.show.label" args="[dashboard.name]"/></title>
+    <title>${dashboard.name}</title>
 
 	<r:require module="webcomponents"/>
 	<link rel="import" href="${createLink(uri:"/webcomponents/index.html", plugin:"unifina-core")}">
@@ -16,7 +16,6 @@
 </head>
 
 <body class="dashboard">
-	<streamr-client server="${serverUrl}"></streamr-client>
 	
 	<form method="post" role="form" id="toolbarForm">
 		<g:hiddenField name="id" value="${dashboard.id}" />
@@ -34,15 +33,6 @@
 		</div>
 	</form>
 	
-	<div class="row">
-		<g:each in="${dashboard.items}" var="item">
-			<g:if test="${item.uiChannel.module?.id == 67}">
-				<g:render template="/dashboard/streamr-chart" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
-			</g:if>
-			<g:if test="${item.uiChannel.module?.id == 145}">
-				<g:render template="/dashboard/streamr-label" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
-			</g:if>
-		</g:each>
-    </div>
+	<g:render template="dashboard-content" />
 </body>
 </html>
