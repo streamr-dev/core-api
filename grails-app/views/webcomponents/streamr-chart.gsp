@@ -32,7 +32,6 @@
 						client.subscribe(
 						    _this.channel, 
 						    function(message) {
-						    	console.log(message)
 						    	chart.handleMessage(message)
 						    },
 						    { 

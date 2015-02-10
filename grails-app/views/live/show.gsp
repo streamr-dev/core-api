@@ -29,7 +29,7 @@
 </r:script>
 
 </head>
-<body class="full-width-height">	
+<body class="build-page full-width-height">	
 	<div id="canvas"></div>
 </body>
 </html>
