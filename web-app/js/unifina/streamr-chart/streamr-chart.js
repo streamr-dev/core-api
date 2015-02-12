@@ -366,48 +366,49 @@ StreamrChart.prototype.handleMessage = function(d) {
 	
 	// Init message
 	else if (d.type=="init") {
-		// Cleanup and re-read instance variables
-		this.destroy();
-		seriesMeta = this.seriesMeta
-		realYAxis = this.realYAxis
-
-		var yAxis = d.yAxis || [];
-		this.yAxis = yAxis
-		
-		var x=0;
-		var seenYAxisNumbers = []
-
-		// Remap the "user" yAxis assignments to actual Highcharts ones,
-		// which need to be ascending and without gaps
-		$(d.series).each(function (i,s) {
-			if (s.yAxis==null || $.inArray(s.yAxis, seenYAxisNumbers)<0) {
-				seenYAxisNumbers.push(s.yAxis)
-				yAxis.push({});
-				realYAxis[s.yAxis] = x;
-				s.yAxis = x;
-				x++;
-			}
-			else {
-				s.yAxis = realYAxis[s.yAxis];
-			}
-		});
-		
-		// Must have at least one yAxis
-		if (yAxis.length==0) {
-			yAxis.push({
-				title: ""
+		// Don't reinitialize if we already have initialized
+		if (seriesMeta.length===0) {
+			seriesMeta = this.seriesMeta
+			realYAxis = this.realYAxis
+	
+			var yAxis = d.yAxis || [];
+			this.yAxis = yAxis
+			
+			var x=0;
+			var seenYAxisNumbers = []
+	
+			// Remap the "user" yAxis assignments to actual Highcharts ones,
+			// which need to be ascending and without gaps
+			$(d.series).each(function (i,s) {
+				if (s.yAxis==null || $.inArray(s.yAxis, seenYAxisNumbers)<0) {
+					seenYAxisNumbers.push(s.yAxis)
+					yAxis.push({});
+					realYAxis[s.yAxis] = x;
+					s.yAxis = x;
+					x++;
+				}
+				else {
+					s.yAxis = realYAxis[s.yAxis];
+				}
 			});
+			
+			// Must have at least one yAxis
+			if (yAxis.length==0) {
+				yAxis.push({
+					title: ""
+				});
+			}
+			
+			// Delay adding the series to the chart until they get data points, Highstocks is buggy
+			seriesMeta = d.series;
+			seriesMeta.forEach(function(meta) {
+				meta.min = Infinity
+				meta.max = -Infinity
+			})
+			this.seriesMeta = seriesMeta
+	
+			this.title = d.title;
 		}
-		
-		// Delay adding the series to the chart until they get data points, Highstocks is buggy
-		seriesMeta = d.series;
-		seriesMeta.forEach(function(meta) {
-			meta.min = Infinity
-			meta.max = -Infinity
-		})
-		this.seriesMeta = seriesMeta
-
-		this.title = d.title;
 	}
 	
 	

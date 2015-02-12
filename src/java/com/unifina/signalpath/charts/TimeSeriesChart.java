@@ -131,7 +131,7 @@ public class TimeSeriesChart extends Chart {
 			
 			if (!Double.isNaN(input.value) 
 					&& hasRc 
-					&& (!barify || globals.time.getTime() - input.previousTime > 60000L)) {
+					&& (!barify || globals.time.getTime() - input.previousTime >= 60000L)) {
 				
 					PointMessage msg = new PointMessage(
 							input.seriesIndex, 

@@ -45,41 +45,6 @@ class CanvasController {
 		
 		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
 	}
-
-	def abort() {
-		String runnerId = params.runnerId
-		
-		Map r
-		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(runnerId)
-		if (runner!=null && runner.isAlive()) {
-			runner.abort()
-			r = [success:true, runnerId:runnerId, status:"Aborting"]
-		}
-		else r = [success:false, runnerId:runnerId, status:"Runner already stopped"]
-		
-		render r as JSON
-	}
-	
-	def run() {
-		def iData
-		if (params.signalPathData)
-			iData = JSON.parse(params.signalPathData);
-		else iData = JSON.parse(SavedSignalPath.get(Integer.parseInt(params.id)).json)
-
-		// TODO: remove backwards compatibility
-		def signalPathContext
-		if (!params.signalPathContext) {
-			signalPathContext = [beginFile:iData.beginFile, endFile:iData.endFile, timeOfDayFilter:iData.timeOfDayFilter]
-		}
-		else {
-			signalPathContext = JSON.parse(params.signalPathContext)
-		}
-		
-		List<RunningSignalPath> rsps = signalPathService.launch([iData], signalPathContext, springSecurityService.currentUser)
-		
-		Map result = [success:true, ids:rsps.collect{it.id}, uiChannels:rsps[0].uiChannels.collect { [id:it.id, hash:it.hash] }, runnerId:rsps[0].runner]
-		render result as JSON
-	}
 	
 	def reconstruct() {
 		Map signalPathContext = (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:])

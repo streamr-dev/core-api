@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import com.unifina.domain.signalpath.Module;
-import com.unifina.push.IHasPushChannel;
+import com.unifina.domain.signalpath.RunningSignalPath;
 import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
 
@@ -37,12 +36,13 @@ public class SignalPath extends ModuleWithUI {
 	List<Input> exportedInputs = new ArrayList<Input>();
 	List<Output> exportedOutputs = new ArrayList<Output>();
 	
+	RunningSignalPath runningSignalPath = null;
 	Map representation = null;
 	Map<Integer,AbstractSignalPathModule> modulesByHash = new HashMap<>();
 	
 	ModuleService moduleService = new ModuleService();
 	
-	private boolean isRoot = false;
+	private boolean root = false;
 	
 	public SignalPath() {
 		super();
@@ -50,9 +50,15 @@ public class SignalPath extends ModuleWithUI {
 		canRefresh = true;
 	}
 	
+	public SignalPath(boolean isRoot) {
+		this();
+		this.root = isRoot;
+	}
+	
+	@Deprecated
 	public SignalPath(Map iData, boolean isRoot, Globals globals) {
 		super();
-		this.isRoot = isRoot;
+		this.root = isRoot;
 		this.globals = globals;
 		initPriority = 10;
 		canRefresh = true;
@@ -159,7 +165,7 @@ public class SignalPath extends ModuleWithUI {
 		 * Exported inputs may be exported with another name if the io names
 		 * in different modules clash
 		 */
-		if (!isRoot) {
+		if (!root) {
 			for (Input it : exportedInputs) {
 				// Don't retain the saved json configuration
 				it.resetConfiguration();
@@ -237,6 +243,7 @@ public class SignalPath extends ModuleWithUI {
 		if (sp!=null && sp.value!=null) {
 			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())).getJSONObject("signalPathData"));
 		}
+		else initFromRepresentation(config);
 	}
 	
 	@Override
@@ -359,6 +366,14 @@ public class SignalPath extends ModuleWithUI {
 
 	public void setExportedOutputs(List<Output> exportedOutputs) {
 		this.exportedOutputs = exportedOutputs;
+	}
+
+	public RunningSignalPath getRunningSignalPath() {
+		return runningSignalPath;
+	}
+
+	public void setRunningSignalPath(RunningSignalPath runningSignalPath) {
+		this.runningSignalPath = runningSignalPath;
 	}
 
 }

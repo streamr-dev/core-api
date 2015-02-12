@@ -23,20 +23,4 @@ public class KafkaFeed extends AbstractFeedProxy<UnifinaKafkaMessage, KafkaMessa
 		return new FeedEvent[] {e};
 	}
 
-//	@Override
-//	protected List<Class> getValidSubscriberClasses() {
-//		return Arrays.asList(new Class[] {ConfigurableStreamModule.class});
-//	}
-
-//	@Override
-//	protected Object getEventRecipientKey(Object subscriber) {
-//		return ((KafkaModule)subscriber).getTopic();
-//	}
-
-//	@Override
-//	protected IEventRecipient createEventRecipient(Object subscriber) {
-//		ConfigurableStreamModule m = (ConfigurableStreamModule)subscriber;
-//		return new MapMessageEventRecipient(globals,m.getStream());
-//	}
-
 }

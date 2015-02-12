@@ -1,7 +1,11 @@
 package com.unifina.signalpath;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.unifina.push.IHasPushChannel;
 import com.unifina.utils.IdGenerator;
+import com.unifina.utils.MapTraversal;
 
 public abstract class ModuleWithUI extends AbstractSignalPathModule implements IHasPushChannel {
 
@@ -9,7 +13,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	
 	public ModuleWithUI() {
 		super();
-		uiChannelId = IdGenerator.get();
 	}
 
 	@Override
@@ -28,6 +31,25 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	@Override
 	public String getUiChannelName() {
 		return getName();
+	}
+	
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		Map uiChannel = new HashMap<String,Object>();
+		uiChannel.put("id", getUiChannelId());
+		uiChannel.put("name", getUiChannelName());
+		config.put("uiChannel", uiChannel);
+		return config;
+	}
+	
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+		
+		uiChannelId = MapTraversal.getString(config, "uiChannel.id");
+		if (uiChannelId==null)
+			uiChannelId = IdGenerator.get();
 	}
 	
 }

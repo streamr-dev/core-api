@@ -96,7 +96,7 @@ public abstract class AbstractFeed implements IFeed {
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
 			IEventRecipient recipient;
-			Object key = keyProvider.getEventRecipientKey(subscriber);
+			Object key = keyProvider.getSubscriberKey(subscriber);
 			if (!eventRecipientsByKey.containsKey(key)) {
 				recipient = createEventRecipient(subscriber);
 				eventRecipientsByKey.put(key, recipient);

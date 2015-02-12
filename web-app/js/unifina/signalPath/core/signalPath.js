@@ -10,6 +10,7 @@
  * stopped
  * workspaceChanged (mode)
  * moduleAdded (jsonData, div)
+ * done
  * error (message)
  * 
  * Events for internal use:
@@ -27,7 +28,6 @@
  * getModuleUrl: url for module JSON
  * uiActionUrl: url for POSTing module UI runtime changes
  * connectionOptions: option object passed to StreamrClient
- * zoom: zoom level, default 1
  */
 
 var SignalPath = (function () { 
@@ -44,13 +44,12 @@ var SignalPath = (function () {
 			alert((typeof data == "string" ? data : data.msg));
 		},
 		allowRuntimeChanges: true,
-		runUrl: "run",
-		abortUrl: "abort",
+		runUrl: undefined,
+		abortUrl: undefined,
 		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
 		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
-		connectionOptions: {},
-		zoom: 1
+		connectionOptions: {}
     };
     
     var connection;
@@ -87,7 +86,6 @@ var SignalPath = (function () {
 		});
 		
 	    connection = new StreamrClient(options.connectionOptions)
-	    pub.setZoom(opts.zoom)
 	};
 	pub.unload = function() {
 		jsPlumb.unload();
@@ -529,7 +527,7 @@ var SignalPath = (function () {
 			getModuleById(hash).addWarning(message.payload);
 		}
 		else if (message.type=="D") {
-			abort();
+			$(pub).trigger("done")
 		}
 		else if (message.type=="E") {
 			disconnect();
@@ -558,7 +556,7 @@ var SignalPath = (function () {
 			type: 'POST',
 			url: options.abortUrl, 
 			data: {
-				runnerId: runData.runnerId
+				id: runData.id
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -594,21 +592,6 @@ var SignalPath = (function () {
 		return workspace;
 	}
 	pub.getWorkspace = getWorkspace;
-	
-	function getZoom() {
-		return canvas.css("zoom") != null ? canvas.css("zoom") : 1 
-	}
-	pub.getZoom = getZoom
-	
-	function setZoom(zoom, animate) {
-		if (animate===undefined)
-			animate = true
-		
-		if (animate)
-			canvas.animate({ zoom: zoom }, 300);
-		else (canvas.css("zoom", zoom))
-	}
-	pub.setZoom = setZoom
 	
 	return pub; 
 }());

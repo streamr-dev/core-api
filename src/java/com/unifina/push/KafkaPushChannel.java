@@ -31,14 +31,6 @@ public class KafkaPushChannel extends PushChannel {
 	}
 	
 	@Override
-	public void destroy() {
-		super.destroy();
-		
-		// Delayed-delete the topics in one hour
-		kafkaService.createDeleteTopicTask(getChannels(), 60*60*1000);
-	}
-	
-	@Override
 	protected void doPush(PushChannelMessage msg) {
 		String str = msg.toJSON(json);
 		kafkaService.getProducer().sendRaw(msg.getChannel(), "ui", str.getBytes());

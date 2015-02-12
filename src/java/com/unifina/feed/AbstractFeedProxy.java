@@ -1,12 +1,12 @@
 package com.unifina.feed;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.domain.data.Feed;
-import com.unifina.service.FeedService;
 import com.unifina.utils.Globals;
 
 
@@ -50,14 +50,18 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	}
 	
 	protected MessageHub<R,T> getMessageHub() {
-		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
-		Feed feed = feedService.getFeedByRealtimeClass(this.getClass().getName());
-		return (MessageHub<R,T>) feedService.getMessageRecipient(feed);
+		try {
+			return FeedFactory.getInstance(domainObject, globals.getGrailsApplication().getConfig());
+		} catch (InstantiationException | ClassNotFoundException
+				| NoSuchMethodException | InvocationTargetException
+				| IllegalAccessException | IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
 	public boolean subscribe(Object subscriber) {
-		hub.subscribe(subscriber);
+		hub.subscribe(keyProvider.getSubscriberKey(subscriber), this);
 		return super.subscribe(subscriber);
 	}
 	
@@ -245,6 +249,9 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	
 	@Override
 	public void stopFeed() throws Exception {
+		for (Object subscriber : subscribers)
+			hub.unsubscribe(keyProvider.getSubscriberKey(subscriber), this);
+		
 		hub.removeRecipient(this);
 		log.info("Unsubscribed from hub: "+this);
 	}

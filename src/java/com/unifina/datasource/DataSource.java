@@ -107,7 +107,7 @@ public abstract class DataSource {
 		if (feedService == null)
 			feedService = new FeedService();
 		
-		// Create the feed required by this OrderBook
+		// Create the feed implementation
 		String feedClass = feedService.getFeedClass(domain, isHistoricalFeed);
 		
 		// Feed already created?

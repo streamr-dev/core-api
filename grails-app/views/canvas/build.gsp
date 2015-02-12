@@ -64,8 +64,8 @@ $(document).ready(function() {
 	        	delay: 4000
     		});
 		},
-		runUrl: Streamr.createLink('canvas', 'run'),
-		abortUrl: Streamr.createLink('canvas', 'abort')
+		runUrl: Streamr.createLink('live', 'ajaxCreate'),
+		abortUrl: Streamr.createLink('live', 'ajaxDelete')
 	});
 	
 	$(SignalPath).on('loading', function() {
@@ -124,6 +124,10 @@ $(document).ready(function() {
 	        delay: 4000
     	});
 	});
+	
+	$(SignalPath).on('done', function() {
+		SignalPath.abort()
+	})
 
 	// show search control
 	new SearchControl(
@@ -193,9 +197,11 @@ $(document).ready(function() {
 			
 			$.pnotify({
 				type: 'info',
-	        	text: "Live Canvas launced: <a href='"+url_root+"/"+data.ids[0]+"'>"+name+"</a>",
+	        	text: "Live Canvas launced:"+name,
 	        	delay: 4000
     		});
+    		
+    		window.location = url_root + "/" + data.id
 		});
 	})
 })
