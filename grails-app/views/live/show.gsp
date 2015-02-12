@@ -36,6 +36,7 @@
 </r:script>
 
 </head>
+
 <body class="full-width-height">
 
 	<form method="post" role="form" id="toolbarForm">
@@ -58,5 +59,6 @@
 	</form>
 
 	<div id="canvas" class="embeddable"></div>
+
 </body>
 </html>
