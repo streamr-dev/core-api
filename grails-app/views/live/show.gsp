@@ -22,12 +22,10 @@
 			zoom: ${params.zoom ?: 1}
 		});
 		
-		$.getJSON('${createLink(action:"getJson")}', {id: ${rsp.id}}, function(data) {
-			if (!data.error) {
-				SignalPath.loadJSON(data);
-				SignalPath.subscribe(data.runData, true);
-			}
-			else alert(data.error);
+		SignalPath.loadSignalPath({
+			url: '${createLink(action:"getJson", id:rsp.id)}'
+		}, function(saveData, signalPathData, signalPathContext, runData) {
+			SignalPath.subscribe(runData, true);
 		});
 	});
 	$(document).unload(function () {

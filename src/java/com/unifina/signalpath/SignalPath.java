@@ -318,7 +318,7 @@ public class SignalPath extends ModuleWithUI {
 							notReady.append("\n");
 
 							if (globals.getUiChannel()!=null) {
-								globals.getUiChannel().push(new ModuleWarningMessage("Input was never ready: "+input.name, hash), uiChannelId);
+								globals.getUiChannel().push(new ModuleWarningMessage("Input was never ready: "+input.name, input.getOwner().getHash()), uiChannelId);
 							}
 						}
 					}

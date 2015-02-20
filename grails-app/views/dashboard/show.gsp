@@ -42,6 +42,9 @@
 			<g:if test="${item.uiChannel.module?.id == 145}">
 				<g:render template="/dashboard/streamr-label" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
 			</g:if>
+			<g:if test="${item.uiChannel.module?.id == 196}">
+				<g:render template="/dashboard/streamr-heatmap" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
+			</g:if>
 		</g:each>
     </div>
 </body>

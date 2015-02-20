@@ -82,7 +82,7 @@ class LiveController {
 			r = [success:true, id:rsp.id, status:"Aborting"]
 			rsp.delete(flush:true, failOnError:true)
 		}
-		else r = [success:false, id:rsp.id, status:"Running canvas not found"]
+		else r = [success:false, id:params.id, status:"Running canvas not found"]
 		
 		render r as JSON
 	}

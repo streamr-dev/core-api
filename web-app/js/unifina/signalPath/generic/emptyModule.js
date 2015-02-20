@@ -315,12 +315,13 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.renderHelp = renderHelp;
 	
-	function initResizable(options) {
+	function initResizable(options, element) {
 		var defaultOptions = {
 			helper: "chart-resize-helper"
 		}
 		options = $.extend({},defaultOptions,options || {});
-		prot.div.resizable(options);
+		element = element || prot.div
+		element.resizable(options);
 		prot.resizable = true;
 	}
 	prot.initResizable = initResizable;

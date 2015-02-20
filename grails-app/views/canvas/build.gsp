@@ -124,10 +124,6 @@ $(document).ready(function() {
 	        delay: 4000
     	});
 	});
-	
-	$(SignalPath).on('done', function() {
-		SignalPath.abort()
-	})
 
 	// show search control
 	new SearchControl(

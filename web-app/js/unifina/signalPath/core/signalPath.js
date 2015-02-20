@@ -86,6 +86,9 @@ var SignalPath = (function () {
 		});
 		
 	    connection = new StreamrClient(options.connectionOptions)
+	    connection.bind('disconnected', function() {
+	    	$(pub).trigger('stopped')
+	    })
 	};
 	pub.unload = function() {
 		jsPlumb.unload();
@@ -427,12 +430,12 @@ var SignalPath = (function () {
 		setName(saveData.name)
 		
 		// TODO: remove backwards compatibility
-		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext);
+		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext, data.runData);
 		
 		if (data.workspace!=null && data.workspace!="normal")
 			setWorkspace(data.workspace);
 		
-		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
+		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext, data.runData]);
 	}
 	
 	function run(additionalContext, subscribeOnSuccess, callback) {
@@ -524,7 +527,7 @@ var SignalPath = (function () {
 		}
 		else if (message.type=="MW") {
 			var hash = message.hash;
-			getModuleById(hash).addWarning(message.payload);
+			getModuleById(hash).addWarning(message.msg);
 		}
 		else if (message.type=="D") {
 			$(pub).trigger("done")

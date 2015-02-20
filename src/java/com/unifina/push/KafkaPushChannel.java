@@ -3,6 +3,7 @@ package com.unifina.push;
 import grails.converters.JSON;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
@@ -15,9 +16,21 @@ public class KafkaPushChannel extends PushChannel {
 
 	private static final Logger log = Logger.getLogger(KafkaPushChannel.class);
 	
+	HashMap<String, Object> byeMsg;
+	
 	public KafkaPushChannel(KafkaService kafkaService) {
 		super();
 		this.kafkaService = kafkaService;
+		byeMsg = new HashMap<>();
+		byeMsg.put("_bye", true);
+	}
+	
+	@Override
+	public void destroy() {
+		for (String channel : channels) {
+			push(byeMsg, channel);
+		}
+		super.destroy();
 	}
 	
 	@Override

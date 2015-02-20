@@ -19,5 +19,6 @@ class UnifinaCorePluginUrlMappings {
 		"/webcomponents/streamr-client.html"(view:"/webcomponents/streamr-client")
 		"/webcomponents/streamr-label.html"(view:"/webcomponents/streamr-label")
 		"/webcomponents/streamr-chart.html"(view:"/webcomponents/streamr-chart")
+		"/webcomponents/streamr-heatmap.html"(view:"/webcomponents/streamr-heatmap")
 	}
 }
