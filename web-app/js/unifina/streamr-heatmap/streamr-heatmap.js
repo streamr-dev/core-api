@@ -55,7 +55,6 @@
 		});
 
 		this.heatmapLayer = this.createHeatmapLayer()
-		this.syncData()
 
 		// From https://github.com/pa7/heatmap.js/issues/120
 		this.map.on("resize", function() {
@@ -132,7 +131,10 @@
 		var d = {
 			min: this.options.min,
 			max: this.options.max,
+			// Heatmap crashes on iOS Safari and Android Chrome if trying
+			// to set empty data
 			data: this.data
+			//data: (this.data.length ? : this.data : [{l:0,g:0,value:0}])
 		}
 		this.heatmapLayer.setData(d)
 
