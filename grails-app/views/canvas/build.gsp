@@ -65,7 +65,10 @@ $(document).ready(function() {
     		});
 		},
 		runUrl: Streamr.createLink('live', 'ajaxCreate'),
-		abortUrl: Streamr.createLink('live', 'ajaxDelete')
+		abortUrl: Streamr.createLink('live', 'ajaxDelete'),
+		connectionOptions: {
+			server: "${grailsApplication.config.streamr.ui.server}"
+		}
 	});
 	
 	$(SignalPath).on('loading', function() {

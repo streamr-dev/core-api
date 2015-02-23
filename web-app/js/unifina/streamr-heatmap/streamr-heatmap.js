@@ -56,6 +56,12 @@
 
 		this.heatmapLayer = this.createHeatmapLayer()
 
+		// Workaround for https://github.com/pa7/heatmap.js/issues/160
+		this.data = [{l:0,g:0,value:0}]
+		this.syncData()
+		this.data = []
+		this.syncData()
+
 		// From https://github.com/pa7/heatmap.js/issues/120
 		this.map.on("resize", function() {
 			_this.map.removeLayer(_this.heatmapLayer)
@@ -93,7 +99,7 @@
 	StreamrHeatMap.prototype.updateData = function() {
 		var now = Date.now()
 		// Remove already-expired points
-		var dirty = this.expireData()
+		var dirty = this.expireData(now)
 
 		// Update fading-out values from top of array
 		for (var i=0;i<this.data.length;i++) {
@@ -101,6 +107,7 @@
 			// Are we in fade-out phase? Already expired points have been removed
 			if (d.expiresTime - now < this.options.fadeOutTime) {
 				d.value = d.v * ((d.expiresTime-now) / this.options.fadeOutTime)
+				// console.log("Fading out: "+d.value+" ("+d.v+")")
 				dirty = true
 			}
 			else {
@@ -114,6 +121,7 @@
 			// Are we in fade-in phase?
 			if (now - d.addedTime < this.options.fadeInTime) {
 				d.value = d.v * ((now - d.addedTime) / this.options.fadeInTime)
+				// console.log("Fading in: "+d.value+" ("+d.v+")")
 				dirty = true
 			}
 			// Break if at full value or fading out
@@ -131,14 +139,11 @@
 		var d = {
 			min: this.options.min,
 			max: this.options.max,
-			// Heatmap crashes on iOS Safari and Android Chrome if trying
-			// to set empty data
 			data: this.data
-			//data: (this.data.length ? : this.data : [{l:0,g:0,value:0}])
 		}
 		this.heatmapLayer.setData(d)
 
-		// Workaround for a bug in the layer regarding setting empty data
+		// Workaround for https://github.com/pa7/heatmap.js/issues/141
 		if (this.data.length===0)
 			this.heatmapLayer._heatmap.setData(d)
 	}
@@ -153,9 +158,8 @@
 		return this.map
 	}
 
-	StreamrHeatMap.prototype.expireData = function() {
+	StreamrHeatMap.prototype.expireData = function(t) {
 		var i
-		var t = Date.now()
 		for (i=0;i<this.data.length;i++) {
 			if (this.data[i].expiresTime > t)
 				break;
@@ -172,7 +176,7 @@
 		var _this = this
 		data.addedTime = Date.now()
 		data.expiresTime = Date.now() + this.options.lifeTime
-		data.radius = Math.max(this.options.radius, Math.ceil(100 * (data.v / this.options.max)))
+		//data.radius = Math.max(this.options.radius, Math.ceil(100 * (data.v / this.options.max)))
 		data.value = this.options.min
 		this.data.push(data)
 

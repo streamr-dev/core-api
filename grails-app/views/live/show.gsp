@@ -19,7 +19,10 @@
 	$(document).ready(function() {
 		SignalPath.init({
 			canvas: "canvas",
-			zoom: ${params.zoom ?: 1}
+			zoom: ${params.zoom ?: 1},
+			connectionOptions: {
+				server: "${grailsApplication.config.streamr.ui.server}"
+			}
 		});
 		
 		SignalPath.loadSignalPath({

@@ -20,7 +20,7 @@
 			// This function is executed multiple times, once for each element!
 			ready: function() {
 				if (this.server) {
-					streamrClient.options.socketIoUrl = this.server
+					streamrClient.options.server = this.server
 					streamrClient.connect()
 				}
 			},
