@@ -242,10 +242,13 @@ class SignalPathService {
 	void startLocal(RunningSignalPath rsp, Map signalPathContext) {		
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		globals.uiChannel = new KafkaPushChannel(kafkaService)
+		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
 		
 		// Create the runner thread
 		SignalPathRunner runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+		runner.signalPaths.each {
+			it.runningSignalPath = rsp
+		}
 		String runnerId = runner.runnerId
 		
 		// Start the runner thread
@@ -253,6 +256,7 @@ class SignalPathService {
 		
 		rsp.runner = runnerId
 		rsp.state = "running"
+		rsp.server = NetworkInterfaceUtils.getIPAddress()?.toString()
 		rsp.save()
 	}
 	

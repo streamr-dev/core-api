@@ -17,18 +17,26 @@ public class KafkaPushChannel extends PushChannel {
 	private static final Logger log = Logger.getLogger(KafkaPushChannel.class);
 	
 	HashMap<String, Object> byeMsg;
+	private boolean sendByeOnDestroy;
 	
-	public KafkaPushChannel(KafkaService kafkaService) {
+	/**
+	 * @param kafkaService
+	 * @param sendByeOnDestroy Sends a special 'bye' message when this channel is destroyed. 'Bye' is meant to be final, so only set it to true for adhoc channels.
+	 */
+	public KafkaPushChannel(KafkaService kafkaService, boolean sendByeOnDestroy) {
 		super();
 		this.kafkaService = kafkaService;
+		this.sendByeOnDestroy = sendByeOnDestroy;
 		byeMsg = new HashMap<>();
 		byeMsg.put("_bye", true);
 	}
 	
 	@Override
 	public void destroy() {
-		for (String channel : channels) {
-			push(byeMsg, channel);
+		if (sendByeOnDestroy) {
+			for (String channel : channels) {
+				push(byeMsg, channel);
+			}
 		}
 		super.destroy();
 	}

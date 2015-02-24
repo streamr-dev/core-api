@@ -3,10 +3,15 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import java.security.AccessControlException
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.UiChannel
+import com.unifina.signalpath.SignalPath
+import com.unifina.signalpath.SignalPathRunner
 
 class LiveController {
 	
@@ -34,7 +39,7 @@ class LiveController {
 	def show() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		if (!unifinaSecurityService.canAccess(rsp))
-			render "Access denied"
+			render(status: 401, text: 'Access denied.')
 		
 		[rsp:rsp]
 	}
@@ -43,8 +48,7 @@ class LiveController {
 	def getJson() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		if (!unifinaSecurityService.canAccess(rsp)) {
-			Map err = [error: "Access denied."]
-			render err as JSON
+			render(status: 401, text: 'Access denied.')
 		}
 		else {
 			Map signalPathData = JSON.parse(rsp.json)
@@ -54,6 +58,82 @@ class LiveController {
 			result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
 			
 			render result as JSON
+		}
+	}
+	
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def getModuleJson() {
+		response.setHeader('Access-Control-Allow-Origin', '*')
+		
+		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
+		RunningSignalPath rsp = ui.runningSignalPath
+		
+		if (!unifinaSecurityService.canAccess(rsp)) {
+			render(status: 401, text: 'Access denied.')
+		}
+		else {
+			Map signalPathData = JSON.parse(rsp.json)
+			Map moduleJson = signalPathData.modules.find { it.hash.toString() == ui.hash.toString() }
+			
+			if (!moduleJson) {
+				render(status: 404, text: 'Module not found.')
+			}
+			else render moduleJson as JSON
+		}
+	}
+	
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def uiAction() {
+		response.setHeader('Access-Control-Allow-Origin', '*')
+		
+		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
+		RunningSignalPath rsp = ui.runningSignalPath
+		Map msg = JSON.parse(params.msg)
+		Integer hash = Integer.parseInt(ui.hash)
+		
+		if (!unifinaSecurityService.canAccess(rsp)) {
+			render(status: 401, text: 'Access denied.')
+		}
+		else {
+			SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
+
+			// Give an error if the runner was not found locally although it should have been 
+			if (params.local && !spr) {
+				Map err = [success:false, channel:params.channel, error: "Canvas not found!"]
+				render err as JSON
+			}
+			// May be a remote runner, check server and send a message
+			else if (!params.local && !spr) {
+				// TODO: implement
+				Map err = [success:false, channel:params.channel, error: "Canvas not found!"]
+				render err as JSON
+			}
+			// If runner found
+			else {
+				SignalPath sp = spr.signalPaths.find {
+					it.runningSignalPath.id == rsp.id
+				}
+				
+				if (!sp) {
+					Map err = [success:false, channel:params.channel, error: "Canvas not found in runner. This should not happen."]
+					render err as JSON
+				}
+				else {
+					Map	r = [success:true, channel:params.channel, msg:msg]
+					
+					Future future = sp.getModule(hash).receiveUIMessage(msg)
+					if (future) {
+						try {
+							r.response = future.get(20, TimeUnit.SECONDS)
+							render r as JSON
+						} catch (TimeoutException e) {
+							Map err = [success:false, channel:params.channel, error: "Timed out while waiting for response."]
+							render err as JSON
+						}
+					}			
+					
+				}
+			}
 		}
 	}
 	

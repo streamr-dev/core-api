@@ -48,7 +48,7 @@ var SignalPath = (function () {
 		abortUrl: undefined,
 		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
+		uiActionUrl: Streamr.projectWebroot+"live/uiAction",
 		connectionOptions: {}
     };
     
@@ -94,21 +94,38 @@ var SignalPath = (function () {
 		jsPlumb.unload();
 	};
 	pub.sendUIAction = function(hash,msg,callback) {
-		if (sessionId!=null) {
-			$.ajax({
-				type: 'POST',
-				url: options.uiActionUrl,
-				data: {
-					sessionId: sessionId,
-					hash: hash,
-					msg: JSON.stringify(msg)
-				},
-				success: callback,
-				dataType: 'json'
-			});
-			return true;
+		if (runData) {
+			var channel
+			for (var i=0;i<runData.uiChannels.length;i++) {
+				// using == on purpose
+				if (runData.uiChannels[i].hash==hash) {
+					channel = runData.uiChannels[i].id
+					break
+				}
+			}
+
+			if (channel) {
+				$.ajax({
+					type: 'POST',
+					url: options.uiActionUrl,
+					data: {
+						channel: channel,
+						msg: JSON.stringify(msg)
+					},
+					success: function(data) {
+						if (!data.success) {
+							handleError(data.error)
+						}
+						else if (callback)
+							callback(data.response)
+					},
+					dataType: 'json'
+				});
+				return true;
+			}
 		}
-		else return false;
+		
+		return false;
 	}
 	pub.getCanvas = function() {
 		return canvas;
@@ -496,7 +513,8 @@ var SignalPath = (function () {
 		runData.uiChannels.forEach(function(uiChannel) {
 			// Module channels reference the module by hash
 			if (uiChannel.hash!=null) {
-				connection.subscribe(uiChannel.id, getModuleById(uiChannel.hash).receiveResponse, {resend_all:true})
+				var m = getModuleById(uiChannel.hash)
+				connection.subscribe(uiChannel.id, m.receiveResponse, m.getUIChannelOptions())
 			}
 			// Other channels handled by this SignalPath
 			else {

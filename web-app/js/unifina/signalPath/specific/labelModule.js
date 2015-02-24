@@ -14,6 +14,11 @@ SignalPath.LabelModule = function(data,canvas,prot) {
 	pub.receiveResponse = function(payload) {
 		label.html(payload.value);
 	}
+
+	pub.getUIChannelOptions = function() {
+		// Force resending of only last value
+		return { resend_last: 1 }
+	}
 	
 	return pub;
 }

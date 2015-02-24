@@ -1,8 +1,11 @@
 package com.unifina.signalpath.charts;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
@@ -50,13 +53,11 @@ public class TimeSeriesChart extends Chart {
 					}
 					names.add(newName);
 					it.seriesName = newName;
-
-					seriesData.add(new Series(it.seriesName,it.seriesIndex,true,it.yAxis));
 				}
 			}
 
 			if (hasRc) {
-				globals.getUiChannel().push(new InitMessage(seriesData, null), uiChannelId);
+				globals.getUiChannel().push(getInitMessage(), uiChannelId);
 			}
 		}
 		else {
@@ -98,6 +99,21 @@ public class TimeSeriesChart extends Chart {
 			}
 		}
 
+	}
+	
+	protected InitMessage getInitMessage() {
+		ArrayList<Series> seriesData = new ArrayList<>();
+		
+		for (Input input : getInputs()) {
+			TimeSeriesChartInput it = (TimeSeriesChartInput) input;
+			
+			// Set names and series indices
+			if (it.isConnected()) {
+				seriesData.add(new Series(it.seriesName,it.seriesIndex,true,it.yAxis));
+			}
+		}
+
+		return new InitMessage(seriesData, null);
 	}
 	
 	public TimeSeriesInput getInputConnection(String name) {
@@ -219,6 +235,35 @@ public class TimeSeriesChart extends Chart {
 	@Override
 	protected void addDefaultInputs() {
 		// inputs added in onConfiguration()
+	}
+	
+	@Override
+	public Future<Map<String, Object>> receiveUIMessage(Map message) {
+		if (message.get("type").equals("initRequest")) {
+			/**
+			 * The TimeSeriesChart be queried for InitMessage
+			 */
+			final Map<String,Object> response = new HashMap<>();
+			FutureTask<Map<String,Object>> future = new FutureTask<>(new Runnable() {
+				@Override
+				public void run() {
+					response.put("initRequest", getInitMessage());
+				}
+			}, response);
+			message.put("future", future);
+			super.receiveUIMessage(message);
+			return future;
+		}
+		else return super.receiveUIMessage(message);
+	}
+	
+	@Override
+	protected void handleUIMessage(Map message) {
+		if (message.get("type").equals("initRequest")) {
+			FutureTask<Map<String,Object>> future = (FutureTask<Map<String,Object>>) message.get("future");
+			future.run();
+		}
+		else super.handleUIMessage(message);
 	}
 	
 }

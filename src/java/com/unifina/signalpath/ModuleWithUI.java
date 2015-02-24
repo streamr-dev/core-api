@@ -10,6 +10,8 @@ import com.unifina.utils.MapTraversal;
 public abstract class ModuleWithUI extends AbstractSignalPathModule implements IHasPushChannel {
 
 	protected String uiChannelId;
+	protected boolean resendAll = true;
+	protected int resendLast = 0;
 	
 	public ModuleWithUI() {
 		super();
@@ -40,6 +42,11 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		uiChannel.put("id", getUiChannelId());
 		uiChannel.put("name", getUiChannelName());
 		config.put("uiChannel", uiChannel);
+		
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("uiResendAll", resendAll, "boolean"));
+		options.add(new ModuleOption("uiResendLast", resendLast, "int"));
+		
 		return config;
 	}
 	
@@ -50,6 +57,15 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		uiChannelId = MapTraversal.getString(config, "uiChannel.id");
 		if (uiChannelId==null)
 			uiChannelId = IdGenerator.get();
+		
+		ModuleOptions options = ModuleOptions.get(config);
+		if (options.getOption("uiResendAll")!=null) {
+			resendAll = options.getOption("uiResendAll").getBoolean();
+		}
+		if (options.getOption("uiResendLast")!=null) {
+			resendLast = options.getOption("uiResendLast").getInt();
+		}
+		
 	}
 	
 }
