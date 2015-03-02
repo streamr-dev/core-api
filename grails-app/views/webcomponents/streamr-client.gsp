@@ -1,7 +1,5 @@
 <link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
 
-<r:require module="jquery"/>
-<r:require module="socket-io"/>
 <r:require module="streamr-client"/>
 
 <r:layoutResources disposition="head"/>

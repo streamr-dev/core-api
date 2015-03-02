@@ -25,6 +25,7 @@
     <resource>com.unifina.controller.task.TaskWorkerController</resource>
     <resource>com.unifina.controller.tour.TourUserController</resource>
     <resource>com.unifina.controller.util.JavascriptErrorController</resource>
+    <resource>com.unifina.controller.util.WebcomponentsController</resource>
     <resource>com.unifina.domain.config.HostConfig</resource>
     <resource>com.unifina.domain.dashboard.Dashboard</resource>
     <resource>com.unifina.domain.dashboard.DashboardItem</resource>

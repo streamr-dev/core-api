@@ -160,7 +160,7 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
-		dependsOn 'jquery, socket-io'
+		dependsOn 'socket-io'
 		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'streamr-chart' {
