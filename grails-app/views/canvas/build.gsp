@@ -64,8 +64,11 @@ $(document).ready(function() {
 	        	delay: 4000
     		});
 		},
-		runUrl: Streamr.createLink('canvas', 'run'),
-		abortUrl: Streamr.createLink('canvas', 'abort')
+		runUrl: Streamr.createLink('live', 'ajaxCreate'),
+		abortUrl: Streamr.createLink('live', 'ajaxDelete'),
+		connectionOptions: {
+			server: "${grailsApplication.config.streamr.ui.server}"
+		}
 	});
 	
 	$(SignalPath).on('loading', function() {
@@ -193,9 +196,11 @@ $(document).ready(function() {
 			
 			$.pnotify({
 				type: 'info',
-	        	text: "Live Canvas launced: <a href='"+url_root+"/"+data.ids[0]+"'>"+name+"</a>",
+	        	text: "Live Canvas launced:"+name,
 	        	delay: 4000
     		});
+    		
+    		window.location = url_root + "/" + data.id
 		});
 	})
 })

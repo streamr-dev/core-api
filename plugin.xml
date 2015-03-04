@@ -8,6 +8,10 @@
     <resource>BootStrap</resource>
     <resource>UnifinaCorePluginResources</resource>
     <resource>UnifinaCorePluginUrlMappings</resource>
+    <resource>spring.resources</resource>
+    <resource>com.unifina.controller.core.signalpath.CanvasController</resource>
+    <resource>com.unifina.controller.core.signalpath.LiveController</resource>
+    <resource>com.unifina.controller.dashboard.DashboardController</resource>
     <resource>com.unifina.controller.data.FeedFileController</resource>
     <resource>com.unifina.controller.data.LocalFeedFileController</resource>
     <resource>com.unifina.controller.data.StreamController</resource>
@@ -21,10 +25,15 @@
     <resource>com.unifina.controller.task.TaskWorkerController</resource>
     <resource>com.unifina.controller.tour.TourUserController</resource>
     <resource>com.unifina.controller.util.JavascriptErrorController</resource>
+    <resource>com.unifina.controller.util.WebcomponentsController</resource>
+    <resource>com.unifina.domain.config.HostConfig</resource>
+    <resource>com.unifina.domain.dashboard.Dashboard</resource>
+    <resource>com.unifina.domain.dashboard.DashboardItem</resource>
     <resource>com.unifina.domain.data.Feed</resource>
     <resource>com.unifina.domain.data.FeedFile</resource>
     <resource>com.unifina.domain.data.FeedUser</resource>
     <resource>com.unifina.domain.data.Stream</resource>
+    <resource>com.unifina.domain.data.StreamSubclassDummy</resource>
     <resource>com.unifina.domain.security.SecRole</resource>
     <resource>com.unifina.domain.security.SecUser</resource>
     <resource>com.unifina.domain.security.SecUserSecRole</resource>
@@ -32,9 +41,12 @@
     <resource>com.unifina.domain.signalpath.ModuleCategory</resource>
     <resource>com.unifina.domain.signalpath.ModulePackage</resource>
     <resource>com.unifina.domain.signalpath.ModulePackageUser</resource>
+    <resource>com.unifina.domain.signalpath.RunningSignalPath</resource>
     <resource>com.unifina.domain.signalpath.SavedSignalPath</resource>
+    <resource>com.unifina.domain.signalpath.UiChannel</resource>
     <resource>com.unifina.domain.task.Task</resource>
     <resource>com.unifina.domain.tour.TourUser</resource>
+    <resource>com.unifina.service.BootService</resource>
     <resource>com.unifina.service.FeedFileService</resource>
     <resource>com.unifina.service.FeedService</resource>
     <resource>com.unifina.service.KafkaService</resource>

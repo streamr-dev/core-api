@@ -4,21 +4,27 @@ import com.unifina.domain.security.SecUser
 
 class RunningSignalPath {
 	SecUser user
-	
 	String name
-	String runner
-	String server
 	String json
 	
+	String runner
+	String server
+
 	Date dateCreated
 	Date lastUpdated
 	
 	Boolean shared
+	Boolean adhoc
+	String state
 	
 	static hasMany = [uiChannels: UiChannel]
 	
 	static constraints = {
+		runner(nullable:true)
+		server(nullable:true)
 		shared(nullable:true)
+		state(nullable:true)
+		adhoc(nullable:true)
 	}
 	
 	static mapping = {

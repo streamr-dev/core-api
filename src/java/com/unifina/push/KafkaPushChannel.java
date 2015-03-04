@@ -3,6 +3,7 @@ package com.unifina.push;
 import grails.converters.JSON;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
@@ -15,9 +16,29 @@ public class KafkaPushChannel extends PushChannel {
 
 	private static final Logger log = Logger.getLogger(KafkaPushChannel.class);
 	
-	public KafkaPushChannel(KafkaService kafkaService) {
+	HashMap<String, Object> byeMsg;
+	private boolean sendByeOnDestroy;
+	
+	/**
+	 * @param kafkaService
+	 * @param sendByeOnDestroy Sends a special 'bye' message when this channel is destroyed. 'Bye' is meant to be final, so only set it to true for adhoc channels.
+	 */
+	public KafkaPushChannel(KafkaService kafkaService, boolean sendByeOnDestroy) {
 		super();
 		this.kafkaService = kafkaService;
+		this.sendByeOnDestroy = sendByeOnDestroy;
+		byeMsg = new HashMap<>();
+		byeMsg.put("_bye", true);
+	}
+	
+	@Override
+	public void destroy() {
+		if (sendByeOnDestroy) {
+			for (String channel : channels) {
+				push(byeMsg, channel);
+			}
+		}
+		super.destroy();
 	}
 	
 	@Override
@@ -28,14 +49,6 @@ public class KafkaPushChannel extends PushChannel {
 		ArrayList<String> topics = new ArrayList<>(1);
 		topics.add(channel);
 		kafkaService.createTopics(topics);
-	}
-	
-	@Override
-	public void destroy() {
-		super.destroy();
-		
-		// Delayed-delete the topics in one hour
-		kafkaService.createDeleteTopicTask(getChannels(), 60*60*1000);
 	}
 	
 	@Override

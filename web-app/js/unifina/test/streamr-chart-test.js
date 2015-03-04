@@ -111,6 +111,27 @@ describe('streamr-chart', function() {
 			assert.equal(chart.yAxis.length, 2)
 			assert.equal(chart.realYAxis[3], 1)
 		})
+
+		it('can be included in constructor options', function() {
+			chart = new StreamrChart($parent, {
+				init: {
+					type: 'init',
+					series: [{
+						name: 'test',
+						yAxis: 0,
+						idx: 0
+					},
+					{
+						name: 'test2',
+						yAxis: 1,
+						idx: 1
+					}]
+				}
+			})
+
+			assert.equal(chart.seriesMeta.length, 2)
+			assert.equal(chart.yAxis.length, 2)
+		})
 	})
 
 	describe('data point message', function() {

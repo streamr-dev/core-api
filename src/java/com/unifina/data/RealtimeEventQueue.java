@@ -36,15 +36,16 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		while(!abort) {
 			FeedEvent event;
 			synchronized(queue) {
-				while (queue.isEmpty()) {
+				while (queue.isEmpty() && !abort) {
 					try {
 						queue.wait();
 					} catch (InterruptedException ignored) {
-						if (abort) {
-							log.info("Interrupted, exiting.");
-							return;
-						}
+
 					}
+				}
+
+				if (abort) {
+					return;
 				}
 				
 				event = queue.poll();

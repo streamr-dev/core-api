@@ -1,7 +1,5 @@
 <link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
 
-<r:require module="jquery"/>
-<r:require module="socket-io"/>
 <r:require module="streamr-client"/>
 
 <r:layoutResources disposition="head"/>
@@ -20,7 +18,7 @@
 			// This function is executed multiple times, once for each element!
 			ready: function() {
 				if (this.server) {
-					streamrClient.options.socketIoUrl = this.server
+					streamrClient.options.server = this.server
 					streamrClient.connect()
 				}
 			},

@@ -5,10 +5,17 @@ public class Message {
 	public Object message;
 	public Object rawMessage;
 	public boolean checkCounter = true;
+	public Object key;
 	
 	public Message(long counter, Object message) {
 		this.counter = counter;
 		this.message = message;
+	}
+	
+	public Message(Object key, long counter, Object message) {
+		this.counter = counter;
+		this.message = message;
+		this.key = key;
 	}
 	
 	public Message(long counter, Object message, Object rawMessage) {

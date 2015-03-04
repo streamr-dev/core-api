@@ -14,10 +14,13 @@ function StreamrChart(parent, options) {
 
 	this.options = $.extend({
 		rangeDropdown: true,
-		showHideButtons: true
+		showHideButtons: true,
+		init: undefined
 	}, options || {})
 
+	this.metaDataInitialized = false
 	this.chart = null
+	this.messageQueue = []
 
 	this.seriesMeta = []
 	this.realYAxis = [];	
@@ -103,9 +106,14 @@ function StreamrChart(parent, options) {
 	this.$parent.append(area)
 	this.$area = area
 
+	// An init message can be included in the options
+	if (this.options.init) {
+		this.initMetaData(this.options.init)
+	}
+
 }
 
-StreamrChart.prototype.initialize = function(title, series, yAxis) {
+StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis) {
 	var _this = this
 
 	this.$area.show();
@@ -261,6 +269,8 @@ StreamrChart.prototype.destroy = function() {
 		this.chart = null
 	}
 
+	this.metaDataInitialized = false;
+	this.messageQueue = [];
 	this.seriesMeta = [];
 	this.navigatorSeries = null
 	this.latestNavigatorTimestamp = null
@@ -292,12 +302,67 @@ StreamrChart.prototype.pushDataToMetaSeries = function(meta, d) {
 	}
 }
 
+StreamrChart.prototype.initMetaData = function(d) {
+	var _this = this
+
+	// Never reinitialize
+	if (!this.metaDataInitialized) {
+		this.yAxis = d.yAxis || [];
+		
+		var x=0;
+		var seenYAxisNumbers = []
+
+		// Remap the "user" yAxis assignments to actual Highcharts ones,
+		// which need to be ascending and without gaps
+		$(d.series).each(function (i,s) {
+			if (s.yAxis==null || $.inArray(s.yAxis, seenYAxisNumbers)<0) {
+				seenYAxisNumbers.push(s.yAxis)
+				_this.yAxis.push({});
+				_this.realYAxis[s.yAxis] = x;
+				s.yAxis = x;
+				x++;
+			}
+			else {
+				s.yAxis = _this.realYAxis[s.yAxis];
+			}
+		});
+		
+		// Must have at least one yAxis
+		if (this.yAxis.length==0) {
+			this.yAxis.push({
+				title: ""
+			});
+		}
+		
+		// Delay adding the series to the chart until they get data points, Highstocks is buggy
+		this.seriesMeta = d.series;
+		this.seriesMeta.forEach(function(meta) {
+			meta.min = Infinity
+			meta.max = -Infinity
+		})
+
+		this.title = d.title;
+		this.metaDataInitialized = true
+
+		// If messageQueue contains messages, process them now
+		this.messageQueue.forEach(function(msg) {
+			_this.handleMessage(msg)
+		})
+		this.messageQueue = []
+	}
+}
+
 StreamrChart.prototype.handleMessage = function(d) {
 	var _this = this
 	var seriesMeta = this.seriesMeta
 	var realYAxis = this.realYAxis
 	var chart = this.chart
-	
+
+	if (!this.metaDataInitialized && d.type!=="init") {
+		this.messageQueue.push(d)
+		return
+	}
+
 	// Data point message
 	if (d.type=="p") {
 		if (this.minTime==null || d.x!=null && d.x<this.minTime)
@@ -325,7 +390,7 @@ StreamrChart.prototype.handleMessage = function(d) {
 					}
 				}
 				
-				this.initialize(this.chartTitle,seriesMeta,this.yAxis);
+				this.createHighstocksInstance(this.chartTitle,seriesMeta,this.yAxis);
 			}
 		}
 		// Chart has already been initialized
@@ -364,52 +429,10 @@ StreamrChart.prototype.handleMessage = function(d) {
 		}
 	}
 	
-	// Init message
+	// Init message, for backwards compatibility
 	else if (d.type=="init") {
-		// Cleanup and re-read instance variables
-		this.destroy();
-		seriesMeta = this.seriesMeta
-		realYAxis = this.realYAxis
-
-		var yAxis = d.yAxis || [];
-		this.yAxis = yAxis
-		
-		var x=0;
-		var seenYAxisNumbers = []
-
-		// Remap the "user" yAxis assignments to actual Highcharts ones,
-		// which need to be ascending and without gaps
-		$(d.series).each(function (i,s) {
-			if (s.yAxis==null || $.inArray(s.yAxis, seenYAxisNumbers)<0) {
-				seenYAxisNumbers.push(s.yAxis)
-				yAxis.push({});
-				realYAxis[s.yAxis] = x;
-				s.yAxis = x;
-				x++;
-			}
-			else {
-				s.yAxis = realYAxis[s.yAxis];
-			}
-		});
-		
-		// Must have at least one yAxis
-		if (yAxis.length==0) {
-			yAxis.push({
-				title: ""
-			});
-		}
-		
-		// Delay adding the series to the chart until they get data points, Highstocks is buggy
-		seriesMeta = d.series;
-		seriesMeta.forEach(function(meta) {
-			meta.min = Infinity
-			meta.max = -Infinity
-		})
-		this.seriesMeta = seriesMeta
-
-		this.title = d.title;
+		this.initMetaData(d)
 	}
-	
 	
 	// New series message
 	else if (d.type=="s") {

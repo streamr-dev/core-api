@@ -20,6 +20,7 @@ public class SignalPathRunner extends Thread {
 	
 	private List<Map> signalPathData
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
+	private boolean deleteOnStop
 	
 	String runnerId
 	
@@ -33,11 +34,12 @@ public class SignalPathRunner extends Thread {
 	
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
 	
-	public SignalPathRunner(List<Map> signalPathData, Globals globals) {
+	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
 		this.servletContext = globals.grailsApplication.mainContext.getBean("servletContext")
 		this.signalPathData = signalPathData
+		this.deleteOnStop = deleteOnStop
 		
 		runnerId = "s-"+new Date().getTime()
 		
@@ -133,7 +135,10 @@ public class SignalPathRunner extends Thread {
 		servletContext["signalPathRunners"].remove(runnerId)
 		signalPaths.each {it.destroy()}
 		globals.destroy()
-		signalPathService.deleteRunningSignalPathReferences(this)
+		
+		if (deleteOnStop)
+			signalPathService.deleteRunningSignalPathReferences(this)
+		else signalPathService.updateState(getRunnerId(), "stopped")
 	}
 	
 	public void abort() {

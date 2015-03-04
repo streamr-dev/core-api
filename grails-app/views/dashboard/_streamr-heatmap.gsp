@@ -9,8 +9,8 @@
         </div> <!-- /.stat-row -->
         <div class="stat-row">
             <!-- Bordered, without top border, without horizontal padding -->
-            <div class="stat-cell bordered no-border-t no-padding-vr">
-                <streamr-chart class="streamr-chart" channel="${channel}"></streamr-chart>
+            <div class="stat-cell bordered no-border-t no-padding-hr no-padding-vr" style="height:400px">
+                <streamr-heatmap class="streamr-heatmap" channel="${channel}"></streamr-heatmap>
             </div>
         </div> <!-- /.stat-row -->
     </div> <!-- /.stat-panel -->

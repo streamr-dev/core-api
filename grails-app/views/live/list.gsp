@@ -34,6 +34,7 @@
 				        <tr>
 				        	<th><g:message code="runningSignalPath.id.label" /></th>
 				        	<th><g:message code="runningSignalPath.name.label" /></th>
+							<th><g:message code="runningSignalPath.state.label" /></th>
 				        	<th><g:message code="runningSignalPath.created.label" /></th>
 				        </tr>
 				    </thead>
@@ -42,7 +43,8 @@
 					        <tr>					        
 					            <td><g:link action="show" id="${rsp.id}">${fieldValue(bean: rsp, field: "id")}</g:link></td>					        
 					            <td>${fieldValue(bean: rsp, field: "name")}</td>
-					            <td><g:formatDate timeZone="${user.timezone}"/></td>
+					            <td>${fieldValue(bean: rsp, field: "state")}</td>
+					            <td><g:formatDate date="${rsp.dateCreated}" timeZone="${user.timezone}"/></td>
 							</tr>
 						</g:each>
 					</tbody>

@@ -16,7 +16,7 @@ public class KafkaKeyProvider extends AbstractKeyProvider {
 	}
 
 	@Override
-	public Object getEventRecipientKey(Object subscriber) {
+	public Object getSubscriberKey(Object subscriber) {
 		return ((Map)JSON.parse(((IStreamRequirement)subscriber).getStream().getStreamConfig())).get("topic").toString();
 	}
 

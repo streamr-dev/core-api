@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.apache.log4j.Logger;
 
@@ -533,15 +534,19 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * This method is used to communicate messages from the UI to
 	 * individual modules. The default implementation inserts the message into the global event queue.
+	 * 
+	 * This method may optionally return a future for a Map that is to be the result
+	 * of processing the UI message. The default implementation returns null (does not use this feature).
 	 * @param message
 	 */
-	public void receiveUIMessage(Map message) {
+	public Future<Map<String,Object>> receiveUIMessage(Map message) {
 		// Add event to message queue, don't do it right away 
 		FeedEvent fe = new FeedEvent();
 		fe.content = message;
 		fe.recipient = this;
 		fe.timestamp = globals.time;
 		globals.getDataSource().getEventQueue().enqueue(fe);
+		return null;
 	}
 	
 	@Override

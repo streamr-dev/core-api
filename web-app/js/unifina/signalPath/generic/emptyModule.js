@@ -136,16 +136,18 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			editOptions.click(function() {
 				var $optionEditor = $("<div class='optionEditor'></div>");
 				
+				// Create and sort options by key
+				var keys = Object.keys(prot.jsonData.options)
+				keys.sort()
+
 				// Create options
-				for (var key in prot.jsonData.options) {
-					if (prot.jsonData.options.hasOwnProperty(key)) {
-						// Create the option div
-						var div = prot.createOption(key, prot.jsonData.options[key]);
-						$optionEditor.append(div);
-						// Store reference to the JSON option
-						$(div).data("option",prot.jsonData.options[key]);
-					}
-				}
+				keys.forEach(function(key) {
+					// Create the option div
+					var div = prot.createOption(key, prot.jsonData.options[key]);
+					$optionEditor.append(div);
+					// Store reference to the JSON option
+					$(div).data("option",prot.jsonData.options[key]);
+				})
 				
 				bootbox.dialog({
 					animate: false,
@@ -315,12 +317,13 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.renderHelp = renderHelp;
 	
-	function initResizable(options) {
+	function initResizable(options, element) {
 		var defaultOptions = {
 			helper: "chart-resize-helper"
 		}
 		options = $.extend({},defaultOptions,options || {});
-		prot.div.resizable(options);
+		element = element || prot.div
+		element.resizable(options);
 		prot.resizable = true;
 	}
 	prot.initResizable = initResizable;
@@ -472,6 +475,18 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function receiveResponse(payload) {}
 	pub.receiveResponse = receiveResponse;
+
+	function getUIChannelOptions() {
+		// Check if module options contain channel options
+		if (prot.jsonData.options && prot.jsonData.options.uiResendAll && prot.jsonData.options.uiResendAll.value) {
+			return { resend_all: true }
+		}
+		else if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
+			return { resend_last: prot.jsonData.options.uiResendLast.value }
+		}
+		else return { resend_all: true }
+	}
+	pub.getUIChannelOptions = getUIChannelOptions
 	
 	function updateFrom(data) {
 		// Overwrite jsonData

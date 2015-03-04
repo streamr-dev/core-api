@@ -10,6 +10,7 @@
  * stopped
  * workspaceChanged (mode)
  * moduleAdded (jsonData, div)
+ * done
  * error (message)
  * 
  * Events for internal use:
@@ -27,7 +28,6 @@
  * getModuleUrl: url for module JSON
  * uiActionUrl: url for POSTing module UI runtime changes
  * connectionOptions: option object passed to StreamrClient
- * zoom: zoom level, default 1
  */
 
 var SignalPath = (function () { 
@@ -44,13 +44,12 @@ var SignalPath = (function () {
 			alert((typeof data == "string" ? data : data.msg));
 		},
 		allowRuntimeChanges: true,
-		runUrl: "run",
-		abortUrl: "abort",
+		runUrl: undefined,
+		abortUrl: undefined,
 		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-		uiActionUrl: Streamr.projectWebroot+"module/uiAction",
-		connectionOptions: {},
-		zoom: 1
+		uiActionUrl: Streamr.projectWebroot+"live/uiAction",
+		connectionOptions: {}
     };
     
     var connection;
@@ -87,27 +86,46 @@ var SignalPath = (function () {
 		});
 		
 	    connection = new StreamrClient(options.connectionOptions)
-	    pub.setZoom(opts.zoom)
+	    connection.bind('disconnected', function() {
+	    	$(pub).trigger('stopped')
+	    })
 	};
 	pub.unload = function() {
 		jsPlumb.unload();
 	};
 	pub.sendUIAction = function(hash,msg,callback) {
-		if (sessionId!=null) {
-			$.ajax({
-				type: 'POST',
-				url: options.uiActionUrl,
-				data: {
-					sessionId: sessionId,
-					hash: hash,
-					msg: JSON.stringify(msg)
-				},
-				success: callback,
-				dataType: 'json'
-			});
-			return true;
+		if (runData) {
+			var channel
+			for (var i=0;i<runData.uiChannels.length;i++) {
+				// using == on purpose
+				if (runData.uiChannels[i].hash==hash) {
+					channel = runData.uiChannels[i].id
+					break
+				}
+			}
+
+			if (channel) {
+				$.ajax({
+					type: 'POST',
+					url: options.uiActionUrl,
+					data: {
+						channel: channel,
+						msg: JSON.stringify(msg)
+					},
+					success: function(data) {
+						if (!data.success) {
+							handleError(data.error)
+						}
+						else if (callback)
+							callback(data.response)
+					},
+					dataType: 'json'
+				});
+				return true;
+			}
 		}
-		else return false;
+		
+		return false;
 	}
 	pub.getCanvas = function() {
 		return canvas;
@@ -429,12 +447,12 @@ var SignalPath = (function () {
 		setName(saveData.name)
 		
 		// TODO: remove backwards compatibility
-		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext);
+		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext, data.runData);
 		
 		if (data.workspace!=null && data.workspace!="normal")
 			setWorkspace(data.workspace);
 		
-		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext]);
+		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext, data.runData]);
 	}
 	
 	function run(additionalContext, subscribeOnSuccess, callback) {
@@ -495,7 +513,8 @@ var SignalPath = (function () {
 		runData.uiChannels.forEach(function(uiChannel) {
 			// Module channels reference the module by hash
 			if (uiChannel.hash!=null) {
-				connection.subscribe(uiChannel.id, getModuleById(uiChannel.hash).receiveResponse, {resend_all:true})
+				var m = getModuleById(uiChannel.hash)
+				connection.subscribe(uiChannel.id, m.receiveResponse, m.getUIChannelOptions())
 			}
 			// Other channels handled by this SignalPath
 			else {
@@ -526,10 +545,10 @@ var SignalPath = (function () {
 		}
 		else if (message.type=="MW") {
 			var hash = message.hash;
-			getModuleById(hash).addWarning(message.payload);
+			getModuleById(hash).addWarning(message.msg);
 		}
 		else if (message.type=="D") {
-			abort();
+			$(pub).trigger("done")
 		}
 		else if (message.type=="E") {
 			disconnect();
@@ -558,7 +577,7 @@ var SignalPath = (function () {
 			type: 'POST',
 			url: options.abortUrl, 
 			data: {
-				runnerId: runData.runnerId
+				id: runData.id
 			},
 			dataType: 'json',
 			success: function(data) {
@@ -594,21 +613,6 @@ var SignalPath = (function () {
 		return workspace;
 	}
 	pub.getWorkspace = getWorkspace;
-	
-	function getZoom() {
-		return canvas.css("zoom") != null ? canvas.css("zoom") : 1 
-	}
-	pub.getZoom = getZoom
-	
-	function setZoom(zoom, animate) {
-		if (animate===undefined)
-			animate = true
-		
-		if (animate)
-			canvas.animate({ zoom: zoom }, 300);
-		else (canvas.css("zoom", zoom))
-	}
-	pub.setZoom = setZoom
 	
 	return pub; 
 }());

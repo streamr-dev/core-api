@@ -2,7 +2,12 @@ package com.unifina.feed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -23,6 +28,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 	
 	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
 	protected ArrayList<MessageRecipient> proxies = new ArrayList<>();
+	protected HashMap<Object, List<MessageRecipient>> proxiesByKey = new HashMap<>();
 	
 	protected MessageRecipient[] proxiesByPriority = new MessageRecipient[0];
 	protected Comparator<MessageRecipient> proxyPriorityComparator = new Comparator<MessageRecipient>() {
@@ -34,6 +40,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 	
 	private boolean quit = false;
 	private static final Logger log = Logger.getLogger(MessageHub.class);
+
 	
 	protected MessageHub(MessageSource source, MessageParser<R,T> parser, IFeedCache cache) {
 		this.source = source;
@@ -51,7 +58,6 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 //		start(); not safe to start Thread in constructor! Started in FeedFactory
 	}
 	
-//	public abstract T preprocess(Object msg);
 	public MessageParser<R,T> getParser() {
 		return parser;
 	}
@@ -78,9 +84,17 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 			}
 			
 			if (parsedMessage!=null) try {
-				// Distribute preprocessed message to recipients
-				for (MessageRecipient p : proxiesByPriority) {
-					p.receive(parsedMessage);
+				// If the message contains a key, distribute to subscribers for that key only
+				if (m.key!=null) {
+					List<MessageRecipient> list = proxiesByKey.get(m.key);
+					for (MessageRecipient p : list)
+						p.receive(parsedMessage);
+				}
+				else {
+					// Distribute un-keyed messages to all recipients
+					for (MessageRecipient p : proxiesByPriority) {
+						p.receive(parsedMessage);
+					}
 				}
 			} catch (Exception e) {
 				log.error("Failed to handle message!",e);
@@ -178,8 +192,45 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 		return 0;
 	}
 
-	public void subscribe(Object subscriber) {
-		source.subscribe(subscriber);
+	/**
+	 * Lets the hub know that the given MessageRecipient is interested in messages with
+	 * the given key. The hub requests the underlying MessageSource to route messages
+	 * with the given key to the given MessageRecipient.
+	 * @param key
+	 * @param proxy
+	 */
+	public void subscribe(Object key, MessageRecipient proxy) {
+		
+		synchronized(proxiesByKey) {
+			if (!proxiesByKey.containsKey(key))
+				proxiesByKey.put(key, new ArrayList<MessageRecipient>());
+		}
+		
+		List<MessageRecipient> list = proxiesByKey.get(key);
+		
+		synchronized(list) {
+			if (!list.contains(proxy))
+				list.add(proxy);
+			
+			Collections.sort(list, proxyPriorityComparator);
+			
+			source.subscribe(key);
+		}
+		
+	}
+	
+	public void unsubscribe(Object key, MessageRecipient proxy) {
+		List<MessageRecipient> list = proxiesByKey.get(key);
+		
+		if (list!=null) {
+			synchronized(list) {
+				list.remove(proxy);
+				if (list.isEmpty()) {
+					log.info("unsubscribe: No more MessageRecipients for key "+key+", unsubscribing from source");
+					source.unsubscribe(key);
+				}
+			}
+		}
 	}
 
 }

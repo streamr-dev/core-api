@@ -13,6 +13,7 @@ import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.push.IHasPushChannel
@@ -23,6 +24,7 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.IdGenerator
 import com.unifina.utils.NetworkInterfaceUtils
 
 class SignalPathService {
@@ -36,7 +38,11 @@ class SignalPathService {
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
 	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot) {
-		SignalPath sp = new SignalPath(signalPathData,isRoot,globals)
+		SignalPath sp = new SignalPath(isRoot)
+		sp.globals = globals
+		sp.init()		
+		sp.configure(signalPathData)
+		
 		if (connectionsReady)
 			sp.connectionsReady()
 		return sp
@@ -122,14 +128,14 @@ class SignalPathService {
 		
 	}
 	
-	public List<RunningSignalPath> launch(List<Map> signalPathData, Map signalPathContext, SecUser user) {
+	public List<RunningSignalPath> launch(List<Map> signalPathData, Map signalPathContext, SecUser user, boolean adhoc) {
 		
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
 		globals.uiChannel = new KafkaPushChannel(kafkaService)
 		
 		// Create the runner thread
-		SignalPathRunner runner = new SignalPathRunner(signalPathData, globals)
+		SignalPathRunner runner = new SignalPathRunner(signalPathData, globals, adhoc)
 		String runnerId = runner.runnerId
 		
 		// Abort on client disconnect
@@ -143,44 +149,62 @@ class SignalPathService {
 		runner.start()
 		
 		// Save reference to running SignalPaths to the database
-		return createRunningSignalPathReferences(runner, user)
+		return createRunningSignalPathReferences(runner, user, adhoc)
 	}
 	
+	/**
+	 * Creates RunningSignalPath domain objects into the database with initial state "starting".
+	 * The RunningSignalPaths can be subsequently started by calling startLocal() or startRemote().
+	 * @param signalPathData
+	 * @param user
+	 * @param adhoc
+	 * @param resetUiChannelIds
+	 * @return
+	 */
 	@Transactional
-	public List<RunningSignalPath> createRunningSignalPathReferences(SignalPathRunner runner, SecUser user) {
-		
-		return runner.getSignalPaths().collect {SignalPath sp->
-			RunningSignalPath rsp = new RunningSignalPath()
-			rsp.name = sp.name ?: "(unsaved canvas)"
-			rsp.user = user
-			rsp.runner = runner.getRunnerId()
-			rsp.server = NetworkInterfaceUtils.getIPAddress()
-			rsp.json = (signalPathToJson(sp) as JSON)
-			
-			UiChannel rspUi = new UiChannel()
-			rspUi.id = sp.getUiChannelId()
-			rsp.addToUiChannels(rspUi)
-			
-			for (AbstractSignalPathModule it : sp.getModules()) {
-				if (it instanceof IHasPushChannel) {
-					UiChannel ui = new UiChannel()
-					ui.id = ((IHasPushChannel) it).getUiChannelId()
-					ui.hash = it.getHash().toString()
-					ui.module = it.getDomainObject()
-					ui.name = ((IHasPushChannel) it).getUiChannelName()
-					
-					rsp.addToUiChannels(ui)
-				}
+	public RunningSignalPath createRunningSignalPath(Map sp, SecUser user, boolean adhoc, boolean resetUiChannelIds) {
+		if (resetUiChannelIds) {
+			sp.uiChannel = [id:IdGenerator.get(), name: "Notifications"]
+			sp.modules.each {
+				if (it.uiChannel)
+					it.uiChannel.id = IdGenerator.get()
 			}
-			
-			rsp.save(flush:true, failOnError:true)
-			
-			return rsp
 		}
+		
+		RunningSignalPath rsp = new RunningSignalPath()
+		rsp.name = sp.name ?: "(unsaved canvas)"
+		rsp.user = user
+		rsp.json = (sp as JSON)
+		rsp.state = "starting"
+		rsp.adhoc = adhoc
+		
+		UiChannel rspUi = new UiChannel()
+		rspUi.id = sp.uiChannel.id
+		rsp.addToUiChannels(rspUi)
+		
+		for (Map it : sp.modules) { 
+			if (it.uiChannel) {
+				UiChannel ui = new UiChannel()
+				ui.id = it.uiChannel.id
+				ui.hash = it.hash.toString()
+				ui.module = Module.load(it.id)
+				ui.name = it.uiChannel.name
+				
+				rsp.addToUiChannels(ui)
+			}
+		}
+		
+		rsp.save(flush:true, failOnError:true)
+		
+		return rsp
 	}
 	
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
+		// Delayed-delete the topics in one hour
+		List<UiChannel> channels = UiChannel.findAll { runningSignalPath.runner == runner.getRunnerId()}
+		kafkaService.createDeleteTopicTask(channels.collect{it.id}, 60*60*1000)
+		
 		List uiIds = UiChannel.executeQuery("select ui.id from UiChannel ui where ui.runningSignalPath.runner = ?", [runner.getRunnerId()])
 		if (!uiIds.isEmpty())
 			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiIds])
@@ -209,9 +233,42 @@ class SignalPathService {
 		globals.dataSource.stopFeed()
     }
 	
+	@Deprecated
 	def stopSignalPath(SignalPath signalPath) {
 		// Stop feed
 		signalPath.globals.dataSource.stopFeed()
+	}
+	
+	void startLocal(RunningSignalPath rsp, Map signalPathContext) {		
+		// Create Globals
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
+		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
+		
+		// Create the runner thread
+		SignalPathRunner runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+		runner.signalPaths.each {
+			it.runningSignalPath = rsp
+		}
+		String runnerId = runner.runnerId
+		
+		// Start the runner thread
+		runner.start()
+		
+		rsp.runner = runnerId
+		rsp.state = "running"
+		rsp.server = NetworkInterfaceUtils.getIPAddress()?.toString()
+		rsp.save()
+	}
+	
+	void stopLocal(RunningSignalPath rsp) {
+		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(rsp.runner)
+		if (runner!=null && runner.isAlive()) {
+			runner.abort()
+		}
+	}
+	
+	void updateState(String runnerId, String state) {
+		RunningSignalPath.executeUpdate("update RunningSignalPath rsp set rsp.state = ? where rsp.runner = ?", [state, runnerId])
 	}
 	
 	@Deprecated

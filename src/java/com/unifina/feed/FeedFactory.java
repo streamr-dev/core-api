@@ -9,13 +9,17 @@ import org.apache.log4j.Logger;
 
 import com.unifina.domain.data.Feed;
 
+/**
+ * Utility class to help create singleton MessageSources and associated MessageHubs to be used
+ * with/by feed implementations that extend AbstractFeedProxy.
+ */
 public class FeedFactory {
 
-	private static HashMap<Long,MessageRecipient> instanceByFeed = new HashMap<>();
+	private static HashMap<Long,MessageHub> instanceByFeed = new HashMap<>();
 	private static final Logger log = Logger.getLogger(FeedFactory.class);
 	
-	synchronized static MessageRecipient startInstance(Feed feed, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
-		MessageRecipient instance = instanceByFeed.get(feed.getId());
+	synchronized static MessageHub startInstance(Feed feed, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
+		MessageHub instance = instanceByFeed.get(feed.getId());
 		
 		if (instance==null) {
 			// Instantiate the MessageSource
@@ -25,8 +29,8 @@ public class FeedFactory {
 		else throw new IllegalStateException("Singleton instance for "+feed+" already started!");
 	}
 	
-	synchronized static MessageRecipient startInstance(Feed feed, MessageSource source, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
-		MessageRecipient instance = instanceByFeed.get(feed.getId());
+	synchronized static MessageHub startInstance(Feed feed, MessageSource source, Map<String,Object> config) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, IllegalArgumentException {
+		MessageHub instance = instanceByFeed.get(feed.getId());
 		
 		if (instance==null) {
 			// Instantiate the cache
@@ -35,8 +39,8 @@ public class FeedFactory {
 			// Instantiate the parser
 			MessageParser parser = createParser(feed);
 			
-			// Instantiate the MessageRecipient
-			instance = createMessageRecipient(feed,source,parser,cache);
+			// Instantiate the MessageHub
+			instance = createMessageHub(feed,source,parser,cache);
 			instanceByFeed.put(feed.getId(),instance);
 			return instance;
 		}
@@ -66,13 +70,13 @@ public class FeedFactory {
 		return (MessageSource) messageSourceConstructor.newInstance(feed, config);
 	}
 	
-	private static MessageRecipient createMessageRecipient(Feed feed, MessageSource source, MessageParser parser, IFeedCache cache) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private static MessageHub createMessageHub(Feed feed, MessageSource source, MessageParser parser, IFeedCache cache) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		MessageHub hub = new MessageHub(source,parser,cache);
 		hub.start();
 		return hub;
 	}
 	
-	synchronized static MessageRecipient getInstance(Feed feed, Map<String,Object> config) throws InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IllegalArgumentException {
+	synchronized static MessageHub getInstance(Feed feed, Map<String,Object> config) throws InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, IllegalArgumentException {
 		if (!instanceByFeed.containsKey(feed.getId())) {
 			 if (feed.getStartOnDemand()==null || !feed.getStartOnDemand())
 				 throw new IllegalStateException("Feed instance not started (and startOnDemand is false)!");

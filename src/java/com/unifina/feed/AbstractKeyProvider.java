@@ -19,7 +19,7 @@ public abstract class AbstractKeyProvider {
 	 * @param subscriber
 	 * @return
 	 */
-	public abstract Object getEventRecipientKey(Object subscriber);
+	public abstract Object getSubscriberKey(Object subscriber);
 	
 	/**
 	 * Extracts a key from a message that can be used to find the correct 

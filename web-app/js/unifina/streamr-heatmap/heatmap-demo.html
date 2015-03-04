@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+		<link rel="stylesheet" href="../../leaflet-0.7.3/leaflet-0.7.3.css" />
+		<script src="../../leaflet-0.7.3/leaflet-0.7.3.min.js"></script>
+		<script src="heatmap.min.js"></script>
+		<script src="leaflet-heatmap.js"></script>
+		<script src="streamr-heatmap.js"></script>
+
+	</head>
+	<body>
+		<div id="heatmap" style="width: 100%; height: 70%;"></div>
+		<button id="addButton">Add</button>
+		<button id="clearButton">Clear</button>
+		<button id="resizeButton">Resize</button>
+		<script>
+			var heatmap = new StreamrHeatMap($("#heatmap"), {
+				lifeTime: 10000,
+				fadeInTime: 500,
+				fadeOutTime: 9500
+			})
+			$("#addButton").click(function() {
+				heatmap.addData({
+					l: Math.random()*180 - 90,
+					g: Math.random()*180 - 90,
+					v: Math.random()*20
+				})
+			})
+			$("#clearButton").click(function() {
+				heatmap.clear()
+			})
+			$("#resizeButton").click(function() {
+				heatmap.resize(800,600)
+			})
+		</script>
+	</body>
+</html>

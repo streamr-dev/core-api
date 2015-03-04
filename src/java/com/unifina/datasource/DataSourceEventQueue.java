@@ -141,6 +141,9 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	@Override
 	public void abort() {
 		abort = true;
+		synchronized(queue) {
+			queue.notify(); // Notify the SignalPathRunner thread
+		}
 	}
 
 	public Queue<FeedEvent> getQueue() {

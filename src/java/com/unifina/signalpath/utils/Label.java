@@ -35,6 +35,14 @@ public class Label extends ModuleWithUI {
 	}
 	
 	@Override
+	public Map<String, Object> getConfiguration() {
+		// Remove default configuration, always force resendLast=1
+		Map<String,Object> config = super.getConfiguration();
+		config.remove("options");
+		return config;
+	}
+	
+	@Override
 	public String getUiChannelName() {
 		if (label.isConnected()) {
 			return super.getUiChannelName() + " ("+label.getSource().getLongName()+")";

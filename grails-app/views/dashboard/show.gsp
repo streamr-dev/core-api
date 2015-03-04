@@ -34,5 +34,6 @@
 	</form>
 	
 	<g:render template="dashboard-content" />
+
 </body>
 </html>

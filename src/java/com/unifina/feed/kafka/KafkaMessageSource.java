@@ -1,13 +1,9 @@
 package com.unifina.feed.kafka;
 
-import grails.converters.JSON;
-
 import java.util.Map;
 import java.util.Properties;
 
-import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
-import com.unifina.domain.data.Stream;
 import com.unifina.feed.Message;
 import com.unifina.feed.MessageRecipient;
 import com.unifina.feed.MessageSource;
@@ -21,7 +17,6 @@ public class KafkaMessageSource implements MessageSource {
 	private MessageRecipient recipient;
 
 	private UnifinaKafkaConsumer consumer;
-	private Feed feed;
 	
 	private UnifinaKafkaMessageHandler handler = new UnifinaKafkaMessageHandler() {
 		
@@ -29,15 +24,13 @@ public class KafkaMessageSource implements MessageSource {
 		
 		@Override
 		public void handleMessage(UnifinaKafkaMessage kafkaMessage) {
-			Message msg = new Message(offset++, kafkaMessage);
+			Message msg = new Message(kafkaMessage.getChannel(), offset++, kafkaMessage);
 			msg.checkCounter = false;
 			recipient.receive(msg);
 		}
 	};
 	
 	public KafkaMessageSource(Feed feed, Map<String,Object> config) {
-		this.feed = feed;
-		
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(config, "unifina.kafka"));
 		Properties properties = new Properties();
 		for (String s : kafkaConfig.keySet())
@@ -62,10 +55,13 @@ public class KafkaMessageSource implements MessageSource {
 	}
 
 	@Override
-	public void subscribe(Object subscriber) {
-		Stream stream = ((IStreamRequirement) subscriber).getStream();
-		Map streamConfig = (Map) JSON.parse(stream.getStreamConfig());
-		consumer.subscribe(streamConfig.get("topic").toString(), handler, false);
+	public void subscribe(Object key) {
+		consumer.subscribe(key.toString(), handler, false);
+	}
+
+	@Override
+	public void unsubscribe(Object key) {
+		consumer.unsubscribe(key.toString());
 	}
 	
 }
