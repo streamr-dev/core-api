@@ -66,7 +66,7 @@
 				// Get JSON from the server to initialize options
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(controller:'live', action:'getModuleJson')}",
+					url: "${createLink(controller:'live', action:'getModuleJson', absolute:'true')}",
 					data: {
 						channel: this.channel
 					},
@@ -77,7 +77,7 @@
 			sendUIAction: function(msg, callback) {
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(controller:'live', action:'uiAction')}",
+					url: "${createLink(controller:'live', action:'uiAction', absolute:'true')}",
 					data: {
 						channel: this.channel,
 						msg: JSON.stringify(msg)
