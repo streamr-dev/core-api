@@ -35,7 +35,7 @@
 	</form>
 	
 	<div class="row">
-		<g:each in="${dashboard.items}" var="item">
+		<g:each in="${dashboard.items.sort{it.id}}" var="item">
 			<g:if test="${item.uiChannel.module?.id == 67}">
 				<g:render template="/dashboard/streamr-chart" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
 			</g:if>

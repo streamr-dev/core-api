@@ -1,4 +1,4 @@
-<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
+<link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
 <r:require module="streamr-client"/>
 
