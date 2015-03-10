@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /*!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -22,7 +23,7 @@
 }
 /* makes the font 33% larger relative to the icon container */
 .fa-lg {
-  font-size: 1.3333333333333333em;
+  font-size: 1.33333333em;
   line-height: 0.75em;
   vertical-align: -15%;
 }
@@ -39,12 +40,12 @@
   font-size: 5em;
 }
 .fa-fw {
-  width: 1.2857142857142858em;
+  width: 1.28571429em;
   text-align: center;
 }
 .fa-ul {
   padding-left: 0;
-  margin-left: 2.142857142857143em;
+  margin-left: 2.14285714em;
   list-style-type: none;
 }
 .fa-ul > li {
@@ -52,13 +53,13 @@
 }
 .fa-li {
   position: absolute;
-  left: -2.142857142857143em;
-  width: 2.142857142857143em;
-  top: 0.14285714285714285em;
+  left: -2.14285714em;
+  width: 2.14285714em;
+  top: 0.14285714em;
   text-align: center;
 }
 .fa-li.fa-lg {
-  left: -1.8571428571428572em;
+  left: -1.85714286em;
 }
 .fa-border {
   padding: .2em .25em .15em;
@@ -1336,7 +1337,6 @@
 .fa-plus-square-o:before {
   content: "\f196";
 }
-@charset "UTF-8";
 /*!
 Animate.css - http://daneden.me/animate
 Licensed under the MIT license
@@ -6711,7 +6711,7 @@ a.list-group-item.active .badge {
 }
 legend {
   color: #666;
-  font-size: 15.600000000000001px;
+  font-size: 15.6px;
   padding-bottom: 7px;
 }
 label {
@@ -9647,7 +9647,7 @@ optgroup {
   position: relative;
 }
 .stat-cell .fa {
-  line-height: 1.428571429;
+  line-height: 1.42857143;
 }
 .stat-cell .bg-icon {
   bottom: 0;
@@ -10341,7 +10341,6 @@ body:not(.right-to-left) .no-border-l {
 .ui-helper-clearfix {
   min-height: 0;
   /* support: IE7 */
-
 }
 .ui-helper-zfix {
   width: 100%;
@@ -10590,7 +10589,6 @@ body:not(.right-to-left) .no-border-l {
   padding: 0;
   width: 100%;
   /* support: IE10, see #8844 */
-
 }
 .ui-menu .ui-menu-item a {
   clear: both;
@@ -10602,7 +10600,6 @@ body:not(.right-to-left) .no-border-l {
   margin: 0 -2px;
   min-height: 0;
   /* support: IE7 */
-
   padding: 5px 18px;
   text-decoration: none;
   white-space: nowrap;
@@ -11353,7 +11350,7 @@ body .ui-tooltip {
   padding: 7px 13px;
   color: #777777;
   font-size: 12px;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
 }
 .expanding-input-hidden {
   display: none;
@@ -11607,7 +11604,6 @@ body .ui-tooltip {
   height: auto !important;
   position: relative;
   /* inline-block for ie7 */
-
   zoom: 1;
   *display: inline;
   vertical-align: middle;
@@ -11623,7 +11619,7 @@ body .ui-tooltip {
   color: #555555;
   display: block;
   font-size: 12px;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
   height: 31px;
   overflow: hidden;
   padding: 6px 12px;
@@ -11677,7 +11673,7 @@ body .ui-tooltip {
   font-family: FontAwesome;
   font-size: 12px;
   font-weight: 400;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
   height: 100%;
   margin-top: 1px;
   padding: 6px 0;
@@ -11912,7 +11908,7 @@ body .ui-tooltip {
   border: 0;
   color: #555555;
   font-size: 12px;
-  line-height: 1.428571429;
+  line-height: 1.42857143;
   margin-top: -5px;
   padding: 6px 12px;
   outline: 0;
@@ -12003,7 +11999,6 @@ body .ui-tooltip {
   width: auto;
   z-index: 9998;
   /* styles required for IE to work */
-
   background-color: #fff;
   filter: alpha(opacity=0);
 }
@@ -12705,7 +12700,7 @@ body .ui-tooltip {
   float: right;
   width: 20px;
   height: 150px;
-  background: #ffffff url("../../images/plugins/jquery.minicolors.png") 0 0;
+  background: white url("../../images/plugins/jquery.minicolors.png") 0 0;
   cursor: row-resize;
   margin: 1px 1px 1px 0;
 }
@@ -13591,32 +13586,22 @@ div.dataTables_scrollFoot table {
   border: 1px solid #cccccc;
   background: #fff;
   /* dropzone */
-
   /* fullscreen mode */
-
   /* codeview mode */
-
   /* toolbar */
-
   /* note handle */
-
   /* dialog */
-
   /* editable */
-
   /* codeable */
-
   /* dropdown-menu for toolbar and popover */
-
   /* color palette for toolbar and popover */
-
 }
 .note-editor .note-dropzone {
   position: absolute;
   display: none;
   z-index: 1;
-  border: 2px dashed #87cefa;
-  color: #87cefa;
+  border: 2px dashed lightskyblue;
+  color: lightskyblue;
   background-color: white;
   opacity: 0.95;
   pointer-event: none;
@@ -13784,10 +13769,8 @@ div.dataTables_scrollFoot table {
   text-overflow: ellipsis;
   white-space: nowrap;
   /* for FF */
-
   vertical-align: middle;
   /* for FF */
-
 }
 .note-editor .note-popover .popover .popover-content .btn-group + .btn-group {
   margin-left: 5px;
@@ -13797,7 +13780,6 @@ div.dataTables_scrollFoot table {
 }
 .note-editor .note-handle {
   /* control selection */
-
 }
 .note-editor .note-handle .note-control-selection {
   position: absolute;
@@ -13868,14 +13850,12 @@ div.dataTables_scrollFoot table {
 .note-editor .note-dialog > div {
   display: none;
   /* BS2's hide pacth. */
-
 }
 .note-editor .note-dialog .note-image-dialog .note-dropzone {
   min-height: 100px;
   font-size: 30px;
   line-height: 4;
   /* vertical-align */
-
   color: lightgray;
   text-align: center;
   border: 4px dashed lightgray;
@@ -13888,7 +13868,6 @@ div.dataTables_scrollFoot table {
   opacity: 0.9;
   filter: alpha(opacity=90);
   /* BS2's background pacth. */
-
   background: transparent;
   border: none;
 }
@@ -13957,7 +13936,6 @@ div.dataTables_scrollFoot table {
   resize: none;
   direction: ltr !important;
   /* override BS2 default style */
-
   border-radius: 0;
   margin-bottom: 0;
 }
@@ -13967,11 +13945,8 @@ div.dataTables_scrollFoot table {
 .note-editor .dropdown-menu {
   min-width: 90px;
   /* dropdown-menu right position */
-
   /* http://forrst.com/posts/Bootstrap_right_positioned_dropdown-2KB */
-
   /* dropdown-menu for selectbox */
-
 }
 .note-editor .dropdown-menu.right {
   right: 0;
@@ -16329,7 +16304,7 @@ div.output .switchContainer {
  * jQuery UI stuff
  **/
 .ui-autocomplete-loading {
-  background: #ffffff url('../../images/spinner_16x16.gif') right center no-repeat;
+  background: white url('../../images/spinner_16x16.gif') right center no-repeat;
 }
 .ui-button-text-only .ui-button-text {
   padding: 0.2em 0.7em;
@@ -16358,7 +16333,6 @@ button.arrow:after {
   height: 0;
   width: 0;
   /* order of following 3 rules important for fallbacks to work */
-
   border: 5px solid transparent;
   border-top-color: #1c94c4;
 }
@@ -16535,6 +16509,9 @@ body.build-page #content-wrapper {
 }
 .show-sign-up .btn-sign-in {
   display: none;
+}
+.dashboard-edit #main-menu .navigation {
+  padding-top: 0;
 }
 .remote-tabs-content {
   outline: none;

@@ -4,7 +4,7 @@
         <div class="stat-row">
             <!-- Dark gray background, small padding, extra small text, semibold text -->
             <div class="stat-cell bg-dark-gray padding-sm text-s text-semibold">
-                <i class="fa fa-globe"></i>&nbsp;&nbsp;${title}
+                ${title}
             </div>
         </div> <!-- /.stat-row -->
         <div class="stat-row">
