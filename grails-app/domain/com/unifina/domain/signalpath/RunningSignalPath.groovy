@@ -3,6 +3,7 @@ package com.unifina.domain.signalpath
 import com.unifina.domain.security.SecUser
 
 class RunningSignalPath {
+	Long id
 	SecUser user
 	String name
 	String json

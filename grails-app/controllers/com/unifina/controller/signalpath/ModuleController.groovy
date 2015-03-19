@@ -150,26 +150,6 @@ class ModuleController {
 		}
 	}
 	
-	
-	/**
-	 * Used to communicate back user actions in the UI
-	 */
-//	def uiAction() {
-//		String sessionId = params.sessionId
-//		def msg = JSON.parse(params.msg)
-//		def hash = params.int("hash")
-//		
-//		Map r
-//		IReturnChannel channel = servletContext["returnChannels"]?.get(sessionId)
-//		if (channel) {
-//			channel.signalPath.getModule(hash).receiveUIMessage(msg)
-//			r = [success:true, sessionId:sessionId, hash:hash, msg:msg]
-//		}
-//		else r = [success:false, sessionId:sessionId, hash:hash, msg:msg, error:"Session not found"]
-//		
-//		render r as JSON
-//	}
-	
 	def jsonGetModuleHelp() {
 		Module module = Module.get(params.id)
 		if (!unifinaSecurityService.canAccess(module)) {

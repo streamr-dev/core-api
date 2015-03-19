@@ -3,15 +3,11 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.domain.signalpath.UiChannel
-import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.SignalPathRunner
+import com.unifina.signalpath.RuntimeResponse
 
 class LiveController {
 	
@@ -19,10 +15,13 @@ class LiveController {
 	def unifinaSecurityService
 	def signalPathService
 	
-	static defaultAction = "list"
-	
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))},
-		except:['index','list','show','getJson', 'ajaxCreate']]
+		except:['index','list','show','getJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent']]
+	
+	@Secured("ROLE_USER")
+	def index() {
+		redirect(action:'list')
+	}
 	
 	@Secured("ROLE_USER")
 	def list() {
@@ -83,56 +82,42 @@ class LiveController {
 	}
 	
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
-	def uiAction() {
+	def request() {
 		response.setHeader('Access-Control-Allow-Origin', '*')
 		
-		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
-		RunningSignalPath rsp = ui.runningSignalPath
-		Map msg = JSON.parse(params.msg)
-		Integer hash = Integer.parseInt(ui.hash)
+		RunningSignalPath rsp
+		UiChannel ui = null
+		Integer hash = null
 		
-		if (!unifinaSecurityService.canAccess(rsp)) {
+		/**
+		 * Provide as parameter:
+		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
+		 * 2) RSP.id for messages intended for the RSP itself
+		 */
+		if (params.channel) {
+			ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
+			rsp = ui.runningSignalPath
+			if (ui.hash)
+				hash = Integer.parseInt(ui.hash)
+		}
+		else if (params.id) {
+			rsp = RunningSignalPath.get(params.id)
+			if (params.hash)
+				hash = Integer.parseInt(params.hash)
+		}
+		
+		if (!unifinaSecurityService.canAccess(rsp, params.auth)) {
 			render(status: 401, text: 'Access denied.')
 		}
 		else {
-			SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
-
-			// Give an error if the runner was not found locally although it should have been 
-			if (params.local && !spr) {
-				Map err = [success:false, channel:params.channel, error: "Canvas not found!"]
-				render err as JSON
-			}
-			// May be a remote runner, check server and send a message
-			else if (!params.local && !spr) {
-				// TODO: implement
-				Map err = [success:false, channel:params.channel, error: "Canvas not found!"]
-				render err as JSON
-			}
-			// If runner found
+			Map msg = JSON.parse(params.msg)
+			SecUser user = springSecurityService.currentUser ?: (params.auth ? SecUser.findByApiKey(params.auth) : null)
+			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, servletContext, params.local ? true : false)
+			if (rr.containsKey("success") && rr.containsKey("response"))
+				render rr as JSON
 			else {
-				SignalPath sp = spr.signalPaths.find {
-					it.runningSignalPath.id == rsp.id
-				}
-				
-				if (!sp) {
-					Map err = [success:false, channel:params.channel, error: "Canvas not found in runner. This should not happen."]
-					render err as JSON
-				}
-				else {
-					Map	r = [success:true, channel:params.channel, msg:msg]
-					
-					Future future = sp.getModule(hash).receiveUIMessage(msg)
-					if (future) {
-						try {
-							r.response = future.get(20, TimeUnit.SECONDS)
-							render r as JSON
-						} catch (TimeoutException e) {
-							Map err = [success:false, channel:params.channel, error: "Timed out while waiting for response."]
-							render err as JSON
-						}
-					}			
-					
-				}
+				Map result = [success: rr.isSuccess(), id: rsp.id, hash: hash, response: rr]
+				render result as JSON
 			}
 		}
 	}
@@ -178,14 +163,44 @@ class LiveController {
 	@Secured("ROLE_USER") 
 	def stop() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		if (signalPathService.stopLocal(rsp)) {
-			flash.message = message(code:"runningSignalPath.stopped", args:[rsp.name])
-			redirect(action:"show", id:rsp.id)
-		}
-		else {
-			flash.error = "Error stopping Live Canvas $rsp.name. It might not be alive."
-			redirect(action:"show", id:rsp.id)
-		}
 		
+		Map result = signalPathService.runtimeRequest([type:"stopRequest"], rsp, null, springSecurityService.currentUser, servletContext)
+		redirect(action:"show", id:rsp.id)
+	}
+	
+	@Secured("ROLE_USER")
+	def loadBrowser() {
+		def result = [
+			browserId: params.browserId,
+			headers: ["Id", "Name"],
+			contentUrl: createLink(
+				controller: "live",
+				action: "loadBrowserContent",
+				params: [
+					browserId: params.browserId,
+					command: params.command
+				]
+			)
+		]
+		render(template:"/savedSignalPath/loadBrowser",model:result)
+	}
+	
+	@Secured("ROLE_USER")
+	def loadBrowserContent() {
+		def max = params.int("max") ?: 100
+		def offset = params.int("offset") ?: 0
+		def ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from RunningSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+		
+		def result = [signalPaths:[]]
+		ssp.each {
+			def tmp = [:]
+			tmp.id = it[0]
+			tmp.name = it[1]
+			tmp.url = createLink(controller:"live",action:"getJson",params:[id:it[0]])
+			tmp.command = params.command
+			tmp.offset = offset++
+			result.signalPaths.add(tmp)
+		}
+		render(view:"/savedSignalPath/loadBrowserContent",model:result)
 	}
 }

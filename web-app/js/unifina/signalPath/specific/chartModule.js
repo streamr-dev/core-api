@@ -141,7 +141,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		for (var i=0; i<connectedInputs.length; i++) {
 			connectedInputs[i].seriesIndex = i
 		}
-		SignalPath.sendUIAction(prot.hash, {type:'initRequest'}, function(response) {
+		SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
 			chart.handleMessage(response.initRequest)
 		})
 	})

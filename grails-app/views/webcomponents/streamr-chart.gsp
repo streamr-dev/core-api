@@ -28,7 +28,7 @@
 						showHideButtons: _this.showHideButtons	// default: true
 					})
 
-					_this.sendUIAction({type:'initRequest'}, function(response) {
+					_this.sendRequest({type:'initRequest'}, function(response) {
 						chart.handleMessage(response.initRequest)
 					})
 

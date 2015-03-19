@@ -22,6 +22,9 @@
 			zoom: ${params.zoom ?: 1},
 			connectionOptions: {
 				server: "${grailsApplication.config.streamr.ui.server}"
+			},
+			errorHandler: function(msg) {
+				console.error(msg)
 			}
 		});
 		

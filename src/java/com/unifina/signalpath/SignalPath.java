@@ -2,12 +2,15 @@ package com.unifina.signalpath;
 
 import grails.converters.JSON;
 
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
@@ -330,6 +333,18 @@ public class SignalPath extends ModuleWithUI {
 			// Clean up
 			it.destroy(); 
 		}
+	}
+	
+	@Override
+	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
+		if (request.getType().equals("stopRequest")) {
+			if (!request.isAuthenticated())
+				throw new AccessControlException("stopRequest requires authentication!");
+
+			globals.getDataSource().stopFeed();
+			response.setSuccess(true);
+		}
+		else super.handleRequest(request, response);
 	}
 	
 	class InputConnection {

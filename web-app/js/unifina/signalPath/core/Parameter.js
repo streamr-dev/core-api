@@ -162,7 +162,7 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		pub.input.change(function() {
 			if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges && confirm("Make a runtime change to '"+pub.getDisplayName()+"'?")) {
 				var value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
-				SignalPath.sendUIAction(module.getHash(), {type:"paramChange", param:pub.getName(), value:value}, function(resp) {});
+				SignalPath.sendRequest(module.getHash(), {type:"paramChange", param:pub.getName(), value:value}, function(resp) {});
 			}
 		});
 		

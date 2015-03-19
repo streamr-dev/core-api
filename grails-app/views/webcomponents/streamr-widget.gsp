@@ -74,10 +74,10 @@
 					dataType: 'json'
 				});
 			},
-			sendUIAction: function(msg, callback) {
+			sendRequest: function(msg, callback) {
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(controller:'live', action:'uiAction', absolute:'true')}",
+					url: "${createLink(controller:'live', action:'request', absolute:'true')}",
 					data: {
 						channel: this.channel,
 						msg: JSON.stringify(msg)
