@@ -271,7 +271,7 @@ class SignalPathService {
 		URL url = new URL(link)
 		
 		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes).getHostAddress()
-		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+"/"+grailsLinkGenerator.link(controller:"live", action:"request")
+		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(controller:"live", action:"request")
 		
 		rsp.save()
 	}
