@@ -11,7 +11,9 @@
         
         	$(document).ready(function() {
         		var autodetecting = false
-        		var client = new StreamrClient()
+        		var client = new StreamrClient({
+					server: "${grailsApplication.config.streamr.ui.server}"
+				})
         		var streamConfig = ${raw(stream.streamConfig ?: "{}")}
         		
         		listView = new ListView({

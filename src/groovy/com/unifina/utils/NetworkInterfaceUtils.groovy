@@ -1,28 +1,33 @@
 package com.unifina.utils
 
 class NetworkInterfaceUtils {
-	public static Inet4Address getIPAddress() {
-		//		InetAddress[] all = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())
-		//		InetAddress ip = all.find {!it.isLoopbackAddress() && it.getHostAddress().indexOf(":")==-1}
-		def interfaces = NetworkInterface.getNetworkInterfaces()
+	public static Inet4Address getIPAddress(List<String> prefixes=null) {
+		Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces()
 
 		// Find non-loopback non-virtual non-p2p interface with at least one ipv4 address
-		def i = interfaces.find {
-			!(it.virtual || it.pointToPoint || it.loopback) && it.inetAddresses.find {addr-> addr instanceof Inet4Address} != null
+		List<Inet4Address> candidates = []
+		for (NetworkInterface it : interfaces.findAll {!(it.virtual || it.pointToPoint || it.loopback)}) {
+			for (InetAddress addr : it.inetAddresses.findAll {it instanceof Inet4Address}) {
+				if (prefixes==null || prefixes.isEmpty())
+					return addr
+				else {
+					candidates.add(addr)
+				}
+			}
 		}
-		def ip = i.inetAddresses.find {addr-> addr instanceof Inet4Address}
-		//		interfaces.each {
-		//			println "-------"
-		//			println "Name: $it.name"
-		//			println "Parent: $it.parent"
-		//			println "Loopback: $it.loopback"
-		//			println "P2P: $it.pointToPoint"
-		//			println "Virtual: $it.virtual"
-		//			it.inetAddresses.each {addr->
-		//				println "  address: $addr"
-		//			}
-		//		}
 		
-		return ip
+		// Search through candidates in the order specified by the prefixes
+		for (def prefix : prefixes) {
+			Inet4Address found = candidates.find {it.hostAddress.startsWith(prefix)}
+			if (found)
+				return found
+		}
+		
+		throw new RuntimeException("IP address could not be determined! Prefixes: $prefixes")
+	}
+	
+	public static void main(String[] args) {
+		println getIPAddress()
+		println getIPAddress(["192.168.10.", "192.168."])
 	}
 }

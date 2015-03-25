@@ -16,7 +16,7 @@ class LiveController {
 	def signalPathService
 	
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))},
-		except:['index','list','show','getJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent']]
+		except:['index','list','show','getJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
 	
 	@Secured("ROLE_USER")
 	def index() {

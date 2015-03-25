@@ -10,6 +10,7 @@ class RunningSignalPath {
 	
 	String runner
 	String server
+	String requestUrl
 
 	Date dateCreated
 	Date lastUpdated
@@ -23,6 +24,7 @@ class RunningSignalPath {
 	static constraints = {
 		runner(nullable:true)
 		server(nullable:true)
+		requestUrl(nullable:true)
 		shared(nullable:true)
 		state(nullable:true)
 		adhoc(nullable:true)

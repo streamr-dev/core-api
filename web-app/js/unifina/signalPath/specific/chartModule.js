@@ -22,8 +22,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
 			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
 			stop: function(event,ui) {
-				if (chart)
-					chart.resize(ui.size.width, ui.size.height);
+				if (prot.chart)
+					prot.chart.resize(ui.size.width, ui.size.height);
 			}
 		});
 	}
@@ -56,10 +56,10 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	function addInput(data) {
 		var input = super_addInput(data, SignalPath.ChartInput)
 		input.div.on('yAxisChanged', function(event, name, yx) {
-			if (chart) {
+			if (prot.chart) {
 				var seriesIndex = pub.getInput(name).seriesIndex
 				if (seriesIndex !== null) {
-					chart.setYAxis(seriesIndex, yx)
+					prot.chart.setYAxis(seriesIndex, yx)
 				}
 			}
 		})
@@ -67,27 +67,27 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	prot.addInput = addInput
 	
 	function getChart() {
-		return chart;
+		return prot.chart;
 	}
 	prot.getChart = getChart;
 
 	function initChart() {
 		prot.body.find(".ioTable").css("width","0px");
-		chart = new StreamrChart(prot.body, SignalPath.defaultChartOptions)
-		chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
-		$(chart).on('destroyed', function() {
+		prot.chart = new StreamrChart(prot.body, SignalPath.defaultChartOptions)
+		prot.chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
+		$(prot.chart).on('destroyed', function() {
 			prot.body.find("div.csvDownload").remove()
 		})
 	}
 	
 	function destroyChart() {
-		if (chart) {
-			chart.destroy()
+		if (prot.chart) {
+			prot.chart.destroy()
 		}
 	}
 	
 	pub.receiveResponse = function(d) {
-		chart.handleMessage(d)
+		prot.chart.handleMessage(d)
 		// Show csv download link
 		if (d.type==="csv") {
 			var div = $("<span class='csvDownload'></span>");
@@ -142,7 +142,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			connectedInputs[i].seriesIndex = i
 		}
 		SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
-			chart.handleMessage(response.initRequest)
+			prot.chart.handleMessage(response.initRequest)
 		})
 	})
 	
@@ -150,8 +150,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	 * On SignalPath stopped, check that all series are shown properly in relation to chart yaxis range
 	 */
 	$(SignalPath).on("stopped", function() {
-		if (chart && chart.getSeriesMetaData().length > 1) {
-			var seriesMeta = chart.getSeriesMetaData()
+		if (prot.chart && prot.chart.getSeriesMetaData().length > 1) {
+			var seriesMeta = prot.chart.getSeriesMetaData()
 			// Find connected inputs
 			var connectedInputs = pub.getInputs().filter(function(input) {
 				return input.isConnected()
@@ -160,16 +160,18 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			// If series range is less than 10% of axis range, show a tip
 			var popover = true
 			for (var i=0; i<seriesMeta.length; i++) {
-				var yAxisRange = seriesMeta[i].impl.yAxis.getExtremes().max - seriesMeta[i].impl.yAxis.getExtremes().min
-				var seriesRange = seriesMeta[i].max - seriesMeta[i].min
-				
-				if (seriesRange/yAxisRange < 0.1) {
-					var $input = connectedInputs[i] 
-					$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name, popover)
+				if (seriesMeta[i].impl) {
+					var yAxisRange = seriesMeta[i].impl.yAxis.getExtremes().max - seriesMeta[i].impl.yAxis.getExtremes().min
+					var seriesRange = seriesMeta[i].max - seriesMeta[i].min
 					
-					// Show only one popover
-					if (popover)
-						popover = false
+					if (seriesRange/yAxisRange < 0.1) {
+						var $input = connectedInputs[i] 
+						$input.div.data("spObject").showYAxisWarning(seriesMeta[i].impl.name, popover)
+						
+						// Show only one popover
+						if (popover)
+							popover = false
+					}
 				}
 			}
 		}

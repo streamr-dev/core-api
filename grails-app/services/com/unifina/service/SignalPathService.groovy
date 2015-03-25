@@ -269,7 +269,9 @@ class SignalPathService {
 		// as the host to get the address of this individual server
 		String link = grailsLinkGenerator.link(controller:'live', action:'request', absolute:true)
 		URL url = new URL(link)
-		rsp.server = url.protocol+"://"+NetworkInterfaceUtils.getIPAddress()?.toString().replace("/","")+":"+(url.port>0 ? url.port : url.defaultPort)
+		
+		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes).getHostAddress()
+		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+"/"+grailsLinkGenerator.link(controller:"live", action:"request")
 		
 		rsp.save()
 	}
@@ -282,7 +284,7 @@ class SignalPathService {
 	}
 	
 	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
-		def req = Unirest.post(rsp.server + grailsLinkGenerator.link(controller:"live", action:"request"))
+		def req = Unirest.post(rsp.requestUrl)
 		def body = req.field("local", "true")
 		body.field("msg", (msg as JSON).toString())
 
@@ -311,7 +313,7 @@ class SignalPathService {
 			try {
 				return sendRemoteRequest(msg, rsp, hash, user)
 			} catch (Exception e) {
-				log.error("Unable to contact remote RunningSignalPath id $rsp.id on server $rsp.server", e)
+				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl", e)
 				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
 			}
 		}

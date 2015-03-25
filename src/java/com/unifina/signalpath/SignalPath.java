@@ -87,6 +87,8 @@ public class SignalPath extends ModuleWithUI {
 		Map<String,Output> outputs = new HashMap<>();
 		
 		List<Map> modulesJSON = (List<Map>) iData.get("modules");
+		if (modulesJSON==null)
+			modulesJSON = new ArrayList<>(0);
 		
 		HashMap<Long,Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON))

@@ -25,15 +25,14 @@ class UnifinaSecurityService {
 	 * @param user
 	 * @return
 	 */
-	private boolean checkUser(instance, SecUser user=null) {
+	private boolean checkUser(instance, SecUser user=null, boolean logIfDenied=true) {
 		if (user==null)
 			user = springSecurityService.getCurrentUser()
 		
 		if (instance.hasProperty("user") && instance.user?.id!=null) {
 			boolean result = instance.user.id == user?.id
-			if (!result) {
+			if (!result && logIfDenied) {
 				log.warn("User ${user?.id} tried to access $instance owned by user $instance.user.id!")
-				return false
 			}
 			return result
 		}
@@ -62,7 +61,7 @@ class UnifinaSecurityService {
 	
 	@CompileStatic 
 	boolean canAccess(RunningSignalPath rsp, String apiKey=null) {
-		return rsp.shared || checkUser(rsp) || checkApiKey(rsp, apiKey)
+		return rsp.shared || checkUser(rsp, null, false) || checkApiKey(rsp, apiKey)
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage) {
