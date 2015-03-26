@@ -130,6 +130,10 @@ modules = {
 		dependsOn 'hopscotch, streamr'
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
+	'dashboard-editor' {
+		dependsOn 'backbone'
+		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
+	}
 	'stream-fields' {
 		dependsOn 'jquery, backbone'
 		resource url:[dir:'js/unifina/stream-fields', file:'stream-fields.js', plugin: 'unifina-core']

@@ -1,5 +1,6 @@
 package com.unifina.controller.dashboard
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 import java.security.AccessControlException
@@ -61,7 +62,7 @@ class DashboardController {
 	}
 	
 	def edit() {
-		Dashboard dashboard = Dashboard.get(params.id)
+		Dashboard dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
 		
 		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
 		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
@@ -71,7 +72,9 @@ class DashboardController {
 			return found!=null
 		}
 
-		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard, serverUrl: grailsApplication.config.streamr.ui.server, dashboard:dashboard]
+		
+		
+		return [runningSignalPathsAsJson:(runningSignalPaths as JSON), dashboard:dashboard, dashboardAsJson:(dashboard as JSON), dashboardItemsAsJson:(dashboard.items as JSON), serverUrl: grailsApplication.config.streamr.ui.server]
 	}
 	
 	def show() {
