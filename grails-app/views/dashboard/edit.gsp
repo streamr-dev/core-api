@@ -13,14 +13,13 @@
 			$(document).ready(function() {
 				var runningSignalPaths = ${raw(runningSignalPathsAsJson ?: "[]")}
 				var dashboard = ${raw(dashboardAsJson ?: "{}")}
-				dashboard.items = ${raw(dashboardItemsAsJson ?: "[]")}
 
 				//console.log(runningSignalPaths)
 				//console.log(dashboard)
-				console.log(dashboard.items)
+				//console.log(dashboard.items)
 
 				var DIList = new DashboardItemList(dashboard.items)
-				var sidebar = new SidebarView(runningSignalPaths, DIList)
+				var sidebar = new SidebarView(dashboard.name, runningSignalPaths, DIList)
 				var dashboard = new DashboardView(DIList)
 
 				// Bind slimScroll to main menu
@@ -41,23 +40,16 @@
 	</div>
 
 	<div id="content-wrapper">
+		<streamr-client server="${serverUrl}"></streamr-client>
 		<div id="dashboard-view"></div>
-	</div>
+
+		</div>
 	<div id="main-menu-bg"></div>
 
-	<script id="rsp-template" type="text/template">
-		<a><span class="mm-text mmc-dropdown-delay animated fadeIn">${'<%= name %>'}</span></a>
-	</script>
+	<g:render template="dashboard-template" />
 
-	<script id="uichannel-template" type="text/template">
-		<input class="toggle" type="checkbox" ${"<%= checked ? 'checked' : '' %>"}>
-		<a>${'<%= id %>'}</a>
-	</script>
 
-	<script id="di-template" type="text/template">
-		<span>${'<%= title %>'}</span>
-		<span>${'<%= uiChannel.id %>'}</span>
-	</script>
+	
 
 </body>
 </html>

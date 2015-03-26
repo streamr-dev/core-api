@@ -63,7 +63,14 @@ class DashboardController {
 	
 	def edit() {
 		Dashboard dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
-		
+		Map dashboardMap = [
+			id: dashboard.id,
+			name: dashboard.name,
+			items: dashboard.items.collect {item->
+				[title: item.title, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
+			}
+		]
+
 		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
 		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
 			UiChannel found = rsp.uiChannels.find {UiChannel ui->
@@ -71,10 +78,17 @@ class DashboardController {
 			}
 			return found!=null
 		}
+		List runningSignalPathMaps = runningSignalPaths.collect {rsp->
+			[
+				id: rsp.id,
+				name: rsp.name,
+				uiChannels: rsp.uiChannels.findAll {it.module!=null}.collect {uiChannel->
+					[id: uiChannel.id, name: uiChannel.name, module: [id:uiChannel.module.id]]
+				}
+			]
+		}
 
-		
-		
-		return [runningSignalPathsAsJson:(runningSignalPaths as JSON), dashboard:dashboard, dashboardAsJson:(dashboard as JSON), dashboardItemsAsJson:(dashboard.items as JSON), serverUrl: grailsApplication.config.streamr.ui.server]
+		return [runningSignalPathsAsJson:(runningSignalPathMaps as JSON), dashboard:dashboard, dashboardAsJson:(dashboardMap as JSON), serverUrl: grailsApplication.config.streamr.ui.server]
 	}
 	
 	def show() {
