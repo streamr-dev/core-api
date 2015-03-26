@@ -23,6 +23,7 @@
 			connectionOptions: {
 				server: "${grailsApplication.config.streamr.ui.server}"
 			},
+			resendOptions: { resend_all: false },
 			errorHandler: function(msg) {
 				console.error(msg)
 			}

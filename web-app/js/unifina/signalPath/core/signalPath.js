@@ -50,6 +50,7 @@ var SignalPath = (function () {
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
 		requestUrl: Streamr.projectWebroot+"live/request",
 		connectionOptions: {},
+		resendOptions: {resend_all:true},
 		zoom: 1
     };
     
@@ -522,7 +523,7 @@ var SignalPath = (function () {
 			}
 			// Other channels handled by this SignalPath
 			else {
-				connection.subscribe(uiChannel.id, processMessage, {resend_all:true})
+				connection.subscribe(uiChannel.id, processMessage, options.resendOptions)
 			}
 		})
 		
