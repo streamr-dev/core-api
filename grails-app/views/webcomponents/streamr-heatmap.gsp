@@ -13,7 +13,11 @@
 	</template>
 	
 	<script>
-		Polymer('streamr-heatmap',{
+		Polymer('streamr-heatmap', {
+			publish: {
+				// hint that center is an array
+				center: []
+			},
 			ready: function() {
 				var _this = this
 
@@ -22,14 +26,14 @@
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
 
-					var map = new StreamrHeatMap(_this.$.container, {
+					_this.map = new StreamrHeatMap(_this.$.container, {
 						lifeTime: this.lifeTime,
 						fadeInTime: this.fadeInTime,
 						fadeOutTime: this.fadeOutTime,
 						min: this.min,
 						max: this.max,
 						radius: this.radius,
-						center: this.center,
+						center: (this.center!=null && this.center.length===2 ? this.center : undefined),
 						zoom: this.zoom,
 						minZoom: this.minZoom,
 						maxZoom: this.maxZoom
@@ -37,11 +41,14 @@
 
 					_this.subscribe(
 						function(message) {
-					    	map.handleMessage(message)
+					    	_this.map.handleMessage(message)
 					    },
 					    resendOptions
 					)
 				})
+			},
+			centerChanged: function(oldValue, newValue) {
+				this.map.setCenter(newValue)
 			}
 		});
 	</script>

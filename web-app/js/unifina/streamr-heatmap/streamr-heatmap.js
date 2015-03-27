@@ -70,6 +70,10 @@
 		});
 	}
 
+	StreamrHeatMap.prototype.setCenter = function(coords) {
+		this.map.setView(new L.LatLng(coords[0],coords[1]))
+	}
+
 	StreamrHeatMap.prototype.requestUpdate = function() {
 		var _this = this
 		var draw = function() {
