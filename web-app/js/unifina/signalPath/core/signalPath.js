@@ -82,6 +82,7 @@ var SignalPath = (function () {
 		
 		canvas = $("#"+options.canvas);
 		jsPlumb.Defaults.Container = canvas;
+		canvas.data("spObject",pub)
 		
 		jsPlumb.bind('ready', function() {
 			pub.newSignalPath();
@@ -92,9 +93,13 @@ var SignalPath = (function () {
 	    	$(pub).trigger('stopped')
 	    })
 		pub.setZoom(opts.zoom)
+		pub.jsPlumb = jsPlumb
 	};
 	pub.unload = function() {
-		jsPlumb.unload();
+		jsPlumb.reset();
+		if (connection && connection.isConnected()) {
+			connection.disconnect()
+		}
 	};
 	pub.sendRequest = function(hash,msg,callback) {
 		if (runData) {
@@ -287,6 +292,14 @@ var SignalPath = (function () {
 	}
 	pub.createModuleFromJSON = createModuleFromJSON;
 	
+	function redraw() {
+		pub.getModules().forEach(function(module) {
+			module.redraw()
+		})
+		jsPlumb.repaintEverything()
+	}
+	pub.redraw = redraw
+	
 	function getModules() {
 		var result = []
 		Object.keys(modules).forEach(function(key) {
@@ -457,7 +470,7 @@ var SignalPath = (function () {
 		if (data.workspace!=null && data.workspace!="normal")
 			setWorkspace(data.workspace);
 		
-		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext || {}, data.runData]);
+		$(pub).add(canvas).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext || {}, data.runData]);
 	}
 	
 	function run(additionalContext, subscribeOnSuccess, callback) {
