@@ -1,12 +1,21 @@
-.btn-sign-up {
-	display: none;
+.login-page {
+	.btn-sign-up {
+		display: none;
+	}
+	
+	.btn-sign-in {
+		display: none;
+	}
 }
-
-.show-sign-up {
+	
+.login-page.show-sign-up {
 	.btn-sign-up {
 		display: inline-block;
 	}
-	.btn-sign-in {
-		display: none;
+}
+
+.login-page.show-sign-in {
+	.btn-sign-up {
+		display: inline-block;
 	}
 }

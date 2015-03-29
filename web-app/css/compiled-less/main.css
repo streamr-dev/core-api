@@ -16504,14 +16504,17 @@ body.build-page #content-wrapper {
 #main-menu .twitter-typeahead {
   width: 100%;
 }
-.btn-sign-up {
+.login-page .btn-sign-up {
   display: none;
 }
-.show-sign-up .btn-sign-up {
+.login-page .btn-sign-in {
+  display: none;
+}
+.login-page.show-sign-up .btn-sign-up {
   display: inline-block;
 }
-.show-sign-up .btn-sign-in {
-  display: none;
+.login-page.show-sign-in .btn-sign-up {
+  display: inline-block;
 }
 .remote-tabs-content {
   outline: none;
