@@ -290,16 +290,16 @@ class KafkaService {
 				schema = new String[headers.length]
 			}
 			else {
-				String[] fields = line.split(separator)
+				String[] fields = line.split(separator, -1)
 				if (fields.length < headers.length) {
-					throw new RuntimeException("Unexpected number of columns on row "+(lineCount+1))
+					throw new RuntimeException("Unexpected number of columns on row "+lineCount)
 				}
 				
 				Date date
 				try {
 					date = df.parse(fields[0])
 				} catch (Exception e) {
-					throw new RuntimeException("Failed to parse timestamp on line "+(lineCount+1))
+					throw new RuntimeException("Failed to parse timestamp on line "+lineCount)
 				}
 				
 				// Check that we have a writer for the current day
@@ -331,7 +331,7 @@ class KafkaService {
 						} catch (Exception e) {}
 						
 						// Try to parse as boolean
-						if (schema[i] == null) {
+						if (schema[i] == null && (fields[i].equalsIgnoreCase("true") || fields[i].equalsIgnoreCase("false"))) {
 							try {
 								Boolean.parseBoolean(fields[i])
 								schema[i] = "boolean"
