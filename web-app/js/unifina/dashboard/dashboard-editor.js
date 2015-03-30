@@ -139,7 +139,7 @@ var SidebarView = Backbone.View.extend({
 			_.each(this.collection.models, function(runningsignalpath){
 				_.each(runningsignalpath.get("uiChannels"), function(uiChannel) {
 					if(uiChannel.id == uiChannelModel.get("id")) {
-						this.DIList.push({title: uiChannelModel.get("name"), uiChannel: uiChannelModel})
+						this.DIList.push({title: uiChannelModel.get("name"), uiChannel: uiChannel})
 					}
 				},this)
 			},this)
@@ -156,7 +156,12 @@ var SidebarView = Backbone.View.extend({
 var DashboardItem = Backbone.Model.extend({
 	defaults: {
 		title: "",
-		uiChannel: {id: ""}
+		uiChannel: {id: "", name: "", module: {id: ""}},
+		type: ""
+	},
+
+	initialize: function() {
+		this.set("type", this.get("uiChannel").module.id) 
 	}
 })
 
@@ -167,10 +172,12 @@ var DashboardItemList = Backbone.Collection.extend({
 var DashboardItemView = Backbone.View.extend({
 	tagName: "div",
 	className: "dashboarditem",	
-	template: _.template($("#streamr-label-template").html()),
+	template: _.template($("#streamr-widget-template").html()),
+	labelTemplate: _.template($("#streamr-label-template").html()),
+	chartTemplate: _.template($("#streamr-chart-template").html()),
+	heatmapTemplate: _.template($("#streamr-heatmap-template").html()),
 
 	events: {
-		// 'click .destroy': 'destroy',
 	},
 
 	initialize: function(){
@@ -180,14 +187,22 @@ var DashboardItemView = Backbone.View.extend({
 
 	render: function() {
 		this.$el.html(this.template(this.model.toJSON()))
-		console.log("New dashboardItem created!")
+		if(this.model.get("type") == 67) {
+			this.$el.addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
+			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
+		}
+		else if(this.model.get("type") == 145) {
+			this.$el.addClass("col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered")
+			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
+		}
+		else if(this.model.get("type") == 196) {
+			this.$el.addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
+			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
+		}
+		else {
+			console.log("Module not recognized!")
+		}
 		return this
-	},
-
-	removeView: function() {
-      this.$el.remove(); /* off to unbind the events */
-      this.stopListening();
-      return this;
 	}
 })
 
@@ -197,6 +212,13 @@ var DashboardView = Backbone.View.extend({
 		this.collection = DIList
 
 		this.render()
+
+		// $(this.el).droppable({
+  //           drop: function(ev, ui){
+  //               // get reference to dropped view's model
+  //               var model = $(ui.draggable).data("backbone-view").model;
+  //           },
+  //       });
 
 		this.collection.on("add", function(model){
 			this.$el.append(new DashboardItemView({
@@ -221,6 +243,8 @@ var DashboardView = Backbone.View.extend({
 			model: item
 		})
 		this.$el.append(DIView.render().el)
+        // DIView.$el.draggable();
+        DIView.$el.data("backbone-view", this);
 	},
 })
 

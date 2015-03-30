@@ -4,19 +4,16 @@
 
 		<title><g:message code="dashboard.edit.label" args="[dashboard.name]" /></title>
 
-		<r:require module="dashboard-editor"/>
-		<r:require module="slimscroll"/>
 		<r:require module="webcomponents"/>
+		<r:require module="slimscroll"/>
+		<r:require module="dashboard-editor"/>
+
 		<link rel="import" href="${createLink(uri:"/webcomponents/index.html", plugin:"unifina-core")}">
 
 		<r:script>
 			$(document).ready(function() {
 				var runningSignalPaths = ${raw(runningSignalPathsAsJson ?: "[]")}
 				var dashboard = ${raw(dashboardAsJson ?: "{}")}
-
-				//console.log(runningSignalPaths)
-				//console.log(dashboard)
-				//console.log(dashboard.items)
 
 				var DIList = new DashboardItemList(dashboard.items)
 				var sidebar = new SidebarView(dashboard.name, runningSignalPaths, DIList)
@@ -26,6 +23,11 @@
 			    $('#main-menu-inner').slimScroll({
 			      height: '100%'
 			    })
+
+			    DIList.on("remove", function (model) {
+					var client = document.getElementById("client")
+					client.streamrClient.unsubscribe([model.get("uiChannel").id])
+				})
 			})
 		</r:script>
 </head>
@@ -40,7 +42,7 @@
 	</div>
 
 	<div id="content-wrapper">
-		<streamr-client server="${serverUrl}"></streamr-client>
+		<streamr-client id="client" server="${serverUrl}"></streamr-client>
 		<div id="dashboard-view"></div>
 
 		</div>
