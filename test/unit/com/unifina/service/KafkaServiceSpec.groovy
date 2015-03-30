@@ -31,7 +31,7 @@ class KafkaServiceSpec extends Specification {
 		def feedFileService = Mock(FeedFileService)
 		
 		when:
-		List fields = service.createFeedFilesFromCsv(fis, stream)
+		List fields = service.createFeedFilesFromCsv(fis, stream, feedFileService)
 		
 		then:
 		5 * feedFileService.createFeedFile(stream, _, _, _, false)
