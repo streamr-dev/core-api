@@ -15,12 +15,24 @@ class UnifinaSecurityService {
 	def springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 	
-	private boolean checkUser(instance) {
+	/**
+	 * Checks if the given user has access to the given instance.
+	 * If no user is provided, the current logged in user (as returned by springSecurityService.currentUser) is used.
+	 * 
+	 * Access to instance is granted if the instance has a field called "user",
+	 * and the user id it points to equals the user id being checked against.
+	 * @param instance
+	 * @param user
+	 * @return
+	 */
+	private boolean checkUser(instance, SecUser user=null, boolean logIfDenied=true) {
+		if (user==null)
+			user = springSecurityService.getCurrentUser()
+		
 		if (instance.hasProperty("user") && instance.user?.id!=null) {
-			boolean result = instance.user.id == springSecurityService.getCurrentUser()?.id
-			if (!result) {
-				log.warn("User ${springSecurityService.currentUser?.id} tried to access $instance owned by user $instance.user.id!")
-				return false
+			boolean result = instance.user.id == user?.id
+			if (!result && logIfDenied) {
+				log.warn("User ${user?.id} tried to access $instance owned by user $instance.user.id!")
 			}
 			return result
 		}
@@ -48,24 +60,26 @@ class UnifinaSecurityService {
 	}
 	
 	@CompileStatic 
-	boolean canAccess(RunningSignalPath rsp) {
-		return rsp.shared || checkUser(rsp)
+	boolean canAccess(RunningSignalPath rsp, String apiKey=null) {
+		return rsp.shared || checkUser(rsp, null, false) || checkApiKey(rsp, apiKey)
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage) {
 		ModulePackageUser mpu = ModulePackageUser.findByUserAndModulePackage(springSecurityService.currentUser, modulePackage)
 		return mpu != null
 	}
-
-	SecUser checkDataToken(String username, String dataToken) {
-		SecUser user = SecUser.findByUsernameAndDataToken(username,dataToken)
-		if (!user)
-			throw new RuntimeException("Invalid username or token")
-		else return user
-	}
-
-	String createDataToken() {
-		return UUID.randomUUID();
+	
+	/**
+	 * Checks if the given API key should grant access to the given protected instance
+	 * @param username
+	 * @param dataToken
+	 * @return
+	 */
+	boolean checkApiKey(Object instance, String apiKey) {
+		SecUser user = SecUser.findByApiKey(apiKey)
+		if (!apiKey)
+			return false
+		else return checkUser(instance, user)
 	}
 
 }

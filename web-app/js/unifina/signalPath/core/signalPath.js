@@ -26,7 +26,7 @@
  * runUrl: url where to POST the run command
  * abortUrl: url where to POST the abort command
  * getModuleUrl: url for module JSON
- * uiActionUrl: url for POSTing module UI runtime changes
+ * requestUrl: url for POSTing runtime requests
  * connectionOptions: option object passed to StreamrClient
  */
 
@@ -48,8 +48,10 @@ var SignalPath = (function () {
 		abortUrl: undefined,
 		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-		uiActionUrl: Streamr.projectWebroot+"live/uiAction",
-		connectionOptions: {}
+		requestUrl: Streamr.projectWebroot+"live/request",
+		connectionOptions: {},
+		resendOptions: {resend_all:true},
+		zoom: 1
     };
     
     var connection;
@@ -80,6 +82,7 @@ var SignalPath = (function () {
 		
 		canvas = $("#"+options.canvas);
 		jsPlumb.Defaults.Container = canvas;
+		canvas.data("spObject",pub)
 		
 		jsPlumb.bind('ready', function() {
 			pub.newSignalPath();
@@ -89,12 +92,19 @@ var SignalPath = (function () {
 	    connection.bind('disconnected', function() {
 	    	$(pub).trigger('stopped')
 	    })
+		pub.setZoom(opts.zoom)
+		pub.jsPlumb = jsPlumb
 	};
 	pub.unload = function() {
-		jsPlumb.unload();
+		jsPlumb.reset();
+		if (connection && connection.isConnected()) {
+			connection.disconnect()
+		}
 	};
-	pub.sendUIAction = function(hash,msg,callback) {
+	pub.sendRequest = function(hash,msg,callback) {
 		if (runData) {
+			
+			// Include UI channel if exists
 			var channel
 			for (var i=0;i<runData.uiChannels.length;i++) {
 				// using == on purpose
@@ -104,25 +114,25 @@ var SignalPath = (function () {
 				}
 			}
 
-			if (channel) {
-				$.ajax({
-					type: 'POST',
-					url: options.uiActionUrl,
-					data: {
-						channel: channel,
-						msg: JSON.stringify(msg)
-					},
-					success: function(data) {
-						if (!data.success) {
-							handleError(data.error)
-						}
-						else if (callback)
-							callback(data.response)
-					},
-					dataType: 'json'
-				});
-				return true;
-			}
+			$.ajax({
+				type: 'POST',
+				url: options.requestUrl,
+				data: {
+					id: runData.id,
+					hash: hash,
+					channel: channel,
+					msg: JSON.stringify(msg)
+				},
+				success: function(data) {
+					if (!data.success) {
+						handleError(data.error || data.response.error)
+					}
+					else if (callback)
+						callback(data.response)
+				},
+				dataType: 'json'
+			});
+			return true;
 		}
 		
 		return false;
@@ -281,6 +291,14 @@ var SignalPath = (function () {
 		return mod;
 	}
 	pub.createModuleFromJSON = createModuleFromJSON;
+	
+	function redraw() {
+		pub.getModules().forEach(function(module) {
+			module.redraw()
+		})
+		jsPlumb.repaintEverything()
+	}
+	pub.redraw = redraw
 	
 	function getModules() {
 		var result = []
@@ -447,12 +465,12 @@ var SignalPath = (function () {
 		setName(saveData.name)
 		
 		// TODO: remove backwards compatibility
-		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext, data.runData);
+		if (callback) callback(saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext || {}, data.runData);
 		
 		if (data.workspace!=null && data.workspace!="normal")
 			setWorkspace(data.workspace);
 		
-		$(pub).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext, data.runData]);
+		$(pub).add(canvas).trigger('loaded', [saveData, data.signalPathData ? data.signalPathData : data, data.signalPathContext || {}, data.runData]);
 	}
 	
 	function run(additionalContext, subscribeOnSuccess, callback) {
@@ -518,7 +536,7 @@ var SignalPath = (function () {
 			}
 			// Other channels handled by this SignalPath
 			else {
-				connection.subscribe(uiChannel.id, processMessage, {resend_all:true})
+				connection.subscribe(uiChannel.id, processMessage, options.resendOptions)
 			}
 		})
 		
@@ -614,6 +632,21 @@ var SignalPath = (function () {
 	}
 	pub.getWorkspace = getWorkspace;
 	
+	function getZoom() {
+		return canvas.css("zoom") != null ? canvas.css("zoom") : 1 
+	}
+	pub.getZoom = getZoom
+
+	function setZoom(zoom, animate) {
+		if (animate===undefined)
+			animate = true
+		
+		if (animate)
+			canvas.animate({ zoom: zoom }, 300);
+		else (canvas.css("zoom", zoom))
+	}
+	pub.setZoom = setZoom
+
 	return pub; 
 }());
 

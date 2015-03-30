@@ -16463,6 +16463,9 @@ body.embedded #main-navbar {
 body.embedded #content-wrapper {
   padding: 0;
 }
+body.embedded #content-wrapper > :not(.embeddable) {
+  display: none;
+}
 .form-group-period .input-group-addon {
   width: 60px;
 }
@@ -16501,14 +16504,17 @@ body.build-page #content-wrapper {
 #main-menu .twitter-typeahead {
   width: 100%;
 }
-.btn-sign-up {
+.login-page .btn-sign-up {
   display: none;
 }
-.show-sign-up .btn-sign-up {
+.login-page .btn-sign-in {
+  display: none;
+}
+.login-page.show-sign-up .btn-sign-up {
   display: inline-block;
 }
-.show-sign-up .btn-sign-in {
-  display: none;
+.login-page.show-sign-in .btn-sign-up {
+  display: inline-block;
 }
 .dashboard-edit #main-menu .navigation {
   padding-top: 0;

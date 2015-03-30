@@ -14,6 +14,6 @@
 
 <script>
 $(document).ready(function() {
-	SignalPathBrowser.contentAppender($("#${browserId}"), '${contentUrl}')
+	SignalPathBrowser.contentAppender($("#${browserId}"), '${raw(contentUrl)}')
 })
 </script>

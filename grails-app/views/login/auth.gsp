@@ -10,7 +10,7 @@
 		</r:script>
 	</head>
 
-	<body class="show-sign-up">
+	<body class="login-page show-sign-up">
 		<g:render template="/login/form" plugin="unifina-core"/>
 	</body>
 </html>

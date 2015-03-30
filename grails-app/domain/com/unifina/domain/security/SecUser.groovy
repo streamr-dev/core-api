@@ -13,7 +13,9 @@ class SecUser {
 	boolean accountLocked
 	boolean passwordExpired
 
+	@Deprecated
 	String dataToken
+	String apiKey
 	
 	// Added by Unifina
 	String name
@@ -23,10 +25,12 @@ class SecUser {
 		name blank: false
 		username blank: false, unique: true
 		password blank: false
+		apiKey nullable:true
 	}
 
 	static mapping = {
 		password column: '`password`'
+		apiKey index: 'apiKey_index'
 	}
 
 	Set<SecRole> getAuthorities() {

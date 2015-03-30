@@ -3,12 +3,11 @@ package com.unifina.controller.data
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import org.hibernate.criterion.CriteriaSpecification
-
 import com.unifina.domain.data.Feed
+import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Module
-import com.unifina.utils.IdGenerator;
+import com.unifina.utils.IdGenerator
 
 @Secured(["ROLE_USER"])
 class StreamController {
@@ -18,6 +17,9 @@ class StreamController {
 	static defaultAction = "list"
 	
 	def unifinaSecurityService
+	def feedFileService
+	def kafkaService
+	
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Stream.get(params.long("id")))},
 		except:['list','search','create']]
 	
@@ -63,9 +65,9 @@ class StreamController {
 				[stream:stream]
 			}
 			else {
-				flash.message = "Your stream has been created and you can already start pushing events to it using the API keys. To use your stream on the Canvas, you need to configure the fields in the stream. Use the <b>auto-detect</b> feature to do this in one click."
+				flash.message = "Your stream has been created! You can start pushing realtime messages to the API or upload a message history from a csv file."
 				stream.save(flush:true, failOnError:true)
-				redirect(action:"edit", id:stream.id)
+				redirect(action:"show", id:stream.id)
 			}
 		}
 	}
@@ -121,4 +123,27 @@ class StreamController {
 		render streams as JSON
 	}
 
+	
+	def files() {
+		// Access checked by beforeInspector
+		Stream stream = Stream.get(params.id)
+		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
+		return [feedFiles: feedFiles]
+	}
+	
+	def upload() {
+		// Access checked by beforeInspector
+		Stream stream = Stream.get(params.id)
+		def file = request.getFile("file")
+		List fields = kafkaService.createFeedFilesFromCsv(file.inputStream, stream)
+		
+		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		if (!config.fields || config.fields.isEmpty()) {
+			config.fields = fields
+			stream.streamConfig = (config as JSON)
+		}
+		
+		render ([success:true] as JSON)
+	}
+	
 }

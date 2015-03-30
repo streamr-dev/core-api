@@ -1,16 +1,20 @@
-<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
+<link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
 <r:require module="streamr-client"/>
 
 <r:layoutResources disposition="head"/>
 <r:layoutResources disposition="defer"/>
 
-<polymer-element name="streamr-client" attributes="server">
+<polymer-element name="streamr-client" attributes="server autoconnect">
 	<script>
 	(function(){
 		var streamrClient = new StreamrClient()
 
 		Polymer('streamr-client', {
+			publish: {
+				server: undefined,
+				autoconnect: true,
+			},
 			// This function is executed multiple times, once for each element!
 			created: function() {
 				this.streamrClient = streamrClient
@@ -19,7 +23,8 @@
 			ready: function() {
 				if (this.server) {
 					streamrClient.options.server = this.server
-					streamrClient.connect()
+					if (this.autoconnect)
+						streamrClient.connect()
 				}
 			},
 			getClient: function() {

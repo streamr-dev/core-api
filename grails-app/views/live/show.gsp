@@ -22,6 +22,10 @@
 			zoom: ${params.zoom ?: 1},
 			connectionOptions: {
 				server: "${grailsApplication.config.streamr.ui.server}"
+			},
+			resendOptions: { resend_all:false, resend_last: 0 },
+			errorHandler: function(msg) {
+				console.error(msg)
 			}
 		});
 		
@@ -29,6 +33,16 @@
 			url: '${createLink(action:"getJson", id:rsp.id)}'
 		}, function(saveData, signalPathData, signalPathContext, runData) {
 			SignalPath.subscribe(runData, true);
+			
+			<g:if test="${params.embedded}">
+			// Terrible workaround for jsPlumb rendering problems within iframe on IE
+			var count = 0
+			var interval = setInterval(function() {
+				SignalPath.jsPlumb.repaintEverything()
+				if (count++ === 10)
+					clearInterval(interval)
+			}, 2000)
+			</g:if>
 		});
 	});
 	$(document).unload(function () {

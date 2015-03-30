@@ -10,6 +10,8 @@ import java.util.concurrent.FutureTask;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
+import com.unifina.signalpath.RuntimeRequest;
+import com.unifina.signalpath.RuntimeResponse;
 import com.unifina.signalpath.TimeSeriesChartInput;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.utils.MapTraversal;
@@ -238,32 +240,14 @@ public class TimeSeriesChart extends Chart {
 	}
 	
 	@Override
-	public Future<Map<String, Object>> receiveUIMessage(Map message) {
-		if (message.get("type").equals("initRequest")) {
-			/**
-			 * The TimeSeriesChart be queried for InitMessage
-			 */
-			final Map<String,Object> response = new HashMap<>();
-			FutureTask<Map<String,Object>> future = new FutureTask<>(new Runnable() {
-				@Override
-				public void run() {
-					response.put("initRequest", getInitMessage());
-				}
-			}, response);
-			message.put("future", future);
-			super.receiveUIMessage(message);
-			return future;
+	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
+		if (request.getType().equals("initRequest")) {
+			// We need to support unauthenticated initRequests for public views, so no authentication check
+			
+			response.put("initRequest", getInitMessage());
+			response.setSuccess(true);
 		}
-		else return super.receiveUIMessage(message);
-	}
-	
-	@Override
-	protected void handleUIMessage(Map message) {
-		if (message.get("type").equals("initRequest")) {
-			FutureTask<Map<String,Object>> future = (FutureTask<Map<String,Object>>) message.get("future");
-			future.run();
-		}
-		else super.handleUIMessage(message);
+		else super.handleRequest(request, response);
 	}
 	
 }

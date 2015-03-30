@@ -2,7 +2,7 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="stream.show.label" args="[stream.name]"/></title>
-        
+        <r:require module="dropzone"/>
     </head>
     <body>
     	<ui:breadcrumb>

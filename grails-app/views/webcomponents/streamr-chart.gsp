@@ -1,4 +1,4 @@
-<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
+<link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
 <r:require module="highstock"/>
 <r:require module="streamr-chart"/>
@@ -28,7 +28,7 @@
 						showHideButtons: _this.showHideButtons	// default: true
 					})
 
-					_this.sendUIAction({type:'initRequest'}, function(response) {
+					_this.sendRequest({type:'initRequest'}, function(response) {
 						chart.handleMessage(response.initRequest)
 					})
 

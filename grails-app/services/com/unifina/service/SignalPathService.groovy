@@ -2,13 +2,20 @@ package com.unifina.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import groovy.transform.CompileStatic
 
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.json.JSONObject
 
+import com.mashape.unirest.http.HttpResponse
+import com.mashape.unirest.http.Unirest
 import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.RealtimeDataSource
@@ -16,10 +23,10 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
-import com.unifina.push.IHasPushChannel
 import com.unifina.push.KafkaPushChannel
 import com.unifina.push.PushChannelEventListener
-import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.signalpath.RuntimeRequest
+import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
@@ -33,6 +40,7 @@ class SignalPathService {
 	
 	def servletContext
 	def grailsApplication
+	def grailsLinkGenerator
 	def kafkaService
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
@@ -256,7 +264,15 @@ class SignalPathService {
 		
 		rsp.runner = runnerId
 		rsp.state = "running"
-		rsp.server = NetworkInterfaceUtils.getIPAddress()?.toString()
+		
+		// Use the link generator to get the protocol and port, but use network IP address
+		// as the host to get the address of this individual server
+		String link = grailsLinkGenerator.link(controller:'live', action:'request', absolute:true)
+		URL url = new URL(link)
+		
+		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes).getHostAddress()
+		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(controller:"live", action:"request")
+		
 		rsp.save()
 	}
 	
@@ -265,6 +281,74 @@ class SignalPathService {
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
 		}
+	}
+	
+	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
+		def req = Unirest.post(rsp.requestUrl)
+		def body = req.field("local", "true")
+		body.field("msg", (msg as JSON).toString())
+
+		body.field("id", rsp.id.toString())
+		
+		if (hash)
+			body.field("hash", hash.toString())
+			
+		if (user)
+			body.field("auth", user.apiKey)
+
+		HttpResponse<String> response = body.asString()
+		Map map = (JSONObject) JSON.parse(response.getBody())
+		return new RuntimeResponse(map)
+	}
+	
+	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, def servletContext, boolean localOnly = false) {
+		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
+		
+		// Give an error if the runner was not found locally although it should have been
+		if (localOnly && !spr) {
+			return new RuntimeResponse([success:false, error: "Canvas not found!"])
+		}
+		// May be a remote runner, check server and send a message
+		else if (!localOnly && !spr) {
+			try {
+				return sendRemoteRequest(msg, rsp, hash, user)
+			} catch (Exception e) {
+				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl", e)
+				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
+			}
+		}
+		// If runner found
+		else {
+			SignalPath sp = spr.signalPaths.find {
+				it.runningSignalPath.id == rsp.id
+			}
+			
+			if (!sp) {
+				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
+			}
+			else {				
+				RuntimeRequest request = new RuntimeRequest(msg)
+				request.setAuthenticated(user != null)
+				
+				// Handle module-specific message
+				Future<RuntimeResponse> future
+				if (hash!=null) {
+					future = sp.getModule(hash).onRequest(request)
+				}
+				// Handle signalpath-specific message
+				else {
+					future = sp.onRequest(request)
+				}
+				
+				try {
+					return future.get(10, TimeUnit.SECONDS)
+				} catch (TimeoutException e) {
+					return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+				}
+				
+			}
+		}
+		
 	}
 	
 	void updateState(String runnerId, String state) {

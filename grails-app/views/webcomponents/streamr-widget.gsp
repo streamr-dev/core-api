@@ -1,4 +1,4 @@
-<link rel="import" href="${r.resource(uri:"/js/polymer/polymer.html")}">
+<link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
 <r:require module="jquery"/>
 
@@ -74,10 +74,10 @@
 					dataType: 'json'
 				});
 			},
-			sendUIAction: function(msg, callback) {
+			sendRequest: function(msg, callback) {
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(controller:'live', action:'uiAction', absolute:'true')}",
+					url: "${createLink(controller:'live', action:'request', absolute:'true')}",
 					data: {
 						channel: this.channel,
 						msg: JSON.stringify(msg)

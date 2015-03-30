@@ -142,6 +142,8 @@ $(document).ready(function() {
 	loadBrowser = new SignalPathBrowser()
 		.tab('Archive', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
+		.tab('Live', '${ createLink(controller: "live", \
+			action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
 		.tab('Examples', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
 		.onSelect(function(url) {

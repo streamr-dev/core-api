@@ -25,16 +25,16 @@ SignalPathBrowser.contentAppender = function contentAppender(browser, url) {
 		else
 			browser.data('requesting', true)
 			
-		var offset = 0
+		var offset
 		var $lastOffsetRow = browser.find(".has-offset:last")
-		if ($lastOffsetRow)
+		if ($lastOffsetRow && $lastOffsetRow.data("offset"))
 			offset = $lastOffsetRow.data("offset")
 
 		browser.append("<div class='loading fa fa-spin fa-spinner'></div>")
 
 		$.get(url, {
 				max: 100,
-				offset: offset+1
+				offset: (offset ? offset+1 : 0)
 			}, function(data) {
 				var tbody = browser.find('table tbody')
 				var oldLength = tbody.find('tr').length

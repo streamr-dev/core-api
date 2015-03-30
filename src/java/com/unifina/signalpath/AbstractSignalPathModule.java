@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
 import java.lang.reflect.Field;
+import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 
 import org.apache.log4j.Logger;
 
@@ -532,38 +535,79 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 	
 	/**
-	 * This method is used to communicate messages from the UI to
-	 * individual modules. The default implementation inserts the message into the global event queue.
+	 * This method is used to serve requests from the UI to individual modules. 
+	 * The default implementation inserts the requests into the global event queue
+	 * as a FeedEvent. It returns a Future that will hold the RuntimeResponse that
+	 * results when the event is processed from the queue.
 	 * 
-	 * This method may optionally return a future for a Map that is to be the result
-	 * of processing the UI message. The default implementation returns null (does not use this feature).
-	 * @param message
+	 * This method is not intended to be subclassed. To implement handling of requests,
+	 * subclass the handleRequest() method.
+	 * 
+	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
-	public Future<Map<String,Object>> receiveUIMessage(Map message) {
+	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
 		// Add event to message queue, don't do it right away 
 		FeedEvent fe = new FeedEvent();
-		fe.content = message;
+		fe.content = request;
 		fe.recipient = this;
 		fe.timestamp = globals.time;
+
+		final RuntimeResponse response = new RuntimeResponse();
+		response.put("request", request);
+		
+		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					handleRequest(request, response);
+				} catch (AccessControlException e) {
+					String error = "Unauthenticated request! Type: "+request.getType()+", Msg: "+e.getMessage();
+					log.error(error);
+					response.setSuccess(false);
+					response.put("error", error);
+				}
+			}
+		}, response);
+		request.setFuture(future);
+		
 		globals.getDataSource().getEventQueue().enqueue(fe);
-		return null;
+		return future;
 	}
 	
 	@Override
 	public void receive(FeedEvent event) {
-		handleUIMessage((Map)event.content);
+		if (event.content instanceof RuntimeRequest) {
+			RuntimeRequest request = (RuntimeRequest) event.content;
+			((FutureTask)request.getFuture()).run();
+		}
+		else log.warn("receive: Unidentified FeedEvent content: "+event.content);
 	}
 	
 	/**
-	 * The UI events are pushed from the event queue to this method. Override this method to handle them.
-	 * @param message
+	 * This method handles RuntimeRequests. Handlers can check if the request is made by an
+	 * authenticated user by checking request.isAuthenticated(). An AccessControlException
+	 * should be thrown for secure but unauthenticated requests.
+	 * 
+	 * If you override this method, be sure to call super.handleRequest(request,response) if the
+	 * request type is not processed in the subclass.
+	 * 
+	 * Key-value pairs can be added to the response via response.put(key, value). Also
+	 * you should call response.setSuccess(true) to indicate successful processing of the message.
+	 * 
+	 * @param request
 	 */
-	protected void handleUIMessage(Map message) {
+	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		// By default all modules support runtime parameter changes
-		if (message.get("type")!=null && message.get("type").toString().equals("paramChange")) {
-			Parameter param = (Parameter) getInput(message.get("param").toString());
+		if (request.getType().equals("paramChange")) {
+			
+			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
-				Object value = param.parseValue(message.get("value").toString());
+				
+				if (!request.isAuthenticated()) {
+					throw new AccessControlException("Unauthenticated parameter change request!");
+				}
+				
+				Object value = param.parseValue(request.get("value").toString());
 				param.receive(value);
 				
 				if (isSendPending()) {
@@ -576,8 +620,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 						uiEventPropagator.propagate();
 					}
 				}
+				
+				response.setSuccess(true);
 			} catch (Exception e) {
-				log.error("Error making runtime change!",e);
+				log.error("Error making runtime parameter change!",e);
 				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}

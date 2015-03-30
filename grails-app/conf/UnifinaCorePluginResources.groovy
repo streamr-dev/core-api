@@ -119,6 +119,9 @@ modules = {
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.css', plugin: 'unifina-core']
 	}
+	dropzone {
+		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
+	}
 	
 	/**
 	 * In-house widgets and resources
