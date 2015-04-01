@@ -10,21 +10,42 @@
 
 		<link rel="import" href="${createLink(uri:"/webcomponents/index.html", plugin:"unifina-core")}">
 
+		<style>
+			#main-menu .navigation .uichannel.checked .menu-icon.fa-square {
+				display:none;
+			}
+			#main-menu .navigation .uichannel:not(.checked) .menu-icon.fa-check-square {
+				display:none;
+			}
+			#main-menu .mm-dropdown > ul > li > a.ui-title {
+				padding-left: 30px;
+			}
+			.selected-theme #main-menu .navigation .uichannel.checked a {
+				color:#d25213;
+			}
+			#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit {
+				display:none;
+			}
+			#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar {
+				display:none;
+			}
+		</style>
+
 		<r:script>
 			$(document).ready(function() {
 				var runningSignalPaths = ${raw(runningSignalPathsAsJson ?: "[]")}
-				var dashboard = ${raw(dashboardAsJson ?: "{}")}
+				var dashboard = new Dashboard(${raw(dashboardAsJson ?: "{}")})
 
-				var DIList = new DashboardItemList(dashboard.items)
-				var sidebar = new SidebarView(dashboard.name, runningSignalPaths, DIList)
-				var dashboard = new DashboardView(DIList)
+				var dashboardView = new DashboardView(dashboard)
+				var sidebar = new SidebarView(dashboard, runningSignalPaths)
+				
 
 				// Bind slimScroll to main menu
 			    $('#main-menu-inner').slimScroll({
 			      height: '100%'
 			    })
 
-			    DIList.on("remove", function (model) {
+			    dashboard.collection.on("remove", function (model) {
 					var client = document.getElementById("client")
 					client.streamrClient.unsubscribe([model.get("uiChannel").id])
 				})
@@ -35,9 +56,7 @@
 <body class="main-menu-fixed dashboard-edit">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
-			<div id="sidebar-view">
-
-			</div>
+			<div id="sidebar-view" class=""></div>
 		</div> 
 	</div>
 
@@ -49,9 +68,6 @@
 	<div id="main-menu-bg"></div>
 
 	<g:render template="dashboard-template" />
-
-
-	
 
 </body>
 </html>
