@@ -94,6 +94,12 @@ class KafkaService {
 		sendMessage(channelId, key, str, true);
 	}
 	
+	@CompileStatic
+	void sendMessage(Stream stream, Object key, Map message) {
+		String str = (message as JSON).toString();
+		sendMessage(stream.getUuid(), key, str, true);
+	}
+	
 	/**
 	 * Uses a FetchMetadataRequest to create topics. This requires
 	 * auto.create.topics.enable=true on the server. This is a workaround for

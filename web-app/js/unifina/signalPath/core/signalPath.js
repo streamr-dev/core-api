@@ -90,7 +90,7 @@ var SignalPath = (function () {
 		
 	    connection = new StreamrClient(options.connectionOptions)
 	    connection.bind('disconnected', function() {
-	    	$(pub).trigger('stopped')
+	    	pub.disconnect()
 	    })
 		pub.setZoom(opts.zoom)
 		pub.jsPlumb = jsPlumb
@@ -140,7 +140,9 @@ var SignalPath = (function () {
 	pub.getCanvas = function() {
 		return canvas;
 	}
-	
+	pub.getConnection = function() {
+		return connection;
+	}
 	function loadJSON(data) {
 		// Reset signal path
 		newSignalPath();
@@ -583,6 +585,7 @@ var SignalPath = (function () {
 		runData = null
 		$(pub).trigger('stopped');
 	}
+	pub.disconnect = disconnect;
 	
 	function isRunning() {
 		return runData!=null;

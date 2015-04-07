@@ -262,6 +262,9 @@ class SignalPathService {
 		// Start the runner thread
 		runner.start()
 		
+		// Wait for runner to be in ready state
+		runner.waitReady()
+		
 		rsp.runner = runnerId
 		rsp.state = "running"
 		

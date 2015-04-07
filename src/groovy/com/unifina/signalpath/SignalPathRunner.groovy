@@ -79,6 +79,20 @@ public class SignalPathRunner extends Thread {
 		return result
 	}
 	
+	public synchronized void setReady(boolean ready) {
+		this.ready = ready
+		this.notify()
+	}
+	
+	public synchronized boolean getReady() {
+		return ready
+	}
+	
+	public synchronized void waitReady() {
+		while (!getReady())
+			this.wait(500)
+	}
+	
 	@Override
 	public void run() {
 		
@@ -90,7 +104,7 @@ public class SignalPathRunner extends Thread {
 			for (SignalPath it : signalPaths)
 				it.connectionsReady()
 				
-			ready = true
+			setReady(true)
 			
 			if (!signalPaths.isEmpty())
 				signalPathService.runSignalPaths(signalPaths)
