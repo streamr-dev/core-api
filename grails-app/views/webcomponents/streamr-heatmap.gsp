@@ -1,9 +1,11 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<r:require module="streamr-heatmap"/>
+<g:if test="${!params.noDependencies}">
+	<r:require module="streamr-heatmap"/>
 
-<r:layoutResources disposition="head"/>
-<r:layoutResources disposition="defer"/>
+	<r:layoutResources disposition="head"/>
+	<r:layoutResources disposition="defer"/>
+</g:if>
 
 <polymer-element name="streamr-heatmap" extends="streamr-widget" attributes="lifeTime fadeInTime fadeOutTime min max radius center zoom minZoom maxZoom">
 	<template>
@@ -49,7 +51,12 @@
 			},
 			centerChanged: function(oldValue, newValue) {
 				this.map.setCenter(newValue)
-			}
+			},
+			<g:if test="${params.lightDOM}">
+				parseDeclaration: function(elementElement) {
+					return this.lightFromTemplate(this.fetchTemplate(elementElement))
+				}
+			</g:if>
 		});
 	</script>
 </polymer-element>

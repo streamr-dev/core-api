@@ -8,5 +8,11 @@ class DashboardItem {
 	
 	UiChannel uiChannel
 	
+	int order
+	
 	static belongsTo = [dashboard: Dashboard]
+	
+	static constraints = {
+		title(nullable:true)
+	}
 }

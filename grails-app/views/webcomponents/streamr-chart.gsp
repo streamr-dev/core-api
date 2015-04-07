@@ -1,10 +1,12 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<r:require module="highstock"/>
-<r:require module="streamr-chart"/>
+<g:if test="${!params.noDependencies}">
+	<r:require module="streamr-chart"/>
+	<r:require module="highstock"/>
 
-<r:layoutResources disposition="head"/>
-<r:layoutResources disposition="defer"/>
+	<r:layoutResources disposition="head"/>
+	<r:layoutResources disposition="defer"/>
+</g:if>
 
 <polymer-element name="streamr-chart" extends="streamr-widget" attributes="rangeDropdown showHideButtons">
 	<template>
@@ -39,7 +41,12 @@
 					    resendOptions
 					)
 				})
-			}
+			},
+			<g:if test="${params.lightDOM}">
+				parseDeclaration: function(elementElement) {
+					return this.lightFromTemplate(this.fetchTemplate(elementElement))
+				}
+			</g:if>
 		});
 	</script>
 </polymer-element>

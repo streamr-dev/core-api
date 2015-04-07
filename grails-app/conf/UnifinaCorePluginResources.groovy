@@ -115,6 +115,10 @@ modules = {
 		dependsOn 'underscore,jquery'
 		resource url:[dir:'js/backbone', file:'backbone.js', plugin: 'unifina-core']
 	}
+	'backbone-associations' {
+		dependsOn 'backbone'
+		resource url:[dir:'js/backbone-associations', file:'backbone-associations-min.js', plugin: 'unifina-core']
+	}
 	leaflet {
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.css', plugin: 'unifina-core']
@@ -134,8 +138,11 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, jquery-ui'
+		dependsOn 'backbone, backbone-associations, jquery-ui'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
+	}
+	'webcomponent-resources' {
+		dependsOn 'streamr-client, streamr-chart, streamr-heatmap'
 	}
 	'stream-fields' {
 		dependsOn 'jquery, backbone'
@@ -168,10 +175,10 @@ modules = {
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
-		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core'], disposition:'head'
 	}
 	'streamr-chart' {
-		dependsOn 'jquery'
+		dependsOn 'jquery,highstock'
 		resource url:[dir:'js/unifina/streamr-chart', file:'streamr-chart.js', plugin: 'unifina-core']
 	}
 	'streamr-heatmap' {

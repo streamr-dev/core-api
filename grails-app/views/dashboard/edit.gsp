@@ -8,7 +8,10 @@
 		<r:require module="slimscroll"/>
 		<r:require module="dashboard-editor"/>
 
-		<link rel="import" href="${createLink(uri:"/webcomponents/index.html", plugin:"unifina-core")}">
+		<!--If ~/index.html?noDependencies=true-->
+		<r:require module="webcomponent-resources" disposition="head"/>
+
+		<link rel="import" href="${createLink(uri:"/webcomponents/index.html?lightDOM=true&noDependencies=true", plugin:"unifina-core")}">
 
 		<style>
 			#main-menu .navigation .uichannel.checked .menu-icon.fa-square {
@@ -29,12 +32,26 @@
 			#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar {
 				display:none;
 			}
+			body, body .main-wrapper #content-wrapper, #dashboard-view {
+				height:100%;
+			}
+			.dashboarditem:first-child .prev-order {
+				display:none;
+			}
+			.dashboarditem:last-child .next-order {
+				display:none;
+			}
+			#dashboard-view {
+				padding:0px;
+				list-style-type: none;
+			}
 		</style>
 
 		<r:script>
 			$(document).ready(function() {
 				var runningSignalPaths = ${raw(runningSignalPathsAsJson ?: "[]")}
 				var dashboard = new Dashboard(${raw(dashboardAsJson ?: "{}")})
+				dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 
 				var dashboardView = new DashboardView(dashboard)
 				var sidebar = new SidebarView(dashboard, runningSignalPaths)
@@ -45,7 +62,7 @@
 			      height: '100%'
 			    })
 
-			    dashboard.collection.on("remove", function (model) {
+			    dashboard.get("items").on("remove", function (model) {
 					var client = document.getElementById("client")
 					client.streamrClient.unsubscribe([model.get("uiChannel").id])
 				})
@@ -60,11 +77,12 @@
 		</div> 
 	</div>
 
-	<div id="content-wrapper">
-		<streamr-client id="client" server="${serverUrl}"></streamr-client>
-		<div id="dashboard-view"></div>
+	<div id="content-wrapper" class="scrollable">
+		<streamr-client id="client" server="${serverUrl}" autoconnect="true" autodisconnect="false"></streamr-client>
+		<ul id="dashboard-view"></ul>
+		<!--div id="dashboard-view"></div-->
 
-		</div>
+	</div>
 	<div id="main-menu-bg"></div>
 
 	<g:render template="dashboard-template" />

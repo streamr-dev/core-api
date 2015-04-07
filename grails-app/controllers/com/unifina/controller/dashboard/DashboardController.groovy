@@ -67,7 +67,7 @@ class DashboardController {
 			id: dashboard.id,
 			name: dashboard.name,
 			items: dashboard.items.collect {item->
-				[title: item.title, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
+				[id:item.id, title: item.title, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
 			}
 		]
 
@@ -116,46 +116,46 @@ class DashboardController {
 	}
 	
 	def update() {
-		Dashboard dashboard = Dashboard.get(params.id)
-		dashboard.name = params.name
+		Map dashboardMap = request.JSON
+		Dashboard dashboard = Dashboard.get(dashboardMap.id)
 		
-		List uiChannels = UiChannel.findAllByIdInList(params.list("uiChannels"))
-
-		Collection added = uiChannels.findAll {UiChannel ui->
-			DashboardItem found = dashboard.items.find {DashboardItem item-> 
-				item.uiChannel.id == ui.id
+		dashboard.properties = dashboardMap
+		
+		// collect dashboard items into a map by id
+		Map itemsById = [:]
+		dashboard.items.findAll {it.id!=null}.each { 
+			itemsById[it.id] = it
+		}
+		
+		Collection toBeRemoved = []
+		Collection toBeAdded = []
+		
+		
+		dashboard.items.each {
+			if(itemsById[it.id] == null){
+				toBeRemoved.add(it)
 			}
-			return found==null
-		}
-		
-		Collection removed = dashboard.items.findAll {DashboardItem item->
-			UiChannel found = uiChannels.find {UiChannel ui->
-				item.uiChannel.id == ui.id				
+			else {
+				it.properties = itemsById[it.id]
 			}
-			return found==null
-		}
-			
-		added.each {UiChannel uiChannel->
-			if (!unifinaSecurityService.canAccess(uiChannel))
-				throw new AccessControlException("Access to $uiChannel denied for user $springSecurityService.currentUser")
-			
-			DashboardItem item = new DashboardItem()
-			item.uiChannel = uiChannel
-			
-			dashboard.addToItems(item)
 		}
 		
-		removed.each {DashboardItem item->			
-			dashboard.removeFromItems(item)
+		dashboardMap.items.findAll {it.id==null}.each {
+			DashboardItem item = new DashboardItem(it)
+			//item.uiChannel = UiChannel.load(it.uiChannel.id)
+			toBeAdded.add(it)
 		}
 		
-		// Set the titles of all DashboardItems
-		dashboard.items.each {DashboardItem item->
-			item.title = params["title_"+item.uiChannel.id]
+		toBeRemoved.each {
+			dashboard.removeFromItems(it)
+		}
+		
+		toBeAdded.each {
+			dashboard.addToItems(it)
 		}
 		
 		dashboard.save(flush:true, failOnError:true)
 		
-		redirect(action: "show", id: dashboard.id)
+		redirect(action: "edit", id: params.id)
 	}
 }

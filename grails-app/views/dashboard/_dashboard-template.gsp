@@ -1,7 +1,11 @@
 
 <script id="sidebar-template" type="text/template">
-    <div class="title menu-content"></div>
-    <div class="menu-content"></div>
+    <div class="title menu-content">
+        <label>Dashboard name</label>
+    </div>
+    <div class="menu-content">
+        <label>Running Signalpaths</label>
+    </div>
     <div class="content"></div>
     <div class="menu-content text-center">
         <button class="save-button btn btn-block btn-primary">Save</button>
@@ -9,24 +13,23 @@
 </script>
 
 <script id="rsp-template" type="text/template">
-    <a class="rsp-title"><span class="mm-text mmc-dropdown-delay animated fadeIn">${'<%= name %>'}</span></a>
+    <a class="rsp-title">
+        <span class="mm-text mmc-dropdown-delay animated fadeIn">${'<%= name %>'}</span>
+        <span class="howmanychecked badge badge-primary"></span>
+    </a>
 </script>
 
 <script id="uichannel-template" type="text/template">
-        <a href="#" class="ui-title">
+        <a href="#" class="uichannel-title">
+        <!--title="${'<%= id %>'}"-->
             <i class="menu-icon fa fa-square"></i>
             <i class="menu-icon fa fa-check-square"></i>
             ${'<%= name ? name : id %>'}
         </a>
 </script>
 
-<script id="di-template" type="text/template">
-    <span>${'<%= title %>'}</span>
-    <span>${'<%= uiChannel.id %>'}</span>
-</script>
-
 <script id="streamr-widget-template" type="text/template">
-        <!-- Centered text -->
+    <div>
         <div class="stat-panel">
             <div class="stat-row">
                 <!-- Dark gray background, small padding, extra small text, semibold text -->
@@ -40,6 +43,7 @@
                 </div>
             </div> <!-- /.stat-row -->
         </div> <!-- /.stat-panel -->
+    </div>
 </script>
 
 <script id="streamr-label-template" type="text/template">
@@ -58,17 +62,21 @@
     <div class="titlebar">
         <span>${'<%= title ? title : "&nbsp;" %>'}</span>
         <div class="panel-heading-controls">
-            <button class="edit btn btn-xs btn-outline dark"><i class="fa fa-pencil"></i></button>
-            <button class="delete btn btn-xs btn-outline dark"><i class="fa fa-times"></i></button>
+            <button class="edit btn btn-xs btn-outline dark" title="Edit"><i class="fa fa-pencil"></i></button>
+            <button class="delete btn btn-xs btn-outline dark" title="Remove"><i class="fa fa-times"></i></button>
         </div>
     </div>
 
     <div class="titlebar-edit">
-        <div class="col-xs-8">
-            <input class="name-input form-control input-sm" type="text" value="${'<%= title %>'}" placeholder="Title" name="${'<%= title %>'}"></input>
+        <div class="col-xs-7">
+            <input class="name-input form-control input-sm" type="text" value="${'<%= title %>'}" placeholder="Title" name="dashboard-item-name"></input>
         </div>
-        <div class="text-right">
-            <button class="close-edit btn btn-xs btn-outline dark"><i class="fa fa-check"></i></button>
+        <div class="panel-heading-controls text-left">
+        
+            <!--button class="prev-order btn btn-xs btn-outline dark" title="Move left"><i class="fa fa-arrow-circle-left"></i></button>
+            <button class="next-order btn btn-xs btn-outline dark" title="Move right" ><i class="fa fa-arrow-circle-right"></i></button-->
+
+            <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
         </div>
     </div>
 </script<
