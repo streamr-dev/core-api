@@ -29,7 +29,7 @@
 </script>
 
 <script id="streamr-widget-template" type="text/template">
-    <div>
+    <div class="contains">
         <div class="stat-panel">
             <div class="stat-row">
                 <!-- Dark gray background, small padding, extra small text, semibold text -->
@@ -72,7 +72,7 @@
             <input class="name-input form-control input-sm" type="text" value="${'<%= title %>'}" placeholder="Title" name="dashboard-item-name"></input>
         </div>
         <div class="panel-heading-controls text-left">
-        
+
             <!--button class="prev-order btn btn-xs btn-outline dark" title="Move left"><i class="fa fa-arrow-circle-left"></i></button>
             <button class="next-order btn btn-xs btn-outline dark" title="Move right" ><i class="fa fa-arrow-circle-right"></i></button-->
 

@@ -161,9 +161,6 @@ var DashboardItemView = Backbone.View.extend({
 
 	initialize: function(){
 		this.model.on("remove", this.remove)
-		this.$el.on("drop", function(index){
-			this.model.set("order", index)
-		},this)
 	},
 
 	render: function() {
@@ -187,7 +184,12 @@ var DashboardItemView = Backbone.View.extend({
 			console.log("Module not recognized!")
 		}
 		this.$el.find(".title").append(this.titlebarTemplate(this.model.toJSON()))
+		this.initializeTrigger()
 		return this
+	},
+
+	initializeTrigger: function() {
+		this.listenTo(this.$el, "drop")
 	},
 
 	delete: function () {
@@ -339,7 +341,8 @@ var DashboardView = Backbone.View.extend({
 		
 		this.$el.sortable({
 			stop: function(event, ui) {
-	            ui.item.trigger("drop", ui.item.index())
+				var i = ui.item.index()
+	            ui.item.find(".contains").trigger('dropped', i)
         	}
 		})
 
