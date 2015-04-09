@@ -15,6 +15,8 @@ import com.unifina.service.KafkaService;
 import com.unifina.service.UnifinaSecurityService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
+import com.unifina.signalpath.ListInput;
+import com.unifina.signalpath.MapInput;
 import com.unifina.signalpath.NotificationMessage;
 import com.unifina.signalpath.Parameter;
 import com.unifina.signalpath.StreamParameter;
@@ -108,6 +110,12 @@ public class SendToStream extends AbstractSignalPathModule {
 			else if (type.equalsIgnoreCase("string")) {
 				StringInput input = new StringInput(this, name);
 				addInput(input);
+			}
+			else if (type.equalsIgnoreCase("map")) {
+				addInput(new MapInput(this,name));
+			}
+			else if (type.equalsIgnoreCase("list")) {
+				addInput(new ListInput(this,name));
 			}
 		}
 		

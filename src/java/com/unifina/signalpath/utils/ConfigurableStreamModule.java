@@ -10,6 +10,8 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Stream;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.ListOutput;
+import com.unifina.signalpath.MapOutput;
 import com.unifina.signalpath.StreamParameter;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.TimeSeriesOutput;
@@ -63,7 +65,6 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 			String type = j.getString("type");
 			String name = j.getString("name");
 			
-			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
 				output.noRepeat = false;
@@ -76,6 +77,12 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
 				output.noRepeat = false;
 				addOutput(output);
+			}
+			else if (type.equalsIgnoreCase("map")) {
+				addOutput(new MapOutput(this, name));
+			}
+			else if (type.equalsIgnoreCase("list")) {
+				addOutput(new ListOutput(this, name));
 			}
 		}
 		

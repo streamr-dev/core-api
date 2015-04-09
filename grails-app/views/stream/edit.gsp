@@ -38,10 +38,15 @@
         				delete message.channel
         				
 						Object.keys(message).forEach(function(key) {
-							console.log("Detected field: "+key+", type: "+(typeof message[key]))
+							var type = (typeof message[key])
+							if (type==="object") {
+								type = (Array.isArray(message[key]) ? "list" : "map")
+							}
+							
+							console.log("Detected field: "+key+", type: "+type)
 							listView.collection.add({
 								name: key, 
-								type: (typeof message[key])
+								type: type
 							})
 						})
 						
