@@ -56,12 +56,8 @@ public abstract class AbstractJavaCodeWrapper extends AbstractSignalPathModule {
 		return Arrays.asList(new String[] {
 			"com.unifina.signalpath.custom.*",
 			"com.unifina.signalpath.*",
-			"com.unifina.orderbook.event.*",
-			"com.unifina.order.*",
-			"com.unifina.orderbook.*",
 			"com.unifina.utils.*",
 			"java.text.SimpleDateFormat",
-			"com.unifina.event.*",
 			"java.lang.*",
 			"java.math.*",
 			"java.util.*"
