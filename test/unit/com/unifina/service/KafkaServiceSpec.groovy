@@ -2,6 +2,7 @@ package com.unifina.service
 
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
 import com.unifina.domain.data.Stream
@@ -9,7 +10,7 @@ import com.unifina.domain.data.Stream
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
-@TestMixin(GrailsUnitTestMixin)
+@TestMixin(ControllerUnitTestMixin) // Initializes the JSON converter, can be used even though this test is for a service
 @TestFor(KafkaService)
 @Mock([Stream])
 class KafkaServiceSpec extends Specification {
@@ -21,7 +22,7 @@ class KafkaServiceSpec extends Specification {
     }
 
     def cleanup() {
-		
+		java.util.LinkedHashMap.metaClass.asType = null
     }
 
 	void "test reading a csv file and producing feedfiles and schema"() {
@@ -31,11 +32,11 @@ class KafkaServiceSpec extends Specification {
 		def feedFileService = Mock(FeedFileService)
 		
 		when:
-		List fields = service.createFeedFilesFromCsv(fis, stream)
+		List fields = service.createFeedFilesFromCsv(fis, stream, feedFileService)
 		
 		then:
-		5 * feedFileService.createFeedFile(stream, _, _, _, false)
-		fields.size() == 2
+		3 * feedFileService.createFeedFile(stream, _, _, _, false)
+		fields.size() == 4
 		fields[0].name == "price"
 		fields[0].type == "number"
 		fields[1].name == "size"

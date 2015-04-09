@@ -82,6 +82,11 @@ SignalPath.ParamRenderers = {
 					}
 				})(symbol,search,id,module,data);
 				
+				var searchParams = {}
+				
+				if (data.feedFilter)
+					searchParams.feed = data.feedFilter
+				
 				$(search).typeahead({
 					highlight: true,
 					hint: false,
@@ -92,7 +97,7 @@ SignalPath.ParamRenderers = {
 					source: function(q, callback) {
 						$.ajax({
 							url: Streamr.projectWebroot+"stream/search", 
-							data: { term: q },
+							data: $.extend({}, searchParams, { term: q }),
 							dataType: 'json',
 							success: callback,
 							error: function(jqXHR, textStatus, errorThrown) {

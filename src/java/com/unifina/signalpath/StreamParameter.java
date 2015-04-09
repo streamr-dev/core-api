@@ -2,6 +2,7 @@ package com.unifina.signalpath;
 
 import java.util.Map;
 
+import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedService;
 
@@ -9,7 +10,8 @@ import com.unifina.service.FeedService;
 public class StreamParameter extends Parameter<Stream> {
 	
 	private boolean checkModuleId = false;
-	
+	private Feed feedFilter = null;
+
 	public StreamParameter(AbstractSignalPathModule owner, String name) {
 		super(owner,name,null,"Stream");
 		this.canToggleDrivingInput = false;
@@ -49,6 +51,11 @@ public class StreamParameter extends Parameter<Stream> {
 				config.put("checkModuleId",true);
 			}
 		}
+
+		if (feedFilter!=null) {
+			config.put("feedFilter", feedFilter.getId());
+		}
+		
 		return config;
 	}
 	
@@ -79,6 +86,14 @@ public class StreamParameter extends Parameter<Stream> {
 	 */
 	public void setCheckModuleId(boolean checkModuleId) {
 		this.checkModuleId = checkModuleId;
+	}
+	
+	public Feed getFeedFilter() {
+		return feedFilter;
+	}
+
+	public void setFeedFilter(Feed feedFilter) {
+		this.feedFilter = feedFilter;
 	}
 	
 }
