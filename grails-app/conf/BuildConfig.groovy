@@ -13,7 +13,7 @@ grails.project.test.reports.dir = "target/test-reports"
 def gebVersion = "0.9.3"
 def seleniumVersion = "2.41.0"
 
-//grails.project.dependency.resolver = "maven" // or ivy
+grails.project.dependency.resolver = "maven" // or ivy
 
 // grails.project.fork.run = false
 grails.project.fork = [
@@ -52,6 +52,8 @@ grails.project.dependency.resolution = {
 		
 		runtime('commons-net:commons-net:3.3')
 		runtime('org.apache.commons:commons-math3:3.2')
+		runtime('commons-codec:commons-codec:1.6')
+		
 		compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
 		compile('com.unifina:kafka-client:0.1.4') {
