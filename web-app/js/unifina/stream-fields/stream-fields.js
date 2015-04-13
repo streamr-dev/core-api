@@ -1,6 +1,6 @@
 (function(exports) {
 
-	var TYPES = ['string','number','boolean']
+	var TYPES = ['string','number','boolean','map','list']
 
 	// **Item class**: The atomic part of our Model. A model is basically a Javascript object, i.e. key-value pairs, with some helper functions to handle event triggering, persistence, etc.
 	var Item = Backbone.Model.extend({
