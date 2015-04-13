@@ -13,48 +13,21 @@
 
 		<link rel="import" href="${createLink(uri:"/webcomponents/index.html?lightDOM=true&noDependencies=true", plugin:"unifina-core")}">
 
-		<style>
-			#main-menu .navigation .uichannel.checked .menu-icon.fa-square {
-				display:none;
-			}
-			#main-menu .navigation .uichannel:not(.checked) .menu-icon.fa-check-square {
-				display:none;
-			}
-			#main-menu .mm-dropdown > ul > li > a.ui-title {
-				padding-left: 30px;
-			}
-			.selected-theme #main-menu .navigation .uichannel.checked a {
-				color:#d25213;
-			}
-			#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit {
-				display:none;
-			}
-			#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar {
-				display:none;
-			}
-			body, body .main-wrapper #content-wrapper, #dashboard-view {
-				height:100%;
-			}
-			.dashboarditem:first-child .prev-order {
-				display:none;
-			}
-			.dashboarditem:last-child .next-order {
-				display:none;
-			}
-			#dashboard-view {
-				padding:0px;
-				list-style-type: none;
-			}
-		</style>
-
 		<r:script>
 			$(document).ready(function() {
 				var runningSignalPaths = ${raw(runningSignalPathsAsJson ?: "[]")}
 				var dashboard = new Dashboard(${raw(dashboardAsJson ?: "{}")})
 				dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 
-				var dashboardView = new DashboardView(dashboard)
-				var sidebar = new SidebarView(dashboard, runningSignalPaths)
+				var dashboardView = new DashboardView({
+					model: dashboard,
+					el: $("#dashboard-view")
+				})
+				var sidebar = new SidebarView({
+					dashboard: dashboard, 
+					RSPs: runningSignalPaths,
+					el: $("#sidebar-view")
+				})
 				
 
 				// Bind slimScroll to main menu
@@ -78,10 +51,8 @@
 	</div>
 
 	<div id="content-wrapper" class="scrollable">
-		<streamr-client id="client" server="${serverUrl}" autoconnect="true" autodisconnect="false"></streamr-client>
+		<streamr-client id="client" server="${ serverUrl }" autoconnect="true" autodisconnect="false"></streamr-client>
 		<ul id="dashboard-view"></ul>
-		<!--div id="dashboard-view"></div-->
-
 	</div>
 	<div id="main-menu-bg"></div>
 

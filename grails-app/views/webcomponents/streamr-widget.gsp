@@ -86,7 +86,7 @@
 					},
 					success: function(data) {
 						if (!data.success) {
-							//handleError(data.error)
+							handleError(data.error)
 						}
 						else if (callback)
 							callback(data.response)
