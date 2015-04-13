@@ -59,15 +59,10 @@
         </div>
         <div class="panel-heading-controls text-left">
 
-            <!--button class="prev-order btn btn-xs btn-outline dark" title="Move left"><i class="fa fa-arrow-circle-left"></i></button>
-            <button class="next-order btn btn-xs btn-outline dark" title="Move right" ><i class="fa fa-arrow-circle-right"></i></button-->
+            <button class="compress-btn btn btn-xs btn-outline dark" title="Compress" ><i class="fa fa-compress"></i></button>
+            <button class="expand-btn btn btn-xs btn-outline dark" title="Expand"><i class="fa fa-expand"></i></button>
 
             <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
         </div>
     </div>
-</script>
-
-
-<script id="template" type="text/template">
-    {{ name }} {{ id }}
 </script>

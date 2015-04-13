@@ -9,6 +9,8 @@ class DashboardItem implements Comparable {
 	UiChannel uiChannel
 	
 	int ord
+
+	String size
 	
 	static belongsTo = [dashboard: Dashboard]
 	

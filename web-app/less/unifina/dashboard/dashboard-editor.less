@@ -13,6 +13,12 @@
 #dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit {
 	display:none;
 }
+#dashboard-view .dashboarditem.small .stat-panel .stat-row .stat-cell .titlebar-edit .compress-btn {
+	display:none;
+}
+#dashboard-view .dashboarditem.large .stat-panel .stat-row .stat-cell .titlebar-edit .expand-btn {
+	display:none;
+}
 #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar {
 	display:none;
 }
@@ -25,4 +31,7 @@
     border: 1px dotted black;
     margin: 0 1em 1em 0;
     height: 50px;
+}
+body {
+	height:100%;
 }

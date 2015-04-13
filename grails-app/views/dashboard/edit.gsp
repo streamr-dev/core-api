@@ -15,30 +15,41 @@
 
 		<r:script>
 			$(document).ready(function() {
-				var runningSignalPaths = ${raw(runningSignalPathsAsJson ?: "[]")}
-				var dashboard = new Dashboard(${raw(dashboardAsJson ?: "{}")})
-				dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
+				var dashboard
 
-				var dashboardView = new DashboardView({
-					model: dashboard,
-					el: $("#dashboard-view")
+
+				$.getJSON("${createLink(controller:'dashboard', action:'getJson', id:dashboard.id)}", {}, function(dbJson) {
+					dashboard = new Dashboard(dbJson)
+					var dashboardView = new DashboardView({
+						model: dashboard,
+						el: $("#dashboard-view")
+					})
+
+					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
+
+				    dashboard.get("items").on("remove", function (model) {
+						var client = document.getElementById("client")
+						client.streamrClient.unsubscribe([model.get("uiChannel").id])
+					})
+					
+					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
+						var sidebar = new SidebarView({
+							edit: true,
+							dashboard: dashboard, 
+							RSPs: rspJson,
+							el: $("#sidebar-view")
+						})
+					})
 				})
-				var sidebar = new SidebarView({
-					dashboard: dashboard, 
-					RSPs: runningSignalPaths,
-					el: $("#sidebar-view")
-				})
+
 				
-
+				
+				
 				// Bind slimScroll to main menu
 			    $('#main-menu-inner').slimScroll({
 			      height: '100%'
 			    })
 
-			    dashboard.get("items").on("remove", function (model) {
-					var client = document.getElementById("client")
-					client.streamrClient.unsubscribe([model.get("uiChannel").id])
-				})
 			})
 		</r:script>
 </head>

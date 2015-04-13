@@ -16,6 +16,11 @@ assert.equal($("body").length, 1)
 $("body").append(templates)
 
 var db = require('../dashboard/dashboard-editor')
+var sidebar
+var dashboard
+var dashboardView
+var dashboardJson
+var runningSignalPathsJson
 
 describe('dashboard-editor', function() {
 
@@ -29,27 +34,51 @@ describe('dashboard-editor', function() {
 
 		$("#sidebar-view").remove()
 		$("body").append("<div id='sidebar-view'></div>")
+
+		dashboardJson = {
+			id: 1,
+			name: "Test",
+			items: [
+				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', module: {id:67}}, size:"medium"},
+				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', module: {id:145}}, size:"small"}
+			]
+		}
+
+		runningSignalPathsJson = [
+			{id: 1, name: "RSP1", uiChannels: [
+				{name: "uiChannel-1", checked: true, id: "uiChannel-id-1", module: {id: 67}}
+				]},
+			{id: 2, name: "RSP2", uiChannels: [
+				{name: "uiChannel-3", checked: false, id: "uiChannel-id-3", module: {id: 145}},
+				{name: "uiChannel-4", checked: false, id: "uiChannel-id-4", module: {id: 167}}
+				]},
+			{id: 3, name: "RSP3", uiChannels: [
+				{name: "uiChannel-2", checked: true, id: "uiChannel-id-2", module: {id: 145}}
+			]},			
+			{id: 4, name: "RSP4", uiChannels: [
+				{name: "uiChannel-5", checked: false, id: "uiChannel-id-5", module: {id: 67}}
+				]}
+		]
+
+		dashboard = new db.Dashboard(dashboardJson)
+		dashboard.urlRoot = "nourl"
+
+		dashboardView = new db.DashboardView({
+			model: dashboard,
+			el: $("#dashboard-view")
+		})
+
+		sidebar = new db.SidebarView({
+			el: $("#sidebar-view"),
+			dashboard: dashboard, 
+			RSPs: runningSignalPathsJson
+		})
 	})
 
 	describe("Dashboard", function() {
 
-		var dashboard
-		var dashboardView
-		var dashboardJson = {
-			id: 1,
-			name: "Test",
-			items: [
-				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', module: {id:67}}},
-				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', module: {id:167}}}
-			]
-		}
-
 		beforeEach(function() {
-			dashboard = new db.Dashboard(dashboardJson)
-			dashboardView = new db.DashboardView({
-				model: dashboard,
-				el: $("#dashboard-view")
-			})
+			
 		})
 
 		it('should return the same JSON representation it was initialized with', function() {
@@ -59,13 +88,13 @@ describe('dashboard-editor', function() {
 		it('should throw error when trying to create module with id 1', function () {
 			assert.throws(
 				function() {
-					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:1}}})
+					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:1}}, size:"medium"})
 				}, Error);
 		})
 
 		it('should render the amount of dashboardItems should be correct when added', function (){
 			assert(dashboardView.$el.children().length == 2)
-			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:67}}})
+			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:67}}, size:"medium"})
 			assert(dashboardView.$el.children().length == 3)
 		})
 
@@ -90,7 +119,7 @@ describe('dashboard-editor', function() {
 			assert(dashboard.get("items").models[0].get("ord") == 0)
 			assert(dashboard.get("items").models[1].get("ord") == 1)
 
-			//Simulate jQuery's sortable, which trigger 'drop'-event when dragged to a another place
+			//Simulate jQuery's sortable, which triggers 'drop'-event when dragged to another place
 			$(dashboardView.$el.children()[0]).insertAfter(dashboardView.$el.children()[1])
 			$(dashboardView.$el.children()[0]).trigger('drop')
 
@@ -132,40 +161,18 @@ describe('dashboard-editor', function() {
 	})
 
 	describe("Sidebar", function() {
-		var sidebar
-		var dashboard
-		var runningSignalPathsJson = [
-			{id: 1, name: "RSP1", uiChannels: [
-				{name: "uiChannel-1", checked: true, id: "uiChannel-id-1", module: {id: 67}}
-				]},
-			{id: 2, name: "RSP2", uiChannels: [
-				{name: "uiChannel-3", checked: false, id: "uiChannel-id-3", module: {id: 145}},
-				{name: "uiChannel-4", checked: false, id: "uiChannel-id-4", module: {id: 167}}
-				]},
-			{id: 3, name: "RSP3", uiChannels: [
-				{name: "uiChannel-2", checked: true, id: "uiChannel-id-2", module: {id: 145}}
-			]},			
-			{id: 4, name: "RSP4", uiChannels: [
-				{name: "uiChannel-5", checked: false, id: "uiChannel-id-5", module: {id: 67}}
-				]}
-		]
+		
 		var dashboardJson = {
 			id: 1,
 			name: "Test",
 			items: [
-				{id: 1, title: "Item1", ord:0, uiChannel: {id:'uiChannel-id-1', module: {id:67}}},
-				{id: 2, title: "Item2", ord:1, uiChannel: {id:'uiChannel-id-2', module: {id:145}}}
+				{id: 1, title: "Item1", ord:0, uiChannel: {id:'uiChannel-id-1', module: {id:67}}, size: "medium"},
+				{id: 2, title: "Item2", ord:1, uiChannel: {id:'uiChannel-id-2', module: {id:145}}, size: "small"}
 			]
 		}
 
 		beforeEach(function() {
-				dashboard = new db.Dashboard(dashboardJson)
-				dashboard.urlRoot = "nourl"
-				sidebar = new db.SidebarView({
-					el: $("#sidebar-view"),
-					dashboard: dashboard, 
-					RSPs: runningSignalPathsJson
-				})
+				
 		})
 
 		it('must render runningsignalpath-elements', function() {
@@ -267,5 +274,14 @@ describe('dashboard-editor', function() {
 		})
 	})
 
+	describe("save button", function() {
+		it("must call backbone model save function", function(done) {
+			dashboard.save = function() {
+				done()
+			}
+
+			$("#sidebar-view .save-button").click()
+		})
+	})
 
 })

@@ -129,7 +129,20 @@ var DashboardItem = Backbone.AssociatedModel.extend({
 	defaults: {
 		title: "",
 		uiChannel: {id: "", name: "", module: {id: ""}},
-		ord: ""
+		ord: "",
+		size: ""
+	},
+	makeBigger: function() {
+		if(this.get("size") == "small")
+			this.set("size", "medium")
+		else if(this.get("size") == "medium")
+			this.set("size", "large")
+	},
+	makeSmaller: function() {
+		if(this.get("size") == "large")
+			this.set("size", "medium")
+		else if(this.get("size") == "medium")
+			this.set("size", "small")
 	}
 })
 
@@ -150,7 +163,9 @@ var DashboardItemView = Backbone.View.extend({
 		"click .delete" : "delete",
 		"click .edit" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
-		"keypress .name-input" : "updateOnEnter"
+		"keypress .name-input" : "updateOnEnter",
+		"click .expand-btn" : "makeBigger",
+		"click .compress-btn" : "makeSmaller"
 	},
 
 	initialize: function(){
@@ -159,24 +174,34 @@ var DashboardItemView = Backbone.View.extend({
 		this.$el.on("drop", function(e, index) {
 			_this.model.collection.trigger("orderchange")
 		})
+		$("body").on("classChange", function() {
+			_this.$el.find(".panel-heading-controls").toggle()
+		})
 	},
 
 	render: function() {
+		this.smallClass = "small-size col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered"
+		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
+		this.largeClass = "large-size col-xs-12 col-centered"
+
 		var type = this.model.get("uiChannel").module.id
 		this.$el.html(this.template(this.model.toJSON()))
 		if(type == 67) {
-			// this.$el.find("div:first").addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
-			this.$el.addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
+			if(!this.model.get("size"))
+				this.model.set("size", "medium")
+			this.initSize()
 			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
 		}
 		else if(type == 145) {
-			//this.$el.find("div:first").addClass("col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered")
-			this.$el.addClass("col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered")
+			if(!this.model.get("size"))
+				this.model.set("size", "small")
+			this.initSize()
 			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
 		}
 		else if(type == 167) {
-			//this.$el.find("div:first").addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
-			this.$el.addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
+			if(!this.model.get("size"))
+				this.model.set("size", "medium")
+			this.initSize()
 			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
 		else {
@@ -202,6 +227,29 @@ var DashboardItemView = Backbone.View.extend({
 
 	updateOnEnter: function(e) {
       if (e.keyCode == 13) this.toggleEdit();
+    },
+
+    initSize: function() {
+    	this.$el.removeClass(this.smallClass+ " " +this.mediumClass+ " " +this.largeClass)
+    	if(this.model.get("size") == "small") {
+    		this.$el.addClass(this.smallClass)
+    	} else if(this.model.get("size") == "medium") {
+    		this.$el.addClass(this.mediumClass)
+    	} else if(this.model.get("size") == "large") {
+    		this.$el.addClass(this.largeClass)
+    	} else 
+    		console.log("Module size not found")
+
+    },
+
+    makeBigger: function() {
+    	this.model.makeBigger()
+    	this.initSize()
+    },
+
+    makeSmaller: function() {
+    	this.model.makeSmaller()
+    	this.initSize()
     }
 })
 
@@ -215,11 +263,26 @@ var SidebarView = Backbone.View.extend({
 	initialize: function (options) {
 		this.el = options.el
 		this.dashboard = options.dashboard
-		this.RSPs = options.RSPs
+		this.allRSPs = options.RSPs
+		this.RSPs = []
+		_.each(this.allRSPs, function(rsp){
+			rsp.uiChannels = _.filter(rsp.uiChannels, function(uic){
+				return uic.module
+			})
+			if(rsp.uiChannels.length)
+				this.RSPs.push(rsp)
+		},this)
 		this.setData(this.RSPs, this.dashboard.get("items"))
 		this.listenTo(this.dashboard.get("items"), "remove", function(DI){
 			this.uncheck(DI.get("uiChannel").id)
 		})
+		$("#main-menu-toggle").click(function () {
+    		$("body").trigger("classChange")
+		})
+		if(!options.edit) {
+			this.triggerClassChange()
+			$("body").addClass("mmc")
+		}
 		this.render()
 	},
 
@@ -313,6 +376,10 @@ var SidebarView = Backbone.View.extend({
     save: function() {
     	this.updateTitle()
     	this.dashboard.save()
+    },
+
+    triggerClassChange: function () {
+    	$("body").trigger("classChange")
     }
 })
 
@@ -346,6 +413,7 @@ var DashboardView = Backbone.View.extend({
 					ui.item.trigger('drop');
 	        	}
 			})
+			this.$el.droppable()
 		}
 
 		_.each(this.model.get("items").models, this.addDashboardItem, this)
