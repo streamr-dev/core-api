@@ -53,12 +53,8 @@ abstract class AbstractCodeWrapper extends AbstractSignalPathModule {
 	List<String> getImports() {return [
 		"com.unifina.signalpath.custom.*",
 		"com.unifina.signalpath.*",
-		"com.unifina.orderbook.event.*",
-		"com.unifina.order.*",
-		"com.unifina.orderbook.*",
 		"com.unifina.utils.*",
 		"java.text.SimpleDateFormat",
-		"com.unifina.event.*"
 	]}
 	
 	abstract String getHeader()
