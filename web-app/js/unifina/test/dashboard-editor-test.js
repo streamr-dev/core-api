@@ -158,6 +158,24 @@ describe('dashboard-editor', function() {
 			$(dashboardView.$el.children()[0]).find(".name-input").trigger(press)
 			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
 		})
+
+		it('must change the size by the buttons', function () {
+			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
+
+			$(dashboardView.$el.children()[0]).click()
+			assert($($(dashboardView.$el.children()[0])).hasClass("medium-size"))
+
+			$(dashboardView.$el.children()[0]).find(".btn.edit").click()
+			$(dashboardView.$el.children()[0]).find(".expand-btn").click()
+			assert(!($($(dashboardView.$el.children()[0])).hasClass("medium-size")))
+			assert($(dashboardView.$el.children()[0]).hasClass("large-size"))
+
+			$(dashboardView.$el.children()[0]).find(".compress-btn").click()
+			$(dashboardView.$el.children()[0]).find(".compress-btn").click()
+			assert(!($($(dashboardView.$el.children()[0])).hasClass("large-size")))
+			assert(!($($(dashboardView.$el.children()[0])).hasClass("medium-size")))
+			assert($(dashboardView.$el.children()[0]).hasClass("small-size"))
+		})
 	})
 
 	describe("Sidebar", function() {
@@ -279,7 +297,6 @@ describe('dashboard-editor', function() {
 			dashboard.save = function() {
 				done()
 			}
-
 			$("#sidebar-view .save-button").click()
 		})
 	})

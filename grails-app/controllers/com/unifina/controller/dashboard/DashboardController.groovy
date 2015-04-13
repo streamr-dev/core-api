@@ -26,17 +26,17 @@ class DashboardController {
 		return [dashboards:dashboards]
 	}
 	
-	def create() {
-		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
-		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
-			UiChannel found = rsp.uiChannels.find {UiChannel ui->
-				ui.module
-			}
-			return found!=null
-		}
-		Dashboard dashboard = new Dashboard()
-		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
-	}
+	// def create() {
+	// 	def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
+	// 	def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
+	// 		UiChannel found = rsp.uiChannels.find {UiChannel ui->
+	// 			ui.module
+	// 		}
+	// 		return found!=null
+	// 	}
+	// 	Dashboard dashboard = new Dashboard()
+	// 	return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
+	// }
 	
 	def save() {
 		Dashboard dashboard = new Dashboard()
@@ -61,10 +61,11 @@ class DashboardController {
 		redirect(action: "show", id: dashboard.id)
 	}
 	
-	def edit() {
-		Dashboard dashboard = Dashboard.get(params.id)
-		return [dashboard:dashboard, serverUrl: grailsApplication.config.streamr.ui.server]
-	}
+	// def edit() {
+	// 	Dashboard dashboard = Dashboard.get(params.id)
+	// 	return [dashboard:dashboard, serverUrl: grailsApplication.config.streamr.ui.server]
+	// }
+
 	
 	def getJson() {
 		Dashboard dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
@@ -72,7 +73,7 @@ class DashboardController {
 			id: dashboard.id,
 			name: dashboard.name,
 			items: dashboard.items.collect {item->
-				[id:item.id, title: item.title, ord:item.ord, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
+				[id:item.id, title: item.title, ord:item.ord, size:item.size, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
 			}
 		]
 		render dashboardMap as JSON

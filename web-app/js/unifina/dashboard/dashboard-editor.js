@@ -164,6 +164,7 @@ var DashboardItemView = Backbone.View.extend({
 		"click .edit" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
 		"keypress .name-input" : "updateOnEnter",
+		"blur .name-input" : "toggleEdit",
 		"click .expand-btn" : "makeBigger",
 		"click .compress-btn" : "makeSmaller"
 	},
@@ -216,11 +217,14 @@ var DashboardItemView = Backbone.View.extend({
 	},
 
 	toggleEdit: function () {
-		// if(this.$el.find("div:first").hasClass("editing"))
-		if(this.$el.hasClass("editing"))
+		if(this.$el.hasClass("editing")){
 			this.model.set("title", this.$el.find(".name-input").val())
-		// this.$el.find("div:first").toggleClass("editing")
-		this.$el.toggleClass("editing")
+			this.$el.removeClass("editing")
+		} else {
+			this.$el.addClass("editing")
+			this.$el.find(".name-input").focus()
+		}
+
 		this.$el.find(".title").empty()
 		this.$el.find(".title").append(this.titlebarTemplate(this.model.toJSON()))
 	},
@@ -289,7 +293,7 @@ var SidebarView = Backbone.View.extend({
 	render: function () {
 		this.title = $("<div/>", {
 			class: "menu-content",
-			html: "<label>Running Signalpaths</label>"
+			html: "<label>Dashboard name</label>"
 		})
 		this.titleInput = $("<input/>", {
 			class: "dashboard-name title-input form-control",
@@ -297,6 +301,10 @@ var SidebarView = Backbone.View.extend({
 			name: "dashboard-name",
 			value: this.dashboard.get("name"),
 			placeholder: "Dashboard name"
+		})
+		this.rspTitle = $("<li/>", {
+			class: "rsp-title",
+			html: "<label>Running Signalpaths</label>"
 		})
 		this.list = $("<ul/>", {
 			class: "navigation",
@@ -307,15 +315,28 @@ var SidebarView = Backbone.View.extend({
 		})
 		this.menuContent = $("<div/>", {
 			class: "menu-content text-center",
-			html: "<button class='save-button btn btn-block btn-primary'>Save</button>"
+		})
+		this.saveButton = $("<button/>", {
+			class: 'save-button btn btn-block btn-primary',
+			title: 'Save dashboard',
+			text: 'Save'
+		})
+		this.deleteButton = $("<button/>", {
+			class: 'delete-button btn btn-block btn-default confirm',
+			id: 'deleteButton',
+			title: 'Delete dashboard',
+			text: 'Delete'
 		})
 		this.$el.append(this.title)
 		this.title.append(this.titleInput)
 		this.$el.append(this.list)
+		this.list.append(this.rspTitle)
 		_.each(this.rspCollection.models, function(item) {
 			this.list.append(this.renderRSP(item).el)
 		}, this)
 		this.$el.append(this.menuContent)
+		this.menuContent.append(this.saveButton)
+		this.menuContent.append(this.deleteButton)
 	},
 
 	renderRSP: function(item) {
@@ -407,11 +428,11 @@ var DashboardView = Backbone.View.extend({
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
 			this.$el.sortable({
-				items: "> .dashboarditem",
+				items: ".dashboarditem",
 				// placeholder: "dashboarditem-placeholder ui-corner-all",
 				stop: function(event, ui) {
 					ui.item.trigger('drop');
-	        	}
+	 	   	}
 			})
 			this.$el.droppable()
 		}

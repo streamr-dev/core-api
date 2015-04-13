@@ -16572,6 +16572,12 @@ body.build-page #content-wrapper {
 body {
   height: 100%;
 }
+#sidebar-view button.delete-button {
+  margin-bottom: 200px;
+}
+#sidebar-view .rsp-title {
+  margin-left: 20px;
+}
 .widget-notifications .notification {
   position: relative;
   padding: 7px 12px;
