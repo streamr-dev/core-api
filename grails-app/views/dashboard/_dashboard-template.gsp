@@ -1,30 +1,16 @@
-
-<script id="sidebar-template" type="text/template">
-    <div class="title menu-content">
-        <label>Dashboard name</label>
-    </div>
-    <div class="menu-content">
-        <label>Running Signalpaths</label>
-    </div>
-    <div class="content"></div>
-    <div class="menu-content text-center">
-        <button class="save-button btn btn-block btn-primary">Save</button>
-    </div>
-</script>
-
 <script id="rsp-template" type="text/template">
     <a class="rsp-title">
-        <span class="mm-text mmc-dropdown-delay animated fadeIn">${'<%= name %>'}</span>
+        <span class="mm-text mmc-dropdown-delay animated fadeIn">{{ name }}</span>
         <span class="howmanychecked badge badge-primary"></span>
     </a>
 </script>
 
 <script id="uichannel-template" type="text/template">
         <a href="#" class="uichannel-title">
-        <!--title="${'<%= id %>'}"-->
+        <!--title="{{ id }}"-->
             <i class="menu-icon fa fa-square"></i>
             <i class="menu-icon fa fa-check-square"></i>
-            ${'<%= name ? name : id %>'}
+            {{ name ? name : id }}
         </a>
 </script>
 
@@ -47,20 +33,20 @@
 </script>
 
 <script id="streamr-label-template" type="text/template">
-    <h1><streamr-label class="streamr-label" channel="${'<%= uiChannel.id %>'}"></streamr-label></h1>
+    <h1><streamr-label class="streamr-label" channel="{{ uiChannel.id }}"></streamr-label></h1>
 </script>
 
 <script id="streamr-heatmap-template" type="text/template">
-    <streamr-heatmap class="streamr-heatmap" channel="${'<%= uiChannel.id%>'}"></streamr-heatmap>
+    <streamr-heatmap class="streamr-heatmap" channel="{{ uiChannel.id }}"></streamr-heatmap>
 </script>
 
 <script id="streamr-chart-template" type="text/template">
-    <streamr-chart class="streamr-chart" channel="${'<%= uiChannel.id %>'}"></streamr-chart>    
+    <streamr-chart class="streamr-chart" channel="{{ uiChannel.id }}"></streamr-chart>    
 </script>
 
 <script id="titlebar-template" type="text/template">
     <div class="titlebar">
-        <span>${'<%= title ? title : "&nbsp;" %>'}</span>
+        <span>{{ title ? title : "&nbsp;" }}</span>
         <div class="panel-heading-controls">
             <button class="edit btn btn-xs btn-outline dark" title="Edit"><i class="fa fa-pencil"></i></button>
             <button class="delete btn btn-xs btn-outline dark" title="Remove"><i class="fa fa-times"></i></button>
@@ -69,7 +55,7 @@
 
     <div class="titlebar-edit">
         <div class="col-xs-7">
-            <input class="name-input form-control input-sm" type="text" value="${'<%= title %>'}" placeholder="Title" name="dashboard-item-name"></input>
+            <input class="name-input form-control input-sm" type="text" value="{{ title }}" placeholder="Title" name="dashboard-item-name"></input>
         </div>
         <div class="panel-heading-controls text-left">
 
@@ -79,4 +65,9 @@
             <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
         </div>
     </div>
-</script<
+</script>
+
+
+<script id="template" type="text/template">
+    {{ name }} {{ id }}
+</script>

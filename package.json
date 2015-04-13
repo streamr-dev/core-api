@@ -13,7 +13,10 @@
   "license": "Unifina",
   "devDependencies": {
     "mocha": "^1.21.4",
-    "jquery": "*",
-    "jsdom": "3.*"
+    "jquery": "1.11.1",
+    "jquery-ui": "*",
+    "jsdom": "3.*",
+    "underscore": "*",
+    "backbone-associations": "*"
   }
 }

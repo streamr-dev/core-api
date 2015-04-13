@@ -1,3 +1,11 @@
+(function(exports) {
+
+//Change the variable signs from <%= var %> to {{ var }}
+_.templateSettings = {
+	evaluate : /\{\[([\s\S]+?)\]\}/g,
+	escape : /\[\[([\s\S]+?)\]\]/g,
+	interpolate : /\{\{([\s\S]+?)\}\}/g
+};
 
 var UiChannel = Backbone.Model.extend({
 	defaults: {
@@ -121,25 +129,12 @@ var DashboardItem = Backbone.AssociatedModel.extend({
 	defaults: {
 		title: "",
 		uiChannel: {id: "", name: "", module: {id: ""}},
-		type: "",
-		order: ""
-	},
-
-	initialize: function() {
-		id = this.get("uiChannel").module.id
-		if(id == 67) {
-			this.set("type", "chart")
-		} else if(id == 145) {
-			this.set("type", "label")
-		} else if(id == 196) {
-			this.set("type", "heatmap")
-		}
+		ord: ""
 	}
 })
 
 var DashboardItemList = Backbone.Collection.extend({
-	model: DashboardItem,
-	comparator: "order"
+	model: DashboardItem
 })
 
 var DashboardItemView = Backbone.View.extend({
@@ -155,41 +150,40 @@ var DashboardItemView = Backbone.View.extend({
 		"click .delete" : "delete",
 		"click .edit" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
-		"blur .name-input" : "toggleEdit",
 		"keypress .name-input" : "updateOnEnter"
 	},
 
 	initialize: function(){
-		this.model.on("remove", this.remove)
+		var _this = this
+		this.model.on("remove", this.remove, this)
+		this.$el.on("drop", function(e, index) {
+			_this.model.collection.trigger("orderchange")
+		})
 	},
 
 	render: function() {
+		var type = this.model.get("uiChannel").module.id
 		this.$el.html(this.template(this.model.toJSON()))
-		if(this.model.get("type") == "chart") {
+		if(type == 67) {
 			// this.$el.find("div:first").addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
 			this.$el.addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
 			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
 		}
-		else if(this.model.get("type") == "label") {
+		else if(type == 145) {
 			//this.$el.find("div:first").addClass("col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered")
 			this.$el.addClass("col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered")
 			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
 		}
-		else if(this.model.get("type") == "heatmap") {
+		else if(type == 167) {
 			//this.$el.find("div:first").addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
 			this.$el.addClass("col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered")
 			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
 		else {
-			console.log("Module not recognized!")
+			throw new Error("Module id not recognized!");
 		}
 		this.$el.find(".title").append(this.titlebarTemplate(this.model.toJSON()))
-		this.initializeTrigger()
 		return this
-	},
-
-	initializeTrigger: function() {
-		this.listenTo(this.$el, "drop")
 	},
 
 	delete: function () {
@@ -212,45 +206,53 @@ var DashboardItemView = Backbone.View.extend({
 })
 
 var SidebarView = Backbone.View.extend({
-	el: $("#sidebar-view"),
-	template: _.template($("#sidebar-template").html()),
-
 	events: {
 		"checked" : "updateDIList",
 		"unchecked" : "updateDIList",
-		"blur #dashboard-name" : "updateTitle",
-		"keypress #dashboard-name" : "updateOnEnter",
 		"click .save-button" : "save"
 	},
 
-	initialize: function (dashboard, RSPs) {
-		this.dashboard = dashboard
-		this.setData(RSPs, dashboard.get("items"))
-		this.listenTo(dashboard.get("items"), "remove", function(DI){
+	initialize: function (options) {
+		this.el = options.el
+		this.dashboard = options.dashboard
+		this.RSPs = options.RSPs
+		this.setData(this.RSPs, this.dashboard.get("items"))
+		this.listenTo(this.dashboard.get("items"), "remove", function(DI){
 			this.uncheck(DI.get("uiChannel").id)
 		})
 		this.render()
 	},
 
 	render: function () {
-		this.$el.html(this.template())
-		var title = $("<input/>", {
-			class: "title-input form-control",
+		this.title = $("<div/>", {
+			class: "menu-content",
+			html: "<label>Running Signalpaths</label>"
+		})
+		this.titleInput = $("<input/>", {
+			class: "dashboard-name title-input form-control",
 			type: "text",
-			id: "dashboard-name",
 			name: "dashboard-name",
 			value: this.dashboard.get("name"),
 			placeholder: "Dashboard name"
 		})
-		var list = $("<ul/>", {
+		this.list = $("<ul/>", {
 			class: "navigation",
 			id: "rsp-list"
-		})		
-		this.$el.find(".title").append(title)
-		this.$el.find(".content").append(list)
+		})
+		this.content = $("<div/>", {
+			class: "content"
+		})
+		this.menuContent = $("<div/>", {
+			class: "menu-content text-center",
+			html: "<button class='save-button btn btn-block btn-primary'>Save</button>"
+		})
+		this.$el.append(this.title)
+		this.title.append(this.titleInput)
+		this.$el.append(this.list)
 		_.each(this.rspCollection.models, function(item) {
-			list.append(this.renderRSP(item).el)
+			this.list.append(this.renderRSP(item).el)
 		}, this)
+		this.$el.append(this.menuContent)
 	},
 
 	renderRSP: function(item) {
@@ -304,14 +306,12 @@ var SidebarView = Backbone.View.extend({
 	},
 
 	updateTitle: function (e) {
-		this.dashboard.set("name", $("#dashboard-name").val())
+		var a = this.titleInput.val()
+		this.dashboard.set({name: a})
 	},
 
-	updateOnEnter: function(e) {
-      if (e.keyCode == 13) this.updateTitle();
-    },
-
     save: function() {
+    	this.updateTitle()
     	this.dashboard.save()
     }
 })
@@ -333,23 +333,28 @@ var Dashboard = Backbone.AssociatedModel.extend({
 })
 
 var DashboardView = Backbone.View.extend({
-	el: "#dashboard-view",
 
-	initialize: function(dashboard) {
-		this.dashboard = dashboard
+	initialize: function(options) {
 		this.dashboardItemViews = []
 		
-		this.$el.sortable({
-			stop: function(event, ui) {
-				var i = ui.item.index()
-	            ui.item.find(".contains").trigger('dropped', i)
-        	}
-		})
+		// Avoid needing jquery ui in tests
+		if (this.$el.sortable) {
+			this.$el.sortable({
+				items: "> .dashboarditem",
+				// placeholder: "dashboarditem-placeholder ui-corner-all",
+				stop: function(event, ui) {
+					ui.item.trigger('drop');
+	        	}
+			})
+		}
 
-		_.each(this.dashboard.get("items").models, this.addDashboardItem, this)
+		_.each(this.model.get("items").models, this.addDashboardItem, this)
 
-		this.dashboard.get("items").on("add", this.addDashboardItem, this)
-		this.dashboard.get("items").on("remove", this.removeDashboardItem, this)
+		this.model.get("items").on("add", this.addDashboardItem, this)
+		this.model.get("items").on("add", this.updateOrders, this)
+		this.model.get("items").on("remove", this.removeDashboardItem, this)
+		this.model.get("items").on("remove", this.updateOrders, this)
+		this.model.get("items").on("orderchange", this.updateOrders,this)
 	},
 
 	addDashboardItem: function(model) {
@@ -366,5 +371,17 @@ var DashboardView = Backbone.View.extend({
 		})
 		viewsToRemove.forEach(function(view) { view.remove() })
 		this.dashboardItemViews = _.without(this.dashboardItemViews, viewsToRemove)
+	},
+
+	updateOrders: function() {
+		_.each(this.dashboardItemViews, function(item) {
+				item.model.set("ord", item.$el.index())
+		},this)
 	}
 })
+
+exports.Dashboard = Dashboard
+exports.DashboardView = DashboardView
+exports.SidebarView = SidebarView
+
+})(typeof(exports) !== 'undefined' ? exports : window)

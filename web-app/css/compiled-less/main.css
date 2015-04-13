@@ -16516,9 +16516,6 @@ body.build-page #content-wrapper {
 .login-page.show-sign-in .btn-sign-up {
   display: inline-block;
 }
-.dashboard-edit #main-menu .navigation {
-  padding-top: 0;
-}
 .remote-tabs-content {
   outline: none;
 }
@@ -16537,6 +16534,34 @@ body.build-page #content-wrapper {
   z-index: 101;
   top: 50%;
   left: 50%;
+}
+#main-menu .navigation .uichannel.checked .menu-icon.fa-square {
+  display: none;
+}
+#main-menu .navigation .uichannel:not(.checked) .menu-icon.fa-check-square {
+  display: none;
+}
+#main-menu .mm-dropdown > ul > li > a.ui-title {
+  padding-left: 30px;
+}
+.selected-theme #main-menu .navigation .uichannel.checked a {
+  color: #e95b15;
+}
+#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit {
+  display: none;
+}
+#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar {
+  display: none;
+}
+#dashboard-view {
+  height: 100%;
+  padding: 0px;
+  list-style-type: none;
+}
+.dashboarditem-placeholder {
+  border: 1px dotted black;
+  margin: 0 1em 1em 0;
+  height: 50px;
 }
 .widget-notifications .notification {
   position: relative;

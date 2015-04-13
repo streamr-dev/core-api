@@ -67,7 +67,7 @@ class DashboardController {
 			id: dashboard.id,
 			name: dashboard.name,
 			items: dashboard.items.collect {item->
-				[id:item.id, title: item.title, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
+				[id:item.id, title: item.title, ord:item.ord, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
 			}
 		]
 

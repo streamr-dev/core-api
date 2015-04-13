@@ -13,6 +13,8 @@ class Dashboard {
 	Date dateCreated
 	Date lastUpdated
 	
+	SortedSet items
+	
 	static hasMany = [items: DashboardItem]
 	
 	static constraints = {
