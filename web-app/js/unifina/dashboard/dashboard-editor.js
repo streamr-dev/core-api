@@ -196,7 +196,7 @@ var DashboardItemView = Backbone.View.extend({
 			this.initSize()
 			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
 		}
-		else if(type == 167) {
+		else if(type == 196) {
 			if(!this.model.get("size"))
 				this.model.set("size", "medium")
 			this.initSize()
