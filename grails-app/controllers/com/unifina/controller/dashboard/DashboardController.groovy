@@ -3,12 +3,8 @@ package com.unifina.controller.dashboard
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import java.security.AccessControlException
-
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.UiChannel
 
 @Secured(["ROLE_ADMIN"])
 class DashboardController {
@@ -26,46 +22,18 @@ class DashboardController {
 		return [dashboards:dashboards]
 	}
 	
-	// def create() {
-	// 	def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
-	// 	def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
-	// 		UiChannel found = rsp.uiChannels.find {UiChannel ui->
-	// 			ui.module
-	// 		}
-	// 		return found!=null
-	// 	}
-	// 	Dashboard dashboard = new Dashboard()
-	// 	return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
-	// }
-	
-	def save() {
-		Dashboard dashboard = new Dashboard()
-		dashboard.name = params.name
-		dashboard.user = springSecurityService.currentUser
-		
-		List uiChannels = UiChannel.findAllByIdInList(params.list("uiChannels"))
-	
-		uiChannels.each {UiChannel uiChannel->
-			if (!unifinaSecurityService.canAccess(uiChannel))
-				throw new AccessControlException("Access to $uiChannel denied for user $springSecurityService.currentUser")
-			
-			DashboardItem item = new DashboardItem()
-			item.uiChannel = uiChannel
-			item.title = params["title_"+uiChannel.id]
-			
-			dashboard.addToItems(item)
+	def create() {
+		if (request.method=="GET")
+			Dashboard dashboard = new Dashboard()
+		else {
+			Dashboard dashboard = new Dashboard()
+			dashboard.name = params.name
+			dashboard.user = springSecurityService.currentUser
+			dashboard.save(flush:true, failOnError:true)
+			redirect(action:"show", id:dashboard.id, params:[edit:'true'])
 		}
 		
-		dashboard.save(flush:true, failOnError:true)
-		
-		redirect(action: "show", id: dashboard.id)
 	}
-	
-	// def edit() {
-	// 	Dashboard dashboard = Dashboard.get(params.id)
-	// 	return [dashboard:dashboard, serverUrl: grailsApplication.config.streamr.ui.server]
-	// }
-
 	
 	def getJson() {
 		Dashboard dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
@@ -84,16 +52,17 @@ class DashboardController {
 		return [serverUrl: grailsApplication.config.streamr.ui.server, dashboard:dashboard]
 	}
 	
-	def delete = {
+	def delete() {
 		def dashboardInstance = Dashboard.get(params.id)
 		if (dashboardInstance) {
 			try {
+				DashboardItem.executeUpdate("delete from DashboardItem di where di.dashboard = ?", [dashboardInstance])
 				dashboardInstance.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboardInstance.name])}"
 				redirect(action: "list")
 			}
 			catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboardInstance.name])}"
 				redirect(action: "show", id: params.id)
 			}
 		}
@@ -107,43 +76,48 @@ class DashboardController {
 		Map dashboardMap = request.JSON
 		Dashboard dashboard = Dashboard.get(dashboardMap.id)
 		
-		dashboard.properties = dashboardMap
-		
-		// collect dashboard items into a map by id
-		Map itemsById = [:]
-		dashboard.items.findAll {it.id!=null}.each { 
-			itemsById[it.id] = it
-		}
-		
-		Collection toBeRemoved = []
-		Collection toBeAdded = []
-		
-		
-		dashboard.items.each {
-			if(itemsById[it.id] == null){
-				toBeRemoved.add(it)
+		if (dashboard) {
+			dashboard.properties = dashboardMap
+			
+			// collect dashboard items into a map by id
+			Map itemsById = [:]
+			dashboard.items?.findAll {it.id!=null}.each { 
+				itemsById[it.id] = it
 			}
-			else {
-				it.properties = itemsById[it.id]
+			
+			Collection toBeRemoved = []
+			Collection toBeAdded = []
+			
+			
+			dashboard.items?.each {
+				if(itemsById[it.id] == null){
+					toBeRemoved.add(it)
+				}
+				else {
+					it.properties = itemsById[it.id]
+				}
 			}
+			
+			dashboardMap.items?.findAll {it.id==null}.each {
+				DashboardItem item = new DashboardItem(it)
+				//item.uiChannel = UiChannel.load(it.uiChannel.id)
+				toBeAdded.add(it)
+			}
+			
+			toBeRemoved.each {
+				dashboard.removeFromItems(it)
+			}
+			
+			toBeAdded.each {
+				dashboard.addToItems(it)
+			}
+			
+			dashboard.save(flush:true, failOnError:true)
+			
+			render ([success:true] as JSON)
 		}
-		
-		dashboardMap.items.findAll {it.id==null}.each {
-			DashboardItem item = new DashboardItem(it)
-			//item.uiChannel = UiChannel.load(it.uiChannel.id)
-			toBeAdded.add(it)
+		else {
+			render(status: 404, text: "Dashboard $params.id not found!")
 		}
-		
-		toBeRemoved.each {
-			dashboard.removeFromItems(it)
-		}
-		
-		toBeAdded.each {
-			dashboard.addToItems(it)
-		}
-		
-		dashboard.save(flush:true, failOnError:true)
-		
-		redirect(action: "edit", id: params.id)
 	}
 }

@@ -5,11 +5,13 @@ var jsdom = require("jsdom")
 var $ = require('jquery')(jsdom.jsdom().parentWindow);
 var _ = require('underscore')
 var Backbone = require('backbone-associations')
+var Toolbar = require('../toolbar/toolbar')
 
 global.$ = $
 global._ = _
 global.Backbone = Backbone
 Backbone.$ = $
+// global.Toolbar = Toolbar
 
 var templates = fs.readFileSync('grails-app/views/dashboard/_dashboard-template.gsp','utf8') // read content of _dashboard-template.gsp
 assert.equal($("body").length, 1)

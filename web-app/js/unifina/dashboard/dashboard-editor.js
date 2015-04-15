@@ -160,11 +160,11 @@ var DashboardItemView = Backbone.View.extend({
 	titlebarTemplate: _.template($("#titlebar-template").html()),
 
 	events: {
-		"click .delete" : "delete",
+		"click .delete-btn" : "delete",
 		"click .edit" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
 		"keypress .name-input" : "updateOnEnter",
-		"blur .name-input" : "toggleEdit",
+		"blur .name-input" : "blurEdit",
 		"click .expand-btn" : "makeBigger",
 		"click .compress-btn" : "makeSmaller"
 	},
@@ -174,9 +174,6 @@ var DashboardItemView = Backbone.View.extend({
 		this.model.on("remove", this.remove, this)
 		this.$el.on("drop", function(e, index) {
 			_this.model.collection.trigger("orderchange")
-		})
-		$("body").on("classChange", function() {
-			_this.$el.find(".panel-heading-controls").toggle()
 		})
 	},
 
@@ -217,12 +214,17 @@ var DashboardItemView = Backbone.View.extend({
 	},
 
 	toggleEdit: function () {
+		_this = this
+		//If the item is in editing mode update 'title' and remove class 'editing' 
 		if(this.$el.hasClass("editing")){
 			this.model.set("title", this.$el.find(".name-input").val())
 			this.$el.removeClass("editing")
+		//If not, add class 'editing' and focus into the name-input (focusing because of the blur-event)
 		} else {
 			this.$el.addClass("editing")
-			this.$el.find(".name-input").focus()
+			setTimeout(function(){
+			    _this.$el.find(".name-input").focus();
+			}, 0);
 		}
 
 		this.$el.find(".title").empty()
@@ -231,6 +233,28 @@ var DashboardItemView = Backbone.View.extend({
 
 	updateOnEnter: function(e) {
       if (e.keyCode == 13) this.toggleEdit();
+    },
+
+    blurEdit: function(e) {
+    	if($(e.relatedTarget).hasClass("expand-btn")) {
+    		this.makeBigger()
+    		setTimeout(function(){
+			    _this.$el.find(".name-input").focus();
+			}, 0);
+		}
+    	else if($(e.relatedTarget).hasClass("compress-btn")) {
+    		this.makeSmaller()
+    		setTimeout(function(){
+			    _this.$el.find(".name-input").focus();
+			}, 0);
+		}
+    	else if($(e.relatedTarget).hasClass("delete-btn")) {
+    		this.delete()
+    	}
+    	else {
+    		this.toggleEdit()
+    	}
+    	
     },
 
     initSize: function() {
@@ -280,14 +304,45 @@ var SidebarView = Backbone.View.extend({
 		this.listenTo(this.dashboard.get("items"), "remove", function(DI){
 			this.uncheck(DI.get("uiChannel").id)
 		})
-		$("#main-menu-toggle").click(function () {
-    		$("body").trigger("classChange")
+		var _this = this
+		this.dashboard.get("items").on("change", function () {
+			_this.dashboard.saved = false
 		})
-		if(!options.edit) {
-			this.triggerClassChange()
-			$("body").addClass("mmc")
-		}
+		$("#main-menu-toggle").click(function () {
+			if($("body").hasClass("editing"))
+				_this.setEditMode(false)
+			else
+				_this.setEditMode(true)
+		})
+		this.setEditMode(options.edit)
 		this.render()
+		this.$el.find(".dashboard-name").change(function () {
+			_this.dashboard.saved = false
+		})
+
+		this.dashboard.on('invalid', function(error) {
+			console.log(error)
+			$.pnotify({
+				type: 'error',
+        		title: 'Invalid value',
+	        	text: _this.dashboard.validationError,
+	        	delay: 4000
+    		});
+		})
+	},
+
+	setEditMode: function (active) {
+		if(active){
+			$("body").addClass("mme")
+			$("body").removeClass("mmc")
+			$("body").addClass("editing")
+		} else {
+			$("body").addClass("mmc")
+			$("body").removeClass("mme")
+			$("body").removeClass("editing")
+		}
+
+    	$("body").trigger("classChange")
 	},
 
 	render: function () {
@@ -310,23 +365,8 @@ var SidebarView = Backbone.View.extend({
 			class: "navigation",
 			id: "rsp-list"
 		})
-		this.content = $("<div/>", {
-			class: "content"
-		})
-		this.menuContent = $("<div/>", {
-			class: "menu-content text-center",
-		})
-		this.saveButton = $("<button/>", {
-			class: 'save-button btn btn-block btn-primary',
-			title: 'Save dashboard',
-			text: 'Save'
-		})
-		this.deleteButton = $("<button/>", {
-			class: 'delete-button btn btn-block btn-default confirm',
-			id: 'deleteButton',
-			title: 'Delete dashboard',
-			text: 'Delete'
-		})
+		var buttonTemplate = _.template($("#button-template").html())
+		this.buttons = $(buttonTemplate(this.dashboard.toJSON()))
 		this.$el.append(this.title)
 		this.title.append(this.titleInput)
 		this.$el.append(this.list)
@@ -334,9 +374,8 @@ var SidebarView = Backbone.View.extend({
 		_.each(this.rspCollection.models, function(item) {
 			this.list.append(this.renderRSP(item).el)
 		}, this)
-		this.$el.append(this.menuContent)
-		this.menuContent.append(this.saveButton)
-		this.menuContent.append(this.deleteButton)
+		this.$el.append(this.buttons)
+		new Toolbar(this.buttons.find("form"))
 	},
 
 	renderRSP: function(item) {
@@ -395,8 +434,30 @@ var SidebarView = Backbone.View.extend({
 	},
 
     save: function() {
+    	var _this = this
     	this.updateTitle()
-    	this.dashboard.save()
+
+    	this.dashboard.save({}, {
+    		success: function() {
+	    		_this.dashboard.saved = true
+
+			    $.pnotify({
+					type: 'success',
+	        		title: 'Saved!',
+		        	text: 'Dashboard ' +_this.dashboard.get("name")+ ' saved successfully',
+		        	delay: 4000
+				});
+	    	},
+	    	error: function(model, response) {
+		    	$.pnotify({
+					type: 'error',
+	        		title: 'Error while saving',
+		        	text: response.responseText,
+		        	delay: 4000,
+		        	// addClass: "alert alert-danger alert-dark"
+	    		});
+	    	}
+	    })
     },
 
     triggerClassChange: function () {
@@ -417,14 +478,23 @@ var Dashboard = Backbone.AssociatedModel.extend({
 	defaults: {
 		name: "",
 		items: []
+	},
+
+	validate: function() {
+		if (!this.get("name"))
+			return "Dashboard name can't be empty"
+	},
+
+	initialize: function (){
+		this.saved = true
 	}
 })
 
 var DashboardView = Backbone.View.extend({
 
 	initialize: function(options) {
+		var _this = this
 		this.dashboardItemViews = []
-		
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
 			this.$el.sortable({
@@ -444,6 +514,23 @@ var DashboardView = Backbone.View.extend({
 		this.model.get("items").on("remove", this.removeDashboardItem, this)
 		this.model.get("items").on("remove", this.updateOrders, this)
 		this.model.get("items").on("orderchange", this.updateOrders,this)
+
+		$("body").on("classChange", function() {
+			if(!($("body").hasClass("editing"))) {
+				if(!_this.model.saved){
+					$.pnotify({
+						type: 'error',
+		        		title: 'Not saved',
+			        	text: 'The dashboard has changes which are not saved',
+			        	delay: 4000,
+			        	// addClass: "alert alert-danger alert-dark"
+		    		});
+				}
+				_this.ableSortable()
+			} else {
+				_this.disableSortable()
+			}
+		})
 	},
 
 	addDashboardItem: function(model) {
@@ -466,6 +553,18 @@ var DashboardView = Backbone.View.extend({
 		_.each(this.dashboardItemViews, function(item) {
 				item.model.set("ord", item.$el.index())
 		},this)
+	},
+
+	ableSortable: function() {
+		if (this.$el.sortable) {
+			this.$el.sortable("option", "disabled", false)
+		}
+	},
+
+	disableSortable: function() {
+		if (this.$el.sortable) {
+			this.$el.sortable("option", "disabled", true)	
+		}
 	}
 })
 

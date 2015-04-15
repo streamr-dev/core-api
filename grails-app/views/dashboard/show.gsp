@@ -34,7 +34,7 @@
 					
 					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
 						var sidebar = new SidebarView({
-							edit: true,
+							edit: "${params.edit}",
 							dashboard: dashboard, 
 							RSPs: rspJson,
 							el: $("#sidebar-view")
@@ -42,9 +42,6 @@
 					})
 				})
 
-				
-				
-				
 				// Bind slimScroll to main menu
 			    $('#main-menu-inner').slimScroll({
 			      height: '100%'
@@ -54,7 +51,7 @@
 		</r:script>
 </head>
 
-<body class="main-menu-fixed dashboard-edit">
+<body class="main-menu-fixed dashboard-edit mmc">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
 			<div id="sidebar-view" class=""></div>
