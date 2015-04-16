@@ -132,17 +132,19 @@ var DashboardItem = Backbone.AssociatedModel.extend({
 		ord: "",
 		size: ""
 	},
-	makeBigger: function() {
-		if(this.get("size") == "small")
-			this.set("size", "medium")
-		else if(this.get("size") == "medium")
-			this.set("size", "large")
-	},
-	makeSmaller: function() {
-		if(this.get("size") == "large")
-			this.set("size", "medium")
-		else if(this.get("size") == "medium")
+	makeSmall: function() {
+		if(this.get("size") != "small")
 			this.set("size", "small")
+	},
+
+	makeMedium: function() {
+		if(this.get("size") != "medium")
+			this.set("size", "medium")
+	},
+
+	makeLarge: function() {
+		if(this.get("size") != "large")
+			this.set("size", "large")
 	}
 })
 
@@ -161,12 +163,15 @@ var DashboardItemView = Backbone.View.extend({
 
 	events: {
 		"click .delete-btn" : "delete",
-		"click .edit" : "toggleEdit",
+		"click .titlebar-clickable" : "toggleEdit",
+		"click .edit-btn" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
 		"keypress .name-input" : "updateOnEnter",
 		"blur .name-input" : "blurEdit",
-		"click .expand-btn" : "makeBigger",
-		"click .compress-btn" : "makeSmaller"
+		"click .expand-btn" : "toggleSizeButtons",
+		"change .make-small-btn" : "makeSmall",
+		"change .make-medium-btn" : "makeMedium",
+		"change .make-large-btn" : "makeLarge"
 	},
 
 	initialize: function(){
@@ -187,25 +192,25 @@ var DashboardItemView = Backbone.View.extend({
 		if(type == 67) {
 			if(!this.model.get("size"))
 				this.model.set("size", "medium")
-			this.initSize()
 			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
 		}
 		else if(type == 145) {
 			if(!this.model.get("size"))
 				this.model.set("size", "small")
-			this.initSize()
 			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
 		}
 		else if(type == 196) {
 			if(!this.model.get("size"))
 				this.model.set("size", "medium")
-			this.initSize()
 			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
 		else {
 			throw new Error("Module id not recognized!");
 		}
-		this.$el.find(".title").append(this.titlebarTemplate(this.model.toJSON()))
+		var titlebar = this.titlebarTemplate(this.model.toJSON())
+		this.$el.find(".title").append(titlebar)
+		this.initSize()
+		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("active")
 		return this
 	},
 
@@ -218,6 +223,8 @@ var DashboardItemView = Backbone.View.extend({
 		//If the item is in editing mode update 'title' and remove class 'editing' 
 		if(this.$el.hasClass("editing")){
 			this.model.set("title", this.$el.find(".name-input").val())
+			this.$el.find(".titlebar").html(this.model.get("title"))
+			this.$el.find(".titlebar-clickable").html(this.model.get("title"))
 			this.$el.removeClass("editing")
 		//If not, add class 'editing' and focus into the name-input (focusing because of the blur-event)
 		} else {
@@ -226,9 +233,6 @@ var DashboardItemView = Backbone.View.extend({
 			    _this.$el.find(".name-input").focus();
 			}, 0);
 		}
-
-		this.$el.find(".title").empty()
-		this.$el.find(".title").append(this.titlebarTemplate(this.model.toJSON()))
 	},
 
 	updateOnEnter: function(e) {
@@ -254,31 +258,44 @@ var DashboardItemView = Backbone.View.extend({
     	else {
     		this.toggleEdit()
     	}
-    	
     },
 
     initSize: function() {
     	this.$el.removeClass(this.smallClass+ " " +this.mediumClass+ " " +this.largeClass)
-    	if(this.model.get("size") == "small") {
+    	var size = this.model.get("size")
+    	if(size == "small") {
     		this.$el.addClass(this.smallClass)
-    	} else if(this.model.get("size") == "medium") {
+    	} else if(size == "medium") {
     		this.$el.addClass(this.mediumClass)
-    	} else if(this.model.get("size") == "large") {
+    	} else if(size == "large") {
     		this.$el.addClass(this.largeClass)
     	} else 
     		console.log("Module size not found")
-
     },
 
-    makeBigger: function() {
-    	this.model.makeBigger()
+	makeSmall: function() {
+    	this.model.makeSmall()
     	this.initSize()
+    	this.toggleSizeButtons()
     },
 
-    makeSmaller: function() {
-    	this.model.makeSmaller()
+	makeMedium: function() {
+		this.model.makeMedium()
+		this.initSize()
+    	this.toggleSizeButtons()
+    },
+
+    makeLarge: function() {
+    	this.model.makeLarge()
     	this.initSize()
+    	this.toggleSizeButtons()
+    },
+
+    toggleSizeButtons: function () {
+    	this.$el.find(".expand-btn").toggle()
+    	this.$el.find(".size-btn-group").fadeToggle()
     }
+    
 })
 
 var SidebarView = Backbone.View.extend({
@@ -516,19 +533,22 @@ var DashboardView = Backbone.View.extend({
 		this.model.get("items").on("orderchange", this.updateOrders,this)
 
 		$("body").on("classChange", function() {
+			//This is called after the classChange
+			//editing -> !editing
 			if(!($("body").hasClass("editing"))) {
 				if(!_this.model.saved){
 					$.pnotify({
-						type: 'error',
+						type: 'info',
 		        		title: 'Not saved',
 			        	text: 'The dashboard has changes which are not saved',
 			        	delay: 4000,
 			        	// addClass: "alert alert-danger alert-dark"
 		    		});
 				}
-				_this.ableSortable()
-			} else {
 				_this.disableSortable()
+			//!editing -> editing
+			} else {
+				_this.ableSortable()
 			}
 		})
 	},

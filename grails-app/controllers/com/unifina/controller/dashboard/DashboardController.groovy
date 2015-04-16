@@ -6,7 +6,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 
-@Secured(["ROLE_ADMIN"])
+@Secured(["ROLE_USER"])
 class DashboardController {
 	def grailsApplication
 	def springSecurityService

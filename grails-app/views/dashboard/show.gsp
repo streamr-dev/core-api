@@ -54,7 +54,7 @@
 <body class="main-menu-fixed dashboard-edit mmc">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
-			<div id="sidebar-view" class=""></div>
+			<div id="sidebar-view" class="scrollable"></div>
 		</div> 
 	</div>
 

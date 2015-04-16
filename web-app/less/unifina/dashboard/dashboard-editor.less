@@ -10,22 +10,31 @@
 .selected-theme #main-menu .navigation .uichannel.checked a {
 	color:@primary-color;
 }
-body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .panel-heading-controls {
+body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell {
+	.panel-heading-controls, .titlebar-clickable {
+		display:none;
+	}
+}
+body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .titlebar {
 	display:none;
 }
-#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit {
-	display:none;
+#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell {
+	.titlebar, .titlebar-clickable, .edit-btn {
+		display:none;
+	}
 }
-#dashboard-view .dashboarditem.small-size .contains .stat-panel .stat-row .stat-cell .titlebar .compress-btn,
-#dashboard-view .dashboarditem.small-size .contains .stat-panel .stat-row .stat-cell .titlebar-edit .compress-btn {
-	display:none;
+#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell {
+	.titlebar-edit, .close-edit {
+		display:none;
+	}
 }
-#dashboard-view .dashboarditem.large-size .contains .stat-panel .stat-row .stat-cell .titlebar .expand-btn,
-#dashboard-view .dashboarditem.large-size .contains .stat-panel .stat-row .stat-cell .titlebar-edit .expand-btn {
-	display:none;
-}
-#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar {
-	display:none;
+#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls {
+	label.btn.active {
+		color:#333333;
+	}
+	.size-btn-group {
+		display:none;
+	}
 }
 #dashboard-view {
 	height:100%;

@@ -108,7 +108,7 @@ $(document).ready(function() {
 	</g:if>
 	
 	$.pnotify.defaults.history = false;
-	$.pnotify.defaults.styling = "jqueryui";
+	$.pnotify.defaults.styling = "bootstrap";
 
 	$(SignalPath).on('error', function(error) {
 		console.error(error)

@@ -6,7 +6,7 @@
 </script>
 
 <script id="uichannel-template" type="text/template">
-        <a href="#" class="uichannel-title">
+        <a href="#" class="uichannel-title" id="uichannel_{{ id }}">
         <!--title="{{ id }}"-->
             <i class="menu-icon fa fa-square"></i>
             <i class="menu-icon fa fa-check-square"></i>
@@ -47,13 +47,21 @@
 <script id="titlebar-template" type="text/template">
         <div class="col-xs-7">
             <span class="titlebar">{{ title ? title : "&nbsp;" }}</span>
+            <span class="titlebar-clickable" title="Edit title">{{ title ? title : "&nbsp;" }}</span>
             <input class="titlebar-edit name-input form-control input-sm" type="text" value="{{ title }}" placeholder="Title" name="dashboard-item-name"></input>
         </div>
         <div class="panel-heading-controls text-left">
+            <button class="edit-btn btn btn-xs btn-outline dark" title="Edit title"><i class="fa fa-edit"></i></button>
             <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
-            <button class="compress-btn btn btn-xs btn-outline dark" title="Compress" ><i class="fa fa-compress"></i></button>
             <button class="expand-btn btn btn-xs btn-outline dark" title="Expand"><i class="fa fa-expand"></i></button>
-
+            <div class="size-btn-group btn-group btn-sm" data-toggle="buttons">
+                <label class="btn btn-sm btn-outline dark">
+                    <input type="radio" class="make-small-btn" title="Small">1</label>
+                <label class="btn btn-sm btn-outline dark">
+                    <input type="radio" class="make-medium-btn" title="Medium">2</label>
+                <label class="btn btn-sm btn-outline dark">
+                    <input type="radio" class="make-large-btn" title="Large">3</label>
+            </div>
             <button class="delete-btn btn btn-xs btn-outline dark" title="Remove"><i class="fa fa-times"></i></button>
         </div>
 </script>
