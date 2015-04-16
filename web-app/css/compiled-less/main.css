@@ -16551,6 +16551,9 @@ body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-ro
 body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .titlebar-clickable {
   display: none;
 }
+body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell {
+  overflow: visible;
+}
 body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .titlebar {
   display: none;
 }
@@ -16558,6 +16561,9 @@ body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .ti
 #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-clickable,
 #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .edit-btn {
   display: none;
+}
+#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-edit {
+  height: 20px;
 }
 #dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit,
 #dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .close-edit {
@@ -16568,6 +16574,12 @@ body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .ti
 }
 #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .size-btn-group {
   display: none;
+}
+#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .btn-group {
+  padding-top: 0px;
+}
+#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
+  opacity: 0;
 }
 #dashboard-view {
   height: 100%;

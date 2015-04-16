@@ -168,10 +168,9 @@ var DashboardItemView = Backbone.View.extend({
 		"click .close-edit" : "toggleEdit",
 		"keypress .name-input" : "updateOnEnter",
 		"blur .name-input" : "blurEdit",
-		"click .expand-btn" : "toggleSizeButtons",
-		"change .make-small-btn" : "makeSmall",
-		"change .make-medium-btn" : "makeMedium",
-		"change .make-large-btn" : "makeLarge"
+		"click .make-small-btn" : "makeSmall",
+		"click .make-medium-btn" : "makeMedium",
+		"click .make-large-btn" : "makeLarge"
 	},
 
 	initialize: function(){
@@ -210,7 +209,7 @@ var DashboardItemView = Backbone.View.extend({
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
 		this.$el.find(".title").append(titlebar)
 		this.initSize()
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("active")
+		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
 		return this
 	},
 
@@ -274,26 +273,24 @@ var DashboardItemView = Backbone.View.extend({
     },
 
 	makeSmall: function() {
+		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
     	this.model.makeSmall()
     	this.initSize()
-    	this.toggleSizeButtons()
+    	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
     },
 
 	makeMedium: function() {
+		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
 		this.model.makeMedium()
 		this.initSize()
-    	this.toggleSizeButtons()
+		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
     },
 
     makeLarge: function() {
+    	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
     	this.model.makeLarge()
     	this.initSize()
-    	this.toggleSizeButtons()
-    },
-
-    toggleSizeButtons: function () {
-    	this.$el.find(".expand-btn").toggle()
-    	this.$el.find(".size-btn-group").fadeToggle()
+    	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
     }
     
 })
@@ -515,6 +512,7 @@ var DashboardView = Backbone.View.extend({
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
 			this.$el.sortable({
+				cancel: ".non-draggable",
 				items: ".dashboarditem",
 				// placeholder: "dashboarditem-placeholder ui-corner-all",
 				stop: function(event, ui) {

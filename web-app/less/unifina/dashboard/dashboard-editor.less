@@ -15,12 +15,20 @@ body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-ro
 		display:none;
 	}
 }
-body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .titlebar {
-	display:none;
+body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell {
+	overflow:visible;
+}
+body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell {
+	.titlebar {
+		display:none;
+	}
 }
 #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell {
 	.titlebar, .titlebar-clickable, .edit-btn {
 		display:none;
+	}
+	.titlebar-edit {
+		height:20px;
 	}
 }
 #dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell {
@@ -34,6 +42,12 @@ body.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .ti
 	}
 	.size-btn-group {
 		display:none;
+	}
+	.btn-group {
+		padding-top:0px;
+	}
+	.dropdown-menu li:not(.checked) .fa {
+		opacity:0;
 	}
 }
 #dashboard-view {

@@ -37,11 +37,11 @@
 </script>
 
 <script id="streamr-heatmap-template" type="text/template">
-    <streamr-heatmap class="streamr-heatmap" channel="{{ uiChannel.id }}"></streamr-heatmap>
+    <streamr-heatmap class="streamr-heatmap non-draggable" channel="{{ uiChannel.id }}"></streamr-heatmap>
 </script>
 
 <script id="streamr-chart-template" type="text/template">
-    <streamr-chart class="streamr-chart" channel="{{ uiChannel.id }}"></streamr-chart>    
+    <streamr-chart class="streamr-chart non-draggable" channel="{{ uiChannel.id }}"></streamr-chart>    
 </script>
 
 <script id="titlebar-template" type="text/template">
@@ -51,18 +51,33 @@
             <input class="titlebar-edit name-input form-control input-sm" type="text" value="{{ title }}" placeholder="Title" name="dashboard-item-name"></input>
         </div>
         <div class="panel-heading-controls text-left">
-            <button class="edit-btn btn btn-xs btn-outline dark" title="Edit title"><i class="fa fa-edit"></i></button>
-            <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
-            <button class="expand-btn btn btn-xs btn-outline dark" title="Expand"><i class="fa fa-expand"></i></button>
-            <div class="size-btn-group btn-group btn-sm" data-toggle="buttons">
-                <label class="btn btn-sm btn-outline dark">
-                    <input type="radio" class="make-small-btn" title="Small">1</label>
-                <label class="btn btn-sm btn-outline dark">
-                    <input type="radio" class="make-medium-btn" title="Medium">2</label>
-                <label class="btn btn-sm btn-outline dark">
-                    <input type="radio" class="make-large-btn" title="Large">3</label>
-            </div>
-            <button class="delete-btn btn btn-xs btn-outline dark" title="Remove"><i class="fa fa-times"></i></button>
+                <button class="edit-btn btn btn-xs btn-outline dark" title="Edit title"><i class="fa fa-edit"></i></button>
+                <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
+                <div class="btn-group btn-group-xs">
+                    <button data-toggle="dropdown" type="button" class="btn btn-outline dark dropdown-toggle" >
+                        <span class="fa fa-expand"></span>
+                        &nbsp;
+                        <span class="fa fa-caret-down"></span>
+                    </button>
+                    <ul class="dropdown-menu pull-right">
+                        <li>
+                            <a href="#" class="make-small-btn">
+                                <i class="fa fa-check"></i> Small 
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="make-medium-btn">
+                                <i class="fa fa-check"></i> Medium
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="make-large-btn">
+                                <i class="fa fa-check"></i> Large
+                            </a>
+                        </li>
+                    </ul>
+                </div>   
+                <button class="delete-btn btn btn-xs btn-outline dark" title="Remove"><i class="fa fa-times"></i></button>
         </div>
 </script>
 
