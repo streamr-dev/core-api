@@ -86,7 +86,7 @@
 					},
 					success: function(data) {
 						if (!data.success) {
-							handleError(data.error)
+							console.log("Error while communicating with widget: "+data.error)
 						}
 						else if (callback)
 							callback(data.response)
