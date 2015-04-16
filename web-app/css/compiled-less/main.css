@@ -16547,6 +16547,13 @@ body.build-page #content-wrapper {
 .selected-theme #main-menu .navigation .uichannel.checked a {
   color: #e95b15;
 }
+body.editing #dashboard-view .dashboarditem .stat-panel {
+  overflow: auto;
+}
+body.editing #dashboard-view .dashboarditem .stat-panel .title.stat-cell {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
 body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .panel-heading-controls,
 body:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .titlebar-clickable {
   display: none;

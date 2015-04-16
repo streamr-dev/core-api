@@ -40,6 +40,10 @@
 							el: $("#sidebar-view")
 						})
 					})
+					$(window).bind('beforeunload', function(){
+						if(!dashboard.saved)
+							return 'The dashboard has changes which are not saved'
+					});
 				})
 
 				// Bind slimScroll to main menu

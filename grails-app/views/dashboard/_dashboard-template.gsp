@@ -54,12 +54,12 @@
                 <button class="edit-btn btn btn-xs btn-outline dark" title="Edit title"><i class="fa fa-edit"></i></button>
                 <button class="close-edit btn btn-xs btn-outline dark" title="Ready"><i class="fa fa-check"></i></button>
                 <div class="btn-group btn-group-xs">
-                    <button data-toggle="dropdown" type="button" class="btn btn-outline dark dropdown-toggle" >
+                    <button data-toggle="dropdown" type="button" class="btn btn-outline dark dropdown-toggle" title="Edit size">
                         <span class="fa fa-expand"></span>
                         &nbsp;
                         <span class="fa fa-caret-down"></span>
                     </button>
-                    <ul class="dropdown-menu pull-right">
+                    <ul class="dropdown-menu">
                         <li>
                             <a href="#" class="make-small-btn">
                                 <i class="fa fa-check"></i> Small 

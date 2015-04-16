@@ -328,7 +328,9 @@ var SidebarView = Backbone.View.extend({
 			else
 				_this.setEditMode(true)
 		})
-		this.setEditMode(options.edit)
+		if(this.dashboard.get("items").models.length)
+			this.setEditMode(options.edit)
+		else this.setEditMode(true)
 		this.render()
 		this.$el.find(".dashboard-name").change(function () {
 			_this.dashboard.saved = false
