@@ -29,7 +29,7 @@
 
 				    dashboard.get("items").on("remove", function (model) {
 						var client = document.getElementById("client")
-						client.streamrClient.unsubscribe([model.get("uiChannel").id])
+						client.streamrClient.unsubscribe(model.get("uiChannel").id)
 					})
 					
 					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
