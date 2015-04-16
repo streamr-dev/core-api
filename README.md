@@ -16,6 +16,26 @@ Shared functionality between different actual applications (Streamr webapp, Algo
 
 This allows for app-specific configuration and extensions to reside at the top level, with shared core functionality in this plugin.
 
+This plugin is used in the app-level projects `unifina-trading` and `streamr-webapp`. Both projects contain this repository in the `plugins/unifina-core` folder as a Git submodule. This allows you to easily develop and test the app against development versions of the core plugin.
+
+## Setting up the development environment
+
+- Install the Grails version required by the project (currently 2.3.7)
+- Add the Grails `bin` directory to `PATH`
+- You may also want to install `GGTS` (an Eclipse-based IDE for Groovy/Grails). Give it more memory by editing GGTS.ini and editing the -Xmx value!
+- Set the `GRAILS_HOME` and `JAVA_HOME` environment variables
+- Checkout the top-level project(s) you need (`unifina-trading` or `streamr-webapp`)
+- Do a `git submodule update --init`, which will pull this core plugin as well as other submodules
+- Run the app in GGTS or on the command line with `grails run-app`
+
+## Testing
+
+`grails test-app` will run all tests. To run the core plugin tests, give the command in the `unifina-core` directory.
+
+There are also `mocha` tests for javascript components. Install <a href="https://nodejs.org/">node.js</a>, then do `npm install` in the `unifina-core` directory. Then you can `npm test`.
+
+The top-level apps may contain functional tests (browser tests). Functional tests use Geb with <a href="https://code.google.com/p/selenium/wiki/ChromeDriver">chromedriver</a> and Google Chrome. You need to place the `chromedriver` executeble in your `PATH`, and set an environment variable `CHROMEDRIVER` to point to the executable.
+
 ## Webcomponents
 
 A number of core webcomponents are available at `/webcomponents/<component-name>.html` with liberal CORS policy. An example of using them:
