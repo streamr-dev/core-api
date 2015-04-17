@@ -152,6 +152,22 @@ describe('dashboard-editor', function() {
 			assert(dashboard.get("items").models[0].get("title") == "test-name")
 		})
 
+		it('must also edit the title by clicking titlebar and blurring', function () {
+			//dashboarditem doesn't have class'editing' (titlebar-edit shouldn't be visible)
+			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
+			
+			$(dashboardView.$el.children()[0]).find(".titlebar-clickable").click()
+			
+			//dashboarditem has class 'editing' (titlebar-edit should turn visible)
+			assert($(dashboardView.$el.children()[0]).hasClass("editing"))			
+			
+			$(dashboardView.$el.children()[0]).find(".name-input").val("test-name")
+			$($(dashboardView.$el.children()[0]).find(".name-input")).trigger("focusout")
+			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
+			//should change the dashboarditem's title
+			assert(dashboard.get("items").models[0].get("title") == "test-name")
+		})
+
 		it('must also work with enter', function () {
 			//dashboarditem doesn't have class'editing' (titlebar-edit shouldn't be visible)
 			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
@@ -166,23 +182,27 @@ describe('dashboard-editor', function() {
 			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
 		})
 
-		// it('must change the size by the buttons', function () {
-		// 	assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
+		it('must change the size from the dropdown', function () {
+			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
 
-		// 	$(dashboardView.$el.children()[0]).click()
-		// 	assert($($(dashboardView.$el.children()[0])).hasClass("medium-size"))
+			$(dashboardView.$el.children()[0]).click()
+			assert($($(dashboardView.$el.children()[0])).hasClass("medium-size"))
 
-		// 	$(dashboardView.$el.children()[0]).find(".btn.edit-btn").click()
-		// 	$(dashboardView.$el.children()[0]).find(".expand-btn").click()
-		// 	assert(!($($(dashboardView.$el.children()[0])).hasClass("medium-size")))
-		// 	assert($(dashboardView.$el.children()[0]).hasClass("large-size"))
+			$(dashboardView.$el.children()[0]).find(".dropdown-toggle").click()
+			$(dashboardView.$el.children()[0]).find(".make-large-btn").click()
+			assert(!($($(dashboardView.$el.children()[0])).hasClass("medium-size")))
+			assert($(dashboardView.$el.children()[0]).hasClass("large-size"))
 
-		// 	$(dashboardView.$el.children()[0]).find(".compress-btn").click()
-		// 	$(dashboardView.$el.children()[0]).find(".compress-btn").click()
-		// 	assert(!($($(dashboardView.$el.children()[0])).hasClass("large-size")))
-		// 	assert(!($($(dashboardView.$el.children()[0])).hasClass("medium-size")))
-		// 	assert($(dashboardView.$el.children()[0]).hasClass("small-size"))
-		// })
+			$(dashboardView.$el.children()[0]).find(".dropdown-toggle").click()
+			$(dashboardView.$el.children()[0]).find(".make-small-btn").click()
+			assert(!($($(dashboardView.$el.children()[0])).hasClass("large-size")))
+			assert($(dashboardView.$el.children()[0]).hasClass("small-size"))
+
+			$(dashboardView.$el.children()[0]).find(".dropdown-toggle").click()
+			$(dashboardView.$el.children()[0]).find(".make-medium-btn").click()
+			assert(!($($(dashboardView.$el.children()[0])).hasClass("small-size")))
+			assert($(dashboardView.$el.children()[0]).hasClass("medium-size"))
+		})
 	})
 
 	describe("Sidebar", function() {

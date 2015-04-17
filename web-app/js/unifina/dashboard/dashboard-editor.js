@@ -166,8 +166,8 @@ var DashboardItemView = Backbone.View.extend({
 		"click .titlebar-clickable" : "toggleEdit",
 		"click .edit-btn" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
-		"keypress .name-input" : "updateOnEnter",
-		"blur .name-input" : "blurEdit",
+		"keypress .name-input" : "toggleEdit",
+		"blur .name-input" : "toggleEdit",
 		"click .make-small-btn" : "makeSmall",
 		"click .make-medium-btn" : "makeMedium",
 		"click .make-large-btn" : "makeLarge"
@@ -217,47 +217,37 @@ var DashboardItemView = Backbone.View.extend({
 		this.model.collection.remove(this.model)
 	},
 
-	toggleEdit: function () {
+	toggleEdit: function (e) {
 		_this = this
-		//If the item is in editing mode update 'title' and remove class 'editing' 
-		if(this.$el.hasClass("editing")){
-			this.model.set("title", this.$el.find(".name-input").val())
-			this.$el.find(".titlebar").html(this.model.get("title"))
-			this.$el.find(".titlebar-clickable").html(this.model.get("title"))
-			this.$el.removeClass("editing")
-		//If not, add class 'editing' and focus into the name-input (focusing because of the blur-event)
-		} else {
-			this.$el.addClass("editing")
-			setTimeout(function(){
-			    _this.$el.find(".name-input").focus();
-			}, 0);
+		_this.editOff = function () {
+			if(this.$el.hasClass("editing")){
+					this.model.set("title", this.$el.find(".name-input").val())
+					this.$el.find(".titlebar").html(this.model.get("title"))
+					this.$el.find(".titlebar-clickable").html(this.model.get("title"))
+					this.$el.removeClass("editing")
+				}
 		}
+		_this.editOn = function() {
+			if(!(this.$el.hasClass("editing"))){
+					this.$el.addClass("editing")
+					setTimeout(function(){
+					    _this.$el.find(".name-input").focus();
+					}, 0);
+				}
+		}
+		if(e.type == "click") {
+			if($(e.currentTarget).hasClass("edit-btn") || $(e.currentTarget).hasClass("titlebar-clickable")) {
+				_this.editOn()
+			} else if($(e.currentTarget).hasClass("close-edit")){
+				_this.editOff()
+			}
+		} else if(e.type == "focusout" || e.type == "blur"){ //='blur'
+			_this.editOff()
+		} else if(e.keyCode == 13) {
+			_this.editOff()
+		}
+			
 	},
-
-	updateOnEnter: function(e) {
-      if (e.keyCode == 13) this.toggleEdit();
-    },
-
-    blurEdit: function(e) {
-    	if($(e.relatedTarget).hasClass("expand-btn")) {
-    		this.makeBigger()
-    		setTimeout(function(){
-			    _this.$el.find(".name-input").focus();
-			}, 0);
-		}
-    	else if($(e.relatedTarget).hasClass("compress-btn")) {
-    		this.makeSmaller()
-    		setTimeout(function(){
-			    _this.$el.find(".name-input").focus();
-			}, 0);
-		}
-    	else if($(e.relatedTarget).hasClass("delete-btn")) {
-    		this.delete()
-    	}
-    	else {
-    		this.toggleEdit()
-    	}
-    },
 
     initSize: function() {
     	this.$el.removeClass(this.smallClass+ " " +this.mediumClass+ " " +this.largeClass)
@@ -514,7 +504,7 @@ var DashboardView = Backbone.View.extend({
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
 			this.$el.sortable({
-				cancel: ".non-draggable",
+				cancel: ".non-draggable, .titlebar-edit",
 				items: ".dashboarditem",
 				// placeholder: "dashboarditem-placeholder ui-corner-all",
 				stop: function(event, ui) {

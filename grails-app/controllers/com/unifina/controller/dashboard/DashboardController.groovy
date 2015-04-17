@@ -30,7 +30,7 @@ class DashboardController {
 			dashboard.name = params.name
 			dashboard.user = springSecurityService.currentUser
 			dashboard.save(flush:true, failOnError:true)
-			redirect(action:"show", id:dashboard.id, params:[edit:'true'])
+			redirect(action:"show", id:dashboard.id)
 		}
 		
 	}
