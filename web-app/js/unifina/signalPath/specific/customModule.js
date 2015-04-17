@@ -22,70 +22,111 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	addStuffToDiv();
 	
+	var dialogTemplate = '<div class="codeWindow" style="width:600px; height:400px">'+
+							'<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'+
+							  '<div class="modal-dialog">'+
+							    '<div class="modal-content">'+
+							      '<div class="modal-header">'+
+							        '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+							        '<h4 class="modal-title" id="myModalLabel">Code editor</h4>'+
+							      '</div>'+
+							      '<div class="modal-body">'+
+							      '</div>'+
+							      '<div class="modal-footer">'+
+							        '<button type="button" class="debug-btn btn btn-default">Show debug</button>'+
+							        '<button type="button" class="apply-btn btn btn-default">Apply</button>'+
+							        '<button type="button" class="close-btn btn btn-default" data-dismiss="modal">Close</button>'+
+							      '</div>'+
+							    '</div>'+
+							  '</div>'+
+							'</div>'+
+						'</div>'
+		
+	var debugTemplate = '<div class="debugWindow" style="display:none; width:400px; height:300px">'+
+							'<div class="modal" id="code-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">'+
+							  '<div class="modal-dialog">'+
+							    '<div class="modal-content">'+
+							      '<div class="modal-header">'+
+							        '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+							        '<h4 class="modal-title" id="myModalLabel">Debug messages</h4>'+
+							      '</div>'+
+							      '<div class="modal-body">'+
+								      '<div id="debugText" style="width:100%; height:95%; background-color:white; overflow:auto">'+
+										'</div>'+
+							      '</div>'+
+							      '<div class="modal-footer">'+
+							        '<button type="button" class="clear-btn btn btn-default">Clear</button>'+
+							        '<button type="button" class="close-btn btn btn-default" data-dismiss="modal">Close</button>'+
+							      '</div>'+
+							    '</div>'+
+							  '</div>'+
+							'</div>'+
+						'</div>'
+	
 	function createCodeWindow() {
 		if (dialog==null) {
-			dialog = $("<div class='codeWindow' style='display:none'></div>");
+			dialog = $(dialogTemplate)
 			
-			$(dialog).dialog({
-				autoOpen:true,
-				title:"Code editor",
-				width: 600,
-				height: 400,
-				buttons: {
-					"Show debug": function() {
-						$(debug).dialog("open");
-					},
-					"Apply": function() {
-						editor.clearGutter("breakpoints");
-						updateJson();
-						SignalPath.updateModule(pub, function() {
-							module = pub.getDiv();
-							addStuffToDiv();
-						});
-					},
-					"Close": function() {
-						$( this ).dialog( "close" );
-					}
-				},
-				open: function() {
-					editor = CodeMirror(dialog[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
-						value: prot.jsonData.code,
-						mode:  "groovy"
-					}));
-				},
-				close: pub.onDelete
-			}).dialog("widget").draggable("option","containment","none");
+//			prot.div.parent().append(dialog)
+			dialog.find(".modal").modal({
+				backdrop:true
+			})
+			dialog.find('.debug-btn').click(function() {
+				createDebugWindow()
+			})
+			
+			dialog.find('.apply-btn').click(function() {
+				editor.clearGutter("breakpoints");
+				updateJson();
+				SignalPath.updateModule(pub, function() {
+					module = pub.getDiv();
+					addStuffToDiv();
+				});
+			})
+			
+			dialog.find('.close-btn').click(function() {
+				dialog.hide()
+				pub.onDelete()
+			})
+			
+			editor = CodeMirror(dialog.find('.modal-body')[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
+					value: prot.jsonData.code,
+					mode:  "groovy"
+				}));
+			
+			dialog.draggable({
+				containment: "none",
+				cancel: ".modal-body"
+			});
 			
 			$(SignalPath).on("new", pub.onDelete);
 			$(SignalPath).on("loaded", pub.onDelete);
 		}
+		else dialog.show()
+	}
+		
+	function createDebugWindow() {
 		
 		if (debug==null) {
-			debug = $("<div class='debugWindow' style='display:none'></div>");
-			debugTextArea = $("<div id='debugText' style='width:100%; height:95%; background-color:white; overflow:auto'></div>");
-			debug.append(debugTextArea);
+			debug = $(debugTemplate)
 			
-			$(debug).dialog({
-				autoOpen:false,
-				title:"Debug messages",
-				width: 400,
-				height: 300,
-				buttons: {
-					"Clear": function() {
-						debugTextArea.html("");
-					},
-					"Close": function() {
-						$(this).dialog("close");
-					}
-				}
-			});
-		}
+			prot.div.parent().append(debug)
+	
+			debug.find(".clear-btn").click(function() {
+					debugTextArea.html("");
+			})
+			debug.find(".close-btn").click(function() {
+					debug.hide()
+			})
+		} else debug.show()
 
 	}
 	
 	function addStuffToDiv() {
-		var editButton = $("<button>Edit code</button>");
-		editButton.click(createCodeWindow);
+		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
+		editButton.click(function () {
+			createCodeWindow()
+		});
 		
 		module.find(".modulefooter").prepend(editButton);
 		editButton.button();
@@ -93,12 +134,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	function updateJson() {
 		prot.jsonData.code = editor.getValue();
-//		if (prot.jsonData.inputs!=null)
-//			delete prot.jsonData.inputs;
-//		if (prot.jsonData.outputs!=null)
-//			delete prot.jsonData.outputs;
-//		if (prot.jsonData.params!=null)
-//			delete prot.jsonData.params;
 	}
 	
 	var superReceiveResponse = pub.receiveResponse;
@@ -108,13 +143,9 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		
 		if (payload.type=="debug" && debug != null) {
 			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
-//			debugTextArea.scrollTop(
-//					debugTextArea[0].scrollHeight - debugTextArea.height()
-//	        );
 		}
 		else if (payload.type=="compilationErrors") {
 			for (var i=0;i<payload.errors.length;i++) {
-//				editor.addLineClass(payload.errors[i].line, "text", "cm-error");
 				editor.setGutterMarker(payload.errors[i].line-1, "breakpoints", makeMarker());
 			}
 		}
@@ -133,14 +164,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			super_onDelete();
 		
 		if (dialog!=null) {
-			$(dialog).dialog("close");
-			$(dialog).dialog("destroy");
 			$(dialog).remove();
 			dialog = null;
 		}
 		if (debug!=null) {
-			$(debug).dialog("close");
-			$(debug).dialog("destroy");
 			$(debug).remove();
 			debug = null;
 			debugTextArea = null;
