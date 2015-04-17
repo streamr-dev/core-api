@@ -29,10 +29,9 @@
             
             <div class="panel-body">
 	
-				<table class="table table-striped table-bordered table-hover table-condensed table-responsive">
+				<table class="table-clickable table table-striped table-bordered table-hover table-condensed table-responsive">
 				    <thead>
 				        <tr>
-				        	<th><g:message code="runningSignalPath.id.label" /></th>
 				        	<th><g:message code="runningSignalPath.name.label" /></th>
 							<th><g:message code="runningSignalPath.state.label" /></th>
 				        	<th><g:message code="runningSignalPath.created.label" /></th>
@@ -40,8 +39,7 @@
 				    </thead>
 				    <tbody>
 					    <g:each in="${running}" var="rsp">
-					        <tr>					        
-					            <td><g:link action="show" id="${rsp.id}">${fieldValue(bean: rsp, field: "id")}</g:link></td>					        
+					        <tr data-link="${createLink(action:'show', id:rsp.id) }">					        
 					            <td>${fieldValue(bean: rsp, field: "name")}</td>
 					            <td>${fieldValue(bean: rsp, field: "state")}</td>
 					            <td><g:formatDate date="${rsp.dateCreated}" timeZone="${user.timezone}"/></td>
