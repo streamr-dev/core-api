@@ -1,19 +1,24 @@
 <div class="col-sm-4">
-	<ui:panel title="Fields">
-		<g:if test="${!config.fields || config.fields.size()==0}">
-			<div class='alert alert-info'>
-				<i class='fa fa-exclamation-triangle'></i>
-				The fields for this stream are not yet configured. Click the button below to configure them.
+	<div class="panel ">
+		<div class="panel-heading">
+			<span class="panel-title">Fields</span>
+			<div class="panel-heading-controls">
+				<g:link action="configure" id="${stream.id}"><span class="btn btn-sm">Configure Fields</span></g:link>
 			</div>
-		</g:if>
-		<g:else>
-			<g:render template="userStreamFields" model="[config:config]"/>
-		</g:else>
-		
-		<g:link action="edit" id="${stream.id}"><span class="btn btn-default">Configure Fields</span></g:link>
-	</ui:panel>
+		</div>
+		<div class="panel-body">
+			<g:if test="${!config.fields || config.fields.size()==0}">
+				<div class='alert alert-info'>
+					<i class='fa fa-exclamation-triangle'></i>
+					The fields for this stream are not yet configured. Click the button below to configure them.
+				</div>
+			</g:if>
+			<g:else>
+				<g:render template="userStreamFields" model="[config:config]"/>
+			</g:else>
+		</div>
+	</div>
 </div>
-
 <div class="col-sm-4">
 	<ui:panel title="HTTP API credentials">
 		<g:render template="userStreamCredentials" model="[stream:stream]"/>

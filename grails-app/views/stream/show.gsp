@@ -13,20 +13,31 @@
 		<ui:flashMessage/>
 		
 		<div class="row">
-		
 			<div class="col-sm-4">
-				<ui:panel title="${message(code:"stream.show.label", args:[stream.name])}">
-					<ui:labeled label="${message(code:"stream.name.label")}">
+				<div class="panel ">
+					<div class="panel-heading">
+						<span class="panel-title">${message(code:"stream.show.label", args:[stream.name])}</span>
+						<div class="panel-heading-controls">
+							<g:link action="edit" id="${stream.id}"><span class="btn btn-sm">Edit</span></g:link>
+						</div>
+					</div>
+					<div class="panel-body">
+						<ui:labeled label="${message(code:"stream.name.label")}">
 					    	${stream.name}
-					</ui:labeled>
+						</ui:labeled>
+						
+						<ui:labeled label="${message(code:"stream.description.label")}">
+						    	${stream.description}
+						</ui:labeled>
+						
+						<ui:labeled label="${message(code:"stream.type.label")}">
+						    	${stream.feed.name}
+						</ui:labeled>
+					</div>
+				</div>
+
+				<ui:panel >
 					
-					<ui:labeled label="${message(code:"stream.description.label")}">
-					    	${stream.description}
-					</ui:labeled>
-					
-					<ui:labeled label="${message(code:"stream.type.label")}">
-					    	${stream.feed.name}
-					</ui:labeled>
 				</ui:panel>
 			</div>
 			

@@ -2,74 +2,6 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="stream.edit.label" args="[stream.name]"/></title>
-        
-        <r:require module="streamr-client"/>
-        <r:require module="stream-fields"/>
-        
-        <r:script>
-        	var listView
-        
-        	$(document).ready(function() {
-        		var autodetecting = false
-        		var client = new StreamrClient({
-					server: "${grailsApplication.config.streamr.ui.server}"
-				})
-        		var streamConfig = ${raw(stream.streamConfig ?: "{}")}
-        		
-        		listView = new ListView({
-        			el: $("#stream-fields"),
-        			id: ${stream.id}
-        		});
-        		listView.on('saved', function() {
-        			window.location = '${createLink(action:"show", id:stream.id)}'
-        		})
-        		
-        		if (streamConfig && streamConfig.fields) {
-        			listView.collection.reset(streamConfig.fields)
-        			listView.render()
-        		}
-        	
-        		function handleMessage(message) {
-        			if (autodetecting) {
-        				listView.clear()
-        				
-        				// Delete metadata keys
-        				delete message.counter
-        				delete message.channel
-        				
-						Object.keys(message).forEach(function(key) {
-							var type = (typeof message[key])
-							if (type==="object") {
-								type = (Array.isArray(message[key]) ? "list" : "map")
-							}
-							
-							console.log("Detected field: "+key+", type: "+type)
-							listView.collection.add({
-								name: key, 
-								type: type
-							})
-						})
-						
-						autodetecting = false
-						client.disconnect()
-						$("#autodetect").removeAttr("disabled").html("Autodetect")
-	        		}
-        		}
-        	
-        		$("#autodetect").click(function() {
-        			if (!autodetecting) {
-	        			autodetecting = true
-						client.subscribe("${stream.uuid}", handleMessage, {resend_last:1})
-						client.connect()
-						
-						$(this).attr("disabled","disabled")
-						$(this).html("Waiting for data...")
-					}
-        		})
-        		
-        		
-        	})
-        </r:script>
     </head>
     <body>
     	<ui:breadcrumb>
@@ -84,19 +16,21 @@
     
 		<ui:flashMessage/>
 
-		<div class="col-sm-8">
+		<div class="col-xs-12 col-md-8 col-md-offset-2">
 			<ui:panel title="${message(code:"stream.edit.label", args:[stream.name])}">
-				<button class="btn btn-lg" id="autodetect">Autodetect</button>
-							
-				<div id="stream-fields"></div>
+				<g:form action="update">
+					<g:hiddenField name="id" value="${stream.id}"/>
+					<div class="form-group">
+						<label for="name">${message(code:"stream.name.label")}</label> 
+						<input class="form-control" type="text" placeholder="Name" name="name" value="${stream.name}"></input>
+					</div>
+					<div class="form-group">
+						<label for="description">${message(code:"stream.description.label")}</label> 
+						<textarea class="form-control" placeholder="Description" name="description">${stream.description}</textarea>
+					</div>
+					<g:submitButton name="submit" class="btn btn-lg btn-primary" value="${message(code:"stream.update.label")}" />
+				</g:form>
 			</ui:panel>
 		</div>
-		
-		<div class="col-sm-4">
-			<ui:panel title="HTTP API credentials">
-				<g:render template="userStreamCredentials" model="[stream:stream]"/>
-			</ui:panel>
-		</div>
-		
     </body>
 </html>
