@@ -85,7 +85,7 @@
 		<ui:flashMessage/>
 
 		<div class="col-sm-8">
-			<ui:panel title="${message(code:"stream.edit.label", args:[stream.name])}">
+			<ui:panel title="${message(code:"stream.configure.label", args:[stream.name])}">
 				<button class="btn btn-lg" id="autodetect">Autodetect</button>
 							
 				<div id="stream-fields"></div>
