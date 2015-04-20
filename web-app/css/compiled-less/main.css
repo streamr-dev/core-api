@@ -16466,6 +16466,12 @@ body.embedded #content-wrapper {
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
 }
+body.live-show-view #toolbarForm {
+  height: 5%;
+}
+body.live-show-view #canvas {
+  height: 95%;
+}
 .form-group-period .input-group-addon {
   width: 60px;
 }

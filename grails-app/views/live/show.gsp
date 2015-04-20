@@ -52,7 +52,7 @@
 
 </head>
 
-<body class="full-width-height">
+<body class="live-show-view full-width-height">
 
 	<form method="post" role="form" id="toolbarForm">
 		<g:hiddenField name="id" value="${rsp.id}" />
