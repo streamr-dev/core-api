@@ -35,10 +35,6 @@
 						</ui:labeled>
 					</div>
 				</div>
-
-				<ui:panel >
-					
-				</ui:panel>
 			</div>
 			
 			<g:include action="details" id="${stream.id}"/>
