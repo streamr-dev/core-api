@@ -22,48 +22,87 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	addStuffToDiv();
 	
+	var codeWindow = ''
+    + 	'<div class="dialog modal fade">'
+    + 		'<div class="modal-dialog">'
+    +   		'<div class="modal-content">'
+    +     			'<div class="modal-header">'
+    +					'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+    +         			'<h4 class="modal-title">Code editor</h4>'
+    +     			'</div>'
+    +     			'<div class="modal-body"></div>'
+    +     			'<div class="modal-footer">'
+    +					'<button class="debug-btn btn btn-default">Show debug</button>'
+    +					'<button class="apply-btn btn btn-default">Apply</button>'
+    +					'<button class="close-btn btn btn-default">Close</button>'
+    +				'</div>'
+    +   		'</div>'
+    + 		'</div>'
+    + 	'</div>';
+	
+	
 	function createCodeWindow() {
 		if (dialog==null) {
-			dialog = $("<div class='codeWindow' style='display:none'></div>");
+			dialog = $(codeWindow);
 			
-			$(dialog).dialog({
-				autoOpen:true,
-				title:"Code editor",
-				width: 600,
-				height: 400,
-				buttons: {
-					"Show debug": function() {
-						$(debug).dialog("open");
-					},
-					"Apply": function() {
-						editor.clearGutter("breakpoints");
-						updateJson();
-						SignalPath.updateModule(pub, function() {
-							module = pub.getDiv();
-							addStuffToDiv();
-						});
-					},
-					"Close": function() {
-						$( this ).dialog( "close" );
-					}
-				},
-				open: function() {
-					editor = CodeMirror(dialog[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
-						value: prot.jsonData.code,
-						mode:  "groovy"
-					}));
-				},
-				close: pub.onDelete
-			}).dialog("widget").draggable("option","containment","none");
+//			$(document.body).append(dialog);
+			dialog.modal({
+				backdrop:false
+			})
+			dialog.draggable({
+				cancel:".modal-body",
+				containment: "none"
+			})
+			dialog.find(".debug-btn").click(function() {
+				
+			})
+			
+			dialog.find(".apply-btn").click(function() {
+				editor.clearGutter("breakpoints");
+				updateJson();
+				SignalPath.updateModule(pub, function() {
+					module = pub.getDiv();
+					addStuffToDiv();
+				});
+			})
+			dialog.find(".close-btn").click(function(){
+				dialog.modal('hide')
+			})
+						
 			
 			$(SignalPath).on("new", pub.onDelete);
 			$(SignalPath).on("loaded", pub.onDelete);
-		}
+			
+			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
+				value: prot.jsonData.code,
+				mode:  "groovy"
+			}));
+		} else dialog.modal('show')
 		
+		
+
+	}
+	
+	var debugWindow = ''
+	    + 	'<div class="dialog modal fade modal-sm">'
+	    + 		'<div class="modal-dialog">'
+	    +   		'<div class="modal-content">'
+	    +     			'<div class="modal-header">'
+	    +         			'<button type="button" class="close">&times;</button>'
+	    +         			'<h4 class="modal-title">Debug messages</h4>'
+	    +     			'</div>'
+	    +     			'<div class="modal-body"></div>'
+	    +     			'<div class="modal-footer">'
+	    +					'<button class="clear-btn btn btn-default">Apply</button>'
+	    +					'<button class="close-btn btn btn-default">Close</button>'
+	    +				'</div>'
+	    +   		'</div>'
+	    + 		'</div>'
+	    + 	'</div>';
+	
+	function createDebugWindow() {
 		if (debug==null) {
-			debug = $("<div class='debugWindow' style='display:none'></div>");
-			debugTextArea = $("<div id='debugText' style='width:100%; height:95%; background-color:white; overflow:auto'></div>");
-			debug.append(debugTextArea);
+			debug = $(debugWindow);
 			
 			$(debug).dialog({
 				autoOpen:false,
@@ -78,9 +117,24 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 						$(this).dialog("close");
 					}
 				}
-			});
+			})
+			
+			debug.modal({
+				backdrop:false
+			})
+			
+			dialog.find(".apply-btn").click(function() {
+				editor.clearGutter("breakpoints");
+				updateJson();
+				SignalPath.updateModule(pub, function() {
+					module = pub.getDiv();
+					addStuffToDiv();
+				});
+			})
+			dialog.find(".close-btn").click(function(){
+				dialog.modal('hide')
+			})
 		}
-
 	}
 	
 	function addStuffToDiv() {
