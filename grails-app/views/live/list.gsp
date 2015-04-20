@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta name="layout" content="main" />
-        <title><g:message code="runningSignalPath.list.label" /></title>
+        <title><g:message code="runningSignalPath.list.label" /></title> 
         
     </head>
     <body>
@@ -29,7 +29,7 @@
             
             <div class="panel-body">
 	
-				<table class="table-clickable table table-striped table-bordered table-hover table-condensed table-responsive">
+				<table style="overflow:auto"  class="table-clickable table table-striped table-bordered table-hover table-condensed table-responsive table-scrollable">
 				    <thead>
 				        <tr>
 				        	<th><g:message code="runningSignalPath.name.label" /></th>
@@ -50,5 +50,6 @@
 
             </div> <%-- end panel body --%>
         </div> <%-- end panel --%>
+       
     </body>
 </html>

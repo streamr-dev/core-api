@@ -16469,6 +16469,9 @@ body.embedded #content-wrapper > :not(.embeddable) {
 .table-clickable tbody tr:hover {
   cursor: pointer;
 }
+.table-scrollable tbody {
+  overflow: auto;
+}
 .form-group-period .input-group-addon {
   width: 60px;
 }
