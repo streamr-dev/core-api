@@ -23,38 +23,35 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	addStuffToDiv();
 	
 	var codeWindow = ''
-    + 	'<div class="dialog modal fade">'
-    + 		'<div class="modal-dialog">'
-    +   		'<div class="modal-content">'
-    +     			'<div class="modal-header">'
-    +					'<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
-    +         			'<h4 class="modal-title">Code editor</h4>'
-    +     			'</div>'
-    +     			'<div class="modal-body"></div>'
-    +     			'<div class="modal-footer">'
-    +					'<button class="debug-btn btn btn-default">Show debug</button>'
-    +					'<button class="apply-btn btn btn-default">Apply</button>'
-    +					'<button class="close-btn btn btn-default">Close</button>'
-    +				'</div>'
-    +   		'</div>'
-    + 		'</div>'
-    + 	'</div>';
+    +   	'<div class="modal-content" style="width:600px">'
+    +    		'<div class="modal-header">'
+    +			'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
+    +        		'<h4 class="modal-title">Code editor</h4>'
+    +  	 		'</div>'
+    +   	 	'<div class="modal-body"></div>'
+    +   		'<div class="modal-footer">'
+    +				'<button class="debug-btn btn btn-default">Show debug</button>'
+    +				'<button class="apply-btn btn btn-default">Apply</button>'
+    +				'<button class="close-btn btn btn-default">Close</button>'
+    +			'</div>'
+    +   	'</div>'
 	
 	
 	function createCodeWindow() {
 		if (dialog==null) {
 			dialog = $(codeWindow);
 			
-//			$(document.body).append(dialog);
-			dialog.modal({
-				backdrop:false
-			})
+			prot.div.parent().append(dialog)
+
 			dialog.draggable({
-				cancel:".modal-body",
+				cancel: ".modal-body",
 				containment: "none"
 			})
+
+			dialog.resizable()
+
 			dialog.find(".debug-btn").click(function() {
-				
+				createDebugWindow()
 			})
 			
 			dialog.find(".apply-btn").click(function() {
@@ -66,7 +63,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 				});
 			})
 			dialog.find(".close-btn").click(function(){
-				dialog.modal('hide')
+				dialog.hide()
 			})
 						
 			
@@ -77,64 +74,42 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 				value: prot.jsonData.code,
 				mode:  "groovy"
 			}));
-		} else dialog.modal('show')
-		
-		
-
+		} else dialog.show()
 	}
 	
 	var debugWindow = ''
-	    + 	'<div class="dialog modal fade modal-sm">'
-	    + 		'<div class="modal-dialog">'
-	    +   		'<div class="modal-content">'
-	    +     			'<div class="modal-header">'
-	    +         			'<button type="button" class="close">&times;</button>'
-	    +         			'<h4 class="modal-title">Debug messages</h4>'
-	    +     			'</div>'
-	    +     			'<div class="modal-body"></div>'
-	    +     			'<div class="modal-footer">'
-	    +					'<button class="clear-btn btn btn-default">Apply</button>'
-	    +					'<button class="close-btn btn btn-default">Close</button>'
-	    +				'</div>'
-	    +   		'</div>'
-	    + 		'</div>'
-	    + 	'</div>';
+    + 		'<div style="width:400px">'
+    +   		'<div class="modal-content">'
+    +     			'<div class="modal-header">'
+    +					'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
+    +         			'<h4 class="modal-title">Debug messages</h4>'
+    +     			'</div>'
+    +     			'<div class="modal-body">'
+    +					'<div class="debugText" style="width:100%; height:95%; background-color:white; overflow:auto"></div>'
+    +				'</div>'
+    +     			'<div class="modal-footer">'
+    +					'<button class="clear-btn btn btn-default">Clear</button>'
+    +					'<button class="close-btn btn btn-default">Close</button>'
+    +				'</div>'
+    +   		'</div>'
+    + 		'</div>'
 	
 	function createDebugWindow() {
 		if (debug==null) {
 			debug = $(debugWindow);
+			debugTextArea = debug.find(".debugText")
 			
-			$(debug).dialog({
-				autoOpen:false,
-				title:"Debug messages",
-				width: 400,
-				height: 300,
-				buttons: {
-					"Clear": function() {
-						debugTextArea.html("");
-					},
-					"Close": function() {
-						$(this).dialog("close");
-					}
-				}
-			})
+			prot.div.parent().append(debug)
+
+			debug.draggable()
 			
-			debug.modal({
-				backdrop:false
+			debug.find(".clear-btn").click(function() {
+				debugTextArea.html("");
 			})
-			
-			dialog.find(".apply-btn").click(function() {
-				editor.clearGutter("breakpoints");
-				updateJson();
-				SignalPath.updateModule(pub, function() {
-					module = pub.getDiv();
-					addStuffToDiv();
-				});
+			debug.find(".close-btn").click(function(){
+				debug.hide()
 			})
-			dialog.find(".close-btn").click(function(){
-				dialog.modal('hide')
-			})
-		}
+		} else debug.show()
 	}
 	
 	function addStuffToDiv() {
@@ -187,17 +162,14 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			super_onDelete();
 		
 		if (dialog!=null) {
-			$(dialog).dialog("close");
-			$(dialog).dialog("destroy");
-			$(dialog).remove();
+			$(dialog).modal("close");
+			$(dialog).modal("destroy");
 			dialog = null;
 		}
 		if (debug!=null) {
-			$(debug).dialog("close");
-			$(debug).dialog("destroy");
-			$(debug).remove();
+			$(debug).modal("close");
+			$(debug).modal("destroy");
 			debug = null;
-			debugTextArea = null;
 		}
 	}
 	

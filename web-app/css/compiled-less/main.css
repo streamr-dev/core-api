@@ -16519,6 +16519,13 @@ body.build-page #content-wrapper {
 .remote-tabs-content {
   outline: none;
 }
+.modal-content {
+  display: flex;
+  flex-direction: column;
+}
+.modal-content .modal-body {
+  flex-grow: 1;
+}
 #modal-spinner {
   display: none;
   position: absolute;
