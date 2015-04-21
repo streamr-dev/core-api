@@ -2,17 +2,26 @@ var assert = require('assert')
 var fs = require('fs')
 var jsdom = require("jsdom")
 
-var $ = require('jquery')(jsdom.jsdom().parentWindow);
+var window = jsdom.jsdom().parentWindow
+var $ = require('jquery')(window);
 var _ = require('underscore')
 var Backbone = require('backbone-associations')
 
 global.$ = $
 global._ = _
+global.window = window
+global.document = window.document
 global.Backbone = Backbone
 Backbone.$ = $
 global.jQuery = $
 global.$.pnotify = function(options) {
 	return options
+}
+// jsdom wants to use the deprecated style of creating events, so let's mock a bridge between old and new
+global.Event = function(type) {
+	var e = window.document.createEvent("MockEvent")
+	e.initEvent(type, true, true)
+	return e
 }
 
 var templates = fs.readFileSync('grails-app/views/dashboard/_dashboard-template.gsp','utf8') // read content of _dashboard-template.gsp
