@@ -62,7 +62,7 @@ class LiveController {
 	
 	@Secured("ROLE_USER")
 	def getListJson() {
-		def runningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
+		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(springSecurityService.currentUser, false)
 		List runningSignalPathMaps = runningSignalPaths.collect {rsp->
 			[
 				id: rsp.id,
