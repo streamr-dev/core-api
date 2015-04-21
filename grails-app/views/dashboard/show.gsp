@@ -8,7 +8,7 @@
 		<r:require module="slimscroll"/>
 		<r:require module="dashboard-editor"/>
 
-		<!--If ~/index.html?noDependencies=true-->
+		<!--Webcomponent-resources are required because webcomponents are imported with lightDOM=true and noDependencies=true-->
 		<r:require module="webcomponent-resources" disposition="head"/>
 
 		<link rel="import" href="${createLink(uri:"/webcomponents/index.html?lightDOM=true&noDependencies=true", plugin:"unifina-core")}">
@@ -37,7 +37,8 @@
 							edit: "${params.edit}",
 							dashboard: dashboard, 
 							RSPs: rspJson,
-							el: $("#sidebar-view")
+							el: $("#sidebar-view"),
+							menuToggle: $("#main-menu-toggle")
 						})
 					})
 					$(window).bind('beforeunload', function(){

@@ -8,11 +8,6 @@ _.templateSettings = {
 };
 
 var UiChannel = Backbone.Model.extend({
-	defaults: {
-		name:"",
-		id: "",
-		checked: false,
-	},
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
 	}
@@ -58,17 +53,16 @@ var UiChannelView = Backbone.View.extend({
 })
 
 var RunningSignalPath = Backbone.Model.extend({
-	defaults: {
-		name: "",
-		uiChannels: ""
-	},
 	initialize: function (){
-		this.howManyChecked = 0
 		this.uiChannelCollection = new UiChannelList(this.get("uiChannels"))
+	},
+	getCheckedCount: function () {
+		var howManyChecked = 0
 		_.each(this.uiChannelCollection.models, function(model){
 			if(model.get("checked"))
-				this.howManyChecked++
+				howManyChecked++
 		},this)
+		return howManyChecked
 	}
 })
 
@@ -87,11 +81,6 @@ var RunningSignalPathView = Backbone.View.extend({
 	
 	initialize: function (){
 		this.model.uiChannelCollection.on("change:checked", function(model){
-			if(model.get("checked") == true)
-				this.model.howManyChecked++
-			else {
-				this.model.howManyChecked--
-			}
 			this.render()
 		},this)
 	},
@@ -101,8 +90,8 @@ var RunningSignalPathView = Backbone.View.extend({
 			this.$el.append(this.template(this.model.toJSON()))
 			this.$el.append(this.renderUIC())
 		}
-		if(this.model.howManyChecked)
-			this.$el.find(".howmanychecked").html(this.model.howManyChecked)
+		if(this.model.getCheckedCount())
+			this.$el.find(".howmanychecked").html(this.model.getCheckedCount())
 		else this.$el.find(".howmanychecked").empty()
 		return this
 	},
@@ -126,12 +115,6 @@ var RunningSignalPathView = Backbone.View.extend({
 })
 
 var DashboardItem = Backbone.AssociatedModel.extend({
-	defaults: {
-		title: "",
-		uiChannel: {id: "", name: "", module: {id: ""}},
-		ord: "",
-		size: ""
-	},
 	makeSmall: function() {
 		if(this.get("size") != "small")
 			this.set("size", "small")
@@ -296,6 +279,8 @@ var SidebarView = Backbone.View.extend({
 		this.el = options.el
 		this.dashboard = options.dashboard
 		this.allRSPs = options.RSPs
+		this.menuToggle = options.menuToggle
+
 		this.RSPs = []
 		_.each(this.allRSPs, function(rsp){
 			rsp.uiChannels = _.filter(rsp.uiChannels, function(uic){
@@ -312,7 +297,7 @@ var SidebarView = Backbone.View.extend({
 		this.dashboard.get("items").on("change", function () {
 			_this.dashboard.saved = false
 		})
-		$("#main-menu-toggle").click(function () {
+		this.menuToggle.click(function () {
 			if($("body").hasClass("editing"))
 				_this.setEditMode(false)
 			else
@@ -481,11 +466,6 @@ var Dashboard = Backbone.AssociatedModel.extend({
         }
     ],
 
-	defaults: {
-		name: "",
-		items: []
-	},
-
 	validate: function() {
 		if (!this.get("name"))
 			return "Dashboard name can't be empty"
@@ -504,9 +484,8 @@ var DashboardView = Backbone.View.extend({
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
 			this.$el.sortable({
-				cancel: ".non-draggable, .titlebar-edit",
+				cancel: ".non-draggable, .titlebar-edit, .panel-heading-controls",
 				items: ".dashboarditem",
-				// placeholder: "dashboarditem-placeholder ui-corner-all",
 				stop: function(event, ui) {
 					ui.item.trigger('drop');
 	 	   	}
