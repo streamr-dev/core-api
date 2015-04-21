@@ -99,6 +99,10 @@ function StreamrChart(parent, options) {
 	$(this).on("initialized", function() {
 		_this.$parent.find(".chart-show-on-run").show()
 	})
+
+	this.$parent.on('resize', function() {
+		_this.resize()
+	})
 	
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
@@ -225,14 +229,19 @@ StreamrChart.prototype.resize = function(moduleWidth, moduleHeight) {
 	if (!this.$area)
 		return;
 
-	var w = moduleWidth - 100
-	var h = moduleHeight - 110
+	if (moduleWidth && moduleHeight) {
+		var w = moduleWidth - 100
+		var h = moduleHeight - 110
 
-	this.$area.css('width', w)
-	this.$area.css('height', h)
+		this.$area.css('width', w)
+		this.$area.css('height', h)
 
-	if (this.chart)
-		this.chart.setSize(w, h, false)
+		if (this.chart)
+			this.chart.setSize(w, h, false)
+	}
+	else if (this.chart) {
+		this.chart.setSize(this.$area.width(), this.$area.height(), false)
+	}
 }
 
 StreamrChart.prototype.getSeriesMetaData = function() {

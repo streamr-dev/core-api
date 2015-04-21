@@ -1,15 +1,12 @@
 package com.unifina.controller.dashboard
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-
-import java.security.AccessControlException
 
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.UiChannel
 
-@Secured(["ROLE_ADMIN"])
+@Secured(["ROLE_USER"])
 class DashboardController {
 	def grailsApplication
 	def springSecurityService
@@ -26,69 +23,46 @@ class DashboardController {
 	}
 	
 	def create() {
-		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
-		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
-			UiChannel found = rsp.uiChannels.find {UiChannel ui->
-				ui.module
-			}
-			return found!=null
+		if (request.method=="GET")
+			Dashboard dashboard = new Dashboard()
+		else {
+			Dashboard dashboard = new Dashboard()
+			dashboard.name = params.name
+			dashboard.user = springSecurityService.currentUser
+			dashboard.save(flush:true, failOnError:true)
+			redirect(action:"show", id:dashboard.id)
 		}
-		Dashboard dashboard = new Dashboard()
-		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
+		
 	}
 	
-	def save() {
-		Dashboard dashboard = new Dashboard()
-		dashboard.name = params.name
-		dashboard.user = springSecurityService.currentUser
-		
-		List uiChannels = UiChannel.findAllByIdInList(params.list("uiChannels"))
-	
-		uiChannels.each {UiChannel uiChannel->
-			if (!unifinaSecurityService.canAccess(uiChannel))
-				throw new AccessControlException("Access to $uiChannel denied for user $springSecurityService.currentUser")
-			
-			DashboardItem item = new DashboardItem()
-			item.uiChannel = uiChannel
-			item.title = params["title_"+uiChannel.id]
-			
-			dashboard.addToItems(item)
-		}
-		
-		dashboard.save(flush:true, failOnError:true)
-		
-		redirect(action: "show", id: dashboard.id)
-	}
-	
-	def edit() {
-		Dashboard dashboard = Dashboard.get(params.id)
-		
-		def allRunningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
-		def runningSignalPaths = allRunningSignalPaths.findAll{RunningSignalPath rsp ->
-			UiChannel found = rsp.uiChannels.find {UiChannel ui->
-				ui.module
+	def getJson() {
+		Dashboard dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
+		Map dashboardMap = [
+			id: dashboard.id,
+			name: dashboard.name,
+			items: dashboard.items.collect {item->
+				[id:item.id, title: item.title, ord:item.ord, size:item.size, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
 			}
-			return found!=null
-		}
+		]
+		render dashboardMap as JSON
+	}
 
-		return [runningSignalPaths:runningSignalPaths, dashboard:dashboard]
-	}
-	
 	def show() {
 		Dashboard dashboard = Dashboard.get(params.id)
 		return [serverUrl: grailsApplication.config.streamr.ui.server, dashboard:dashboard]
 	}
 	
-	def delete = {
+	def delete() {
 		def dashboardInstance = Dashboard.get(params.id)
 		if (dashboardInstance) {
 			try {
+				DashboardItem.executeUpdate("delete from DashboardItem di where di.dashboard = ?", [dashboardInstance])
 				dashboardInstance.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboardInstance.name])}"
 				redirect(action: "list")
 			}
 			catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboardInstance.name])}"
 				redirect(action: "show", id: params.id)
 			}
 		}
@@ -99,46 +73,51 @@ class DashboardController {
 	}
 	
 	def update() {
-		Dashboard dashboard = Dashboard.get(params.id)
-		dashboard.name = params.name
+		Map dashboardMap = request.JSON
+		Dashboard dashboard = Dashboard.get(dashboardMap.id)
 		
-		List uiChannels = UiChannel.findAllByIdInList(params.list("uiChannels"))
-
-		Collection added = uiChannels.findAll {UiChannel ui->
-			DashboardItem found = dashboard.items.find {DashboardItem item-> 
-				item.uiChannel.id == ui.id
+		if (dashboard) {
+			dashboard.properties = dashboardMap
+			
+			// collect dashboard items into a map by id
+			Map itemsById = [:]
+			dashboard.items?.findAll {it.id!=null}.each { 
+				itemsById[it.id] = it
 			}
-			return found==null
-		}
-		
-		Collection removed = dashboard.items.findAll {DashboardItem item->
-			UiChannel found = uiChannels.find {UiChannel ui->
-				item.uiChannel.id == ui.id				
+			
+			Collection toBeRemoved = []
+			Collection toBeAdded = []
+			
+			
+			dashboard.items?.each {
+				if(itemsById[it.id] == null){
+					toBeRemoved.add(it)
+				}
+				else {
+					it.properties = itemsById[it.id]
+				}
 			}
-			return found==null
-		}
 			
-		added.each {UiChannel uiChannel->
-			if (!unifinaSecurityService.canAccess(uiChannel))
-				throw new AccessControlException("Access to $uiChannel denied for user $springSecurityService.currentUser")
+			dashboardMap.items?.findAll {it.id==null}.each {
+				DashboardItem item = new DashboardItem(it)
+				//item.uiChannel = UiChannel.load(it.uiChannel.id)
+				toBeAdded.add(it)
+			}
 			
-			DashboardItem item = new DashboardItem()
-			item.uiChannel = uiChannel
+			toBeRemoved.each {
+				dashboard.removeFromItems(it)
+			}
 			
-			dashboard.addToItems(item)
+			toBeAdded.each {
+				dashboard.addToItems(it)
+			}
+			
+			dashboard.save(flush:true, failOnError:true)
+			
+			render ([success:true] as JSON)
 		}
-		
-		removed.each {DashboardItem item->			
-			dashboard.removeFromItems(item)
+		else {
+			render(status: 404, text: "Dashboard $params.id not found!")
 		}
-		
-		// Set the titles of all DashboardItems
-		dashboard.items.each {DashboardItem item->
-			item.title = params["title_"+item.uiChannel.id]
-		}
-		
-		dashboard.save(flush:true, failOnError:true)
-		
-		redirect(action: "show", id: dashboard.id)
 	}
 }

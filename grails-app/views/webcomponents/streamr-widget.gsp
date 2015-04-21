@@ -1,9 +1,11 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<r:require module="jquery"/>
+<g:if test="${!params.noDependencies}">
+	<r:require module="jquery"/>
 
-<r:layoutResources disposition="head"/>
-<r:layoutResources disposition="defer"/>
+	<r:layoutResources disposition="head"/>
+	<r:layoutResources disposition="defer"/>
+</g:if>
 
 <polymer-element name="streamr-widget" attributes="channel resendAll resendLast">
 	<template>
@@ -17,6 +19,11 @@
 				channel: undefined,
 				resendLast: undefined,
 				resendAll: undefined
+			},
+			bindEvents: function(container) {
+				container.parentNode.addEventListener("resize", function() {
+					container.dispatchEvent(new Event('resize'))
+				})
 			},
 			subscribe: function(messageHandler, resendOptions) {
 				var _this = this
@@ -84,14 +91,19 @@
 					},
 					success: function(data) {
 						if (!data.success) {
-							handleError(data.error)
+							console.log("Error while communicating with widget: "+data.error)
 						}
 						else if (callback)
 							callback(data.response)
 					},
 					dataType: 'json'
 				});
-			}
+			},
+			<g:if test="${params.lightDOM}">
+				parseDeclaration: function(elementElement) {
+					return this.lightFromTemplate(this.fetchTemplate(elementElement))
+				}
+			</g:if>
 		});
 	</script>
 </polymer-element>

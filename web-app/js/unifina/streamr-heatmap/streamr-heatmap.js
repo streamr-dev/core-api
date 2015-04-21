@@ -68,6 +68,10 @@
 			_this.heatmapLayer = _this.createHeatmapLayer()
 			_this.syncData()
 		});
+
+		this.parent.on('resize', function() {
+			_this.map.invalidateSize()
+		})
 	}
 
 	StreamrHeatMap.prototype.setCenter = function(coords) {
@@ -203,7 +207,7 @@
 	StreamrHeatMap.prototype.resize = function(width, height) {
 		this.parent.css("width", width+"px")
 		this.parent.css("height", height+"px")
-		this.map.invalidateSize()
+		this.parent.trigger('resize')
 	}
 
 	exports.StreamrHeatMap = StreamrHeatMap

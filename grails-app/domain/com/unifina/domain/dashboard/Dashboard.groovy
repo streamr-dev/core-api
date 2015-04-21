@@ -13,7 +13,13 @@ class Dashboard {
 	Date dateCreated
 	Date lastUpdated
 	
+	SortedSet items
+	
 	static hasMany = [items: DashboardItem]
+	
+	static constraints = {
+		name(nullable:true)
+	}
 	
 	static mapping = {
 		items cascade: 'all-delete-orphan'
