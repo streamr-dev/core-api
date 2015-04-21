@@ -56,7 +56,7 @@
 		</r:script>
 </head>
 
-<body class="main-menu-fixed dashboard-edit mmc">
+<body class="main-menu-fixed dashboard-show mmc">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
 			<div id="sidebar-view" class="scrollable"></div>

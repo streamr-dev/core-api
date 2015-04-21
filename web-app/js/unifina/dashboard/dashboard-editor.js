@@ -159,6 +159,9 @@ var DashboardItemView = Backbone.View.extend({
 	initialize: function(){
 		var _this = this
 		this.model.on("remove", this.remove, this)
+		this.model.on("resize", function() {
+			_this.$el.find(".streamr-widget")[0].dispatchEvent(new Event("resize"))
+		})
 		this.$el.on("drop", function(e, index) {
 			_this.model.collection.trigger("orderchange")
 		})
@@ -248,7 +251,6 @@ var DashboardItemView = Backbone.View.extend({
     },
 
     changeSize: function(e) {
-		var resizeEvent = new Event("resize")
     	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
     	if($(e.target).hasClass("make-small-btn"))
     		this.model.makeSmall()
@@ -258,7 +260,7 @@ var DashboardItemView = Backbone.View.extend({
     		this.model.makeLarge()
     	this.initSize()
     	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
-    	window.dispatchEvent(resizeEvent)
+    	this.$el.find(".widget-content").children()[0].dispatchEvent(new Event("resize"))
     }
 })
 
@@ -316,18 +318,20 @@ var SidebarView = Backbone.View.extend({
 		})
 	},
 
-	setEditMode: function (active) {
-		if(active){
-			$("body").addClass("mme")
-			$("body").removeClass("mmc")
-			$("body").addClass("editing")
-		} else {
-			$("body").addClass("mmc")
-			$("body").removeClass("mme")
-			$("body").removeClass("editing")
-		}
+	setData: function(RSPs, DIList) {
+		this.DIList = DIList
 
-    	$("body").trigger("classChange")
+		var checked = {}
+		_.each(this.DIList.models, function(item) {
+			checked[item.get("uiChannel").id] = true
+		})
+		_.each(RSPs, function(rsp) {
+			_.each(rsp.uiChannels, function(uiChannel) {
+				if (checked[uiChannel.id])
+					uiChannel.checked = true
+			})
+		})
+		this.rspCollection = new RunningSignalPathList(RSPs)
 	},
 
 	render: function () {
@@ -370,20 +374,22 @@ var SidebarView = Backbone.View.extend({
 		return runningSignalPathView.render()
 	},
 
-	setData: function(RSPs, DIList) {
-		this.DIList = DIList
+	setEditMode: function (active) {
+		if(active){
+			$("body").addClass("mme")
+			$("body").removeClass("mmc")
+			$("body").addClass("editing")
+		} else {
+			$("body").addClass("mmc")
+			$("body").removeClass("mme")
+			$("body").removeClass("editing")
+		}
 
-		var checked = {}
-		_.each(this.DIList.models, function(item) {
-			checked[item.get("uiChannel").id] = true
-		})
-		_.each(RSPs, function(rsp) {
-			_.each(rsp.uiChannels, function(uiChannel) {
-				if (checked[uiChannel.id])
-					uiChannel.checked = true
-			})
-		})
-		this.rspCollection = new RunningSignalPathList(RSPs)
+    	$("body").trigger("classChange")
+
+    	_.each(this.dashboard.get("items").models, function(item) {
+    		item.trigger("resize")
+    	},this)
 	},
 
 	updateDIList: function(event, uiChannelModel) {
@@ -512,7 +518,7 @@ var DashboardView = Backbone.View.extend({
 				_this.disableSortable()
 			//!editing -> editing
 			} else {
-				_this.ableSortable()
+				_this.enableSortable()
 			}
 		})
 	},
@@ -539,7 +545,7 @@ var DashboardView = Backbone.View.extend({
 		},this)
 	},
 
-	ableSortable: function() {
+	enableSortable: function() {
 		if (this.$el.sortable) {
 			this.$el.sortable("option", "disabled", false)
 		}

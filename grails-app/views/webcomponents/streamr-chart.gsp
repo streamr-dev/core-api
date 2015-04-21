@@ -21,26 +21,30 @@
 			},
 			ready: function() {
 				var _this = this
+				this.bindEvents(_this.$.container)
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
 
-					var chart = new StreamrChart(_this.$.container, {
+					_this.chart = new StreamrChart(_this.$.container, {
 						rangeDropdown: _this.rangeDropdown,	// default: true
 						showHideButtons: _this.showHideButtons	// default: true
 					})
 
 					_this.sendRequest({type:'initRequest'}, function(response) {
-						chart.handleMessage(response.initRequest)
+						_this.chart.handleMessage(response.initRequest)
 					})
 
 					_this.subscribe(
 						function(message) {
-					    	chart.handleMessage(message)
+					    	_this.chart.handleMessage(message)
 					    },
 					    resendOptions
 					)
 				})
+			},
+			getChart: function() {
+				return this.chart
 			},
 			<g:if test="${params.lightDOM}">
 				parseDeclaration: function(elementElement) {
