@@ -2,7 +2,7 @@
 	<head>
 		<meta name="layout" content="sidemenu" />
 
-		<title><g:message code="dashboard.edit.label" args="[dashboard.name]" /></title>
+		<title>${ dashboard.name }</title>
 
 		<r:require module="webcomponents"/>
 		<r:require module="slimscroll"/>
@@ -64,6 +64,10 @@
 	</div>
 
 	<div id="content-wrapper" class="scrollable">
+		<ui:breadcrumb>
+			<g:render template="/dashboard/breadcrumbList" model="[dashboard:dashboard]"/>
+			<g:render template="/dashboard/breadcrumbShow" model="[dashboard:dashboard, active:true]"/>
+		</ui:breadcrumb>
 		<streamr-client id="client" server="${ serverUrl }" autoconnect="true" autodisconnect="false"></streamr-client>
 		<ul id="dashboard-view"></ul>
 	</div>

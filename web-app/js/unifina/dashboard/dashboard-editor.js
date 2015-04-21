@@ -151,9 +151,9 @@ var DashboardItemView = Backbone.View.extend({
 		"click .close-edit" : "toggleEdit",
 		"keypress .name-input" : "toggleEdit",
 		"blur .name-input" : "toggleEdit",
-		"click .make-small-btn" : "makeSmall",
-		"click .make-medium-btn" : "makeMedium",
-		"click .make-large-btn" : "makeLarge"
+		"click .make-small-btn" : "changeSize",
+		"click .make-medium-btn" : "changeSize",
+		"click .make-large-btn" : "changeSize"
 	},
 
 	initialize: function(){
@@ -235,37 +235,31 @@ var DashboardItemView = Backbone.View.extend({
     initSize: function() {
     	this.$el.removeClass(this.smallClass+ " " +this.mediumClass+ " " +this.largeClass)
     	var size = this.model.get("size")
-    	if(size == "small") {
-    		this.$el.addClass(this.smallClass)
-    	} else if(size == "medium") {
-    		this.$el.addClass(this.mediumClass)
-    	} else if(size == "large") {
-    		this.$el.addClass(this.largeClass)
+    	if(size == "small" || size == "medium" || size == "large") {
+    		if(size == "small") {
+    			this.$el.addClass(this.smallClass)
+	    	} else if(size == "medium") {
+	    		this.$el.addClass(this.mediumClass)
+	    	} else if(size == "large") {
+	    		this.$el.addClass(this.largeClass)
+    		}
     	} else 
-    		console.log("Module size not found")
+    		throw new Error("Module size not found")
     },
 
-	makeSmall: function() {
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
-    	this.model.makeSmall()
-    	this.initSize()
-    	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
-    },
-
-	makeMedium: function() {
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
-		this.model.makeMedium()
-		this.initSize()
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
-    },
-
-    makeLarge: function() {
+    changeSize: function(e) {
+		var resizeEvent = new Event("resize")
     	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
-    	this.model.makeLarge()
+    	if($(e.target).hasClass("make-small-btn"))
+    		this.model.makeSmall()
+    	else if($(e.target).hasClass("make-medium-btn"))
+    		this.model.makeMedium()
+    	else if($(e.target).hasClass("make-large-btn"))
+    		this.model.makeLarge()
     	this.initSize()
     	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
+    	window.dispatchEvent(resizeEvent)
     }
-    
 })
 
 var SidebarView = Backbone.View.extend({
@@ -431,6 +425,7 @@ var SidebarView = Backbone.View.extend({
     	this.dashboard.save({}, {
     		success: function() {
 	    		_this.dashboard.saved = true
+	    		document.title = _this.dashboard.get("name")
 
 			    $.pnotify({
 					type: 'success',
