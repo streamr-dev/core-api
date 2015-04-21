@@ -2,13 +2,13 @@
 	<head>
 		<meta name="layout" content="sidemenu" />
 
-		<title><g:message code="dashboard.edit.label" args="[dashboard.name]" /></title>
+		<title>${ dashboard.name }</title>
 
 		<r:require module="webcomponents"/>
 		<r:require module="slimscroll"/>
 		<r:require module="dashboard-editor"/>
 
-		<!--If ~/index.html?noDependencies=true-->
+		<!--Webcomponent-resources are required because webcomponents are imported with lightDOM=true and noDependencies=true-->
 		<r:require module="webcomponent-resources" disposition="head"/>
 
 		<link rel="import" href="${createLink(uri:"/webcomponents/index.html?lightDOM=true&noDependencies=true", plugin:"unifina-core")}">
@@ -37,7 +37,8 @@
 							edit: "${params.edit}",
 							dashboard: dashboard, 
 							RSPs: rspJson,
-							el: $("#sidebar-view")
+							el: $("#sidebar-view"),
+							menuToggle: $("#main-menu-toggle")
 						})
 					})
 					$(window).bind('beforeunload', function(){
@@ -55,7 +56,7 @@
 		</r:script>
 </head>
 
-<body class="main-menu-fixed dashboard-edit mmc">
+<body class="main-menu-fixed dashboard-show mmc">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
 			<div id="sidebar-view" class="scrollable"></div>
@@ -63,6 +64,10 @@
 	</div>
 
 	<div id="content-wrapper" class="scrollable">
+		<ui:breadcrumb>
+			<g:render template="/dashboard/breadcrumbList" model="[dashboard:dashboard]"/>
+			<g:render template="/dashboard/breadcrumbShow" model="[dashboard:dashboard, active:true]"/>
+		</ui:breadcrumb>
 		<streamr-client id="client" server="${ serverUrl }" autoconnect="true" autodisconnect="false"></streamr-client>
 		<ul id="dashboard-view"></ul>
 	</div>

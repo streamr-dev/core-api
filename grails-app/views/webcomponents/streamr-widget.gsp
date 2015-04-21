@@ -20,6 +20,11 @@
 				resendLast: undefined,
 				resendAll: undefined
 			},
+			bindEvents: function(container) {
+				container.parentNode.addEventListener("resize", function() {
+					container.dispatchEvent(new Event('resize'))
+				})
+			},
 			subscribe: function(messageHandler, resendOptions) {
 				var _this = this
 

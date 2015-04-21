@@ -8,10 +8,11 @@
 </g:if>
 
 <polymer-element name="streamr-heatmap" extends="streamr-widget" attributes="lifeTime fadeInTime fadeOutTime min max radius center zoom minZoom maxZoom">
+	<!-- Using shadow element doesn't work with CSS -->
 	<template>
 		<link rel="stylesheet" href="${r.resource(uri:'/js/leaflet-0.7.3/leaflet-0.7.3.css')}">
 		<streamr-client id="client"></streamr-client>
-		<div id="container" style="min-height:400px"></div>
+		<div id="container"></div>
 	</template>
 	
 	<script>
@@ -22,8 +23,9 @@
 			},
 			ready: function() {
 				var _this = this
+				this.bindEvents(_this.$.container)
 
-				var _this = this
+				this.$.container.setAttribute("style", "min-height:400px")
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
@@ -47,7 +49,9 @@
 					    },
 					    resendOptions
 					)
+
 				})
+
 			},
 			centerChanged: function(oldValue, newValue) {
 				this.map.setCenter(newValue)
