@@ -78,7 +78,8 @@ describe('dashboard-editor', function() {
 		sidebar = new db.SidebarView({
 			el: $("#sidebar-view"),
 			dashboard: dashboard, 
-			RSPs: runningSignalPathsJson
+			RSPs: runningSignalPathsJson,
+			menuToggle: $("#main-menu-toggle")
 		})
 	})
 
