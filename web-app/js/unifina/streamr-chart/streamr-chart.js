@@ -103,6 +103,10 @@ function StreamrChart(parent, options) {
 	this.$parent.on('resize', function() {
 		_this.resize()
 	})
+
+	$(window).on('resize', function() {
+		_this.resize()
+	})
 	
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
