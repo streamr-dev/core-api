@@ -27,9 +27,11 @@ class LiveController {
 	def list() {
 		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
 			eq("user",springSecurityService.currentUser)
+			eq("adhoc",false)
 			if (params.term) {
 				like("name","%${params.term}%")
 			}
+			
 		}
 		[running: rsps, user:springSecurityService.currentUser]
 	}
