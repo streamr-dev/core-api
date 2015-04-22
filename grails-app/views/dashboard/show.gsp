@@ -1,51 +1,80 @@
 <html>
-<head>
-    <meta name="layout" content="main" />
-    <title><g:message code="dashboard.show.label" args="[dashboard.name]"/></title>
+	<head>
+		<meta name="layout" content="sidemenu" />
 
-	<r:require module="webcomponents"/>
-	<link rel="import" href="${createLink(uri:"/webcomponents/index.html", plugin:"unifina-core")}">
-	
-	<r:require module="toolbar"/>
+		<title>${ dashboard.name }</title>
 
-	<r:script>
-		 $(document).ready(function() {
-		 	new Toolbar($("#toolbar"))
-		 })
-	</r:script>
+		<r:require module="webcomponents"/>
+		<r:require module="slimscroll"/>
+		<r:require module="dashboard-editor"/>
+
+		<!--Webcomponent-resources are required because webcomponents are imported with lightDOM=true and noDependencies=true-->
+		<r:require module="webcomponent-resources" disposition="head"/>
+
+		<link rel="import" href="${createLink(uri:"/webcomponents/index.html?lightDOM=true&noDependencies=true", plugin:"unifina-core")}">
+
+		<r:script>
+			$(document).ready(function() {
+				var dashboard
+
+
+				$.getJSON("${createLink(controller:'dashboard', action:'getJson', id:dashboard.id)}", {}, function(dbJson) {
+					dashboard = new Dashboard(dbJson)
+					var dashboardView = new DashboardView({
+						model: dashboard,
+						el: $("#dashboard-view")
+					})
+
+					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
+
+				    dashboard.get("items").on("remove", function (model) {
+						var client = document.getElementById("client")
+						client.streamrClient.unsubscribe(model.get("uiChannel").id)
+					})
+					
+					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
+						var sidebar = new SidebarView({
+							edit: "${params.edit}",
+							dashboard: dashboard, 
+							RSPs: rspJson,
+							el: $("#sidebar-view"),
+							menuToggle: $("#main-menu-toggle")
+						})
+					})
+					$(window).bind('beforeunload', function(){
+						if(!dashboard.saved)
+							return 'The dashboard has changes which are not saved'
+					});
+				})
+
+				// Bind slimScroll to main menu
+			    $('#main-menu-inner').slimScroll({
+			      height: '100%'
+			    })
+
+			})
+		</r:script>
 </head>
 
-<body class="dashboard">
-	<streamr-client server="${serverUrl}"></streamr-client>
-	
-	<form method="post" role="form" id="toolbarForm">
-		<g:hiddenField name="id" value="${dashboard.id}" />
+<body class="main-menu-fixed dashboard-show mmc">
+	<div id="main-menu" role="navigation">
+		<div id="main-menu-inner">
+			<div id="sidebar-view" class="scrollable"></div>
+		</div> 
+	</div>
 
-		<div id="toolbar" class="btn-group toolbar">
-			<button id="editButton" class="btn btn-default" data-action="${createLink(action:'edit')}">
-				<i class="fa fa-edit"></i>
-				${message(code: 'default.button.edit.label', default: 'Edit')}
-			</button>
+	<div id="content-wrapper" class="scrollable">
+		<ui:breadcrumb>
+			<g:render template="/dashboard/breadcrumbList" model="[dashboard:dashboard]"/>
+			<g:render template="/dashboard/breadcrumbShow" model="[dashboard:dashboard, active:true]"/>
+		</ui:breadcrumb>
+		<streamr-client id="client" server="${ serverUrl }" autoconnect="true" autodisconnect="false"></streamr-client>
+		<ul id="dashboard-view"></ul>
+	</div>
+	<div id="main-menu-bg"></div>
 
-			<button id="deleteButton" class="btn btn-default confirm" data-action="${createLink(action:'delete')}" data-confirm="<g:message code="dashboard.delete.confirm" args="[dashboard.name]"></g:message>">
-				<i class="fa fa-trash-o"></i>
-				${message(code: 'default.button.delete.label', default: 'Delete')}
-			</button>        	
-		</div>
-	</form>
-	
-	<div class="row">
-		<g:each in="${dashboard.items.sort{it.id}}" var="item">
-			<g:if test="${item.uiChannel.module?.id == 67}">
-				<g:render template="/dashboard/streamr-chart" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
-			</g:if>
-			<g:if test="${item.uiChannel.module?.id == 145}">
-				<g:render template="/dashboard/streamr-label" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
-			</g:if>
-			<g:if test="${item.uiChannel.module?.id == 196}">
-				<g:render template="/dashboard/streamr-heatmap" model="[title:"${item.title}", channel:"${item.uiChannel.id}"]"></g:render>
-			</g:if>
-		</g:each>
-    </div>
+	<g:render template="dashboard-template" />
+
 </body>
 </html>
+

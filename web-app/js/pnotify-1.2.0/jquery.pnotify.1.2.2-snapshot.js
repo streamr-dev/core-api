@@ -43,7 +43,7 @@
 				info_icon: "icon-info-sign",
 				success: "alert-success",
 				success_icon: "icon-ok-sign",
-				error: "alert-error",
+				error: "alert-danger",
 				error_icon: "icon-warning-sign",
 				closer: "icon-remove",
 				pin_up: "icon-pause",

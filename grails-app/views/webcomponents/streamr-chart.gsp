@@ -1,10 +1,12 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<r:require module="highstock"/>
-<r:require module="streamr-chart"/>
+<g:if test="${!params.noDependencies}">
+	<r:require module="streamr-chart"/>
+	<r:require module="highstock"/>
 
-<r:layoutResources disposition="head"/>
-<r:layoutResources disposition="defer"/>
+	<r:layoutResources disposition="head"/>
+	<r:layoutResources disposition="defer"/>
+</g:if>
 
 <polymer-element name="streamr-chart" extends="streamr-widget" attributes="rangeDropdown showHideButtons">
 	<template>
@@ -19,27 +21,36 @@
 			},
 			ready: function() {
 				var _this = this
+				this.bindEvents(_this.$.container)
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
 
-					var chart = new StreamrChart(_this.$.container, {
+					_this.chart = new StreamrChart(_this.$.container, {
 						rangeDropdown: _this.rangeDropdown,	// default: true
 						showHideButtons: _this.showHideButtons	// default: true
 					})
 
 					_this.sendRequest({type:'initRequest'}, function(response) {
-						chart.handleMessage(response.initRequest)
+						_this.chart.handleMessage(response.initRequest)
 					})
 
 					_this.subscribe(
 						function(message) {
-					    	chart.handleMessage(message)
+					    	_this.chart.handleMessage(message)
 					    },
 					    resendOptions
 					)
 				})
-			}
+			},
+			getChart: function() {
+				return this.chart
+			},
+			<g:if test="${params.lightDOM}">
+				parseDeclaration: function(elementElement) {
+					return this.lightFromTemplate(this.fetchTemplate(elementElement))
+				}
+			</g:if>
 		});
 	</script>
 </polymer-element>
