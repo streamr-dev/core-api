@@ -16519,12 +16519,28 @@ body.build-page #content-wrapper {
 .remote-tabs-content {
   outline: none;
 }
-.modal-content {
+.modal-content.code-editor-module {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
 }
-.modal-content .modal-body {
-  flex-grow: 1;
+.modal-content.code-editor-module .modal-body {
+  height: 100%;
+  position: relative;
+  /*padding:0px;*/
+}
+.modal-content.code-editor-module .modal-header,
+.modal-content.code-editor-module .modal-footer {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.modal-content.code-editor-module .CodeMirror {
+  border: 1px solid #eee;
+  display: flex;
+  position: absolute;
+  height: calc(100% - 30px);
+  width: calc(100% - 30px);
 }
 #modal-spinner {
   display: none;

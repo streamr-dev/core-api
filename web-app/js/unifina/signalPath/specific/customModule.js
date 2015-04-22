@@ -23,7 +23,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	addStuffToDiv();
 	
 	var codeWindow = ''
-    +   	'<div class="modal-content" style="width:600px">'
+    +   '<div class="wrapper" style="width:600px; height:400px">'
+    +   	'<div class="modal-content code-editor-module">'
     +    		'<div class="modal-header">'
     +			'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
     +        		'<h4 class="modal-title">Code editor</h4>'
@@ -35,6 +36,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
     +				'<button class="close-btn btn btn-default">Close</button>'
     +			'</div>'
     +   	'</div>'
+    +	'</div>'
 	
 	
 	function createCodeWindow() {
@@ -45,10 +47,18 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 
 			dialog.draggable({
 				cancel: ".modal-body",
-				containment: "none"
+				containment: "none",
+				stack: ".module",
+				drag: function(e, ui) {
+					var cpos = canvas.offset()
+					var x = ui.offset.left + canvas.scrollLeft()
+					var y = ui.offset.top + canvas.scrollTop()
+					
+					if (x < cpos.left-100 || y < cpos.top-50) {
+						return false
+					}
+				}
 			})
-
-			dialog.resizable()
 
 			dialog.find(".debug-btn").click(function() {
 				createDebugWindow()
@@ -74,12 +84,21 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 				value: prot.jsonData.code,
 				mode:  "groovy"
 			}));
+
+			dialog.resizable({
+				minHeight:320,
+				minWidth:400,
+				maxHeight:1000,
+				maxWidth:1500,
+				resize: function(){
+					editor.refresh()
+				}
+			})
 		} else dialog.show()
 	}
 	
 	var debugWindow = ''
-    + 		'<div style="width:400px">'
-    +   		'<div class="modal-content">'
+    +   		'<div class="modal-content module" style="width:400px">'
     +     			'<div class="modal-header">'
     +					'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
     +         			'<h4 class="modal-title">Debug messages</h4>'
@@ -92,7 +111,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
     +					'<button class="close-btn btn btn-default">Close</button>'
     +				'</div>'
     +   		'</div>'
-    + 		'</div>'
 	
 	function createDebugWindow() {
 		if (debug==null) {
@@ -101,7 +119,18 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			
 			prot.div.parent().append(debug)
 
-			debug.draggable()
+			debug.draggable({
+				drag: function(e, ui) {
+					var cpos = canvas.offset()
+					var x = ui.offset.left + canvas.scrollLeft()
+					var y = ui.offset.top + canvas.scrollTop()
+					
+					if (x < cpos.left-100 || y < cpos.top-50) {
+						return false
+					}
+				},
+				stack: ".module"
+			})
 			
 			debug.find(".clear-btn").click(function() {
 				debugTextArea.html("");
@@ -122,12 +151,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	function updateJson() {
 		prot.jsonData.code = editor.getValue();
-//		if (prot.jsonData.inputs!=null)
-//			delete prot.jsonData.inputs;
-//		if (prot.jsonData.outputs!=null)
-//			delete prot.jsonData.outputs;
-//		if (prot.jsonData.params!=null)
-//			delete prot.jsonData.params;
 	}
 	
 	var superReceiveResponse = pub.receiveResponse;
@@ -137,13 +160,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		
 		if (payload.type=="debug" && debug != null) {
 			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
-//			debugTextArea.scrollTop(
-//					debugTextArea[0].scrollHeight - debugTextArea.height()
 //	        );
 		}
 		else if (payload.type=="compilationErrors") {
 			for (var i=0;i<payload.errors.length;i++) {
-//				editor.addLineClass(payload.errors[i].line, "text", "cm-error");
 				editor.setGutterMarker(payload.errors[i].line-1, "breakpoints", makeMarker());
 			}
 		}
