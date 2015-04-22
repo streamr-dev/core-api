@@ -165,7 +165,7 @@ modules = {
 	}
 	toolbar {
 		dependsOn 'jquery'
-		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin:'unifina-core']
 	}
 	'global-error-handler' {
 		dependsOn 'jquery, bootbox'

@@ -24,7 +24,7 @@
             
             <div class="panel-body">
             
-				<table class="table-clickable table table-striped table-bordered table-hover table-condensed table-responsive">
+				<ui:clickableTable>
 				    <thead>
 				        <tr>
 				            <th>Name</th>
@@ -34,14 +34,14 @@
 				    </thead>
 				    <tbody>
 					    <g:each in="${dashboards}" status="i" var="dashboard">
-					        <tr title="Show or edit dashboard" data-link="${createLink(action: 'show', id:dashboard.id) }">
+					    	<ui:clickableRow title="Show or edit dashboard" link="${createLink(action: 'show', id:dashboard.id) }" id="${dashboard.id}">
 					            <td>${dashboard.name}</td>					        
 					           	<td>${dashboard.dateCreated.format("yyyy-MM-dd")}</td>
-					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>		            	
-							</tr>
+					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>	
+				            </ui:clickableRow>	            	
 						</g:each>
 					</tbody>
-				</table>
+				</ui:clickableTable>
             </div> <%-- end panel body --%>
         </div> <%-- end panel --%>
 </body>
