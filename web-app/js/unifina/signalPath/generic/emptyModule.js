@@ -28,8 +28,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			if (x < cpos.left-100 || y < cpos.top-50) {
 				return false
 			}
-		},
-		stack: ".component"
+		}
 	}
 	
 	pub.getDragOptions = function() {

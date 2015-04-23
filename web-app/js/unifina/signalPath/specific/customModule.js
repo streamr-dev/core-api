@@ -23,8 +23,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	addStuffToDiv();
 	
 	var codeWindow = ''
-    +   '<div class="wrapper component module" style="width:600px; height:400px">'
-    +   	'<div class="modal-content code-editor-module">'
+    +   '<div class="code-editor-dialog" style="width:600px; height:400px">'
+    +   	'<div class="modal-content flexing">'
     +    		'<div class="modal-header">'
     +			'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
     +        		'<h4 class="modal-title">Code editor</h4>'
@@ -48,7 +48,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			dialog.draggable({
 				cancel: ".modal-body",
 				containment: "none",
-				stack: ".ui-draggable",
 				drag: function(e, ui) {
 					var cpos = canvas.offset()
 					var x = ui.offset.left + canvas.scrollLeft()
@@ -88,8 +87,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			dialog.resizable({
 				minHeight:320,
 				minWidth:400,
-				maxHeight:1000,
-				maxWidth:1500,
 				resize: function(){
 					editor.refresh()
 				}
@@ -98,7 +95,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	}
 	
 	var debugWindow = ''
-    +   	'<div class="modal-content component module" style="width:400px">'
+    +   	'<div class="debug-dialog modal-content flexing" style="width:400px; height:300px">'
     +     		'<div class="modal-header">'
     +				'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
     +         		'<h4 class="modal-title">Debug messages</h4>'
@@ -120,6 +117,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			prot.div.parent().append(debug)
 
 			debug.draggable({
+				cancel: ".modal-body",
+				containment: "none",
 				drag: function(e, ui) {
 					var cpos = canvas.offset()
 					var x = ui.offset.left + canvas.scrollLeft()
@@ -128,10 +127,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 					if (x < cpos.left-100 || y < cpos.top-50) {
 						return false
 					}
-				},
-				stack: ".ui-draggable"
+				}
 			})
-			
 			debug.find(".clear-btn").click(function() {
 				debugTextArea.html("");
 			})
