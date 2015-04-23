@@ -23,7 +23,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	addStuffToDiv();
 	
 	var codeWindow = ''
-    +   '<div class="wrapper" style="width:600px; height:400px">'
+    +   '<div class="wrapper component module" style="width:600px; height:400px">'
     +   	'<div class="modal-content code-editor-module">'
     +    		'<div class="modal-header">'
     +			'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
@@ -48,7 +48,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			dialog.draggable({
 				cancel: ".modal-body",
 				containment: "none",
-				stack: ".module",
+				stack: ".ui-draggable",
 				drag: function(e, ui) {
 					var cpos = canvas.offset()
 					var x = ui.offset.left + canvas.scrollLeft()
@@ -98,19 +98,19 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	}
 	
 	var debugWindow = ''
-    +   		'<div class="modal-content module" style="width:400px">'
-    +     			'<div class="modal-header">'
-    +					'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
-    +         			'<h4 class="modal-title">Debug messages</h4>'
-    +     			'</div>'
-    +     			'<div class="modal-body">'
-    +					'<div class="debugText" style="width:100%; height:95%; background-color:white; overflow:auto"></div>'
-    +				'</div>'
-    +     			'<div class="modal-footer">'
-    +					'<button class="clear-btn btn btn-default">Clear</button>'
-    +					'<button class="close-btn btn btn-default">Close</button>'
-    +				'</div>'
-    +   		'</div>'
+    +   	'<div class="modal-content component module" style="width:400px">'
+    +     		'<div class="modal-header">'
+    +				'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
+    +         		'<h4 class="modal-title">Debug messages</h4>'
+    +     		'</div>'
+    +     		'<div class="modal-body">'
+    +				'<div class="debugText" style="width:100%; height:95%; background-color:white; overflow:auto"></div>'
+    +			'</div>'
+    +     		'<div class="modal-footer">'
+    +				'<button class="clear-btn btn btn-default">Clear</button>'
+    +				'<button class="close-btn btn btn-default">Close</button>'
+    +			'</div>'
+    +   	'</div>'
 	
 	function createDebugWindow() {
 		if (debug==null) {
@@ -129,7 +129,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 						return false
 					}
 				},
-				stack: ".module"
+				stack: ".ui-draggable"
 			})
 			
 			debug.find(".clear-btn").click(function() {
@@ -142,7 +142,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	}
 	
 	function addStuffToDiv() {
-		var editButton = $("<button>Edit code</button>");
+		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
 		editButton.click(createCodeWindow);
 		
 		module.find(".modulefooter").prepend(editButton);
