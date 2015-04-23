@@ -135,6 +135,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			debug.find(".close-btn").click(function(){
 				debug.hide()
 			})
+			debug.resizable({
+				minHeight:200,
+				minWidth:200
+			})
 		} else debug.show()
 	}
 	
