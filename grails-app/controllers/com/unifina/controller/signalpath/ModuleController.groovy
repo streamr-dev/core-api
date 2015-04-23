@@ -31,7 +31,10 @@ class ModuleController {
 		if (!allowedPackages.isEmpty()) {
 			mods = Module.createCriteria().list {
 				isNull("hide")
-				like("name","%"+params.term+"%")
+				or {
+					like("name","%"+params.term+"%")
+					like("alternativeNames","%"+params.term+"%")
+				}
 				or {
 					'in'("modulePackage",allowedPackages)
 					modulePackage {
@@ -39,6 +42,14 @@ class ModuleController {
 					}
 				}
 			}
+			mods = mods.sort({Module x ->
+				if(x.name.toLowerCase().equals(params.term.toLowerCase()))
+					return 0
+				else if(x.name.toLowerCase().startsWith(params.term.toLowerCase()))
+					return 1
+				else
+					return 2
+			})
 		}
 
 		render mods as JSON

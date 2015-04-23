@@ -6,7 +6,21 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 		var matches = modules.filter(function(mod) {
 			return re.test(mod.name) || re.test(mod.alternativeNames)
 		})
+		matches.sort(function(a,b){
+			return (getSortScore(a, q) - getSortScore(b, q))
+		})
 		cb(matches.slice(0, 5))
+	}
+
+	function getSortScore (module, term){
+		var name = module.name.toLowerCase()
+		term = term.toLowerCase()
+		if(name === term)
+			return 0
+		else if(name.indexOf(term) === 0)
+			return 1
+		else
+			return 2
 	}
 
 	function streamsTypeAhead(q, cb) {
@@ -29,7 +43,8 @@ function SearchControl(streamUrl, modulesUrl, $elem) {
 
 	$elem.typeahead({
 		highlight: true,
-		hint: false
+		hint: true,
+		autoselect: 'first'
 	}, {
 		name: 'modules',
 		displayKey: 'name',
