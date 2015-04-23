@@ -16477,6 +16477,7 @@ body.live-show-view #toolbarForm {
 }
 body.live-show-view .full {
   height: 100%;
+  display: table-row;
 }
 .form-group-period .input-group-addon {
   width: 60px;
