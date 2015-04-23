@@ -16466,11 +16466,17 @@ body.embedded #content-wrapper {
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
 }
-body.live-show-view #toolbarForm {
-  height: 5%;
+body.live-show-view .table {
+  display: table;
+  height: 100%;
 }
-body.live-show-view #canvas {
-  height: 95%;
+body.live-show-view #toolbarForm {
+  height: 46px;
+  padding-bottom: 10px;
+  display: table-row;
+}
+body.live-show-view .full {
+  height: 100%;
 }
 .form-group-period .input-group-addon {
   width: 60px;

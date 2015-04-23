@@ -69,9 +69,17 @@ body.embedded {
 		display:none;
 	}
 }
-body.live-show-view #toolbarForm {
-	height:5%;
-}
-body.live-show-view #canvas {
-	height:95%;
+body.live-show-view {
+	.table {
+		display:table;
+		height:100%;
+	}
+	#toolbarForm {
+		height:46px;
+		padding-bottom:10px;
+		display:table-row;
+	}
+	.full{
+		height:100%;
+	}
 }
