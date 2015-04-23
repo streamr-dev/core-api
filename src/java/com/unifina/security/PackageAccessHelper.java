@@ -14,12 +14,6 @@ public class PackageAccessHelper {
 		restrictedClasses.add("java.lang.Runtime");
 	}
 	
-//	private static final String[] restrictedPackages = new String[] {
-////		"java.lang.reflect", // required by Groovy. safe?
-//		"java.lang.Thread",
-//		"java.lang.Runtime"
-//	};
-	
 	private static final String[] allowedPackages = new String[] {
 			"CustomModule",
 			"java.lang.",
@@ -39,18 +33,6 @@ public class PackageAccessHelper {
 			"org.springsource.loaded.TypeRegistry" // safe?
 	};
 	
-	// Most of these are probably unsafe because Groovy allows very liberal
-	// access to private fields etc.
-	private static final String[] groovyPackages = new String[] {
-		"groovy.lang.", // required by Groovy. safe?
-		"groovy.util.", // required by Groovy. safe?
-		"org.codehaus.groovy.runtime.", // required by Groovy. safe?
-		"org.codehaus.groovy.reflection.ClassInfo", // required by Groovy. safe?
-		
-		"sun.reflect.MethodAccessorImpl", // probably very UNSAFE. needed outside run-app, too?
-		"sun.reflect.ConstructorAccessorImpl" // probably very UNSAFE. needed outside run-app, too?
-	};
-
 	private static boolean checkMatches(String className, String[] packages) {
     	for (String s : packages)
     		if (className.startsWith(s))
@@ -60,9 +42,7 @@ public class PackageAccessHelper {
 	
     public static boolean checkAccess(String className, String codeBase) {
     	// Matches for restricted packages are checked in Java security system, if listed in packages.access security property
-    	if (restrictedClasses.contains(className)
-    		|| codeBase.endsWith("java/untrusted") && !checkMatches(className, allowedPackages)
-    		|| codeBase.endsWith("groovy/untrusted") && !(checkMatches(className, allowedPackages) ||  checkMatches(className, groovyPackages)))
+    	if (restrictedClasses.contains(className) || !checkMatches(className, allowedPackages))
     		throw new SecurityException("Access denied to "+className);
     	else return true;
     } 

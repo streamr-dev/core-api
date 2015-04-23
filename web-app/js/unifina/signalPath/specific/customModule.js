@@ -93,12 +93,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	function updateJson() {
 		prot.jsonData.code = editor.getValue();
-//		if (prot.jsonData.inputs!=null)
-//			delete prot.jsonData.inputs;
-//		if (prot.jsonData.outputs!=null)
-//			delete prot.jsonData.outputs;
-//		if (prot.jsonData.params!=null)
-//			delete prot.jsonData.params;
 	}
 	
 	var superReceiveResponse = pub.receiveResponse;
@@ -108,13 +102,9 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		
 		if (payload.type=="debug" && debug != null) {
 			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
-//			debugTextArea.scrollTop(
-//					debugTextArea[0].scrollHeight - debugTextArea.height()
-//	        );
 		}
 		else if (payload.type=="compilationErrors") {
 			for (var i=0;i<payload.errors.length;i++) {
-//				editor.addLineClass(payload.errors[i].line, "text", "cm-error");
 				editor.setGutterMarker(payload.errors[i].line-1, "breakpoints", makeMarker());
 			}
 		}
@@ -123,7 +113,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	function makeMarker() {
 		var marker = document.createElement("div");
 		marker.style.color = "#822";
-		marker.innerHTML = "���";
+		marker.innerHTML = "&#9679;";
 		return marker;
 	}
 	
