@@ -8,11 +8,6 @@ _.templateSettings = {
 };
 
 var UiChannel = Backbone.Model.extend({
-	defaults: {
-		name:"",
-		id: "",
-		checked: false,
-	},
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
 	}
@@ -58,17 +53,16 @@ var UiChannelView = Backbone.View.extend({
 })
 
 var RunningSignalPath = Backbone.Model.extend({
-	defaults: {
-		name: "",
-		uiChannels: ""
-	},
 	initialize: function (){
-		this.howManyChecked = 0
 		this.uiChannelCollection = new UiChannelList(this.get("uiChannels"))
+	},
+	getCheckedCount: function () {
+		var howManyChecked = 0
 		_.each(this.uiChannelCollection.models, function(model){
 			if(model.get("checked"))
-				this.howManyChecked++
+				howManyChecked++
 		},this)
+		return howManyChecked
 	}
 })
 
@@ -87,11 +81,6 @@ var RunningSignalPathView = Backbone.View.extend({
 	
 	initialize: function (){
 		this.model.uiChannelCollection.on("change:checked", function(model){
-			if(model.get("checked") == true)
-				this.model.howManyChecked++
-			else {
-				this.model.howManyChecked--
-			}
 			this.render()
 		},this)
 	},
@@ -101,8 +90,8 @@ var RunningSignalPathView = Backbone.View.extend({
 			this.$el.append(this.template(this.model.toJSON()))
 			this.$el.append(this.renderUIC())
 		}
-		if(this.model.howManyChecked)
-			this.$el.find(".howmanychecked").html(this.model.howManyChecked)
+		if(this.model.getCheckedCount())
+			this.$el.find(".howmanychecked").html(this.model.getCheckedCount())
 		else this.$el.find(".howmanychecked").empty()
 		return this
 	},
@@ -126,12 +115,6 @@ var RunningSignalPathView = Backbone.View.extend({
 })
 
 var DashboardItem = Backbone.AssociatedModel.extend({
-	defaults: {
-		title: "",
-		uiChannel: {id: "", name: "", module: {id: ""}},
-		ord: "",
-		size: ""
-	},
 	makeSmall: function() {
 		if(this.get("size") != "small")
 			this.set("size", "small")
@@ -168,14 +151,17 @@ var DashboardItemView = Backbone.View.extend({
 		"click .close-edit" : "toggleEdit",
 		"keypress .name-input" : "toggleEdit",
 		"blur .name-input" : "toggleEdit",
-		"click .make-small-btn" : "makeSmall",
-		"click .make-medium-btn" : "makeMedium",
-		"click .make-large-btn" : "makeLarge"
+		"click .make-small-btn" : "changeSize",
+		"click .make-medium-btn" : "changeSize",
+		"click .make-large-btn" : "changeSize"
 	},
 
 	initialize: function(){
 		var _this = this
 		this.model.on("remove", this.remove, this)
+		this.model.on("resize", function() {
+			_this.$el.find(".streamr-widget")[0].dispatchEvent(new Event("resize"))
+		})
 		this.$el.on("drop", function(e, index) {
 			_this.model.collection.trigger("orderchange")
 		})
@@ -252,37 +238,30 @@ var DashboardItemView = Backbone.View.extend({
     initSize: function() {
     	this.$el.removeClass(this.smallClass+ " " +this.mediumClass+ " " +this.largeClass)
     	var size = this.model.get("size")
-    	if(size == "small") {
-    		this.$el.addClass(this.smallClass)
-    	} else if(size == "medium") {
-    		this.$el.addClass(this.mediumClass)
-    	} else if(size == "large") {
-    		this.$el.addClass(this.largeClass)
+    	if(size == "small" || size == "medium" || size == "large") {
+    		if(size == "small") {
+    			this.$el.addClass(this.smallClass)
+	    	} else if(size == "medium") {
+	    		this.$el.addClass(this.mediumClass)
+	    	} else if(size == "large") {
+	    		this.$el.addClass(this.largeClass)
+    		}
     	} else 
-    		console.log("Module size not found")
+    		throw new Error("Module size not found")
     },
 
-	makeSmall: function() {
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
-    	this.model.makeSmall()
-    	this.initSize()
-    	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
-    },
-
-	makeMedium: function() {
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
-		this.model.makeMedium()
-		this.initSize()
-		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
-    },
-
-    makeLarge: function() {
+    changeSize: function(e) {
     	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().removeClass("checked")
-    	this.model.makeLarge()
+    	if($(e.target).hasClass("make-small-btn"))
+    		this.model.makeSmall()
+    	else if($(e.target).hasClass("make-medium-btn"))
+    		this.model.makeMedium()
+    	else if($(e.target).hasClass("make-large-btn"))
+    		this.model.makeLarge()
     	this.initSize()
     	this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
+    	this.$el.find(".widget-content").children()[0].dispatchEvent(new Event("resize"))
     }
-    
 })
 
 var SidebarView = Backbone.View.extend({
@@ -296,6 +275,8 @@ var SidebarView = Backbone.View.extend({
 		this.el = options.el
 		this.dashboard = options.dashboard
 		this.allRSPs = options.RSPs
+		this.menuToggle = options.menuToggle
+
 		this.RSPs = []
 		_.each(this.allRSPs, function(rsp){
 			rsp.uiChannels = _.filter(rsp.uiChannels, function(uic){
@@ -312,7 +293,7 @@ var SidebarView = Backbone.View.extend({
 		this.dashboard.get("items").on("change", function () {
 			_this.dashboard.saved = false
 		})
-		$("#main-menu-toggle").click(function () {
+		this.menuToggle.click(function () {
 			if($("body").hasClass("editing"))
 				_this.setEditMode(false)
 			else
@@ -337,18 +318,20 @@ var SidebarView = Backbone.View.extend({
 		})
 	},
 
-	setEditMode: function (active) {
-		if(active){
-			$("body").addClass("mme")
-			$("body").removeClass("mmc")
-			$("body").addClass("editing")
-		} else {
-			$("body").addClass("mmc")
-			$("body").removeClass("mme")
-			$("body").removeClass("editing")
-		}
+	setData: function(RSPs, DIList) {
+		this.DIList = DIList
 
-    	$("body").trigger("classChange")
+		var checked = {}
+		_.each(this.DIList.models, function(item) {
+			checked[item.get("uiChannel").id] = true
+		})
+		_.each(RSPs, function(rsp) {
+			_.each(rsp.uiChannels, function(uiChannel) {
+				if (checked[uiChannel.id])
+					uiChannel.checked = true
+			})
+		})
+		this.rspCollection = new RunningSignalPathList(RSPs)
 	},
 
 	render: function () {
@@ -391,20 +374,22 @@ var SidebarView = Backbone.View.extend({
 		return runningSignalPathView.render()
 	},
 
-	setData: function(RSPs, DIList) {
-		this.DIList = DIList
+	setEditMode: function (active) {
+		if(active){
+			$("body").addClass("mme")
+			$("body").removeClass("mmc")
+			$("body").addClass("editing")
+		} else {
+			$("body").addClass("mmc")
+			$("body").removeClass("mme")
+			$("body").removeClass("editing")
+		}
 
-		var checked = {}
-		_.each(this.DIList.models, function(item) {
-			checked[item.get("uiChannel").id] = true
-		})
-		_.each(RSPs, function(rsp) {
-			_.each(rsp.uiChannels, function(uiChannel) {
-				if (checked[uiChannel.id])
-					uiChannel.checked = true
-			})
-		})
-		this.rspCollection = new RunningSignalPathList(RSPs)
+    	$("body").trigger("classChange")
+
+    	_.each(this.dashboard.get("items").models, function(item) {
+    		item.trigger("resize")
+    	},this)
 	},
 
 	updateDIList: function(event, uiChannelModel) {
@@ -446,6 +431,7 @@ var SidebarView = Backbone.View.extend({
     	this.dashboard.save({}, {
     		success: function() {
 	    		_this.dashboard.saved = true
+	    		document.title = _this.dashboard.get("name")
 
 			    $.pnotify({
 					type: 'success',
@@ -481,11 +467,6 @@ var Dashboard = Backbone.AssociatedModel.extend({
         }
     ],
 
-	defaults: {
-		name: "",
-		items: []
-	},
-
 	validate: function() {
 		if (!this.get("name"))
 			return "Dashboard name can't be empty"
@@ -504,9 +485,8 @@ var DashboardView = Backbone.View.extend({
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
 			this.$el.sortable({
-				cancel: ".non-draggable, .titlebar-edit",
+				cancel: ".non-draggable, .titlebar-edit, .panel-heading-controls",
 				items: ".dashboarditem",
-				// placeholder: "dashboarditem-placeholder ui-corner-all",
 				stop: function(event, ui) {
 					ui.item.trigger('drop');
 	 	   	}
@@ -538,7 +518,7 @@ var DashboardView = Backbone.View.extend({
 				_this.disableSortable()
 			//!editing -> editing
 			} else {
-				_this.ableSortable()
+				_this.enableSortable()
 			}
 		})
 	},
@@ -565,7 +545,7 @@ var DashboardView = Backbone.View.extend({
 		},this)
 	},
 
-	ableSortable: function() {
+	enableSortable: function() {
 		if (this.$el.sortable) {
 			this.$el.sortable("option", "disabled", false)
 		}

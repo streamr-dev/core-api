@@ -2,17 +2,26 @@ var assert = require('assert')
 var fs = require('fs')
 var jsdom = require("jsdom")
 
-var $ = require('jquery')(jsdom.jsdom().parentWindow);
+var window = jsdom.jsdom().parentWindow
+var $ = require('jquery')(window);
 var _ = require('underscore')
 var Backbone = require('backbone-associations')
 
 global.$ = $
 global._ = _
+global.window = window
+global.document = window.document
 global.Backbone = Backbone
 Backbone.$ = $
 global.jQuery = $
 global.$.pnotify = function(options) {
 	return options
+}
+// jsdom wants to use the deprecated style of creating events, so let's mock a bridge between old and new
+global.Event = function(type) {
+	var e = window.document.createEvent("MockEvent")
+	e.initEvent(type, true, true)
+	return e
 }
 
 var templates = fs.readFileSync('grails-app/views/dashboard/_dashboard-template.gsp','utf8') // read content of _dashboard-template.gsp
@@ -40,14 +49,14 @@ describe('dashboard-editor', function() {
 		$("body").append("<ul id='dashboard-view'></ul>")
 
 		$("#sidebar-view").remove()
-		$("body").append("<div id='sidebar-view'></div>")
+		$("body").append("<div id='sidebar-view'><button id='main-menu-toggle'></button></div>")
 
 		dashboardJson = {
 			id: 1,
 			name: "Test",
 			items: [
-				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', module: {id:67}}, size:"medium"},
-				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', module: {id:145}}, size:"small"}
+				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', module: {id:67}}, size:"medium"}, //chart
+				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', module: {id:145}}, size:"small"}  //label
 			]
 		}
 
@@ -78,7 +87,8 @@ describe('dashboard-editor', function() {
 		sidebar = new db.SidebarView({
 			el: $("#sidebar-view"),
 			dashboard: dashboard, 
-			RSPs: runningSignalPathsJson
+			RSPs: runningSignalPathsJson,
+			menuToggle: $("#main-menu-toggle")
 		})
 	})
 
@@ -100,8 +110,10 @@ describe('dashboard-editor', function() {
 		})
 
 		it('should render the amount of dashboardItems should be correct when added', function (){
+			assert($(".streamr-widget").length == 2)
 			assert(dashboardView.$el.children().length == 2)
 			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:67}}, size:"medium"})
+			assert($(".streamr-widget").length == 3)
 			assert(dashboardView.$el.children().length == 3)
 		})
 
@@ -206,15 +218,6 @@ describe('dashboard-editor', function() {
 	})
 
 	describe("Sidebar", function() {
-		
-		var dashboardJson = {
-			id: 1,
-			name: "Test",
-			items: [
-				{id: 1, title: "Item1", ord:0, uiChannel: {id:'uiChannel-id-1', module: {id:67}}, size: "medium"},
-				{id: 2, title: "Item2", ord:1, uiChannel: {id:'uiChannel-id-2', module: {id:145}}, size: "small"}
-			]
-		}
 
 		beforeEach(function() {
 				
@@ -316,6 +319,21 @@ describe('dashboard-editor', function() {
 
 			//Dashboard name should have changed
 			assert(dashboard.get("name") == "changed-name")
+		})
+
+		it('must trigger "resize"-event for all dashboarditems when menuToggle is clicked', function (done) {
+			assert($(".streamr-widget").length == 2)
+			assert(dashboardView.$el.children().length == 2)
+
+			var counter = 0
+			$(".streamr-widget").on('resize', function() {
+				counter++
+
+				if (counter===2)
+					done()
+			})
+			
+			sidebar.menuToggle.click()
 		})
 	})
 

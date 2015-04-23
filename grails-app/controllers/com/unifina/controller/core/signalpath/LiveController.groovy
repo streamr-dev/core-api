@@ -27,9 +27,11 @@ class LiveController {
 	def list() {
 		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
 			eq("user",springSecurityService.currentUser)
+			eq("adhoc",false)
 			if (params.term) {
 				like("name","%${params.term}%")
 			}
+			
 		}
 		[running: rsps, user:springSecurityService.currentUser]
 	}
@@ -62,7 +64,7 @@ class LiveController {
 	
 	@Secured("ROLE_USER")
 	def getListJson() {
-		def runningSignalPaths = RunningSignalPath.findAllByUser(springSecurityService.currentUser)
+		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(springSecurityService.currentUser, false)
 		List runningSignalPathMaps = runningSignalPaths.collect {rsp->
 			[
 				id: rsp.id,
