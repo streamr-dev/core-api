@@ -16546,6 +16546,9 @@ body.build-page #content-wrapper {
   display: flex;
   position: absolute;
 }
+.code-editor-dialog .CodeMirror .CodeMirror-scroll {
+  width: 100%;
+}
 .debug-dialog {
   position: absolute;
   z-index: 21;
