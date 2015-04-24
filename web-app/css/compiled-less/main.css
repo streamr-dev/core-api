@@ -16665,8 +16665,12 @@ body.dashboard-show #sidebar-view button.delete-button {
   margin-top: 5px;
   margin-bottom: 200px;
 }
+body.dashboard-show #sidebar-view .runningsignalpath.stopped .rsp-title {
+  color: #666;
+}
 body.dashboard-show #sidebar-view .rsp-title {
   margin-left: 20px;
+  cursor: pointer;
 }
 .widget-notifications .notification {
   position: relative;

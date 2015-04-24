@@ -1,5 +1,5 @@
 <script id="rsp-template" type="text/template">
-    <a class="rsp-title">
+    <a class="rsp-title" title="{{state != 'running' ? state : ''}}">
         <span class="mm-text mmc-dropdown-delay animated fadeIn">{{ name }}</span>
         <span class="howmanychecked badge badge-primary"></span>
     </a>

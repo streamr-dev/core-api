@@ -92,7 +92,11 @@ var RunningSignalPathView = Backbone.View.extend({
 		}
 		if(this.model.getCheckedCount())
 			this.$el.find(".howmanychecked").html(this.model.getCheckedCount())
-		else this.$el.find(".howmanychecked").empty()
+		else 
+			this.$el.find(".howmanychecked").empty()
+		if(this.model.get("state") == 'stopped'){
+			this.$el.addClass("stopped")
+		}
 		return this
 	},
 
