@@ -15,10 +15,9 @@
 		</div>
 		
 		<ui:panel title="${message(code:"stream.list.label")}">
-			<table class="table table-striped table-bordered table-hover table-condensed table-responsive">
+			<ui:clickableTable>
 			    <thead>
 			        <tr>
-			        	<th><g:message code="stream.id.label" /></th>
 			        	<th><g:message code="stream.name.label" /></th>
 			        	<th><g:message code="stream.type.label" /></th>
 			        	<th><g:message code="stream.description.label" /></th>
@@ -26,15 +25,14 @@
 			    </thead>
 			    <tbody>
 				    <g:each in="${streams}" var="stream">
-				        <tr>					        
-				            <td><g:link action="show" id="${stream.id}">${fieldValue(bean: stream, field: "id")}</g:link></td>					        
+				        <ui:clickableRow link="${ createLink(action:'show', id: stream.id) }" id="${stream.id }">					        
 				            <td>${fieldValue(bean: stream, field: "name")}</td>
 				            <td>${fieldValue(bean: stream.feed, field: "name")}</td>
 				            <td>${fieldValue(bean: stream, field: "description")}</td>
-						</tr>
+						</ui:clickableRow>
 					</g:each>
 				</tbody>
-			</table>
+			</ui:clickableTable>
 		</ui:panel>
 		
     </body>
