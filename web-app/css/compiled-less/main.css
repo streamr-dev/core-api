@@ -16466,6 +16466,29 @@ body.embedded #content-wrapper {
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
 }
+body.live-show-view #content-wrapper {
+  padding: 56px 0px 0px 0px;
+}
+body.live-show-view div.toolbar {
+  width: 100%;
+  padding-right: 30px;
+}
+body.live-show-view #stopButton {
+  float: right;
+  z-index: 20;
+}
+body.live-show-view #toolbarForm {
+  width: 100%;
+  position: absolute;
+  /*height:46px;
+		padding-bottom:10px;
+		display:table-row;*/
+}
+body.live-show-view #canvas {
+  height: 100%;
+  width: 100%;
+  /*display:table-row;*/
+}
 .form-group-period .input-group-addon {
   width: 60px;
 }
