@@ -1,8 +1,7 @@
 $( document ).ready(function () {
 	var table = $("table.table-clickable")
 	if(table){
-		var a = table.find("tr")
-		console.log(a)
+		var a = table.find("tbody tr")
 		$.each(a, function(i, tr){
 			if($(tr).attr("data-link")){
 				$(tr).click(function(){
