@@ -61,17 +61,17 @@ describe('dashboard-editor', function() {
 		}
 
 		runningSignalPathsJson = [
-			{id: 1, name: "RSP1", uiChannels: [
+			{id: 1, state: 'running', name: "RSP1", uiChannels: [
 				{name: "uiChannel-1", checked: true, id: "uiChannel-id-1", module: {id: 67}}
 				]},
-			{id: 2, name: "RSP2", uiChannels: [
+			{id: 2, state: 'running', name: "RSP2", uiChannels: [
 				{name: "uiChannel-3", checked: false, id: "uiChannel-id-3", module: {id: 145}},
 				{name: "uiChannel-4", checked: false, id: "uiChannel-id-4", module: {id: 196}}
 				]},
-			{id: 3, name: "RSP3", uiChannels: [
+			{id: 3, state: 'stopped', name: "RSP3", uiChannels: [
 				{name: "uiChannel-2", checked: true, id: "uiChannel-id-2", module: {id: 145}}
 			]},			
-			{id: 4, name: "RSP4", uiChannels: [
+			{id: 4, state: 'running', name: "RSP4", uiChannels: [
 				{name: "uiChannel-5", checked: false, id: "uiChannel-id-5", module: {id: 67}}
 				]}
 		]
@@ -334,6 +334,14 @@ describe('dashboard-editor', function() {
 			})
 			
 			sidebar.menuToggle.click()
+		})
+
+		it('must add the class "stopped" for the runningsignalpaths which have state:stopped', function() {
+			assert($("#sidebar-view").find(".runningsignalpath").length == 4)
+			assert(!($($("#sidebar-view").find(".runningsignalpath")[0]).hasClass("stopped")))
+			assert(!($($("#sidebar-view").find(".runningsignalpath")[1]).hasClass("stopped")))
+			assert($($("#sidebar-view").find(".runningsignalpath")[2]).hasClass("stopped"))
+			assert(!($($("#sidebar-view").find(".runningsignalpath")[4]).hasClass("stopped")))
 		})
 	})
 
