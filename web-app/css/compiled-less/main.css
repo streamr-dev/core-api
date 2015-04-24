@@ -16606,6 +16606,7 @@ body.dashboard-show #sidebar-view .runningsignalpath.stopped .rsp-title {
 }
 body.dashboard-show #sidebar-view .rsp-title {
   margin-left: 20px;
+  cursor: pointer;
 }
 .widget-notifications .notification {
   position: relative;
