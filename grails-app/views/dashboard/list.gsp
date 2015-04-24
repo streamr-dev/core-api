@@ -11,7 +11,7 @@
 
 	<div class="btn-group toolbar">
 		<a id="createButton" class="btn btn-primary" href="${createLink(action:'create')}">
-			<i class="fa fa-plus"></i> Create new dashboard
+			<i class="fa fa-plus"></i> Create a new dashboard
 		</a>        	
 	</div>
 	
@@ -24,10 +24,9 @@
             
             <div class="panel-body">
             
-				<table class="table table-striped table-bordered table-hover table-condensed table-responsive">
+				<ui:clickableTable>
 				    <thead>
 				        <tr>
-				            <g:sortableColumn property="id" title="Id" />
 				            <th>Name</th>
 				            <th>Created</th>
 				            <th>Modified</th>
@@ -35,15 +34,14 @@
 				    </thead>
 				    <tbody>
 					    <g:each in="${dashboards}" status="i" var="dashboard">
-					        <tr>
-					            <td><g:link action="show" id="${dashboard.id}">${fieldValue(bean: dashboard, field: "id")}</g:link></td>
+					    	<ui:clickableRow title="Show or edit dashboard" link="${createLink(action: 'show', id:dashboard.id) }" id="${dashboard.id}">
 					            <td>${dashboard.name}</td>					        
 					           	<td>${dashboard.dateCreated.format("yyyy-MM-dd")}</td>
-					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>		            	
-							</tr>
+					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>	
+				            </ui:clickableRow>	            	
 						</g:each>
 					</tbody>
-				</table>
+				</ui:clickableTable>
             </div> <%-- end panel body --%>
         </div> <%-- end panel --%>
 </body>

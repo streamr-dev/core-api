@@ -22,69 +22,128 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	addStuffToDiv();
 	
+	var codeWindow = ''
+    +   '<div class="code-editor-dialog" style="width:600px; height:400px">'
+    +   	'<div class="modal-content flexing">'
+    +    		'<div class="modal-header">'
+    +			'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
+    +        		'<h4 class="modal-title">Code editor</h4>'
+    +  	 		'</div>'
+    +   	 	'<div class="modal-body"></div>'
+    +   		'<div class="modal-footer">'
+    +				'<button class="debug-btn btn btn-default">Show debug</button>'
+    +				'<button class="apply-btn btn btn-default">Apply</button>'
+    +				'<button class="close-btn btn btn-default">Close</button>'
+    +			'</div>'
+    +   	'</div>'
+    +	'</div>'
+	
+	
 	function createCodeWindow() {
 		if (dialog==null) {
-			dialog = $("<div class='codeWindow' style='display:none'></div>");
+			dialog = $(codeWindow);
 			
-			$(dialog).dialog({
-				autoOpen:true,
-				title:"Code editor",
-				width: 600,
-				height: 400,
-				buttons: {
-					"Show debug": function() {
-						$(debug).dialog("open");
-					},
-					"Apply": function() {
-						editor.clearGutter("breakpoints");
-						updateJson();
-						SignalPath.updateModule(pub, function() {
-							module = pub.getDiv();
-							addStuffToDiv();
-						});
-					},
-					"Close": function() {
-						$( this ).dialog( "close" );
+			prot.div.parent().append(dialog)
+
+			dialog.draggable({
+				cancel: ".modal-body",
+				containment: "none",
+				drag: function(e, ui) {
+					var cpos = canvas.offset()
+					var x = ui.offset.left + canvas.scrollLeft()
+					var y = ui.offset.top + canvas.scrollTop()
+					
+					if (x < cpos.left-100 || y < cpos.top-50) {
+						return false
 					}
-				},
-				open: function() {
-					editor = CodeMirror(dialog[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
-						value: prot.jsonData.code,
-						mode:  "groovy"
-					}));
-				},
-				close: pub.onDelete
-			}).dialog("widget").draggable("option","containment","none");
+				}
+			})
+
+			dialog.find(".debug-btn").click(function() {
+				createDebugWindow()
+			})
+			
+			dialog.find(".apply-btn").click(function() {
+				editor.clearGutter("breakpoints");
+				updateJson();
+				SignalPath.updateModule(pub, function() {
+					module = pub.getDiv();
+					addStuffToDiv();
+				});
+			})
+			dialog.find(".close-btn").click(function(){
+				dialog.hide()
+			})
+						
 			
 			$(SignalPath).on("new", pub.onDelete);
 			$(SignalPath).on("loaded", pub.onDelete);
-		}
-		
-		if (debug==null) {
-			debug = $("<div class='debugWindow' style='display:none'></div>");
-			debugTextArea = $("<div id='debugText' style='width:100%; height:95%; background-color:white; overflow:auto'></div>");
-			debug.append(debugTextArea);
 			
-			$(debug).dialog({
-				autoOpen:false,
-				title:"Debug messages",
-				width: 400,
-				height: 300,
-				buttons: {
-					"Clear": function() {
-						debugTextArea.html("");
-					},
-					"Close": function() {
-						$(this).dialog("close");
+			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
+				value: prot.jsonData.code,
+				mode:  "groovy"
+			}));
+
+			dialog.resizable({
+				minHeight:320,
+				minWidth:400,
+				resize: function(){
+					editor.refresh()
+				}
+			})
+		} else dialog.show()
+	}
+	
+	var debugWindow = ''
+    +   	'<div class="debug-dialog modal-content flexing" style="width:400px; height:300px">'
+    +     		'<div class="modal-header">'
+    +				'<button type="button" class="close close-btn"><span aria-hidden="true">&times;</span></button>'
+    +         		'<h4 class="modal-title">Debug messages</h4>'
+    +     		'</div>'
+    +     		'<div class="modal-body">'
+    +				'<div class="debugText" style="width:100%; height:95%; background-color:white; overflow:auto"></div>'
+    +			'</div>'
+    +     		'<div class="modal-footer">'
+    +				'<button class="clear-btn btn btn-default">Clear</button>'
+    +				'<button class="close-btn btn btn-default">Close</button>'
+    +			'</div>'
+    +   	'</div>'
+	
+	function createDebugWindow() {
+		if (debug==null) {
+			debug = $(debugWindow);
+			debugTextArea = debug.find(".debugText")
+			
+			prot.div.parent().append(debug)
+
+			debug.draggable({
+				cancel: ".modal-body",
+				containment: "none",
+				drag: function(e, ui) {
+					var cpos = canvas.offset()
+					var x = ui.offset.left + canvas.scrollLeft()
+					var y = ui.offset.top + canvas.scrollTop()
+					
+					if (x < cpos.left-100 || y < cpos.top-50) {
+						return false
 					}
 				}
-			});
-		}
-
+			})
+			debug.find(".clear-btn").click(function() {
+				debugTextArea.html("");
+			})
+			debug.find(".close-btn").click(function(){
+				debug.hide()
+			})
+			debug.resizable({
+				minHeight:200,
+				minWidth:200
+			})
+		} else debug.show()
 	}
 	
 	function addStuffToDiv() {
-		var editButton = $("<button>Edit code</button>");
+		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
 		editButton.click(createCodeWindow);
 		
 		module.find(".modulefooter").prepend(editButton);
@@ -93,12 +152,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	
 	function updateJson() {
 		prot.jsonData.code = editor.getValue();
-//		if (prot.jsonData.inputs!=null)
-//			delete prot.jsonData.inputs;
-//		if (prot.jsonData.outputs!=null)
-//			delete prot.jsonData.outputs;
-//		if (prot.jsonData.params!=null)
-//			delete prot.jsonData.params;
 	}
 	
 	var superReceiveResponse = pub.receiveResponse;
@@ -108,13 +161,9 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		
 		if (payload.type=="debug" && debug != null) {
 			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
-//			debugTextArea.scrollTop(
-//					debugTextArea[0].scrollHeight - debugTextArea.height()
-//	        );
 		}
 		else if (payload.type=="compilationErrors") {
 			for (var i=0;i<payload.errors.length;i++) {
-//				editor.addLineClass(payload.errors[i].line, "text", "cm-error");
 				editor.setGutterMarker(payload.errors[i].line-1, "breakpoints", makeMarker());
 			}
 		}
@@ -123,7 +172,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	function makeMarker() {
 		var marker = document.createElement("div");
 		marker.style.color = "#822";
-		marker.innerHTML = "���";
+		marker.innerHTML = "&#9679;";
 		return marker;
 	}
 	
@@ -133,17 +182,14 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			super_onDelete();
 		
 		if (dialog!=null) {
-			$(dialog).dialog("close");
-			$(dialog).dialog("destroy");
-			$(dialog).remove();
+			$(dialog).modal("close");
+			$(dialog).modal("destroy");
 			dialog = null;
 		}
 		if (debug!=null) {
-			$(debug).dialog("close");
-			$(debug).dialog("destroy");
-			$(debug).remove();
+			$(debug).modal("close");
+			$(debug).modal("destroy");
 			debug = null;
-			debugTextArea = null;
 		}
 	}
 	

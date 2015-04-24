@@ -108,7 +108,7 @@ $(document).ready(function() {
 	</g:if>
 	
 	$.pnotify.defaults.history = false;
-	$.pnotify.defaults.styling = "jqueryui";
+	$.pnotify.defaults.styling = "bootstrap";
 
 	$(SignalPath).on('error', function(error) {
 		console.error(error)
@@ -122,6 +122,7 @@ $(document).ready(function() {
 	$(SignalPath).on('saved', function(event,data) {
 		$('#modal-spinner').hide()
 		$.pnotify({
+			type: 'success',
         	title: '${message(code:"signalpath.saved.title")}',
 	        text: '${message(code:"signalpath.saved.to")} '+data.target+'.',
 	        delay: 4000

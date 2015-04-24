@@ -3,10 +3,10 @@
  */
 
 function Toolbar($elem) {
-	$elem.find('.btn').click(function(e) {
+	$elem.find('.btn[data-action]').click(function(e) {
 		var btn = $(this)
-		var $form = $elem.parent("form")
-			
+		var $form = ($elem.is("form") ? $elem : $elem.parent("form"))
+		
 		if ($form)	
 			$form.attr('action', btn.data('action'))
 

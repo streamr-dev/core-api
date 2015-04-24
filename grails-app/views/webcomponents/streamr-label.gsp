@@ -1,8 +1,5 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<r:layoutResources disposition="head"/>
-<r:layoutResources disposition="defer"/>
-
 <polymer-element name="streamr-label" attributes="channel">
 	<template>
 		<streamr-client id="client"></streamr-client>
@@ -33,9 +30,11 @@
 			getValue: function() {
 				return this.value
 			},
-			parseDeclaration: function(elementElement) {
-				return this.lightFromTemplate(this.fetchTemplate(elementElement))
-			}
+			<g:if test="${params.lightDOM}">
+				parseDeclaration: function(elementElement) {
+					return this.lightFromTemplate(this.fetchTemplate(elementElement))
+				}
+			</g:if>
 		});
 	</script>
 </polymer-element>

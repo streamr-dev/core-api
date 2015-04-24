@@ -115,6 +115,10 @@ modules = {
 		dependsOn 'underscore,jquery'
 		resource url:[dir:'js/backbone', file:'backbone.js', plugin: 'unifina-core']
 	}
+	'backbone-associations' {
+		dependsOn 'backbone'
+		resource url:[dir:'js/backbone-associations', file:'backbone-associations-min.js', plugin: 'unifina-core']
+	}
 	leaflet {
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.css', plugin: 'unifina-core']
@@ -133,6 +137,13 @@ modules = {
 		dependsOn 'hopscotch, streamr'
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
+	'dashboard-editor' {
+		dependsOn 'backbone, backbone-associations, jquery-ui, pnotify, toolbar, bootstrap'
+		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
+	}
+	'webcomponent-resources' {
+		dependsOn 'streamr-client, streamr-chart, streamr-heatmap'
+	}
 	'stream-fields' {
 		dependsOn 'jquery, backbone'
 		resource url:[dir:'js/unifina/stream-fields', file:'stream-fields.js', plugin: 'unifina-core']
@@ -149,9 +160,12 @@ modules = {
 		dependsOn 'remote-tabs'
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
 	}
+	'clickable-table' {
+		resource url:[dir:'js/unifina/clickable-table', file:'clickable-table.js', plugin:'unifina-core']
+	}
 	toolbar {
 		dependsOn 'jquery'
-		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin:'unifina-core']
 	}
 	'global-error-handler' {
 		dependsOn 'jquery, bootbox'
@@ -164,10 +178,10 @@ modules = {
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
-		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core'], disposition:'head'
 	}
 	'streamr-chart' {
-		dependsOn 'jquery'
+		dependsOn 'jquery,highstock'
 		resource url:[dir:'js/unifina/streamr-chart', file:'streamr-chart.js', plugin: 'unifina-core']
 	}
 	'streamr-heatmap' {
@@ -196,6 +210,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+		
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'

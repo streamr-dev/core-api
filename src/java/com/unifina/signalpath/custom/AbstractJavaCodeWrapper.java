@@ -16,11 +16,12 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleException;
 import com.unifina.signalpath.ModuleExceptionMessage;
+import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.Output;
 
-public abstract class AbstractJavaCodeWrapper extends AbstractSignalPathModule {
+public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
-	AbstractSignalPathModule instance = null;
+	ModuleWithUI instance = null;
 	String code = null;
 	
 	private static final Logger log = Logger.getLogger(AbstractJavaCodeWrapper.class);
@@ -85,6 +86,16 @@ public abstract class AbstractJavaCodeWrapper extends AbstractSignalPathModule {
 		return result.toString();
 	}
 	
+	@Override
+	public String getUiChannelId() {
+		return instance.getUiChannelId();
+	}
+	
+	@Override
+	public String getUiChannelName() {
+		return instance.getUiChannelName();
+	}
+	
 	protected void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (config.containsKey("code")) {
@@ -121,7 +132,7 @@ public abstract class AbstractJavaCodeWrapper extends AbstractSignalPathModule {
 					
 					throw new ModuleException(sb.toString(),null,msgs);
 				}
-				Class<AbstractSignalPathModule> clazz = (Class<AbstractSignalPathModule>) ujcl.loadClass(className);
+				Class<ModuleWithUI> clazz = (Class<ModuleWithUI>) ujcl.loadClass(className);
 				
 				// Register the created class so that it will be cleaned when Globals is destroyed
 				// TODO: not needed for Java classes?
@@ -141,6 +152,8 @@ public abstract class AbstractJavaCodeWrapper extends AbstractSignalPathModule {
 				instance.globals = globals;
 				instance.setHash(hash);
 				instance.setParentSignalPath(parentSignalPath);
+				
+				instance.configure(config);
 			}
 			catch (Exception e) {
 				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found

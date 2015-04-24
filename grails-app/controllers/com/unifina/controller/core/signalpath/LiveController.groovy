@@ -16,7 +16,7 @@ class LiveController {
 	def signalPathService
 	
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))},
-		except:['index','list','show','getJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
+		except:['index','list','show','getJson', 'getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -27,9 +27,11 @@ class LiveController {
 	def list() {
 		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
 			eq("user",springSecurityService.currentUser)
+			eq("adhoc",false)
 			if (params.term) {
 				like("name","%${params.term}%")
 			}
+			
 		}
 		[running: rsps, user:springSecurityService.currentUser]
 	}
@@ -60,6 +62,21 @@ class LiveController {
 		}
 	}
 	
+	@Secured("ROLE_USER")
+	def getListJson() {
+		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(springSecurityService.currentUser, false)
+		List runningSignalPathMaps = runningSignalPaths.collect {rsp->
+			[
+				id: rsp.id,
+				name: rsp.name,
+				uiChannels: rsp.uiChannels.collect {uiChannel->
+					[id: uiChannel.id, name: uiChannel.name, module: (uiChannel.module ? [id:uiChannel.module.id] : null)]
+				}
+			]
+		}
+		render runningSignalPathMaps as JSON
+	}
+
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def getModuleJson() {
 		response.setHeader('Access-Control-Allow-Origin', '*')
