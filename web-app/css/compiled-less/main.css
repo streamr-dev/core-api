@@ -16466,8 +16466,8 @@ body.embedded #content-wrapper {
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
 }
-.table-scrollable tbody {
-  overflow: auto;
+.table-clickable tbody tr:hover {
+  cursor: pointer;
 }
 .form-group-period .input-group-addon {
   width: 60px;
