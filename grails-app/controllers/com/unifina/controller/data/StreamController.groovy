@@ -46,6 +46,14 @@ class StreamController {
 		}
 		else render ""
 	}
+
+	def update() {
+		Stream stream = Stream.get(params.id)
+		stream.name = params.name
+		stream.description = params.description
+		stream.save(flush:true, failOnError:true)
+		redirect(action: "show", id: stream.id)
+	}
 	
 	def create() {
 		if (request.method=="GET")
@@ -72,6 +80,12 @@ class StreamController {
 		}
 	}
 	
+	def configure() {
+		// Access checked by beforeInterceptor
+		Stream stream = Stream.get(params.id)
+		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+	}
+
 	def edit() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
