@@ -16516,6 +16516,48 @@ body.build-page #content-wrapper {
 .login-page.show-sign-in .btn-sign-up {
   display: inline-block;
 }
+.modal-content.flexing {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+.modal-content.flexing .modal-body {
+  height: 100%;
+  position: relative;
+  padding: 0px;
+}
+.modal-content.flexing .modal-body:hover {
+  cursor: auto;
+}
+.modal-content.flexing .modal-header,
+.modal-content.flexing .modal-footer {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.modal-content.flexing:hover {
+  cursor: move;
+}
+.code-editor-dialog {
+  position: absolute;
+  z-index: 20;
+}
+.code-editor-dialog .CodeMirror {
+  display: flex;
+  position: absolute;
+}
+.code-editor-dialog .CodeMirror .CodeMirror-scroll {
+  width: 100%;
+}
+.debug-dialog {
+  position: absolute;
+  z-index: 21;
+}
+.debug-dialog .debugText {
+  display: flex;
+  position: absolute;
+  padding: 5px;
+}
 .remote-tabs-content {
   outline: none;
 }
