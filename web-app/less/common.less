@@ -70,17 +70,28 @@ body.embedded {
 	}
 }
 body.live-show-view {
-	.table {
-		display:table;
-		height:100%;
+	#content-wrapper {
+		padding:56px 0px 0px 0px;
+	}
+	div.toolbar {
+		width:100%;
+		padding-right: 30px;
+	}
+	#stopButton {
+		float:right;
+		z-index:20;
 	}
 	#toolbarForm {
-		height:46px;
+		width:100%;
+		position:absolute;
+		
+		/*height:46px;
 		padding-bottom:10px;
-		display:table-row;
+		display:table-row;*/
 	}
-	.full{
+	#canvas{
 		height:100%;
-		display:table-row;
+		width:100%;
+		/*display:table-row;*/
 	}
 }
