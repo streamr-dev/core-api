@@ -16466,9 +16466,6 @@ body.embedded #content-wrapper {
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
 }
-.table-clickable tbody tr:hover {
-  cursor: pointer;
-}
 .table-scrollable tbody {
   overflow: auto;
 }
