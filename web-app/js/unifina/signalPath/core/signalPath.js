@@ -544,7 +544,7 @@ var SignalPath = (function () {
 		
 		connection.connect(newSession)
 
-		$(pub).trigger('started');
+		$(pub).trigger('started', [runData]);
 	}
 	pub.subscribe = subscribe
 	

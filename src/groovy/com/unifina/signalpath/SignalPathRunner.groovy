@@ -89,7 +89,8 @@ public class SignalPathRunner extends Thread {
 	}
 	
 	public synchronized void waitReady() {
-		while (!getReady())
+		int i = 0
+		while (!getReady() && i++<20)
 			this.wait(500)
 	}
 	
@@ -125,6 +126,7 @@ public class SignalPathRunner extends Thread {
 			signalPaths.each {SignalPath sp->
 				globals?.uiChannel?.push(new ErrorMessage(sb.toString()), sp.uiChannelId)
 			}
+			setReady(false)
 		}
 		
 		signalPaths.each {SignalPath sp->

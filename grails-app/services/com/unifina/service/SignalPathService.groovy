@@ -264,6 +264,8 @@ class SignalPathService {
 		
 		// Wait for runner to be in ready state
 		runner.waitReady()
+		if (!runner.getReady())
+			log.error("Timed out while waiting for runner $runnerId to become ready!")
 		
 		rsp.runner = runnerId
 		rsp.state = "running"
