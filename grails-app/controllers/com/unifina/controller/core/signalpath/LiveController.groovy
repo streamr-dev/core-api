@@ -152,7 +152,7 @@ class LiveController {
 		RunningSignalPath rsp = signalPathService.createRunningSignalPath(signalPathData, springSecurityService.currentUser, signalPathContext.live ? false : true, true)
 		signalPathService.startLocal(rsp, signalPathContext)
 		
-		Map result = [success:true, id:rsp.id, uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }]
+		Map result = [success:true, id:rsp.id, adhoc:rsp.adhoc, uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }]
 		render result as JSON
 	}
 	

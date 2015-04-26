@@ -636,7 +636,7 @@ var SignalPath = (function () {
 	pub.getWorkspace = getWorkspace;
 	
 	function getZoom() {
-		return canvas.css("zoom") != null ? canvas.css("zoom") : 1 
+		return canvas.css("zoom") != null ? parseFloat(canvas.css("zoom")) : 1
 	}
 	pub.getZoom = getZoom
 

@@ -130,7 +130,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	 * On start, bind connected inputs to series indices. We need
 	 * to know which input results in which series.
 	 */
-	$(SignalPath).on("started", function() {
+	$(SignalPath).on("started", function(e, runData) {
 		// Reset all series indices
 		pub.getInputs().forEach(function(input) {
 			input.seriesIndex = null
@@ -141,9 +141,11 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		for (var i=0; i<connectedInputs.length; i++) {
 			connectedInputs[i].seriesIndex = i
 		}
-		SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
-			prot.chart.handleMessage(response.initRequest)
-		})
+		if (!runData || !runData.adhoc) {
+			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
+				prot.chart.handleMessage(response.initRequest)
+			})
+		}
 	})
 	
 	/**
