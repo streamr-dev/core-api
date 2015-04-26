@@ -182,14 +182,12 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			super_onDelete();
 		
 		if (dialog!=null) {
-			$(dialog).modal("close");
-			$(dialog).modal("destroy");
-			dialog = null;
+			$(dialog).remove()
+			dialog = null
 		}
 		if (debug!=null) {
-			$(debug).modal("close");
-			$(debug).modal("destroy");
-			debug = null;
+			$(debug).remove()
+			debug = null
 		}
 	}
 	

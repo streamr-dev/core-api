@@ -86,16 +86,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		return result.toString();
 	}
 	
-	@Override
-	public String getUiChannelId() {
-		return instance.getUiChannelId();
-	}
-	
-	@Override
-	public String getUiChannelName() {
-		return instance.getUiChannelName();
-	}
-	
 	protected void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (config.containsKey("code")) {
