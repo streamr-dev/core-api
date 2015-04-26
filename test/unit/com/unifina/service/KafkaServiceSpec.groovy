@@ -24,6 +24,22 @@ class KafkaServiceSpec extends Specification {
     def cleanup() {
 		java.util.LinkedHashMap.metaClass.asType = null
     }
+	
+	void "test creating and deleting a Kafka topic"() {
+		setup:
+		String topic = "KafkaServiceSpec_"+new Date().time
+		
+		when:
+		service.createTopics([topic])
+		then:
+		service.topicExists(topic)
+		
+		when:
+		service.deleteTopics([topic])
+		Thread.sleep(2000)
+		then:
+		!service.topicExists(topic)
+	}
 
 	void "test reading a csv file and producing feedfiles and schema"() {
 		setup:

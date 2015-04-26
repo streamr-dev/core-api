@@ -24,12 +24,14 @@ log4j = {
 }
 
 // Example config for Kafka
-unifina.kafka.metadata.broker.list = "192.168.10.81:9092"
+unifina.kafka.metadata.broker.list = "192.168.10.21:9092"
+unifina.kafka.zookeeper.connect = "192.168.10.21:2181"
 unifina.kafka.producer.type = "async"
+unifina.kafka.queue.buffering.max.ms = "100"
+unifina.kafka.retry.backoff.ms = "500"
 unifina.kafka.serializer.class = "kafka.serializer.StringEncoder"
-unifina.kafka.request.required.acks = "1"
-unifina.kafka.zookeeper.connect = "192.168.10.81:2181"
-unifina.kafka.group.id = "unifina"
+unifina.kafka.request.required.acks = "0"
+unifina.kafka.group.id = "streamr"
 
 unifina.feed.fileStorageAdapter = "com.unifina.feed.file.HTTPFileStorageAdapter"
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements

@@ -107,40 +107,28 @@ class KafkaService {
 	 * @param topics
 	 */
 	@CompileStatic
-	void createTopics(List<String> topics) {
-		SimpleConsumer consumer = getTopicCreateConsumer();
+	void createTopics(List<String> topics, int partitions=1, int replicationFactor=1) {
+		ZkClient zkClient = createZkClient()
 		
-		TopicMetadataRequest req = new TopicMetadataRequest(topics);
-		
-		int retry = 0;
-		boolean success = false;
-		while (retry++ < 20) {
-			
-			log.info("createTopics: sending TopicMetadataRequest for "+topics)
-			TopicMetadataResponse resp = consumer.send(req);
-			
-			boolean hadError = false
-			for (TopicMetadata tmd : resp.topicsMetadata()) {
-				if (tmd.errorCode()>0) {
-					hadError = true
-				}
-			}
-			
-			if (hadError) {
-				log.info("createTopics: Retrying topic metadata fetch for "+topics+", retry "+retry);
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {}
+		for (String topic : topics) {
+			if (AdminUtils.topicExists(zkClient, topic)) {
+				log.warn("createTopics: topic $topic already exists")
 			}
 			else {
-				success = true
-				break
+				Properties props = new Properties();
+				AdminUtils.createTopic(zkClient, topic, partitions, replicationFactor, props);
 			}
 		}
 		
-		if (!success) {
-			throw new RuntimeException("Failed to create topics: "+topics)
-		}
+		zkClient.close()
+	}
+	
+	@CompileStatic
+	boolean topicExists(String topic) {
+		ZkClient zkClient = createZkClient()
+		boolean result = AdminUtils.topicExists(zkClient, topic)
+		zkClient.close()
+		return result
 	}
 	
 	/**
