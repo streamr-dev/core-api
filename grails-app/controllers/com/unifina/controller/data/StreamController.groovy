@@ -3,10 +3,13 @@ package com.unifina.controller.data
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import org.springframework.web.multipart.MultipartFile
+
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Module
+import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 
 @Secured(["ROLE_USER"])
@@ -147,17 +150,29 @@ class StreamController {
 	
 	def upload() {
 		// Access checked by beforeInspector
-		Stream stream = Stream.get(params.id)
-		def file = request.getFile("file")
-		List fields = kafkaService.createFeedFilesFromCsv(file.inputStream, stream)
 		
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
-		if (!config.fields || config.fields.isEmpty()) {
-			config.fields = fields
-			stream.streamConfig = (config as JSON)
+		File temp
+		try {
+			Stream stream = Stream.get(params.id)
+			MultipartFile file = request.getFile("file")
+			temp = File.createTempFile("csv_upload_", ".csv")
+			file.transferTo(temp)
+			List fields = kafkaService.createFeedFilesFromCsv(new CSVImporter(temp), stream)
+			
+			Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+			if (!config.fields || config.fields.isEmpty()) {
+				config.fields = fields
+				stream.streamConfig = (config as JSON)
+			}
+			
+			render ([success:true] as JSON)
+		} catch (Exception e) {
+			flash.message = "An error occurred while handling file: $e"
+			render ([success:false] as JSON)
+		} finally {
+			if (temp.exists())
+				temp.delete()
 		}
-		
-		render ([success:true] as JSON)
 	}
 	
 }
