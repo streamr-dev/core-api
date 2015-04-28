@@ -142,7 +142,7 @@ modules = {
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
-		dependsOn 'streamr-client, streamr-chart, streamr-heatmap'
+		dependsOn 'streamr-client, streamr-chart, streamr-heatmap, streamr-table'
 	}
 	'stream-fields' {
 		dependsOn 'jquery, backbone'
@@ -190,8 +190,11 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'leaflet-heatmap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'streamr-heatmap.js', plugin: 'unifina-core']
 	}
+	'streamr-table' {
+		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
-		dependsOn 'streamr, streamr-client, streamr-chart, streamr-heatmap, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets'
+		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

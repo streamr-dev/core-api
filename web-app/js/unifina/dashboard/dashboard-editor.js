@@ -146,6 +146,7 @@ var DashboardItemView = Backbone.View.extend({
 	labelTemplate: _.template($("#streamr-label-template").html()),
 	chartTemplate: _.template($("#streamr-chart-template").html()),
 	heatmapTemplate: _.template($("#streamr-heatmap-template").html()),
+	tableTemplate: _.template($("#streamr-table-template").html()),
 	titlebarTemplate: _.template($("#titlebar-template").html()),
 
 	events: {
@@ -182,6 +183,11 @@ var DashboardItemView = Backbone.View.extend({
 			if(!this.model.get("size"))
 				this.model.set("size", "medium")
 			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
+		}
+		else if(type == 142) {
+			if(!this.model.get("size"))
+				this.model.set("size", "medium")
+			this.$el.find(".widget-content").append(this.tableTemplate(this.model.toJSON()))
 		}
 		else if(type == 145) {
 			if(!this.model.get("size"))

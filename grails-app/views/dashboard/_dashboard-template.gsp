@@ -44,6 +44,10 @@
     <streamr-chart class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-chart>    
 </script>
 
+<script id="streamr-table-template" type="text/template">
+    <streamr-table class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" maxRows="100"></streamr-table>    
+</script>
+
 <script id="titlebar-template" type="text/template">
         <div class="col-xs-7">
             <span class="titlebar">{{ title ? title : "&nbsp;" }}</span>
@@ -59,7 +63,7 @@
                         &nbsp;
                         <span class="fa fa-caret-down"></span>
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu pull-right">
                         <li>
                             <a href="#" class="make-small-btn">
                                 <i class="fa fa-check"></i> Small 
