@@ -31,6 +31,7 @@ import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.task.KafkaCollectTask
 import com.unifina.task.KafkaDeleteTopicTask
+import com.unifina.utils.CSVImporter
 import com.unifina.utils.TimeOfDayUtil
 
 
@@ -244,17 +245,7 @@ class KafkaService {
 	}
 	
 	@CompileStatic
-	public List<Map<String,String>> createFeedFilesFromCsv(InputStream csv, Stream stream, FeedFileService feedFileService=null) {
-		int lineCount = 0
-		String headerLine
-		String[] headers
-		String[] separatorsToTry = [",",";"]
-		String separator
-		String[] schema = []
-		
-		// TODO: support other dateformats
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-		df.setTimeZone(TimeZone.getTimeZone("UTC"))
+	public List<Map<String,String>> createFeedFilesFromCsv(CSVImporter csv, Stream stream, FeedFileService feedFileService=null) {
 		
 		List<KafkaFeedFileWriter> doneWriters = []
 		List<Date> beginDates = []
@@ -267,97 +258,42 @@ class KafkaService {
 		if (!feedFileService)
 			feedFileService = (FeedFileService) grailsApplication.getMainContext().getBean("feedFileService")
 		
-		csv.eachLine {String line->
-			if (lineCount++ == 0) {
-				headerLine = line
-				
-				int sep = 0
-				while ((headers==null || headers.length<2) && sep < separatorsToTry.length) {
-					separator = separatorsToTry[sep++]
-					headers = line.split(separator)
+		for (CSVImporter.LineValues line : csv) {
+			Date date = line.getTimestamp()
+			
+			// Check that we have a writer for the current day
+			if (writer==null || !DateUtils.isSameDay(date, prevDate)) {
+				if (writer!=null) {
+					println "Done with writer for $prevDate"
+					writer.close()
+					doneWriters.add(writer)
+					endDates.add(prevDate)
 				}
 				
-				if (headers.length<2) {
-					throw new RuntimeException("Sorry, couldn't determine separator of csv file!")
-				}
-				
-				schema = new String[headers.length]
+				Date beginDate = TimeOfDayUtil.getMidnight(date)
+				String filename = new KafkaFeedFileName(stream, beginDate).toString()
+				writer = new KafkaFeedFileWriter(filename)
+				beginDates.add(beginDate)
 			}
-			else {
-				String[] fields = line.split(separator, -1)
-				if (fields.length < headers.length) {
-					throw new RuntimeException("Unexpected number of columns on row "+lineCount)
+			
+			// Take note of previous date for the next round
+			prevDate = date
+			
+			// Write all fields into the item except for the timestamp column
+			Map item = [:]
+			for (int i=0; i<line.values.length; i++) {
+				if (i!=line.schema.timestampColumnIndex && line.values[i]!=null) {
+					String name = line.schema.entries[i].name
+					item[name] = line.values[i]
 				}
-				
-				Date date
-				try {
-					date = df.parse(fields[0])
-				} catch (Exception e) {
-					throw new RuntimeException("Failed to parse timestamp on line "+lineCount)
-				}
-				
-				// Check that we have a writer for the current day
-				if (writer==null || !DateUtils.isSameDay(date, prevDate)) {
-					if (writer!=null) {
-						writer.close()
-						doneWriters.add(writer)
-						endDates.add(prevDate)
-					}
-					
-					Date beginDate = TimeOfDayUtil.getMidnight(date)
-					String filename = new KafkaFeedFileName(stream, beginDate).toString()
-					writer = new KafkaFeedFileWriter(filename)
-					beginDates.add(beginDate)
-				}
-				
-				// Take note of previous date for the next round
-				prevDate = date
-				
-				Map item = [:]
-				for (int i=1;i<headers.length;i++) {
-					
-					// If format is not yet detected, try to detect it
-					if (schema[i]==null && fields[i].length()>0) {
-						// Try to parse as double
-						try {
-							Double.parseDouble(fields[i])
-							schema[i] = "number"
-						} catch (Exception e) {}
-						
-						// Try to parse as boolean
-						if (schema[i] == null && (fields[i].equalsIgnoreCase("true") || fields[i].equalsIgnoreCase("false"))) {
-							try {
-								Boolean.parseBoolean(fields[i])
-								schema[i] = "boolean"
-							} catch (Exception e) {}
-						}
-						
-						// Else treat it as string
-						if (schema[i] == null) {
-							schema[i] = "string"
-						}
-					}
-					
-					if (fields[i].length()>0) {
-						
-						// Parse field according to schema
-						if (schema[i]=="number") {
-							item.put(headers[i], Double.parseDouble(fields[i]))
-						}
-						else if (schema[i]=="boolean") {
-							item.put(headers[i], Boolean.parseBoolean(fields[i]))
-						}
-						else item.put(headers[i], fields[i].toString())
-					}
-				}
-				
-				// Create JSON stringification
-				String data = (item as JSON).toString()
-				
-				// Write to file
-				UnifinaKafkaMessage msg = new UnifinaKafkaMessage(null, null, date.time, UnifinaKafkaMessage.CONTENT_TYPE_JSON, data.getBytes("UTF-8"))
-				writer.write(msg.toBytes())
 			}
+			
+			// Create JSON stringification
+			String data = (item as JSON).toString()
+			
+			// Write to file
+			UnifinaKafkaMessage msg = new UnifinaKafkaMessage(null, null, date.time, UnifinaKafkaMessage.CONTENT_TYPE_JSON, data.getBytes("UTF-8"))
+			writer.write(msg.toBytes())
 		}
 		
 		// Close the last writer
@@ -367,22 +303,18 @@ class KafkaService {
 			endDates.add(prevDate)
 		}
 		
+		List<FeedFile> result = []
 		// Create the FeedFiles
 		for (int i=0;i<doneWriters.size();i++) {
 			// Create the FeedFile (not overwriting existing)
-			feedFileService.createFeedFile(stream, beginDates[i], endDates[i], doneWriters[i].getFile(), false)
+			FeedFile feedFile = feedFileService.createFeedFile(stream, beginDates[i], endDates[i], doneWriters[i].getFile(), false)
+			if (feedFile!=null)
+				result.add(feedFile)
 			
 			// Delete the temporary file
 			doneWriters[i].deleteFile()
 		}
 		
-		List result = []
-		// Don't write the timestamp column (0)
-		for (int i=1;i<headers.length;i++) {
-			if (schema[i]!=null) {
-				result << [name:headers[i], type:schema[i]]
-			}
-		}
 		return result
 	}
 	
