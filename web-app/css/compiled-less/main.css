@@ -16520,19 +16520,14 @@ body.build-page #content-wrapper {
   display: inline-block;
 }
 body.live-show-view #content-wrapper {
-  padding: 56px 0px 0px 0px;
-}
-body.live-show-view div.toolbar {
-  width: 100%;
-  padding-right: 30px;
-}
-body.live-show-view #stopButton {
-  float: right;
-  z-index: 20;
+  padding: 38px 0px 0px 0px;
 }
 body.live-show-view #toolbarForm {
-  width: 100%;
+  z-index: 50;
+  right: 0;
   position: absolute;
+  padding-right: 30px;
+  padding-top: 15px;
 }
 body.live-show-view #canvas {
   height: 100%;
