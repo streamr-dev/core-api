@@ -54,6 +54,10 @@
 
 <body class="live-show-view full-width-height">
 	<!-- <div class="table"> -->
+		<ui:breadcrumb>
+			<g:render template="/live/breadcrumbList" model="[runningSignalPath:rsp]"/>
+			<g:render template="/live/breadcrumbShow" model="[runningSignalPath:rsp, active:true]"/>
+		</ui:breadcrumb>
 		<form method="post" role="form" id="toolbarForm">
 			<g:hiddenField name="id" value="${rsp.id}" />
 

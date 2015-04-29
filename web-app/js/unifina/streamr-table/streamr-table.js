@@ -1,3 +1,5 @@
+(function(exports) {
+
 function StreamrTable(parent, options) {
 	var _this = this
 	this.$parent = $(parent)
@@ -6,9 +8,14 @@ function StreamrTable(parent, options) {
 	this.table;
 	this.tableHeader;
 	this.tableBody;
-	this.rowCount = options.maxRows ? options.maxRows : 0;
+	if(options){
+		this.options = options
+		this.rowCount = options.maxRows ? options.maxRows : 0;
+	} else {
+		this.options = {}
+		this.options.maxRows = 0
+	}
 
-	this.options = options ? options : {}
 }
 
 StreamrTable.prototype.initTable = function (headers) {
@@ -53,8 +60,8 @@ StreamrTable.prototype.receiveResponse = function (d) {
 		this.tableBody.prepend(newRow);
 	}
 	// Edit cell message: d.id=row id, d.e=cell index, d.c=cell content 
-	else if (d.e!=null) {
-		var cell = $('#'+d.id+" td:eq("+d.e+")");
+	else if (d.e!=null && d.id) {
+		var cell = this.tableBody.find('#'+d.id+ " td").eq(d.e);
 		cell.html(d.c);
 	}
 	else if (d.hdr) {
@@ -69,3 +76,6 @@ StreamrTable.prototype.clean = function() {
 	}
 }
 
+exports.StreamrTable = StreamrTable
+
+})(typeof(exports) !== 'undefined' ? exports : window)

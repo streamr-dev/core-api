@@ -3,6 +3,72 @@ body.dashboard-show {
 
 	#main-wrapper #content-wrapper ul#dashboard-view {
 		overflow:auto;
+		height:100%;
+		padding:0px;
+		list-style-type: none;
+		.dashboarditem {
+			&.editing .stat-panel .stat-row .stat-cell {
+				.titlebar, .titlebar-clickable, .edit-btn {
+					display:none;
+				}
+				.titlebar-edit {
+					height:20px;
+				}
+			}
+			&:not(.editing) .stat-panel .stat-row .stat-cell {
+				.titlebar-edit, .close-edit {
+					display:none;
+				}
+			}
+			.stat-panel .stat-row .stat-cell {
+				&.title {
+					border-top-right-radius: 4px;
+					border-top-left-radius: 4px;
+				}
+				&.widget-content {
+					border-bottom-left-radius: 4px;
+					border-bottom-right-radius: 4px;
+				}
+				.panel-heading-controls {
+					cursor:auto;
+					label.btn.active {
+						color:#333333;
+					}
+					.size-btn-group {
+						display:none;
+					}
+					.btn-group {
+						padding-top:0px;
+					}
+					.dropdown-menu li:not(.checked) .fa {
+						opacity:0;
+					}
+				}
+				
+			}
+			.contains .stat-panel .stat-row .widget-content streamr-table .container {
+				overflow:auto;
+				width:100%;
+				height:100%;
+				max-height:400px;
+				padding:15px;
+				padding-top:0px;
+				.table-module-container {
+					width:100%;
+				}
+			}
+			.contains .stat-panel .stat-row .widget-content streamr-chart .container {
+				overflow:auto;
+				width:100%;
+				max-height:400px;
+				padding:15px;
+				padding-top:0px;
+				padding-bottom:0px;
+				.chartDrawArea {
+					width:100%;
+				}
+			}
+		}
 	}
 	&:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell {
 		.panel-heading-controls, .titlebar-clickable {
@@ -13,12 +79,18 @@ body.dashboard-show {
 		overflow:auto;
 
 		.title.stat-cell {
-			border-top-left-radius:4px;
-			border-top-right-radius:4px;
+			border-top-right-radius: 4px;
+			border-top-left-radius: 4px;
+			cursor:move;
 		}
-		.stat-row .stat-cell {
+		.widget-content.stat-cell {
+			border-bottom-left-radius: 4px;
+			border-bottom-right-radius: 4px;
+		}
+		.stat-row {
+			.stat-cell {
 			overflow:visible;
-
+			}
 			.titlebar {
 				display:none;
 			}
@@ -36,61 +108,6 @@ body.dashboard-show {
 		}
 		.mm-dropdown > ul > li > a.ui-title {
 			padding-left: 30px;
-		}
-	}
-	#dashboard-view {
-		height:100%;
-		padding:0px;
-		list-style-type: none;
-
-		.dashboarditem {
-			&.editing .stat-panel .stat-row .stat-cell {
-				.titlebar, .titlebar-clickable, .edit-btn {
-					display:none;
-				}
-				.titlebar-edit {
-					height:20px;
-				}
-			}
-			&:not(.editing) .stat-panel .stat-row .stat-cell {
-				.titlebar-edit, .close-edit {
-					display:none;
-				}
-			}
-			.stat-panel .stat-row .stat-cell .panel-heading-controls {
-				label.btn.active {
-					color:#333333;
-				}
-				.size-btn-group {
-					display:none;
-				}
-				.btn-group {
-					padding-top:0px;
-				}
-				.dropdown-menu li:not(.checked) .fa {
-					opacity:0;
-				}
-			}
-			.contains .stat-panel .stat-row .widget-content streamr-table .container {
-				overflow:auto;
-				width:100%;
-				height:100%;
-				max-height:430px;
-				padding:15px;
-				padding-top:0px;
-				.table-module-container {
-					width:100%;
-				}
-			}
-			.contains .stat-panel .stat-row .widget-content streamr-chart .container {
-				overflow:auto;
-				width:100%;
-				height:100%;
-				padding:15px;
-				.chartDrawArea {
-					width:100%;
-				}
-			}
 		}
 	}
 	#sidebar-view {
