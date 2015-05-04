@@ -169,10 +169,18 @@ class StreamController {
 		} catch (Exception e) {
 			flash.message = "An error occurred while handling file: $e"
 			render ([success:false] as JSON)
-		} finally {
+		} catch (IncorrectTimestampException e) {
+			flash.message = "Unfortunately we could not recognize some of the fields in the CSV-file. But no worry! With a couple of confirmations we still can import your data."
+			redirect(action: "confirm", id: stream.id)
+		}finally {
 			if (temp.exists())
 				temp.delete()
 		}
+	}
+
+	def confirm() {
+		List<Stream> streams = Stream.findAllByUser(springSecurityService.currentUser)
+		[streams:streams]
 	}
 	
 }

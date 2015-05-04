@@ -152,6 +152,9 @@ public class CSVImporter implements Iterable<LineValues> {
 			    				}
 			    			}
 			    		}
+			    		if(timestampColumnIndex == null){
+			    			throw new IncorrectTimestampException("The index of the timestamp column could not be detected");
+			    		}
 			    	}
 			    	
 			    	lineCount++;
@@ -182,7 +185,7 @@ public class CSVImporter implements Iterable<LineValues> {
 			}
 			
 			if (headers.length<2) {
-				throw new RuntimeException("Sorry, couldn't determine format of csv file!");
+				throw new RuntimeException("Sorry, couldn't determine format of the csv file!");
 			}
 			else return headers;
 		}
@@ -279,6 +282,22 @@ public class CSVImporter implements Iterable<LineValues> {
 		
 		public Date getTimestamp() {
 			return (Date) values[schema.timestampColumnIndex];
+		}
+	}
+	
+
+	public class IncorrectTimestampException extends IOException {
+		public IncorrectTimestampException() { 
+			super();
+		}
+		public IncorrectTimestampException(String message) {
+			super(message); 
+		}
+		public IncorrectTimestampException(String message, Throwable cause) {
+			super(message, cause); 
+		}
+		public IncorrectTimestampException(Throwable cause) {
+			super(cause);
 		}
 	}
 
