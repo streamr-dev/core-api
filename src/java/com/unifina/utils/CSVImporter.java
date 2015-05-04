@@ -102,7 +102,15 @@ public class CSVImporter implements Iterable<LineValues> {
 		
 		// TODO: expand, support ISO standards
 		public final SimpleDateFormat[] dateFormatsToTry = {
-				new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+				new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS"),
+				new SimpleDateFormat("dd/MM/yyyy HH:mm"),
+				new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"),
+				new SimpleDateFormat("yyyy-MM-dd HH:mm"),
+				new SimpleDateFormat("MM/dd/yyyy HH:mm.ss.SSS"),
+				new SimpleDateFormat("MM/dd/yyyy HH:mm"),
+				new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy"),
+				new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy"),
+				new SimpleDateFormat("ddMMyyyyHHmmss"),
 		};
 		
 		public CSVParser parser = null;
@@ -198,6 +206,17 @@ public class CSVImporter implements Iterable<LineValues> {
 					return new SchemaEntry(name, df);
 				} catch (Exception e) {}
 			}
+			
+//			// Try to parse as long
+//			try {
+//				long epoch = Long.parseLong(value);
+//				if((int)(Math.log10(epoch)+1) == 8){
+//					SimpleDateFormat df = dateFormatsToTry[0];
+//					df.format(new Date(epoch));
+//					return new SchemaEntry(name, df);
+//				}
+//				
+//			} catch (Exception e) {}
 			
 			// Try to parse as double
 			try {
