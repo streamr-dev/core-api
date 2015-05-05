@@ -193,17 +193,20 @@ class StreamController {
 	def confirmUpload(){
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
-		CSVImporter csv = new CSVImporter(file)
-		Schema schema = csv.getSchema()
+		def format
+		def index
+		if(params.customFormat)
+			format = params.customFormat
+		else format = params.format
+		index = Integer.parseInt(params.timestampIndex)
 		try {
-			
+			CSVImporter csv = new CSVImporter(file, index, format)
+			Schema schema = csv.getSchema()
+			importCsv(csv, stream)
 		} catch (Exception e) {
 			flash.message = "The format of the timestamp is not correct"
-			redirect(action:"confirm", params:[schema:schema, file:params.file, stream:stream])
 		}
-		
-//		importCsv(csv, stream)
-		redirect(action:"show", params:[id:"params.id"])
+		redirect(action:"show", id:params.id)
 	}
 	
 	private void importCsv(CSVImporter csv, Stream stream){

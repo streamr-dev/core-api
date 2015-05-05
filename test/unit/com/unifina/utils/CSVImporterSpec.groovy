@@ -74,7 +74,7 @@ class CSVImporterSpec extends Specification {
 		File file = Paths.get(getClass().getResource("test-files/crime-records.csv").toURI()).toFile()
 		
 		when:
-		CSVImporter csv = new CSVImporter(file)
+		CSVImporter csv = new CSVImporter(file, 0, "MM/dd/yy HH:mm")
 		CSVImporter.Schema schema = csv.getSchema()
 
 		then:
@@ -103,7 +103,6 @@ class CSVImporterSpec extends Specification {
 		setup:
 		File file = Paths.get(getClass().getResource("test-files/epoch-test.csv").toURI()).toFile()
 		CSVImporter csv = new CSVImporter(file, 0, "unix")
-//		CSVImporter csv = new CSVImporter(file)
 		CSVImporter.Schema schema = csv.getSchema()
 		
 		int rowsRead = 0

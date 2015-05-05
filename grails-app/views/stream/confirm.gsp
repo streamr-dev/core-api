@@ -20,9 +20,12 @@
 					</select>
 				</div>
 				<div class="form-group"> 
-					<g:hiddenField name="formats" value='${formats = ["yyyy-MM-dd HH:mm:ss.SSS":"yyyy-MM-dd HH:mm:ss.SSS", "dd-MM-yyyy HH:mm:ss.SSS":"dd-MM-yyyy HH:mm:ss.SSS", "MM-dd-yyyy HH:mm:ss.SSS":"MM-dd-yyyy HH:mm:ss.SSS", "unix":"Unix timestamp(milliseconds)"]}'/>
 					<label class="control-label">Date standard</label>
-					<g:each in="${ formats }" status="i" var="format">
+					<g:each in='${ 
+						["dd-MM-yyyy HH:mm:ss.SSS":"dd/MM/yyyy HH:mm:ss.SSS", 
+						"MM-dd-yyyy HH:mm:ss.SSS":"MM/dd/yyyy HH:mm:ss.SSS", 
+						"unix":"Java timestamp (milliseconds since January 1st 1970 UTC)", 
+						"unix-s":"Unix timestamp (seconds since January 1st 1970 UTC)"] }' status="i" var="format">
 						<div class="radio">
 						  <label>
 						    <input type="radio" name="format" value="${format.key}" class="px">
@@ -33,7 +36,7 @@
 					<div class="radio">
 					  	<label>
 					    	<input type="radio" name="format" value="custom" class="px">
-					    	<span class="lbl">Custom date format (in java standard)</span>
+					    	<span class="lbl">Custom date format (in <a href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" target="_blank">SimpleDateFormat</a> notation)</span>
 					    	<input type="text" name="customFormat" class="form-control"></input>
 					  	</label>
 					</div>

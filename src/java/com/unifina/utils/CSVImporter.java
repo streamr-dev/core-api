@@ -115,12 +115,17 @@ public class CSVImporter implements Iterable<LineValues> {
 		
 		// TODO: expand, support ISO standards
 		public final OwnDateFormat[] dateFormatsToTry = {
-				new OwnDateFormat("dd/MM/yyyy HH:mm:ss.SSS"),
+				new OwnDateFormat("EEE MMM dd HH:mm:ss.SSS ZZZ yyyy"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX"),
 				new OwnDateFormat("yyyy-MM-dd HH:mm:ss.SSS"),
-				new OwnDateFormat("MM/dd/yyyy HH:mm.ss.SSS"),
-				new OwnDateFormat("dd/MM/yyyy HH:mm"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss"),
 				new OwnDateFormat("yyyy-MM-dd HH:mm"),
-				new OwnDateFormat("MM/dd/yyyy HH:mm")
 		};
 		
 		public CSVParser parser = null;
@@ -128,6 +133,7 @@ public class CSVImporter implements Iterable<LineValues> {
 		
 		public Integer timestampColumnIndex = null;
 		private String format;
+		public String[] headers;
 		
 		public Schema(InputStream is) throws IOException {
 			for (OwnDateFormat df : dateFormatsToTry)
@@ -153,7 +159,6 @@ public class CSVImporter implements Iterable<LineValues> {
 				int lineCount = 0;
 				int undetectedSchemaEntries = Integer.MAX_VALUE;
 			    String line;
-			    String[] headers = null;
 			    
 			    while (undetectedSchemaEntries>0 && (line = reader.readLine()) != null) {
 			    	
@@ -219,7 +224,9 @@ public class CSVImporter implements Iterable<LineValues> {
 			if (headers.length<2) {
 				throw new RuntimeException("Sorry, couldn't determine format of csv file!");
 			}
-			else return headers;
+			else {
+				return headers;
+			}
 		}
 		
 		private SchemaEntry detectEntry(String value, String name) {
