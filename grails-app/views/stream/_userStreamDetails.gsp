@@ -10,7 +10,7 @@
 			<g:if test="${!config.fields || config.fields.size()==0}">
 				<div class='alert alert-info'>
 					<i class='fa fa-exclamation-triangle'></i>
-					The fields for this stream are not yet configured. Click the button below to configure them.
+					The fields for this stream are not yet configured. Click the button above to configure them.
 				</div>
 			</g:if>
 			<g:else>
