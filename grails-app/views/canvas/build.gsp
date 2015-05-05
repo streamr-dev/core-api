@@ -172,7 +172,8 @@ $(document).ready(function() {
 		var ctx = {
 			csv: true,
 			csvOptions: {
-				csvTimeFormat: $("#csvTimeFormat").val(),
+				timeFormat: $("#csvTimeFormat").val(),
+				separator: $("#csvSeparator").val(),
 				filterEmpty: $("#csvFilterEmpty").attr("checked") ? true : false,
 				lastOfDayOnly: $("#csvLastOfDayOnly").attr("checked") ? true : false
 			}
@@ -338,11 +339,23 @@ $(document).unload(function () {
 	      </div>
 	      <div class="modal-body">
 				<div class="form-group">
-					<label>CSV time format</label>
+					<label>Time Format</label>
+					
 					<select id="csvTimeFormat" class="form-control">
-						<option value="1">milliseconds</option>
-						<option value="2" selected>yyyy-mm-dd hh:mm:ss.sss</option>
+						<option value="1">Java timestamp (milliseconds since January 1st 1970 UTC)</option>
+						<option value="2" selected>ISO 8601 in your timezone</option>
+						<option value="3">ISO 8601 in UTC</option>
 					</select>
+					
+					<label>Separator</label>
+					
+					<select id="csvSeparator" class="form-control">
+						<option value="," selected>Comma (,)</option>
+						<option value=";">Semicolon (;)</option>
+						<option value="tab">Tab</option>
+					</select>
+					
+					<label>Filters</label>
 					
 					<div class="checkbox">
 						<label>

@@ -14,9 +14,10 @@ import java.util.TimeZone;
 public class CSVWriter {
 
 	public static int TIMEFORMAT_MILLIS = 1;
-	public static int TIMEFORMAT_ISO = 2;
+	public static int TIMEFORMAT_ISO_LOCAL = 2;
+	public static int TIMEFORMAT_ISO_UTC = 3;
 	
-	private SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+	private SimpleDateFormat dtf;
 	
 	File file;
 	String separator;
@@ -32,8 +33,8 @@ public class CSVWriter {
 	}
 	
 	public CSVWriter(File file, ConfigObject config, Map<String,Object> signalPathContext, TimeZone timeZone) {
-		this(file, 
-			(String) MapTraversal.getProperty(config,"unifina.csv.separator"),
+		this(file,
+			MapTraversal.getString(signalPathContext,"csvOptions.separator"),
 			MapTraversal.getInteger(signalPathContext,"csvOptions.timeFormat"),
 			MapTraversal.getBoolean(signalPathContext,"csvOptions.lastOfDayOnly"),
 			timeZone
@@ -43,11 +44,22 @@ public class CSVWriter {
 	public CSVWriter(File file, String separator, Integer timeFormat, Boolean lastOfDayOnly, TimeZone timeZone) {
 		try {
 			this.file = file!=null ? file : File.createTempFile("unifina_csv_",".csv");
-			this.separator = separator!=null ? separator : ";";
-			this.timeFormat = timeFormat!=null ? timeFormat : TIMEFORMAT_ISO;
+			
+			if (separator!=null && separator.equals("tab"))
+				this.separator = "\t";
+			else this.separator = separator!=null ? separator : ",";
+			
+			this.timeFormat = timeFormat!=null ? timeFormat : TIMEFORMAT_ISO_LOCAL;
+			
 			this.lastOfDayOnly = lastOfDayOnly!=null ? lastOfDayOnly : false;
-			if (timeZone!=null)
-				isoFormat.setTimeZone(timeZone);
+			
+			if (timeZone!=null && this.timeFormat==TIMEFORMAT_ISO_LOCAL) {
+				dtf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+			}
+			else {
+				dtf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				dtf.setTimeZone(TimeZone.getTimeZone("UTC"));
+			}
 			
 			writer = new BufferedWriter(new FileWriter(this.file),8192*100);
 		} catch (IOException e) {
@@ -64,10 +76,9 @@ public class CSVWriter {
 	}
 	
 	public void writeField(Date date) {
-		if (timeFormat==TIMEFORMAT_ISO)
-			writeField(isoFormat.format(date));
-		else if (timeFormat==TIMEFORMAT_MILLIS)
+		if (timeFormat==TIMEFORMAT_MILLIS)
 			writeField(String.valueOf(date.getTime()));
+		else writeField(dtf.format(date));
 	}
 	
 	public void newLine() {
@@ -95,7 +106,7 @@ public class CSVWriter {
 	}
 	
 	public void setTimeZone(TimeZone tz) {
-		isoFormat.setTimeZone(tz);
+		dtf.setTimeZone(tz);
 	}
 	
 	public File finish() {
