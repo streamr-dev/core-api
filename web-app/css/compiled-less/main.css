@@ -16532,8 +16532,11 @@ body.live-show-view #stopButton {
   z-index: 20;
 }
 body.live-show-view #toolbarForm {
-  width: 100%;
+  z-index: 50;
+  right: 0;
   position: absolute;
+  padding-right: 30px;
+  padding-top: 15px;
 }
 body.live-show-view #canvas {
   height: 100%;

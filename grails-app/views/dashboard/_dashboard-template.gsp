@@ -45,7 +45,7 @@
 </script>
 
 <script id="streamr-table-template" type="text/template">
-    <streamr-table class="streamr-widget non-draggable text-left" channel="{{ uiChannel.id }}" maxRows="100"></streamr-table>    
+    <streamr-table class="streamr-widget non-draggable text-left" channel="{{ uiChannel.id }}"></streamr-table>    
 </script>
 
 <script id="titlebar-template" type="text/template">
