@@ -10,7 +10,7 @@
 <polymer-element name="streamr-widget" attributes="channel resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
-		<div id="container"></div>
+		<div id="container" class="container"></div>
 	</template>
 	
 	<script>

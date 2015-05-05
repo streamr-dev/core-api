@@ -10,6 +10,8 @@ import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.ModuleWithUI;
+import com.unifina.signalpath.RuntimeRequest;
+import com.unifina.signalpath.RuntimeResponse;
 
 
 public class EventTable extends ModuleWithUI {
@@ -132,6 +134,19 @@ public class EventTable extends ModuleWithUI {
 		for (int i=1;i<=inputCount;i++) {
 			createAndAddInput("input"+i);
 		}
+	}
+	
+	@Override
+	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
+		if (request.getType().equals("initRequest")) {
+			// We need to support unauthenticated initRequests for public views, so no authentication check
+			
+			Map<String,Object> hdrMsg = new HashMap<String,Object>();
+			hdrMsg.put("hdr", getHeaderDefinition());
+			response.put("initRequest", hdrMsg);
+			response.setSuccess(true);
+		}
+		else super.handleRequest(request, response);
 	}
 	
 	@Override
