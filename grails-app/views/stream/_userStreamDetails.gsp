@@ -64,9 +64,18 @@
 						return info;
 					}
 				});
+				
+				var redirects = []
+				dz[0].dropzone.on("error", function(e, msg, xhr){
+					if(msg.redirect)
+						redirects.push(msg.redirect)
+				})
 
 				dz[0].dropzone.on("queuecomplete", function() {
-					location.reload();
+					if(redirects.length)
+						window.location = redirects[0]
+					else
+						location.reload();
 				});
 				
 			});

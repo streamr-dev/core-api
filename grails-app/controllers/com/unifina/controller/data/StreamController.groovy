@@ -11,6 +11,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Module
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.CSVImporter.Schema
 
 @Secured(["ROLE_USER"])
 class StreamController {
@@ -152,35 +153,67 @@ class StreamController {
 		// Access checked by beforeInspector
 		
 		File temp
+		boolean deleteFile = true
 		try {
 			Stream stream = Stream.get(params.id)
 			MultipartFile file = request.getFile("file")
 			temp = File.createTempFile("csv_upload_", ".csv")
 			file.transferTo(temp)
-			List fields = kafkaService.createFeedFilesFromCsv(new CSVImporter(temp), stream)
 			
-			Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
-			if (!config.fields || config.fields.isEmpty()) {
-				config.fields = fields
-				stream.streamConfig = (config as JSON)
+			CSVImporter csv = new CSVImporter(temp)
+			if (csv.getSchema().timestampColumnIndex==null) {
+				flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
+				response.status = 500
+				render ([success:false, redirect:createLink(action:'confirm', params: [id:params.id, file:temp.getCanonicalPath()])] as JSON)
+				deleteFile = false
 			}
-			
-			render ([success:true] as JSON)
+			else {
+				importCsv(csv, stream)
+				render ([success:true] as JSON)
+			}
 		} catch (Exception e) {
-			flash.message = "An error occurred while handling file: $e"
-			render ([success:false] as JSON)
-		} catch (IncorrectTimestampException e) {
-			flash.message = "Unfortunately we could not recognize some of the fields in the CSV-file. But no worry! With a couple of confirmations we still can import your data."
-			redirect(action: "confirm", id: stream.id)
-		}finally {
-			if (temp.exists())
+				flash.message = "An error occurred while handling file: $e"
+				response.status = 500
+				render ([success:false, error: e.toString()] as JSON)
+		} finally {
+			if (deleteFile && temp.exists())
 				temp.delete()
 		}
 	}
 
 	def confirm() {
-		List<Stream> streams = Stream.findAllByUser(springSecurityService.currentUser)
-		[streams:streams]
+		Stream stream = Stream.get(params.id)
+		File file = new File(params.file)
+		CSVImporter csv = new CSVImporter(file)
+		Schema schema = csv.getSchema()
+		
+		[schema:schema, file:params.file, stream:stream]
+	}
+	
+	def confirmUpload(){
+		Stream stream = Stream.get(params.id)
+		File file = new File(params.file)
+		CSVImporter csv = new CSVImporter(file)
+		Schema schema = csv.getSchema()
+		try {
+			
+		} catch (Exception e) {
+			flash.message = "The format of the timestamp is not correct"
+			redirect(action:"confirm", params:[schema:schema, file:params.file, stream:stream])
+		}
+		
+//		importCsv(csv, stream)
+		redirect(action:"show", params:[id:"params.id"])
+	}
+	
+	private void importCsv(CSVImporter csv, Stream stream){
+		List fields = kafkaService.createFeedFilesFromCsv(csv, stream)
+		
+		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		if (!config.fields || config.fields.isEmpty()) {
+			config.fields = fields
+			stream.streamConfig = (config as JSON)
+		}
 	}
 	
 }
