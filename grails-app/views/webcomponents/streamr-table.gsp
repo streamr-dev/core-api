@@ -23,7 +23,7 @@
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
-					var options = []
+					var options = {}
 					options.maxRows = _this.maxRows
 
 					_this.table = new StreamrTable(_this.$.container, options)
