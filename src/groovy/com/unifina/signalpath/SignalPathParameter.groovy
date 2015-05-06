@@ -48,7 +48,13 @@ class SignalPathParameter extends Parameter<SavedSignalPath> {
 		}
 		else signalPaths = []
 
-		config.put("possibleValues",signalPaths.collect {[value:it[0], name:it[1]]})
+		List possibleValues = signalPaths.collect {[value:it[0], name:it[1]]}
+		
+		if (value==null)
+			possibleValues.add(0, [value:null, name: "Select >>"])
+			
+		config.put("possibleValues", possibleValues)
+
 		return config
 	}
 
