@@ -1,4 +1,4 @@
-<div class="col-sm-4">
+<div class="col-sm-6 col-md-4">
 	<div class="panel ">
 		<div class="panel-heading">
 			<span class="panel-title">Fields</span>
@@ -19,7 +19,7 @@
 		</div>
 	</div>
 </div>
-<div class="col-sm-4">
+<div class="col-sm-6 col-md-4">
 	<ui:panel title="HTTP API credentials">
 		<g:render template="userStreamCredentials" model="[stream:stream]"/>
 	</ui:panel>

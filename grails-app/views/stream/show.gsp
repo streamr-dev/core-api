@@ -13,7 +13,7 @@
 		<ui:flashMessage/>
 		
 		<div class="row">
-			<div class="col-sm-4">
+			<div class="col-sm-6 col-md-4">
 				<div class="panel ">
 					<div class="panel-heading">
 						<span class="panel-title">${message(code:"stream.show.label", args:[stream.name])}</span>
