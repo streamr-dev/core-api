@@ -92,7 +92,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		if (d.type==="csv") {
 			var div = $("<span class='csvDownload'></span>");
 			var link = $("<a href='"+d.link+"'></a>");
-			link.append("<img src='../images/download.png'/>&nbsp;"+d.filename);
+			link.append("<i class='fa fa-download'></i>&nbsp;"+d.filename);
 			div.append(link);
 			prot.body.append(div);
 			div.effect("highlight",{},2000);

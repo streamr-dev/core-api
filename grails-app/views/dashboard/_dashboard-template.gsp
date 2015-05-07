@@ -33,7 +33,7 @@
 </script>
 
 <script id="streamr-label-template" type="text/template">
-    <h1><streamr-label class="streamr-widget" channel="{{ uiChannel.id }}"></streamr-label></h1>
+    <h1><streamr-label class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-label></h1>
 </script>
 
 <script id="streamr-heatmap-template" type="text/template">
@@ -42,6 +42,10 @@
 
 <script id="streamr-chart-template" type="text/template">
     <streamr-chart class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-chart>    
+</script>
+
+<script id="streamr-table-template" type="text/template">
+    <streamr-table class="streamr-widget non-draggable text-left" channel="{{ uiChannel.id }}"></streamr-table>    
 </script>
 
 <script id="titlebar-template" type="text/template">
@@ -59,7 +63,7 @@
                         &nbsp;
                         <span class="fa fa-caret-down"></span>
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu pull-right">
                         <li>
                             <a href="#" class="make-small-btn">
                                 <i class="fa fa-check"></i> Small 
