@@ -10,7 +10,7 @@
 <polymer-element name="streamr-widget" attributes="channel resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
-		<div id="container"></div>
+		<div id="container" class="container"></div>
 	</template>
 	
 	<script>
@@ -91,7 +91,7 @@
 					},
 					success: function(data) {
 						if (!data.success) {
-							console.log("Error while communicating with widget: "+data.error)
+							console.log("Error while communicating with widget: "+(data.response ? data.response.error : data.error))
 						}
 						else if (callback)
 							callback(data.response)
