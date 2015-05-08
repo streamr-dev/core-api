@@ -245,7 +245,7 @@ class KafkaService {
 	}
 	
 	@CompileStatic
-	public List<Map<String,String>> createFeedFilesFromCsv(CSVImporter csv, Stream stream, FeedFileService feedFileService=null) {
+	public List<FeedFile> createFeedFilesFromCsv(CSVImporter csv, Stream stream, FeedFileService feedFileService=null) {
 		
 		List<KafkaFeedFileWriter> doneWriters = []
 		List<Date> beginDates = []

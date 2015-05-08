@@ -157,10 +157,23 @@ class StreamController {
 			MultipartFile file = request.getFile("file")
 			temp = File.createTempFile("csv_upload_", ".csv")
 			file.transferTo(temp)
-			List fields = kafkaService.createFeedFilesFromCsv(new CSVImporter(temp), stream)
 			
+			CSVImporter csv = new CSVImporter(temp)
+			List<FeedFile> feedFiles = kafkaService.createFeedFilesFromCsv(csv, stream)
+			
+			// Autocreate the stream config based on fields in the csv schema
 			Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
 			if (!config.fields || config.fields.isEmpty()) {
+				List fields = []
+				
+				// The primary timestamp column is implicit, so don't include it in streamConfig
+				for (int i=0;i<csv.schema.entries.length;i++) {
+					if (i!=csv.schema.timestampColumnIndex) {
+						CSVImporter.SchemaEntry e = csv.schema.entries[i]
+						fields << [name:e.name, type:e.type]
+					}
+				}
+				
 				config.fields = fields
 				stream.streamConfig = (config as JSON)
 			}
