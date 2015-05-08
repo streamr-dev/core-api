@@ -6,6 +6,7 @@
 			<tr>
 				<td>Begin Date</td>
 				<td>End Date</td>
+				<td></td>
 			</tr>
 		</thead>
 		<tbody>
@@ -13,6 +14,7 @@
 				<tr>
 					<td><g:formatDate date="${it.beginDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></td>
 					<td><g:formatDate date="${it.endDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></td>
+					<td><a href='${createLink(action:"deleteFeedFile", params:[feedId:it.id, id:stream.id])}'><i class="fa fa-trash-o"></i></a></td>
 				</tr>
 			</g:each>
 		</tbody>

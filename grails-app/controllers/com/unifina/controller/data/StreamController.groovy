@@ -146,7 +146,7 @@ class StreamController {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
 		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
-		return [feedFiles: feedFiles]
+		return [feedFiles: feedFiles, stream:stream]
 	}
 	
 	def upload() {
@@ -218,5 +218,13 @@ class StreamController {
 			stream.streamConfig = (config as JSON)
 		}
 	}
+	
+	
+	def deleteFeedFile() {
+		Stream stream = Stream.get(params.id)
+		FeedFile.executeUpdate("delete from FeedFile feed where feed.id = ?", [Long.parseLong(params.feedId)])
+		redirect(action:"show", id:params.id)
+	}
+	
 	
 }
