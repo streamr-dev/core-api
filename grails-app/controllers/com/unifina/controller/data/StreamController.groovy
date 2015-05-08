@@ -190,7 +190,7 @@ class StreamController {
 		[schema:schema, file:params.file, stream:stream]
 	}
 	
-	def confirmUpload(){
+	def confirmUpload() {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
 		def format
@@ -209,11 +209,22 @@ class StreamController {
 		redirect(action:"show", id:params.id)
 	}
 	
-	private void importCsv(CSVImporter csv, Stream stream){
-		List fields = kafkaService.createFeedFilesFromCsv(csv, stream)
+	private void importCsv(CSVImporter csv, Stream stream) {		
+		List<FeedFile> feedFiles = kafkaService.createFeedFilesFromCsv(csv, stream)
 		
+		// Autocreate the stream config based on fields in the csv schema
 		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
 		if (!config.fields || config.fields.isEmpty()) {
+			List fields = []
+			
+			// The primary timestamp column is implicit, so don't include it in streamConfig
+			for (int i=0;i<csv.schema.entries.length;i++) {
+				if (i!=csv.schema.timestampColumnIndex) {
+					CSVImporter.SchemaEntry e = csv.schema.entries[i]
+					fields << [name:e.name, type:e.type]
+				}
+			}
+			
 			config.fields = fields
 			stream.streamConfig = (config as JSON)
 		}
