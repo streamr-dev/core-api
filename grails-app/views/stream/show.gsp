@@ -3,8 +3,9 @@
         <meta name="layout" content="main" />
         <title><g:message code="stream.show.label" args="[stream.name]"/></title>
         <r:require module="dropzone"/>
+		<r:require module="toolbar"/>
     </head>
-    <body>
+    <body class="stream-show">
     	<ui:breadcrumb>
 			<g:render template="/stream/breadcrumbList" model="[stream:stream]"/>
 			<g:render template="/stream/breadcrumbShow" model="[stream:stream, active:true]"/>

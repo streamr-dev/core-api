@@ -231,10 +231,17 @@ class StreamController {
 	}
 	
 	
-	def deleteFeedFile() {
-		Stream stream = Stream.get(params.id)
-		FeedFile.executeUpdate("delete from FeedFile feed where feed.id = ?", [Long.parseLong(params.feedId)])
-		redirect(action:"show", id:params.id)
+	def deleteSelectedFeedFiles() {
+		if(params.list("selectedFeedFiles").size() == 0){
+			flash.message = "No selected feed files!"
+			redirect(action:"show", params:[id:params.streamId])
+		} else {
+			def toBeDeleted = params.list("selectedFeedFiles")
+			toBeDeleted.each {feedId ->
+				FeedFile.executeUpdate("delete from FeedFile feed where feed.id = ?", [Long.parseLong(feedId)])
+			}
+			redirect(action:"show", params:[id:params.streamId])
+		}
 	}
 	
 	
