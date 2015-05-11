@@ -11,7 +11,7 @@
 					<td class="text-center">
 						<div class="checkbox text-center">
 						  <label>
-						    <input type="checkbox" name="selectAll" class="px selectAll"><span class="lbl"></span>
+						    <input type="checkbox" name="selectAll" class="px selectAll"><span class="lbl" title="Select All"></span>
 						  </label>
 						</div>
 					</td>
