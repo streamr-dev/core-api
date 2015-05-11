@@ -16550,6 +16550,12 @@ body.stream-show table.file-table td.text-center .lbl {
   vertical-align: top;
   margin-left: 2px;
 }
+body.stream-show #toolbar {
+  padding-bottom: 35px;
+}
+body.stream-show #dropzone {
+  margin-top: 30px;
+}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;

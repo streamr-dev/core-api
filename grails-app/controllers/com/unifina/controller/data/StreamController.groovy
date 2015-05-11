@@ -233,13 +233,14 @@ class StreamController {
 	
 	def deleteSelectedFeedFiles() {
 		if(params.list("selectedFeedFiles").size() == 0){
-			flash.message = "No selected feed files!"
+			flash.error = "No selected feed files!"
 			redirect(action:"show", params:[id:params.streamId])
 		} else {
 			def toBeDeleted = params.list("selectedFeedFiles")
 			toBeDeleted.each {feedId ->
 				FeedFile.executeUpdate("delete from FeedFile feed where feed.id = ?", [Long.parseLong(feedId)])
 			}
+			flash.message = "Data deleted"
 			redirect(action:"show", params:[id:params.streamId])
 		}
 	}
