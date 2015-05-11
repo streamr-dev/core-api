@@ -113,24 +113,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 			});
 		}
 	}
-	
-	var superClean = pub.clean;
-	pub.clean = function() {
-		superClean()
-		destroyChart()
-	}
-	
-	var superUpdateFrom = pub.updateFrom;
-	pub.updateFrom = function(data) {
-		destroyChart();
-		superUpdateFrom(data);
-	}
-	
-	/**
-	 * On start, bind connected inputs to series indices. We need
-	 * to know which input results in which series.
-	 */
-	$(SignalPath).on("started", function(e, runData) {
+
+	var startFunction = function(e, runData) {
 		// Reset all series indices
 		pub.getInputs().forEach(function(input) {
 			input.seriesIndex = null
@@ -146,12 +130,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				prot.chart.handleMessage(response.initRequest)
 			})
 		}
-	})
-	
-	/**
-	 * On SignalPath stopped, check that all series are shown properly in relation to chart yaxis range
-	 */
-	$(SignalPath).on("stopped", function() {
+	}
+
+	var stopFunction = function() {
 		if (prot.chart && prot.chart.getSeriesMetaData().length > 1) {
 			var seriesMeta = prot.chart.getSeriesMetaData()
 			// Find connected inputs
@@ -177,7 +158,38 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 				}
 			}
 		}
-	})
+	}
+
+	var superClose = pub.close;
+	pub.close = function() {
+		$(SignalPath).off("started", startFunction)
+		$(SignalPath).off("stopped", stopFunction)
+		superClose()
+	}
+	
+	var superClean = pub.clean;
+	pub.clean = function() {
+		superClean()
+		destroyChart()
+	}
+	
+	var superUpdateFrom = pub.updateFrom;
+	pub.updateFrom = function(data) {
+		destroyChart();
+		superUpdateFrom(data);
+	}
+	
+	/**
+	 * On start, bind connected inputs to series indices. We need
+	 * to know which input results in which series.
+	 */
+	$(SignalPath).on("started", startFunction)
+	
+	/**
+	 * On SignalPath stopped, check that all series are shown properly in relation to chart yaxis range
+	 */
+	
+	$(SignalPath).on("stopped", stopFunction)
 	
 	return pub;
 }
