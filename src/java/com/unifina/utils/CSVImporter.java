@@ -38,6 +38,19 @@ public class CSVImporter implements Iterable<LineValues> {
 			is.close();
 		}
 	}
+	
+	public CSVImporter(File file, int timestampIndex, String format) throws IOException {
+		this.file = file;
+		
+		// Detect the schema
+		InputStream is = new FileInputStream(file);
+		
+		try {
+			schema = new Schema(is, timestampIndex, format);
+		} finally {
+			is.close();
+		}
+	}
 
 	@Override
 	public Iterator<LineValues> iterator() {
@@ -101,19 +114,42 @@ public class CSVImporter implements Iterable<LineValues> {
 		};
 		
 		// TODO: expand, support ISO standards
-		public final SimpleDateFormat[] dateFormatsToTry = {
-				new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		public final OwnDateFormat[] dateFormatsToTry = {
+				new OwnDateFormat("EEE MMM dd HH:mm:ss.SSS ZZZ yyyy"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm:ss"),
+				new OwnDateFormat("yyyy-MM-dd'T'HH:mm"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss.SSSXXX"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss.SSS"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm:ss"),
+				new OwnDateFormat("yyyy-MM-dd HH:mm"),
 		};
 		
 		public CSVParser parser = null;
 		public SchemaEntry[] entries;
+		
 		public Integer timestampColumnIndex = null;
+		private String format;
+		public String[] headers;
 		
 		public Schema(InputStream is) throws IOException {
-			for (SimpleDateFormat df : dateFormatsToTry)
+			for (OwnDateFormat df : dateFormatsToTry)
 				df.setTimeZone(TimeZone.getTimeZone("UTC"));
 			
 			detect(is);
+		}
+		
+		public Schema(InputStream is, int timestampIndex, String format) throws IOException {
+			setTimeStampColumnIndex(timestampIndex);
+			setDateFormat(format);
+			//If format is null, all the auto formats are checked	
+			for (OwnDateFormat dateFormat : dateFormatsToTry)
+				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			
+			detect(is);		
 		}
 		
 		private void detect(InputStream is) throws IOException {
@@ -123,7 +159,6 @@ public class CSVImporter implements Iterable<LineValues> {
 				int lineCount = 0;
 				int undetectedSchemaEntries = Integer.MAX_VALUE;
 			    String line;
-			    String[] headers = null;
 			    
 			    while (undetectedSchemaEntries>0 && (line = reader.readLine()) != null) {
 			    	
@@ -144,12 +179,17 @@ public class CSVImporter implements Iterable<LineValues> {
 			    		for (int i=0;i<fields.length;i++) {
 			    			// Is the type of this field still undetected?
 			    			if (entries[i]==null) {
-			    				entries[i] = detectEntry(fields[i], headers[i]);
+			    				if(timestampColumnIndex != null && i == timestampColumnIndex){
+			    					entries[i] = new SchemaEntry(headers[i], new OwnDateFormat(format));
+			    				} else {
+			    					entries[i] = detectEntry(fields[i], headers[i]);
+			    				}
 			    				if (entries[i] != null) {
 			    					undetectedSchemaEntries--;
 			    					if (entries[i].dateFormat!=null && timestampColumnIndex==null)
 			    						timestampColumnIndex = i;
 			    				}
+			    				
 			    			}
 			    		}
 			    	}
@@ -184,7 +224,9 @@ public class CSVImporter implements Iterable<LineValues> {
 			if (headers.length<2) {
 				throw new RuntimeException("Sorry, couldn't determine format of csv file!");
 			}
-			else return headers;
+			else {
+				return headers;
+			}
 		}
 		
 		private SchemaEntry detectEntry(String value, String name) {
@@ -192,7 +234,7 @@ public class CSVImporter implements Iterable<LineValues> {
 				return null;
 			
 			// Try to parse as one of the date formats
-			for (SimpleDateFormat df : dateFormatsToTry) {
+			for (OwnDateFormat df : dateFormatsToTry) {
 				try {
 					df.parse(value);
 					return new SchemaEntry(name, df);
@@ -246,6 +288,14 @@ public class CSVImporter implements Iterable<LineValues> {
 			
 			return new LineValues(schema, parsed);
 		}
+		
+		private void setTimeStampColumnIndex(int index){
+			this.timestampColumnIndex = index;
+		}
+		
+		private void setDateFormat(String format){
+			this.format = format;
+		}
 	}
 	
 	
@@ -253,14 +303,14 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		public String name;
 		public String type;
-		public SimpleDateFormat dateFormat;
+		public OwnDateFormat dateFormat;
 		
 		public SchemaEntry(String name, String type) {
 			this.name = name;
 			this.type = type;
 		}
 		
-		public SchemaEntry(String name, SimpleDateFormat dateFormat) {
+		public SchemaEntry(String name, OwnDateFormat dateFormat) {
 			this.name = name;
 			this.type = "timestamp";
 			this.dateFormat = dateFormat;
@@ -280,6 +330,31 @@ public class CSVImporter implements Iterable<LineValues> {
 		public Date getTimestamp() {
 			return (Date) values[schema.timestampColumnIndex];
 		}
+	}
+	
+	public class OwnDateFormat extends SimpleDateFormat {
+		private String format;
+		private int factor = 1;
+		
+		public OwnDateFormat(String format) {
+			super();
+			if(format.equals("unix") || format.equals("unix-s")){
+				if(format.equals("unix-s"))
+					factor = 1000;
+				this.format = format;
+			} else {
+				super.applyPattern(format);
+			}
+		}
+		
+		public Date parse(String value) throws ParseException{
+			if(this.format != null && (this.format.equals("unix") || this.format.equals("unix-s")))
+				return new Date(Long.parseLong(value) * factor);
+			else {
+				return super.parse(value);
+			}
+		}
+		
 	}
 
 }

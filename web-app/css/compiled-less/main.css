@@ -16542,6 +16542,20 @@ body.live-show-view #canvas {
   height: 100%;
   width: 100%;
 }
+body.stream-show table.file-table td.text-center {
+  width: 40px;
+}
+body.stream-show table.file-table td.text-center .lbl {
+  position: absolute;
+  vertical-align: top;
+  margin-left: 2px;
+}
+body.stream-show #toolbar {
+  padding-bottom: 35px;
+}
+body.stream-show #dropzone {
+  margin-top: 30px;
+}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;

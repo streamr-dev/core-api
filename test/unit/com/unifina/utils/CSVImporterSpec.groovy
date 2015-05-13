@@ -17,16 +17,15 @@ class CSVImporterSpec extends Specification {
 
 	void "test detecting a schema from a csv file"() {
 		setup:
-		File file = Paths.get(getClass().getResource("test-upload-file.csv").toURI()).toFile()
+		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
 		
 		when:
 		CSVImporter csv = new CSVImporter(file)
 		CSVImporter.Schema schema = csv.getSchema()
-		
+	
 		then:
 		schema.entries.length == 5
 		schema.timestampColumnIndex == 0
-		schema.entries[0].name == "timestamp"
 		schema.entries[0].type == "timestamp"
 		schema.entries[1].name == "price"
 		schema.entries[1].type == "number"
@@ -40,7 +39,7 @@ class CSVImporterSpec extends Specification {
 	
 	void "test reading values from a csv file"() {
 		setup:
-		File file = Paths.get(getClass().getResource("test-upload-file.csv").toURI()).toFile()
+		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
 		int rowsRead = 0
 		List<CSVImporter.LineValues> firstRows = []
 		
@@ -69,5 +68,83 @@ class CSVImporterSpec extends Specification {
 		firstRows[23].values[1] == 477.16
 		firstRows[23].values[4] == "No way!"
 	}
+	
+	void "test detecting the schema from another csv file"(){
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/crime-records.csv").toURI()).toFile()
+		
+		when:
+		CSVImporter csv = new CSVImporter(file, 0, "MM/dd/yy HH:mm")
+		CSVImporter.Schema schema = csv.getSchema()
+
+		then:
+		schema.entries.length == 9
+		schema.timestampColumnIndex == 0
+		schema.entries[0].type == "timestamp"
+		schema.entries[1].name == "address"
+		schema.entries[1].type == "string"
+		schema.entries[2].name == "district"
+		schema.entries[2].type == "number"
+		schema.entries[3].name == "beat"
+		schema.entries[3].type == "string"
+		schema.entries[4].name == "grid"
+		schema.entries[4].type == "number"
+		schema.entries[5].name == "crimedescr"
+		schema.entries[5].type == "string"
+		schema.entries[6].name == "ucr_ncic_code"
+		schema.entries[6].type == "number"
+		schema.entries[7].name == "latitude"
+		schema.entries[7].type == "number"
+		schema.entries[8].name == "longitude"
+		schema.entries[8].type == "number"
+	}
+	
+	void "test detecting the timestamp from epoch"(){
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/epoch-test.csv").toURI()).toFile()
+		CSVImporter csv = new CSVImporter(file, 0, "unix")
+		CSVImporter.Schema schema = csv.getSchema()
+		
+		int rowsRead = 0
+		List<CSVImporter.LineValues> firstRows = []
+		
+		expect:
+		schema.entries.length == 6
+		schema.timestampColumnIndex == 0
+		
+		when:
+		for (CSVImporter.LineValues line : csv) {
+			if (line==null)
+				continue
+			
+			if (rowsRead<25)
+				firstRows << line
+				
+			rowsRead++
+		}
+		
+		then:
+		rowsRead == 8
+		firstRows[0].values[0] instanceof Date
+		Date d = firstRows[5].values[0]
+		d instanceof Date
+		firstRows[5].values[2] == 53		
+	}
+	
+	
+	
+	void "test detecting timestamp from another time format"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/real_time_sales.csv").toURI()).toFile()
+		
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+		
+		then:
+		schema.entries.length == 12
+		schema.timestampColumnIndex == 5
+	}
+	
 	
 }

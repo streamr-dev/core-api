@@ -3,8 +3,9 @@
         <meta name="layout" content="main" />
         <title><g:message code="stream.show.label" args="[stream.name]"/></title>
         <r:require module="dropzone"/>
+		<r:require module="toolbar"/>
     </head>
-    <body>
+    <body class="stream-show">
     	<ui:breadcrumb>
 			<g:render template="/stream/breadcrumbList" model="[stream:stream]"/>
 			<g:render template="/stream/breadcrumbShow" model="[stream:stream, active:true]"/>
@@ -13,7 +14,7 @@
 		<ui:flashMessage/>
 		
 		<div class="row">
-			<div class="col-sm-4">
+			<div class="col-sm-6 col-md-4">
 				<div class="panel ">
 					<div class="panel-heading">
 						<span class="panel-title">${message(code:"stream.show.label", args:[stream.name])}</span>

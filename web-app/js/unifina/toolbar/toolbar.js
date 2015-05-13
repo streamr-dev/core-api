@@ -11,7 +11,6 @@ function Toolbar($elem) {
 			$form.attr('action', btn.data('action'))
 
 		if (btn.hasClass('confirm')) {
-		
 			bootbox.confirm({
 				message: btn.data('confirm') ? btn.data('confirm') : "Are you sure?",
 				callback: function(result) {
