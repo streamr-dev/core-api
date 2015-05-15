@@ -3,6 +3,7 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
@@ -69,6 +70,7 @@ class LiveController {
 			[
 				id: rsp.id,
 				name: rsp.name,
+				state: rsp.state,
 				uiChannels: rsp.uiChannels.collect {uiChannel->
 					[id: uiChannel.id, name: uiChannel.name, module: (uiChannel.module ? [id:uiChannel.module.id] : null)]
 				}
@@ -151,7 +153,7 @@ class LiveController {
 		RunningSignalPath rsp = signalPathService.createRunningSignalPath(signalPathData, springSecurityService.currentUser, signalPathContext.live ? false : true, true)
 		signalPathService.startLocal(rsp, signalPathContext)
 		
-		Map result = [success:true, id:rsp.id, uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }]
+		Map result = [success:true, id:rsp.id, adhoc:rsp.adhoc, uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }]
 		render result as JSON
 	}
 	
@@ -219,5 +221,30 @@ class LiveController {
 			result.signalPaths.add(tmp)
 		}
 		render(view:"/savedSignalPath/loadBrowserContent",model:result)
+	}
+	
+	@Secured("ROLE_USER")
+	def delete() {
+		def rspInstance = RunningSignalPath.get(params.id)
+		if (rspInstance) {
+			try {
+				def uicIds = UiChannel.executeQuery("SELECT uic.id FROM UiChannel uic WHERE uic.runningSignalPath =?", [rspInstance])
+				uicIds.each({String id ->
+					DashboardItem.executeUpdate("DELETE FROM DashboardItem di WHERE di.uiChannel.id = ?", [id])
+				})
+				UiChannel.executeUpdate("delete from UiChannel uic where uic.runningSignalPath = ?", [rspInstance])
+				rspInstance.delete(flush: true)
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), rspInstance.name])}"
+				redirect(action: "list")
+			}
+			catch (org.springframework.dao.DataIntegrityViolationException e) {
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), rspInstance.name])}"
+				redirect(action: "show", id: params.id)
+			}
+		}
+		else {
+			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), params.id])}"
+			redirect(action: "list")
+		}
 	}
 }

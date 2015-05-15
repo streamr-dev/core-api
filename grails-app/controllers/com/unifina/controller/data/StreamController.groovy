@@ -3,11 +3,15 @@ package com.unifina.controller.data
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import org.springframework.web.multipart.MultipartFile
+
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Module
+import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
+import com.unifina.utils.CSVImporter.Schema
 
 @Secured(["ROLE_USER"])
 class StreamController {
@@ -142,22 +146,104 @@ class StreamController {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
 		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
-		return [feedFiles: feedFiles]
+		return [feedFiles: feedFiles, stream:stream]
 	}
 	
 	def upload() {
 		// Access checked by beforeInspector
-		Stream stream = Stream.get(params.id)
-		def file = request.getFile("file")
-		List fields = kafkaService.createFeedFilesFromCsv(file.inputStream, stream)
 		
+		File temp
+		boolean deleteFile = true
+		try {
+			Stream stream = Stream.get(params.id)
+			MultipartFile file = request.getFile("file")
+			temp = File.createTempFile("csv_upload_", ".csv")
+			file.transferTo(temp)
+			
+			CSVImporter csv = new CSVImporter(temp)
+			if (csv.getSchema().timestampColumnIndex==null) {
+				flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
+				response.status = 500
+				render ([success:false, redirect:createLink(action:'confirm', params: [id:params.id, file:temp.getCanonicalPath()])] as JSON)
+				deleteFile = false
+			}
+			else {
+				importCsv(csv, stream)
+				render ([success:true] as JSON)
+			}
+		} catch (Exception e) {
+				flash.message = "An error occurred while handling file: $e"
+				response.status = 500
+				render ([success:false, error: e.toString()] as JSON)
+		} finally {
+			if (deleteFile && temp.exists())
+				temp.delete()
+		}
+	}
+
+	def confirm() {
+		Stream stream = Stream.get(params.id)
+		File file = new File(params.file)
+		CSVImporter csv = new CSVImporter(file)
+		Schema schema = csv.getSchema()
+		
+		[schema:schema, file:params.file, stream:stream]
+	}
+	
+	def confirmUpload() {
+		Stream stream = Stream.get(params.id)
+		File file = new File(params.file)
+		def format
+		def index
+		if(params.customFormat)
+			format = params.customFormat
+		else format = params.format
+		index = Integer.parseInt(params.timestampIndex)
+		try {
+			CSVImporter csv = new CSVImporter(file, index, format)
+			Schema schema = csv.getSchema()
+			importCsv(csv, stream)
+		} catch (Exception e) {
+			flash.message = "The format of the timestamp is not correct"
+		}
+		redirect(action:"show", id:params.id)
+	}
+	
+	private void importCsv(CSVImporter csv, Stream stream) {		
+		List<FeedFile> feedFiles = kafkaService.createFeedFilesFromCsv(csv, stream)
+		
+		// Autocreate the stream config based on fields in the csv schema
 		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
 		if (!config.fields || config.fields.isEmpty()) {
+			List fields = []
+			
+			// The primary timestamp column is implicit, so don't include it in streamConfig
+			for (int i=0;i<csv.schema.entries.length;i++) {
+				if (i!=csv.schema.timestampColumnIndex) {
+					CSVImporter.SchemaEntry e = csv.schema.entries[i]
+					fields << [name:e.name, type:e.type]
+				}
+			}
+			
 			config.fields = fields
 			stream.streamConfig = (config as JSON)
 		}
-		
-		render ([success:true] as JSON)
 	}
+	
+	
+	def deleteSelectedFeedFiles() {
+		if(params.list("selectedFeedFiles").size() == 0){
+			flash.error = "No selected feed files!"
+			redirect(action:"show", params:[id:params.streamId])
+		} else {
+			def toBeDeleted = params.list("selectedFeedFiles")
+			toBeDeleted.each {feedId ->
+				FeedFile.executeUpdate("delete from FeedFile feed where feed.id = ?", [Long.parseLong(feedId)])
+			}
+			flash.message = "Data deleted"
+			redirect(action:"show", params:[id:params.streamId])
+		}
+	}
+	
 	
 }

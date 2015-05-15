@@ -35,6 +35,7 @@ class Stream implements Comparable {
 		localId index: 'localId_idx'
 		uuid index: "uuid_idx"
 		feed lazy:false
+		streamConfig type: 'text'
 	}
 	
 	@Override

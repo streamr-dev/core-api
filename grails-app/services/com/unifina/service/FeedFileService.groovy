@@ -6,14 +6,11 @@ import groovy.transform.CompileStatic
 import java.nio.channels.Channel
 import java.nio.channels.Channels
 import java.nio.channels.FileChannel
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 
-import org.apache.commons.lang.time.DateUtils
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -25,10 +22,7 @@ import com.unifina.feed.AbstractFeedPreprocessor
 import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.feed.file.FileStorageAdapter
 import com.unifina.feed.file.RemoteFeedFile
-import com.unifina.feed.kafka.KafkaFeedFileName
-import com.unifina.feed.kafka.KafkaFeedFileWriter
 import com.unifina.task.FeedFilePreprocessTask
-import com.unifina.utils.TimeOfDayUtil
 
 class FeedFileService {
 
@@ -98,7 +92,7 @@ class FeedFileService {
 		return feedFile
 	}
 	
-	public void createFeedFile(Stream stream, Date beginDate, Date endDate, File file, boolean overwriteExisting) {
+	public FeedFile createFeedFile(Stream stream, Date beginDate, Date endDate, File file, boolean overwriteExisting) {
 		// Check that the FeedFile does not exist
 		FeedFile feedFile = getFeedFile(stream.feed, beginDate, endDate, file.getName())
 		
@@ -109,7 +103,7 @@ class FeedFileService {
 		}
 		else if (feedFile) {
 			log.warn("FeedFile already exists: $feedFile.name, not overwriting.")
-			return
+			return null
 		}
 		
 		// Send file to file storage service if its size is greater than zero
@@ -149,7 +143,10 @@ class FeedFileService {
 					
 				stream.save(flush:true, failOnError:true)
 			}
+			
+			return feedFile
 		}
+		else return null
 	}
 	
 	public void setPreprocessed(FeedFile feedFile) {

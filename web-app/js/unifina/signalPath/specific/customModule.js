@@ -187,7 +187,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		}
 		if (debug!=null) {
 			$(debug).remove()
-			debug = null;
+			debug = null
 		}
 	}
 	

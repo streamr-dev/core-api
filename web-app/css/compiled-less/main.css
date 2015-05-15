@@ -16466,8 +16466,8 @@ body.embedded #content-wrapper {
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
 }
-.table-scrollable tbody {
-  overflow: auto;
+.table-clickable tbody tr:hover {
+  cursor: pointer;
 }
 .form-group-period .input-group-addon {
   width: 60px;
@@ -16520,7 +16520,8 @@ body.build-page #content-wrapper {
   display: inline-block;
 }
 body.live-show-view #content-wrapper {
-  padding: 56px 0px 0px 0px;
+  padding-bottom: 0px;
+  padding-right: 0px;
 }
 body.live-show-view div.toolbar {
   width: 100%;
@@ -16531,12 +16532,29 @@ body.live-show-view #stopButton {
   z-index: 20;
 }
 body.live-show-view #toolbarForm {
-  width: 100%;
+  z-index: 50;
+  right: 0;
   position: absolute;
+  padding-right: 30px;
+  padding-top: 15px;
 }
 body.live-show-view #canvas {
   height: 100%;
   width: 100%;
+}
+body.stream-show table.file-table td.text-center {
+  width: 40px;
+}
+body.stream-show table.file-table td.text-center .lbl {
+  position: absolute;
+  vertical-align: top;
+  margin-left: 2px;
+}
+body.stream-show #toolbar {
+  padding-bottom: 35px;
+}
+body.stream-show #dropzone {
+  margin-top: 30px;
 }
 .modal-content.flexing {
   display: flex;
@@ -16604,6 +16622,66 @@ body.dashboard-show {
 }
 body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view {
   overflow: auto;
+  height: 100%;
+  padding: 0px;
+  list-style-type: none;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar,
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-clickable,
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .edit-btn {
+  display: none;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-edit {
+  height: 20px;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit,
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .close-edit {
+  display: none;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell.title {
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell.widget-content {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls {
+  cursor: auto;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls label.btn.active {
+  color: #333333;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .size-btn-group {
+  display: none;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .btn-group {
+  padding-top: 0px;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
+  opacity: 0;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-table .container {
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  max-height: 400px;
+  padding: 15px;
+  padding-top: 0px;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-table .container .table-module-container {
+  width: 100%;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-chart .container {
+  overflow: auto;
+  width: 100%;
+  max-height: 400px;
+  padding: 15px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-chart .container .chartDrawArea {
+  width: 100%;
 }
 body.dashboard-show:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .panel-heading-controls,
 body.dashboard-show:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .titlebar-clickable {
@@ -16613,13 +16691,18 @@ body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel {
   overflow: auto;
 }
 body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .title.stat-cell {
-  border-top-left-radius: 4px;
   border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  cursor: move;
+}
+body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .widget-content.stat-cell {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell {
   overflow: visible;
 }
-body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .titlebar {
+body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .stat-row .titlebar {
   display: none;
 }
 body.dashboard-show.selected-theme #main-menu .navigation .uichannel.checked a {
@@ -16632,41 +16715,16 @@ body.dashboard-show #main-menu .navigation .uichannel:not(.checked) .menu-icon.f
 body.dashboard-show #main-menu .mm-dropdown > ul > li > a.ui-title {
   padding-left: 30px;
 }
-body.dashboard-show #dashboard-view {
-  height: 100%;
-  padding: 0px;
-  list-style-type: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar,
-body.dashboard-show #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-clickable,
-body.dashboard-show #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .edit-btn {
-  display: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-edit {
-  height: 20px;
-}
-body.dashboard-show #dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit,
-body.dashboard-show #dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .close-edit {
-  display: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls label.btn.active {
-  color: #333333;
-}
-body.dashboard-show #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .size-btn-group {
-  display: none;
-}
-body.dashboard-show #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .btn-group {
-  padding-top: 0px;
-}
-body.dashboard-show #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
-  opacity: 0;
-}
 body.dashboard-show #sidebar-view button.delete-button {
   margin-top: 5px;
   margin-bottom: 200px;
 }
+body.dashboard-show #sidebar-view .runningsignalpath.stopped .rsp-title {
+  color: #666;
+}
 body.dashboard-show #sidebar-view .rsp-title {
   margin-left: 20px;
+  cursor: pointer;
 }
 .widget-notifications .notification {
   position: relative;
