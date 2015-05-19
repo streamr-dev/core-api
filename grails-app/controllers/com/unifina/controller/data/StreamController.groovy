@@ -3,11 +3,14 @@ package com.unifina.controller.data
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import java.security.AccessControlException
+
 import org.springframework.web.multipart.MultipartFile
 
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
@@ -59,17 +62,23 @@ class StreamController {
 		redirect(action: "show", id: stream.id)
 	}
 	
+	// Action included in API
+	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 	def create() {
+		SecUser user = unifinaSecurityService.getUserByApiKey(params.key, params.secret) ?: springSecurityService.currentUser
+		if (!user)
+			throw new AccessControlException("User could not be identified")
+		
 		if (request.method=="GET")
 			[stream:new Stream()]
 		else {
 			Stream stream = new Stream(params)
 			stream.uuid = IdGenerator.get()
 			stream.apiKey = IdGenerator.get()
-			stream.user = springSecurityService.currentUser			
+			stream.user = user			
 			stream.localId = stream.name
 			
-			stream.feed = Feed.load(7)
+			stream.feed = Feed.load(7) // API stream
 			stream.streamConfig = ([fields:[], topic: stream.uuid] as JSON)
 			
 			if (!stream.validate()) {
@@ -77,8 +86,9 @@ class StreamController {
 				[stream:stream]
 			}
 			else {
-				flash.message = "Your stream has been created! You can start pushing realtime messages to the API or upload a message history from a csv file."
 				stream.save(flush:true, failOnError:true)
+				flash.message = "Your stream has been created! You can start pushing realtime messages to the API or upload a message history from a csv file."
+
 				redirect(action:"show", id:stream.id)
 			}
 		}

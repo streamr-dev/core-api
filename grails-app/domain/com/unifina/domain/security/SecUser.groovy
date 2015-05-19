@@ -15,7 +15,9 @@ class SecUser {
 
 	@Deprecated
 	String dataToken
+	
 	String apiKey
+	String apiSecret
 	
 	// Added by Unifina
 	String name
@@ -25,7 +27,8 @@ class SecUser {
 		name blank: false
 		username blank: false, unique: true
 		password blank: false
-		apiKey nullable:true
+		apiKey nullable:true, unique: true
+		apiSecret nullable:true
 	}
 
 	static mapping = {

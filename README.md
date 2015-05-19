@@ -7,7 +7,7 @@ Unfortunately this README is *very* incomplete. Please let Henri know which topi
 This is a Grails plugin providing core Streamr platform functionality. This includes, among other stuff:
 
 - Basic core library of modules (packages `com.unifina.signalpath.*`)
-- Controllers for instantiating, showing and running SignalPaths (canvases)
+- Controllers for instantiating, showing and running SignalPaths (canvases), creating Streams etc.
 - The Build view and its resources
 - Core webcomponents
 - Mechanism of communicating with running SignalPaths (/live/request)
@@ -35,6 +35,37 @@ This plugin is used in the app-level projects `unifina-trading` and `streamr-web
 There are also `mocha` tests for javascript components. Install <a href="https://nodejs.org/">node.js</a>, then do `npm install` in the `unifina-core` directory. Then you can `npm test`.
 
 The top-level apps may contain functional tests (browser tests). Functional tests use Geb with <a href="https://code.google.com/p/selenium/wiki/ChromeDriver">chromedriver</a> and Google Chrome. You need to place the `chromedriver` executeble in your `PATH`, and set an environment variable `CHROMEDRIVER` to point to the executable.
+
+## API methods
+
+Some actions can be called by sending JSON requests to api endpoints. The user must provide his api `key` and api `secret` as part of the request.
+
+### ``/stream/create``
+
+Creates a new API stream. Example request:
+
+```
+{
+	key: "", 	// User API key
+	secret: "", // User API secret
+
+	name: "Stream name",
+	description: "Stream description"
+}
+```
+
+Example response:
+
+```
+{
+	success: true,
+	stream: "", // Stream id,
+	auth: "", // Stream auth key
+
+	name: "Stream name",
+	description: "Stream description"
+}
+```
 
 ## Webcomponents
 

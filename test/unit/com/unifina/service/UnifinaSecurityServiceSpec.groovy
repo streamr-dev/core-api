@@ -54,8 +54,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("userDetailsService").grailsApplication = grailsApplication
 		
 		// Users
-		me = new SecUser(username: "me", password: "foo")
-		anotherUser = new SecUser(username: "him", password: "bar")
+		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
+		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret")
 		me.save(validate:false)
 		anotherUser.save(validate:false)
 		
@@ -146,4 +146,34 @@ class UnifinaSecurityServiceSpec extends Specification {
 		}
 	}
 	
+	void "looking up a user based on correct api keys"() {
+		when:
+		def user = service.getUserByApiKey("apiKey", "apiSecret")
+		
+		then:
+		user.username == me.username
+	}
+	
+	void "looking up a user with incorrect api keys"() {
+		when:
+		def user = service.getUserByApiKey("apiKey", "wrong secret")
+		
+		then:
+		!user
+		
+		when:
+		user = service.getUserByApiKey("wrong api key", "apiSecret")
+		
+		then:
+		!user
+	}
+	
+	void "granting access to restricted object based on api keys"() {
+		expect:
+		service.canAccess(owned, "apiKey", "apiSecret")
+		!service.canAccess(restricted, "apiKey", "apiSecret")
+		!service.canAccess(owned, "apiKey", "wrong secret")
+		!service.canAccess(restricted, "apiKey", "wrong secret")
+	}
+
 }
