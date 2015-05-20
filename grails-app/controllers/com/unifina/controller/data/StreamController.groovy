@@ -100,6 +100,21 @@ class StreamController {
 		}
 	}
 	
+	// Action included in API
+	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
+	def apiLookup() {
+		SecUser user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
+		if (!user) {
+			render (status:401, text: [success:false, error: "authorization error"] as JSON)
+			return
+		}
+
+		Stream stream = Stream.findByUserAndLocalId(user, request.JSON?.localId)
+		if (!stream)
+			render (status:404, text: [success:false, error: "stream not found"] as JSON)
+		else render ([stream:stream.uuid] as JSON)
+	}
+	
 	def configure() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)

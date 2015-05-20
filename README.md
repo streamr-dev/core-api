@@ -40,7 +40,7 @@ The top-level apps may contain functional tests (browser tests). Functional test
 
 Some actions can be called by sending JSON requests to API endpoints. The user's API `key` and API `secret` must be provided as part of all requests. All requests must have the `Content-Type: application/json` header.
 
-### ``POST /api/createStream``
+### ``POST /api/stream/create``
 
 Creates a new API stream. Example request:
 
@@ -81,7 +81,43 @@ Example error response (response codes 40x):
 
 Example using `curl`:
 
-`curl -i -X POST -H "Content-Type: application/json" -d "{\"key\":\"my-api-key\",\"secret\":\"my-api-secret\",\"name\":\"API generated stream\",\"description\":\"Stream description\"}" http://www.streamr.com/api/createStream`
+`curl -i -X POST -H "Content-Type: application/json" -d "{\"key\":\"my-api-key\",\"secret\":\"my-api-secret\",\"name\":\"API generated stream\",\"description\":\"Stream description\"}" http://www.streamr.com/api/stream/create`
+
+
+### ``POST /api/stream/lookup``
+
+Queries the stream id based on your localId:
+
+```
+{
+	key: "", 	// User API key
+	secret: "", // User API secret
+
+	localId: "my-stream-id"
+}
+```
+
+Example success response:
+
+```
+{
+	stream: "" // stream id
+}
+```
+
+Example error response (response code 404):
+
+```
+{
+	success: false,
+	error: "stream not found"
+}
+```
+
+Example using `curl`:
+
+`curl -i -X POST -H "Content-Type: application/json" -d "{\"key\":\"my-api-key\",\"secret\":\"my-api-secret\",\"localId\":\"my-stream-local-id\"}" http://www.streamr.com/api/stream/lookup`
+
 
 ## Webcomponents
 

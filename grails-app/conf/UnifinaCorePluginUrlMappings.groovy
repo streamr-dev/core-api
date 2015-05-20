@@ -18,6 +18,7 @@ class UnifinaCorePluginUrlMappings {
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 		
 		// API url mappings
-		"/api/createStream"(controller: "stream", action: "apiCreate")
+		"/api/stream/create"(controller: "stream", action: "apiCreate")
+		"/api/stream/lookup"(controller: "stream", action: "apiLookup")
 	}
 }

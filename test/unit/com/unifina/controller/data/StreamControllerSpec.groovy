@@ -9,6 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.service.StreamService
 import com.unifina.service.UnifinaSecurityService
+import com.unifina.utils.IdGenerator;
 
 @TestFor(StreamController)
 @Mock([SecUser, Stream, Feed])
@@ -85,6 +86,30 @@ class StreamControllerSpec extends Specification {
 			response.redirectedUrl == '/stream/show/1'
 			Stream.count() == 1
 			Stream.list()[0].user == user
+	}
+	
+	void "successful stream lookup by localId"() {
+		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
+		
+		when:
+			request.json = [key: user.apiKey, secret: user.apiSecret, localId: stream.localId]
+			request.method = 'POST'
+			controller.apiLookup()
+		then:
+			response.status == 200
+			response.json.stream == stream.uuid
+	}
+	
+	void "unsuccessful stream lookup by localId"() {
+		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
+		
+		when:
+			request.json = [key: user.apiKey, secret: user.apiSecret, localId: "wrong local id"]
+			request.method = 'POST'
+			controller.apiLookup()
+		then:
+			response.status == 404
+			response.json.success == false
 	}
 
 }
