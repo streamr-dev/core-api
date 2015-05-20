@@ -38,9 +38,9 @@ The top-level apps may contain functional tests (browser tests). Functional test
 
 ## API methods
 
-Some actions can be called by sending JSON requests to api endpoints. The user must provide his api `key` and api `secret` as part of the request.
+Some actions can be called by sending JSON requests to API endpoints. The user's API `key` and API `secret` must be provided as part of all requests. All requests must have the `Content-Type: application/json` header.
 
-### ``/stream/create``
+### ``POST /api/createStream``
 
 Creates a new API stream. Example request:
 
@@ -50,22 +50,38 @@ Creates a new API stream. Example request:
 	secret: "", // User API secret
 
 	name: "Stream name",
-	description: "Stream description"
+	description: "Stream description",
+	localId: "my-stream-id" // A user-defined id for the stream. If not given, the name will be used.
 }
 ```
 
-Example response:
+Example success response:
 
 ```
 {
 	success: true,
 	stream: "", // Stream id,
-	auth: "", // Stream auth key
+	auth: "" 	// Stream auth key
 
 	name: "Stream name",
-	description: "Stream description"
+	description: "Stream description",
+	localId: "my-stream-id"
 }
 ```
+
+Example error response (response codes 40x):
+
+```
+{
+	success: false,
+	error: "error description",
+	details: [] // optional error details
+}
+```
+
+Example using `curl`:
+
+`curl -i -X POST -H "Content-Type: application/json" -d "{\"key\":\"my-api-key\",\"secret\":\"my-api-secret\",\"name\":\"API generated stream\",\"description\":\"Stream description\"}" http://www.streamr.com/api/createStream`
 
 ## Webcomponents
 

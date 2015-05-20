@@ -16,5 +16,8 @@ class UnifinaCorePluginUrlMappings {
 		"/logout/$action?"(controller: "logout")
 		
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
+		
+		// API url mappings
+		"/api/createStream"(controller: "stream", action: "apiCreate")
 	}
 }

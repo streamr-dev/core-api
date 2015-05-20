@@ -26,6 +26,7 @@ class StreamController {
 	def unifinaSecurityService
 	def feedFileService
 	def kafkaService
+	def streamService
 	
 	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Stream.get(params.long("id")))},
 		except:['list','search','create']]
@@ -62,35 +63,40 @@ class StreamController {
 		redirect(action: "show", id: stream.id)
 	}
 	
-	// Action included in API
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 	def create() {
-		SecUser user = unifinaSecurityService.getUserByApiKey(params.key, params.secret) ?: springSecurityService.currentUser
-		if (!user)
-			throw new AccessControlException("User could not be identified")
-		
 		if (request.method=="GET")
 			[stream:new Stream()]
 		else {
-			Stream stream = new Stream(params)
-			stream.uuid = IdGenerator.get()
-			stream.apiKey = IdGenerator.get()
-			stream.user = user			
-			stream.localId = stream.name
+			SecUser user = springSecurityService.currentUser
+			Stream stream = streamService.createUserStream(params, user)
 			
-			stream.feed = Feed.load(7) // API stream
-			stream.streamConfig = ([fields:[], topic: stream.uuid] as JSON)
-			
-			if (!stream.validate()) {
+			if (stream.hasErrors()) {
 				log.info(stream.errors)
-				[stream:stream]
+				return [stream:stream]
 			}
 			else {
-				stream.save(flush:true, failOnError:true)
 				flash.message = "Your stream has been created! You can start pushing realtime messages to the API or upload a message history from a csv file."
-
 				redirect(action:"show", id:stream.id)
 			}
+		}
+	}
+	
+	// Action included in API
+	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
+	def apiCreate() {
+		SecUser user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
+		if (!user) {
+			render (status:401, text: [success:false, error: "authorization error"] as JSON)
+			return
+		}
+
+		Stream stream = streamService.createUserStream(request.JSON, user)
+		if (stream.hasErrors()) {
+			log.info(stream.errors)
+			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
+		}
+		else {
+			render ([success:true, stream:stream.uuid, auth:stream.apiKey, name:stream.name, description:stream.description, localId:stream.localId] as JSON)
 		}
 	}
 	
