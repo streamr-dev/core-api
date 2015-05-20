@@ -90,6 +90,9 @@ class UnifinaSecurityService {
 	 * @return
 	 */
 	SecUser getUserByApiKey(String apiKey, String apiSecret) {
+		if (!apiKey || !apiSecret)
+			return null
+			
 		SecUser user = SecUser.findByApiKey(apiKey)
 		if (!user || user.apiSecret != apiSecret)
 			return null
