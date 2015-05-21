@@ -12,6 +12,7 @@ import java.security.CodeSource;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -95,35 +96,22 @@ public class UserJavaClassLoader extends URLClassLoader {
 		 String cp = StringUtils.join(urls.toArray(),File.pathSeparator);
 		 
 		 List<String> optionList = new ArrayList<String>();
+		 
 		 // set compiler's classpath to be same as the runtime's
 		 optionList.addAll(Arrays.asList("-classpath",cp));
 
-		 // any other options you want
-//		 optionList.addAll(Arrays.asList(options));
-		 
 		 diagnostics = new DiagnosticCollector<JavaFileObject>();
 		 
 		 JavaCompiler.CompilationTask task = compiler.getTask(null,fileManager,diagnostics,optionList,null,jfiles);
 	    
-//		 CompilationTask task = compiler.getTask(null, null, diagnostics, null, null, compilationUnits);
-	    
 	    boolean success = task.call();
-//	    for (Diagnostic diagnostic : diagnostics.getDiagnostics()) {
-//	      System.out.println(diagnostic.getCode());
-//	      System.out.println(diagnostic.getKind());
-//	      System.out.println(diagnostic.getPosition());
-//	      System.out.println(diagnostic.getStartPosition());
-//	      System.out.println(diagnostic.getEndPosition());
-//	      System.out.println(diagnostic.getSource());
-//	      System.out.println(diagnostic.getMessage(null));
-//	    }
-	    
-//	    System.out.println("Success: " + success);
-	    
+
 	    if (success) {
-	    	byte[] bytes = fileManager.getBytes();
-	        Class<?> clazz = super.defineClass(name, bytes, 0, bytes.length, cs);
-			cache.put(name,clazz);
+	    	for (JavaClassObject ob : fileManager.getClassObjects()) {
+		    	byte[] bytes = ob.getBytes();
+		        Class<?> clazz = super.defineClass(ob.getName(), bytes, 0, bytes.length, cs);
+				cache.put(ob.getName(),clazz);
+	    	}
 	    }
 	    
 	    return success;
@@ -225,10 +213,10 @@ public class UserJavaClassLoader extends URLClassLoader {
 	
 	public class ClassFileManager extends ForwardingJavaFileManager {
 		/**
-		* Instance of JavaClassObject that will store the
-		* compiled bytecode of our class
+		* JavaClassObject that will store the
+		* compiled bytecode of our class. They are stored in 
 		*/
-		private JavaClassObject jclassObject;
+		private HashMap<String, JavaClassObject> classObjectByName = new HashMap<>();
 		
 		/**
 		* Will initialize the manager with the specified
@@ -241,8 +229,8 @@ public class UserJavaClassLoader extends URLClassLoader {
 		    super(standardManager);
 		}
 		
-		public byte[] getBytes() {
-			return jclassObject.getBytes();
+		public Collection<JavaClassObject> getClassObjects() {
+			return classObjectByName.values();
 		}
 		
 		/**
@@ -253,8 +241,9 @@ public class UserJavaClassLoader extends URLClassLoader {
 		public JavaFileObject getJavaFileForOutput(Location location,
 		    String className, Kind kind, FileObject sibling)
 		        throws IOException {
-		        jclassObject = new JavaClassObject(className, kind);
-		    return jclassObject;
+			JavaClassObject jclassObject = new JavaClassObject(className, kind);
+			classObjectByName.put(className, jclassObject);
+			return jclassObject;
 		}
 	}
 	
