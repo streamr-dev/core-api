@@ -53,6 +53,7 @@
     <resource>com.unifina.service.KafkaService</resource>
     <resource>com.unifina.service.ModuleService</resource>
     <resource>com.unifina.service.SignalPathService</resource>
+    <resource>com.unifina.service.StreamService</resource>
     <resource>com.unifina.service.TaskService</resource>
     <resource>com.unifina.service.UnifinaSecurityService</resource>
     <resource>com.unifina.taglibs.SignalPathTagLib</resource>

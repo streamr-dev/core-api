@@ -4,10 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 /**
  * Used to compile and load user-defined Groovy scripts at runtime.
@@ -49,6 +52,8 @@ public class UserJavaClassLoader extends URLClassLoader {
 	
 	private CodeSource cs; 
 	
+	private static final Logger log = Logger.getLogger(UserJavaClassLoader.class);
+	
 	public UserJavaClassLoader(ClassLoader parent) {
 		super(new URL[0], parent);
 		this.delegate = parent;
@@ -60,10 +65,9 @@ public class UserJavaClassLoader extends URLClassLoader {
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		PackageAccessHelper.checkAccess(name,cs.getLocation().getPath());
-		if (cache.containsKey(name)) {
+		if (cache.containsKey(name))
 			return cache.get(name);
-		}
-		return delegate.loadClass(name);
+		else return delegate.loadClass(name);
 	}
 
 	public boolean parseClass(String name, String source) {
@@ -88,8 +92,14 @@ public class UserJavaClassLoader extends URLClassLoader {
 		 
 		 while (cl!=null && cl instanceof URLClassLoader) {
 			 URL[] clUrls = ((URLClassLoader)cl).getURLs();
-			 for (URL url : clUrls)
-				 urls.add(url.getPath());
+			 for (URL url : clUrls) {
+				 try {
+					 // decode special characters such as # from url
+					 urls.add(URLDecoder.decode(url.getPath(),"UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					log.error(e);
+				}
+			 }
 			 cl = cl.getParent();
 		 }
 	    
@@ -99,7 +109,7 @@ public class UserJavaClassLoader extends URLClassLoader {
 		 
 		 // set compiler's classpath to be same as the runtime's
 		 optionList.addAll(Arrays.asList("-classpath",cp));
-
+		 
 		 diagnostics = new DiagnosticCollector<JavaFileObject>();
 		 
 		 JavaCompiler.CompilationTask task = compiler.getTask(null,fileManager,diagnostics,optionList,null,jfiles);
