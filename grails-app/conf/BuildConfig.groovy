@@ -42,6 +42,8 @@ grails.project.dependency.resolution = {
 		// Remote Grails repos
         grailsPlugins()
         grailsCentral()
+		// New Grails repo
+		mavenRepo "https://repo.grails.org/grails/plugins"
     }
 
     dependencies {
@@ -98,6 +100,8 @@ grails.project.dependency.resolution = {
 		runtime ":zipped-resources:1.0"
 		compile ":uglify-js-minified-resources:0.1.1"
 
+		runtime ":cors:1.1.8"
+		
 		test ":plastic-criteria:1.5"
 		test ":geb:$gebVersion"
     }

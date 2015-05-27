@@ -23,6 +23,9 @@ log4j = {
     warn   'org.mortbay.log'
 }
 
+// Remember to add this to your app Config.groovy to enable API actions
+cors.url.pattern = '/api/*'
+
 // Example config for Kafka
 unifina.kafka.metadata.broker.list = "192.168.10.21:9092"
 unifina.kafka.zookeeper.connect = "192.168.10.21:2181"
