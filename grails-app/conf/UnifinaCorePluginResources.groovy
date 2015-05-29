@@ -28,6 +28,10 @@ modules = {
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 	}
+	'bootstrap-docs' {
+		dependsOn "bootstrap"
+		resource url:[dir:'js/bootstrap-3.2.0-assets/css', file:'docs.min.css', plugin: 'unifina-core']
+	}
 	'bootstrap-contextmenu' {
 		dependsOn 'bootstrap'
 		resource url:[dir:'js/bootstrap-contextmenu', file:'contextmenu.js', plugin: 'unifina-core']
@@ -162,6 +166,10 @@ modules = {
 	}
 	'clickable-table' {
 		resource url:[dir:'js/unifina/clickable-table', file:'clickable-table.js', plugin:'unifina-core']
+	}
+	'module-browser' {
+		dependsOn 'bootstrap'
+		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	toolbar {
 		dependsOn 'jquery'

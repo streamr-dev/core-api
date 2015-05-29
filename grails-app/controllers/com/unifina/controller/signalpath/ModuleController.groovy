@@ -3,6 +3,7 @@ package com.unifina.controller.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
+import groovy.json.JsonSlurper
 
 import org.apache.log4j.Logger
 
@@ -22,7 +23,13 @@ class ModuleController {
 	def springSecurityService
 	def unifinaSecurityService
 	
+	static defaultAction = "list"
+	
 	private static final Logger log = Logger.getLogger(ModuleController)
+	
+	def list() {
+		
+	}
 	
 	def jsonSearchModule() {
 		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
