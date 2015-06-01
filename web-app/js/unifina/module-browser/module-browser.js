@@ -21,10 +21,10 @@ var renderChildren = function(ul, list){
 var renderSidebar = function(el, json){
 	var el = $(el)
 	var nav = $("<nav/>", {
-		class: "bs-docs-sidebar"
+		class: "streamr-sidebar"
 	})
 	var ul = $("<ul/>", {
-		class: "nav bs-docs-sidenav",
+		class: "nav",
 		id: "module-help-browser"
 	})
 	el.append(nav)

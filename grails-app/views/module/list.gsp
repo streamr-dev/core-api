@@ -14,8 +14,9 @@
         		})
         		$('#sidebar li a').click(function(event) {
         			event.preventDefault()
-				    $($(this).attr('href'))[0].scrollIntoView();
-				    scrollBy(0, -(offset-30));
+				    $($(this).attr('href'))[0].scrollIntoView()
+				    scrollBy(0, -(offset-30))
+                    this.blur()
 				});
         	})
         </r:script>
