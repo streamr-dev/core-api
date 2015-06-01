@@ -98,6 +98,22 @@ public class UiTagLib {
 	}
 	
 	/**
+	 * Renders a Bootstrap panel and generates an id for it automatically. The id is used with the bootstrap scrollspy.
+	 * @attr title REQUIRED Title of the panel
+	 * @attr class Classes added to the panel
+	 */
+	def scrollSpyPanel = {attrs, body->
+		out << "<div id='${ attrs.title.replaceAll(' ', '').toLowerCase() }' class='panel ${attrs.class ?: ''}'>"
+		out << "<div class='panel-heading'>"
+		out << "<span class='panel-title'>${attrs.title}</span>"
+		out << "</div>"
+		out << "<div class='panel-body'>"
+		out << body()
+		out << "</div>" // end panel body
+		out << "</div>" // end panel
+	}
+	
+	/**
 	 * Renders a labeled element.
 	 * @attr label REQUIRED The label
 	 * @attr for In forms, the name of the form input that this label is for
@@ -219,6 +235,23 @@ public class UiTagLib {
 		out << "<tr ${attrs.title ? "title='${attrs.title}'" : ""} data-link='${attrs.link}' ${attrs.id ? "data-id='${attrs.id}'" : ""}>"
 		out << body()
 		out << "</tr>"
+	}
+	
+	/**
+	 * Renders a bootstrap style sidebar which can be used e.g. with scrollspy. Can't be used with sub classes
+	 *
+	 * @attr title REQUIRED titles to be rendered
+	 */
+	def sidebarNav = {attrs ->
+		out << "<nav class='streamr-sidebar'>"
+		out << "<ul class='nav'>"
+		attrs.titles.each {title ->
+			out << "<li>"
+			out << "<a href='#${ title.replaceAll(' ', '').toLowerCase() }'>${ title }</a>"
+			out << "</li>"
+		}
+		out << "</ul>"
+		out << "</nav>"
 	}
 
 }

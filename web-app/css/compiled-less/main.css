@@ -16617,6 +16617,80 @@ body.stream-show #dropzone {
   top: 50%;
   left: 50%;
 }
+.streamr-sidebar {
+  position: fixed;
+  padding-top: 70px;
+}
+.streamr-sidebar ul.nav li.active:hover > a,
+.streamr-sidebar ul.nav li.active:focus > a,
+.streamr-sidebar ul.nav li.active > a {
+  padding-left: 18px;
+  font-weight: 700;
+  color: #e95b15;
+  background-color: transparent;
+  border-left: 2px solid #e95b15;
+}
+.streamr-sidebar ul.nav li a:hover,
+.streamr-sidebar ul.nav li a:focus {
+  padding-left: 19px;
+  color: #e95b15;
+  text-decoration: none;
+  background-color: transparent;
+  border-left: 1px solid #e95b15;
+}
+.streamr-sidebar ul.nav li a {
+  font-size: 14px;
+  display: block;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-weight: 500;
+  color: #767676;
+}
+.streamr-sidebar ul.nav li > ul.nav {
+  display: none;
+}
+.streamr-sidebar ul.nav li > ul.nav li a {
+  padding-left: 28px;
+  font-size: 12px;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav {
+  display: none;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li a {
+  padding-left: 36px;
+  font-size: 12px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  font-weight: 400;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li a:focus,
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li a:hover {
+  padding-left: 38px;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li a.active,
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li a.active:hover,
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li a.active:focus {
+  font-weight: bold;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li > ul.nav {
+  display: none;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li > ul.nav li a {
+  padding-left: 44px;
+  font-size: 12px;
+}
+.streamr-sidebar ul.nav li > ul.nav li > ul.nav li.active > ul.nav {
+  display: block;
+}
+.streamr-sidebar ul.nav li > ul.nav li.active > ul.nav {
+  display: block;
+}
+.streamr-sidebar ul.nav li.active > ul.nav {
+  display: block;
+}
+.scrollspy-wrapper {
+  padding-bottom: 600px;
+}
 body.dashboard-show {
   height: 100%;
 }
