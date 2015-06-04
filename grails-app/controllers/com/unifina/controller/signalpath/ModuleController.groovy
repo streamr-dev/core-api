@@ -201,4 +201,13 @@ class ModuleController {
 		[module:module]
 	}
 	
+	def canEdit() {
+		Module module = Module.get(params.id)
+		if (module.modulePackage.user!=springSecurityService.currentUser) {
+			render ([success:false] as JSON)
+		} else {
+			render ([success:true] as JSON)
+		}
+	}
+	
 }

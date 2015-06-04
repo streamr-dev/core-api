@@ -4,20 +4,10 @@
         <title>Available modules</title>
         
         <r:script>
-        	var moduleHelpUrl = "${createLink(action: 'jsonGetModuleHelp')}"
-        	$.getJSON("${ createLink(action:'jsonGetModuleTree') }", {}, function(data){
-        		renderSidebar($("#sidebar"), data)
-        		renderModules($("#module-help-tree"), data)
-        		var offset = 70
-        		$('body').scrollspy({
-        			offset: offset
-        		})
-        		$('#sidebar li a').click(function(event) {
-        			event.preventDefault()
-				    $($(this).attr('href'))[0].scrollIntoView()
-				    scrollBy(0, -(offset-30))
-                    this.blur()
-				});
+        	var moduleBrowser = new ModuleBrowser({
+        		url: "${ createLink(uri:"/") }module",
+        		sidebarEl: $("#sidebar"),
+        		moduleTreeEl: $("#module-help-tree")
         	})
         </r:script>
         

@@ -17,9 +17,17 @@ body.module-list {
 		}
 		.panel {
 			margin-bottom: 10px;
-			.panel-body table tr th:nth-child(1),
-			.panel-body table tr th:nth-child(2) {
-				width: 20%;
+			.panel-body {
+				table tr th:nth-child(1),
+				table tr th:nth-child(2) {
+					width: 20%;
+				}
+				.edit-btn,
+				.save-btn {
+					margin-top: -10px;
+					margin-bottom: 10px;
+					float: right;
+				}
 			}
 		}
 	}

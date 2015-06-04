@@ -1,4 +1,53 @@
-var renderChildren = function(ul, list){
+function ModuleBrowser(options){
+	var _this = this
+
+	this.url = options.url
+	this.sidebarEl = options.sidebarEl
+	this.moduleTreeEl = options.moduleTreeEl
+
+	this.level = 0
+	
+	$.getJSON(this.url +"/jsonGetModuleTree/", function(moduleTree){
+		new Sidebar(_this.sidebarEl, moduleTree)
+		_this.renderModules(_this.moduleTreeEl, moduleTree)
+
+		var offset = 80
+		$('body').scrollspy({
+			offset: offset
+		})
+		$('#sidebar li a').click(function(event) {
+			event.preventDefault()
+		    $($(this).attr('href'))[0].scrollIntoView()
+		    scrollBy(0, -(offset-30))
+	        this.blur()
+		});
+	})
+}
+ModuleBrowser.prototype.renderModules = function(element,list){
+	var _this = this
+	
+	$.each(list, function(i, module){
+		if(!module.children){
+    		new Module(_this.url, element, module)
+		} else {
+			_this.level++
+			// var title = $("<h"+(level+1)+" id='"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h"+(level+1)+">")
+			var title = $("<h3 id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*20)+"px;'>"+module.data+"</h3>")
+			element.append(title)
+			if(_this.level == 0)
+				max = module.children.length
+			_this.renderModules(element, module.children)
+		}
+		if(i == list.length-1) {
+			_this.level--
+		}
+	})
+}
+function Sidebar(el, moduleTree){
+	this.renderSidebar(el, moduleTree)
+}
+Sidebar.prototype.renderChildren = function(ul, list){
+	var _this = this
 	$.each(list, function(i, module){
 		var li = $("<li/>")
 		var a = $("<a/>", {
@@ -12,13 +61,13 @@ var renderChildren = function(ul, list){
 				class: "nav"
 			})
 			li.append(innerUl)
-			renderChildren(innerUl, module.children)
+			_this.renderChildren(innerUl, module.children)
 		} else {
 			a.attr("href", "#module"+module.metadata.id)
 		}
 	})
 }   			
-var renderSidebar = function(el, json){
+Sidebar.prototype.renderSidebar = function(el, json){
 	var el = $(el)
 	var nav = $("<nav/>", {
 		class: "streamr-sidebar"
@@ -29,108 +78,185 @@ var renderSidebar = function(el, json){
 	})
 	el.append(nav)
 	nav.append(ul)
-	renderChildren(ul, json)
+	this.renderChildren(ul, json)
 }
-
-var level = 0
-var renderModules = function(element,list){
-	$.each(list, function(i, module){
-		if(isModule(module)){
-    		renderModule(element, module)
-		} else {
-			level++
-			// var title = $("<h"+(level+1)+" id='"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h"+(level+1)+">")
-			var title = $("<h3 id='category"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h3>")
-			element.append(title)
-			if(level == 0)
-				max = module.children.length
-			renderModules(element, module.children)
-		}
-		if(i == list.length-1) {
-			level--
-		}
-	})
+function Module(url, element, module){
+	this.element = element
+	this.module = module
+	this.url = url
+	this.render()
 }
-var renderModule = function(element, module){
-	var panel = $("<div/>", {
+Module.prototype.render = function(){
+	var _this = this
+	this.panel = $("<div/>", {
 		class: "panel",
 		// style: "margin-left:"+(20*(level-1))+"px;",
-		id: "module"+module.metadata.id
+		id: "module"+this.module.metadata.id
 	})
-	var panelHeading = $("<div/>", {
+	this.panelHeading = $("<div/>", {
 		class: "panel-heading"
 	})
-	var a = $("<a/>", {
+	this.a = $("<a/>", {
 		class: "accordion-toggle collapsed panel-heading",
 		'data-toggle': "collapse",
-		href: "#collapse"+module.metadata.id
+		href: "#collapse"+this.module.metadata.id
 	})
-	var panelTitle = $("<span/>", {
+	this.panelTitle = $("<span/>", {
 		class: "",
-		text: module.data
+		text: this.module.data
 	})
-	var collapse = $("<div/>", {
-		id: "collapse"+module.metadata.id,
+	this.collapse = $("<div/>", {
+		id: "collapse"+this.module.metadata.id,
 		class: "panel-collapse collapse"
 	})
-	var panelBody = $("<div/>", {
+	this.panelBody = $("<div/>", {
 		class: "panel-body"
 	})
 	// a.append(panelHeading)
-	a.append(panelTitle)
-	panel.append(a)
-	collapse.append(panelBody)
-	panel.append(collapse)
-	$.getJSON(moduleHelpUrl +"/"+ module.metadata.id, {}, function(moduleHelp){
+	this.a.append(this.panelTitle)
+	this.panel.append(this.a)
+	this.collapse.append(this.panelBody)
+	this.panel.append(this.collapse)
+	
+	_this.renderHelp()
+	
 
-		var helpText = $("<table class='table help-text-table'></table>")
+	this.element.append(this.panel)
+}
+Module.prototype.renderHelp = function(){
+	var _this = this
+
+	$.getJSON(this.url +"/jsonGetModuleHelp/"+ this.module.metadata.id, {}, function(moduleHelp){
+
+		_this.helpTextTable = $("<table class='table help-text-table'></table>")
 		if(moduleHelp.helpText){
 			// helpText.append($("<thead><tr><th>Help Text</th></tr></thead>"))
-			helpText.append($("<tr><td><div class='help-text'></div></td></tr>"))
-			helpText.find(".help-text").append($(moduleHelp.helpText))
+			_this.helpTextTable.append($("<tr><td><div class='help-text'></div></td></tr>"))
+			_this.helpTextTable.find(".help-text").html(moduleHelp.helpText)
 		} else {
-			helpText.append($("<thead><tr><th>No Help Text</th></tr></thead>"))
+			_this.helpTextTable.append($("<thead><tr><th><div class='no-help-text'>No Help Text</div></th></tr></thead>"))
 		}
-		panelBody.append(helpText)
+		_this.panelBody.append(_this.helpTextTable)
 
-		var inputs = $("<table class='table input-table'></table>")
+		_this.inputs = $("<table class='table input-table'></table>")
 		if(moduleHelp.inputNames && moduleHelp.inputNames.length){
-			inputs.append($("<thead><tr><th>Inputs</th><th>Name</th><th>Description</th></tr></thead>"))
+			_this.inputs.append($("<thead><tr><th>Inputs</th><th>Name</th><th>Description</th></tr></thead>"))
 			var tbody = $("<tbody></tbody>")
 			$.each(moduleHelp.inputNames, function(i, inputName){
-				inputs.append($("<tr><td></td><td>"+inputName+"</td><td>"+moduleHelp.inputs[inputName]+"</td></tr>"))
+				_this.inputs.append($("<tr><td></td><td class='name'>"+inputName+"</td><td class='value input-description'><span>"+moduleHelp.inputs[inputName]+"</span></td></tr>"))
 			})
 		} else {
-			inputs.append($("<thead><tr><th>No Inputs</th></tr></thead>"))
+			_this.inputs.append($("<thead><tr><th>No Inputs</th></tr></thead>"))
 		}
-		panelBody.append(inputs)
+		_this.panelBody.append(_this.inputs)
 
-		var outputs = $("<table class='table output-table'></table>")
+		_this.outputs = $("<table class='table output-table'></table>")
 		if(moduleHelp.outputNames && moduleHelp.outputNames.length){
-			outputs.append($("<thead><tr><th>Outputs</th><th>Name</th><th>Description</th></tr></thead>"))
+			_this.outputs.append($("<thead><tr><th>Outputs</th><th>Name</th><th>Description</th></tr></thead>"))
 			$.each(moduleHelp.outputNames, function(i, outputName){
-				outputs.append($("<tr><td></td><td>"+outputName+"</td><td>"+moduleHelp.outputs[outputName]+"</td></tr>"))
+				_this.outputs.append($("<tr><td></td><td class='name'>"+outputName+"</td><td class='value output-description'><span>"+moduleHelp.outputs[outputName]+"</span></td></tr>"))
 			})
 		} else {
-			outputs.append($("<thead><tr><th>No Outputs</th></tr></thead>"))
+			_this.outputs.append($("<thead><tr><th>No Outputs</th></tr></thead>"))
 		}
-		panelBody.append(outputs)
+		_this.panelBody.append(_this.outputs)
 
-		var params = $("<table class='table param-table'></table>")
+		_this.params = $("<table class='table param-table'></table>")
 		if(moduleHelp.paramNames && moduleHelp.paramNames.length){
-			params.append($("<thead><tr><th>Parameters</th><th>Name</th><th>Description</th></tr></thead>"))
+			_this.params.append($("<thead><tr><th>Parameters</th><th>Name</th><th>Description</th></tr></thead>"))
 			var tbody = $("<tbody></tbody>")
 			$.each(moduleHelp.paramNames, function(i, paramName){
-				params.append($("<tr><td></td><td>"+paramName+"</td><td>"+moduleHelp.params[paramName]+"</td></tr>"))
+				_this.params.append($("<tr><td></td><td class='name'>"+paramName+"</td><td class='value param-description'><span>"+moduleHelp.params[paramName]+"</span></td></tr>"))
 			})
 		} else {
-			params.append($("<thead><tr><th>No Outputs</th></tr></thead>"))
+			_this.params.append($("<thead><tr><th>No Params</th></tr></thead>"))
 		}
-		panelBody.append(params)
+		_this.panelBody.append(_this.params)
+		$.getJSON(_this.url +"/canEdit/"+ _this.module.metadata.id, {}, function(canEdit){
+			if(canEdit.success){
+				_this.editBtn = $("<button/>", {
+					class: "btn btn-default btn-sm edit-btn",
+					text: "Edit help"
+				})
+				_this.editBtn.click(function(){
+					$(this).hide()
+					_this.saveBtn.show()
+					_this.edit()
+				})
+				_this.editBtn.insertBefore(_this.helpTextTable)
+				_this.saveBtn = $("<button/>", {
+					class: "btn btn-primary btn-sm save-btn",
+					text: "Save edits"
+				})
+				_this.saveBtn.click(function(){
+					$(this).hide()
+					_this.editBtn.show()
+					_this.save()
+				})
+				_this.saveBtn.insertBefore(_this.helpTextTable)
+				_this.saveBtn.hide()
+			}
+		})
 	})
-	element.append(panel)
+	
+}
+Module.prototype.edit = function() {
+	$.each(this.panelBody.find(".value"), function(i, el){
+		$(el).append($("<input/>", {
+			type: "text",
+			value: $(el).html(),
+			width: "100%"
+		}))
+		$(el).find("span").hide()
+	})
+	if(this.helpTextTable.find(".no-help-text").length){
+		this.helpTextTable.find(".no-help-text").remove()
+		this.helpTextTable.append($("<tbody><tr><td><div class='help-text'>No help text</div></td></tr></tbody>"))
+	}
+	this.helpTextTable.find(".help-text").parent().append($("<textarea class='module-help' style='width:100%; height:300px; resize:vertical;'>"+this.helpTextTable.find(".help-text").html()+"</textarea>"))
+	this.helpTextTable.find(".help-text").hide()
+}
+Module.prototype.save = function(){
+	var _this = this
+	var moduleHelp = this.makeHelp()
+
+	this.panelBody.empty()
+	this.renderHelp()
+
+	console.log(moduleHelp)
 }
 
-var isModule = function(module){
-	return !module.children
+Module.prototype.makeHelp = function() {
+	var paramTable = this.panelBody.find(".param-table"),
+		inputTable = this.panelBody.find(".input-table"),
+		outputTable = this.panelBody.find(".output-table"),
+		result = {params:{}, paramNames:[], inputs:{}, inputNames:[], outputs:{}, outputNames:[]}
+	
+	result.helpText = this.panelBody.find("textarea.module-help").val()
+	paramTable.find("tbody tr").each(function(i,row) {
+		var name = $(row).find("td.name").text()
+		var value = $(row).find("td.value input").val()
+		if (value!=null && value!="") {
+			result.paramNames.push(name)
+			result.params[name] = value
+		}
+	})
+	inputTable.find("tbody tr").each(function(i,row) {
+		var name = $(row).find("td.name").text()
+		var value = $(row).find("td.value input").val()
+		if (value!=null && value!="") {
+			result.inputNames.push(name)
+			result.inputs[name] = value
+		}
+	})
+	outputTable.find("tbody tr").each(function(i,row) {
+		var name = $(row).find("td.name").text()
+		var value = $(row).find("td.value input").val()
+		if (value!=null && value!="") {
+			result.outputNames.push(name)
+			result.outputs[name] = value
+		}
+	})
+	return result;
 }
+

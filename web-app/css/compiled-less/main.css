@@ -16582,6 +16582,12 @@ body.module-list #module-help-tree .panel .panel-body table tr th:nth-child(1),
 body.module-list #module-help-tree .panel .panel-body table tr th:nth-child(2) {
   width: 20%;
 }
+body.module-list #module-help-tree .panel .panel-body .edit-btn,
+body.module-list #module-help-tree .panel .panel-body .save-btn {
+  margin-top: -10px;
+  margin-bottom: 10px;
+  float: right;
+}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;
@@ -16713,9 +16719,6 @@ body.module-list #module-help-tree .panel .panel-body table tr th:nth-child(2) {
 }
 .streamr-sidebar ul.nav li.active > ul.nav {
   display: block;
-}
-.scrollspy-wrapper {
-  padding-bottom: 600px;
 }
 body.dashboard-show {
   height: 100%;
