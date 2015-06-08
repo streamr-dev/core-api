@@ -123,10 +123,20 @@ Module.prototype.render = function(){
 
 	this.element.append(this.panel)
 }
-Module.prototype.renderHelp = function(){
+Module.prototype.renderHelp = function(msg){
 	var _this = this
 
 	$.getJSON(this.url +"/jsonGetModuleHelp/"+ this.module.metadata.id, {}, function(moduleHelp){
+		_this.topContainer = $("<div/>", {
+			class: 'col-xs-12 top-container'
+		})
+		_this.panelBody.append(_this.topContainer)
+		if(msg){
+			_this.topContainer.append($("<span/>", {
+				class: 'flash-message',
+				html: msg
+			}))
+		}
 
 		_this.helpTextTable = $("<table class='table help-text-table'></table>")
 		if(moduleHelp.helpText){
@@ -146,7 +156,7 @@ Module.prototype.renderHelp = function(){
 				_this.inputs.append($("<tr><td></td><td class='name'>"+inputName+"</td><td class='value input-description'><span>"+moduleHelp.inputs[inputName]+"</span></td></tr>"))
 			})
 		} else {
-			_this.inputs.append($("<thead><tr><th>No Inputs</th></tr></thead>"))
+			_this.inputs.append($("<thead><tr><th>No Input Helps</th></tr></thead>"))
 		}
 		_this.panelBody.append(_this.inputs)
 
@@ -157,7 +167,7 @@ Module.prototype.renderHelp = function(){
 				_this.outputs.append($("<tr><td></td><td class='name'>"+outputName+"</td><td class='value output-description'><span>"+moduleHelp.outputs[outputName]+"</span></td></tr>"))
 			})
 		} else {
-			_this.outputs.append($("<thead><tr><th>No Outputs</th></tr></thead>"))
+			_this.outputs.append($("<thead><tr><th>No Output Helps</th></tr></thead>"))
 		}
 		_this.panelBody.append(_this.outputs)
 
@@ -169,9 +179,10 @@ Module.prototype.renderHelp = function(){
 				_this.params.append($("<tr><td></td><td class='name'>"+paramName+"</td><td class='value param-description'><span>"+moduleHelp.params[paramName]+"</span></td></tr>"))
 			})
 		} else {
-			_this.params.append($("<thead><tr><th>No Params</th></tr></thead>"))
+			_this.params.append($("<thead><tr><th>No Parameter Helps</th></tr></thead>"))
 		}
 		_this.panelBody.append(_this.params)
+
 		$.getJSON(_this.url +"/canEdit/"+ _this.module.metadata.id, {}, function(canEdit){
 			if(canEdit.success){
 				_this.editBtn = $("<button/>", {
@@ -183,7 +194,7 @@ Module.prototype.renderHelp = function(){
 					_this.saveBtn.show()
 					_this.edit()
 				})
-				_this.editBtn.insertBefore(_this.helpTextTable)
+				_this.panelBody.find(".top-container").append(_this.editBtn)
 				_this.saveBtn = $("<button/>", {
 					class: "btn btn-primary btn-sm save-btn",
 					text: "Save edits"
@@ -193,7 +204,7 @@ Module.prototype.renderHelp = function(){
 					_this.editBtn.show()
 					_this.save()
 				})
-				_this.saveBtn.insertBefore(_this.helpTextTable)
+				_this.panelBody.find(".top-container").append(_this.saveBtn)
 				_this.saveBtn.hide()
 			}
 		})
@@ -220,10 +231,20 @@ Module.prototype.save = function(){
 	var _this = this
 	var moduleHelp = this.makeHelp()
 
-	this.panelBody.empty()
-	this.renderHelp()
-
-	console.log(moduleHelp)
+	$.ajax({
+	    type: 'POST',
+	    url: _this.url +"/jsonSetModuleHelp/",
+	    dataType: 'json',
+	    success: function(data) {
+	    	_this.panelBody.empty()
+	    	var msg = (data.success ? "Module help successfully saved." : "An error has occurred.")
+			_this.renderHelp(msg)
+	    },
+	    error: function(jqXHR, textStatus, errorThrown) {
+	    	_this.panelBody.find(".flash-message").append("An error has occurred.")
+	    },
+	    data: {id:_this.module.metadata.id, jsonHelp:JSON.stringify(moduleHelp)}
+	})
 }
 
 Module.prototype.makeHelp = function() {
