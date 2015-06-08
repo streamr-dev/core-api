@@ -103,7 +103,7 @@ public class UiTagLib {
 	 * @attr class Classes added to the panel
 	 */
 	def scrollSpyPanel = {attrs, body->
-		out << "<div id='${ attrs.title.replaceAll(' ', '').toLowerCase() }' class='panel ${attrs.class ?: ''}'>"
+		out << "<div id='${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase()  + '-panel'}' class='panel ${attrs.class ?: ''}'>"
 		out << "<div class='panel-heading'>"
 		out << "<span class='panel-title'>${attrs.title}</span>"
 		out << "</div>"
@@ -111,6 +111,14 @@ public class UiTagLib {
 		out << body()
 		out << "</div>" // end panel body
 		out << "</div>" // end panel
+	}
+	
+	/**
+	 * Renders a first-level category to a list with scrollspy. Generates the id automatically
+	 * @attr title REQUIRED title of the category
+	 */
+	def scrollspyCategory = {attrs, body ->
+		out << "<h3 id='${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase() + '-category'}'>${ attrs.title }</h3>"
 	}
 	
 	/**
@@ -238,20 +246,33 @@ public class UiTagLib {
 	}
 	
 	/**
-	 * Renders a bootstrap style sidebar which can be used e.g. with scrollspy. Can't be used with sub classes
+	 * Renders a bootstrap style sidebar which can be used e.g. with scrollspy. Consists of sidebarElements
 	 *
-	 * @attr title REQUIRED titles to be rendered
 	 */
-	def sidebarNav = {attrs ->
+	def sidebarNav = {attrs, body ->
 		out << "<nav class='streamr-sidebar'>"
 		out << "<ul class='nav'>"
-		attrs.titles.each {title ->
-			out << "<li>"
-			out << "<a href='#${ title.replaceAll(' ', '').toLowerCase() }'>${ title }</a>"
-			out << "</li>"
-		}
+		out << body()
 		out << "</ul>"
 		out << "</nav>"
+	}
+	
+	/**
+	 * An element to the sidebarNav
+	 *
+	 * @attr title the title of the domain object
+	 */
+	def sidebarElement = {attrs, body ->
+		out << "<li>"
+		if(body) {
+			out << "<a href='#${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase() + '-category'}'>${ attrs.title }</a>"
+			out << "<ul class='nav'>"
+			out << body()
+			out << "</ul>"
+		} else {
+			out << "<a href='#${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase() + '-panel'}'>${ attrs.title }</a>"
+		}
+		out << "</li>"
 	}
 
 }
