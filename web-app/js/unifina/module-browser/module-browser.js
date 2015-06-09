@@ -4,21 +4,23 @@ function ModuleBrowser(options){
 	this.url = options.url
 	this.sidebarEl = options.sidebarEl
 	this.moduleTreeEl = options.moduleTreeEl
+	this.searchBoxEl = options.searchBoxEl
 
 	this.level = 0
 	
 	$.getJSON(this.url +"/jsonGetModuleTree/", function(moduleTree){
-		new Sidebar(_this.sidebarEl, moduleTree)
+		var sidebar = new Sidebar(_this.sidebarEl, moduleTree)
 		_this.renderModules(_this.moduleTreeEl, moduleTree)
+		_this.offset = 80
+		sidebar.initSearch(_this.searchBoxEl, _this.offset)
 
-		var offset = 80
 		$('body').scrollspy({
-			offset: offset
+			offset: _this.offset
 		})
 		$('#sidebar li a').click(function(event) {
 			event.preventDefault()
 		    $($(this).attr('href'))[0].scrollIntoView()
-		    scrollBy(0, -(offset-30))
+		    scrollBy(0, -(_this.offset-30))
 	        this.blur()
 		});
 	})
@@ -44,7 +46,64 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 	})
 }
 function Sidebar(el, moduleTree){
+	this.modules = {}
 	this.renderSidebar(el, moduleTree)
+}
+// The searchbox now searches from the modules and categorys by the input and 
+// scrolls to the next search result. If a search with a space is typed, it first looks that is
+// there any results by the whole search (e.g. 'time series' > 'Time Series') and then by the last word
+// (e.g. 'time statistics corr' > 'Correlation')
+Sidebar.prototype.initSearch = function(searchBoxEl, offset){
+	var _this = this
+	this.offset = offset
+	this.searchBox = $(searchBoxEl)
+	var moduleNames = Object.keys(this.modules)
+
+	var scroll = function(href){
+		var module = $(href)
+		if(module.length){
+			module[0].scrollIntoView()
+			window.scrollBy(0, -(_this.offset-30))
+		}			
+	}
+
+	var lastSearch = null
+	var index = 0
+	var search = function(text){
+		if(lastSearch == text)
+			index++
+		else {
+			index = 0
+			lastSearch = text
+		}
+		if(text == "")
+			return null
+		else {
+			var names = _.filter(moduleNames, function(str){
+				return str.lastIndexOf(text, 0) === 0
+			})
+			if(names.length < index+1){
+				index = 0
+				return _this.modules[names[0]]
+			}
+			else 
+				return _this.modules[names[index]]
+		}
+	}
+
+	this.searchBox.on("keyup", function(e){
+		var s = _this.searchBox.val().toLowerCase()
+		if(s){
+			var href = search(s)
+			if(href === undefined){
+				var words = s.split(" ")
+				href = search(words[words.length-1])
+			}
+			scroll(href)
+		} else {
+			$("body").scrollTop(0)
+		}
+	})
 }
 Sidebar.prototype.renderChildren = function(ul, list){
 	var _this = this
@@ -61,9 +120,11 @@ Sidebar.prototype.renderChildren = function(ul, list){
 				class: "nav"
 			})
 			li.append(innerUl)
+			_this.modules[module.data.toLowerCase()] = "#category"+module.metadata.id
 			_this.renderChildren(innerUl, module.children)
 		} else {
 			a.attr("href", "#module"+module.metadata.id)
+			_this.modules[module.data.toLowerCase()] = "#module"+module.metadata.id
 		}
 	})
 }   			

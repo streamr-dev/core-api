@@ -168,7 +168,7 @@ modules = {
 		resource url:[dir:'js/unifina/clickable-table', file:'clickable-table.js', plugin:'unifina-core']
 	}
 	'module-browser' {
-		dependsOn 'bootstrap'
+		dependsOn 'bootstrap, underscore'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	toolbar {
