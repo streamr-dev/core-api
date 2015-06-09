@@ -20,7 +20,9 @@
     	
     	<div class="row">
     		<div class="col-sm-12 col-md-8 col-md-offset-2">
-                <input id="moduleSearch" type="search" class="form-control input-sm"placeholder="Search..." style="position:fixed;right:30px;top:60px;height:35px;width:200px;"/>
+                <div class="hidden-sm hidden-xs moduleSearch">
+                    <input id="moduleSearch" type="text" class="form-control input-md" placeholder="Search..." />
+                </div>
 		        <div class="col-md-9" id="module-help-tree">
 		     		<h1 class="title">All modules by category</h1>
 		        </div>

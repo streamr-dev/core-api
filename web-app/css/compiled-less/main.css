@@ -16588,6 +16588,13 @@ body.module-list #module-help-tree .panel .panel-body .save-btn {
   margin-bottom: 10px;
   float: right;
 }
+body.module-list .moduleSearch {
+  position: fixed;
+  right: 30px;
+  top: 60px;
+  height: 35px;
+  width: 200px;
+}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;
