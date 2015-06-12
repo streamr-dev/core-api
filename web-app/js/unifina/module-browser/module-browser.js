@@ -14,7 +14,8 @@ function ModuleBrowser(options){
 		var sidebar = new Sidebar(_this.sidebarEl, moduleTree)
 		_this.renderModules(_this.moduleTreeEl, moduleTree)
 		_this.offset = 80
-		sidebar.initSearch(_this.searchBoxEl, _this.offset)
+		
+		new Search(_this.searchBoxEl, _this.offset, sidebar.modules)
 
 		$('body').scrollspy({
 			offset: _this.offset
@@ -57,65 +58,92 @@ function Sidebar(el, moduleTree){
 // scrolls to the next search result. If a search with a space is typed, it first looks that is
 // there any results by the whole search (e.g. 'time series' > 'Time Series') and then by the last word
 // (e.g. 'time statistics corr' > 'Correlation')
-Sidebar.prototype.initSearch = function(searchBoxEl, offset){
+function Search(searchBoxEl, offset, modules){
 	var _this = this
 	this.offset = offset
 	this.searchBox = $(searchBoxEl)
-	var moduleNames = Object.keys(this.modules)
+	this.modules = modules
+	this.moduleNames = Object.keys(this.modules)
 	this.msgField = $(".search-message")
 
-	var scroll = function(href){
-		var module = $(href)
-		if(module.length){
-			module[0].scrollIntoView()
-			window.scrollBy(0, -(_this.offset-30))
-		}
-	}
-
-	var lastSearch = null
-	var index = 0
-	var search = function(text){
-		if(lastSearch == text)
-			index++
-		else {
-			index = 0
-			lastSearch = text
-		}
-		if(text == "")
-			return null
-		else {
-			var names = _.filter(moduleNames, function(str){
-				return str.lastIndexOf(text, 0) === 0
-			})
-			if(names.length < index+1){
-				index = 0
-				return _this.modules[names[0]]
-			}
-			else 
-				return _this.modules[names[index]]
-		}
-	}
+	this.lastHref = undefined
+	this.lastSearch = undefined
+	this.index = 0
 
 	this.searchBox.on("keyup", function(e){
 		var s = _this.searchBox.val().toLowerCase()
 		if(s){
-			var href = search(s)
+			var href = _this.search(s)
 			if(href === undefined){
 				var words = s.split(" ")
-				href = search(words[words.length-1])
+				href = _this.search(words[words.length-1])
 			}
 			if(href === undefined){
 				_this.msgField.html("No search results")
 			} else {
 				_this.msgField.empty()
 			}
-			scroll(href)
+			_this.action(href)
 		} else {
+			_this.action(undefined)
 			$("body").scrollTop(0)
 			_this.msgField.empty()
 		}
 	})
 }
+Search.prototype.action = function(href){
+	var _this = this
+
+	var open = function(panel){
+		if($(panel).find(".panel-heading").hasClass("collapsed")){
+			// With clicking the panel heading there's animation, which looks nice
+			$(panel).find(".panel-heading").click()
+		}
+	}
+	var close = function(panel){
+		if(!$(panel).find(".panel-heading").hasClass("collapsed")){
+			// By changing only the classes there's no animation when closing the module, which would mess up the scrolling
+			$(panel).find(".panel-heading").addClass("collapsed")
+			$(panel).find(".panel-collapse").removeClass("in")
+		}
+	}
+	var module = $(href)
+	var lastModule = $(this.lastHref)
+	if(module.length){
+		if(lastModule.length || (this.lastHref && href != this.lastHref))
+			close(lastModule)
+		module[0].scrollIntoView()
+		window.scrollBy(0, -(_this.offset-30))
+		open(module)
+		this.lastHref = href
+	} else if(!module.length && lastModule.length){
+		close(lastModule)
+	}
+}
+
+Search.prototype.search = function(text){
+	var _this = this
+	if(this.lastSearch == text)
+		index++
+	else {
+		index = 0
+		this.lastSearch = text
+	}
+	if(text == "")
+		return null
+	else {
+		var names = _.filter(this.moduleNames, function(str){
+			return str.lastIndexOf(text, 0) === 0
+		})
+		if(names.length < index+1){
+			index = 0
+			return _this.modules[names[0]]
+		}
+		else 
+			return _this.modules[names[index]]
+	}
+}
+
 Sidebar.prototype.renderChildren = function(ul, list){
 	var _this = this
 	$.each(list, function(i, module){

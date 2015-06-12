@@ -16600,12 +16600,12 @@ body.module-list .moduleSearch {
 body.module-list .moduleSearch input {
   margin-top: 20px;
   margin-left: 20px;
-  padding-bottom: 7px;
+  padding-bottom: 8px;
   height: 35px;
   width: 200px;
 }
 body.module-list .moduleSearch .search-message {
-  padding-left: 5px;
+  padding-left: 25px;
 }
 body.module-list div.breadcrumb {
   z_index: 2;
