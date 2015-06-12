@@ -1,14 +1,16 @@
+(function(exports) {
+
 function ModuleBrowser(options){
 	var _this = this
 
 	this.url = options.url
-	this.sidebarEl = options.sidebarEl
-	this.moduleTreeEl = options.moduleTreeEl
-	this.searchBoxEl = options.searchBoxEl
+	this.sidebarEl = $(options.sidebarEl)
+	this.moduleTreeEl = $(options.moduleTreeEl)
+	this.searchBoxEl = $(options.searchBoxEl)
 
 	this.level = 0
 	
-	$.getJSON(this.url +"/jsonGetModuleTree/", function(moduleTree){
+	$.getJSON(this.url +"/jsonGetModuleTree/", {}, function(moduleTree){
 		var sidebar = new Sidebar(_this.sidebarEl, moduleTree)
 		_this.renderModules(_this.moduleTreeEl, moduleTree)
 		_this.offset = 80
@@ -30,14 +32,16 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 	
 	$.each(list, function(i, module){
 		if(!module.children){
-    		new Module(_this.url, element, module)
+    		new Module(_this.url, element, module, _this.level)
 		} else {
 			_this.level++
+			if(_this.level == 1)
+				var h = "h3"
+			else
+				var h = "h4"
 			// var title = $("<h"+(level+1)+" id='"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h"+(level+1)+">")
-			var title = $("<h3 id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*20)+"px;'>"+module.data+"</h3>")
+			var title = $("<"+h+" id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*20)+"px;'>"+module.data+"</"+h+">")
 			element.append(title)
-			if(_this.level == 0)
-				max = module.children.length
 			_this.renderModules(element, module.children)
 		}
 		if(i == list.length-1) {
@@ -58,13 +62,14 @@ Sidebar.prototype.initSearch = function(searchBoxEl, offset){
 	this.offset = offset
 	this.searchBox = $(searchBoxEl)
 	var moduleNames = Object.keys(this.modules)
+	this.msgField = $(".search-message")
 
 	var scroll = function(href){
 		var module = $(href)
 		if(module.length){
 			module[0].scrollIntoView()
 			window.scrollBy(0, -(_this.offset-30))
-		}			
+		}
 	}
 
 	var lastSearch = null
@@ -99,9 +104,15 @@ Sidebar.prototype.initSearch = function(searchBoxEl, offset){
 				var words = s.split(" ")
 				href = search(words[words.length-1])
 			}
+			if(href === undefined){
+				_this.msgField.html("No search results")
+			} else {
+				_this.msgField.empty()
+			}
 			scroll(href)
 		} else {
 			$("body").scrollTop(0)
+			_this.msgField.empty()
 		}
 	})
 }
@@ -141,7 +152,8 @@ Sidebar.prototype.renderSidebar = function(el, json){
 	nav.append(ul)
 	this.renderChildren(ul, json)
 }
-function Module(url, element, module){
+function Module(url, element, module, level){
+	this.level = level
 	this.element = element
 	this.module = module
 	this.url = url
@@ -151,7 +163,7 @@ Module.prototype.render = function(){
 	var _this = this
 	this.panel = $("<div/>", {
 		class: "panel",
-		// style: "margin-left:"+(20*(level-1))+"px;",
+		style: "margin-left:"+(20*(_this.level-1))+"px;",
 		id: "module"+this.module.metadata.id
 	})
 	this.panelHeading = $("<div/>", {
@@ -342,3 +354,6 @@ Module.prototype.makeHelp = function() {
 	return result;
 }
 
+exports.ModuleBrowser = ModuleBrowser
+
+})(typeof(exports) !== 'undefined' ? exports : window)
