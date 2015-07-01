@@ -41,7 +41,7 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 			else
 				var h = "h4"
 			// var title = $("<h"+(level+1)+" id='"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h"+(level+1)+">")
-			var title = $("<"+h+" id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*20)+"px;'>"+module.data+"</"+h+">")
+			var title = $("<"+h+" id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*30)+"px;'>"+module.data+"</"+h+">")
 			element.append(title)
 			_this.renderModules(element, module.children)
 		}
@@ -71,28 +71,53 @@ function Search(searchBoxEl, offset, modules){
 	this.index = 0
 
 	this.searchBox.on("keyup", function(e){
-		var s = _this.searchBox.val().toLowerCase()
-		if(s){
-			var href = _this.search(s)
-			if(href === undefined){
-				var words = s.split(" ")
-				href = _this.search(words[words.length-1])
-			}
-			if(href === undefined){
-				_this.msgField.html("No search results")
-			} else {
-				_this.msgField.empty()
-			}
-			_this.action(href)
-		} else {
-			_this.action(undefined)
-			$("body").scrollTop(0)
-			_this.msgField.empty()
-		}
+		var search = _this.searchBox.val().toLowerCase()
+		
+		var href = _this.search(search)
+		
+		_this.action(href)
 	})
 }
+
+Search.prototype.search = function(text){
+	var _this = this
+	if(this.lastSearch == text)
+		index++
+	else {
+		index = 0
+		this.lastSearch = text
+	}
+	if(text == "")
+		return ""
+	else {
+		var names = _.filter(this.moduleNames, function(str){
+			return str.lastIndexOf(text, 0) === 0
+		})
+		if(!names.length){
+			var words = text.split(" ")
+			text = words[words.length-1]
+			names = _.filter(this.moduleNames, function(str){
+				return str.lastIndexOf(text, 0) === 0
+			})
+		}
+		if(names.length < index+1){
+			index = 0
+			if(_this.modules[names[0]])
+				return _this.modules[names[0]]
+			else
+				return text
+		}
+		else
+			if(_this.modules[names[index]])
+				return _this.modules[names[index]]
+			else
+				return text
+	}
+}
+
 Search.prototype.action = function(href){
 	var _this = this
+	var timeout
 
 	var open = function(panel){
 		if($(panel).find(".panel-heading").hasClass("collapsed")){
@@ -109,38 +134,28 @@ Search.prototype.action = function(href){
 	}
 	var module = $(href)
 	var lastModule = $(this.lastHref)
-	if(module.length){
-		if(lastModule.length || (this.lastHref && href != this.lastHref))
+	if(href === ""){
+		$("body").scrollTop(0)
+		_this.msgField.empty()
+		if(lastModule)
 			close(lastModule)
+	}
+	if(module.length){
+		if(lastModule.length && (this.lastHref && href != this.lastHref)){
+			if(timeout){
+				clearTimeout(timeout)
+			}
+			close(lastModule)
+		}
 		module[0].scrollIntoView()
 		window.scrollBy(0, -(_this.offset-30))
-		open(module)
-		this.lastHref = href
-	} else if(!module.length && lastModule.length){
-		close(lastModule)
-	}
-}
 
-Search.prototype.search = function(text){
-	var _this = this
-	if(this.lastSearch == text)
-		index++
-	else {
-		index = 0
-		this.lastSearch = text
-	}
-	if(text == "")
-		return null
-	else {
-		var names = _.filter(this.moduleNames, function(str){
-			return str.lastIndexOf(text, 0) === 0
-		})
-		if(names.length < index+1){
-			index = 0
-			return _this.modules[names[0]]
-		}
-		else 
-			return _this.modules[names[index]]
+		if(timeout)
+			clearTimeout(timeout)
+		timeout = setTimeout(function(){
+			open(module)
+		},200)
+		this.lastHref = href
 	}
 }
 
@@ -191,7 +206,7 @@ Module.prototype.render = function(){
 	var _this = this
 	this.panel = $("<div/>", {
 		class: "panel",
-		style: "margin-left:"+(20*(_this.level-1))+"px;",
+		style: "margin-left:"+(30*(_this.level-1))+"px;",
 		id: "module"+this.module.metadata.id
 	})
 	this.panelHeading = $("<div/>", {
@@ -226,6 +241,7 @@ Module.prototype.render = function(){
 }
 Module.prototype.renderHelp = function(msg){
 	var _this = this
+	this.moduleData
 
 	$.getJSON(this.url +"/jsonGetModuleHelp/"+ this.module.metadata.id, {}, function(moduleHelp){
 		_this.topContainer = $("<div/>", {
