@@ -16588,24 +16588,13 @@ body.module-list #module-help-tree .panel .panel-body .save-btn {
   margin-bottom: 10px;
   float: right;
 }
-body.module-list .moduleSearch {
-  position: fixed;
-  right: 60px;
-  top: 37px;
-  height: 50px;
-  width: 240px;
-  z-index: 3;
-  background-color: #f6f6f6;
-}
-body.module-list .moduleSearch input {
+body.module-list #sidebar {
   margin-top: 20px;
-  margin-left: 20px;
-  padding-bottom: 8px;
-  height: 35px;
-  width: 200px;
 }
-body.module-list .moduleSearch .search-message {
-  padding-left: 25px;
+body.module-list #sidebar .moduleSearch {
+  margin-top: 15px;
+  position: fixed;
+  z-index: 10;
 }
 body.module-list div.breadcrumb {
   z_index: 2;

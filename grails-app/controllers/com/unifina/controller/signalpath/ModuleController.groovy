@@ -102,12 +102,7 @@ class ModuleController {
 		item.data = category.name
 		item.metadata = [canAdd:false, id:category.id]
 		item.children = []
-
-		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
-			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
-			item.children.add(subItem)
-		}
-
+		
 		category.modules.each {Module module->
 			if (allowedPackageIds.contains(module.modulePackage.id) && (module.hide==null || !module.hide)) {
 				def moduleItem = [:]
@@ -116,6 +111,12 @@ class ModuleController {
 				item.children.add(moduleItem)
 			}
 		}
+		
+		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
+			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
+			item.children.add(subItem)
+		}
+
 
 		return item
 	}
