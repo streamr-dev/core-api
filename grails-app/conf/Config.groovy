@@ -1,5 +1,7 @@
 // configuration for plugin testing - will not be included in the plugin zip
 
+// Most of the config comes from UnifinaCoreDefaultConfig.groovy
+
 log4j = {
     // Example of changing the log pattern for the default console
     // appender:
@@ -23,40 +25,11 @@ log4j = {
     warn   'org.mortbay.log'
 }
 
-// Remember to add this to your app Config.groovy to enable API actions
-cors.url.pattern = '/api/*'
 
-// Example config for Kafka
-unifina.kafka.metadata.broker.list = "192.168.10.21:9092"
-unifina.kafka.zookeeper.connect = "192.168.10.21:2181"
-unifina.kafka.producer.type = "async"
-unifina.kafka.queue.buffering.max.ms = "100"
-unifina.kafka.retry.backoff.ms = "500"
-unifina.kafka.serializer.class = "kafka.serializer.StringEncoder"
-unifina.kafka.request.required.acks = "0"
-unifina.kafka.group.id = "streamr"
-
-unifina.feed.fileStorageAdapter = "com.unifina.feed.file.HTTPFileStorageAdapter"
-// Uncomment and edit the following lines to start using Grails encoding & escaping improvements
-
-/* remove this line 
-// GSP settings
-grails {
-    views {
-        gsp {
-            encoding = 'UTF-8'
-            htmlcodec = 'xml' // use xml escaping instead of HTML4 escaping
-            codecs {
-                expression = 'html' // escapes values inside null
-                scriptlet = 'none' // escapes output from scriptlets in GSPs
-                taglib = 'none' // escapes output from taglibs
-                staticparts = 'none' // escapes output from static template parts
-            }
-        }
-        // escapes all not-encoded output at final stage of outputting
-        filteringCodecForContentType {
-            //'text/html' = 'html'
-        }
-    }
-}
-remove this line */
+/**
+ * com.unifina.feed.file.S3FileStorageAdapter config
+ */
+// The following are used with S3FileStorageAdapter
+unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
+unifina.feed.s3FileStorageAdapter.secretKey = "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"
+unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"

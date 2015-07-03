@@ -1,5 +1,9 @@
+import grails.util.Environment
+
 import java.security.Policy
 import java.security.Security
+
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
@@ -111,9 +115,21 @@ class UnifinaCoreGrailsPlugin {
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+		// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
+		mergeConfig(application)
     }
 
+	private void mergeConfig(app) {
+		ConfigObject currentConfig = app.config
+		ConfigSlurper slurper = new ConfigSlurper(Environment.getCurrent().getName());
+		ConfigObject secondaryConfig = slurper.parse(app.classLoader.loadClass("UnifinaCoreDefaultConfig"))
+		
+		ConfigObject config = new ConfigObject();
+		config.putAll(secondaryConfig.merge(currentConfig))
+		
+		app.config = config;
+	}
+	
     def doWithDynamicMethods = { ctx ->
         // TODO Implement registering dynamic methods to classes (optional)
     }

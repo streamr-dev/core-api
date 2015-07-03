@@ -6,3 +6,6 @@
 	path = web-app/js/unifina/streamr-socketio-client
 	url = git@github.com:Unifina/streamr-client.git
 	branch = master
+[submodule "test/functional/core"]
+	path = test/functional/core
+	url = git@github.com:Unifina/core-functest-common.git
