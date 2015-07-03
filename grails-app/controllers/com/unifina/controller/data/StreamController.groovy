@@ -12,6 +12,7 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
+import com.unifina.service.FeedFileService;
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.CSVImporter.Schema
@@ -267,11 +268,14 @@ class StreamController {
 			flash.error = "No selected feed files!"
 			redirect(action:"show", params:[id:params.streamId])
 		} else {
-			def toBeDeleted = params.list("selectedFeedFiles")
-			toBeDeleted.each {feedId ->
-				FeedFile.executeUpdate("delete from FeedFile feed where feed.id = ?", [Long.parseLong(feedId)])
+			def ids = params.list("selectedFeedFiles").collect {Long.parseLong(it)}
+			def feedFiles = FeedFile.findAllByIdInList(ids)
+			feedFiles.each {
+				feedFileService.deleteFile(it)
 			}
-			flash.message = "Data deleted"
+			FeedFile.executeUpdate("delete from FeedFile ff where ff.id in (:ids)", [ids:ids])
+			
+			flash.message = "Data deleted!"
 			redirect(action:"show", params:[id:params.streamId])
 		}
 	}

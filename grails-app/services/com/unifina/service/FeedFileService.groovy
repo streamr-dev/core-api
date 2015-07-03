@@ -339,6 +339,13 @@ class FeedFileService {
 		getFileStorageAdapter().store(f, canonicalName)
 	}
 	
+	public void deleteFile(FeedFile feedFile) {
+		feedFile = FeedFile.get(feedFile.id)
+		String canonicalName = getCanonicalName(feedFile.feed, feedFile.day, feedFile.name)
+		log.debug("Deleting $canonicalName")
+		getFileStorageAdapter().delete(canonicalName)
+	}
+	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,
 			FeedFile feedFile) {
 			
