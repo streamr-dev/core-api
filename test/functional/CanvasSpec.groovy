@@ -97,22 +97,6 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "save in place button should be shown"
 			saveButton.displayed
 	}
-
-	def "running a SignalPath should produce output"() {
-		when: "SignalPath is loaded and run"
-			loadSignalPath 'test-run-canvas'
-			runButton.click()
-		then: "output should be produced"
-			waitFor(30) {
-				$('#run', text: contains('Abort'))
-				$('.modulebody .table td', text: "2014-04-29 17:00:00.000")
-			}
-		then: "Clicking on Abort should return the button to Run"
-			$('#run', text: contains('Abort')).click()
-			waitFor {
-				$('#run', text: 'Run')
-			}
-	}
 	
 	def "begin- and end date datepickers"() {
 		when: "a signalpath is loaded"
@@ -135,6 +119,24 @@ class CanvasSpec extends LoginTester1Spec {
 			$(".datepicker").size() == 0
 		then: "the input field shows the selected value"
 			beginDate.value() == "2015-07-03"
+	}
+
+	def "running a SignalPath should produce output"() {
+		when: "SignalPath is loaded"
+			loadSignalPath 'test-run-canvas'
+		then: "signalpath content must be loaded"
+			moduleShouldAppearOnCanvas('Table')
+			runButton.click()
+		then: "output should be produced"
+			waitFor(30) {
+				$('#run', text: contains('Abort'))
+				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
+			}
+		then: "Clicking on Abort should return the button to Run"
+			$('#run', text: contains('Abort')).click()
+			waitFor {
+				$('#run', text: 'Run')
+			}
 	}
 
 }
