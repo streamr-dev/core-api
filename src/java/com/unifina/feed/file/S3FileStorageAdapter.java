@@ -9,6 +9,7 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
@@ -42,6 +43,12 @@ public class S3FileStorageAdapter extends FileStorageAdapter {
 	protected void tryStore(File file, String location) throws IOException {
 		// Amazon S3 client retries internally, may log Exceptions to log file on each retry
 		s3Client.putObject(new PutObjectRequest(bucketName, location, file));
+	}
+	
+	@Override
+	protected void tryDelete(String location) throws IOException {
+		// Amazon S3 client retries internally, may log Exceptions to log file on each retry
+		s3Client.deleteObject(new DeleteObjectRequest(bucketName, location));
 	}
 
 }

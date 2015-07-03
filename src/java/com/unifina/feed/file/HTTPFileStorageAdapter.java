@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -110,6 +111,28 @@ public class HTTPFileStorageAdapter extends FileStorageAdapter {
 			response = client.execute(post);
 			if (response.getStatusLine().getStatusCode()!=HttpStatus.SC_OK)
 				throw new RuntimeException("Store POST to "+url+" resulted in status code: "+response.getStatusLine().getStatusCode());
+		} catch (Exception e) {
+			throw new IOException(e);
+		} finally {
+			if (response!=null)
+				response.close();
+			if (client!=null)
+				client.close();
+		}
+	}
+	
+	@Override
+	protected void tryDelete(String location) throws IOException {
+		URL url = makeURL(location);
+		
+		CloseableHttpClient client = null;
+		CloseableHttpResponse response = null;
+		try {
+			client = HttpClients.createDefault();
+			HttpDelete delete = new HttpDelete(url.toURI());
+			response = client.execute(delete);
+			if (response.getStatusLine().getStatusCode()!=HttpStatus.SC_OK)
+				throw new RuntimeException("DELETE to "+url+" resulted in status code: "+response.getStatusLine().getStatusCode());
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
