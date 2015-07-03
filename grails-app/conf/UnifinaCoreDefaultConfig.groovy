@@ -48,6 +48,13 @@
 		 grails.resources.processing.excludes = ['**/*.js']
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
+	 test {
+		 grails.resources.mappers.bundle.excludes = ['**/*.*']
+		 grails.resources.mappers.hashandcache.excludes = ['**/*.*']
+		 grails.resources.mappers.zip.excludes = ['**/*.*']
+		 grails.resources.processing.excludes = ['**/*.js']
+		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
+	 }
  }
  
  environments {
