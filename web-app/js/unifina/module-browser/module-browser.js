@@ -3,7 +3,6 @@
 function ModuleBrowser(options){
 	var _this = this
 
-	this.url = options.url
 	this.sidebarEl = $(options.sidebarEl)
 	this.moduleTreeEl = $(options.moduleTreeEl)
 	this.searchBoxEl = $(options.searchBoxEl)
@@ -13,7 +12,7 @@ function ModuleBrowser(options){
 
 	this.categoryName = ""
 	
-	$.getJSON(this.url +"/jsonGetModuleTree/", {}, function(moduleTree){
+	$.getJSON(Streamr.createLink("module", "jsonGetModuleTree")+"?modulesFirst=true", {}, function(moduleTree){
 		var sidebar = new Sidebar(_this.sidebarEl, moduleTree)
 		_this.renderModules(_this.moduleTreeEl, moduleTree)
 		
@@ -40,7 +39,7 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 		} else {
 			_this.level++
 			if(_this.level == 1){
-				var h = "h3"
+				var h = "h2"
 				_this.categoryName = module.data
 			}
 			else {
@@ -48,7 +47,7 @@ ModuleBrowser.prototype.renderModules = function(element,list){
 				_this.categoryName += " > "+ module.data
 			}
 			// var title = $("<h"+(level+1)+" id='"+module.metadata.id+"' style='padding-left:"+((level-1)*20)+"px;'>"+module.data+"</h"+(level+1)+">")
-			var title = $("<"+h+" id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*30)+"px;'>"+_this.categoryName+"</"+h+">")
+			var title = $("<"+h+" id='category"+module.metadata.id+"' style='padding-left:"+((_this.level-1)*20)+"px;'>"+_this.categoryName+"</"+h+">")
 			element.append(title)
 			_this.renderModules(element, module.children)
 		}
@@ -78,7 +77,7 @@ Module.prototype.render = function(){
 	var _this = this
 	this.panel = $("<div/>", {
 		class: "panel",
-		style: "margin-left:"+(30*(_this.level-1))+"px;",
+		style: "margin-left:"+(20*(_this.level-1))+"px;",
 		id: "module"+this.module.metadata.id
 	})
 	this.panelHeading = $("<div/>", {
@@ -125,7 +124,7 @@ Module.prototype.renderHelp = function(msg){
 	this.moduleHelp
 
 	this.hasModuleData = false
-	this.canEdit = false
+	this.hasModuleHelp = false
 
 	this.drawHelp = function(){
 		var moduleHelp = _this.moduleHelp
@@ -173,17 +172,16 @@ Module.prototype.renderHelp = function(msg){
 		
 
 		_this.spinner.remove()
-		_this.topContainer = $("<div/>", {
-			class: 'col-xs-12 top-container'
-		})
-		_this.panelBody.append(_this.topContainer)
-		if(msg){
+		if(msg === undefined){
+			var msg = ""
+		}
+		if(_this.topContainer){
 			_this.topContainer.append($("<span/>", {
 				class: 'flash-message',
 				html: msg
 			}))
 		}
-
+		
 		_this.helpTextTable = $("<table class='table help-text-table'></table>")
 		if(moduleHelp.helpText){
 			// helpText.append($("<thead><tr><th>Help Text</th></tr></thead>"))
@@ -193,6 +191,19 @@ Module.prototype.renderHelp = function(msg){
 			_this.helpTextTable.append($("<thead><tr><th><div class='no-help-text'>No Help Text</div></th></tr></thead>"))
 		}
 		_this.panelBody.append(_this.helpTextTable)
+
+		_this.params = $("<table class='table param-table'></table>")
+		if(paramNames.length){
+			_this.params.append($("<thead><tr><th>Parameters</th><th>Name</th><th>Description</th></tr></thead>"))
+			var tbody = $("<tbody></tbody>")
+			$.each(paramNames, function(i, paramName){
+				var paramHelp = moduleHelp.params[paramName] ? moduleHelp.params[paramName] : ""
+				_this.params.append($("<tr><td></td><td class='name'>"+paramName+"</td><td class='value param-description'><span>"+paramHelp+"</span></td></tr>"))
+			})
+		} else {
+			_this.params.append($("<thead><tr><th>No Parameter Helps</th></tr></thead>"))
+		}
+		_this.panelBody.append(_this.params)
 
 		_this.inputs = $("<table class='table input-table'></table>")
 		if(inputNames.length){
@@ -219,80 +230,65 @@ Module.prototype.renderHelp = function(msg){
 		}
 		_this.panelBody.append(_this.outputs)
 
-		_this.params = $("<table class='table param-table'></table>")
-		if(paramNames.length){
-			_this.params.append($("<thead><tr><th>Parameters</th><th>Name</th><th>Description</th></tr></thead>"))
-			var tbody = $("<tbody></tbody>")
-			$.each(paramNames, function(i, paramName){
-				var paramHelp = moduleHelp.params[paramName] ? moduleHelp.params[paramName] : ""
-				_this.params.append($("<tr><td></td><td class='name'>"+paramName+"</td><td class='value param-description'><span>"+paramHelp+"</span></td></tr>"))
-			})
-		} else {
-			_this.params.append($("<thead><tr><th>No Parameter Helps</th></tr></thead>"))
-		}
-		_this.panelBody.append(_this.params)
-
-		var drawEdit = function(){
-			_this.editBtn = $("<button/>", {
-				class: "btn btn-default btn-sm edit-btn",
-				text: "Edit help"
-			})
-			_this.editBtn.click(function(){
-				$(this).hide()
-				_this.saveBtn.show()
-				_this.edit()
-			})
-			_this.panelBody.find(".top-container").append(_this.editBtn)
-			_this.saveBtn = $("<button/>", {
-				class: "btn btn-primary btn-sm save-btn",
-				text: "Save edits"
-			})
-			_this.saveBtn.click(function(){
-				$(this).hide()
-				_this.editBtn.show()
-				_this.save()
-			})
-			_this.panelBody.find(".top-container").append(_this.saveBtn)
-			_this.saveBtn.hide()
-		}
-
-		if(_this.canEdit == true){
-			drawEdit()
-		} else if(_this.canEdit === undefined) {
-			_this.element.one("canEdit", function(){
-				drawEdit()
-			})
-		}
+		MathJax.Hub.Queue(["Typeset",MathJax.Hub,_this.helpTextTable.find(".help-text")[0]]);
+		MathJax.Hub.Queue(function(){
+			_this.helpTextTable.find(".help-text .math-tex").addClass("math-jax-ready")
+		})
 	}
 
-	$.getJSON(this.url +"/jsonGetModule/"+ this.module.metadata.id, {}, function(module){
+
+	this.drawEdit = function(){
+		_this.topContainer = $("<div/>", {
+			class: 'col-xs-12 top-container'
+		})
+		_this.panelBody.prepend(_this.topContainer)
+		_this.editBtn = $("<button/>", {
+			class: "btn btn-default btn-sm edit-btn",
+			text: "Edit help"
+		})
+		_this.editBtn.click(function(){
+			$(this).hide()
+			_this.saveBtn.show()
+			_this.edit()
+		})
+		_this.panelBody.find(".top-container").append(_this.editBtn)
+		_this.saveBtn = $("<button/>", {
+			class: "btn btn-primary btn-sm save-btn",
+			text: "Save edits"
+		})
+		_this.saveBtn.click(function(){
+			$(this).hide()
+			_this.editBtn.show()
+			_this.save()
+		})
+		_this.panelBody.find(".top-container").append(_this.saveBtn)
+		_this.saveBtn.hide()
+	}
+
+	$.getJSON(Streamr.createLink("module", "jsonGetModule", this.module.metadata.id), {}, function(module){
 		_this.moduleData = module
 		_this.hasModuleData = true
-		_this.element.trigger("hasModuleData")
+		if(_this.hasModuleHelp == true)
+			_this.drawHelp()
 	})
 
-	$.getJSON(_this.url +"/canEdit/"+ _this.module.metadata.id, {}, function(canEdit){
+	$.getJSON(Streamr.createLink("module", "canEdit", this.module.metadata.id), {}, function(canEdit){
 		if(canEdit.success == true){
-			_this.canEdit = true
-			_this.element.trigger("canEdit")
-		} else {
-			_this.canEdit = false
+			_this.drawEdit()
 		}
 	})
 
-	$.getJSON(this.url +"/jsonGetModuleHelp/"+ this.module.metadata.id, {}, function(moduleHelp){
+	$.getJSON(Streamr.createLink("module", "jsonGetModuleHelp", this.module.metadata.id), {}, function(moduleHelp){
 		_this.moduleHelp = moduleHelp
-		if(_this.hasModuleData){
+		_this.helpText = moduleHelp.helpText
+		_this.hasModuleHelp = true
+		if(_this.hasModuleData == true)
 			_this.drawHelp()
-		} else {
-			_this.element.one("hasModuleData", function(){
-				_this.drawHelp()
-			})
-		}		
 	})
 }
 
 Module.prototype.edit = function() {
+	var _this = this
 	$.each(this.panelBody.find(".value"), function(i, el){
 		$(el).append($("<input/>", {
 			type: "text",
@@ -306,21 +302,42 @@ Module.prototype.edit = function() {
 		this.helpTextTable.find(".no-help-text").remove()
 		this.helpTextTable.append($("<tbody><tr><td><div class='help-text'>No help text</div></td></tr></tbody>"))
 	}
-	this.helpTextTable.find(".help-text").parent().append($("<textarea class='module-help form-control' style='width:100%; height:300px; resize:vertical;'>"+this.helpTextTable.find(".help-text").html()+"</textarea>"))
+	this.helpTextTable.find(".help-text").parent().append($("<textarea rows='10' cols='80' id='textarea"+this.module.metadata.id+"' class='module-help form-control' style='width:100%; height:300px; resize:vertical;'>"+this.helpText+"</textarea>"))
 	this.helpTextTable.find(".help-text").hide()
+	
+	var createEditor = function(result){
+		CKEDITOR.replace("textarea"+_this.module.metadata.id, {
+			customConfig: CKEDITORConfigUrl+'/custom-config.js',
+			// skin : 'BootstrapCK4-Skin,'+CKEDITORConfigUrl+'/skins/bootstrapck/'
+		})
+	}
+	if(window.CKEDITOR === undefined){
+		jQuery.ajax({
+	        type: "GET",
+	        url: "//cdn.ckeditor.com/4.5.1/standard-all/ckeditor.js",
+	        success: createEditor,
+	        dataType: "script",
+	        cache: true
+		})
+	} else {
+		createEditor()
+	}
 }
 
 Module.prototype.save = function(){
 	var _this = this
 	var moduleHelp = this.makeHelp()
-
+	var data = {success: ""}
 	$.ajax({
 	    type: 'POST',
-	    url: _this.url +"/jsonSetModuleHelp/",
+	    url: Streamr.createLink('module', 'jsonSetModuleHelp'),
 	    dataType: 'json',
 	    success: function(data) {
 	    	_this.panelBody.empty()
 	    	var msg = (data.success ? "Module help successfully saved." : "An error has occurred.")
+			try {
+			     CKEDITOR.instances["textarea"+this.module.metadata.id].destroy(false)
+			 } catch (e) { }
 			_this.renderHelp(msg)
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
@@ -336,7 +353,9 @@ Module.prototype.makeHelp = function() {
 		outputTable = this.panelBody.find(".output-table"),
 		result = {params:{}, paramNames:[], inputs:{}, inputNames:[], outputs:{}, outputNames:[]}
 	
-	result.helpText = this.panelBody.find("textarea.module-help").val()
+	result.helpText = CKEDITOR.instances["textarea"+this.module.metadata.id].getData()
+	this.helpText = result.helpText
+
 	paramTable.find("tbody tr").each(function(i,row) {
 		var name = $(row).find("td.name").text()
 		var value = $(row).find("td.value input").val()

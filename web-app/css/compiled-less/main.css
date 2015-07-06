@@ -16469,6 +16469,9 @@ body.embedded #content-wrapper > :not(.embeddable) {
 .table-clickable tbody tr:hover {
   cursor: pointer;
 }
+.math-tex:not(.math-jax-ready) {
+  display: none;
+}
 .form-group-period .input-group-addon {
   width: 60px;
 }
@@ -16588,16 +16591,15 @@ body.module-list #module-help-tree .panel .panel-body .save-btn {
   margin-bottom: 10px;
   float: right;
 }
-body.module-list #sidebar {
-  margin-top: 20px;
+body.module-list .streamr-sidebar {
+  margin-top: -15px;
 }
 body.module-list #sidebar .moduleSearch {
-  margin-top: 15px;
   position: fixed;
   z-index: 10;
 }
 body.module-list div.breadcrumb {
-  z_index: 2;
+  z-index: 2;
 }
 .modal-content.flexing {
   display: flex;

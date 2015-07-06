@@ -5,8 +5,8 @@
         
         <r:script>
             var spinnerImg = "${resource(dir:'images', file: 'spinner.gif') }"
+            var CKEDITORConfigUrl = "${resource(dir:'js/ckeditor-config') }"
         	var moduleBrowser = new ModuleBrowser({
-        		url: "${ createLink(uri:"/") }module",
         		sidebarEl: $("#sidebar"),
         		moduleTreeEl: $("#module-help-tree"),
                 searchBoxEl: "#moduleSearch"

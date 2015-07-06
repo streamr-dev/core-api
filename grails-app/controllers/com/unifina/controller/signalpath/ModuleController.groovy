@@ -91,32 +91,43 @@ class ModuleController {
 		
 		def result = []	
 		categories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {category->
-			def item = moduleTreeRecurse(category,allowedPackageIds)
+			def item = moduleTreeRecurse(category,allowedPackageIds,params.boolean('modulesFirst') ?: false)
 			result.add(item)
 		}
 		render result as JSON
 	}
 
-	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds) {
+	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds, boolean modulesFirst=false) {
 		def item = [:]
 		item.data = category.name
 		item.metadata = [canAdd:false, id:category.id]
 		item.children = []
+		
+		List categoryChildren = []
+		List moduleChildren = []
+		
+		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
+			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
+			categoryChildren.add(subItem)
+		}
 		
 		category.modules.each {Module module->
 			if (allowedPackageIds.contains(module.modulePackage.id) && (module.hide==null || !module.hide)) {
 				def moduleItem = [:]
 				moduleItem.data = module.name
 				moduleItem.metadata = [canAdd:true, id:module.id]
-				item.children.add(moduleItem)
+				moduleChildren.add(moduleItem)
 			}
 		}
 		
-		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
-			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
-			item.children.add(subItem)
+		if (modulesFirst) {
+			item.children.addAll(moduleChildren)
+			item.children.addAll(categoryChildren)
 		}
-
+		else {
+			item.children.addAll(categoryChildren)
+			item.children.addAll(moduleChildren)
+		}
 
 		return item
 	}
