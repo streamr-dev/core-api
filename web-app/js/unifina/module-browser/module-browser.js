@@ -77,7 +77,7 @@ Module.prototype.render = function(){
 	var _this = this
 	this.panel = $("<div/>", {
 		class: "panel",
-		style: "margin-left:"+(20*(_this.level-1))+"px;",
+		style: "margin-left:"+(20*(_this.level))+"px;",
 		id: "module"+this.module.metadata.id
 	})
 	this.panelHeading = $("<div/>", {

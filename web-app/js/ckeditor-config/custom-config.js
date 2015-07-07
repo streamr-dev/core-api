@@ -23,10 +23,12 @@ CKEDITOR.editorConfig = function( config ) {
 	// are not needed in a basic editor. They are removed here.
 	config.removeButtons = 'Image,Anchor,Subscript,Superscript,About,RemoveFormat';
 
+	config.allowedContent = true;
+
 	// Dialog windows are also simplified.
 	config.removeDialogTabs = 'link:advanced';
 
-	config.mathJaxLib = 'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
+	config.mathJaxLib = 'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML';
 	// config.mathJaxLib = MathJaxUrl;
 	config.extraPlugins = 'mathjax';
 };

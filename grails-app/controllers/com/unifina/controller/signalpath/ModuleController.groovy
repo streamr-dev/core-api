@@ -107,7 +107,7 @@ class ModuleController {
 		List moduleChildren = []
 		
 		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
-			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
+			def subItem = moduleTreeRecurse(subcat,allowedPackageIds, modulesFirst)
 			categoryChildren.add(subItem)
 		}
 		

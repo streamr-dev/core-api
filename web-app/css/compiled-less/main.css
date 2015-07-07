@@ -16407,6 +16407,9 @@ button.arrow:after {
   display: inline-block;
   font-weight: bolder;
 }
+.bootbox-body .modulehelp {
+  overflow: auto;
+}
 .dashboard streamr-label {
   font-size: 70px;
 }
@@ -16600,6 +16603,11 @@ body.module-list #sidebar .moduleSearch {
 }
 body.module-list div.breadcrumb {
   z-index: 2;
+}
+body.module-list .help-text .math-jax-ready span.mn,
+body.module-list .help-text .math-jax-ready span.mtext {
+  font-size: 14px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 .modal-content.flexing {
   display: flex;
