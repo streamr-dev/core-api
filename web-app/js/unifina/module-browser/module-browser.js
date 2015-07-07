@@ -302,6 +302,7 @@ Module.prototype.edit = function() {
 		this.helpTextTable.find(".no-help-text").remove()
 		this.helpTextTable.append($("<tbody><tr><td><div class='help-text'>No help text</div></td></tr></tbody>"))
 	}
+	
 	this.helpTextTable.find(".help-text").parent().append($("<textarea rows='10' cols='80' id='textarea"+this.module.metadata.id+"' class='module-help form-control' style='width:100%; height:300px; resize:vertical;'>"+this.helpText+"</textarea>"))
 	this.helpTextTable.find(".help-text").hide()
 	
@@ -353,7 +354,11 @@ Module.prototype.makeHelp = function() {
 		outputTable = this.panelBody.find(".output-table"),
 		result = {params:{}, paramNames:[], inputs:{}, inputNames:[], outputs:{}, outputNames:[]}
 	
-	result.helpText = CKEDITOR.instances["textarea"+this.module.metadata.id].getData()
+	if(window.CKEDITOR)
+		result.helpText = CKEDITOR.instances["textarea"+this.module.metadata.id].getData()
+	else
+		result.helpText = this.helpTextTable.find(".module-help").val()
+
 	this.helpText = result.helpText
 
 	paramTable.find("tbody tr").each(function(i,row) {

@@ -12,6 +12,27 @@ global.jQuery = $
 
 $.fn.scrollspy = function(options){}
 
+global.MathJax = {
+	Hub: {
+		Queue: function(param){
+			if (typeof(param) === "function")
+				param()
+		}
+	}
+}
+
+global.Streamr = {
+	createLink: function(controller, action, id){
+		if(id === undefined)
+			return controller+"/"+action
+		else
+			return controller+"/"+action+"/"+id
+	}
+}
+
+
+global.spinnerImg = ""
+
 var mb = require('../module-browser/module-browser')
 
 assert.equal($("body").length, 1)
@@ -68,14 +89,13 @@ describe('module-browser', function(){
 				}
 			]
 			$.getJSON = function(url, data, cb){
-				if(url.split("/")[1] == "jsonGetModuleTree"){
+				if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
 					cb(moduleTree)
 				} else if(url.split("/")[1] == "canEdit"){
 					cb({success: false})
 				}
 			}
 			var moduleBrowser = new mb.ModuleBrowser({
-				url: 'url',
 				sidebarEl: ".sidebar",
 				moduleTreeEl: ".module-tree",
 				searchBoxEl: ".search"
@@ -93,19 +113,15 @@ describe('module-browser', function(){
 		})
 
 		it('should have rendered the modules correctly with categories', function(){
-			assert.equal($(".module-tree h3").length, 3)
-			assert.equal($(".module-tree h3").eq(0).text(), "module2")
-			assert.equal($(".module-tree h3").eq(1).text(), "module3")
-			assert.equal($(".module-tree h3").eq(2).text(), "submodule12")
+			assert.equal($(".module-tree h2").length, 2)
+			assert.equal($(".module-tree h4").length, 1)
+			assert.equal($(".module-tree h2").eq(1).text(), "module3")
+			assert.equal($(".module-tree h4").eq(0).text(), "module3 > submodule12")
 
 			assert.equal($(".module-tree .panel").length, 3)
 			assert.equal($(".module-tree .panel .panel-heading span").eq(0).text(), "module1")
 			assert.equal($(".module-tree .panel .panel-heading span").eq(1).text(), "submodule11")
 			assert.equal($(".module-tree .panel .panel-heading span").eq(2).text(), "submodule21")
-		})
-
-		it('should not have the "Edit" button rendered', function(){
-			assert.equal($(".module-tree .panel .btn").length, 0)
 		})
 	})
 	
@@ -123,26 +139,26 @@ describe('module-browser', function(){
 		})
 
 		describe('without rights to edit', function(){
-			beforeEach(function(done){
+			beforeEach(function(){
 				$.getJSON = function(url, data, cb){
-					if(url.split("/")[1] == "jsonGetModuleTree"){
+					if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
 						cb(moduleTree)
+					} else if(url.split("/")[1] == "jsonGetModule"){
+						cb({})
 					} else if(url.split("/")[1] == "jsonGetModuleHelp"){
 						cb(getHelp(url.split("/")[2]))
 					}
 				}
 				var moduleBrowser = new mb.ModuleBrowser({
-					url: 'url',
 					sidebarEl: ".sidebar",
 					moduleTreeEl: ".module-tree",
 					searchBoxEl: ".search"
 				})
-				setTimeout(function(){
-					done()
-				},0)
+				$("div.panel-collapse").trigger("show.bs.collapse")
 			})
 
 			it('should not have the "Edit" button rendered', function(){
+				assert.notEqual($(".help-text-table .help-text").length, 0)
 				assert.equal($(".module-tree .panel .btn").length, 0)
 			})
 
@@ -160,25 +176,24 @@ describe('module-browser', function(){
 		})
 
 		describe('editing the help', function(){
-			beforeEach(function(done){
+			beforeEach(function(){
 				$.getJSON = function(url, data, cb){
-					if(url.split("/")[1] == "jsonGetModuleTree"){
+					if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
 						cb(moduleTree)
 					} else if(url.split("/")[1] == "jsonGetModuleHelp"){
 						cb(getHelp(url.split("/")[2]))
+					} else if(url.split("/")[1] == "jsonGetModule"){
+						cb({})
 					} else if(url.split("/")[1] == "canEdit"){
 						cb({success: true})
 					}
 				}
 				var moduleBrowser = new mb.ModuleBrowser({
-					url: 'url',
 					sidebarEl: ".sidebar",
 					moduleTreeEl: ".module-tree",
 					searchBoxEl: ".search"
 				})
-				setTimeout(function(){
-					done()
-				},0)
+				$("div.panel-collapse").trigger("show.bs.collapse")
 			})
 
 			it('have rendered the editing buttons', function(){
@@ -192,8 +207,8 @@ describe('module-browser', function(){
 				panelBody.find(".edit-btn").click()
 				assert.equal(panelBody.find(".help-text-table textarea.module-help").length, 1)
 				assert.equal(panelBody.find(".help-text-table textarea.module-help").text(), "helpText-22")
-				assert.equal(panelBody.find(".input-table tbody tr").eq(1).find("td input").val(), "<span>inputHelp2-22</span>")
-				assert.equal(panelBody.find(".output-table tbody tr").eq(0).find("td input").val(), "<span>outputHelp1-22</span>")
+				assert.equal(panelBody.find(".input-table tbody tr").eq(1).find("td input").val(), "inputHelp2-22")
+				assert.equal(panelBody.find(".output-table tbody tr").eq(0).find("td input").val(), "outputHelp1-22")
 			})
 
 			describe('saving', function(){
@@ -215,16 +230,104 @@ describe('module-browser', function(){
 						return help
 					}
 					$.ajax = function(attr){
-						assert.equal(attr.data.id, 11)
-						assert.equal(JSON.toString(attr.data.jsonHelp), JSON.toString(getNewHelp(11)))
+						if(attr.url && attr.url === '//cdn.ckeditor.com/4.5.1/standard-all/ckeditor.js'){
+						} else {
+							assert.equal(attr.data.id, 11)
+							assert.equal(JSON.toString(attr.data.jsonHelp), JSON.toString(getNewHelp(11)))
+						}
 					}
 					panelBody.find(".edit-btn").click()
 
 					panelBody.find(".help-text-table textarea.module-help").text("newHelpText-11")
-					panelBody.find(".input-table tbody tr").eq(1).find("td input").val("<span>NEWInputHelp2-11</span>")
-					panelBody.find(".output-table tbody tr").eq(0).find("td input").val("<span>outputHelp1-11</span>")
+					panelBody.find(".input-table tbody tr").eq(1).find("td input").val("NEWInputHelp2-11")
+					panelBody.find(".output-table tbody tr").eq(0).find("td input").val("outputHelp1-11")
 					panelBody.find(".save-btn").click()
 				})
+			})
+		})
+
+		describe('if jsonModuleHelp and jsonModule have different data', function(){
+			beforeEach(function(){
+				$.getJSON = function(url, data, cb){
+					if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
+						cb(moduleTree)
+					} else if(url.split("/")[1] == "jsonGetModule"){
+						cb({inputs:[{name:"moduleExtraInput"}]})
+					} else if(url.split("/")[1] == "jsonGetModuleHelp"){
+						var help = getHelp(url.split("/")[2])
+						help.inputNames.push("helpExtraInput")
+						cb(help)
+					}
+				}
+				var moduleBrowser = new mb.ModuleBrowser({
+					sidebarEl: ".sidebar",
+					moduleTreeEl: ".module-tree",
+					searchBoxEl: ".search"
+				})
+				$("div.panel-collapse").trigger("show.bs.collapse")
+			})
+			it('should have rendered all the inputs from both jsons', function(){
+				var panelBody = $(".module-tree .panel .panel-body").eq(1)
+				var names = []
+				panelBody.find(".input-table tbody tr").each(function(i, el){
+					names.push($(el).find("td").eq(1).text())
+				})
+				assert(names.indexOf("moduleExtraInput") > -1)
+				assert(names.indexOf("helpExtraInput") > -1)
+			})
+		})
+		
+		describe('ajax queries answer in different orders', function(){
+			afterEach(function(){
+				it('should have rendered the helps', function(){
+					var panelBody = $(".module-tree .panel .panel-body").eq(1)
+					assert.equal(panelBody.find(".help-text-table .help-text").text(), "helpText-22")
+					assert.equal(panelBody.find(".input-table tbody tr").eq(0).find("td").eq(1).text(), "inputName1-22")
+					assert.equal(panelBody.find(".input-table tbody tr").eq(0).find("td").eq(2).text(), "inputHelp1-22")
+					assert.equal(panelBody.find(".input-table tbody tr").eq(1).find("td").eq(1).text(), "inputName2-22")
+					assert.equal(panelBody.find(".input-table tbody tr").eq(1).find("td").eq(2).text(), "inputHelp2-22")
+					assert.equal(panelBody.find(".output-table tbody tr").eq(0).find("td").eq(1).text(), "outputName1-22")
+					assert.equal(panelBody.find(".output-table tbody tr").eq(0).find("td").eq(2).text(), "outputHelp1-22")
+					assert.equal(panelBody.find(".param-table thead th").eq(0).text(), "No Parameter Helps")
+				})
+			})
+			it('should render normally when help comes first', function(){
+				$.getJSON = function(url, data, cb){
+					if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
+						cb(moduleTree)
+					} else if(url.split("/")[1] == "jsonGetModule"){
+						setTimeout(function(){
+							cb({})
+						}, 50)
+					} else if(url.split("/")[1] == "jsonGetModuleHelp"){
+						cb(getHelp(url.split("/")[2]))
+					}
+				}
+				var moduleBrowser = new mb.ModuleBrowser({
+					sidebarEl: ".sidebar",
+					moduleTreeEl: ".module-tree",
+					searchBoxEl: ".search"
+				})
+				$("div.panel-collapse").trigger("show.bs.collapse")
+			})
+			it('should render normally when module comes first', function(){
+				$.getJSON = function(url, data, cb){
+					if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
+						cb(moduleTree)
+					} else if(url.split("/")[1] == "jsonGetModule"){
+						cb({})
+					} else if(url.split("/")[1] == "jsonGetModuleHelp"){
+						setTimeout(function(){
+							cb(getHelp(url.split("/")[2]))
+						}, 50)
+					}
+				}
+				var moduleBrowser = new mb.ModuleBrowser({
+					sidebarEl: ".sidebar",
+					moduleTreeEl: ".module-tree",
+					searchBoxEl: ".search"
+				})
+				$("div.panel-collapse").trigger("show.bs.collapse")
 			})
 		})
 	})
