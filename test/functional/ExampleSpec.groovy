@@ -1,0 +1,46 @@
+import pages.*
+import spock.lang.*
+import core.mixins.CanvasMixin
+
+@Mixin(CanvasMixin)
+class ExampleSpec extends LoginTester1Spec {
+
+	def "examples tabs must be shown in the load browser"() {
+		when: "load button is clicked"
+			loadButton.click()
+		then: "load browser must appear"
+			waitFor {
+				$('#archiveLoadBrowser table')
+			}
+		
+		when: "examples tab is clicked"
+			$("ul li > a", text:"Examples").click()
+		then: "examples must appear"
+			waitFor {
+				$('#examplesLoadBrowser table td', text:"Test example")
+			}
+			
+		when: "example is selected"
+			$('#examplesLoadBrowser table td', text:"Test example").click()
+		then: "selected signalpath must load"
+			waitFor {
+				$("#module_0")
+			}
+	}
+	
+	def "examples link in help nav must show load browser"() {
+		when: "help link is clicked"
+			$("#navHelpLink").click()
+		then: "examples option must be shown in help menu"
+			waitFor {
+				$('#navExamplesLink').displayed
+			}
+			
+		when: "examples link is clicked"
+			$("#navExamplesLink").click()
+		then: "examples load browser must be displayed"
+			waitFor {
+				$('#examplesLoadBrowser table td', text:"Test example")
+			}
+	}
+}
