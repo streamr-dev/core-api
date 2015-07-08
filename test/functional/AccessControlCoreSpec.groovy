@@ -1,7 +1,10 @@
 import spock.lang.*
-import core.LoginTester2Spec;
 import core.mixins.ConfirmationMixin
-import core.pages.*
+import core.pages.AccessDeniedPage
+import core.pages.CanvasPage
+import core.pages.LoginPage
+import core.LoginTester2Spec
+
 
 /**
  * Basic features in the backtest views
@@ -9,20 +12,14 @@ import core.pages.*
 @Mixin(ConfirmationMixin)
 class AccessControlCoreSpec extends LoginTester2Spec {
 
-	
 	void checkDenied(String url) {
 		go url
 		waitFor { at AccessDeniedPage }
 	}
 	
-	void checkEmpty(String url) {
-		go url
-		waitFor { $("body").text()=="" }
-	}
-	
 	def "search won't show modules the user doesn't have access to"() {
 		when: "the name of a forbidden module is entered"
-			search << "orderage"
+			search << "GroovyModule"
 		then: "no search results are displayed"
 			$('.tt-suggestion').size()==0
 	}
@@ -41,13 +38,31 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 		
 	}
 	
+	def "anonymous users must be directed to login page when accessing protected resources"() {
+		when: "user logs out"
+			navbar.navSettingsLink.click()
+			$("#navLogoutLink").click() // for some reason navbar.navSettingsLink did not work
+		then: "must go to login page"
+			at LoginPage
+		
+		when: "navigating to protected resource"
+			go "savedSignalPath/load/1"
+		then: "must go to login page"
+			at LoginPage
+			
+		when: "navigating to admin-only resource"
+			go "kafka/collect"
+		then: "must go to login page"
+			at LoginPage
+	}
+	
 	def "user cannot load other users' SavedSignalPaths"() {
 		expect:
-		checkEmpty "savedSignalPath/load/1"
+		checkDenied "savedSignalPath/load/1"
 	}
 	
 
-	def "user cannot view other people's Accounts"() {
+	def "user cannot view other people's RunningSignalPaths"() {
 		expect:
 		checkDenied "live/show/13"
 		

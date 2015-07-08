@@ -10,6 +10,9 @@ class UnifinaCorePluginUrlMappings {
 
 		// Root should be mapped in app, not in plugin, because plugin url mappings can't currently be overridden
 		
+		// 403 would be handled by Spring Security Core by default, but due to 
+		// https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 it needs to be specified explicitly
+		"403"(controller: "login", action: "denied")
 		"500"(view:'/error')
 		
 		"/login/$action?"(controller: "login")

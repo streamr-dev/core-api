@@ -16,8 +16,18 @@ class LiveController {
 	def unifinaSecurityService
 	def signalPathService
 	
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))},
-		except:['index','list','show','getJson', 'getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
+	def beforeInterceptor = [action:{
+			if (!unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))) {
+				if (request.xhr) 
+					redirect(controller:'login', action:'ajaxDenied')
+				else 
+					redirect(controller:'login', action:'denied')
+					
+				return false
+			}
+			else return true
+		},
+		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -37,30 +47,26 @@ class LiveController {
 		[running: rsps, user:springSecurityService.currentUser]
 	}
 	
+	// Can be accessed anonymously for embedding the show view in iframes (eg. the landing page)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def show() {
+		// Access checked by beforeInterceptor
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		if (!unifinaSecurityService.canAccess(rsp))
-			render(status: 401, text: 'Access denied.')
-		
 		[rsp:rsp]
 	}
 	
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def getJson() {
+		// Access checked by beforeInterceptor
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		if (!unifinaSecurityService.canAccess(rsp)) {
-			render(status: 401, text: 'Access denied.')
-		}
-		else {
-			Map signalPathData = JSON.parse(rsp.json)
-			Map result = [:]
-			
-			result.signalPathData = signalPathData
-			result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
-			
-			render result as JSON
-		}
+
+		Map signalPathData = JSON.parse(rsp.json)
+		Map result = [:]
+		
+		result.signalPathData = signalPathData
+		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
+		
+		render result as JSON
 	}
 	
 	@Secured("ROLE_USER")
@@ -87,7 +93,7 @@ class LiveController {
 		RunningSignalPath rsp = ui.runningSignalPath
 		
 		if (!unifinaSecurityService.canAccess(rsp)) {
-			render(status: 401, text: 'Access denied.')
+			redirect(controller:'login', action:'ajaxDenied')
 		}
 		else {
 			Map signalPathData = JSON.parse(rsp.json)
@@ -126,7 +132,7 @@ class LiveController {
 		}
 		
 		if (!unifinaSecurityService.canAccess(rsp, params.auth)) {
-			render(status: 401, text: 'Access denied.')
+			redirect(controller:'login', action:'ajaxDenied')
 		}
 		else {
 			Map msg = JSON.parse(params.msg)
