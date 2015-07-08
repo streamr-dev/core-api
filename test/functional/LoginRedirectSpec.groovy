@@ -11,7 +11,7 @@ class LoginRedirectSpec extends GebReportingSpec {
 			
 		when: "logged in"
 			username = "tester1@streamr.com"
-			password = "tester1"
+			password = "tester1TESTER1"
 			loginButton.click()
 		then: "must go to requested page"
 			waitFor {

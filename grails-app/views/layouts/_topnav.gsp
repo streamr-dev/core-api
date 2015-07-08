@@ -65,8 +65,7 @@ Tour.list(function(tourList) {
 							<i class="dropdown-icon fa fa-cog"></i>
 						</a>
 						<ul class="dropdown-menu">
-<%--							<li><g:link elementId="navProfileLink" controller="profile"><g:message code="profile.edit.label"/></g:link></li>--%>
-<%--							<li class="divider"></li>--%>
+							<li><g:link elementId="navProfileLink" controller="profile"><g:message code="profile.edit.label"/></g:link></li>
 							<li><g:link elementId="navLogoutLink" controller="logout"><i class="dropdown-icon fa fa-power-off"></i>&nbsp;&nbsp;Log Out</g:link></li>
 						</ul>
 					</li>

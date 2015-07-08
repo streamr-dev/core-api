@@ -1,5 +1,6 @@
 import pages.*
 import spock.lang.*
+import core.LoginTester1Spec;
 import core.mixins.CanvasMixin
 
 @Mixin(CanvasMixin)
@@ -292,7 +293,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			def ob = findModuleOnCanvas "Stream"
 			ob.find(".streamName").click()
 		then: "an input must be shown"
-			ob.find(".streamSearch").displayedp
+			ob.find(".streamSearch").displayed
 			
 		when: "search term is changed to 'xyzzy'"
 			ob.find(".streamSearch").firstElement().clear()

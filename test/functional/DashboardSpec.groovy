@@ -1,5 +1,6 @@
 import pages.*
 import spock.lang.*
+import core.LoginTester1Spec;
 import core.mixins.CanvasMixin
 import core.pages.DashboardCreatePage
 import core.pages.DashboardListPage

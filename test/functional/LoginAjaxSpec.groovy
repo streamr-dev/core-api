@@ -1,3 +1,4 @@
+import core.LoginTester1Spec;
 import geb.spock.GebReportingSpec
 import spock.lang.*
 import pages.*
@@ -14,8 +15,8 @@ class LoginAjaxSpec extends LoginTester1Spec {
 			}
 			
 		when: "correct credentials are entered and login button is clicked"
-			$("#username") << tester1Username
-			$("#password") << tester1Password
+			$("#username") << testerUsername
+			$("#password") << testerPassword
 			$("#loginButton").click()
 		then: "login form must disappear"
 			waitFor {

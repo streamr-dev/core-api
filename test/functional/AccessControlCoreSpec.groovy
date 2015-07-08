@@ -1,4 +1,5 @@
 import spock.lang.*
+import core.LoginTester2Spec;
 import core.mixins.ConfirmationMixin
 import core.pages.*
 
@@ -33,7 +34,6 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 			!navbar.navAdminLink
 		
 		expect:
-		checkDenied "user"
 		checkDenied "feedFile"
 		checkDenied "kafka/collect"
 		checkDenied "taskWorker/status"

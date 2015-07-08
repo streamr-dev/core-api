@@ -4,6 +4,7 @@ import org.openqa.selenium.Keys
 
 import pages.*
 import spock.lang.*
+import core.LoginTester1Spec;
 import core.mixins.CanvasMixin
 import core.pages.LoginPage
 
