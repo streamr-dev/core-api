@@ -119,17 +119,17 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			findInput("Add", "in1").classes().contains("warning")
 			
 		when: "another module is added"
-			searchAndClick "AAPL"
+			searchAndClick "CanvasSpec"
 		then: "it must appear"
-			moduleShouldAppearOnCanvas "Orderbook"
+			moduleShouldAppearOnCanvas "Stream"
 			
 		when: "the input is connected to an output"
-			connectEndpoints(findOutput("Orderbook","last"), findInput("Add","in1"))
+			connectEndpoints(findOutput("Stream","temperature"), findInput("Add","in1"))
 		then: "the input must no longer have the warning class"
 			!findInput("Add", "in1").classes().contains("warning")
 			
 		when: "the module is disconnected"
-			selectFromContextMenu(findModuleOnCanvas("Orderbook"), "Disconnect all")
+			selectFromContextMenu(findModuleOnCanvas("Stream"), "Disconnect all")
 		then: "the warning class must reappear"
 			findInput("Add", "in1").classes().contains("warning")
 	}
@@ -245,68 +245,68 @@ class ModuleBuildSpec extends LoginTester1Spec {
 				dragAndDropBy(addHandle, 200, 0)
 			}
 			
-			addModule "Trades"
-			moduleShouldAppearOnCanvas "Trades"
-			def tradesHandle = findModuleOnCanvas("Trades").find(".modulename")
-			def tradesInput = getJSPlumbEndpoint(findInput("Trades","trades"))
+			addModule "Contains"
+			moduleShouldAppearOnCanvas "Contains"
+			def containsHandle = findModuleOnCanvas("Contains").find(".modulename")
+			def containsInput = getJSPlumbEndpoint(findInput("Contains","search"))
 			interact {
-				dragAndDropBy(tradesHandle, 200, 200)
+				dragAndDropBy(containsHandle, 200, 200)
 			}
 			
-			searchAndClick "AAPL"
-			moduleShouldAppearOnCanvas "Orderbook"
-			def lastOutput = getJSPlumbEndpoint(findOutput("Orderbook", "last"))
-			def tradesOutput = getJSPlumbEndpoint(findOutput("Orderbook", "trades"))
+			searchAndClick "CanvasSpec"
+			moduleShouldAppearOnCanvas "Stream"
+			def temperatureOutput = getJSPlumbEndpoint(findOutput("Stream", "temperature"))
+			def textOutput = getJSPlumbEndpoint(findOutput("Stream", "text"))
 			
 		when: "a Double connection is being made"
 			interact {
-				clickAndHold(lastOutput)
+				clickAndHold(temperatureOutput)
 				moveByOffset(100, 100)
 			}
 		then: "Double connection must highlight"
 			addInput.classes().contains("highlight")
 		then: "Trades input must not highlight"
-			!tradesInput.classes().contains("highlight")
+			!textOutput.classes().contains("highlight")
 			
 		when: "a Trades connection is being made"
 			interact {
 				release()
 			}
 			interact {
-				clickAndHold(tradesOutput)
+				clickAndHold(textOutput)
 				moveByOffset(100, 100)
 			}
 		then: "Trades input must highlight"
-			tradesInput.classes().contains("highlight")
+			containsInput.classes().contains("highlight")
 		then: "Double connection must not highlight"
 			!addInput.classes().contains("highlight")
 	}
 	
 	def "stream parameter change"() {
-		when: "AAPL is added"
-			searchAndClick("AAPL")
+		when: "CanvasSpec is added"
+			searchAndClick("CanvasSpec")
 		then: "An Orderbook must appear"
-			moduleShouldAppearOnCanvas "Orderbook"
+			moduleShouldAppearOnCanvas "Stream"
 			
-		when: "the AAPL parameter link is clicked"
-			def ob = findModuleOnCanvas "Orderbook"
+		when: "the CanvasSpec parameter link is clicked"
+			def ob = findModuleOnCanvas "Stream"
 			ob.find(".streamName").click()
 		then: "an input must be shown"
-			ob.find(".streamSearch").displayed
+			ob.find(".streamSearch").displayedp
 			
-		when: "search term is changed to 'interactive'"
+		when: "search term is changed to 'xyzzy'"
 			ob.find(".streamSearch").firstElement().clear()
-			ob.find(".streamSearch") << "interactive"
-		then: "IBKR stream must be shown in suggestions"
+			ob.find(".streamSearch") << "xyzzy"
+		then: "ModuleBuildSpec stream must be shown in suggestions"
 			waitFor {
-				ob.find('.tt-suggestion p', text: contains("IBKR"))
+				ob.find('.tt-suggestion span', text: contains("ModuleBuildSpec"))
 			}
 			
 		when: "suggestion is clicked"
-			ob.find('.tt-suggestion p', text: contains("IBKR")).click()
+			ob.find('.tt-suggestion span', text: contains("ModuleBuildSpec")).click()
 		then: "stream is changed"
 			waitFor {
-				$(".streamName", text: "IBKR")
+				$(".streamName", text: "ModuleBuildSpec")
 			}
 	}
 	

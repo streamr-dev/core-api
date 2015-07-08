@@ -3,7 +3,7 @@ import spock.lang.*
 import core.mixins.CanvasMixin
 
 @Mixin(CanvasMixin)
-class ExampleSpec extends LoginTester1Spec {
+class ExampleSpec extends LoginTester2Spec {
 
 	def "examples tabs must be shown in the load browser"() {
 		when: "load button is clicked"
@@ -17,14 +17,14 @@ class ExampleSpec extends LoginTester1Spec {
 			$("ul li > a", text:"Examples").click()
 		then: "examples must appear"
 			waitFor {
-				$('#examplesLoadBrowser table td', text:"Test example")
+				$('#examplesLoadBrowser table td', text:"ExampleSpec")
 			}
 			
 		when: "example is selected"
-			$('#examplesLoadBrowser table td', text:"Test example").click()
+			$('#examplesLoadBrowser table td', text:"ExampleSpec").click()
 		then: "selected signalpath must load"
 			waitFor {
-				$("#module_0")
+				$("#module_2")
 			}
 	}
 	
@@ -40,7 +40,7 @@ class ExampleSpec extends LoginTester1Spec {
 			$("#navExamplesLink").click()
 		then: "examples load browser must be displayed"
 			waitFor {
-				$('#examplesLoadBrowser table td', text:"Test example")
+				$('#examplesLoadBrowser table td', text:"ExampleSpec")
 			}
 	}
 }

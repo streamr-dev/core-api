@@ -31,10 +31,10 @@ class DashboardSpec extends LoginTester1Spec {
 		when: "a rsp clicked to open"
 		runningSignalPath.click()
 		then: "uichannel-list opens"
-		waitFor { $("#uichannel_XKDjVQU5QI2vwysJjLyYtg").displayed }
+		waitFor { $(".uichannel-title").displayed }
 		
 		when: "uichannel clicked"
-		$("#uichannel_XKDjVQU5QI2vwysJjLyYtg").click()
+		$(".uichannel-title", 0).click()
 		then: "one dashboarditem should be visible"
 		waitFor { $("#dashboard-view .dashboarditem").displayed }
 		

@@ -5,19 +5,7 @@ import core.mixins.CanvasMixin
 
 @Mixin(CanvasMixin)
 class CanvasSpec extends LoginTester1Spec {
-	def "adding Barify to canvas should add it"() {
-		when: "Barify is added via module browser"
-			addModule 'Barify'
-		then: "module should appear on canvas"
-			moduleShouldAppearOnCanvas 'Barify'
-	}
-
-	def "drag and dropping a module to canvas should add it"() {
-		when: "Barify is added via drag and drop"
-			dragAndDropModule 'Barify'
-		then: "module should appear on canvas"
-			moduleShouldAppearOnCanvas 'Barify'
-	}
+	
 
 	def "clicking module close button in canvas should remove it"() {
 		setup: "Barify is added via module browser"
@@ -31,6 +19,20 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "module should be removed from canvas"
 			!findModuleOnCanvas('Barify')
 	}
+	def "drag and dropping a module to canvas should add it"() {
+		when: "Barify is added via drag and drop"
+			dragAndDropModule 'Barify'
+		then: "module should appear on canvas"
+			moduleShouldAppearOnCanvas 'Barify'
+	}
+
+	def "adding Barify to canvas should add it"() {
+		when: "Barify is added via module browser"
+			addModule 'Barify'
+		then: "module should appear on canvas"
+			moduleShouldAppearOnCanvas 'Barify'
+	}
+
 
 	def "adding a module through search box should add it"() {
 		when: "Barify is added via search"

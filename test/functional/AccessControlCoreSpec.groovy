@@ -49,7 +49,8 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 
 	def "user cannot view other people's Accounts"() {
 		expect:
-		checkDenied "live/show/1"
+		checkDenied "live/show/13"
+		
 	}
 
 	def "user cannot add modules the user doesn't have access to"() {
