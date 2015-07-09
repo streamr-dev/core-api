@@ -29,7 +29,17 @@ class StreamController {
 	def kafkaService
 	def streamService
 	
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Stream.get(params.long("id")))},
+	def beforeInterceptor = [action:{
+			if (!unifinaSecurityService.canAccess(Stream.get(params.long("id")))) {
+				if (request.xhr)
+					redirect(controller:'login', action:'ajaxDenied')
+				else
+					redirect(controller:'login', action:'denied')
+					
+				return false
+			}
+			else return true
+		},
 		except:['list','search','create']]
 	
 	def list() {

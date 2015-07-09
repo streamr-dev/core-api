@@ -238,6 +238,10 @@ grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/canvas'
 grails.plugin.springsecurity.ui.encodePassword = true
 grails.plugin.springsecurity.ui.password.minLength = 8
 
+// Due to https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 errorPage needs to be 
+// set to null and 403 mapped in UnifinaCorePluginUrlMappings
+grails.plugin.springsecurity.adh.errorPage = null
+
 grails.plugin.springsecurity.securityConfigType = 'Annotation'
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
