@@ -9,6 +9,7 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.domain.signalpath.SavedSignalPath
 
 class UnifinaSecurityService {
 	
@@ -58,6 +59,7 @@ class UnifinaSecurityService {
 				return false
 			}
 		}
+		// TODO: questionable
 		return true
 	}
 
@@ -76,6 +78,14 @@ class UnifinaSecurityService {
 	boolean canAccess(RunningSignalPath rsp, String apiKey=null, String apiSecret=null) {
 		// Shared RunningSignalPaths can be accessed by everyone
 		return rsp.shared || checkUser(rsp, null, true, apiKey, apiSecret)
+	}
+	
+	@CompileStatic
+	boolean canAccess(SavedSignalPath ssp, boolean isLoad) {
+		// Examples can be read by everyone
+		if (isLoad && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+			return true
+		else return canAccess(ssp)
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage) {

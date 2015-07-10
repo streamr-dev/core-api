@@ -24,9 +24,9 @@ class SecUser {
 	String timezone
 	
 	static constraints = {
-		name blank: false
-		username blank: false, unique: true
+		username blank: false, unique: true, email: true
 		password blank: false
+		name blank: false
 		apiKey nullable:true, unique: true
 		apiSecret nullable:true
 	}

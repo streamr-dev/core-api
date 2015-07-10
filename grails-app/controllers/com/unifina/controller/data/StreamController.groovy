@@ -31,7 +31,17 @@ class StreamController {
 	def kafkaService
 	def streamService
 	
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Stream.get(params.long("id")))},
+	def beforeInterceptor = [action:{
+			if (!unifinaSecurityService.canAccess(Stream.get(params.long("id")))) {
+				if (request.xhr)
+					redirect(controller:'login', action:'ajaxDenied')
+				else
+					redirect(controller:'login', action:'denied')
+					
+				return false
+			}
+			else return true
+		},
 		except:['list','search','create']]
 	
 	def list() {
@@ -156,7 +166,7 @@ class StreamController {
 			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+
 				"left outer join s.feed "+
 				"left outer join s.feed.module "+
-				"where (s.name like '"+params.term+"%' or s.description like '"+params.term+"%') "
+				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "
 				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "
 
 				if (params.feed) {

@@ -1,5 +1,8 @@
 package com.unifina.service
 
+import grails.util.Environment
+
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.web.context.support.WebApplicationContextUtils
 
 import com.unifina.domain.config.HostConfig
@@ -84,6 +87,20 @@ class BootService {
 		
 		// Start a listener for Task-related events
 		servletContext["taskMessageListener"] = new TaskMessageListener(grailsApplication, taskWorkers)
+	}
+	
+	// Run from UnifinaCoreGrailsPlugin.groovy -> doWithSpring
+	// as well as some unit tests that require config.
+	// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
+	static void mergeDefaultConfig(GrailsApplication app) {
+		ConfigObject currentConfig = app.config
+		ConfigSlurper slurper = new ConfigSlurper(Environment.getCurrent().getName());
+		ConfigObject secondaryConfig = slurper.parse(app.classLoader.loadClass("UnifinaCoreDefaultConfig"))
+		
+		ConfigObject config = new ConfigObject();
+		config.putAll(secondaryConfig.merge(currentConfig))
+		
+		app.config = config;
 	}
 	
 	def onDestroy() {

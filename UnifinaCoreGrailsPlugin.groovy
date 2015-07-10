@@ -1,9 +1,12 @@
+import grails.util.Environment
+
 import java.security.Policy
 import java.security.Security
 
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import com.unifina.security.PackageAccessHelper
+import com.unifina.service.BootService
 
 class UnifinaCoreGrailsPlugin {
     // the plugin version
@@ -111,9 +114,10 @@ class UnifinaCoreGrailsPlugin {
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+		// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
+		BootService.mergeDefaultConfig(application)
     }
-
+	
     def doWithDynamicMethods = { ctx ->
         // TODO Implement registering dynamic methods to classes (optional)
     }

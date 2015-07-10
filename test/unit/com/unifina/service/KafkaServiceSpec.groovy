@@ -20,6 +20,12 @@ import com.unifina.utils.CSVImporter
 @Mock([Stream])
 class KafkaServiceSpec extends Specification {
 
+	def setupSpec() {
+		// This is normally run in UnifinaCoreGrailsPlugin.groovy -> doWithSpring,
+		// but unit test environment doesn't execute that
+		BootService.mergeDefaultConfig(grailsApplication)
+	}
+	
     def setup() {
 		defineBeans {
 
