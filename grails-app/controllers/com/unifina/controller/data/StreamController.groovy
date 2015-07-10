@@ -17,6 +17,8 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.CSVImporter.Schema
 
+import java.text.SimpleDateFormat
+
 @Secured(["ROLE_USER"])
 class StreamController {
 
@@ -279,6 +281,22 @@ class StreamController {
 			redirect(action:"show", params:[id:params.streamId])
 		}
 	}
-	
+
+	def deleteFeedFilesUpTo() {
+		def date = new SimpleDateFormat(message(code:"default.dateOnly.format")).parse(params.date) + 1
+
+		def stream = Stream.get(params.id)
+		def feedFiles = FeedFile.findAllByStreamAndEndDateLessThan(stream, date)
+		feedFiles.each {
+			feedFileService.deleteFile(it)
+		}
+		def deletedCount = FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream and ff.endDate < :date", [stream: stream, date: date])
+		if(deletedCount > 0){
+			flash.message = "All data up to "+params.date+" successfully deleted"
+		} else {
+			flash.error = "Something went wrong with deleting files"
+		}
+		redirect(action:"show", params:[id:params.id])
+	}
 	
 }
