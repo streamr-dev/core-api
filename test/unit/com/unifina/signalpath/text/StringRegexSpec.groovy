@@ -17,15 +17,14 @@ class StringRegexSpec extends Specification {
 		
     }
 	
-	void "words starting with a capital letter"() {		
+	void "words starting with a capital letter"() {
+		module.getInput("pattern").receive(/([A-Z])\w+/)		
 		when:
-		module.getInput("pattern").receive(/([A-Z])\w+/)
 		Map inputValues = [
 			text: ["test", "Secondtest", "thirdTest", "FOURTHTEST", "the Fifth Regex test"].collect {it?.toString()}
 		]
 		Map outputValues = [
-			"match?": [0, 1, 0, 1, 0].collect {it?.doubleValue()},
-			"matchAny?": [0, 1, 1, 1, 1].collect {it?.doubleValue()},
+			"match?": [0, 1, 1, 1, 1].collect {it?.doubleValue()},
 			"matchCount": [0, 1, 1, 1, 2].collect {it?.doubleValue()},
 			"matchList": [[], ['Secondtest'], ['Test'], ['FOURTHTEST'], ['Fifth', 'Regex']]
 		]
@@ -40,17 +39,16 @@ class StringRegexSpec extends Specification {
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}
 
-	void "phone numbers"() {		
+	void "phone numbers"() {
+		module.getInput("pattern").receive(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/)		
 		when:
-		module.getInput("pattern").receive(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/)
 		Map inputValues = [
-			text: ["p:444-555-1234, 1235554567", "246.555.8888", "m:1235554567", "not a phone number", "eleven numbers: 01234567890"].collect {it?.toString()}
+			text: ["p:444-555-1234 + 1235554567", "246.555.8888", "m:1235554567", "not a phone number", "eleven numbers: 01234567890"].collect {it?.toString()}
 		]
 		Map outputValues = [
-			"match?": [0, 1, 0, 0, 0].collect {it?.doubleValue()},
-			"matchAny?": [1, 1, 1, 0, 0].collect {it?.doubleValue()},
+			"match?": [1, 1, 1, 0, 0].collect {it?.doubleValue()},
+			"matchList": [["444-555-1234", "1235554567"], ['246.555.8888'], ['1235554567'], [], []],
 			"matchCount": [2, 1, 1, 0, 0].collect {it?.doubleValue()},
-			"matchList": [['444-555-1234', '1235554567'], ['246.555.8888'], ['1235554567'], [], []]
 		]
 		
 		then:

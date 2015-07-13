@@ -9,7 +9,7 @@ import com.unifina.signalpath.StringParameter;
 
 public class StringSplit extends AbstractSignalPathModule {
 
-	StringParameter s = new StringParameter(this, "splitter", "");
+	StringParameter s = new StringParameter(this, "separator", "");
 	
 	StringInput in = new StringInput(this,"text");
 

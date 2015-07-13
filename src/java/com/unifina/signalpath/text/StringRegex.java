@@ -17,7 +17,6 @@ public class StringRegex extends AbstractSignalPathModule {
 	StringInput in = new StringInput(this,"text");
 
 	TimeSeriesOutput match = new TimeSeriesOutput(this,"match?");
-	TimeSeriesOutput matchAny = new TimeSeriesOutput(this,"matchAny?");
 	TimeSeriesOutput count = new TimeSeriesOutput(this,"matchCount");
 	ListOutput list = new ListOutput(this,"matchList");
 	
@@ -29,7 +28,6 @@ public class StringRegex extends AbstractSignalPathModule {
 		addInput(s);
 		addInput(in);
 		addOutput(match);
-		addOutput(matchAny);
 		addOutput(count);
 		addOutput(list);
 	}
@@ -46,42 +44,25 @@ public class StringRegex extends AbstractSignalPathModule {
 			} else
 				m.reset(text);
 			
-			// Matches
-			if(match.isConnected()){
-				if(m.matches())
+			while (m.find()) {
+				matchCount++;
+				matchList.add(m.group());
+				if(!count.isConnected() && !list.isConnected()) {
+					break;
+				}
+			}
+
+			if(match.isConnected()) {
+				if(matchCount > 0)
 					match.send(1);
 				else
 					match.send(0);
 			}
-			if(matchAny.isConnected()) {
-				if(m.find()) {
-					matchCount++;
-					matchList.add(m.group());
-					matchAny.send(1);
-				} else if(m.matches()) {
-					matchAny.send(1);
-				} else
-					matchAny.send(0);
-			}
-			if(count.isConnected() || list.isConnected()){
-				if(m.matches()){
-					matchCount = 1;
-					matchList.add(m.group());
-				} else {
-					while(m.find()){
-						matchCount++;
-						if(list.isConnected()){
-							matchList.add(m.group());
-						}
-					}
-				}
-				if(count.isConnected())
-					count.send(matchCount);
-				if(list.isConnected())
-					list.send(matchList);
-			}
+			if(count.isConnected())
+				count.send(matchCount);
+			if(list.isConnected())
+				list.send(matchList);
 		}
-		
 	}
 
 	@Override
