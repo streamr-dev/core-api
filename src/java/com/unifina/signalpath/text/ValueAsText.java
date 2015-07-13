@@ -1,7 +1,5 @@
 package com.unifina.signalpath.text;
 
-import java.util.Arrays;
-
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.StringOutput;

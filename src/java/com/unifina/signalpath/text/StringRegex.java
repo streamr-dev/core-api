@@ -38,8 +38,12 @@ public class StringRegex extends AbstractSignalPathModule {
 		int matchCount = 0;
 		ArrayList<String> matchList = new ArrayList<String>();
 		if(!s.getValue().isEmpty()){
-			if(p == null || !p.toString().equals(s.getValue())){
-				p = Pattern.compile(s.getValue());
+			String pattern = s.getValue();
+			if(Pattern.matches("^/.*/$", pattern))
+				pattern = pattern.split("^/|/$")[1];
+
+			if(p == null || !p.toString().equals(pattern)){
+				p = Pattern.compile(pattern);
 				m = p.matcher(text);
 			} else
 				m.reset(text);
