@@ -18,14 +18,14 @@ class StringRegexSpec extends Specification {
     }
 	
 	void "regex"() {
-		module.getInput("pattern").receive(~/([A-Z])\w+/.toString())
+		module.getInput("pattern").receive(/([A-Z])\w+/)
 		
 		when:
 		Map inputValues = [
-			text: ["test", "secondTest", "thirdTest"].collect {it?.toString()}
+			text: ["test", "Secondtest", "thirdTest", "FOURTHTEST"].collect {it?.toString()}
 		]
 		Map outputValues = [
-			"match?": [0, 1, 1].collect {it?.doubleValue()}
+			"match?": [0, 1, 0, 1].collect {it?.doubleValue()}
 		]
 		
 		then:
