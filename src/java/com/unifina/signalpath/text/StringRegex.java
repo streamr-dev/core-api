@@ -37,10 +37,14 @@ public class StringRegex extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		String text = in.getValue();
+		int matchCount = 0;
+		ArrayList<String> matchList = new ArrayList<String>();
 		if(!s.getValue().isEmpty()){
-			if(p == null || !p.toString().equals(s.getValue()))
+			if(p == null || !p.toString().equals(s.getValue())){
 				p = Pattern.compile(s.getValue());
-			m = p.matcher(text);
+				m = p.matcher(text);
+			} else
+				m.reset(text);
 			
 			// Matches
 			if(match.isConnected()){
@@ -49,25 +53,32 @@ public class StringRegex extends AbstractSignalPathModule {
 				else
 					match.send(0);
 			}
-			if(matchAny.isConnected()){
-				if(m.find())
+			if(matchAny.isConnected()) {
+				if(m.find()) {
+					matchCount++;
+					matchList.add(m.group());
 					matchAny.send(1);
-				else
+				} else if(m.matches()) {
+					matchAny.send(1);
+				} else
 					matchAny.send(0);
 			}
 			if(count.isConnected() || list.isConnected()){
-				int i = 0;
-				ArrayList<String> l = new ArrayList<String>();
-				while(m.find()){
-					i++;
-					if(list.isConnected()){
-						l.add(m.group());
+				if(m.matches()){
+					matchCount = 1;
+					matchList.add(m.group());
+				} else {
+					while(m.find()){
+						matchCount++;
+						if(list.isConnected()){
+							matchList.add(m.group());
+						}
 					}
 				}
 				if(count.isConnected())
-					count.send(i);
+					count.send(matchCount);
 				if(list.isConnected())
-					list.send(l);
+					list.send(matchList);
 			}
 		}
 		
