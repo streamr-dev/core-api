@@ -35,7 +35,7 @@
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*"]
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*"]
  grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**']
  
  grails.resources.processing.enabled = true
@@ -226,6 +226,11 @@ environments {
 /**
  * Spring security config
  */
+
+streamr.user.defaultFeeds = [7]
+streamr.user.defaultModulePackages = [1]
+grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
+
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'com.unifina.domain.security.SecUserSecRole'
 grails.plugin.springsecurity.authority.className = 'com.unifina.domain.security.SecRole'
@@ -256,7 +261,6 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
  * Miscellaneous
  */
 tomcat.nio = true // in run-app or test-app
-hello = "Hello from default Config"
 
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements

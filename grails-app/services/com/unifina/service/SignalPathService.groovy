@@ -67,22 +67,12 @@ class SignalPathService {
 	 * @return
 	 */
 	public Map reconstruct(Map json, Globals globals) {
+		SignalPath sp = jsonToSignalPath(json.signalPathData, true, globals, true)
 		
 		// TODO: remove backwards compatibility
-		Map signalPathData = json.signalPathData ? json.signalPathData : json
+		if (json.timeOfDayFilter)
+			json.signalPathContext.timeOfDayFilter = json.timeOfDayFilter
 		
-		SignalPath sp = jsonToSignalPath(signalPathData,true,globals,true)
-		
-		Map context = [:]
-		if (json.signalPathContext)
-			context = json.signalPathContext
-		// TODO: remove backwards compatibility
-		else {
-			if (json.timeOfDayFilter)
-				context["timeOfDayFilter"] = json.timeOfDayFilter
-		}
-		
-		json.signalPathContext = context
 		json.signalPathData = signalPathToJson(sp)
 		
 		return json

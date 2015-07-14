@@ -4,22 +4,20 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
+import com.unifina.utils.IdGenerator;
 
 class SecUser {
+	
 	String username
 	String password
 	boolean enabled
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
-
-	@Deprecated
-	String dataToken
 	
-	String apiKey
-	String apiSecret
+	String apiKey = IdGenerator.get()
+	String apiSecret = IdGenerator.get()
 	
-	// Added by Unifina
 	String name
 	String timezone
 	
@@ -40,12 +38,10 @@ class SecUser {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 
-	// Added by Unifina
 	Set<ModulePackage> getModulePackages() {
 		ModulePackageUser.findAllByUser(this).collect { it.modulePackage } as Set
 	}
 	
-	// Added by Unifina
 	Set<Feed> getFeeds() {
 		FeedUser.findAllByUser(this).collect { it.feed } as Set
 	}

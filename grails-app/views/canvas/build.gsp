@@ -143,10 +143,16 @@ $(document).ready(function() {
 	loadBrowser = new SignalPathBrowser()
 		.tab('Archive', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
-		.tab('Live', '${ createLink(controller: "live", \
-			action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
+
+		<%-- Don't show the live tab without ROLE_LIVE --%>
+		<sec:ifAllGranted roles="ROLE_LIVE">
+			.tab('Live', '${ createLink(controller: "live", \
+				action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
+		</sec:ifAllGranted>
+		
 		.tab('Examples', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
+			
 		.onSelect(function(url) {
 			SignalPath.loadSignalPath({ url: url })
 		})
@@ -273,7 +279,9 @@ $(document).unload(function () {
 							<span class="sr-only">Toggle Dropdown</span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
+							<sec:ifAllGranted roles="ROLE_LIVE">
+								<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
+							</sec:ifAllGranted>
 							<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
 						</ul>
 					</div>
