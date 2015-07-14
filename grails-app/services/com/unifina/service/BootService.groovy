@@ -51,9 +51,6 @@ class BootService {
 		def adminRole = SecRole.findByAuthority('ROLE_ADMIN') ?: new SecRole(authority: 'ROLE_ADMIN').save(failOnError: true)
 		def liveRole = SecRole.findByAuthority('ROLE_LIVE') ?: new SecRole(authority: 'ROLE_LIVE').save(failOnError: true)
 		
-		def webAppContext = WebApplicationContextUtils.getWebApplicationContext(servletContext)
-		def sessionFactory = webAppContext.getBean("sessionFactory")
-		
 		/**
 		 * Create a map for signalPathRunners
 		 */
