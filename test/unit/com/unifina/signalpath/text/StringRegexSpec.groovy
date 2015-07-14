@@ -59,5 +59,72 @@ class StringRegexSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
-	}	
+	}
+
+	void "inCaseSensitive flag in the pattern"() {
+		when:
+		module.getInput("pattern").receive("/^foo/i")
+		Map inputValues = [
+			text: ["Foobah", "foo\nfoo", "FOO", "bah"].collect {it?.toString()}
+		]
+		Map outputValues = [
+			"match?": [1, 1, 1, 0].collect {it?.doubleValue()},
+			"matchList": [["Foo"], ["foo"], ["FOO"], []],
+			"matchCount": [1,1,1,0].collect {it?.doubleValue()},
+		]
+		
+		then:
+		new ModuleTestHelper(module, inputValues, outputValues).test()
+		
+		when:
+		module.clearState()
+		
+		then:
+		new ModuleTestHelper(module, inputValues, outputValues).test()
+
+	}
+
+	void "multiline flag in the pattern"() {
+		when:
+		module.getInput("pattern").receive("/^foo/m")
+		Map inputValues = [
+			text: ["Foobah", "foo\nfoo", "FOO", "bah"].collect {it?.toString()}
+		]
+		Map outputValues = [
+			"match?": [0, 1, 0, 0].collect {it?.doubleValue()},
+			"matchList": [[], ["foo", "foo"], [], []],
+			"matchCount": [0,2,0,0].collect {it?.doubleValue()},
+		]
+		
+		then:
+		new ModuleTestHelper(module, inputValues, outputValues).test()
+		
+		when:
+		module.clearState()
+		
+		then:
+		new ModuleTestHelper(module, inputValues, outputValues).test()
+	}
+
+	void "multiline and inCaseSensitive flagS in the pattern"() {
+		when:
+		module.getInput("pattern").receive("/^foo/mi")
+		Map inputValues = [
+			text: ["Foobah", "foo\nFoo", "FOO", "bah"].collect {it?.toString()}
+		]
+		Map outputValues = [
+			"match?": [1, 1, 1, 0].collect {it?.doubleValue()},
+			"matchList": [["Foo"], ["foo", "Foo"], ["FOO"], []],
+			"matchCount": [1,2,1,0].collect {it?.doubleValue()},
+		]
+		
+		then:
+		new ModuleTestHelper(module, inputValues, outputValues).test()
+		
+		when:
+		module.clearState()
+		
+		then:
+		new ModuleTestHelper(module, inputValues, outputValues).test()
+	}
 }

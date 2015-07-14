@@ -22,6 +22,9 @@ public class StringRegex extends AbstractSignalPathModule {
 	
 	Pattern p = null;
 	Matcher m = null;
+
+	boolean caseInsensitive = false;
+	boolean multiline = false;
 		
 	@Override
 	public void init() {
@@ -39,8 +42,17 @@ public class StringRegex extends AbstractSignalPathModule {
 		ArrayList<String> matchList = new ArrayList<String>();
 		if(!s.getValue().isEmpty()){
 			String pattern = s.getValue();
-			if(Pattern.matches("^/.*/$", pattern))
-				pattern = pattern.split("^/|/$")[1];
+			if(Pattern.matches("^/.*/[im]{0,2}?$", pattern)){
+				String[] pList = pattern.split("^/|(/(?=([im]{0,2}$)))");
+				pattern = pList[1];
+				if(pList.length > 2){
+					String flags = pList[2];
+					if(flags.contains("i"))
+						pattern = "(?i)"+pattern;
+					if(flags.contains("m"))
+						pattern = "(?m)"+pattern;
+				}
+			}
 
 			if(p == null || !p.toString().equals(pattern)){
 				p = Pattern.compile(pattern);
