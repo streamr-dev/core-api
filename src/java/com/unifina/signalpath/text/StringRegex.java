@@ -3,12 +3,16 @@ package com.unifina.signalpath.text;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.ListOutput;
 import com.unifina.signalpath.StringInput;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.utils.MapTraversal;
+
 
 public class StringRegex extends AbstractSignalPathModule {
 	
@@ -23,8 +27,8 @@ public class StringRegex extends AbstractSignalPathModule {
 	Pattern p = null;
 	Matcher m = null;
 
-	boolean caseInsensitive = false;
-	boolean multiline = false;
+	boolean lastIgnoreCase = false;
+	boolean ignoreCase = false;
 		
 	@Override
 	public void init() {
@@ -42,20 +46,13 @@ public class StringRegex extends AbstractSignalPathModule {
 		ArrayList<String> matchList = new ArrayList<String>();
 		if(!s.getValue().isEmpty()){
 			String pattern = s.getValue();
-			if(Pattern.matches("^/.*/[im]{0,2}?$", pattern)){
-				String[] pList = pattern.split("^/|(/(?=([im]{0,2}$)))");
-				pattern = pList[1];
-				if(pList.length > 2){
-					String flags = pList[2];
-					if(flags.contains("i"))
-						pattern = "(?i)"+pattern;
-					if(flags.contains("m"))
-						pattern = "(?m)"+pattern;
-				}
-			}
 
-			if(p == null || !p.toString().equals(pattern)){
-				p = Pattern.compile(pattern);
+			if(p == null || lastIgnoreCase != ignoreCase || !p.toString().equals(pattern)){
+				lastIgnoreCase = ignoreCase;
+				if(ignoreCase)
+					p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+				else
+					p = Pattern.compile(pattern);
 				m = p.matcher(text);
 			} else
 				m.reset(text);
@@ -85,6 +82,31 @@ public class StringRegex extends AbstractSignalPathModule {
 	public void clearState() {
 		p = null;
 		m = null;
+	}
+
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String,Object> config = super.getConfiguration();
+		
+		if (!config.containsKey("options")) {
+			config.put("options", new HashMap<String,Object>());
+		}
+		Map<String,Object> options = (Map<String,Object>) config.get("options");
+		
+		Map<String,Object> caseOption = new HashMap<>();
+		options.put("ignoreCase", caseOption);
+		caseOption.put("type","boolean");
+		caseOption.put("value",ignoreCase);
+		
+		return config;
+	}
+	
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+		if (MapTraversal.getProperty(config, "options.ignoreCase.value")!=null) {
+			ignoreCase = MapTraversal.getBoolean(config, "options.ignoreCase.value"); 
+		}
 	}
 	
 }

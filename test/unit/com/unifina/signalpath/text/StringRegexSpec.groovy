@@ -39,8 +39,8 @@ class StringRegexSpec extends Specification {
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}
 
-	void "phone numbers with slashes in the pattern"() {
-		module.getInput("pattern").receive("/\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b/")
+	void "phone numbers in the pattern"() {
+		module.getInput("pattern").receive("\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b")
 		when:
 		Map inputValues = [
 			text: ["p:444-555-1234 + 1235554567", "246.555.8888", "m:1235554567", "not a phone number", "eleven numbers: 01234567890"].collect {it?.toString()}
@@ -61,32 +61,9 @@ class StringRegexSpec extends Specification {
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}
 
-	void "inCaseSensitive flag in the pattern"() {
+	void "ignoreCase off and on"() {
+		module.getInput("pattern").receive("foo")
 		when:
-		module.getInput("pattern").receive("/^foo/i")
-		Map inputValues = [
-			text: ["Foobah", "foo\nfoo", "FOO", "bah"].collect {it?.toString()}
-		]
-		Map outputValues = [
-			"match?": [1, 1, 1, 0].collect {it?.doubleValue()},
-			"matchList": [["Foo"], ["foo"], ["FOO"], []],
-			"matchCount": [1,1,1,0].collect {it?.doubleValue()},
-		]
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-
-	}
-
-	void "multiline flag in the pattern"() {
-		when:
-		module.getInput("pattern").receive("/^foo/m")
 		Map inputValues = [
 			text: ["Foobah", "foo\nfoo", "FOO", "bah"].collect {it?.toString()}
 		]
@@ -104,17 +81,12 @@ class StringRegexSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
-	}
 
-	void "multiline and inCaseSensitive flagS in the pattern"() {
 		when:
-		module.getInput("pattern").receive("/^foo/mi")
-		Map inputValues = [
-			text: ["Foobah", "foo\nFoo", "FOO", "bah"].collect {it?.toString()}
-		]
-		Map outputValues = [
+    	module.onConfiguration([options: [ignoreCase: [value: true]]])
+		outputValues = [
 			"match?": [1, 1, 1, 0].collect {it?.doubleValue()},
-			"matchList": [["Foo"], ["foo", "Foo"], ["FOO"], []],
+			"matchList": [["Foo"], ["foo", "foo"], ["FOO"], []],
 			"matchCount": [1,2,1,0].collect {it?.doubleValue()},
 		]
 		
@@ -126,5 +98,6 @@ class StringRegexSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
+
 	}
 }
