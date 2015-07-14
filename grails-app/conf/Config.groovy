@@ -1,5 +1,3 @@
-// configuration for plugin testing - will not be included in the plugin zip
-
 // Most of the config comes from UnifinaCoreDefaultConfig.groovy
 
 log4j = {
