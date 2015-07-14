@@ -279,8 +279,11 @@ Module.prototype.renderHelp = function(msg){
 	})
 
 	$.getJSON(Streamr.createLink("module", "jsonGetModuleHelp", this.module.metadata.id), {}, function(moduleHelp){
-		_this.moduleHelp = moduleHelp
-		_this.helpText = moduleHelp.helpText
+		if(!$.isEmptyObject(moduleHelp))
+			_this.moduleHelp = moduleHelp
+		else
+			_this.moduleHelp = {helpText: "", params:{}, paramNames:[], inputs:{}, inputNames:[], outputs:{}, outputNames:[]}
+		_this.helpText = _this.moduleHelp.helpText
 		_this.hasModuleHelp = true
 		if(_this.hasModuleData == true)
 			_this.drawHelp()
