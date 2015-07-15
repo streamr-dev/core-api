@@ -99,7 +99,11 @@ class BootService {
 		ConfigObject config = new ConfigObject();
 		config.putAll(secondaryConfig.merge(currentConfig))
 		
+		println "Default config from core: "+secondaryConfig
+		
 		app.config = config;
+		
+		println "Merged config: "+config
 	}
 	
 	def onDestroy() {
