@@ -1,5 +1,6 @@
 package com.unifina.signalpath.time;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,9 +9,9 @@ import java.util.TimeZone;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
+import com.unifina.signalpath.ModuleException;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.StringParameter;
-import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
 public class DateConversion extends AbstractSignalPathModule {
@@ -19,7 +20,7 @@ public class DateConversion extends AbstractSignalPathModule {
 	StringParameter tz = new StringParameter(this, "timezone", "");
 	StringParameter format = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 	
-	Input<Object> dateIn = new Input<>(this, "date", "Date Double");
+	Input<Object> dateIn = new Input<>(this, "date", "Date Double String");
 
 	StringOutput dateOut = new StringOutput(this, "date");
 	TimeSeriesOutput tsOut = new TimeSeriesOutput(this,"ts");
@@ -66,6 +67,12 @@ public class DateConversion extends AbstractSignalPathModule {
 			date = new Date(Math.round((double)dateIn.getValue()));
 		} else if(dateIn.getValue() instanceof Date){
 			date = (Date)dateIn.getValue();
+		} else if(dateIn.getValue() instanceof String){
+			try {
+				date = new SimpleDateFormat(format.getValue()).parse((String)dateIn.getValue());
+			} catch (ParseException e) {
+				throw new RuntimeException("The input date is not in the given format!",e);
+			}
 		}
 		cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
 		cal.setTime(date);

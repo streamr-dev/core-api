@@ -51,6 +51,34 @@ class DateConversionSpec extends Specification {
 		module.getOutput("date").getValue() == null
 	}
 	
+	void "timestamp output must be correct from string input"() {
+		when: "time is set and asked"
+		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
+		module.getInput("date").receive("2015-07-15 09:32:00")
+		module.sendOutput()
+		
+		then: "the time is sent out"
+		module.getOutput("ts").getValue() == new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2015-07-15 09:32:00").getTime()
+		module.getOutput("date").getValue() == null
+	}
+	
+	def testRuntimeException(Closure c){
+		try {
+			c();
+			return false
+		} catch (RuntimeException e) {
+			return true
+		}
+	}
+	
+	void "must throw exception when the given string is not in right format"() {
+		when: "time is set and asked"
+		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
+		module.getInput("date").receive("15/07/2015 09:32:00")
+		then: "it throws exception"
+		testRuntimeException{module.sendOutput()}
+	}
+	
 	void "string output must be correct from date input"() {
 		when: "time is set and asked without giving a format"
 		Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2015-07-15 09:32:00")
