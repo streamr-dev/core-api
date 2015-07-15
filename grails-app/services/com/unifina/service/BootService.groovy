@@ -24,6 +24,8 @@ class BootService {
 	def servletContext
 	
 	def onInit() {
+		mergeDefaultConfig(grailsApplication)
+		
 		/**
 		 * Workaround for GRAILS-8895
 		 * https://jira.grails.org/browse/GRAILS-8895
