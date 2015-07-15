@@ -1,4 +1,4 @@
-package com.unifina.signalpath.utils;
+package com.unifina.signalpath.text;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;

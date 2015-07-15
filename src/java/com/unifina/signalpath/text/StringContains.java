@@ -1,4 +1,4 @@
-package com.unifina.signalpath.utils;
+package com.unifina.signalpath.text;
 
 import java.util.HashMap;
 import java.util.Map;
