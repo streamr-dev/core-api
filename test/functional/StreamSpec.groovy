@@ -1,10 +1,9 @@
-import geb.spock.GebReportingSpec
-
 import java.nio.file.Paths
 
+import spock.lang.*
+import core.LoginTester1Spec
 import core.mixins.StreamMixin
 import core.pages.*
-import spock.lang.*
 
 
 

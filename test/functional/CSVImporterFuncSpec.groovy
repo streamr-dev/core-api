@@ -1,9 +1,10 @@
 import java.nio.file.Paths
 
+import spock.lang.*
+import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.StreamMixin
 import core.pages.*
-import spock.lang.*
 
 
 

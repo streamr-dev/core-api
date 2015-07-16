@@ -262,8 +262,11 @@ class FeedFileService {
 			feedFile = FeedFile.findByStreamAndDayBetween(stream, beginDate, endDate, [sort:'day', max:1, offset:piece])
 		
 		// Null signals the end of data
-		if (feedFile==null)
+		if (feedFile==null) {
+			log.debug("getStream: no more FeedFiles for stream $stream.id, feed $stream.feed.id, beginDate: $beginDate, endDate: $endDate, piece: $piece")
 			return null
+		}
+		else log.debug("getStream: starting FeedFile "+feedFile.id+" for stream "+stream.id)
 		
 		// Instantiate preprocessor and get the preprocessed file name
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(feed)
