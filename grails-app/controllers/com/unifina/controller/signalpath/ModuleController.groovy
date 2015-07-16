@@ -195,11 +195,11 @@ class ModuleController {
 		// Needs to be owner
 		Module module = Module.get(params.id)
 		if (module.modulePackage.user!=springSecurityService.currentUser) {
-			render ([success:false, error: "Access denied, only owner can edit module help"])
-		}
-		else {
+			response.status = 403
+			render ([success:false, error: "Access denied, only owner can edit module help"] as JSON)
+		} else {
 			module.jsonHelp = params.jsonHelp
-			module.save(failOnError:true)
+			module.save(failOnError:true, flush:true)
 			render ([success:true] as JSON)
 		}
 	}

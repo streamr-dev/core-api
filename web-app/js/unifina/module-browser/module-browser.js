@@ -1,5 +1,6 @@
 (function(exports) {
 
+//ModuleBrowser
 function ModuleBrowser(options){
 	var _this = this
 
@@ -8,7 +9,7 @@ function ModuleBrowser(options){
 	this.searchBoxEl = $(options.searchBoxEl)
 
 	this.level = 0
-	_this.offset = 80
+	this.offset = 80
 
 	this.categoryName = ""
 	
@@ -16,7 +17,7 @@ function ModuleBrowser(options){
 		var sidebar = new Sidebar(_this.sidebarEl, moduleTree)
 		_this.renderModules(_this.moduleTreeEl, moduleTree)
 		
-		new Search(_this.searchBoxEl, _this.offset, sidebar.modules)
+		_this.search = new Search(_this.searchBoxEl, _this.offset, sidebar.modules)
 
 		$('body').scrollspy({
 			offset: _this.offset
@@ -81,9 +82,6 @@ Module.prototype.render = function(){
 		id: "module"+this.module.metadata.id
 	})
 	this.panelHeading = $("<div/>", {
-		class: "panel-heading"
-	})
-	this.a = $("<a/>", {
 		class: "accordion-toggle collapsed panel-heading",
 		'data-toggle': "collapse",
 		href: "#collapse"+this.module.metadata.id
@@ -103,30 +101,36 @@ Module.prototype.render = function(){
 		src: spinnerImg,
 		style: "margin-left:50%;"
 	})
-	// a.append(panelHeading)
-	this.a.append(this.panelTitle)
-	this.panel.append(this.a)
+	this.panelHeading.append(this.panelTitle)
+	this.panel.append(this.panelHeading)
+	this.panel.append(this.collapse)
 	this.collapse.append(this.panelBody)
 	this.panelBody.append(this.spinner)
-	this.panel.append(this.collapse)
 	
 	_this.collapse.one("show.bs.collapse", function(){
 		_this.renderHelp()
 	})
-	
 
 	this.element.append(this.panel)
 }
 
-Module.prototype.renderHelp = function(msg){
+Module.prototype.renderHelp = function(){
 	var _this = this
+
+	if(_this.helpTextTable)
+		_this.panelBody.empty()
+
+	// These are set in the ajax call success handlers
 	this.moduleData
 	this.moduleHelp
 
 	this.hasModuleData = false
 	this.hasModuleHelp = false
 
-	this.drawHelp = function(){
+	this.renderHelpElements = function(){
+		_this.panelBody.removeClass("editing")
+		_this.spinner.remove()
+
 		var moduleHelp = _this.moduleHelp
 		var moduleData = _this.moduleData
 
@@ -170,25 +174,13 @@ Module.prototype.renderHelp = function(msg){
 			})
 		}
 		
-
-		_this.spinner.remove()
-		if(msg === undefined){
-			var msg = ""
-		}
-		if(_this.topContainer){
-			_this.topContainer.append($("<span/>", {
-				class: 'flash-message',
-				html: msg
-			}))
-		}
-		
 		_this.helpTextTable = $("<table class='table help-text-table'></table>")
 		if(moduleHelp.helpText){
 			// helpText.append($("<thead><tr><th>Help Text</th></tr></thead>"))
 			_this.helpTextTable.append($("<tr><td><div class='help-text'></div></td></tr>"))
 			_this.helpTextTable.find(".help-text").html(moduleHelp.helpText)
 		} else {
-			_this.helpTextTable.append($("<thead><tr><th><div class='no-help-text'>No Help Text</div></th></tr></thead>"))
+			_this.helpTextTable.append($("<thead><tr><th><div class='no-help-text help-text'>No Help Text</div></th></tr></thead>"))
 		}
 		_this.panelBody.append(_this.helpTextTable)
 
@@ -237,7 +229,7 @@ Module.prototype.renderHelp = function(msg){
 	}
 
 
-	this.drawEdit = function(){
+	this.drawEditButtons = function(){
 		_this.topContainer = $("<div/>", {
 			class: 'col-xs-12 top-container'
 		})
@@ -247,34 +239,37 @@ Module.prototype.renderHelp = function(msg){
 			text: "Edit help"
 		})
 		_this.editBtn.click(function(){
-			$(this).hide()
-			_this.saveBtn.show()
-			_this.edit()
+			_this.startEdit()
 		})
-		_this.panelBody.find(".top-container").append(_this.editBtn)
 		_this.saveBtn = $("<button/>", {
 			class: "btn btn-primary btn-sm save-btn",
-			text: "Save edits"
+			text: "Save"
 		})
 		_this.saveBtn.click(function(){
-			$(this).hide()
-			_this.editBtn.show()
 			_this.save()
 		})
+		_this.cancelBtn = $("<button/>", {
+			class: "btn btn-default btn-sm cancel-btn",
+			text: "Cancel"
+		})
+		_this.cancelBtn.click(function(){
+			_this.renderHelp()
+		})
+		_this.panelBody.find(".top-container").append(_this.editBtn)
+		_this.panelBody.find(".top-container").append(_this.cancelBtn)
 		_this.panelBody.find(".top-container").append(_this.saveBtn)
-		_this.saveBtn.hide()
 	}
 
 	$.getJSON(Streamr.createLink("module", "jsonGetModule", this.module.metadata.id), {}, function(module){
 		_this.moduleData = module
 		_this.hasModuleData = true
 		if(_this.hasModuleHelp == true)
-			_this.drawHelp()
+			_this.renderHelpElements()
 	})
 
 	$.getJSON(Streamr.createLink("module", "canEdit", this.module.metadata.id), {}, function(canEdit){
 		if(canEdit.success == true){
-			_this.drawEdit()
+			_this.drawEditButtons()
 		}
 	})
 
@@ -286,11 +281,11 @@ Module.prototype.renderHelp = function(msg){
 		_this.helpText = _this.moduleHelp.helpText
 		_this.hasModuleHelp = true
 		if(_this.hasModuleData == true)
-			_this.drawHelp()
+			_this.renderHelpElements()
 	})
 }
 
-Module.prototype.edit = function() {
+Module.prototype.startEdit = function() {
 	var _this = this
 	$.each(this.panelBody.find(".value"), function(i, el){
 		$(el).append($("<input/>", {
@@ -301,10 +296,6 @@ Module.prototype.edit = function() {
 		}))
 		$(el).find("span").hide()
 	})
-	if(this.helpTextTable.find(".no-help-text").length){
-		this.helpTextTable.find(".no-help-text").remove()
-		this.helpTextTable.append($("<tbody><tr><td><div class='help-text'>No help text</div></td></tr></tbody>"))
-	}
 	
 	this.helpTextTable.find(".help-text").parent().append($("<textarea rows='10' cols='80' id='textarea"+this.module.metadata.id+"' class='module-help form-control' style='width:100%; height:300px; resize:vertical;'>"+this.helpText+"</textarea>"))
 	this.helpTextTable.find(".help-text").hide()
@@ -312,7 +303,6 @@ Module.prototype.edit = function() {
 	var createEditor = function(result){
 		CKEDITOR.replace("textarea"+_this.module.metadata.id, {
 			customConfig: CKEDITORConfigUrl+'/custom-config.js',
-			// skin : 'BootstrapCK4-Skin,'+CKEDITORConfigUrl+'/skins/bootstrapck/'
 		})
 	}
 	if(window.CKEDITOR === undefined){
@@ -326,32 +316,43 @@ Module.prototype.edit = function() {
 	} else {
 		createEditor()
 	}
+
+	_this.panelBody.addClass("editing")
 }
 
 Module.prototype.save = function(){
 	var _this = this
-	var moduleHelp = this.makeHelp()
+	var moduleHelp = this.buildHelpJSON()
 	var data = {success: ""}
 	$.ajax({
 	    type: 'POST',
 	    url: Streamr.createLink('module', 'jsonSetModuleHelp'),
 	    dataType: 'json',
 	    success: function(data) {
-	    	_this.panelBody.empty()
-	    	var msg = (data.success ? "Module help successfully saved." : "An error has occurred.")
 			try {
 			     CKEDITOR.instances["textarea"+this.module.metadata.id].destroy(false)
-			 } catch (e) { }
-			_this.renderHelp(msg)
+			} catch (e) { }
+			$.pnotify({
+				type: 'success',
+        		title: "Great!",
+        		text: _this.module.data+" help saved successfully",
+	        	delay: 4000
+    		});
+			_this.renderHelp()
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
-	    	_this.panelBody.find(".flash-message").append("An error has occurred.")
+			$.pnotify({
+				type: 'error',
+        		title: "Something went wrong!",
+        		text: jqXHR.responseJSON.error ? jqXHR.responseJSON.error : _this.module.data+" help couldn't be saved",
+	        	delay: 4000
+    		});
 	    },
 	    data: {id:_this.module.metadata.id, jsonHelp:JSON.stringify(moduleHelp)}
 	})
 }
 
-Module.prototype.makeHelp = function() {
+Module.prototype.buildHelpJSON = function() {
 	var paramTable = this.panelBody.find(".param-table"),
 		inputTable = this.panelBody.find(".input-table"),
 		outputTable = this.panelBody.find(".output-table"),
@@ -391,6 +392,7 @@ Module.prototype.makeHelp = function() {
 	return result;
 }
 
+// Sidebar
 function Sidebar(el, moduleTree){
 	this.modules = {}
 	this.renderSidebar(el, moduleTree)
@@ -434,10 +436,7 @@ Sidebar.prototype.renderSidebar = function(el, json){
 	this.renderChildren(ul, json)
 }
 
-// The searchbox now searches from the modules and categorys by the input and 
-// scrolls to the next search result. If a search with a space is typed, it first looks that is
-// there any results by the whole search (e.g. 'time series' > 'Time Series') and then by the last word
-// (e.g. 'time statistics corr' > 'Correlation')
+// Search
 function Search(searchBoxEl, offset, modules){
 	var _this = this
 	this.offset = offset
@@ -452,9 +451,7 @@ function Search(searchBoxEl, offset, modules){
 
 	this.searchBox.on("keyup", function(e){
 		var search = _this.searchBox.val().toLowerCase()
-		
 		var href = _this.search(search)
-		
 		_this.action(href)
 	})
 }
@@ -499,15 +496,17 @@ Search.prototype.action = function(href){
 	var _this = this
 	var timeout
 
-	var open = function(panel){
+	// By only changing the classes and triggering the 'show.bs.collapse' event 
+	// manually there's no animation, so the scroll doesn't mess up
+	this.openPanel = function(panel){
 		if($(panel).find(".panel-heading").hasClass("collapsed")){
-			// With clicking the panel heading there's animation, which looks nice
-			$(panel).find(".panel-heading").click()
+			$(panel).find(".panel-collapse.collapse").trigger("show.bs.collapse")
+			$(panel).find(".panel-heading").removeClass("collapsed")
+			$(panel).find(".panel-collapse").addClass("in")
 		}
 	}
-	var close = function(panel){
+	this.closePanel = function(panel){
 		if(!$(panel).find(".panel-heading").hasClass("collapsed")){
-			// By changing only the classes there's no animation when closing the module, which would mess up the scrolling
 			$(panel).find(".panel-heading").addClass("collapsed")
 			$(panel).find(".panel-collapse").removeClass("in")
 		}
@@ -517,15 +516,16 @@ Search.prototype.action = function(href){
 	if(href === ""){
 		$("body").scrollTop(0)
 		_this.msgField.empty()
-		if(lastModule)
-			close(lastModule)
+		$(".panel .collapse.in").each(function(i, e){
+			_this.closePanel($(e).closest(".panel"))
+		})
 	}
 	if(module.length){
 		if(lastModule.length && (this.lastHref && href != this.lastHref)){
 			if(timeout){
 				clearTimeout(timeout)
 			}
-			close(lastModule)
+			_this.closePanel(lastModule)
 		}
 		module[0].scrollIntoView()
 		window.scrollBy(0, -(_this.offset-30))
@@ -533,13 +533,14 @@ Search.prototype.action = function(href){
 		if(timeout)
 			clearTimeout(timeout)
 		timeout = setTimeout(function(){
-			open(module)
+			_this.openPanel(module)
 		},200)
 		this.lastHref = href
 	}
 }
 
-
 exports.ModuleBrowser = ModuleBrowser
+exports.Sidebar = Sidebar
+exports.Search = Search
 
 })(typeof(exports) !== 'undefined' ? exports : window)

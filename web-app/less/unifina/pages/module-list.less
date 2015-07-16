@@ -17,16 +17,34 @@ body.module-list {
 		}
 		.panel {
 			margin-bottom: 10px;
+			.panel-heading {
+				cursor: pointer;
+			}
 			.panel-body {
 				table tr th:nth-child(1),
 				table tr th:nth-child(2) {
 					width: 20%;
 				}
 				.edit-btn,
-				.save-btn {
+				.save-btn,
+				.cancel-btn {
 					margin-top: -10px;
 					margin-bottom: 10px;
 					float: right;
+				}
+				.cancel-btn {
+					margin-left: 7px;
+				}
+			}
+			.panel-body:not(.editing){
+				.btn.save-btn,
+				.btn.cancel-btn {
+					display: none;
+				}
+			}
+			.panel-body.editing {
+				.btn.edit-btn {
+					display: none;
 				}
 			}
 		}

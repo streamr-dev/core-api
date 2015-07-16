@@ -16584,15 +16584,29 @@ body.module-list #module-help-tree .highlight {
 body.module-list #module-help-tree .panel {
   margin-bottom: 10px;
 }
+body.module-list #module-help-tree .panel .panel-heading {
+  cursor: pointer;
+}
 body.module-list #module-help-tree .panel .panel-body table tr th:nth-child(1),
 body.module-list #module-help-tree .panel .panel-body table tr th:nth-child(2) {
   width: 20%;
 }
 body.module-list #module-help-tree .panel .panel-body .edit-btn,
-body.module-list #module-help-tree .panel .panel-body .save-btn {
+body.module-list #module-help-tree .panel .panel-body .save-btn,
+body.module-list #module-help-tree .panel .panel-body .cancel-btn {
   margin-top: -10px;
   margin-bottom: 10px;
   float: right;
+}
+body.module-list #module-help-tree .panel .panel-body .cancel-btn {
+  margin-left: 7px;
+}
+body.module-list #module-help-tree .panel .panel-body:not(.editing) .btn.save-btn,
+body.module-list #module-help-tree .panel .panel-body:not(.editing) .btn.cancel-btn {
+  display: none;
+}
+body.module-list #module-help-tree .panel .panel-body.editing .btn.edit-btn {
+  display: none;
 }
 body.module-list .streamr-sidebar {
   margin-top: -15px;

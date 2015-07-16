@@ -171,7 +171,7 @@ modules = {
 		resource url:[dir:'js/unifina/clickable-table', file:'clickable-table.js', plugin:'unifina-core']
 	}
 	'module-browser' {
-		dependsOn 'mathjax, bootstrap, underscore, streamr'
+		dependsOn 'mathjax, bootstrap, underscore, streamr, pnotify'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	toolbar {
