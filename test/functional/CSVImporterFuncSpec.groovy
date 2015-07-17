@@ -6,8 +6,6 @@ import core.mixins.CanvasMixin
 import core.mixins.StreamMixin
 import core.pages.*
 
-
-
 @Mixin(StreamMixin)
 @Mixin(CanvasMixin)
 class CSVImporterFuncSpec extends LoginTester1Spec {
@@ -38,21 +36,9 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		$("#submit").click()
 		then: "The data is uploaded"
 		waitFor { at StreamShowPage }
-		$(".col-sm-12 table td", text:"Begin Date").displayed
-		$(".col-sm-12 table td", text:"2015-04-30").displayed
-		$(".col-sm-12 table td", text:"2015-05-01").displayed
-		$(".col-sm-12 table td", text:"2015-05-02").displayed
-		$(".col-sm-12 table td", text:"2015-05-03").displayed
-		$("#stream-fields tbody td")[0].text() == "Product Title"
-		$("#stream-fields tbody td")[2].text() == "Price"
-		$("#stream-fields tbody td")[4].text() == "Rootstock"
-		$("#stream-fields tbody td")[6].text() == "Height"
-		$("#stream-fields tbody td")[8].text() == "Description"
-		$("#stream-fields tbody td")[1].text() == "string"
-		$("#stream-fields tbody td")[3].text() == "number"
-		$("#stream-fields tbody td")[5].text() == "string"
-		$("#stream-fields tbody td")[7].text() == "number"
-		$("#stream-fields tbody td")[9].text() == "string"
+		waitFor { $(".history .control-label", text:"Range").displayed }
+		waitFor { $(".history div", text:contains("2015-04-30")).displayed }
+		waitFor { $(".history div", text:contains("2015-05-03")).displayed }
 		
 		//The stream must be left empty
 		emptyStream("CSVImporterFuncSpec")
@@ -75,19 +61,9 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		fileInput = file
 		then: "the correct data is uploaded"
 		waitFor(){ at StreamShowPage }
-		waitFor(10){ $(".col-sm-12 table td", text:"Begin Date").displayed }
-		$(".col-sm-12 table td", text:"Begin Date").displayed
-		$(".col-sm-12 table td", text:"2015-02-23").displayed
-		$(".col-sm-12 table td", text:"2015-02-24").displayed
-		$(".col-sm-12 table td", text:"2015-02-25").displayed
-		$("#stream-fields tbody td")[0].text() == "price"
-		$("#stream-fields tbody td")[2].text() == "size"
-		$("#stream-fields tbody td")[4].text() == "really"
-		$("#stream-fields tbody td")[6].text() == "comment"
-		$("#stream-fields tbody td")[1].text() == "number"
-		$("#stream-fields tbody td")[3].text() == "number"
-		$("#stream-fields tbody td")[5].text() == "boolean"
-		$("#stream-fields tbody td")[7].text() == "string"
+		waitFor { $(".history .control-label", text:"Range").displayed }
+		waitFor { $(".history div", text:contains("2015-02-23")).displayed }
+		waitFor { $(".history div", text:contains("2015-02-25")).displayed }
 	}
 	
 	void "the data of the stream can now be used e.g. in canvas"() {
@@ -98,7 +74,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		$("#endDate") << "2015-02-25"
 		$(".input-group-addon", text:"To").click()
 		
-		searchAndClickContains("CSVImporterFuncSpec")
+		searchAndClickContains("CSVImporter")
 		searchAndClick("Label")
 		
 		connectEndpoints(findOutput("Stream", "price"), findInput("Label", "label"))

@@ -4,6 +4,7 @@
         <title><g:message code="stream.show.label" args="[stream.name]"/></title>
         <r:require module="dropzone"/>
 		<r:require module="toolbar"/>
+		<r:require module="bootstrap-datepicker"/>
     </head>
     <body class="stream-show">
     	<ui:breadcrumb>

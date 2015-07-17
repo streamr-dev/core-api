@@ -17,6 +17,8 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.CSVImporter.Schema
 
+import java.text.SimpleDateFormat
+
 @Secured(["ROLE_USER"])
 class StreamController {
 
@@ -272,23 +274,22 @@ class StreamController {
 		}
 	}
 	
-	
-	def deleteSelectedFeedFiles() {
-		if(params.list("selectedFeedFiles").size() == 0){
-			flash.error = "No selected feed files!"
-			redirect(action:"show", params:[id:params.streamId])
-		} else {
-			def ids = params.list("selectedFeedFiles").collect {Long.parseLong(it)}
-			def feedFiles = FeedFile.findAllByIdInList(ids)
-			feedFiles.each {
-				feedFileService.deleteFile(it)
-			}
-			FeedFile.executeUpdate("delete from FeedFile ff where ff.id in (:ids)", [ids:ids])
-			
-			flash.message = "Data deleted!"
-			redirect(action:"show", params:[id:params.streamId])
+	def deleteFeedFilesUpTo() {
+		// Access checked by beforeInspector
+		def stream = Stream.get(params.id)
+		
+		def date = new SimpleDateFormat(message(code:"default.dateOnly.format")).parse(params.date) + 1
+		def feedFiles = FeedFile.findAllByStreamAndEndDateLessThan(stream, date)
+		feedFiles.each {
+			feedFileService.deleteFile(it)
 		}
+		def deletedCount = FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream and ff.endDate < :date", [stream: stream, date: date])
+		if(deletedCount > 0){
+			flash.message = "All data up to "+params.date+" successfully deleted"
+		} else {
+			flash.error = "Something went wrong with deleting files"
+		}
+		redirect(action:"show", params:[id:params.id])
 	}
-	
 	
 }

@@ -41,7 +41,6 @@ modules = {
 		// Current version is from: https://raw.github.com/n9/bootstrap-datepicker/6deee4ec7fa22bd1dee78913e0340f3841f58982/js/bootstrap-datepicker.js
 		// due to this issue not yet fixed: https://github.com/eternicode/bootstrap-datepicker/issues/775
 		resource url:[dir:'js/bootstrap-datepicker/js', file:'bootstrap-datepicker.js', plugin: 'unifina-core']
-		resource url:[dir:'js/bootstrap-datepicker/css', file:'datepicker.css', plugin: 'unifina-core']
 	}
 	hopscotch {
 		resource url:[dir:'js/hopscotch', file:'hopscotch.css', plugin: 'unifina-core']
