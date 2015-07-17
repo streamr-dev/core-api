@@ -23,5 +23,6 @@ class UnifinaCorePluginUrlMappings {
 		// API url mappings
 		"/api/stream/create"(controller: "stream", action: "apiCreate")
 		"/api/stream/lookup"(controller: "stream", action: "apiLookup")
+		"/api/live/request"(controller: "live", action: "request")
 	}
 }

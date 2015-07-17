@@ -73,4 +73,27 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 		waitFor { $("body").text().contains("error") }
 	}
 
+	
+	def "user doesn't see Live tabs in loadBrowser without ROLE_LIVE role"() {
+		when: "user clicks load button"
+			at CanvasPage
+			loadButton.click()
+		then: "load browser is opened with archive content"
+			waitFor {
+				$('#archiveLoadBrowser')
+			}
+		then: "Live tab must not be displayed"
+			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li").size()==3
+			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li", text:"Live").size()==0
+	}
+	
+	
+	def "user shouldn't see 'Launch live' -button in the launch-dropdown"(){
+		when: "Dropdown is opened"
+			at CanvasPage
+			runDropdownButton.click()
+		then:
+			$("#runLiveModalButton").size() == 0
+	}
+	
 }

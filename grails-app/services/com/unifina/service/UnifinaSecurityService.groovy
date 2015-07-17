@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
 import org.apache.log4j.Logger
@@ -13,7 +14,7 @@ import com.unifina.domain.signalpath.SavedSignalPath
 
 class UnifinaSecurityService {
 	
-	def springSecurityService
+	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 	
 	/**
@@ -28,15 +29,10 @@ class UnifinaSecurityService {
 	 * @param user
 	 * @return
 	 */
-	private boolean checkUser(instance, SecUser user=null, boolean logIfDenied=true, String apiKey=null, String apiSecret=null) {
-		// What user are we authenticating?
-		if (user==null) {
-			// Api keys take precedence over session user
-			if (apiKey!=null) {
-				user = getUserByApiKey(apiKey, apiSecret)
-			}
-			if (user==null)
-				user = springSecurityService.getCurrentUser()
+	private boolean checkUser(instance, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
+		if (!instance) {
+			log.warn("checkUser: no instance, denying access for user $user?.id")
+			return false
 		}
 		
 		// Is this a protected instance?
@@ -47,49 +43,47 @@ class UnifinaSecurityService {
 			}
 			return result
 		}
-		// For unprotected instances, return true
+		// TODO: For unprotected instances, return true. Safe?
 		else return true
 	}
 
 	@CompileStatic
-	boolean canAccess(Object instance, String apiKey=null, String apiSecret=null) {
-		if (instance) {
-			
-			if (!checkUser(instance, null, true, apiKey, apiSecret)) {
-				return false
-			}
+	boolean canAccess(Object instance, SecUser user=springSecurityService.getCurrentUser()) {
+		if (!instance) {
+			log.warn("canAccess: no instance, denying access for user $user?.id")
+			return false
 		}
-		// TODO: questionable
-		return true
+		
+		return checkUser(instance, user) 
 	}
 
 	@CompileStatic
-	boolean canAccess(Module module) {
-		return canAccess(module.modulePackage)
+	boolean canAccess(Module module, SecUser user=springSecurityService.getCurrentUser()) {
+		return canAccess(module.modulePackage, user)
 	}
 	
 	@CompileStatic
-	boolean canAccess(ModulePackage modulePackage) {
+	boolean canAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
 		// Everyone who has been granted access to a ModulePackage can access it
-		return checkModulePackageAccess(modulePackage) || checkUser(modulePackage)
+		return checkModulePackageAccess(modulePackage, user) || checkUser(modulePackage, user)
 	}
 	
 	@CompileStatic 
-	boolean canAccess(RunningSignalPath rsp, String apiKey=null, String apiSecret=null) {
+	boolean canAccess(RunningSignalPath rsp, SecUser user=springSecurityService.getCurrentUser()) {
 		// Shared RunningSignalPaths can be accessed by everyone
-		return rsp.shared || checkUser(rsp, null, true, apiKey, apiSecret)
+		return rsp?.shared || checkUser(rsp, user)
 	}
 	
 	@CompileStatic
-	boolean canAccess(SavedSignalPath ssp, boolean isLoad) {
+	boolean canAccess(SavedSignalPath ssp, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
 		if (isLoad && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
 			return true
-		else return canAccess(ssp)
+		else return canAccess(ssp, user)
 	}
 	
-	private boolean checkModulePackageAccess(ModulePackage modulePackage) {
-		ModulePackageUser mpu = ModulePackageUser.findByUserAndModulePackage(springSecurityService.currentUser, modulePackage)
+	private boolean checkModulePackageAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
+		ModulePackageUser mpu = ModulePackageUser.findByUserAndModulePackage(user, modulePackage)
 		return mpu != null
 	}
 	

@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.security.StreamrApi
 import com.unifina.signalpath.RuntimeResponse
 
 class LiveController {
@@ -27,7 +28,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
+		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request', 'test']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -106,38 +107,43 @@ class LiveController {
 		}
 	}
 	
+	@StreamrApi(requiresAuthentication = false)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def request() {
-		response.setHeader('Access-Control-Allow-Origin', '*')
-		
 		RunningSignalPath rsp
 		UiChannel ui = null
 		Integer hash = null
+		SecUser user = request.apiUser ?: springSecurityService.currentUser
+		
+		def json = request.JSON
 		
 		/**
 		 * Provide as parameter:
 		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
 		 * 2) RSP.id for messages intended for the RSP itself
 		 */
-		if (params.channel) {
-			ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
+		if (json?.channel) {
+			ui = UiChannel.findById(json?.channel, [fetch: [runningSignalPath: 'join']])
 			rsp = ui.runningSignalPath
 			if (ui.hash)
 				hash = Integer.parseInt(ui.hash)
 		}
-		else if (params.id) {
-			rsp = RunningSignalPath.get(params.id)
-			if (params.hash)
-				hash = Integer.parseInt(params.hash)
+		else if (json?.id) {
+			rsp = RunningSignalPath.get(json?.id)
+			if (json?.hash)
+				hash = Integer.parseInt(json?.hash)
 		}
 		
-		if (!unifinaSecurityService.canAccess(rsp, params.auth)) {
+		if (!unifinaSecurityService.canAccess(rsp, user)) {
+			log.warn("request: access to rsp $rsp?.id denied for user $user?.id")
 			redirect(controller:'login', action:'ajaxDenied')
 		}
 		else {
-			Map msg = JSON.parse(params.msg)
-			SecUser user = springSecurityService.currentUser ?: (params.auth ? SecUser.findByApiKey(params.auth) : null)
-			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, servletContext, params.local ? true : false)
+			Map msg = json?.msg
+			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, servletContext, json?.local ? true : false)
+			
+			log.info("request: responding with $rr")
+			
 			if (rr.containsKey("success") && rr.containsKey("response"))
 				render rr as JSON
 			else {

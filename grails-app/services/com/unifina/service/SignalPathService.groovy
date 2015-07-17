@@ -2,7 +2,6 @@ package com.unifina.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
-import groovy.transform.CompileStatic
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Future
@@ -12,6 +11,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 import com.mashape.unirest.http.HttpResponse
@@ -266,7 +266,7 @@ class SignalPathService {
 		URL url = new URL(link)
 		
 		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(controller:"live", action:"request")
+		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/live/request")
 		
 		rsp.save()
 	}
@@ -289,27 +289,42 @@ class SignalPathService {
 	
 	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
 		def req = Unirest.post(rsp.requestUrl)
-		def body = req.field("local", "true")
-		body.field("msg", (msg as JSON).toString())
-
-		body.field("id", rsp.id.toString())
+		def json = [
+			local: true,
+			msg: msg,
+			id: rsp.id
+		]
 		
 		if (hash)
-			body.field("hash", hash.toString())
+			json.hash = hash
 			
-		if (user)
-			body.field("auth", user.apiKey)
+		if (user) {
+			json.key = user.apiKey
+			json.secret = user.apiSecret
+		}
 
-		HttpResponse<String> response = body.asString()
-		Map map = (JSONObject) JSON.parse(response.getBody())
-		return new RuntimeResponse(map)
+		req.header("Content-Type", "application/json")
+		
+		log.info("sendRemoteRequest: $json")
+		
+		HttpResponse<String> response = req.body((json as JSON).toString()).asString()
+		try {
+			Map map = (JSONObject) JSON.parse(response.getBody())
+			return new RuntimeResponse(map)
+		} catch (ConverterException e) {
+			log.error("sendRemoteRequest: Failed to parse JSON response: "+response.getBody())
+			throw new RuntimeException("Failed to parse JSON response", e)
+		}
 	}
 	
 	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, def servletContext, boolean localOnly = false) {
 		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
 		
+		log.info("runtimeRequest: $msg, RunningSignalPath: $rsp.id, module: $hash, localOnly: $localOnly")
+		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
+			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
 			return new RuntimeResponse([success:false, error: "Canvas not found!"])
 		}
 		// May be a remote runner, check server and send a message
@@ -328,6 +343,7 @@ class SignalPathService {
 			}
 			
 			if (!sp) {
+				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $rsp, module: $hash")
 				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
 			}
 			else {				
