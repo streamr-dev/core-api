@@ -30,7 +30,7 @@ public class SignalPathRunner extends Thread {
 	SignalPathService signalPathService
 	
 	// Have the SignalPaths been instantiated?
-	boolean ready = false
+	boolean running = false
 	
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
 	
@@ -79,24 +79,23 @@ public class SignalPathRunner extends Thread {
 		return result
 	}
 	
-	public synchronized void setReady(boolean ready) {
-		this.ready = ready
+	public synchronized void setRunning(boolean running) {
+		this.running = running
 		this.notify()
 	}
 	
-	public synchronized boolean getReady() {
-		return ready
+	public synchronized boolean getRunning() {
+		return running
 	}
 	
-	public synchronized void waitReady() {
+	public synchronized void waitRunning(boolean target=true) {
 		int i = 0
-		while (!getReady() && i++<20)
+		while (getRunning() != target && i++<20)
 			this.wait(500)
 	}
 	
 	@Override
 	public void run() {
-		
 		Throwable reportException = null
 		setName("SignalPathRunner");
 		
@@ -105,7 +104,7 @@ public class SignalPathRunner extends Thread {
 			for (SignalPath it : signalPaths)
 				it.connectionsReady()
 				
-			setReady(true)
+			setRunning(true)
 			
 			if (!signalPaths.isEmpty())
 				signalPathService.runSignalPaths(signalPaths)
@@ -126,7 +125,7 @@ public class SignalPathRunner extends Thread {
 			signalPaths.each {SignalPath sp->
 				globals?.uiChannel?.push(new ErrorMessage(sb.toString()), sp.uiChannelId)
 			}
-			setReady(false)
+
 		}
 		
 		signalPaths.each {SignalPath sp->
@@ -142,6 +141,7 @@ public class SignalPathRunner extends Thread {
 		}
 
 		log.info("SignalPathRunner is ready.")
+		setRunning(false)
 	}
 	
 	/**

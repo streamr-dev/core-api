@@ -252,10 +252,10 @@ class SignalPathService {
 		// Start the runner thread
 		runner.start()
 		
-		// Wait for runner to be in ready state
-		runner.waitReady()
-		if (!runner.getReady())
-			log.error("Timed out while waiting for runner $runnerId to become ready!")
+		// Wait for runner to be in running state
+		runner.waitRunning(true)
+		if (!runner.getRunning())
+			log.error("Timed out while waiting for runner $runnerId to start!")
 		
 		rsp.runner = runnerId
 		rsp.state = "running"
@@ -275,6 +275,15 @@ class SignalPathService {
 		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(rsp.runner)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
+			
+			// Wait for runner to be stopped state
+			runner.waitRunning(false)
+			if (runner.getRunning())
+				log.error("Timed out while waiting for runner $runnerId to stop!")
+		}
+		else {
+			log.error("stopLocal: could not find runner $rsp.runner!")
+			updateState(rsp.runner, "stopped")
 		}
 	}
 	
