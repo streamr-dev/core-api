@@ -19,6 +19,6 @@ eventConfigureTomcat = {tomcat ->
 }
 
 eventTestPhaseStart = { args ->
-	println "eventTestPhaseStart called in unifina-core"
+	println "eventTestPhaseStart called in unifina-core: $args"
 	System.properties["grails.test.phase"] = args
 }

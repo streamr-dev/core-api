@@ -1,3 +1,4 @@
+package com.unifina.filters
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 

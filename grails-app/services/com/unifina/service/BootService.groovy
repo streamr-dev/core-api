@@ -65,7 +65,8 @@ class BootService {
 		/**
 		 * Create a map for signalPathRunners
 		 */
-		servletContext["signalPathRunners"] = [:]
+		if (servletContext)
+			servletContext["signalPathRunners"] = [:]
 		
 		/**
 		 * Start a number of taskWorkers, specified by system property or config
@@ -122,9 +123,11 @@ class BootService {
 	}
 	
 	def onDestroy() {
-		servletContext["signalPathRunners"]?.values().each {it.abort()}
-		servletContext["taskWorkers"]?.each {it.quit()}
-		servletContext["taskMessageListener"]?.quit()
-		servletContext["realtimeDataSource"]?.stopFeed()
+		if (servletContext) {
+			servletContext["signalPathRunners"]?.values().each {it.abort()}
+			servletContext["taskWorkers"]?.each {it.quit()}
+			servletContext["taskMessageListener"]?.quit()
+			servletContext["realtimeDataSource"]?.stopFeed()
+		}
 	}
 }
