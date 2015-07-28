@@ -1,19 +1,20 @@
 import grails.test.mixin.TestFor
-import pages.*
 import spock.lang.*
 
 import com.unifina.controller.core.signalpath.LiveController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.BootService;
+import com.unifina.service.BootService
 import com.unifina.utils.MapTraversal
 
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
+import core.mixins.ConfirmationMixin
 import core.pages.LiveListPage
 import core.pages.LiveShowPage
 
 
 @Mixin(CanvasMixin)
+@Mixin(ConfirmationMixin)
 @TestFor(LiveController) // This makes grailsApplication available
 public class LiveSpec extends LoginTester1Spec {
 
@@ -55,36 +56,48 @@ public class LiveSpec extends LoginTester1Spec {
 		
 		when: "Modules are added and clicked 'Launch live'"
 			// The stream
-			searchAndClickContains("LiveSpec")
-			searchAndClickContains("label")
-			def label = $(".modulename", text:"Label")
+			searchAndClick("LiveSpec")
+			moduleShouldAppearOnCanvas("Stream")
+			searchAndClick("Label")
+			moduleShouldAppearOnCanvas("Label")
+			searchAndClick("Chart")
+			moduleShouldAppearOnCanvas("Chart")
+			
 			connectEndpoints(findOutput("Stream", "rand"), findInput("Label", "label"))
+			connectEndpoints(findOutput("Stream", "rand"), findInput("Chart", "in1"))
+			
 			$("#runDropdown").click()
 			waitFor { $("#runLiveModalButton").displayed }
 			$("#runLiveModalButton").click()
+			
 		then: "launch live -modal opens"
 			waitFor { $("#runLiveModal").displayed }
 		
 		when: "Name for live canvas is given and it is launched"
 			$("#runLiveName") << liveName
 			$("#runLiveButton").click()
-		then: "LiveShowPage is opened"
+		then: "LiveShowPage is opened and Label shows data"
 			waitFor { at LiveShowPage }
 			stopButton.displayed
+			!$(".alert").displayed
+			
 			// Wait for data, sometimes takes more than 30sec to come
 			waitFor(30){ $(".modulelabel").text() != "" }
 			def oldLabel = $(".modulelabel").text()
 			
 		when: "Live canvas is stopped"
 			stopButton.click()
-			then: "The confirmation dialog is shown"
-			waitFor { $(".modal-dialog").displayed }
+		then: "The confirmation dialog is shown"
+			waitForConfirmation()
+			
 		when: "Clicked OK"
-			confirmOkButton.click()
-		then: "The LiveShowPage is opened again, now with the start and delete -buttons"
-			waitFor{ at LiveShowPage }
-			startButton.displayed // TODO: FAILS, wait for stopping
-			deleteButton.displayed
+			acceptConfirmation()
+		then: "The LiveShowPage is opened again, now with the start and delete -buttons and info alert"
+			waitFor(30) { 
+				startButton.displayed
+				deleteButton.displayed
+				$(".alert.alert-info").displayed
+			}
 		
 		when: "Started again"
 			startButton.click()
@@ -93,13 +106,12 @@ public class LiveSpec extends LoginTester1Spec {
 			waitFor(30){ $(".modulelabel").text() != oldLabel }
 		
 		when: "Went to the LiveListPage"
-			to BuildPage
 			to LiveListPage
 		then: "The just created live canvas can be found"
 			waitFor { at LiveListPage }
 			$("table td", text:liveName).displayed
 		
-		when: "Clicked to open the just created live canvas"
+		when: "Clicking to open the just created live canvas"
 			$("table td", text:liveName).click()
 		then: "The LiveShowPage is opened"
 			waitFor { at LiveShowPage }
@@ -108,24 +120,79 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "Clicked to stop"
 			stopButton.click()
 		then: "The confirmation dialog is shown"
-			waitFor { $(".modal-dialog").displayed }
+			waitForConfirmation()
 		when: "Clicked OK"
-			confirmOkButton.click()
-		then: "The liveShowPage is opened again with the start and delete -buttons"
+			acceptConfirmation()
+		then: "The liveShowPage is opened again with the start and delete -buttons, no error must be shown"
 			waitFor{ at LiveShowPage }
 			startButton.displayed
 			deleteButton.displayed
+			$(".alert.alert-info").displayed
+			!$(".alert.alert-danger").displayed
 			
 		when: "Clicked to delete"
 			deleteButton.click()
 		then: "Confirmation dialog is opened"
-			waitFor { $(".modal-dialog").displayed }
+			waitForConfirmation()
 		when: "Clicked OK"
-			confirmOkButton.click()
-		then: "LiveListPage is opened, and the just created (and deleted) live canvas cannot be found from there anymore"
+			acceptConfirmation()
+		then: "LiveListPage is opened, and the just created (and deleted) live canvas is not displayed anymore"
 			waitFor{ at LiveListPage }
 			waitFor { !($("table td", text:liveName).displayed) }
 	}
+	
+	def "an alert must be shown if running canvas cannot be pinged"() {
+		to LiveListPage
+		waitFor{ at LiveListPage }
+		
+		when: "selecting running canvas"
+			$("table td", text:"LiveSpec dead").click()
+		then: "navigate to show page that shows an error"
+			waitFor {at LiveShowPage}
+			waitFor {$(".alert.alert-danger").displayed}
+	}
+	
+	def "don't subscribe to stopped SignalPath channels"() {
+		to LiveListPage
+		waitFor{ at LiveListPage }
+		
+		when: "selecting running canvas"
+			$("table td", text:"LiveSpec stopped").click()
+		then: "navigate to show page"
+			waitFor {at LiveShowPage}
+			!js.exec("return SignalPath.getConnection().isConnected()")
+	}
 
+	def "stopping non-running signalpaths must mark them as stopped and show a flash message"() {
+		to LiveListPage
+		waitFor{ at LiveListPage }
+		
+		when: "selecting running canvas"
+			$("table td", text:"LiveSpec dead").click()
+		then: "navigate to show page that shows an error"
+			waitFor {at LiveShowPage}
+		
+		when: "stop button is clicked"
+			stopButton.click()
+		then: "confirmation is shown"
+			waitFor { $(".modal-dialog").displayed } // WHY does waitForConfirmation() from ConfirmationMixin give groovy.lang.MissingMethodException here??!
+			
+		when: "confirmation accepted"
+			$(".modal-dialog .btn-primary").click() // WHY does acceptConfirmation() from ConfirmationMixin give groovy.lang.MissingMethodException here??!
+		then: "must show alert, start button and delete button"
+			waitFor{ at LiveShowPage }
+			$(".alert.alert-danger").displayed
+			startButton.displayed
+			deleteButton.displayed
+			
+		when: "canvas is resumed"
+			startButton.click()
+		then: "info alert and stop button must be displayed"
+			waitFor{ at LiveShowPage }
+			$(".alert.alert-info").displayed
+			!startButton.displayed
+			!deleteButton.displayed
+			stopButton.displayed
+	}
 
 }

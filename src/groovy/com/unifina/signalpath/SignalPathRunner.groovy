@@ -90,7 +90,7 @@ public class SignalPathRunner extends Thread {
 	
 	public synchronized void waitRunning(boolean target=true) {
 		int i = 0
-		while (getRunning() != target && i++<20)
+		while (getRunning() != target && i++<60)
 			this.wait(500)
 	}
 	

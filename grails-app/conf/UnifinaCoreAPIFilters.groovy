@@ -3,6 +3,7 @@ import groovy.transform.CompileStatic
 
 import java.lang.reflect.Method
 
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.domain.security.SecUser
@@ -21,6 +22,7 @@ class UnifinaCoreAPIFilters {
 	GrailsApplication grailsApplication
 	
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
+	private static final Logger log = Logger.getLogger(UnifinaCoreAPIFilters.class)
 	
 	@CompileStatic
 	private StreamrApi getApiAnnotation(String controllerName, String actionName) {
@@ -50,18 +52,24 @@ class UnifinaCoreAPIFilters {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 				
-				SecUser user = null
-				if (request.JSON?.key && request.JSON?.secret) {
-					user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
-				}
-					
-				if (!user && annotation.requiresAuthentication()) {
-					render (status:401, text: [success:false, error: "authentication error"] as JSON)
+				if (!request.JSON || request.JSON.isEmpty()) {
+					render (status:400, text: [success:false, error: "Invalid request. Did you set Content-Type to application/json?"] as JSON)
 					return false
 				}
 				else {
-					request.apiUser = user
-					return true
+					SecUser user = null
+					if (request.JSON?.key && request.JSON?.secret) {
+						user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
+					}
+						
+					if (!user && annotation.requiresAuthentication()) {
+						render (status:401, text: [success:false, error: "authentication error"] as JSON)
+						return false
+					}
+					else {
+						request.apiUser = user
+						return true
+					}
 				}
 			}
 		}

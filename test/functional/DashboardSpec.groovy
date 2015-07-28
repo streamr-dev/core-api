@@ -30,7 +30,7 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		//Modifying the just created dashboard
 		when: "a rsp clicked to open"
-		runningSignalPath.click()
+		$("#main-menu .navigation .runningsignalpath", text: contains('DashboardSpec')).click()
 		then: "uichannel-list opens"
 		waitFor { $(".uichannel-title").displayed }
 		

@@ -82,21 +82,26 @@
 				});
 			},
 			sendRequest: function(msg, callback) {
+				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(controller:'live', action:'request', absolute:'true')}",
-					data: {
+					url: "${createLink(uri:'/api/live/request', absolute:'true')}",
+					data: JSON.stringify({
 						channel: this.channel,
-						msg: JSON.stringify(msg)
-					},
+						msg: msg
+					}),
+					dataType: 'json',
+					contentType: 'application/json; charset=utf-8',
 					success: function(data) {
 						if (!data.success) {
 							console.log("Error while communicating with widget: "+(data.response ? data.response.error : data.error))
+							_this.fire('error', {
+								error: (data.response ? data.response.error : data.error)
+							}, undefined, false)
 						}
 						else if (callback)
 							callback(data.response)
-					},
-					dataType: 'json'
+					}
 				});
 			},
 			<g:if test="${params.lightDOM}">

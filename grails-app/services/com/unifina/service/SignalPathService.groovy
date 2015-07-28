@@ -2,8 +2,10 @@ package com.unifina.service
 
 import grails.converters.JSON
 import grails.transaction.Transactional
+import groovy.transform.CompileStatic
 
 import java.nio.charset.StandardCharsets
+import java.security.AccessControlException
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -271,22 +273,38 @@ class SignalPathService {
 		rsp.save()
 	}
 	
-	void stopLocal(RunningSignalPath rsp) {
+	boolean stopLocal(RunningSignalPath rsp) {
 		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(rsp.runner)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
 			
 			// Wait for runner to be stopped state
 			runner.waitRunning(false)
-			if (runner.getRunning())
-				log.error("Timed out while waiting for runner $runnerId to stop!")
+			if (runner.getRunning()) {
+				log.error("Timed out while waiting for runner $rsp.runner to stop!")
+				return false
+			}
+			else return true
 		}
 		else {
 			log.error("stopLocal: could not find runner $rsp.runner!")
 			updateState(rsp.runner, "stopped")
+			return false
 		}
 	}
 	
+	@CompileStatic
+	RuntimeResponse stopRemote(RunningSignalPath rsp, SecUser user) {
+		return runtimeRequest([type:"stopRequest"], rsp, null, user)
+	}
+	
+	@CompileStatic
+	boolean ping(RunningSignalPath rsp, SecUser user) {
+		RuntimeResponse response = sendRemoteRequest([type:'ping'], rsp, null, user)
+		return response.isSuccess()
+	}
+	
+	@CompileStatic
 	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
 		def req = Unirest.post(rsp.requestUrl)
 		def json = [
@@ -317,7 +335,7 @@ class SignalPathService {
 		}
 	}
 	
-	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, def servletContext, boolean localOnly = false) {
+	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, boolean localOnly = false) {
 		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
 		
 		log.info("runtimeRequest: $msg, RunningSignalPath: $rsp.id, module: $hash, localOnly: $localOnly")
@@ -325,7 +343,7 @@ class SignalPathService {
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
 			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
-			return new RuntimeResponse([success:false, error: "Canvas not found!"])
+			return new RuntimeResponse([success:false, error: "Canvas does not appear to be running!"])
 		}
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
@@ -350,20 +368,44 @@ class SignalPathService {
 				RuntimeRequest request = new RuntimeRequest(msg)
 				request.setAuthenticated(user != null)
 				
-				// Handle module-specific message
-				Future<RuntimeResponse> future
-				if (hash!=null) {
-					future = sp.getModule(hash).onRequest(request)
+				/**
+				 * Requests for the runner thread
+				 */
+				if (request.type=="stopRequest") {
+					if (!request.isAuthenticated())
+						throw new AccessControlException("stopRequest requires authentication!");
+		
+					stopLocal(rsp);
+					
+					return new RuntimeResponse(true, [request:request])
 				}
-				// Handle signalpath-specific message
+				else if (request.type=="ping") {
+					if (!request.isAuthenticated())
+						throw new AccessControlException("ping requires authentication!");
+					
+					return new RuntimeResponse(true, [request:request])
+				}
+				/**
+				 * Requests for SignalPaths and modules
+				 */
 				else {
-					future = sp.onRequest(request)
-				}
-				
-				try {
-					return future.get(10, TimeUnit.SECONDS)
-				} catch (TimeoutException e) {
-					return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+					// Handle module-specific message
+					Future<RuntimeResponse> future
+					if (hash!=null) {
+						future = sp.getModule(hash).onRequest(request)
+					}
+					// Handle signalpath-specific message
+					else {
+						future = sp.onRequest(request)
+					}
+					
+					try {
+						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
+						log.info("runtimeRequest: responding with $resp")
+						return resp
+					} catch (TimeoutException e) {
+						return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+					}
 				}
 				
 			}

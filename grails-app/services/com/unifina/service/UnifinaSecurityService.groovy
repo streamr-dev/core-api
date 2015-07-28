@@ -31,7 +31,7 @@ class UnifinaSecurityService {
 	 */
 	private boolean checkUser(instance, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
 		if (!instance) {
-			log.warn("checkUser: no instance, denying access for user $user?.id")
+			log.warn("checkUser: domain object instance is null, denying access for user ${user?.id}")
 			return false
 		}
 		
@@ -49,11 +49,6 @@ class UnifinaSecurityService {
 
 	@CompileStatic
 	boolean canAccess(Object instance, SecUser user=springSecurityService.getCurrentUser()) {
-		if (!instance) {
-			log.warn("canAccess: no instance, denying access for user $user?.id")
-			return false
-		}
-		
 		return checkUser(instance, user) 
 	}
 

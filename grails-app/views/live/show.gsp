@@ -9,6 +9,8 @@
 <g:render template="/canvas/signalPathExtensions"/>
 
 <r:require module="toolbar"/>
+<r:require module="pnotify"/>
+
 <r:script>
 	 $(document).ready(function() {
 	 	new Toolbar($("#toolbar"))
@@ -32,7 +34,10 @@
 		SignalPath.loadSignalPath({
 			url: '${createLink(action:"getJson", id:rsp.id)}'
 		}, function(saveData, signalPathData, signalPathContext, runData) {
-			SignalPath.subscribe(runData, true);
+		
+			<g:if test="${rsp.state=='running'}">
+				SignalPath.subscribe(runData, true);
+			</g:if>
 			
 			<g:if test="${params.embedded}">
 			// Terrible workaround for jsPlumb rendering problems within iframe on IE
@@ -58,6 +63,7 @@
 			<g:render template="/live/breadcrumbList" model="[runningSignalPath:rsp]"/>
 			<g:render template="/live/breadcrumbShow" model="[runningSignalPath:rsp, active:true]"/>
 		</ui:breadcrumb>
+		<ui:flashMessage/>
 		<form method="post" role="form" id="toolbarForm">
 			<g:hiddenField name="id" value="${rsp.id}" />
 
@@ -70,7 +76,7 @@
 						</button>        	
 					</g:if>
 					<g:elseif test="${rsp.state=="stopped"}">
-						<button id="startButton" class="btn btn-default" data-action="${createLink(action:'start')}">
+						<button id="startButton" class="btn btn-primary" data-action="${createLink(action:'start')}">
 							<i class="fa fa-play"></i>
 							${message(code: 'runningSignalPath.start.label')}
 						</button>
