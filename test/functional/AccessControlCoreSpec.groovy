@@ -83,7 +83,7 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 				$('#archiveLoadBrowser')
 			}
 		then: "Live tab must not be displayed"
-			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li").size()==3
+			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li").size()==2
 			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li", text:"Live").size()==0
 	}
 	

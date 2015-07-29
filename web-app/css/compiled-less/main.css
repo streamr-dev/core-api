@@ -16557,6 +16557,10 @@ body.stream-show .dropzone-box {
 body.stream-show .history .delete-btn {
   height: 30px;
 }
+body.stream-show .history-start-date,
+body.stream-show .history-end-date {
+  font-weight: bold;
+}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;

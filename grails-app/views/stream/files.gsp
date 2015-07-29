@@ -1,25 +1,25 @@
 <g:if test="${feedFiles?.size()>0}">
 	<div class="history">
 		<ui:labeled label="Range">
-  			This stream has history data from 
-  			<strong><g:formatDate date="${feedFiles[0].beginDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></strong>
+  			This stream has archived history from 
+  			<span class="history-start-date"><g:formatDate date="${feedFiles[0].beginDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></span>
   			 to 
-  			<strong><g:formatDate date="${feedFiles[feedFiles.size() -1].endDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></strong>.
+  			<span class="history-end-date"><g:formatDate date="${feedFiles[feedFiles.size() -1].endDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></span>.
 		</ui:labeled>
 		<ui:labeled label="Delete data up to and including">
-			<g:form class="form-inline feedFileDelete">
+			<form id="history-delete-form" class="form-inline">
 				<g:hiddenField name="id" value="${ stream.id }" />
-				<ui:datePicker name="date" value="${feedFiles[0].beginDate}" startDate="${feedFiles[0].beginDate}" endDate="${feedFiles[feedFiles.size() -1].endDate}" class="form-control input-sm"/>
-				<button data-action="${ createLink(action:'deleteFeedFilesUpTo') }" class="btn btn-danger delete-btn confirm" data-confirm="Are you sure?">Delete</button>
-			</g:form>
+				<ui:datePicker id="history-delete-date" name="date" value="${feedFiles[0].beginDate}" startDate="${feedFiles[0].beginDate}" endDate="${feedFiles[feedFiles.size() -1].endDate}" class="form-control input-sm"/>
+				<button id="history-delete-button" data-action="${ createLink(action:'deleteFeedFilesUpTo') }" class="btn btn-danger confirm" data-confirm="Are you sure?">Delete</button>
+			</form>
 		</ui:labeled>
   	</div>
 </g:if>
 <g:else>
-	<p>This stream has no history.</p>
+	<p id="no-history-message">This stream has no history.</p>
 </g:else>
 <script>
 	$(document).ready(function() {
-	 	new Toolbar($("form.feedFileDelete"))
+	 	new Toolbar($("#history-delete-form"))
 	 })
 </script>

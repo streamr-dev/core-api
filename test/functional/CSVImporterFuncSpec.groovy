@@ -10,7 +10,11 @@ import core.pages.*
 @Mixin(CanvasMixin)
 class CSVImporterFuncSpec extends LoginTester1Spec {
 
+	
 	void "uploading data from csv with a non-supported date format to a stream works"() {
+		setup:
+		emptyStream("CSVImporterFuncSpec")
+		
 		when: "Go to StreamListPage"
 		to StreamListPage
 		then: "The previously created testing stream can be found"
@@ -75,7 +79,9 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		$(".input-group-addon", text:"To").click()
 		
 		searchAndClickContains("CSVImporter")
+		moduleShouldAppearOnCanvas("Stream")
 		searchAndClick("Label")
+		moduleShouldAppearOnCanvas("Label")
 		
 		connectEndpoints(findOutput("Stream", "price"), findInput("Label", "label"))
 		runButton.click()

@@ -33,7 +33,7 @@
 			$types.append(TYPES.map(function(type) {
 				return $("<option value='"+type+"'>"+type+"</option>")
 			}))
-			$(this.el).html('<td class="name"><input type="text" class="form-control input-sm" name="field_name" value="'+this.model.get('name')+'"></td><td class="types">'+this.model.get('type')+'</td><td><span class="btn btn-sm delete fa fa-trash-o"></span></td>');
+			$(this.el).html('<td class="name"><input type="text" class="form-control input-sm" name="field_name" value="'+this.model.get('name')+'"></td><td class="types">'+this.model.get('type')+'</td><td><span class="btn btn-sm delete fa fa-trash-o delete-field-button"></span></td>');
 			$types.val(this.model.get('type'))
 			$(this.el).find("td.types").html($types)
 			return this; // for chainable calls, like .render().el

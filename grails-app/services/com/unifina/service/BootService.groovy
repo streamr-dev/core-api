@@ -32,7 +32,6 @@ class BootService {
 	}
 	
 	def onInit() {
-		log.info("onInit: Merging default config")
 		mergeDefaultConfig(grailsApplication)
 		
 		/**
@@ -108,6 +107,7 @@ class BootService {
 	// as well as some unit tests that require config.
 	// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
 	static void mergeDefaultConfig(GrailsApplication app) {
+		log.info("mergeDefaultConfig: Merging...")
 		ConfigObject currentConfig = app.config
 		ConfigSlurper slurper = new ConfigSlurper(Environment.getCurrent().getName());
 		ConfigObject secondaryConfig = slurper.parse(app.classLoader.loadClass("UnifinaCoreDefaultConfig"))
@@ -115,11 +115,7 @@ class BootService {
 		ConfigObject config = new ConfigObject();
 		config.putAll(secondaryConfig.merge(currentConfig))
 		
-		log.info "Default config from core: "+secondaryConfig
-		
 		app.config = config;
-		
-		log.info "Merged config: "+config
 	}
 	
 	def onDestroy() {
