@@ -1,12 +1,8 @@
-import geb.spock.GebReportingSpec
-
 import org.openqa.selenium.Keys
 
-import pages.*
-import spock.lang.*
-import core.LoginTester1Spec;
+import core.LoginTester1Spec
 import core.mixins.CanvasMixin
-import core.pages.LoginPage
+
 
 @Mixin(CanvasMixin)
 class SearchModuleSpec extends LoginTester1Spec {
