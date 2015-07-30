@@ -1,5 +1,7 @@
 import java.nio.file.Paths
 
+import org.openqa.selenium.remote.RemoteWebDriver
+
 import core.LoginTester1Spec
 import core.mixins.StreamMixin
 import core.pages.StreamListPage
@@ -17,13 +19,19 @@ class StreamSpec extends LoginTester1Spec {
 		to StreamListPage
 		openStream("CSVImporterFuncSpec")
 		waitFor { at StreamShowPage }
-		File file = Paths.get(getClass().getResource("files/test-upload-file.csv").toURI()).toFile()
-		fileInput = file
+		fileInput = getFile("test-upload-file.csv")
 		waitFor { 
 			historyDeleteButton.displayed
 			historyStartDate.text() == "2015-02-23"
 			historyEndDate.text() == "2015-02-25"
 		}
+	}
+	
+	private File getFile(String filename) {
+		if (driver instanceof RemoteWebDriver) {
+			return new File("/vagrant/$filename")
+		}
+		else return Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
 	}
 	
 	void "removing data from a stream works"() {		

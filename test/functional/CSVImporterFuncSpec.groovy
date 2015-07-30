@@ -1,5 +1,7 @@
 import java.nio.file.Paths
 
+import org.openqa.selenium.remote.RemoteWebDriver;
+
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.StreamMixin
@@ -11,6 +13,12 @@ import core.pages.StreamShowPage
 @Mixin(CanvasMixin)
 class CSVImporterFuncSpec extends LoginTester1Spec {
 
+	private File getFile(String filename) {
+		if (driver instanceof RemoteWebDriver) {
+			return new File("/vagrant/$filename")
+		}
+		else return Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
+	}
 	
 	void "uploading data from csv with a non-supported date format to a stream works"() {
 		setup:
@@ -27,12 +35,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		waitFor { at StreamShowPage }
 		
 		when: "The file to be uploaded is configured"
-		File file = Paths.get(getClass().getResource("files/epoch-test.csv").toURI()).toFile()
-		then:
-		file.exists()
-		
-		when: "File is uploaded to the dropzone"
-		fileInput = file
+		fileInput = getFile("epoch-test.csv")
 		then: "Go to StreamConfirmPage"
 		waitFor{ at StreamConfirmPage }
 		
@@ -58,12 +61,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		waitFor { at StreamShowPage }
 		
 		when: "A another testing file is configured to be uploaded"
-		File file = Paths.get(getClass().getResource("files/test-upload-file.csv").toURI()).toFile()
-		then:
-		file.exists()
-		
-		when: "File is uploaded"
-		fileInput = file
+		fileInput = getFile("test-upload-file.csv")
 		then: "the correct data is uploaded"
 		waitFor(){ at StreamShowPage }
 		waitFor { $(".history .control-label", text:"Range").displayed }
