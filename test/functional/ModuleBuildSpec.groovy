@@ -1,9 +1,13 @@
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 
-@Mixin(CanvasMixin)
 class ModuleBuildSpec extends LoginTester1Spec {
 
+	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		ModuleBuildSpec.metaClass.mixin(CanvasMixin)
+	}
+	
 	def "cloning a module should produce a duplicate"() {
 		when: "Barify is added via module browser"
 			addModule 'Barify'

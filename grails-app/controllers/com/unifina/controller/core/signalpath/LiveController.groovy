@@ -3,6 +3,8 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import org.hibernate.StaleObjectStateException
+
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
@@ -190,7 +192,12 @@ class LiveController {
 		Map r
 		if (rsp && signalPathService.stopLocal(rsp)) {
 			r = [success:true, id:rsp.id, status:"Aborting"]
-			rsp.delete(flush:true, failOnError:true)
+			try {
+				rsp.delete(flush:true, failOnError:true)
+			} catch (StaleObjectStateException e) {
+				// rsp may be deleted in-between getting and deleting it if it finishes and deletes itself
+				// ignore this exception
+			}
 		}
 		else r = [success:false, id:params.id, status:"Running canvas not found"]
 		

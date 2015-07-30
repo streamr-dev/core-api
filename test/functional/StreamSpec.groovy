@@ -6,9 +6,13 @@ import core.pages.StreamListPage
 import core.pages.StreamShowPage
 
 
-@Mixin(StreamMixin)
 class StreamSpec extends LoginTester1Spec {
 
+	def setupSpec() {
+		// @Mixin is buggy, don't use it
+		StreamSpec.metaClass.mixin(StreamMixin)
+	}
+	
 	def setup() {
 		to StreamListPage
 		openStream("CSVImporterFuncSpec")

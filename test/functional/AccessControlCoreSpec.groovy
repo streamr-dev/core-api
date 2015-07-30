@@ -1,10 +1,8 @@
-import spock.lang.*
+import core.LoginTester2Spec
 import core.mixins.ConfirmationMixin
 import core.pages.AccessDeniedPage
 import core.pages.CanvasPage
 import core.pages.LoginPage
-import core.LoginTester2Spec
-
 
 /**
  * Basic features in the backtest views

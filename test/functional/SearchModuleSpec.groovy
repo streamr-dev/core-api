@@ -4,9 +4,12 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 
 
-@Mixin(CanvasMixin)
 class SearchModuleSpec extends LoginTester1Spec {
 
+	def setupSpec() {
+		// @Mixin is buggy, don't use it
+		SearchModuleSpec.metaClass.mixin(CanvasMixin)
+	}
 	
 	void "must select the first result with enter"() {
 		when: "typed the partial name of a module in the search bar and pressed enter"

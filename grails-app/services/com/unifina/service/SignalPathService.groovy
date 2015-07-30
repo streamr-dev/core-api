@@ -350,7 +350,7 @@ class SignalPathService {
 			try {
 				return sendRemoteRequest(msg, rsp, hash, user)
 			} catch (Exception e) {
-				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl", e)
+				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl")
 				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
 			}
 		}

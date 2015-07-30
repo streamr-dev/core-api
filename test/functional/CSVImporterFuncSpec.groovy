@@ -1,10 +1,11 @@
 import java.nio.file.Paths
 
-import spock.lang.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.StreamMixin
-import core.pages.*
+import core.pages.StreamConfirmPage
+import core.pages.StreamListPage
+import core.pages.StreamShowPage
 
 @Mixin(StreamMixin)
 @Mixin(CanvasMixin)
