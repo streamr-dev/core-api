@@ -20,11 +20,15 @@ public class EventTable extends ModuleWithUI {
 	private SimpleDateFormat df;
 	
 	int inputCount = 1;
-	int maxRows = 0;
+	int maxRows = 20;
 	
 	public EventTable() {
 		super();
 		canClearState = false;
+		
+		// More sensible defaults, in line with default maxRows
+		resendAll = false;
+		resendLast = 20;
 	}
 	
 	@Override

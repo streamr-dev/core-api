@@ -1,6 +1,7 @@
 package com.unifina.controller.signalpath
 
 import static org.junit.Assert.*
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.support.*
@@ -40,7 +41,12 @@ class SavedSignalPathControllerSpec extends Specification {
 		assert SecUser.count()==2
 		assert SavedSignalPath.count()==4
 		
-		def springSecurityService = [currentUser: me, getCurrentUser: {me}]
+		SpringSecurityService springSecurityService = new SpringSecurityService() {
+			def getCurrentUser() {
+				return me
+			}
+		}
+		
 		controller.springSecurityService = springSecurityService
 		grailsApplication.mainContext.getBean("unifinaSecurityService").springSecurityService = springSecurityService
 		controller.signalPathService = [

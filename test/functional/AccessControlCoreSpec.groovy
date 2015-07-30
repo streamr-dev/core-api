@@ -1,0 +1,97 @@
+import core.LoginTester2Spec
+import core.mixins.ConfirmationMixin
+import core.pages.AccessDeniedPage
+import core.pages.CanvasPage
+import core.pages.LoginPage
+
+/**
+ * Basic features in the backtest views
+ */
+@Mixin(ConfirmationMixin)
+class AccessControlCoreSpec extends LoginTester2Spec {
+
+	void checkDenied(String url) {
+		go url
+		waitFor { at AccessDeniedPage }
+	}
+	
+	def "search won't show modules the user doesn't have access to"() {
+		when: "the name of a forbidden module is entered"
+			search << "GroovyModule"
+		then: "no search results are displayed"
+			$('.tt-suggestion').size()==0
+	}
+	
+	def "user cannot access admin pages"() {
+		when: "user logins"
+			at CanvasPage
+		then: "Admin dropdown menu must not be displayed"
+			!navbar.navAdminLink
+		
+		expect:
+		checkDenied "feedFile"
+		checkDenied "kafka/collect"
+		checkDenied "taskWorker/status"
+		checkDenied "securityManager"
+		
+	}
+	
+	def "anonymous users must be directed to login page when accessing protected resources"() {
+		when: "user logs out"
+			navbar.navSettingsLink.click()
+			$("#navLogoutLink").click() // for some reason navbar.navSettingsLink did not work
+		then: "must go to login page"
+			at LoginPage
+		
+		when: "navigating to protected resource"
+			go "savedSignalPath/load/1"
+		then: "must go to login page"
+			at LoginPage
+			
+		when: "navigating to admin-only resource"
+			go "kafka/collect"
+		then: "must go to login page"
+			at LoginPage
+	}
+	
+	def "user cannot load other users' SavedSignalPaths"() {
+		expect:
+		checkDenied "savedSignalPath/load/1"
+	}
+	
+
+	def "user cannot view other people's RunningSignalPaths"() {
+		expect:
+		checkDenied "live/show/13"
+		
+	}
+
+	def "user cannot add modules the user doesn't have access to"() {
+		go "module/jsonGetModule/22"
+		waitFor { $("body").text().contains("error") }
+	}
+
+	
+	def "user doesn't see Live tabs in loadBrowser without ROLE_LIVE role"() {
+		when: "user clicks load button"
+			at CanvasPage
+			loadButton.click()
+		then: "load browser is opened with archive content"
+			waitFor {
+				$('#archiveLoadBrowser')
+			}
+		then: "Live tab must not be displayed"
+			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li").size()==2
+			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li", text:"Live").size()==0
+	}
+	
+	
+	def "user shouldn't see 'Launch live' -button in the launch-dropdown"(){
+		when: "Dropdown is opened"
+			at CanvasPage
+			runDropdownButton.click()
+		then:
+			$("#runLiveModalButton").size() == 0
+	}
+	
+}

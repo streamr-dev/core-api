@@ -36,7 +36,7 @@ public abstract class PushChannel {
 	protected abstract void doPush(PushChannelMessage msg);
 	
 	public void destroy() {
-		log.info("destroy() called");
+		log.info("destroy() called! Channels: "+channels);
 		destroyed = true;
 	}
 	
