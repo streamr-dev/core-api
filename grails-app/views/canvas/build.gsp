@@ -429,13 +429,19 @@ $(document).unload(function () {
 				<tbody>
 
 				</tbody>
+
 			</table>
+			<div class="col-xs-12 form-inline setup">
+				<button class="btn add-range-btn">Add range</button>
+				<button class="btn validate-btn">Validate</button>
+				Default value: <input type="text" name="default" class="form-control input-default input-sm" value="0"/>
+			</div>
 		</script>
 	<script id="range-view-template" type="text/template">
 			<tr class="start">
 				<td class="base">Every</td>
 				<td class="base interval">
-					<select name="interval">
+					<select name="interval" class="form-control input-sm" style="display:none;">
 					  	<option value="0"></option>
 					  	<option value="1">2nd</option>
 					  	<option value="2">3rd</option>
@@ -445,7 +451,7 @@ $(document).unload(function () {
 					</select>
 				</td>
 				<td class="base interval-type">
-					<select name="interval-type">
+					<select name="interval-type" class="form-control input-sm">
 						<option value="0">hour</option>
 						<option value="1">day</option>
 						<option value="2">week</option>
@@ -455,11 +461,8 @@ $(document).unload(function () {
 				</td>
 				<td>from</td>
 				<td class="date"></td>
-				<td class="value">
-					Value: <input name="value" type="text" class="form-control input-sm" />
-				</td>
 				<td class="delete">
-					<button class="delete-btn">Delete</button>
+					<i class="delete-btn fa fa-trash-o"></i>
 				</td>
 			</tr>
 			<tr class="end">
@@ -468,13 +471,14 @@ $(document).unload(function () {
 				<td></td>
 				<td>to</td>
 				<td class="date"></td>
-				<td></td>
-				<td></td>
+				<td class="value">
+					Value: <input name="value" type="text" class="form-control input-sm" />
+				</td>
 			</tr>
 		</script>
 	<script id="range-view-year-template" type="text/template">
 				the
-				<select name="day">
+				<select name="day" class="form-control input-sm">
 					{[ _.each(_.range(31), function(i){ ]}
 						<option value="{{i+1}}">
 							{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} 
@@ -490,7 +494,7 @@ $(document).unload(function () {
 					{[ }); ]}
 				</select>
 				of
-				<select name="month">
+				<select name="month" class="form-control input-sm">
 					<option value="1">January</option>
 					<option value="2">February</option>
 					<option value="3">March</option>
@@ -505,7 +509,7 @@ $(document).unload(function () {
 					<option value="12">December</option>
 				</select>
 				at
-				<select name="hour">
+				<select name="hour" class="form-control input-sm">
 					{[ _.each(_.range(24), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -517,7 +521,7 @@ $(document).unload(function () {
 					{[ }); ]}
 				</select>
 				:
-				<select name="minute">
+				<select name="minute" class="form-control input-sm">
 					{[ _.each(_.range(60), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -531,7 +535,7 @@ $(document).unload(function () {
 		</script>
 	<script id="range-view-month-template" type="text/template"> 
 				the
-				<select name="day">
+				<select name="day" class="form-control input-sm">
 					{[ _.each(_.range(31), function(i){ ]}
 						<option value="{{i+1}}">
 							{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} 
@@ -547,7 +551,7 @@ $(document).unload(function () {
 					{[ }); ]}
 				</select>
 				at
-				<select name="hour">
+				<select name="hour" class="form-control input-sm">
 					{[ _.each(_.range(24), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -559,7 +563,7 @@ $(document).unload(function () {
 					{[ }); ]}
 				</select>
 				:
-				<select name="minute">
+				<select name="minute" class="form-control input-sm">
 					{[ _.each(_.range(60), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -572,7 +576,7 @@ $(document).unload(function () {
 				</select>
 		</script>
 	<script id="range-view-week-template" type="text/template"> 
-				<select name="weekday">
+				<select name="weekday" class="form-control input-sm">
 					<option value="1">Monday</option>
 					<option value="2">Tuesday</option>
 					<option value="3">Wednesday</option>
@@ -582,7 +586,7 @@ $(document).unload(function () {
 					<option value="7">Sunday</option>
 				</select>
 				at
-				<select name="hour">
+				<select name="hour" class="form-control input-sm">
 					{[ _.each(_.range(24), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -594,7 +598,7 @@ $(document).unload(function () {
 					{[ }); ]}
 				</select>
 				:
-				<select name="minute">
+				<select name="minute" class="form-control input-sm">
 					{[ _.each(_.range(60), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -607,7 +611,7 @@ $(document).unload(function () {
 				</select>
 		</script>
 	<script id="range-view-day-template" type="text/template"> 
-				<select name="hour">
+				<select name="hour" class="form-control input-sm">
 					{[ _.each(_.range(24), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -619,7 +623,7 @@ $(document).unload(function () {
 					{[ }); ]}
 				</select>
 				:
-				<select name="minute">
+				<select name="minute" class="form-control input-sm">
 					{[ _.each(_.range(60), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 
@@ -632,7 +636,7 @@ $(document).unload(function () {
 				</select>
 		</script>
 	<script id="range-view-hour-template" type="text/template"> 
-				<select name="minute">
+				<select name="minute" class="form-control input-sm">
 					{[ _.each(_.range(60), function(i){ ]}
 						<option value="{{i}}">
 							{[ if(i<10){ ]} 

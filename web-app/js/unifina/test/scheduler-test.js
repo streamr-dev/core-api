@@ -59,6 +59,9 @@ describe('scheduler', function() {
 			assert.equal($("select[name='day']").length, 2)
 			assert.equal($("td:contains('minutes from the beginning of the hour')").length, 0)
 		})
+		it('must have the value field', function(){
+			assert($("td.value"))
+		})
 	})
 
 })

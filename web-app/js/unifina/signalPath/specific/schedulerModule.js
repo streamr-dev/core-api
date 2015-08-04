@@ -11,14 +11,18 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 		var container = $("<div/>", {
 			class: "scheduler"
 		})
-		var dateParser = new DateParser()
 		prot.body.append(container)
 		prot.scheduler = new Scheduler({
 			el: container,
 			schedule: prot.jsonData.schedule
 		})
-		prot.scheduler.on('error', function(msg) {
-			$.pnotify()
+		prot.scheduler.on('Error', function(msg) {
+			$.pnotify({
+				type: 'error',
+        		title: 'Something went wrong!',
+	        	text: msg.text,
+	        	delay: 4000
+			})
 		})
 	}
 

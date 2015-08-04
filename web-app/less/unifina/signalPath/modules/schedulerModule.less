@@ -1,0 +1,40 @@
+body.build-page {
+	div.module div.modulebody {
+		div.scheduler {
+			font-size: 14px;
+			padding: 15px;
+			table {
+				tr {
+					border-collapse: collapse;
+					td {
+						padding-left: 2px;
+						padding-right: 2px;
+						vertical-align: bottom;
+						&.value {
+							padding-left: 20px;
+						}
+						&.delete {
+							.delete-btn {
+								float: right;
+								font-size: 15px;
+							}
+						}
+						select.form-control.input-sm,
+						input.form-control.input-sm {
+							display: inline;
+						}
+						select.form-control.input-sm {
+							width: auto;
+						}
+					}
+					&.error-highlight {
+						background-color: red;
+					}
+				}
+			}
+			div.setup {
+				margin-top: 40px;
+			}
+		}
+	}
+}

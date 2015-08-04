@@ -37,8 +37,8 @@ var Range = Backbone.Model.extend({
 			return {
 				interval: interval,
 				intervalType: intervalType,
-				start: dateParser.formatDate(startDate),
-				end: dateParser.formatDate(endDate),
+				startDate: startDate,
+				endDate: endDate,
 				value: value
 			}
 		} else {
@@ -48,10 +48,14 @@ var Range = Backbone.Model.extend({
 
 	validate: function(value, startDate, endDate){
 		if(!dateParser.validate(startDate, endDate)){
-			// throw new Error("The end date must be after the start date!")
+			this.trigger("Error", {
+				text: "The end date must be after the start date!"
+			})
 			return false
 		} else if (!value) {
-			// throw new Error("Ranges must have a value!")
+			this.trigger("Error", {
+				text: "Ranges must have a value!"
+			})
 			return false
 		} else 
 			return true
@@ -131,6 +135,8 @@ var RangeView = Backbone.View.extend({
 
 	updateFields: function(){
 		var _this = this
+		this.model.set("start", {})
+		this.model.set("end", {})
 		this.$el.eq(0).find(".date select").each(function(i, el){
 			_this.model.get("start")[$(el).attr("name")] = parseInt($(el).find("option:selected").val())
 		})
@@ -155,7 +161,7 @@ var RangeView = Backbone.View.extend({
 		this.$el.addClass("error-highlight")
 		this.timeout = setTimeout(function(){
 			_this.$el.removeClass("error-highlight")
-		}, 3000)
+		}, 4000)
 	},
 
 	removeErrorHighlight: function(){
@@ -169,11 +175,18 @@ var Scheduler = Backbone.View.extend({
 
 		this.template = _.template($('#scheduler-template').html())
 		this.collection = new RangeCollection()
+
+		this.collection.on("Error", function(msg){
+			_this.trigger("Error", msg)
+		})
+
 		this.render()
+
+		this.bindEvents()
 	},
 	render: function(){
 		var _this = this
-		this.$el.append(this.template)
+		this.$el.html(this.template)
 
 		for(var i = 0; i < (this.collection.models.length || 1); i++){
 			_this.addRange(_this.collection.models[i])
@@ -207,24 +220,20 @@ var Scheduler = Backbone.View.extend({
 				JSON.push(modelJSON)
 		})
 		return JSON
+	},
+
+	bindEvents: function(){
+		var _this = this
+		this.$el.find(".btn.add-range-btn").click(function(){
+			_this.addRange()
+		})
+		this.$el.find(".btn.validate-btn").click(function(){
+			_this.buildJSON()
+		})
 	}
 })
 
 function DateParser(){}
-
-DateParser.prototype.formatDate = function(date){
-	var month = date.month != undefined ? (date.month < 10 ? "0"+date.month : date.month) : "xx"
-	var day = date.day != undefined ? (date.day < 10 ? "0"+date.day : date.day) : "xx"
-	var hour = date.hour != undefined ? (date.our < 10 ? "0"+date.hour : date.hour) : "xx"
-	var minute = date.minute != undefined ? (date.minute < 10 ? "0"+date.minute : date.minute) : "xx"
-	var weekday = date.weekday != undefined ? date.weekday : ""
-	
-	if(weekday){
-		return weekday +" "+ hour +":"+ minute
-	} else {
-		return day +"-"+ month +" "+ hour +":"+ minute
-	}
-}
 
 DateParser.prototype.validate = function(startDate, endDate){
 	if(startDate.month === undefined || startDate.month >= endDate.month){

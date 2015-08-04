@@ -16407,6 +16407,38 @@ button.arrow:after {
   display: inline-block;
   font-weight: bolder;
 }
+body.build-page div.module div.modulebody div.scheduler {
+  font-size: 14px;
+  padding: 15px;
+}
+body.build-page div.module div.modulebody div.scheduler table tr {
+  border-collapse: collapse;
+}
+body.build-page div.module div.modulebody div.scheduler table tr td {
+  padding-left: 2px;
+  padding-right: 2px;
+  vertical-align: bottom;
+}
+body.build-page div.module div.modulebody div.scheduler table tr td.value {
+  padding-left: 20px;
+}
+body.build-page div.module div.modulebody div.scheduler table tr td.delete .delete-btn {
+  float: right;
+  font-size: 15px;
+}
+body.build-page div.module div.modulebody div.scheduler table tr td select.form-control.input-sm,
+body.build-page div.module div.modulebody div.scheduler table tr td input.form-control.input-sm {
+  display: inline;
+}
+body.build-page div.module div.modulebody div.scheduler table tr td select.form-control.input-sm {
+  width: auto;
+}
+body.build-page div.module div.modulebody div.scheduler table tr.error-highlight {
+  background-color: red;
+}
+body.build-page div.module div.modulebody div.scheduler div.setup {
+  margin-top: 40px;
+}
 .dashboard streamr-label {
   font-size: 70px;
 }
