@@ -214,37 +214,37 @@ var Scheduler = Backbone.View.extend({
 			_this.trigger("Error", msg)
 		})
 
-		var options
-		options.config = {
-			defaultValue: 3,
-			ranges: [{
-				value: 100,
-				intervalType: 1,
-				startDate: {
-					hour: 10,
-					minute: 25
-				},
-				endDate: {
-					hour: 11,
-					minute: 35
-				}
-			}, {
-				value: 200,
-				intervalType: 2,
-				startDate: {
-					weekday: 2,
-					hour: 10,
-					minute: 25
-				},
-				endDate: {
-					weekday: 3,
-					hour: 11,
-					minute: 35
-				}
-			}]
-		}
+		// var options
+		// options.config = {
+		// 	defaultValue: 3,
+		// 	ranges: [{
+		// 		value: 100,
+		// 		intervalType: 1,
+		// 		startDate: {
+		// 			hour: 10,
+		// 			minute: 25
+		// 		},
+		// 		endDate: {
+		// 			hour: 11,
+		// 			minute: 35
+		// 		}
+		// 	}, {
+		// 		value: 200,
+		// 		intervalType: 2,
+		// 		startDate: {
+		// 			weekday: 2,
+		// 			hour: 10,
+		// 			minute: 25
+		// 		},
+		// 		endDate: {
+		// 			weekday: 3,
+		// 			hour: 11,
+		// 			minute: 35
+		// 		}
+		// 	}]
+		// }
 
-		this.defaultValue = 2
+		this.defaultValue = 0
 
 		if(options && options.config){
 			_.each(options.config.ranges, function(r){

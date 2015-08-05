@@ -25,6 +25,7 @@ var select = function(selectName, optionValue, index){
 	var row = $("li").eq(index || 0)
 	var select = row.find("select[name='"+selectName+"']")
 	select.val(optionValue)
+	select.change()
 }
 
 var scheduler
@@ -48,8 +49,8 @@ describe('scheduler', function() {
 			assert.equal($("select[name='interval-type'] option:selected").text(), "hour")
 			assert.equal($("select[name='day']").length, 0)
 			assert.equal($("select[name='minute']").length, 2)
-			assert.equal($("div.start:contains('minutes')").length, 1)
-			assert.equal($("div.end:contains('minutes')").length, 1)
+			assert.equal($("div.startDate:contains('minutes')").length, 1)
+			assert.equal($("div.endDate:contains('minutes')").length, 1)
 		})
 		it('must have the value field', function(){
 			assert.equal($("div.td.value").length, 1)
