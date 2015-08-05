@@ -2,38 +2,90 @@ body.build-page {
 	div.module div.modulebody {
 		div.scheduler {
 			font-size: 14px;
-			padding: 15px;
-			table {
-				tr {
-					border-collapse: collapse;
-					td {
+			padding: 10px;
+			ol.table.scheduler-table {
+				margin-bottom: 0px;
+				display: table;
+				list-style-type:none;
+				border-collapse: collapse;
+  				counter-reset: sectioncounter;
+				li {
+					display: table-row;
+					&:before {
+						content: counter(sectioncounter) ".";
+						counter-increment: sectioncounter;
+						display:inline-block; width:2em; text-align:right;
+						position:relative; left:-2.5em; margin-right:-2em;
+						margin-left: 40px; margin-top: 30px;
+					}
+					&:not(:first-of-type) {
+						border-top: 1px solid #ccc;
+					}
+					div.td {
+						display: table-cell;
+						padding-top: 10px;
+						padding-bottom: 10px;
+						&:first-of-type {
+							padding-left: 15px;
+							border-top-left-radius: 10px;
+							border-bottom-left-radius: 10px;
+						}
+						&:last-of-type {
+							padding-right: 15px;
+							border-top-right-radius: 10px;
+							border-bottom-right-radius: 10px;
+						}
+						vertical-align: middle;
 						padding-left: 2px;
 						padding-right: 2px;
-						vertical-align: bottom;
-						&.value {
-							padding-left: 20px;
-						}
 						&.delete {
 							.delete-btn {
+								cursor: pointer;
 								float: right;
 								font-size: 15px;
+								margin-left: 10px;
+								padding: 10px;
+								&:hover {
+									color: #999;
+								}
 							}
+						}
+						.startDate span,
+						.endDate span {
+							margin-top: 5px;
+							margin-left: 10px;
+							float: left;
+							width: 42px;
 						}
 						select.form-control.input-sm,
 						input.form-control.input-sm {
 							display: inline;
-						}
-						select.form-control.input-sm {
 							width: auto;
+							margin-left: 5px;
+							margin-right: 5px;
+						}
+						&.value {
+							padding-left: 20px;
+							input {
+								width: 70px;
+							}
 						}
 					}
 					&.error-highlight {
-						background-color: red;
+						background-color: rgb(255, 222, 222);
 					}
 				}
 			}
 			div.setup {
-				margin-top: 40px;
+				margin-top: 30px;
+				div {
+					display: inline-block;
+				}
+				div.default-value {
+					float: right;
+					margin-left: 15px;
+					margin-right: 51px;
+				}
 			}
 		}
 	}

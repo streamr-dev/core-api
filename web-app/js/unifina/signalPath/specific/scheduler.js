@@ -8,54 +8,59 @@ _.templateSettings = {
 };
 
 var Range = Backbone.Model.extend({
-	initialize: function(){
-		this.set("start", {})
-		this.set("end", {})
+	initialize: function(attributes, options){
+		if($.isEmptyObject(attributes)){
+			this.set("startDate", {})
+			this.set("endDate", {})
+			this.set("intervalType", 0)
+			this.set("value", 0)
+		}
 	},
 
 	buildJSON: function(){
 		var interval = this.get("interval")
 		var intervalType = this.get("intervalType")
-		var startDate = {
-			minute: this.get("start").minute,
-			hour: this.get("start").hour,
-			day: this.get("start").day,
-			month: this.get("start").month,
-			weekday: this.get("start").weekday
-		}
-		var endDate = {
-			minute: this.get("end").minute,
-			hour: this.get("end").hour,
-			day: this.get("end").day,
-			month: this.get("end").month,
-			weekday: this.get("end").weekday
-		}
 		var value = this.get("value")
+		var startDate = this.get("startDate")
+		var endDate = this.get("endDate")
 
-		if(this.validate(value, startDate, endDate)){
-			this.view.removeErrorHighlight()
-			return {
-				interval: interval,
-				intervalType: intervalType,
-				startDate: startDate,
-				endDate: endDate,
-				value: value
-			}
-		} else {
-			this.view.errorHighlight()
+		return {
+			interval: interval,
+			intervalType: intervalType,
+			startDate: startDate,
+			endDate: endDate,
+			value: value
 		}
 	},
 
-	validate: function(value, startDate, endDate){
+	validate: function(){
+		this.view.removeErrorHighlight()
+		var startDate = {
+			minute: this.get("startDate").minute,
+			hour: this.get("startDate").hour,
+			day: this.get("startDate").day,
+			month: this.get("startDate").month,
+			weekday: this.get("startDate").weekday
+		}
+		var endDate = {
+			minute: this.get("endDate").minute,
+			hour: this.get("endDate").hour,
+			day: this.get("endDate").day,
+			month: this.get("endDate").month,
+			weekday: this.get("endDate").weekday
+		}
+		var value = this.get("value")
 		if(!dateParser.validate(startDate, endDate)){
 			this.trigger("Error", {
 				text: "The end date must be after the start date!"
 			})
+			this.view.errorHighlight()
 			return false
 		} else if (!value) {
 			this.trigger("Error", {
 				text: "Ranges must have a value!"
 			})
+			this.view.errorHighlight()
 			return false
 		} else 
 			return true
@@ -101,16 +106,36 @@ var RangeView = Backbone.View.extend({
 		})
 
 		table.append(this.$el)
-		this.select(this.$el.find(".interval-type select option:selected").val())
+
+		var select = this.$el.find("select[name='interval-type']")
+		select.val(this.model.get("intervalType"))
+		select.change()
+
+		if(!$.isEmptyObject(this.model.get("startDate"))){
+			var startRow = this.$el.find("div.date div.startDate")
+			_.each(this.model.get("startDate"), function(val, key){
+				var select = startRow.find("select[name='"+key+"']")
+				select.val(val)
+			})
+		}
+
+		if(!$.isEmptyObject(this.model.get("endDate"))){
+			var endRow = this.$el.find("div.date div.endDate")
+			_.each(this.model.get("endDate"), function(val, key){
+				var select = endRow.find("select[name='"+key+"']")
+				select.val(val)
+			})
+		}
+
+		this.$el.find("input[name='value']").val(this.model.get("value"))
 
 		this.updateFields()
 	},
 
 	select: function(value){
 		var _this = this
-		var startContent = this.$el.eq(0).find("td.date")
-		var endContent = this.$el.eq(2).find("td.date")
-		this.$el.find(".date").empty()
+		var date = this.$el.find("div.date")
+		date.empty()
 		var temp
 		if(value == 0){
 			temp = this.hourTemplate
@@ -123,25 +148,33 @@ var RangeView = Backbone.View.extend({
 		} else if(value == 4){
 			temp = this.yearTemplate
 		}
-		startContent.append(temp)
-		endContent.append(temp)
-		_this.$el.eq(0).find("select").change(function(){
-			_this.updateFields()
+		var start = $("<div/>", {
+			class: "startDate",
+			html: "<span>from</span>"
 		})
-		_this.$el.eq(2).find("select").change(function(){
+		var end = $("<div/>", {
+			class: "endDate",
+			html: "<span>to</span>"
+		})
+		date.append(start)
+		start.append(temp)
+		date.append(end)
+		end.append(temp)
+
+		_this.$el.find("select").change(function(){
 			_this.updateFields()
 		})
 	},
 
 	updateFields: function(){
 		var _this = this
-		this.model.set("start", {})
-		this.model.set("end", {})
-		this.$el.eq(0).find(".date select").each(function(i, el){
-			_this.model.get("start")[$(el).attr("name")] = parseInt($(el).find("option:selected").val())
+		this.model.set("startDate", {})
+		this.model.set("endDate", {})
+		this.$el.find(".date .startDate select").each(function(i, el){
+			_this.model.get("startDate")[$(el).attr("name")] = parseInt($(el).find("option:selected").val())
 		})
-		this.$el.eq(2).find(".date select").each(function(i, el){
-			_this.model.get("end")[$(el).attr("name")] = parseInt($(el).find("option:selected").val())
+		this.$el.find(".date .endDate select").each(function(i, el){
+			_this.model.get("endDate")[$(el).attr("name")] = parseInt($(el).find("option:selected").val())
 		})
 		this.model.set("interval", parseInt(_this.$el.find("select[name='interval'] option:selected").val()))
 		this.model.set("intervalType", parseInt(_this.$el.find("select[name='interval-type'] option:selected").val()))
@@ -170,8 +203,9 @@ var RangeView = Backbone.View.extend({
 })
 
 var Scheduler = Backbone.View.extend({
-	initialize: function(){
+	initialize: function(options){
 		var _this = this
+
 
 		this.template = _.template($('#scheduler-template').html())
 		this.collection = new RangeCollection()
@@ -179,6 +213,46 @@ var Scheduler = Backbone.View.extend({
 		this.collection.on("Error", function(msg){
 			_this.trigger("Error", msg)
 		})
+
+		var options
+		options.config = {
+			defaultValue: 3,
+			ranges: [{
+				value: 100,
+				intervalType: 1,
+				startDate: {
+					hour: 10,
+					minute: 25
+				},
+				endDate: {
+					hour: 11,
+					minute: 35
+				}
+			}, {
+				value: 200,
+				intervalType: 2,
+				startDate: {
+					weekday: 2,
+					hour: 10,
+					minute: 25
+				},
+				endDate: {
+					weekday: 3,
+					hour: 11,
+					minute: 35
+				}
+			}]
+		}
+
+		this.defaultValue = 2
+
+		if(options && options.config){
+			_.each(options.config.ranges, function(r){
+				var range = new Range(r)
+				_this.collection.add(range)
+			})
+			this.defaultValue = options.config.defaultValue
+		}
 
 		this.render()
 
@@ -191,6 +265,9 @@ var Scheduler = Backbone.View.extend({
 		for(var i = 0; i < (this.collection.models.length || 1); i++){
 			_this.addRange(_this.collection.models[i])
 		}
+
+		this.defaultValueInput = this.$el.find("input[name='default']")
+		this.defaultValueInput.val(this.defaultValue)
 	},
 
 	addRange: function(model){
@@ -205,21 +282,40 @@ var Scheduler = Backbone.View.extend({
 		this.collection.add(m)
 		var rangeView = new RangeView({
 			model: m,
-			el: _this.$el.find("tbody")
+			el: _this.$el.find("ol")
 		})
-		rangeView.render(this.$el.find("tbody"))
+		rangeView.render(this.$el.find("ol"))
 	},
 
 	buildJSON: function(){
 		var _this = this
 
-		var JSON = []
+		if(this.validate()){
+			var JSON = {}
+			JSON.ranges = []
+			JSON.defaultValue = this.defaultValueInput.val()
+			_.each(_this.collection.models, function(model){
+				JSON.ranges.push(model.buildJSON())
+			})
+			console.log(JSON)
+			return JSON
+		}
+	},
+
+	validate: function(){
+		var _this = this
+		var validate = true
+		if(!this.defaultValueInput.val()){
+			this.trigger("Error", {
+				text: "The scheduler needs a default value!"
+			})
+			validate = false
+		}
 		_.each(_this.collection.models, function(model){
-			var modelJSON = model.buildJSON()
-			if(modelJSON != null)
-				JSON.push(modelJSON)
+			if(!model.validate())
+				validate = false
 		})
-		return JSON
+		return validate
 	},
 
 	bindEvents: function(){

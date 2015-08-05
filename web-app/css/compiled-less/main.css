@@ -16409,35 +16409,94 @@ button.arrow:after {
 }
 body.build-page div.module div.modulebody div.scheduler {
   font-size: 14px;
-  padding: 15px;
+  padding: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler table tr {
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table {
+  margin-bottom: 0px;
+  display: table;
+  list-style-type: none;
   border-collapse: collapse;
+  counter-reset: sectioncounter;
 }
-body.build-page div.module div.modulebody div.scheduler table tr td {
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li {
+  display: table-row;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li:before {
+  content: counter(sectioncounter) ".";
+  counter-increment: sectioncounter;
+  display: inline-block;
+  width: 2em;
+  text-align: right;
+  position: relative;
+  left: -2.5em;
+  margin-right: -2em;
+  margin-left: 40px;
+  margin-top: 30px;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li:not(:first-of-type) {
+  border-top: 1px solid #ccc;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td {
+  display: table-cell;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: middle;
   padding-left: 2px;
   padding-right: 2px;
-  vertical-align: bottom;
 }
-body.build-page div.module div.modulebody div.scheduler table tr td.value {
-  padding-left: 20px;
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:first-of-type {
+  padding-left: 15px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler table tr td.delete .delete-btn {
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:last-of-type {
+  padding-right: 15px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn {
+  cursor: pointer;
   float: right;
   font-size: 15px;
+  margin-left: 10px;
+  padding: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler table tr td select.form-control.input-sm,
-body.build-page div.module div.modulebody div.scheduler table tr td input.form-control.input-sm {
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn:hover {
+  color: #999;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .startDate span,
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .endDate span {
+  margin-top: 5px;
+  margin-left: 10px;
+  float: left;
+  width: 42px;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td select.form-control.input-sm,
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
   display: inline;
-}
-body.build-page div.module div.modulebody div.scheduler table tr td select.form-control.input-sm {
   width: auto;
+  margin-left: 5px;
+  margin-right: 5px;
 }
-body.build-page div.module div.modulebody div.scheduler table tr.error-highlight {
-  background-color: red;
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value {
+  padding-left: 20px;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value input {
+  width: 70px;
+}
+body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight {
+  background-color: #ffdede;
 }
 body.build-page div.module div.modulebody div.scheduler div.setup {
-  margin-top: 40px;
+  margin-top: 30px;
+}
+body.build-page div.module div.modulebody div.scheduler div.setup div {
+  display: inline-block;
+}
+body.build-page div.module div.modulebody div.scheduler div.setup div.default-value {
+  float: right;
+  margin-left: 15px;
+  margin-right: 51px;
 }
 .dashboard streamr-label {
   font-size: 70px;

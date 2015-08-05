@@ -20,7 +20,7 @@ public class CalendarTest {
 		Date now = new Date();
 		Map<Integer, Integer> targets = new HashMap<>();
 		
-		targets.put(Calendar.MINUTE, 49);
+		targets.put(Calendar.HOUR_OF_DAY, 00);
 		
 		Date next = getNext(now, targets);
 		
@@ -69,8 +69,6 @@ public class CalendarTest {
 		for(int i = 0; i < targets.size(); i++){
 			int field = targetFields[i];
 			target = targets.get(field);
-			if(field == Calendar.HOUR)
-				field = Calendar.HOUR_OF_DAY;
 			
 			int valueNow = cal.get(field);
 			

@@ -423,24 +423,24 @@ $(document).unload(function () {
 	<!-- extension point for apps using the core plugin -->
 	<g:render template="/canvas/buildBodyExtensions"/>
 	
-	// Template -->
+	<!-- Template -->
 	<script id="scheduler-template" type="text/template">
-			<table>
-				<tbody>
-
-				</tbody>
-
-			</table>
+			<ol class="table scheduler-table">
+				
+			</ol>
 			<div class="col-xs-12 form-inline setup">
-				<button class="btn add-range-btn">Add range</button>
-				<button class="btn validate-btn">Validate</button>
-				Default value: <input type="text" name="default" class="form-control input-default input-sm" value="0"/>
+				<div class="add-range">
+					<i class="btn add-range-btn btn-primary fa fa-plus">&nbsp;Add</i>
+				</div>
+				<div class="default-value">
+					Default value: <input type="number" step="any" name="default" class="form-control input-default input-sm" value="0"/>
+				</div>
 			</div>
 		</script>
 	<script id="range-view-template" type="text/template">
-			<tr class="start">
-				<td class="base">Every</td>
-				<td class="base interval">
+			<li class="range">
+				<div class="td">Every</div>
+				<div class="td interval">
 					<select name="interval" class="form-control input-sm" style="display:none;">
 					  	<option value="0"></option>
 					  	<option value="1">2nd</option>
@@ -449,8 +449,8 @@ $(document).unload(function () {
 					  	<option value="4">5th</option>
 					  	<option value="5">6th</option>
 					</select>
-				</td>
-				<td class="base interval-type">
+				</div>
+				<div class="td interval-type">
 					<select name="interval-type" class="form-control input-sm">
 						<option value="0">hour</option>
 						<option value="1">day</option>
@@ -458,23 +458,15 @@ $(document).unload(function () {
 						<option value="3">month</option>
 						<option value="4">year</option>
 					</select>
-				</td>
-				<td>from</td>
-				<td class="date"></td>
-				<td class="delete">
-					<i class="delete-btn fa fa-trash-o"></i>
-				</td>
-			</tr>
-			<tr class="end">
-				<td></td>
-				<td></td>
-				<td></td>
-				<td>to</td>
-				<td class="date"></td>
-				<td class="value">
-					Value: <input name="value" type="text" class="form-control input-sm" />
-				</td>
-			</tr>
+				</div>
+				<div class="td date"></div>
+				<div class="td value">
+					Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>
+				</div>
+				<div class="td delete">
+					<i class="delete-btn fa fa-trash-o" title="Remove"></i>
+				</div>
+			</li>
 		</script>
 	<script id="range-view-year-template" type="text/template">
 				the
@@ -649,7 +641,7 @@ $(document).unload(function () {
 				</select>
 				minutes from the beginning of the hour
 		</script>
-	// <-- Template
+	<!-- Template -->
 </body>
 </html>
 

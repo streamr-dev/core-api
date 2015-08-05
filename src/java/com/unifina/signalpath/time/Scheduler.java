@@ -18,6 +18,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 
 	Date nextTime;
 	List<Rule> rules = new ArrayList<Rule>();
+	Double defaultValue;
 
 	@Override
 	public void init() {
@@ -64,9 +65,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		// Read json rules and add Rule objects to list
 		rules.clear();
 		List<Map<String, Object>> ruleList = (List<Map<String, Object>>) config.get("rules");
+		defaultValue = (Double)config.get("defaultValue");
 		if (ruleList != null) {
 			for (Map<String, Object> rule : ruleList) {
-				int type = (int) rule.get("interval-type");
+				int type = (int) rule.get("intervalType");
 				switch (type) {
 				case 0:
 					rules.add(new HourlyRule(rule));
@@ -95,6 +97,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		}
 
 		config.put("rules", ruleList);
+		config.put("defaultValue", defaultValue);
 
 		return config;
 	}
