@@ -18,14 +18,12 @@ var Range = Backbone.Model.extend({
 	},
 
 	buildJSON: function(){
-		var interval = this.get("interval")
 		var intervalType = this.get("intervalType")
 		var value = this.get("value")
 		var startDate = this.get("startDate")
 		var endDate = this.get("endDate")
 
 		return {
-			interval: interval,
 			intervalType: intervalType,
 			startDate: startDate,
 			endDate: endDate,
@@ -50,13 +48,13 @@ var Range = Backbone.Model.extend({
 			weekday: this.get("endDate").weekday
 		}
 		var value = this.get("value")
-		if(!dateParser.validate(startDate, endDate)){
+		if(!dateValidator.validate(startDate, endDate)){
 			this.trigger("Error", {
 				text: "The end date must be after the start date!"
 			})
 			this.view.errorHighlight()
 			return false
-		} else if (!value) {
+		} else if (!value && value != 0) {
 			this.trigger("Error", {
 				text: "Ranges must have a value!"
 			})
@@ -67,6 +65,7 @@ var Range = Backbone.Model.extend({
 	},
 
 	delete: function(){
+		this.trigger("update")
 		this.destroy({
 			sync: false
 		})
@@ -93,17 +92,7 @@ var RangeView = Backbone.View.extend({
 		var _this = this
 		this.$el = $(this.template())
 
-		this.$el.find("select[name='interval-type']").change(function(e){
-			_this.select($(this).find("option:selected").val())
-		})
-
-		this.$el.find("input[name='value']").on("keyup", function(e){
-			_this.model.set("value", $(this).val())
-		})
-
-		this.$el.find(".delete-btn").click(function(){
-			_this.delete()
-		})
+		this.bindEvents()
 
 		table.append(this.$el)
 
@@ -130,6 +119,28 @@ var RangeView = Backbone.View.extend({
 		this.$el.find("input[name='value']").val(this.model.get("value"))
 
 		this.updateFields()
+	},
+
+	bindEvents: function(){
+		var _this = this
+		this.$el.find("select[name='interval-type']").change(function(e){
+			_this.select($(this).find("option:selected").val())
+			_this.model.trigger("update")
+		})
+
+		this.$el.find("input[name='value']").on("keyup", function(e){
+			_this.model.set("value", parseFloat($(this).val()))
+		})
+
+		this.$el.find(".delete-btn").click(function(){
+			_this.delete()
+		})
+		this.$el.find(".move-up-btn").click(function(){
+			_this.moveUp()
+		})
+		this.$el.find(".move-down-btn").click(function(){
+			_this.moveDown()
+		})
 	},
 
 	select: function(value){
@@ -178,7 +189,7 @@ var RangeView = Backbone.View.extend({
 		})
 		this.model.set("interval", parseInt(_this.$el.find("select[name='interval'] option:selected").val()))
 		this.model.set("intervalType", parseInt(_this.$el.find("select[name='interval-type'] option:selected").val()))
-		this.model.set("value", _this.$el.find("input[name='value']").val())
+		this.model.set("value", parseFloat(_this.$el.find("input[name='value']").val()))
 	},
 
 	delete: function(){
@@ -199,6 +210,16 @@ var RangeView = Backbone.View.extend({
 
 	removeErrorHighlight: function(){
 		this.$el.removeClass("error-highlight")
+	},
+
+	moveUp: function(){
+		this.model.trigger("move-up", this.model)
+		this.$el.insertBefore(this.$el.prev())
+	},
+
+	moveDown: function(){
+		this.model.trigger("move-down", this.model)
+		this.$el.insertAfter(this.$el.next())
 	}
 })
 
@@ -214,36 +235,6 @@ var Scheduler = Backbone.View.extend({
 			_this.trigger("Error", msg)
 		})
 
-		// var options
-		// options.config = {
-		// 	defaultValue: 3,
-		// 	ranges: [{
-		// 		value: 100,
-		// 		intervalType: 1,
-		// 		startDate: {
-		// 			hour: 10,
-		// 			minute: 25
-		// 		},
-		// 		endDate: {
-		// 			hour: 11,
-		// 			minute: 35
-		// 		}
-		// 	}, {
-		// 		value: 200,
-		// 		intervalType: 2,
-		// 		startDate: {
-		// 			weekday: 2,
-		// 			hour: 10,
-		// 			minute: 25
-		// 		},
-		// 		endDate: {
-		// 			weekday: 3,
-		// 			hour: 11,
-		// 			minute: 35
-		// 		}
-		// 	}]
-		// }
-
 		this.defaultValue = 0
 
 		if(options && options.config){
@@ -258,6 +249,7 @@ var Scheduler = Backbone.View.extend({
 
 		this.bindEvents()
 	},
+
 	render: function(){
 		var _this = this
 		this.$el.html(this.template)
@@ -266,7 +258,7 @@ var Scheduler = Backbone.View.extend({
 			_this.addRange(_this.collection.models[i])
 		}
 
-		this.defaultValueInput = this.$el.find("input[name='default']")
+		this.defaultValueInput = this.$el.find("input[name='default-value']")
 		this.defaultValueInput.val(this.defaultValue)
 	},
 
@@ -292,13 +284,14 @@ var Scheduler = Backbone.View.extend({
 
 		if(this.validate()){
 			var JSON = {}
+			JSON.defaultValue = parseFloat(this.defaultValueInput.val())
 			JSON.ranges = []
-			JSON.defaultValue = this.defaultValueInput.val()
 			_.each(_this.collection.models, function(model){
 				JSON.ranges.push(model.buildJSON())
 			})
-			console.log(JSON)
 			return JSON
+		} else {
+			throw 'Not valid!'
 		}
 	},
 
@@ -311,11 +304,43 @@ var Scheduler = Backbone.View.extend({
 			})
 			validate = false
 		}
-		_.each(_this.collection.models, function(model){
-			if(!model.validate())
-				validate = false
-		})
+		if(validate){
+			_.each(_this.collection.models, function(model){
+				if(!model.validate())
+					validate = false
+			})
+		}
 		return validate
+	},
+
+	moveRangeUp: function(range){
+		var i = this.collection.models.indexOf(range)
+		this.collection.models.splice(i, 1)
+		this.collection.models.splice(i-1, 0, range)
+	},
+
+	moveRangeDown: function(range){
+		var i = this.collection.models.indexOf(range)
+		this.collection.models.splice(i, 1)
+		this.collection.models.splice(i+1, 0, range)
+	},
+
+	lock: function(){
+		var _this = this
+		$.each(_this.$el.find("select, input"), function(i, el){
+			$(el).attr("disabled", true)
+		})
+		this.$el.addClass("locked")
+		this.trigger("update")
+	},
+
+	unlock: function(){
+		var _this = this
+		$.each(_this.$el.find("select, input"), function(i, el){
+			$(el).attr("disabled", false)
+		})
+		this.$el.removeClass("locked")
+		this.trigger("update")
 	},
 
 	bindEvents: function(){
@@ -326,13 +351,28 @@ var Scheduler = Backbone.View.extend({
 		this.$el.find(".btn.validate-btn").click(function(){
 			_this.buildJSON()
 		})
+		// this.$el.find(".lock-btn").click(function(){
+		// 	_this.lock()
+		// })
+		// this.$el.find(".unlock-btn").click(function(){
+		// 	_this.unlock()
+		// })
+		this.collection.on("move-up", function(range){
+			_this.moveRangeUp(range)
+		})
+		this.collection.on("move-down", function(range){
+			_this.moveRangeDown(range)
+		})
+		this.collection.on("update", function(){
+			_this.trigger("update")
+		})
 	}
 })
 
-function DateParser(){}
+function DateValidator(){}
 
-DateParser.prototype.validate = function(startDate, endDate){
-	if(startDate.month === undefined || startDate.month >= endDate.month){
+DateValidator.prototype.validate = function(startDate, endDate){
+	if(startDate.month === undefined || startDate.month == endDate.month){
 		if((startDate.weekday && startDate.weekday == endDate.weekday) || (startDate.day && startDate.day == endDate.day) || (startDate.weekday === undefined && startDate.day === undefined)){
 			if(startDate.hour === undefined || startDate.hour == endDate.hour){
 				if(startDate.minute > endDate.minute)
@@ -343,13 +383,12 @@ DateParser.prototype.validate = function(startDate, endDate){
 			return false
 	} else if(startDate.month > endDate.month)
 		return false
-	
 	return true
 }
 
-var dateParser = new DateParser()
+var dateValidator = new DateValidator()
 
-exports.dateParser = dateParser
+exports.dateValidator = dateValidator
 exports.Scheduler = Scheduler
 
 })(typeof(exports) !== 'undefined' ? exports : window)

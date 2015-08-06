@@ -429,45 +429,47 @@ $(document).unload(function () {
 				
 			</ol>
 			<div class="col-xs-12 form-inline setup">
+				<!--div class="lock-unlock-scheduler">
+					<i class="lock-btn fa fa-unlock" title="Lock Scheduler"></i>
+					<i class="unlock-btn fa fa-lock" title="Unlock Scheduler"></i>
+				</div-->
 				<div class="add-range">
 					<i class="btn add-range-btn btn-primary fa fa-plus">&nbsp;Add</i>
 				</div>
 				<div class="default-value">
-					Default value: <input type="number" step="any" name="default" class="form-control input-default input-sm" value="0"/>
+					Default value: <input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>
 				</div>
 			</div>
 		</script>
 	<script id="range-view-template" type="text/template">
-			<li class="range">
-				<div class="td">Every</div>
-				<div class="td interval">
-					<select name="interval" class="form-control input-sm" style="display:none;">
-					  	<option value="0"></option>
-					  	<option value="1">2nd</option>
-					  	<option value="2">3rd</option>
-					  	<option value="3">4th</option>
-					  	<option value="4">5th</option>
-					  	<option value="5">6th</option>
-					</select>
+		<li class="range">
+			<div class="td">Every</div>
+			<div class="td interval-type">
+				<select name="interval-type" class="form-control input-sm">
+					<option value="0">hour</option>
+					<option value="1">day</option>
+					<option value="2">week</option>
+					<option value="3">month</option>
+					<option value="4">year</option>
+				</select>
+			</div>
+			<div class="td date"></div>
+			<div class="td value">
+				Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>
+			</div>
+			<div class="td move">
+				<div class="move-up-btn" title="Move up">
+					<i class=" fa fa-caret-up"></i>
 				</div>
-				<div class="td interval-type">
-					<select name="interval-type" class="form-control input-sm">
-						<option value="0">hour</option>
-						<option value="1">day</option>
-						<option value="2">week</option>
-						<option value="3">month</option>
-						<option value="4">year</option>
-					</select>
+				<div class="move-down-btn" title="Move down">
+					<i class=" fa fa-caret-down"></i>
 				</div>
-				<div class="td date"></div>
-				<div class="td value">
-					Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>
-				</div>
-				<div class="td delete">
-					<i class="delete-btn fa fa-trash-o" title="Remove"></i>
-				</div>
-			</li>
-		</script>
+			</div>
+			<div class="td delete">
+				<i class="delete-btn fa fa-trash-o" title="Remove"></i>
+			</div>
+		</li>
+	</script>
 	<script id="range-view-year-template" type="text/template">
 				the
 				<select name="day" class="form-control input-sm">
@@ -569,13 +571,13 @@ $(document).unload(function () {
 		</script>
 	<script id="range-view-week-template" type="text/template"> 
 				<select name="weekday" class="form-control input-sm">
-					<option value="1">Monday</option>
-					<option value="2">Tuesday</option>
-					<option value="3">Wednesday</option>
-					<option value="4">Thursday</option>
-					<option value="5">Friday</option>
-					<option value="6">Saturday</option>
-					<option value="7">Sunday</option>
+					<option value="0">Monday</option>
+					<option value="1">Tuesday</option>
+					<option value="2">Wednesday</option>
+					<option value="3">Thursday</option>
+					<option value="4">Friday</option>
+					<option value="5">Saturday</option>
+					<option value="6">Sunday</option>
 				</select>
 				at
 				<select name="hour" class="form-control input-sm">

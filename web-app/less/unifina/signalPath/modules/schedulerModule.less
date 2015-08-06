@@ -11,12 +11,28 @@ body.build-page {
   				counter-reset: sectioncounter;
 				li {
 					display: table-row;
+					height: 80px;
 					&:before {
 						content: counter(sectioncounter) ".";
 						counter-increment: sectioncounter;
-						display:inline-block; width:2em; text-align:right;
-						position:relative; left:-2.5em; margin-right:-2em;
-						margin-left: 40px; margin-top: 30px;
+						display:inline-block;
+						text-align: center;
+						position:relative;
+						margin-right:-2em;
+						margin-left: 28px;
+						height: 80px;
+						width:2em;
+						top: 0px;
+						left: -28px;
+						padding-top: 30px;
+						padding-right: 30px;
+						padding-left: 20px;
+						padding-bottom: 30px;
+						border-top-left-radius: 10px;
+						border-bottom-left-radius: 10px;
+					}
+					&.error-highlight:before {
+						background-color: rgb(255, 222, 222);
 					}
 					&:not(:first-of-type) {
 						border-top: 1px solid #ccc;
@@ -27,11 +43,9 @@ body.build-page {
 						padding-bottom: 10px;
 						&:first-of-type {
 							padding-left: 15px;
-							border-top-left-radius: 10px;
-							border-bottom-left-radius: 10px;
 						}
 						&:last-of-type {
-							padding-right: 15px;
+							padding-right: 10px;
 							border-top-right-radius: 10px;
 							border-bottom-right-radius: 10px;
 						}
@@ -64,27 +78,97 @@ body.build-page {
 							margin-left: 5px;
 							margin-right: 5px;
 						}
+						input.form-control.input-sm {
+							width: 100px;
+						}
 						&.value {
 							padding-left: 20px;
 							input {
 								width: 70px;
 							}
 						}
+						&.move {
+							width: 20px;
+							padding-left: 15px;
+							.move-up-btn,
+							.move-down-btn {
+								cursor: pointer;
+							}
+							.move-up-btn:hover,
+							.move-down-btn:hover {
+								color: #999;
+							}
+							div.move-down {
+								margin-top: 25px;
+							}
+						}
 					}
 					&.error-highlight {
-						background-color: rgb(255, 222, 222);
+						div.td {
+							background-color: rgb(255, 222, 222);
+						}
+					}
+					&:first-of-type {
+						div.move-up-btn {
+							visibility: hidden;
+						}
+					}
+					&:last-of-type {
+						div.move-down-btn {
+							visibility: hidden;
+						}
 					}
 				}
 			}
 			div.setup {
 				margin-top: 30px;
+				.add-range-btn {
+					height: 30px;
+				}
 				div {
 					display: inline-block;
 				}
 				div.default-value {
 					float: right;
-					margin-left: 15px;
-					margin-right: 51px;
+					margin-right: 72px;
+					input.form-control.input-sm {
+						width: 100px;
+					}
+				}
+				div.lock-unlock-scheduler {
+					width: 20px;
+					margin-right: 20px;
+					.lock-btn,
+					.unlock-btn {
+						vertical-align: bottom;
+						font-size: 20px;
+						cursor: pointer;
+						&:hover {
+							color: #999;
+						}
+					}
+					.unlock-btn {
+						margin-top: 4px;
+					}
+				}
+			}
+			&:not(.locked) {
+				div.setup div.lock-unlock-scheduler .unlock-btn {
+					display: none;
+				}
+			}
+			&.locked {
+				div.setup div.lock-unlock-scheduler .lock-btn,
+				div.setup .add-range-btn {
+					display: none;
+				}
+				div.setup div.default-value {
+					margin-right: 25px;
+				}
+				ol.table.scheduler-table li.range .delete-btn,
+				ol.table.scheduler-table li.range .move-up-btn,
+				ol.table.scheduler-table li.range .move-down-btn {
+					display: none;
 				}
 			}
 		}

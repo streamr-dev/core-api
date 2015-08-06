@@ -24,18 +24,31 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 	        	delay: 4000
 			})
 		})
+		prot.scheduler.on("update", function(){
+			console.log("update")
+		})
 	}
 
 	var superToJSON = pub.toJSON;
 	function toJSON() {
-		if (!prot.scheduler.validate())
+		var schedulerJSON
+
+		try {
+			schedulerJSON = prot.scheduler.buildJSON()
+		} catch (e) {
 			throw "Scheduler has invalid data"
+		}
 
 		prot.jsonData = superToJSON();
-		prot.jsonData.schedule = prot.scheduler.buildJSON()
+		prot.jsonData.schedule = schedulerJSON
 
 		return prot.jsonData;
 	}
+
+	function getScheduler() {
+		return prot.scheduler
+	}
+
 	pub.toJSON = toJSON;
 
 	prot.createDiv = createDiv;

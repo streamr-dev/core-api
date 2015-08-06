@@ -65,7 +65,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		// Read json rules and add Rule objects to list
 		rules.clear();
 		List<Map<String, Object>> ruleList = (List<Map<String, Object>>) config.get("rules");
-		defaultValue = (Double)config.get("defaultValue");
+		defaultValue = ((Number)config.get("defaultValue")).doubleValue();
 		if (ruleList != null) {
 			for (Map<String, Object> rule : ruleList) {
 				int type = (int) rule.get("intervalType");
@@ -101,6 +101,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 
 		return config;
 	}
+	
+	public List<Rule> getRules(){
+		return rules;
+	}
 
 	abstract class Rule {
 		private Map<String, Object> config;
@@ -119,10 +123,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 
 		public HashMap<Integer, Integer> startTargets = new HashMap<>();
 		public HashMap<Integer, Integer> endTargets = new HashMap<>();
-
+		
 		public Rule(Map<String, Object> config) {
 			this.config = config;
-			value = ((Number) config.get("value")).doubleValue();
+			value = ((Number)config.get("value")).doubleValue();
 		}
 
 		public Date getNext(Date now) {
@@ -166,6 +170,9 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 				if (fields == null) {
 					if (field == Calendar.DAY_OF_WEEK) {
 						fields = dayOfWeekFields;
+						valueNow++;
+						if(valueNow == 7)
+							valueNow = 0;
 					} else {
 						fields = dateFields;
 					}
