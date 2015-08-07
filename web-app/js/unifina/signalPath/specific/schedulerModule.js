@@ -25,8 +25,12 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 			})
 		})
 		prot.scheduler.on("update", function(){
-			console.log("update")
+			prot.redraw()
 		})
+	}
+
+	pub.receiveResponse = function(d){
+		console.log(d)
 	}
 
 	var superToJSON = pub.toJSON;

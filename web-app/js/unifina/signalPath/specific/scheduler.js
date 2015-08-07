@@ -7,7 +7,7 @@ _.templateSettings = {
 	interpolate : /\{\{([\s\S]+?)\}\}/g
 };
 
-var Range = Backbone.Model.extend({
+var Rule = Backbone.Model.extend({
 	initialize: function(attributes, options){
 		if($.isEmptyObject(attributes)){
 			this.set("startDate", {})
@@ -56,7 +56,7 @@ var Range = Backbone.Model.extend({
 			return false
 		} else if (!value && value != 0) {
 			this.trigger("Error", {
-				text: "Ranges must have a value!"
+				text: "Rules must have a value!"
 			})
 			this.view.errorHighlight()
 			return false
@@ -72,18 +72,18 @@ var Range = Backbone.Model.extend({
 	}
 })
 
-var RangeCollection = Backbone.Collection.extend({
-	model: Range
+var RuleCollection = Backbone.Collection.extend({
+	model: Rule
 })
 
-var RangeView = Backbone.View.extend({
+var RuleView = Backbone.View.extend({
 	initialize: function(){
-		this.template = _.template($('#range-view-template').html()),
-		this.yearTemplate = _.template($('#range-view-year-template').html()),
-		this.monthTemplate = _.template($('#range-view-month-template').html()),
-		this.weekTemplate = _.template($("#range-view-week-template").html()),
-		this.dayTemplate = _.template($('#range-view-day-template').html()),
-		this.hourTemplate = _.template($('#range-view-hour-template').html())
+		this.template = _.template($('#rule-view-template').html()),
+		this.yearTemplate = _.template($('#rule-view-year-template').html()),
+		this.monthTemplate = _.template($('#rule-view-month-template').html()),
+		this.weekTemplate = _.template($("#rule-view-week-template").html()),
+		this.dayTemplate = _.template($('#rule-view-day-template').html()),
+		this.hourTemplate = _.template($('#rule-view-hour-template').html())
 
 		this.model.view = this
 	},
@@ -229,7 +229,7 @@ var Scheduler = Backbone.View.extend({
 
 
 		this.template = _.template($('#scheduler-template').html())
-		this.collection = new RangeCollection()
+		this.collection = new RuleCollection()
 
 		this.collection.on("Error", function(msg){
 			_this.trigger("Error", msg)
@@ -237,12 +237,12 @@ var Scheduler = Backbone.View.extend({
 
 		this.defaultValue = 0
 
-		if(options && options.config){
-			_.each(options.config.ranges, function(r){
-				var range = new Range(r)
-				_this.collection.add(range)
+		if(options && options.schedule){
+			_.each(options.schedule.rules, function(r){
+				var rule = new Rule(r)
+				_this.collection.add(rule)
 			})
-			this.defaultValue = options.config.defaultValue
+			this.defaultValue = options.schedule.defaultValue
 		}
 
 		this.render()
@@ -255,28 +255,28 @@ var Scheduler = Backbone.View.extend({
 		this.$el.html(this.template)
 
 		for(var i = 0; i < (this.collection.models.length || 1); i++){
-			_this.addRange(_this.collection.models[i])
+			_this.addRule(_this.collection.models[i])
 		}
 
 		this.defaultValueInput = this.$el.find("input[name='default-value']")
 		this.defaultValueInput.val(this.defaultValue)
 	},
 
-	addRange: function(model){
+	addRule: function(model){
 		var _this = this
 		var m
 		if(model === undefined)
-			m = new Range({},{
+			m = new Rule({},{
 				collection: _this.collection
 			})
 		else
 			m = model
 		this.collection.add(m)
-		var rangeView = new RangeView({
+		var ruleView = new RuleView({
 			model: m,
 			el: _this.$el.find("ol")
 		})
-		rangeView.render(this.$el.find("ol"))
+		ruleView.render(this.$el.find("ol"))
 	},
 
 	buildJSON: function(){
@@ -285,9 +285,9 @@ var Scheduler = Backbone.View.extend({
 		if(this.validate()){
 			var JSON = {}
 			JSON.defaultValue = parseFloat(this.defaultValueInput.val())
-			JSON.ranges = []
+			JSON.rules = []
 			_.each(_this.collection.models, function(model){
-				JSON.ranges.push(model.buildJSON())
+				JSON.rules.push(model.buildJSON())
 			})
 			return JSON
 		} else {
@@ -313,55 +313,31 @@ var Scheduler = Backbone.View.extend({
 		return validate
 	},
 
-	moveRangeUp: function(range){
-		var i = this.collection.models.indexOf(range)
+	moveRuleUp: function(rule){
+		var i = this.collection.models.indexOf(rule)
 		this.collection.models.splice(i, 1)
-		this.collection.models.splice(i-1, 0, range)
+		this.collection.models.splice(i-1, 0, rule)
 	},
 
-	moveRangeDown: function(range){
-		var i = this.collection.models.indexOf(range)
+	moveRuleDown: function(rule){
+		var i = this.collection.models.indexOf(rule)
 		this.collection.models.splice(i, 1)
-		this.collection.models.splice(i+1, 0, range)
-	},
-
-	lock: function(){
-		var _this = this
-		$.each(_this.$el.find("select, input"), function(i, el){
-			$(el).attr("disabled", true)
-		})
-		this.$el.addClass("locked")
-		this.trigger("update")
-	},
-
-	unlock: function(){
-		var _this = this
-		$.each(_this.$el.find("select, input"), function(i, el){
-			$(el).attr("disabled", false)
-		})
-		this.$el.removeClass("locked")
-		this.trigger("update")
+		this.collection.models.splice(i+1, 0, rule)
 	},
 
 	bindEvents: function(){
 		var _this = this
-		this.$el.find(".btn.add-range-btn").click(function(){
-			_this.addRange()
+		this.$el.find(".btn.add-rule-btn").click(function(){
+			_this.addRule()
 		})
 		this.$el.find(".btn.validate-btn").click(function(){
 			_this.buildJSON()
 		})
-		// this.$el.find(".lock-btn").click(function(){
-		// 	_this.lock()
-		// })
-		// this.$el.find(".unlock-btn").click(function(){
-		// 	_this.unlock()
-		// })
-		this.collection.on("move-up", function(range){
-			_this.moveRangeUp(range)
+		this.collection.on("move-up", function(rule){
+			_this.moveRuleUp(rule)
 		})
-		this.collection.on("move-down", function(range){
-			_this.moveRangeDown(range)
+		this.collection.on("move-down", function(rule){
+			_this.moveRuleDown(rule)
 		})
 		this.collection.on("update", function(){
 			_this.trigger("update")
@@ -373,9 +349,11 @@ function DateValidator(){}
 
 DateValidator.prototype.validate = function(startDate, endDate){
 	if(startDate.month === undefined || startDate.month == endDate.month){
-		if((startDate.weekday && startDate.weekday == endDate.weekday) || (startDate.day && startDate.day == endDate.day) || (startDate.weekday === undefined && startDate.day === undefined)){
+		if((startDate.weekday != undefined && startDate.weekday == endDate.weekday) 
+			|| (startDate.day != undefined && startDate.day == endDate.day) 
+			|| (startDate.weekday === undefined && startDate.day === undefined)){
 			if(startDate.hour === undefined || startDate.hour == endDate.hour){
-				if(startDate.minute > endDate.minute)
+				if(startDate.minute >= endDate.minute)
 					return false
 			} else if(startDate.hour > endDate.hour)
 				return false

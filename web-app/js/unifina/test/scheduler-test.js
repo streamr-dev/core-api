@@ -69,6 +69,18 @@ describe('dateValidator', function(){
 				minute: 2
 			}
 		})
+		it('must return true when given correct weekdays', function(){
+			startDate = {
+				weekday: 1,
+				hour: 1,
+				minute: 1
+			}
+			endDate = {
+				weekday: 2,
+				hour: 1,
+				minute: 2
+			}
+		})
 		it('must return true when the startDate month is smaller but the day is bigger than in the endDate', function(){
 			startDate = {
 				month: 1,
@@ -85,20 +97,6 @@ describe('dateValidator', function(){
 			}
 			endDate = {
 				minute: 2
-			}
-		})
-		it('must return true with the exactly same dates', function(){
-			startDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-			endDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
 			}
 		})
 	})
@@ -152,6 +150,32 @@ describe('dateValidator', function(){
 				minute: 1
 			}
 		})
+		it('must return true when given false weekdays', function(){
+			startDate = {
+				weekday: 3,
+				hour: 1,
+				minute: 1
+			}
+			endDate = {
+				weekday: 2,
+				hour: 1,
+				minute: 2
+			}
+		})
+		it('must return false with the exactly same dates', function(){
+			startDate = {
+				month: 1,
+				day: 1,
+				hour: 1,
+				minute: 1
+			}
+			endDate = {
+				month: 1,
+				day: 1,
+				hour: 1,
+				minute: 1
+			}
+		})
 	})
 })
 
@@ -171,7 +195,7 @@ describe('scheduler', function() {
 			})
 		})
 		it('must have the "hour" option selected first', function(){
-			assert.equal($("ol.table li.range").length, 1)
+			assert.equal($("ol.table li.rule").length, 1)
 			assert.equal($("div.td.date").length, 1)
 			assert.equal($("select[name='interval-type'] option:selected").text(), "hour")
 			assert.equal($("select[name='day']").length, 0)
@@ -189,8 +213,8 @@ describe('scheduler', function() {
 			assert.equal($("input[name='default-value']").length, 1)
 			assert.equal($("input[name='default-value']").val(), 0)
 		})
-		it('must have the add-range-button', function(){
-			assert.equal($(".btn.add-range-btn").length, 1)
+		it('must have the add-rule-button', function(){
+			assert.equal($(".btn.add-rule-btn").length, 1)
 		})
 	})
 
@@ -231,64 +255,64 @@ describe('scheduler', function() {
 		})
 	})
 
-	describe('adding and removing ranges', function(){
+	describe('adding and removing rules', function(){
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
 				el: "#scheduler"
 			})
 		})
-		it('must add the ranges when clicked add-button', function(){
-			assert.equal($("ol.table li.range").length, 1)
-			$(".btn.add-range-btn").click()
-			assert.equal($("ol.table li.range").length, 2)
-			$(".btn.add-range-btn").click()
-			assert.equal($("ol.table li.range").length, 3)
+		it('must add the rules when clicked add-button', function(){
+			assert.equal($("ol.table li.rule").length, 1)
+			$(".btn.add-rule-btn").click()
+			assert.equal($("ol.table li.rule").length, 2)
+			$(".btn.add-rule-btn").click()
+			assert.equal($("ol.table li.rule").length, 3)
 		})
-		it('must remove the ranges when clicked delete-button', function(){
-			$(".btn.add-range-btn").click()
-			$(".btn.add-range-btn").click()
-			$("ol.table li.range").eq(0).find(".delete-btn").click()
-			assert.equal($("ol.table li.range").length, 2)
-			$("ol.table li.range").find(".delete-btn").click()
-			assert.equal($("ol.table li.range").length, 0)
+		it('must remove the rules when clicked delete-button', function(){
+			$(".btn.add-rule-btn").click()
+			$(".btn.add-rule-btn").click()
+			$("ol.table li.rule").eq(0).find(".delete-btn").click()
+			assert.equal($("ol.table li.rule").length, 2)
+			$("ol.table li.rule").find(".delete-btn").click()
+			assert.equal($("ol.table li.rule").length, 0)
 		})
-		it('must remove the ranges when clicked delete-button', function(){
-			$(".btn.add-range-btn").click()
-			$(".btn.add-range-btn").click()
-			$("ol.table li.range").eq(0).find(".delete-btn").click()
-			assert.equal($("ol.table li.range").length, 2)
-			$("ol.table li.range").find(".delete-btn").click()
-			assert.equal($("ol.table li.range").length, 0)
+		it('must remove the rules when clicked delete-button', function(){
+			$(".btn.add-rule-btn").click()
+			$(".btn.add-rule-btn").click()
+			$("ol.table li.rule").eq(0).find(".delete-btn").click()
+			assert.equal($("ol.table li.rule").length, 2)
+			$("ol.table li.rule").find(".delete-btn").click()
+			assert.equal($("ol.table li.rule").length, 0)
 		})
 	})
 
-	describe('reordering ranges', function(){
+	describe('reordering rules', function(){
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
 				el: "#scheduler"
 			})
-			$(".btn.add-range-btn").click()
-			$(".btn.add-range-btn").click()
-			$("ol.table li.range").eq(0).find("select[name='interval-type']").val(4)
-			$("ol.table li.range").eq(2).find("select[name='interval-type']").val(1)
-			$("ol.table li.range").eq(0).find("input[name='value']").val("10")
-			$("ol.table li.range").eq(2).find("input[name='value']").val("20")
+			$(".btn.add-rule-btn").click()
+			$(".btn.add-rule-btn").click()
+			$("ol.table li.rule").eq(0).find("select[name='interval-type']").val(4)
+			$("ol.table li.rule").eq(2).find("select[name='interval-type']").val(1)
+			$("ol.table li.rule").eq(0).find("input[name='value']").val("10")
+			$("ol.table li.rule").eq(2).find("input[name='value']").val("20")
 		})
 		it('must change the order when clicked move-down-btn', function(){
-			$("ol.table li.range").eq(0).find(".move-down-btn").click()
-			assert.equal($("ol.table li.range").eq(0).find("select[name='interval-type']").val(), 0)
-			assert.equal($("ol.table li.range").eq(1).find("select[name='interval-type']").val(), 4)
-			$("ol.table li.range").eq(1).find(".move-down-btn").click()
-			assert.equal($("ol.table li.range").eq(1).find("input[name='value']").val(), "20")
-			assert.equal($("ol.table li.range").eq(2).find("input[name='value']").val(), "10")
+			$("ol.table li.rule").eq(0).find(".move-down-btn").click()
+			assert.equal($("ol.table li.rule").eq(0).find("select[name='interval-type']").val(), 0)
+			assert.equal($("ol.table li.rule").eq(1).find("select[name='interval-type']").val(), 4)
+			$("ol.table li.rule").eq(1).find(".move-down-btn").click()
+			assert.equal($("ol.table li.rule").eq(1).find("input[name='value']").val(), "20")
+			assert.equal($("ol.table li.rule").eq(2).find("input[name='value']").val(), "10")
 		})
 		it('must change the order when clicked move-up-btn', function(){
-			$("ol.table li.range").eq(2).find(".move-up-btn").click()
-			assert.equal($("ol.table li.range").eq(1).find("select[name='interval-type']").val(), 1)
-			assert.equal($("ol.table li.range").eq(2).find("select[name='interval-type']").val(), 0)
-			$("ol.table li.range").eq(1).find(".move-up-btn").click()
-			assert.equal($("ol.table li.range").eq(0).find("input[name='value']").val(), "20")
-			assert.equal($("ol.table li.range").eq(1).find("input[name='value']").val(), "10")
+			$("ol.table li.rule").eq(2).find(".move-up-btn").click()
+			assert.equal($("ol.table li.rule").eq(1).find("select[name='interval-type']").val(), 1)
+			assert.equal($("ol.table li.rule").eq(2).find("select[name='interval-type']").val(), 0)
+			$("ol.table li.rule").eq(1).find(".move-up-btn").click()
+			assert.equal($("ol.table li.rule").eq(0).find("input[name='value']").val(), "20")
+			assert.equal($("ol.table li.rule").eq(1).find("input[name='value']").val(), "10")
 		})
 	})
 
@@ -317,19 +341,19 @@ describe('scheduler', function() {
 				}
 			}
 		})
-		it('Should trigger Error if a range value is not given', function(){
-			$("ol.table li.range").eq(0).find("input[name='value']").val("")
-			$("ol.table li.range").eq(0).find("input[name='value']").keyup()
+		it('Should trigger Error if a rule value is not given', function(){
+			$("ol.table li.rule").eq(0).find("input[name='value']").val("")
+			$("ol.table li.rule").eq(0).find("input[name='value']").keyup()
 			shouldFail(function(){
 				scheduler.buildJSON()
-			}, "Ranges must have a value!")
+			}, "Rules must have a value!")
 			assert(hasGoneToError && hasFailed)
 		})
 		it('Should trigger Error if the startDate is after the endDate', function(done){
-			$("ol.table li.range").eq(0).find(".startDate select[name='minute']").val(20)
-			$("ol.table li.range").eq(0).find(".startDate select[name='minute']").change()
-			$("ol.table li.range").eq(0).find(".endDate select[name='minute']").val(0)
-			$("ol.table li.range").eq(0).find(".endDate select[name='minute']").change()
+			$("ol.table li.rule").eq(0).find(".startDate select[name='minute']").val(20)
+			$("ol.table li.rule").eq(0).find(".startDate select[name='minute']").change()
+			$("ol.table li.rule").eq(0).find(".endDate select[name='minute']").val(0)
+			$("ol.table li.rule").eq(0).find(".endDate select[name='minute']").change()
 			shouldFail(function(){
 				scheduler.buildJSON()
 			}, "The end date must be after the start date!", done)
@@ -346,42 +370,42 @@ describe('scheduler', function() {
 
 	describe('printing the JSON', function(){
 		var testJSON
-		var range1
-		var range2
+		var rule1
+		var rule2
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
 				el: "#scheduler"
 			})
-			$(".btn.add-range-btn").click()
+			$(".btn.add-rule-btn").click()
 			$(".default-value input[name='default-value']").val(100)
 
-			range1 = $("li.range").eq(0)
-			range1.find("select[name='interval-type']").val(2)
-			range1.find("select[name='interval-type']").change()
-			range1.find(".startDate select[name='weekday']").val(0)
-			range1.find(".startDate select[name='weekday']").change()
-			range1.find(".endDate select[name='weekday']").val(2)
-			range1.find(".endDate select[name='weekday']").change()
-			range1.find("input[name='value']").val("10")
-			range1.find("input[name='value']").keyup()
+			rule1 = $("li.rule").eq(0)
+			rule1.find("select[name='interval-type']").val(2)
+			rule1.find("select[name='interval-type']").change()
+			rule1.find(".startDate select[name='weekday']").val(0)
+			rule1.find(".startDate select[name='weekday']").change()
+			rule1.find(".endDate select[name='weekday']").val(2)
+			rule1.find(".endDate select[name='weekday']").change()
+			rule1.find("input[name='value']").val("10")
+			rule1.find("input[name='value']").keyup()
 
-			range2 = $("li.range").eq(1)
-			range2.find("select[name='interval-type']").val(1)
-			range2.find("select[name='interval-type']").change()
-			range2.find(".startDate select[name='hour']").val(10)
-			range2.find(".startDate select[name='hour']").change()
-			range2.find(".startDate select[name='minute']").val(10)
-			range2.find(".startDate select[name='minute']").change()
-			range2.find(".endDate select[name='hour']").val(12)
-			range2.find(".endDate select[name='hour']").change()
-			range2.find(".endDate select[name='minute']").val(20)
-			range2.find(".endDate select[name='minute']").change()
-			range2.find("input[name='value']").val("20")
-			range2.find("input[name='value']").keyup()
+			rule2 = $("li.rule").eq(1)
+			rule2.find("select[name='interval-type']").val(1)
+			rule2.find("select[name='interval-type']").change()
+			rule2.find(".startDate select[name='hour']").val(10)
+			rule2.find(".startDate select[name='hour']").change()
+			rule2.find(".startDate select[name='minute']").val(10)
+			rule2.find(".startDate select[name='minute']").change()
+			rule2.find(".endDate select[name='hour']").val(12)
+			rule2.find(".endDate select[name='hour']").change()
+			rule2.find(".endDate select[name='minute']").val(20)
+			rule2.find(".endDate select[name='minute']").change()
+			rule2.find("input[name='value']").val("20")
+			rule2.find("input[name='value']").keyup()
 
 			testJSON = {
 				defaultValue: 100,
-				ranges: [{
+				rules: [{
 					intervalType: 2,
 					startDate: {
 						weekday: 0,
@@ -414,19 +438,19 @@ describe('scheduler', function() {
 		})
 
 		it('should update the JSON correctly', function(){
-			range1.find(".startDate select[name='weekday']").val(1)
-			range1.find(".startDate select[name='weekday']").change()
-			testJSON.ranges[0].startDate.weekday = 1
+			rule1.find(".startDate select[name='weekday']").val(1)
+			rule1.find(".startDate select[name='weekday']").change()
+			testJSON.rules[0].startDate.weekday = 1
 
 			assert.deepEqual(scheduler.buildJSON(), testJSON)
 		})
 
-		it('should reorder the ranges in JSON when the fields are reordered', function(){
-			range1.find(".move-down-btn").click()
-			var newRanges = []
-			newRanges.push(testJSON.ranges[1])
-			newRanges.push(testJSON.ranges[0])
-			testJSON.ranges = newRanges
+		it('should reorder the rules in JSON when the fields are reordered', function(){
+			rule1.find(".move-down-btn").click()
+			var newRules = []
+			newRules.push(testJSON.rules[1])
+			newRules.push(testJSON.rules[0])
+			testJSON.rules = newRules
 
 			assert.deepEqual(scheduler.buildJSON(), testJSON)
 		})
@@ -436,7 +460,7 @@ describe('scheduler', function() {
 		beforeEach(function(){
 			var config = {
 				defaultValue: 3,
-				ranges: [{
+				rules: [{
 					value: 100,
 					intervalType: 1,
 					startDate: {
@@ -467,34 +491,34 @@ describe('scheduler', function() {
 				config: config
 			})
 		})
-		it('must have rendered all the ranges', function(){
-			assert.equal($("ol.table li.range").length, 2)
+		it('must have rendered all the rules', function(){
+			assert.equal($("ol.table li.rule").length, 2)
 		})
-		it('must have the correct values in the first range', function(){
-			var range = $("ol.table li.range").eq(0)
-			assert.equal(range.find("select[name='interval-type'] option:selected").text(), "day")
+		it('must have the correct values in the first rule', function(){
+			var rule = $("ol.table li.rule").eq(0)
+			assert.equal(rule.find("select[name='interval-type'] option:selected").text(), "day")
 
-			assert.equal(range.find(".startDate select[name='hour']").val(), 10)
-			assert.equal(range.find(".startDate select[name='minute']").val(), 25)
+			assert.equal(rule.find(".startDate select[name='hour']").val(), 10)
+			assert.equal(rule.find(".startDate select[name='minute']").val(), 25)
 
-			assert.equal(range.find(".endDate select[name='hour']").val(), 11)
-			assert.equal(range.find(".endDate select[name='minute']").val(), 35)
+			assert.equal(rule.find(".endDate select[name='hour']").val(), 11)
+			assert.equal(rule.find(".endDate select[name='minute']").val(), 35)
 
-			assert.equal(range.find("input[name='value']").val(), 100)
+			assert.equal(rule.find("input[name='value']").val(), 100)
 		})
-		it('must have the correct values in the second range', function(){
-			var range = $("ol.table li.range").eq(1)
-			assert.equal(range.find("select[name='interval-type'] option:selected").text(), "week")
+		it('must have the correct values in the second rule', function(){
+			var rule = $("ol.table li.rule").eq(1)
+			assert.equal(rule.find("select[name='interval-type'] option:selected").text(), "week")
 
-			assert.equal(range.find(".startDate select[name='weekday'] option:selected").text().toLowerCase(), "monday")
-			assert.equal(range.find(".startDate select[name='hour']").val(), 10)
-			assert.equal(range.find(".startDate select[name='minute']").val(), 25)
+			assert.equal(rule.find(".startDate select[name='weekday'] option:selected").text().toLowerCase(), "monday")
+			assert.equal(rule.find(".startDate select[name='hour']").val(), 10)
+			assert.equal(rule.find(".startDate select[name='minute']").val(), 25)
 
-			assert.equal(range.find(".endDate select[name='weekday'] option:selected").text().toLowerCase(), "wednesday")
-			assert.equal(range.find(".endDate select[name='hour']").val(), 11)
-			assert.equal(range.find(".endDate select[name='minute']").val(), 35)
+			assert.equal(rule.find(".endDate select[name='weekday'] option:selected").text().toLowerCase(), "wednesday")
+			assert.equal(rule.find(".endDate select[name='hour']").val(), 11)
+			assert.equal(rule.find(".endDate select[name='minute']").val(), 35)
 
-			assert.equal(range.find("input[name='value']").val(), 200)
+			assert.equal(rule.find("input[name='value']").val(), 200)
 			assert.equal($(".default-value input").val(), 3)
 		})
 	})

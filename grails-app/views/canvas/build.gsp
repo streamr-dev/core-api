@@ -429,20 +429,16 @@ $(document).unload(function () {
 				
 			</ol>
 			<div class="col-xs-12 form-inline setup">
-				<!--div class="lock-unlock-scheduler">
-					<i class="lock-btn fa fa-unlock" title="Lock Scheduler"></i>
-					<i class="unlock-btn fa fa-lock" title="Unlock Scheduler"></i>
-				</div-->
-				<div class="add-range">
-					<i class="btn add-range-btn btn-primary fa fa-plus">&nbsp;Add</i>
+				<div class="add-rule">
+					<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>
 				</div>
 				<div class="default-value">
 					Default value: <input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>
 				</div>
 			</div>
 		</script>
-	<script id="range-view-template" type="text/template">
-		<li class="range">
+	<script id="rule-view-template" type="text/template">
+		<li class="rule">
 			<div class="td">Every</div>
 			<div class="td interval-type">
 				<select name="interval-type" class="form-control input-sm">
@@ -470,23 +466,9 @@ $(document).unload(function () {
 			</div>
 		</li>
 	</script>
-	<script id="range-view-year-template" type="text/template">
+	<script id="rule-view-year-template" type="text/template">
 				the
-				<select name="day" class="form-control input-sm">
-					{[ _.each(_.range(31), function(i){ ]}
-						<option value="{{i+1}}">
-							{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} 
-								{{ i+1 + "st" }}
-							{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}
-								{{ i+1 + "nd" }}
-							{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}
-								{{ i+1 + "rd" }}
-							{[ } else { ]}
-								{{ i+1 + "th" }}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
+				{{ _.template($("#day-select-template").html())() }}
 				of
 				<select name="month" class="form-control input-sm">
 					<option value="1">January</option>
@@ -503,73 +485,15 @@ $(document).unload(function () {
 					<option value="12">December</option>
 				</select>
 				at
-				<select name="hour" class="form-control input-sm">
-					{[ _.each(_.range(24), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
-				:
-				<select name="minute" class="form-control input-sm">
-					{[ _.each(_.range(60), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
+				{{ _.template($("#rule-view-day-template").html())() }}
 		</script>
-	<script id="range-view-month-template" type="text/template"> 
+	<script id="rule-view-month-template" type="text/template"> 
 				the
-				<select name="day" class="form-control input-sm">
-					{[ _.each(_.range(31), function(i){ ]}
-						<option value="{{i+1}}">
-							{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} 
-								{{ i+1 + "st" }}
-							{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}
-								{{ i+1 + "nd" }}
-							{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}
-								{{ i+1 + "rd" }}
-							{[ } else { ]}
-								{{ i+1 + "th" }}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
+				{{ _.template($("#day-select-template").html())() }}
 				at
-				<select name="hour" class="form-control input-sm">
-					{[ _.each(_.range(24), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
-				:
-				<select name="minute" class="form-control input-sm">
-					{[ _.each(_.range(60), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
+				{{ _.template($("#rule-view-day-template").html())() }}
 		</script>
-	<script id="range-view-week-template" type="text/template"> 
+	<script id="rule-view-week-template" type="text/template"> 
 				<select name="weekday" class="form-control input-sm">
 					<option value="0">Monday</option>
 					<option value="1">Tuesday</option>
@@ -580,69 +504,60 @@ $(document).unload(function () {
 					<option value="6">Sunday</option>
 				</select>
 				at
-				<select name="hour" class="form-control input-sm">
-					{[ _.each(_.range(24), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
+				{{ _.template($("#rule-view-day-template").html())() }}
+		</script>
+	<script id="rule-view-day-template" type="text/template"> 
+				{{ _.template($("#hour-select-template").html())() }}
 				:
-				<select name="minute" class="form-control input-sm">
-					{[ _.each(_.range(60), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
+				{{ _.template($("#minute-select-template").html())() }}
 		</script>
-	<script id="range-view-day-template" type="text/template"> 
-				<select name="hour" class="form-control input-sm">
-					{[ _.each(_.range(24), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
-				:
-				<select name="minute" class="form-control input-sm">
-					{[ _.each(_.range(60), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
-		</script>
-	<script id="range-view-hour-template" type="text/template"> 
-				<select name="minute" class="form-control input-sm">
-					{[ _.each(_.range(60), function(i){ ]}
-						<option value="{{i}}">
-							{[ if(i<10){ ]} 
-								0{{i}}
-							{[ } else { ]}
-								{{i}}
-							{[ } ]}
-						</option>
-					{[ }); ]}
-				</select>
-				minutes from the beginning of the hour
-		</script>
+	<script id="rule-view-hour-template" type="text/template"> 
+			{{ _.template($("#minute-select-template").html())() }}
+			minutes from the beginning of the hour
+	</script>
+	<script id="day-select-template" type="text/template">
+		<select name="day" class="form-control input-sm">
+			{[ _.each(_.range(31), function(i){ ]}
+				<option value="{{i+1}}">
+					{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} 
+						{{ i+1 + "st" }}
+					{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}
+						{{ i+1 + "nd" }}
+					{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}
+						{{ i+1 + "rd" }}
+					{[ } else { ]}
+						{{ i+1 + "th" }}
+					{[ } ]}
+				</option>
+			{[ }); ]}
+		</select>
+	</script>
+	<script id="hour-select-template" type="text/template">
+		<select name="hour" class="form-control input-sm">
+			{[ _.each(_.range(24), function(i){ ]}
+				<option value="{{i}}">
+					{[ if(i<10){ ]} 
+						0{{i}}
+					{[ } else { ]}
+						{{i}}
+					{[ } ]}
+				</option>
+			{[ }); ]}
+		</select>
+	</script>
+	<script id="minute-select-template" type="text/template">
+		<select name="minute" class="form-control input-sm">
+			{[ _.each(_.range(60), function(i){ ]}
+				<option value="{{i}}">
+					{[ if(i<10){ ]} 
+						0{{i}}
+					{[ } else { ]}
+						{{i}}
+					{[ } ]}
+				</option>
+			{[ }); ]}
+		</select>
+	</script>
 	<!-- Template -->
 </body>
 </html>

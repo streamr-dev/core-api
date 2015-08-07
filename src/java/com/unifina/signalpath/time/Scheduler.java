@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.unifina.datasource.ITimeListener;
+import com.unifina.domain.signalpath.Module;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.TimeSeriesOutput;
 
@@ -61,27 +62,26 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
-		// Read json rules and add Rule objects to list
-		rules.clear();
-		List<Map<String, Object>> ruleList = (List<Map<String, Object>>) config.get("rules");
-		defaultValue = ((Number)config.get("defaultValue")).doubleValue();
-		if (ruleList != null) {
+		Module m = this.getDomainObject();
+		Map<String, Object> schedule = (Map<String, Object>)config.get("schedule");
+		
+		if(schedule != null){
+			List<Map<String, Object>> ruleList = (List<Map<String, Object>>) schedule.get("rules");
+			defaultValue = ((Number)schedule.get("defaultValue")).doubleValue();
+			// Read json rules and add Rule objects to list
+			rules.clear();
 			for (Map<String, Object> rule : ruleList) {
 				int type = (int) rule.get("intervalType");
-				switch (type) {
-				case 0:
+				if(type == 0)
 					rules.add(new HourlyRule(rule));
-				case 1:
+				else if(type == 1)
 					rules.add(new DailyRule(rule));
-				case 2:
+				else if(type == 2)
 					rules.add(new WeeklyRule(rule));
-				case 3:
+				else if(type == 3)
 					rules.add(new MonthlyRule(rule));
-				case 4:
+				else if(type == 4)
 					rules.add(new YearlyRule(rule));
-				}
-
 			}
 		}
 	}
@@ -105,6 +105,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 	public List<Rule> getRules(){
 		return rules;
 	}
+	
+	public Rule getRule(int index){
+		return rules.get(index);
+	}
 
 	abstract class Rule {
 		private Map<String, Object> config;
@@ -112,11 +116,11 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		private Double value;
 
 		private List<Integer> dateFields = Arrays.asList(new Integer[] {
-				Calendar.MONTH, Calendar.DATE, Calendar.HOUR, Calendar.MINUTE,
+				Calendar.YEAR, Calendar.MONTH, Calendar.DATE, Calendar.HOUR_OF_DAY, Calendar.MINUTE,
 				Calendar.SECOND, Calendar.MILLISECOND });
 		private List<Integer> dayOfWeekFields = Arrays.asList(new Integer[] {
-				Calendar.MONTH, Calendar.WEEK_OF_YEAR, Calendar.DAY_OF_WEEK,
-				Calendar.HOUR, Calendar.MINUTE, Calendar.SECOND,
+				Calendar.YEAR, Calendar.MONTH, Calendar.WEEK_OF_YEAR, Calendar.DAY_OF_WEEK,
+				Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND,
 				Calendar.MILLISECOND });
 		
 		private Calendar cal = Calendar.getInstance();
@@ -153,7 +157,6 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		private Date getNext(Date now, Map<Integer, Integer> targets) {
 			cal.setTime(now);
 
-			Date date = now;
 			int target;
 			List<Integer> fields = null;
 			Integer[] targetFields = Arrays.copyOf(targets.keySet().toArray(),
@@ -184,7 +187,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 								.indexOf(targetFields[0]) - 1);
 						cal.add(fieldToRaise, 1);
 					}
-					for (int j = fields.indexOf(field); j < fields.size(); j++) {
+					for (int j = fields.indexOf(field); j < fields.size()-fields.indexOf(field); j++) {
 						if (targets.containsKey(fields.get(j))) {
 							cal.set(fields.get(j), targets.get(fields.get(j)));
 						} else {
@@ -230,10 +233,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			endHour = (int) ((Map) config.get("endDate")).get("hour");
 			endMinute = (int) ((Map) config.get("endDate")).get("minute");
 
-			startTargets.put(Calendar.HOUR, startHour);
+			startTargets.put(Calendar.HOUR_OF_DAY, startHour);
 			startTargets.put(Calendar.MINUTE, startMinute);
 
-			endTargets.put(Calendar.HOUR, endHour);
+			endTargets.put(Calendar.HOUR_OF_DAY, endHour);
 			endTargets.put(Calendar.MINUTE, endMinute);
 		}
 	}
@@ -259,11 +262,11 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			endMinute = (int) ((Map) config.get("endDate")).get("minute");
 
 			startTargets.put(Calendar.DAY_OF_WEEK, startWeekday);
-			startTargets.put(Calendar.HOUR, startHour);
+			startTargets.put(Calendar.HOUR_OF_DAY, startHour);
 			startTargets.put(Calendar.MINUTE, startMinute);
 
 			endTargets.put(Calendar.DAY_OF_WEEK, endWeekday);
-			endTargets.put(Calendar.HOUR, endHour);
+			endTargets.put(Calendar.HOUR_OF_DAY, endHour);
 			endTargets.put(Calendar.MINUTE, endMinute);
 		}
 	}
@@ -280,20 +283,20 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		public MonthlyRule(Map<String, Object> config) {
 			super(config);
 
-			startDate = (int) ((Map) config.get("startDate")).get("date");
+			startDate = (int) ((Map) config.get("startDate")).get("day");
 			startHour = (int) ((Map) config.get("startDate")).get("hour");
 			startMinute = (int) ((Map) config.get("startDate")).get("minute");
 
-			endDate = (int) ((Map) config.get("endDate")).get("date");
+			endDate = (int) ((Map) config.get("endDate")).get("day");
 			endHour = (int) ((Map) config.get("endDate")).get("hour");
 			endMinute = (int) ((Map) config.get("endDate")).get("minute");
 
 			startTargets.put(Calendar.DATE, startDate);
-			startTargets.put(Calendar.HOUR, startHour);
+			startTargets.put(Calendar.HOUR_OF_DAY, startHour);
 			startTargets.put(Calendar.MINUTE, startMinute);
 
 			endTargets.put(Calendar.DATE, endDate);
-			endTargets.put(Calendar.HOUR, endHour);
+			endTargets.put(Calendar.HOUR_OF_DAY, endHour);
 			endTargets.put(Calendar.MINUTE, endMinute);
 		}
 	}
@@ -313,23 +316,23 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			super(config);
 
 			startMonth = (int) ((Map) config.get("startDate")).get("month");
-			startDate = (int) ((Map) config.get("startDate")).get("date");
+			startDate = (int) ((Map) config.get("startDate")).get("day");
 			startHour = (int) ((Map) config.get("startDate")).get("hour");
 			startMinute = (int) ((Map) config.get("startDate")).get("minute");
 
 			endMonth = (int) ((Map) config.get("endDate")).get("month");
-			endDate = (int) ((Map) config.get("endDate")).get("date");
+			endDate = (int) ((Map) config.get("endDate")).get("day");
 			endHour = (int) ((Map) config.get("endDate")).get("hour");
 			endMinute = (int) ((Map) config.get("endDate")).get("minute");
 
 			startTargets.put(Calendar.MONTH, startMonth);
 			startTargets.put(Calendar.DATE, startDate);
-			startTargets.put(Calendar.HOUR, startHour);
+			startTargets.put(Calendar.HOUR_OF_DAY, startHour);
 			startTargets.put(Calendar.MINUTE, startMinute);
 
 			endTargets.put(Calendar.MONTH, endMonth);
 			endTargets.put(Calendar.DATE, endDate);
-			endTargets.put(Calendar.HOUR, endHour);
+			endTargets.put(Calendar.HOUR_OF_DAY, endHour);
 			endTargets.put(Calendar.MINUTE, endMinute);
 		}
 	}

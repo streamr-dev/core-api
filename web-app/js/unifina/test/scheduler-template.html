@@ -3,16 +3,16 @@
 				
 			</ol>
 			<div class="col-xs-12 form-inline setup">
-				<div class="add-range">
-					<i class="btn add-range-btn btn-primary fa fa-plus">&nbsp;Add</i>
+				<div class="add-rule">
+					<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>
 				</div>
 				<div class="default-value">
 					Default value: <input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>
 				</div>
 			</div>
 		</script>
-	<script id="range-view-template" type="text/template">
-		<li class="range">
+	<script id="rule-view-template" type="text/template">
+		<li class="rule">
 			<div class="td">Every</div>
 			<div class="td interval-type">
 				<select name="interval-type" class="form-control input-sm">
@@ -40,7 +40,7 @@
 			</div>
 		</li>
 	</script>
-	<script id="range-view-year-template" type="text/template">
+	<script id="rule-view-year-template" type="text/template">
 				the
 				<select name="day" class="form-control input-sm">
 					{[ _.each(_.range(31), function(i){ ]}
@@ -97,7 +97,7 @@
 					{[ }); ]}
 				</select>
 		</script>
-	<script id="range-view-month-template" type="text/template"> 
+	<script id="rule-view-month-template" type="text/template"> 
 				the
 				<select name="day" class="form-control input-sm">
 					{[ _.each(_.range(31), function(i){ ]}
@@ -139,7 +139,7 @@
 					{[ }); ]}
 				</select>
 		</script>
-	<script id="range-view-week-template" type="text/template"> 
+	<script id="rule-view-week-template" type="text/template"> 
 				<select name="weekday" class="form-control input-sm">
 					<option value="0">Monday</option>
 					<option value="1">Tuesday</option>
@@ -174,7 +174,7 @@
 					{[ }); ]}
 				</select>
 		</script>
-	<script id="range-view-day-template" type="text/template"> 
+	<script id="rule-view-day-template" type="text/template"> 
 				<select name="hour" class="form-control input-sm">
 					{[ _.each(_.range(24), function(i){ ]}
 						<option value="{{i}}">
@@ -199,7 +199,7 @@
 					{[ }); ]}
 				</select>
 		</script>
-	<script id="range-view-hour-template" type="text/template"> 
+	<script id="rule-view-hour-template" type="text/template"> 
 				<select name="minute" class="form-control input-sm">
 					{[ _.each(_.range(60), function(i){ ]}
 						<option value="{{i}}">

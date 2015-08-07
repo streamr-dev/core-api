@@ -16407,22 +16407,22 @@ button.arrow:after {
   display: inline-block;
   font-weight: bolder;
 }
-body.build-page div.module div.modulebody div.scheduler {
+div.module div.modulebody div.scheduler {
   font-size: 14px;
   padding: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table {
+div.module div.modulebody div.scheduler ol.table.scheduler-table {
   margin-bottom: 0px;
   display: table;
   list-style-type: none;
   border-collapse: collapse;
   counter-reset: sectioncounter;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li {
   display: table-row;
   height: 80px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li:before {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:before {
   content: counter(sectioncounter) ".";
   counter-increment: sectioncounter;
   display: inline-block;
@@ -16441,13 +16441,13 @@ body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight:before {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight:before {
   background-color: #ffdede;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li:not(:first-of-type) {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:not(:first-of-type) {
   border-top: 1px solid #ccc;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td {
   display: table-cell;
   padding-top: 10px;
   padding-bottom: 10px;
@@ -16455,116 +16455,87 @@ body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table
   padding-left: 2px;
   padding-right: 2px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:first-of-type {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:first-of-type {
   padding-left: 15px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:last-of-type {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:last-of-type {
   padding-right: 10px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn {
   cursor: pointer;
   float: right;
   font-size: 15px;
   margin-left: 10px;
   padding: 10px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn:hover {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn:hover {
   color: #999;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .startDate span,
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .endDate span {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .startDate span,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .endDate span {
   margin-top: 5px;
   margin-left: 10px;
   float: left;
   width: 42px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td select.form-control.input-sm,
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td select.form-control.input-sm,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
   display: inline;
   width: auto;
   margin-left: 5px;
   margin-right: 5px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
   width: 100px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value {
   padding-left: 20px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value input {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value input {
   width: 70px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move {
   width: 20px;
   padding-left: 15px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-up-btn,
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-down-btn {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-up-btn,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-down-btn {
   cursor: pointer;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-up-btn:hover,
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-down-btn:hover {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-up-btn:hover,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-down-btn:hover {
   color: #999;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move div.move-down {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move div.move-down {
   margin-top: 25px;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight div.td {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight div.td {
   background-color: #ffdede;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type div.move-up-btn {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type div.move-up-btn {
   visibility: hidden;
 }
-body.build-page div.module div.modulebody div.scheduler ol.table.scheduler-table li:last-of-type div.move-down-btn {
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:last-of-type div.move-down-btn {
   visibility: hidden;
 }
-body.build-page div.module div.modulebody div.scheduler div.setup {
+div.module div.modulebody div.scheduler div.setup {
   margin-top: 30px;
+  margin-bottom: -8px;
 }
-body.build-page div.module div.modulebody div.scheduler div.setup .add-range-btn {
+div.module div.modulebody div.scheduler div.setup .add-range-btn {
   height: 30px;
 }
-body.build-page div.module div.modulebody div.scheduler div.setup div {
+div.module div.modulebody div.scheduler div.setup div {
   display: inline-block;
 }
-body.build-page div.module div.modulebody div.scheduler div.setup div.default-value {
+div.module div.modulebody div.scheduler div.setup div.default-value {
   float: right;
   margin-right: 72px;
 }
-body.build-page div.module div.modulebody div.scheduler div.setup div.default-value input.form-control.input-sm {
+div.module div.modulebody div.scheduler div.setup div.default-value input.form-control.input-sm {
   width: 100px;
-}
-body.build-page div.module div.modulebody div.scheduler div.setup div.lock-unlock-scheduler {
-  width: 20px;
-  margin-right: 20px;
-}
-body.build-page div.module div.modulebody div.scheduler div.setup div.lock-unlock-scheduler .lock-btn,
-body.build-page div.module div.modulebody div.scheduler div.setup div.lock-unlock-scheduler .unlock-btn {
-  vertical-align: bottom;
-  font-size: 20px;
-  color: #333;
-  cursor: pointer;
-}
-body.build-page div.module div.modulebody div.scheduler div.setup div.lock-unlock-scheduler .lock-btn:hover,
-body.build-page div.module div.modulebody div.scheduler div.setup div.lock-unlock-scheduler .unlock-btn:hover {
-  color: #999;
-}
-body.build-page div.module div.modulebody div.scheduler:not(.locked) div.setup div.lock-unlock-scheduler .unlock-btn {
-  display: none;
-}
-body.build-page div.module div.modulebody div.scheduler.locked div.setup div.lock-unlock-scheduler .lock-btn,
-body.build-page div.module div.modulebody div.scheduler.locked div.setup .add-range-btn {
-  display: none;
-}
-body.build-page div.module div.modulebody div.scheduler.locked div.setup div.default-value {
-  margin-right: 25px;
-}
-body.build-page div.module div.modulebody div.scheduler.locked ol.table.scheduler-table li.range .delete-btn,
-body.build-page div.module div.modulebody div.scheduler.locked ol.table.scheduler-table li.range .move-up-btn,
-body.build-page div.module div.modulebody div.scheduler.locked ol.table.scheduler-table li.range .move-down-btn {
-  display: none;
 }
 .dashboard streamr-label {
   font-size: 70px;
