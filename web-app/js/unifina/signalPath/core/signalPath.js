@@ -48,7 +48,7 @@ var SignalPath = (function () {
 		abortUrl: undefined,
 		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
 		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-		requestUrl: Streamr.projectWebroot+"live/request",
+		requestUrl: Streamr.projectWebroot+"api/live/request",
 		connectionOptions: {},
 		resendOptions: {resend_all:true},
 		zoom: 1
@@ -117,20 +117,21 @@ var SignalPath = (function () {
 			$.ajax({
 				type: 'POST',
 				url: options.requestUrl,
-				data: {
+				data: JSON.stringify({
 					id: runData.id,
 					hash: hash,
 					channel: channel,
-					msg: JSON.stringify(msg)
-				},
+					msg: msg
+				}),
+				dataType: 'json',
+				contentType: 'application/json; charset=utf-8',
 				success: function(data) {
 					if (!data.success) {
 						handleError(data.error || data.response.error)
 					}
 					else if (callback)
 						callback(data.response)
-				},
-				dataType: 'json'
+				}
 			});
 			return true;
 		}

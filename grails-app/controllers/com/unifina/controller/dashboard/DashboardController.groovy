@@ -10,9 +10,19 @@ import com.unifina.domain.dashboard.DashboardItem
 class DashboardController {
 	def grailsApplication
 	def springSecurityService
-	
 	def unifinaSecurityService
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Dashboard.get(params.long("id")))},
+	
+	def beforeInterceptor = [action:{
+			if (!unifinaSecurityService.canAccess(Dashboard.get(params.long("id")))) {
+				if (request.xhr)
+					redirect(controller:'login', action:'ajaxDenied')
+				else
+					redirect(controller:'login', action:'denied')
+					
+				return false
+			}
+			else return true
+		},
 		except:['list', 'create', 'save']]
 	
 	static defaultAction = "list"

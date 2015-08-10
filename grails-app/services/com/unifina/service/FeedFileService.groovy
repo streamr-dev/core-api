@@ -262,8 +262,11 @@ class FeedFileService {
 			feedFile = FeedFile.findByStreamAndDayBetween(stream, beginDate, endDate, [sort:'day', max:1, offset:piece])
 		
 		// Null signals the end of data
-		if (feedFile==null)
+		if (feedFile==null) {
+			log.debug("getStream: no more FeedFiles for stream $stream.id, feed $stream.feed.id, beginDate: $beginDate, endDate: $endDate, piece: $piece")
 			return null
+		}
+		else log.debug("getStream: starting FeedFile "+feedFile.id+" for stream "+stream.id)
 		
 		// Instantiate preprocessor and get the preprocessed file name
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(feed)
@@ -337,6 +340,13 @@ class FeedFileService {
 		String canonicalName = getCanonicalName(feedFile.feed, feedFile.day, f.name)
 		log.debug("Storing $f to $canonicalName")
 		getFileStorageAdapter().store(f, canonicalName)
+	}
+	
+	public void deleteFile(FeedFile feedFile) {
+		feedFile = FeedFile.get(feedFile.id)
+		String canonicalName = getCanonicalName(feedFile.feed, feedFile.day, feedFile.name)
+		log.debug("Deleting $canonicalName")
+		getFileStorageAdapter().delete(canonicalName)
 	}
 	
 	public void saveOrUpdateStreams(List<Stream> foundStreams,

@@ -7,8 +7,8 @@
  * -------------------------- */
 @font-face {
   font-family: 'FontAwesome';
-  src: url('../../fonts/font-awesome/fontawesome-webfont.eot');
-  src: url('../../fonts/font-awesome/fontawesome-webfont.eot') format('embedded-opentype'), url('../../fonts/font-awesome/fontawesome-webfont.woff') format('woff'), url('../../fonts/font-awesome/fontawesome-webfont.ttf') format('truetype'), url('../../fonts/font-awesome/fontawesome-webfont.svg') format('svg');
+  src: url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.eot');
+  src: url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.eot') format('embedded-opentype'), url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.woff') format('woff'), url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.ttf') format('truetype'), url('//netdna.bootstrapcdn.com/font-awesome/4.0.3/fonts/fontawesome-webfont.svg') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -16206,9 +16206,6 @@ a:hover {
   vertical-align: top;
   cursor: pointer;
 }
-.disabled {
-  display: none;
-}
 table.paramTable {
   width: 100%;
   padding: 0px;
@@ -16475,30 +16472,33 @@ body.embedded #content-wrapper > :not(.embeddable) {
 .math-tex:not(.math-jax-ready) {
   display: none;
 }
-.form-group-period .input-group-addon {
-  width: 60px;
-}
-.load-save-group {
-  width: 100%;
-}
-.load-save-group > .btn,
-.load-save-group > .btn-group {
-  width: 50%;
-}
-.load-save-group > .btn-group > .btn {
-  width: 100%;
-}
-#run i.fa {
-  margin-right: 5px;
-}
-#run-group button.dropdown-toggle {
-  padding-left: 0px;
-  padding-right: 0px;
-}
 body.build-page {
   overflow: hidden;
   height: 100%;
   width: 100%;
+}
+body.build-page .form-group-period .input-group-addon {
+  width: 60px;
+}
+body.build-page .load-save-group {
+  width: 100%;
+}
+body.build-page .load-save-group > .btn,
+body.build-page .load-save-group > .btn-group {
+  width: 50%;
+}
+body.build-page .load-save-group > .btn-group > .btn {
+  width: 100%;
+}
+body.build-page #save-dropdown-menu .disabled {
+  display: none;
+}
+body.build-page #run i.fa {
+  margin-right: 5px;
+}
+body.build-page #run-group button.dropdown-toggle {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 body.build-page #content-wrapper {
   padding-top: 38px;
@@ -16506,11 +16506,11 @@ body.build-page #content-wrapper {
   padding-right: 0px;
   padding-bottom: 0px;
 }
-#moduleTree {
+body.build-page #moduleTree {
   max-height: 300px;
   overflow: auto;
 }
-#main-menu .twitter-typeahead {
+body.build-page #main-menu .twitter-typeahead {
   width: 100%;
 }
 .login-page .btn-sign-up {
@@ -16541,8 +16541,8 @@ body.live-show-view #toolbarForm {
   z-index: 50;
   right: 0;
   position: absolute;
-  padding-right: 30px;
-  padding-top: 15px;
+  margin-top: -10px;
+  /* shown over breadcrumb margin-bottom */
 }
 body.live-show-view #canvas {
   height: 100%;
@@ -16556,11 +16556,16 @@ body.stream-show table.file-table td.text-center .lbl {
   vertical-align: top;
   margin-left: 2px;
 }
-body.stream-show #toolbar {
-  padding-bottom: 35px;
+body.stream-show .dropzone-box {
+  margin-top: 5px;
+  min-height: 200px;
 }
-body.stream-show #dropzone {
-  margin-top: 30px;
+body.stream-show .history .delete-btn {
+  height: 30px;
+}
+body.stream-show .history-start-date,
+body.stream-show .history-end-date {
+  font-weight: bold;
 }
 body.module-list {
   position: relative;

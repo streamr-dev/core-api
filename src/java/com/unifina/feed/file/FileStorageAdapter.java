@@ -70,6 +70,25 @@ public abstract class FileStorageAdapter {
 		throw new IOException("Failed to store "+file+" to "+location+", attempts exhausted");
 	}
 	
+	/**
+	 * Attempts to delete a File from the specified location. Will throw an
+	 * IOException if not successful after a number of retries.
+	 * @param file
+	 * @param location
+	 */
+	public void delete(String location) throws IOException {
+		for (int i=1;i<=retries;i++) {
+			try {
+				tryDelete(location);
+				return;
+			} catch (Exception e) {
+				log.error("Failed to delete "+location+", attempt "+i,e);
+			}
+		}
+		throw new IOException("Failed to delete "+location+", attempts exhausted");
+	}
+	
 	protected abstract InputStream tryRetrieve(String location) throws IOException;
 	protected abstract void tryStore(File file, String location) throws IOException;
+	protected abstract void tryDelete(String location) throws IOException;
 }
