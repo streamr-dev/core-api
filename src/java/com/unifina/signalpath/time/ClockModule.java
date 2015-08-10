@@ -2,6 +2,7 @@ package com.unifina.signalpath.time;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -38,8 +39,13 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	@Override
 	public void setTime(Date timestamp) {
 		if(date.isConnected() && !format.getValue().isEmpty()){
-			if(df == null || !df.toPattern().equals(format.getValue()))
+			if(df == null){
 				df = new SimpleDateFormat(format.getValue());
+				df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+			}
+			else if(!df.toPattern().equals(format.getValue()))
+				df.applyPattern(format.getValue());
+				
 			date.send(df.format(timestamp));
 		}
 		ts.send((double)timestamp.getTime());

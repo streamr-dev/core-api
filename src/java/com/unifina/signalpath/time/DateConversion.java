@@ -9,7 +9,6 @@ import java.util.TimeZone;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleException;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.signalpath.TimeSeriesOutput;
@@ -78,9 +77,14 @@ public class DateConversion extends AbstractSignalPathModule {
 		cal.setTime(date);
 		
 		if(dateOut.isConnected() && !format.getValue().isEmpty()){
-			if(df == null || !df.toPattern().equals(format.getValue()) || !df.getTimeZone().equals(TimeZone.getTimeZone(tz.getValue()))){
+			if(df == null){
 				df = new SimpleDateFormat(format.getValue());
 				df.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
+			} else if(!df.toPattern().equals(format.getValue())){
+				df.applyPattern(format.getValue());
+			} else if(!df.getTimeZone().equals(TimeZone.getTimeZone(tz.getValue()))){
+				df.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
+				cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
 			}
 			dateOut.send(df.format(date));
 		}
