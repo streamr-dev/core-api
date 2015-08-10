@@ -6,46 +6,48 @@ var window = jsdom.jsdom().parentWindow
 var $ = require('jquery')(window)
 var _ = require('underscore')
 
-global.$ = $
-global.window = window
-global.document = window.document
-global.jQuery = $
-global._ = _
-
-$.fn.scrollspy = function(options){}
-$.fn.pnotify = function(options){
-	return options
-}
-
-global.MathJax = {
-	Hub: {
-		Queue: function(param){
-			if (typeof(param) === "function")
-				param()
-		}
-	}
-}
-
-global.Streamr = {
-	createLink: function(controller, action, id){
-		if(id === undefined)
-			return controller+"/"+action
-		else
-			return controller+"/"+action+"/"+id
-	}
-}
-
-
-global.spinnerImg = ""
-
-var mb = require('../module-browser/module-browser')
-
-assert.equal($("body").length, 1)
-
 var moduleTree
 var getHelp
+var mb
 
 describe('module-browser-page', function(){
+	before(function(){
+		global.$ = $
+		global.window = window
+		global.document = window.document
+		global.jQuery = $
+		global._ = _
+		$.fn.scrollspy = function(options){}
+		$.fn.pnotify = function(options){
+			return options
+		}
+
+		global.MathJax = {
+			Hub: {
+				Queue: function(param){
+					if (typeof(param) === "function")
+						param()
+				}
+			}
+		}
+
+		global.Streamr = {
+			createLink: function(controller, action, id){
+				if(id === undefined)
+					return controller+"/"+action
+				else
+					return controller+"/"+action+"/"+id
+			}
+		}
+
+
+		global.spinnerImg = ""
+
+		mb = require('../module-browser/module-browser')
+
+		assert.equal($("body").length, 1)
+	})
+
 	beforeEach(function(){
 		getHelp = function(id){
 			var help = {
@@ -63,10 +65,6 @@ describe('module-browser-page', function(){
 			return help
 		}
 		$("body").append("<div class='sidebar'></div><div class='module-tree'></div><input class='search'></input>")
-	})
-
-	afterEach(function(){
-		$("body").empty()
 	})
 
 	describe('module-browser', function(){
@@ -479,5 +477,21 @@ describe('module-browser-page', function(){
 			assert.equal($("nav.streamr-sidebar>.nav>li>.nav>li").length, 2)
 			assert.equal($("nav.streamr-sidebar>.nav>li>.nav>li>.nav>li").length, 1)
 		})
+	})
+
+	afterEach(function(){
+		$("body").empty()
+	})
+
+	after(function(){
+		global.$ = undefined
+		global.window = undefined
+		global.document = undefined
+		global.jQuery = undefined
+		global._ = undefined
+		global.MathJax = undefined
+		global.Streamr = undefined
+		global.spinnerImg = undefined
+		mb = undefined
 	})
 })
