@@ -23,3 +23,7 @@ driver = {
 	else
 		new ChromeDriver()
 }
+
+waiting {
+	timeout = 10
+}

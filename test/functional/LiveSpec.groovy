@@ -77,7 +77,7 @@ public class LiveSpec extends LoginTester1Spec {
 			$("#runLiveName") << liveName
 			$("#runLiveButton").click()
 		then: "LiveShowPage is opened and Label shows data"
-			waitFor { at LiveShowPage }
+			waitFor(30) { at LiveShowPage }
 			stopButton.displayed
 			!$(".alert").displayed
 			

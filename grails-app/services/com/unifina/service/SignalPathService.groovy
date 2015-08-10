@@ -300,7 +300,7 @@ class SignalPathService {
 	
 	@CompileStatic
 	boolean ping(RunningSignalPath rsp, SecUser user) {
-		RuntimeResponse response = sendRemoteRequest([type:'ping'], rsp, null, user)
+		RuntimeResponse response = runtimeRequest([type:'ping'], rsp, null, user)
 		return response.isSuccess()
 	}
 	
@@ -326,6 +326,7 @@ class SignalPathService {
 		log.info("sendRemoteRequest: $json")
 		
 		HttpResponse<String> response = req.body((json as JSON).toString()).asString()
+
 		try {
 			Map map = (JSONObject) JSON.parse(response.getBody())
 			return new RuntimeResponse(map)
