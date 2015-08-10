@@ -3,6 +3,7 @@ package com.unifina.controller.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
+import groovy.json.JsonSlurper
 
 import org.apache.log4j.Logger
 
@@ -22,7 +23,13 @@ class ModuleController {
 	def springSecurityService
 	def unifinaSecurityService
 	
+	static defaultAction = "list"
+	
 	private static final Logger log = Logger.getLogger(ModuleController)
+	
+	def list() {
+		
+	}
 	
 	def jsonSearchModule() {
 		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
@@ -84,30 +91,42 @@ class ModuleController {
 		
 		def result = []	
 		categories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {category->
-			def item = moduleTreeRecurse(category,allowedPackageIds)
+			def item = moduleTreeRecurse(category,allowedPackageIds,params.boolean('modulesFirst') ?: false)
 			result.add(item)
 		}
 		render result as JSON
 	}
 
-	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds) {
+	private Map moduleTreeRecurse(ModuleCategory category, Set<Long> allowedPackageIds, boolean modulesFirst=false) {
 		def item = [:]
 		item.data = category.name
 		item.metadata = [canAdd:false, id:category.id]
 		item.children = []
-
+		
+		List categoryChildren = []
+		List moduleChildren = []
+		
 		category.subcategories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {subcat->
-			def subItem = moduleTreeRecurse(subcat,allowedPackageIds)
-			item.children.add(subItem)
+			def subItem = moduleTreeRecurse(subcat,allowedPackageIds, modulesFirst)
+			categoryChildren.add(subItem)
 		}
-
+		
 		category.modules.each {Module module->
 			if (allowedPackageIds.contains(module.modulePackage.id) && (module.hide==null || !module.hide)) {
 				def moduleItem = [:]
 				moduleItem.data = module.name
 				moduleItem.metadata = [canAdd:true, id:module.id]
-				item.children.add(moduleItem)
+				moduleChildren.add(moduleItem)
 			}
+		}
+		
+		if (modulesFirst) {
+			item.children.addAll(moduleChildren)
+			item.children.addAll(categoryChildren)
+		}
+		else {
+			item.children.addAll(categoryChildren)
+			item.children.addAll(moduleChildren)
 		}
 
 		return item
@@ -176,11 +195,11 @@ class ModuleController {
 		// Needs to be owner
 		Module module = Module.get(params.id)
 		if (module.modulePackage.user!=springSecurityService.currentUser) {
-			render ([success:false, error: "Access denied, only owner can edit module help"])
-		}
-		else {
+			response.status = 403
+			render ([success:false, error: "Access denied, only owner can edit module help"] as JSON)
+		} else {
 			module.jsonHelp = params.jsonHelp
-			module.save(failOnError:true)
+			module.save(failOnError:true, flush:true)
 			render ([success:true] as JSON)
 		}
 	}
@@ -192,6 +211,15 @@ class ModuleController {
 			throw new Exception("User $springSecurityService.currentUser can not edit help of module $module.name")
 		}
 		[module:module]
+	}
+	
+	def canEdit() {
+		Module module = Module.get(params.id)
+		if (module.modulePackage.user!=springSecurityService.currentUser) {
+			render ([success:false] as JSON)
+		} else {
+			render ([success:true] as JSON)
+		}
 	}
 	
 }

@@ -7,48 +7,46 @@ var $ = require('jquery')(window);
 var _ = require('underscore')
 var Backbone = require('backbone-associations')
 
-global.$ = $
-global._ = _
-global.window = window
-global.document = window.document
-global.Backbone = Backbone
-Backbone.$ = $
-global.jQuery = $
-global.$.pnotify = function(options) {
-	return options
-}
-// jsdom wants to use the deprecated style of creating events, so let's mock a bridge between old and new
-global.Event = function(type) {
-	var e = window.document.createEvent("MockEvent")
-	e.initEvent(type, true, true)
-	return e
-}
-
-var templates = fs.readFileSync('grails-app/views/dashboard/_dashboard-template.gsp','utf8') // read content of _dashboard-template.gsp
-assert.equal($("body").length, 1)
-$("body").append(templates)
-
-var db = require('../dashboard/dashboard-editor')
-global.Toolbar = function(options) {
-	return options
-}
 var sidebar
 var dashboard
 var dashboardView
 var dashboardJson
 var runningSignalPathsJson
+var templates
+var db
 
 describe('dashboard-editor', function() {
+	before(function(){
+		global.$ = $
+		global._ = _
+		global.window = window
+		global.document = window.document
+		global.Backbone = Backbone
+		Backbone.$ = $
+		global.jQuery = $
+		global.$.pnotify = function(options) {
+			return options
+		}
+		// jsdom wants to use the deprecated style of creating events, so let's mock a bridge between old and new
+		global.Event = function(type) {
+			var e = window.document.createEvent("MockEvent")
+			e.initEvent(type, true, true)
+			return e
+		}
 
-	before(function() {
+		templates = fs.readFileSync('grails-app/views/dashboard/_dashboard-template.gsp','utf8') // read content of _dashboard-template.gsp
+		assert.equal($("body").length, 1)
+		$("body").append(templates)
+		db = require('../dashboard/dashboard-editor')
 
+		global.Toolbar = function(options) {
+			return options
+		}
 	})
 
 	beforeEach(function() {
-		$("#dashboard-view").remove()
+		$("body").append(templates)
 		$("body").append("<ul id='dashboard-view'></ul>")
-
-		$("#sidebar-view").remove()
 		$("body").append("<div id='sidebar-view'><button id='main-menu-toggle'></button></div>")
 
 		dashboardJson = {
@@ -83,7 +81,6 @@ describe('dashboard-editor', function() {
 			model: dashboard,
 			el: $("#dashboard-view")
 		})
-
 		sidebar = new db.SidebarView({
 			el: $("#sidebar-view"),
 			dashboard: dashboard, 
@@ -354,4 +351,23 @@ describe('dashboard-editor', function() {
 		})
 	})
 
+	afterEach(function(){
+		$("body").empty()
+	})
+
+	after(function(){
+		global.$ = undefined
+		global._ = undefined
+		global.window = undefined
+		global.document = undefined
+		global.Backbone = undefined
+		Backbone.$ = undefined
+		global.jQuery = undefined
+		global.Event = undefined
+
+		templates = undefined
+		db = undefined
+
+		global.Toolbar = undefined
+	})
 })

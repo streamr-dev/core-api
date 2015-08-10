@@ -28,6 +28,10 @@ modules = {
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 	}
+	'bootstrap-docs' {
+		dependsOn "bootstrap"
+		resource url:[dir:'js/bootstrap-3.2.0-assets/css', file:'docs.min.css', plugin: 'unifina-core']
+	}
 	'bootstrap-contextmenu' {
 		dependsOn 'bootstrap'
 		resource url:[dir:'js/bootstrap-contextmenu', file:'contextmenu.js', plugin: 'unifina-core']
@@ -125,6 +129,9 @@ modules = {
 	dropzone {
 		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
 	}
+	mathjax {
+		resource url:'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
+	}
 	
 	/**
 	 * In-house widgets and resources
@@ -162,6 +169,10 @@ modules = {
 	'clickable-table' {
 		resource url:[dir:'js/unifina/clickable-table', file:'clickable-table.js', plugin:'unifina-core']
 	}
+	'module-browser' {
+		dependsOn 'mathjax, bootstrap, underscore, streamr, pnotify'
+		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
+	}
 	toolbar {
 		dependsOn 'jquery'
 		resource url:[dir:'js/unifina/toolbar', file:'toolbar.js', plugin:'unifina-core']
@@ -193,7 +204,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets'
+		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
