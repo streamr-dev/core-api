@@ -1,4 +1,4 @@
-package com.unifina.signalpath.utils;
+package com.unifina.signalpath.text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +9,13 @@ import com.unifina.signalpath.StringParameter;
 import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.MapTraversal;
 
-public class StringContains extends AbstractSignalPathModule {
+public class StringEquals extends AbstractSignalPathModule {
 
 	StringParameter s = new StringParameter(this,"search","");
-	StringInput in = new StringInput(this,"string");
-	TimeSeriesOutput out = new TimeSeriesOutput(this,"contains");
+
+	StringInput in = new StringInput(this,"text");
+
+	TimeSeriesOutput out = new TimeSeriesOutput(this,"equals?");
 	
 	boolean ignoreCase = true;
 	
@@ -28,10 +30,11 @@ public class StringContains extends AbstractSignalPathModule {
 	public void sendOutput() {
 		// Output nothing if searching for an empty string
 		if (!s.getValue().isEmpty()) {
-			if (!ignoreCase && in.getValue().contains(s.getValue())
-					|| ignoreCase && in.getValue().toLowerCase().contains(s.getValue().toLowerCase()))
+			if ((ignoreCase && in.getValue().toLowerCase().equals(s.getValue().toLowerCase()))
+				|| (!ignoreCase && in.getValue().equals(s.getValue())))
 				out.send(1);
-			else out.send(0);
+			else 
+				out.send(0);
 		}
 	}
 
