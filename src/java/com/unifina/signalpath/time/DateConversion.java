@@ -17,7 +17,7 @@ public class DateConversion extends AbstractSignalPathModule {
 	
 	// The default value of tz is added in the initialize() method
 	StringParameter tz = new StringParameter(this, "timezone", "");
-	StringParameter format = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
+	StringParameter pattern = new StringParameter(this, "format", "yyyy-MM-dd HH:mm:ss z");
 	
 	Input<Object> dateIn = new Input<>(this, "date", "Date Double String");
 
@@ -33,13 +33,13 @@ public class DateConversion extends AbstractSignalPathModule {
 	TimeSeriesOutput msOut = new TimeSeriesOutput(this, "milliseconds");
 
 	Date date = null;
-	Calendar cal = Calendar.getInstance();
+	Calendar cal = null;
 	SimpleDateFormat df = null;
 	
 	@Override
 	public void init() {
 		addInput(tz);
-		addInput(format);
+		addInput(pattern);
 		addInput(dateIn);
 		
 		addOutput(dateOut);
@@ -52,6 +52,11 @@ public class DateConversion extends AbstractSignalPathModule {
 		addOutput(minutesOut);
 		addOutput(secondsOut);
 		addOutput(msOut);
+		
+		cal = Calendar.getInstance();
+		df = new SimpleDateFormat();
+		cal.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+		df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
 	}
 	
 	@Override
@@ -62,32 +67,25 @@ public class DateConversion extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
+		if(pattern.getValue() != null && !df.toPattern().equals(pattern.getValue())){
+			df.applyPattern(pattern.getValue());
+		}
+		
 		if(dateIn.getValue() instanceof Double){
 			date = new Date(Math.round((double)dateIn.getValue()));
 		} else if(dateIn.getValue() instanceof Date){
 			date = (Date)dateIn.getValue();
 		} else if(dateIn.getValue() instanceof String){
 			try {
-				date = new SimpleDateFormat(format.getValue()).parse((String)dateIn.getValue());
+				date = df.parse((String)dateIn.getValue());
 			} catch (ParseException e) {
 				throw new RuntimeException("The input date is not in the given format!",e);
 			}
 		}
-		cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
 		cal.setTime(date);
+		if(tz.getValue() != null)
+			cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
 		
-		if(dateOut.isConnected() && !format.getValue().isEmpty()){
-			if(df == null){
-				df = new SimpleDateFormat(format.getValue());
-				df.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
-			} else if(!df.toPattern().equals(format.getValue())){
-				df.applyPattern(format.getValue());
-			} else if(!df.getTimeZone().equals(TimeZone.getTimeZone(tz.getValue()))){
-				df.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
-				cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
-			}
-			dateOut.send(df.format(date));
-		}
 		tsOut.send((double)date.getTime());
 		wdOut.send(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
 		yearsOut.send(cal.get(Calendar.YEAR));
@@ -97,12 +95,16 @@ public class DateConversion extends AbstractSignalPathModule {
 		minutesOut.send(cal.get(Calendar.MINUTE));
 		secondsOut.send(cal.get(Calendar.SECOND));
 		msOut.send(cal.get(Calendar.MILLISECOND));
+		
+		if(dateOut.isConnected()){
+			dateOut.send(df.format(date));
+		}
 	}
 	
 	@Override
 	public void clearState() {
 		df = null;
-		cal = Calendar.getInstance();
+		cal = null;
 		date = null;
 	}
 }

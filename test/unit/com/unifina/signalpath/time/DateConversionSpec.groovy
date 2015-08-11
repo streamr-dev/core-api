@@ -56,7 +56,7 @@ class DateConversionSpec extends Specification {
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
-		module.getInput("date").receive("2015-07-15 09:32:00")
+		module.getInput("date").receive("2015-07-15 06:32:00")
 		module.sendOutput()
 		
 		then: "the time is sent out"
@@ -69,11 +69,11 @@ class DateConversionSpec extends Specification {
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked"
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
-		module.getInput("date").receive("2015-01-15 09:32:00")
+		module.getInput("date").receive("2015-01-15 06:32:00")
 		module.sendOutput()
 		
 		then: "the time is sent out"
-		module.getOutput("ts").getValue() == df.parse("2015-01-15 09:32:00").getTime()
+		module.getOutput("ts").getValue() == df.parse("2015-01-15 08:32:00").getTime()
 		module.getOutput("date").getValue() == null
 	}
 	
