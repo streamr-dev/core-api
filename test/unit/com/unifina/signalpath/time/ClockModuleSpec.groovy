@@ -49,7 +49,7 @@ class ClockModuleSpec extends Specification {
 		module.getOutput("date").getValue() == "2015-07-15 06:32:00 UTC"
 		
 		when: "time is set and asked with a format"
-		date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2015-07-15 09:32:00")
+		date = df.parse("2015-07-15 09:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.setTime(date)
 		
