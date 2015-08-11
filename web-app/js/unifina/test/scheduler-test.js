@@ -71,12 +71,12 @@ describe('dateValidator', function(){
 		})
 		it('must return true when given correct weekdays', function(){
 			startDate = {
-				weekday: 1,
+				weekday: 2,
 				hour: 1,
 				minute: 1
 			}
 			endDate = {
-				weekday: 2,
+				weekday: 3,
 				hour: 1,
 				minute: 2
 			}
@@ -174,6 +174,14 @@ describe('dateValidator', function(){
 				day: 1,
 				hour: 1,
 				minute: 1
+			}
+		})
+		it('must return false when the first date is sunday and the second is monday', function(){
+			startDate = {
+				weekday: 1
+			}
+			endDate = {
+				weekday: 2
 			}
 		})
 	})
@@ -382,9 +390,9 @@ describe('scheduler', function() {
 			rule1 = $("li.rule").eq(0)
 			rule1.find("select[name='interval-type']").val(2)
 			rule1.find("select[name='interval-type']").change()
-			rule1.find(".startDate select[name='weekday']").val(0)
+			rule1.find(".startDate select[name='weekday']").val(2)
 			rule1.find(".startDate select[name='weekday']").change()
-			rule1.find(".endDate select[name='weekday']").val(2)
+			rule1.find(".endDate select[name='weekday']").val(3)
 			rule1.find(".endDate select[name='weekday']").change()
 			rule1.find("input[name='value']").val("10")
 			rule1.find("input[name='value']").keyup()
@@ -408,12 +416,12 @@ describe('scheduler', function() {
 				rules: [{
 					intervalType: 2,
 					startDate: {
-						weekday: 0,
+						weekday: 2,
 						hour: 0,
 						minute: 0
 					},
 					endDate: {
-						weekday: 2,
+						weekday: 3,
 						hour: 0,
 						minute: 0
 					},
@@ -438,9 +446,9 @@ describe('scheduler', function() {
 		})
 
 		it('should update the JSON correctly', function(){
-			rule1.find(".startDate select[name='weekday']").val(1)
-			rule1.find(".startDate select[name='weekday']").change()
-			testJSON.rules[0].startDate.weekday = 1
+			rule1.find(".endDate select[name='weekday']").val(1)
+			rule1.find(".endDate select[name='weekday']").change()
+			testJSON.rules[0].endDate.weekday = 1
 
 			assert.deepEqual(scheduler.buildJSON(), testJSON)
 		})
@@ -458,7 +466,7 @@ describe('scheduler', function() {
 
 	describe('rendering from a config file', function(){
 		beforeEach(function(){
-			var config = {
+			var schedule = {
 				defaultValue: 3,
 				rules: [{
 					value: 100,
@@ -475,12 +483,12 @@ describe('scheduler', function() {
 					value: 200,
 					intervalType: 2,
 					startDate: {
-						weekday: 0,
+						weekday: 2,
 						hour: 10,
 						minute: 25
 					},
 					endDate: {
-						weekday: 2,
+						weekday: 3,
 						hour: 11,
 						minute: 35
 					}
@@ -488,7 +496,7 @@ describe('scheduler', function() {
 			}
 			scheduler = new s.Scheduler({
 				el: "#scheduler",
-				config: config
+				schedule: schedule
 			})
 		})
 		it('must have rendered all the rules', function(){
@@ -514,7 +522,7 @@ describe('scheduler', function() {
 			assert.equal(rule.find(".startDate select[name='hour']").val(), 10)
 			assert.equal(rule.find(".startDate select[name='minute']").val(), 25)
 
-			assert.equal(rule.find(".endDate select[name='weekday'] option:selected").text().toLowerCase(), "wednesday")
+			assert.equal(rule.find(".endDate select[name='weekday'] option:selected").text().toLowerCase(), "tuesday")
 			assert.equal(rule.find(".endDate select[name='hour']").val(), 11)
 			assert.equal(rule.find(".endDate select[name='minute']").val(), 35)
 

@@ -29,10 +29,6 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 		})
 	}
 
-	pub.receiveResponse = function(d){
-		console.log(d)
-	}
-
 	var superToJSON = pub.toJSON;
 	function toJSON() {
 		var schedulerJSON
@@ -54,6 +50,7 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 	}
 
 	pub.toJSON = toJSON;
+	prot.toJSON = toJSON;
 
 	prot.createDiv = createDiv;
 

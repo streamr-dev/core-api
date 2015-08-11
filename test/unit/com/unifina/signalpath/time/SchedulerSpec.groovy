@@ -11,7 +11,7 @@ class SchedulerSpec extends Specification {
 	
 	Calendar cal = Calendar.getInstance()
 	Scheduler.Rule rule
-	Date now = new Date(1438930362780) // Fri Aug 07 2015 09:52:42
+	Date now
 	
 	def setup() {
 		scheduler = new Scheduler()
@@ -29,6 +29,7 @@ class SchedulerSpec extends Specification {
 		scheduler.onConfiguration(config)
 		
 		rule = new Scheduler.Rule()
+		now = new Date(1438930362780) // Fri Aug 07 2015 09:52:42
 	}
 
 	def cleanup() {
@@ -40,7 +41,41 @@ class SchedulerSpec extends Specification {
 		when: "targets is set"
 		targets.put(Calendar.MINUTE, 0)
 		then: "getNext is correct"
-		rule.getNext(now, targets).toString() == "gpsigjsdf"
+		rule.getNext(now, targets).toString() == "Fri Aug 07 10:00:00 EEST 2015"
+		
+		when: "targets is set"
+		targets.put(Calendar.DATE, 9)
+		targets.put(Calendar.HOUR_OF_DAY, 9)
+		then: "getNext is correct"
+		rule.getNext(now, targets).toString() == "Sun Aug 09 09:00:00 EEST 2015"
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		then: "getNext is correct"
+		rule.getNext(now, targets).toString() == "Fri Aug 07 12:00:00 EEST 2015"
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.MINUTE, 59)
+		then: "getNext is correct"
+		rule.getNext(now, targets).toString() == "Fri Aug 07 09:59:00 EEST 2015"
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY)
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		then: "getNext is correct"
+		rule.getNext(now, targets).toString() == "Wed Aug 12 12:00:00 EEST 2015"
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.MONTH, 2)
+		targets.put(Calendar.DATE, 16)
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		targets.put(Calendar.MINUTE, 30)
+		then: "getNext is correct"
+		rule.getNext(now, targets).toString() == "Wed Mar 16 12:30:00 EEST 2016"
 	}
 	
 //	void "the scheduler rules should have correct configs"() {

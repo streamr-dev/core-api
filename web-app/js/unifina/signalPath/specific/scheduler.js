@@ -11,7 +11,9 @@ var Rule = Backbone.Model.extend({
 	initialize: function(attributes, options){
 		if($.isEmptyObject(attributes)){
 			this.set("startDate", {})
-			this.set("endDate", {})
+			this.set("endDate", {
+				minute: 1
+			})
 			this.set("intervalType", 0)
 			this.set("value", 0)
 		}
@@ -92,9 +94,9 @@ var RuleView = Backbone.View.extend({
 		var _this = this
 		this.$el = $(this.template())
 
-		this.bindEvents()
-
 		table.append(this.$el)
+
+		this.bindEvents()
 
 		var select = this.$el.find("select[name='interval-type']")
 		select.val(this.model.get("intervalType"))
@@ -102,7 +104,7 @@ var RuleView = Backbone.View.extend({
 
 		if(!$.isEmptyObject(this.model.get("startDate"))){
 			var startRow = this.$el.find("div.date div.startDate")
-			_.each(this.model.get("startDate"), function(val, key){
+			_.each(this.model.get("startDate"), function(val, key, i){
 				var select = startRow.find("select[name='"+key+"']")
 				select.val(val)
 			})
@@ -172,7 +174,7 @@ var RuleView = Backbone.View.extend({
 		date.append(end)
 		end.append(temp)
 
-		_this.$el.find("select").change(function(){
+		$(temp).find("select").change(function(){
 			_this.updateFields()
 		})
 	},
@@ -214,12 +216,16 @@ var RuleView = Backbone.View.extend({
 
 	moveUp: function(){
 		this.model.trigger("move-up", this.model)
+		this.$el.hide()
 		this.$el.insertBefore(this.$el.prev())
+		this.$el.show("slow")
 	},
 
 	moveDown: function(){
 		this.model.trigger("move-down", this.model)
+		this.$el.hide()
 		this.$el.insertAfter(this.$el.next())
+		this.$el.show("slow")
 	}
 })
 
@@ -348,6 +354,11 @@ var Scheduler = Backbone.View.extend({
 function DateValidator(){}
 
 DateValidator.prototype.validate = function(startDate, endDate){
+	if(startDate.weekday != undefined && startDate.weekday == 1)
+		startDate.weekday = 8
+	if(endDate.weekday != undefined && endDate.weekday == 1)
+		endDate.weekday = 8
+
 	if(startDate.month === undefined || startDate.month == endDate.month){
 		if((startDate.weekday != undefined && startDate.weekday == endDate.weekday) 
 			|| (startDate.day != undefined && startDate.day == endDate.day) 

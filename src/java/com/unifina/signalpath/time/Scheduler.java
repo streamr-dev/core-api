@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.domain.signalpath.Module;
@@ -72,16 +73,20 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			rules.clear();
 			for (Map<String, Object> rule : ruleList) {
 				int type = (int) rule.get("intervalType");
+				Rule r;
 				if(type == 0)
-					rules.add(new HourlyRule(rule));
+					r = new HourlyRule(rule);
 				else if(type == 1)
-					rules.add(new DailyRule(rule));
+					r = new DailyRule(rule);
 				else if(type == 2)
-					rules.add(new WeeklyRule(rule));
+					r = new WeeklyRule(rule);
 				else if(type == 3)
-					rules.add(new MonthlyRule(rule));
-				else if(type == 4)
-					rules.add(new YearlyRule(rule));
+					r = new MonthlyRule(rule);
+				else if (type == 4)
+					r = new YearlyRule(rule);
+				else
+					r = new Rule();
+				r.setTimeZone(globals.getUser().getTimezone());
 			}
 		}
 	}
@@ -130,7 +135,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		
 		public Rule() {}
 		
-		public Rule(Map<String, Object> schedule) {
+		public void setSchedule(Map<String, Object> schedule){
 			this.schedule = schedule;
 			value = ((Number)schedule.get("value")).doubleValue();
 		}
@@ -155,6 +160,14 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		public Map<String, Object> getSchedule() {
 			return schedule;
 		}
+		
+		public void setTimeZone(TimeZone tz){
+			cal.setTimeZone(tz);
+		}
+		
+		public void setTimeZone(String tz){
+			cal.setTimeZone(TimeZone.getTimeZone(tz));
+		}
 
 		private Date getNext(Date now, Map<Integer, Integer> targets) {
 			cal.setTime(now);
@@ -167,17 +180,12 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			for (int i = 0; i < targets.size(); i++) {
 				int field = targetFields[i];
 				target = targets.get(field);
-				if (field == Calendar.HOUR)
-					field = Calendar.HOUR_OF_DAY;
 
 				int valueNow = cal.get(field);
 
 				if (fields == null) {
 					if (field == Calendar.DAY_OF_WEEK) {
 						fields = dayOfWeekFields;
-						valueNow++;
-						if(valueNow == 7)
-							valueNow = 0;
 					} else {
 						fields = dateFields;
 					}
@@ -189,9 +197,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 								.indexOf(targetFields[0]) - 1);
 						cal.add(fieldToRaise, 1);
 					}
-					for (int j = fields.indexOf(field); j < fields.size()-fields.indexOf(field); j++) {
+					for (int j = fields.indexOf(field); j < fields.size(); j++) {
 						if (targets.containsKey(fields.get(j))) {
 							cal.set(fields.get(j), targets.get(fields.get(j)));
+							targets.remove(fields.get(j));
 						} else {
 							cal.set(fields.get(j), 0);
 						}
@@ -207,7 +216,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		int endMinute;
 
 		public HourlyRule(Map<String, Object> schedule) {
-			super(schedule);
+			setSchedule(schedule);
 
 			startMinute = (int) ((Map) schedule.get("startDate")).get("minute");
 
@@ -227,7 +236,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		int endMinute;
 
 		public DailyRule(Map<String, Object> schedule) {
-			super(schedule);
+			setSchedule(schedule);
 
 			startHour = (int) ((Map) schedule.get("startDate")).get("hour");
 			startMinute = (int) ((Map) schedule.get("startDate")).get("minute");
@@ -253,7 +262,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		int endMinute;
 
 		public WeeklyRule(Map<String, Object> schedule) {
-			super(schedule);
+			setSchedule(schedule);
 
 			startWeekday = (int) ((Map) schedule.get("startDate")).get("weekday");
 			startHour = (int) ((Map) schedule.get("startDate")).get("hour");
@@ -283,7 +292,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		int endMinute;
 
 		public MonthlyRule(Map<String, Object> schedule) {
-			super(schedule);
+			setSchedule(schedule);
 
 			startDate = (int) ((Map) schedule.get("startDate")).get("day");
 			startHour = (int) ((Map) schedule.get("startDate")).get("hour");
@@ -315,7 +324,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		int endMinute;
 
 		public YearlyRule(Map<String, Object> schedule) {
-			super(schedule);
+			setSchedule(schedule);
 
 			startMonth = (int) ((Map) schedule.get("startDate")).get("month");
 			startDate = (int) ((Map) schedule.get("startDate")).get("day");
