@@ -139,7 +139,7 @@ var RuleView = Backbone.View.extend({
 		})
 		this.model.on("active", function(i){
 			if(i == 0)
-				this.$el.addClass("first")
+				_this.$el.addClass("first")
 			_this.$el.addClass("active-highlight")
 		})
 		this.model.on("unactive", function(){
@@ -238,6 +238,7 @@ var Scheduler = Backbone.View.extend({
 
 		function templatesLoaded() {
 			_this.template = _.template($('#scheduler-template').html())
+			_this.footerTemplate = _.template($("#scheduler-footer-template").html())
 			_this.collection = new RuleCollection()
 
 			_this.collection.on("Error", function(msg){
@@ -246,12 +247,16 @@ var Scheduler = Backbone.View.extend({
 
 			_this.defaultValue = 0
 
-			if(options && options.schedule){
-				_.each(options.schedule.rules, function(r){
-					var rule = new Rule(r)
-					_this.collection.add(rule)
-				})
-				_this.defaultValue = options.schedule.defaultValue
+			if(options){
+				if(options.footerEl)
+					_this.footerEl = $(options.footerEl)
+				if(options.schedule){
+					_.each(options.schedule.rules, function(r){
+						var rule = new Rule(r)
+						_this.collection.add(rule)
+					})
+					_this.defaultValue = options.schedule.defaultValue
+				}
 			}
 
 			_this.render()
@@ -281,12 +286,13 @@ var Scheduler = Backbone.View.extend({
 	render: function(){
 		var _this = this
 		this.$el.html(this.template)
+		$(this.footerEl).prepend(this.footerTemplate)
 
 		for(var i = 0; i < (this.collection.models.length || 1); i++){
 			_this.addRule(_this.collection.models[i])
 		}
 
-		this.defaultValueInput = this.$el.find("input[name='default-value']")
+		this.defaultValueInput = this.footerEl.find("input[name='default-value']")
 		this.defaultValueInput.val(this.defaultValue)
 	},
 
@@ -327,6 +333,7 @@ var Scheduler = Backbone.View.extend({
 		var _this = this
 		var validate = true
 		if(!this.defaultValueInput.val()){
+			this.errorHighlightDefault()
 			this.trigger("Error", {
 				text: "The scheduler needs a default value!"
 			})
@@ -341,11 +348,25 @@ var Scheduler = Backbone.View.extend({
 		return validate
 	},
 
+	errorHighlightDefault: function(){
+		var _this = this
+		if(this.timeout){
+			clearTimeout(this.timeout)
+		}
+		this.defaultValueInput.addClass("error-highlight")
+		this.timeout = setTimeout(function(){
+			_this.defaultValueInput.removeClass("error-highlight")
+		}, 4000)
+	},
+
 	highlightActives: function(activeRules){
 		var _this = this
+		var j = 0
 		$.each(_this.collection.models, function(i, model){
-			if(_.contains(activeRules, i))
-				model.trigger("active", i)
+			if(_.contains(activeRules, i)){
+				model.trigger("active", j)
+				j++;
+			}
 			else
 				model.trigger("unactive")
 		})
@@ -365,11 +386,8 @@ var Scheduler = Backbone.View.extend({
 
 	bindEvents: function(){
 		var _this = this
-		this.$el.find(".btn.add-rule-btn").click(function(){
+		this.footerEl.find(".btn.add-rule-btn").click(function(){
 			_this.addRule()
-		})
-		this.$el.find(".btn.validate-btn").click(function(){
-			_this.buildJSON()
 		})
 		this.collection.on("move-up", function(rule){
 			_this.moveRuleUp(rule)

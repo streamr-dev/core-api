@@ -39,7 +39,7 @@ class SchedulerSpec extends Specification {
 		schedule.rules = []
 		schedule.rules.add([value: 10, intervalType: 0, startDate:[minute:55], endDate:[minute:05]])
 		schedule.rules.add([value: 20, intervalType: 1, startDate:[hour:6, minute:30], endDate:[hour: 6, minute:59]])
-		schedule.rules.add([value: 30, intervalType: 2, startDate:[weekday:2, hour:12, minute:30], endDate:[weekday:5, hour: 10, minute:45]])
+		schedule.rules.add([value: 30, intervalType: 2, startDate:[weekday:2, hour:12, minute:30], endDate:[weekday:6, hour: 10, minute:45]])
 		schedule.rules.add([value: 40, intervalType: 3, startDate:[day:1, hour:12, minute:30], endDate:[day:10, hour: 10, minute:45]])
 		schedule.rules.add([value: 50, intervalType: 4, startDate:[month:1, day:4, hour:12, minute:30], endDate:[month: 2, day:1, hour: 10, minute:45]])
 		
@@ -54,66 +54,74 @@ class SchedulerSpec extends Specification {
 		
 	}
 	
-//	void "the rules getNext should work correctly (daylight saving)"() {
-//		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-//		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
-//
-//		HashMap<Integer, Integer> targets = [:]
-//		when: "targets is set"
-//		targets.put(Calendar.MINUTE, 0)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2015-08-07 10:00:00")
-//		
-//		when: "targets is set"
-//		targets = [:]
-//		targets.put(Calendar.MINUTE, 52)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2015-08-07 10:52:00")
-//		
-//		when: "targets is set"
-//		targets = [:]
-//		targets.put(Calendar.HOUR_OF_DAY, 12)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2015-08-07 15:00:00")
-//		
-//		when: "targets is set"
-//		targets.put(Calendar.DATE, 9)
-//		targets.put(Calendar.HOUR_OF_DAY, 9)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2015-08-09 12:00:00")
-//		
-//		when: "targets is set"
-//		targets = [:]
-//		targets.put(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY)
-//		targets.put(Calendar.HOUR_OF_DAY, 12)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2015-08-12 15:00:00")
-//		
-//		when: "targets is set"
-//		targets = [:]
-//		targets.put(Calendar.MONTH, 4)
-//		targets.put(Calendar.DATE, 16)
-//		targets.put(Calendar.HOUR_OF_DAY, 12)
-//		targets.put(Calendar.MINUTE, 30)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2016-05-16 15:30:00")
-//	}
-//	
-//	void "the rules getNext should work correctly (no daylight saving)"() {
-//		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-//		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
-//		
-//		HashMap<Integer, Integer> targets = [:]
-//
-//		when: "targets is set"
-//		targets = [:]
-//		targets.put(Calendar.MONTH, 0)
-//		targets.put(Calendar.DATE, 16)
-//		targets.put(Calendar.HOUR_OF_DAY, 12)
-//		targets.put(Calendar.MINUTE, 30)
-//		then: "getNext is correct"
-//		rule.getNext(now, targets) == df.parse("2016-01-16 14:30:00")
-//	}
+	void "the rules getNext should work correctly (daylight saving)"() {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
+
+		HashMap<Integer, Integer> targets = [:]
+		when: "targets is set"
+		targets.put(Calendar.MINUTE, 0)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2015-08-07 10:00:00")
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.MINUTE, 52)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2015-08-07 10:52:00")
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2015-08-07 15:00:00")
+		
+		when: "targets is set"
+		targets.put(Calendar.DATE, 9)
+		targets.put(Calendar.HOUR_OF_DAY, 9)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2015-08-09 12:00:00")
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY)
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2015-08-12 15:00:00")
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		targets.put(Calendar.MINUTE, 30)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2015-08-08 15:30:00")
+		
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.MONTH, 4)
+		targets.put(Calendar.DATE, 16)
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		targets.put(Calendar.MINUTE, 30)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2016-05-16 15:30:00")
+	}
+	
+	void "the rules getNext should work correctly (no daylight saving)"() {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
+		
+		HashMap<Integer, Integer> targets = [:]
+
+		when: "targets is set"
+		targets = [:]
+		targets.put(Calendar.MONTH, 0)
+		targets.put(Calendar.DATE, 16)
+		targets.put(Calendar.HOUR_OF_DAY, 12)
+		targets.put(Calendar.MINUTE, 30)
+		then: "getNext is correct"
+		rule.getNext(now, targets) == df.parse("2016-01-16 14:30:00")
+	}
 	
 	void "the scheduler rules should have correct schedules"() {
 		expect:
@@ -123,10 +131,10 @@ class SchedulerSpec extends Specification {
 	
 	void "the right rules should be active"() {
 		when: "now is set"
-		then: "2. and 4. rule should be active"
+		then: "2. , 3. and 4. rule should be active"
 		scheduler.getRule(0).isActive(now) == false
 		scheduler.getRule(1).isActive(now) == true
-		scheduler.getRule(2).isActive(now) == false
+		scheduler.getRule(2).isActive(now) == true
 		scheduler.getRule(3).isActive(now) == true
 		scheduler.getRule(4).isActive(now) == false
 	}

@@ -22,6 +22,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		
 		var div = $("<div class='modulefooter'></div>");
 		prot.div.append(div);
+		prot.footer = div;
 		
 		var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
 		div.append(container)

@@ -121,7 +121,7 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 
 		config.put("rules", ruleList);
 		config.put("defaultValue", defaultValue);
-
+		
 		return config;
 	}
 	

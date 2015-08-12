@@ -32,7 +32,7 @@ var scheduler
 
 describe('scheduler', function() {
 	beforeEach(function(){
-		$("body").append($("<div id='scheduler'></div>"))
+		$("body").append($("<div id='scheduler'></div><div id='footer'></div>"))
 		$("body").append(templates)
 	})
 	afterEach(function(){
@@ -59,7 +59,8 @@ describe('scheduler', function() {
 		}
 
 		scheduler = new s.Scheduler({
-			el: "#scheduler"
+			el: "#scheduler",
+			footerEl: "#footer"
 		})
 		// Must fire ready event when templates are loaded
 		scheduler.on('ready', function() {
@@ -73,7 +74,8 @@ describe('scheduler', function() {
 	describe('rendering', function(){
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
-				el: "#scheduler"
+				el: "#scheduler",
+				footerEl: "#footer"
 			})
 		})
 		it('must have the "hour" option selected first', function(){
@@ -103,7 +105,8 @@ describe('scheduler', function() {
 	describe('changing interval-type', function(){
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
-				el: "#scheduler"
+				el: "#scheduler",
+				footerEl: "#footer"
 			})
 		})
 		it('must change to the year option when selected', function(){
@@ -140,7 +143,8 @@ describe('scheduler', function() {
 	describe('adding and removing rules', function(){
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
-				el: "#scheduler"
+				el: "#scheduler",
+				footerEl: "#footer"
 			})
 		})
 		it('must add the rules when clicked add-button', function(){
@@ -171,7 +175,8 @@ describe('scheduler', function() {
 	describe('reordering rules', function(){
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
-				el: "#scheduler"
+				el: "#scheduler",
+				footerEl: "#footer"
 			})
 			$(".btn.add-rule-btn").click()
 			$(".btn.add-rule-btn").click()
@@ -206,7 +211,8 @@ describe('scheduler', function() {
 			hasGoneToError = false
 			hasFailed = false
 			scheduler = new s.Scheduler({
-				el: "#scheduler"
+				el: "#scheduler",
+				footerEl: "#footer"
 			})
 			shouldFail = function(c, text, done){
 				scheduler.on("Error", function(msg){
@@ -246,7 +252,8 @@ describe('scheduler', function() {
 		var rule2
 		beforeEach(function(){
 			scheduler = new s.Scheduler({
-				el: "#scheduler"
+				el: "#scheduler",
+				footerEl: "#footer"
 			})
 			$(".btn.add-rule-btn").click()
 			$(".default-value input[name='default-value']").val(100)
@@ -360,7 +367,8 @@ describe('scheduler', function() {
 			}
 			scheduler = new s.Scheduler({
 				el: "#scheduler",
-				schedule: schedule
+				schedule: schedule,
+				footerEl: "#footer"
 			})
 		})
 		it('must have rendered all the rules', function(){

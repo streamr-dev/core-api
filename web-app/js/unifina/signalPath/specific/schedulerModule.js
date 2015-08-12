@@ -9,6 +9,7 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 	 */
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
+		prot.jsonData.canCollapse = true
 		superCreateDiv();
 		var container = $("<div/>", {
 			class: "scheduler"
@@ -17,6 +18,7 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 
 		prot.scheduler = new Scheduler({
 			el: container,
+			footerEl: prot.footer,
 			schedule: prot.jsonData.schedule
 		})
 		prot.scheduler.on('Error', function(msg) {
