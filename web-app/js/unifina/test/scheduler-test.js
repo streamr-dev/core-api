@@ -7,30 +7,34 @@ var $ = require('jquery')(window);
 var _ = require('underscore')
 var Backbone = require('../../backbone/backbone')
 
-global.$ = $
-global._ = _
-global.window = window
-global.document = window.document
-global.Backbone = Backbone
-Backbone.$ = $
-global.jQuery = $
-
-
-var templates = fs.readFileSync('web-app/js/unifina/signalPath/specific/scheduler-template.html','utf8')
-assert.equal($("body").length, 1)
-
-var s = require('../signalPath/specific/scheduler')
-
-var select = function(selectName, optionValue, index){
-	var row = $("li").eq(index || 0)
-	var select = row.find("select[name='"+selectName+"']")
-	select.val(optionValue)
-	select.change()
-}
-
+var select
+var s
+var templates
 var scheduler
 
 describe('scheduler', function() {
+	before(function(){
+		global.$ = $
+		global._ = _
+		global.window = window
+		global.document = window.document
+		global.Backbone = Backbone
+		Backbone.$ = $
+		global.jQuery = $
+
+
+		templates = fs.readFileSync('web-app/js/unifina/signalPath/specific/scheduler-template.html','utf8')
+		assert.equal($("body").length, 1)
+
+		s = require('../signalPath/specific/scheduler')
+
+		select = function(selectName, optionValue, index){
+			var row = $("li").eq(index || 0)
+			var select = row.find("select[name='"+selectName+"']")
+			select.val(optionValue)
+			select.change()
+		}
+	})
 	beforeEach(function(){
 		$("body").append($("<div id='scheduler'></div><div id='footer'></div>"))
 		$("body").append(templates)
@@ -401,5 +405,18 @@ describe('scheduler', function() {
 			assert.equal(rule.find("input[name='value']").val(), 200)
 			assert.equal($(".default-value input").val(), 3)
 		})
+	})
+
+	after(function(){
+		global.$ = undefined
+		global._ = undefined
+		global.window = undefined
+		global.document = undefined
+		global.Backbone = undefined
+		Backbone.$ = undefined
+		global.jQuery = undefined
+		templates = undefined
+		s = undefined
+		select = undefined
 	})
 })
