@@ -16455,6 +16455,9 @@ div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highl
 div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight div.td {
   background-color: #ffdede;
 }
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type div.move-up-btn {
+  visibility: hidden;
+}
 div.module div.modulebody div.scheduler ol.table.scheduler-table li:last-of-type div.move-down-btn {
   visibility: hidden;
 }
