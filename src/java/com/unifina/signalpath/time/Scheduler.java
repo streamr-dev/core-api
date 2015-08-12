@@ -11,16 +11,17 @@ import java.util.TimeZone;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.TimeSeriesOutput;
 
-public class Scheduler extends AbstractSignalPathModule implements ITimeListener {
+public class Scheduler extends ModuleWithUI implements ITimeListener {
 
 	TimeSeriesOutput out = new TimeSeriesOutput(this, "value");
 
 	Date nextTime;
 	List<Rule> rules = new ArrayList<Rule>();
 	Double defaultValue;
+	List<Integer> activeRules = new ArrayList<>();
 
 	@Override
 	public void init() {
@@ -35,26 +36,42 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 
 	@Override
 	public void setTime(Date time) {
-		if (nextTime == null)
-			nextTime = getMinimumNextTime();
+		if (nextTime == null){
+			nextTime = getMinimumNextTime(time);
+		}
 
-		if (time.equals(nextTime)) {
+		if (out.getValue() == null || time.equals(nextTime)) {
+			boolean foundActive = false;
+			int i = 0;
+			activeRules.clear();
 			for(Rule r : rules){
 				if(r.isActive(time)){
-					out.send(r.getValue());
-					nextTime = getMinimumNextTime();
-					break;
+					if(!foundActive){
+						foundActive = true;
+						out.send(r.getValue());
+						nextTime = getMinimumNextTime(time);
+					}
+					activeRules.add(i);
 				}
+				i++;
+			}
+			if(!foundActive)
+				out.send(defaultValue);
+			
+			if (globals.getUiChannel()!=null) {
+				Map<String,Object> msg = new HashMap<>();
+				msg.put("activeRules", activeRules);
+				globals.getUiChannel().push(msg, uiChannelId);
 			}
 		}
 	}
 
-	private Date getMinimumNextTime() {
+	private Date getMinimumNextTime(Date time) {
 		Date firstNextTime = null;
 		for(Rule r : rules){
-			Date next = r.getNext(globals.time);
+			Date next = r.getNext(time);
 			if(firstNextTime == null || next.before(firstNextTime)){
-				firstNextTime = nextTime;
+				firstNextTime = next;
 			}
 		}
 		return firstNextTime;
@@ -87,6 +104,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 				else
 					r = new Rule();
 				r.setTimeZone(globals.getUser().getTimezone());
+				rules.add(r);
 			}
 		}
 	}
@@ -141,10 +159,11 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 		}
 
 		public Date getNext(Date now) {
-			if (isActive(now))
+			if (this.isActive(now)) {
 				return getNext(now, endTargets);
-			else
+			} else {
 				return getNext(now, startTargets);
+			}
 		}
 
 		public boolean isActive(Date now) {
@@ -169,8 +188,10 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			cal.setTimeZone(TimeZone.getTimeZone(tz));
 		}
 
-		private Date getNext(Date now, Map<Integer, Integer> targets) {
+		private Date getNext(Date now, Map<Integer, Integer> t) {
 			cal.setTime(now);
+			
+			Map<Integer, Integer> targets = new HashMap<Integer, Integer>(t);
 
 			int target;
 			List<Integer> fields = null;
@@ -197,6 +218,18 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 								.indexOf(targetFields[0]) - 1);
 						cal.add(fieldToRaise, 1);
 					}
+					for (int j = fields.indexOf(field); j < fields.size(); j++) {
+						if (targets.containsKey(fields.get(j))) {
+							cal.set(fields.get(j), targets.get(fields.get(j)));
+							targets.remove(fields.get(j));
+						} else {
+							cal.set(fields.get(j), 0);
+						}
+					}
+				} else if (field == Calendar.MINUTE && valueNow == target) {
+					int fieldToRaise = fields.get(fields
+							.indexOf(targetFields[0]) - 1);
+					cal.add(fieldToRaise, 1);
 					for (int j = fields.indexOf(field); j < fields.size(); j++) {
 						if (targets.containsKey(fields.get(j))) {
 							cal.set(fields.get(j), targets.get(fields.get(j)));
@@ -268,7 +301,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			startHour = (int) ((Map) schedule.get("startDate")).get("hour");
 			startMinute = (int) ((Map) schedule.get("startDate")).get("minute");
 
-			endWeekday = (int) ((Map) schedule.get("startDate")).get("weekday");
+			endWeekday = (int) ((Map) schedule.get("endDate")).get("weekday");
 			endHour = (int) ((Map) schedule.get("endDate")).get("hour");
 			endMinute = (int) ((Map) schedule.get("endDate")).get("minute");
 
@@ -279,6 +312,7 @@ public class Scheduler extends AbstractSignalPathModule implements ITimeListener
 			endTargets.put(Calendar.DAY_OF_WEEK, endWeekday);
 			endTargets.put(Calendar.HOUR_OF_DAY, endHour);
 			endTargets.put(Calendar.MINUTE, endMinute);
+			
 		}
 	}
 

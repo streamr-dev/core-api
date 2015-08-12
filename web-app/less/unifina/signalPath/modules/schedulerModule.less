@@ -30,6 +30,37 @@ div.module div.modulebody {
 					border-top-left-radius: 10px;
 					border-bottom-left-radius: 10px;
 				}
+				&.active-highlight {
+					&:before {
+						background-color: #dff0d8;
+					}
+					div.td {
+						background-color: #dff0d8;
+					}
+				}
+				&.error-highlight {
+					div.td {
+						background-color: rgb(255, 222, 222);
+					}
+				}
+				&:first-of-type {
+					div.move-up-btn {
+						visibility: hidden;
+					}
+					&.active-highlight {
+						&:before {
+							background-color: #92BF80;
+						}
+						div.td {
+							background-color: #92BF80;
+						}
+					}
+				}
+				&:last-of-type {
+					div.move-down-btn {
+						visibility: hidden;
+					}
+				}
 				&.error-highlight:before {
 					background-color: rgb(255, 222, 222);
 				}
@@ -100,21 +131,6 @@ div.module div.modulebody {
 						div.move-down {
 							margin-top: 25px;
 						}
-					}
-				}
-				&.error-highlight {
-					div.td {
-						background-color: rgb(255, 222, 222);
-					}
-				}
-				&:first-of-type {
-					div.move-up-btn {
-						visibility: hidden;
-					}
-				}
-				&:last-of-type {
-					div.move-down-btn {
-						visibility: hidden;
 					}
 				}
 			}

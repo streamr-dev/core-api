@@ -16,7 +16,7 @@ Backbone.$ = $
 global.jQuery = $
 
 
-var templates = fs.readFileSync('web-app/js/unifina/test/scheduler-template.html','utf8')
+var templates = fs.readFileSync('web-app/js/unifina/signalPath/specific/scheduler-template.html','utf8')
 assert.equal($("body").length, 1)
 
 var s = require('../signalPath/specific/scheduler')
@@ -28,164 +28,7 @@ var select = function(selectName, optionValue, index){
 	select.change()
 }
 
-var dateValidator
 var scheduler
-
-describe('dateValidator', function(){
-	var startDate
-	var endDate
-	beforeEach(function(){
-		dateValidator = s.dateValidator
-	})
-	describe('must return true', function(){
-		afterEach(function(){
-			assert(dateValidator.validate(startDate, endDate))
-		})
-		it('must return true when the startDate is clearly before the endDate', function(){
-			startDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-			endDate = {
-				month: 2,
-				day: 2,
-				hour: 2,
-				minute: 2
-			}
-		})
-		it('must return true when only minute is smaller in startDate', function(){
-			startDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-			endDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 2
-			}
-		})
-		it('must return true when given correct weekdays', function(){
-			startDate = {
-				weekday: 2,
-				hour: 1,
-				minute: 1
-			}
-			endDate = {
-				weekday: 3,
-				hour: 1,
-				minute: 2
-			}
-		})
-		it('must return true when the startDate month is smaller but the day is bigger than in the endDate', function(){
-			startDate = {
-				month: 1,
-				day: 3
-			}
-			endDate = {
-				month: 2,
-				day: 2
-			}
-		})
-		it('must return true with only minute given correctly', function(){
-			startDate = {
-				minute: 1
-			}
-			endDate = {
-				minute: 2
-			}
-		})
-	})
-	describe('must return false', function(){
-		afterEach(function(){
-			assert.equal(dateValidator.validate(startDate, endDate), false)
-		})
-		it('must return false when the startDate is clearly after the endDate', function(){
-			startDate = {
-				month: 2,
-				day: 2,
-				hour: 2,
-				minute: 2
-			}
-			endDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-		})
-		it('must return false when only minute is bigger in startDate', function(){
-			startDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 2
-			}
-			endDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-		})
-		it('must return false when the startDate month is bigger but the day is smaller than in the endDate', function(){
-			startDate = {
-				month: 2,
-				day: 3
-			}
-			endDate = {
-				month: 1,
-				day: 4
-			}
-		})
-		it('must return false with only minute given not correctly', function(){
-			startDate = {
-				minute: 2
-			}
-			endDate = {
-				minute: 1
-			}
-		})
-		it('must return true when given false weekdays', function(){
-			startDate = {
-				weekday: 3,
-				hour: 1,
-				minute: 1
-			}
-			endDate = {
-				weekday: 2,
-				hour: 1,
-				minute: 2
-			}
-		})
-		it('must return false with the exactly same dates', function(){
-			startDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-			endDate = {
-				month: 1,
-				day: 1,
-				hour: 1,
-				minute: 1
-			}
-		})
-		it('must return false when the first date is sunday and the second is monday', function(){
-			startDate = {
-				weekday: 1
-			}
-			endDate = {
-				weekday: 2
-			}
-		})
-	})
-})
 
 describe('scheduler', function() {
 	beforeEach(function(){
@@ -194,6 +37,37 @@ describe('scheduler', function() {
 	})
 	afterEach(function(){
 		$("body").empty()
+	})
+
+	it('must load templates asynchronously if they are not found on page', function(done) {
+		$("#scheduler-template").remove()
+
+		global.Streamr = {
+			getResourceUrl: function(dir,file,absolute,cb) {
+				setTimeout(function() { 
+					cb('testUrl') 
+				})
+			}
+		}
+		var ajax = $.ajax
+		$.ajax = function(params) {
+			assert.equal(params.url, 'testUrl')
+			$.ajax = ajax
+			setTimeout(function() {
+				params.success(templates)
+			})
+		}
+
+		scheduler = new s.Scheduler({
+			el: "#scheduler"
+		})
+		// Must fire ready event when templates are loaded
+		scheduler.on('ready', function() {
+			// Loaded templates must have been inserted to page
+			assert($("#scheduler-template").length>0)
+			assert(scheduler.ready)
+			done()
+		})
 	})
 
 	describe('rendering', function(){
@@ -355,16 +229,6 @@ describe('scheduler', function() {
 			shouldFail(function(){
 				scheduler.buildJSON()
 			}, "Rules must have a value!")
-			assert(hasGoneToError && hasFailed)
-		})
-		it('Should trigger Error if the startDate is after the endDate', function(done){
-			$("ol.table li.rule").eq(0).find(".startDate select[name='minute']").val(20)
-			$("ol.table li.rule").eq(0).find(".startDate select[name='minute']").change()
-			$("ol.table li.rule").eq(0).find(".endDate select[name='minute']").val(0)
-			$("ol.table li.rule").eq(0).find(".endDate select[name='minute']").change()
-			shouldFail(function(){
-				scheduler.buildJSON()
-			}, "The end date must be after the start date!", done)
 			assert(hasGoneToError && hasFailed)
 		})
 		it('Should trigger Error if the scheduler does not have a default value', function(done){

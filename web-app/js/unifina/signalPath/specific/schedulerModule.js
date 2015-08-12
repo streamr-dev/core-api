@@ -2,6 +2,8 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.GenericModule(data,canvas,prot)
 
+	var pendingMessage
+
 	/**
 	 * Initialization
 	 */
@@ -12,6 +14,7 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 			class: "scheduler"
 		})
 		prot.body.append(container)
+
 		prot.scheduler = new Scheduler({
 			el: container,
 			schedule: prot.jsonData.schedule
@@ -27,6 +30,30 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 		prot.scheduler.on("update", function(){
 			prot.redraw()
 		})
+		prot.scheduler.on('ready', function() {
+			if (pendingMessage)
+				pub.receiveResponse(pendingMessage)
+			pendingMessage = undefined
+
+			prot.redraw()
+		})
+	}
+	prot.createDiv = createDiv;
+
+	pub.receiveResponse = function(payload) {
+		// If the scheduler is not ready yet, keep the latest message in memory
+		// and handle it on scheduler ready event
+		if (!prot.scheduler.ready)
+			pendingMessage = payload
+		else {
+			var activeRules = payload.activeRules
+			prot.scheduler.highlightActives(activeRules)
+		}
+	}
+
+	pub.getUIChannelOptions = function() {
+		// Force resending of only last value
+		return { resend_last: 1 }
 	}
 
 	var superToJSON = pub.toJSON;
@@ -44,15 +71,13 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 
 		return prot.jsonData;
 	}
+	pub.toJSON = toJSON;
 
 	function getScheduler() {
 		return prot.scheduler
 	}
 
-	pub.toJSON = toJSON;
-	prot.toJSON = toJSON;
 
-	prot.createDiv = createDiv;
 
 	return pub;
 }

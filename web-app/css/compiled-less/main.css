@@ -16441,6 +16441,27 @@ div.module div.modulebody div.scheduler ol.table.scheduler-table li:before {
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highlight:before {
+  background-color: #dff0d8;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highlight div.td {
+  background-color: #dff0d8;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight div.td {
+  background-color: #ffdede;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type div.move-up-btn {
+  visibility: hidden;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type.active-highlight:before {
+  background-color: #92BF80;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type.active-highlight div.td {
+  background-color: #92BF80;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:last-of-type div.move-down-btn {
+  visibility: hidden;
+}
 div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight:before {
   background-color: #ffdede;
 }
@@ -16510,15 +16531,6 @@ div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move 
 }
 div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move div.move-down {
   margin-top: 25px;
-}
-div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight div.td {
-  background-color: #ffdede;
-}
-div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type div.move-up-btn {
-  visibility: hidden;
-}
-div.module div.modulebody div.scheduler ol.table.scheduler-table li:last-of-type div.move-down-btn {
-  visibility: hidden;
 }
 div.module div.modulebody div.scheduler div.setup {
   margin-top: 30px;

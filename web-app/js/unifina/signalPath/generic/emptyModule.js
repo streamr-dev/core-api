@@ -515,7 +515,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.updateFrom = updateFrom;
 	
 	function clone() {
-		var cloneData = jQuery.extend(true, {}, prot.toJSON());
+		var cloneData = jQuery.extend(true, {}, pub.toJSON());
 		prot.prepareCloneData(cloneData);
 		return SignalPath.createModuleFromJSON(cloneData);
 	}

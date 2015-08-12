@@ -50,13 +50,7 @@ var Rule = Backbone.Model.extend({
 			weekday: this.get("endDate").weekday
 		}
 		var value = this.get("value")
-		if(!dateValidator.validate(startDate, endDate)){
-			this.trigger("Error", {
-				text: "The end date must be after the start date!"
-			})
-			this.view.errorHighlight()
-			return false
-		} else if (!value && value != 0) {
+		if (!value && value != 0) {
 			this.trigger("Error", {
 				text: "Rules must have a value!"
 			})
@@ -142,6 +136,12 @@ var RuleView = Backbone.View.extend({
 		})
 		this.$el.find(".move-down-btn").click(function(){
 			_this.moveDown()
+		})
+		this.model.on("active", function(){
+			_this.$el.addClass("active-highlight")
+		})
+		this.model.on("unactive", function(){
+			_this.$el.removeClass("active-highlight")
 		})
 	},
 
@@ -233,27 +233,46 @@ var Scheduler = Backbone.View.extend({
 	initialize: function(options){
 		var _this = this
 
+		function templatesLoaded() {
+			_this.template = _.template($('#scheduler-template').html())
+			_this.collection = new RuleCollection()
 
-		this.template = _.template($('#scheduler-template').html())
-		this.collection = new RuleCollection()
-
-		this.collection.on("Error", function(msg){
-			_this.trigger("Error", msg)
-		})
-
-		this.defaultValue = 0
-
-		if(options && options.schedule){
-			_.each(options.schedule.rules, function(r){
-				var rule = new Rule(r)
-				_this.collection.add(rule)
+			_this.collection.on("Error", function(msg){
+				_this.trigger("Error", msg)
 			})
-			this.defaultValue = options.schedule.defaultValue
+
+			_this.defaultValue = 0
+
+			if(options && options.schedule){
+				_.each(options.schedule.rules, function(r){
+					var rule = new Rule(r)
+					_this.collection.add(rule)
+				})
+				_this.defaultValue = options.schedule.defaultValue
+			}
+
+			_this.render()
+			_this.bindEvents()
+			_this.ready = true
+			_this.trigger('ready')
 		}
 
-		this.render()
-
-		this.bindEvents()
+		// Load templates if they are not loaded
+		if ($('#scheduler-template').length) {
+			templatesLoaded()
+		}
+		else {
+			Streamr.getResourceUrl('js/unifina/signalPath/specific','scheduler-template.html',false,function(url) {
+				$.ajax({
+					url: url,
+					dataType: 'text',
+					success: function(templates) {
+						$("body").append(templates)
+						templatesLoaded()
+					}
+				})
+			})
+		}
 	},
 
 	render: function(){
@@ -319,6 +338,19 @@ var Scheduler = Backbone.View.extend({
 		return validate
 	},
 
+	highlightActives: function(activeRules){
+		var _this = this
+		$.each(_this.collection.models, function(i, model){
+			if(_.contains(activeRules, i))
+				if(i == 0)
+					model.trigger("first-active")
+				else
+					model.trigger("active")
+			else
+				model.trigger("unactive")
+		})
+	},
+
 	moveRuleUp: function(rule){
 		var i = this.collection.models.indexOf(rule)
 		this.collection.models.splice(i, 1)
@@ -351,33 +383,6 @@ var Scheduler = Backbone.View.extend({
 	}
 })
 
-function DateValidator(){}
-
-DateValidator.prototype.validate = function(startDate, endDate){
-	if(startDate.weekday != undefined && startDate.weekday == 1)
-		startDate.weekday = 8
-	if(endDate.weekday != undefined && endDate.weekday == 1)
-		endDate.weekday = 8
-
-	if(startDate.month === undefined || startDate.month == endDate.month){
-		if((startDate.weekday != undefined && startDate.weekday == endDate.weekday) 
-			|| (startDate.day != undefined && startDate.day == endDate.day) 
-			|| (startDate.weekday === undefined && startDate.day === undefined)){
-			if(startDate.hour === undefined || startDate.hour == endDate.hour){
-				if(startDate.minute >= endDate.minute)
-					return false
-			} else if(startDate.hour > endDate.hour)
-				return false
-		} else if((startDate.day && startDate.day > endDate.day) || (startDate.weekday && startDate.weekday > endDate.weekday))
-			return false
-	} else if(startDate.month > endDate.month)
-		return false
-	return true
-}
-
-var dateValidator = new DateValidator()
-
-exports.dateValidator = dateValidator
 exports.Scheduler = Scheduler
 
 })(typeof(exports) !== 'undefined' ? exports : window)
