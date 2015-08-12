@@ -5,6 +5,7 @@ import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 
 import java.nio.charset.StandardCharsets
+import java.security.AccessControlException
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -12,6 +13,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 import com.mashape.unirest.http.HttpResponse
@@ -67,22 +69,12 @@ class SignalPathService {
 	 * @return
 	 */
 	public Map reconstruct(Map json, Globals globals) {
+		SignalPath sp = jsonToSignalPath(json.signalPathData, true, globals, true)
 		
 		// TODO: remove backwards compatibility
-		Map signalPathData = json.signalPathData ? json.signalPathData : json
+		if (json.timeOfDayFilter)
+			json.signalPathContext.timeOfDayFilter = json.timeOfDayFilter
 		
-		SignalPath sp = jsonToSignalPath(signalPathData,true,globals,true)
-		
-		Map context = [:]
-		if (json.signalPathContext)
-			context = json.signalPathContext
-		// TODO: remove backwards compatibility
-		else {
-			if (json.timeOfDayFilter)
-				context["timeOfDayFilter"] = json.timeOfDayFilter
-		}
-		
-		json.signalPathContext = context
 		json.signalPathData = signalPathToJson(sp)
 		
 		return json
@@ -262,10 +254,10 @@ class SignalPathService {
 		// Start the runner thread
 		runner.start()
 		
-		// Wait for runner to be in ready state
-		runner.waitReady()
-		if (!runner.getReady())
-			log.error("Timed out while waiting for runner $runnerId to become ready!")
+		// Wait for runner to be in running state
+		runner.waitRunning(true)
+		if (!runner.getRunning())
+			log.error("Timed out while waiting for runner $runnerId to start!")
 		
 		rsp.runner = runnerId
 		rsp.state = "running"
@@ -276,49 +268,90 @@ class SignalPathService {
 		URL url = new URL(link)
 		
 		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(controller:"live", action:"request")
+		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/live/request")
 		
 		rsp.save()
 	}
 	
-	void stopLocal(RunningSignalPath rsp) {
+	boolean stopLocal(RunningSignalPath rsp) {
 		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(rsp.runner)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
+			
+			// Wait for runner to be stopped state
+			runner.waitRunning(false)
+			if (runner.getRunning()) {
+				log.error("Timed out while waiting for runner $rsp.runner to stop!")
+				return false
+			}
+			else return true
+		}
+		else {
+			log.error("stopLocal: could not find runner $rsp.runner!")
+			updateState(rsp.runner, "stopped")
+			return false
 		}
 	}
 	
-	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
-		def req = Unirest.post(rsp.requestUrl)
-		def body = req.field("local", "true")
-		body.field("msg", (msg as JSON).toString())
-
-		body.field("id", rsp.id.toString())
-		
-		if (hash)
-			body.field("hash", hash.toString())
-			
-		if (user)
-			body.field("auth", user.apiKey)
-
-		HttpResponse<String> response = body.asString()
-		Map map = (JSONObject) JSON.parse(response.getBody())
-		return new RuntimeResponse(map)
+	@CompileStatic
+	RuntimeResponse stopRemote(RunningSignalPath rsp, SecUser user) {
+		return runtimeRequest([type:"stopRequest"], rsp, null, user)
 	}
 	
-	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, def servletContext, boolean localOnly = false) {
+	@CompileStatic
+	boolean ping(RunningSignalPath rsp, SecUser user) {
+		RuntimeResponse response = runtimeRequest([type:'ping'], rsp, null, user)
+		return response.isSuccess()
+	}
+	
+	@CompileStatic
+	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
+		def req = Unirest.post(rsp.requestUrl)
+		def json = [
+			local: true,
+			msg: msg,
+			id: rsp.id
+		]
+		
+		if (hash)
+			json.hash = hash
+			
+		if (user) {
+			json.key = user.apiKey
+			json.secret = user.apiSecret
+		}
+
+		req.header("Content-Type", "application/json")
+		
+		log.info("sendRemoteRequest: $json")
+		
+		HttpResponse<String> response = req.body((json as JSON).toString()).asString()
+
+		try {
+			Map map = (JSONObject) JSON.parse(response.getBody())
+			return new RuntimeResponse(map)
+		} catch (ConverterException e) {
+			log.error("sendRemoteRequest: Failed to parse JSON response: "+response.getBody())
+			throw new RuntimeException("Failed to parse JSON response", e)
+		}
+	}
+	
+	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, boolean localOnly = false) {
 		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
+		
+		log.info("runtimeRequest: $msg, RunningSignalPath: $rsp.id, module: $hash, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
-			return new RuntimeResponse([success:false, error: "Canvas not found!"])
+			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
+			return new RuntimeResponse([success:false, error: "Canvas does not appear to be running!"])
 		}
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
 				return sendRemoteRequest(msg, rsp, hash, user)
 			} catch (Exception e) {
-				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl", e)
+				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl")
 				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
 			}
 		}
@@ -329,26 +362,51 @@ class SignalPathService {
 			}
 			
 			if (!sp) {
+				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $rsp, module: $hash")
 				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
 			}
 			else {				
 				RuntimeRequest request = new RuntimeRequest(msg)
 				request.setAuthenticated(user != null)
 				
-				// Handle module-specific message
-				Future<RuntimeResponse> future
-				if (hash!=null) {
-					future = sp.getModule(hash).onRequest(request)
+				/**
+				 * Requests for the runner thread
+				 */
+				if (request.type=="stopRequest") {
+					if (!request.isAuthenticated())
+						throw new AccessControlException("stopRequest requires authentication!");
+		
+					stopLocal(rsp);
+					
+					return new RuntimeResponse(true, [request:request])
 				}
-				// Handle signalpath-specific message
+				else if (request.type=="ping") {
+					if (!request.isAuthenticated())
+						throw new AccessControlException("ping requires authentication!");
+					
+					return new RuntimeResponse(true, [request:request])
+				}
+				/**
+				 * Requests for SignalPaths and modules
+				 */
 				else {
-					future = sp.onRequest(request)
-				}
-				
-				try {
-					return future.get(10, TimeUnit.SECONDS)
-				} catch (TimeoutException e) {
-					return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+					// Handle module-specific message
+					Future<RuntimeResponse> future
+					if (hash!=null) {
+						future = sp.getModule(hash).onRequest(request)
+					}
+					// Handle signalpath-specific message
+					else {
+						future = sp.onRequest(request)
+					}
+					
+					try {
+						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
+						log.info("runtimeRequest: responding with $resp")
+						return resp
+					} catch (TimeoutException e) {
+						return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+					}
 				}
 				
 			}

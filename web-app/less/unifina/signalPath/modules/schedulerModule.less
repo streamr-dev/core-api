@@ -34,26 +34,19 @@ div.module div.modulebody {
 					&:before {
 						background-color: #dff0d8;
 					}
+					&.first:before {
+						background-color: #92BF80;
+					}
 					div.td {
+						background-color: #dff0d8;
+					}
+					&.first div.td {
 						background-color: #dff0d8;
 					}
 				}
 				&.error-highlight {
 					div.td {
 						background-color: rgb(255, 222, 222);
-					}
-				}
-				&:first-of-type {
-					div.move-up-btn {
-						visibility: hidden;
-					}
-					&.active-highlight {
-						&:before {
-							background-color: #92BF80;
-						}
-						div.td {
-							background-color: #92BF80;
-						}
 					}
 				}
 				&:last-of-type {

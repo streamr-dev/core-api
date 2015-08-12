@@ -137,14 +137,16 @@ A number of core webcomponents are available at `/webcomponents/<component-name>
 
 ## Runtime requests
 
-For request-response cycles with running SignalPaths, you use the `/live/request` endpoint. Your request will be internally redirected to whichever server the live SignalPath is actually running on.
+For request-response cycles with running SignalPaths, you use the `/api/live/request` endpoint. Your request will be internally redirected to whichever server the live SignalPath is actually running on. This is not really part of the public api.
 
-The following request parameters should be supplied:
+The request content should be the following:
 
-Name 	| Description
---- 	| ---
-msg		| A stringified JSON message. The content is arbitrary but must include at least a key called `type`, which is a String that describes the request, for example `stopRequest` or `paramChange`.
-id 		| Id of the RunningSignalPath the message is intended for
-hash	| Hash of the module within the RunningSignalPath. Can be omitted when the message recipient is not a module but the RunningSignalPath itself.
-channel | Instead of the id and hash, messages can be targeted at a module with an UI channel id.
-
+```
+{
+	key: "", 		// User API key
+	secret: "", 	// User API secret
+	id: 0,			// Id of the RunningSignalPath
+	hash: undefined,// Hash of the module within the RunningSignalPath. Can be omitted when the message recipient is not a module but the RunningSignalPath itself.
+	channel: ""		// Instead of the id and hash, messages can be targeted at a module with an UI channel id.
+}
+```

@@ -3,7 +3,7 @@ package com.unifina.controller.data
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import java.security.AccessControlException
+import java.text.SimpleDateFormat
 
 import org.springframework.web.multipart.MultipartFile
 
@@ -12,9 +12,8 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
-import com.unifina.service.FeedFileService;
+import com.unifina.security.StreamrApi
 import com.unifina.utils.CSVImporter
-import com.unifina.utils.IdGenerator
 import com.unifina.utils.CSVImporter.Schema
 
 @Secured(["ROLE_USER"])
@@ -29,7 +28,17 @@ class StreamController {
 	def kafkaService
 	def streamService
 	
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(Stream.get(params.long("id")))},
+	def beforeInterceptor = [action:{
+			if (!unifinaSecurityService.canAccess(Stream.get(params.long("id")))) {
+				if (request.xhr)
+					redirect(controller:'login', action:'ajaxDenied')
+				else
+					redirect(controller:'login', action:'denied')
+					
+				return false
+			}
+			else return true
+		},
 		except:['list','search','create']]
 	
 	def list() {
@@ -82,16 +91,10 @@ class StreamController {
 		}
 	}
 	
-	// Action included in API
+	@StreamrApi
 	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 	def apiCreate() {
-		SecUser user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
-		if (!user) {
-			render (status:401, text: [success:false, error: "authorization error"] as JSON)
-			return
-		}
-
-		Stream stream = streamService.createUserStream(request.JSON, user)
+		Stream stream = streamService.createUserStream(request.JSON, request.apiUser)
 		if (stream.hasErrors()) {
 			log.info(stream.errors)
 			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
@@ -101,16 +104,10 @@ class StreamController {
 		}
 	}
 	
-	// Action included in API
+	@StreamrApi
 	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 	def apiLookup() {
-		SecUser user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
-		if (!user) {
-			render (status:401, text: [success:false, error: "authorization error"] as JSON)
-			return
-		}
-
-		Stream stream = Stream.findByUserAndLocalId(user, request.JSON?.localId)
+		Stream stream = Stream.findByUserAndLocalId(request.apiUser, request.JSON?.localId)
 		if (!stream)
 			render (status:404, text: [success:false, error: "stream not found"] as JSON)
 		else render ([stream:stream.uuid] as JSON)
@@ -154,7 +151,7 @@ class StreamController {
 			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+
 				"left outer join s.feed "+
 				"left outer join s.feed.module "+
-				"where (s.name like '"+params.term+"%' or s.description like '"+params.term+"%') "
+				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "
 				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "
 
 				if (params.feed) {
@@ -262,23 +259,22 @@ class StreamController {
 		}
 	}
 	
-	
-	def deleteSelectedFeedFiles() {
-		if(params.list("selectedFeedFiles").size() == 0){
-			flash.error = "No selected feed files!"
-			redirect(action:"show", params:[id:params.streamId])
-		} else {
-			def ids = params.list("selectedFeedFiles").collect {Long.parseLong(it)}
-			def feedFiles = FeedFile.findAllByIdInList(ids)
-			feedFiles.each {
-				feedFileService.deleteFile(it)
-			}
-			FeedFile.executeUpdate("delete from FeedFile ff where ff.id in (:ids)", [ids:ids])
-			
-			flash.message = "Data deleted!"
-			redirect(action:"show", params:[id:params.streamId])
+	def deleteFeedFilesUpTo() {
+		// Access checked by beforeInspector
+		def stream = Stream.get(params.id)
+		
+		def date = new SimpleDateFormat(message(code:"default.dateOnly.format")).parse(params.date) + 1
+		def feedFiles = FeedFile.findAllByStreamAndEndDateLessThan(stream, date)
+		feedFiles.each {
+			feedFileService.deleteFile(it)
 		}
+		def deletedCount = FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream and ff.endDate < :date", [stream: stream, date: date])
+		if(deletedCount > 0){
+			flash.message = "All data up to "+params.date+" successfully deleted"
+		} else {
+			flash.error = "Something went wrong with deleting files"
+		}
+		redirect(action:"show", params:[id:params.id])
 	}
-	
 	
 }

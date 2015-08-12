@@ -143,10 +143,16 @@ $(document).ready(function() {
 	loadBrowser = new SignalPathBrowser()
 		.tab('Archive', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
-		.tab('Live', '${ createLink(controller: "live", \
-			action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
+
+		<%-- Don't show the live tab without ROLE_LIVE --%>
+		<sec:ifAllGranted roles="ROLE_LIVE">
+			.tab('Live', '${ createLink(controller: "live", \
+				action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
+		</sec:ifAllGranted>
+		
 		.tab('Examples', '${ createLink(controller: "savedSignalPath", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
+			
 		.onSelect(function(url) {
 			SignalPath.loadSignalPath({ url: url })
 		})
@@ -273,7 +279,9 @@ $(document).unload(function () {
 							<span class="sr-only">Toggle Dropdown</span>
 						</button>
 						<ul class="dropdown-menu" role="menu">
-							<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
+							<sec:ifAllGranted roles="ROLE_LIVE">
+								<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
+							</sec:ifAllGranted>
 							<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
 						</ul>
 					</div>
@@ -423,142 +431,6 @@ $(document).unload(function () {
 	<!-- extension point for apps using the core plugin -->
 	<g:render template="/canvas/buildBodyExtensions"/>
 	
-	<!-- Template -->
-	<script id="scheduler-template" type="text/template">
-			<ol class="table scheduler-table">
-				
-			</ol>
-			<div class="col-xs-12 form-inline setup">
-				<div class="add-rule">
-					<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>
-				</div>
-				<div class="default-value">
-					Default value: <input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>
-				</div>
-			</div>
-		</script>
-	<script id="rule-view-template" type="text/template">
-		<li class="rule">
-			<div class="td">Every</div>
-			<div class="td interval-type">
-				<select name="interval-type" class="form-control input-sm">
-					<option value="0">hour</option>
-					<option value="1">day</option>
-					<option value="2">week</option>
-					<option value="3">month</option>
-					<option value="4">year</option>
-				</select>
-			</div>
-			<div class="td date"></div>
-			<div class="td value">
-				Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>
-			</div>
-			<div class="td move">
-				<div class="move-up-btn" title="Move up">
-					<i class=" fa fa-caret-up"></i>
-				</div>
-				<div class="move-down-btn" title="Move down">
-					<i class=" fa fa-caret-down"></i>
-				</div>
-			</div>
-			<div class="td delete">
-				<i class="delete-btn fa fa-trash-o" title="Remove"></i>
-			</div>
-		</li>
-	</script>
-	<script id="rule-view-year-template" type="text/template">
-				the
-				{{ _.template($("#day-select-template").html())() }}
-				of
-				<select name="month" class="form-control input-sm">
-					<option value="0">January</option>
-					<option value="1">February</option>
-					<option value="2">March</option>
-					<option value="3">April</option>
-					<option value="4">May</option>
-					<option value="5">June</option>
-					<option value="6">July</option>
-					<option value="7">August</option>
-					<option value="8">September</option>
-					<option value="9">October</option>
-					<option value="10">November</option>
-					<option value="11">December</option>
-				</select>
-				at
-				{{ _.template($("#rule-view-day-template").html())() }}
-		</script>
-	<script id="rule-view-month-template" type="text/template"> 
-				the
-				{{ _.template($("#day-select-template").html())() }}
-				at
-				{{ _.template($("#rule-view-day-template").html())() }}
-		</script>
-	<script id="rule-view-week-template" type="text/template"> 
-				<select name="weekday" class="form-control input-sm">
-					<option value="2">Monday</option>
-					<option value="3">Tuesday</option>
-					<option value="4">Wednesday</option>
-					<option value="5">Thursday</option>
-					<option value="6">Friday</option>
-					<option value="7">Saturday</option>
-					<option value="1">Sunday</option>
-				</select>
-				at
-				{{ _.template($("#rule-view-day-template").html())() }}
-		</script>
-	<script id="rule-view-day-template" type="text/template"> 
-				{{ _.template($("#hour-select-template").html())() }}
-				:
-				{{ _.template($("#minute-select-template").html())() }}
-		</script>
-	<script id="rule-view-hour-template" type="text/template"> 
-			{{ _.template($("#minute-select-template").html())() }}
-			minutes from the beginning of the hour
-	</script>
-	<script id="day-select-template" type="text/template">
-		<select name="day" class="form-control input-sm">
-			{[ _.each(_.range(31), function(i){ ]}
-				<option value="{{i+1}}">
-					{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} 
-						{{ i+1 + "st" }}
-					{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}
-						{{ i+1 + "nd" }}
-					{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}
-						{{ i+1 + "rd" }}
-					{[ } else { ]}
-						{{ i+1 + "th" }}
-					{[ } ]}
-				</option>
-			{[ }); ]}
-		</select>
-	</script>
-	<script id="hour-select-template" type="text/template">
-		<select name="hour" class="form-control input-sm">
-			{[ _.each(_.range(24), function(i){ ]}
-				<option value="{{i}}">
-					{[ if(i<10){ ]} 
-						0{{i}}
-					{[ } else { ]}
-						{{i}}
-					{[ } ]}
-				</option>
-			{[ }); ]}
-		</select>
-	</script>
-	<script id="minute-select-template" type="text/template">
-		<select name="minute" class="form-control input-sm">
-			{[ _.each(_.range(60), function(i){ ]}
-				<option value="{{i}}">
-					{[ if(i<10){ ]} 
-						0{{i}}
-					{[ } else { ]}
-						{{i}}
-					{[ } ]}
-				</option>
-			{[ }); ]}
-		</select>
-	</script>
-	<!-- Template -->
 </body>
 </html>
 

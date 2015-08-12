@@ -137,10 +137,13 @@ var RuleView = Backbone.View.extend({
 		this.$el.find(".move-down-btn").click(function(){
 			_this.moveDown()
 		})
-		this.model.on("active", function(){
+		this.model.on("active", function(i){
+			if(i == 0)
+				this.$el.addClass("first")
 			_this.$el.addClass("active-highlight")
 		})
 		this.model.on("unactive", function(){
+			_this.$el.removeClass("first")
 			_this.$el.removeClass("active-highlight")
 		})
 	},
@@ -342,10 +345,7 @@ var Scheduler = Backbone.View.extend({
 		var _this = this
 		$.each(_this.collection.models, function(i, model){
 			if(_.contains(activeRules, i))
-				if(i == 0)
-					model.trigger("first-active")
-				else
-					model.trigger("active")
+				model.trigger("active", i)
 			else
 				model.trigger("unactive")
 		})

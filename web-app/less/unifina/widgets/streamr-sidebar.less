@@ -1,0 +1,76 @@
+.streamr-sidebar {
+	position: fixed;
+	padding-top: 70px;
+	ul.nav li {
+		&.active:hover, &.active:focus, &.active {
+			>a {
+				padding-left: 18px;
+			    font-weight: 700;
+			    color: @primary-color;
+			    background-color: transparent;
+			    border-left: 2px solid @primary-color
+			}
+		}
+		a:hover, a:focus {
+	    	padding-left: 19px;
+		    color: @primary-color;
+		    text-decoration: none;
+		    background-color: transparent;
+		    border-left: 1px solid @primary-color
+	    }
+		a {
+			font-size: 14px;
+			display: block;
+		    padding-top: 2px;
+		    padding-bottom: 2px;
+		    font-weight: 500;
+		    color: #767676
+		}
+		>ul.nav {
+			display:none;
+			li {
+			    // padding-bottom: 10px;
+				a {
+					padding-left: 28px;
+					font-size: 12px;
+				}
+				>ul.nav {
+					display: none;
+					li {
+						a {
+							padding-left: 36px;
+							font-size: 12px;
+						    padding-top: 1px;
+						    padding-bottom: 1px;
+						    font-weight: 400
+						}
+						a:focus, a:hover {
+					    	padding-left:38px;
+					    }
+					    a.active, a.active:hover, a.active:focus {
+					    	font-weight: bold;
+					    }
+						>ul.nav {
+							display:none;
+							li {
+								a {
+									padding-left: 44px;
+									font-size: 12px;
+								}
+							}
+						}
+						&.active >ul.nav {
+							display: block;
+						}
+					}
+				}
+				&.active >ul.nav {
+					display: block;
+				}
+			}
+		}
+		&.active >ul.nav {
+			display:block;
+		}
+	}
+}

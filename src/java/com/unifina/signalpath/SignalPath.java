@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
@@ -18,6 +17,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.domain.signalpath.RunningSignalPath;
 import com.unifina.service.ModuleService;
+import com.unifina.service.SignalPathService;
 import com.unifina.utils.Globals;
 
 public class SignalPath extends ModuleWithUI {
@@ -335,18 +335,6 @@ public class SignalPath extends ModuleWithUI {
 			// Clean up
 			it.destroy(); 
 		}
-	}
-	
-	@Override
-	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
-		if (request.getType().equals("stopRequest")) {
-			if (!request.isAuthenticated())
-				throw new AccessControlException("stopRequest requires authentication!");
-
-			globals.getDataSource().stopFeed();
-			response.setSuccess(true);
-		}
-		else super.handleRequest(request, response);
 	}
 	
 	class InputConnection {

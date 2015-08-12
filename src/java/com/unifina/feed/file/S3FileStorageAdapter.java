@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -21,6 +23,8 @@ public class S3FileStorageAdapter extends FileStorageAdapter {
 	private AmazonS3 s3Client;
 	private String bucketName;
 	
+	private static final Logger log = Logger.getLogger(S3FileStorageAdapter.class);
+	
 	public S3FileStorageAdapter(Map<String, Object> config) {
 		super(config);
 		
@@ -34,19 +38,23 @@ public class S3FileStorageAdapter extends FileStorageAdapter {
 
 	@Override
 	protected InputStream tryRetrieve(String location) throws IOException {
+		log.debug("tryRetrieve: "+location);
 		S3Object object = s3Client.getObject(new GetObjectRequest(bucketName, location));
 		InputStream objectData = object.getObjectContent();
+		log.debug("tryRetrieve: content length is "+object.getObjectMetadata().getContentLength());
 		return objectData;
 	}
 
 	@Override
 	protected void tryStore(File file, String location) throws IOException {
+		log.debug("tryStore: "+file+" to "+location);
 		// Amazon S3 client retries internally, may log Exceptions to log file on each retry
 		s3Client.putObject(new PutObjectRequest(bucketName, location, file));
 	}
 	
 	@Override
 	protected void tryDelete(String location) throws IOException {
+		log.debug("tryDelete: "+location);
 		// Amazon S3 client retries internally, may log Exceptions to log file on each retry
 		s3Client.deleteObject(new DeleteObjectRequest(bucketName, location));
 	}

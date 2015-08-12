@@ -42,6 +42,8 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	
 	protected PriorityQueue<FeedEvent> queue = new PriorityQueue<>();
 	
+	private static final Logger log = Logger.getLogger(AbstractHistoricalFeed.class);
+	
 	public AbstractHistoricalFileFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 	}
@@ -134,6 +136,9 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	@Override
 	public void startFeed() throws Exception {
 		started = true;
+		
+		log.debug("Starting feed with event recipients by key: "+eventRecipientsByKey);
+		log.debug("Starting feed with streams: "+streams);
 
 		// For each recipient get an input stream and place the first event in a PriorityQueue
 		for (IEventRecipient recipient : eventRecipients) {
@@ -145,6 +150,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 			}
 		}
 		
+		log.debug("Starting contents of event queue: "+queue);
 	}
 
 	private FeedEventIterator createIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient) {
@@ -184,6 +190,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 			
 			// Null signals end of processing
 			if (response==null) {
+				log.debug("getNextIterator: no more iterators for recipient "+recipient);
 				return null;
 			}
 			else {
