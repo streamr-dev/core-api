@@ -235,8 +235,6 @@ grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domai
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'com.unifina.domain.security.SecUserSecRole'
 grails.plugin.springsecurity.authority.className = 'com.unifina.domain.security.SecRole'
 
-grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
-grails.plugin.springsecurity.rememberMe.key = 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
 grails.plugin.springsecurity.logout.postOnly = false
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/canvas'
