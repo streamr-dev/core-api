@@ -30,7 +30,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
+		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -100,9 +100,6 @@ class LiveController {
 		
 		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
 		RunningSignalPath rsp = ui.runningSignalPath
-		
-		log.info("ui: $ui")
-		log.info("rsp: $rsp")
 		
 		if (!unifinaSecurityService.canAccess(rsp)) {
 			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")

@@ -44,28 +44,26 @@
 				trySubscribe()
 			},
 			getResendOptions: function(json) {
-				json = json || {}
+				// Default resend options
+				var resendOptions = {
+					resend_last: 1
+				}
 
-				var resendOptions = $.extend(
-					// By default, resend all
-					{
-						resend_all: true
-					},
-					// Default can be overridden by module options
-					{
+				// Can be overridden by module options
+				if (json.options && (json.options.uiResendAll.value || json.options.uiResendLast.value!=null)) {
+					resendOptions = {
 						resend_all: (json.options && json.options.uiResendAll ? json.options.uiResendAll.value : undefined),
 						resend_last: (json.options && json.options.uiResendLast ? json.options.uiResendLast.value : undefined)
-					},
-					// Module options can be overridden by tag attributes
-					{
+					}
+				}
+
+				// Can be overridden by tag attributes
+				if (this.resendAll || this.resendLast!=null) {
+					resendOptions = {
 						resend_all: this.resendAll,
 						resend_last: this.resendLast
 					}
-				)
-				if (resendOptions.resend_all)
-					delete resendOptions['resend_last']
-				else 
-					delete resendOptions['resend_all']
+				}
 
 				return resendOptions
 			},
