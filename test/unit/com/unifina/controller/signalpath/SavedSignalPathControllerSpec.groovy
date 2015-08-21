@@ -82,7 +82,6 @@ class SavedSignalPathControllerSpec extends Specification {
 				controller.save()
 		then:
 			response.json.isSaved
-			SavedSignalPath.get(1).name == "new sp"
 	}
 	
 	void "must not be able to load others' SignalPath"() {
