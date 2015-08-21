@@ -26,7 +26,7 @@ log4j = {
 
     warn   'org.mortbay.log',
 			'org.apache.zookeeper',
-			'org.codehaus.groovy.grails.domain.DomainClassCleaner'
+			'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
 }
 
 
