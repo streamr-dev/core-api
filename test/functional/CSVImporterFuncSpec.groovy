@@ -14,10 +14,18 @@ import core.pages.StreamShowPage
 class CSVImporterFuncSpec extends LoginTester1Spec {
 
 	private File getFile(String filename) {
-		if (driver instanceof RemoteWebDriver) {
-			return new File("/vagrant/$filename")
-		}
-		else return Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
+		// The test csv files must be available in the local filesystem (of the machine where the browser is running)
+		// The files should be found under /vagrant on selenium node boxes
+		File file = new File("/vagrant/$filename")
+
+		// If not, we're probably running the test locally so try to find them in the package structure 		
+		if (!file.exists())
+			file = Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
+		
+		if (!file.exists())
+			throw new FileNotFoundException(filename);
+		
+		return file
 	}
 	
 	void "uploading data from csv with a non-supported date format to a stream works"() {

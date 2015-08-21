@@ -52,7 +52,6 @@ class ProfileController {
 		else {
 			if (!cmd.validate()) {
 				flash.error = "Password not changed!"
-				log.warn("Password change failed: "+cmd.errors)
 				return render(view: 'changePwd', model: [cmd: cmd, user:user])
 			}
 			else {
