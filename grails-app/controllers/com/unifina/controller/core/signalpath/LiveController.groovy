@@ -183,18 +183,12 @@ class LiveController {
 	}
 	
 	@Secured("ROLE_USER")
-	def ajaxDelete() {
+	def ajaxStop() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		
 		Map r
 		if (rsp && signalPathService.stopLocal(rsp)) {
-			r = [success:true, id:rsp.id, status:"Aborting"]
-			try {
-				rsp.delete(flush:true)
-			} catch (Exception e) {
-				// rsp may be deleted in-between getting and deleting it if it finishes and deletes itself
-				// ignore this exception (unfortunately it gets logged anyway by Hibernate)
-			}
+			r = [success:true, id:rsp.id, status:"Stopped"]
 		}
 		else r = [success:false, id:params.id, status:"Running canvas not found"]
 		
