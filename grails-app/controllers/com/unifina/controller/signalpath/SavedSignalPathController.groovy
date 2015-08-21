@@ -20,7 +20,7 @@ class SavedSignalPathController {
 	
 	def unifinaSecurityService
 	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(SavedSignalPath.get(params.id), actionName=='load')) {
+			if (params.id!=null && !unifinaSecurityService.canAccess(SavedSignalPath.get(params.id), actionName=='load')) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else
