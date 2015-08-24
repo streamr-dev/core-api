@@ -11,18 +11,7 @@ class ProfileController {
 	
 	static defaultAction = "edit"
 	
-	static final myPasswordValidator = { String password, command ->
-		// Check password score
-		if (command.pwdStrength < 1) {
-			return ['command.password.error.strength']
-		}
-	}
-	
-	static final password2Validator = { value, command ->
-		if (command.password != command.password2) {
-			return 'command.password2.error.mismatch'
-		}
-	}
+
 	
 	def edit() {
 		[user:SecUser.get(springSecurityService.currentUser.id)]
@@ -52,7 +41,6 @@ class ProfileController {
 		else {
 			if (!cmd.validate()) {
 				flash.error = "Password not changed!"
-				log.warn("Password change failed: "+cmd.errors)
 				return render(view: 'changePwd', model: [cmd: cmd, user:user])
 			}
 			else {
@@ -74,6 +62,7 @@ class ProfileController {
 class ChangePasswordCommand {
 	
 	def springSecurityService
+	def unifinaSecurityService
 	
 	String currentpassword
 	String password
@@ -86,7 +75,11 @@ class ChangePasswordCommand {
 			def encodedPassword = SecUser.get(cmd.springSecurityService.currentUser.id).password
 			return encoder.isPasswordValid(encodedPassword, pwd, null /*salt*/)
 		}
-		password validator: ProfileController.myPasswordValidator
-		password2 validator: ProfileController.password2Validator
+		password validator: {String password, ChangePasswordCommand command ->
+			return command.unifinaSecurityService.passwordValidator(password, command)
+		}
+		password2 validator: {value, ChangePasswordCommand command ->
+			return command.unifinaSecurityService.password2Validator(value, command)
+		}
 	}
 }

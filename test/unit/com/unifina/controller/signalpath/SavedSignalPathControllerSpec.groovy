@@ -72,6 +72,18 @@ class SavedSignalPathControllerSpec extends Specification {
 			response.json.saveData.isSaved == true
 	}
 	
+	void "must be able to save a new SignalPath"() {
+		when:
+			params.name = "new sp"
+			params.json = ssp1.json
+			request.method = "POST"
+			webRequest.actionName = "save"
+			if (controller.beforeInterceptor.action.doCall())
+				controller.save()
+		then:
+			response.json.isSaved
+	}
+	
 	void "must not be able to load others' SignalPath"() {
 		when:
 			params.id = "2"
