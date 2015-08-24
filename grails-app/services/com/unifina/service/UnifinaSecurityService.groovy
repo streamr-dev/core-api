@@ -97,5 +97,18 @@ class UnifinaSecurityService {
 			return null
 		else return user
 	}
+	
+	def passwordValidator = { String password, command ->
+		// Check password score
+		if (command.pwdStrength < 1) {
+			return ['command.password.error.strength']
+		}
+	}
+	
+	def password2Validator = { value, command ->
+		if (command.password != command.password2) {
+			return 'command.password2.error.mismatch'
+		}
+	}
 
 }

@@ -123,20 +123,32 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "the input field shows the selected value"
 			beginDate.value() == "2015-07-03"
 	}
+	
+	private void sleepForNSeconds(int n) {
+		def originalMilliseconds = System.currentTimeMillis()
+		waitFor(n + 1, 0.5) {
+			(System.currentTimeMillis() - originalMilliseconds) > (n * 1000)
+		}
+	}
 
 	def "running a SignalPath should produce output"() {
 		when: "SignalPath is loaded"
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
 			moduleShouldAppearOnCanvas('Table')
+			
+		when: "run button is clicked"
 			runButton.click()
 		then: "output should be produced"
 			waitFor(30) {
 				$('#run', text: contains('Abort'))
 				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
 			}
-		then: "Clicking on Abort should return the button to Run"
+			
+		when: "abort button is clicked"
 			$('#run', text: contains('Abort')).click()
+			sleepForNSeconds(2) // Allow some time for server-side stuff to clean up
+		then: "button must change back to run"
 			waitFor {
 				$('#run', text: 'Run')
 			}
