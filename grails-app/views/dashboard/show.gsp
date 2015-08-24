@@ -24,6 +24,14 @@
 						model: dashboard,
 						el: $("#dashboard-view")
 					})
+					dashboardView.on('error', function(error, itemTitle) {
+						$.pnotify({
+							type: 'error',
+			        		title: 'Error',
+				        	text: itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error,
+				        	delay: 4000
+			    		});
+					})
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 

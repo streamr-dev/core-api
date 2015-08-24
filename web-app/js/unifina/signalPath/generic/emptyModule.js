@@ -106,6 +106,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 							helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
 							helpLink.tooltip("show")
 						}
+						MathJax.Hub.Queue(["Typeset",MathJax.Hub,$tt[0]]);
+						MathJax.Hub.Queue(function(){
+							$tt.find(".math-tex").addClass("math-jax-ready")
+						})
 					}
 				})
 				helpLink.tooltip('show')
@@ -116,12 +120,20 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		})
 
 		helpLink.click(function() {
-			bootbox.dialog({
+			var bb = bootbox.dialog({
 				message: '<div class="modulehelp">'+ prot.getHelp(true)+'</div>',
 				onEscape: function() { return true },
 				animate: false,
-				title: prot.jsonData.name
+				title: prot.jsonData.name,
+				show: false
 			})
+			bb.on("shown.bs.modal", function(){
+				MathJax.Hub.Queue(["Typeset",MathJax.Hub,bb.find(".modal-body")[0]]);
+				MathJax.Hub.Queue(function(){
+					bb.find(".modal-body .math-tex").addClass("math-jax-ready")
+				})
+			})
+			bb.modal("show")
 		})
 
 		buttons.push(helpLink);

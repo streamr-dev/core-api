@@ -45,6 +45,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 				}
 
 				if (abort) {
+					log.info("doStart: aborting");
 					return;
 				}
 				

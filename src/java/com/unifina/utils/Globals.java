@@ -30,6 +30,7 @@ public class Globals {
 	private static final Logger log = Logger.getLogger(Globals.class);
 	
 	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 	public SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	
@@ -66,6 +67,9 @@ public class Globals {
 		this.signalPathContext = signalPathContext;
 		this.grailsApplication = grailsApplication;
 		this.user = user;
+		
+		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+		
 		// Use ModuleService classloader as parent to keep all loaded modules in same CL hierarchy
 //		this.classLoader = new ModuleClassLoader(ModuleService.class.getClassLoader())
 	}
@@ -136,8 +140,9 @@ public class Globals {
 	}
 	
 	public void init() {
-		startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormat);
-		endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormat);
+		// Use UTC timezone for beginDate and endDate
+		startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
+		endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
 		time = startDate;
 		
 		// Set time to midnight UTC of the current date if nothing specified

@@ -20,14 +20,13 @@ class SavedSignalPathController {
 	
 	def unifinaSecurityService
 	def beforeInterceptor = [action:{
-			if (params.id != null) {
-				SavedSignalPath ssp = SavedSignalPath.get(params.id)
-				
-				// Don't check access for loading examples
-				
-				if (actionName=="load" && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
-					return true
-				else return unifinaSecurityService.canAccess(ssp)
+			if (params.id!=null && !unifinaSecurityService.canAccess(SavedSignalPath.get(params.id), actionName=='load')) {
+				if (request.xhr)
+					redirect(controller:'login', action:'ajaxDenied')
+				else
+					redirect(controller:'login', action:'denied')
+					
+				return false
 			}
 			else return true
 		},only:['load', 'save']]

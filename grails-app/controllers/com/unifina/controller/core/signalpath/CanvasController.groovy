@@ -47,9 +47,9 @@ class CanvasController {
 	}
 	
 	def reconstruct() {
-		Map signalPathContext = (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:])
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		Map result = signalPathService.reconstruct(JSON.parse(params.signalPathData), globals)
+		Map json = [signalPathContext: (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:]), signalPathData: JSON.parse(params.signalPathData)]
+		Globals globals = GlobalsFactory.createInstance(json.signalPathContext, grailsApplication)
+		Map result = signalPathService.reconstruct(json, globals)
 		render result as JSON
 	}
 	
