@@ -30,7 +30,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
+		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -100,9 +100,6 @@ class LiveController {
 		
 		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
 		RunningSignalPath rsp = ui.runningSignalPath
-		
-		log.info("ui: $ui")
-		log.info("rsp: $rsp")
 		
 		if (!unifinaSecurityService.canAccess(rsp)) {
 			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")
@@ -186,18 +183,12 @@ class LiveController {
 	}
 	
 	@Secured("ROLE_USER")
-	def ajaxDelete() {
+	def ajaxStop() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		
 		Map r
 		if (rsp && signalPathService.stopLocal(rsp)) {
-			r = [success:true, id:rsp.id, status:"Aborting"]
-			try {
-				rsp.delete(flush:true, failOnError:true)
-			} catch (StaleObjectStateException e) {
-				// rsp may be deleted in-between getting and deleting it if it finishes and deletes itself
-				// ignore this exception
-			}
+			r = [success:true, id:rsp.id, status:"Stopped"]
 		}
 		else r = [success:false, id:params.id, status:"Running canvas not found"]
 		

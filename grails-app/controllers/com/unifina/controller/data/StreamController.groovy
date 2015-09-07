@@ -39,7 +39,7 @@ class StreamController {
 			}
 			else return true
 		},
-		except:['list','search','create']]
+		except:['list','search','create','apiCreate','apiLookup']]
 	
 	def list() {
 		List<Stream> streams = Stream.findAllByUser(springSecurityService.currentUser)
