@@ -125,6 +125,21 @@ class StreamController {
 		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
 	}
 	
+	def delete() {
+		// Access checked by beforeInterceptor
+		Stream streamInstance = Stream.get(params.id)
+		def name = streamInstance.name
+		def streamId = streamInstance.uuid
+		try {
+			streamService.deleteStream(streamInstance)
+			flash.message = "The stream $name removed successfully"
+			redirect(action:"list")
+		} catch (Exception e) {
+			flash.error = "An error occurred while deleting the stream: $e"
+			redirect(action:"show", id:streamInstance.id)
+		}
+	}
+	
 	def fields() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
