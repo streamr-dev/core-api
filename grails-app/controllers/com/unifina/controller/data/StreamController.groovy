@@ -128,21 +128,16 @@ class StreamController {
 	def delete() {
 		// Access checked by beforeInterceptor
 		Stream streamInstance = Stream.get(params.id)
-		def name = streamInstance.getName()
+		def name = streamInstance.name
+		def streamId = streamInstance.uuid
 		try {
-			def feedFiles = FeedFile.findAllByStream(streamInstance, [sort:'beginDate'])
-			feedFiles.each {
-				feedFileService.deleteFile(it)
-			}
-			FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream", [stream: streamInstance])
-			streamInstance.delete(flush:true)
+			streamService.deleteStream(streamInstance)
 			flash.message = "The stream $name removed successfully"
+			redirect(action:"list")
 		} catch (Exception e) {
 			flash.error = "An error occurred while deleting the stream: $e"
-			response.status = 500
-			render ([success:false, error: e.toString()] as JSON)
+			redirect(action:"show", id:streamInstance.id)
 		}
-		redirect(action:"list")
 	}
 	
 	def fields() {
