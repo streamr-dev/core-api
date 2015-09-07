@@ -28,7 +28,7 @@
 							<g:link action="edit" id="${stream.id}"><span class="btn btn-sm">Edit info</span></g:link>
 							<form id="stream-delete-form">
 								<g:hiddenField name="id" value="${ stream.id }" />
-								<button data-action="${ createLink(action:'delete') }" data-confirm="Are you sure you want to delete the stream?" class="btn btn-danger btn-sm confirm">Delete stream</button>
+								<button id="delete-stream-button" data-action="${ createLink(action:'delete') }" data-confirm="Are you sure you want to delete the stream?" class="btn btn-danger btn-sm confirm">Delete stream</button>
 							</form>
 						</div>
 					</div>

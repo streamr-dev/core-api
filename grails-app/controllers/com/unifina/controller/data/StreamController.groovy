@@ -132,10 +132,10 @@ class StreamController {
 		def streamId = streamInstance.uuid
 		try {
 			streamService.deleteStream(streamInstance)
-			flash.message = "The stream $name removed successfully"
+			flash.message = "The stream $name has been deleted."
 			redirect(action:"list")
 		} catch (Exception e) {
-			flash.error = "An error occurred while deleting the stream: $e"
+			flash.error = "An error occurred while deleting the stream!"
 			redirect(action:"show", id:streamInstance.id)
 		}
 	}

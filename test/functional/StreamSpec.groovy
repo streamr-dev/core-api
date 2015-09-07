@@ -3,6 +3,7 @@ import java.nio.file.Paths
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 
 import core.LoginTester1Spec
+import core.mixins.ConfirmationMixin;
 import core.mixins.StreamMixin
 import core.pages.StreamConfigurePage
 import core.pages.StreamCreatePage
@@ -15,6 +16,7 @@ class StreamSpec extends LoginTester1Spec {
 	def setupSpec() {
 		// @Mixin is buggy, don't use it
 		StreamSpec.metaClass.mixin(StreamMixin)
+		StreamSpec.metaClass.mixin(ConfirmationMixin)
 	}
 	
 	def setup() {
@@ -104,9 +106,21 @@ class StreamSpec extends LoginTester1Spec {
 			
 		when: "save button is clicked"
 			saveButton.click()
-		then: "navigate back to show page, showing the fields"
+		then: "navigate back to show page, showing the fields and message"
 			waitFor { at StreamShowPage }
+			$(".alert-info").displayed
 			$("#stream-fields tbody tr").size() == 2
+			
+		when: "delete stream button is clicked"
+			deleteStreamButton.click()
+		then: "must show confirmation"
+			waitForConfirmation()
+			
+		when: "confirmation accepted"
+			acceptConfirmation()
+		then: "must navigate to list page and show message"
+			waitFor { at StreamListPage }
+			$(".alert-info").displayed
 	}
 	
 }
