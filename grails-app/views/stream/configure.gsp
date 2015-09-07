@@ -76,9 +76,7 @@
 			<g:render template="/stream/breadcrumbList" />
 			<g:render template="/stream/breadcrumbShow" />
 			<li class="active">
-				<g:link controller="stream" action="edit">
-					<g:message code="stream.edit.label" args="[stream.name]"/>
-				</g:link>
+				<g:message code="stream.edit.label" args="[stream.name]"/>
 			</li>
 		</ui:breadcrumb>
     

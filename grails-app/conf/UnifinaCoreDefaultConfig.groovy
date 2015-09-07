@@ -173,7 +173,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "dev.unifina:8889"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "localhost:8889"//"dev.unifina:8889"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "api.streamr.com"

@@ -1,9 +1,7 @@
-<plugin name='unifina-core' version='0.1' grailsVersion='2.2 &gt; *'>
+<plugin name='unifina-core' version='0.1' grailsVersion='2.3.7 &gt; *'>
   <author>Henri Pihkala</author>
   <authorEmail>henri.pihkala@unifina.com</authorEmail>
   <title>Unifina Core Plugin</title>
-  <description>
-</description>
   <documentation>http://www.unifina.com</documentation>
   <type>UnifinaCoreGrailsPlugin</type>
   <resources>
