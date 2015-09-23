@@ -24,9 +24,7 @@ class StreamService {
 		stream.feed = Feed.load(7) // API stream
 		stream.streamConfig = ([fields:[], topic: stream.uuid] as JSON)
 		
-		stream.save(failOnError:true)
-		
-		kafkaService.createTopics([stream.uuid])
+		stream.save()
 		
 		if (!stream.hasErrors()) {
 			kafkaService.createTopics([stream.uuid])
