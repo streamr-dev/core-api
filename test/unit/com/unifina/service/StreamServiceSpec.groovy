@@ -20,8 +20,8 @@ class StreamServiceSpec extends Specification {
 	def kafkaService
 	
 	def setup() {
-			kafkaService = Mock(KafkaService)
-			service.kafkaService = kafkaService
+		kafkaService = Mock(KafkaService)
+		service.kafkaService = kafkaService
 	}
 
 	void "createUserStream throws ValidationException when certain fields are missing"() {
