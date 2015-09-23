@@ -11,6 +11,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
 import com.unifina.service.UnifinaSecurityService
 
@@ -26,6 +27,8 @@ class StreamControllerSpec extends Specification {
 			unifinaSecurityService(UnifinaSecurityService)
 			streamService(StreamService)
 		}
+		
+		controller.streamService.kafkaService = Mock(KafkaService)
 		
 		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
 		

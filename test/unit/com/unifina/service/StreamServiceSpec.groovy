@@ -24,12 +24,13 @@ class StreamServiceSpec extends Specification {
 		service.kafkaService = kafkaService
 	}
 
-	void "createUserStream throws ValidationException when certain fields are missing"() {
+	void "createUserStream must not call kafkaService.createTopics() if input incomplete"() {
+		
 		when:
 		service.createUserStream([:], null)
 
 		then:
-		thrown(ValidationException)
+		0 * kafkaService.createTopics(_)
 	}
 
 	void "createUserStream results in persisted Stream"() {

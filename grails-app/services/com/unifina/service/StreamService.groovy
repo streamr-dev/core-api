@@ -28,6 +28,9 @@ class StreamService {
 		
 		kafkaService.createTopics([stream.uuid])
 		
+		if (!stream.hasErrors()) {
+			kafkaService.createTopics([stream.uuid])
+		}
 		return stream
 	}
 	
