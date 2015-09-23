@@ -101,12 +101,6 @@ class KafkaService {
 		sendMessage(stream.getUuid(), key, str, true);
 	}
 	
-	/**
-	 * Uses a FetchMetadataRequest to create topics. This requires
-	 * auto.create.topics.enable=true on the server. This is a workaround for
-	 * AdminUtils.createTopic not seeming to work properly on Kafka 0.8.1.1 and 0.8.2-beta.
-	 * @param topics
-	 */
 	@CompileStatic
 	void createTopics(List<String> topics, int partitions=1, int replicationFactor=1) {
 		ZkClient zkClient = createZkClient()
