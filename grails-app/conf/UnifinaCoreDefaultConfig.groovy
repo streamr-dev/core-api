@@ -203,8 +203,8 @@ unifina.kafka.request.required.acks = "0"
 unifina.kafka.group.id = "streamr"
 environments {
 	production {
-		unifina.kafka.metadata.broker.list = "54.197.243.207:9092"
-		unifina.kafka.zookeeper.connect = "54.197.243.207:2181"
+		unifina.kafka.metadata.broker.list = "ip-10-16-207-139.ec2.internal:9092"
+		unifina.kafka.zookeeper.connect = "ip-10-16-207-139.ec2.internal:2181"
 	}
 }
 
