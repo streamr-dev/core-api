@@ -173,10 +173,10 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "dev.unifina:8889"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev.unifina:8889"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "api.streamr.com"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
 	}
 }
 
@@ -186,7 +186,7 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.unifina:8888"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "http://api.streamr.com"
+		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
 	}
 }
 
