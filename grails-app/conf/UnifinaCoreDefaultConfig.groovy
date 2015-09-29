@@ -55,6 +55,9 @@
 		 grails.resources.processing.excludes = ['**/*.js']
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
+	 production {
+		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
+	 }
  }
  
  environments {
