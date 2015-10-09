@@ -12,7 +12,7 @@
     
     <script>
     	Streamr = {}
-		Streamr.projectWebroot = '${createLink(uri:"/")}'
+		Streamr.projectWebroot = '${createLink(uri:"/", absolute:true)}'
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
 		<sec:ifLoggedIn>
