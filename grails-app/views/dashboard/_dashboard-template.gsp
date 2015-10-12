@@ -7,7 +7,6 @@
 
 <script id="uichannel-template" type="text/template">
         <a href="#" class="uichannel-title" id="uichannel_{{ id }}">
-        <!--title="{{ id }}"-->
             <i class="menu-icon fa fa-square"></i>
             <i class="menu-icon fa fa-check-square"></i>
             {{ name ? name : id }}

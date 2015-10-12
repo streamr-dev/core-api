@@ -17,7 +17,6 @@
 			$(document).ready(function() {
 				var dashboard
 
-
 				$.getJSON("${createLink(controller:'dashboard', action:'getJson', id:dashboard.id)}", {}, function(dbJson) {
 					dashboard = new Dashboard(dbJson)
 					var dashboardView = new DashboardView({
@@ -34,11 +33,6 @@
 					})
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
-
-				    dashboard.get("items").on("remove", function (model) {
-						var client = document.getElementById("client")
-						client.streamrClient.unsubscribe(model.get("uiChannel").id)
-					})
 					
 					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
 						var sidebar = new SidebarView({

@@ -17,6 +17,7 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		String dashboardName = "test" + new Date().getTime()
 		
+		// Create a dashboard
 		when: "clicked to create new dashboard"
 		createButton.click()
 		then: "go to the dashboard create page"
@@ -26,29 +27,50 @@ class DashboardSpec extends LoginTester1Spec {
 		nameInput << dashboardName
 		createButton.click()
 		then: "go to dashboard show page"
-		waitFor { at DashboardShowPage }
+		waitFor { 
+			at DashboardShowPage
+			$("#main-menu .navigation .runningsignalpath", text: contains('DashboardSpec')).displayed
+		}
 		
-		//Modifying the just created dashboard
+		// Open a rsp
 		when: "a rsp clicked to open"
 		$("#main-menu .navigation .runningsignalpath", text: contains('DashboardSpec')).click()
 		then: "uichannel-list opens"
 		waitFor { $(".uichannel-title").displayed }
 		
+		// Add a module
 		when: "uichannel clicked"
 		$(".uichannel-title", 0).click()
 		then: "one dashboarditem should be visible"
 		waitFor { $("#dashboard-view .dashboarditem").displayed }
 		
+		// Click to edit the title of the module
 		when: "clicked to edit the title"
 		$("#dashboard-view .dashboarditem .titlebar-clickable").click()
 		then: "title changes to input"
 		waitFor { $("#dashboard-view .dashboarditem .titlebar-edit").displayed }
 		
+		// Edit the title of the module
 		when: "dashboarditem title changed"
 		$("#dashboard-view .dashboarditem .titlebar-edit").firstElement().clear()
 		$("#dashboard-view .dashboarditem .titlebar-edit") << "New title"
 		nameInput.click()
 		then: "title changes"
+		$("#dashboard-view .dashboarditem .titlebar-clickable", text:"New title").displayed
+		
+		// Delete the module
+		when: "clicked delete-button"
+		$("#dashboard-view .dashboarditem .delete-btn").click()
+		then: "the item should be removed"
+		!$("#dashboard-view .dashboarditem").displayed
+		
+		// Add a new module
+		when: "added and edited"
+		$(".uichannel-title", 0).click()
+		$("#dashboard-view .dashboarditem .titlebar-edit").firstElement().clear()
+		$("#dashboard-view .dashboarditem .titlebar-edit") << "New title"
+		nameInput.click()
+		then: "the new module is visible"
 		$("#dashboard-view .dashboarditem .titlebar-clickable", text:"New title").displayed
 		
 		when: "the dashboard name changed"

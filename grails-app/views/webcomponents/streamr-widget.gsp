@@ -21,6 +21,9 @@
 				resendAll: undefined
 			},
 			bindEvents: function(container) {
+				container.parentNode.addEventListener("remove", function(){
+					this.$.client.streamrClient.unsubscribe(this.sub)
+				})
 				container.parentNode.addEventListener("resize", function() {
 					container.dispatchEvent(new Event('resize'))
 				})
@@ -31,7 +34,7 @@
 				var trySubscribe = function() {
 					if(_this.$.client.streamrClient) {
 						var client = _this.$.client.streamrClient
-						client.subscribe(
+						_this.sub = client.subscribe(
 						    _this.channel, 
 						    messageHandler,
 						    resendOptions
