@@ -55,6 +55,7 @@ Tour.list(function(tourList) {
 						<ul class="dropdown-menu" id="help-tour-list">
 							<%-- Tours are dynamically inserted here --%>
 <%--							<li class="divider"></li>--%>
+							<li><g:link elementId="navUserGuideLink" controller="help" action="userGuide">User Guide</g:link></li>
 							<li><g:link elementId="navExamplesLink" controller="canvas" params="[examples:1]">Example Canvases</g:link></li>
 							<li><g:link controller="feedback"><g:message code="feedback.label"/></g:link></li>
 						</ul>
