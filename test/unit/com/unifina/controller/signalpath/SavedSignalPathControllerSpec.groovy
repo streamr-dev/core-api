@@ -1,6 +1,7 @@
 package com.unifina.controller.signalpath
 
 import static org.junit.Assert.*
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.support.*
@@ -40,7 +41,12 @@ class SavedSignalPathControllerSpec extends Specification {
 		assert SecUser.count()==2
 		assert SavedSignalPath.count()==4
 		
-		def springSecurityService = [currentUser: me, getCurrentUser: {me}]
+		SpringSecurityService springSecurityService = new SpringSecurityService() {
+			def getCurrentUser() {
+				return me
+			}
+		}
+		
 		controller.springSecurityService = springSecurityService
 		grailsApplication.mainContext.getBean("unifinaSecurityService").springSecurityService = springSecurityService
 		controller.signalPathService = [
@@ -64,6 +70,18 @@ class SavedSignalPathControllerSpec extends Specification {
 		then:
 			response.json.signalPathData.name == "mine"
 			response.json.saveData.isSaved == true
+	}
+	
+	void "must be able to save a new SignalPath"() {
+		when:
+			params.name = "new sp"
+			params.json = ssp1.json
+			request.method = "POST"
+			webRequest.actionName = "save"
+			if (controller.beforeInterceptor.action.doCall())
+				controller.save()
+		then:
+			response.json.isSaved
 	}
 	
 	void "must not be able to load others' SignalPath"() {

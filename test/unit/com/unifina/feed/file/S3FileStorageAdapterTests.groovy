@@ -47,6 +47,28 @@ class S3FileStorageAdapterTests {
 		}
     }
 	
+	void testStoreAndDelete() {
+		File file = Files.createTempFile("S3-delete-test",".txt").toFile()
+		
+		try {
+			file.withWriter {out->
+				out.writeLine("Bar")
+			}
+			
+			grailsApplication.config.unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
+			grailsApplication.config.unifina.feed.s3FileStorageAdapter.secretKey = "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"
+			grailsApplication.config.unifina.feed.s3FileStorageAdapter.bucket = "trading-data-us"
+			S3FileStorageAdapter s3 = new S3FileStorageAdapter(grailsApplication.config)
+			
+			s3.store(file, "test/delete-test.txt")
+			s3.delete("test/delete-test.txt")
+		} catch (Exception e) {
+			throw e
+		} finally {
+			file.delete()
+		}
+	}
+	
 	void testOverwrite() {
 		File file = Files.createTempFile("S3-test",".txt").toFile()
 		

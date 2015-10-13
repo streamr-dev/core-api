@@ -16,9 +16,10 @@ class UrlMappings {
 		"/login/$action?"(controller: "login")
 		"/logout/$action?"(controller: "logout")
 	
-		"/webcomponents/index.html"(view:"/webcomponents/index.gsp")
-		"/webcomponents/streamr-client.html"(view:"/webcomponents/streamr-client.gsp")
-		"/webcomponents/streamr-label.html"(view:"/webcomponents/streamr-label.gsp")
-		"/webcomponents/streamr-chart.html"(view:"/webcomponents/streamr-chart.gsp")
+		"/webcomponents/$view"(controller: "webcomponents", action: "index")
+		
+		// API url mappings
+		"/api/stream/create"(controller: "stream", action: "apiCreate")
+		"/api/stream/lookup"(controller: "stream", action: "apiLookup")
 	}
 }

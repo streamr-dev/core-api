@@ -173,6 +173,8 @@ var DashboardItemView = Backbone.View.extend({
 	},
 
 	render: function() {
+		var _this = this
+		
 		this.smallClass = "small-size col-xs-12 col-sm-6 col-md-4 col-lg-3 col-centered"
 		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
 		this.largeClass = "large-size col-xs-12 col-centered"
@@ -206,6 +208,12 @@ var DashboardItemView = Backbone.View.extend({
 		this.$el.find(".title").append(titlebar)
 		this.initSize()
 		this.$el.find(".make-" +this.model.get("size")+ "-btn").parent().addClass("checked")
+		
+		// Pass error events from webcomponents onto the model
+		this.$el.find(".streamr-widget").on('error', function(e) {
+			_this.model.trigger('error', e.originalEvent.detail.error, _this.model.get('title'))
+		})
+		
 		return this
 	},
 
@@ -511,6 +519,11 @@ var DashboardView = Backbone.View.extend({
 		this.model.get("items").on("remove", this.removeDashboardItem, this)
 		this.model.get("items").on("remove", this.updateOrders, this)
 		this.model.get("items").on("orderchange", this.updateOrders,this)
+		
+		// Pass errors on items onto this view
+		this.model.get("items").on("error", function(error, itemTitle) {
+			_this.trigger('error', error, itemTitle)
+		})
 
 		$("body").on("classChange", function() {
 			//This is called after the classChange

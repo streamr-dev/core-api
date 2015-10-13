@@ -1,6 +1,14 @@
 import grails.util.Environment
 
-grails.servlet.version = "3.0"
+
+def env = System.getenv()
+
+def sutHost = env['SUT_HOST'] ?: 'localhost'
+def sutPort = env['SUT_PORT'] ?: '8081'
+
+grails.server.port.http = sutPort
+
+rails.servlet.version = "3.0"
 grails.tomcat.nio = true
 
 grails.project.target.level = 1.7
@@ -16,9 +24,13 @@ def seleniumVersion = "2.41.0"
 grails.project.dependency.resolver = "maven" // or ivy
 
 // grails.project.fork.run = false
+//grails.project.fork = [
+//	run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+//	test: false
+//]
 grails.project.fork = [
 	run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-	test: false
+	test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
 grails.project.dependency.resolution = {
@@ -49,7 +61,7 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        // runtime 'mysql:mysql-connector-java:5.1.21'
+		runtime 'mysql:mysql-connector-java:5.1.20'
 		compile('log4j:log4j:1.2.16')
 		
 		runtime('commons-net:commons-net:3.3')
@@ -69,6 +81,7 @@ grails.project.dependency.resolution = {
 
 		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
 		test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
+		test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
 		test "org.gebish:geb-spock:$gebVersion"
 		
 		runtime('org.twitter4j:twitter4j-core:[4.0,)')
@@ -90,12 +103,12 @@ grails.project.dependency.resolution = {
 		runtime ':hibernate:3.6.10.2'
 			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
-		compile ":cache-headers:1.1.5"
+		compile ":cache-headers:1.1.7"
 			  
 		runtime ":spring-security-core:2.0-RC4"
 		runtime ":jquery:1.11.1"
 		runtime ":jquery-ui:1.10.3"
-		runtime ":resources:1.2.8"
+		runtime ":resources:1.2.14"
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
 		compile ":uglify-js-minified-resources:0.1.1"

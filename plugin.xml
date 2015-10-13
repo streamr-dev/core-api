@@ -6,8 +6,10 @@
   <type>UnifinaCoreGrailsPlugin</type>
   <resources>
     <resource>BootStrap</resource>
+    <resource>UnifinaCoreDefaultConfig</resource>
     <resource>UnifinaCorePluginResources</resource>
     <resource>UnifinaCorePluginUrlMappings</resource>
+    <resource>com.unifina.filters.UnifinaCoreAPIFilters</resource>
     <resource>spring.resources</resource>
     <resource>com.unifina.controller.core.signalpath.CanvasController</resource>
     <resource>com.unifina.controller.core.signalpath.LiveController</resource>
@@ -19,6 +21,7 @@
     <resource>com.unifina.controller.kafka.KafkaController</resource>
     <resource>com.unifina.controller.security.LoginController</resource>
     <resource>com.unifina.controller.security.LogoutController</resource>
+    <resource>com.unifina.controller.security.ProfileController</resource>
     <resource>com.unifina.controller.security.SecurityManagerController</resource>
     <resource>com.unifina.controller.signalpath.ModuleController</resource>
     <resource>com.unifina.controller.signalpath.SavedSignalPathController</resource>

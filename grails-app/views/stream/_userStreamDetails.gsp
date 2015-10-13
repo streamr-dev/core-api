@@ -9,7 +9,7 @@
 		<div class="panel-heading">
 			<span class="panel-title">Fields</span>
 			<div class="panel-heading-controls">
-				<g:link action="configure" id="${stream.id}"><span class="btn btn-sm">Configure Fields</span></g:link>
+				<g:link action="configure" id="${stream.id}"><span class="btn btn-sm" id="configure-fields-button">Configure Fields</span></g:link>
 			</div>
 		</div>
 		<div class="panel-body">

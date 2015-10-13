@@ -168,12 +168,11 @@ class UnifinaSecurityServiceSpec extends Specification {
 		!user
 	}
 	
-	void "granting access to restricted object based on api keys"() {
+	void "granting access to restricted object based supplied user"() {
 		expect:
-		service.canAccess(owned, "apiKey", "apiSecret")
-		!service.canAccess(restricted, "apiKey", "apiSecret")
-		!service.canAccess(owned, "apiKey", "wrong secret")
-		!service.canAccess(restricted, "apiKey", "wrong secret")
+		service.canAccess(owned, me)
+		!service.canAccess(restricted,me)
+		!service.canAccess(owned, anotherUser)
 	}
 
 }

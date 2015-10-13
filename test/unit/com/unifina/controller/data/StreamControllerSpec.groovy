@@ -1,24 +1,24 @@
 package com.unifina.controller.data
 
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
 import com.unifina.service.UnifinaSecurityService
-import com.unifina.utils.IdGenerator;
 
 @TestFor(StreamController)
-@Mock([SecUser, Stream, Feed])
+@Mixin(FiltersUnitTestMixin)
+@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters])
 class StreamControllerSpec extends Specification {
-
-	def springSecurityService = [
-		encodePassword: { pw -> return pw+"-encoded" },
-		currentUser: null
-	]
 	
 	SecUser user
 	
@@ -28,20 +28,39 @@ class StreamControllerSpec extends Specification {
 			streamService(StreamService)
 		}
 		
-		controller.springSecurityService = springSecurityService
-		controller.unifinaSecurityService.springSecurityService = springSecurityService
+		controller.streamService.kafkaService = Mock(KafkaService)
+		
+		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
 		
 		// Users
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
 		user.save(validate:false)
 		
 	}
+	
+	private void mockSpringSecurityService(user) {
+		SpringSecurityService springSecurityService = new SpringSecurityService() {
+			@Override
+			def getCurrentUser() {
+				return user
+			}
+			@Override
+			String encodePassword(String pw) {
+				return pw+"-encoded"
+			}
+		}
+		controller.springSecurityService = springSecurityService
+		controller.unifinaSecurityService.springSecurityService = springSecurityService
+	}
 
 	void "successful stream create json api call"() {
 		when:
 			request.json = [key: user.apiKey, secret: user.apiSecret, name: "Test stream", description: "Test stream", localId: "my-stream-id"]
 			request.method = 'POST'
-			controller.apiCreate()
+			request.requestURI = '/api/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
+			withFilters([action:'apiCreate']) {
+				controller.apiCreate()
+			}
 		then:
 			response.json.success
 			response.json.stream instanceof String
@@ -57,7 +76,10 @@ class StreamControllerSpec extends Specification {
 		when:
 			request.json = [key: user.apiKey, secret: "wrong secret", name: "Test stream", description: "Test stream", localId: "my-stream-id"]
 			request.method = 'POST'
-			controller.apiCreate()
+			request.requestURI = '/api/stream/create'
+			withFilters([action:'apiCreate']) {
+				controller.apiCreate()
+			}
 		then:
 			response.json.success == false
 			response.status == 401
@@ -67,14 +89,17 @@ class StreamControllerSpec extends Specification {
 		when:
 			request.json = [key: user.apiKey, secret: user.apiSecret]
 			request.method = 'POST'
-			controller.apiCreate()
+			request.requestURI = '/api/stream/create'
+			withFilters([action:'apiCreate']) {
+				controller.apiCreate()
+			}
 		then:
 			response.json.success == false
 			response.status == 400
 	}
 	
 	void "stream create form"() {
-		springSecurityService.currentUser = user
+		mockSpringSecurityService(user)
 		
 		when:
 			params.name = "Test stream"
@@ -94,7 +119,10 @@ class StreamControllerSpec extends Specification {
 		when:
 			request.json = [key: user.apiKey, secret: user.apiSecret, localId: stream.localId]
 			request.method = 'POST'
-			controller.apiLookup()
+			request.requestURI = '/api/stream/lookup'
+			withFilters([action:'apiLookup']) {
+				controller.apiLookup()
+			}
 		then:
 			response.status == 200
 			response.json.stream == stream.uuid
@@ -106,7 +134,10 @@ class StreamControllerSpec extends Specification {
 		when:
 			request.json = [key: user.apiKey, secret: user.apiSecret, localId: "wrong local id"]
 			request.method = 'POST'
-			controller.apiLookup()
+			request.requestURI = '/api/stream/lookup'
+			withFilters([action:'apiLookup']) {
+				controller.apiLookup()
+			}
 		then:
 			response.status == 404
 			response.json.success == false

@@ -86,6 +86,7 @@ public abstract class DataSource {
 	protected IFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
 		IFeed feed = createFeed(feedDomain);
 		try {
+			log.debug("subscribeToFeed: subscriber "+subscriber+" subscribing to feed "+feedDomain.getName());
 			feed.subscribe(subscriber);
 		} catch (Exception e) {
 			log.error("Failed to subscribe "+subscriber+" to feed "+feed,e);
@@ -115,9 +116,13 @@ public abstract class DataSource {
 		
 		// Should we instantiate a new feed?
 		if (feed==null) {
+			log.debug("createFeed: Instatiating new feed "+feedClass);
 			feed = feedService.instantiateFeed(domain, isHistoricalFeed, globals);
 			feed.setEventQueue(getEventQueue());
 			feedByClass.put(feedClass, feed);
+		}
+		else {
+			log.debug("createFeed: Feed "+feedClass+" exists, using that instance.");
 		}
 		
 		return feed;

@@ -3,11 +3,14 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
+import org.hibernate.StaleObjectStateException
+
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.security.StreamrApi
 import com.unifina.signalpath.RuntimeResponse
 
 class LiveController {
@@ -16,8 +19,18 @@ class LiveController {
 	def unifinaSecurityService
 	def signalPathService
 	
-	def beforeInterceptor = [action:{unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))},
-		except:['index','list','show','getJson', 'getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request']]
+	def beforeInterceptor = [action:{
+			if (!unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))) {
+				if (request.xhr) 
+					redirect(controller:'login', action:'ajaxDenied')
+				else 
+					redirect(controller:'login', action:'denied')
+					
+				return false
+			}
+			else return true
+		},
+		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -37,30 +50,32 @@ class LiveController {
 		[running: rsps, user:springSecurityService.currentUser]
 	}
 	
+	// Can be accessed anonymously for embedding the show view in iframes (eg. the landing page)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def show() {
+		// Access checked by beforeInterceptor
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		if (!unifinaSecurityService.canAccess(rsp))
-			render(status: 401, text: 'Access denied.')
+		
+		// Ping the running SignalPath to check that it's alive
+		def alive = rsp.state!='running' || signalPathService.ping(rsp, springSecurityService.currentUser)
+		if (!alive)
+			flash.error = message(code:'runningSignalPath.ping.error')
 		
 		[rsp:rsp]
 	}
 	
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def getJson() {
+		// Access checked by beforeInterceptor
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		if (!unifinaSecurityService.canAccess(rsp)) {
-			render(status: 401, text: 'Access denied.')
-		}
-		else {
-			Map signalPathData = JSON.parse(rsp.json)
-			Map result = [:]
-			
-			result.signalPathData = signalPathData
-			result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
-			
-			render result as JSON
-		}
+
+		Map signalPathData = JSON.parse(rsp.json)
+		Map result = [:]
+		
+		result.signalPathData = signalPathData
+		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
+		
+		render result as JSON
 	}
 	
 	@Secured("ROLE_USER")
@@ -87,7 +102,8 @@ class LiveController {
 		RunningSignalPath rsp = ui.runningSignalPath
 		
 		if (!unifinaSecurityService.canAccess(rsp)) {
-			render(status: 401, text: 'Access denied.')
+			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")
+			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		}
 		else {
 			Map signalPathData = JSON.parse(rsp.json)
@@ -100,38 +116,47 @@ class LiveController {
 		}
 	}
 	
+	@StreamrApi(requiresAuthentication = false)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def request() {
-		response.setHeader('Access-Control-Allow-Origin', '*')
-		
 		RunningSignalPath rsp
 		UiChannel ui = null
 		Integer hash = null
+		SecUser user = request.apiUser ?: springSecurityService.currentUser
+		
+		def json = request.JSON
 		
 		/**
 		 * Provide as parameter:
 		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
 		 * 2) RSP.id for messages intended for the RSP itself
 		 */
-		if (params.channel) {
-			ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
+		if (json?.channel) {
+			ui = UiChannel.findById(json?.channel, [fetch: [runningSignalPath: 'join']])
 			rsp = ui.runningSignalPath
 			if (ui.hash)
 				hash = Integer.parseInt(ui.hash)
 		}
-		else if (params.id) {
-			rsp = RunningSignalPath.get(params.id)
-			if (params.hash)
-				hash = Integer.parseInt(params.hash)
-		}
-		
-		if (!unifinaSecurityService.canAccess(rsp, params.auth)) {
-			render(status: 401, text: 'Access denied.')
+		else if (json?.id) {
+			rsp = RunningSignalPath.get(json?.id)
+			if (json?.hash != null)
+				hash = json?.hash
 		}
 		else {
-			Map msg = JSON.parse(params.msg)
-			SecUser user = springSecurityService.currentUser ?: (params.auth ? SecUser.findByApiKey(params.auth) : null)
-			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, servletContext, params.local ? true : false)
+			log.warn("request: no channel and no id given. Request json: $json")
+			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
+		}
+		
+		if (!unifinaSecurityService.canAccess(rsp, user)) {
+			log.warn("request: access to rsp ${rsp?.id} denied for user ${user?.id}")
+			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
+		}
+		else {
+			Map msg = json?.msg
+			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, json?.local ? true : false)
+			
+			log.info("request: responding with $rr")
+			
 			if (rr.containsKey("success") && rr.containsKey("response"))
 				render rr as JSON
 			else {
@@ -158,13 +183,12 @@ class LiveController {
 	}
 	
 	@Secured("ROLE_USER")
-	def ajaxDelete() {
+	def ajaxStop() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		
 		Map r
 		if (rsp && signalPathService.stopLocal(rsp)) {
-			r = [success:true, id:rsp.id, status:"Aborting"]
-			rsp.delete(flush:true, failOnError:true)
+			r = [success:true, id:rsp.id, status:"Stopped"]
 		}
 		else r = [success:false, id:params.id, status:"Running canvas not found"]
 		
@@ -183,7 +207,15 @@ class LiveController {
 	def stop() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 		
-		Map result = signalPathService.runtimeRequest([type:"stopRequest"], rsp, null, springSecurityService.currentUser, servletContext)
+		RuntimeResponse result = signalPathService.stopRemote(rsp, springSecurityService.currentUser)
+		if (!result.isSuccess()) {
+			log.error("stop: RSP $rsp.id could not be stopped due to: $result.error, marking RSP as stopped")
+			flash.error = message(code:'runningSignalPath.stop.error')
+			signalPathService.updateState(rsp.runner, "stopped")
+		}
+		else {
+			flash.message = message(code:'runningSignalPath.stopped')
+		}
 		redirect(action:"show", id:rsp.id)
 	}
 	

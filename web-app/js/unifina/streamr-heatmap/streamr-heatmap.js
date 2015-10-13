@@ -41,7 +41,7 @@
 		this.data = []
 
 		var baseLayer = L.tileLayer(
-		  'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+		  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 		    attribution: '© OpenStreetMap contributors, Streamr',
 		    minZoom: this.options.minZoom,
 		    maxZoom: this.options.maxZoom

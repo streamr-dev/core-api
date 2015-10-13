@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+
 import com.unifina.feed.util.RawMessageIterator;
 import com.unifina.kafkaclient.UnifinaKafkaMessageFactory;
 
@@ -19,7 +21,11 @@ public class KafkaHistoricalIterator implements Iterator<Object> {
 	private ByteBuffer raw;
 	private byte[] arr;
 	
+	private static final Logger log = Logger.getLogger(KafkaHistoricalIterator.class);
+	long counter = 0;
+	
 	public KafkaHistoricalIterator(InputStream inputStream, String topic) throws IOException {
+		log.debug("Iterator created for "+topic);
 		rawIterator = new RawMessageIterator(inputStream, 4, 65536, ByteOrder.BIG_ENDIAN);
 		parser = new KafkaMessageParser();
 		this.topic = topic;
@@ -39,6 +45,7 @@ public class KafkaHistoricalIterator implements Iterator<Object> {
 
 		arr = new byte[msgLength];
 		raw.get(arr);
+		counter++;
 		return parser.parse(UnifinaKafkaMessageFactory.parse(topic, new byte[0], arr));
 	}
 
@@ -49,6 +56,7 @@ public class KafkaHistoricalIterator implements Iterator<Object> {
 
 	public void close() throws IOException {
 		rawIterator.close();
+		log.debug("Iterator closed for "+topic+". Read "+counter+" messages.");
 	}
 
 }
