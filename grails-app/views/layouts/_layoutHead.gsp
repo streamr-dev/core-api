@@ -1,6 +1,6 @@
 <head>
     <title><g:layoutTitle default="Unifina" /></title>
-    <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />
+<%--    <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />--%>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -12,7 +12,7 @@
     
     <script>
     	Streamr = {}
-		Streamr.projectWebroot = '${createLink(uri:"/")}'
+		Streamr.projectWebroot = '${createLink(uri:"/", absolute:true)}'
 		Streamr.controller = '${controllerName}'
 		Streamr.action = '${actionName}'
 		<sec:ifLoggedIn>

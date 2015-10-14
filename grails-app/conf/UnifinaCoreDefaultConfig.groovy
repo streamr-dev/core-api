@@ -55,6 +55,9 @@
 		 grails.resources.processing.excludes = ['**/*.js']
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
+	 production {
+		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
+	 }
  }
  
  environments {
@@ -173,10 +176,10 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "dev.unifina:8889"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev.unifina:8889"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "api.streamr.com"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
 	}
 }
 
@@ -186,7 +189,7 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.unifina:8888"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "http://api.streamr.com"
+		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
 	}
 }
 
@@ -203,8 +206,8 @@ unifina.kafka.request.required.acks = "0"
 unifina.kafka.group.id = "streamr"
 environments {
 	production {
-		unifina.kafka.metadata.broker.list = "ip-10-231-166-179.ec2.internal:9092"
-		unifina.kafka.zookeeper.connect = "ip-10-231-166-179.ec2.internal:2181"
+		unifina.kafka.metadata.broker.list = "ip-10-16-207-139.ec2.internal:9092"
+		unifina.kafka.zookeeper.connect = "ip-10-16-207-139.ec2.internal:2181"
 	}
 }
 

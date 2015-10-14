@@ -39,7 +39,7 @@ class StreamController {
 			}
 			else return true
 		},
-		except:['list','search','create']]
+		except:['list','search','create','apiCreate','apiLookup']]
 	
 	def list() {
 		List<Stream> streams = Stream.findAllByUser(springSecurityService.currentUser)
@@ -123,6 +123,21 @@ class StreamController {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
 		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+	}
+	
+	def delete() {
+		// Access checked by beforeInterceptor
+		Stream streamInstance = Stream.get(params.id)
+		def name = streamInstance.name
+		def streamId = streamInstance.uuid
+		try {
+			streamService.deleteStream(streamInstance)
+			flash.message = "The stream $name has been deleted."
+			redirect(action:"list")
+		} catch (Exception e) {
+			flash.error = "An error occurred while deleting the stream!"
+			redirect(action:"show", id:streamInstance.id)
+		}
 	}
 	
 	def fields() {
