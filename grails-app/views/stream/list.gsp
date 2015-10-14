@@ -17,11 +17,11 @@
 		<ui:panel title="${message(code:"stream.list.label")}">
 			<ui:clickableTable>
 			    <div class="thead">
-			        <div class="tr">
+			        <a class="tr">
 			        	<span class="th"><g:message code="stream.name.label" /></span>
 			        	<span class="th"><g:message code="stream.type.label" /></span>
 			        	<span class="th"><g:message code="stream.description.label" /></span>
-			        </div>
+			        </a>
 			    </div>
 			    <div class="tbody">
 				    <g:each in="${streams}" var="stream">

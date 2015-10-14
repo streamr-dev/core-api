@@ -31,12 +31,12 @@
 		<div class="panel-body">
 			<ui:clickableTable>
 				<div class="thead">
-					<div class="tr">
+					<a class="tr">
 						<span class="th"><g:message
 								code="runningSignalPath.name.label" /></span> <span class="th"><g:message
 								code="runningSignalPath.state.label" /></span> <span class="th"><g:message
 								code="runningSignalPath.created.label" /></span>
-					</div>
+					</a>
 				</div>
 				<div class="tbody">
 					<g:each in="${running}" var="rsp">

@@ -26,11 +26,11 @@
             
 				<ui:clickableTable>
 				    <div class="thead">
-				        <div class="tr">
+				        <a class="tr">
 				            <span class="th">Name</span>
 				            <span class="th">Created</span>
 				            <span class="th">Modified</span>
-				        </div>
+				        </a>
 				    </div>
 				    <div class="tbody">
 					    <g:each in="${dashboards}" status="i" var="dashboard">
