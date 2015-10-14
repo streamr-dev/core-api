@@ -58,21 +58,6 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "title changes"
 		$("#dashboard-view .dashboarditem .titlebar-clickable", text:"New title").displayed
 		
-		// Delete the module
-		when: "clicked delete-button"
-		$("#dashboard-view .dashboarditem .delete-btn").click()
-		then: "the item should be removed"
-		!$("#dashboard-view .dashboarditem").displayed
-		
-		// Add a new module
-		when: "added and edited"
-		$(".uichannel-title", 0).click()
-		$("#dashboard-view .dashboarditem .titlebar-edit").firstElement().clear()
-		$("#dashboard-view .dashboarditem .titlebar-edit") << "New title"
-		nameInput.click()
-		then: "the new module is visible"
-		$("#dashboard-view .dashboarditem .titlebar-clickable", text:"New title").displayed
-		
 		when: "the dashboard name changed"
 		nameInput.firstElement().clear()
 		nameInput << dashboardName + "2"
@@ -107,7 +92,7 @@ class DashboardSpec extends LoginTester1Spec {
 		waitFor { js.exec("return \$('#main-menu').width()") > 0 }
 		js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
 		
-		//Deleting the dashboard
+		// Click to delete the dashboard without accepting it
 		when: "clicked the delete-button"
 		deleteButton.click()
 		then: "confirmation should appear"
@@ -120,7 +105,6 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "confirmation is not visible anymore"
 		waitFor { !($(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed) }
 		
-//<--   replace with wait(44) etc.		
 		when: "went to the dashboard list page"
 		to DashboardListPage
 		then: "the new dashboard is visible"
@@ -137,8 +121,15 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "the dashboard should be in edit-mode"
 		waitFor { js.exec("return \$('#main-menu').width()") > 0 }
 		js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
-//-->			
 		
+		
+		// Delete the module
+		when: "clicked delete-button"
+		$("#dashboard-view .dashboarditem .delete-btn").click()
+		then: "the item should be removed"
+		!$("#dashboard-view .dashboarditem").displayed
+		
+		// Delete the dashboard
 		when: "clicked the delete button"
 		deleteButton.click()
 		then: "confirmation should appear"

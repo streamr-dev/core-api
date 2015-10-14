@@ -87,7 +87,7 @@
 <script id="button-template" type="text/template">
     <div class="menu-content">
         <button class='save-button btn btn-block btn-primary' title='Save dashboard'>Save</button>
-        <form method="post" role="form" id="toolbarForm">
+        <form method="post" role="form" id="deleteDashboardForm">
             <g:hiddenField name="id" value="${params.id}" />
             <button id='deleteButton' class='delete-button btn btn-block btn-default confirm' data-action="${createLink(action:'delete')}" data-confirm="Really delete dashboard {{ name }}?" title: 'Delete dashboard'>Delete</button>
         </form>

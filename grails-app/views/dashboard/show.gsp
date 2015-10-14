@@ -42,8 +42,12 @@
 							el: $("#sidebar-view"),
 							menuToggle: $("#main-menu-toggle")
 						})
+						// we dont want to accept exiting the page when we have just removed the whole dashboard
+						$("#deleteDashboardForm").on("submit", function(){
+							$(window).off("beforeunload")
+						})
 					})
-					$(window).bind('beforeunload', function(){
+					$(window).on('beforeunload', function(){
 						if(!dashboard.saved)
 							return 'The dashboard has changes which are not saved'
 					});
