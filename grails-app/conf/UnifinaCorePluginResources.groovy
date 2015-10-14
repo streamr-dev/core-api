@@ -166,9 +166,6 @@ modules = {
 		dependsOn 'remote-tabs'
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
 	}
-	'clickable-table' {
-		resource url:[dir:'js/unifina/clickable-table', file:'clickable-table.js', plugin:'unifina-core']
-	}
 	'module-browser' {
 		dependsOn 'mathjax, bootstrap, underscore, streamr, pnotify'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
