@@ -78,7 +78,7 @@ modules = {
 		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
 	}
 	"socket-io" {
-		resource url:[dir:'js/socket.io-1.2.1', file:'socket.io-1.2.1.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/socket.io-1.3.7', file:'socket.io-1.3.7.min.js', plugin: 'unifina-core']
 	}
 	hotkeys {
 		dependsOn 'jquery'
