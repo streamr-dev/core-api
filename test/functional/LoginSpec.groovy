@@ -14,7 +14,7 @@ class LoginSpec extends GebReportingSpec {
 		loginButton.click()
 		then: "should not go forward"
 		at LoginPage
-		$("p.login-failed-message", text:"Sorry, we were not able to find a user with that username and password.").displayed
+		$("p.login-failed-message").displayed
 	}
 	
 	def "cannot log in with false information"() {
@@ -25,7 +25,7 @@ class LoginSpec extends GebReportingSpec {
 		loginButton.click()
 		then: "should not go forward"
 		at LoginPage
-		$("p.login-failed-message", text:"Sorry, we were not able to find a user with that username and password.").displayed
+		$("p.login-failed-message").displayed
 	}
 	
 	def "login without remember me works"(){
@@ -46,7 +46,7 @@ class LoginSpec extends GebReportingSpec {
 		to LoginPage
 		username = "tester1@streamr.com"
 		password = "tester1TESTER1"
-		$(".checkbox-inline").click()
+		rememberMeCheckbox.click()
 		loginButton.click()
 		waitFor {
 			at CanvasPage
