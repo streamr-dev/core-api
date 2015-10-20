@@ -27,7 +27,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		when: "Go to StreamListPage"
 		to StreamListPage
 		then: "The previously created testing stream can be found"
-		waitFor { $("table td", text:contains("CSVImporterFuncSpec")).displayed }
+		streamExists("CSVImporterFuncSpec")
 		
 		when: "Stream is opened"
 		openStream("CSVImporterFuncSpec")
@@ -56,7 +56,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		to StreamListPage
 		
 		when: "The previously created testing stream is clicked to open"
-		$("table td", text:contains("CSVImporterFuncSpec")).click()
+		openStream("CSVImporterFuncSpec")
 		then: "Go to StreamShowPage"
 		waitFor { at StreamShowPage }
 		
