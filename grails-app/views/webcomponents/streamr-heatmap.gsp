@@ -21,7 +21,7 @@
 				// hint that center is an array
 				center: []
 			},
-			ready: function() {
+			ready: function() {			
 				var _this = this
 				this.bindEvents(_this.$.container)
 
