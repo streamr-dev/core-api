@@ -16,22 +16,22 @@
 		
 		<ui:panel title="${message(code:"stream.list.label")}">
 			<ui:clickableTable>
-			    <thead>
-			        <tr>
-			        	<th><g:message code="stream.name.label" /></th>
-			        	<th><g:message code="stream.type.label" /></th>
-			        	<th><g:message code="stream.description.label" /></th>
-			        </tr>
-			    </thead>
-			    <tbody>
+			    <div class="thead">
+			        <a class="tr">
+			        	<span class="th"><g:message code="stream.name.label" /></span>
+			        	<span class="th"><g:message code="stream.type.label" /></span>
+			        	<span class="th"><g:message code="stream.description.label" /></span>
+			        </a>
+			    </div>
+			    <div class="tbody">
 				    <g:each in="${streams}" var="stream">
 				        <ui:clickableRow link="${ createLink(action:'show', id: stream.id) }" id="${stream.id }">					        
-				            <td>${fieldValue(bean: stream, field: "name")}</td>
-				            <td>${fieldValue(bean: stream.feed, field: "name")}</td>
-				            <td>${fieldValue(bean: stream, field: "description")}</td>
+				            <div class="td">${fieldValue(bean: stream, field: "name")}</div>
+				            <div class="td">${fieldValue(bean: stream.feed, field: "name")}</div>
+				            <div class="td">${fieldValue(bean: stream, field: "description")}</div>
 						</ui:clickableRow>
 					</g:each>
-				</tbody>
+				</div>
 			</ui:clickableTable>
 		</ui:panel>
 		
