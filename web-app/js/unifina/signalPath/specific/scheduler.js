@@ -74,12 +74,12 @@ var RuleCollection = Backbone.Collection.extend({
 
 var RuleView = Backbone.View.extend({
 	initialize: function(){
-		this.template = _.template($('#rule-view-template').html()),
-		this.yearTemplate = _.template($('#rule-view-year-template').html()),
-		this.monthTemplate = _.template($('#rule-view-month-template').html()),
-		this.weekTemplate = _.template($("#rule-view-week-template").html()),
-		this.dayTemplate = _.template($('#rule-view-day-template').html()),
-		this.hourTemplate = _.template($('#rule-view-hour-template').html())
+		this.template = _.template(Templates['rule-view-template']),
+		this.yearTemplate = _.template(Templates['rule-view-year-template']),
+		this.monthTemplate = _.template(Templates['rule-view-month-template']),
+		this.weekTemplate = _.template(Templates["rule-view-week-template"]),
+		this.dayTemplate = _.template(Templates['rule-view-day-template']),
+		this.hourTemplate = _.template(Templates['rule-view-hour-template'])
 
 		this.model.view = this
 	},
@@ -236,51 +236,30 @@ var Scheduler = Backbone.View.extend({
 	initialize: function(options){
 		var _this = this
 
-		function templatesLoaded() {
-			_this.template = _.template($('#scheduler-template').html())
-			_this.footerTemplate = _.template($("#scheduler-footer-template").html())
-			_this.collection = new RuleCollection()
+		_this.template = _.template(Templates['scheduler-template'])
+		_this.footerTemplate = _.template(Templates["scheduler-footer-template"])
+		_this.collection = new RuleCollection()
 
-			_this.collection.on("Error", function(msg){
-				_this.trigger("Error", msg)
-			})
+		_this.collection.on("Error", function(msg){
+			_this.trigger("Error", msg)
+		})
 
-			_this.defaultValue = 0
+		_this.defaultValue = 0
 
-			if(options){
-				if(options.footerEl)
-					_this.footerEl = $(options.footerEl)
-				if(options.schedule){
-					_.each(options.schedule.rules, function(r){
-						var rule = new Rule(r)
-						_this.collection.add(rule)
-					})
-					_this.defaultValue = options.schedule.defaultValue
-				}
-			}
-
-			_this.render()
-			_this.bindEvents()
-			_this.ready = true
-			_this.trigger('ready')
-		}
-
-		// Load templates if they are not loaded
-		if ($('#scheduler-template').length) {
-			templatesLoaded()
-		}
-		else {
-			Streamr.getResourceUrl('js/unifina/signalPath/specific','scheduler-template.html',false,function(url) {
-				$.ajax({
-					url: url,
-					dataType: 'text',
-					success: function(templates) {
-						$("body").append(templates)
-						templatesLoaded()
-					}
+		if(options){
+			if(options.footerEl)
+				_this.footerEl = $(options.footerEl)
+			if(options.schedule){
+				_.each(options.schedule.rules, function(r){
+					var rule = new Rule(r)
+					_this.collection.add(rule)
 				})
-			})
+				_this.defaultValue = options.schedule.defaultValue
+			}
 		}
+
+		_this.render()
+		_this.bindEvents()
 	},
 
 	render: function(){
@@ -400,6 +379,227 @@ var Scheduler = Backbone.View.extend({
 		})
 	}
 })
+
+var Templates = {}
+
+Templates["scheduler-template"] = ''+
+	'<ol class="table scheduler-table">'+
+		
+	'</ol>';
+
+
+Templates["scheduler-footer-template"] = ''+
+	'<div class="setup col-xs-12">'+
+		'<div class="add-rule">'+
+			'<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>'+
+		'</div>'+
+		'<div class="default-value">'+
+			'<span>Default value:</span><input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>'+
+		'</div>'+
+	'</div>';
+
+Templates["rule-view-template"] = ''+
+	'<li class="rule">'+
+		'<div class="td">Every</div>'+
+		'<div class="td interval-type">'+
+			'<select name="interval-type" class="form-control input-sm">'+
+				'<option value="0">hour</option>'+
+				'<option value="1">day</option>'+
+				'<option value="2">week</option>'+
+				'<option value="3">month</option>'+
+				'<option value="4">year</option>'+
+			'</select>'+
+		'</div>'+
+		'<div class="td date"></div>'+
+		'<div class="td value">'+
+			'Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>'+
+		'</div>'+
+		'<div class="td move">'+
+			'<div class="move-up-btn" title="Move up">'+
+				'<i class=" fa fa-caret-up"></i>'+
+			'</div>'+
+			'<div class="move-down-btn" title="Move down">'+
+				'<i class=" fa fa-caret-down"></i>'+
+			'</div>'+
+		'</div>'+
+		'<div class="td delete">'+
+			'<i class="delete-btn fa fa-trash-o" title="Remove"></i>'+
+		'</div>'+
+	'</li>';
+
+Templates["rule-view-year-template"] = ''+
+		'the'+
+		'<select name="day" class="form-control input-sm">'+
+			'{[ _.each(_.range(31), function(i){ ]}'+
+				'<option value="{{i+1}}">'+
+					'{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} '+
+						'{{ i+1 + "st" }}'+
+					'{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}'+
+						'{{ i+1 + "nd" }}'+
+					'{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}'+
+						'{{ i+1 + "rd" }}'+
+					'{[ } else { ]}'+
+						'{{ i+1 + "th" }}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		'of'+
+		'<select name="month" class="form-control input-sm">'+
+			'<option value="1">January</option>'+
+			'<option value="2">February</option>'+
+			'<option value="3">March</option>'+
+			'<option value="4">April</option>'+
+			'<option value="5">May</option>'+
+			'<option value="6">June</option>'+
+			'<option value="7">July</option>'+
+			'<option value="8">August</option>'+
+			'<option value="9">September</option>'+
+			'<option value="10">October</option>'+
+			'<option value="11">November</option>'+
+			'<option value="12">December</option>'+
+		'</select>'+
+		'at'+
+		'<select name="hour" class="form-control input-sm">'+
+			'{[ _.each(_.range(24), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		':'+
+		'<select name="minute" class="form-control input-sm">'+
+			'{[ _.each(_.range(60), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>';
+
+Templates["rule-view-month-template"] = ''+
+		'the'+
+		'<select name="day" class="form-control input-sm">'+
+			'{[ _.each(_.range(31), function(i){ ]}'+
+				'<option value="{{i+1}}">'+
+					'{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} '+
+						'{{ i+1 + "st" }}'+
+					'{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}'+
+						'{{ i+1 + "nd" }}'+
+					'{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}'+
+						'{{ i+1 + "rd" }}'+
+					'{[ } else { ]}'+
+						'{{ i+1 + "th" }}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		'at'+
+		'<select name="hour" class="form-control input-sm">'+
+			'{[ _.each(_.range(24), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		':'+
+		'<select name="minute" class="form-control input-sm">'+
+			'{[ _.each(_.range(60), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>';
+
+Templates["rule-view-week-template"] = ''+
+		'<select name="weekday" class="form-control input-sm">'+
+			'<option value="2">Monday</option>'+
+			'<option value="3">Tuesday</option>'+
+			'<option value="4">Wednesday</option>'+
+			'<option value="5">Thursday</option>'+
+			'<option value="6">Friday</option>'+
+			'<option value="7">Saturday</option>'+
+			'<option value="1">Sunday</option>'+
+		'</select>'+
+		'at'+
+		'<select name="hour" class="form-control input-sm">'+
+			'{[ _.each(_.range(24), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		':'+
+		'<select name="minute" class="form-control input-sm">'+
+			'{[ _.each(_.range(60), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>';
+
+Templates["rule-view-day-template"] = ''+ 
+		'<select name="hour" class="form-control input-sm">'+
+			'{[ _.each(_.range(24), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		':'+
+		'<select name="minute" class="form-control input-sm">'+
+			'{[ _.each(_.range(60), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>';
+
+Templates["rule-view-hour-template"] = ''+
+		'<select name="minute" class="form-control input-sm">'+
+			'{[ _.each(_.range(60), function(i){ ]}'+
+				'<option value="{{i}}">'+
+					'{[ if(i<10){ ]} '+
+						'0{{i}}'+
+					'{[ } else { ]}'+
+						'{{i}}'+
+					'{[ } ]}'+
+				'</option>'+
+			'{[ }); ]}'+
+		'</select>'+
+		'minutes from the beginning of the hour';
+
 
 exports.Scheduler = Scheduler
 

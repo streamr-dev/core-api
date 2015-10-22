@@ -32,13 +32,8 @@ SignalPath.SchedulerModule = function(data,canvas,prot) {
 		prot.scheduler.on("update", function(){
 			prot.redraw()
 		})
-		prot.scheduler.on('ready', function() {
-			if (pendingMessage)
-				pub.receiveResponse(pendingMessage)
-			pendingMessage = undefined
-
-			prot.redraw()
-		})
+		
+		prot.redraw()
 	}
 	prot.createDiv = createDiv;
 

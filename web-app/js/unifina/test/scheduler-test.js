@@ -22,8 +22,6 @@ describe('scheduler', function() {
 		Backbone.$ = $
 		global.jQuery = $
 
-
-		templates = fs.readFileSync('web-app/js/unifina/signalPath/specific/scheduler-template.html','utf8')
 		assert.equal($("body").length, 1)
 
 		s = require('../signalPath/specific/scheduler')
@@ -37,42 +35,9 @@ describe('scheduler', function() {
 	})
 	beforeEach(function(){
 		$("body").append($("<div id='scheduler'></div><div id='footer'></div>"))
-		$("body").append(templates)
 	})
 	afterEach(function(){
 		$("body").empty()
-	})
-
-	it('must load templates asynchronously if they are not found on page', function(done) {
-		$("#scheduler-template").remove()
-
-		global.Streamr = {
-			getResourceUrl: function(dir,file,absolute,cb) {
-				setTimeout(function() { 
-					cb('testUrl') 
-				})
-			}
-		}
-		var ajax = $.ajax
-		$.ajax = function(params) {
-			assert.equal(params.url, 'testUrl')
-			$.ajax = ajax
-			setTimeout(function() {
-				params.success(templates)
-			})
-		}
-
-		scheduler = new s.Scheduler({
-			el: "#scheduler",
-			footerEl: "#footer"
-		})
-		// Must fire ready event when templates are loaded
-		scheduler.on('ready', function() {
-			// Loaded templates must have been inserted to page
-			assert($("#scheduler-template").length>0)
-			assert(scheduler.ready)
-			done()
-		})
 	})
 
 	describe('rendering', function(){
@@ -415,7 +380,6 @@ describe('scheduler', function() {
 		global.Backbone = undefined
 		Backbone.$ = undefined
 		global.jQuery = undefined
-		templates = undefined
 		s = undefined
 		select = undefined
 	})
