@@ -27,10 +27,15 @@
 				<label id="rememberMeCheckbox" class="checkbox-inline" style="margin-top:15px;width:100%;">
 					<input type="checkbox" class="px" name="_spring_security_remember_me">
 					<span class="lbl">Remember me</span>
+		</g:if>
+		<g:else>
+			<div>
+				<label style="margin-top:15px;width:100%;">
+		</g:else>
+		
 					<g:link controller="register" action="forgotPassword" class="forgot" style="float:right;">Forgot password?</g:link>
 				</label>
 			</div>
-		</g:if>
 	</form>
 	<!-- / Form -->
 

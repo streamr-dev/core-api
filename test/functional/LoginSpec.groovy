@@ -44,6 +44,9 @@ class LoginSpec extends GebReportingSpec {
 	def "log in with checking remember me"(){
 		when: "logged in and clicked remember me"
 		to LoginPage
+		then: "the remember me checkbox is visible"
+		rememberMeCheckbox.displayed
+		when: "logged in and checked the remember me"
 		username = "tester1@streamr.com"
 		password = "tester1TESTER1"
 		rememberMeCheckbox.click()
@@ -52,7 +55,7 @@ class LoginSpec extends GebReportingSpec {
 			at CanvasPage
 		}
 		cookieValue = driver.manage().getCookieNamed(cookieName).getValue()
-		then:
+		then: "at canvaspage" 
 		at CanvasPage
 	}
 	
