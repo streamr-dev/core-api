@@ -232,6 +232,7 @@ environments {
 
 streamr.user.defaultFeeds = [7]
 streamr.user.defaultModulePackages = [1]
+
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
 
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'
@@ -287,3 +288,23 @@ grails {
 	}
 }
 remove this line */
+
+// emails
+grails {
+	mail {
+		host = "smtp.gmail.com"
+		port = 465
+		username = "contact@algocanvas.com"
+		password = 'wss;^w38WN<G)$$'
+		props = ["mail.smtp.auth":"true",
+			   "mail.smtp.socketFactory.port":"465",
+			   "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+			   "mail.smtp.socketFactory.fallback":"false"]
+	}
+}
+
+unifina.email.sender = "contact@streamr.com"
+unifina.email.signup.subject = "Thanks for signing up to Streamr"
+unifina.email.invite.subject = "Invitation to Streamr"
+unifina.email.welcome.subject = "Welcome to Streamr"
+unifina.email.feedback.recipient = "contact@streamr.com"
