@@ -9,6 +9,8 @@
 	<script>
 		Polymer('streamr-label',{
 			ready: function() {
+				this.bindEvents(this.$.container)
+
 				var _this = this
 				var trySubscribe = function() {
 					if (_this.$.client.streamrClient) {

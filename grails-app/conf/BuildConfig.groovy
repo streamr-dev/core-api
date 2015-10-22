@@ -81,6 +81,7 @@ grails.project.dependency.resolution = {
 
 		test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
 		test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
+		test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
 		test "org.gebish:geb-spock:$gebVersion"
 		
 		runtime('org.twitter4j:twitter4j-core:[4.0,)')
@@ -102,12 +103,12 @@ grails.project.dependency.resolution = {
 		runtime ':hibernate:3.6.10.2'
 			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
-		compile ":cache-headers:1.1.5"
+		compile ":cache-headers:1.1.7"
 			  
 		runtime ":spring-security-core:2.0-RC4"
 		runtime ":jquery:1.11.1"
 		runtime ":jquery-ui:1.10.3"
-		runtime ":resources:1.2.8"
+		runtime ":resources:1.2.14"
 		runtime ":cached-resources:1.0"
 		runtime ":zipped-resources:1.0"
 		compile ":uglify-js-minified-resources:0.1.1"

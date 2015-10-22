@@ -257,11 +257,6 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		return obj.getClass().equals(this.getClass());
-	}
-	
-	@Override
 	public boolean startCatchup() {
 		log.info("Starting catchup");
 		catchup = hub.startCatchup(this);

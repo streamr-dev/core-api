@@ -109,10 +109,10 @@ public class LiveSpec extends LoginTester1Spec {
 			to LiveListPage
 		then: "The just created live canvas can be found"
 			waitFor { at LiveListPage }
-			$("table td", text:liveName).displayed
+			$(".table .td", text:liveName).displayed
 		
 		when: "Clicking to open the just created live canvas"
-			$("table td", text:liveName).click()
+			$(".table .td", text:liveName).click()
 		then: "The LiveShowPage is opened"
 			waitFor { at LiveShowPage }
 			stopButton.displayed
@@ -138,7 +138,7 @@ public class LiveSpec extends LoginTester1Spec {
 			acceptConfirmation()
 		then: "LiveListPage is opened, and the just created (and deleted) live canvas is not displayed anymore"
 			waitFor{ at LiveListPage }
-			waitFor { !($("table td", text:liveName).displayed) }
+			waitFor { !($(".table .td", text:liveName).displayed) }
 	}
 	
 	def "an alert must be shown if running canvas cannot be pinged"() {
@@ -146,7 +146,7 @@ public class LiveSpec extends LoginTester1Spec {
 		waitFor{ at LiveListPage }
 		
 		when: "selecting running canvas"
-			$("table td", text:"LiveSpec dead").click()
+			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at LiveShowPage}
 			waitFor {$(".alert.alert-danger").displayed}
@@ -157,7 +157,7 @@ public class LiveSpec extends LoginTester1Spec {
 		waitFor{ at LiveListPage }
 		
 		when: "selecting running canvas"
-			$("table td", text:"LiveSpec stopped").click()
+			$(".table .td", text:"LiveSpec stopped").click()
 		then: "navigate to show page"
 			waitFor {at LiveShowPage}
 			!js.exec("return SignalPath.getConnection().isConnected()")
@@ -168,7 +168,7 @@ public class LiveSpec extends LoginTester1Spec {
 		waitFor{ at LiveListPage }
 		
 		when: "selecting running canvas"
-			$("table td", text:"LiveSpec dead").click()
+			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at LiveShowPage}
 		

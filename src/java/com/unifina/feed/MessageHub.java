@@ -62,6 +62,10 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 		return parser;
 	}
 	
+	public void quit() {
+		quit = true;
+	}
+	
 	@Override
 	public void run() {
 		while (!quit) {
