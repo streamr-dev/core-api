@@ -17,7 +17,6 @@
 			$(document).ready(function() {
 				var dashboard
 
-
 				$.getJSON("${createLink(controller:'dashboard', action:'getJson', id:dashboard.id)}", {}, function(dbJson) {
 					dashboard = new Dashboard(dbJson)
 					var dashboardView = new DashboardView({
@@ -34,11 +33,6 @@
 					})
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
-
-				    dashboard.get("items").on("remove", function (model) {
-						var client = document.getElementById("client")
-						client.streamrClient.unsubscribe(model.get("uiChannel").id)
-					})
 					
 					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
 						var sidebar = new SidebarView({
@@ -48,8 +42,12 @@
 							el: $("#sidebar-view"),
 							menuToggle: $("#main-menu-toggle")
 						})
+						// we dont want to accept exiting the page when we have just removed the whole dashboard
+						$("#deleteDashboardForm").on("submit", function(){
+							$(window).off("beforeunload")
+						})
 					})
-					$(window).bind('beforeunload', function(){
+					$(window).on('beforeunload', function(){
 						if(!dashboard.saved)
 							return 'The dashboard has changes which are not saved'
 					});

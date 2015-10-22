@@ -5,6 +5,11 @@
         <r:require module="dropzone"/>
 		<r:require module="toolbar"/>
 		<r:require module="bootstrap-datepicker"/>
+		<r:script>
+			$(document).ready(function() {
+		 		new Toolbar($("#stream-delete-form"))
+		 	})
+		</r:script>
     </head>
     <body class="stream-show">
     	<ui:breadcrumb>
@@ -20,7 +25,11 @@
 					<div class="panel-heading">
 						<span class="panel-title">${message(code:"stream.show.label", args:[stream.name])}</span>
 						<div class="panel-heading-controls">
-							<g:link action="edit" id="${stream.id}"><span class="btn btn-sm">Edit</span></g:link>
+							<g:link action="edit" id="${stream.id}"><span class="btn btn-sm">Edit info</span></g:link>
+							<form id="stream-delete-form">
+								<g:hiddenField name="id" value="${ stream.id }" />
+								<button id="delete-stream-button" data-action="${ createLink(action:'delete') }" data-confirm="Are you sure you want to delete the stream?" class="btn btn-danger btn-sm confirm">Delete stream</button>
+							</form>
 						</div>
 					</div>
 					<div class="panel-body">

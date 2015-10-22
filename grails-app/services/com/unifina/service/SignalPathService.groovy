@@ -381,7 +381,7 @@ class SignalPathService {
 					return new RuntimeResponse(true, [request:request])
 				}
 				else if (request.type=="ping") {
-					if (!request.isAuthenticated())
+					if (!rsp.shared && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
 					
 					return new RuntimeResponse(true, [request:request])

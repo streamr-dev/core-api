@@ -20,13 +20,7 @@ This plugin is used in the app-level projects `unifina-trading` and `streamr-web
 
 ## Setting up the development environment
 
-- Install the Grails version required by the project (currently 2.3.7)
-- Add the Grails `bin` directory to `PATH`
-- You may also want to install `GGTS` (an Eclipse-based IDE for Groovy/Grails). Give it more memory by editing GGTS.ini and editing the -Xmx value!
-- Set the `GRAILS_HOME` and `JAVA_HOME` environment variables
-- Checkout the top-level project(s) you need (`unifina-trading` or `streamr-webapp`)
-- Do a `git submodule update --init`, which will pull this core plugin as well as other submodules
-- Run the app in GGTS or on the command line with `grails run-app`
+Please refer to the [Developer onboarding document](https://docs.google.com/document/d/1a14cJYjGBwe8-BXeAz08UvE-qa12KLA6OocnXEq_cKU/edit#)
 
 ## Testing
 
