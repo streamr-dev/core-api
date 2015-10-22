@@ -206,9 +206,9 @@ public class UiTagLib {
 	 * Renders a table with clickable rows
 	 */
 	def clickableTable = {attrs, body->
-		out << "<table class='table-clickable table table-striped table-bordered table-hover table-condensed table-responsive'>"
+		out << "<div class='clickable-table table table-striped table-hover table-condensed table-bordered'>"
 		out << body()
-		out << "</table>"
+		out << "</div>"
 	}
 	
 	/**
@@ -219,9 +219,9 @@ public class UiTagLib {
 	 * @attr title the title of the domain object
 	 */
 	def clickableRow = {attrs, body->
-		out << "<tr ${attrs.title ? "title='${attrs.title}'" : ""} data-link='${attrs.link}' ${attrs.id ? "data-id='${attrs.id}'" : ""}>"
+		out << "<a class='tr' ${attrs.title ? "title='${attrs.title}'" : ""} href='${attrs.link}' ${attrs.id ? "data-id='${attrs.id}'" : ""}>"
 		out << body()
-		out << "</tr>"
+		out << "</a>"
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.unifina.signalpath.bool;
+package com.unifina.signalpath.time;
 
 import java.util.Date;
 
