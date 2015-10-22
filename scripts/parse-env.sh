@@ -2,7 +2,7 @@
 
 DSCONFIG=$WORKSPACE/grails-app/conf/DataSource.groovy
 BRANCHNAME=`echo $GIT_BRANCH | cut -d'/' -f2`
-DBNAME=`echo $JOB_NAME'_'$BRANCHNAME | sed 's/-/_/g'`
+DBNAME=`echo $JOB_NAME'_'$BRANCHNAME | cut -c1-64 | sed 's/-/_/g'` # max db name length is 64 chars
 DBSOURCE=core_test
 MYSQL_PW=Trez2tuV
 

@@ -24,7 +24,6 @@
     <r:require module="jquery"/>
     <r:require module="main-theme"/>
 	<r:require module="global-error-handler"/>
-	<r:require module="clickable-table"/>
 
 	<g:if test="${!login}">
 		<r:require module='tour'/>

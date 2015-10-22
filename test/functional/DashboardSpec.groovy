@@ -75,10 +75,10 @@ class DashboardSpec extends LoginTester1Spec {
 		to DashboardListPage
 		then: "the new dashboard is visible"
 		waitFor { at DashboardListPage }
-		$("table td", text:dashboardName + "2").displayed
+		$(".table .td", text:dashboardName + "2").displayed
 		
 		when: "clicked the new dashboard to open"
-		$("table td", text:dashboardName + "2").click()
+		$(".table .td", text:dashboardName + "2").click()
 		then: "the dashboard should open in non-edit-mode"
 		waitFor { at DashboardShowPage }
 		waitFor { js.exec("return \$('#main-menu').width()") == 0 }
@@ -109,10 +109,10 @@ class DashboardSpec extends LoginTester1Spec {
 		to DashboardListPage
 		then: "the new dashboard is visible"
 		waitFor { at DashboardListPage }
-		$("table td", text:dashboardName + "2").displayed
+		$(".table .td", text:dashboardName + "2").displayed
 		
 		when: "clicked the new dashboard to open"
-		$("table td", text:dashboardName + "2").parent().click()
+		$(".table .td", text:dashboardName + "2").parent().click()
 		then: "the dashboard should open in non-edit-mode"
 		waitFor { at DashboardShowPage }
 		
@@ -142,6 +142,6 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "alert 'Deleted' is shown"
 		$(".alert", text:contains("Dashboard " +dashboardName+ "2 deleted")).displayed
 		then: "the old dashboard is not in the list anymore"
-		!($("table td", text:dashboardName + "2").displayed)		
+		!($(".table .td", text:dashboardName + "2").displayed)		
 	}
 }
