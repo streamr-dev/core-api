@@ -1,13 +1,13 @@
 package com.unifina.utils.testutils;
 
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.Output;
-import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.serialization.Serializer;
+import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 
 /**
@@ -17,157 +17,208 @@ import com.unifina.utils.DU;
  * and output lists must be the same size. Null output values mean that no output 
  * must be produced.
  */
-public class ModuleTestHelper {
-	
-	private List<InputHolder> inputHolders = new ArrayList<>();
-	private List<OutputHolder> outputHolders = new ArrayList<>();
-	private AbstractSignalPathModule module;
-	int valueCount;
-	
-	public ModuleTestHelper(AbstractSignalPathModule module, Map<String, List<Object>> inputValuesByName, Map<String, List<Object>> outputValuesByName) {
-		this.module = module;
-		
-		// Pair input values with actual inputs
-		for (String s : inputValuesByName.keySet()) {
-			Input<Object> input = module.getInput(s);
-			if (input==null)
-				throw new IllegalArgumentException("No input found by name: "+s);
-			inputHolders.add(new InputHolder(input, inputValuesByName.get(s)));
-		}
 
-		// Pair output values with actual outputs
-		for (String s : outputValuesByName.keySet()) {
-			Output output = module.getOutput(s);
-			if (output==null)
-				throw new IllegalArgumentException("No output found by name: "+s);
-			outputHolders.add(new OutputHolder(output, outputValuesByName.get(s)));
-			
-			// Set noRepeat on all TimeSeriesOutputs to false
-			if (output instanceof TimeSeriesOutput)
-				((TimeSeriesOutput)output).noRepeat = false;
-		}
-		
-		if (inputHolders.size()==0 || inputHolders.get(0).values.size()==0)
-			throw new IllegalArgumentException("No input values given!");
-		if (outputHolders.size()==0)
-			throw new IllegalArgumentException("No output values given!");
-		
-		// Check that all input and output lists have the same number of values
-		valueCount = inputHolders.get(0).values.size();
-		for (InputHolder ih : inputHolders)
-			if (ih.values.size()!=valueCount)
-				throw new IllegalArgumentException("Input value lists are not the same size!");
-		for (OutputHolder oh : outputHolders)
-			if (oh.values.size()!=valueCount)
-				throw new IllegalArgumentException("Output value lists are not the same size as input lists!");
-		
-	}
+/**
+ * A utility class for unit testing subclasses that inherit from <code>AbstractSignalPathModule</code>.
+ *
+ * Given an instance of the subclass, and a list of input values and expected output values, this test verifies that the
+ * inherited class fulfils its contract, in other words, it
+ *
+ * 	- produces output values that match with expected output
+ * 	- implements clearState() properly
+ * 	- properly serializes and deserializes without affecting results
+ *
+ */
+public class ModuleTestHelper {
+
+	private AbstractSignalPathModule module;
+	private Map<String, List<Object>> inputValuesByName;
+	private Map<String, List<Object>> outputValuesByName;
+	private int valueCount;
+	private boolean clearStateCalled = false;
 	
-	public boolean test() {
+	public ModuleTestHelper(AbstractSignalPathModule module,
+							Map<String, List<Object>> inputValuesByName,
+							Map<String, List<Object>> outputValuesByName) {
+
+		this.module = module;
+		this.inputValuesByName = inputValuesByName;
+		this.outputValuesByName = outputValuesByName;
+		this.valueCount = inputValuesByName.values().iterator().next().size();
+
+		validateThatInputAndOutputListsAreAllOfSameSize();
+		falsifyNoRepeats(module);
+		connectCollectorsToModule(module);
+	}
+
+	public boolean test() throws IOException, ClassNotFoundException {
 		return test(0);
 	}
-	
+
+	public boolean test(int skip) throws IOException, ClassNotFoundException {
+		boolean a = test(skip, false);		// Clean slate test
+
+		clearModuleAndCollectors();
+		clearStateCalled = true;
+		boolean b = test(skip, false);      // Test that clearState() works
+
+		clearModuleAndCollectors();
+		boolean c = test(skip, true);       // Test that serialization works
+
+		return a && b && c;
+	}
+
 	/**
-	 * Runs the test.
+	 * Runs a test.
 	 * @param skip Number of values to NOT test. Input values will be given and module will be activated, but output will not be tested.
 	 */
-	public boolean test(int skip) {
-		if (skip>=valueCount)
-			throw new IllegalArgumentException("All values would be skipped! Skip: "+skip+", ValueCount: "+valueCount);
-		
-		for (int i=0; i<valueCount; i++) {
+	public boolean test(int skip, boolean withInBetweenSerializations) throws IOException, ClassNotFoundException {
+		if (skip>=valueCount) {
+			throw new IllegalArgumentException("All values would be skipped.");
+		}
+
+		for (int i = 0; i < valueCount; ++i) {
+
+			serializeAndDeserializeModel(withInBetweenSerializations);
+
 			// Set input values
-			for (InputHolder h : inputHolders) {
-				Object val = h.values.get(i);
-				if (val!=null)
-					h.input.receive(val);
+			for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
+				Input input = module.getInput(entry.getKey());
+				if (input == null) {
+					throw new IllegalArgumentException("No input found with name " + entry.getKey());
+				}
+				input.receive(entry.getValue().get(i));
 			}
-			
+
+			serializeAndDeserializeModel(withInBetweenSerializations);
+
 			// Activate module
 			module.sendOutput();
-			
+
+			serializeAndDeserializeModel(withInBetweenSerializations);
+
 			// Test outputs
-			if (i>=skip) {
-				for (OutputHolder h : outputHolders)  {
-					Object value = h.targetInput.getValue();
-					Object target = h.values.get(i);
-					if (target instanceof Double)
-						target = DU.clean((Double)target);
-					
+			if (i >= skip) {
+				for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
+
+					Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
+					Object expected = entry.getValue().get(i);
+
+					if (actual instanceof Double) {
+						actual = DU.clean((Double) actual);
+					}
+
 					// Possible failures:
 					// - An output value exists when it should not
 					// - No output value exists when it should
 					// - Incorrect output value is produced
-					if (target==null && value!=null || value==null && target!=null || value!=null && !value.equals(target)) {
-						throwException(h, i, value, target);
+					if ((expected == null && actual != null) ||
+							(expected != null && actual == null) ||
+							expected != null && !expected.equals(actual)) {
+
+						throwException(entry.getKey(), i, withInBetweenSerializations, actual, expected);
 					}
 				}
 			}
 		}
 		return true;
 	}
-	
-	private void throwException(OutputHolder h, int i, Object value, Object target)  {
-		
+
+	private void throwException(String outputName, int i, boolean withInBetweenSerializations, Object value,
+								Object target)  {
+
 		StringBuilder sb = new StringBuilder("Incorrect value at output ")
-		.append(h.output.getName())
-		.append(" at index ").append(i)
-		.append("! Output: ").append(value)
-		.append(", Target: ").append(target)
-		.append(", Inputs: [");
-		
-		for (InputHolder ih : inputHolders) {
-			sb.append(ih.input.getName())
-			.append(":")
-			.append(ih.input.getValue())
-			.append(", ");
+				.append(outputName)
+				.append(" at index ").append(i)
+				.append(withInBetweenSerializations ? " with" : " without").append(" serialization, ")
+				.append("clearState() called? ").append(clearStateCalled)
+				.append("! Output: ").append(value)
+				.append(", Target: ").append(target)
+				.append(", Inputs: [");
+
+		for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
+			sb.append(entry.getKey())
+					.append(":")
+					.append(entry.getValue())
+					.append(", ");
 		}
 		sb.append("]");
-		
+
 		throw new RuntimeException(sb.toString());
 	}
-	
-	class InputHolder {
-		public Input<Object> input;
-		public List<Object> values;
-		
-		public InputHolder(Input<Object> input, List<Object> values) {
-			this.input = input;
-			this.values = values;
+
+	private void serializeAndDeserializeModel(boolean withInBetweenSerializations)
+			throws IOException, ClassNotFoundException {
+		if (withInBetweenSerializations) {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Serializer.serialize(module, out);
+			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+			module = (AbstractSignalPathModule) Serializer.deserialize(in);
 		}
-		
 	}
-	
-	class OutputHolder {
-		public Output<Object> output;
-		public Input<Object> targetInput;
-		public List<Object> values;
-		
-		public OutputHolder(Output<Object> output, List<Object> values) {
-			this.output = output;
-			this.values = values;
-			
-			// Create a dummy target module with one input
-			AbstractSignalPathModule module = new AbstractSignalPathModule() {
-				
-				Input<Object> input = new Input<Object>(this, "input", "Object");
-				
-				@Override
-				public void init() {
-					addInput(input);
-				}
-				
-				@Override
-				public void sendOutput() {}
-				
-				@Override
-				public void clearState() {}
-			};
-			module.init();
-			targetInput = module.getInput("input");
-			
-			output.connect(targetInput);
+
+	private void clearModuleAndCollectors() {
+		module.clearState();
+		for (Output<Object> output : module.getOutputs()) {
+			for (Input<Object> target : output.getTargets()) {
+				target.receive(null); // TODO: this shouldn't be needed.
+				target.getOwner().clear();
+			}
 		}
-		
+	}
+
+	private void validateThatInputAndOutputListsAreAllOfSameSize() {
+		for (List<Object> inputValues : inputValuesByName.values()) {
+			if (inputValues.size() != valueCount) {
+				throw new IllegalArgumentException("Input value lists are not the same size.");
+			}
+		}
+		for (List<Object> outputValues : outputValuesByName.values()) {
+			if (outputValues.size() != valueCount) {
+				throw new IllegalArgumentException("An output value list is not the same size as input lists.");
+			}
+		}
+	}
+
+	private static void falsifyNoRepeats(AbstractSignalPathModule module) {
+		for (Output output : module.getOutputs()) {
+			if (output instanceof TimeSeriesOutput) {
+				((TimeSeriesOutput) output).noRepeat = false;
+			}
+		}
+	}
+
+	private void connectCollectorsToModule(AbstractSignalPathModule module) {
+		for (String outputName : outputValuesByName.keySet()) {
+			Output output = module.getOutput(outputName);
+			if (output == null) {
+				throw new IllegalArgumentException("No output found with name " + outputName);
+			}
+			Collector collector = new Collector();
+			collector.init();
+			collector.attachToModule(output);
+		}
+	}
+
+	static class Collector extends AbstractSignalPathModule {
+
+		Input<Object> input = new Input<>(this, "input", "Object");
+
+		@Override
+		public void init() {
+			addInput(input);
+		}
+
+		@Override
+		public void sendOutput() {
+		}
+
+		@Override
+		public void clearState() {
+		}
+
+		public void attachToModule(Output<Object> externalOutput) {
+			externalOutput.connect(input);
+		}
 	}
 }

@@ -5,3 +5,4 @@
 target-eclipse
 target
 node_modules
+out/

@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.AccessController;
@@ -33,7 +34,7 @@ import com.unifina.utils.MapTraversal;
  * - Call module.setConfiguration()
  * - Call module.connectionsReady()
  */
-public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener {
+public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
 	private Map<String,Object> json;
 	
