@@ -39,7 +39,7 @@ public class Sum extends AbstractSignalPathModule {
 		sum += input.value;
 		count++;
 
-		if (count>=minSamples.value)
+		if (count>=minSamples.getValue())
 			out.send(sum);
 	}
 
