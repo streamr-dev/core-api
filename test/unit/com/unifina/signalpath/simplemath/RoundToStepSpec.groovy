@@ -12,9 +12,6 @@ class RoundToStepSpec extends Specification {
 		module.init()
 	}
 
-	def cleanup() {
-	}
-
 	void "roundToStep gives the right answer"() {
 		when:
 		Map inputValues = [

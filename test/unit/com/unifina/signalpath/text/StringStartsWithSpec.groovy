@@ -32,22 +32,10 @@ class StringStartsWithSpec extends Specification {
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 		
 		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
     	module.onConfiguration([options: [ignoreCase: [value: false]]])
 		outputValues = [
 			"startsWith?": [1, 0, 1, 0, 0].collect {it?.doubleValue()}
 		]
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}

@@ -12,10 +12,6 @@ class AbsSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "abs gives the right answer"() {
 		when:
 		Map inputValues = [

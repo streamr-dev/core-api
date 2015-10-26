@@ -39,11 +39,5 @@ class ValueAsTextSpec extends Specification {
 		]
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}
 }

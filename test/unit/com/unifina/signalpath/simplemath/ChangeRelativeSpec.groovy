@@ -13,10 +13,6 @@ class ChangeRelativeSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "changeRelative gives the right answer"() {
 		when:
 		Map inputValues = [

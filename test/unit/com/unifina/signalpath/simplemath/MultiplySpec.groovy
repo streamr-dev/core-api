@@ -12,10 +12,6 @@ class MultiplySpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "multiply gives the right answer"() {
 		when:
 		Map inputValues = [

@@ -13,10 +13,6 @@ class AddMultiSpec extends Specification {
 		module.configure([options: [inputs: [value: 4]] ])
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "addMulti gives the right answer"() {
 		when:
 		Map inputValues = [

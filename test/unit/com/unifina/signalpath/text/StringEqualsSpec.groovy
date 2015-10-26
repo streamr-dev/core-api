@@ -32,22 +32,10 @@ class StringEqualsSpec extends Specification {
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 		
 		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
     	module.onConfiguration([options: [ignoreCase: [value: false]]])
 		outputValues = [
 			"equals?": [0, 1, 0, 0].collect {it?.doubleValue()}
 		]
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}

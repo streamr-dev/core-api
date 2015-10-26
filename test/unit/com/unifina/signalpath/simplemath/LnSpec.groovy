@@ -12,10 +12,6 @@ class LnSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "ln gives the right answer"() {
 		when:
 		Map inputValues = [

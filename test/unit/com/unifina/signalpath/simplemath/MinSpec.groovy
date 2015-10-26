@@ -12,10 +12,6 @@ class MinSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "min gives the right answer"() {
 		when:
 		Map inputValues = [

@@ -13,10 +13,6 @@ class ModuloSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "modulo gives the right answer"() {
 		module.getInput("divisor").receive(5)		
 		when:

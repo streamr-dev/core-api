@@ -12,10 +12,6 @@ class CovarianceSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "covariance gives the right answer"() {
 		when:
 		module.getInput("windowLength").receive(4)

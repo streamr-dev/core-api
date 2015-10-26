@@ -12,10 +12,6 @@ class SubtractSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "subtract gives the right answer"() {
 		when:
 		Map inputValues = [

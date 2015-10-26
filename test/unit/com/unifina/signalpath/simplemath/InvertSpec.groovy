@@ -12,10 +12,6 @@ class InvertSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "invert gives the right answer"() {
 		when:
 		Map inputValues = [

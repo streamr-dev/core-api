@@ -12,10 +12,6 @@ class SquareRootSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "squareRoot gives the right answer"() {
 		when:
 		Map inputValues = [

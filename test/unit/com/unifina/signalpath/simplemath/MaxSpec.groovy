@@ -12,10 +12,6 @@ class MaxSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "max gives the right answer"() {
 		when:
 		Map inputValues = [

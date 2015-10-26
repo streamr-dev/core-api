@@ -12,10 +12,6 @@ class NegateSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "negate gives the right answer"() {
 		when:
 		Map inputValues = [

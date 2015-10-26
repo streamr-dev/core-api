@@ -12,10 +12,6 @@ class DivideSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "divide gives the right answer"() {
 		when:
 		Map inputValues = [

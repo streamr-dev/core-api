@@ -12,10 +12,6 @@ class SignSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "sign gives the right answer"() {
 		when:
 		Map inputValues = [

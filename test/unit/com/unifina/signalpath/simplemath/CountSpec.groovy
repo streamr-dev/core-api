@@ -12,10 +12,6 @@ class CountSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "count gives the right answer"() {
 		when:
 		Map inputValues = [

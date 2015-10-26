@@ -31,12 +31,6 @@ class StringRegexSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
 	}
 
 	void "phone numbers in the pattern"() {
@@ -50,12 +44,6 @@ class StringRegexSpec extends Specification {
 			"matchList": [["444-555-1234", "1235554567"], ['246.555.8888'], ['1235554567'], [], []],
 			"matchCount": [2, 1, 1, 0, 0].collect {it?.doubleValue()},
 		]
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
@@ -75,12 +63,6 @@ class StringRegexSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
 
 		when:
     	module.onConfiguration([options: [ignoreCase: [value: true]]])
@@ -92,12 +74,5 @@ class StringRegexSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-
 	}
 }

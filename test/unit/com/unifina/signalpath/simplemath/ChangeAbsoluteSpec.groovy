@@ -12,10 +12,6 @@ class ChangeAbsoluteSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "changeAbsolute gives the right answer"() {
 		when:
 		Map inputValues = [

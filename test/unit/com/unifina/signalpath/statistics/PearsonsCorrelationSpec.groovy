@@ -12,10 +12,6 @@ class PearsonsCorrelationSpec extends Specification {
 		module.init()
 	}
 
-	def cleanup() {
-
-	}
-
 	void "pearsonsCorrelation gives the right answer"() {
 		when:
 		module.getInput("windowLength").receive(3)

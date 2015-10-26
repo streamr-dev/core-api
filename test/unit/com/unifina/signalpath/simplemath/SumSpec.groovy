@@ -12,10 +12,6 @@ class SumSpec extends Specification {
 		module.init()
 	}
 
-	def cleanup() {
-
-	}
-
 	void "sum without window gives the right answer"() {
 		when:
 		Map inputValues = [

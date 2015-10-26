@@ -12,10 +12,6 @@ class ChangeLogarithmicSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
-	
 	void "changeLogarithmic gives the right answer"() {
 		when:
 		Map inputValues = [
