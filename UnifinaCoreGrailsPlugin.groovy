@@ -1,7 +1,7 @@
-import grails.util.Environment
-
 import java.security.Policy
 import java.security.Security
+
+import org.codehaus.groovy.grails.plugins.GrailsPlugin
 
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
@@ -115,6 +115,7 @@ class UnifinaCoreGrailsPlugin {
 
     def doWithSpring = {
 		// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
+		// Should not be called any later than this, otherwise plugins might startup with missing config
 		BootService.mergeDefaultConfig(application)
     }
 	
@@ -123,6 +124,12 @@ class UnifinaCoreGrailsPlugin {
     }
 
     def doWithApplicationContext = { applicationContext ->
+		// Let other plugins know that the config may have been changed (BootService.mergeDefaultConfig changes it)
+		def pluginManager = applicationContext.getBean("pluginManager")
+		pluginManager.allPlugins.each {
+			it.notifyOfEvent(GrailsPlugin.EVENT_ON_CONFIG_CHANGE, application.config) //Second parameter is Source of event, here we have just passed the ConfigObject for simplicity.
+		}
+		
         // TODO Implement post initialization spring config (optional)
 		if (!System.securityManager) {
 			Security.setProperty("package.access", PackageAccessHelper.getRestrictedPackages().join(","))
