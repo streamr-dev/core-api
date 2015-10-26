@@ -9,7 +9,7 @@
  * - email sending config
  */
 
- /**
+/**
   * Grails configuration 
   */
 
@@ -290,18 +290,7 @@ grails {
 remove this line */
 
 // emails
-grails {
-    mail {
-        host = "smtp.gmail.com"
-        port = 465
-        username = "henri.pihkala@streamr.com"
-        password = "gnqxzdmojlkzlxjy"
-        props = ["mail.smtp.auth":"true",
-               "mail.smtp.socketFactory.port":"465",
-               "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
-               "mail.smtp.socketFactory.fallback":"false"]
-    }
-}
+// the server settings come from Config.groovy of each project
 
 unifina.email.sender = "contact@streamr.com"
 unifina.email.signup.subject = "Thanks for signing up to Streamr"
