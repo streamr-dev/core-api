@@ -1,6 +1,7 @@
 package com.unifina.serialization;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.nustaq.serialization.*;
 
 import java.io.*;
@@ -11,9 +12,11 @@ public class Serializer {
     private static final FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
 
     static {
-        conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
+		//((JsonFactory) conf.getCoderSpecific()).configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
+		conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
-    }
+		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
+	}
 
     public static void serializeToFile(Object object, String filename) throws IOException {
         serialize(object, new FileOutputStream(filename));
@@ -39,6 +42,31 @@ public class Serializer {
 
 
 	// Custom serializers below
+
+	private static class DescriptiveStatisticsSerializer extends FSTBasicObjectSerializer {
+
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			DescriptiveStatistics descriptiveStatistics = (DescriptiveStatistics) toWrite;
+			out.writeObject(descriptiveStatistics.getValues());
+			out.writeInt(descriptiveStatistics.getWindowSize());
+		}
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics((double[]) in.readObject());
+			descriptiveStatistics.setWindowSize(in.readInt());
+			return descriptiveStatistics;
+		}
+	}
 
 	private static class PatternSerializer extends FSTBasicObjectSerializer {
 
