@@ -291,16 +291,16 @@ remove this line */
 
 // emails
 grails {
-	mail {
-		host = "smtp.gmail.com"
-		port = 465
-		username = "contact@algocanvas.com"
-		password = 'wss;^w38WN<G)$$'
-		props = ["mail.smtp.auth":"true",
-			   "mail.smtp.socketFactory.port":"465",
-			   "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
-			   "mail.smtp.socketFactory.fallback":"false"]
-	}
+    mail {
+        host = "smtp.gmail.com"
+        port = 465
+        username = "henri.pihkala@streamr.com"
+        password = "gnqxzdmojlkzlxjy"
+        props = ["mail.smtp.auth":"true",
+               "mail.smtp.socketFactory.port":"465",
+               "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+               "mail.smtp.socketFactory.fallback":"false"]
+    }
 }
 
 unifina.email.sender = "contact@streamr.com"
