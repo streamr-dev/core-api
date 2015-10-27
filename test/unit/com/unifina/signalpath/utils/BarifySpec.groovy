@@ -38,11 +38,13 @@ class BarifySpec extends Specification {
 		Map ticks = [
 			2: new Date(60 * 1000),
 			8: new Date(60 * 3000),
-			17: new Date(60 * 17000),
+			16: new Date(60 * 17000),
 		]
 
 
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues, ticks).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.ticks(ticks)
+			.test()
 	}
 }

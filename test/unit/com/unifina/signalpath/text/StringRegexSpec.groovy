@@ -30,7 +30,7 @@ class StringRegexSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "phone numbers in the pattern"() {
@@ -46,7 +46,7 @@ class StringRegexSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "ignoreCase off and on"() {
@@ -62,7 +62,7 @@ class StringRegexSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 
 		when:
     	module.onConfiguration([options: [ignoreCase: [value: true]]])
@@ -73,6 +73,6 @@ class StringRegexSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

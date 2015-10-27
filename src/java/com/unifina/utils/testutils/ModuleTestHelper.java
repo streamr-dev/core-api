@@ -28,141 +28,171 @@ import com.unifina.utils.Globals;
  */
 public class ModuleTestHelper {
 
+	public static class Builder {
+
+		private ModuleTestHelper testHelper = new ModuleTestHelper();
+
+		public Builder(AbstractSignalPathModule module) {
+			testHelper.module = module;
+		}
+
+		public Builder(AbstractSignalPathModule module,
+					   Map<String, List<Object>> inputValuesByName,
+					   Map<String, List<Object>> outputValuesByName) {
+			this(module);
+			inputValues(inputValuesByName);
+			outputValues(outputValuesByName);
+		}
+
+		public ModuleTestHelper.Builder inputValues(Map<String, List<Object>> inputValuesByName) {
+			testHelper.inputValuesByName = inputValuesByName;
+			return this;
+		}
+
+		public ModuleTestHelper.Builder outputValues(Map<String, List<Object>> outputValuesByName) {
+			testHelper.outputValuesByName = outputValuesByName;
+			return this;
+		}
+
+		public ModuleTestHelper.Builder ticks(Map<Integer, Date> ticks) {
+			testHelper.turnOnTimedMode(ticks);
+			return this;
+		}
+
+		public ModuleTestHelper.Builder extraIterationsAfterInput(int extraIterationsAfterInput) {
+			testHelper.extraIterationsAfterInput = extraIterationsAfterInput;
+			return this;
+		}
+
+		public ModuleTestHelper.Builder skip(int skip) {
+			testHelper.skip = skip;
+			return this;
+		}
+
+		public boolean test() throws IOException, ClassNotFoundException {
+			return build().test();
+		}
+
+		public ModuleTestHelper build() {
+			if (testHelper.module == null) {
+				throw new RuntimeException("Field module cannot be null");
+			}
+			if (testHelper.inputValuesByName == null) {
+				throw new RuntimeException("Field inputValuesByName cannot be null");
+			}
+			if (testHelper.outputValuesByName == null) {
+				throw new RuntimeException("Field outputValuesByName cannot be null");
+			}
+			testHelper.initializeAndValidate();
+			return testHelper;
+		}
+	}
+
+
 	private AbstractSignalPathModule module;
 	private Map<String, List<Object>> inputValuesByName;
 	private Map<String, List<Object>> outputValuesByName;
 	private Map<Integer, Date> ticks;
 	private int inputValueCount;
+	private int outputValueCount;
 	private boolean clearStateCalled = false;
+	private int extraIterationsAfterInput = 0;
+	private int skip = 0;
 
-	/**
-	 * Constructor for module test helper
-	 *
-	 * @param inputValuesByName input values and their names
-	 * @param outputValuesByName expected output values and their names
-	 */
-	public ModuleTestHelper(AbstractSignalPathModule module,
-							Map<String, List<Object>> inputValuesByName,
-							Map<String, List<Object>> outputValuesByName) {
-
-		this(module, inputValuesByName, outputValuesByName, null);
+	private ModuleTestHelper() {
 	}
 
-	/**
-	 * Constructor for "timed" module test helper, i.e., one that calls setTime() when desired.
-	 *
-	 * @param module should be instance of <code>ITimeListener</code> when using this constructor
-	 * @param inputValuesByName input values and their names
-	 * @param outputValuesByName expected output values and their names
-	 * @param ticks at which iterations to invoke setTime() and what <code>Date</code> to pass as argument
-	 */
-	public ModuleTestHelper(AbstractSignalPathModule module,
-							Map<String, List<Object>> inputValuesByName,
-							Map<String, List<Object>> outputValuesByName,
-							Map<Integer, Date> ticks) {
-
-		this.module = module;
-		this.inputValuesByName = inputValuesByName;
-		this.outputValuesByName = outputValuesByName;
-		this.inputValueCount = inputValuesByName.values().iterator().next().size();
-
-		if (ticks != null) {
-			turnOnTimedMode(ticks);
-		}
-
+	private void initializeAndValidate() {
+		inputValueCount = inputValuesByName.values().iterator().next().size();
+		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput;
 		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
 		connectCollectorsToModule(module);
 	}
 
 	public boolean test() throws IOException, ClassNotFoundException {
-		return test(0);
-	}
-
-	public boolean test(int skip) throws IOException, ClassNotFoundException {
-		boolean a = test(skip, false);		// Clean slate test
+		boolean a = test(false);		// Clean slate test
 
 		clearModuleAndCollectors();
 		clearStateCalled = true;
-		boolean b = test(skip, false);      // Test that clearState() works
+		boolean b = test(false);      // Test that clearState() works
 
 		clearModuleAndCollectors();
-		boolean c = test(skip, true);       // Test that serialization works
+		boolean c = test(true);       // Test that serialization works
 
 		return a && b && c;
 	}
 
 	/**
 	 * Runs a test.
-	 * @param skip Number of values to NOT test. Input values will be given and module will be activated, but output will not be tested.
 	 */
-	public boolean test(int skip, boolean withInBetweenSerializations) throws IOException, ClassNotFoundException {
-		if (skip >= inputValueCount) {
-			throw new IllegalArgumentException("All values would be skipped.");
-		}
-
+	public boolean test(boolean withInBetweenSerializations) throws IOException, ClassNotFoundException {
 		int outputIndex = 0;
-		for (int i = 0; i < inputValueCount; ++i) {
-
-			serializeAndDeserializeModel(withInBetweenSerializations);
+		for (int i = 0; i < inputValueCount + extraIterationsAfterInput; ++i) {
 
 			// Set input values
-			for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
-				Input input = module.getInput(entry.getKey());
-				if (input == null) {
-					throw new IllegalArgumentException("No input found with name " + entry.getKey());
-				}
-				input.receive(entry.getValue().get(i));
+			if (i < inputValueCount) {
+				serializeAndDeserializeModel(withInBetweenSerializations);
+				feedInputs(i);
 			}
 
-			serializeAndDeserializeModel(withInBetweenSerializations);
-
 			// Activate module
-			module.sendOutput();
-			invokeSetTimeIfNecessary(i);
-
 			serializeAndDeserializeModel(withInBetweenSerializations);
+			activateModule(i);
 
 			// Test outputs
+			serializeAndDeserializeModel(withInBetweenSerializations);
 			if (shouldValidateOutput(i, skip)) {
-				for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
-
-					Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
-					Object expected = entry.getValue().get(outputIndex);
-
-					if (actual instanceof Double) {
-						actual = DU.clean((Double) actual);
-					}
-
-					// Possible failures:
-					// - An output value exists when it should not
-					// - No output value exists when it should
-					// - Incorrect output value is produced
-					if ((expected == null && actual != null) ||
-							(expected != null && actual == null) ||
-							expected != null && !expected.equals(actual)) {
-
-						throwException(entry.getKey(), i, outputIndex, withInBetweenSerializations, actual, expected);
-					}
-				}
+				validateOutput(withInBetweenSerializations, outputIndex, i);
 				++outputIndex;
 			}
 		}
+
 		return true;
 	}
 
-	private void invokeSetTimeIfNecessary(int i) {
+	private void feedInputs(int i) {
+		for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
+            Input input = module.getInput(entry.getKey());
+            if (input == null) {
+                throw new IllegalArgumentException("No input found with name " + entry.getKey());
+            }
+            input.receive(entry.getValue().get(i));
+        }
+	}
+
+	private void activateModule(int i) {
+		module.sendOutput();
 		if (isTimedMode() && ticks.containsKey(i)) {
 			((ITimeListener) module).setTime(ticks.get(i));
 		}
 	}
 
-	private boolean shouldValidateOutput(int i, int skip) {
-		return i >= skip && (!isTimedMode() || ticks.containsKey(i));
+	private void validateOutput(boolean withInBetweenSerializations, int outputIndex, int i) {
+		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
+
+			Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
+			Object expected = entry.getValue().get(outputIndex);
+
+			if (actual instanceof Double) {
+				actual = DU.clean((Double) actual);
+			}
+
+			// Possible failures:
+			// - An output value exists when it should not
+			// - No output value exists when it should
+			// - Incorrect output value is produced
+			if ((expected == null && actual != null) ||
+					(expected != null && actual == null) ||
+					expected != null && !expected.equals(actual)) {
+
+				throwException(entry.getKey(), i, outputIndex, withInBetweenSerializations, actual, expected);
+			}
+		}
 	}
 
-	private boolean isTimedMode() {
-		return ticks != null;
+	private boolean shouldValidateOutput(int i, int skip) {
+		return i >= skip && (!isTimedMode() || ticks.containsKey(i));
 	}
 
 	private void throwException(String outputName, int i, int outputIndex,
@@ -189,11 +219,15 @@ public class ModuleTestHelper {
 		throw new RuntimeException(sb.toString());
 	}
 
+	private boolean isTimedMode() {
+		return ticks != null;
+	}
+
 	private void serializeAndDeserializeModel(boolean withInBetweenSerializations)
 			throws IOException, ClassNotFoundException {
 		if (withInBetweenSerializations) {
 
-			// Globals is rather tricky to serialize
+			// Globals is rather tricky to serialize so temporarily pull out
 			Globals globalsTempHolder = module.globals;
 			module.globals = null;
 
@@ -226,18 +260,21 @@ public class ModuleTestHelper {
 		}
 	}
 
+
 	private void validateThatListSizesMatch() {
+		if (skip >= inputValueCount) {
+			throw new IllegalArgumentException("All values would be skipped.");
+		}
 		for (List<Object> inputValues : inputValuesByName.values()) {
 			if (inputValues.size() != inputValueCount) {
-				throw new IllegalArgumentException("Input value lists are not the same size.");
+				String msg = String.format("Input value lists are not the same size (%d).", inputValueCount);
+				throw new IllegalArgumentException(msg);
 			}
 		}
-
-		int outputCount = isTimedMode() ? ticks.size() : inputValueCount;
-
 		for (List<Object> outputValues : outputValuesByName.values()) {
-			if (outputValues.size() != outputCount) {
-				throw new IllegalArgumentException("An output value list is not of expected size.");
+			if (outputValues.size() != outputValueCount) {
+				String msg = String.format("An output value list is not of expected size (%d).", outputValueCount);
+				throw new IllegalArgumentException(msg);
 			}
 		}
 	}
@@ -262,7 +299,7 @@ public class ModuleTestHelper {
 		}
 	}
 
-	static class Collector extends AbstractSignalPathModule {
+	private static class Collector extends AbstractSignalPathModule {
 
 		Input<Object> input = new Input<>(this, "input", "Object");
 

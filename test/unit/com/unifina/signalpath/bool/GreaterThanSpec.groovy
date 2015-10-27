@@ -27,7 +27,7 @@ class GreaterThanSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 //
 //	void "lessThan with equality turned on gives the right answer"() {

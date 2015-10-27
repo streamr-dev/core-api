@@ -29,6 +29,6 @@ class StringReplaceSpec extends Specification {
 			"out": ["bahbah", "bah", "bah", "abcdeFoog"]
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

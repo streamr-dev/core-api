@@ -29,7 +29,7 @@ class StringEndsWithSpec extends Specification {
 			"endsWith?": [0, 1, 1, 0, 1].collect {it?.doubleValue()}
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 		
 		when:
     	module.onConfiguration([options: [ignoreCase: [value: false]]])
@@ -37,6 +37,6 @@ class StringEndsWithSpec extends Specification {
 			"endsWith?": [0, 1, 1, 0, 0].collect {it?.doubleValue()}
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

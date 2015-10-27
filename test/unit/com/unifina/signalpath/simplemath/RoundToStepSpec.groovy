@@ -44,6 +44,6 @@ class RoundToStepSpec extends Specification {
 		]
 
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

@@ -27,6 +27,6 @@ class StringTrimSpec extends Specification {
 			trimmedText: ["", "foo", "foo", "foo"]
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

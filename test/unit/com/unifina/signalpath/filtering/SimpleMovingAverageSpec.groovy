@@ -30,7 +30,7 @@ class SimpleMovingAverageSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(sma, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(sma, inputValues, outputValues).test()
 	}
 	
 	void "must produce no output before minSamples samples"() {
@@ -46,7 +46,7 @@ class SimpleMovingAverageSpec extends Specification {
 		]
 		
 		then:
-		new ModuleTestHelper(sma, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(sma, inputValues, outputValues).test()
 	}
 	
 }

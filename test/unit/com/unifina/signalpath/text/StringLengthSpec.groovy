@@ -27,6 +27,6 @@ class StringLengthSpec extends Specification {
 			length: [3, 1, 3, 0, 7].collect {it?.doubleValue()}
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

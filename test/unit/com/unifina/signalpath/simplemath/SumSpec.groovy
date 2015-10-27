@@ -22,7 +22,7 @@ class SumSpec extends Specification {
 		]
 
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "sum with window gives the right answer"() {
@@ -37,6 +37,6 @@ class SumSpec extends Specification {
 		]
 
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }
