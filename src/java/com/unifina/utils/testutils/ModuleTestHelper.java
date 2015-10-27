@@ -104,7 +104,7 @@ public class ModuleTestHelper {
 
 	private void initializeAndValidate() {
 		inputValueCount = inputValuesByName.values().iterator().next().size();
-		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput;
+		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput - skip;
 		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
 		connectCollectorsToModule(module);
