@@ -103,7 +103,7 @@ public class ModuleTestHelper {
 	}
 
 	private void initializeAndValidate() {
-		inputValueCount = inputValuesByName.values().iterator().next().size();
+		inputValueCount = inputValuesByName.isEmpty() ? 0 : inputValuesByName.values().iterator().next().size();
 		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput - skip;
 		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
@@ -262,8 +262,8 @@ public class ModuleTestHelper {
 
 
 	private void validateThatListSizesMatch() {
-		if (skip >= inputValueCount) {
-			throw new IllegalArgumentException("All values would be skipped.");
+		if (skip >= inputValueCount && extraIterationsAfterInput == 0) {
+			throw new IllegalArgumentException("All values would be skipped and not a single output tested.");
 		}
 		for (List<Object> inputValues : inputValuesByName.values()) {
 			if (inputValues.size() != inputValueCount) {

@@ -34,7 +34,7 @@ public class ConstantString extends AbstractSignalPathModule implements Pullable
 	
 	@Override
 	public void sendOutput() {
-		
+		out.send(constant.getValue());
 	}
 
 	@Override
