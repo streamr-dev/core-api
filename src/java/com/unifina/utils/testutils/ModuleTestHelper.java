@@ -34,7 +34,13 @@ public class ModuleTestHelper {
 	private Map<Integer, Date> ticks;
 	private int inputValueCount;
 	private boolean clearStateCalled = false;
-	
+
+	/**
+	 * Constructor for module test helper
+	 *
+	 * @param inputValuesByName input values and their names
+	 * @param outputValuesByName expected output values and their names
+	 */
 	public ModuleTestHelper(AbstractSignalPathModule module,
 							Map<String, List<Object>> inputValuesByName,
 							Map<String, List<Object>> outputValuesByName) {
@@ -42,6 +48,14 @@ public class ModuleTestHelper {
 		this(module, inputValuesByName, outputValuesByName, null);
 	}
 
+	/**
+	 * Constructor for "timed" module test helper, i.e., one that calls setTime() when desired.
+	 *
+	 * @param module should be instance of <code>ITimeListener</code> when using this constructor
+	 * @param inputValuesByName input values and their names
+	 * @param outputValuesByName expected output values and their names
+	 * @param ticks at which iterations to invoke setTime() and what <code>Date</code> to pass as argument
+	 */
 	public ModuleTestHelper(AbstractSignalPathModule module,
 							Map<String, List<Object>> inputValuesByName,
 							Map<String, List<Object>> outputValuesByName,
