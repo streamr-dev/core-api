@@ -3,20 +3,17 @@ package com.unifina.utils.testutils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.Serializer;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
+import com.unifina.utils.Globals;
 
-/**
- * Utility class for unit testing AbstractSignalPathModules.
- * Takes a list of input and output values for named inputs/outputs and checks
- * that the values produced by the module match the target values. All input
- * and output lists must be the same size. Null output values mean that no output 
- * must be produced.
- */
 
 /**
  * A utility class for unit testing subclasses that inherit from <code>AbstractSignalPathModule</code>.
@@ -34,19 +31,32 @@ public class ModuleTestHelper {
 	private AbstractSignalPathModule module;
 	private Map<String, List<Object>> inputValuesByName;
 	private Map<String, List<Object>> outputValuesByName;
-	private int valueCount;
+	private Map<Integer, Date> ticks;
+	private int inputValueCount;
 	private boolean clearStateCalled = false;
 	
 	public ModuleTestHelper(AbstractSignalPathModule module,
 							Map<String, List<Object>> inputValuesByName,
 							Map<String, List<Object>> outputValuesByName) {
 
+		this(module, inputValuesByName, outputValuesByName, null);
+	}
+
+	public ModuleTestHelper(AbstractSignalPathModule module,
+							Map<String, List<Object>> inputValuesByName,
+							Map<String, List<Object>> outputValuesByName,
+							Map<Integer, Date> ticks) {
+
 		this.module = module;
 		this.inputValuesByName = inputValuesByName;
 		this.outputValuesByName = outputValuesByName;
-		this.valueCount = inputValuesByName.values().iterator().next().size();
+		this.inputValueCount = inputValuesByName.values().iterator().next().size();
 
-		validateThatInputAndOutputListsAreAllOfSameSize();
+		if (ticks != null) {
+			turnOnTimedMode(ticks);
+		}
+
+		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
 		connectCollectorsToModule(module);
 	}
@@ -73,11 +83,12 @@ public class ModuleTestHelper {
 	 * @param skip Number of values to NOT test. Input values will be given and module will be activated, but output will not be tested.
 	 */
 	public boolean test(int skip, boolean withInBetweenSerializations) throws IOException, ClassNotFoundException {
-		if (skip>=valueCount) {
+		if (skip >= inputValueCount) {
 			throw new IllegalArgumentException("All values would be skipped.");
 		}
 
-		for (int i = 0; i < valueCount; ++i) {
+		int outputIndex = 0;
+		for (int i = 0; i < inputValueCount; ++i) {
 
 			serializeAndDeserializeModel(withInBetweenSerializations);
 
@@ -94,15 +105,16 @@ public class ModuleTestHelper {
 
 			// Activate module
 			module.sendOutput();
+			invokeSetTimeIfNecessary(i);
 
 			serializeAndDeserializeModel(withInBetweenSerializations);
 
 			// Test outputs
-			if (i >= skip) {
+			if (shouldValidateOutput(i, skip)) {
 				for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
 					Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
-					Object expected = entry.getValue().get(i);
+					Object expected = entry.getValue().get(outputIndex);
 
 					if (actual instanceof Double) {
 						actual = DU.clean((Double) actual);
@@ -116,20 +128,36 @@ public class ModuleTestHelper {
 							(expected != null && actual == null) ||
 							expected != null && !expected.equals(actual)) {
 
-						throwException(entry.getKey(), i, withInBetweenSerializations, actual, expected);
+						throwException(entry.getKey(), i, outputIndex, withInBetweenSerializations, actual, expected);
 					}
 				}
+				++outputIndex;
 			}
 		}
 		return true;
 	}
 
-	private void throwException(String outputName, int i, boolean withInBetweenSerializations, Object value,
-								Object target)  {
+	private void invokeSetTimeIfNecessary(int i) {
+		if (isTimedMode() && ticks.containsKey(i)) {
+			((ITimeListener) module).setTime(ticks.get(i));
+		}
+	}
 
-		StringBuilder sb = new StringBuilder("Incorrect value at output ")
-				.append(outputName)
-				.append(" at index ").append(i)
+	private boolean shouldValidateOutput(int i, int skip) {
+		return i >= skip && (!isTimedMode() || ticks.containsKey(i));
+	}
+
+	private boolean isTimedMode() {
+		return ticks != null;
+	}
+
+	private void throwException(String outputName, int i, int outputIndex,
+								boolean withInBetweenSerializations, Object value, Object target)  {
+
+		StringBuilder sb = new StringBuilder("Incorrect value at output '")
+				.append(outputName).append("'")
+				.append(" at index ").append(outputIndex)
+				.append(" (input index ").append(i).append(")")
 				.append(withInBetweenSerializations ? " with" : " without").append(" serialization, ")
 				.append("clearState() called? ").append(clearStateCalled)
 				.append("! Output: ").append(value)
@@ -150,10 +178,19 @@ public class ModuleTestHelper {
 	private void serializeAndDeserializeModel(boolean withInBetweenSerializations)
 			throws IOException, ClassNotFoundException {
 		if (withInBetweenSerializations) {
+
+			// Globals is rather tricky to serialize
+			Globals globalsTempHolder = module.globals;
+			module.globals = null;
+
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Serializer.serialize(module, out);
+
+			//Serializer.serializeToFile(module, "temp.out");
+
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 			module = (AbstractSignalPathModule) Serializer.deserialize(in);
+			module.globals = globalsTempHolder;
 		}
 	}
 
@@ -167,15 +204,26 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private void validateThatInputAndOutputListsAreAllOfSameSize() {
+	private void turnOnTimedMode(Map<Integer, Date> ticks) {
+		if (module instanceof ITimeListener) {
+			this.ticks = new HashMap<>(ticks);
+		} else {
+			throw new RuntimeException("Module does not implement ITimeListener interface");
+		}
+	}
+
+	private void validateThatListSizesMatch() {
 		for (List<Object> inputValues : inputValuesByName.values()) {
-			if (inputValues.size() != valueCount) {
+			if (inputValues.size() != inputValueCount) {
 				throw new IllegalArgumentException("Input value lists are not the same size.");
 			}
 		}
+
+		int outputCount = isTimedMode() ? ticks.size() : inputValueCount;
+
 		for (List<Object> outputValues : outputValuesByName.values()) {
-			if (outputValues.size() != valueCount) {
-				throw new IllegalArgumentException("An output value list is not the same size as input lists.");
+			if (outputValues.size() != outputCount) {
+				throw new IllegalArgumentException("An output value list is not of expected size.");
 			}
 		}
 	}
