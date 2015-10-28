@@ -41,43 +41,45 @@ public class ModuleTestHelper {
 			outputValues(outputValuesByName);
 		}
 
-		public ModuleTestHelper.Builder inputValues(Map<String, List<Object>> inputValuesByName) {
+		public Builder inputValues(Map<String, List<Object>> inputValuesByName) {
 			testHelper.inputValuesByName = inputValuesByName;
 			return this;
 		}
 
-		public ModuleTestHelper.Builder outputValues(Map<String, List<Object>> outputValuesByName) {
+		public Builder outputValues(Map<String, List<Object>> outputValuesByName) {
 			testHelper.outputValuesByName = outputValuesByName;
 			return this;
 		}
 
-		public ModuleTestHelper.Builder uiChannelMessages(Map<String, List<Object>> uiChannelMessages) {
+		public Builder uiChannelMessages(Map<String, List<Object>> uiChannelMessages) {
 			testHelper.turnOnUiChannelMode(uiChannelMessages);
 			return this;
 		}
 
-		public ModuleTestHelper.Builder ticks(Map<Integer, Date> ticks) {
+		public Builder ticks(Map<Integer, Date> ticks) {
 			testHelper.turnOnTimedMode(ticks);
 			return this;
 		}
 
-		public ModuleTestHelper.Builder extraIterationsAfterInput(int extraIterationsAfterInput) {
+		public Builder extraIterationsAfterInput(int extraIterationsAfterInput) {
 			testHelper.extraIterationsAfterInput = extraIterationsAfterInput;
 			return this;
 		}
 
-		public ModuleTestHelper.Builder skip(int skip) {
+		public Builder skip(int skip) {
 			testHelper.skip = skip;
 			return this;
 		}
 
-		public ModuleTestHelper.Builder timeToFurtherPerIteration(int timeStep) {
+		public Builder timeToFurtherPerIteration(int timeStep) {
 			testHelper.timeStep = timeStep;
 			return this;
 		}
 
-		public boolean test() throws IOException, ClassNotFoundException {
-			return build().test();
+
+		public Builder sendNullInputs(boolean sendNullInputs) {
+			testHelper.sendNullInputs = sendNullInputs;
+			return this;
 		}
 
 		public ModuleTestHelper build() {
@@ -93,6 +95,10 @@ public class ModuleTestHelper {
 			testHelper.initializeAndValidate();
 			return testHelper;
 		}
+
+		public boolean test() throws IOException, ClassNotFoundException {
+			return build().test();
+		}
 	}
 
 
@@ -101,12 +107,14 @@ public class ModuleTestHelper {
 	private Map<String, List<Object>> outputValuesByName;
 	private Map<String, List<Object>> uiChannelMessages;
 	private Map<Integer, Date> ticks;
-	private int inputValueCount;
-	private int outputValueCount;
-	private boolean clearStateCalled = false;
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
 	private int timeStep = 0;
+	private boolean sendNullInputs = true;
+
+	private int inputValueCount;
+	private int outputValueCount;
+	private boolean clearStateCalled = false;
 
 	private ModuleTestHelper() {}
 
@@ -134,6 +142,8 @@ public class ModuleTestHelper {
 			if (i < inputValueCount) {
 				serializeAndDeserializeModel(withInBetweenSerializations);
 				feedInputs(i);
+			} else {
+				module.setSendPending(true); // TODO: ugly hack, isn't concern of user of module!
 			}
 
 			// Activate module
@@ -161,16 +171,19 @@ public class ModuleTestHelper {
 
 	private void feedInputs(int i) {
 		for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
-            Input input = module.getInput(entry.getKey());
-            if (input == null) {
-                throw new IllegalArgumentException("No input found with name " + entry.getKey());
-            }
-            input.receive(entry.getValue().get(i));
-        }
+			Input input = module.getInput(entry.getKey());
+			if (input == null) {
+				throw new IllegalArgumentException("No input found with name " + entry.getKey());
+			}
+			Object val = entry.getValue().get(i);
+			if (val != null || sendNullInputs) {
+				input.receive(val);
+			}
+		}
 	}
 
 	private void activateModule(int i) {
-		module.sendOutput();
+		module.trySendOutput();
 		if (isTimedMode() && ticks.containsKey(i)) {
 			((ITimeListener) module).setTime(ticks.get(i));
 		}
@@ -205,26 +218,9 @@ public class ModuleTestHelper {
 
 	private void throwException(String outputName, int i, int outputIndex,
 								boolean withInBetweenSerializations, Object value, Object target)  {
-
-		StringBuilder sb = new StringBuilder("Incorrect value at output '")
-				.append(outputName).append("'")
-				.append(" at index ").append(outputIndex)
-				.append(" (input index ").append(i).append(")")
-				.append(withInBetweenSerializations ? " with" : " without").append(" serialization, ")
-				.append("clearState() called? ").append(clearStateCalled)
-				.append("! Output: ").append(value)
-				.append(", Target: ").append(target)
-				.append(", Inputs: [");
-
-		for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
-			sb.append(entry.getKey())
-					.append(":")
-					.append(entry.getValue())
-					.append(", ");
-		}
-		sb.append("]");
-
-		throw new RuntimeException(sb.toString());
+		String msg = "%s: mismatch at %d (inputIndex %d), was '%s' expected '%s'" +
+				moduleStateAsString(withInBetweenSerializations);
+		throw new RuntimeException(String.format(msg, outputName, outputIndex, i, value, target));
 	}
 
 	private void furtherTime() {
@@ -233,7 +229,7 @@ public class ModuleTestHelper {
 
 	private void validateUiChannelMessages(boolean withInBetweenSerializations) {
 
-		String moduleState = " (clearState=" + clearStateCalled + ", serialized=" + withInBetweenSerializations + ")";
+		String moduleState = moduleStateAsString(withInBetweenSerializations);
 
 		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
 		if (uiChannel == null) {
@@ -280,6 +276,10 @@ public class ModuleTestHelper {
 				}
 			}
 		}
+	}
+
+	private String moduleStateAsString(boolean withInBetweenSerializations) {
+		return " (clearState=" + clearStateCalled + ", serialized=" + withInBetweenSerializations + ")";
 	}
 
 	private boolean isUiChannelMode() {
