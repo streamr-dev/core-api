@@ -3,10 +3,7 @@ package com.unifina.utils.testutils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.Serializer;
@@ -54,6 +51,11 @@ public class ModuleTestHelper {
 			return this;
 		}
 
+		public ModuleTestHelper.Builder uiChannelMessages(Map<String, List<Object>> uiChannelMessages) {
+			testHelper.turnOnUiChannelMode(uiChannelMessages);
+			return this;
+		}
+
 		public ModuleTestHelper.Builder ticks(Map<Integer, Date> ticks) {
 			testHelper.turnOnTimedMode(ticks);
 			return this;
@@ -92,6 +94,7 @@ public class ModuleTestHelper {
 	private AbstractSignalPathModule module;
 	private Map<String, List<Object>> inputValuesByName;
 	private Map<String, List<Object>> outputValuesByName;
+	private Map<String, List<Object>> uiChannelMessages;
 	private Map<Integer, Date> ticks;
 	private int inputValueCount;
 	private int outputValueCount;
@@ -108,16 +111,22 @@ public class ModuleTestHelper {
 		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
 		connectCollectorsToModule(module);
+
+		if (module.globals == null) {
+			module.globals = new Globals();
+			module.globals.time = new Date(0);
+			module.globals.setUiChannel(new FakePushChannel());
+		}
 	}
 
 	public boolean test() throws IOException, ClassNotFoundException {
 		boolean a = test(false);		// Clean slate test
 
-		clearModuleAndCollectors();
+		clearModuleAndCollectorsAndChannels();
 		clearStateCalled = true;
 		boolean b = test(false);      // Test that clearState() works
 
-		clearModuleAndCollectors();
+		clearModuleAndCollectorsAndChannels();
 		boolean c = test(true);       // Test that serialization works
 
 		return a && b && c;
@@ -148,6 +157,11 @@ public class ModuleTestHelper {
 			}
 		}
 
+		// Test ui channel messages
+		if (isUiChannelMode()) {
+			validateUiChannelMessages(withInBetweenSerializations);
+		}
+
 		return true;
 	}
 
@@ -166,6 +180,10 @@ public class ModuleTestHelper {
 		if (isTimedMode() && ticks.containsKey(i)) {
 			((ITimeListener) module).setTime(ticks.get(i));
 		}
+	}
+
+	private boolean shouldValidateOutput(int i, int skip) {
+		return i >= skip && (!isTimedMode() || ticks.containsKey(i));
 	}
 
 	private void validateOutput(boolean withInBetweenSerializations, int outputIndex, int i) {
@@ -189,10 +207,6 @@ public class ModuleTestHelper {
 				throwException(entry.getKey(), i, outputIndex, withInBetweenSerializations, actual, expected);
 			}
 		}
-	}
-
-	private boolean shouldValidateOutput(int i, int skip) {
-		return i >= skip && (!isTimedMode() || ticks.containsKey(i));
 	}
 
 	private void throwException(String outputName, int i, int outputIndex,
@@ -219,6 +233,61 @@ public class ModuleTestHelper {
 		throw new RuntimeException(sb.toString());
 	}
 
+	private void validateUiChannelMessages(boolean withInBetweenSerializations) {
+
+		String moduleState = " (clearState= " + clearStateCalled + ", serialized=" + withInBetweenSerializations + ")";
+
+		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
+		if (uiChannel == null) {
+			throw new RuntimeException("uiChannel: module.globals.uiChannel unexpectedly null" + moduleState);
+		}
+
+		for (Map.Entry<String, List<Object>> expectedEntry : uiChannelMessages.entrySet()) {
+			String channel = expectedEntry.getKey();
+			List<Object> expectedMessages = expectedEntry.getValue();
+
+			if (!uiChannel.receivedContentByChannel.containsKey(channel)) {
+				throw new RuntimeException(String.format("uiChannel: channel '%s' was never pushed to" + moduleState,
+						channel));
+			}
+
+			List<Object> actualMessages = uiChannel.receivedContentByChannel.get(channel);
+			for (int i = 0; i < Math.max(expectedMessages.size(), actualMessages.size()); ++i) {
+
+				if (actualMessages.size() <= i) {
+					String msg = "uiChannel: expected %d messages on channel '%s' but received only %d";
+					throw new RuntimeException(String.format(msg + moduleState,
+							expectedMessages.size(),
+							channel,
+							actualMessages.size()
+					));
+				}
+
+				if (expectedMessages.size() <= i) {
+					String msg = "uiChannel: expected %d messages on channel '%s' but received %d additional: %s";
+					throw new RuntimeException(String.format(msg + moduleState,
+							expectedMessages.size(),
+							channel,
+							actualMessages.size() - expectedMessages.size(),
+							Arrays.toString(actualMessages.subList(i, actualMessages.size()).toArray())
+					));
+				}
+
+				Object actual = actualMessages.get(i);
+				Object expected = expectedMessages.get(i);
+
+				if (!actual.equals(expected)) {
+					String msg = "uiChannel: mismatch at %d, was '%s' expected '%s'" + moduleState;
+					throw new RuntimeException(String.format(msg, i, actual, expected));
+				}
+			}
+		}
+	}
+
+	private boolean isUiChannelMode() {
+		return uiChannelMessages != null;
+	}
+
 	private boolean isTimedMode() {
 		return ticks != null;
 	}
@@ -242,7 +311,8 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private void clearModuleAndCollectors() {
+	private void clearModuleAndCollectorsAndChannels() {
+		module.globals.setUiChannel(new FakePushChannel());
 		module.clearState();
 		for (Output<Object> output : module.getOutputs()) {
 			for (Input<Object> target : output.getTargets()) {
@@ -251,6 +321,15 @@ public class ModuleTestHelper {
 			}
 		}
 	}
+
+	private void turnOnUiChannelMode(Map<String, List<Object>> uiChannelMessages) {
+		if (module instanceof ModuleWithUI) {
+			this.uiChannelMessages = new HashMap<>(uiChannelMessages);
+		} else {
+			throw new RuntimeException("Module does not extend ModuleWithUI");
+		}
+	}
+
 
 	private void turnOnTimedMode(Map<Integer, Date> ticks) {
 		if (module instanceof ITimeListener) {

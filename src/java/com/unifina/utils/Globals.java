@@ -56,6 +56,12 @@ public class Globals {
 	protected Date endDate = null;
 	
 	protected PushChannel uiChannel = null;
+
+	/**
+	 * Construct fake environment, e.g., for testing.
+	 */
+	public Globals() {
+	}
 	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
 		if (signalPathContext==null)

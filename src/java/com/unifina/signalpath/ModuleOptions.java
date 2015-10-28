@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class ModuleOptions extends LinkedHashMap<String, Object> {
 	
-	ModuleOptions() {
+	public ModuleOptions() {
 
 	}
 	
