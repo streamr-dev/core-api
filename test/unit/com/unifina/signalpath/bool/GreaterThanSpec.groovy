@@ -10,6 +10,7 @@ class GreaterThanSpec extends Specification {
     def setup() {
 		module = new GreaterThan()
 		module.init()
+		module.configure([:])
     }
 
     def cleanup() {

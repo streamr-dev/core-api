@@ -10,6 +10,7 @@ class SumSpec extends Specification {
 	def setup() {
 		module = new Sum()
 		module.init()
+		module.configure([:])
 	}
 
 	void "sum without window gives the right answer"() {

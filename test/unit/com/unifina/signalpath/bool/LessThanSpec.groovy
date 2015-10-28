@@ -10,6 +10,7 @@ class LessThanSpec extends Specification {
     def setup() {
 		module = new LessThan()
 		module.init()
+		module.configure([:])
     }
 
     def cleanup() {

@@ -10,6 +10,7 @@ class EqualsSpec extends Specification {
     def setup() {
 		module = new Equals()
 		module.init()
+		module.configure([:])
     }
 
     def cleanup() {

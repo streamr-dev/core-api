@@ -10,6 +10,7 @@ class KurtosisSpec extends Specification {
     def setup() {
 		module = new Kurtosis()
 		module.init()
+		module.configure([:])
     }
 	
 	void "kurtosis gives the right answer"() {
