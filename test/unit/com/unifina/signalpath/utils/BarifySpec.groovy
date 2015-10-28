@@ -1,6 +1,5 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
@@ -9,10 +8,7 @@ class BarifySpec extends Specification {
 	Barify module
 
 	def setup() {
-		def globals = Stub(Globals)
-		globals.time = new Date(0)
 		module = new Barify()
-		module.globals = globals
 		module.init()
 	}
 

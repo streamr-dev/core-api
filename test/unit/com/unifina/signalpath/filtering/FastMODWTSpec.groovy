@@ -16,7 +16,6 @@ class FastMODWTSpec extends Specification {
 		when:
 		module.getInput("level").receive(2)
 		module.getInput("wavelet").receive("d4")
-		module.initialize()
 		Map inputValues = [
 			in: (1..14).collect {it.doubleValue()}
 		]

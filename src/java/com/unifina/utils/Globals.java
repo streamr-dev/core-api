@@ -61,6 +61,7 @@ public class Globals {
 	 * Construct fake environment, e.g., for testing.
 	 */
 	public Globals() {
+		signalPathContext = new HashMap();
 	}
 	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {

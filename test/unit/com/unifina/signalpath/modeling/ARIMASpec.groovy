@@ -9,6 +9,7 @@ class ARIMASpec extends Specification {
 	
     def setup() {
 		module = new ARIMA()
+		module.init()
 		module.configure([
 		    options: [
 		        "AR(p)": [value: 2],
@@ -16,8 +17,6 @@ class ARIMASpec extends Specification {
 				"MA(q)": [value: 2],
 		    ]
 		])
-		module.initialize()
-		module.init()
     }
 
 	void "ARIMA gives the right answer"() {

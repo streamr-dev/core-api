@@ -71,6 +71,11 @@ public class ModuleTestHelper {
 			return this;
 		}
 
+		public ModuleTestHelper.Builder timeToFurtherPerIteration(int timeStep) {
+			testHelper.timeStep = timeStep;
+			return this;
+		}
+
 		public boolean test() throws IOException, ClassNotFoundException {
 			return build().test();
 		}
@@ -101,23 +106,9 @@ public class ModuleTestHelper {
 	private boolean clearStateCalled = false;
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
+	private int timeStep = 0;
 
-	private ModuleTestHelper() {
-	}
-
-	private void initializeAndValidate() {
-		inputValueCount = inputValuesByName.isEmpty() ? 0 : inputValuesByName.values().iterator().next().size();
-		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput - skip;
-		validateThatListSizesMatch();
-		falsifyNoRepeats(module);
-		connectCollectorsToModule(module);
-
-		if (module.globals == null) {
-			module.globals = new Globals();
-			module.globals.time = new Date(0);
-			module.globals.setUiChannel(new FakePushChannel());
-		}
-	}
+	private ModuleTestHelper() {}
 
 	public boolean test() throws IOException, ClassNotFoundException {
 		boolean a = test(false);		// Clean slate test
@@ -155,6 +146,9 @@ public class ModuleTestHelper {
 				validateOutput(withInBetweenSerializations, outputIndex, i);
 				++outputIndex;
 			}
+
+			// Further global time
+			furtherTime();
 		}
 
 		// Test ui channel messages
@@ -233,9 +227,13 @@ public class ModuleTestHelper {
 		throw new RuntimeException(sb.toString());
 	}
 
+	private void furtherTime() {
+		module.globals.time = new Date(module.globals.time.getTime() + timeStep);
+	}
+
 	private void validateUiChannelMessages(boolean withInBetweenSerializations) {
 
-		String moduleState = " (clearState= " + clearStateCalled + ", serialized=" + withInBetweenSerializations + ")";
+		String moduleState = " (clearState=" + clearStateCalled + ", serialized=" + withInBetweenSerializations + ")";
 
 		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
 		if (uiChannel == null) {
@@ -312,7 +310,7 @@ public class ModuleTestHelper {
 	}
 
 	private void clearModuleAndCollectorsAndChannels() {
-		module.globals.setUiChannel(new FakePushChannel());
+		setUpGlobals(module);
 		module.clearState();
 		for (Output<Object> output : module.getOutputs()) {
 			for (Input<Object> target : output.getTargets()) {
@@ -320,6 +318,7 @@ public class ModuleTestHelper {
 				target.getOwner().clear();
 			}
 		}
+		module.connectionsReady();
 	}
 
 	private void turnOnUiChannelMode(Map<String, List<Object>> uiChannelMessages) {
@@ -339,6 +338,18 @@ public class ModuleTestHelper {
 		}
 	}
 
+
+	// Initialization steps below
+
+	private void initializeAndValidate() {
+		inputValueCount = inputValuesByName.isEmpty() ? 0 : inputValuesByName.values().iterator().next().size();
+		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput - skip;
+		validateThatListSizesMatch();
+		falsifyNoRepeats(module);
+		connectCollectorsToModule(module);
+		setUpGlobals(module);
+		module.connectionsReady();
+	}
 
 	private void validateThatListSizesMatch() {
 		if (skip >= inputValueCount && extraIterationsAfterInput == 0) {
@@ -376,6 +387,12 @@ public class ModuleTestHelper {
 			collector.init();
 			collector.attachToModule(output);
 		}
+	}
+
+	private static void setUpGlobals(AbstractSignalPathModule module) {
+		module.globals = new Globals();
+		module.globals.time = new Date(0);
+		module.globals.setUiChannel(new FakePushChannel());
 	}
 
 	private static class Collector extends AbstractSignalPathModule {
