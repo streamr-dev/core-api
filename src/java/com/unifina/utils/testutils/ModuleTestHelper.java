@@ -88,6 +88,11 @@ public class ModuleTestHelper {
 			return this;
 		}
 
+		public Builder afterEachTestCase(Closure<?> afterEachTestCase) {
+			testHelper.afterEachTestCase = afterEachTestCase;
+			return this;
+		}
+
 		public ModuleTestHelper build() {
 			if (testHelper.module == null) {
 				throw new RuntimeException("Field module cannot be null");
@@ -118,6 +123,7 @@ public class ModuleTestHelper {
 	private int timeStep = 0;
 	private boolean sendNullInputs = true;
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
+	private Closure<?> afterEachTestCase = Closure.IDENTITY;
 
 	private int inputValueCount;
 	private int outputValueCount;
@@ -173,6 +179,7 @@ public class ModuleTestHelper {
 			validateUiChannelMessages(withInBetweenSerializations);
 		}
 
+		afterEachTestCase.call();
 		return true;
 	}
 
