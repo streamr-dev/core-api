@@ -2,7 +2,7 @@ package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
 
-class Stream implements Comparable {
+class Stream implements Comparable, Serializable {
 	Long id
 	String uuid
 	String apiKey

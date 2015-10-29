@@ -10,6 +10,7 @@ import com.unifina.serialization.Serializer;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
+import groovy.lang.Closure;
 
 
 /**
@@ -82,6 +83,11 @@ public class ModuleTestHelper {
 			return this;
 		}
 
+		public Builder overrideGlobals(Closure overrideGlobalsClosure) {
+			testHelper.overrideGlobalsClosure = overrideGlobalsClosure;
+			return this;
+		}
+
 		public ModuleTestHelper build() {
 			if (testHelper.module == null) {
 				throw new RuntimeException("Field module cannot be null");
@@ -111,6 +117,7 @@ public class ModuleTestHelper {
 	private int skip = 0;
 	private int timeStep = 0;
 	private boolean sendNullInputs = true;
+	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 
 	private int inputValueCount;
 	private int outputValueCount;
@@ -224,7 +231,9 @@ public class ModuleTestHelper {
 	}
 
 	private void furtherTime() {
-		module.globals.time = new Date(module.globals.time.getTime() + timeStep);
+		if (timeStep != 0) {
+			module.globals.time = new Date(module.globals.time.getTime() + timeStep);
+		}
 	}
 
 	private void validateUiChannelMessages(boolean withInBetweenSerializations) {
@@ -397,10 +406,11 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private static void setUpGlobals(AbstractSignalPathModule module) {
+	private void setUpGlobals(AbstractSignalPathModule module) {
 		module.globals = new Globals();
 		module.globals.time = new Date(0);
 		module.globals.setUiChannel(new FakePushChannel());
+		module.globals = overrideGlobalsClosure.call(module.globals);
 	}
 
 	private static class Collector extends AbstractSignalPathModule {
