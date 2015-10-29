@@ -5,24 +5,26 @@ import spock.lang.Specification
 
 class LinearMapperSpec extends Specification {
 	
-	AddMulti module
+	LinearMapper module
 	
     def setup() {
-		module = new AddMulti()
+		module = new LinearMapper()
 		module.init()
-		module.configure([options: [inputs: [value: 4]] ])
+		module.configure([params: [
+		    [name: "xMin", value: -0.5],
+			[name: "xMax", value: 1],
+			[name: "yMin", value: 0],
+			[name: "yMax", value: 1],
+		]])
     }
 
-	void "addMulti gives the right answer"() {
+	void "linearMapper gives the right answer"() {
 		when:
 		Map inputValues = [
-			in1: [1, 2, 3, 4, 5].collect {it?.doubleValue()},
-			in2: [5, 10, 15, 20, 25].collect {it?.doubleValue()},
-			in3: [100, 0, 100, 0, 100].collect {it?.doubleValue()},
-			in4: [-10, -1, -1000, 0, -5].collect {it?.doubleValue()}
+			in: [0, -0.3, 0.3, 0.5, 1, 13, -13, -0.5, -4, -1, 0.3].collect {it?.doubleValue()},
 		]
 		Map outputValues = [
-			"sum": [96, 11, -882, 24, 125].collect {it?.doubleValue()}
+			"out": [0.33333333, 0.13333333, 0.53333333, 0.66666667, 1, 1, 0, 0, 0, 0, 0.53333333].collect {it?.doubleValue()}
 		]
 		
 		then:
