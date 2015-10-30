@@ -26,7 +26,7 @@ class EventTableSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			table: [
-				[hdr: [headers: ["timestamp", "input1", "input2", "input3"]]],
+				[hdr: [headers: ["timestamp", "outputForinput1", "outputForinput2", "outputForinput3"]]],
 				[nr: ["1970-01-01 02:00:00.000", "a", "1", null]],
 				[nr: ["1970-01-01 02:01:00.000", "b", "2", null]],
 				[nr: ["1970-01-01 02:02:00.000", "c", "3", "hello"]],

@@ -24,8 +24,6 @@ class MergeSpec extends Specification {
 		]
 
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.sendNullInputs(false) // null inputs are not sent to module
-			.test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

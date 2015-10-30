@@ -24,8 +24,6 @@ class SamplerConditionalSpec extends Specification {
 		]
 
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.sendNullInputs(false)
-			.test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

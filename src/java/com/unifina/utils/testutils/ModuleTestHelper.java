@@ -77,12 +77,6 @@ public class ModuleTestHelper {
 			return this;
 		}
 
-
-		public Builder sendNullInputs(boolean sendNullInputs) {
-			testHelper.sendNullInputs = sendNullInputs;
-			return this;
-		}
-
 		public Builder overrideGlobals(Closure overrideGlobalsClosure) {
 			testHelper.overrideGlobalsClosure = overrideGlobalsClosure;
 			return this;
@@ -121,25 +115,26 @@ public class ModuleTestHelper {
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
 	private int timeStep = 0;
-	private boolean sendNullInputs = true;
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
 
 	private int inputValueCount;
 	private int outputValueCount;
 	private boolean clearStateCalled = false;
+	private boolean serializationMode = false;
 
 	private ModuleTestHelper() {}
 
 	public boolean test() throws IOException, ClassNotFoundException {
-		boolean a = test(false);		// Clean slate test
+		boolean a = runTestCase();		// Clean slate test
 
 		clearModuleAndCollectorsAndChannels();
 		clearStateCalled = true;
-		boolean b = test(false);      // Test that clearState() works
+		boolean b = runTestCase();      // Test that clearState() works
 
 		clearModuleAndCollectorsAndChannels();
-		boolean c = test(true);       // Test that serialization works
+		serializationMode = true;
+		boolean c = runTestCase();       // Test that serialization works
 
 		return a && b && c;
 	}
@@ -147,26 +142,26 @@ public class ModuleTestHelper {
 	/**
 	 * Runs a test.
 	 */
-	public boolean test(boolean withInBetweenSerializations) throws IOException, ClassNotFoundException {
+	public boolean runTestCase() throws IOException, ClassNotFoundException {
 		int outputIndex = 0;
 		for (int i = 0; i < inputValueCount + extraIterationsAfterInput; ++i) {
 
 			// Set input values
 			if (i < inputValueCount) {
-				serializeAndDeserializeModel(withInBetweenSerializations);
+				serializeAndDeserializeModel();
 				feedInputs(i);
 			} else {
-				module.setSendPending(true); // TODO: ugly hack, isn't concern of user of module!
+				module.setSendPending(true); // TODO: hack, isn't concern of user of module!
 			}
 
 			// Activate module
-			serializeAndDeserializeModel(withInBetweenSerializations);
+			serializeAndDeserializeModel();
 			activateModule(i);
 
 			// Test outputs
-			serializeAndDeserializeModel(withInBetweenSerializations);
+			serializeAndDeserializeModel();
 			if (shouldValidateOutput(i, skip)) {
-				validateOutput(withInBetweenSerializations, outputIndex, i);
+				validateOutput(outputIndex, i);
 				++outputIndex;
 			}
 
@@ -176,7 +171,7 @@ public class ModuleTestHelper {
 
 		// Test ui channel messages
 		if (isUiChannelMode()) {
-			validateUiChannelMessages(withInBetweenSerializations);
+			validateUiChannelMessages();
 		}
 
 		afterEachTestCase.call();
@@ -190,8 +185,8 @@ public class ModuleTestHelper {
 				throw new IllegalArgumentException("No input found with name " + entry.getKey());
 			}
 			Object val = entry.getValue().get(i);
-			if (val != null || sendNullInputs) {
-				input.receive(val);
+			if (val != null) {
+				input.getSource().send(val);
 			}
 		}
 	}
@@ -207,7 +202,7 @@ public class ModuleTestHelper {
 		return i >= skip && (!isTimedMode() || ticks.containsKey(i));
 	}
 
-	private void validateOutput(boolean withInBetweenSerializations, int outputIndex, int i) {
+	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
 			Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
@@ -225,15 +220,13 @@ public class ModuleTestHelper {
 					(expected != null && actual == null) ||
 					expected != null && !expected.equals(actual)) {
 
-				throwException(entry.getKey(), i, outputIndex, withInBetweenSerializations, actual, expected);
+				throwException(entry.getKey(), i, outputIndex, actual, expected);
 			}
 		}
 	}
 
-	private void throwException(String outputName, int i, int outputIndex,
-								boolean withInBetweenSerializations, Object value, Object target)  {
-		String msg = "%s: mismatch at %d (inputIndex %d), was '%s' expected '%s'" +
-				moduleStateAsString(withInBetweenSerializations);
+	private void throwException(String outputName, int i, int outputIndex, Object value, Object target)  {
+		String msg = "%s: mismatch at %d (inputIndex %d), was '%s' expected '%s'" + moduleStateAsString();
 		throw new RuntimeException(String.format(msg, outputName, outputIndex, i, value, target));
 	}
 
@@ -243,9 +236,9 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private void validateUiChannelMessages(boolean withInBetweenSerializations) {
+	private void validateUiChannelMessages() {
 
-		String moduleState = moduleStateAsString(withInBetweenSerializations);
+		String moduleState = moduleStateAsString();
 
 		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
 		if (uiChannel == null) {
@@ -294,8 +287,8 @@ public class ModuleTestHelper {
 		}
 	}
 
-	private String moduleStateAsString(boolean withInBetweenSerializations) {
-		return " (clearState=" + clearStateCalled + ", serialized=" + withInBetweenSerializations + ")";
+	private String moduleStateAsString() {
+		return " (clearState=" + clearStateCalled + ", serialized=" + serializationMode + ")";
 	}
 
 	private boolean isUiChannelMode() {
@@ -306,9 +299,9 @@ public class ModuleTestHelper {
 		return ticks != null;
 	}
 
-	private void serializeAndDeserializeModel(boolean withInBetweenSerializations)
+	private void serializeAndDeserializeModel()
 			throws IOException, ClassNotFoundException {
-		if (withInBetweenSerializations) {
+		if (serializationMode) {
 
 			// Globals is rather tricky to serialize so temporarily pull out
 			Globals globalsTempHolder = module.globals;
@@ -317,7 +310,7 @@ public class ModuleTestHelper {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Serializer.serialize(module, out);
 
-			//Serializer.serializeToFile(module, "temp.out");
+			Serializer.serializeToFile(module, "temp.out");
 
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 			module = (AbstractSignalPathModule) Serializer.deserialize(in);
@@ -370,6 +363,7 @@ public class ModuleTestHelper {
 		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput - skip;
 		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
+		initAndAttachOutputsToModuleInputs();
 		connectCollectorsToModule(module);
 		setUpGlobals(module);
 		module.connectionsReady();
@@ -398,6 +392,15 @@ public class ModuleTestHelper {
 			if (output instanceof TimeSeriesOutput) {
 				((TimeSeriesOutput) output).noRepeat = false;
 			}
+		}
+	}
+
+	private void initAndAttachOutputsToModuleInputs() {
+		for (String inputName : inputValuesByName.keySet()) {
+			Input input = module.getInput(inputName);
+			Output output = new Output(null, "outputFor" + inputName, input.getTypeName());
+			output.setDisplayName("outputFor" + inputName);
+			output.connect(input);
 		}
 	}
 
