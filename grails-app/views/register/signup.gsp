@@ -13,7 +13,7 @@
 <body>
 	<g:if test='${signupOk}'>
 	
-		<h1 class="form-header">Thanks for signing up!</h1>
+		<h1 id="signup-ok" class="form-header">Thanks for signing up!</h1>
 	
 		<div class="panel">
 			<p>
