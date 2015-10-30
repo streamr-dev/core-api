@@ -16,6 +16,8 @@ public class Serializer {
 		conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
+		conf.registerSerializer(Double.class, new DoubleSerializer(), true);
+		conf.registerSerializer(DoubleSerializer.Wrapper.class, new DoubleWrapperSerializer(), true);
 	}
 
     public static void serializeToFile(Object object, String filename) throws IOException {
@@ -42,6 +44,50 @@ public class Serializer {
 
 
 	// Custom serializers below
+
+	// TODO: hack for getting NaN double values serialized, definitely not optimal
+	private static class DoubleWrapperSerializer extends FSTBasicObjectSerializer {
+
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			out.writeStringUTF(((DoubleSerializer.Wrapper)toWrite).d);
+		}
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			return Double.parseDouble(in.readStringUTF());
+		}
+	}
+
+	// TODO: hack for getting NaN double values serialized, definitely not optimal
+	static class DoubleSerializer extends FSTBasicObjectSerializer {
+
+		static class Wrapper implements Serializable {
+			String d = null;
+
+			public Wrapper(Object o) {
+				Double d = (Double) o;
+				this.d = d.toString();
+			}
+		}
+
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			out.writeObjectInternal(new Wrapper(toWrite), conf.getClazzInfo(Wrapper.class));
+		}
+	}
 
 	private static class DescriptiveStatisticsSerializer extends FSTBasicObjectSerializer {
 
