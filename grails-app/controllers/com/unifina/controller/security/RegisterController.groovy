@@ -1,5 +1,6 @@
 package com.unifina.controller.security
 
+import grails.util.Environment
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
@@ -39,8 +40,18 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
             render view: 'signup', model: [ user: cmd ]
             return
         }
-
-        SignupInvite invite = signupCodeService.create(cmd.username)
+        SignupInvite invite
+        if(Environment.current == Environment.TEST){
+            invite = new SignupInvite(
+                    username: cmd.username,
+                    code: cmd.username.replaceAll("@", "_"),
+                    sent: true,
+                    used: false
+            )
+            invite.save()
+        } else {
+            invite = signupCodeService.create(cmd.username)
+        }
 		
         mailService.sendMail {
             from grailsApplication.config.unifina.email.sender
@@ -91,6 +102,8 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
         def invite = SignupInvite.findByCode(cmd.invite)
         if (!invite || invite.used || !invite.sent) {
             flash.message = "Sorry, that is not a valid invitation code"
+            if(invite)
+                flash.message+=". Code: $invite.code"
             redirect action: 'signup'
             return
         }
