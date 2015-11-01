@@ -211,9 +211,8 @@ public class ModuleTestHelper {
 	}
 
 	private void activateModule(int i) {
-		if (!isTimedMode()) {
-			module.trySendOutput();
-		} else if (ticks.containsKey(i)) {
+		module.trySendOutput();
+		if (isTimedMode() && ticks.containsKey(i)) {
 			((ITimeListener) module).setTime(ticks.get(i));
 		}
 	}
