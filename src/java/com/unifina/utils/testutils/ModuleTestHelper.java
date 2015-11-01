@@ -87,6 +87,11 @@ public class ModuleTestHelper {
 			return this;
 		}
 
+		public Builder beforeEachTestCase(Closure<?> beforeEachTestCase) {
+			testHelper.beforeEachTestCase = beforeEachTestCase;
+			return this;
+		}
+
 		public ModuleTestHelper build() {
 			if (testHelper.module == null) {
 				throw new RuntimeException("Field module cannot be null");
@@ -97,12 +102,24 @@ public class ModuleTestHelper {
 			if (testHelper.outputValuesByName == null) {
 				throw new RuntimeException("Field outputValuesByName cannot be null");
 			}
+			verifyNoTicksBeforeSkip();
 			testHelper.initializeAndValidate();
 			return testHelper;
 		}
 
 		public boolean test() throws IOException, ClassNotFoundException {
 			return build().test();
+		}
+
+		private void verifyNoTicksBeforeSkip() {
+			if (testHelper.ticks != null) {
+				for (Integer tickAt : testHelper.ticks.keySet()) {
+					if (tickAt < testHelper.skip) {
+						String msg = "A tick (at %d) occurred before skip %d.";
+						throw new RuntimeException(String.format(msg, tickAt, testHelper.skip));
+					}
+				}
+			}
 		}
 	}
 
@@ -116,6 +133,7 @@ public class ModuleTestHelper {
 	private int skip = 0;
 	private int timeStep = 0;
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
+	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
 
 	private int inputValueCount;
@@ -143,6 +161,7 @@ public class ModuleTestHelper {
 	 * Runs a test.
 	 */
 	public boolean runTestCase() throws IOException, ClassNotFoundException {
+		beforeEachTestCase.call(module);
 		int outputIndex = 0;
 		for (int i = 0; i < inputValueCount + extraIterationsAfterInput; ++i) {
 
@@ -192,8 +211,9 @@ public class ModuleTestHelper {
 	}
 
 	private void activateModule(int i) {
-		module.trySendOutput();
-		if (isTimedMode() && ticks.containsKey(i)) {
+		if (!isTimedMode()) {
+			module.trySendOutput();
+		} else if (ticks.containsKey(i)) {
 			((ITimeListener) module).setTime(ticks.get(i));
 		}
 	}
@@ -310,7 +330,7 @@ public class ModuleTestHelper {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Serializer.serialize(module, out);
 
-			Serializer.serializeToFile(module, "temp.out");
+			//Serializer.serializeToFile(module, "temp.out");
 
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 			module = (AbstractSignalPathModule) Serializer.deserialize(in);
@@ -360,7 +380,7 @@ public class ModuleTestHelper {
 
 	private void initializeAndValidate() {
 		inputValueCount = inputValuesByName.isEmpty() ? 0 : inputValuesByName.values().iterator().next().size();
-		outputValueCount = (isTimedMode() ? ticks.size() : inputValueCount) + extraIterationsAfterInput - skip;
+		outputValueCount = isTimedMode() ? ticks.size() : inputValueCount + extraIterationsAfterInput - skip;
 		validateThatListSizesMatch();
 		falsifyNoRepeats(module);
 		initAndAttachOutputsToModuleInputs();

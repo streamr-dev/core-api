@@ -15,9 +15,14 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 	StringParameter startTime = new StringParameter(this,"startTime","00:00:00");
 	StringParameter endTime = new StringParameter(this,"endTime","23:59:59");
 
-	TimeOfDayUtil util;
+	transient TimeOfDayUtil util;
 	
 	Double currentOut = null;
+
+	String lastStartTime = null;
+	String lastEndTime = null;
+	Date lastBaseDay = null;
+
 	
 	@Override
 	public void init() {
@@ -28,9 +33,11 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 	
 	@Override
 	public void initialize() {
-		util = new TimeOfDayUtil(startTime.getValue(), endTime.getValue(), globals.getUserTimeZone());
+		lastStartTime = startTime.getValue();
+		lastEndTime = endTime.getValue();
+		initUtilIfNeeded();
 	}
-	
+
 	@Override
 	public void clearState() {
 		currentOut = null;
@@ -44,11 +51,13 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 	@Override
 	public void onDay(Date day) {
 		super.onDay(day);
-		util.setBaseDate(day);
+		lastBaseDay = day;
+		util.setBaseDate(lastBaseDay);
 	}
 	
 	@Override
 	public void setTime(Date timestamp) {
+		initUtilIfNeeded();
 		if (util.isInRange(timestamp)) {
 			if (currentOut==null || currentOut==0) {
 				out.send(1D);
@@ -58,6 +67,15 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 		else if (currentOut==null || currentOut==1) {
 			out.send(0D);
 			currentOut = 0.0;
+		}
+	}
+
+	private void initUtilIfNeeded() {
+		if (util == null) {
+			util = new TimeOfDayUtil(lastStartTime, lastEndTime, globals.getUserTimeZone());
+			if (lastBaseDay != null) {
+				util.setBaseDate(lastBaseDay);
+			}
 		}
 	}
 

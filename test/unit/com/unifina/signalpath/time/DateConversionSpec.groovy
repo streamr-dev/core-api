@@ -1,5 +1,6 @@
 package com.unifina.signalpath.time
 
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -25,10 +26,38 @@ class DateConversionSpec extends Specification {
 		module.connectionsReady()
     }
 
-    def cleanup() {
-		
-    }
-	
+	void "dateConversion gives the right answer"() {
+		when:
+		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
+		Map inputValues = [
+			date: [
+				new Date(2015 - 1900, 9, 15, 10, 35, 10),
+				"2000-01-01 12:45:55",
+				Double.valueOf(1000 * 60 * 15) // +15 minutes to epoch
+			],
+		]
+		Map outputValues = [
+			date: ["2015-10-15 07:35:10", "2000-01-01 12:45:55", "1970-01-01 00:15:00"],
+			ts: [
+				new Date(2015 - 1900, 9, 15, 10, 35, 10).getTime(),
+				new Date(2000 - 1900, 0, 1, 14, 45, 55).getTime(),
+				1000 * 60 * 15
+			].collect { it?.doubleValue() },
+			dayOfWeek: ["Thu", "Sat", "Thu"],
+			years: [2015, 2000, 1970].collect { it?.doubleValue() },
+			months: [10, 1, 1].collect { it?.doubleValue() },
+			days: [15, 1, 1].collect { it?.doubleValue() },
+			hours: [7, 0, 0].collect { it?.doubleValue() },
+			minutes: [35, 45, 15].collect { it?.doubleValue() },
+			seconds: [10, 55, 0].collect { it?.doubleValue() },
+			milliseconds: [0, 0, 0].collect { it?.doubleValue() }
+		]
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.test()
+	}
+
 	void "timestamp output must be correct from date input"() {
 		when: "time is set and asked"
 		Date date = new Date()
