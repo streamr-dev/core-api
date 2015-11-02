@@ -2,8 +2,11 @@ package com.unifina.signalpath.charts
 
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
+@TestMixin(GrailsUnitTestMixin)
 class TimeSeriesChartSpec extends Specification {
 
 	TimeSeriesChart module
@@ -11,7 +14,6 @@ class TimeSeriesChartSpec extends Specification {
 	def setup() {
 		module = new TimeSeriesChart()
 		module.globals = new Globals()
-		module.init()
 		module.configure([
 			uiChannel: [id: "timeSeries"],
 			options: [
@@ -23,6 +25,7 @@ class TimeSeriesChartSpec extends Specification {
 	}
 
 	void "timeSeriesChart (csv off) sends correct data to uiChannel"() {
+		module.init()
 		when:
 		Map inputValues = [
 			in1: [0,         null, null, null, 0.125, 0.05, null, null].collect {it?.doubleValue()},
@@ -61,5 +64,30 @@ class TimeSeriesChartSpec extends Specification {
 				g
 			}
 			.test()
+	}
+
+	void "timeSeriesChart (csv on) sends correct data to uiChannel"() {
+		module.globals.grailsApplication = grailsApplication
+		module.globals.signalPathContext.put("csv", true)
+		module.init()
+		when:
+		Map inputValues = [
+			in1: [0,         null, null, null, 0.125, 0.05, null, null].collect {it?.doubleValue()},
+			in2: [null, -3.141592, null, null,  null, null,  1.0,  180].collect {it?.doubleValue()},
+			in3: [null,      null,  666,   42,  null, null, null, null].collect {it?.doubleValue()}
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.timeToFurtherPerIteration(1000)
+			.overrideGlobals { g ->
+				g.init()
+				g.time = new Date(0)
+				g.grailsApplication = grailsApplication
+				g
+			}
+			.test()
+		// TODO: test output values
 	}
 }

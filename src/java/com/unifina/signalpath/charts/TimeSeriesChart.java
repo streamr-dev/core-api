@@ -68,7 +68,7 @@ public class TimeSeriesChart extends Chart {
 			ArrayList<String> names = new ArrayList<String>();
 			ArrayList<TimeSeriesInput> connectedInputs = new ArrayList<>();
 
-			csvWriter.writeField("timestamp");
+			csvWriter().writeField("timestamp");
 
 			for (Input inp : getInputs()) {
 				TimeSeriesInput input = (TimeSeriesInput)inp;
@@ -84,14 +84,14 @@ public class TimeSeriesChart extends Chart {
 					}
 
 					names.add(name);
-					csvWriter.writeField(name);
+					csvWriter().writeField(name);
 					connectedInputs.add(input);
 				}
 				else {
 					input.setInitialValue(0.0);
 				}
 			}
-			csvWriter.newLine();
+			csvWriter().newLine();
 			myInputs = connectedInputs.toArray(new TimeSeriesInput[connectedInputs.size()]);
 
 			if (MapTraversal.getProperty(globals.getSignalPathContext(), "csvOptions.filterEmpty")!=null 
@@ -164,13 +164,13 @@ public class TimeSeriesChart extends Chart {
 
 	@Override
 	protected void recordCsvString() {
-		csvWriter.writeField(globals.time);
+		csvWriter().writeField(globals.time);
 
 		for (int i=0;i<myInputs.length;i++) {
 			Double v = myInputs[i].getValue();
 			if (v!=null && !v.equals(Double.NaN))
-				csvWriter.writeField(Double.toString(myInputs[i].value));
-			else csvWriter.writeField("");
+				csvWriter().writeField(Double.toString(myInputs[i].value));
+			else csvWriter().writeField("");
 		}
 	}
 	

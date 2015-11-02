@@ -220,4 +220,7 @@ public class Globals {
 		this.uiChannel = uiChannel;
 	}
 
+	public void setGrailsApplication(GrailsApplication grailsApplication) {
+		this.grailsApplication = grailsApplication;
+	}
 }
