@@ -144,17 +144,23 @@ public class ModuleTestHelper {
 	private ModuleTestHelper() {}
 
 	public boolean test() throws IOException, ClassNotFoundException {
-		boolean a = runTestCase();		// Clean slate test
+		try {
+			boolean a = runTestCase();        // Clean slate test
 
-		clearModuleAndCollectorsAndChannels();
-		clearStateCalled = true;
-		boolean b = runTestCase();      // Test that clearState() works
+			clearModuleAndCollectorsAndChannels();
+			clearStateCalled = true;
+			boolean b = runTestCase();      // Test that clearState() works
 
-		clearModuleAndCollectorsAndChannels();
-		serializationMode = true;
-		boolean c = runTestCase();       // Test that serialization works
+			clearModuleAndCollectorsAndChannels();
+			serializationMode = true;
+			boolean c = runTestCase();       // Test that serialization works
 
-		return a && b && c;
+			return a && b && c;
+		} catch (TestHelperException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new TestHelperException(ex, this);
+		}
 	}
 
 	/**
@@ -195,6 +201,14 @@ public class ModuleTestHelper {
 
 		afterEachTestCase.call();
 		return true;
+	}
+
+	public boolean isClearStateCalled() {
+		return clearStateCalled;
+	}
+
+	public boolean isSerializationMode() {
+		return serializationMode;
 	}
 
 	private void feedInputs(int i) {
@@ -245,8 +259,8 @@ public class ModuleTestHelper {
 	}
 
 	private void throwException(String outputName, int i, int outputIndex, Object value, Object target)  {
-		String msg = "%s: mismatch at %d (inputIndex %d), was '%s' expected '%s'" + moduleStateAsString();
-		throw new RuntimeException(String.format(msg, outputName, outputIndex, i, value, target));
+		String msg = "%s: mismatch at %d (inputIndex %d), was '%s' expected '%s'";
+		throw new TestHelperException(String.format(msg, outputName, outputIndex, i, value, target), this);
 	}
 
 	private void furtherTime() {
@@ -256,12 +270,9 @@ public class ModuleTestHelper {
 	}
 
 	private void validateUiChannelMessages() {
-
-		String moduleState = moduleStateAsString();
-
 		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
 		if (uiChannel == null) {
-			throw new RuntimeException("uiChannel: module.globals.uiChannel unexpectedly null" + moduleState);
+			throw new TestHelperException("uiChannel: module.globals.uiChannel unexpectedly null", this);
 		}
 
 		for (Map.Entry<String, List<Object>> expectedEntry : uiChannelMessages.entrySet()) {
@@ -269,45 +280,38 @@ public class ModuleTestHelper {
 			List<Object> expectedMessages = expectedEntry.getValue();
 
 			if (!uiChannel.receivedContentByChannel.containsKey(channel)) {
-				throw new RuntimeException(String.format("uiChannel: channel '%s' was never pushed to" + moduleState,
-						channel));
+				throw new TestHelperException(String.format("uiChannel: channel '%s' was never pushed to", channel),
+						this);
 			}
 
 			List<Object> actualMessages = uiChannel.receivedContentByChannel.get(channel);
 			for (int i = 0; i < Math.max(expectedMessages.size(), actualMessages.size()); ++i) {
 
 				if (actualMessages.size() <= i) {
-					String msg = "uiChannel: expected %d messages on channel '%s' but received only %d";
-					throw new RuntimeException(String.format(msg + moduleState,
-							expectedMessages.size(),
-							channel,
-							actualMessages.size()
-					));
+					String msg = String.format("uiChannel: expected %d messages on channel '%s' but received only %d",
+							expectedMessages.size(), channel, actualMessages.size());
+					throw new TestHelperException(msg, this);
 				}
 
 				if (expectedMessages.size() <= i) {
 					String msg = "uiChannel: expected %d messages on channel '%s' but received %d additional: %s";
-					throw new RuntimeException(String.format(msg + moduleState,
+					throw new TestHelperException(String.format(msg,
 							expectedMessages.size(),
 							channel,
 							actualMessages.size() - expectedMessages.size(),
 							Arrays.toString(actualMessages.subList(i, actualMessages.size()).toArray())
-					));
+					), this);
 				}
 
 				Object actual = actualMessages.get(i);
 				Object expected = expectedMessages.get(i);
 
 				if (!actual.equals(expected)) {
-					String msg = "uiChannel: mismatch at %d, was '%s' expected '%s'" + moduleState;
-					throw new RuntimeException(String.format(msg, i, actual, expected));
+					String msg = "uiChannel: mismatch at %d, was '%s' expected '%s'";
+					throw new TestHelperException(String.format(msg, i, actual, expected), this);
 				}
 			}
 		}
-	}
-
-	private String moduleStateAsString() {
-		return " (clearState=" + clearStateCalled + ", serialized=" + serializationMode + ")";
 	}
 
 	private boolean isUiChannelMode() {

@@ -1,5 +1,6 @@
 package com.unifina.signalpath.messaging
 
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -41,9 +42,36 @@ public class EmailModuleSpec extends Specification {
 		module = new EmailModule()
 		module.globals = globals
 		module.init()
-		module.inputCount = 2	
+		module.emailInputCount = 2
 		module.configure(module.getConfiguration())
-		
+	}
+
+	void "emailModule sends the correct email"() {
+		globals.dataSource = new RealtimeDataSource()
+		when:
+		Map inputValues = [
+			subject: ["Subject"],
+			message: ["Message"],
+			value1: [1],
+			value2: ["abcd"],
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals {
+				globals.time = new Date(0)
+				globals
+			}
+			.afterEachTestCase {
+				assert ms.mailSent
+				assert ms.from == grailsApplication.config.unifina.email.sender
+				assert ms.to == globals.user.username
+				assert ms.subject == "Subject"
+				assert ms.body == "\nMessage:\nMessage\n\nEvent Timestamp:\n1970-01-01 02:00:00.000\n\nInput Values:\nvalue1: 1\nvalue2: abcd\n\n"
+				ms.clear()
+			}
+			.test()
 	}
 
 	void "module should send an email for a realtime datasource"(){
@@ -122,7 +150,7 @@ value2: test value
 		globals.uiChannel = Mock(PushChannel)
 		module.globals = globals
 		module.init()
-		module.inputCount = 2	
+		module.emailInputCount = 2
 		module.configure(module.getConfiguration())
 	
 		when: "sent two emails very often"
