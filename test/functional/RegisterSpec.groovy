@@ -8,7 +8,7 @@ class RegisterSpec extends GebReportingSpec {
 	
         
         // Not a real email
-        def emailAddress = "testingemail2@streamr.com"
+        def emailAddress = "testingemail@streamr.com"
         def code = emailAddress.replaceAll("@", "_")
         // Just a random password
         def pwd = "Aymaw4HV"
