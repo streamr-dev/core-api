@@ -2,6 +2,8 @@ package com.unifina.controller.security
 
 import grails.plugin.springsecurity.annotation.Secured
 
+import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
 import com.unifina.domain.signalpath.ModulePackage
@@ -45,4 +47,17 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
 			}
 		}
 	}
+    
+    @Override
+    def delete() {
+        def user = findById()
+        if (!user) return
+        
+        SecUserSecRole.executeUpdate("delete from SecUserSecRole ss where ss.secUser = ?", [user])
+        FeedUser.executeUpdate("delete from FeedUser fu where fu.user = ?", [user])
+        ModulePackageUser.executeUpdate("delete from ModulePackageUser mu where mu.user = ?", [user])
+        SignupInvite.executeUpdate("delete from SignupInvite si where si.username = ?", [user.username])
+        
+        super.delete()
+    }
 }

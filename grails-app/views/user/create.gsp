@@ -46,21 +46,11 @@ tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.lab
 
 			<s2ui:checkboxRow name='passwordExpired' labelCode='user.passwordExpired.label' bean="${user}"
                            labelCodeDefault='Password Expired' value="${user?.passwordExpired}"/>
-                           
-           	<s2ui:textFieldRow name='dataToken' labelCode='user.dataToken.label' bean="${user}"
-                            labelCodeDefault='Data Token' value="${user?.dataToken}"/>
-                            
+                                                       
            	<s2ui:textFieldRow name='timezone' labelCode='user.timezone.label' bean="${user}"
                             labelCodeDefault='Timezone' value="${user?.timezone}"/>
                             
-           	<s2ui:textFieldRow name='baseCurrency' labelCode='user.baseCurrency.label' bean="${user}"
-                            labelCodeDefault='Base Currency' value="${user?.baseCurrency}"/>
-                            
-           	<s2ui:textFieldRow name='defaultCommission' labelCode='user.defaultCommission.label' bean="${user}"
-                            labelCodeDefault='Default Commission' value="${user?.defaultCommission}"/>
-                            
-           	<s2ui:textFieldRow name='defaultPortfolio' labelCode='user.defaultPortfolio.label' bean="${user}"
-                            labelCodeDefault='Default Portfolio' value="${user?.defaultPortfolio}"/>
+           	<g:render template="/user/projectExtras" model="[user:user]"/>
 		</tbody>
 		</table>
 	</s2ui:tab>

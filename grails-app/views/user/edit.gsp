@@ -60,8 +60,11 @@ if (isOpenId) {
 
 			<s2ui:checkboxRow name='passwordExpired' labelCode='user.passwordExpired.label' bean="${user}"
                            labelCodeDefault='Password Expired' value="${user?.passwordExpired}"/>
+            
+             <s2ui:textFieldRow name='timezone' labelCode='user.timezone.label' bean="${user}" 
+                            labelCodeDefault='Timezone' value="${user?.timezone}"/>
                            
-                        <g:render template="/user/projectExtras" model="[user:user]"/>
+            <g:render template="/user/projectExtras" model="[user:user]"/>
 		</tbody>
 		</table>
 	</s2ui:tab>
