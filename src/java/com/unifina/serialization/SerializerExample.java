@@ -7,10 +7,11 @@ import com.unifina.signalpath.statistics.PearsonsCorrelation;
 
 import java.io.IOException;
 
-import static com.unifina.serialization.Serializer.serializeToFile;
-
 
 public class SerializerExample {
+
+	private static Serializer serializer = new SerializerImpl();
+
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		Subtract subtract = new Subtract();
 		subtract.init();
@@ -40,9 +41,9 @@ public class SerializerExample {
 			ma.sendOutput();
 		}
 
-		serializeToFile(subtract, "subtract.json");
-		serializeToFile(linearRegression, "linear-regression.json");
-		serializeToFile(pearsonsCorrelation, "pearson-correlation.json");
-		serializeToFile(ma, "ma.json");
+		serializer.serializeToFile(subtract, "subtract.json");
+		serializer.serializeToFile(linearRegression, "linear-regression.json");
+		serializer.serializeToFile(pearsonsCorrelation, "pearson-correlation.json");
+		serializer.serializeToFile(ma, "ma.json");
 	}
 }

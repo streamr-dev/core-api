@@ -7,6 +7,7 @@ import java.util.*;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.Serializer;
+import com.unifina.serialization.SerializerImpl;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
@@ -183,6 +184,7 @@ public class ModuleTestHelper {
 	private int outputValueCount;
 	private boolean clearStateCalled = false;
 	private boolean serializationMode = false;
+	private Serializer serializer = new SerializerImpl();
 
 	private ModuleTestHelper() {}
 
@@ -374,12 +376,12 @@ public class ModuleTestHelper {
 			module.globals = null;
 
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			Serializer.serialize(module, out);
+			serializer.serialize(module, out);
 
-			//Serializer.serializeToFile(module, "temp.out");
+			//SerializerImpl.serializeToFile(module, "temp.out");
 
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-			module = (AbstractSignalPathModule) Serializer.deserialize(in);
+			module = (AbstractSignalPathModule) serializer.deserialize(in);
 			module.globals = globalsTempHolder;
 		}
 	}

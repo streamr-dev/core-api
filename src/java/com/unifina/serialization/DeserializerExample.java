@@ -8,24 +8,25 @@ import com.unifina.signalpath.statistics.PearsonsCorrelation;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.unifina.serialization.Serializer.deserializeFromFile;
-
 public class DeserializerExample {
+
+	private static Serializer serializer = new SerializerImpl();
+
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        Subtract subtract = (Subtract) deserializeFromFile("subtract.json");
+        Subtract subtract = (Subtract) serializer.deserializeFromFile("subtract.json");
         subtract.sendOutput();
 
-        LinearRegression linearRegression = (LinearRegression) deserializeFromFile("linear-regression.json");
+        LinearRegression linearRegression = (LinearRegression) serializer.deserializeFromFile("linear-regression.json");
         linearRegression.getInput("in").receive(115.0);
         linearRegression.sendOutput();
 
-        PearsonsCorrelation pearsonsCorrelation = (PearsonsCorrelation) deserializeFromFile("pearson-correlation.json");
+        PearsonsCorrelation pearsonsCorrelation = (PearsonsCorrelation) serializer.deserializeFromFile("pearson-correlation.json");
 
         pearsonsCorrelation.getInput("inX").receive(Double.valueOf(Math.random() * 100));
         pearsonsCorrelation.getInput("inY").receive(Double.valueOf(Math.random() * 100));
         pearsonsCorrelation.sendOutput();
 
-        SimpleMovingAverageEvents ma = (SimpleMovingAverageEvents) deserializeFromFile("ma.json");
+        SimpleMovingAverageEvents ma = (SimpleMovingAverageEvents) serializer.deserializeFromFile("ma.json");
 
         System.out.println(subtract.getOutput("A-B"));
         System.out.println(Arrays.toString(linearRegression.getOutputs()));
