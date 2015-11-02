@@ -3,6 +3,7 @@ package com.unifina.serialization;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.nustaq.serialization.*;
+import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
 
 import java.io.*;
 import java.util.regex.Pattern;
@@ -17,7 +18,7 @@ public class Serializer {
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
 		conf.registerSerializer(Double.class, new DoubleSerializer(), true);
-		conf.registerSerializer(DoubleSerializer.Wrapper.class, new DoubleWrapperSerializer(), true);
+		conf.registerSerializer(SpecialValueDouble.class, new SpecialValueDoubleSerializer(), true);
 	}
 
     public static void serializeToFile(Object object, String filename) throws IOException {
@@ -45,8 +46,8 @@ public class Serializer {
 
 	// Custom serializers below
 
-	// TODO: hack for getting NaN double values serialized, definitely not optimal
-	private static class DoubleWrapperSerializer extends FSTBasicObjectSerializer {
+	// TODO: hack for getting NaN Double values serialized, definitely not optimal
+	private static class SpecialValueDoubleSerializer extends FSTBasicObjectSerializer {
 
 		@Override
 		public void writeObject(FSTObjectOutput out,
@@ -54,7 +55,7 @@ public class Serializer {
 								FSTClazzInfo clzInfo,
 								FSTClazzInfo.FSTFieldInfo referencedBy,
 								int streamPosition) throws IOException {
-			out.writeStringUTF(((DoubleSerializer.Wrapper)toWrite).d);
+			out.writeStringUTF(((SpecialValueDouble)toWrite).d);
 		}
 
 		@Override
@@ -67,25 +68,20 @@ public class Serializer {
 		}
 	}
 
-	// TODO: hack for getting NaN double values serialized, definitely not optimal
-	static class DoubleSerializer extends FSTBasicObjectSerializer {
-
-		static class Wrapper implements Serializable {
-			String d = null;
-
-			public Wrapper(Object o) {
-				Double d = (Double) o;
-				this.d = d.toString();
-			}
-		}
-
+	// TODO: hack for getting NaN Double values serialized, definitely not optimal
+	static class DoubleSerializer extends FSTBigNumberSerializers.FSTDoubleSerializer {
 		@Override
 		public void writeObject(FSTObjectOutput out,
 								Object toWrite,
 								FSTClazzInfo clzInfo,
 								FSTClazzInfo.FSTFieldInfo referencedBy,
 								int streamPosition) throws IOException {
-			out.writeObjectInternal(new Wrapper(toWrite), conf.getClazzInfo(Wrapper.class));
+			Double d = (Double) toWrite;
+			if (d.isNaN() || d.isInfinite()) {
+				out.writeObjectInternal(new SpecialValueDouble(d), conf.getClazzInfo(SpecialValueDouble.class));
+			} else {
+				super.writeObject(out, toWrite, clzInfo, referencedBy, streamPosition);
+			}
 		}
 	}
 
