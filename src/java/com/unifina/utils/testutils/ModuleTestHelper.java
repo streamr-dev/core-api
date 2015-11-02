@@ -286,8 +286,8 @@ public class ModuleTestHelper {
 			Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
-			if (actual instanceof Double) {
-				actual = DU.clean((Double) actual);
+			if (expected instanceof Double) {
+				expected = DU.clean((Double) expected);
 			}
 
 			// Possible failures:
