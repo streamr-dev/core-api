@@ -42,56 +42,96 @@ public class ModuleTestHelper {
 			outputValues(outputValuesByName);
 		}
 
+		/**
+		 * Set input values grouped by input name (mandatory)
+		 */
 		public Builder inputValues(Map<String, List<Object>> inputValuesByName) {
 			testHelper.inputValuesByName = inputValuesByName;
 			return this;
 		}
 
+		/**
+		 * Set expected output values grouped by output name (mandatory)
+		 */
 		public Builder outputValues(Map<String, List<Object>> outputValuesByName) {
 			testHelper.outputValuesByName = outputValuesByName;
 			return this;
 		}
 
+		/**
+		 * Set expected messages that should've been pushed to ui channel at end of input list. (optional)
+		 * Notice that previously set <code>module</code> must be an instance of <code>ModuleWithUI</code>.
+		 */
 		public Builder uiChannelMessages(Map<String, List<Object>> uiChannelMessages) {
 			testHelper.turnOnUiChannelMode(uiChannelMessages);
 			return this;
 		}
 
+		/**
+		 * Command the helper to invoke <code>setTime(Date)</code> at given iterations with given Date value.
+		 * Notice that previously set <code>module</code> must be an instance of <code>ITimeListener</code>.
+		 */
 		public Builder ticks(Map<Integer, Date> ticks) {
 			testHelper.turnOnTimedMode(ticks);
 			return this;
 		}
 
+		/**
+		 * After input list has been iterated through, run additional rounds during which <code>trySendOutput()</code>
+		 * (and possibly <code>setTime(Date)</code>) is invoked, and output is verified.
+		 */
 		public Builder extraIterationsAfterInput(int extraIterationsAfterInput) {
 			testHelper.extraIterationsAfterInput = extraIterationsAfterInput;
 			return this;
 		}
 
+		/**
+		 * Determine a certain number of rounds from the very beginning during which input is fed but output is not
+		 * verified.
+		 */
 		public Builder skip(int skip) {
 			testHelper.skip = skip;
 			return this;
 		}
 
+		/**
+		 * How many milliseconds to further <code>globals.time</code> after each round. (default = 0)
+		 */
 		public Builder timeToFurtherPerIteration(int timeStep) {
 			testHelper.timeStep = timeStep;
 			return this;
 		}
 
+		/**
+		 * Override or extend the module's <code>globals</code> instance. Return value is interpreted as new
+		 * <code>globals</code>.
+		 */
 		public Builder overrideGlobals(Closure overrideGlobalsClosure) {
 			testHelper.overrideGlobalsClosure = overrideGlobalsClosure;
 			return this;
 		}
 
+		/**
+		 * Additional operations after a test case has been finished. Return value is ignored.
+		 */
 		public Builder afterEachTestCase(Closure<?> afterEachTestCase) {
 			testHelper.afterEachTestCase = afterEachTestCase;
 			return this;
 		}
 
+		/**
+		 * Additional operations before a test case has been run. <code>module</code> is passed as argument to closure.
+		 * Return value is ignored.
+		 */
 		public Builder beforeEachTestCase(Closure<?> beforeEachTestCase) {
 			testHelper.beforeEachTestCase = beforeEachTestCase;
 			return this;
 		}
 
+		/**
+		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
+		 * configured inappropriately.
+		 */
 		public ModuleTestHelper build() {
 			if (testHelper.module == null) {
 				throw new RuntimeException("Field module cannot be null");
@@ -107,6 +147,9 @@ public class ModuleTestHelper {
 			return testHelper;
 		}
 
+		/**
+		 * Shortcut for building the <code>ModuleTestHelper</code> and running it.
+		 */
 		public boolean test() throws IOException, ClassNotFoundException {
 			return build().test();
 		}
