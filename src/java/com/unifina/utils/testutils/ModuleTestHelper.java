@@ -104,6 +104,14 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * Whether null values in input lists should be fed to to inputs (default = false, null values are ignored)
+		 */
+		public Builder feedNullInputs(boolean feedNullInputs) {
+			testHelper.feedNullInputs = feedNullInputs;
+			return this;
+		}
+
+		/**
 		 * Override or extend the module's <code>globals</code> instance. Return value is interpreted as new
 		 * <code>globals</code>.
 		 */
@@ -176,6 +184,7 @@ public class ModuleTestHelper {
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
 	private int timeStep = 0;
+	private boolean feedNullInputs = false;
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
@@ -265,6 +274,8 @@ public class ModuleTestHelper {
 			Object val = entry.getValue().get(i);
 			if (val != null) {
 				input.getSource().send(val);
+			} else if (feedNullInputs) {
+				input.receive(null);
 			}
 		}
 	}
