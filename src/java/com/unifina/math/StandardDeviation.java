@@ -2,14 +2,16 @@ package com.unifina.math;
 
 import com.unifina.utils.SlidingDoubleArray;
 
-public class StandardDeviation implements IWindowedOperation {
+import java.io.Serializable;
+
+public class StandardDeviation implements IWindowedOperation, Serializable {
 
 	private int length;
 
 	private MovingAverage mean;
 	private SlidingDoubleArray values;
 	
-	org.apache.commons.math3.stat.descriptive.moment.StandardDeviation sd = new org.apache.commons.math3.stat.descriptive.moment.StandardDeviation();
+	transient org.apache.commons.math3.stat.descriptive.moment.StandardDeviation sd = new org.apache.commons.math3.stat.descriptive.moment.StandardDeviation();
 	
 	public StandardDeviation(int length) {
 		this.length = length;
@@ -43,6 +45,9 @@ public class StandardDeviation implements IWindowedOperation {
 
 	@Override
 	public double getValue() {
+		if (sd == null) {
+			sd = new org.apache.commons.math3.stat.descriptive.moment.StandardDeviation();
+		}
 		return sd.evaluate(values.getValues(), mean.getValue());
 	}
 
