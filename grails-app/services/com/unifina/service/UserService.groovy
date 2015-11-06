@@ -1,6 +1,10 @@
 package com.unifina.service
 
-import com.unifina.UserCreationFailedException
+import org.apache.log4j.Logger
+
+import grails.plugin.springsecurity.SpringSecurityUtils
+
+import com.unifina.user.UserCreationFailedException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
 import com.unifina.domain.security.SecUser
@@ -11,18 +15,29 @@ import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.security.SecRole
 
 class UserService {
-    def UserRole
-    def Role
+    
+	def grailsApplication
+    def springSecurityService
+	def springSecurityUiService
+    
+    def userRoleClass
+    def roleClass
+    def conf
 	
-    def createUser(Map properties, List<SecRole> roles=null, List<Feed> feeds=null, List<ModulePackage> packages=null) {
+    def createUser(Map properties, String name, List<SecRole> roles=null, List<Feed> feeds=null, List<ModulePackage> packages=null) {
+        conf = SpringSecurityUtils.securityConfig
         ClassLoader cl = this.getClass().getClassLoader()
         SecUser user = cl.loadClass(grailsApplication.config.grails.plugin.springsecurity.userLookup.userDomainClassName).newInstance(properties)
         
-        UserRole = lookupUserRoleClass()
-        Role = lookupRoleClass()
+        userRoleClass = grailsApplication.getDomainClass(
+            SpringSecurityUtils.securityConfig.userLookup.authorityJoinClassName
+        ).clazz
+        roleClass = grailsApplication.getDomainClass(
+            SpringSecurityUtils.securityConfig.authority.className
+        ).clazz
 		
         user.properties = properties
-        user.name = cmd.name // not copied by above line for some reason
+        user.name = name // not copied by above line for some reason
         user.password = springSecurityService.encodePassword(user.password)
         user.enabled = true
         user.accountLocked = false
@@ -39,7 +54,7 @@ class UserService {
             // If list is given, use it, otherwise get the default from config
             
             for (roleName in ((roles != null) ? roles : conf.ui.register.defaultRoleNames)) {
-                UserRole.create user, Role.findByAuthority(roleName)
+                userRoleClass.create user, roleClass.findByAuthority(roleName)
             } 
             for (feedId in ((feeds != null) ? feeds : grailsApplication.config.streamr.user.defaultFeeds)) {
                 new FeedUser(user: user, feed: Feed.load(feedId)).save(flush: true)

@@ -22,6 +22,7 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
     def unifinaSecurityService
     def springSecurityService
     def signupCodeService
+    def userService
 
     def log = Logger.getLogger(RegisterController)
 
@@ -44,10 +45,10 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
         SignupInvite invite
         if(Environment.current == Environment.TEST){
             invite = new SignupInvite(
-                    username: cmd.username,
-                    code: cmd.username.replaceAll("@", "_"),
-                    sent: true,
-                    used: false
+                username: cmd.username,
+                code: cmd.username.replaceAll("@", "_"),
+                sent: true,
+                used: false
             )
             invite.save()
         } else {
@@ -104,7 +105,7 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
         if (!invite || invite.used || !invite.sent) {
             flash.message = "Sorry, that is not a valid invitation code"
             if(invite)
-                flash.message+=". Code: $invite.code"
+            flash.message+=". Code: $invite.code"
             redirect action: 'signup'
             return
         }
@@ -125,9 +126,9 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
-        SignupInvite.withTransaction { status ->
+//        SignupInvite.withTransaction { status ->
             try {
-                user = userService.createUser(cmd.properties)
+                user = userService.createUser(cmd.properties, cmd.name)
             } catch (UserCreationFailedException e) {
                 flash.message = e.getMessage()
                 return render(view: 'register', model: [ user: user, invite: invite.code ])
@@ -152,7 +153,7 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
 			
             flash.message = "Account created!"
             redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
-        }
+//        }
     }
 	
     def forgotPassword(EmailCommand cmd) {
