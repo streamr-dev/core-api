@@ -2,6 +2,7 @@ package com.unifina.controller.security
 
 import grails.plugin.springsecurity.annotation.Secured
 
+import com.unifina.user.UserCreationFailedException
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.data.Feed
@@ -47,6 +48,18 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
 			}
 		}
 	}
+    
+    @Override
+    def save() {
+        def par = params
+        def User
+        try {
+            User = UserService.createUser()
+        } catch (UserCreationFailedException e) {
+            
+        }
+        redirect action: 'search'
+    }
     
     @Override
     def delete() {

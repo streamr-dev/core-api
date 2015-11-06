@@ -8,6 +8,7 @@ import grails.plugin.springsecurity.ui.RegistrationCode
 
 import org.apache.log4j.Logger
 
+import com.unifina.user.UserCreationFailedException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
 import com.unifina.domain.security.SecUser
@@ -114,6 +115,8 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
             // activated the registration, but not yet submitted it
             return render(view: 'register', model: [user: [username: invite.username], invite: invite.code])
         }
+        
+        def user
 
         cmd.username = invite.username
 
@@ -121,25 +124,12 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
             log.warn("Registration command has errors: "+cmd.errors)
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
-		
-        ClassLoader cl = this.getClass().getClassLoader()
-        SecUser user = cl.loadClass(grailsApplication.config.grails.plugin.springsecurity.userLookup.userDomainClassName).newInstance()
-		
-        user.properties = cmd.properties
-        user.name = cmd.name // not copied by above line for some reason
-        user.password = springSecurityService.encodePassword(user.password)
-        user.enabled = true
-        user.accountLocked = false
-
-        if (!user.validate()) {
-            log.warn("Registration user validation failed: "+user.errors)
-            return render(view: 'register', model: [ user: user, invite: invite.code])
-        }
 
         SignupInvite.withTransaction { status ->
-            if (!user.save(flush: true)) {
-                log.warn("Failed to save user data: "+user.errors)
-                flash.message = "Failed to save user"
+            try {
+                user = userService.createUser(cmd.properties)
+            } catch (UserCreationFailedException e) {
+                flash.message = e.getMessage()
                 return render(view: 'register', model: [ user: user, invite: invite.code ])
             }
 
@@ -150,22 +140,6 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
                 return render(view: 'register', model: [ user: user, invite: invite.code ])
             }
 
-            log.info("Created user for "+user.username)
-
-            def UserRole = lookupUserRoleClass()
-            def Role = lookupRoleClass()
-            for (roleName in conf.ui.register.defaultRoleNames) {
-                UserRole.create user, Role.findByAuthority(roleName)
-            }
-
-            grailsApplication.config.streamr.user.defaultFeeds.each { id ->
-                new FeedUser(user: user, feed: Feed.load(id)).save(flush: true)
-            }
-
-            grailsApplication.config.streamr.user.defaultModulePackages.each { id ->
-                new ModulePackageUser(user: user, modulePackage: ModulePackage.load(id)).save(flush: true)
-            }
-			
             mailService.sendMail {
                 from grailsApplication.config.unifina.email.sender
                 to user.username
