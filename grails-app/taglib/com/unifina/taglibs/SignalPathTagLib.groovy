@@ -184,17 +184,15 @@ class SignalPathTagLib {
 				jQuery('#$id').text('Run')
 			}
 
-			jQuery(SignalPath).on('started', function() {
-				running = true
-				jQuery('#$id').html('Abort <span class="fa fa-spin fa-spinner"></span>')
-			})
-
 			jQuery(SignalPath).on('error', reset)
 			jQuery(SignalPath).on('stopped', reset)
 
 			jQuery('#$id').click(function() {
-				if (!running)
+				if (!running) {
 					SignalPath.run()
+					running = true
+					jQuery('#$id').html('Abort <span class="fa fa-spin fa-spinner"></span>')
+				}
 				else
 					SignalPath.abort()
 			})
