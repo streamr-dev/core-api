@@ -10,7 +10,7 @@
 	</r:script>
 </head>
 
-<body>
+<body class="login-page show-sign-in">
 	<g:if test='${signupOk}'>
 	
 		<h1 id="signup-ok" class="form-header">Thanks for signing up!</h1>
