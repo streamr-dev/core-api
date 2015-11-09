@@ -246,6 +246,19 @@ class SignalPathService {
 		
 		// Create the runner thread
 		SignalPathRunner runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+
+		runner.addStartListener({
+
+			if (!servletContext["signalPathRunners"]) {
+				servletContext["signalPathRunners"] = [:]
+			}
+			servletContext["signalPathRunners"].put(runner.runnerId, runner)
+		})
+
+		runner.addStopListener({
+			servletContext["signalPathRunners"].remove(runner.runnerId)
+		})
+
 		runner.signalPaths.each {
 			it.runningSignalPath = rsp
 		}

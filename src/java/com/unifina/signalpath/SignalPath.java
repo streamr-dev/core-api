@@ -1,7 +1,10 @@
 package com.unifina.signalpath;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.serialization.SerializationRequest;
 import grails.converters.JSON;
 
+import java.io.*;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -296,7 +299,16 @@ public class SignalPath extends ModuleWithUI {
 		if (parentSignalPath!=null && parentSignalPath.getUiChannelId()!=null)
 			uiChannelId = parentSignalPath.getUiChannelId();
 	}
-	
+
+	@Override
+	public void receive(FeedEvent event) {
+		if (event.content instanceof SerializationRequest) {
+			((SerializationRequest) event.content).serialize(this);
+		} else {
+			super.receive(event);
+		}
+	}
+
 	@Override
 	public void destroy() {
 		super.destroy();
@@ -347,7 +359,7 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 	
-	class ModuleConfig {
+	class ModuleConfig implements Serializable {
 		public AbstractSignalPathModule module;
 		public Map config;
 		

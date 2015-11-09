@@ -2,7 +2,7 @@ package com.unifina.domain.signalpath
 
 import com.unifina.domain.security.SecUser
 
-class RunningSignalPath {
+class RunningSignalPath implements Serializable {
 	Long id
 	SecUser user
 	String name

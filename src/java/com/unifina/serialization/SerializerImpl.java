@@ -1,15 +1,18 @@
 package com.unifina.serialization;
 
+import com.unifina.domain.data.Feed;
+import com.unifina.domain.signalpath.Module;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.nustaq.serialization.*;
 import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
-import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
-@Service
 public class SerializerImpl implements Serializer {
 
 	private static final FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
@@ -21,6 +24,9 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
 		conf.registerSerializer(Double.class, new DoubleSerializer(), true);
 		conf.registerSerializer(SpecialValueDouble.class, new SpecialValueDoubleSerializer(), true);
+		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
+		conf.registerSerializer(Feed.class, new FeedSerializer(), true);
+		conf.registerSerializer(Module.class, new ModuleSerializer(), true);
 	}
 
 	public SerializerImpl() {}
@@ -171,6 +177,75 @@ public class SerializerImpl implements Serializer {
 			} else {
 				return new org.apache.commons.math3.stat.correlation.PearsonsCorrelation(matrix);
 			}
+		}
+	}
+
+	private static class JSONObjectSerializer extends FSTBasicObjectSerializer {
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			out.writeUTF(toWrite.toString());
+		}
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			return new JSONObject(in.readStringUTF());
+		}
+	}
+
+	private static abstract class DomainClassSerializer extends FSTBasicObjectSerializer {
+
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			try {
+				Method method = toWrite.getClass().getMethod("getId");
+				Long id = (Long) method.invoke(toWrite);
+				out.writeLong(id);
+			} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		abstract public Object instantiate(Class objectClass,
+										   FSTObjectInput in,
+										   FSTClazzInfo serializationInfo,
+										   FSTClazzInfo.FSTFieldInfo referencee,
+										   int streamPosition) throws Exception;
+	}
+
+	private static class FeedSerializer extends DomainClassSerializer {
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			return Feed.get(in.readLong());
+		}
+	}
+
+	private static class ModuleSerializer extends DomainClassSerializer {
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			return Module.get(in.readLong());
 		}
 	}
 }

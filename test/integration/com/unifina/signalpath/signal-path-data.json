@@ -1,0 +1,457 @@
+{
+  "signalPathContext": {
+    "beginDate": "2015-11-03",
+    "endDate": "2015-11-03",
+    "speed": "0",
+    "timeOfDayFilter": {
+      "timeOfDayEnd": "23:59:00",
+      "timeOfDayStart": "00:00:00",
+      "timeZone": "Europe/Minsk",
+      "timeZoneDst": true,
+      "timeZoneOffset": 120
+    },
+    "live": true
+  },
+  "signalPathData": {
+    "modules": [
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 0,
+        "id": 147,
+        "inputs": [],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "170px",
+            "top": "115px"
+          }
+        },
+        "name": "Stream",
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_0_1446643955903",
+            "longName": "Stream.a",
+            "name": "a",
+            "noRepeat": false,
+            "targets": [
+              "myId_1_1446643971120"
+            ],
+            "type": "Double"
+          },
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_0_1446643955911",
+            "longName": "Stream.b",
+            "name": "b",
+            "noRepeat": false,
+            "targets": [
+              "myId_1_1446643971128",
+              "myId_3_1446643988721"
+            ],
+            "type": "Double"
+          },
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_0_1446643955916",
+            "longName": "Stream.c",
+            "name": "c",
+            "noRepeat": false,
+            "targets": [
+              "myId_6_1446644020528"
+            ],
+            "type": "Double"
+          }
+        ],
+        "params": [
+          {
+            "acceptedTypes": [
+              "Stream",
+              "String"
+            ],
+            "canConnect": true,
+            "canToggleDrivingInput": false,
+            "checkModuleId": true,
+            "connected": false,
+            "defaultValue": null,
+            "drivingInput": false,
+            "feed": 7,
+            "id": "myId_0_1446643955884",
+            "longName": "Stream.stream",
+            "name": "stream",
+            "requiresConnection": false,
+            "streamName": "serializationTestStream",
+            "type": "Stream",
+            "value": "116177"
+          }
+        ],
+        "type": "module"
+      },
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 1,
+        "id": 100,
+        "inputs": [
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_1_1446643971120",
+            "longName": "Add.in1",
+            "name": "in1",
+            "requiresConnection": true,
+            "sourceId": "myId_0_1446643955903",
+            "type": "Double"
+          },
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_1_1446643971128",
+            "longName": "Add.in2",
+            "name": "in2",
+            "requiresConnection": true,
+            "sourceId": "myId_0_1446643955911",
+            "type": "Double"
+          }
+        ],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "624px",
+            "top": "38px"
+          }
+        },
+        "name": "Add",
+        "options": {
+          "inputs": {
+            "type": "int",
+            "value": 2
+          }
+        },
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_1_1446643971132",
+            "longName": "Add.sum",
+            "name": "sum",
+            "noRepeat": true,
+            "targets": [
+              "myId_2_1446643982294"
+            ],
+            "type": "Double"
+          }
+        ],
+        "params": [],
+        "type": "module"
+      },
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 2,
+        "id": 29,
+        "inputs": [
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_2_1446643982294",
+            "longName": "Invert.in",
+            "name": "in",
+            "requiresConnection": true,
+            "sourceId": "myId_1_1446643971132",
+            "type": "Double"
+          }
+        ],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "859px",
+            "top": "167px"
+          }
+        },
+        "name": "Invert",
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_2_1446643982301",
+            "longName": "Invert.out",
+            "name": "out",
+            "noRepeat": true,
+            "targets": [
+              "myId_5_1446644004715"
+            ],
+            "type": "Double"
+          }
+        ],
+        "params": [],
+        "type": "module"
+      },
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 3,
+        "id": 161,
+        "inputs": [
+          {
+            "acceptedTypes": [
+              "Object"
+            ],
+            "canConnect": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "id": "myId_3_1446643988721",
+            "longName": "Count.in",
+            "name": "in",
+            "requiresConnection": true,
+            "sourceId": "myId_0_1446643955911",
+            "type": "Object"
+          }
+        ],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "564px",
+            "top": "277px"
+          }
+        },
+        "name": "Count",
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_3_1446643988728",
+            "longName": "Count.count",
+            "name": "count",
+            "noRepeat": true,
+            "targets": [
+              "myId_4_1446643995009"
+            ],
+            "type": "Double"
+          }
+        ],
+        "params": [],
+        "type": "module"
+      },
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 4,
+        "id": 115,
+        "inputs": [
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_4_1446643995009",
+            "longName": "LogNatural.in",
+            "name": "in",
+            "requiresConnection": true,
+            "sourceId": "myId_3_1446643988728",
+            "type": "Double"
+          }
+        ],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "742px",
+            "top": "407px"
+          }
+        },
+        "name": "LogNatural",
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": true,
+            "id": "myId_4_1446643995014",
+            "longName": "LogNatural.out",
+            "name": "out",
+            "noRepeat": true,
+            "targets": [
+              "myId_5_1446644004719"
+            ],
+            "type": "Double"
+          }
+        ],
+        "params": [],
+        "type": "module"
+      },
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 5,
+        "id": 54,
+        "inputs": [
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_5_1446644004715",
+            "longName": "Correlation.inX",
+            "name": "inX",
+            "requiresConnection": true,
+            "sourceId": "myId_2_1446643982301",
+            "type": "Double"
+          },
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_5_1446644004719",
+            "longName": "Correlation.inY",
+            "name": "inY",
+            "requiresConnection": true,
+            "sourceId": "myId_4_1446643995014",
+            "type": "Double"
+          }
+        ],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "969px",
+            "top": "299px"
+          }
+        },
+        "name": "Correlation",
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": false,
+            "id": "myId_5_1446644004723",
+            "longName": "Correlation.corr",
+            "name": "corr",
+            "noRepeat": true,
+            "type": "Double"
+          }
+        ],
+        "params": [
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canConnect": true,
+            "canToggleDrivingInput": true,
+            "connected": false,
+            "defaultValue": 60,
+            "drivingInput": false,
+            "id": "myId_5_1446644004708",
+            "longName": "Correlation.windowLength",
+            "name": "windowLength",
+            "requiresConnection": false,
+            "type": "Double",
+            "value": "60"
+          }
+        ],
+        "type": "module"
+      },
+      {
+        "canClearState": true,
+        "clearState": false,
+        "hash": 6,
+        "id": 32,
+        "inputs": [
+          {
+            "acceptedTypes": [
+              "Double"
+            ],
+            "canBeFeedback": true,
+            "canConnect": true,
+            "canHaveInitialValue": true,
+            "canToggleDrivingInput": true,
+            "connected": true,
+            "drivingInput": true,
+            "feedback": false,
+            "id": "myId_6_1446644020528",
+            "longName": "Not.in",
+            "name": "in",
+            "requiresConnection": true,
+            "sourceId": "myId_0_1446643955916",
+            "type": "Double"
+          }
+        ],
+        "jsModule": "GenericModule",
+        "layout": {
+          "position": {
+            "left": "415px",
+            "top": "523px"
+          }
+        },
+        "name": "Not",
+        "outputs": [
+          {
+            "canBeNoRepeat": true,
+            "canConnect": true,
+            "connected": false,
+            "id": "myId_6_1446644020534",
+            "longName": "Not.out",
+            "name": "out",
+            "noRepeat": true,
+            "type": "Double"
+          }
+        ],
+        "params": [],
+        "type": "module"
+      }
+    ],
+    "name": "serialization-canvas"
+  },
+  "workspace": "normal"
+}

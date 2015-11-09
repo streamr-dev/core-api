@@ -37,7 +37,7 @@ import com.unifina.utils.MapTraversal;
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
 	private Map<String,Object> json;
-	
+
 	protected SignalPath parentSignalPath;
 	private SignalPath topParentSignalPath;
 	protected Integer initPriority = 50;
@@ -75,7 +75,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	protected String name;
 	protected Integer hash;
 	
-	public Globals globals;
+	transient public Globals globals;
 
 	private boolean initialized;
 	

@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.unifina.serialization.SerializationRequest;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -86,6 +87,20 @@ public class RealtimeDataSource extends DataSource {
 					},
 					new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
 					1000);   // Repeat every second
+
+			secTimer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					FeedEvent serializeEvent = new FeedEvent();
+					serializeEvent.content = new SerializationRequest();
+					serializeEvent.recipient = getSignalPath();
+					serializeEvent.timestamp = new Date();
+					eventQueue.enqueue(serializeEvent);
+
+				}
+			}, new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
+					 1000);   // Repeat every second);
+
 
 			// This will block indefinitely until the feed is stopped!
 			eventQueue.start();

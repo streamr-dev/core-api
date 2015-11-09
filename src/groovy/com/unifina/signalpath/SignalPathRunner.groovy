@@ -2,8 +2,6 @@ package com.unifina.signalpath
 
 import grails.util.GrailsUtil
 
-import javax.servlet.ServletContext
-
 import org.apache.log4j.Logger
 
 import com.unifina.push.IHasPushChannel
@@ -25,28 +23,24 @@ public class SignalPathRunner extends Thread {
 	String runnerId
 	
 	Globals globals
-	
-	ServletContext servletContext
+
 	SignalPathService signalPathService
 	
 	// Have the SignalPaths been instantiated?
 	boolean running = false
 	
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
-	
+
+	private List<Runnable> startListeners = []
+	private List<Runnable> stopListeners = []
+
 	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
-		this.servletContext = globals.grailsApplication.mainContext.getBean("servletContext")
 		this.signalPathData = signalPathData
 		this.deleteOnStop = deleteOnStop
 		
 		runnerId = "s-"+new Date().getTime()
-		
-		if (!servletContext["signalPathRunners"])
-			servletContext["signalPathRunners"] = [:]
-			
-		servletContext["signalPathRunners"].put(runnerId,this)
 		
 		/**
 		 * Instantiate the SignalPaths
@@ -87,7 +81,15 @@ public class SignalPathRunner extends Thread {
 	public synchronized boolean getRunning() {
 		return running
 	}
-	
+
+	public void addStartListener(Runnable r) {
+		startListeners << r
+	}
+
+	public void addStopListener(Runnable r) {
+		stopListeners << r
+	}
+
 	public synchronized void waitRunning(boolean target=true) {
 		int i = 0
 		while (getRunning() != target && i++<60)
@@ -96,6 +98,9 @@ public class SignalPathRunner extends Thread {
 	
 	@Override
 	public void run() {
+		startListeners.each {
+			it.run()
+		}
 		Throwable reportException = null
 		setName("SignalPathRunner");
 		
@@ -148,7 +153,9 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	public void destroy() {
-		servletContext["signalPathRunners"].remove(runnerId)
+		stopListeners.each {
+			it.run()
+		}
 		signalPaths.each {it.destroy()}
 		globals.destroy()
 		

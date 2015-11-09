@@ -6,7 +6,7 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.utils.IdGenerator;
 
-class SecUser {
+class SecUser implements Serializable {
 	
 	String username
 	String password
