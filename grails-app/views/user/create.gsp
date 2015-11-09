@@ -32,11 +32,11 @@ tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.lab
 			<s2ui:textFieldRow name='username' labelCode='user.username.label' bean="${user}"
                             labelCodeDefault='Username' value="${user?.username}"/>
 
+			<s2ui:textFieldRow name='name' labelCode='user.name.label' bean="${user}"
+							   labelCodeDefault='Real Name' value="${user?.name}"/>
+
 			<s2ui:passwordFieldRow name='password' labelCode='user.password.label' bean="${user}"
                                 labelCodeDefault='Password' value="${user?.password}"/>
-
-			<s2ui:checkboxRow name='enabled' labelCode='user.enabled.label' bean="${user}"
-                           labelCodeDefault='Enabled' value="${user?.enabled}"/>
 
 			<s2ui:checkboxRow name='accountExpired' labelCode='user.accountExpired.label' bean="${user}"
                            labelCodeDefault='Account Expired' value="${user?.accountExpired}"/>
@@ -58,7 +58,7 @@ tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.lab
 	<s2ui:tab name='roles' height='280'>
 		<g:each var="auth" in="${authorityList}">
 		<div>
-			<g:checkBox name="${auth.authority}" />
+			<g:checkBox name="role" value="${auth.authority}" checked="false" />
 			<g:link controller='role' action='edit' id='${auth.id}'>${auth.authority.encodeAsHTML()}</g:link>
 		</div>
 		</g:each>

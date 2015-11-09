@@ -18,6 +18,8 @@ import com.unifina.domain.signalpath.ModulePackageUser
 
 class RegisterController extends grails.plugin.springsecurity.ui.RegisterController {
 
+    static defaultAction = 'index'
+
     def mailService
     def unifinaSecurityService
     def springSecurityService
@@ -126,34 +128,32 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
-//        SignupInvite.withTransaction { status ->
-            try {
-                user = userService.createUser(cmd.properties, cmd.name)
-            } catch (UserCreationFailedException e) {
-                flash.message = e.getMessage()
-                return render(view: 'register', model: [ user: user, invite: invite.code ])
-            }
+        try {
+            user = userService.createUser(cmd.properties)
+        } catch (UserCreationFailedException e) {
+            flash.message = e.getMessage()
+            return render(view: 'register', model: [ user: user, invite: invite.code ])
+        }
 
-            invite.used = true
-            if (!invite.save(flush: true)) {
-                log.warn("Failed to save invite: "+invite.errors)
-                flash.message = "Failed to save invite"
-                return render(view: 'register', model: [ user: user, invite: invite.code ])
-            }
+        invite.used = true
+        if (!invite.save(flush: true)) {
+            log.warn("Failed to save invite: "+invite.errors)
+            flash.message = "Failed to save invite"
+            return render(view: 'register', model: [ user: user, invite: invite.code ])
+        }
 
-            mailService.sendMail {
-                from grailsApplication.config.unifina.email.sender
-                to user.username
-                subject grailsApplication.config.unifina.email.welcome.subject
-                html g.render(template:"email_welcome", model:[user: user], plugin:'unifina-core')
-            }
-			
-            log.info("Logging in "+user.username+" after registering")
-            springSecurityService.reauthenticate(user.username)
-			
-            flash.message = "Account created!"
-            redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
-//        }
+        mailService.sendMail {
+            from grailsApplication.config.unifina.email.sender
+            to user.username
+            subject grailsApplication.config.unifina.email.welcome.subject
+            html g.render(template:"email_welcome", model:[user: user], plugin:'unifina-core')
+        }
+
+        log.info("Logging in "+user.username+" after registering")
+        springSecurityService.reauthenticate(user.username)
+
+        flash.message = "Account created!"
+        redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
     }
 	
     def forgotPassword(EmailCommand cmd) {

@@ -1,17 +1,19 @@
 package com.unifina.controller.security
 
-import grails.plugin.springsecurity.annotation.Secured
-
-import com.unifina.user.UserCreationFailedException
-import com.unifina.domain.security.SecUserSecRole
-import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.SecRole
+import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
+import com.unifina.user.UserCreationFailedException
+import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["ROLE_ADMIN"])
 class UserController extends grails.plugin.springsecurity.ui.UserController {
+
+	def userService
 	
 	@Override
 	protected void addRoles(user) {
@@ -52,13 +54,17 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
     @Override
     def save() {
         def par = params
-        def User
+		List<SecRole> roles = SecRole.findAllByAuthorityInList(params.list("role"))
+		List<Feed> feeds = Feed.findAllByIdInList(params.list("feed"))
+		List<ModulePackage> packages = ModulePackage.findAllByIdInList(params.list("modulePackage"))
+		def user
         try {
-            User = UserService.createUser()
+            user = userService.createUser(params, roles, feeds, packages)
+			redirect action: 'search'
         } catch (UserCreationFailedException e) {
-            
+			flash.error = e.getMessage()
+			redirect action: "create"
         }
-        redirect action: 'search'
     }
     
     @Override
