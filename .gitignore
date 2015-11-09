@@ -8,3 +8,4 @@ node_modules
 .idea/
 unifina-core*.iml
 .slcache/
+plugin.xml
