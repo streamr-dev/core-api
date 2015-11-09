@@ -1,13 +1,10 @@
 package com.unifina.signalpath
 
-import grails.util.GrailsUtil
-
-import org.apache.log4j.Logger
-
 import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
-
+import grails.util.GrailsUtil
+import org.apache.log4j.Logger
 
 /**
  * A Thread that instantiates and runs a list of SignalPaths.
@@ -15,8 +12,6 @@ import com.unifina.utils.Globals
  * servletContext["signalPathRunners"] map.
  */
 public class SignalPathRunner extends Thread {
-	
-	private List<Map> signalPathData
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
 	private boolean deleteOnStop
 	
@@ -34,14 +29,13 @@ public class SignalPathRunner extends Thread {
 	private List<Runnable> startListeners = []
 	private List<Runnable> stopListeners = []
 
-	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
+	private SignalPathRunner(Globals globals, boolean deleteOnStop) {
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
-		this.signalPathData = signalPathData
 		this.deleteOnStop = deleteOnStop
-		
+
 		runnerId = "s-"+new Date().getTime()
-		
+
 		/**
 		 * Instantiate the SignalPaths
 		 */
@@ -51,12 +45,22 @@ public class SignalPathRunner extends Thread {
 		if (globals.signalPathContext.csv) {
 			globals.signalPathContext.speed = 0
 		}
+	}
+
+	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
+		this(globals, deleteOnStop)
 
 		// Instantiate SignalPaths from JSON
 		for (int i=0;i<signalPathData.size();i++) {
 			SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,true)
 			signalPaths.add(signalPath)
 		}
+	}
+
+	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean deleteOnStop = true) {
+		this(globals, deleteOnStop)
+		signalPath.globals = globals
+		signalPaths.add(signalPath)
 	}
 	
 	public List<SignalPath> getSignalPaths() {

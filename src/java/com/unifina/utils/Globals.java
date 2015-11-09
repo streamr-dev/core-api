@@ -1,5 +1,6 @@
 package com.unifina.utils;
 
+import com.unifina.service.SerializationService;
 import groovy.lang.GroovySystem;
 
 import java.security.AccessController;
@@ -222,5 +223,9 @@ public class Globals {
 
 	public void setGrailsApplication(GrailsApplication grailsApplication) {
 		this.grailsApplication = grailsApplication;
+	}
+
+	public SerializationService getSerializationService() {
+		return (SerializationService) grailsApplication.getMainContext().getBean("serializationService");
 	}
 }

@@ -88,6 +88,7 @@ public class RealtimeDataSource extends DataSource {
 					new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
 					1000);   // Repeat every second
 
+			// Serialization
 			secTimer.scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
@@ -99,7 +100,7 @@ public class RealtimeDataSource extends DataSource {
 
 				}
 			}, new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
-					 1000);   // Repeat every second);
+					 5000);   // Repeat every 5 second);
 
 
 			// This will block indefinitely until the feed is stopped!

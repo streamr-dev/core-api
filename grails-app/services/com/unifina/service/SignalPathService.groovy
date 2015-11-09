@@ -44,6 +44,7 @@ class SignalPathService {
 	def grailsApplication
 	def grailsLinkGenerator
 	def kafkaService
+	def serializationService
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
@@ -243,9 +244,15 @@ class SignalPathService {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
 		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
-		
+
+		SignalPathRunner runner
 		// Create the runner thread
-		SignalPathRunner runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+		if (rsp.serialized == null || rsp.serialized.empty) {
+			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+		} else {
+			SignalPath sp = serializationService.deserialize(rsp.serialized)
+			runner = new SignalPathRunner(sp, globals, rsp.adhoc)
+		}
 
 		runner.addStartListener({
 

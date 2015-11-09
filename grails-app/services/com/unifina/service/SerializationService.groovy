@@ -1,17 +1,16 @@
 package com.unifina.service
 
 import com.unifina.serialization.SerializerImpl
-import grails.transaction.Transactional
 
 class SerializationService {
 
 	def serializer = new SerializerImpl()
 
-	def serialize(Object object, String filename) {
-		serializer.serializeToFile(object, filename)
+	String serialize(Object object) {
+		serializer.serializeToString(object)
 	}
 
-	def deserialize(String filename) {
-		serializer.deserializeFromFile(filename)
+	def deserialize(String data) {
+		serializer.deserializeFromString(data)
 	}
 }

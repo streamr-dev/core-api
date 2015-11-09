@@ -2,9 +2,12 @@ package com.unifina.serialization;
 
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.domain.signalpath.RunningSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.codehaus.groovy.runtime.InvokerHelper;
+import org.grails.datastore.gorm.GormStaticApi;
 import org.nustaq.serialization.*;
 import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
 
@@ -25,11 +28,19 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(Double.class, new DoubleSerializer(), true);
 		conf.registerSerializer(SpecialValueDouble.class, new SpecialValueDoubleSerializer(), true);
 		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
-		conf.registerSerializer(Feed.class, new FeedSerializer(), true);
-		conf.registerSerializer(Module.class, new ModuleSerializer(), true);
+		conf.registerSerializer(Feed.class, new DomainClassSerializer(), true);
+		conf.registerSerializer(Module.class, new DomainClassSerializer(), true);
+		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), true);
 	}
 
 	public SerializerImpl() {}
+
+	@Override
+	public String serializeToString(Object object) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		serialize(object, out);
+		return out.toString("UTF-8");
+	}
 
 	@Override
 	public void serializeToFile(Object object, String filename) throws IOException {
@@ -42,6 +53,11 @@ public class SerializerImpl implements Serializer {
 		fstOutput.writeObject(object);
 		fstOutput.flush();
 		fstOutput.close();
+	}
+
+	@Override
+	public Object deserializeFromString(String string) throws IOException, ClassNotFoundException {
+		return deserialize(new ByteArrayInputStream(string.getBytes()));
 	}
 
 	@Override
@@ -200,7 +216,7 @@ public class SerializerImpl implements Serializer {
 		}
 	}
 
-	private static abstract class DomainClassSerializer extends FSTBasicObjectSerializer {
+	private static class DomainClassSerializer extends FSTBasicObjectSerializer {
 
 		@Override
 		public void writeObject(FSTObjectOutput out,
@@ -218,34 +234,12 @@ public class SerializerImpl implements Serializer {
 		}
 
 		@Override
-		abstract public Object instantiate(Class objectClass,
+		public Object instantiate(Class objectClass,
 										   FSTObjectInput in,
 										   FSTClazzInfo serializationInfo,
 										   FSTClazzInfo.FSTFieldInfo referencee,
-										   int streamPosition) throws Exception;
-	}
-
-	private static class FeedSerializer extends DomainClassSerializer {
-
-		@Override
-		public Object instantiate(Class objectClass,
-								  FSTObjectInput in,
-								  FSTClazzInfo serializationInfo,
-								  FSTClazzInfo.FSTFieldInfo referencee,
-								  int streamPosition) throws Exception {
-			return Feed.get(in.readLong());
-		}
-	}
-
-	private static class ModuleSerializer extends DomainClassSerializer {
-
-		@Override
-		public Object instantiate(Class objectClass,
-								  FSTObjectInput in,
-								  FSTClazzInfo serializationInfo,
-								  FSTClazzInfo.FSTFieldInfo referencee,
-								  int streamPosition) throws Exception {
-			return Module.get(in.readLong());
+										   int streamPosition) throws Exception {
+			return InvokerHelper.invokeMethod(objectClass, "get", in.readLong());
 		}
 	}
 }

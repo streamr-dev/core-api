@@ -2,7 +2,7 @@ package com.unifina.domain.signalpath
 
 import com.unifina.domain.security.SecUser
 
-class RunningSignalPath implements Serializable {
+class RunningSignalPath {
 	Long id
 	SecUser user
 	String name
@@ -18,6 +18,7 @@ class RunningSignalPath implements Serializable {
 	Boolean shared
 	Boolean adhoc
 	String state
+	String serialized
 	
 	static hasMany = [uiChannels: UiChannel]
 	
@@ -28,12 +29,14 @@ class RunningSignalPath implements Serializable {
 		shared(nullable:true)
 		state(nullable:true)
 		adhoc(nullable:true)
+		serialized(nullable:true)
 	}
 	
 	static mapping = {
 		json type: 'text'
 		runner index: 'runner_idx'
 		uiChannels cascade: 'all-delete-orphan'
+		serialized type: 'text'
 	}
-	
+
 }

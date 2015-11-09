@@ -19,7 +19,7 @@ import org.springframework.mock.web.MockServletContext
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-@Mock([SecUser, Stream, SecRole, SecUserSecRole, ModulePackage, ModulePackageUser])
+@Mock([SecUser, Stream, SecRole, SecUserSecRole, ModulePackage, ModulePackageUser, RunningSignalPath])
 class SignalPathSpec extends Specification {
 
 	def user
@@ -51,15 +51,21 @@ class SignalPathSpec extends Specification {
 	void "and gives the right answer"() {
 		when:
 		Random r = new Random()
-		RunningSignalPath rsp = createAndRun(readSavedStructure(stream), user)
+		def savedStructure = readSavedStructure(stream)
+		RunningSignalPath rsp = createAndRun(savedStructure, user)
 		for (int i = 0; i < 100; ++i) {
 			kafkaService.sendMessage(stream, "", [a: i, b: i * 2.5, c: i % 3 == 0])
 			servletContext["signalPathRunners"].iterator().next().value.signalPaths[0].mods.each {
 				println it.outputs
 			}
-			sleep(500)
+			sleep(1500)
+			if (i != 0 && i % 10 == 0) {
+				signalPathService.stopLocal(rsp)
+				sleep(500)
+				signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
+				sleep(500)
+			}
 		}
-		signalPathService.stopLocal(rsp)
 		then:
 		rsp != null
 	}
@@ -85,7 +91,7 @@ class SignalPathSpec extends Specification {
 		RunningSignalPath rsp = signalPathService.createRunningSignalPath(
 			savedStructure["signalPathData"],
 			user,
-			true,
+			false,
 			true)
 
 		signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
