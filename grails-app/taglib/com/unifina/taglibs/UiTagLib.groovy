@@ -205,25 +205,107 @@ public class UiTagLib {
 	/**
 	 * Renders a table with clickable rows
 	 */
-	def clickableTable = {attrs, body->
-		out << "<div class='clickable-table table table-striped table-hover table-condensed table-bordered'>"
+	def table = {attrs, body->
+		if (!attrs.containsKey('class'))
+			attrs.put('class', 'clickable-table table table-striped table-hover table-condensed table-bordered')
+		else attrs.put('class', attrs.get('class') + " clickable-table")
+			
+		out << "<div "
+		outputAttributes(attrs, out)
+		out << ">"
+		out << body()
+		out << "</div>"
+	}
+
+	def thead = {attrs, body->
+		if (!attrs.containsKey('class'))
+			attrs.put('class', 'thead')
+		else attrs.put('class', attrs.get('class') + " thead")
+			
+		out << "<div "
+		outputAttributes(attrs, out)
+		out << ">"
 		out << body()
 		out << "</div>"
 	}
 	
-	/**
-	 * Renders a clickable table row
-	 *
-	 * @attr link REQUIRED url that the row links to
-	 * @attr id id of the domain object
-	 * @attr title the title of the domain object
-	 */
-	def clickableRow = {attrs, body->
-		out << "<a class='tr' ${attrs.title ? "title='${attrs.title}'" : ""} href='${attrs.link}' ${attrs.id ? "data-id='${attrs.id}'" : ""}>"
+	def th = {attrs, body->
+		if (!attrs.containsKey('class'))
+			attrs.put('class', 'th')
+		else attrs.put('class', attrs.get('class') + " th")
+			
+		out << "<span "
+		outputAttributes(attrs, out)
+		out << ">"
 		out << body()
-		out << "</a>"
+		out << "</span>"
+	}
+	
+	def tbody = {attrs, body->
+		if (!attrs.containsKey('class'))
+			attrs.put('class', 'tbody')
+		else attrs.put('class', attrs.get('class') + " tbody")
+			
+		out << "<div "
+		outputAttributes(attrs, out)
+		out << ">"
+		out << body()
+		out << "</div>"
+	}
+	
+	def td = {attrs, body->
+		if (!attrs.containsKey('class'))
+			attrs.put('class', 'td')
+		else attrs.put('class', attrs.get('class') + " td")
+			
+		out << "<span "
+		outputAttributes(attrs, out)
+		out << ">"
+		out << body()
+		out << "</span>"
+	}
+		
+		
+	/**
+	 * Renders a table row that can act as a link.
+	 *
+	 * @attr link Url that the row links to. If none is given, the row is not rendered as a link.
+	 */
+	def tr = {attrs, body->
+		if (!attrs.containsKey('class'))
+			attrs.put('class', 'tr')
+		else attrs.put('class', attrs.get('class') + " tr")
+	
+		def link = attrs.remove('link')
+		if (link) {
+			out << "<a href='${link}' "
+			outputAttributes(attrs, out)
+			out << ">"
+			out << body()
+			out << "</a>"
+		}
+		else {
+			out << "<div "
+			outputAttributes(attrs, out)
+			out << ">"
+			out << body()
+			out << "</div>"
+		}
 	}
 
+	/**
+	 * Dump out attributes in HTML compliant fashion.
+	 */
+	@CompileStatic
+	void outputAttributes(Map attrs, Writer writer) {
+		attrs.remove('tagName') // Just in case one is left
+		attrs.each { k, v ->
+			if (v != null) {
+				writer << "$k=\"${InvokerHelper.invokeMethod(v.toString(), "encodeAsHTML", null)}\" "
+			}
+		}
+	}
+	
 }
 
 
