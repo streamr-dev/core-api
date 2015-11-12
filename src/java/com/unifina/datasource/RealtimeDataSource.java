@@ -92,15 +92,11 @@ public class RealtimeDataSource extends DataSource {
 			secTimer.scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
-					FeedEvent serializeEvent = new FeedEvent();
-					serializeEvent.content = new SerializationRequest();
-					serializeEvent.recipient = getSignalPath();
-					serializeEvent.timestamp = new Date();
-					eventQueue.enqueue(serializeEvent);
+					eventQueue.enqueue(SerializationRequest.makeFeedEvent(getSignalPath()));
 
 				}
 			}, new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
-					 5000);   // Repeat every 5 second);
+					 10000);   // Repeat every 10 second);
 
 
 			// This will block indefinitely until the feed is stopped!

@@ -249,9 +249,11 @@ class SignalPathService {
 		// Create the runner thread
 		if (rsp.serialized == null || rsp.serialized.empty) {
 			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+			log.info("Creating new signalPath connections " + rsp.id)
 		} else {
 			SignalPath sp = serializationService.deserialize(rsp.serialized)
 			runner = new SignalPathRunner(sp, globals, rsp.adhoc)
+			log.info("De-serializing existing signalPath " + rsp.id + " " + rsp.serialized)
 		}
 
 		runner.addStartListener({

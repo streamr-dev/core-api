@@ -1,7 +1,6 @@
 package com.unifina.signalpath
 
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.ModulePackage
@@ -19,7 +18,7 @@ import org.springframework.mock.web.MockServletContext
 import spock.lang.Specification
 
 @TestMixin(ControllerUnitTestMixin)
-@Mock([SecUser, Stream, SecRole, SecUserSecRole, ModulePackage, ModulePackageUser, RunningSignalPath])
+//@Mock([Stream, SecUserSecRole, ModulePackage, ModulePackageUser])
 class SignalPathSpec extends Specification {
 
 	def user
@@ -37,47 +36,65 @@ class SignalPathSpec extends Specification {
 		signalPathService.servletContext = grailsApplication.mainContext.getBean("servletContext")
 		servletContext = grailsApplication.mainContext.getBean("servletContext")
 
-		user = makeUser()
-		stream = createStream(user)
+		def userId = makeUser()
+		user = SecUser.get(userId)
+		def streamId = createStream(user)
+		stream = Stream.get(streamId)
     }
-
-	private Stream createStream(SecUser secUser) {
-		def s = streamService.createUserStream([name: "serializationTestStream"], secUser)
-		s.streamConfig = ([fields: [[name: "a", type: "number"], [name: "b", type: "number"], [name: "c", type: "boolean"]], topic: s.uuid] as JSON)
-		s.save()
-		s
-	}
 
 	void "and gives the right answer"() {
 		when:
-		Random r = new Random()
+
 		def savedStructure = readSavedStructure(stream)
-		RunningSignalPath rsp = createAndRun(savedStructure, user)
+		def runningSignalPathId = createAndRun(savedStructure, user)
+
+		Random r = new Random()
+
 		for (int i = 0; i < 100; ++i) {
 			kafkaService.sendMessage(stream, "", [a: i, b: i * 2.5, c: i % 3 == 0])
-			servletContext["signalPathRunners"].iterator().next().value.signalPaths[0].mods.each {
-				println it.outputs
+			if (servletContext["signalPathRunners"]) {
+				servletContext["signalPathRunners"].iterator().next().value.signalPaths[0].mods.each {
+					println it.outputs
+				}
 			}
-			sleep(1500)
-			if (i != 0 && i % 10 == 0) {
+
+			if (r.nextDouble() < 0.05) {
+				sleep(3000)
+				def rsp = RunningSignalPath.get(runningSignalPathId)
 				signalPathService.stopLocal(rsp)
-				sleep(500)
-				signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
-				sleep(500)
+				signalPathService.startLocal(rsp, savedStructure.signalPathContext)
 			}
+
+			sleep(100)
 		}
+
+		sleep(2000)
+
+		def actual = servletContext["signalPathRunners"].iterator().next().value.signalPaths[0].mods.collect {
+			def h = [:]
+			h[it.getName()] = it.outputs.collect { it.getValue() }
+			h
+		}
+		signalPathService.stopLocal(RunningSignalPath.get(runningSignalPathId))
 		then:
-		rsp != null
+		actual == [[Stream:[99.0, 247.5, 1.0]], [Count:[100.0]], [Count:[100.0]], [Count:[100.0]], [Add:[300.0]]]
 	}
 
-	private SecUser makeUser() {
+	private def createStream(SecUser secUser) {
+		def s = streamService.createUserStream([name: "serializationTestStream"], secUser)
+		s.streamConfig = ([fields: [[name: "a", type: "number"], [name: "b", type: "number"], [name: "c", type: "boolean"]], topic: s.uuid] as JSON)
+		s.save()
+		s.id
+	}
+
+	private def makeUser() {
 		def user = new SecUser(
 			username: "serialization-test@streamr.com",
 			password: "foo",
 			name: "eric",
 			timezone: "Europe/Helsinki")
-		user.save(validate:true)
-		user
+		user.save(flush: true)
+		user.id
 	}
 
 	private Object readSavedStructure(stream) {
@@ -87,7 +104,7 @@ class SignalPathSpec extends Specification {
 		s
 	}
 
-	private RunningSignalPath createAndRun(savedStructure, SecUser user) {
+	private def createAndRun(savedStructure, SecUser user) {
 		RunningSignalPath rsp = signalPathService.createRunningSignalPath(
 			savedStructure["signalPathData"],
 			user,
@@ -95,6 +112,6 @@ class SignalPathSpec extends Specification {
 			true)
 
 		signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
-		return rsp
+		return rsp.id
 	}
 }

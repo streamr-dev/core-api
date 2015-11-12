@@ -1,6 +1,7 @@
 package com.unifina.serialization;
 
 import com.unifina.domain.data.Feed;
+import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.domain.signalpath.RunningSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
@@ -31,6 +32,7 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(Feed.class, new DomainClassSerializer(), true);
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), true);
 		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), true);
+		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), true);
 	}
 
 	public SerializerImpl() {}

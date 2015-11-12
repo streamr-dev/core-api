@@ -60,6 +60,9 @@ public class SignalPathRunner extends Thread {
 	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean deleteOnStop = true) {
 		this(globals, deleteOnStop)
 		signalPath.globals = globals
+		for (AbstractSignalPathModule module : signalPath.getModules()) {
+			module.globals = globals
+		}
 		signalPaths.add(signalPath)
 	}
 	
