@@ -7,5 +7,5 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="${r.resource(uri:"/js/polymer/layout.html")}">
-<script src="${r.resource(uri:"/js/polymer/polymer.js")}"></script>
+<link rel="import" href="${r.resource(dir:"/js/polymer", file:"layout.html", plugin:"unifina-core")}">
+<script src="${r.resource(dir:"/js/polymer", file:"polymer.js", plugin:"unifina-core")}"></script>

@@ -9,3 +9,4 @@ node_modules
 unifina-core*.iml
 .slcache/
 out/
+plugin.xml
