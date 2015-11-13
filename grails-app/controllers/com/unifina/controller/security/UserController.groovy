@@ -55,8 +55,8 @@ class UserController extends grails.plugin.springsecurity.ui.UserController {
     def save() {
         def par = params
 		List<SecRole> roles = SecRole.findAllByAuthorityInList(params.list("role"))
-		List<Feed> feeds = Feed.findAllByIdInList(params.list("feed"))
-		List<ModulePackage> packages = ModulePackage.findAllByIdInList(params.list("modulePackage"))
+		List<Feed> feeds = Feed.findAllByIdInList(params.list("feed").collect{ Long.parseLong(it) })
+		List<ModulePackage> packages = ModulePackage.findAllByIdInList(params.list("modulePackage").collect{ Long.parseLong(it) })
 		def user
         try {
             user = userService.createUser(params, roles, feeds, packages)

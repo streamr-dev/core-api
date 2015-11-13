@@ -36,8 +36,7 @@ class UserService {
 
         // If lists are given, use them, otherwise get the defaults from config
         if(feeds == null) {
-//            feeds = Feed.findAllByIdInList(grailsApplication.config.streamr.user.defaultFeeds)
-            feeds = Feed.findAll()
+            feeds = Feed.findAllByIdInList(grailsApplication.config.streamr.user.defaultFeeds.collect {it.longValue()})
             if(feeds.size() != grailsApplication.config.streamr.user.defaultFeeds.size())
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
@@ -47,7 +46,7 @@ class UserService {
                 throw new RuntimeException("Roles not found: "+conf.ui.register.defaultRoleNames)
         }
         if(packages == null) {
-            packages = ModulePackage.findAllByIdInList(grailsApplication.config.streamr.user.defaultModulePackages)
+            packages = ModulePackage.findAllByIdInList(grailsApplication.config.streamr.user.defaultModulePackages.collect {it.longValue()})
             if(packages.size() != grailsApplication.config.streamr.user.defaultModulePackages.size())
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }

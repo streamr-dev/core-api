@@ -1,10 +1,16 @@
 
 package com.unifina.controller.security
 
+import com.unifina.domain.signalpath.Module
+import com.unifina.service.UserService
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.ui.RegistrationCode
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.support.GrailsUnitTestMixin
+import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
+import org.springframework.security.core.userdetails.UserDetailsService
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
@@ -22,40 +28,41 @@ import com.unifina.service.UnifinaSecurityService
 
 @TestFor(RegisterController)
 @Mock([SignupInvite,
-		UnifinaSecurityService,
-		SignupCodeService,
-		RegistrationCode,
-		SecUser, SecRole, SecUserSecRole,
-		Feed, FeedUser,
-		ModulePackage, ModulePackageUser])
+		UnifinaSecurityService, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
+		Feed, FeedUser, ModulePackage, ModulePackageUser, UserService, SpringSecurityService])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
 	def username = "user@invite.to"
 	String reauthenticated = null
-	
-	def springSecurityService = [
-		encodePassword: { pw ->
-			return pw+"-encoded"
-		},
-		reauthenticate: {username->
-			reauthenticated = username
-		}
-	]
 
 	void setupSpec() {
 		BootService.mergeDefaultConfig(grailsApplication)
 	}
+
+	def springSecurityService = [
+			encodePassword: { pw ->
+				return pw+"-encoded"
+			},
+			reauthenticate: {username->
+				reauthenticated = username
+			}
+	]
 	
 	void setup() {
 		mailSent = false
 
-		controller.springSecurityService = springSecurityService
+
 		controller.mailService = [
 			sendMail: {
 				mailSent = true
 			}
 		]
+
+		controller.userService = new UserService()
+		controller.userService.springSecurityService = springSecurityService
+		controller.userService.grailsApplication = grailsApplication
+		controller.springSecurityService = springSecurityService
 	}
 
 	void "index should not be available"() {
@@ -235,6 +242,39 @@ class RegisterControllerSpec extends Specification {
 	}
 
 	void "submitting registration with valid invite should create user"() {
+		setup:
+			// A feed created with minimum fields required
+			Feed feed = new Feed()
+			feed.id = new Long(7)
+			feed.name = "testFeed"
+			feed.eventRecipientClass = ""
+			feed.keyProviderClass = ""
+			feed.messageSourceClass = ""
+			feed.module = new Module()
+			feed.parserClass = ""
+			feed.timezone = "Europe/Minsk"
+			feed.save()
+
+			// A modulePackage created with minimum fields required
+			def modulePackage = new ModulePackage()
+			modulePackage.id = new Long(1)
+			modulePackage.name = "test"
+			modulePackage.user = new SecUser()
+			modulePackage.save()
+
+			def modulePackage2 = new ModulePackage()
+			modulePackage2.id = new Long(2)
+			modulePackage2.name = "test2"
+			modulePackage2.user = new SecUser()
+			modulePackage2.save()
+
+			// The roles created
+			["ROLE_USER","ROLE_LIVE","ROLE_ADMIN"].each {
+				def role = new SecRole()
+				role.authority = it
+				role.save()
+			}
+
 		when: "registering with valid invite code"
 			def inv = controller.signupCodeService.create(username)
 			inv.sent = true

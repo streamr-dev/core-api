@@ -16,14 +16,14 @@ class RegisterSpec extends GebReportingSpec {
         def pwd = "Aymaw4HV"
         
         def setup() {
-            // The environment must be TEST so the SignUpCodeService creates a preisible invitation token
+            // The environment must be TEST so the SignUpCodeService creates a previsible invitation token
             expect:
             assert Environment.current == Environment.TEST
         }
         
         // Delete the user
         def cleanupSpec() {
-            when: "go to user search page"
+            when: "login"
                 to LoginPage
                 username = "tester-admin@streamr.com"
                 password = "tester-adminTESTER-ADMIN"
@@ -32,9 +32,10 @@ class RegisterSpec extends GebReportingSpec {
                 at CanvasPage
                 
             when: "search for the user and click it"
-                to UserSearchPage, "?username="+emailAddress
+                to UserSearchPage
+                username = emailAddress
+                search.click()
             then: "go to user edit page"
-                userList.find("tr", 1).find("td",0).find("a", 0).click()
                 at UserEditPage
                 
             when: "click to delete"
