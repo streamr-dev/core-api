@@ -9,25 +9,16 @@
 	<script>
 		Polymer('streamr-label',{
 			ready: function() {
-				this.bindEvents(this.$.container)
-
 				var _this = this
-				var trySubscribe = function() {
-					if (_this.$.client.streamrClient) {
-						_this.$.client.streamrClient.subscribe(
-							_this.channel, 
-							function(message) {
-								_this.value = message.value
-								_this.fire('value')
-							},
-							{resend_last: 1}
-						)
-					}
-					else {
-						setTimeout(trySubscribe, 200)
-					}
-				}
-				trySubscribe()
+				
+				this.bindEvents(this.$.container)
+				this.subscribe(
+					function(message) {
+						_this.value = message.value
+						_this.fire('value')
+					},
+					{resend_last: 1}
+				)
 			},
 			getValue: function() {
 				return this.value
