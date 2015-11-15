@@ -35,12 +35,25 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		return getName();
 	}
 	
+	/**
+	 * Override this method if a webcomponent is available for this module. The
+	 * default implementation returns null, which means there is no webcomponent.
+	 * @return The name of the webcomponent.
+	 */
+	public String getWebcomponentName() {
+		return null;
+	}
+	
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 		Map uiChannel = new HashMap<String,Object>();
 		uiChannel.put("id", getUiChannelId());
 		uiChannel.put("name", getUiChannelName());
+		
+		if (getWebcomponentName()!=null && globals.isRealtime())
+			uiChannel.put("webcomponent", getWebcomponentName());
+		
 		config.put("uiChannel", uiChannel);
 		
 		ModuleOptions options = ModuleOptions.get(config);

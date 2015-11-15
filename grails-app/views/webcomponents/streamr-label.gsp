@@ -1,6 +1,6 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<polymer-element name="streamr-label" attributes="channel">
+<polymer-element name="streamr-label" extends="streamr-widget" attributes="channel">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<span class="streamr-label-value">{{value}}</span>

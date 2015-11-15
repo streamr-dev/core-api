@@ -60,11 +60,12 @@ public class LiveSpec extends LoginTester1Spec {
 			moduleShouldAppearOnCanvas("Stream")
 			searchAndClick("Label")
 			moduleShouldAppearOnCanvas("Label")
-			searchAndClick("Chart")
-			moduleShouldAppearOnCanvas("Chart")
+			interact {
+				clickAndHold(findModuleOnCanvas("Label"))
+				moveByOffset(0, 200)
+			}
 			
 			connectEndpoints(findOutput("Stream", "rand"), findInput("Label", "label"))
-			connectEndpoints(findOutput("Stream", "rand"), findInput("Chart", "in1"))
 			
 			$("#runDropdown").click()
 			waitFor { $("#runLiveModalButton").displayed }
@@ -85,6 +86,20 @@ public class LiveSpec extends LoginTester1Spec {
 			waitFor(30){ $(".modulelabel").text() != "" }
 			def oldLabel = $(".modulelabel").text()
 			
+		when: "Help button is clicked"
+			findModuleOnCanvas("Label").find(".modulebutton .help").click()
+		then: "Dialog is opened with webcomponent tag shown"
+			waitFor {
+				$(".modal-dialog .modulehelp", text:contains("streamr-label"))
+			}
+			
+		when: "Help dialog close button is clicked"
+			$(".modal-dialog button.close").click()
+		then: "Dialog exits"
+			waitFor {
+				$(".modal-dialog").size()==0
+			}	
+		
 		when: "Live canvas is stopped"
 			stopButton.click()
 		then: "The confirmation dialog is shown"

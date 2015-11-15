@@ -3,8 +3,6 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
-import org.hibernate.StaleObjectStateException
-
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
@@ -12,12 +10,14 @@ import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
 import com.unifina.signalpath.RuntimeResponse
+import com.unifina.utils.GlobalsFactory
 
 class LiveController {
 	
 	def springSecurityService
 	def unifinaSecurityService
 	def signalPathService
+	def grailsApplication
 	
 	def beforeInterceptor = [action:{
 			if (!unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))) {
@@ -70,9 +70,7 @@ class LiveController {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 
 		Map signalPathData = JSON.parse(rsp.json)
-		Map result = [:]
-		
-		result.signalPathData = signalPathData
+		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication))
 		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
 		
 		render result as JSON

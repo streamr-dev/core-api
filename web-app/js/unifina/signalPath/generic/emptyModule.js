@@ -89,30 +89,30 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var delay=500, tooltipDelayTimer		
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
-	 			var htext = prot.getHelp(false)
-				tooltipOptions.title = htext
-				// show tooltip after help text is loaded
-				helpLink.tooltip(tooltipOptions)
+	 			prot.getHelp(false, function(htext) {
+	 				tooltipOptions.title = htext
+					// show tooltip after help text is loaded
+					helpLink.tooltip(tooltipOptions)
 
-				helpLink.on('shown.bs.tooltip', function(event, param) {
-					$tt = $(".tooltip")
-					if ($tt.length) {
-						var top = $tt.offset().top
-						console.log("Tooltip shown at "+top)
-						// Workaround for CORE-216: tooltip is shown under main navbar
-						if (top < 40 && $tt.hasClass("top")) {
-							console.log("Destroying and replacing tooltip")
-							helpLink.tooltip("destroy")
-							helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
-							helpLink.tooltip("show")
+					helpLink.on('shown.bs.tooltip', function(event, param) {
+						$tt = $(".tooltip")
+						if ($tt.length) {
+							var top = $tt.offset().top
+							// Workaround for CORE-216: tooltip is shown under main navbar
+							if (top < 40 && $tt.hasClass("top")) {
+								console.log("Destroying and replacing tooltip")
+								helpLink.tooltip("destroy")
+								helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
+								helpLink.tooltip("show")
+							}
+							MathJax.Hub.Queue(["Typeset",MathJax.Hub,$tt[0]]);
+							MathJax.Hub.Queue(function(){
+								$tt.find(".math-tex").addClass("math-jax-ready")
+							})
 						}
-						MathJax.Hub.Queue(["Typeset",MathJax.Hub,$tt[0]]);
-						MathJax.Hub.Queue(function(){
-							$tt.find(".math-tex").addClass("math-jax-ready")
-						})
-					}
-				})
-				helpLink.tooltip('show')
+					})
+					helpLink.tooltip('show')
+	 			})
 			}, delay)
 		}).mouseleave(function() {
 			clearTimeout(tooltipDelayTimer)
@@ -120,20 +120,22 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		})
 
 		helpLink.click(function() {
-			var bb = bootbox.dialog({
-				message: '<div class="modulehelp">'+ prot.getHelp(true)+'</div>',
-				onEscape: function() { return true },
-				animate: false,
-				title: prot.jsonData.name,
-				show: false
-			})
-			bb.on("shown.bs.modal", function(){
-				MathJax.Hub.Queue(["Typeset",MathJax.Hub,bb.find(".modal-body")[0]]);
-				MathJax.Hub.Queue(function(){
-					bb.find(".modal-body .math-tex").addClass("math-jax-ready")
+			prot.getHelp(true, function(helptext) {
+				var bb = bootbox.dialog({
+					message: '<div class="modulehelp">'+helptext+'</div>',
+					onEscape: function() { return true },
+					animate: false,
+					title: prot.jsonData.name,
+					show: false
 				})
+				bb.on("shown.bs.modal", function(){
+					MathJax.Hub.Queue(["Typeset",MathJax.Hub,bb.find(".modal-body")[0]]);
+					MathJax.Hub.Queue(function(){
+						bb.find(".modal-body .math-tex").addClass("math-jax-ready")
+					})
+				})
+				bb.modal("show")
 			})
-			bb.modal("show")
 		})
 
 		buttons.push(helpLink);
@@ -301,33 +303,48 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	pub.getLayoutData = getLayoutData;
 	
-	function getHelp(extended) {
-		var result = null;
-    	$.ajax({
-		    type: 'GET',
-		    url: prot.signalPath.options.getModuleHelpUrl,
-		    dataType: 'json',
-		    success: function(data) {
-		    	if (!data.helpText) {
-		    		result = "No help is available for this module.";
-		    	}
-		    	else result = prot.renderHelp(data,extended);
-			},
-		    error: function() {
-		    	result = "An error occurred while loading module help.";
-		    },
-		    data: {id:prot.jsonData.id},
-		    async: false
-		});
-    	return result;
+	function getHelp(extended, cb) {
+		if (prot.cachedHelpResponse)
+			cb(prot.renderHelp(prot.cachedHelpResponse, extended))
+		else {
+	    	$.ajax({
+			    type: 'GET',
+			    url: prot.signalPath.options.getModuleHelpUrl,
+			    dataType: 'json',
+			    success: function(data) {
+			    	prot.cachedHelpResponse = data;
+			    	cb(prot.renderHelp(prot.cachedHelpResponse, extended))
+				},
+			    error: function() {
+			    	result = "An error occurred while loading module help.";
+			    },
+			    data: {id:prot.jsonData.id}
+			});
+		}
 	}
 	prot.getHelp = getHelp;
 	
-	function renderHelp(data) {
-		var result = "<p>"+data.helpText+"</p>";
+	function renderHelp(data, extended) {
+		var result = "<p>"+(data && data.helpText ? data.helpText : "No help is available for this module.")+"</p>";
+		
+		var embedCode = prot.getEmbedCode()
+		if (extended && embedCode) {
+			result += "<div class='note note-info'>"
+			result += "<p>To use this visualization on an external page, use the following tag:</p>";
+			result += "<code>"+embedCode+"</code>"
+			result += "</div>"
+		}
+		
 		return result;
 	}
 	prot.renderHelp = renderHelp;
+	
+	prot.getEmbedCode = function() {
+		if (prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
+			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" channel='"+prot.jsonData.uiChannel.id+"' /&gt;"
+		}
+		else return undefined;
+	}
 	
 	function initResizable(options, element) {
 		var defaultOptions = {
