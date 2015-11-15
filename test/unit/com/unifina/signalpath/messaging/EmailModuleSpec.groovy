@@ -34,20 +34,21 @@ public class EmailModuleSpec extends Specification {
 		
 		grailsApplication.config.unifina.email.sender = "sender"
 		
-		
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:"Europe/Helsinki", username: "username"))
-		globals.time = new Date()
-				
 		module = new EmailModule()
+	}
+	
+	private void initContext(Map context) {
+		globals = new Globals(context, grailsApplication, new SecUser(timezone:"Europe/Helsinki", username: "username"))
+		globals.time = new Date()
+		
 		module.globals = globals
 		module.init()
-		module.inputCount = 2	
+		module.inputCount = 2
 		module.configure(module.getConfiguration())
-		
 	}
 
 	void "module should send an email for a realtime datasource"(){
-		globals.dataSource = new RealtimeDataSource()
+		initContext([live:true])
 		
 		when: "feedback sent from the feedback page"
 			module.sub.receive("Test subject")
@@ -79,6 +80,7 @@ value2: test value
 	}
 	
 	void "module should send a notification for a non-realtime datasource"(){
+		initContext([:])
 		module.parentSignalPath = new SignalPath()
 		globals.uiChannel = Mock(PushChannel)
 		
@@ -106,7 +108,8 @@ value2: test value
 	}
 	
 	void "If trying to send emails too often send notification to warn about it"(){
-		globals.dataSource = new RealtimeDataSource()
+		initContext([live:true])
+		
 		module = new EmailModule(){
 			long myTime
 			
