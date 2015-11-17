@@ -29,31 +29,29 @@
 		</div>
 
 		<div class="panel-body">
-			<ui:clickableTable>
-				<div class="thead">
-					<a class="tr">
-						<span class="th"><g:message
-								code="runningSignalPath.name.label" /></span> <span class="th"><g:message
-								code="runningSignalPath.state.label" /></span> <span class="th"><g:message
-								code="runningSignalPath.created.label" /></span>
-					</a>
-				</div>
-				<div class="tbody">
+			<ui:table>
+				<ui:thead>
+					<ui:tr>
+						<ui:th><g:message code="runningSignalPath.name.label" /></ui:th>
+						<ui:th><g:message code="runningSignalPath.state.label" /></ui:th>
+						<ui:th><g:message code="runningSignalPath.created.label" /></ui:th>
+					</ui:tr>
+				</ui:thead>
+				<ui:tbody>
 					<g:each in="${running}" var="rsp">
-						<ui:clickableRow link="${createLink(action:'show', id:rsp.id) }"
-							id="${rsp.id }">
-							<span class="td">
+						<ui:tr link="${createLink(action:'show', id:rsp.id) }" data-id="${rsp.id }">
+							<ui:td>
 								${fieldValue(bean: rsp, field: "name")}
-							</span>
-							<span class="td">
+							</ui:td>
+							<ui:td>
 								${fieldValue(bean: rsp, field: "state")}
-							</span>
-							<span class="td"><g:formatDate date="${rsp.dateCreated}"
-									timeZone="${user.timezone}" /></span>
-						</ui:clickableRow>
+							</ui:td>
+							<ui:td><g:formatDate date="${rsp.dateCreated}"
+									timeZone="${user.timezone}" /></ui:td>
+						</ui:tr>
 					</g:each>
-				</div>
-			</ui:clickableTable>
+				</ui:tbody>
+			</ui:table>
 		</div>
 		<%-- end panel body --%>
 	</div>

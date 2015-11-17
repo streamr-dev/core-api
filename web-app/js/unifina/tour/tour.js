@@ -157,7 +157,10 @@ Tour.prototype._closed = function() {
 	console.log('Tour closed', this._tourNumber)
 	// Clean up any event handlers waiting for events for the current step
 	$('*').off('.tour')
-	$(SignalPath).off('.tour')
+	
+	if (SignalPath)
+		$(SignalPath).off('.tour')
+		
 	return this._markAsCompleted()
 }
 

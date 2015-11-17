@@ -35,7 +35,7 @@
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*"]
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet-0.7.3"]
  grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**']
  
  grails.resources.processing.enabled = true
@@ -238,6 +238,7 @@ grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domai
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'com.unifina.domain.security.SecUserSecRole'
 grails.plugin.springsecurity.authority.className = 'com.unifina.domain.security.SecRole'
 
+grails.plugin.springsecurity.rememberMe.enabled = true
 grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
 grails.plugin.springsecurity.rememberMe.key = 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
