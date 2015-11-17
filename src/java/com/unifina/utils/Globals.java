@@ -1,5 +1,6 @@
 package com.unifina.utils;
 
+import com.unifina.service.RunningSignalPathService;
 import com.unifina.service.SerializationService;
 import groovy.lang.GroovySystem;
 
@@ -227,5 +228,9 @@ public class Globals {
 
 	public SerializationService getSerializationService() {
 		return (SerializationService) grailsApplication.getMainContext().getBean("serializationService");
+	}
+
+	public RunningSignalPathService getRunningSignalPathService() {
+		return (RunningSignalPathService) grailsApplication.getMainContext().getBean("runningSignalPathService");
 	}
 }

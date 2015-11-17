@@ -6,6 +6,7 @@ import com.unifina.domain.signalpath.Module;
 import com.unifina.domain.signalpath.RunningSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.grails.datastore.gorm.GormStaticApi;
@@ -18,6 +19,8 @@ import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
 public class SerializerImpl implements Serializer {
+
+	private static final Logger logger = Logger.getLogger(SerializerImpl.class);
 
 	private static final FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
 
@@ -38,41 +41,53 @@ public class SerializerImpl implements Serializer {
 	public SerializerImpl() {}
 
 	@Override
-	public String serializeToString(Object object) throws IOException {
+	public String serializeToString(Object object) throws SerializationException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		serialize(object, out);
-		return out.toString("UTF-8");
+		try {
+			return out.toString("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new SerializationException("Unsupported encoding", e);
+		}
 	}
 
 	@Override
-	public void serializeToFile(Object object, String filename) throws IOException {
+	public void serializeToFile(Object object, String filename) throws SerializationException, FileNotFoundException {
 		serialize(object, new FileOutputStream(filename));
 	}
 
 	@Override
-	public void serialize(Object object, OutputStream out) throws IOException {
+	public void serialize(Object object, OutputStream out) throws SerializationException {
 		FSTObjectOutput fstOutput = conf.getObjectOutput(out);
-		fstOutput.writeObject(object);
-		fstOutput.flush();
-		fstOutput.close();
+		try {
+			fstOutput.writeObject(object);
+			fstOutput.flush();
+			fstOutput.close();
+		} catch (IOException e) {
+			throw new SerializationException("Failed to serialize ", e);
+		}
 	}
 
 	@Override
-	public Object deserializeFromString(String string) throws IOException, ClassNotFoundException {
+	public Object deserializeFromString(String string) throws SerializationException {
 		return deserialize(new ByteArrayInputStream(string.getBytes()));
 	}
 
 	@Override
-	public Object deserializeFromFile(String filename) throws IOException, ClassNotFoundException {
+	public Object deserializeFromFile(String filename) throws SerializationException, FileNotFoundException {
 		return deserialize(new FileInputStream(filename));
 	}
 
 	@Override
-	public Object deserialize(InputStream in) throws IOException, ClassNotFoundException {
-		FSTObjectInput fstInput = SerializerImpl.conf.getObjectInput(in);
-		Object object = fstInput.readObject();
-		in.close();
-		return object;
+	public Object deserialize(InputStream in) throws SerializationException {
+		try {
+			FSTObjectInput fstInput = SerializerImpl.conf.getObjectInput(in);
+			Object object = fstInput.readObject();
+			in.close();
+			return object;
+		} catch (ClassNotFoundException | IOException e) {
+			throw new SerializationException("Failed to deserialize", e);
+		}
 	}
 
 

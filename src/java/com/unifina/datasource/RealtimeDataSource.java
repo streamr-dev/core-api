@@ -20,6 +20,8 @@ import com.unifina.utils.Globals;
 
 public class RealtimeDataSource extends DataSource {
 
+	public static final int SERIALIZATION_INTERVAL_IN_SECS = 10;
+
 	Timer secTimer = new Timer();
 	
 	private PriorityQueue<FeedEvent> catchupQueue = new PriorityQueue<>();
@@ -96,7 +98,7 @@ public class RealtimeDataSource extends DataSource {
 
 				}
 			}, new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
-					 10000);   // Repeat every 10 second);
+					 1000 * SERIALIZATION_INTERVAL_IN_SECS);   // Repeat every 10 second);
 
 
 			// This will block indefinitely until the feed is stopped!

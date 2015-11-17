@@ -253,7 +253,7 @@ class SignalPathService {
 		} else {
 			SignalPath sp = serializationService.deserialize(rsp.serialized)
 			runner = new SignalPathRunner(sp, globals, rsp.adhoc)
-			log.info("De-serializing existing signalPath " + rsp.id + " " + rsp.serialized)
+			log.info("De-serializing existing signalPath " + rsp.id)
 		}
 
 		runner.addStartListener({

@@ -2,6 +2,7 @@ package com.unifina.serialization
 
 import com.unifina.data.FeedEvent
 import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.service.RunningSignalPathService
 import com.unifina.signalpath.SignalPath
 import org.apache.log4j.Logger
 
@@ -12,7 +13,7 @@ public class SerializationRequest {
 	public void serialize(SignalPath sp) {
 		def rsp = sp.runningSignalPath
 		rsp.serialized = sp.globals.serializationService.serialize(sp)
-		RunningSignalPath.withTransaction { rsp.save() }
+		sp.globals.runningSignalPathService.save(rsp)
 		log.info("RunningSignalPath " + rsp.id + " serialized")
 	}
 
