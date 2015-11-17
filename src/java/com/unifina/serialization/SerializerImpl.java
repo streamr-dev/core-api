@@ -1,6 +1,7 @@
 package com.unifina.serialization;
 
 import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.domain.signalpath.RunningSignalPath;
@@ -36,6 +37,7 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), true);
 		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), true);
 		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), true);
+		conf.registerSerializer(Stream.class, new DomainClassSerializer(), true);
 	}
 
 	public SerializerImpl() {}
