@@ -7272,9 +7272,9 @@ optgroup {
   margin-right: 7px;
 }
 .panel-heading-controls {
-  margin-top: -2px;
-  margin-bottom: -200px;
-  float: right;
+  position: absolute !important;
+  right: 10px;
+  top: 8px;
 }
 .panel-heading-controls > * {
   display: block;
@@ -16892,6 +16892,8 @@ div.table.clickable-table div.tbody {
 div.table.clickable-table div.tbody .tr:first-child .td {
   border-top: 0;
 }
+div.table.clickable-table a.tr,
+div.table.clickable-table a.tr:active,
 div.table.clickable-table a.tr:focus {
   text-decoration: none;
 }
