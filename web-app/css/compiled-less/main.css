@@ -16139,6 +16139,10 @@ fieldset[disabled] .btn {
   body.main-menu-fixed:not(.mme) #main-wrapper {
     padding-left: 0px;
   }
+  .mme #content-wrapper {
+    left: 0;
+    padding-left: 162px;
+  }
 }
 .paramTable .form-control {
   height: 20px;
