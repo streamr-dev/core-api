@@ -4,31 +4,29 @@ import com.unifina.domain.data.Stream
 import com.unifina.service.FeedService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
-@TestFor(Stream)
+@Mock(Stream)
 class ConfigurableStreamModuleSpec extends Specification {
-
-	static class FakeFeedService extends FeedService {
-		@Override
-		Stream getStream(String name) {
-			def s = new Stream()
-			s.name = name
-			s.streamConfig = [fields: [[name: "out", type: "string"]]]
-			s
-		}
-	}
 
 	Globals globals
 	ConfigurableStreamModule module
 
 	def setup() {
 		defineBeans {
-			feedService(FakeFeedService){ bean -> bean.autowire = true }
+			feedService(FeedService){ bean -> bean.autowire = true }
+		}
+
+		0.upto(4) {
+			def s = new Stream()
+			s.name = "stream-" + it
+			s.streamConfig = [fields: [[name: "out", type: "string"]]]
+			s.save(false)
 		}
 
 		module = new ConfigurableStreamModule()

@@ -11,11 +11,13 @@ import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.converters.JSON
+import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
+@Mock([Stream, Feed])
 class SendToStreamSpec extends Specification {
 
 	static class FakeUnifinaSecurityService extends UnifinaSecurityService {
@@ -34,21 +36,6 @@ class SendToStreamSpec extends Specification {
 		}
 	}
 
-	static class FakeFeedService extends FeedService {
-		@Override
-		Stream getStream(String name) {
-			def s = new Stream()
-			s.feed = new Feed()
-			s.feed.id = 7
-			s.name = name
-			s.streamConfig = [fields: [
-				[name: "strIn", type: "string"],
-				[name: "numIn", type: "number"],
-			]]
-			s
-		}
-	}
-
 	FakeKafkaService fakeKafkaService
 	Globals globals
 	SendToStream module
@@ -56,9 +43,22 @@ class SendToStreamSpec extends Specification {
     def setup() {
 		defineBeans {
 			kafkaService(FakeKafkaService)
-			feedService(FakeFeedService)
+			feedService(FeedService)
 			unifinaSecurityService(FakeUnifinaSecurityService)
 		}
+
+		def feed = new Feed()
+		feed.id = 7
+		feed.save(false)
+
+		def s = new Stream()
+		s.feed = feed
+		s.name = "stream-0"
+		s.streamConfig = [fields: [
+			[name: "strIn", type: "string"],
+			[name: "numIn", type: "number"],
+		]]
+		s.save(false)
 
 		module = new SendToStream()
 		module.globals = globals = new Globals([:], grailsApplication, null)
