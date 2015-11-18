@@ -20,6 +20,10 @@ class SerializationSpec extends LoginTester1Spec {
 	def setupSpec() {
 		BootService.mergeDefaultConfig(grailsApplication)
 		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
+
+		// For some reason the annotations don't work so need the below.
+		SerializationSpec.metaClass.mixin(CanvasMixin)
+		SerializationSpec.metaClass.mixin(ConfirmationMixin)
 	}
 
 	def cleanupSpec() {
