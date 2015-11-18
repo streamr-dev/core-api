@@ -19,6 +19,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	var pub = {}
 	var $prot = $(prot)
 
+	prot.warnings = []
+
 	prot.dragOptions = {
 		drag: function(e, ui) {
 			var cpos = canvas.offset()
@@ -477,7 +479,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	pub.redraw = function() {}
 	
-	pub.clean = function() {}
+	pub.clean = function() {
+		pub.clearWarnings()
+	}
 	
 	pub.onClose = function() {};
 	
@@ -498,9 +502,18 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				alert(msg);
 			}
 		})(content));
+		prot.warnings.push(warning)
 		prot.div.append(warning);
 	}
 	pub.addWarning = addWarning
+
+	function clearWarnings() {
+		prot.warnings.forEach(function(warning) {
+			warning.remove()
+		})
+		prot.warnings = []
+	}
+	pub.clearWarnings = clearWarnings
 	
 	function receiveResponse(payload) {}
 	pub.receiveResponse = receiveResponse;
