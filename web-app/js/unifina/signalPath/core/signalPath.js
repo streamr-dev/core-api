@@ -489,9 +489,6 @@ var SignalPath = (function () {
 		
 		var result = signalPathToJSON(signalPathContext);
 
-		// TODO: move to module clean()
-		$(".warning").remove();
-
 		// Clean modules before running
 		getModules().forEach(function(module) {
 			module.clean()
