@@ -32,11 +32,23 @@ class RegisterSpec extends GebReportingSpec {
                 at CanvasPage
                 
             when: "search for the user and click it"
-                to UserSearchPage
+                navbar.navAdminLink.click()
+                $("li a", text:"Users").click()
+                waitFor {
+                    at UserSearchPage
+                }
+                assert username.displayed
                 username = emailAddress
-                search.click()
+                searchButton.click()
+                waitFor {
+                    at UserSearchResultPage
+                }
+                searchResult.click()
+
             then: "go to user edit page"
-                at UserEditPage
+                waitFor {
+                    at UserEditPage
+                }
                 
             when: "click to delete"
                 deleteButton.click()
@@ -46,7 +58,9 @@ class RegisterSpec extends GebReportingSpec {
             when: "confirms"
                 deleteConfirmButton.click()
             then: "go back to user search page"
-                at UserSearchPage
+                waitFor {
+                    at UserSearchPage
+                }
         }
         
         def "the invitation token can be requested correctly"() {
@@ -60,7 +74,7 @@ class RegisterSpec extends GebReportingSpec {
                 }
         }
         
-        def "registering can now be done correctly"() {           
+        def "registering can now be done correctly"() {
             when: "registered"
                 to RegisterPage, "?invite="+ code
                 name = "Test Tester"
@@ -68,8 +82,8 @@ class RegisterSpec extends GebReportingSpec {
                 password2 = pwd
                 agreeCheckbox.click()
                 loginButton.click()
-                
-            then: "go to canvas page"   
+
+            then: "go to canvas page"
                 at CanvasPage
         }
 }

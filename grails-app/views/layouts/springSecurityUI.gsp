@@ -15,6 +15,9 @@
 
     <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon"/>
 
+    <%-- Used by Geb GrailsPage abstraction --%>
+    <meta name="pageId" content="${controllerName}.${actionName}" />
+
     <s2ui:resources module='spring-security-ui' />
     <%--
 
