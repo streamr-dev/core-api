@@ -2,24 +2,6 @@
 if (!Streamr)
 	var Streamr = {}
 
-Streamr.getResourceUrl = function(dir, file, absolute, cb) {
-	$.ajax({
-		url: Streamr.createLink('resource', 'index'),
-		data: {
-			dir: dir,
-			file: file,
-			absolute: absolute,
-			dataType: 'text'
-		},
-		success: function(url) {
-			cb(url)
-		},
-		error: function(xhr, status, error) {
-			console.log("getResourceUrl: error fetching url for "+dir+"/"+file+": "+error)
-		}
-	})
-}
-
 Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController
 
