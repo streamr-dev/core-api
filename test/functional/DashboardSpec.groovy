@@ -11,11 +11,13 @@ import core.pages.LiveListPage
 import core.pages.LiveShowPage
 import core.pages.LoginPage
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
 class DashboardSpec extends LoginTester1Spec {
 
 	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		
 		super.login()
 		waitFor { at CanvasPage }
 		
@@ -38,15 +40,6 @@ class DashboardSpec extends LoginTester1Spec {
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}
-	
-//	def cleanupSpec() {
-//		to LiveListPage
-//		waitFor { at LiveListPage }
-//		$(".table .td", text:"DashboardSpec").click()
-//		waitFor { at LiveShowPage }
-//		stopButton.click()
-//		waitFor { startButton.displayed }
-//	}
 	
 	def findRunningSignalPath(String name) {
 		return $("#main-menu .navigation .runningsignalpath", text: contains(name))
@@ -176,15 +169,14 @@ class DashboardSpec extends LoginTester1Spec {
 			$(".table .td", text:dashboardName + "2").parent().click()
 		then: "the dashboard should open in non-edit-mode"
 			waitFor { 
-				at DashboardShowPage 
-				js.exec("return \$('#main-menu').width()") == 0
+				at DashboardShowPage
 			}
 		
 		when: "clicked to edit"
 			$("#main-menu-toggle").click()
 		then: "the dashboard should be in edit-mode"
 			waitFor { 
-				js.exec("return \$('#main-menu').width()") > 0
+				findRunningSignalPath("DashboardSpec").displayed
 				js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
 			}
 			
