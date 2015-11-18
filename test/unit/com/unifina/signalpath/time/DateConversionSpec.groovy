@@ -14,7 +14,9 @@ import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
 class DateConversionSpec extends Specification {
-	
+
+	def final static format = "yyyy-MM-dd HH:mm:ss";
+
 	Globals globals
 	DateConversion module
 	
@@ -37,7 +39,11 @@ class DateConversionSpec extends Specification {
 			],
 		]
 		Map outputValues = [
-			date: ["2015-10-15 07:35:10", "2000-01-01 12:45:55", "1970-01-01 00:15:00"],
+			date: [
+				new Date(2015 - 1900, 9, 15, 10, 35, 10).format(format, TimeZone.getTimeZone("UTC")),
+				new Date(2000 - 1900, 0, 1, 14, 45, 55).format(format, TimeZone.getTimeZone("UTC")),
+				new Date(1000 * 60 * 15).format(format, TimeZone.getTimeZone("UTC")),
+			],
 			ts: [
 				new Date(2015 - 1900, 9, 15, 10, 35, 10).getTime(),
 				new Date(2000 - 1900, 0, 1, 14, 45, 55).getTime(),

@@ -3,7 +3,11 @@ package com.unifina.signalpath.utils
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
+import java.text.SimpleDateFormat
+
 class EventTableSpec extends Specification {
+
+	def final static format = "yyyy-MM-dd HH:mm:ss.SSS";
 
 	EventTable module
 
@@ -27,10 +31,10 @@ class EventTableSpec extends Specification {
 		Map channelMessages = [
 			table: [
 				[hdr: [headers: ["timestamp", "outputForinput1", "outputForinput2", "outputForinput3"]]],
-				[nr: ["1970-01-01 02:00:00.000", "a", "1", null]],
-				[nr: ["1970-01-01 02:01:00.000", "b", "2", null]],
-				[nr: ["1970-01-01 02:02:00.000", "c", "3", "hello"]],
-				[nr: ["1970-01-01 02:03:00.000", "d", "4", "world"]],
+				[nr: [new Date(0).format(format), "a", "1", null]],
+				[nr: [new Date(60 * 1000).format(format), "b", "2", null]],
+				[nr: [new Date(60 * 1000 * 2).format(format), "c", "3", "hello"]],
+				[nr: [new Date(60 * 1000 * 3).format(format), "d", "4", "world"]],
 			]
 		]
 
