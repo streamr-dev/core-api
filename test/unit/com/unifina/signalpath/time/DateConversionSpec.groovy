@@ -19,16 +19,21 @@ class DateConversionSpec extends Specification {
 
 	Globals globals
 	DateConversion module
-	
+
     def setup() {
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:"UTC", username: "username"))
+		initContext()
+    }
+
+	private def initContext(timezone = "UTC") {
 		module = new DateConversion()
+		globals = new Globals([:], grailsApplication, new SecUser(timezone:timezone, username: "username"))
 		module.globals = globals
 		module.init()
 		module.connectionsReady()
-    }
+	}
 
 	void "dateConversion gives the right answer"() {
+		initContext(TimeZone.getDefault().ID)
 		when:
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		Map inputValues = [
@@ -40,20 +45,20 @@ class DateConversionSpec extends Specification {
 		]
 		Map outputValues = [
 			date: [
-				new Date(2015 - 1900, 9, 15, 10, 35, 10).format(format, TimeZone.getTimeZone("UTC")),
-				new Date(2000 - 1900, 0, 1, 14, 45, 55).format(format, TimeZone.getTimeZone("UTC")),
-				new Date(1000 * 60 * 15).format(format, TimeZone.getTimeZone("UTC")),
+				new Date(2015 - 1900, 9, 15, 10, 35, 10).format(format),
+				new Date(2000 - 1900, 0, 1, 12, 45, 55).format(format),
+				new Date(1000 * 60 * 15).format(format),
 			],
 			ts: [
 				new Date(2015 - 1900, 9, 15, 10, 35, 10).getTime(),
-				new Date(2000 - 1900, 0, 1, 14, 45, 55).getTime(),
+				new Date(2000 - 1900, 0, 1, 12, 45, 55).getTime(),
 				1000 * 60 * 15
 			].collect { it?.doubleValue() },
 			dayOfWeek: ["Thu", "Sat", "Thu"],
 			years: [2015, 2000, 1970].collect { it?.doubleValue() },
 			months: [10, 1, 1].collect { it?.doubleValue() },
 			days: [15, 1, 1].collect { it?.doubleValue() },
-			hours: [7, 0, 0].collect { it?.doubleValue() },
+			hours: [10, 0, 2].collect { it?.doubleValue() },
 			minutes: [35, 45, 15].collect { it?.doubleValue() },
 			seconds: [10, 55, 0].collect { it?.doubleValue() },
 			milliseconds: [0, 0, 0].collect { it?.doubleValue() }
