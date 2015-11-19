@@ -249,4 +249,8 @@ public class TimeSeriesChart extends Chart {
 		else super.handleRequest(request, response);
 	}
 	
+	@Override
+	public String getWebcomponentName() {
+		return "streamr-chart";
+	}
 }

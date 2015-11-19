@@ -41,6 +41,11 @@ public class Heatmap extends ModuleWithUI {
 
 	}
 
+	@Override
+	public String getWebcomponentName() {
+		return "streamr-heatmap";
+	}
+	
 	class HeatPoint extends LinkedHashMap<String,Object> {
 		public HeatPoint(Double latitude, Double longitude, Double value) {
 			super();
@@ -50,5 +55,4 @@ public class Heatmap extends ModuleWithUI {
 			put("v", value);
 		}
 	}
-
 }

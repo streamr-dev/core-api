@@ -150,4 +150,9 @@ public class EventTable extends ModuleWithUI {
 
 	}
 	
+	@Override
+	public String getWebcomponentName() {
+		return "streamr-table";
+	}
+	
 }
