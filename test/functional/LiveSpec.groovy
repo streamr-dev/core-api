@@ -24,8 +24,8 @@ public class LiveSpec extends LoginTester1Spec {
 	def setupSpec() {
 
 		// For some reason the annotations don't work so need the below.
-		SerializationSpec.metaClass.mixin(CanvasMixin)
-		SerializationSpec.metaClass.mixin(ConfirmationMixin)
+		LiveSpec.metaClass.mixin(CanvasMixin)
+		LiveSpec.metaClass.mixin(ConfirmationMixin)
 
 		BootService.mergeDefaultConfig(grailsApplication)
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));

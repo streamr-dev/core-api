@@ -58,7 +58,10 @@ class DateConversionSpec extends Specification {
 			years: [2015, 2000, 1970].collect { it?.doubleValue() },
 			months: [10, 1, 1].collect { it?.doubleValue() },
 			days: [15, 1, 1].collect { it?.doubleValue() },
-			hours: [10, 0, 2].collect { it?.doubleValue() },
+			hours: [10,
+					Date.parse("HH", "00").format("HH").toInteger(),
+					new Date(1000 * 60 * 15).format("HH").toInteger()
+			].collect { it?.doubleValue() },
 			minutes: [35, 45, 15].collect { it?.doubleValue() },
 			seconds: [10, 55, 0].collect { it?.doubleValue() },
 			milliseconds: [0, 0, 0].collect { it?.doubleValue() }
