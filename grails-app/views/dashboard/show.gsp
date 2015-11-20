@@ -31,7 +31,7 @@
 					
 					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
 						var sidebar = new SidebarView({
-							edit: "${params.edit}",
+							edit: ${params.edit ? "true" : "undefined"},
 							dashboard: dashboard, 
 							RSPs: rspJson,
 							el: $("#sidebar-view"),

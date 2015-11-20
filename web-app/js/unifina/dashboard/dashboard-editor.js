@@ -395,8 +395,8 @@ var SidebarView = Backbone.View.extend({
 		return runningSignalPathView.render()
 	},
 
-	setEditMode: function (active) {
-		if(active){
+	setEditMode: function (active) {		
+		if (active || active===undefined && !$("body").hasClass("mmc")) {
 			$("body").addClass("mme")
 			$("body").removeClass("mmc")
 			$("body").addClass("editing")
