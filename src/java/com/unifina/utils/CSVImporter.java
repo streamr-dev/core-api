@@ -8,9 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.TimeZone;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -23,33 +21,39 @@ public class CSVImporter implements Iterable<LineValues> {
 
 	private Schema schema;
 	private File file;
-	
+
 	private static final Logger log = Logger.getLogger(CSVImporter.class);
-	
-	public CSVImporter(File file) throws IOException {
+
+	public CSVImporter(File file, List fields, Integer timestampIndex, String format) throws IOException {
 		this.file = file;
-		
+
 		// Detect the schema
 		InputStream is = new FileInputStream(file);
+
+		HashMap<String, String> fieldMap = new HashMap<>();
+		if(fields != null)
+			for(Object field : fields){
+				if(field instanceof Map) {
+					System.out.println(field);
+					String name = (String) ((Map) field).get("name");
+					String value = (String) ((Map) field).get("type");
+					fieldMap.put(name, value);
+				}
+			}
 		
 		try {
-			schema = new Schema(is);
+			schema = new Schema(is, fieldMap, timestampIndex, format);
 		} finally {
 			is.close();
 		}
 	}
-	
-	public CSVImporter(File file, int timestampIndex, String format) throws IOException {
-		this.file = file;
-		
-		// Detect the schema
-		InputStream is = new FileInputStream(file);
-		
-		try {
-			schema = new Schema(is, timestampIndex, format);
-		} finally {
-			is.close();
-		}
+
+	public CSVImporter(File file) throws IOException {
+		this(file, null, null, null);
+	}
+
+	public CSVImporter(File file, List fields) throws IOException {
+		this(file, fields, null, null);
 	}
 
 	@Override
@@ -136,23 +140,22 @@ public class CSVImporter implements Iterable<LineValues> {
 		public String[] headers;
 
 		// Used to test if the lines are in chronological order
-		public Date lastDate = null;
+		private Date lastDate = null;
+
+		private Map fields = null;
 		
-		public Schema(InputStream is) throws IOException {
+		public Schema(InputStream is, Map fields, Integer timestampIndex, String format) throws IOException {
+			if(timestampIndex != null)
+				setTimeStampColumnIndex(timestampIndex);
+			if(format != null)
+				setDateFormat(format);
+			if(fields != null)
+				this.fields = fields;
+
 			for (OwnDateFormat df : dateFormatsToTry)
 				df.setTimeZone(TimeZone.getTimeZone("UTC"));
-			
+
 			detect(is);
-		}
-		
-		public Schema(InputStream is, int timestampIndex, String format) throws IOException {
-			setTimeStampColumnIndex(timestampIndex);
-			setDateFormat(format);
-			//If format is null, all the auto formats are checked	
-			for (OwnDateFormat dateFormat : dateFormatsToTry)
-				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-			
-			detect(is);		
 		}
 		
 		private void detect(InputStream is) throws IOException {
@@ -235,28 +238,35 @@ public class CSVImporter implements Iterable<LineValues> {
 		private SchemaEntry detectEntry(String value, String name) {
 			if (value==null || value.length()==0)
 				return null;
-			
-			// Try to parse as one of the date formats
-			for (OwnDateFormat df : dateFormatsToTry) {
+
+			System.out.println(fields);
+			if(fields != null && fields.containsKey(name)) {
+				return new SchemaEntry(name, (String)fields.get(name));
+			} else {
+				// Try to parse as one of the date formats
+				for (OwnDateFormat df : dateFormatsToTry) {
+					try {
+						df.parse(value);
+						return new SchemaEntry(name, df);
+					} catch (Exception e) {
+					}
+				}
+
+				// Try to parse as double
 				try {
-					df.parse(value);
-					return new SchemaEntry(name, df);
-				} catch (Exception e) {}
+					Double.parseDouble(value);
+					return new SchemaEntry(name, "number");
+				} catch (Exception e) {
+				}
+
+				// Try to parse as boolean
+				if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+					return new SchemaEntry(name, "boolean");
+				}
+				// Else treat it as string
+				else return new SchemaEntry(name, "string");
 			}
-			
-			// Try to parse as double
-			try {
-				Double.parseDouble(value);
-				return new SchemaEntry(name, "number");
-			} catch (Exception e) {}
-			
-			// Try to parse as boolean
-			if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-				return new SchemaEntry(name, "boolean");
-			}
-			
-			// Else treat it as string
-			else return new SchemaEntry(name, "string");
+
 		}
 		
 		LineValues parseLine(String line) throws IOException, ParseException {
