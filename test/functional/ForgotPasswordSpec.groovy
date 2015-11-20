@@ -10,7 +10,7 @@ class ForgotPasswordSpec extends GebReportingSpec {
 			$(".forgot").click()
 		then: "ForgotPasswordPage opened"
 			waitFor {
-				$("#username").displayed
+				at ForgotPasswordPage
 			}
 	}
 	
@@ -20,31 +20,29 @@ class ForgotPasswordSpec extends GebReportingSpec {
 		when: "go to the URL normally found from email"
 			go "register/resetPassword?t=ForgotPasswordSpec"
 		then: "reset password page must be shown"
-			$("#password").displayed
-			$("#password2").displayed
+			at ResetPasswordPage
 			
 		when: "a weak password is given"
-			$("#password") << "weakPassword"
-			$("#password2") << "weakPassword"
-			$("#reset").click()
+			password << "weakPassword"
+			password2 << "weakPassword"
+			resetButton.click()
 		then: "it must not be accepted"
 			waitFor {
-				$("#password").displayed
-				$("#password2").displayed
+				at ResetPasswordPage
 			}
 			
 		when: "an acceptable password is given"
-			$("#password") << "!#¤%t3stPassword123!"
-			$("#password2") << "!#¤%t3stPassword123!"
-			$("#reset").click()
+			password << "!#¤%t3stPassword123!"
+			password2 << "!#¤%t3stPassword123!"
+			resetButton.click()
 		then: "should log in"
 			waitFor(10) {
 				at CanvasPage
 			}
 		
 		when: "logged out"
-			$("#navSettingsLink").click()
-			$("#navLogoutLink").click()
+			navbar.navSettingsLink.click()
+			navbar.navLogoutLink.click()
 		then: "loginPage visible"
 			waitFor {
 				at LoginPage
@@ -53,19 +51,19 @@ class ForgotPasswordSpec extends GebReportingSpec {
 		when: "logged in with new password"
 			username = "tester1@streamr.com"
 			password = "!#¤%t3stPassword123!"
-			$("#loginButton").click()
+			loginButton.click()
 		then: "should log in normally"
 			waitFor {
 				at CanvasPage
 			}
 			
 		when: "Changing password (back to original)"
-			$("#navSettingsLink").click()
-			$("#navProfileLink").click()
+			navbar.navSettingsLink.click()
+			navbar.navProfileLink.click()
 			waitFor {
 				at ProfileEditPage
 			}
-			$(".form-group a", text: "Change Password").click()
+			changePassword.click()
 			waitFor { at ChangePasswordPage }
 			currentPassword << "!#¤%t3stPassword123!"
 			newPassword << "tester1TESTER1"
