@@ -137,6 +137,7 @@ modules = {
 	 * In-house widgets and resources
 	 */
 	streamr {
+		dependsOn 'pnotify'
 		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
 	}
 	tour {
@@ -144,7 +145,7 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, pnotify, toolbar, bootstrap'
+		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, toolbar, bootstrap'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
@@ -167,7 +168,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
 	}
 	'module-browser' {
-		dependsOn 'mathjax, bootstrap, underscore, streamr, pnotify'
+		dependsOn 'mathjax, bootstrap, underscore, streamr'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	toolbar {

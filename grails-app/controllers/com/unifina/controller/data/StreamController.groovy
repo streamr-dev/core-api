@@ -216,7 +216,7 @@ class StreamController {
 				render ([success:true] as JSON)
 			}
 		} catch (Exception e) {
-				flash.message = "An error occurred while handling file: $e"
+				flash.error = "An error occurred while handling file: $e"
 				response.status = 500
 				render ([success:false, error: e.toString()] as JSON)
 		} finally {

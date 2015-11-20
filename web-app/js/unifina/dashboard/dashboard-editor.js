@@ -335,12 +335,7 @@ var SidebarView = Backbone.View.extend({
 
 		this.dashboard.on('invalid', function(error) {
 			console.log(error)
-			$.pnotify({
-				type: 'error',
-        		title: 'Invalid value',
-	        	text: _this.dashboard.validationError,
-	        	delay: 4000
-    		});
+			Streamr.showError(_this.dashboard.validationError, 'Invalid value')
 		})
 	},
 
@@ -458,22 +453,10 @@ var SidebarView = Backbone.View.extend({
     		success: function() {
 	    		_this.dashboard.saved = true
 	    		document.title = _this.dashboard.get("name")
-
-			    $.pnotify({
-					type: 'success',
-	        		title: 'Saved!',
-		        	text: 'Dashboard ' +_this.dashboard.get("name")+ ' saved successfully',
-		        	delay: 4000
-				});
+				Streamr.showSuccess('Dashboard ' +_this.dashboard.get("name")+ ' saved successfully', "Saved!")
 	    	},
 	    	error: function(model, response) {
-		    	$.pnotify({
-					type: 'error',
-	        		title: 'Error while saving',
-		        	text: response.responseText,
-		        	delay: 4000,
-		        	// addClass: "alert alert-danger alert-dark"
-	    		});
+				Streamr.showError(response.responseText, "Error while saving")
 	    	}
 	    })
     },
@@ -538,13 +521,7 @@ var DashboardView = Backbone.View.extend({
 			//editing -> !editing
 			if(!($("body").hasClass("editing"))) {
 				if(!_this.model.saved){
-					$.pnotify({
-						type: 'info',
-		        		title: 'Not saved',
-			        	text: 'The dashboard has changes which are not saved',
-			        	delay: 4000,
-			        	// addClass: "alert alert-danger alert-dark"
-		    		});
+					Streamr.showInfo('The dashboard has changes which are not saved', "Not saved")
 				}
 				_this.disableSortable()
 			//!editing -> editing
