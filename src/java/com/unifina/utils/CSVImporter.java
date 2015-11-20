@@ -92,7 +92,7 @@ public class CSVImporter implements Iterable<LineValues> {
 
 			try {
 				return schema.parseLine(line);
-			} catch (IOException | ParseException e) {
+			} catch (IOException | ParseException | RuntimeException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -134,6 +134,9 @@ public class CSVImporter implements Iterable<LineValues> {
 		public Integer timestampColumnIndex = null;
 		private String format;
 		public String[] headers;
+
+		// Used to test if the lines are in chronological order
+		public Date lastDate = null;
 		
 		public Schema(InputStream is) throws IOException {
 			for (OwnDateFormat df : dateFormatsToTry)
@@ -172,7 +175,7 @@ public class CSVImporter implements Iterable<LineValues> {
 			    	else {
 			    		String[] fields = parser.parseLine(line);
 			    		
-			    		if (fields.length < entries.length) {
+			    		if (fields.length != entries.length) {
 							throw new RuntimeException("Unexpected number of columns on row "+lineCount);
 						}
 			    		
@@ -259,22 +262,25 @@ public class CSVImporter implements Iterable<LineValues> {
 		LineValues parseLine(String line) throws IOException, ParseException {
 			String[] values = parser.parseLine(line);
 			Object[] parsed = new Object[values.length];
-			
-    		if (values.length < entries.length) {
+
+    		if (values.length != entries.length) {
 				throw new RuntimeException("Unexpected number of columns on line: "+line);
 			}
 			
 			for (int i=0; i<values.length; i++) {
 				// The timestamp column cannot be empty
-				if (i == timestampColumnIndex)
-					parsed[i] = entries[i].dateFormat.parse(values[i]);
+				if (i == timestampColumnIndex) {
+					Date d = entries[i].dateFormat.parse(values[i]);
+					System.out.println(d.toString());
+					if(lastDate != null && d.before(lastDate)) {
+						throw new RuntimeException("The lines must be in a chronological order!");
+					}
+					parsed[i] = d;
+					lastDate = d;
+				}
 				// Check for empty fields
 				else if (values[i]==null || values[i].length()==0)
 					parsed[i] = null;
-				// Parse date field
-				else if (entries[i].dateFormat != null) {
-					parsed[i] = entries[i].dateFormat.parse(values[i]);
-				}
 				// Parse number
 				else if (entries[i].type.equals("number"))
 					parsed[i] = Double.parseDouble(values[i]);
@@ -354,7 +360,6 @@ public class CSVImporter implements Iterable<LineValues> {
 				return super.parse(value);
 			}
 		}
-		
 	}
 
 }

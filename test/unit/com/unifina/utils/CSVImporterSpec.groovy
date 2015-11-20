@@ -116,10 +116,10 @@ class CSVImporterSpec extends Specification {
 		for (CSVImporter.LineValues line : csv) {
 			if (line==null)
 				continue
-			
+
 			if (rowsRead<25)
 				firstRows << line
-				
+
 			rowsRead++
 		}
 		
@@ -144,6 +144,26 @@ class CSVImporterSpec extends Specification {
 		then:
 		schema.entries.length == 12
 		schema.timestampColumnIndex == 5
+	}
+
+	void "should fail when the order of the lines is not chronological"() {
+		Exception exception
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/failing-test-file.csv").toURI()).toFile()
+
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+		try {
+			// Tries to parse each line
+			for (CSVImporter.LineValues line : csv) {}
+		} catch (RuntimeException e) {
+			exception = e
+		}
+
+		then:
+		exception instanceof RuntimeException
+		exception.getMessage().contains("chronological")
 	}
 	
 	
