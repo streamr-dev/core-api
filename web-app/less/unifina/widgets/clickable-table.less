@@ -1,0 +1,97 @@
+@import "bootstrap-3.2.0/tables.less";
+@import "pixel-admin/pixel-admin-less/tables.less";
+
+div.table.clickable-table {
+	&:extend(.table);
+	display: table;
+
+	div.thead {
+		display: table-header-group;
+		&:first-child > .tr:first-child  >.th {
+			&:extend(.table > thead:first-child > tr:first-child > th);
+		}
+		&:extend(.table > thead);
+		.tr {
+			&:extend(.table > thead > tr);
+			span.th {
+				&:extend(th);
+				&:extend(.table thead > tr > th);
+				&:extend(.table > thead > tr > th);
+			}
+		}
+	}
+
+	div.tbody {
+		&:extend(.table > tbody);
+		display: table-row-group;
+		.tr {
+			&:extend(.table > tbody > tr);
+			.td {
+				&:extend(.table > tbody > tr > td);
+			}
+
+			&:first-child .td {
+				border-top:0;
+			}
+		}
+	}
+
+	// Prevent the links to be never underlined
+	a.tr, a.tr:active, a.tr:focus {
+		text-decoration: none;
+	}
+
+	.tr {
+		&:extend(tr);
+		color: inherit;
+		display: table-row;
+		.td, .th {
+			display: table-cell;
+		}
+		.td {
+			&:extend(td);
+			&:extend(.table tr > td);
+		}
+		.th {
+			&:extend(td);
+			&:extend(.table tr > th);
+		}
+	}
+
+	&.table-condensed {
+		&:extend(.table-condensed);
+		.thead > .tr > .th {
+			&:extend(.table-condensed > thead > tr > th);
+		}
+		.tbody > .tr > .td {
+			&:extend(.table-condensed > tbody > tr > td);
+		}
+	}
+
+	&.table-bordered {
+		&:extend(.table-bordered);
+		.thead > .tr > .th {
+			&:not(:first-child),{
+				border-left: 1px solid #dddddd;
+			}
+		}
+		.tbody > .tr > .td {
+			&:not(:first-child) {
+				border-left: 1px solid #dddddd;
+			}
+		}
+	}
+
+	&.table-striped {
+		&:extend(.table-striped);
+		.tbody > .tr:nth-child(odd) > .td {
+			&:extend(.table-striped > tbody > tr:nth-child(odd) > td);
+		}
+	}
+
+	&.table-hover {
+		.tbody > .tr:hover > .td {
+			&:extend(.table-hover > tbody > tr:hover > td);
+		}
+	}
+}

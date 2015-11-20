@@ -489,9 +489,6 @@ var SignalPath = (function () {
 		
 		var result = signalPathToJSON(signalPathContext);
 
-		// TODO: move to module clean()
-		$(".warning").remove();
-
 		// Clean modules before running
 		getModules().forEach(function(module) {
 			module.clean()
@@ -520,10 +517,12 @@ var SignalPath = (function () {
 				handleError(textStatus+"\n"+errorThrown)
 			}
 		});
+
+		connection.connect(true)
 	}
 	pub.run = run;
 	
-	function subscribe(rd,newSession) {
+	function subscribe(rd) {
 		if (runData != null)
 			abort();
 		
@@ -542,15 +541,14 @@ var SignalPath = (function () {
 				connection.subscribe(uiChannel.id, processMessage, options.resendOptions)
 			}
 		})
-		
-		connection.connect(newSession)
 
 		$(pub).trigger('started', [runData]);
 	}
 	pub.subscribe = subscribe
 	
 	function reconnect() {
-		subscribe(runData,false);
+		connection.connect(false)
+		subscribe(runData);
 	}
 	pub.reconnect = reconnect;
 	
@@ -595,22 +593,23 @@ var SignalPath = (function () {
 	
 	function abort() {
 
-		$.ajax({
-			type: 'POST',
-			url: options.abortUrl, 
-			data: {
-				id: runData.id
-			},
-			dataType: 'json',
-			success: function(data) {
-				if (data.error) {
-					handleError("Error:\n"+data.error)
+		if (runData) {
+			$.ajax({
+				type: 'POST',
+				url: options.abortUrl, 
+				data: {
+					id: runData.id
+				},
+				dataType: 'json',
+				success: function(data) {
+					// Ignore errors on abort
+					if (data.error) {}
+				},
+				error: function(jqXHR,textStatus,errorThrown) {
+					handleError(textStatus+"\n"+errorThrown)
 				}
-			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(textStatus+"\n"+errorThrown)
-			}
-		});
+			});
+		}
 
 		disconnect();
 	}

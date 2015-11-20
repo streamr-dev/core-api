@@ -2,7 +2,6 @@
 <head>
     <meta name="layout" content="main" />
     <title><g:message code="dashboard.list.label"/></title>
-
 </head>
 
 <body class="dashboard">
@@ -23,25 +22,24 @@
             </div>
             
             <div class="panel-body">
-            
-				<ui:clickableTable>
-				    <thead>
-				        <tr>
-				            <th>Name</th>
-				            <th>Created</th>
-				            <th>Modified</th>
-				        </tr>
-				    </thead>
-				    <tbody>
+				<ui:table>
+				    <ui:thead>
+				        <ui:tr>
+				            <ui:th>Name</ui:th>
+				            <ui:th>Created</ui:th>
+				            <ui:th>Modified</ui:th>
+				        </ui:tr>
+				    </ui:thead>
+				    <ui:tbody>
 					    <g:each in="${dashboards}" status="i" var="dashboard">
-					    	<ui:clickableRow title="Show or edit dashboard" link="${createLink(action: 'show', id:dashboard.id) }" id="${dashboard.id}">
-					            <td>${dashboard.name}</td>					        
-					           	<td>${dashboard.dateCreated.format("yyyy-MM-dd")}</td>
-					            <td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</td>	
-				            </ui:clickableRow>	            	
+					    	<ui:tr title="Show or edit dashboard" link="${createLink(action: 'show', id:dashboard.id) }" data-id="${dashboard.id}">
+					            <ui:td>${dashboard.name}</ui:td>					        
+					           	<ui:td>${dashboard.dateCreated.format("yyyy-MM-dd")}</ui:td>
+					            <ui:td>${dashboard.lastUpdated.format("yyyy-MM-dd")}</ui:td>	
+				            </ui:tr>	            	
 						</g:each>
-					</tbody>
-				</ui:clickableTable>
+					</ui:tbody>
+				</ui:table>
             </div> <%-- end panel body --%>
         </div> <%-- end panel --%>
 </body>

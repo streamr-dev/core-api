@@ -150,7 +150,7 @@ var DashboardItemView = Backbone.View.extend({
 	titlebarTemplate: _.template($("#titlebar-template").html()),
 
 	events: {
-		"click .delete-btn" : "delete",
+		"click .delete-btn" : "deleteDashBoardItem",
 		"click .titlebar-clickable" : "toggleEdit",
 		"click .edit-btn" : "toggleEdit",
 		"click .close-edit" : "toggleEdit",
@@ -159,17 +159,6 @@ var DashboardItemView = Backbone.View.extend({
 		"click .make-small-btn" : "changeSize",
 		"click .make-medium-btn" : "changeSize",
 		"click .make-large-btn" : "changeSize"
-	},
-
-	initialize: function(){
-		var _this = this
-		this.model.on("remove", this.remove, this)
-		this.model.on("resize", function() {
-			_this.$el.find(".streamr-widget")[0].dispatchEvent(new Event("resize"))
-		})
-		this.$el.on("drop", function(e, index) {
-			_this.model.collection.trigger("orderchange")
-		})
 	},
 
 	render: function() {
@@ -214,11 +203,30 @@ var DashboardItemView = Backbone.View.extend({
 			_this.model.trigger('error', e.originalEvent.detail.error, _this.model.get('title'))
 		})
 		
+		this.streamrWidget = this.$el.find(".streamr-widget")
+
+		this.bindEvents()
+
 		return this
 	},
 
-	delete: function () {
+	deleteDashBoardItem: function(){
 		this.model.collection.remove(this.model)
+	},
+
+	bindEvents: function(){
+		var _this = this
+		this.listenTo(this.model, "resize", function() {
+			_this.streamrWidget[0].dispatchEvent(new Event("resize"))
+		})
+		this.$el.on("drop", function(e, index) {
+			_this.model.collection.trigger("orderchange")
+		})
+	},
+
+	remove: function () {
+		this.streamrWidget[0].dispatchEvent(new Event("remove"))
+		Backbone.View.prototype.remove.apply(this)
 	},
 
 	toggleEdit: function (e) {
@@ -392,8 +400,8 @@ var SidebarView = Backbone.View.extend({
 		return runningSignalPathView.render()
 	},
 
-	setEditMode: function (active) {
-		if(active){
+	setEditMode: function (active) {		
+		if (active || active===undefined && !$("body").hasClass("mmc")) {
 			$("body").addClass("mme")
 			$("body").removeClass("mmc")
 			$("body").addClass("editing")

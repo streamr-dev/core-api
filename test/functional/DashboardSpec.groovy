@@ -1,15 +1,58 @@
 import pages.*
 import spock.lang.*
-import core.LoginTester1Spec;
+import core.LoginTester1Spec
 import core.mixins.CanvasMixin
+import core.mixins.ConfirmationMixin
+import core.pages.CanvasPage
 import core.pages.DashboardCreatePage
 import core.pages.DashboardListPage
 import core.pages.DashboardShowPage
+import core.pages.LiveListPage
+import core.pages.LiveShowPage
 import core.pages.LoginPage
 
-@Mixin(CanvasMixin)
 class DashboardSpec extends LoginTester1Spec {
 
+	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		
+		super.login()
+		waitFor { at CanvasPage }
+		
+		// Go start the RunningSignalPath related to this spec
+		to LiveListPage
+		waitFor { at LiveListPage }
+		$(".table .td", text:"DashboardSpec").click()
+		waitFor { at LiveShowPage }
+		if (stopButton.displayed) {
+			stopButton.click()
+			waitForConfirmation()
+			acceptConfirmation()
+			waitFor { startButton.displayed }
+		}
+		
+		startButton.click()
+		waitFor { stopButton.displayed }
+		
+		$("#navSettingsLink").click()
+		$("#navLogoutLink").click()
+		waitFor { at LoginPage }
+	}
+	
+	def findRunningSignalPath(String name) {
+		return $("#main-menu .navigation .runningsignalpath", text: contains(name))
+	}
+	
+	def findDashboardItem(String name) {
+		return $("#dashboard-view .dashboarditem .title", text:contains(name)).parents(".dashboarditem")
+	}
+	
+	def findTitleInput(String title) {
+		return $("#dashboard-view .dashboarditem input", value: title)
+	}
+	
 	void "the flow of creating, modifying and deleting a dashboard works correctly"() {
 //		Creating a new dashboard
 		to DashboardListPage
@@ -17,118 +60,147 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		String dashboardName = "test" + new Date().getTime()
 		
+		// Create a dashboard
 		when: "clicked to create new dashboard"
-		createButton.click()
+			createButton.click()
 		then: "go to the dashboard create page"
-		waitFor { at DashboardCreatePage }
+			waitFor { at DashboardCreatePage }
 		
 		when: "created a new dashboard"
-		nameInput << dashboardName
-		createButton.click()
+			nameInput << dashboardName
+			createButton.click()
 		then: "go to dashboard show page"
-		waitFor { at DashboardShowPage }
+			waitFor { 
+				at DashboardShowPage
+				findRunningSignalPath("DashboardSpec").displayed
+			}
 		
-		//Modifying the just created dashboard
+		// Open a rsp
 		when: "a rsp clicked to open"
-		$("#main-menu .navigation .runningsignalpath", text: contains('DashboardSpec')).click()
+			findRunningSignalPath("DashboardSpec").click()
 		then: "uichannel-list opens"
-		waitFor { $(".uichannel-title").displayed }
+			waitFor { findRunningSignalPath("DashboardSpec").find(".uichannel-title").displayed }
 		
-		when: "uichannel clicked"
-		$(".uichannel-title", 0).click()
-		then: "one dashboarditem should be visible"
-		waitFor { $("#dashboard-view .dashboarditem").displayed }
+		// Add some modules
+		when: "Label added"
+			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Label")).click()
+		then: "Label should be displayed"
+			waitFor { findDashboardItem("Label").displayed }
 		
+		when: "Table added"
+			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Table")).click()
+		then: "Table item should be displayed"
+			waitFor { findDashboardItem("Table").displayed }
+		
+		when: "Chart added"
+			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Chart")).click()
+		then: "Chart item should be displayed"
+			waitFor { findDashboardItem("Chart").displayed }
+		
+		// Click to edit the title of the module
 		when: "clicked to edit the title"
-		$("#dashboard-view .dashboarditem .titlebar-clickable").click()
+			findDashboardItem("Label").find(".titlebar-clickable").click()
 		then: "title changes to input"
-		waitFor { $("#dashboard-view .dashboarditem .titlebar-edit").displayed }
+			waitFor { findTitleInput("Label").displayed }
 		
+		// Edit the title of the module
 		when: "dashboarditem title changed"
-		$("#dashboard-view .dashboarditem .titlebar-edit").firstElement().clear()
-		$("#dashboard-view .dashboarditem .titlebar-edit") << "New title"
-		nameInput.click()
+			findTitleInput("Label").firstElement().clear()
+			findTitleInput("") << "Foo"
+			// Focus lost
+			nameInput.click()
 		then: "title changes"
-		$("#dashboard-view .dashboarditem .titlebar-clickable", text:"New title").displayed
+			waitFor { findDashboardItem("Foo").displayed }
 		
 		when: "the dashboard name changed"
-		nameInput.firstElement().clear()
-		nameInput << dashboardName + "2"
+			nameInput.firstElement().clear()
+			nameInput << dashboardName + "2"
 		
 		then: "the name changes"
-		nameInput.value() == dashboardName + "2"
+			nameInput.value() == dashboardName + "2"
 		
 		when: "saved"
-		saveButton.click()
+			saveButton.click()
 		then: "pnotify with title 'Saved!' appears"
-		waitFor { $("div.ui-pnotify .ui-pnotify-title", text:"Saved!").displayed }
+			waitFor { $(".ui-pnotify .ui-pnotify-title", text:"Saved!").displayed }
 		
 		//Checking the modifications have been saved	
 		when: "went to the dashboard list page"
-		to DashboardListPage
+			to DashboardListPage
 		then: "the new dashboard is visible"
-		waitFor { at DashboardListPage }
-		$("table td", text:dashboardName + "2").displayed
+			waitFor { at DashboardListPage }
+			$(".table .td", text:dashboardName + "2").displayed
 		
 		when: "clicked the new dashboard to open"
-		$("table td", text:dashboardName + "2").click()
-		then: "the dashboard should open in non-edit-mode"
-		waitFor { at DashboardShowPage }
-		waitFor { js.exec("return \$('#main-menu').width()") == 0 }
-		js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true
+			$(".table .td", text:dashboardName + "2").click()
+			then: "the dashboard should open in non-edit-mode"
+			waitFor { at DashboardShowPage }
+			waitFor { js.exec("return \$('#main-menu').width()") == 0 }
+			waitFor { js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true }
 		then: "the dashboarditem should have the same title"
-		$("#dashboard-view .dashboarditem .titlebar", text:"New title").displayed
+			findDashboardItem("Foo").displayed
 		
 		when: "clicked to edit"
-		$("#main-menu-toggle").click()
+			$("#main-menu-toggle").click()
 		then: "the dashboard should be in edit-mode"
-		waitFor { js.exec("return \$('#main-menu').width()") > 0 }
-		js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
+			waitFor { js.exec("return \$('#main-menu').width()") > 0 }
+			js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
 		
-		//Deleting the dashboard
+		// Click to delete the dashboard without accepting it
 		when: "clicked the delete-button"
-		deleteButton.click()
+			deleteButton.click()
 		then: "confirmation should appear"
-		waitFor { $(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed }
+			waitFor { $(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed }
 		
 		when: "clicked 'cancel'"
-		$(".modal-footer button", text:"Cancel").click()
+			$(".modal-footer button", text:"Cancel").click()
 		then: "back to show-page"
-		waitFor { at DashboardShowPage }
-		then: "confirmation is not visible anymore"
-		waitFor { !($(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed) }
+			waitFor { at DashboardShowPage }
+			then: "confirmation is not visible anymore"
+			waitFor { !($(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed) }
 		
-//<--   replace with wait(44) etc.		
 		when: "went to the dashboard list page"
-		to DashboardListPage
+			to DashboardListPage
 		then: "the new dashboard is visible"
-		waitFor { at DashboardListPage }
-		$("table td", text:dashboardName + "2").displayed
+			waitFor { at DashboardListPage }
+			$(".table .td", text:dashboardName + "2").displayed
 		
 		when: "clicked the new dashboard to open"
-		$("table td", text:dashboardName + "2").parent().click()
+			$(".table .td", text:dashboardName + "2").parent().click()
 		then: "the dashboard should open in non-edit-mode"
-		waitFor { at DashboardShowPage }
+			waitFor { 
+				at DashboardShowPage
+			}
 		
 		when: "clicked to edit"
-		$("#main-menu-toggle").click()
+			$("#main-menu-toggle").click()
 		then: "the dashboard should be in edit-mode"
-		waitFor { js.exec("return \$('#main-menu').width()") > 0 }
-		js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
-//-->			
+			waitFor { 
+				findRunningSignalPath("DashboardSpec").displayed
+				js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
+			}
+			
+		// Delete the dashboard items
+		when: "all dashboarditems are deleted"
+			findDashboardItem("Foo").find(".delete-btn").click()
+			findDashboardItem("Table").find(".delete-btn").click()
+			findDashboardItem("Chart").find(".delete-btn").click()
+		then: "the item should be removed"
+			waitFor { $(".dashboarditem").size()==0 }
 		
+		// Delete the dashboard
 		when: "clicked the delete button"
-		deleteButton.click()
+			deleteButton.click()
 		then: "confirmation should appear"
-		waitFor { $(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed }
+			waitFor { $(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed }
 		
 		when: "clicked 'Ok'"
-		$(".modal-footer button", text:"OK").click()
+			$(".modal-footer button", text:"OK").click()
 		then: "go to list-page"
-		waitFor { at DashboardListPage }
+			waitFor { at DashboardListPage }
 		then: "alert 'Deleted' is shown"
-		$(".alert", text:contains("Dashboard " +dashboardName+ "2 deleted")).displayed
+			$(".alert", text:contains("Dashboard " +dashboardName+ "2 deleted")).displayed
 		then: "the old dashboard is not in the list anymore"
-		!($("table td", text:dashboardName + "2").displayed)		
+			!($(".table .td", text:dashboardName + "2").displayed)		
 	}
 }

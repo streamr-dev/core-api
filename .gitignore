@@ -5,3 +5,8 @@
 target-eclipse
 target
 node_modules
+.idea/
+unifina-core*.iml
+.slcache/
+out/
+plugin.xml

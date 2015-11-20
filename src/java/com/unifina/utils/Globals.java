@@ -24,6 +24,7 @@ import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
 
+
 public class Globals {
 	
 	private static final Logger log = Logger.getLogger(Globals.class);
@@ -193,7 +194,8 @@ public class Globals {
 	}
 	
 	public boolean isRealtime() {
-		return dataSource instanceof RealtimeDataSource;
+		return signalPathContext.containsKey("live") && (Boolean) signalPathContext.get("live");
+		//return dataSource instanceof RealtimeDataSource;
 	}
 	
 	public DataSource getDataSource() {

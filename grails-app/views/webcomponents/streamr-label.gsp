@@ -1,6 +1,6 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/polymer.html", plugin:"unifina-core")}">
 
-<polymer-element name="streamr-label" attributes="channel">
+<polymer-element name="streamr-label" extends="streamr-widget" attributes="channel">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<span class="streamr-label-value">{{value}}</span>
@@ -10,22 +10,15 @@
 		Polymer('streamr-label',{
 			ready: function() {
 				var _this = this
-				var trySubscribe = function() {
-					if (_this.$.client.streamrClient) {
-						_this.$.client.streamrClient.subscribe(
-							_this.channel, 
-							function(message) {
-								_this.value = message.value
-								_this.fire('value')
-							},
-							{resend_last: 1}
-						)
-					}
-					else {
-						setTimeout(trySubscribe, 200)
-					}
-				}
-				trySubscribe()
+				
+				this.bindEvents(this.$.container)
+				this.subscribe(
+					function(message) {
+						_this.value = message.value
+						_this.fire('value')
+					},
+					{resend_last: 1}
+				)
 			},
 			getValue: function() {
 				return this.value

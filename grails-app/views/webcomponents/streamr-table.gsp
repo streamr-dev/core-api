@@ -17,7 +17,7 @@
 			publish: {
 				maxRows: 0
 			},
-			ready: function() {
+			ready: function() {				
 				var _this = this
 				this.bindEvents(_this.$.container)
 

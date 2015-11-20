@@ -60,11 +60,12 @@ public class LiveSpec extends LoginTester1Spec {
 			moduleShouldAppearOnCanvas("Stream")
 			searchAndClick("Label")
 			moduleShouldAppearOnCanvas("Label")
-			searchAndClick("Chart")
-			moduleShouldAppearOnCanvas("Chart")
+			interact {
+				clickAndHold(findModuleOnCanvas("Label"))
+				moveByOffset(0, 200)
+			}
 			
 			connectEndpoints(findOutput("Stream", "rand"), findInput("Label", "label"))
-			connectEndpoints(findOutput("Stream", "rand"), findInput("Chart", "in1"))
 			
 			$("#runDropdown").click()
 			waitFor { $("#runLiveModalButton").displayed }
@@ -85,6 +86,20 @@ public class LiveSpec extends LoginTester1Spec {
 			waitFor(30){ $(".modulelabel").text() != "" }
 			def oldLabel = $(".modulelabel").text()
 			
+		when: "Help button is clicked"
+			findModuleOnCanvas("Label").find(".modulebutton .help").click()
+		then: "Dialog is opened with webcomponent tag shown"
+			waitFor {
+				$(".modal-dialog .modulehelp", text:contains("streamr-label"))
+			}
+			
+		when: "Help dialog close button is clicked"
+			$(".modal-dialog button.close").click()
+		then: "Dialog exits"
+			waitFor {
+				$(".modal-dialog").size()==0
+			}	
+		
 		when: "Live canvas is stopped"
 			stopButton.click()
 		then: "The confirmation dialog is shown"
@@ -109,10 +124,10 @@ public class LiveSpec extends LoginTester1Spec {
 			to LiveListPage
 		then: "The just created live canvas can be found"
 			waitFor { at LiveListPage }
-			$("table td", text:liveName).displayed
+			$(".table .td", text:liveName).displayed
 		
 		when: "Clicking to open the just created live canvas"
-			$("table td", text:liveName).click()
+			$(".table .td", text:liveName).click()
 		then: "The LiveShowPage is opened"
 			waitFor { at LiveShowPage }
 			stopButton.displayed
@@ -138,7 +153,7 @@ public class LiveSpec extends LoginTester1Spec {
 			acceptConfirmation()
 		then: "LiveListPage is opened, and the just created (and deleted) live canvas is not displayed anymore"
 			waitFor{ at LiveListPage }
-			waitFor { !($("table td", text:liveName).displayed) }
+			waitFor { !($(".table .td", text:liveName).displayed) }
 	}
 	
 	def "an alert must be shown if running canvas cannot be pinged"() {
@@ -146,7 +161,7 @@ public class LiveSpec extends LoginTester1Spec {
 		waitFor{ at LiveListPage }
 		
 		when: "selecting running canvas"
-			$("table td", text:"LiveSpec dead").click()
+			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at LiveShowPage}
 			waitFor {$(".alert.alert-danger").displayed}
@@ -157,7 +172,7 @@ public class LiveSpec extends LoginTester1Spec {
 		waitFor{ at LiveListPage }
 		
 		when: "selecting running canvas"
-			$("table td", text:"LiveSpec stopped").click()
+			$(".table .td", text:"LiveSpec stopped").click()
 		then: "navigate to show page"
 			waitFor {at LiveShowPage}
 			!js.exec("return SignalPath.getConnection().isConnected()")
@@ -168,7 +183,7 @@ public class LiveSpec extends LoginTester1Spec {
 		waitFor{ at LiveListPage }
 		
 		when: "selecting running canvas"
-			$("table td", text:"LiveSpec dead").click()
+			$(".table .td", text:"LiveSpec dead").click()
 		then: "navigate to show page that shows an error"
 			waitFor {at LiveShowPage}
 		

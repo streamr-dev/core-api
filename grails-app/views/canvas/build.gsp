@@ -67,7 +67,9 @@ $(document).ready(function() {
 		runUrl: Streamr.createLink('live', 'ajaxCreate'),
 		abortUrl: Streamr.createLink('live', 'ajaxStop'),
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}"
+			server: "${grailsApplication.config.streamr.ui.server}",
+			autoConnect: false,
+			autoDisconnect: true
 		}
 	});
 	

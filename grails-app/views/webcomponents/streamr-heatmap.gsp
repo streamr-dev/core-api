@@ -10,7 +10,7 @@
 <polymer-element name="streamr-heatmap" extends="streamr-widget" attributes="lifeTime fadeInTime fadeOutTime min max radius center zoom minZoom maxZoom">
 	<!-- Using shadow element doesn't work with CSS -->
 	<template>
-		<link rel="stylesheet" href="${r.resource(uri:'/js/leaflet-0.7.3/leaflet-0.7.3.css')}">
+		<link rel="stylesheet" href="${r.resource(dir:'/js/leaflet-0.7.3', file:'leaflet-0.7.3.css', plugin:'unifina-core')}">
 		<streamr-client id="client"></streamr-client>
 		<div id="container"></div>
 	</template>
@@ -21,7 +21,7 @@
 				// hint that center is an array
 				center: []
 			},
-			ready: function() {
+			ready: function() {			
 				var _this = this
 				this.bindEvents(_this.$.container)
 
