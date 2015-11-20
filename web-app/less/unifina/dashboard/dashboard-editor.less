@@ -1,13 +1,14 @@
 body.dashboard-show {
 	height:100%;
 
-	#main-wrapper #content-wrapper ul#dashboard-view {
+	#dashboard-view {
 		overflow:auto;
 		height:100%;
 		padding:0px;
 		list-style-type: none;
+		
 		.dashboarditem {
-			&.editing .stat-panel .stat-row .stat-cell {
+			&.editing {
 				.titlebar, .titlebar-clickable, .edit-btn {
 					display:none;
 				}
@@ -15,38 +16,37 @@ body.dashboard-show {
 					height:20px;
 				}
 			}
-			&:not(.editing) .stat-panel .stat-row .stat-cell {
+			&:not(.editing) {
 				.titlebar-edit, .close-edit {
 					display:none;
 				}
 			}
-			.stat-panel .stat-row .stat-cell {
-				&.title {
-					border-top-right-radius: 4px;
-					border-top-left-radius: 4px;
-				}
-				&.widget-content {
-					border-bottom-left-radius: 4px;
-					border-bottom-right-radius: 4px;
-				}
-				.panel-heading-controls {
-					cursor:auto;
-					label.btn.active {
-						color:#333333;
-					}
-					.size-btn-group {
-						display:none;
-					}
-					.btn-group {
-						padding-top:0px;
-					}
-					.dropdown-menu li:not(.checked) .fa {
-						opacity:0;
-					}
-				}
-				
+			
+			&.title {
+				border-top-right-radius: 4px;
+				border-top-left-radius: 4px;
 			}
-			.contains .stat-panel .stat-row .widget-content streamr-table .container {
+			&.widget-content {
+				border-bottom-left-radius: 4px;
+				border-bottom-right-radius: 4px;
+			}
+			.panel-heading-controls {
+				cursor:auto;
+				label.btn.active {
+					color:#333333;
+				}
+				.size-btn-group {
+					display:none;
+				}
+				.btn-group {
+					padding-top:0px;
+				}
+				.dropdown-menu li:not(.checked) .fa {
+					opacity:0;
+				}
+			}
+
+			streamr-table .container {
 				overflow:auto;
 				width:100%;
 				height:100%;
@@ -57,7 +57,7 @@ body.dashboard-show {
 					width:100%;
 				}
 			}
-			.contains .stat-panel .stat-row .widget-content streamr-chart .container {
+			streamr-chart .container {
 				overflow:auto;
 				width:100%;
 				max-height:400px;
@@ -70,12 +70,12 @@ body.dashboard-show {
 			}
 		}
 	}
-	&:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell {
+	&:not(.editing) {
 		.panel-heading-controls, .titlebar-clickable {
 			display:none;
 		}
 	}
-	&.editing #dashboard-view .dashboarditem .stat-panel {
+	&.editing {
 		overflow:auto;
 
 		.title.stat-cell {
@@ -122,5 +122,9 @@ body.dashboard-show {
 			margin-left:20px;
 			cursor:pointer;
 		}
-	} 
+	}
+	
+	.titlebar-clickable {
+		cursor: pointer;
+	}
 }

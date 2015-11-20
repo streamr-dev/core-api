@@ -78,7 +78,14 @@
 	#main-menu, #main-menu-bg {
 		width: 0px;
 	}
-	body.build-page:not(.mme) #main-wrapper {
+	body.main-menu-fixed:not(.mme) #main-wrapper {
 		padding-left: 0px;
+	}
+	
+	.mme {
+		#content-wrapper {
+			left: 0;
+			padding-left: @main-menu-width - @main-menu-collapsed-width + @content-wrapper-padding;
+		}
 	}
 }

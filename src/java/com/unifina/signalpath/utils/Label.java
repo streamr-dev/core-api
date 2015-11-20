@@ -50,4 +50,9 @@ public class Label extends ModuleWithUI {
 		else return super.getUiChannelName();
 	}
 	
+	@Override
+	public String getWebcomponentName() {
+		return "streamr-label";
+	}
+	
 }
