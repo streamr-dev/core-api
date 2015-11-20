@@ -271,7 +271,6 @@ public class CSVImporter implements Iterable<LineValues> {
 				// The timestamp column cannot be empty
 				if (i == timestampColumnIndex) {
 					Date d = entries[i].dateFormat.parse(values[i]);
-					System.out.println(d.toString());
 					if(lastDate != null && d.before(lastDate)) {
 						throw new RuntimeException("The lines must be in a chronological order!");
 					}
