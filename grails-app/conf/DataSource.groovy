@@ -24,10 +24,12 @@ environments {
     test {
         dataSource {
 			// If not in jenkins and if grails.test.database not defined, throw an exception
-			if (System.getenv()['BUILD_NUMBER']==null && !System.getProperty('grails.test.database'))
-				throw new RuntimeException("Please run scripts/copy-test-db.sh YOURNAME to make a personal copy of the test db, then run grails with this command line argument: -Dgrails.test.database=core_test_YOURNAME")
+			def dbDefaultName = 'hft_test'
+			def dbName = System.getProperty('grails.test.database') ?: dbDefaultName
 			
-			def dbName = System.getProperty('grails.test.database') ?: 'core_test'
+			if (System.getenv()['BUILD_NUMBER']==null && !System.getProperty('grails.test.database'))
+				throw new RuntimeException("Please run scripts/copy-test-db.sh YOURNAME to make a personal copy of the test db, then run grails with this command line argument: -Dgrails.test.database=${dbDefaultName}_YOURNAME")
+			
 			println "Using database: $dbName"
 			
 			username = "unifina-test"
