@@ -18,13 +18,13 @@ environments {
 			username = "unifina-test"
 			password = "HqTQK9kB"
             dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
-            url = "jdbc:mysql://192.168.10.21:3306/core_test?useLegacyDatetimeCode=false"
+            url = "jdbc:mysql://192.168.10.21:3306/core_test_master?useLegacyDatetimeCode=false"
         }
     }
     test {
         dataSource {
 			// If not in jenkins and if grails.test.database not defined, throw an exception
-			def dbDefaultName = 'hft_test'
+			def dbDefaultName = 'core_test'
 			def dbName = System.getProperty('grails.test.database') ?: dbDefaultName
 			
 			if (System.getenv()['BUILD_NUMBER']==null && !System.getProperty('grails.test.database'))
