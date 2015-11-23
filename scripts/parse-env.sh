@@ -19,3 +19,7 @@ mysql=`which mysql`
 mysql="$mysql --host=$DBHOST -u root --password=$MYSQL_PW"
 mysqldump=`which mysqldump`
 mysqldump="$mysqldump --host=$DBHOST -u root --password=$MYSQL_PW"
+
+echo "Database host: $DBHOST"
+echo "Source database: $DBSOURCE"
+echo "Target database: $DBNAME"

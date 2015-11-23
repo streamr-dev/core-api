@@ -6,9 +6,11 @@ then
 	exit 1
 fi
 
-source $WORKSPACE/scripts/parse-env.sh `echo $GIT_BRANCH | cut -d'/' -f2`
+BRANCH=`echo $GIT_BRANCH | cut -d'/' -f2`
+source $WORKSPACE/scripts/parse-env.sh $BRANCH
 
 # drop test db
 $mysql -e 'DROP DATABASE IF EXISTS '$DBNAME';'
 
 $git checkout $DSCONFIG
+rm "${DSCONFIG}-e"
