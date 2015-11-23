@@ -1,15 +1,46 @@
 import pages.*
 import spock.lang.*
-import core.LoginTester1Spec;
+import core.LoginTester1Spec
 import core.mixins.CanvasMixin
+import core.mixins.ConfirmationMixin
+import core.pages.CanvasPage
 import core.pages.DashboardCreatePage
 import core.pages.DashboardListPage
 import core.pages.DashboardShowPage
+import core.pages.LiveListPage
+import core.pages.LiveShowPage
 import core.pages.LoginPage
 
-@Mixin(CanvasMixin)
 class DashboardSpec extends LoginTester1Spec {
 
+	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		
+		super.login()
+		waitFor { at CanvasPage }
+		
+		// Go start the RunningSignalPath related to this spec
+		to LiveListPage
+		waitFor { at LiveListPage }
+		$(".table .td", text:"DashboardSpec").click()
+		waitFor { at LiveShowPage }
+		if (stopButton.displayed) {
+			stopButton.click()
+			waitForConfirmation()
+			acceptConfirmation()
+			waitFor { startButton.displayed }
+		}
+		
+		startButton.click()
+		waitFor { stopButton.displayed }
+		
+		$("#navSettingsLink").click()
+		$("#navLogoutLink").click()
+		waitFor { at LoginPage }
+	}
+	
 	def findRunningSignalPath(String name) {
 		return $("#main-menu .navigation .runningsignalpath", text: contains(name))
 	}
@@ -53,24 +84,18 @@ class DashboardSpec extends LoginTester1Spec {
 		// Add some modules
 		when: "Label added"
 			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Label")).click()
-		then: "Label should be visible"
+		then: "Label should be displayed"
 			waitFor { findDashboardItem("Label").displayed }
 		
 		when: "Table added"
 			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Table")).click()
-		then: "Table should be visible and pnotify displayed"
-			waitFor { 
-				findDashboardItem("Table").displayed
-				$(".ui-pnotify .alert").displayed 
-			}
+		then: "Table item should be displayed"
+			waitFor { findDashboardItem("Table").displayed }
 		
 		when: "Chart added"
 			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Chart")).click()
-		then: "Chart should be visible and pnotify displayed"
-			waitFor {
-				findDashboardItem("Chart").displayed
-				$(".ui-pnotify .alert").displayed
-			}
+		then: "Chart item should be displayed"
+			waitFor { findDashboardItem("Chart").displayed }
 		
 		// Click to edit the title of the module
 		when: "clicked to edit the title"
@@ -81,11 +106,11 @@ class DashboardSpec extends LoginTester1Spec {
 		// Edit the title of the module
 		when: "dashboarditem title changed"
 			findTitleInput("Label").firstElement().clear()
-			findTitleInput("") << "New title"
+			findTitleInput("") << "Foo"
 			// Focus lost
 			nameInput.click()
 		then: "title changes"
-			waitFor { findDashboardItem("New title").displayed }
+			waitFor { findDashboardItem("Foo").displayed }
 		
 		when: "the dashboard name changed"
 			nameInput.firstElement().clear()
@@ -113,7 +138,7 @@ class DashboardSpec extends LoginTester1Spec {
 			waitFor { js.exec("return \$('#main-menu').width()") == 0 }
 			waitFor { js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true }
 		then: "the dashboarditem should have the same title"
-			findDashboardItem("New title").displayed
+			findDashboardItem("Foo").displayed
 		
 		when: "clicked to edit"
 			$("#main-menu-toggle").click()
@@ -144,24 +169,20 @@ class DashboardSpec extends LoginTester1Spec {
 			$(".table .td", text:dashboardName + "2").parent().click()
 		then: "the dashboard should open in non-edit-mode"
 			waitFor { 
-				at DashboardShowPage 
-				js.exec("return \$('#main-menu').width()") == 0
+				at DashboardShowPage
 			}
-			// Hide pnotifys so that they don't obstruct the close buttons
-			waitFor { $(".ui-pnotify").size()==2 }
-			waitFor { $(".ui-pnotify").size()==0 }
 		
 		when: "clicked to edit"
 			$("#main-menu-toggle").click()
 		then: "the dashboard should be in edit-mode"
 			waitFor { 
-				js.exec("return \$('#main-menu').width()") > 0
+				findRunningSignalPath("DashboardSpec").displayed
 				js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
 			}
 			
 		// Delete the dashboard items
 		when: "all dashboarditems are deleted"
-			findDashboardItem("New title").find(".delete-btn").click()
+			findDashboardItem("Foo").find(".delete-btn").click()
 			findDashboardItem("Table").find(".delete-btn").click()
 			findDashboardItem("Chart").find(".delete-btn").click()
 		then: "the item should be removed"
