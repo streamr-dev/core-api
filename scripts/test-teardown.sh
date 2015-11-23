@@ -13,4 +13,3 @@ source $WORKSPACE/scripts/parse-env.sh $BRANCH
 $mysql -e 'DROP DATABASE IF EXISTS '$DBNAME';'
 
 $git checkout $DSCONFIG
-rm "${DSCONFIG}-e"
