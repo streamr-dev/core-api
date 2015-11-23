@@ -15,10 +15,10 @@ environments {
     development {
 		// use the test db in dev as well
         dataSource {
-			username = "unifina-test"
-			password = "HqTQK9kB"
+			username = "unifina-dev"
+			password = "2PpJA2vJ"
             dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
-            url = "jdbc:mysql://192.168.10.21:3306/core_test_master?useLegacyDatetimeCode=false"
+            url = "jdbc:mysql://192.168.10.21:3306/core_dev?useLegacyDatetimeCode=false"
         }
     }
     test {
