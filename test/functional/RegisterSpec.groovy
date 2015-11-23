@@ -20,7 +20,7 @@ class RegisterSpec extends GebReportingSpec {
             expect:
             assert Environment.current == Environment.TEST
         }
-        
+
         // Delete the user
         def cleanupSpec() {
             when: "login"
@@ -30,7 +30,7 @@ class RegisterSpec extends GebReportingSpec {
                 loginButton.click()
             then:
                 at CanvasPage
-                
+
             when: "search for the user and click it"
                 navbar.navAdminLink.click()
                 $("li a", text:"Users").click()
@@ -49,18 +49,25 @@ class RegisterSpec extends GebReportingSpec {
                 waitFor {
                     at UserEditPage
                 }
-                
+
             when: "click to delete"
                 deleteButton.click()
             then: "asks for confirmation"
                 assert confirmationBox.displayed
-                
+
             when: "confirms"
                 deleteConfirmButton.click()
             then: "go back to user search page"
                 waitFor {
                     at UserSearchPage
                 }
+                // A notification is blocking the logout button, the easiest way to get rid of it is to reload the page
+                to UserSearchPage
+
+            when:
+                $("#loginLinkContainer a").click()
+            then:
+                at LoginPage
         }
         
         def "the invitation token can be requested correctly"() {
@@ -86,4 +93,4 @@ class RegisterSpec extends GebReportingSpec {
             then: "go to canvas page"
                 at CanvasPage
         }
-}
+    }
