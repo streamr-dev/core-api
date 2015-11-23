@@ -124,7 +124,7 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
         cmd.username = invite.username
 
         if (cmd.hasErrors()) {
-            log.warn("Registration command has errors: "+cmd.errors)
+            log.warn("Registration command has errors: "+unifinaSecurityService.checkErrors(cmd.errors.getAllErrors()))
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
