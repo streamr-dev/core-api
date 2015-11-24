@@ -12,7 +12,7 @@ DSCONFIG=$WORKSPACE/grails-app/conf/DataSource.groovy
 DBHOST="dev.unifina"
 MYSQL_PW=Trez2tuV
 DBSOURCE=core_test
-DBNAME=`echo $DBSOURCE'_'$BRANCHNAME | cut -c1-64 | sed 's/-/_/g'` # max db name length is 64 chars
+DBNAME=`echo $DBSOURCE'_'$BRANCHNAME | cut -c1-64 | sed 's/[-.]/_/g'` # max db name length is 64 chars
 
 git=`which git`
 mysql=`which mysql`
