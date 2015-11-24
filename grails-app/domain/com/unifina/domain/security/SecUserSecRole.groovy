@@ -29,7 +29,7 @@ class SecUserSecRole implements Serializable {
 	}
 
 	static SecUserSecRole create(SecUser secUser, SecRole secRole, boolean flush = false) {
-		new SecUserSecRole(secUser: secUser, secRole: secRole).save(flush: flush, insert: true)
+		new SecUserSecRole(secUser: secUser, secRole: secRole).save(flush: flush, insert: true, failOnError: true)
 	}
 
 	static boolean remove(SecUser secUser, SecRole secRole, boolean flush = false) {
