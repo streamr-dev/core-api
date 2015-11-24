@@ -16533,7 +16533,7 @@ body.build-page #main-menu .twitter-typeahead {
 .login-page.show-sign-up .btn-sign-up {
   display: inline-block;
 }
-.login-page.show-sign-in .btn-sign-up {
+.login-page.show-sign-in .btn-sign-in {
   display: inline-block;
 }
 body.live-show-view #content-wrapper {

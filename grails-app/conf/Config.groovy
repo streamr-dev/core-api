@@ -37,3 +37,16 @@ log4j = {
 unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
 unifina.feed.s3FileStorageAdapter.secretKey = "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"
 unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
+
+grails {
+    mail {
+        host = "smtp.gmail.com"
+        port = 465
+        username = "henri.pihkala@streamr.com"
+        password = "gnqxzdmojlkzlxjy"
+        props = ["mail.smtp.auth":"true",
+               "mail.smtp.socketFactory.port":"465",
+               "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+               "mail.smtp.socketFactory.fallback":"false"]
+    }
+}
