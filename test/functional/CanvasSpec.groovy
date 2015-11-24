@@ -1,12 +1,12 @@
 
-import pages.*
-import spock.lang.*
 import core.LoginTester1Spec;
 import core.mixins.CanvasMixin
 
-@Mixin(CanvasMixin)
 class CanvasSpec extends LoginTester1Spec {
 	
+	def setupSpec(){
+		CanvasSpec.metaClass.mixin(CanvasMixin)
+	}
 
 	def "clicking module close button in canvas should remove it"() {
 		setup: "Barify is added via module browser"

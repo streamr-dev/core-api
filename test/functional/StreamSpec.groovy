@@ -19,10 +19,6 @@ class StreamSpec extends LoginTester1Spec {
 		StreamSpec.metaClass.mixin(ConfirmationMixin)
 	}
 	
-	def setup() {
-
-	}
-	
 	private File getFile(String filename) {
 		// The test csv files must be available in the local filesystem of the machine where the browser is running.
 		// Note that it's impossible to check here whether the file exists because this code runs on a different machine.
