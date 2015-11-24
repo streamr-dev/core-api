@@ -102,13 +102,10 @@ grails.project.dependency.resolution = {
         compile ":mail:1.0.7"
 
 	    // plugins needed at runtime but not for compilation
-		runtime ':hibernate:3.6.10.16'
+		runtime ':hibernate:3.6.10.19'
 			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
 		compile ":cache-headers:1.1.7"
-			  
-        // Required by cached-resources but transitive dependency declaration is missing	  
-        compile ":cache-headers:1.1.7"
 		
         runtime ":spring-security-ui:1.0-RC2"
         runtime ":spring-security-core:2.0-RC4"
