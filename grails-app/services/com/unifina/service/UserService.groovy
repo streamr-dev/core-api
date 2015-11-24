@@ -15,12 +15,12 @@ class UserService {
     def springSecurityService
 	
     def createUser(Map properties, List<SecRole> roles=null, List<Feed> feeds=null, List<ModulePackage> packages=null) {
-        def conf = SpringSecurityUtils.securityConfig
+        def secConf = grailsApplication.config.grails.plugin.springsecurity
         ClassLoader cl = this.getClass().getClassLoader()
-        SecUser user = cl.loadClass(conf.userLookup.userDomainClassName).newInstance(properties)
+        SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
-        def userRoleClass = cl.loadClass(conf.userLookup.authorityJoinClassName)
-        def roleClass = cl.loadClass(conf.authority.className)
+        def userRoleClass = cl.loadClass(secConf.userLookup.authorityJoinClassName)
+        def roleClass = cl.loadClass(secConf.authority.className)
 
         // Encode the password
         if(user.password == null)
@@ -41,9 +41,9 @@ class UserService {
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
         if(roles == null) {
-            roles = roleClass.findAllByAuthorityInList(conf.ui.register.defaultRoleNames)
-            if(roles.size() != conf.ui.register.defaultRoleNames.size())
-                throw new RuntimeException("Roles not found: "+conf.ui.register.defaultRoleNames)
+            roles = roleClass.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
+            if(roles.size() != secConf.ui.register.defaultRoleNames.size())
+                throw new RuntimeException("Roles not found: "+secConf.ui.register.defaultRoleNames)
         }
         if(packages == null) {
             packages = ModulePackage.findAllByIdInList(grailsApplication.config.streamr.user.defaultModulePackages.collect {it.longValue()})
