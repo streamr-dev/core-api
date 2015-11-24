@@ -27,9 +27,8 @@ import com.unifina.service.SignupCodeService
 import com.unifina.service.UnifinaSecurityService
 
 @TestFor(RegisterController)
-@Mock([SignupInvite,
-		UnifinaSecurityService, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
-		Feed, FeedUser, ModulePackage, ModulePackageUser, UserService, SpringSecurityService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
+		Feed, FeedUser, ModulePackage, ModulePackageUser, UnifinaSecurityService])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
@@ -58,11 +57,14 @@ class RegisterControllerSpec extends Specification {
 				mailSent = true
 			}
 		]
-
+		
+		controller.springSecurityService = springSecurityService
+		controller.signupCodeService = new SignupCodeService()
+		controller.unifinaSecurityService = new UnifinaSecurityService()
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication
-		controller.springSecurityService = springSecurityService
+		
 	}
 
 	void "index should not be available"() {
