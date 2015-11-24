@@ -19,7 +19,7 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
 def gebVersion = "0.9.3"
-def seleniumVersion = "2.41.0"
+def seleniumVersion = "2.48.2"
 
 grails.project.dependency.resolver = "maven" // or ivy
 
@@ -100,7 +100,7 @@ grails.project.dependency.resolution = {
         }
 
 	    // plugins needed at runtime but not for compilation
-		runtime ':hibernate:3.6.10.2'
+		runtime ':hibernate:3.6.10.16'
 			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
 		compile ":cache-headers:1.1.7"
