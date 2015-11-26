@@ -37,7 +37,7 @@ public class StoredEndpointFields implements Serializable {
 	/**
 	 * Restore values of fields of type <code>Endpoint</code> on given object.
 	 */
-	public void setValuesOn(Object instance) {
+	public void restoreFields(Object instance) {
 		for (Field f : fields(instance)) {
 			if (isEndpoint(f)) {
 				restoreField(instance, f, endpointsByFieldName.get(f.getName()));

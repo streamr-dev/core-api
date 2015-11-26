@@ -48,24 +48,24 @@ class StoredEndpointFieldsSpec extends Specification {
 		instance.d == ""
 	}
 
-	void "method setValuesOn() restores endpoint fields"() {
+	void "method restoreFields() restores endpoint fields"() {
 		A a = new A(1, null, null, "test")
 		StoredEndpointFields sef = StoredEndpointFields.clearAndCollect(instance)
 
 		when:
-		sef.setValuesOn(a)
+		sef.restoreFields(a)
 
 		then:
 		a.b == input
 		a.c == output
 	}
 
-	void "method setValuesOn() keeps other fields intact"() {
+	void "method restoreFields() keeps other fields intact"() {
 		A a = new A(1, null, null, "test")
 		StoredEndpointFields sef = StoredEndpointFields.clearAndCollect(instance)
 
 		when:
-		sef.setValuesOn(a)
+		sef.restoreFields(a)
 
 		then:
 		a.a == 1

@@ -50,7 +50,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		drivingInputs = null;
 	}
 
-	public void afterDeserialization(SignalPath parentSignalPath,
+	public void copyStateFromWrapper(SignalPath parentSignalPath,
 									 ArrayList<Input> inputs,
 									 Map inputsByName,
 									 ArrayList<Output> outputs,

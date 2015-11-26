@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.tools.Diagnostic;
 
+import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -18,19 +19,15 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	String className = null;
 	String fullCode = null;
 	StoredEndpointFields storedEndpointFields = null;
-	transient UserJavaClassLoader userJavaClassLoader = null;
+	transient UserJavaClassLoader classLoader = null;
 
 	private static final Logger log = Logger.getLogger(AbstractJavaCodeWrapper.class);
-	
-	@Override
-	public void init() {
-
-	}
 
 	@Override
 	public void initialize() {
-		if (instance!=null)
+		if (instance != null) {
 			instance.initialize();
+		}
 	}
 
 	@Override
@@ -57,8 +54,9 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	@Override
 	public void clearState() {
-		if (instance!=null)
-			instance.clear(); //clearState()
+		if (instance != null) {
+			instance.clear();
+		}
 	}
 
 	@Override
@@ -77,6 +75,16 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 			"java.util.*"
 		});
 	}
+
+	private String makeImportString() {
+		StringBuilder result = new StringBuilder();
+		for (String i : getImports()) {
+			result.append("import ");
+			result.append(i);
+			result.append(";\n");
+		}
+		return result.toString();
+	}
 	
 	protected abstract String getHeader();
 	protected abstract String getDefaultCode();
@@ -89,74 +97,22 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		return config;
 	}
 
-	private String makeImportString() {
-		StringBuilder result = new StringBuilder();
-		for (String i : getImports()) {
-			result.append("import ");
-			result.append(i);
-			result.append(";\n");
-		}
-		return result.toString();
-	}
-
-
-	@Override
-	public void beforeSerialization() {
-		super.beforeSerialization();
-		instance.beforeSerialization();
-		storedEndpointFields = StoredEndpointFields.clearAndCollect(instance);
-
-		// Ensure that CustomModule is not serialized when this wrapper is serialized
-		for (Input in : getInputs()) {
-			in.setOwner(null);
-		}
-		for (Output out : getOutputs()) {
-			out.setOwner(null);
-		}
-
-		serializedInstance = globals.getSerializationService().serialize(instance);
-	}
-
-	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
-		try {
-			compileAndRegister(className, fullCode);
-			instance = (AbstractCustomModule) globals.getSerializationService().deserialize(serializedInstance, userJavaClassLoader);
-
-			storedEndpointFields.setValuesOn(instance);
-			storedEndpointFields = null;
-			instance.afterDeserialization(parentSignalPath, inputs, inputsByName, outputs, outputsByName, drivingInputs, globals);
-
-			for (Input in : getInputs()) {
-				in.setOwner(instance);
-			}
-
-			for (Output out : getOutputs()) {
-				out.setOwner(instance);
-			}
-
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Exception " + e);
-		}
-	}
-
 	protected void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (config.containsKey("code")) {
-			
+
 			code = config.get("code").toString();
 
 			try {
 				className = generateClassName();
 				fullCode = combineCode(className);
 				Class<AbstractCustomModule> clazz = compileAndRegister(className, fullCode);
-				setUpCustomModule(clazz, config);
+				instance = setUpCustomModule(clazz, config);
 			}
 			catch (Exception e) {
 				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found
 //				if (!globals.target.save) {
-					throw new RuntimeException(e);
+				throw new RuntimeException(e);
 //				}
 			}
 		}
@@ -172,42 +128,42 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	private Class<AbstractCustomModule> compileAndRegister(String className, String fullCode) throws ClassNotFoundException {
-		userJavaClassLoader = new UserJavaClassLoader(getClass().getClassLoader());
-		boolean success = userJavaClassLoader.parseClass(className, fullCode);
+		classLoader = new UserJavaClassLoader(getClass().getClassLoader());
+		boolean success = classLoader.parseClass(className, fullCode);
 
 		if (!success) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Compilation errors:\n");
+			StringBuilder sb = new StringBuilder();
+			sb.append("Compilation errors:\n");
 
-            List<ModuleExceptionMessage> msgs = new ArrayList<>();
+			List<ModuleExceptionMessage> msgs = new ArrayList<>();
 
-            for (Diagnostic d : userJavaClassLoader.getDiagnostics()) {
-                long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
+			for (Diagnostic d : classLoader.getDiagnostics()) {
+				long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
 
-                sb.append("Line ");
-                sb.append(Long.toString(line));
-                sb.append(": ");
-                sb.append(d.getMessage(null));
-                sb.append("\n");
+				sb.append("Line ");
+				sb.append(Long.toString(line));
+				sb.append(": ");
+				sb.append(d.getMessage(null));
+				sb.append("\n");
 
-                CompilationErrorMessage msg = new CompilationErrorMessage();
-                msg.addError(line, d.getMessage(null));
-                msgs.add(new ModuleExceptionMessage(hash,msg));
-            }
+				CompilationErrorMessage msg = new CompilationErrorMessage();
+				msg.addError(line, d.getMessage(null));
+				msgs.add(new ModuleExceptionMessage(hash,msg));
+			}
 
-            throw new ModuleException(sb.toString(),null,msgs);
-        }
+			throw new ModuleException(sb.toString(),null,msgs);
+		}
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
-		// TODO: not needed for Java classes?
-		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) userJavaClassLoader.loadClass(className);
+		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
 		globals.registerDynamicClass(clazz);
 		return clazz;
 	}
 
-	private void setUpCustomModule(Class<AbstractCustomModule> clazz, Map config) throws InstantiationException, IllegalAccessException {
+	private AbstractCustomModule setUpCustomModule(Class<AbstractCustomModule> clazz, Map config)
+			throws InstantiationException, IllegalAccessException {
 		// Create & init instance
-		instance = clazz.newInstance();
+		AbstractCustomModule instance = clazz.newInstance();
 		instance.init();
 
 		for (Input it : instance.getInputs()) {
@@ -223,5 +179,60 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		instance.setHash(hash);
 		instance.setParentSignalPath(parentSignalPath);
 		instance.configure(config);
+
+		return instance;
+	}
+
+	@Override
+	public void beforeSerialization() {
+		super.beforeSerialization();
+
+		// Ensure that there are no links to AbstractCustomModule before serialization so that it not serialized by
+		// virtue of belonging to object graph. Note that <code>instance</code> is already defined as transient.
+		changeOwnerOfEndpoints(null);
+
+		storedEndpointFields = StoredEndpointFields.clearAndCollect(instance);
+
+		// Note: instance.beforeSerialization() invoked indirectly
+		serializedInstance = serializationService().serialize(instance);
+	}
+
+	@Override
+	public void afterDeserialization() {
+		super.afterDeserialization();
+		try {
+			compileAndRegister(className, fullCode);
+			instance = (AbstractCustomModule) serializationService().deserialize(serializedInstance, classLoader);
+
+			instance.copyStateFromWrapper(parentSignalPath,
+					inputs,
+					inputsByName,
+					outputs,
+					outputsByName,
+					drivingInputs,
+					globals);
+
+
+			storedEndpointFields.restoreFields(instance);
+			storedEndpointFields = null;
+
+			changeOwnerOfEndpoints(instance);
+
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("Exception " + e);
+		}
+	}
+
+	private void changeOwnerOfEndpoints(AbstractSignalPathModule newOwner) {
+		for (Input in : getInputs()) {
+			in.setOwner(newOwner);
+		}
+		for (Output out : getOutputs()) {
+			out.setOwner(newOwner);
+		}
+	}
+
+	private SerializationService serializationService() {
+		return globals.getSerializationService();
 	}
 }
