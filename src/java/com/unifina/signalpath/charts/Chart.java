@@ -141,7 +141,6 @@ public abstract class Chart extends ModuleWithUI {
 
 	protected CSVWriter csvWriter() {
 		if (csvWriter == null) {
-			System.out.println("IT IS " + globals.getGrailsApplication().getConfig());
 			csvWriter = new CSVWriter(null,
 					globals.getGrailsApplication().getConfig(),
 					globals.getSignalPathContext(),

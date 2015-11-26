@@ -387,7 +387,7 @@ public class ModuleTestHelper {
 			module.beforeSerialization();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			serializer.serialize(module, out);
-			serializer.serializeToFile(module, "temp.json");
+			//serializer.serializeToFile(module, "temp.json");
 
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 			module = (AbstractSignalPathModule) serializer.deserialize(in);

@@ -92,7 +92,6 @@ public class ConnexorTweetSentiment extends AbstractSignalPathModule {
 	}
 
 	protected String login(String email, String password, String url) throws UnirestException {
-		System.out.println("In real login");
 		return Unirest.post(url)
 				.field("Email", email)
 				.field("Password", password)
