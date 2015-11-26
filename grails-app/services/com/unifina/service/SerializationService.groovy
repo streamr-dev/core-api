@@ -2,16 +2,20 @@ package com.unifina.service
 
 import com.unifina.serialization.SerializationException
 import com.unifina.serialization.SerializerImpl
+import com.unifina.signalpath.AbstractSignalPathModule
 
 class SerializationService {
 
 	def serializer = new SerializerImpl()
 
-	String serialize(Object object) throws SerializationException {
-		serializer.serializeToString(object)
+	String serialize(AbstractSignalPathModule module) throws SerializationException {
+		module.beforeSerialization()
+		serializer.serializeToString(module)
 	}
 
 	def deserialize(String data) throws SerializationException {
-		serializer.deserializeFromString(data)
+		AbstractSignalPathModule module = serializer.deserializeFromString(data)
+		module.afterDeserialization()
+		return module
 	}
 }

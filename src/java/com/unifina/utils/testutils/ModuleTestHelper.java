@@ -378,22 +378,21 @@ public class ModuleTestHelper {
 		return ticks != null;
 	}
 
-	private void serializeAndDeserializeModel()
-			throws IOException, ClassNotFoundException {
+	private void serializeAndDeserializeModel() throws IOException, ClassNotFoundException {
 		if (serializationMode) {
 
 			// Globals is rather tricky to serialize so temporarily pull out
 			Globals globalsTempHolder = module.globals;
-			module.globals = null;
 
+			module.beforeSerialization();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			serializer.serialize(module, out);
-
-			//SerializerImpl.serializeToFile(module, "temp.out");
+			serializer.serializeToFile(module, "temp.json");
 
 			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 			module = (AbstractSignalPathModule) serializer.deserialize(in);
 			module.globals = globalsTempHolder;
+			module.afterDeserialization();
 		}
 	}
 
