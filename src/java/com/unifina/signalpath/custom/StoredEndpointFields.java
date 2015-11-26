@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Stores and clears the <code>Endpoint</code> fields of a <code>AbstractCustomModule</code>.
+ * Stores and clears the <code>Endpoint</code> fields of a <code>AbstractCustomModule</code>. Used by
+ * <code>AbstractJavaCodeWrapper</code> to serialize fields of custom modules.
  */
 public class StoredEndpointFields implements Serializable {
 
@@ -20,7 +21,9 @@ public class StoredEndpointFields implements Serializable {
 		for (Field f : fields(instance)) {
 			try {
 				f.setAccessible(true);
-				f.set(instance, endpointsByFieldName.get(f.getName()));
+				if (Endpoint.class.isAssignableFrom(f.getType())) {
+					f.set(instance, endpointsByFieldName.get(f.getName()));
+				}
 			} catch (IllegalAccessException e) {
 				log.error("Could not set field: " + f + ", class: " + instance.getClass() + " due to exception: " + e);
 			} finally {

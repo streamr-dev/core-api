@@ -59,7 +59,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	
 	Module domainObject;
 	
-	transient protected HashSet<Input> drivingInputs = new HashSet<Input>();
+	protected HashSet<Input> drivingInputs = new HashSet<Input>();
 	
 	Date lastCleared = null;
 	
@@ -671,6 +671,5 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * Override to handle steps after serialization
 	 */
 	public void afterDeserialization() {
-		drivingInputs = new HashSet<>();
 	}
 }

@@ -3,10 +3,7 @@ package com.unifina.signalpath.custom;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleWithUI;
@@ -50,6 +47,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		inputsByName = null;
 		outputs = null;
 		outputsByName = null;
+		drivingInputs = null;
 	}
 
 	public void afterDeserialization(SignalPath parentSignalPath,
@@ -57,12 +55,14 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 									 Map inputsByName,
 									 ArrayList<Output> outputs,
 									 Map outputsByName,
+									 HashSet<Input> drivingInputs,
 									 Globals globals) {
 		this.parentSignalPath = parentSignalPath;
-		this.inputs = inputs;
-		this.inputsByName = inputsByName;
-		this.outputs = outputs;
-		this.outputsByName = outputsByName;
+		this.inputs = new ArrayList<>(inputs);
+		this.inputsByName = new HashMap<>(inputsByName);
+		this.outputs = new ArrayList<>(outputs);
+		this.outputsByName = new HashMap<>(outputsByName);
+		this.drivingInputs = new HashSet<>(drivingInputs);
 		this.globals = globals;
 	}
 }

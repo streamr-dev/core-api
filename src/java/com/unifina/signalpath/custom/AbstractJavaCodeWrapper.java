@@ -18,6 +18,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	String className = null;
 	String fullCode = null;
 	StoredEndpointFields storedEndpointFields = null;
+	transient UserJavaClassLoader userJavaClassLoader = null;
 
 	private static final Logger log = Logger.getLogger(AbstractJavaCodeWrapper.class);
 	
@@ -120,8 +121,12 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	public void afterDeserialization() {
 		super.afterDeserialization();
 		try {
-			Class<AbstractCustomModule> clazz = compileAndRegister(className, fullCode);
-			instance = (AbstractCustomModule) globals.getSerializationService().deserialize(serializedInstance);
+			compileAndRegister(className, fullCode);
+			instance = (AbstractCustomModule) globals.getSerializationService().deserialize(serializedInstance, userJavaClassLoader);
+
+			storedEndpointFields.setValuesOn(instance);
+			storedEndpointFields = null;
+			instance.afterDeserialization(parentSignalPath, inputs, inputsByName, outputs, outputsByName, drivingInputs, globals);
 
 			for (Input in : getInputs()) {
 				in.setOwner(instance);
@@ -130,11 +135,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 			for (Output out : getOutputs()) {
 				out.setOwner(instance);
 			}
-
-
-			instance.afterDeserialization(parentSignalPath, inputs, inputsByName, outputs, outputsByName, globals);
-			storedEndpointFields.setValuesOn(instance);
-			storedEndpointFields = null;
 
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Exception " + e);
@@ -172,8 +172,8 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	private Class<AbstractCustomModule> compileAndRegister(String className, String fullCode) throws ClassNotFoundException {
-		UserJavaClassLoader ujcl = new UserJavaClassLoader(getClass().getClassLoader());
-		boolean success = ujcl.parseClass(className, fullCode);
+		userJavaClassLoader = new UserJavaClassLoader(getClass().getClassLoader());
+		boolean success = userJavaClassLoader.parseClass(className, fullCode);
 
 		if (!success) {
             StringBuilder sb = new StringBuilder();
@@ -181,7 +181,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
             List<ModuleExceptionMessage> msgs = new ArrayList<>();
 
-            for (Diagnostic d : ujcl.getDiagnostics()) {
+            for (Diagnostic d : userJavaClassLoader.getDiagnostics()) {
                 long line = d.getLineNumber()- StringUtils.countMatches(makeImportString(), "\n")-StringUtils.countMatches(getHeader(), "\n");
 
                 sb.append("Line ");
@@ -200,7 +200,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		// TODO: not needed for Java classes?
-		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) ujcl.loadClass(className);
+		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) userJavaClassLoader.loadClass(className);
 		globals.registerDynamicClass(clazz);
 		return clazz;
 	}

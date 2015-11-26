@@ -18,4 +18,10 @@ class SerializationService {
 		module.afterDeserialization()
 		return module
 	}
+
+	def deserialize(String data, ClassLoader classLoader) {
+		AbstractSignalPathModule module = new SerializerImpl(classLoader).deserializeFromString(data)
+		module.afterDeserialization()
+		return module
+	}
 }

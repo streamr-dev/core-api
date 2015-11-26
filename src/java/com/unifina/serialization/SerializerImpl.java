@@ -23,9 +23,9 @@ public class SerializerImpl implements Serializer {
 
 	private static final Logger logger = Logger.getLogger(SerializerImpl.class);
 
-	private static final FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
+	private final FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
 
-	static {
+	public SerializerImpl() {
 		//((JsonFactory) conf.getCoderSpecific()).configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
 		conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
@@ -40,7 +40,10 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(Stream.class, new DomainClassSerializer(), true);
 	}
 
-	public SerializerImpl() {}
+	public SerializerImpl(ClassLoader classLoader) {
+		this();
+		conf.setClassLoader(classLoader);
+	}
 
 	@Override
 	public String serializeToString(Object object) throws SerializationException {
@@ -83,7 +86,7 @@ public class SerializerImpl implements Serializer {
 	@Override
 	public Object deserialize(InputStream in) throws SerializationException {
 		try {
-			FSTObjectInput fstInput = SerializerImpl.conf.getObjectInput(in);
+			FSTObjectInput fstInput = conf.getObjectInput(in);
 			Object object = fstInput.readObject();
 			in.close();
 			return object;
@@ -118,7 +121,7 @@ public class SerializerImpl implements Serializer {
 	}
 
 	// TODO: hack for getting NaN Double values serialized, definitely not optimal
-	static class DoubleSerializer extends FSTBigNumberSerializers.FSTDoubleSerializer {
+	class DoubleSerializer extends FSTBigNumberSerializers.FSTDoubleSerializer {
 		@Override
 		public void writeObject(FSTObjectOutput out,
 								Object toWrite,
