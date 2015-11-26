@@ -9,15 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Stores and clears the <code>Endpoint</code> fields of a <code>AbstractCustomModule</code>. Used by
- * <code>AbstractJavaCodeWrapper</code> to serialize fields of custom modules.
+ * Stores and clears the <code>Endpoint</code> fields of an Object. Used by
+ * <code>AbstractJavaCodeWrapper</code> to serialize fields of <code>AbstractCustomModule</code>.
  */
 public class StoredEndpointFields implements Serializable {
 
 	private static final Logger log = Logger.getLogger(StoredEndpointFields.class);
 	private Map<String, Endpoint> endpointsByFieldName = new HashMap<>();
 
-	public void setValuesOn(AbstractCustomModule instance) {
+	public void setValuesOn(Object instance) {
 		for (Field f : fields(instance)) {
 			try {
 				f.setAccessible(true);
@@ -32,7 +32,7 @@ public class StoredEndpointFields implements Serializable {
 		}
 	}
 
-	public static StoredEndpointFields clearAndCollect(AbstractCustomModule instance) {
+	public static StoredEndpointFields clearAndCollect(Object instance) {
 		StoredEndpointFields ef = new StoredEndpointFields();
 		for (Field f : fields(instance)) {
 			ef.fetchAndClearField(instance, f);
@@ -40,7 +40,7 @@ public class StoredEndpointFields implements Serializable {
 		return ef;
 	}
 
-	private void fetchAndClearField(AbstractCustomModule instance, Field f) {
+	private void fetchAndClearField(Object instance, Field f) {
 		try {
             f.setAccessible(true); // avoid java.lang.IllegalAccessException and requires privileges
             Object obj = f.get(instance);
@@ -55,7 +55,7 @@ public class StoredEndpointFields implements Serializable {
         }
 	}
 
-	private static Field[] fields(AbstractCustomModule instance) {
+	private static Field[] fields(Object instance) {
 		return instance.getClass().getDeclaredFields();
 	}
 }
