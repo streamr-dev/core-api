@@ -499,4 +499,21 @@ class SignalPathService {
 		}
 		return changed
 	}
+
+	@Transactional
+	def saveState(SignalPath sp) {
+		RunningSignalPath rsp = sp.runningSignalPath
+		rsp = rsp.attach()
+		rsp.serialized = serializationService.serialize(sp)
+		//sp.globals.getBean("runningSignalPathService").save(rsp)
+		rsp.save(failOnError: true)
+		log.info("RunningSignalPath " + rsp.id + " serialized")
+	}
+
+	@Transactional
+	def clearState(RunningSignalPath rsp) {
+		rsp.serialized = null
+		rsp.save(failOnError: true)
+		log.info("RunningSignalPath " + rsp.id + " state cleared")
+	}
 }

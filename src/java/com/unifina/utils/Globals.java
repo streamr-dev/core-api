@@ -1,6 +1,5 @@
 package com.unifina.utils;
 
-import com.unifina.service.RunningSignalPathService;
 import com.unifina.service.SerializationService;
 import groovy.lang.GroovySystem;
 
@@ -19,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.datasource.DataSource;
-import com.unifina.datasource.RealtimeDataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
@@ -228,10 +226,10 @@ public class Globals {
 	}
 
 	public SerializationService getSerializationService() {
-		return (SerializationService) grailsApplication.getMainContext().getBean("serializationService");
+		return getBean("serializationService"); // TODO: refactor out
 	}
 
-	public RunningSignalPathService getRunningSignalPathService() {
-		return (RunningSignalPathService) grailsApplication.getMainContext().getBean("runningSignalPathService");
+	public <T> T getBean(String beanName) {
+		return (T) grailsApplication.getMainContext().getBean(beanName);
 	}
 }

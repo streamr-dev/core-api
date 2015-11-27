@@ -111,7 +111,50 @@ class SerializationSpec extends LoginTester1Spec {
 			}
 
 			waitFor(30){ $(".modulelabel").text().toDouble() == (oldVal + 5 + 255).toDouble()}
-	}
+
+		when: "Live canvas is stopped"
+			stopButton.click()
+		then: "The confirmation dialog is shown"
+			waitForConfirmation()
+
+		when: "Clicked OK"
+			acceptConfirmation()
+		then: "The LiveShowPage is opened again, now with the start and delete -buttons and info alert"
+			waitFor(30) {
+				startButton.displayed
+				deleteButton.displayed
+				$(".alert.alert-info").displayed
+			}
+
+		when: "Dropdown button clicked"
+			dropDownButton.click()
+		then: "Dropdown menu visible"
+			dropDownMenu.displayed
+
+		when: "'Clear and start' clicked"
+			clearAndStartButton.click()
+		then: "The confirmation dialog is shown"
+			waitForConfirmation()
+
+		when: "Clicked OK"
+			acceptConfirmation()
+		then: "LiveShowPage is opened and Label shows data counted from empty state"
+			waitFor(30) { at LiveShowPage }
+			stopButton.displayed
+			//!$(".alert").displayed
+
+			Thread.start {
+				for (int i = 0; i < 20; ++i) {
+					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
+						"", System.currentTimeMillis(),
+						'{"a":' + i + ', "b": ' + (i * 0.5)  + '}')
+					sleep(150)
+				}
+			}
+
+			// Wait for enough data, sometimes takes more than 30 sec to come
+			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
+		}
 
 	private def makeKafkaConfiguration() {
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));

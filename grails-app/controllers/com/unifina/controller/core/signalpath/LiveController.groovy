@@ -196,6 +196,9 @@ class LiveController {
 	@Secured("ROLE_USER")
 	def start() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		if (params.clear) {
+			signalPathService.clearState(rsp)
+		}
 		signalPathService.startLocal(rsp, [live:true])
 		flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
 		redirect(action:"show", id:rsp.id)

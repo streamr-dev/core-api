@@ -76,10 +76,30 @@
 						</button>        	
 					</g:if>
 					<g:elseif test="${rsp.state=="stopped"}">
-						<button id="startButton" class="btn btn-primary" data-action="${createLink(action:'start')}">
-							<i class="fa fa-play"></i>
-							${message(code: 'runningSignalPath.start.label')}
-						</button>
+
+						<div id="run-group" class="btn-group">
+							<button id="startButton" class="btn btn-primary" data-action="${createLink(action:'start')}">
+								<i class="fa fa-play"></i>
+								${message(code: 'runningSignalPath.start.label')}
+							</button>
+
+							<button id="runDropdown" type="button" class="btn btn-primary dropdown-toggle"
+									data-toggle="dropdown">
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							</button>
+
+							<ul id="liveCanvasStartDropdownMenu" class="dropdown-menu" role="menu">
+								<li>
+									<a id="clearAndStartButton" class="confirm" href="#"
+									   data-action="${createLink(action:'start', params:[clear: true])}"
+									   data-confirm="<g:message code="runningSignalPath.clearAndStart.confirm" args="[rsp.name]"></g:message>">
+										${message(code: 'runningSignalPath.clearAndStart.label')}
+									</a>
+								</li>
+							</ul>
+						</div>
+
 						<button id="deleteButton" class="btn btn-default confirm" data-action="${createLink(action:'delete')}" data-confirm="<g:message code="runningSignalPath.delete.confirm" args="[rsp.name]"></g:message>">
 							<i class="fa fa-trash-o"></i>
 							${message(code: 'runningSignalPath.delete.label')}
