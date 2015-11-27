@@ -1,6 +1,7 @@
 package com.unifina.feed;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +25,8 @@ public abstract class AbstractFeed implements IFeed {
 	protected IEventQueue eventQueue;
 	
 	protected Set<Object> subscribers = new HashSet<Object>();
+	
+	protected ArrayList<IEventRecipient> eventRecipients = new ArrayList<>();
 	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
 	
 	protected Globals globals;
@@ -99,6 +102,7 @@ public abstract class AbstractFeed implements IFeed {
 			Object key = keyProvider.getSubscriberKey(subscriber);
 			if (!eventRecipientsByKey.containsKey(key)) {
 				recipient = createEventRecipient(subscriber);
+				eventRecipients.add(recipient);
 				eventRecipientsByKey.put(key, recipient);
 				globals.getDataSource().register(recipient);
 			}
@@ -122,5 +126,8 @@ public abstract class AbstractFeed implements IFeed {
 	public void setTimeZone(TimeZone tz) {
 		this.timeZone = tz;
 	}
+	
+	public abstract void startFeed() throws Exception;
+	public abstract void stopFeed() throws Exception;
 	
 }
