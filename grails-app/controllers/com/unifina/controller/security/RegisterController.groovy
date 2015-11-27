@@ -18,6 +18,8 @@ import com.unifina.domain.signalpath.ModulePackageUser
 
 class RegisterController extends grails.plugin.springsecurity.ui.RegisterController {
 
+    static namespace = 'streamr'
+
     static defaultAction = 'index'
 
     def mailService

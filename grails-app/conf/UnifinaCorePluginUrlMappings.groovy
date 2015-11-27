@@ -17,6 +17,8 @@ class UnifinaCorePluginUrlMappings {
 		
 		"/login/$action?"(controller: "login")
 		"/logout/$action?"(controller: "logout")
+		"/user/$action?/$id?"(controller: "user", namespace:"streamr")
+		"/register/$action?/$id?"(controller: "register", namespace:"streamr")
 		
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 		
