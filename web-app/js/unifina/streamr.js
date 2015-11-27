@@ -1,6 +1,9 @@
 // the Streamr global object is normally initialized in _layoutHead.gsp.
-if (!Streamr)
+if (!Streamr) {
 	var Streamr = {}
+}
+
+$.pnotify.defaults.history = false;
 
 Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController
