@@ -221,8 +221,7 @@ class StreamController {
 		} catch (Exception e) {
 				flash.message = "An error occurred while handling file: $e"
 				response.status = 500
-				throw new Exception(e)
-//				render ([success:false, error: e.toString()] as JSON)
+				render ([success:false, error: e.toString()] as JSON)
 		} finally {
 			if (deleteFile && temp.exists())
 				temp.delete()

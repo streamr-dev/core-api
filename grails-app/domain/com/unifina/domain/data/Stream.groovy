@@ -42,10 +42,6 @@ class Stream implements Comparable {
 	public String toString() {
 		return name
 	}
-
-	public String getConfig() {
-		return streamConfig
-	}
 	
 	@Override
 	public int compareTo(Object arg0) {

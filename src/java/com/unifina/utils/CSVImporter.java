@@ -24,7 +24,7 @@ public class CSVImporter implements Iterable<LineValues> {
 
 	private static final Logger log = Logger.getLogger(CSVImporter.class);
 
-	public CSVImporter(File file, List fields, Integer timestampIndex, String format) throws IOException {
+	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format) throws IOException {
 		this.file = file;
 
 		// Detect the schema
@@ -32,13 +32,10 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		HashMap<String, String> fieldMap = new HashMap<>();
 		if(fields != null)
-			for(Object field : fields){
-				if(field instanceof Map) {
-					System.out.println(field);
-					String name = (String) ((Map) field).get("name");
-					String value = (String) ((Map) field).get("type");
-					fieldMap.put(name, value);
-				}
+			for(Map field : fields){
+				String name = (String) field.get("name");
+				String value = (String) field.get("type");
+				fieldMap.put(name, value);
 			}
 		
 		try {
@@ -142,9 +139,9 @@ public class CSVImporter implements Iterable<LineValues> {
 		// Used to test if the lines are in chronological order
 		private Date lastDate = null;
 
-		private Map fields = null;
+		private Map<String, String> fields = null;
 		
-		public Schema(InputStream is, Map fields, Integer timestampIndex, String format) throws IOException {
+		public Schema(InputStream is, Map<String, String> fields, Integer timestampIndex, String format) throws IOException {
 			if(timestampIndex != null)
 				setTimeStampColumnIndex(timestampIndex);
 			if(format != null)
@@ -176,19 +173,19 @@ public class CSVImporter implements Iterable<LineValues> {
 			    	}
 			    	// On subsequent lines, try to detect the format of each individual column
 			    	else {
-			    		String[] fields = parser.parseLine(line);
+			    		String[] columns = parser.parseLine(line);
 			    		
-			    		if (fields.length != entries.length) {
+			    		if (columns.length != entries.length) {
 							throw new RuntimeException("Unexpected number of columns on row "+lineCount);
 						}
 			    		
-			    		for (int i=0;i<fields.length;i++) {
+			    		for (int i=0;i<columns.length;i++) {
 			    			// Is the type of this field still undetected?
 			    			if (entries[i]==null) {
 			    				if(timestampColumnIndex != null && i == timestampColumnIndex){
 			    					entries[i] = new SchemaEntry(headers[i], new OwnDateFormat(format));
 			    				} else {
-			    					entries[i] = detectEntry(fields[i], headers[i]);
+			    					entries[i] = detectEntry(columns[i], headers[i]);
 			    				}
 			    				if (entries[i] != null) {
 			    					undetectedSchemaEntries--;
@@ -239,9 +236,8 @@ public class CSVImporter implements Iterable<LineValues> {
 			if (value==null || value.length()==0)
 				return null;
 
-			System.out.println(fields);
 			if(fields != null && fields.containsKey(name)) {
-				return new SchemaEntry(name, (String)fields.get(name));
+				return new SchemaEntry(name, fields.get(name));
 			} else {
 				// Try to parse as one of the date formats
 				for (OwnDateFormat df : dateFormatsToTry) {
@@ -290,6 +286,10 @@ public class CSVImporter implements Iterable<LineValues> {
 				// Check for empty fields
 				else if (values[i]==null || values[i].length()==0)
 					parsed[i] = null;
+				// Parse date field
+				else if (entries[i].dateFormat != null) {
+					parsed[i] = entries[i].dateFormat.parse(values[i]);
+				}
 				// Parse number
 				else if (entries[i].type.equals("number"))
 					parsed[i] = Double.parseDouble(values[i]);

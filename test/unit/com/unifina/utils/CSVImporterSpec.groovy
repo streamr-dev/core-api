@@ -147,23 +147,16 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "should fail when the order of the lines is not chronological"() {
-		Exception exception
 		setup:
-		File file = Paths.get(getClass().getResource("test-files/failing-test-file.csv").toURI()).toFile()
+		File file = Paths.get(getClass().getResource("test-files/invalid-chronological-order.csv").toURI()).toFile()
 
 		when:
 		CSVImporter csv = new CSVImporter(file)
-		CSVImporter.Schema schema = csv.getSchema()
-		try {
-			// Tries to parse each line
-			for (CSVImporter.LineValues line : csv) {}
-		} catch (RuntimeException e) {
-			exception = e
-		}
+		// Tries to parse each line
+		for (CSVImporter.LineValues line : csv) {}
 
 		then:
-		exception instanceof RuntimeException
-		exception.getMessage().contains("chronological")
+		thrown RuntimeException
 	}
 
 	void "test giving the field type in a map"() {
@@ -191,6 +184,22 @@ class CSVImporterSpec extends Specification {
 		schema.entries[1].type == "string"
 		schema.entries[2].type == "number"
 		schema.entries[3].type == "string"
+	}
+
+	void "can detect multiple date fields"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/two-date-fields.csv").toURI()).toFile()
+
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+
+		then:
+		schema.entries.length == 3
+		schema.timestampColumnIndex == 0
+		schema.entries[0].type == "timestamp"
+		schema.entries[1].type == "number"
+		schema.entries[2].type == "timestamp"
 	}
 	
 	

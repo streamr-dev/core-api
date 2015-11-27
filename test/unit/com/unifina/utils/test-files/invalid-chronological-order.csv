@@ -16,7 +16,7 @@ timestamp;price;size;really;comment
 2015-02-23 16:30:01.968;477.47;100.0;true;
 2015-02-23 16:30:01.968;477.46;100.0;true;
 2015-02-23 18:30:01.968;477.50;100.0;true;These two lines should fail
-2015-02-23 16:30:01.968;477.46;100.0;true;These two lines should fail
+2015-02-23 16:30:01.968;477.46;100.0;true;These two lines should fail because of this line's timestamp is not before the previous one's
 2015-02-23 16:30:27.307;477.86;65.0;true;
 2015-02-23 16:30:30.343;477.44;100.0;true;
 2015-02-23 16:30:30.619;477.14;22.0;true;
