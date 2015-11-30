@@ -90,7 +90,7 @@ public class SerializerImpl implements Serializer {
 			Object object = fstInput.readObject();
 			in.close();
 			return object;
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (ClassNotFoundException | IOException | NullPointerException e) {
 			throw new SerializationException("Failed to deserialize", e);
 		}
 	}

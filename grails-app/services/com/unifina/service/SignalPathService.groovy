@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.serialization.SerializationException
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.transform.CompileStatic
@@ -239,8 +240,11 @@ class SignalPathService {
 		// Stop feed
 		signalPath.globals.dataSource.stopFeed()
 	}
-	
-	void startLocal(RunningSignalPath rsp, Map signalPathContext) {		
+
+	/**
+	 * @throws SerializationException if de-serialization fails when resuming from existing state
+     */
+	void startLocal(RunningSignalPath rsp, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
 		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
@@ -505,7 +509,6 @@ class SignalPathService {
 		RunningSignalPath rsp = sp.runningSignalPath
 		rsp = rsp.attach()
 		rsp.serialized = serializationService.serialize(sp)
-		//sp.globals.getBean("runningSignalPathService").save(rsp)
 		rsp.save(failOnError: true)
 		log.info("RunningSignalPath " + rsp.id + " serialized")
 	}
