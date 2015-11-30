@@ -51,14 +51,6 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	}
 	
 	/**
-	 * Extracts a Date from the specified event content.
-	 * @param eventContent the content return by the content iterator, for which a timestamp is needed
-	 * @param contentIterator the contentIterator that produced the eventContent
-	 * @return
-	 */
-	protected abstract Date getTimestamp(Object eventContent, Iterator<Object> contentIterator);
-	
-	/**
 	 * Extract the Stream required by the specified recipient.
 	 * @param recipient
 	 * @return

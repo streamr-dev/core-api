@@ -38,7 +38,7 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 	}
 
 	@Override
-	public void handleMessage(UnifinaKafkaMessage msg) {
+	public void handleMessage(UnifinaKafkaMessage msg, String topic, int partition, long offset) {
 		Map json = JSON.parse(msg.toString())
 		if (json.type=="abort") {
 			def id = json.id

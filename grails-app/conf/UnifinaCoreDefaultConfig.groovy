@@ -196,7 +196,7 @@ environments {
 /**
  * Kafka config
  */
-unifina.kafka.metadata.broker.list = "192.168.10.21:9092"
+unifina.kafka.bootstrap.servers = "192.168.10.21:9092"
 unifina.kafka.zookeeper.connect = "192.168.10.21:2181"
 unifina.kafka.producer.type = "async"
 unifina.kafka.queue.buffering.max.ms = "100"
@@ -206,7 +206,7 @@ unifina.kafka.request.required.acks = "0"
 unifina.kafka.group.id = "streamr"
 environments {
 	production {
-		unifina.kafka.metadata.broker.list = "ip-10-16-207-139.ec2.internal:9092"
+		unifina.kafka.bootstrap.servers = "ip-10-16-207-139.ec2.internal:9092"
 		unifina.kafka.zookeeper.connect = "ip-10-16-207-139.ec2.internal:2181"
 	}
 }

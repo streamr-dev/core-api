@@ -136,59 +136,11 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 	protected abstract FeedEventIterator getNextIterator(IEventRecipient recipient) throws IOException;
 	
 	/**
-	 * A helper class to apply a static recipient and iterator to FeedEvents,
-	 * whose content is pulled from a separate content iterator.
-	 * @author Henri
+	 * Extracts a Date from the specified event content.
+	 * @param eventContent the content return by the content iterator, for which a timestamp is needed
+	 * @param contentIterator the contentIterator that produced the eventContent
+	 * @return
 	 */
-	protected class FeedEventIterator implements Iterator<FeedEvent> {
-
-		private Iterator<Object> contentIterator;
-		private IEventRecipient recipient;
-		private AbstractHistoricalFileFeed feed;
-		
-		private final Logger log = Logger.getLogger(FeedEventIterator.class);
-		
-		public FeedEventIterator(Iterator<Object> contentIterator, AbstractHistoricalFileFeed feed, IEventRecipient recipient) {
-			this.contentIterator = contentIterator;
-			this.recipient = recipient;
-			this.feed = feed;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return contentIterator.hasNext();
-		}
-
-		@Override
-		public FeedEvent next() {
-			Object content = contentIterator.next();
-			if (content==null)
-				return null;
-			
-			FeedEvent fe = new FeedEvent(content, feed.getTimestamp(content, contentIterator), recipient);
-			fe.feed = feed;
-			fe.iterator = this;
-			return fe;
-		}
-
-		@Override
-		public void remove() {
-			throw new RuntimeException("Remove operation is not supported!");
-		}
-		
-		public void close() {
-			if (contentIterator instanceof Closeable)
-				try {
-					((Closeable)contentIterator).close();
-				} catch (IOException e) {
-					log.error("Failed to close content iterator: "+contentIterator);
-				}
-		}
-
-		public IEventRecipient getRecipient() {
-			return recipient;
-		}
-	}
-	
+	protected abstract Date getTimestamp(Object eventContent, Iterator<? extends Object> contentIterator);
 	
 }

@@ -56,7 +56,7 @@ public class KafkaCollectTask extends AbstractTask {
 		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(grailsApplication.config.unifina.kafka.toProperties())
 		UnifinaKafkaChannelConsumer channelConsumer = consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {			
 			@Override
-			public void handleMessage(UnifinaKafkaMessage msg) {
+			public void handleMessage(UnifinaKafkaMessage msg, String topic, int partition, long offset) {
 				try {
 					counter++
 					writer.write(msg.toBytes())

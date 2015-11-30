@@ -15,8 +15,10 @@ import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractHistoricalFileFeed;
+import com.unifina.feed.FeedEventIterator;
 import com.unifina.feed.StreamEventRecipient;
-import com.unifina.kafkaclient.UnifinaKafkaConsumer;
+import com.unifina.kafkaclient.UnifinaKafkaIterator;
+import com.unifina.kafkaclient.UnifinaKafkaMessage;
 import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 
@@ -30,7 +32,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 
 	@Override
 	protected Date getTimestamp(Object eventContent,
-			Iterator<Object> contentIterator) {
+			Iterator<? extends Object> contentIterator) {
 		return ((KafkaMessage)eventContent).timestamp;
 	}
 
@@ -64,7 +66,9 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 			for (String s : kafkaConfig.keySet())
 				properties.setProperty(s, kafkaConfig.get(s).toString());
 			
-			UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(properties);
+			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
+			Iterator<UnifinaKafkaMessage> kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, 10*1000, properties);
+			iterator = new FeedEventIterator(kafkaIterator, this, recipient);
 		}
 		
 		return iterator;

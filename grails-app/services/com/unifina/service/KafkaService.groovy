@@ -2,18 +2,14 @@ package com.unifina.service
 
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-
-import java.text.SimpleDateFormat
-
 import kafka.admin.AdminUtils
-import kafka.javaapi.TopicMetadata
-import kafka.javaapi.TopicMetadataRequest
-import kafka.javaapi.TopicMetadataResponse
 import kafka.javaapi.consumer.SimpleConsumer
 import kafka.producer.ProducerConfig
 import kafka.utils.ZKStringSerializer
+import kafka.utils.ZkUtils
 
 import org.I0Itec.zkclient.ZkClient
+import org.I0Itec.zkclient.ZkConnection
 import org.I0Itec.zkclient.exception.ZkMarshallingError
 import org.I0Itec.zkclient.serialize.ZkSerializer
 import org.apache.commons.lang.time.DateUtils
@@ -60,9 +56,12 @@ class KafkaService {
 	}
 	
 	@CompileStatic
-	private ZkClient createZkClient() {
+	private ZkUtils createZkUtils() {
 		// serializer must be explicitly given due to https://issues.apache.org/jira/browse/KAFKA-1737
-		return new ZkClient(getProperties().getProperty("zookeeper.connect"), 30000, 30000, new ZKSerializerImpl());
+		ZkClient zkClient = new ZkClient(getProperties().getProperty("zookeeper.connect"), 30000, 30000, new ZKSerializerImpl());
+		ZkConnection zkConnection = new ZkConnection(getProperties().getProperty("zookeeper.connect"))
+		ZkUtils zkUtils = new ZkUtils(zkClient, zkConnection, false)
+		return zkUtils
 	}
 	
 	/**
@@ -103,26 +102,26 @@ class KafkaService {
 	
 	@CompileStatic
 	void createTopics(List<String> topics, int partitions=1, int replicationFactor=1) {
-		ZkClient zkClient = createZkClient()
+		ZkUtils zkUtils = createZkUtils()
 		
 		for (String topic : topics) {
-			if (AdminUtils.topicExists(zkClient, topic)) {
+			if (AdminUtils.topicExists(zkUtils, topic)) {
 				log.warn("createTopics: topic $topic already exists")
 			}
 			else {
 				Properties props = new Properties();
-				AdminUtils.createTopic(zkClient, topic, partitions, replicationFactor, props);
+				AdminUtils.createTopic(zkUtils, topic, partitions, replicationFactor, props);
 			}
 		}
 		
-		zkClient.close()
+		zkUtils.close()
 	}
 	
 	@CompileStatic
 	boolean topicExists(String topic) {
-		ZkClient zkClient = createZkClient()
-		boolean result = AdminUtils.topicExists(zkClient, topic)
-		zkClient.close()
+		ZkUtils zkUtils = createZkUtils()
+		boolean result = AdminUtils.topicExists(zkUtils, topic)
+		zkUtils.close()
 		return result
 	}
 	
@@ -132,17 +131,17 @@ class KafkaService {
 	 */
 	@CompileStatic
 	void deleteTopics(List topics) {
-		ZkClient zkClient = createZkClient()
+		ZkUtils zkUtils = createZkUtils()
 		
 		for (String topic : topics) {
 			try {
-				AdminUtils.deleteTopic(zkClient, topic)
+				AdminUtils.deleteTopic(zkUtils, topic)
 			} catch (Exception e) {
 				log.warn("Failed to delete topic "+topic+", due to: "+e.getMessage());
 			}
 		}
 		
-		zkClient.close()
+		zkUtils.close()
 	}
 	
 	/**
@@ -161,13 +160,13 @@ class KafkaService {
 		log.info("Querying first timestamp for topic $topic...")
 		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(getProperties())
 		Date firstTimestamp = null
-		consumer.subscribe(topic, new UnifinaKafkaMessageHandler() {
+		consumer.subscribeFromBeginning(topic, new UnifinaKafkaMessageHandler() {
 			@Override
-			public void handleMessage(UnifinaKafkaMessage msg) {
+			public void handleMessage(UnifinaKafkaMessage msg, String t, int partition, long offset) {
 				if (firstTimestamp==null)
 					firstTimestamp = new Date(msg.getTimestamp())
 			}
-		}, true)
+		})
 		
 		// Wait for the Kafka consumption to finish (or timeout)!
 		while (firstTimestamp==null && consumer.getTimeSinceLastEvent() < 60L*1000L) {
