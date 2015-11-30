@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.unifina.serialization.SerializationRequest;
+import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -19,8 +20,6 @@ import com.unifina.feed.ICatchupFeed;
 import com.unifina.utils.Globals;
 
 public class RealtimeDataSource extends DataSource {
-
-	public static final int SERIALIZATION_INTERVAL_IN_SECS = 10;
 
 	Timer secTimer = new Timer();
 	
@@ -98,7 +97,7 @@ public class RealtimeDataSource extends DataSource {
 
 				}
 			}, new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
-					 1000 * SERIALIZATION_INTERVAL_IN_SECS);   // Repeat every 10 second);
+					globals.serializationIntervalInMillis());
 
 
 			// This will block indefinitely until the feed is stopped!
@@ -108,7 +107,7 @@ public class RealtimeDataSource extends DataSource {
 		
 		log.info("RealtimeDataSource has stopped.");
 	}
-	
+
 	private void processCatchups(List<ICatchupFeed> feeds) {
 		
 		// Insert first event from each feed into the queue

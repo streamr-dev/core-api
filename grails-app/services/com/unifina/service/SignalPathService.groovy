@@ -251,7 +251,7 @@ class SignalPathService {
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (rsp.serialized == null || rsp.serialized.empty) {
+		if (rsp.isNotSerialized()) {
 			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
 			log.info("Creating new signalPath connections " + rsp.id)
 		} else {
@@ -509,6 +509,7 @@ class SignalPathService {
 		RunningSignalPath rsp = sp.runningSignalPath
 		rsp = rsp.attach()
 		rsp.serialized = serializationService.serialize(sp)
+		rsp.serializationTime = sp.globals.time
 		rsp.save(failOnError: true)
 		log.info("RunningSignalPath " + rsp.id + " serialized")
 	}

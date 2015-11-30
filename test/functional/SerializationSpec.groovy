@@ -1,3 +1,4 @@
+import com.unifina.utils.GlobalsFactory
 import spock.lang.*
 import com.unifina.controller.core.signalpath.LiveController
 import com.unifina.datasource.RealtimeDataSource
@@ -17,6 +18,8 @@ class SerializationSpec extends LoginTester1Spec {
 
 	static UnifinaKafkaProducer kafka
 
+	@Shared Long serializationIntervalInMillis
+
 	def setupSpec() {
 		BootService.mergeDefaultConfig(grailsApplication)
 		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
@@ -24,6 +27,9 @@ class SerializationSpec extends LoginTester1Spec {
 		// For some reason the annotations don't work so need the below.
 		SerializationSpec.metaClass.mixin(CanvasMixin)
 		SerializationSpec.metaClass.mixin(ConfirmationMixin)
+
+		serializationIntervalInMillis =
+			GlobalsFactory.createInstance([:], grailsApplication).serializationIntervalInMillis()
 	}
 
 	def cleanupSpec() {
@@ -79,7 +85,7 @@ class SerializationSpec extends LoginTester1Spec {
 
 			// Wait for enough data, sometimes takes more than 30 sec to come
 			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
-			sleep(RealtimeDataSource.SERIALIZATION_INTERVAL_IN_SECS * 1200)
+			sleep(serializationIntervalInMillis * 1.2)
 			def oldVal = $(".modulelabel").text().toDouble()
 
 		when: "Live canvas is stopped"

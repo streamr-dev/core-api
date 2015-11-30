@@ -232,4 +232,8 @@ public class Globals {
 	public <T> T getBean(String beanName) {
 		return (T) grailsApplication.getMainContext().getBean(beanName);
 	}
+
+	public Long serializationIntervalInMillis() {
+		return MapTraversal.getLong(getGrailsApplication().getConfig(), "unifina.serialization.intervalInMillis");
+	}
 }

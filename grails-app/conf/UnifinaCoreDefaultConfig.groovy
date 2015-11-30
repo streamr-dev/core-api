@@ -149,8 +149,14 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
  * Task config
  */
 // How many task worker threads to launch on startup
-unifina.task.workers = 0
+unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
+
+environments {
+	development {
+		unifina.task.workers = 0
+	}
+}
 
 /**
  * Data feed config
@@ -211,19 +217,14 @@ environments {
 	}
 }
 
+/**
+ * Serialization config
+ */
+unifina.serialization.intervalInMillis = 30 * 1000
 environments {
-	development {
-
-	}
 	test {
-		// Required for functional tests for backtesting
-		unifina.task.workers = 1
+		unifina.serialization.intervalInMillis = 500
 	}
-	production {
-		// For Amazon
-		unifina.task.workers = 1
-	}
-
 }
 
 /**

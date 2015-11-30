@@ -19,6 +19,7 @@ class RunningSignalPath {
 	Boolean adhoc
 	String state
 	String serialized
+	Date serializationTime
 	
 	static hasMany = [uiChannels: UiChannel]
 	
@@ -30,6 +31,7 @@ class RunningSignalPath {
 		state(nullable:true)
 		adhoc(nullable:true)
 		serialized(nullable:true)
+		serializationTime(nullable: true)
 	}
 	
 	static mapping = {
@@ -39,4 +41,7 @@ class RunningSignalPath {
 		serialized type: 'text'
 	}
 
+	boolean isNotSerialized() {
+		serialized == null || serialized.empty
+	}
 }
