@@ -68,7 +68,7 @@ grails.project.dependency.resolution = {
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
         runtime('com.opencsv:opencsv:3.3')
-        runtime('de.ruedigermoeller:fst:2.40')
+        runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
