@@ -1,27 +1,17 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.signalpath.Module;
+import com.unifina.domain.signalpath.RunningSignalPath;
 import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.ModuleService;
+import com.unifina.utils.Globals;
 import grails.converters.JSON;
-
-import java.io.*;
-import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import com.unifina.domain.signalpath.Module;
-import com.unifina.domain.signalpath.RunningSignalPath;
-import com.unifina.service.ModuleService;
-import com.unifina.service.SignalPathService;
-import com.unifina.utils.Globals;
+import java.io.Serializable;
+import java.util.*;
 
 public class SignalPath extends ModuleWithUI {
 	
