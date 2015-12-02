@@ -56,13 +56,13 @@ class SignalPathServiceSerializationSpec extends Specification {
 	def user
 	def stream
 
-    def setup() {
+	def setup() {
 
 		// BootStrap.groovy not invoked under unit test environment, need to manually configure serialization interval
 		grailsApplication.config.unifina.serialization.intervalInMillis = 500
 
 		// Suppress exception messages because using mocked GORM
-		RunningSignalPath.metaClass.static.executeUpdate = { String query, Collection params ->  1 }
+		RunningSignalPath.metaClass.static.executeUpdate = { String query, Collection params -> 1 }
 
 		defineBeans {
 			springSecurityService(SpringSecurityService)
@@ -99,8 +99,8 @@ class SignalPathServiceSerializationSpec extends Specification {
 
 		def modules = [
 			[id: 147, name: "Stream", implementingClass: ConfigurableStreamModule.canonicalName],
-		 	[id: 100, name: "Add", implementingClass: AddMulti.canonicalName],
-		 	[id: 161, name: "Count", implementingClass: Count.canonicalName]
+			[id: 100, name: "Add", implementingClass: AddMulti.canonicalName],
+			[id: 161, name: "Count", implementingClass: Count.canonicalName]
 		]
 		modules.each {
 			Module mod = new Module(jsModule: "GenericModule", type: "module", category: category)
@@ -111,7 +111,7 @@ class SignalPathServiceSerializationSpec extends Specification {
 		}
 
 		// Create user
-		user = new SecUser(username: "u@u.fi", password: "pass",name: "name",timezone: "UTC").save(failOnError: true)
+		user = new SecUser(username: "u@u.fi", password: "pass", name: "name", timezone: "UTC").save(failOnError: true)
 
 		// Create stream
 		stream = streamService.createUserStream([name: "serializationTestStream"], user)
@@ -122,11 +122,11 @@ class SignalPathServiceSerializationSpec extends Specification {
 					[name: "b", type: "number"],
 					[name: "c", type: "boolean"]
 				],
-				topic: stream.uuid
+				topic : stream.uuid
 			] as JSON
 		)
 		stream.save(failOnError: true)
-    }
+	}
 
 	void "(de)serialization works correctly"() {
 		def savedStructure = readSavedStructure(stream)
@@ -162,7 +162,7 @@ class SignalPathServiceSerializationSpec extends Specification {
 		signalPathService.stopLocal(rsp)
 
 		then: "output values are as expected if no restarts had happened"
-		actual == [[Stream:[99.0, 247.5, 1.0]], [Count:[100.0]], [Count:[100.0]], [Count:[100.0]], [Add:[300.0]]]
+		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], [Add: [300.0]]]
 	}
 
 	private def readSavedStructure(stream) {
