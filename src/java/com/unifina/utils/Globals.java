@@ -23,12 +23,13 @@ import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import org.springframework.util.Assert;
 
 
 public class Globals {
-	
+
 	private static final Logger log = Logger.getLogger(Globals.class);
-	
+
 	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
@@ -234,6 +235,9 @@ public class Globals {
 	}
 
 	public Long serializationIntervalInMillis() {
-		return MapTraversal.getLong(getGrailsApplication().getConfig(), "unifina.serialization.intervalInMillis");
+		String key = "unifina.serialization.intervalInMillis";
+		Long v = MapTraversal.getLong(getGrailsApplication().getConfig(), key);
+		Assert.notNull(v, "Missing key \"" + key + "\" from grailsApplication configuration");
+		return v;
 	}
 }

@@ -21,7 +21,7 @@ class StreamService {
 		if (stream.localId==null)
 			stream.localId = stream.name
 		
-		stream.feed = Feed.load(7) // API stream
+		stream.feed = Feed.load(7L) // API stream
 		stream.streamConfig = ([fields:[], topic: stream.uuid] as JSON)
 		
 		stream.save()
