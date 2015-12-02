@@ -16,7 +16,7 @@ class UnifinaSecurityService {
 	
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
-	
+
 	/**
 	 * Checks if the given user has access to the given instance.
 	 * If no user is provided, the user identified by api keys or the current logged in user (as returned by springSecurityService.currentUser) is used

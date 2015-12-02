@@ -22,6 +22,8 @@ class RegisterController {
     def signupCodeService
     def userService
 
+    def saltSource
+
     def log = Logger.getLogger(RegisterController)
 
     // override to add GET method
@@ -220,7 +222,7 @@ class RegisterController {
 
         String salt = saltSource instanceof NullSaltSource ? null : registrationCode.username
         RegistrationCode.withTransaction { status ->
-            user.password = springSecurityUiService.encodePassword(command.password, salt)
+            user.password = springSecurityService.encodePassword(command.password, salt)
             user.save()
             registrationCode.delete()
         }
