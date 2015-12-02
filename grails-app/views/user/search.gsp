@@ -116,8 +116,6 @@ $(document).ready(function() {
 	});
 });
 
-<s2ui:initCheckboxes/>
-
 </script>
 
 </body>

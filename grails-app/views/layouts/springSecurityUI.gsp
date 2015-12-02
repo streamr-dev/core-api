@@ -15,10 +15,11 @@
 
     <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon"/>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
     <%-- Used by Geb GrailsPage abstraction --%>
     <meta name="pageId" content="${controllerName}.${actionName}" />
 
-    <s2ui:resources module='spring-security-ui' />
     <%--
 
     The 'resources' tag in SecurityUiTagLib renders these tags if you're not using the resources plugin:
@@ -46,21 +47,6 @@
 
     <%-- tab icons --%>
     <style>
-    .icon_role {
-        background-image: url('${fam.icon(name: 'lock')}');
-    }
-    .icon_users {
-        background-image: url('${fam.icon(name: 'group')}');
-    }
-    .icon_user {
-        background-image: url('${fam.icon(name: 'user')}');
-    }
-    .icon_error {
-        background-image: url('${fam.icon(name: 'exclamation')}');
-    }
-    .icon_info {
-        background-image: url('${fam.icon(name: 'information')}');
-    }
     .icon, .ui-tabs .ui-tabs-nav li a.icon {
         background-repeat: no-repeat;
         padding-left: 24px;
@@ -187,7 +173,6 @@
 
     <div id="s2ui_main">
         <div id="s2ui_content">
-            <s2ui:layoutResources module='spring-security-ui' />
             <g:layoutBody/>
             <%--
             <g:javascript src='jquery/jquery.jgrowl.js' plugin='spring-security-ui'/>
