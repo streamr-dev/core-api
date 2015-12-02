@@ -159,16 +159,18 @@ class StreamController {
 	}
 	
 	def search() {
-		Set<Feed> allowedFeeds = springSecurityService.currentUser?.feeds ?: new HashSet<>()
 		List<Map> streams = []
+		SecUser user = springSecurityService.currentUser
+		Set<Feed> allowedFeeds = user.feeds ?: new HashSet<>()
 
 		if (!allowedFeeds.isEmpty()) {
 			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+
 				"left outer join s.feed "+
 				"left outer join s.feed.module "+
-				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "
-				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "
-
+				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "+
+				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "+
+				"and (s.feed.id != 7 OR s.user.id = ${user.id}) " // Quick fix for CORE-452, needs proper ACL
+				
 				if (params.feed) {
 					hql += " and s.feed.id="+Feed.load(params.feed).id
 				}
