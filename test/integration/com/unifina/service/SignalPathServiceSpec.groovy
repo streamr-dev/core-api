@@ -1,4 +1,4 @@
-package com.unifina.serialization
+package com.unifina.service
 
 import com.unifina.data.IFeed
 import com.unifina.domain.data.Feed
@@ -17,7 +17,6 @@ import com.unifina.feed.kafka.fake.FakeMessageSource
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.*
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.simplemath.AddMulti
@@ -27,7 +26,6 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
@@ -37,7 +35,6 @@ import groovy.json.JsonSlurper
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.mock.web.MockServletContext
 import spock.lang.Specification
 
 import java.nio.charset.Charset
@@ -45,39 +42,27 @@ import java.nio.charset.Charset
 @TestFor(SignalPathService)
 @TestMixin(ControllerUnitTestMixin)
 @Mock([RunningSignalPath, UiChannel, Stream, Feed, SecUser, SecRole, Module, ModulePackage, ModuleCategory])
-class SignalPathServiceSerializationSpec extends Specification {
+class SignalPathServiceSpec extends Specification {
 
 	static final String SIGNAL_PATH_FILE = "signal-path-data.json"
 
 	def globals
+
 	def kafkaService
 	def streamService
 	def signalPathService
+
 	def user
 	def stream
-
 	def setup() {
-
-		// BootStrap.groovy not invoked under unit test environment, need to manually configure serialization interval
-		grailsApplication.config.unifina.serialization.intervalInMillis = 500
-
 		// Suppress exception messages because using mocked GORM
 		RunningSignalPath.metaClass.static.executeUpdate = { String query, Collection params -> 1 }
 
-		defineBeans {
-			springSecurityService(SpringSecurityService)
-			kafkaService(FakeKafkaService)
-			streamService(StreamService) { bean -> bean.autowire = true }
-			serializationService(SerializationService) { bean -> bean.autowire = true }
-			feedService(FeedService) { bean -> bean.autowire = true }
-			servletContext(MockServletContext) { bean -> bean.autowire = true }
-			signalPathService(SignalPathService) { bean -> bean.autowire = true }
-		}
-
 		globals = GlobalsFactory.createInstance([:], grailsApplication)
-		kafkaService = globals.getBean("kafkaService")
-		streamService = globals.getBean("streamService")
-		signalPathService = globals.getBean("signalPathService")
+		kafkaService = new FakeKafkaService()
+
+		signalPathService.servletContext = [:]
+		signalPathService.kafkaService = kafkaService
 
 		// Create feed 7
 		Feed feed = new Feed(
