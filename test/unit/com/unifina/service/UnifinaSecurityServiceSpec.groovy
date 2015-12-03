@@ -9,7 +9,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
 import org.springframework.security.core.userdetails.cache.NullUserCache
-
+import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 import com.unifina.domain.security.SecRole
@@ -173,6 +173,32 @@ class UnifinaSecurityServiceSpec extends Specification {
 		service.canAccess(owned, me)
 		!service.canAccess(restricted,me)
 		!service.canAccess(owned, anotherUser)
+	}
+
+	void "censoring errors with checkErrors() works properly"(){
+		List checkedErrors
+		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]
+
+		when: "given list of fieldErrors"
+		List<FieldError> errorList = new ArrayList<>()
+		errorList.add(new FieldError(
+				this.getClass().name, 'password', 'rejectedPassword', false, null, ['null', 'null', 'rejectedPassword'].toArray(), null
+		))
+		errorList.add(new FieldError(
+				this.getClass().name, 'username', 'rejectedUsername', false, null, ['null', 'null', 'rejectedUsername'].toArray(), null
+		))
+		checkedErrors = service.checkErrors(errorList)
+
+		then: "the rejected password is hidden but the rejected username is not"
+		checkedErrors.get(0).getField() == "username"
+		checkedErrors.get(0).getRejectedValue() == "rejectedUsername"
+		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedUsername']
+
+		checkedErrors.get(1).getField() == "password"
+		checkedErrors.get(1).getRejectedValue() == "***"
+		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
+
+
 	}
 
 }

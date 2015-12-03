@@ -1,30 +1,24 @@
 
 package com.unifina.controller.security
 
-import com.unifina.domain.signalpath.Module
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.ui.RegistrationCode
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
-import org.springframework.security.core.userdetails.UserDetailsService
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.RegistrationCode
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.service.BootService
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.UserService
 
 @TestFor(RegisterController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
@@ -61,6 +55,7 @@ class RegisterControllerSpec extends Specification {
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
 		controller.unifinaSecurityService = new UnifinaSecurityService()
+		controller.unifinaSecurityService.grailsApplication = grailsApplication
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication

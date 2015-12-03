@@ -74,7 +74,7 @@ class CSVImporterSpec extends Specification {
 		File file = Paths.get(getClass().getResource("test-files/crime-records.csv").toURI()).toFile()
 		
 		when:
-		CSVImporter csv = new CSVImporter(file, 0, "MM/dd/yy HH:mm")
+		CSVImporter csv = new CSVImporter(file, null, 0, "MM/dd/yy HH:mm")
 		CSVImporter.Schema schema = csv.getSchema()
 
 		then:
@@ -102,7 +102,7 @@ class CSVImporterSpec extends Specification {
 	void "test detecting the timestamp from epoch"(){
 		setup:
 		File file = Paths.get(getClass().getResource("test-files/epoch-test.csv").toURI()).toFile()
-		CSVImporter csv = new CSVImporter(file, 0, "unix")
+		CSVImporter csv = new CSVImporter(file, null, 0, "unix")
 		CSVImporter.Schema schema = csv.getSchema()
 		
 		int rowsRead = 0
@@ -116,10 +116,10 @@ class CSVImporterSpec extends Specification {
 		for (CSVImporter.LineValues line : csv) {
 			if (line==null)
 				continue
-			
+
 			if (rowsRead<25)
 				firstRows << line
-				
+
 			rowsRead++
 		}
 		
@@ -144,6 +144,62 @@ class CSVImporterSpec extends Specification {
 		then:
 		schema.entries.length == 12
 		schema.timestampColumnIndex == 5
+	}
+
+	void "should fail when the order of the lines is not chronological"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/invalid-chronological-order.csv").toURI()).toFile()
+
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		// Tries to parse each line
+		for (CSVImporter.LineValues line : csv) {}
+
+		then:
+		thrown RuntimeException
+	}
+
+	void "test giving the field type in a map"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
+		List fields = [
+		        [name: "really", type: "string"],
+				[name: "price",	type: "string"]
+		]
+
+		when: "the fields are not given"
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+
+		then: "the field types are autodetected"
+		schema.entries[1].type == "number"
+		schema.entries[2].type == "number"
+		schema.entries[3].type == "boolean"
+
+		when: "the fields are given"
+		csv = new CSVImporter(file, fields)
+		schema = csv.getSchema()
+
+		then: "the field types are all strings as given"
+		schema.entries[1].type == "string"
+		schema.entries[2].type == "number"
+		schema.entries[3].type == "string"
+	}
+
+	void "can detect multiple date fields"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/two-date-fields.csv").toURI()).toFile()
+
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+
+		then:
+		schema.entries.length == 3
+		schema.timestampColumnIndex == 0
+		schema.entries[0].type == "timestamp"
+		schema.entries[1].type == "number"
+		schema.entries[2].type == "timestamp"
 	}
 	
 	
