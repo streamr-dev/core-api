@@ -9,7 +9,7 @@
  * - email sending config
  */
 
- /**
+/**
   * Grails configuration 
   */
 
@@ -232,6 +232,7 @@ environments {
 
 streamr.user.defaultFeeds = [7]
 streamr.user.defaultModulePackages = [1]
+
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
 
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'
@@ -290,3 +291,12 @@ grails {
 	}
 }
 remove this line */
+
+// emails
+// the server settings come from Config.groovy of each project
+
+unifina.email.sender = "contact@streamr.com"
+unifina.email.signup.subject = "Thanks for signing up for Streamr"
+unifina.email.invite.subject = "Invitation to Streamr"
+unifina.email.welcome.subject = "Welcome to Streamr"
+unifina.email.feedback.recipient = "contact@streamr.com"
