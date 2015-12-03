@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class EventTable extends ModuleWithUI {
 
-	int inputCount = 1;
+	int eventTableInputCount = 1;
 	int maxRows = 20;
 	
 	public EventTable() {
@@ -107,7 +107,7 @@ public class EventTable extends ModuleWithUI {
 
 		// Module options
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("inputs", inputCount, "int"));
+		options.add(new ModuleOption("inputs", eventTableInputCount, "int"));
 		options.add(new ModuleOption("maxRows", maxRows, "int"));
 		
 		config.put("tableConfig", getHeaderDefinition());
@@ -122,12 +122,12 @@ public class EventTable extends ModuleWithUI {
 		ModuleOptions options = ModuleOptions.get(config);
 		
 		if (options.getOption("inputs")!=null)
-			inputCount = options.getOption("inputs").getInt();
+			eventTableInputCount = options.getOption("inputs").getInt();
 		
 		if (options.getOption("maxRows")!=null)
 			maxRows = options.getOption("maxRows").getInt();
 		
-		for (int i=1;i<=inputCount;i++) {
+		for (int i = 1; i<= eventTableInputCount; i++) {
 			createAndAddInput("input"+i);
 		}
 	}
