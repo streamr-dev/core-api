@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.unifina.datasource.ITimeListener;
+import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.signalpath.*;
@@ -151,6 +152,7 @@ public class ModuleTestHelper {
 			if (testHelper.outputValuesByName == null) {
 				throw new RuntimeException("Field outputValuesByName cannot be null");
 			}
+			validateThatModuleDoesNotHaveKnownSerializationIssues();
 			verifyNoTicksBeforeSkip();
 			testHelper.initializeAndValidate();
 			return testHelper;
@@ -161,6 +163,13 @@ public class ModuleTestHelper {
 		 */
 		public boolean test() throws IOException, ClassNotFoundException {
 			return build().test();
+		}
+
+		private void validateThatModuleDoesNotHaveKnownSerializationIssues() {
+			HiddenFieldDetector hiddenFieldDetector = new HiddenFieldDetector(testHelper.module.getClass());
+			if (hiddenFieldDetector.anyHiddenFields()) {
+				throw new TestHelperException(hiddenFieldDetector);
+			}
 		}
 
 		private void verifyNoTicksBeforeSkip() {
