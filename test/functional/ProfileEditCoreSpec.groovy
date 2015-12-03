@@ -93,7 +93,7 @@ public class ProfileEditCoreSpec extends LoginTester1Spec {
 		waitFor { at ChangePasswordPage }
 		$(".alert", text:"Password not changed!").displayed
 		$(".text-danger li", text: "Incorrect password!").displayed
-		$(".text-danger li", text:contains("Password must have")).displayed
+		$(".text-danger li", text: "Please use a stronger password!").displayed
 
 //		Correct Current Password, New Password without numbers or special characters
 		when: "profile edit page is clicked to open"

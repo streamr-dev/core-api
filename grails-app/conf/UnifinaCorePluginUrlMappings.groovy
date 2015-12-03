@@ -15,11 +15,6 @@ class UnifinaCorePluginUrlMappings {
 		"403"(controller: "login", action: "denied")
 		"500"(view:'/error')
 		
-		"/login/$action?"(controller: "login")
-		"/logout/$action?"(controller: "logout")
-		"/user/$action?/$id?"(controller: "user", namespace:"streamr")
-		"/register/$action?/$id?"(controller: "register", namespace:"streamr")
-		
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 		
 		// API url mappings

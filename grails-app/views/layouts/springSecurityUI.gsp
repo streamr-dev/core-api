@@ -15,7 +15,7 @@
 
     <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon"/>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<r:require module="jquery"/>
 
     <%-- Used by Geb GrailsPage abstraction --%>
     <meta name="pageId" content="${controllerName}.${actionName}" />
