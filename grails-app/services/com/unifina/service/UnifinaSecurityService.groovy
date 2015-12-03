@@ -113,6 +113,15 @@ class UnifinaSecurityService {
 		}
 	}
 
+	/**
+	 * Checks if the errors list contains any fields whose values may not be logged
+	 * as plaintext (passwords etc.). The excluded fields are read from
+	 * grails.exceptionresolver.params.exclude config key.
+	 * 
+	 * If any excluded fields are found, their field values are replaced with "***".
+	 * @param errorList
+	 * @return
+	 */
 	List checkErrors(List<FieldError> errorList) {
 		List<String> blackList = (List<String>) grailsApplication.config.grails.exceptionresolver.params.exclude
 		if (blackList == null) {
