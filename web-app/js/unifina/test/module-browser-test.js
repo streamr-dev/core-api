@@ -18,8 +18,10 @@ describe('module-browser-page', function(){
 		global.jQuery = $
 		global._ = _
 		$.fn.scrollspy = function(options){}
-		$.fn.pnotify = function(options){
-			return options
+		global.Streamr = {
+			showInfo: function(){},
+			showError: function(){},
+			showSuccess: function(){}
 		}
 
 		global.MathJax = {
