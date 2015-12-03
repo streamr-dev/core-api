@@ -14,8 +14,7 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	def "user creation works correctly"(){
 		when: "click to user create page"
-		$("ul.jd_menu li",0).click()
-		$("ul.jd_menu li",0).find("ul li", text:"Create").click()
+		$("ul.jd_menu li",0).find("ul li a", text:"Create").click()
 
 		then:
 		at UserCreatePage
@@ -26,25 +25,11 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 		password = "user-edit-admin-spec"
 		timezone = "Europe/Helsinki"
 
-		roleTab.click()
-		waitFor {
-			roleUser.displayed
-		}
 		roleUser.click()
-
-		feedTab.click()
-		waitFor {
-			feedUserStream.displayed
-		}
 		feedUserStream.click()
-
-		modulePackageTab.click()
-		waitFor {
-			modulePackageCore.displayed
-		}
 		modulePackageCore.click()
 
-		create.click()
+		createButton.click()
 
 		then:
 		at UserSearchPage
@@ -66,6 +51,9 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 		username = "user-edit-admin-spec@streamr.com"
 		searchButton.click()
 		at UserSearchResultPage
+		waitFor {
+			searchResult.displayed
+		}
 		searchResult.click()
 
 		then: "go to the user edit page"
@@ -85,8 +73,10 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 		then: "the user is found"
 		at UserSearchResultPage
-		searchResult.size() == 1
-		searchResult.text() == "user-edit-admin-spec2@streamr.com"
+		waitFor {
+			searchResult.size() == 1
+			searchResult.text() == "user-edit-admin-spec2@streamr.com"
+		}
 	}
 
 	def "the user can be removed"() {
@@ -99,16 +89,18 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 		then: "go to the user edit page"
 		at UserEditPage
 
-		when: "click to delete the user"
-		deleteButton.click()
-
-		then:
-		waitFor {
-			deleteConfirmButton.displayed
+		when: "when clicked to delete and then cancel"
+		withConfirm(false) {
+			deleteButton.click()
 		}
 
-		when: "confirmed"
-		deleteConfirmButton.click()
+		then:
+		at UserEditPage
+
+		when: "when clicked to delete and then OK"
+		withConfirm(true) {
+			deleteButton.click()
+		}
 
 		then:
 		at UserSearchPage

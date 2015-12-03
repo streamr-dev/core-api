@@ -296,7 +296,7 @@ remove this line */
 // the server settings come from Config.groovy of each project
 
 unifina.email.sender = "contact@streamr.com"
-unifina.email.signup.subject = "Thanks for signing up to Streamr"
+unifina.email.signup.subject = "Thanks for signing up for Streamr"
 unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
