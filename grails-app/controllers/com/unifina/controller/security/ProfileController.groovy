@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 class ProfileController {
 	
 	def springSecurityService
+	def unifinaSecurityService
 	
 	static defaultAction = "edit"
 	
@@ -24,7 +25,7 @@ class ProfileController {
 		
 		if (!user.save()) {
 			flash.error = "Profile not updated!"
-			log.warn("Update failed due to validation errors: "+user.errors)
+			log.warn("Update failed due to validation errors: "+unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
 			return render(view: 'edit', model: [user: user])
 		}
 		else {

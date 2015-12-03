@@ -9,7 +9,6 @@
 <g:render template="/canvas/signalPathExtensions"/>
 
 <r:require module="toolbar"/>
-<r:require module="pnotify"/>
 
 <r:script>
 	 $(document).ready(function() {

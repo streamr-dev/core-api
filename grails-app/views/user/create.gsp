@@ -15,17 +15,7 @@
 
 <g:form action="save" name='userCreateForm'>
 
-<%
-def tabData = []
-tabData << [name: 'userinfo', icon: 'icon_user', messageCode: 'spring.security.ui.user.info']
-tabData << [name: 'roles',    icon: 'icon_role', messageCode: 'spring.security.ui.user.roles']
-tabData << [name: 'packages',    icon: 'icon_role', messageCode: 'unifina.modulePackages.label']
-tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.label']
-%>
 
-<s2ui:tabs elementId='tabs' height='375' data="${tabData}">
-
-	<s2ui:tab name='userinfo' height='280'>
 		<table>
 		<tbody>
 
@@ -53,36 +43,31 @@ tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.lab
            	<g:render template="/user/projectExtras" model="[user:user]"/>
 		</tbody>
 		</table>
-	</s2ui:tab>
 
-	<s2ui:tab name='roles' height='280'>
+		<h2>Roles</h2>
 		<g:each var="auth" in="${authorityList}">
 		<div>
 			<g:checkBox name="role" value="${auth.authority}" checked="false" />
 			<g:link controller='role' action='edit' id='${auth.id}'>${auth.authority.encodeAsHTML()}</g:link>
 		</div>
 		</g:each>
-	</s2ui:tab>
 
-	<s2ui:tab name='packages' height='280'>
+		<h2>Module Packages</h2>
 		<g:each var="p" in="${ModulePackage.list()}">
 		<div>
 			<g:checkBox name="modulePackage" value="${p.id}" checked="false"/>
 			${p.name.encodeAsHTML()}
 		</div>
 		</g:each>
-	</s2ui:tab>
-	
-	<s2ui:tab name='feeds' height='280'>
+
+		<h2>Feeds</h2>
 		<g:each var="f" in="${Feed.list()}">
 		<div>
 			<g:checkBox name="feed" value="${f.id}" checked="false"/>
 			${f.name?.encodeAsHTML() ?: f.id}
 		</div>
 		</g:each>
-	</s2ui:tab>
 
-</s2ui:tabs>
 
 <div style='float:left; margin-top: 10px; '>
 <s2ui:submitButton elementId='create' form='userCreateForm' messageCode='default.button.create.label'/>
@@ -93,7 +78,6 @@ tabData << [name: 'feeds',    icon: 'icon_role', messageCode: 'unifina.feeds.lab
 <script>
 $(document).ready(function() {
 	$('#username').focus();
-	<s2ui:initCheckboxes/>
 });
 </script>
 

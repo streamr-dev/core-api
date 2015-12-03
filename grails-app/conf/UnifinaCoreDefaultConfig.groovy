@@ -106,7 +106,7 @@
  grails.spring.bean.packages = []
  // whether to disable processing of multi part requests
  grails.web.disable.multipart=false
- 
+
  // request parameters to mask when logging exceptions
  grails.exceptionresolver.params.exclude = ['password','password2','currentpassword']
  
@@ -297,7 +297,7 @@ remove this line */
 // the server settings come from Config.groovy of each project
 
 unifina.email.sender = "contact@streamr.com"
-unifina.email.signup.subject = "Thanks for signing up to Streamr"
+unifina.email.signup.subject = "Thanks for signing up for Streamr"
 unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
