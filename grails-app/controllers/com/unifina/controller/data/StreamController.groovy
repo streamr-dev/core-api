@@ -205,8 +205,11 @@ class StreamController {
 			MultipartFile file = request.getFile("file")
 			temp = File.createTempFile("csv_upload_", ".csv")
 			file.transferTo(temp)
-			
-			CSVImporter csv = new CSVImporter(temp)
+
+			Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+			List fields = config.fields ? config.fields : []
+
+			CSVImporter csv = new CSVImporter(temp, fields)
 			if (csv.getSchema().timestampColumnIndex==null) {
 				flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
 				response.status = 500
@@ -230,7 +233,11 @@ class StreamController {
 	def confirm() {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
-		CSVImporter csv = new CSVImporter(file)
+
+		Map config = stream.streamConfig ? JSON.parse(stream.streamConfig) : [:]
+		List fields = config.fields ? config.fields : []
+
+		CSVImporter csv = new CSVImporter(file, fields)
 		Schema schema = csv.getSchema()
 		
 		[schema:schema, file:params.file, stream:stream]
@@ -239,6 +246,10 @@ class StreamController {
 	def confirmUpload() {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
+
+		Map config = stream.streamConfig ? JSON.parse(stream.streamConfig) : [:]
+		List fields = config.fields ? config.fields : []
+
 		def format
 		def index
 		if(params.customFormat)
@@ -246,8 +257,7 @@ class StreamController {
 		else format = params.format
 		index = Integer.parseInt(params.timestampIndex)
 		try {
-			CSVImporter csv = new CSVImporter(file, index, format)
-			Schema schema = csv.getSchema()
+			CSVImporter csv = new CSVImporter(file, fields, index, format)
 			importCsv(csv, stream)
 		} catch (Exception e) {
 			flash.message = "The format of the timestamp is not correct"
@@ -255,8 +265,8 @@ class StreamController {
 		redirect(action:"show", id:params.id)
 	}
 	
-	private void importCsv(CSVImporter csv, Stream stream) {		
-		List<FeedFile> feedFiles = kafkaService.createFeedFilesFromCsv(csv, stream)
+	private void importCsv(CSVImporter csv, Stream stream) {
+		kafkaService.createFeedFilesFromCsv(csv, stream)
 		
 		// Autocreate the stream config based on fields in the csv schema
 		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
@@ -265,8 +275,8 @@ class StreamController {
 			
 			// The primary timestamp column is implicit, so don't include it in streamConfig
 			for (int i=0;i<csv.schema.entries.length;i++) {
-				if (i!=csv.schema.timestampColumnIndex) {
-					CSVImporter.SchemaEntry e = csv.schema.entries[i]
+				if (i!=csv.getSchema().timestampColumnIndex) {
+					CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
 					fields << [name:e.name, type:e.type]
 				}
 			}
