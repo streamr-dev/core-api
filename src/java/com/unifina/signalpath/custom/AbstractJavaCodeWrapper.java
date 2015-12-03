@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.tools.Diagnostic;
 
+import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import org.apache.commons.lang.StringUtils;
@@ -110,6 +111,9 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				instance = setUpCustomModule(clazz, config);
 			}
 			catch (Exception e) {
+				if (e instanceof ModuleException) {
+					throw (ModuleException) e;
+				}
 				// TODO: How to allow saving of invalid code? If it doesn't get compiled, inputs etc. won't be found
 //				if (!globals.target.save) {
 				throw new RuntimeException(e);
@@ -131,6 +135,12 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		classLoader = new UserJavaClassLoader(getClass().getClassLoader());
 		boolean success = classLoader.parseClass(className, fullCode);
 
+		HiddenFieldDetector detector = null;
+		if (success) {
+			detector = new HiddenFieldDetector(classLoader.loadClass(className));
+			success = !detector.anyHiddenFields();
+		}
+
 		if (!success) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Compilation errors:\n");
@@ -149,6 +159,24 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				CompilationErrorMessage msg = new CompilationErrorMessage();
 				msg.addError(line, d.getMessage(null));
 				msgs.add(new ModuleExceptionMessage(hash,msg));
+			}
+
+			if (detector != null) {
+				for (String fieldName : detector.hiddenFields().keySet()) {
+
+					String message = "Hiding of field '" + fieldName + "' not allowed. Declarations " +
+							"in inheritance chain by classes: " + detector.hiddenFields().get(fieldName);
+
+					sb.append("Line ");
+					sb.append(0);
+					sb.append(": ");
+					sb.append(message);
+					sb.append("\n");
+
+					CompilationErrorMessage msg = new CompilationErrorMessage();
+					msg.addError(0, message);
+					msgs.add(new ModuleExceptionMessage(hash, msg));
+				}
 			}
 
 			throw new ModuleException(sb.toString(),null,msgs);
