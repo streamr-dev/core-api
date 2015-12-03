@@ -12,6 +12,7 @@ class UserService {
     
 	def grailsApplication
     def springSecurityService
+    def unifinaSecurityService
 	
     def createUser(Map properties, List<SecRole> roles=null, List<Feed> feeds=null, List<ModulePackage> packages=null) {
         def secConf = grailsApplication.config.grails.plugin.springsecurity
@@ -27,12 +28,12 @@ class UserService {
         user.enabled = true
         
         if (!user.validate()) {
-            throw new UserCreationFailedException("Registration user validation failed: "+user.errors)
+            log.warn(unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
+            throw new UserCreationFailedException("Registration user validation failed: "+unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
         }
 
-        
         if (!user.save(flush:true)) {
-            log.warn("Failed to save user data: "+user.errors)
+            log.warn("Failed to save user data: "+unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
             throw new UserCreationFailedException()
         } else {
             // Save roles, feeds and module packages
@@ -76,11 +77,12 @@ class UserService {
     }
 
     def addModulePackages(user, List<ModulePackage> packages=null) {
-        if(packages == null) {
+        if (packages == null) {
             packages = ModulePackage.findAllByIdInList(grailsApplication.config.streamr.user.defaultModulePackages.collect {it.longValue()})
             if(packages.size() != grailsApplication.config.streamr.user.defaultModulePackages.size())
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }
+
         packages.each { modulePackage ->
             new ModulePackageUser(user: user, modulePackage: modulePackage).save(flush: true, failOnError: true)
         }
