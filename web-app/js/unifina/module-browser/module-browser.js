@@ -332,21 +332,11 @@ Module.prototype.save = function(){
 			try {
 			     CKEDITOR.instances["textarea"+this.module.metadata.id].destroy(false)
 			} catch (e) { }
-			$.pnotify({
-				type: 'success',
-        		title: "Great!",
-        		text: _this.module.data+" help saved successfully",
-	        	delay: 4000
-    		});
+			Streamr.showSuccess(_this.module.data+" help saved successfully", "Great!")
 			_this.renderHelp()
 	    },
 	    error: function(jqXHR, textStatus, errorThrown) {
-			$.pnotify({
-				type: 'error',
-        		title: "Something went wrong!",
-        		text: jqXHR.responseJSON.error ? jqXHR.responseJSON.error : _this.module.data+" help couldn't be saved",
-	        	delay: 4000
-    		});
+			Streamr.showError(jqXHR.responseJSON.error ? jqXHR.responseJSON.error : _this.module.data+" help couldn't be saved", "Something went wrong!")
 	    },
 	    data: {id:_this.module.metadata.id, jsonHelp:JSON.stringify(moduleHelp)}
 	})

@@ -24,8 +24,10 @@ describe('dashboard-editor', function() {
 		global.Backbone = Backbone
 		Backbone.$ = $
 		global.jQuery = $
-		global.$.pnotify = function(options) {
-			return options
+		global.Streamr = {
+			showInfo: function(){},
+			showError: function(){},
+			showSuccess: function(){}
 		}
 		// jsdom wants to use the deprecated style of creating events, so let's mock a bridge between old and new
 		global.Event = function(type) {
@@ -363,6 +365,7 @@ describe('dashboard-editor', function() {
 		global.Backbone = undefined
 		Backbone.$ = undefined
 		global.jQuery = undefined
+		global.Streamr = undefined
 		global.Event = undefined
 
 		templates = undefined

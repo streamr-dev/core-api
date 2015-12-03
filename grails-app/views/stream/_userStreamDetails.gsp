@@ -67,18 +67,24 @@
 				});
 				
 				var redirects = []
+				var errorMessages = []
 				dz[0].dropzone.on("error", function(e, msg, xhr){
 					if(msg.redirect)
 						redirects.push(msg.redirect)
+					errorMessages.push(msg)
 				})
 
 				dz[0].dropzone.on("queuecomplete", function() {
 					if(redirects.length)
 						window.location = redirects[0]
-					else
-						location.reload();
-				});
-				
+					else if(errorMessages.length) {
+						errorMessages.forEach(function (msg) {
+							Streamr.showError(msg)
+						})
+						errorMessages = []
+					} else
+						location.reload()
+				})
 			});
 			</script>
 			
