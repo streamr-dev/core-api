@@ -223,7 +223,7 @@ environments {
 unifina.serialization.intervalInMillis = 30 * 1000
 environments {
 	test {
-		unifina.serialization.intervalInMillis = 500
+		unifina.serialization.intervalInMillis = 1000
 	}
 }
 
