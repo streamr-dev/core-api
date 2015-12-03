@@ -53,7 +53,7 @@ public class KafkaCollectTask extends AbstractTask {
 		
 		String name = config.filename
 		
-		final KafkaFeedFileWriter writer = new KafkaFeedFileWriter(name)
+		final KafkaFeedFileWriter writer = createWriter(name)
 		
 		int counter = 0
 
@@ -84,6 +84,10 @@ public class KafkaCollectTask extends AbstractTask {
 	
 	protected UnifinaKafkaIterator createIterator(String topic, Date from, Date to) {
 		new UnifinaKafkaIterator(topic, from, to, 30000L, grailsApplication.config.unifina.kafka.toProperties())
+	}
+	
+	protected KafkaFeedFileWriter createWriter(String name) {
+		new KafkaFeedFileWriter(name)
 	}
 
 	@Override
