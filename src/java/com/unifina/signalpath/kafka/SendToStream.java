@@ -26,10 +26,10 @@ import com.unifina.signalpath.TimeSeriesInput;
 public class SendToStream extends AbstractSignalPathModule {
 
 	protected StreamParameter streamParameter = new StreamParameter(this,"stream");
-	protected JSONObject streamConfig = null;
+	transient protected JSONObject streamConfig = null;
 	
-	protected KafkaService kafkaService = null;
-	protected UnifinaSecurityService unifinaSecurityService = null;
+	transient protected KafkaService kafkaService = null;
+	transient protected UnifinaSecurityService unifinaSecurityService = null;
 	
 	protected boolean historicalWarningShown = false;
 	private Stream authenticatedStream = null;
@@ -56,6 +56,9 @@ public class SendToStream extends AbstractSignalPathModule {
 			Map msg = new LinkedHashMap<>();
 			for (Input i : drivingInputs) {
 				msg.put(i.getName(), i.getValue());
+			}
+			if (kafkaService == null) {
+				kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
 			}
 			kafkaService.sendMessage(authenticatedStream, "", msg);
 		}

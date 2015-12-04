@@ -18,7 +18,7 @@ import com.unifina.utils.MapTraversal;
 
 public class TimeSeriesChart extends Chart {
 	
-	int inputCount = 10;
+	int tsInputCount = 10;
 	boolean barify = true;
 	
 	TimeSeriesInput[] myInputs;
@@ -68,7 +68,7 @@ public class TimeSeriesChart extends Chart {
 			ArrayList<String> names = new ArrayList<String>();
 			ArrayList<TimeSeriesInput> connectedInputs = new ArrayList<>();
 
-			csvWriter.writeField("timestamp");
+			csvWriter().writeField("timestamp");
 
 			for (Input inp : getInputs()) {
 				TimeSeriesInput input = (TimeSeriesInput)inp;
@@ -84,14 +84,14 @@ public class TimeSeriesChart extends Chart {
 					}
 
 					names.add(name);
-					csvWriter.writeField(name);
+					csvWriter().writeField(name);
 					connectedInputs.add(input);
 				}
 				else {
 					input.setInitialValue(0.0);
 				}
 			}
-			csvWriter.newLine();
+			csvWriter().newLine();
 			myInputs = connectedInputs.toArray(new TimeSeriesInput[connectedInputs.size()]);
 
 			if (MapTraversal.getProperty(globals.getSignalPathContext(), "csvOptions.filterEmpty")!=null 
@@ -146,8 +146,7 @@ public class TimeSeriesChart extends Chart {
 	protected void record() {
 		for (Input i : drivingInputs) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
-			
-			if (!Double.isNaN(input.value) 
+			if (!Double.isNaN(input.value)
 					&& hasRc 
 					&& (!barify || globals.time.getTime() - input.previousTime >= 60000L)) {
 				
@@ -165,13 +164,13 @@ public class TimeSeriesChart extends Chart {
 
 	@Override
 	protected void recordCsvString() {
-		csvWriter.writeField(globals.time);
+		csvWriter().writeField(globals.time);
 
 		for (int i=0;i<myInputs.length;i++) {
 			Double v = myInputs[i].getValue();
 			if (v!=null && !v.equals(Double.NaN))
-				csvWriter.writeField(Double.toString(myInputs[i].value));
-			else csvWriter.writeField("");
+				csvWriter().writeField(Double.toString(myInputs[i].value));
+			else csvWriter().writeField("");
 		}
 	}
 	
@@ -196,7 +195,7 @@ public class TimeSeriesChart extends Chart {
 		config.put("barify",barify);
 		
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("inputs", inputCount, "int"));
+		options.add(new ModuleOption("inputs", tsInputCount, "int"));
 		options.add(new ModuleOption("overnightBreak", overnightBreak, "boolean"));
 		
 		return config;
@@ -212,7 +211,7 @@ public class TimeSeriesChart extends Chart {
 		ModuleOptions options = ModuleOptions.get(config);
 		
 		if (options.getOption("inputs")!=null)
-			inputCount = options.getOption("inputs").getInt();
+			tsInputCount = options.getOption("inputs").getInt();
 		if (options.getOption("overnightBreak")!=null)
 			overnightBreak = options.getOption("overnightBreak").getBoolean();
 		
@@ -226,10 +225,10 @@ public class TimeSeriesChart extends Chart {
 				}
 			}
 			if (inputConfig != null)
-				inputCount = Integer.parseInt(inputConfig.get("value").toString());
+				tsInputCount = Integer.parseInt(inputConfig.get("value").toString());
 		}
 		
-		for (int i=1;i<=inputCount;i++) {
+		for (int i=1;i<=tsInputCount;i++) {
 			getInputConnection("in"+i);
 		}
 	}

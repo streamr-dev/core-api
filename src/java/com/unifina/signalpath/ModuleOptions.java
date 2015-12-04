@@ -8,9 +8,7 @@ import java.util.Map;
  */
 public class ModuleOptions extends LinkedHashMap<String, Object> {
 	
-	ModuleOptions() {
-
-	}
+	public ModuleOptions() {}
 	
 	public static ModuleOptions get(Map<String, Object> parentConfig) {
 		ModuleOptions mo;

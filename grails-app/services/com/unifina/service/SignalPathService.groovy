@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.serialization.SerializationException
 import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.transform.CompileStatic
@@ -44,6 +45,7 @@ class SignalPathService {
 	def grailsApplication
 	def grailsLinkGenerator
 	def kafkaService
+	def serializationService
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
@@ -238,14 +240,38 @@ class SignalPathService {
 		// Stop feed
 		signalPath.globals.dataSource.stopFeed()
 	}
-	
-	void startLocal(RunningSignalPath rsp, Map signalPathContext) {		
+
+	/**
+	 * @throws SerializationException if de-serialization fails when resuming from existing state
+     */
+	void startLocal(RunningSignalPath rsp, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
 		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
-		
+
+		SignalPathRunner runner
 		// Create the runner thread
-		SignalPathRunner runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+		if (rsp.isNotSerialized()) {
+			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
+			log.info("Creating new signalPath connections " + rsp.id)
+		} else {
+			SignalPath sp = serializationService.deserialize(rsp.serialized)
+			runner = new SignalPathRunner(sp, globals, rsp.adhoc)
+			log.info("De-serializing existing signalPath " + rsp.id)
+		}
+
+		runner.addStartListener({
+
+			if (!servletContext["signalPathRunners"]) {
+				servletContext["signalPathRunners"] = [:]
+			}
+			servletContext["signalPathRunners"].put(runner.runnerId, runner)
+		})
+
+		runner.addStopListener({
+			servletContext["signalPathRunners"].remove(runner.runnerId)
+		})
+
 		runner.signalPaths.each {
 			it.runningSignalPath = rsp
 		}
@@ -476,5 +502,22 @@ class SignalPathService {
 			}
 		}
 		return changed
+	}
+
+	@Transactional
+	def saveState(SignalPath sp) {
+		RunningSignalPath rsp = sp.runningSignalPath
+		rsp = rsp.attach()
+		rsp.serialized = serializationService.serialize(sp)
+		rsp.serializationTime = sp.globals.time
+		rsp.save(failOnError: true)
+		log.info("RunningSignalPath " + rsp.id + " serialized")
+	}
+
+	@Transactional
+	def clearState(RunningSignalPath rsp) {
+		rsp.serialized = null
+		rsp.save(failOnError: true)
+		log.info("RunningSignalPath " + rsp.id + " state cleared")
 	}
 }

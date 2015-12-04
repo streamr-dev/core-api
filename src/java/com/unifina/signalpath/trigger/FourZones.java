@@ -17,17 +17,7 @@ public class FourZones extends AbstractSignalPathModule {
 	DoubleParameter lowRelease = new DoubleParameter(this,"lowRelease",-0.2);
 	DoubleParameter lowTrigger = new DoubleParameter(this,"lowTrigger",-0.8);
 	
-	IntegerParameter mode = new IntegerParameter(this,"mode",1) {
-		@Override
-		public Map<String,Object> getConfiguration() {
-			Map<String,Object> config = super.getConfiguration();
-			ArrayList<PossibleValue> possibleValues = new ArrayList<>();
-			possibleValues.add(new PossibleValue("enter",1));
-			possibleValues.add(new PossibleValue("exit",2));
-			config.put("possibleValues",possibleValues);
-			return config;
-		}
-	};
+	IntegerParameter mode = new ModeParameter(this);
 	
 	TimeSeriesInput input = new TimeSeriesInput(this,"in");
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
@@ -111,5 +101,21 @@ public class FourZones extends AbstractSignalPathModule {
 		state = null;
 		armed = null;
 	}
-	
+
+	private static class ModeParameter extends IntegerParameter {
+
+		public ModeParameter(AbstractSignalPathModule owner) {
+			super(owner, "mode", 1);
+		}
+
+		@Override
+		public Map<String,Object> getConfiguration() {
+			Map<String,Object> config = super.getConfiguration();
+			ArrayList<PossibleValue> possibleValues = new ArrayList<>();
+			possibleValues.add(new PossibleValue("enter",1));
+			possibleValues.add(new PossibleValue("exit",2));
+			config.put("possibleValues",possibleValues);
+			return config;
+		}
+	}
 }

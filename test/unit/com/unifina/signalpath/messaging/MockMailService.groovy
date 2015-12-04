@@ -18,7 +18,15 @@ class MockMailService {
 		c.delegate = delegate
 		c.call(delegate)
 	}
-	
+
+	def clear() {
+		mailSent = false
+		from = null
+		to = null
+		subject = null
+		body = null
+	}
+
 	public class MailDelegate {
 		def from(s) {
 			from = s
@@ -33,5 +41,4 @@ class MockMailService {
 			body = s
 		}
 	}
-
 }

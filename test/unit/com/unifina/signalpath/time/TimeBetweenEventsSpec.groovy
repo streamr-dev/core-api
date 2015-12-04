@@ -1,5 +1,6 @@
 package com.unifina.signalpath.time
 
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
@@ -20,9 +21,19 @@ class TimeBetweenEventsSpec extends Specification {
 		module.init()
     }
 
-    def cleanup() {
-		
-    }
+	void "timeBetweenEvents gives the right answer"() {
+		when:
+		Map inputValues = [
+			in: ["a", "b", 4, new Object(), "g", "HH"]
+		]
+		Map outputValues = [
+			ms: [null, 100, 100, 100, 100, 100].collect { it?.doubleValue() },
+		]
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.timeToFurtherPerIteration(100)
+			.test()
+	}
 	
 	void "must send no output before two subsequent events"() {
 		when: "first value is received"

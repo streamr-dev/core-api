@@ -24,6 +24,8 @@ import com.unifina.utils.Globals;
  * @author Henri
  */
 public abstract class DataSource {
+
+	private SignalPath signalPath;
 	
 //	public static long eventStartNanos;
 	
@@ -170,11 +172,14 @@ public abstract class DataSource {
 	 * @param sp
 	 */
 	public void connectSignalPath(SignalPath sp) {
-//		signalPaths << sp
+		signalPath = sp;
 		for (AbstractSignalPathModule it : sp.getModules()) {
 			if (canRegister(it))
 				register(it);
 		}
 	}
-	
+
+	public SignalPath getSignalPath() {
+		return signalPath;
+	}
 }
