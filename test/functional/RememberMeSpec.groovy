@@ -10,7 +10,7 @@ class RememberMeSpec extends GebReportingSpec {
 	@Shared cookieName = "streamr_remember_me"
 	@Shared cookieValue = "initial"
 	
-	// NB! These tests must be executed int order
+	// NB! These tests must be executed in order
 	
 	def "log in with checking remember me"(){
 		when: "logged in and clicked remember me"
