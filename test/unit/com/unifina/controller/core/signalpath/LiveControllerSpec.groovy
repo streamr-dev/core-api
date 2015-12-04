@@ -14,21 +14,18 @@ class LiveControllerSpec extends Specification {
 	void setup() {
 		defineBeans {
 			serializationService(SerializationService)
-			signalPathService(SignalPathService)
+			signalPathService(SignalPathService) { it.autowire = true }
 		}
-
-		// Manual wiring required
-		def signalPathService = mainContext.getBean("signalPathService")
-		signalPathService.grailsApplication = grailsApplication
-		signalPathService.serializationService = mainContext.getBean("serializationService")
+		controller.signalPathService = mainContext.getBean(SignalPathService)
 	}
 
 	void "deserialization failure results in error message"() {
-		setup: "runningSignalPath has been incorrectly serialized"
-		def rsp = new RunningSignalPath()
-		rsp.name = "name"
-		rsp.adhoc = true
-		rsp.serialized = "{hello: 'world'}"
+		setup: "runningSignalPath has been incorrectly serialized to database"
+		def rsp = new RunningSignalPath(
+			name: "name",
+			adhoc: true,
+			serialized: "{invalid: 'serialization'}"
+		)
 		rsp.save(failOnError: true, validate: false)
 
 		when: "runningSignalPath is started"
