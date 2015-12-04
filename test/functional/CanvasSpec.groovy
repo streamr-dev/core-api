@@ -1,4 +1,6 @@
 
+import java.text.SimpleDateFormat
+
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 
 import core.LoginTester1Spec
