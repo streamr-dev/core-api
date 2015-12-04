@@ -1,6 +1,8 @@
 package com.unifina.math;
 
-public class ExponentialMovingAverage implements IWindowedOperation {
+import java.io.Serializable;
+
+public class ExponentialMovingAverage implements IWindowedOperation, Serializable {
 	MovingAverage sma;
 	Double ema = null;
 	int length;

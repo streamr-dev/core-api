@@ -38,12 +38,6 @@ class ValueAsTextSpec extends Specification {
 			text: ["1234", "[1, 2, 3]", "{0={a=[a, b]}}" , "string"]
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

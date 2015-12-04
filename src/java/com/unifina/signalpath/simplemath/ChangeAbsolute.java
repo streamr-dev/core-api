@@ -6,18 +6,25 @@ import com.unifina.signalpath.TimeSeriesOutput;
 
 public class ChangeAbsolute extends AbstractSignalPathModule {
 
-	TimeSeriesInput input = new TimeSeriesInput(this,"in") {
+	class CustomTimeSeriesInput extends TimeSeriesInput {
+
+		public CustomTimeSeriesInput(AbstractSignalPathModule owner, String name) {
+			super(owner, name);
+		}
+
 		@Override
 		public void setInitialValue(Double d) {
 			super.setInitialValue(d);
 			prev = d;
 		}
-	};
-	
+	}
+
+	TimeSeriesInput input = new CustomTimeSeriesInput(this,"in");
+
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
-	
+
 	Double prev = null;
-	
+
 	@Override
 	public void init() {
 		addInput(input);

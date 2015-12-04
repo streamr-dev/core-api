@@ -16,6 +16,10 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 			return mo;
 		}
 	}
+
+	// Required for serialization
+	@SuppressWarnings("unused")
+	public ModuleOption() {}
 	
 	ModuleOption(String key, Map<String, Object> map) {
 		this.key = key;

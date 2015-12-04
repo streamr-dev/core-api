@@ -1,6 +1,6 @@
 package com.unifina.domain.signalpath
 
-class UiChannel {
+class UiChannel implements Serializable {
 	String id
 	String hash
 	String name

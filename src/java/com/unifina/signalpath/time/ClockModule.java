@@ -17,7 +17,7 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	StringOutput date = new StringOutput(this, "date");
 	TimeSeriesOutput ts = new TimeSeriesOutput(this,"timestamp");
 		
-	SimpleDateFormat df = null;
+	transient SimpleDateFormat df = null;
 	
 	@Override
 	public void init() {

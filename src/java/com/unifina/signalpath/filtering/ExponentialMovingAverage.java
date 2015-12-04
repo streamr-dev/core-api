@@ -18,6 +18,7 @@ public class ExponentialMovingAverage extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		addInput(length);
+		addInput(minSamples);
 		addInput(input);
 		addOutput(out);
 	}
