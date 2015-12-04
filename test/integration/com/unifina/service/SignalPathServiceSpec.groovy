@@ -4,59 +4,53 @@ import com.unifina.data.IFeed
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.*
+import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
-import com.unifina.feed.kafka.KafkaFeed
-import com.unifina.feed.kafka.KafkaHistoricalFeed
-import com.unifina.feed.kafka.KafkaKeyProvider
-import com.unifina.feed.kafka.KafkaMessageParser
 import com.unifina.feed.kafka.fake.FakeMessageSource
-import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.simplemath.AddMulti
-import com.unifina.signalpath.simplemath.Count
-import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import kafka.javaapi.consumer.SimpleConsumer
+import org.apache.commons.logging.LogFactory
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import spock.lang.Specification
 
 import java.nio.charset.Charset
 
-@TestFor(SignalPathService)
-@TestMixin(ControllerUnitTestMixin)
-@Mock([RunningSignalPath, UiChannel, Stream, Feed, SecUser, SecRole, Module, ModulePackage, ModuleCategory])
-class SignalPathServiceSpec extends Specification {
+class SignalPathServiceSpec extends IntegrationSpec {
 
 	static final String SIGNAL_PATH_FILE = "signal-path-data.json"
 
-	def globals
+	def log = LogFactory.getLog(getClass())
 
+
+	def globals
+	def grailsApplication
 	def kafkaService
 	def streamService
+	def serializationService
 	def signalPathService
 
 	def user
 	def stream
+
 	def setup() {
-		// Suppress exception messages because using mocked GORM
-		RunningSignalPath.metaClass.static.executeUpdate = { String query, Collection params -> 1 }
+		// A bit dirty, but we must do this because otherwise rsp.save() will be called in another thread
+		// which causes exception related to transactions.
+		signalPathService.metaClass.saveState = { SignalPath sp ->
+			RunningSignalPath rsp = sp.runningSignalPath
+			rsp.serialized = serializationService.serialize(sp)
+		}
 
 		globals = GlobalsFactory.createInstance([:], grailsApplication)
 		kafkaService = new FakeKafkaService()
@@ -64,39 +58,13 @@ class SignalPathServiceSpec extends Specification {
 		signalPathService.servletContext = [:]
 		signalPathService.kafkaService = kafkaService
 
-		// Create feed 7
-		Feed feed = new Feed(
-			name: "feed",
-			backtestFeed: KafkaHistoricalFeed.canonicalName,
-			realtimeFeed: KafkaFeed.canonicalName,
-			keyProviderClass: KafkaKeyProvider.canonicalName,
-			messageSourceClass: FakeMessageSource.canonicalName,
-			parserClass: KafkaMessageParser.canonicalName,
-			eventRecipientClass: MapMessageEventRecipient.canonicalName,
-			timezone: "UTC",
-			startOnDemand: true,
-		)
-		feed.id = Long.valueOf(7)
-		feed.save(failOnError: true, validate: false)
+		// Update feed 7 to use fake message source
+		Feed feed = Feed.get(7L)
+		feed.messageSourceClass = FakeMessageSource.canonicalName
+		feed.save(failOnError: true)
 
-		// Create required domain modules
-		ModuleCategory category = new ModuleCategory(name: "name").save(failOnError: true)
-
-		def modules = [
-			[id: 147, name: "Stream", implementingClass: ConfigurableStreamModule.canonicalName],
-			[id: 100, name: "Add", implementingClass: AddMulti.canonicalName],
-			[id: 161, name: "Count", implementingClass: Count.canonicalName]
-		]
-		modules.each {
-			Module mod = new Module(jsModule: "GenericModule", type: "module", category: category)
-			mod.id = it.id
-			mod.name = it.name
-			mod.implementingClass = it.implementingClass
-			mod.save(failOnError: true)
-		}
-
-		// Create user
-		user = new SecUser(username: "u@u.fi", password: "pass", name: "name", timezone: "UTC").save(failOnError: true)
+		// Load user
+		user = SecUser.load(1L)
 
 		// Create stream
 		stream = streamService.createUserStream([name: "serializationTestStream"], user)

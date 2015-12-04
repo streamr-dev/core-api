@@ -1,12 +1,6 @@
 package com.unifina.signalpath.remote
 
-import static org.junit.Assert.*
 import grails.test.spock.IntegrationSpec
-
-import com.unifina.signalpath.AbstractSignalPathModule
-import com.unifina.signalpath.TimeSeriesInput
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 
 class ConnexorTweetSentimentSpec extends IntegrationSpec {
 	
