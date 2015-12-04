@@ -21,6 +21,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.task.Task
 import com.unifina.feed.kafka.KafkaFeedFileName
 import com.unifina.feed.kafka.KafkaFeedFileWriter
+import com.unifina.kafkaclient.KafkaOffsetUtil
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
@@ -156,28 +157,12 @@ class KafkaService {
 		task.save()
 	}
 	
+	@CompileStatic
 	Date getFirstTimestamp(String topic) {
-		log.info("Querying first timestamp for topic $topic...")
-		UnifinaKafkaConsumer consumer = new UnifinaKafkaConsumer(getProperties())
-		Date firstTimestamp = null
-		consumer.subscribeFromBeginning(topic, new UnifinaKafkaMessageHandler() {
-			@Override
-			public void handleMessage(UnifinaKafkaMessage msg, String t, int partition, long offset) {
-				if (firstTimestamp==null)
-					firstTimestamp = new Date(msg.getTimestamp())
-			}
-		})
-		
-		// Wait for the Kafka consumption to finish (or timeout)!
-		while (firstTimestamp==null && consumer.getTimeSinceLastEvent() < 60L*1000L) {
-			Thread.sleep(1000L);
-		}
-		consumer.close()
-		
-		if (firstTimestamp==null)
-			log.warn("Timed out while waiting for the first message of topic $topic")
-		
-		return firstTimestamp
+		KafkaOffsetUtil util = new KafkaOffsetUtil(getProperties())
+		Date result = util.getFirstTimestamp(topic)
+		util.close()
+		return result
 	}
 	
 	List<Task> createCollectTasks(Stream stream) {

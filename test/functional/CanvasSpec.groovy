@@ -1,5 +1,7 @@
 
-import core.LoginTester1Spec;
+import com.unifina.kafkaclient.UnifinaKafkaProducer
+
+import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 
 class CanvasSpec extends LoginTester1Spec {
@@ -151,6 +153,28 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "button must change back to run"
 			waitFor {
 				$('#run', text: 'Run')
+			}
+	}
+	
+	def "running a SignalPath on current day should read from Kafka"() {
+		def myMessage = "hello "+new Date()
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd")
+		
+		when: "SignalPath is loaded"
+			loadSignalPath 'test-run-canvas'
+		then: "signalpath content must be loaded"
+			moduleShouldAppearOnCanvas('Table')
+			
+		when: "data is produced and signalpath is run on current date"
+			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
+			// Procuce to the stream that test-run-canvas reads from
+			kafka.sendJSON("c1_fiG6PTxmtnCYGU-mKuQ", "", System.currentTimeMillis(), '{"myMsg":"'+myMessage+'"}')
+			beginDate = df.format(new Date())
+			endDate = df.format(new Date())
+			runButton.click()
+		then: "output should be produced"
+			waitFor(30) {
+				$('.modulebody .table td', text: myMessage)
 			}
 	}
 
