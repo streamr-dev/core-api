@@ -37,7 +37,9 @@ class MessageHubSpec extends Specification {
 		
 		when: "hub gets a message"
 			hub.receive(msg)
-			Thread.sleep(500) // wait for the hub thread to have a chance to process the message
+			synchronized (hub) {
+				hub.wait(500)
+			}
 		then: "message must be passed on to recipient"
 			1 * recipient.receive(_)
 	}
@@ -55,7 +57,9 @@ class MessageHubSpec extends Specification {
 		
 		when: "hub gets a message"
 			hub.receive(msg)
-			Thread.sleep(500) // wait for the hub thread to have a chance to process the message
+			synchronized (hub) {
+				hub.wait(500)
+			}
 		then: "message must be passed on to both recipients"
 			1 * recipient1.receive(_)
 			1 * recipient2.receive(_)
