@@ -50,7 +50,6 @@ class KafkaService {
 	UnifinaKafkaProducer getProducer() {
 		if (producer == null) {
 			Properties props = getProperties()
-			ProducerConfig producerConfig = new ProducerConfig(props)
 			producer = new UnifinaKafkaProducer(props)
 		}
 		return producer

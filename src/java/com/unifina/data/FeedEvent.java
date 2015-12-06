@@ -3,11 +3,13 @@ package com.unifina.data;
 import java.util.Date;
 import java.util.Iterator;
 
+import com.unifina.feed.AbstractFeed;
+
 public class FeedEvent implements Comparable<FeedEvent> {
 	public Date timestamp;
 	public Object content;
 	public IEventRecipient recipient;
-	public IFeed feed;
+	public AbstractFeed feed;
 	public Iterator<FeedEvent> iterator;
 	
 	public long queueTicket = 0;

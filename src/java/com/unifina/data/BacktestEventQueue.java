@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -11,6 +12,8 @@ import org.apache.log4j.Logger;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
+import com.unifina.feed.AbstractFeed;
+import com.unifina.feed.AbstractHistoricalFeed;
 import com.unifina.utils.Globals;
 import com.unifina.utils.TimeOfDayUtil;
 
@@ -22,8 +25,8 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 		super(globals, dataSource);
 	}
 
-	private ArrayList<IFeed> feeds = new ArrayList<>();
-	private HashMap<String,IFeed> feedsByName = new HashMap<>();
+	private ArrayList<AbstractFeed> feeds = new ArrayList<>();
+	private HashMap<String,AbstractFeed> feedsByName = new HashMap<>();
 
 	long feedStartTime = 0;
 	int speed = 0;
@@ -34,11 +37,11 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 		return new PriorityQueue<>();
 	}
 	
-	public IFeed getFeed(String feedClass) {
+	public AbstractFeed getFeed(String feedClass) {
 		return feedsByName.get(feedClass);
 	}
 	
-	public void addFeed(IFeed feed) {
+	public void addFeed(AbstractFeed feed) {
 		if (!feeds.contains(feed)) {
 			feeds.add(feed);
 			feedsByName.put(feed.getClass().getCanonicalName(), feed);
@@ -47,7 +50,7 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 		
 	public void abort() {
 		super.abort();
-		for (IFeed feed : feeds)
+		for (AbstractFeed feed : feeds)
 			try {
 				feed.stopFeed();
 			} catch (Exception e) {}
@@ -58,12 +61,11 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 		eventCounter = 0;
 		
 		// Insert first event from each feed into the queue
-		for (IFeed feed : feeds) {
+		for (AbstractFeed feed : feeds) {
 			feed.startFeed();
-			if (feed instanceof IBacktestFeed) {
-				FeedEvent event = ((IBacktestFeed)feed).getNext();
-				if (event!=null)
-					enqueue(event);
+			if (feed instanceof AbstractHistoricalFeed && ((AbstractHistoricalFeed)feed).hasNext()) {
+				FeedEvent event = ((AbstractHistoricalFeed)feed).next();
+				enqueue(event);
 			}
 		}
 		
@@ -140,10 +142,9 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 			// If not processed, add to queue without updating the ticket (don't call enqueue(event))
 			if(!processed)
 				queue.add(event);
-			else if (event.feed instanceof IBacktestFeed) {
-				FeedEvent next = ((IBacktestFeed)event.feed).getNext();
-				if (next!=null)
-					enqueue(next);
+			else if (event.feed instanceof AbstractHistoricalFeed && ((AbstractHistoricalFeed)event.feed).hasNext()) {
+				FeedEvent next = ((AbstractHistoricalFeed)event.feed).next();
+				enqueue(next);
 			}
 			
 		}

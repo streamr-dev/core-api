@@ -1,7 +1,6 @@
 package com.unifina.feed;
 
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,12 +12,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.PriorityQueue;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.FeedFile;
@@ -70,7 +67,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	}
 
 	private FeedEventIterator createIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient) {
-		Iterator<Object> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
+		Iterator<? extends Object> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
 		return new FeedEventIterator(contentIterator, this, recipient);
 	}
 	
@@ -81,7 +78,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	 * @param recipient
 	 * @return
 	 */
-	protected abstract Iterator<Object> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient);
+	protected abstract Iterator<? extends Object> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient);
 	
 	/**
 	 * Retrieves a StreamResponse from FileFeedService and creates a FeedEventIterator for the stream.
@@ -113,7 +110,6 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 			else {
 				counts.put(recipient, cnt+1);
 				if (response.getSuccess() && (response.getFileSize()==null || response.getFileSize()>0)) {
-//					BufferedReader reader;
 					InputStream inputStream;
 					
 				    // If not streaming from local file or if the file is large, don't memory map the file

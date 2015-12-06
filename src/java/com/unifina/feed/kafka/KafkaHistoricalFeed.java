@@ -25,9 +25,15 @@ import com.unifina.utils.MapTraversal;
 public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
+	Properties kafkaProperties;
 	
 	public KafkaHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
+		
+		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(globals.getGrailsApplication().getConfig(), "unifina.kafka"));
+		kafkaProperties = new Properties();
+		for (String s : kafkaConfig.keySet())
+			kafkaProperties.setProperty(s, kafkaConfig.get(s).toString());
 	}
 
 	@Override
@@ -42,7 +48,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	}
 
 	@Override
-	protected Iterator<Object> createContentIterator(FeedFile feedFile, Date day,
+	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
 			InputStream inputStream, IEventRecipient recipient) {
 		try {
 			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
@@ -58,17 +64,32 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 		FeedEventIterator iterator = super.getNextIterator(recipient);
 		
 		Stream stream = getStream(recipient);
-		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream)) {
+		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream)) { //&& globals.time.before(globals.getEndDate())) {
 			kafkaIteratorReturnedForStream.put(stream, true);
 			
-			Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(globals.getGrailsApplication().getConfig(), "unifina.kafka"));
-			Properties properties = new Properties();
-			for (String s : kafkaConfig.keySet())
-				properties.setProperty(s, kafkaConfig.get(s).toString());
-			
 			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
-			Iterator<UnifinaKafkaMessage> kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, 10*1000, properties);
-			iterator = new FeedEventIterator(kafkaIterator, this, recipient);
+			final Iterator<UnifinaKafkaMessage> kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
+			
+			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages, 
+			// so need to wrap it with a parsing iterator
+			iterator = new FeedEventIterator(new Iterator<KafkaMessage>() {
+				private KafkaMessageParser parser = new KafkaMessageParser();
+				
+				@Override
+				public boolean hasNext() {
+					return kafkaIterator.hasNext();
+				}
+
+				@Override
+				public KafkaMessage next() {
+					return parser.parse(kafkaIterator.next());
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			}, this, recipient);
 		}
 		
 		return iterator;

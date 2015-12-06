@@ -11,7 +11,6 @@ import java.util.PriorityQueue;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
-import com.unifina.data.IBacktestFeed;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
@@ -42,10 +41,9 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 		// For each recipient get an input stream and place the first event in a PriorityQueue
 		for (IEventRecipient recipient : eventRecipients) {
 			FeedEventIterator iterator = getNextIterator(recipient);
-			if (iterator!=null) {
+			if (iterator!=null && iterator.hasNext()) {
 				FeedEvent event = iterator.next();
-				if (event!=null)
-					queue.add(event);
+				queue.add(event);
 			}
 		}
 		
@@ -99,7 +97,7 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 			}
 			
 			// If the next stream was found, try to get an event
-			if (iterator!=null)
+			if (iterator!=null && iterator.hasNext())
 				nxt = iterator.next();
 			// If no next stream, the we're done for this stream
 			else break;

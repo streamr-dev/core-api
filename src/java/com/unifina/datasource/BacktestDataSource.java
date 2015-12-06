@@ -2,12 +2,9 @@ package com.unifina.datasource;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import com.unifina.data.BacktestEventQueue;
-import com.unifina.data.IFeed;
-import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
+import com.unifina.feed.AbstractFeed;
 import com.unifina.utils.Globals;
 
 public class BacktestDataSource extends DataSource {
@@ -24,8 +21,8 @@ public class BacktestDataSource extends DataSource {
 	}
 	
 	@Override
-	protected IFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
-		IFeed feed = super.subscribeToFeed(subscriber, feedDomain);
+	protected AbstractFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
+		AbstractFeed feed = super.subscribeToFeed(subscriber, feedDomain);
 		
 		if (eventQueue instanceof BacktestEventQueue)
 			((BacktestEventQueue)eventQueue).addFeed(feed);
@@ -54,7 +51,6 @@ public class BacktestDataSource extends DataSource {
 	protected void doStopFeed() throws Exception {
 		globals.abort = true;
 		eventQueue.abort();
-//		globals.market.disconnect()
 	}
 	
 }
