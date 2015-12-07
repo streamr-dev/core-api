@@ -2,7 +2,7 @@ package com.unifina.service
 
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
-
+import org.apache.commons.collections.Unmodifiable
 import org.apache.log4j.Logger
 
 import com.unifina.domain.security.SecUser
@@ -11,12 +11,14 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
+import org.springframework.validation.FieldError
 
 class UnifinaSecurityService {
-	
+
+	def grailsApplication
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
-	
+
 	/**
 	 * Checks if the given user has access to the given instance.
 	 * If no user is provided, the user identified by api keys or the current logged in user (as returned by springSecurityService.currentUser) is used
@@ -109,6 +111,40 @@ class UnifinaSecurityService {
 		if (command.password != command.password2) {
 			return 'command.password2.error.mismatch'
 		}
+	}
+
+	/**
+	 * Checks if the errors list contains any fields whose values may not be logged
+	 * as plaintext (passwords etc.). The excluded fields are read from
+	 * grails.exceptionresolver.params.exclude config key.
+	 * 
+	 * If any excluded fields are found, their field values are replaced with "***".
+	 * @param errorList
+	 * @return
+	 */
+	List checkErrors(List<FieldError> errorList) {
+		List<String> blackList = (List<String>) grailsApplication.config.grails.exceptionresolver.params.exclude
+		if (blackList == null) {
+			blackList = Collections.emptyList();
+		}
+		List<FieldError> finalErrors = new ArrayList<>()
+		List<FieldError> toBeCensoredList = new ArrayList<>();
+		errorList.each {
+			if(blackList.contains(it.getField()))
+				toBeCensoredList.add(it)
+			else
+				finalErrors.add(it)
+		}
+		toBeCensoredList.each {
+			List arguments = Arrays.asList(it.getArguments())
+			int index = arguments.indexOf(it.getRejectedValue())
+			arguments.set(index, "***")
+			FieldError fieldError = new FieldError(
+					it.getObjectName(), it.getField(), "***", it.isBindingFailure(), it.getCodes(), arguments.toArray(), it.getDefaultMessage()
+			)
+			finalErrors.add(fieldError)
+		}
+		return finalErrors
 	}
 
 }

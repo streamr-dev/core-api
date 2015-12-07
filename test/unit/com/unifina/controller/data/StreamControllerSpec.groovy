@@ -17,18 +17,16 @@ import com.unifina.service.UnifinaSecurityService
 
 @TestFor(StreamController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters])
+@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters, UnifinaSecurityService, StreamService])
 class StreamControllerSpec extends Specification {
 	
 	SecUser user
 	
 	void setup() {
-		defineBeans {
-			unifinaSecurityService(UnifinaSecurityService)
-			streamService(StreamService)
-		}
-		
+		// Mock services or use real ones
+		controller.streamService = grailsApplication.mainContext.getBean("streamService")
 		controller.streamService.kafkaService = Mock(KafkaService)
+		controller.unifinaSecurityService = grailsApplication.mainContext.getBean("unifinaSecurityService")
 		
 		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
 		
@@ -39,16 +37,10 @@ class StreamControllerSpec extends Specification {
 	}
 	
 	private void mockSpringSecurityService(user) {
-		SpringSecurityService springSecurityService = new SpringSecurityService() {
-			@Override
-			def getCurrentUser() {
-				return user
-			}
-			@Override
-			String encodePassword(String pw) {
-				return pw+"-encoded"
-			}
-		}
+		def springSecurityService = [
+			getCurrentUser: {-> user },
+			encodePassword: {String pw-> pw+"-encoded" }
+		] as SpringSecurityService
 		controller.springSecurityService = springSecurityService
 		controller.unifinaSecurityService.springSecurityService = springSecurityService
 	}

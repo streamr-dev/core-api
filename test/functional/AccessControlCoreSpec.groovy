@@ -22,6 +22,14 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 			$('.tt-suggestion').size()==0
 	}
 	
+	def "search won't show other users streams"() {
+		when: "the name of a forbidden stream is entered"
+			search << "AccessControlCoreSpec"
+			Thread.sleep(2000)
+		then: "no search results are displayed"
+			$('.tt-suggestion').size()==0
+	}
+	
 	def "user cannot access admin pages"() {
 		when: "user logins"
 			at CanvasPage

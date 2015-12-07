@@ -37,9 +37,7 @@ if (isOpenId) {
 }
 %>
 
-<s2ui:tabs elementId='tabs' height='375' data="${tabData}">
 
-	<s2ui:tab name='userinfo' height='275'>
 		<table>
 		<tbody>
 
@@ -70,37 +68,32 @@ if (isOpenId) {
             <g:render template="/user/projectExtras" model="[user:user]"/>
 		</tbody>
 		</table>
-	</s2ui:tab>
 
-	<s2ui:tab name='roles' height='275'>
-		<g:each var="entry" in="${roleMap}">
-		<div>
-			<g:checkBox name="${entry.key.authority}" value="${entry.value}"/>
-			<g:link controller='role' action='edit' id='${entry.key.id}'>${entry.key.authority.encodeAsHTML()}</g:link>
-		</div>
+	<h2>Roles</h2>
+		<g:each var="auth" in="${authorityList}">
+			<div>
+				<g:checkBox name="role" value="${auth.authority}" checked="${user.authorities.contains(auth)}" />
+				<g:link controller='role' action='edit' id='${auth.id}'>${auth.authority.encodeAsHTML()}</g:link>
+			</div>
 		</g:each>
-	</s2ui:tab>
 
-	<s2ui:tab name='packages' height='275'>
+	<h2>Module Packages</h2>
 		<g:each var="p" in="${ModulePackage.list()}">
 		<div>
 			<g:checkBox name="modulePackage" value="${p.id}" checked="${user.modulePackages.contains(p)}"/>
 			${p.name.encodeAsHTML()}
 		</div>
 		</g:each>
-	</s2ui:tab>
 
-	<s2ui:tab name='feeds' height='275'>
+	<h2>Feeds</h2>
 		<g:each var="f" in="${Feed.list()}">
 		<div>
 			<g:checkBox name="feed" value="${f.id}" checked="${user.feeds.contains(f)}"/>
 			${f.name?.encodeAsHTML() ?: f.id}
 		</div>
 		</g:each>
-	</s2ui:tab>
 
 	<g:if test='${isOpenId}'>
-	<s2ui:tab name='openIds' height='275'>
 	<g:if test='${user?.openIds}'>
 		<ul>
 		<g:each var="openId" in="${user.openIds}">
@@ -111,17 +104,11 @@ if (isOpenId) {
 	<g:else>
 	No OpenIDs registered
 	</g:else>
-	</s2ui:tab>
 	</g:if>
 
-</s2ui:tabs>
 
 <div style='float:left; margin-top: 10px;'>
 <s2ui:submitButton elementId='update' form='userEditForm' messageCode='default.button.update.label'/>
-
-<g:if test='${user}'>
-<s2ui:deleteButton />
-</g:if>
 
 <g:if test='${canRunAs}'>
 <a id="runAsButton">${message(code:'spring.security.ui.runas.submit')}</a>
@@ -141,19 +128,6 @@ if (isOpenId) {
 		<input type='submit' class='s2ui_hidden_button' />
 	</form>
 </g:if>
-
-<script>
-$(document).ready(function() {
-	$('#username').focus();
-
-	<s2ui:initCheckboxes/>
-
-	$("#runAsButton").button();
-	$('#runAsButton').bind('click', function() {
-	   document.forms.runAsForm.submit();
-	});
-});
-</script>
 
 </body>
 </html>

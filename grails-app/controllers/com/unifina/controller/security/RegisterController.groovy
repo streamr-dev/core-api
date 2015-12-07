@@ -1,22 +1,18 @@
 package com.unifina.controller.security
 
+import com.unifina.domain.security.RegistrationCode
 import grails.util.Environment
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.authentication.dao.NullSaltSource
-import grails.plugin.springsecurity.ui.RegistrationCode
-
+import groovy.text.SimpleTemplateEngine
 import org.apache.log4j.Logger
 
 import com.unifina.user.UserCreationFailedException
-import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 
-class RegisterController extends grails.plugin.springsecurity.ui.RegisterController {
+class RegisterController {
 
     static defaultAction = 'index'
 
@@ -26,6 +22,8 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
     def signupCodeService
     def userService
 
+    def saltSource
+
     def log = Logger.getLogger(RegisterController)
 
     // override to add GET method
@@ -33,6 +31,63 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
 	
     def index() {
         render status: 404
+    }
+
+    def register(RegisterCommand cmd) {
+        def conf = SpringSecurityUtils.securityConfig
+        String defaultTargetUrl = conf.successHandler.defaultTargetUrl
+
+        def invite = SignupInvite.findByCode(cmd.invite)
+        if (!invite || invite.used || !invite.sent) {
+            flash.message = "Sorry, that is not a valid invitation code"
+            if(invite)
+                flash.message+=". Code: $invite.code"
+            redirect action: 'signup'
+            return
+        }
+
+        log.info('Activated invite for '+invite.username+', '+invite.code)
+
+        if (request.method == "GET") {
+            // activated the registration, but not yet submitted it
+            return render(view: 'register', model: [user: [username: invite.username], invite: invite.code])
+        }
+
+        def user
+
+        cmd.username = invite.username
+
+        if (cmd.hasErrors()) {
+            log.warn("Registration command has errors: "+unifinaSecurityService.checkErrors(cmd.errors.getAllErrors()))
+            return render(view: 'register', model: [user: cmd, invite: invite.code])
+        }
+
+        try {
+            user = userService.createUser(cmd.properties)
+        } catch (UserCreationFailedException e) {
+            flash.message = e.getMessage()
+            return render(view: 'register', model: [ user: user, invite: invite.code ])
+        }
+
+        invite.used = true
+        if (!invite.save(flush: true)) {
+            log.warn("Failed to save invite: "+invite.errors)
+            flash.message = "Failed to save invite"
+            return render(view: 'register', model: [ user: user, invite: invite.code ])
+        }
+
+        mailService.sendMail {
+            from grailsApplication.config.unifina.email.sender
+            to user.username
+            subject grailsApplication.config.unifina.email.welcome.subject
+            html g.render(template:"email_welcome", model:[user: user], plugin:'unifina-core')
+        }
+
+        log.info("Logging in "+user.username+" after registering")
+        springSecurityService.reauthenticate(user.username)
+
+        flash.message = "Account created!"
+        redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
     }
 
     def signup(EmailCommand cmd) {
@@ -99,63 +154,6 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
         redirect action: 'list'
     }
 
-    def register(RegisterCommand cmd) {
-        def conf = SpringSecurityUtils.securityConfig
-        String defaultTargetUrl = conf.successHandler.defaultTargetUrl
-
-        def invite = SignupInvite.findByCode(cmd.invite)
-        if (!invite || invite.used || !invite.sent) {
-            flash.message = "Sorry, that is not a valid invitation code"
-            if(invite)
-            flash.message+=". Code: $invite.code"
-            redirect action: 'signup'
-            return
-        }
-
-        log.info('Activated invite for '+invite.username+', '+invite.code)
-
-        if (request.method == "GET") {
-            // activated the registration, but not yet submitted it
-            return render(view: 'register', model: [user: [username: invite.username], invite: invite.code])
-        }
-        
-        def user
-
-        cmd.username = invite.username
-
-        if (cmd.hasErrors()) {
-            log.warn("Registration command has errors: "+cmd.errors)
-            return render(view: 'register', model: [user: cmd, invite: invite.code])
-        }
-
-        try {
-            user = userService.createUser(cmd.properties)
-        } catch (UserCreationFailedException e) {
-            flash.message = e.getMessage()
-            return render(view: 'register', model: [ user: user, invite: invite.code ])
-        }
-
-        invite.used = true
-        if (!invite.save(flush: true)) {
-            log.warn("Failed to save invite: "+invite.errors)
-            flash.message = "Failed to save invite"
-            return render(view: 'register', model: [ user: user, invite: invite.code ])
-        }
-
-        mailService.sendMail {
-            from grailsApplication.config.unifina.email.sender
-            to user.username
-            subject grailsApplication.config.unifina.email.welcome.subject
-            html g.render(template:"email_welcome", model:[user: user], plugin:'unifina-core')
-        }
-
-        log.info("Logging in "+user.username+" after registering")
-        springSecurityService.reauthenticate(user.username)
-
-        flash.message = "Account created!"
-        redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
-    }
-	
     def forgotPassword(EmailCommand cmd) {
         if (request.method != 'POST') {
             return
@@ -222,7 +220,7 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
 
         String salt = saltSource instanceof NullSaltSource ? null : registrationCode.username
         RegistrationCode.withTransaction { status ->
-            user.password = springSecurityUiService.encodePassword(command.password, salt)
+            user.password = springSecurityService.encodePassword(command.password, salt)
             user.save()
             registrationCode.delete()
         }
@@ -242,6 +240,16 @@ class RegisterController extends grails.plugin.springsecurity.ui.RegisterControl
 	
     def privacy() {
         render(template:"privacy_policy", plugin:'unifina-core')
+    }
+
+    protected String generateLink(String action, linkParams) {
+        createLink(base: "$request.scheme://$request.serverName:$request.serverPort$request.contextPath",
+                controller: 'register', action: action,
+                params: linkParams)
+    }
+
+    protected String evaluate(s, binding) {
+        new SimpleTemplateEngine().createTemplate(s).make(binding)
     }
 
 }

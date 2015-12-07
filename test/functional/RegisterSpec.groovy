@@ -32,11 +32,7 @@ class RegisterSpec extends GebReportingSpec {
                 at CanvasPage
 
             when: "search for the user and click it"
-                navbar.navAdminLink.click()
-                $("li a", text:"Users").click()
-                waitFor {
-                    at UserSearchPage
-                }
+                to UserSearchPage
                 assert username.displayed
                 username = emailAddress
                 searchButton.click()
@@ -46,23 +42,15 @@ class RegisterSpec extends GebReportingSpec {
                 searchResult.click()
 
             then: "go to user edit page"
-                waitFor {
-                    at UserEditPage
-                }
+                at UserEditPage
 
             when: "click to delete"
-                deleteButton.click()
-            then: "asks for confirmation"
-                assert confirmationBox.displayed
-
-            when: "confirms"
-                deleteConfirmButton.click()
-            then: "go back to user search page"
-                waitFor {
-                    at UserSearchPage
+                withConfirm(true) {
+                    deleteButton.click()
                 }
-                // A notification is blocking the logout button, the easiest way to get rid of it is to reload the page
-                to UserSearchPage
+
+            then: "goes to search page"
+                at UserSearchPage
 
             when:
                 $("#loginLinkContainer a").click()
