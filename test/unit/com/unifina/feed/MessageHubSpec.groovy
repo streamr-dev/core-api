@@ -36,8 +36,8 @@ class MessageHubSpec extends Specification {
 			1 * source.subscribe("key")
 		
 		when: "hub gets a message"
-			hub.receive(msg)
 			synchronized (hub) {
+				hub.receive(msg)
 				hub.wait(500)
 			}
 		then: "message must be passed on to recipient"
@@ -56,8 +56,8 @@ class MessageHubSpec extends Specification {
 			(1..2) * source.subscribe("key")
 		
 		when: "hub gets a message"
-			hub.receive(msg)
 			synchronized (hub) {
+				hub.receive(msg)
 				hub.wait(500)
 			}
 		then: "message must be passed on to both recipients"
