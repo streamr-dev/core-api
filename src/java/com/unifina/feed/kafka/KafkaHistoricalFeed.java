@@ -2,6 +2,7 @@ package com.unifina.feed.kafka;
 
 import grails.converters.JSON;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -29,7 +30,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	
 	public KafkaHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
-		
+
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(globals.getGrailsApplication().getConfig(), "unifina.kafka"));
 		kafkaProperties = new Properties();
 		for (String s : kafkaConfig.keySet())
@@ -66,33 +67,46 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 		Stream stream = getStream(recipient);
 		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream)) { //&& globals.time.before(globals.getEndDate())) {
 			kafkaIteratorReturnedForStream.put(stream, true);
-			
+
 			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
-			final Iterator<UnifinaKafkaMessage> kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
+			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
 			
 			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages, 
 			// so need to wrap it with a parsing iterator
-			iterator = new FeedEventIterator(new Iterator<KafkaMessage>() {
-				private KafkaMessageParser parser = new KafkaMessageParser();
-				
-				@Override
-				public boolean hasNext() {
-					return kafkaIterator.hasNext();
-				}
-
-				@Override
-				public KafkaMessage next() {
-					return parser.parse(kafkaIterator.next());
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-			}, this, recipient);
+			iterator = new FeedEventIterator(new ParsingKafkaIterator(kafkaIterator), this, recipient);
 		}
 		
 		return iterator;
 	}
-	
+
+	class ParsingKafkaIterator implements Iterator<KafkaMessage>, Closeable {
+
+		KafkaMessageParser parser = new KafkaMessageParser();
+		UnifinaKafkaIterator kafkaIterator;
+
+		public ParsingKafkaIterator(UnifinaKafkaIterator kafkaIterator) {
+			this.kafkaIterator = kafkaIterator;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return kafkaIterator.hasNext();
+		}
+
+		@Override
+		public KafkaMessage next() {
+			return parser.parse(kafkaIterator.next());
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void close() throws IOException {
+			kafkaIterator.close();
+		}
+	}
+
 }

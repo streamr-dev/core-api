@@ -26,7 +26,11 @@ log4j = {
 
     warn   'org.mortbay.log',
 			'org.apache.zookeeper',
-			'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
+			'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
+			'kafka.consumer.ConsumerConfig'
+			'org.apache.kafka.clients.consumer.ConsumerConfig'
+			'kafka.producer.ProducerConfig'
+			'org.apache.kafka.clients.producer.ProducerConfig'
 }
 
 

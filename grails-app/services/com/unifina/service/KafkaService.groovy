@@ -64,23 +64,6 @@ class KafkaService {
 		return zkUtils
 	}
 	
-	/**
-	 * Creates a SimpleConsumer that is only used for sending FetchMetadataRequests
-	 * when topics are created.
-	 * @return
-	 */
-	@CompileStatic
-	private SimpleConsumer getTopicCreateConsumer() {
-		if (topicCreateConsumer==null) {
-			Properties props = getProperties()
-			String[] brokers = props.getProperty("metadata.broker.list").split(",")
-			
-			topicCreateConsumer = new SimpleConsumer(brokers[0].split(":")[0], Integer.parseInt(brokers[0].split(":")[1]), 2000, 1024*1024, "TopicCreateConsumer");
-		}
-		
-		return topicCreateConsumer
-	}
-	
 	@CompileStatic
     void sendMessage(String channelId, Object key, String message, boolean isJson=true) {
 		if (isJson)

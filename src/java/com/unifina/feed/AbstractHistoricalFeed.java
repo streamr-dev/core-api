@@ -82,10 +82,9 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 		
 		// From the same stream, get the next event
 		FeedEventIterator iterator = (FeedEventIterator) event.iterator; // TODO: avoid cast?
-		FeedEvent nxt = iterator.next();
-		
+
 		// No next event, try to get the next stream piece and the next event from there
-		while (nxt==null && started) {
+		while (!iterator.hasNext() && started) {
 			try {
 				// Close the old feed reader
 				if (iterator instanceof Closeable)
@@ -95,17 +94,15 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 			} catch (IOException e) {
 				throw new RuntimeException("IOException thrown while getting next event iterator!");
 			}
-			
-			// If the next stream was found, try to get an event
-			if (iterator!=null && iterator.hasNext())
-				nxt = iterator.next();
-			// If no next stream, the we're done for this stream
-			else break;
+
+			// Break if no more iterators
+			if (iterator==null)
+				break;
 		}
 		
 		// If the next event exists, add it to the queue
-		if (nxt!=null) {
-			queue.add(nxt);
+		if (iterator!=null && iterator.hasNext()) {
+			queue.add(iterator.next());
 		}
 		
 		return event;

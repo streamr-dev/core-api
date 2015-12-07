@@ -1,3 +1,4 @@
+import org.openqa.selenium.Keys
 
 import java.text.SimpleDateFormat
 
@@ -159,25 +160,43 @@ class CanvasSpec extends LoginTester1Spec {
 	}
 	
 	def "running a SignalPath on current day should read from Kafka"() {
-		def myMessage = "hello "+new Date()
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd")
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		Date now = new Date()
+		String sNow = df.format(now)
 		
 		when: "SignalPath is loaded"
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
 			moduleShouldAppearOnCanvas('Table')
-			
+
+		when: "Run options button is clicked"
+			runOptionsButton.click()
+		then: "Speed option must be shown"
+			waitFor { speed.displayed }
+
+		when: "The Full speed option is selected and modal is dismissed"
+			speed.click()
+			speed.find("option").find{ it.value() == "0" }.click()
+			runOptionsModal.find(".btn-primary").click()
+		then: "Modal must disappear"
+			waitFor { !runOptionsModal.displayed }
+
 		when: "data is produced and signalpath is run on current date"
 			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
 			// Procuce to the stream that test-run-canvas reads from
-			kafka.sendJSON("c1_fiG6PTxmtnCYGU-mKuQ", "", System.currentTimeMillis(), '{"myMsg":"'+myMessage+'"}')
-			beginDate = df.format(new Date())
+			kafka.sendJSON("c1_fiG6PTxmtnCYGU-mKuQ", "", now.getTime(), '{"temperature": '+Math.random()+'}')
+			beginDate.click()
+			beginDate = "2015-02-27"
+			beginDate << Keys.TAB
+			endDate.click()
 			endDate = df.format(new Date())
+			endDate << Keys.TAB
 			runButton.click()
-		then: "output should be produced"
+		then: "output should be produced and there should be more rows than what exists for 2015-02-27"
 			waitFor(30) {
-				$('.modulebody .table td', text: myMessage)
+				$('.modulebody .table tr').size() > 554
 			}
+
 	}
 
 }

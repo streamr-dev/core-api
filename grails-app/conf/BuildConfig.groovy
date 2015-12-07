@@ -71,7 +71,7 @@ grails.project.dependency.resolution = {
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
-        compile('com.unifina:kafka-client:0.1.9') {
+        compile('com.unifina:kafka-client:0.1.10') {
             excludes "slf4j-log4j12"
         }
 		

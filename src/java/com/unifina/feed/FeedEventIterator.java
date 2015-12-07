@@ -14,7 +14,7 @@ import com.unifina.data.IEventRecipient;
  * whose content is pulled from a separate content iterator.
  * @author Henri
  */
-public class FeedEventIterator implements Iterator<FeedEvent> {
+public class FeedEventIterator implements Iterator<FeedEvent>, Closeable {
 
 	private Iterator<? extends Object> contentIterator;
 	private IEventRecipient recipient;
@@ -49,7 +49,8 @@ public class FeedEventIterator implements Iterator<FeedEvent> {
 	public void remove() {
 		throw new RuntimeException("Remove operation is not supported!");
 	}
-	
+
+	@Override
 	public void close() {
 		if (contentIterator instanceof Closeable)
 			try {
