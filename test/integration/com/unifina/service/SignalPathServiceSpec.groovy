@@ -8,7 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
-import com.unifina.feed.kafka.fake.FakeMessageSource
+import com.unifina.utils.testutils.FakeMessageSource
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.signalpath.AbstractSignalPathModule
