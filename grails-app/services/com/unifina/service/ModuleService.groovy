@@ -10,7 +10,7 @@ import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 
-class ModuleService implements Serializable {
+class ModuleService {
 
 	@CompileStatic
     public AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {

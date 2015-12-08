@@ -36,8 +36,6 @@ public class SignalPath extends ModuleWithUI {
 	Map representation = null;
 	Map<Integer,AbstractSignalPathModule> modulesByHash = new HashMap<>();
 	
-	ModuleService moduleService = new ModuleService();
-	
 	private boolean root = false;
 	
 	public SignalPath() {
@@ -82,6 +80,8 @@ public class SignalPath extends ModuleWithUI {
 		List<Map> modulesJSON = (List<Map>) iData.get("modules");
 		if (modulesJSON==null)
 			modulesJSON = new ArrayList<>(0);
+
+		ModuleService moduleService = globals.getBean("moduleService");
 		
 		HashMap<Long,Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON))
