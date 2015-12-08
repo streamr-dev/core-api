@@ -103,6 +103,10 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 			} catch (Throwable e) {
 				log.error("Failed to handle message!",e);
 			}
+
+			synchronized (this) {
+				notifyAll();
+			}
 		}
 	}
 
