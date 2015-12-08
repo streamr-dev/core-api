@@ -1,9 +1,10 @@
 package com.unifina.math;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Sum implements IWindowedOperation {
+public class Sum implements IWindowedOperation, Serializable {
 
 	int length;
 	double sum = 0;

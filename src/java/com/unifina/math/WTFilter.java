@@ -1,12 +1,14 @@
 package com.unifina.math;
 
+import java.io.Serializable;
+
 /**
  * Contains information for various wavelet filters.
  * Coefficients from http://www.musicdsp.org/showone.php?id=20
  * @author Henri
  */
-public class WTFilter {
-	
+public class WTFilter implements Serializable {
+
 	double[] h;
 	double[] g;
 	int length;

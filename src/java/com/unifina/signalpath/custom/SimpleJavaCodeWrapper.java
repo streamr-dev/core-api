@@ -3,12 +3,12 @@ package com.unifina.signalpath.custom;
 public class SimpleJavaCodeWrapper extends AbstractJavaCodeWrapper {
 	
 /*
-public class [[CLASSNAME]] extends DebugAwareModule {
+public class [[CLASSNAME]] extends AbstractCustomModule {
  */
 	
 	@Override
 	protected String getHeader() {
-		return "public class [[CLASSNAME]] extends DebugAwareModule {\n" +
+		return "public class [[CLASSNAME]] extends AbstractCustomModule {\n" +
 				"public [[CLASSNAME]]() { super(); }\n";
 	}
 

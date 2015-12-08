@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import org.apache.log4j.Logger;
 import com.unifina.signalpath.charts.TimeSeriesChart;
 
 @SuppressWarnings("rawtypes")
-public class Propagator {
+public class Propagator implements Serializable {
 	Set<Input> reachable;
 	
 	Set<AbstractSignalPathModule> originSet = new HashSet<>();

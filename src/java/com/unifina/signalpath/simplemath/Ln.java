@@ -23,8 +23,6 @@ public class Ln extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {
-		// TODO Auto-generated method stub
-
 	}
 
 }

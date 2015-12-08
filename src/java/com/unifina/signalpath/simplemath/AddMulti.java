@@ -9,7 +9,7 @@ import com.unifina.signalpath.TimeSeriesOutput;
 
 public class AddMulti extends AbstractSignalPathModule {
 
-	int inputCount = 2;
+	int multiInputCount = 2;
 	TimeSeriesInput[] inputArr = new TimeSeriesInput[0];
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"sum");
 	
@@ -36,7 +36,7 @@ public class AddMulti extends AbstractSignalPathModule {
 		Map<String,Object> optionsMap = new HashMap<>();
 		
 		Map<String,Object> inputsMap = new HashMap<>();
-		inputsMap.put("value", inputCount);
+		inputsMap.put("value", multiInputCount);
 		inputsMap.put("type", "int");
 		optionsMap.put("inputs", inputsMap);
 		
@@ -51,11 +51,11 @@ public class AddMulti extends AbstractSignalPathModule {
 		Map options = (Map) config.get("options");
 		
 		if (options!=null) {
-			inputCount = (int) ((Map)options.get("inputs")).get("value");
+			multiInputCount = (int) ((Map)options.get("inputs")).get("value");
 		}
 		
-		inputArr = new TimeSeriesInput[inputCount];
-		for (int p=1;p<=inputCount;p++) {
+		inputArr = new TimeSeriesInput[multiInputCount];
+		for (int p=1;p<= multiInputCount;p++) {
 			TimeSeriesInput input = new TimeSeriesInput(this,"in"+p);
 			addInput(input);
 			inputArr[p-1] = input;

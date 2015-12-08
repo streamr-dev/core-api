@@ -31,7 +31,7 @@ import com.unifina.signalpath.TimeSeriesOutput;
 public class ConfigurableStreamModule extends AbstractSignalPathModule implements IStreamRequirement {
 
 	protected StreamParameter streamParameter = new StreamParameter(this,"stream");
-	protected JSONObject streamConfig = null;
+	transient protected JSONObject streamConfig = null;
 	
 	@Override
 	public void init() {

@@ -2,7 +2,7 @@ package com.unifina.domain.data
 
 import com.unifina.domain.signalpath.Module;
 
-class Feed {
+class Feed implements Serializable {
 
 	Long id
 	String name

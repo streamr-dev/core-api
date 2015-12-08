@@ -17,7 +17,6 @@ public class Gauge extends ModuleWithUI {
 	TimeSeriesInput value = new TimeSeriesInput(this,"value");
 	
 	boolean initSent = false;
-	PushChannel rc = null;
 	
 	String title = "";
 	String titleStyle = "";
@@ -31,39 +30,30 @@ public class Gauge extends ModuleWithUI {
 		addInput(max);
 		addInput(value);
 	}
-
-	@Override
-	public void initialize() {
-		super.initialize();
-		if (globals!=null && globals.getUiChannel()!=null)
-			rc = globals.getUiChannel();
-	}
 	
 	@Override
 	public void sendOutput() {
-		if (rc!=null) {
-			if (!initSent) {
-				HashMap<String,Object> msg = new HashMap<>();
-				msg.put("type", "init");
-				msg.put("v",value.value);
-				msg.put("min", min.getValue());
-				msg.put("max", max.getValue());
-				msg.put("title", title);
-				rc.push(msg, uiChannelId);
-				initSent = true;
-			}
-			else {
-				HashMap<String,Object> msg = new HashMap<>();
-				msg.put("type", "u");
-				msg.put("v",value.value);
-				rc.push(msg, uiChannelId);
-			}
+		HashMap<String, Object> msg = new HashMap<>();
+		if (!initSent) {
+			msg.put("type", "init");
+			msg.put("v",value.value);
+			msg.put("min", min.getValue());
+			msg.put("max", max.getValue());
+			msg.put("title", title);
+			initSent = true;
+		} else {
+			msg.put("type", "u");
+			msg.put("v",value.value);
+		}
+
+		if (globals != null && globals.getUiChannel() != null) {
+			globals.getUiChannel().push(msg, uiChannelId);
 		}
 	}
 
 	@Override
 	public void clearState() {
-		
+		initSent = false;
 	}
 	
 	@Override
