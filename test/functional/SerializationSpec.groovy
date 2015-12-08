@@ -9,6 +9,7 @@ import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.pages.LiveShowPage
 import grails.test.mixin.TestFor
+import grails.util.Holders
 import spock.lang.Shared
 
 @Mixin(CanvasMixin)
@@ -28,9 +29,7 @@ class SerializationSpec extends LoginTester1Spec {
 		SerializationSpec.metaClass.mixin(CanvasMixin)
 		SerializationSpec.metaClass.mixin(ConfirmationMixin)
 
-		serializationIntervalInMillis =
-			GlobalsFactory.createInstance([:], grailsApplication)
-				.getBean(SerializationService).serializationIntervalInMillis()
+		serializationIntervalInMillis = MapTraversal.getLong(Holders.config, SerializationService.INTERVAL_CONFIG_KEY)
 	}
 
 	def cleanupSpec() {

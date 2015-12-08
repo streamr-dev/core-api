@@ -8,6 +8,8 @@ import org.springframework.util.Assert
 
 class SerializationService {
 
+	final static String INTERVAL_CONFIG_KEY = "unifina.serialization.intervalInMillis"
+
 	def grailsApplication
 	def serializer = new SerializerImpl()
 
@@ -29,9 +31,8 @@ class SerializationService {
 	}
 
 	public Long serializationIntervalInMillis() {
-		String key = "unifina.serialization.intervalInMillis";
-		Long v = MapTraversal.getLong(grailsApplication.getConfig(), key);
-		Assert.notNull(v, "Missing key \"" + key + "\" from grailsApplication configuration");
+		Long v = MapTraversal.getLong(grailsApplication.getConfig(), INTERVAL_CONFIG_KEY);
+		Assert.notNull(v, "Missing key \"" + INTERVAL_CONFIG_KEY + "\" from grailsApplication configuration");
 		return v;
 	}
 }
