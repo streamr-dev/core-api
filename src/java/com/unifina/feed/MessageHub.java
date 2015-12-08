@@ -100,7 +100,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 						p.receive(parsedMessage);
 					}
 				}
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				log.error("Failed to handle message!",e);
 			}
 		}
