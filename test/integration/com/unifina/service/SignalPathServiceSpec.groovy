@@ -112,8 +112,6 @@ class SignalPathServiceSpec extends IntegrationSpec {
 			}
 		}
 
-		sleep(serializationService.serializationIntervalInMillis() + 100)
-
 		// Collect values of outputs
 		def actual = modules(rsp).collect {
 			def h = [:]
