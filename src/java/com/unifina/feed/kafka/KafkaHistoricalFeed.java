@@ -65,7 +65,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 		FeedEventIterator iterator = super.getNextIterator(recipient);
 		
 		Stream stream = getStream(recipient);
-		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream)) { //&& globals.time.before(globals.getEndDate())) {
+		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && globals.time.before(globals.getEndDate())) {
 			kafkaIteratorReturnedForStream.put(stream, true);
 
 			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
