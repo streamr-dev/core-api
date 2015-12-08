@@ -94,7 +94,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 			synchronized (messageHandledMonitor) {
 				// Produce message to kafka
 				kafkaService.sendMessage(stream, stream.uuid, [a: i, b: i * 2.5, c: i % 3 == 0])
-				messageHandledMonitor.wait(10000)
+				messageHandledMonitor.wait()
 			}
 
 			// Log states of modules' outputs
@@ -104,8 +104,9 @@ class SignalPathServiceSpec extends IntegrationSpec {
 			if (i != 0 && i % 25 == 0) {
 				def serializationMonitor = globals.dataSource.getEventProcessedMonitor(SignalPath)
 				synchronized (serializationMonitor) {
-					serializationMonitor.wait(10000)
+					serializationMonitor.wait()
 				}
+				sleep(500)
 				signalPathService.stopLocal(rsp)
 				signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
 				globals = kafkaService.globals = getGlobalsFrom(rsp)
