@@ -7,7 +7,7 @@ import com.unifina.signalpath.SignalPath
 public class SerializationRequest {
 
 	public void serialize(SignalPath sp) {
-		SignalPathService service = sp.globals.getBean("signalPathService")
+		SignalPathService service = sp.globals.getBean(SignalPathService)
 		service.saveState(sp)
 	}
 

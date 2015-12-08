@@ -81,7 +81,7 @@ public class SignalPath extends ModuleWithUI {
 		if (modulesJSON==null)
 			modulesJSON = new ArrayList<>(0);
 
-		ModuleService moduleService = globals.getBean("moduleService");
+		ModuleService moduleService = globals.getBean(ModuleService.class);
 		
 		HashMap<Long,Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON))

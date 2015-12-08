@@ -261,6 +261,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	private SerializationService serializationService() {
-		return globals.getSerializationService();
+		return globals.getBean(SerializationService.class);
 	}
 }

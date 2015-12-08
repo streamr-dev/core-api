@@ -226,12 +226,8 @@ public class Globals {
 		this.grailsApplication = grailsApplication;
 	}
 
-	public SerializationService getSerializationService() {
-		return getBean("serializationService"); // TODO: refactor out
-	}
-
-	public <T> T getBean(String beanName) {
-		return (T) grailsApplication.getMainContext().getBean(beanName);
+	public <T> T getBean(Class<T> requiredType) {
+		return grailsApplication.getMainContext().getBean(requiredType);
 	}
 
 	public Long serializationIntervalInMillis() {
