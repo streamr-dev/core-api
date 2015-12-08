@@ -103,6 +103,8 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			// Catch any Exception to prevent crashing the whole thing
 			log.error("Exception while processing event!",e);
 			return true;
+		} finally {
+			eventProcessed(event);
 		}
 	}
 	
