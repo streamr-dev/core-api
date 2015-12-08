@@ -96,7 +96,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 
 			// On every 25th message stop and start running signal path
 			if (i % 25 == 0) {
-				sleep(globals.serializationIntervalInMillis() + 5000)
+				sleep(serializationService.serializationIntervalInMillis() + 5000)
 				signalPathService.stopLocal(rsp)
 				signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
 			} else {
@@ -104,7 +104,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 			}
 		}
 
-		sleep(globals.serializationIntervalInMillis() + 5000)
+		sleep(serializationService.serializationIntervalInMillis() + 5000)
 
 		// Collect values of outputs
 		def actual = modules(rsp).collect {

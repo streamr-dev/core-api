@@ -3,9 +3,12 @@ package com.unifina.service
 import com.unifina.serialization.SerializationException
 import com.unifina.serialization.SerializerImpl
 import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.utils.MapTraversal
+import org.springframework.util.Assert
 
 class SerializationService {
 
+	def grailsApplication
 	def serializer = new SerializerImpl()
 
 	String serialize(AbstractSignalPathModule module) throws SerializationException {
@@ -23,5 +26,12 @@ class SerializationService {
 		AbstractSignalPathModule module = new SerializerImpl(classLoader).deserializeFromString(data)
 		module.afterDeserialization()
 		return module
+	}
+
+	public Long serializationIntervalInMillis() {
+		String key = "unifina.serialization.intervalInMillis";
+		Long v = MapTraversal.getLong(grailsApplication.getConfig(), key);
+		Assert.notNull(v, "Missing key \"" + key + "\" from grailsApplication configuration");
+		return v;
 	}
 }

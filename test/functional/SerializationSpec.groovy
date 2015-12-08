@@ -1,6 +1,7 @@
 import com.unifina.controller.core.signalpath.LiveController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.service.BootService
+import com.unifina.service.SerializationService
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
@@ -28,7 +29,8 @@ class SerializationSpec extends LoginTester1Spec {
 		SerializationSpec.metaClass.mixin(ConfirmationMixin)
 
 		serializationIntervalInMillis =
-			GlobalsFactory.createInstance([:], grailsApplication).serializationIntervalInMillis()
+			GlobalsFactory.createInstance([:], grailsApplication)
+				.getBean(SerializationService).serializationIntervalInMillis()
 	}
 
 	def cleanupSpec() {

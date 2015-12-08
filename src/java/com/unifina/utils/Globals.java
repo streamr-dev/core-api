@@ -229,11 +229,4 @@ public class Globals {
 	public <T> T getBean(Class<T> requiredType) {
 		return grailsApplication.getMainContext().getBean(requiredType);
 	}
-
-	public Long serializationIntervalInMillis() {
-		String key = "unifina.serialization.intervalInMillis";
-		Long v = MapTraversal.getLong(getGrailsApplication().getConfig(), key);
-		Assert.notNull(v, "Missing key \"" + key + "\" from grailsApplication configuration");
-		return v;
-	}
 }
