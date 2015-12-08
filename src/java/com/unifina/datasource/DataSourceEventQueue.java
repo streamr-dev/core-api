@@ -33,9 +33,6 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	private int dlCount;
 //	private int tlCount;
 	private int i;
-
-	private boolean enableMonitors = false;
-	private final ConcurrentHashMap<Class<?>, Object> eventProcessedMonitors = new ConcurrentHashMap<>();
 	
 	/**
 	 * Must be set to true if events are enqueued from multiple threads
@@ -119,27 +116,6 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 			masterClock.receive(timeEvent);
 		}
 	}
-
-	protected final void eventProcessed(FeedEvent event) {
-		if (!enableMonitors || event.recipient == null) {
-			return;
-		}
-
-		final Object monitor = getEventProcessedMonitor(event.recipient.getClass());
-		synchronized (monitor) {
-			monitor.notifyAll();
-		}
-
-	}
-
-	protected final Object getEventProcessedMonitor(Class clazz) {
-		if (enableMonitors) {
-			eventProcessedMonitors.putIfAbsent(clazz, new Object());
-			return eventProcessedMonitors.get(clazz);
-		} else {
-			return null;
-		}
-	}
 	
 	@Override
 	public void enqueue(FeedEvent event) {
@@ -184,9 +160,5 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	
 	public FeedEvent poll() {
 		return queue.poll();
-	}
-
-	public void enableMonitors() {
-		enableMonitors = true;
 	}
 }

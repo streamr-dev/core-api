@@ -179,15 +179,4 @@ public abstract class DataSource {
 	protected Iterable<SignalPath> getSignalPaths() {
 		return signalPaths;
 	}
-
-	/**
-	 * Monitor to wait() on until next event processed by eventQueue.
-	 */
-	public final Object getEventProcessedMonitor(Class clazz) {
-		return eventQueue.getEventProcessedMonitor(clazz);
-	}
-
-	public void enableMonitors() {
-		eventQueue.enableMonitors();
-	}
 }

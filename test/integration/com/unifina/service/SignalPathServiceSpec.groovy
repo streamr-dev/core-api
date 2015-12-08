@@ -8,16 +8,13 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
-import com.unifina.feed.map.MapMessageEventRecipient
-import com.unifina.signalpath.utils.ConfigurableStreamModule
-import com.unifina.utils.testutils.FakeMessageSource
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.testutils.FakeMessageSource
 import grails.converters.JSON
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
@@ -88,28 +85,20 @@ class SignalPathServiceSpec extends IntegrationSpec {
 
 		when: "running signal path and abruptly stopping and restarting"
 		for (int i = 0; i < 100; ++i) {
-			globals.dataSource.enableMonitors()
+			// Produce message to kafka
+			kafkaService.sendMessage(stream, stream.uuid, [a: i, b: i * 2.5, c: i % 3 == 0])
 
-			def messageHandledMonitor = globals.dataSource.getEventProcessedMonitor(MapMessageEventRecipient)
-			synchronized (messageHandledMonitor) {
-				// Produce message to kafka
-				kafkaService.sendMessage(stream, stream.uuid, [a: i, b: i * 2.5, c: i % 3 == 0])
-				messageHandledMonitor.wait()
-			}
+			sleep(1000)
 
 			// Log states of modules' outputs
 			log.info(modules(rsp).collect { it.outputs.toString() }.join(" "))
 
 			// On every 25th message stop and start running signal path
 			if (i != 0 && i % 25 == 0) {
-				def serializationMonitor = globals.dataSource.getEventProcessedMonitor(SignalPath)
-				synchronized (serializationMonitor) {
-					serializationMonitor.wait()
-				}
-				sleep(500)
 				signalPathService.stopLocal(rsp)
 				signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
 				globals = kafkaService.globals = getGlobalsFrom(rsp)
+				sleep(1000)
 			}
 		}
 

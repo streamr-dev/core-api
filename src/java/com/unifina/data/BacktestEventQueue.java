@@ -133,7 +133,6 @@ public class BacktestEventQueue extends DataSourceEventQueue {
 			long startTime = System.nanoTime();
 			
 			boolean processed = process(event);
-			eventProcessed(event);
 			
 			timeSpentProcessing += System.nanoTime() - startTime;
 			eventCounter++;
