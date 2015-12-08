@@ -201,6 +201,18 @@ class CSVImporterSpec extends Specification {
 		schema.entries[1].type == "number"
 		schema.entries[2].type == "timestamp"
 	}
-	
+
+	void "should not fail with invalid number of columns on row"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/invalid-number-of-columns.csv").toURI()).toFile()
+
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+
+		then: "schema contains all entries, but two of them are null (undetected)"
+		schema.entries.length == 21
+		schema.entries.findAll {it==null}.size() == 2
+	}
 	
 }

@@ -1,15 +1,10 @@
 package com.unifina.signalpath
 
-import grails.util.GrailsUtil
-
-import javax.servlet.ServletContext
-
-import org.apache.log4j.Logger
-
 import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
-
+import grails.util.GrailsUtil
+import org.apache.log4j.Logger
 
 /**
  * A Thread that instantiates and runs a list of SignalPaths.
@@ -17,37 +12,30 @@ import com.unifina.utils.Globals
  * servletContext["signalPathRunners"] map.
  */
 public class SignalPathRunner extends Thread {
-	
-	private List<Map> signalPathData
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
 	private boolean deleteOnStop
 	
 	String runnerId
 	
 	Globals globals
-	
-	ServletContext servletContext
+
 	SignalPathService signalPathService
 	
 	// Have the SignalPaths been instantiated?
 	boolean running = false
 	
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
-	
-	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
+
+	private List<Runnable> startListeners = []
+	private List<Runnable> stopListeners = []
+
+	private SignalPathRunner(Globals globals, boolean deleteOnStop) {
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
-		this.servletContext = globals.grailsApplication.mainContext.getBean("servletContext")
-		this.signalPathData = signalPathData
 		this.deleteOnStop = deleteOnStop
-		
+
 		runnerId = "s-"+new Date().getTime()
-		
-		if (!servletContext["signalPathRunners"])
-			servletContext["signalPathRunners"] = [:]
-			
-		servletContext["signalPathRunners"].put(runnerId,this)
-		
+
 		/**
 		 * Instantiate the SignalPaths
 		 */
@@ -57,12 +45,25 @@ public class SignalPathRunner extends Thread {
 		if (globals.signalPathContext.csv) {
 			globals.signalPathContext.speed = 0
 		}
+	}
+
+	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
+		this(globals, deleteOnStop)
 
 		// Instantiate SignalPaths from JSON
 		for (int i=0;i<signalPathData.size();i++) {
 			SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,true)
 			signalPaths.add(signalPath)
 		}
+	}
+
+	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean deleteOnStop = true) {
+		this(globals, deleteOnStop)
+		signalPath.globals = globals
+		for (AbstractSignalPathModule module : signalPath.getModules()) {
+			module.globals = globals
+		}
+		signalPaths.add(signalPath)
 	}
 	
 	public List<SignalPath> getSignalPaths() {
@@ -87,7 +88,15 @@ public class SignalPathRunner extends Thread {
 	public synchronized boolean getRunning() {
 		return running
 	}
-	
+
+	public void addStartListener(Runnable r) {
+		startListeners << r
+	}
+
+	public void addStopListener(Runnable r) {
+		stopListeners << r
+	}
+
 	public synchronized void waitRunning(boolean target=true) {
 		int i = 0
 		while (getRunning() != target && i++<60)
@@ -96,6 +105,9 @@ public class SignalPathRunner extends Thread {
 	
 	@Override
 	public void run() {
+		startListeners.each {
+			it.run()
+		}
 		Throwable reportException = null
 		setName("SignalPathRunner");
 		
@@ -148,7 +160,9 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	public void destroy() {
-		servletContext["signalPathRunners"].remove(runnerId)
+		stopListeners.each {
+			it.run()
+		}
 		signalPaths.each {it.destroy()}
 		globals.destroy()
 		

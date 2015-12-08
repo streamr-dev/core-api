@@ -3,7 +3,6 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	var pub = SignalPath.GenericModule(data,canvas,prot)
 
 	var area = null;
-	var options = {};
 	var headers = [];
 	
 	/**
@@ -17,7 +16,14 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	prot.createDiv = createDiv;
 
 	function initTable(){
-		prot.table = new StreamrTable(prot.body, options)
+		var tableOptions = {}
+		if (prot.jsonData.options) {
+			Object.keys(prot.jsonData.options).forEach(function(key) {
+				tableOptions[key] = prot.jsonData.options[key].value
+			})
+		}
+		
+		prot.table = new StreamrTable(prot.body, tableOptions)
 		if (prot.jsonData.options && prot.jsonData.options.maxRows)
 			options = prot.jsonData.options
 

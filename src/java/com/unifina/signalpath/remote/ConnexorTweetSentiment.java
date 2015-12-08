@@ -1,5 +1,6 @@
 package com.unifina.signalpath.remote;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.log4j.Logger;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -23,6 +24,12 @@ public class ConnexorTweetSentiment extends AbstractSignalPathModule {
 	private static final String tweetApiUrl = connexorRoot + "/tweet/";
 	private static final Pattern sentimentRe = Pattern.compile(".*<sentiment> (.*) </sentiment>.*", Pattern.MULTILINE | Pattern.DOTALL);
 
+	@Override
+	public void init() {
+		addInput(tweet);
+		addOutput(out);
+	}
+
 	public void initialize() {
 		String email = "nikke.nylund@unifina.com";
 		String password = "xahtiGhahc8h";
@@ -30,11 +37,7 @@ public class ConnexorTweetSentiment extends AbstractSignalPathModule {
 		String url = connexorRoot + "/login";
 
 		try {
-			String resp = Unirest.post(url)
-				.field("Email", email)
-				.field("Password", password)
-				.asString()
-				.getBody();
+			String resp = login(email, password, url);
 
 			Pattern p = Pattern.compile(".*session key=\"(.*)\".*", Pattern.MULTILINE | Pattern.DOTALL);
 			Matcher m = p.matcher(resp);
@@ -53,11 +56,7 @@ public class ConnexorTweetSentiment extends AbstractSignalPathModule {
 		String twit = tweet.getValue();
 
 		try {
-			String resp = Unirest.post(tweetApiUrl)
-				.field("tweet1", twit)
-				.field("AuthKey", authKey)
-				.asString()
-				.getBody();
+			String resp = postTweet(twit);
 
 			Matcher m = sentimentRe.matcher(resp);
 
@@ -91,5 +90,20 @@ public class ConnexorTweetSentiment extends AbstractSignalPathModule {
 			out.send(0);
 		}
 	}
-	
+
+	protected String login(String email, String password, String url) throws UnirestException {
+		return Unirest.post(url)
+				.field("Email", email)
+				.field("Password", password)
+				.asString()
+				.getBody();
+	}
+
+	protected String postTweet(String tweet) throws UnirestException {
+		return Unirest.post(tweetApiUrl)
+				.field("tweet1", tweet)
+				.field("AuthKey", authKey)
+				.asString()
+				.getBody();
+	}
 }

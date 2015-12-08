@@ -1,5 +1,6 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.serialization.SerializationException
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -196,8 +197,18 @@ class LiveController {
 	@Secured("ROLE_USER")
 	def start() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		signalPathService.startLocal(rsp, [live:true])
-		flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
+		if (params.clear) {
+			signalPathService.clearState(rsp)
+		}
+
+		try {
+			signalPathService.startLocal(rsp, [live: true])
+			flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
+		} catch (SerializationException ex) {
+			flash.error = message(code: "runningSignalPath.deserialization.error", args:[rsp.name])
+			log.error("failed to resume runningSignalPath", ex)
+		}
+
 		redirect(action:"show", id:rsp.id)
 	}
 	

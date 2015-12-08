@@ -79,7 +79,7 @@
 						window.location = redirects[0]
 					else if(errorMessages.length) {
 						errorMessages.forEach(function (msg) {
-							Streamr.showError(msg)
+							Streamr.showError(msg.error)
 						})
 						errorMessages = []
 					} else

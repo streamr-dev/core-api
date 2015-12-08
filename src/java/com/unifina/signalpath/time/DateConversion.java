@@ -33,8 +33,8 @@ public class DateConversion extends AbstractSignalPathModule {
 	TimeSeriesOutput msOut = new TimeSeriesOutput(this, "milliseconds");
 
 	Date date = null;
-	Calendar cal = null;
-	SimpleDateFormat df = null;
+	transient Calendar cal = null;
+	transient SimpleDateFormat df = null;
 	
 	@Override
 	public void init() {
@@ -52,13 +52,10 @@ public class DateConversion extends AbstractSignalPathModule {
 		addOutput(minutesOut);
 		addOutput(secondsOut);
 		addOutput(msOut);
-		
-		cal = Calendar.getInstance();
-		df = new SimpleDateFormat();
-		cal.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
-		df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+
+		ensureState();
 	}
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
@@ -67,10 +64,11 @@ public class DateConversion extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
+		ensureState();
 		if(pattern.getValue() != null && !df.toPattern().equals(pattern.getValue())){
 			df.applyPattern(pattern.getValue());
 		}
-		
+
 		if(dateIn.getValue() instanceof Double){
 			date = new Date(Math.round((double)dateIn.getValue()));
 		} else if(dateIn.getValue() instanceof Date){
@@ -85,7 +83,7 @@ public class DateConversion extends AbstractSignalPathModule {
 		cal.setTime(date);
 		if(tz.getValue() != null)
 			cal.setTimeZone(TimeZone.getTimeZone(tz.getValue()));
-		
+
 		tsOut.send((double)date.getTime());
 		wdOut.send(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
 		yearsOut.send(cal.get(Calendar.YEAR));
@@ -95,12 +93,24 @@ public class DateConversion extends AbstractSignalPathModule {
 		minutesOut.send(cal.get(Calendar.MINUTE));
 		secondsOut.send(cal.get(Calendar.SECOND));
 		msOut.send(cal.get(Calendar.MILLISECOND));
-		
+
 		if(dateOut.isConnected()){
 			dateOut.send(df.format(date));
 		}
 	}
-	
+
+	private void ensureState() {
+		if (cal == null) {
+			cal = Calendar.getInstance();
+			cal.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+		}
+
+		if (df == null) {
+			df = new SimpleDateFormat();
+			df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+		}
+	}
+
 	@Override
 	public void clearState() {
 		df = null;

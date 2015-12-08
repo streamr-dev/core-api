@@ -36,7 +36,7 @@ public class SimpleMovingAverageEvents extends AbstractSignalPathModule {
 			ma.setLength(length.getValue());
 			
 		ma.add(input.value);
-		if (ma.size()>=minSamples.value)
+		if (ma.size()>=minSamples.getValue())
 			out.send(ma.getValue());
 	}
 	

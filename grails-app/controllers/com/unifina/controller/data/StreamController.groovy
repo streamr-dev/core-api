@@ -221,11 +221,11 @@ class StreamController {
 				render ([success:true] as JSON)
 			}
 		} catch (Exception e) {
-				flash.error = "An error occurred while handling file: $e"
+				log.error("Failed to import file", e)
 				response.status = 500
-				render ([success:false, error: e.toString()] as JSON)
+				render ([success:false, error: e.message] as JSON)
 		} finally {
-			if (deleteFile && temp.exists())
+			if (deleteFile && temp!=null && temp.exists())
 				temp.delete()
 		}
 	}
@@ -270,20 +270,20 @@ class StreamController {
 		
 		// Autocreate the stream config based on fields in the csv schema
 		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
-		if (!config.fields || config.fields.isEmpty()) {
-			List fields = []
-			
-			// The primary timestamp column is implicit, so don't include it in streamConfig
-			for (int i=0;i<csv.schema.entries.length;i++) {
-				if (i!=csv.getSchema().timestampColumnIndex) {
-					CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
+
+		List fields = []
+
+		// The primary timestamp column is implicit, so don't include it in streamConfig
+		for (int i=0;i<csv.schema.entries.length;i++) {
+			if (i!=csv.getSchema().timestampColumnIndex) {
+				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
+				if (e!=null)
 					fields << [name:e.name, type:e.type]
-				}
 			}
-			
-			config.fields = fields
-			stream.streamConfig = (config as JSON)
 		}
+
+		config.fields = fields
+		stream.streamConfig = (config as JSON)
 	}
 	
 	def deleteFeedFilesUpTo() {

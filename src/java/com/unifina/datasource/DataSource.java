@@ -1,9 +1,6 @@
 package com.unifina.datasource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 
@@ -24,6 +21,8 @@ import com.unifina.utils.Globals;
  * @author Henri
  */
 public abstract class DataSource {
+
+	private Set<SignalPath> signalPaths = new HashSet<>();
 	
 //	public static long eventStartNanos;
 	
@@ -170,11 +169,14 @@ public abstract class DataSource {
 	 * @param sp
 	 */
 	public void connectSignalPath(SignalPath sp) {
-//		signalPaths << sp
+		signalPaths.add(sp);
 		for (AbstractSignalPathModule it : sp.getModules()) {
 			if (canRegister(it))
 				register(it);
 		}
 	}
-	
+
+	protected Iterable<SignalPath> getSignalPaths() {
+		return signalPaths;
+	}
 }
