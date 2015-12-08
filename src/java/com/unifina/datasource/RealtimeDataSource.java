@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.unifina.serialization.SerializationRequest;
+import com.unifina.signalpath.SignalPath;
 import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
 
@@ -90,14 +91,16 @@ public class RealtimeDataSource extends DataSource {
 					1000);   // Repeat every second
 
 			// Serialization
-			secTimer.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					eventQueue.enqueue(SerializationRequest.makeFeedEvent(getSignalPath()));
+			for (final SignalPath signalPath : getSignalPaths()) {
+				Date nextEvenSecond = new Date(now.getTime() + (1000 - (now.getTime()%1000)));
 
-				}
-			}, new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
-					globals.serializationIntervalInMillis());
+				secTimer.scheduleAtFixedRate(new TimerTask() {
+					@Override
+					public void run() {
+						eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+					}
+				}, nextEvenSecond, globals.serializationIntervalInMillis());
+			}
 
 
 			// This will block indefinitely until the feed is stopped!
