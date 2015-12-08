@@ -1,6 +1,7 @@
 import com.unifina.controller.core.signalpath.LiveController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.service.BootService
+import com.unifina.service.SerializationService
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
@@ -8,6 +9,7 @@ import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.pages.LiveShowPage
 import grails.test.mixin.TestFor
+import grails.util.Holders
 import spock.lang.Shared
 
 @Mixin(CanvasMixin)
@@ -27,8 +29,7 @@ class SerializationSpec extends LoginTester1Spec {
 		SerializationSpec.metaClass.mixin(CanvasMixin)
 		SerializationSpec.metaClass.mixin(ConfirmationMixin)
 
-		serializationIntervalInMillis =
-			GlobalsFactory.createInstance([:], grailsApplication).serializationIntervalInMillis()
+		serializationIntervalInMillis = MapTraversal.getLong(Holders.config, SerializationService.INTERVAL_CONFIG_KEY)
 	}
 
 	def cleanupSpec() {

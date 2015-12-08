@@ -1,4 +1,4 @@
-package com.unifina.feed.kafka.fake;
+package com.unifina.utils.testutils;
 
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.Message;

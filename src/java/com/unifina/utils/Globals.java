@@ -226,18 +226,7 @@ public class Globals {
 		this.grailsApplication = grailsApplication;
 	}
 
-	public SerializationService getSerializationService() {
-		return getBean("serializationService"); // TODO: refactor out
-	}
-
-	public <T> T getBean(String beanName) {
-		return (T) grailsApplication.getMainContext().getBean(beanName);
-	}
-
-	public Long serializationIntervalInMillis() {
-		String key = "unifina.serialization.intervalInMillis";
-		Long v = MapTraversal.getLong(getGrailsApplication().getConfig(), key);
-		Assert.notNull(v, "Missing key \"" + key + "\" from grailsApplication configuration");
-		return v;
+	public <T> T getBean(Class<T> requiredType) {
+		return grailsApplication.getMainContext().getBean(requiredType);
 	}
 }

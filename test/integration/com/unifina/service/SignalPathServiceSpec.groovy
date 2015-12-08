@@ -8,7 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
-import com.unifina.feed.kafka.fake.FakeMessageSource
+import com.unifina.utils.testutils.FakeMessageSource
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.signalpath.AbstractSignalPathModule
@@ -95,16 +95,14 @@ class SignalPathServiceSpec extends IntegrationSpec {
 			log.info(modules(rsp).collect { it.outputs.toString() }.join(" "))
 
 			// On every 25th message stop and start running signal path
-			if (i % 25 == 0) {
-				sleep(globals.serializationIntervalInMillis() + 5000)
+			if (i != 0 && i % 25 == 0) {
+				sleep(serializationService.serializationIntervalInMillis() + 1000)
 				signalPathService.stopLocal(rsp)
 				signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
-			} else {
-				sleep(100)
 			}
 		}
 
-		sleep(globals.serializationIntervalInMillis() + 5000)
+		sleep(serializationService.serializationIntervalInMillis() + 1000)
 
 		// Collect values of outputs
 		def actual = modules(rsp).collect {

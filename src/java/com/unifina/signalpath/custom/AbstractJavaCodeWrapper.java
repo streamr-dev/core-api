@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.tools.Diagnostic;
 
+import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
@@ -208,6 +209,15 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		instance.setParentSignalPath(parentSignalPath);
 		instance.configure(config);
 
+		// Validate that anonymous inner classes are not present since they cannot be serialized
+		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
+		if (anonymousInnerClassDetector.detect(instance)) {
+			String msg = "Anonymous inner classes are not allowed.";
+			CompilationErrorMessage compilationErrorMsg = new CompilationErrorMessage();
+			compilationErrorMsg.addError(0, msg);
+			throw new ModuleException(msg, null, Arrays.asList(new ModuleExceptionMessage(hash, compilationErrorMsg)));
+		}
+
 		return instance;
 	}
 
@@ -261,6 +271,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	private SerializationService serializationService() {
-		return globals.getSerializationService();
+		return globals.getBean(SerializationService.class);
 	}
 }

@@ -31,7 +31,7 @@ public class PackageAccessHelper {
 			
 			"org.apache.commons.math3",
 			"org.springsource.loaded.TypeRegistry", // safe?
-			"sun.reflect."
+			"sun.reflect.SerializationConstructorAccessorImpl" // safe?
 	};
 	
 	private static boolean checkMatches(String className, String[] packages) {
