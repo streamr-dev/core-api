@@ -1,8 +1,10 @@
 package com.unifina.serialization;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.*;
+
+import static com.unifina.serialization.ReflectionTools.notGeneratedByGroovy;
+import static com.unifina.serialization.ReflectionTools.notStatic;
 
 /**
  * Used to determine whether, and to pinpoint where, a subclass hides/shadows a field of any of its parent classes by
@@ -62,13 +64,5 @@ public class HiddenFieldDetector {
 			}
 		}
 		return fieldNames;
-	}
-
-	private static boolean notGeneratedByGroovy(Field field) {
-		return !field.isSynthetic(); // e.g. Groovy's synthetic fields (metaClass, $staticClassInfo, $callSiteArray)
-	}
-
-	private static boolean notStatic(Field field) {
-		return !Modifier.isStatic(field.getModifiers());
 	}
 }

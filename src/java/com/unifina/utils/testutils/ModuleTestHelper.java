@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.unifina.datasource.ITimeListener;
+import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
@@ -152,7 +153,6 @@ public class ModuleTestHelper {
 			if (testHelper.outputValuesByName == null) {
 				throw new RuntimeException("Field outputValuesByName cannot be null");
 			}
-			validateThatModuleDoesNotHaveKnownSerializationIssues();
 			verifyNoTicksBeforeSkip();
 			testHelper.initializeAndValidate();
 			return testHelper;
@@ -163,13 +163,6 @@ public class ModuleTestHelper {
 		 */
 		public boolean test() throws IOException, ClassNotFoundException {
 			return build().test();
-		}
-
-		private void validateThatModuleDoesNotHaveKnownSerializationIssues() {
-			HiddenFieldDetector hiddenFieldDetector = new HiddenFieldDetector(testHelper.module.getClass());
-			if (hiddenFieldDetector.anyHiddenFields()) {
-				throw new TestHelperException(hiddenFieldDetector);
-			}
 		}
 
 		private void verifyNoTicksBeforeSkip() {
@@ -389,6 +382,7 @@ public class ModuleTestHelper {
 
 	private void serializeAndDeserializeModel() throws IOException, ClassNotFoundException {
 		if (serializationMode) {
+			validateThatModuleDoesNotHaveKnownSerializationIssues();
 
 			// Globals is rather tricky to serialize so temporarily pull out
 			Globals globalsTempHolder = module.globals;
@@ -439,6 +433,20 @@ public class ModuleTestHelper {
 			this.ticks = new HashMap<>(ticks);
 		} else {
 			throw new RuntimeException("Module does not implement ITimeListener interface");
+		}
+	}
+
+	private void validateThatModuleDoesNotHaveKnownSerializationIssues() {
+		// Field hiding not allowed
+		HiddenFieldDetector hiddenFieldDetector = new HiddenFieldDetector(module.getClass());
+		if (hiddenFieldDetector.anyHiddenFields()) {
+			throw new TestHelperException(hiddenFieldDetector);
+		}
+
+		// Anonymous inner classes not alowed
+		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
+		if (anonymousInnerClassDetector.detect(module)) {
+			throw new TestHelperException("Anonymous inner class detected. Not allowed when serializing.", this);
 		}
 	}
 
