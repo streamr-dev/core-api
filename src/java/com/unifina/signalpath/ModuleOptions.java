@@ -37,5 +37,11 @@ public class ModuleOptions extends LinkedHashMap<String, Object> {
 	public void add(ModuleOption option) {
 		this.put(option.getKey(), option);
 	}
+
+	public void addIfMissing(ModuleOption option) {
+		if (!this.containsKey(option.getKey())) {
+			this.put(option.getKey(), option);
+		}
+	}
 	
 }

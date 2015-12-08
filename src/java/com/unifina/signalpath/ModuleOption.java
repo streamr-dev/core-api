@@ -4,7 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ModuleOption extends LinkedHashMap<String, Object> {
-	
+
+	public static final String OPTION_STRING = "string";
+	public static final String OPTION_INTEGER = "int";
+	public static final String OPTION_BOOLEAN = "boolean";
+	public static final String OPTION_DOUBLE = "double";
+
 	private String key;
 
 	static ModuleOption get(String key, Map<String, Object> map, ModuleOptions options) {
