@@ -5,6 +5,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.domain.signalpath.RunningSignalPath;
+import com.unifina.domain.signalpath.SavedSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
@@ -38,6 +39,7 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), true);
 		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), true);
 		conf.registerSerializer(Stream.class, new DomainClassSerializer(), true);
+		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), true);
 	}
 
 	public SerializerImpl(ClassLoader classLoader) {
