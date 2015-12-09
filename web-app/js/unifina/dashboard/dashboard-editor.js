@@ -143,10 +143,6 @@ var DashboardItemView = Backbone.View.extend({
 	tagName: "li",
 	className: "dashboarditem",	
 	template: _.template($("#streamr-widget-template").html()),
-	labelTemplate: _.template($("#streamr-label-template").html()),
-	chartTemplate: _.template($("#streamr-chart-template").html()),
-	heatmapTemplate: _.template($("#streamr-heatmap-template").html()),
-	tableTemplate: _.template($("#streamr-table-template").html()),
 	titlebarTemplate: _.template($("#titlebar-template").html()),
 
 	events: {
@@ -170,29 +166,18 @@ var DashboardItemView = Backbone.View.extend({
 
 		var type = this.model.get("uiChannel").module.id
 		this.$el.html(this.template(this.model.toJSON()))
-		if(type == 67) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
-		}
-		else if(type == 142) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.tableTemplate(this.model.toJSON()))
-		}
-		else if(type == 145) {
+		if(type == 145) {
 			if(!this.model.get("size"))
 				this.model.set("size", "small")
-			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
 		}
-		else if(type == 196) {
+		else  {
 			if(!this.model.get("size"))
 				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
-		else {
-			throw new Error("Module id not recognized!");
-		}
+		var templateName = "#" + this.model.get("uiChannel").module.webcomponent + "-template"
+		var template = _.template($(templateName).html())
+		this.$el.find(".widget-content").append(template(this.model.toJSON()))
+
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
 		this.$el.find(".title").append(titlebar)
 		this.initSize()
