@@ -221,6 +221,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
 		
 	}
 	'signalpath-theme' {

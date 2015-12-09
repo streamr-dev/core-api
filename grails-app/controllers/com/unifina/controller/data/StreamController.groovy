@@ -191,8 +191,8 @@ class StreamController {
 	def files() {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
-		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
-		return [feedFiles: feedFiles, stream:stream]
+		def dataRange = streamService.getDataRange(stream)
+		return [dataRange: dataRange, stream:stream]
 	}
 	
 	def upload() {
@@ -302,6 +302,15 @@ class StreamController {
 			flash.error = "Something went wrong with deleting files"
 		}
 		redirect(action:"show", params:[id:params.id])
+	}
+
+	def getDataRange() {
+		Stream stream = Stream.get(params.id)
+		Map dataRange = streamService.getDataRange(stream)
+		if(dataRange != null)
+			render dataRange as JSON
+		else
+			render null
 	}
 	
 }
