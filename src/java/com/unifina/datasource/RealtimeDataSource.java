@@ -95,14 +95,16 @@ public class RealtimeDataSource extends DataSource {
 			SerializationService serializationService = globals.getBean(SerializationService.class);
 
 			for (final SignalPath signalPath : getSignalPaths()) {
-				Date nextEvenSecond = new Date(now.getTime() + (1000 - (now.getTime()%1000)));
+				Date fiveSecsFromNow = new Date(now.getTime() + (5000 - (now.getTime()%1000)));
 
 				secTimer.scheduleAtFixedRate(new TimerTask() {
 					@Override
 					public void run() {
-						eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+						if (signalPath.getRunningSignalPath() != null) {
+							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+						}
 					}
-				}, nextEvenSecond, serializationService.serializationIntervalInMillis());
+				}, fiveSecsFromNow, serializationService.serializationIntervalInMillis());
 			}
 
 
