@@ -9,7 +9,7 @@
  * - email sending config
  */
 
- /**
+/**
   * Grails configuration 
   */
 
@@ -35,7 +35,7 @@
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*"]
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet-0.7.3"]
  grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**']
  
  grails.resources.processing.enabled = true
@@ -106,7 +106,7 @@
  grails.spring.bean.packages = []
  // whether to disable processing of multi part requests
  grails.web.disable.multipart=false
- 
+
  // request parameters to mask when logging exceptions
  grails.exceptionresolver.params.exclude = ['password','password2','currentpassword']
  
@@ -149,8 +149,14 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
  * Task config
  */
 // How many task worker threads to launch on startup
-unifina.task.workers = 0
+unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
+
+environments {
+	development {
+		unifina.task.workers = 0
+	}
+}
 
 /**
  * Data feed config
@@ -211,19 +217,14 @@ environments {
 	}
 }
 
+/**
+ * Serialization config
+ */
+unifina.serialization.intervalInMillis = 30 * 1000
 environments {
-	development {
-
-	}
 	test {
-		// Required for functional tests for backtesting
-		unifina.task.workers = 1
+		unifina.serialization.intervalInMillis = 1000
 	}
-	production {
-		// For Amazon
-		unifina.task.workers = 1
-	}
-
 }
 
 /**
@@ -232,12 +233,14 @@ environments {
 
 streamr.user.defaultFeeds = [7]
 streamr.user.defaultModulePackages = [1]
+
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
 
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'com.unifina.domain.security.SecUserSecRole'
 grails.plugin.springsecurity.authority.className = 'com.unifina.domain.security.SecRole'
 
+grails.plugin.springsecurity.rememberMe.enabled = true
 grails.plugin.springsecurity.rememberMe.cookieName = 'streamr_remember_me'
 grails.plugin.springsecurity.rememberMe.key = 'IfYouCanDreamItYouCanStreamIt'
 grails.plugin.springsecurity.password.algorithm = 'bcrypt'
@@ -289,3 +292,12 @@ grails {
 	}
 }
 remove this line */
+
+// emails
+// the server settings come from Config.groovy of each project
+
+unifina.email.sender = "contact@streamr.com"
+unifina.email.signup.subject = "Thanks for signing up for Streamr"
+unifina.email.invite.subject = "Invitation to Streamr"
+unifina.email.welcome.subject = "Welcome to Streamr"
+unifina.email.feedback.recipient = "contact@streamr.com"

@@ -27,7 +27,7 @@ public class GreaterThan extends AbstractSignalPathModule {
 	}
 	
 	public void sendOutput() {
-		if (a.value > b.value || equality.getValue() && a.value==b.value)
+		if (a.value > b.value || equality.getValue() && a.value.equals(b.value))
 			out.send(1D);
 		else out.send(0D);
 	}

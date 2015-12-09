@@ -5,6 +5,9 @@
 target-eclipse
 target
 node_modules
+lib/grails-rt.jar
 .idea/
 unifina-core*.iml
-
+.slcache/
+out/
+plugin.xml

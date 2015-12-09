@@ -200,10 +200,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	 */
 	var super_renderHelp = prot.renderHelp;
 	prot.renderHelp = function(data, extended) {
-		var result = super_renderHelp(data);
+		var result = super_renderHelp(data, extended);
 		
 		// Add tip about clicking to show extended help
-		if (!extended && (data.paramNames.length>0 || data.inputNames.length>0 || data.outputNames.length>0)) {
+		if (!extended && (data.paramNames && data.paramNames.length>0 || data.inputNames && data.inputNames.length>0 || data.outputNames && data.outputNames.length>0)) {
 			result += "<p class='message'>Click the help button to show extended help.</p>";
 		}
 		else if (extended) {

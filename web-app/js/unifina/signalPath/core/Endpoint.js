@@ -191,8 +191,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 
 			$(iodiv).find(".ioname").html(displayName);
 		}
-		jsPlumb.recalculateOffsets(module.div.attr('id'));
-		jsPlumb.repaint(module.div.attr('id'));
+		module.redraw()
 	}
 	
 	function getContextMenu(div) {

@@ -2,11 +2,9 @@ package com.unifina.service
 
 import grails.util.Environment
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.springframework.web.context.support.WebApplicationContextUtils
 
-import com.sun.org.apache.xalan.internal.xslt.EnvironmentCheck;
 import com.unifina.domain.config.HostConfig
 import com.unifina.domain.security.SecRole
 import com.unifina.task.TaskMessageListener
@@ -111,11 +109,7 @@ class BootService {
 		ConfigObject currentConfig = app.config
 		ConfigSlurper slurper = new ConfigSlurper(Environment.getCurrent().getName());
 		ConfigObject secondaryConfig = slurper.parse(app.classLoader.loadClass("UnifinaCoreDefaultConfig"))
-		
-		ConfigObject config = new ConfigObject();
-		config.putAll(secondaryConfig.merge(currentConfig))
-		
-		app.config = config;
+		currentConfig.putAll(secondaryConfig.merge(currentConfig))
 	}
 	
 	def onDestroy() {

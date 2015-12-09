@@ -7272,9 +7272,9 @@ optgroup {
   margin-right: 7px;
 }
 .panel-heading-controls {
-  margin-top: -2px;
-  margin-bottom: -200px;
-  float: right;
+  position: absolute !important;
+  right: 10px;
+  top: 8px;
 }
 .panel-heading-controls > * {
   display: block;
@@ -16136,8 +16136,12 @@ fieldset[disabled] .btn {
   #main-menu-bg {
     width: 0px;
   }
-  body.build-page:not(.mme) #main-wrapper {
+  body.main-menu-fixed:not(.mme) #main-wrapper {
     padding-left: 0px;
+  }
+  .mme #content-wrapper {
+    left: 0;
+    padding-left: 162px;
   }
 }
 .paramTable .form-control {
@@ -16666,10 +16670,17 @@ body.build-page #main-menu .twitter-typeahead {
 .login-page .btn-sign-in {
   display: none;
 }
+.login-page label.checkbox-inline {
+  margin-top: 15px;
+  width: 100%;
+}
+.login-page label.checkbox-inline a.forgot {
+  float: right;
+}
 .login-page.show-sign-up .btn-sign-up {
   display: inline-block;
 }
-.login-page.show-sign-in .btn-sign-up {
+.login-page.show-sign-in .btn-sign-in {
   display: inline-block;
 }
 body.live-show-view #content-wrapper {
@@ -17032,6 +17043,8 @@ div.table.clickable-table div.tbody {
 div.table.clickable-table div.tbody .tr:first-child .td {
   border-top: 0;
 }
+div.table.clickable-table a.tr,
+div.table.clickable-table a.tr:active,
 div.table.clickable-table a.tr:focus {
   text-decoration: none;
 }
@@ -17184,48 +17197,48 @@ div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
 body.dashboard-show {
   height: 100%;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view {
+body.dashboard-show #dashboard-view {
   overflow: auto;
   height: 100%;
   padding: 0px;
   list-style-type: none;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar,
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-clickable,
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .edit-btn {
+body.dashboard-show #dashboard-view .dashboarditem.editing .titlebar,
+body.dashboard-show #dashboard-view .dashboarditem.editing .titlebar-clickable,
+body.dashboard-show #dashboard-view .dashboarditem.editing .edit-btn {
   display: none;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem.editing .stat-panel .stat-row .stat-cell .titlebar-edit {
+body.dashboard-show #dashboard-view .dashboarditem.editing .titlebar-edit {
   height: 20px;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .titlebar-edit,
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem:not(.editing) .stat-panel .stat-row .stat-cell .close-edit {
+body.dashboard-show #dashboard-view .dashboarditem:not(.editing) .titlebar-edit,
+body.dashboard-show #dashboard-view .dashboarditem:not(.editing) .close-edit {
   display: none;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell.title {
+body.dashboard-show #dashboard-view .dashboarditem.title {
   border-top-right-radius: 4px;
   border-top-left-radius: 4px;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell.widget-content {
+body.dashboard-show #dashboard-view .dashboarditem.widget-content {
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls {
+body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls {
   cursor: auto;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls label.btn.active {
+body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls label.btn.active {
   color: #333333;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .size-btn-group {
+body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .size-btn-group {
   display: none;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .btn-group {
+body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .btn-group {
   padding-top: 0px;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
+body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
   opacity: 0;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-table .container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-table .container {
   overflow: auto;
   width: 100%;
   height: 100%;
@@ -17233,10 +17246,10 @@ body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboardi
   padding: 15px;
   padding-top: 0px;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-table .container .table-module-container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-table .container .table-module-container {
   width: 100%;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-chart .container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-chart .container {
   overflow: auto;
   width: 100%;
   max-height: 400px;
@@ -17244,29 +17257,29 @@ body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboardi
   padding-top: 0px;
   padding-bottom: 0px;
 }
-body.dashboard-show #main-wrapper #content-wrapper ul#dashboard-view .dashboarditem .contains .stat-panel .stat-row .widget-content streamr-chart .container .chartDrawArea {
+body.dashboard-show #dashboard-view .dashboarditem streamr-chart .container .chartDrawArea {
   width: 100%;
 }
-body.dashboard-show:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .panel-heading-controls,
-body.dashboard-show:not(.editing) #dashboard-view .dashboarditem .contains .stat-panel .stat-row .stat-cell .titlebar-clickable {
+body.dashboard-show:not(.editing) .panel-heading-controls,
+body.dashboard-show:not(.editing) .titlebar-clickable {
   display: none;
 }
-body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel {
+body.dashboard-show.editing {
   overflow: auto;
 }
-body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .title.stat-cell {
+body.dashboard-show.editing .title.stat-cell {
   border-top-right-radius: 4px;
   border-top-left-radius: 4px;
   cursor: move;
 }
-body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .widget-content.stat-cell {
+body.dashboard-show.editing .widget-content.stat-cell {
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
 }
-body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .stat-row .stat-cell {
+body.dashboard-show.editing .stat-row .stat-cell {
   overflow: visible;
 }
-body.dashboard-show.editing #dashboard-view .dashboarditem .stat-panel .stat-row .titlebar {
+body.dashboard-show.editing .stat-row .titlebar {
   display: none;
 }
 body.dashboard-show.selected-theme #main-menu .navigation .uichannel.checked a {
@@ -17288,6 +17301,9 @@ body.dashboard-show #sidebar-view .runningsignalpath.stopped .rsp-title {
 }
 body.dashboard-show #sidebar-view .rsp-title {
   margin-left: 20px;
+  cursor: pointer;
+}
+body.dashboard-show .titlebar-clickable {
   cursor: pointer;
 }
 .widget-notifications .notification {

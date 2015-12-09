@@ -6,16 +6,25 @@
 	.btn-sign-in {
 		display: none;
 	}
-}
-	
-.login-page.show-sign-up {
-	.btn-sign-up {
-		display: inline-block;
-	}
-}
 
-.login-page.show-sign-in {
-	.btn-sign-up {
-		display: inline-block;
+	label.checkbox-inline {
+		margin-top: 15px;
+		width: 100%;
+
+		a.forgot {
+			float: right;
+		}
+	}
+
+	&.show-sign-up {
+		.btn-sign-up {
+			display: inline-block;
+		}
+	}
+
+	&.show-sign-in {
+		.btn-sign-in {
+			display: inline-block;
+		}
 	}
 }

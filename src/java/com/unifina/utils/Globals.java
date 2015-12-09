@@ -1,5 +1,6 @@
 package com.unifina.utils;
 
+import com.unifina.service.SerializationService;
 import groovy.lang.GroovySystem;
 
 import java.security.AccessController;
@@ -17,18 +18,18 @@ import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import com.unifina.datasource.DataSource;
-import com.unifina.datasource.RealtimeDataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import org.springframework.util.Assert;
 
 
 public class Globals {
-	
+
 	private static final Logger log = Logger.getLogger(Globals.class);
-	
+
 	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
@@ -56,6 +57,13 @@ public class Globals {
 	protected Date endDate = null;
 	
 	protected PushChannel uiChannel = null;
+
+	/**
+	 * Construct fake environment, e.g., for testing.
+	 */
+	public Globals() {
+		signalPathContext = new HashMap();
+	}
 	
 	public Globals(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
 		if (signalPathContext==null)
@@ -194,7 +202,8 @@ public class Globals {
 	}
 	
 	public boolean isRealtime() {
-		return dataSource instanceof RealtimeDataSource;
+		return signalPathContext.containsKey("live") && (Boolean) signalPathContext.get("live");
+		//return dataSource instanceof RealtimeDataSource;
 	}
 	
 	public DataSource getDataSource() {
@@ -213,4 +222,11 @@ public class Globals {
 		this.uiChannel = uiChannel;
 	}
 
+	public void setGrailsApplication(GrailsApplication grailsApplication) {
+		this.grailsApplication = grailsApplication;
+	}
+
+	public <T> T getBean(Class<T> requiredType) {
+		return grailsApplication.getMainContext().getBean(requiredType);
+	}
 }

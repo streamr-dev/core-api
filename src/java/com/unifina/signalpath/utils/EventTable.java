@@ -1,25 +1,16 @@
 package com.unifina.signalpath.utils;
 
-import java.text.SimpleDateFormat;
+import com.unifina.push.PushChannel;
+import com.unifina.signalpath.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.unifina.push.PushChannel;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleOption;
-import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.RuntimeRequest;
-import com.unifina.signalpath.RuntimeResponse;
-
 
 public class EventTable extends ModuleWithUI {
-	
-	private PushChannel rc;
-	private SimpleDateFormat df;
-	
-	int inputCount = 1;
+
+	int eventTableInputCount = 1;
 	int maxRows = 20;
 	
 	public EventTable() {
@@ -35,6 +26,8 @@ public class EventTable extends ModuleWithUI {
 	public void initialize() {
 		super.initialize();
 
+		PushChannel rc = null;
+
 		if (globals.getUiChannel()!=null && !globals.getSignalPathContext().containsKey("csv")) {
 			rc = globals.getUiChannel();
 		}
@@ -44,24 +37,23 @@ public class EventTable extends ModuleWithUI {
 			hdrMsg.put("hdr", getHeaderDefinition());
 			globals.getUiChannel().push(hdrMsg, uiChannelId);
 		}
-		
-		df = globals.dateTimeFormat;
 	}
 
 	@Override
 	public void sendOutput() {
-		if (rc!=null) {
-			HashMap<String,Object> msg = new HashMap<String,Object>();
+		PushChannel rc = globals.getUiChannel();
+		if (rc != null) {
+			HashMap<String, Object> msg = new HashMap<String, Object>();
 			ArrayList<Object> nr = new ArrayList<>(2);
 			msg.put("nr", nr);
-			nr.add(df.format(globals.time));
-			
+			nr.add(globals.dateTimeFormat.format(globals.time));
+
 			for (Input i : getInputs()) {
 				if (i.hasValue())
 					nr.add(i.getValue().toString());
 				else nr.add(null);
 			}
-			
+
 			rc.push(msg, uiChannelId);
 		}
 	}
@@ -115,7 +107,7 @@ public class EventTable extends ModuleWithUI {
 
 		// Module options
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("inputs", inputCount, "int"));
+		options.add(new ModuleOption("inputs", eventTableInputCount, "int"));
 		options.add(new ModuleOption("maxRows", maxRows, "int"));
 		
 		config.put("tableConfig", getHeaderDefinition());
@@ -130,12 +122,12 @@ public class EventTable extends ModuleWithUI {
 		ModuleOptions options = ModuleOptions.get(config);
 		
 		if (options.getOption("inputs")!=null)
-			inputCount = options.getOption("inputs").getInt();
+			eventTableInputCount = options.getOption("inputs").getInt();
 		
 		if (options.getOption("maxRows")!=null)
 			maxRows = options.getOption("maxRows").getInt();
 		
-		for (int i=1;i<=inputCount;i++) {
+		for (int i = 1; i<= eventTableInputCount; i++) {
 			createAndAddInput("input"+i);
 		}
 	}
@@ -156,6 +148,11 @@ public class EventTable extends ModuleWithUI {
 	@Override
 	public void init() {
 
+	}
+	
+	@Override
+	public String getWebcomponentName() {
+		return "streamr-table";
 	}
 	
 }

@@ -5,7 +5,6 @@
 		<title>Canvas</title>
 
 		<r:require module='jstree'/>
-		<r:require module='pnotify'/>
 		<r:require module='jquery-ui'/>
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>
@@ -50,24 +49,17 @@ $(document).ready(function() {
 		canvas: 'canvas',
 		signalPathContext: getSignalPathContext,
 		errorHandler: function(data) {
-			$.pnotify({
-				type: 'error',
-        		title: 'Error',
-	        	text: data.msg,
-	        	delay: 4000
-    		});
+			Streamr.showError(data.msg)
 		},
 		notificationHandler: function(data) {
-			$.pnotify({
-				type: 'info',
-	        	text: data.msg,
-	        	delay: 4000
-    		});
+			Streamr.showInfo(data.msg)
 		},
 		runUrl: Streamr.createLink('live', 'ajaxCreate'),
 		abortUrl: Streamr.createLink('live', 'ajaxStop'),
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}"
+			server: "${grailsApplication.config.streamr.ui.server}",
+			autoConnect: false,
+			autoDisconnect: true
 		}
 	});
 	
@@ -106,9 +98,6 @@ $(document).ready(function() {
 	<g:if test="${load}">
 		SignalPath.loadSignalPath({url:"${load}"});
 	</g:if>
-	
-	$.pnotify.defaults.history = false;
-	$.pnotify.defaults.styling = "bootstrap";
 
 	$(SignalPath).on('error', function(error) {
 		console.error(error)
@@ -121,12 +110,7 @@ $(document).ready(function() {
 
 	$(SignalPath).on('saved', function(event,data) {
 		$('#modal-spinner').hide()
-		$.pnotify({
-			type: 'success',
-        	title: '${message(code:"signalpath.saved.title")}',
-	        text: '${message(code:"signalpath.saved.to")} '+data.target+'.',
-	        delay: 4000
-    	});
+		Streamr.showSuccess('${message(code:"signalpath.saved.to")} '+data.target+'.', '${message(code:"signalpath.saved.title")}')
 	});
 
 	// show search control
@@ -203,13 +187,7 @@ $(document).ready(function() {
 		
 		SignalPath.run(ctx, false, function(data) {
 			var url_root = '${createLink(controller:"live", action:"show")}'
-			
-			$.pnotify({
-				type: 'info',
-	        	text: "Live Canvas launced:"+name,
-	        	delay: 4000
-    		});
-    		
+			Streamr.showInfo("Live Canvas launced:"+name)
     		window.location = url_root + "/" + data.id
 		});
 	})

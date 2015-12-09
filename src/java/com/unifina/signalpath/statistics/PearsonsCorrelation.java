@@ -18,7 +18,8 @@ public class PearsonsCorrelation extends AbstractSignalPathModule {
 	SlidingDoubleArray xValues;
 	SlidingDoubleArray yValues;
 
-	org.apache.commons.math3.stat.correlation.PearsonsCorrelation correlation = new org.apache.commons.math3.stat.correlation.PearsonsCorrelation();
+	org.apache.commons.math3.stat.correlation.PearsonsCorrelation correlation =
+			new org.apache.commons.math3.stat.correlation.PearsonsCorrelation();
 
 	@Override
 	public void init() {

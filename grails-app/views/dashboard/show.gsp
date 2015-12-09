@@ -24,19 +24,14 @@
 						el: $("#dashboard-view")
 					})
 					dashboardView.on('error', function(error, itemTitle) {
-						$.pnotify({
-							type: 'error',
-			        		title: 'Error',
-				        	text: itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error,
-				        	delay: 4000
-			    		});
+						Streamr.showError(itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error)
 					})
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 					
 					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
 						var sidebar = new SidebarView({
-							edit: "${params.edit}",
+							edit: ${params.edit ? "true" : "undefined"},
 							dashboard: dashboard, 
 							RSPs: rspJson,
 							el: $("#sidebar-view"),

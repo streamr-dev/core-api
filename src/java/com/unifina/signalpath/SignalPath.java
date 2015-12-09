@@ -1,24 +1,17 @@
 package com.unifina.signalpath;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.domain.signalpath.Module;
+import com.unifina.domain.signalpath.RunningSignalPath;
+import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.ModuleService;
+import com.unifina.utils.Globals;
 import grails.converters.JSON;
-
-import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
-import com.unifina.domain.signalpath.Module;
-import com.unifina.domain.signalpath.RunningSignalPath;
-import com.unifina.service.ModuleService;
-import com.unifina.service.SignalPathService;
-import com.unifina.utils.Globals;
+import java.io.Serializable;
+import java.util.*;
 
 public class SignalPath extends ModuleWithUI {
 	
@@ -42,8 +35,6 @@ public class SignalPath extends ModuleWithUI {
 	RunningSignalPath runningSignalPath = null;
 	Map representation = null;
 	Map<Integer,AbstractSignalPathModule> modulesByHash = new HashMap<>();
-	
-	ModuleService moduleService = new ModuleService();
 	
 	private boolean root = false;
 	
@@ -89,6 +80,8 @@ public class SignalPath extends ModuleWithUI {
 		List<Map> modulesJSON = (List<Map>) iData.get("modules");
 		if (modulesJSON==null)
 			modulesJSON = new ArrayList<>(0);
+
+		ModuleService moduleService = globals.getBean(ModuleService.class);
 		
 		HashMap<Long,Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON))
@@ -296,7 +289,16 @@ public class SignalPath extends ModuleWithUI {
 		if (parentSignalPath!=null && parentSignalPath.getUiChannelId()!=null)
 			uiChannelId = parentSignalPath.getUiChannelId();
 	}
-	
+
+	@Override
+	public void receive(FeedEvent event) {
+		if (event.content instanceof SerializationRequest) {
+			((SerializationRequest) event.content).serialize(this);
+		} else {
+			super.receive(event);
+		}
+	}
+
 	@Override
 	public void destroy() {
 		super.destroy();
@@ -347,7 +349,7 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 	
-	class ModuleConfig {
+	class ModuleConfig implements Serializable {
 		public AbstractSignalPathModule module;
 		public Map config;
 		

@@ -13,12 +13,29 @@
 
 		<div class="form-group signin-password">
 			<input type="password" name="j_password" id="password" class="form-control input-lg" placeholder="Password">
-			<g:link controller="register" action="forgotPassword" class="forgot">Forgot?</g:link>
+			
 		</div> <!-- / Password -->
-
+		
+		
+		
 		<div class="form-actions">
 			<input id="loginButton" type="submit" value="${message(code:'springSecurity.login.button')}" class="btn btn-primary btn-block btn-lg">
 		</div> <!-- / .form-actions -->
+		
+		<g:if test="${ grailsApplication.config.grails.plugin.springsecurity.rememberMe.enabled == true }">
+			<div class="remember">
+				<label id="rememberMeCheckbox" class="checkbox-inline" style="margin-top:15px;width:100%;">
+					<input type="checkbox" class="px" name="_spring_security_remember_me">
+					<span class="lbl">Remember me</span>
+		</g:if>
+		<g:else>
+			<div>
+				<label style="margin-top:15px;width:100%;">
+		</g:else>
+		
+					<g:link controller="register" action="forgotPassword" class="forgot" style="float:right;">Forgot password?</g:link>
+				</label>
+			</div>
 	</form>
 	<!-- / Form -->
 

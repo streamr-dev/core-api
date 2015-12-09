@@ -25,10 +25,7 @@ class SavedSignalPathControllerSpec extends Specification {
 	SavedSignalPath ssp4
 	
 	void setup() {
-		defineBeans {
-			unifinaSecurityService(UnifinaSecurityService)
-			signalPathService(SignalPathService)
-		}
+		// Populate db
 		
 		SecUser me = new SecUser(id:1).save(validate:false)
 		SecUser other = new SecUser(id:2).save(validate:false)
@@ -41,14 +38,12 @@ class SavedSignalPathControllerSpec extends Specification {
 		assert SecUser.count()==2
 		assert SavedSignalPath.count()==4
 		
-		SpringSecurityService springSecurityService = new SpringSecurityService() {
-			def getCurrentUser() {
-				return me
-			}
-		}
 		
-		controller.springSecurityService = springSecurityService
-		grailsApplication.mainContext.getBean("unifinaSecurityService").springSecurityService = springSecurityService
+		// Mock services or use real ones
+		
+		controller.unifinaSecurityService = new UnifinaSecurityService()
+		controller.springSecurityService = [getCurrentUser: {-> me}] as SpringSecurityService
+		controller.unifinaSecurityService.springSecurityService = controller.springSecurityService
 		controller.signalPathService = [
 			reconstruct: {json, globals -> return json},
 			jsonToSignalPath: {Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot->
@@ -57,7 +52,7 @@ class SavedSignalPathControllerSpec extends Specification {
 			signalPathToJson: {SignalPath sp->
 				return [:]
 			}
-		]
+		] as SignalPathService
 	}
 	
 	void "must be able to load my own SignalPath"() {

@@ -24,7 +24,7 @@ public abstract class Chart extends ModuleWithUI {
 	
 	protected boolean timeOfDayFilterEnabled = false;
 	protected TimeOfDayUtil todUtil = null;
-	protected CSVWriter csvWriter = null;
+	transient protected CSVWriter csvWriter = null;
 	
 	private static final Logger log = Logger.getLogger(Chart.class);
 	
@@ -65,7 +65,7 @@ public abstract class Chart extends ModuleWithUI {
 				return;
 			
 			recordCsvString();
-			csvWriter.newLine();
+			csvWriter().newLine();
 		}
 		else {
 			if (timeOfDayFilterEnabled && !todUtil.hasBaseDate())
@@ -85,7 +85,7 @@ public abstract class Chart extends ModuleWithUI {
 		super.onDay(day);
 		
 		if (csvWriter!=null)
-			csvWriter.newDay();
+			csvWriter().newDay();
 		
 		if (todUtil!=null)
 			todUtil.setBaseDate(day);
@@ -98,14 +98,14 @@ public abstract class Chart extends ModuleWithUI {
 	
 	// This method can be overridden to do some post-processing on the csv
 	public File getFile() {
-		return csvWriter.finish();
+		return csvWriter().finish();
 	}
 	
 	@Override
 	public void destroy() {
 		super.destroy();
 		if (csv) {
-			File file = csvWriter.finish();
+			File file = csvWriter().finish();
 			if (hasRc) {
 				globals.getUiChannel().push(new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()), uiChannelId);
 			}
@@ -137,5 +137,15 @@ public abstract class Chart extends ModuleWithUI {
 			String end = options.getOption("ignoreAfter").getString();
 			todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
 		}
+	}
+
+	protected CSVWriter csvWriter() {
+		if (csvWriter == null) {
+			csvWriter = new CSVWriter(null,
+					globals.getGrailsApplication().getConfig(),
+					globals.getSignalPathContext(),
+					globals.getUserTimeZone());
+		}
+		return csvWriter;
 	}
 }

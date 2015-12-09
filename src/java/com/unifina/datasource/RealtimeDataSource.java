@@ -9,6 +9,10 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.SerializationService;
+import com.unifina.signalpath.SignalPath;
+import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -87,6 +91,21 @@ public class RealtimeDataSource extends DataSource {
 					new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
 					1000);   // Repeat every second
 
+			// Serialization
+			SerializationService serializationService = globals.getBean(SerializationService.class);
+
+			for (final SignalPath signalPath : getSignalPaths()) {
+				Date nextEvenSecond = new Date(now.getTime() + (1000 - (now.getTime()%1000)));
+
+				secTimer.scheduleAtFixedRate(new TimerTask() {
+					@Override
+					public void run() {
+						eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+					}
+				}, nextEvenSecond, serializationService.serializationIntervalInMillis());
+			}
+
+
 			// This will block indefinitely until the feed is stopped!
 			eventQueue.start();
 		
@@ -94,7 +113,7 @@ public class RealtimeDataSource extends DataSource {
 		
 		log.info("RealtimeDataSource has stopped.");
 	}
-	
+
 	private void processCatchups(List<ICatchupFeed> feeds) {
 		
 		// Insert first event from each feed into the queue

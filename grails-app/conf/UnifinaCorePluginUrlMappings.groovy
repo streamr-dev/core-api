@@ -15,9 +15,6 @@ class UnifinaCorePluginUrlMappings {
 		"403"(controller: "login", action: "denied")
 		"500"(view:'/error')
 		
-		"/login/$action?"(controller: "login")
-		"/logout/$action?"(controller: "logout")
-		
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 		
 		// API url mappings
