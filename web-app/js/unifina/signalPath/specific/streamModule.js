@@ -6,27 +6,24 @@ SignalPath.StreamModule = function(data,canvas,prot) {
 
 	prot.resultHelpText
 	prot.getHelp = function(extended, cb) {
-		var _this = this
 		super_getHelp(extended, function(html){
-			if(!prot.resultHelpText) {
+			if(pub.getInput("stream").getValue() != null) {
 				$.getJSON(Streamr.createLink("stream", "getDataRange", pub.getInput("stream").getValue()), {}, function (dataRange) {
-					if (dataRange != null) {
+					if (dataRange.beginDate && dataRange.endDate) {
 						var beginDate = new Date(dataRange.beginDate)
 						var endDate = new Date(dataRange.endDate)
 
 						html += "<p>This stream has data from <b>" +
 								$.datepicker.formatDate("dd-mm-yy", beginDate) +
 								"</b> to <b>" +
-								$.datepicker.formatDate("dd-mm-yy", beginDate) +
+								$.datepicker.formatDate("dd-mm-yy", endDate) +
 								"</b>.</p>"
 					} else
 						html += "<p>This stream has no history</p>"
-					prot.resultHelpText = html
-					cb(prot.resultHelpText)
+					cb(html)
 				})
-			} else {
-				cb(prot.resultHelpText)
-			}
+			} else
+				cb(html)
 		})
 	}
 	return pub;

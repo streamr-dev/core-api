@@ -49,10 +49,6 @@ class StreamService {
 	Map getDataRange(Stream stream) {
 		def startFile = FeedFile.findByStream(stream, [sort:'beginDate', limit:1])
 		def endFile = FeedFile.findByStream(stream, [sort:'endDate', order:"desc", limit:1])
-		if(startFile && endFile){
-			return [beginDate: startFile.beginDate, endDate: endFile.endDate]
-		} else {
-			return null
-		}
+		return [beginDate: startFile?.beginDate, endDate: endFile?.endDate]
 	}
 }

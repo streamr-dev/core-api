@@ -76,4 +76,21 @@ class StreamServiceSpec extends Specification {
 		dataRange.beginDate == new Date(1440000000000)
 		dataRange.endDate == new Date(1450000000000)
 	}
+
+	void "getDataRange gives empty values if there are no feedFiles"(){
+		Map dataRange
+		Stream stream
+
+		setup:
+		SecUser user = new SecUser(id: 1, username: "user@user.com", password: "pwd", name:"name", enabled:true, timezone: "Europe/Helsinki")
+		user.save()
+		stream = service.createUserStream([name: "streamName", localId:1], user)
+
+		when: "asked for the dataRange"
+		dataRange = service.getDataRange(stream)
+
+		then: "the dates are correct"
+		dataRange.beginDate == null
+		dataRange.endDate == null
+	}
 }

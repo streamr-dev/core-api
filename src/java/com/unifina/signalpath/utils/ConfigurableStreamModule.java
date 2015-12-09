@@ -1,6 +1,5 @@
 package com.unifina.signalpath.utils;
 
-import com.unifina.service.StreamService;
 import grails.converters.JSON;
 
 import java.util.Map;
