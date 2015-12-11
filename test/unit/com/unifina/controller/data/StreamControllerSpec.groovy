@@ -3,7 +3,6 @@ package com.unifina.controller.data
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.ControllerUnitTestMixin
 import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
@@ -47,7 +46,8 @@ class StreamControllerSpec extends Specification {
 
 	void "successful stream create json api call"() {
 		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret, name: "Test stream", description: "Test stream", localId: "my-stream-id"]
+			request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+			request.json = [name: "Test stream", description: "Test stream", localId: "my-stream-id"]
 			request.method = 'POST'
 			request.requestURI = '/api/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
 			withFilters([action:'apiCreate']) {
@@ -66,7 +66,8 @@ class StreamControllerSpec extends Specification {
 	
 	void "invalid stream create json api call credentials"() {
 		when:
-			request.json = [key: user.apiKey, secret: "wrong secret", name: "Test stream", description: "Test stream", localId: "my-stream-id"]
+			request.addHeader("Authorization", "Token ${user.apiKey}:wrongSecret")
+			request.json = [name: "Test stream", description: "Test stream", localId: "my-stream-id"]
 			request.method = 'POST'
 			request.requestURI = '/api/stream/create'
 			withFilters([action:'apiCreate']) {
@@ -79,7 +80,7 @@ class StreamControllerSpec extends Specification {
 	
 	void "invalid stream create json api call values"() {
 		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret]
+			request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
 			request.method = 'POST'
 			request.requestURI = '/api/stream/create'
 			withFilters([action:'apiCreate']) {
@@ -109,7 +110,8 @@ class StreamControllerSpec extends Specification {
 		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
 		
 		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret, localId: stream.localId]
+			request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+			request.json = [localId: stream.localId]
 			request.method = 'POST'
 			request.requestURI = '/api/stream/lookup'
 			withFilters([action:'apiLookup']) {
@@ -124,7 +126,8 @@ class StreamControllerSpec extends Specification {
 		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
 		
 		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret, localId: "wrong local id"]
+			request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+			request.json = [localId: "wrong local id"]
 			request.method = 'POST'
 			request.requestURI = '/api/stream/lookup'
 			withFilters([action:'apiLookup']) {
