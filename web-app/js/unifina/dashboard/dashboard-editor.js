@@ -183,7 +183,7 @@ var DashboardItemView = Backbone.View.extend({
 			var template = _.template($(templateName).html())
 			this.$el.find(".widget-content").append(template(this.model.toJSON()))
 		} else {
-			throw "No webcomponent defined for module "+this.model.get("uiChannel").module.id+"!"
+			throw new Error("No webcomponent defined for module "+this.model.get("uiChannel").module.id+"!")
 		}
 
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
