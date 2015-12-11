@@ -48,6 +48,12 @@ class UnifinaCoreAPIFilters {
 		else return annotation
 	}
 
+	/**
+	 * Parses apiKey and apiSecret from Authorization token
+	 *
+	 * @param s "Authorization: Token a:b"
+	 * @return ["a", "b"] on success, null on failure
+	 */
 	@CompileStatic
 	private static String[] parseAuthorizationHeader(String s) {
 		s = s?.trim()

@@ -91,28 +91,6 @@ class StreamController {
 		}
 	}
 	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiCreate() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser)
-		if (stream.hasErrors()) {
-			log.info(stream.errors)
-			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
-		}
-		else {
-			render ([success:true, stream:stream.uuid, auth:stream.apiKey, name:stream.name, description:stream.description, localId:stream.localId] as JSON)
-		}
-	}
-	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiLookup() {
-		Stream stream = Stream.findByUserAndLocalId(request.apiUser, request.JSON?.localId)
-		if (!stream)
-			render (status:404, text: [success:false, error: "stream not found"] as JSON)
-		else render ([stream:stream.uuid] as JSON)
-	}
-	
 	def configure() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
