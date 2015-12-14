@@ -8,8 +8,6 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class StreamApiController {
 
-	static namespace = "api-v1"
-
 	def streamService
 
 	@StreamrApi
@@ -24,7 +22,7 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def create() {
+	def save() {
 		Stream stream
 		if (request.JSON.fields) {
 			stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.fields)
@@ -37,13 +35,5 @@ class StreamApiController {
 		} else {
 			render([success: true, stream: stream.uuid, auth: stream.apiKey, name: stream.name, description: stream.description, localId: stream.localId] as JSON)
 		}
-	}
-
-	@StreamrApi
-	def lookup() {
-		Stream stream = Stream.findByUserAndLocalId(request.apiUser, request.JSON?.localId)
-		if (!stream)
-			render (status:404, text: [success:false, error: "stream not found"] as JSON)
-		else render ([stream:stream.uuid] as JSON)
 	}
 }
