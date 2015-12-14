@@ -1,12 +1,12 @@
 package com.unifina.service
 
-import com.unifina.data.IFeed
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.task.Task
+import com.unifina.feed.AbstractFeed
 import com.unifina.feed.AbstractFeedProxy
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
@@ -161,7 +161,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 
 		@Override
 		void sendMessage(Stream stream, Object key, Map message) {
-			Collection<IFeed> feeds = globals.getDataSource().getFeeds();
+			Collection<AbstractFeed> feeds = globals.getDataSource().getFeeds();
 			if (feeds.size() != 1) {
 				throw new RuntimeException("Feeds was of unexpected size " + feeds.size() + "!= 1")
 			}
