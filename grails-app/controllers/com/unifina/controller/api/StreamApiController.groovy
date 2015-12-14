@@ -25,13 +25,17 @@ class StreamApiController {
 
 	@StreamrApi
 	def create() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser)
+		Stream stream
+		if (request.JSON.fields) {
+			stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.fields)
+		} else {
+			stream = streamService.createUserStream(request.JSON, request.apiUser)
+		}
 		if (stream.hasErrors()) {
 			log.info(stream.errors)
-			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
-		}
-		else {
-			render ([success:true, stream:stream.uuid, auth:stream.apiKey, name:stream.name, description:stream.description, localId:stream.localId] as JSON)
+			render(status: 400, text: [success: false, error: "validation error", details: stream.errors] as JSON)
+		} else {
+			render([success: true, stream: stream.uuid, auth: stream.apiKey, name: stream.name, description: stream.description, localId: stream.localId] as JSON)
 		}
 	}
 
