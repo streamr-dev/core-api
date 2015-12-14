@@ -1,4 +1,3 @@
-var CHART
 (function(exports) {
 
 /**
@@ -60,35 +59,41 @@ function StreamrChart(parent, options) {
 
 	// Range dropdown
 	if (this.options.rangeDropdown) {
-		var $rangeSelector = $("<select class='chart-range-selector chart-show-on-run form-control pull-right' title='Range'></select>");
-		this.rangeButtons = [
-			{text:"All", type: "all"},
-			{text:"month",count:30*24*60*60*1000, type: "millisecond"},
-			{text:"week",count:7*24*60*60*1000, type: "millisecond"},
-			{text:"day",count:24*60*60*1000, type: "millisecond"},
-			{text:"12 h",count:12*60*60*1000, type: "millisecond"},
-			{text:"8 h",count:8*60*60*1000, type: "millisecond"},
-			{text:"4 h",count:4*60*60*1000, type: "millisecond"},
-			{text:"2 h",count:2*60*60*1000, type: "millisecond"},
-			{text:"30 min",count:30*60*1000, type: "millisecond"},
-			{text:"1 h",count:60*60*1000, type: "millisecond"},
-			{text:"15 min",count:15*60*1000, type: "millisecond"},
-			{text:"1 min",count:60*1000, type: "millisecond"},
-			{text:"15 sec",count:15*1000, type: "millisecond"},
-			{text:"1 sec",count:1*1000, type: "millisecond"}
-		]
-
-		$.each(this.rangeButtons, function(i, c){
-			var $option =  $("<option value='"+i+"'>"+c.text+"</option>")
-			$rangeSelector.append($option)
+		var $rangeDiv = $("<select class='chart-range-selector chart-show-on-run form-control pull-right' title='Range'></select>");
+		var rangeConfig = [{name:"1 sec",range:1*1000},
+		                    {name:"15 sec",range:15*1000},
+		                    {name:"1 min",range:60*1000},
+		                    {name:"15 min",range:15*60*1000},
+		                    {name:"30 min",range:30*60*1000},
+		                    {name:"1 h",range:60*60*1000},
+		                    {name:"2 h",range:2*60*60*1000},
+		                    {name:"4 h",range:4*60*60*1000},
+		                    {name:"8 h",range:8*60*60*1000},
+		                    {name:"12 h",range:12*60*60*1000},
+		                    {name:"day",range:24*60*60*1000},
+		                    {name:"week",range:7*24*60*60*1000},
+		                    {name:"month",range:30*24*60*60*1000},
+		                    {name:"All",range:""}]
+		
+		rangeConfig.reverse()
+		rangeConfig.forEach(function(c) {
+			var $option =  $("<option value='"+c.range+"'>"+c.name+"</option>")
+			$rangeDiv.append($option)
+		})
+		
+		$rangeDiv.on('change', function() {
+			var r = $(this).val()
+			if (r) {
+				r = parseInt(r)
+			}
+			else r = null
+			
+			_this.range = r
+			if (_this.chart)
+				_this.redraw()
 		})
 
-		$rangeSelector.on('change', function(e) {
-			_this.range = _this.rangeButtons[$(this).val()].count
-			_this.chart.rangeSelector.clickButton($(this).val())
-		})
-
-		this.$parent.append($rangeSelector);
+		this.$parent.append($rangeDiv);
 	}
 
 	$(this).on("initialized", function() {
@@ -153,17 +158,14 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 			ordinal: false
 		},
 
-		rangeSelector: {
-			enabled: true,
-			buttons: _this.rangeButtons,
-			inputEnabled: false,
-			height: 0
-		},
-
 		yAxis: yAxis, 
 
 		legend: {
 			enabled: true
+		},
+		
+		rangeSelector: {
+			enabled: false
 		},
 
 		navigator: {
@@ -187,11 +189,7 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 	opts = $.extend(true, {}, this.options, opts);
 	
 	// Create the chart	
-	this.chart = CHART = new Highcharts.StockChart(opts);
-	$(this.chart.rangeSelector.zoomText.element).remove();
-	$.each(this.chart.rangeSelector.buttons,function(i,b){
-		$(b.element).remove();
-	});
+	this.chart = new Highcharts.StockChart(opts);
 	
 	// Collect pointers to actual series objects into seriesMeta[i].impl
 	// This helps in indexkeeping, as the navigator series is appended
@@ -217,15 +215,15 @@ StreamrChart.prototype.redraw = function(scrollToEnd) {
 	this.animationRequest = null
 
 	if (this.chart) {
-		//var extremes = this.chart.xAxis[0].getExtremes();
-        //
-		//var mx = (this.range==null || scrollToEnd ? this.maxTime : extremes.max);
-		//if (mx - this.minTime < this.range)
-		//	mx = Math.min(this.maxTime, this.minTime + this.range);
-        //
-		//var mn = (this.range==null ? this.minTime : Math.max(this.minTime, mx - this.range));
-        //
-		//this.chart.xAxis[0].setExtremes(mn,mx,false,false);
+		var extremes = this.chart.xAxis[0].getExtremes();
+		
+		var mx = (this.range==null || scrollToEnd ? this.maxTime : extremes.max);
+		if (mx - this.minTime < this.range)
+			mx = Math.min(this.maxTime, this.minTime + this.range);
+		
+		var mn = (this.range==null ? this.minTime : Math.max(this.minTime, mx - this.range));
+		
+		this.chart.xAxis[0].setExtremes(mn,mx,false,false);
 		
 		this.chart.redraw();
 	}
@@ -418,24 +416,25 @@ StreamrChart.prototype.handleMessage = function(d) {
 					seriesMeta[d.s].min = d.y
 				if (seriesMeta[d.s].max < d.y)
 					seriesMeta[d.s].max = d.y
-
+					
 				// Only add new points to the navigator if they are at least ten minutes apart
 				if (d.s===0 && (!this.latestNavigatorTimestamp || d.x > this.latestNavigatorTimestamp + 60000)) {
 					this.navigatorSeries.addPoint([d.x, d.y],false,false,false);
 					this.latestNavigatorTimestamp = d.x
 				}
+
 			}
 			// Come here if there are series that are not yet added to the chart (requires at least 2 data points)
 			// We might come here after adding series to the chart on-the-fly
 			else {
 				this.pushDataToMetaSeries(seriesMeta[d.s], [d.x, d.y])
-
+				
 				// Find the first unadded series and see if it can be added
 				// (Unfortunately series need to be added in order to avoid problems with Highcharts)
 				for (var i=0;i<seriesMeta.length;i++) {
 					if (!seriesMeta[i].impl) {
 						if (seriesMeta[i].data!=null && seriesMeta[i].data.length>1)
-							seriesMeta[i].impl = chart.addSeries(seriesMeta[i],false,false);
+							seriesMeta[i].impl = chart.addSeries(seriesMeta[i],false,false);	
 						break
 					}
 				}
