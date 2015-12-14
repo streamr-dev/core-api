@@ -23,7 +23,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/live/request"(controller: "live", action: "request")
 
 		// API v1 url mappings
-		"/api/v1/streams"(controller: "streamApi", action: "index", method: "GET", namespace: "api-v1")
-		"/api/v1/streams"(controller: "streamApi", action: "create", method: "POST", namespace: "api-v1")
+		"/api/v1/stream"(controller: "streamApi", action: "index", method: "GET", namespace: "api-v1")
+		"/api/v1/stream"(controller: "streamApi", action: "create", method: "POST", namespace: "api-v1")
 	}
 }

@@ -14,8 +14,13 @@ class StreamApiController {
 
 	@StreamrApi
 	def index() {
-		List<Stream> streams = Stream.findAllByUser(request.apiUser)
-		render (streams as JSON)
+		def streams
+		if (request.name) {
+			streams = Stream.findAllByUserAndName(request.apiUser, request.name)
+		} else {
+			streams = Stream.findAllByUser(request.apiUser)
+		}
+		render(streams as JSON)
 	}
 
 	@StreamrApi
