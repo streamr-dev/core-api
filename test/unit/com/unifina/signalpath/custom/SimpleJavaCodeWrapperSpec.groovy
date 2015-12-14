@@ -25,6 +25,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		globals = module.globals = GlobalsFactory.createInstance([:], grailsApplication)
 		module.init()
 		module.hash = 666
+		module.connectionsReady()
     }
 
 	void "simpleJavaCodeWrapper gives correct answer"() {
