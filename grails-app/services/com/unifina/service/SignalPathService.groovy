@@ -344,7 +344,6 @@ class SignalPathService {
 			
 		if (user) {
 			json.key = user.apiKey
-			json.secret = user.apiSecret
 		}
 
 		req.header("Content-Type", "application/json")

@@ -27,7 +27,7 @@ class StreamApiControllerSpec extends Specification {
 		controller.streamService = streamService
 		controller.streamService.kafkaService = Mock(KafkaService)
 
-		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
+		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
 
 		streamService.createUserStream([name: "stream", localId: "localId1"], user)
@@ -37,7 +37,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "find all user's streams"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: 'index']) {
@@ -50,7 +50,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "search user's streams by name"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.name = "stream"
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
@@ -64,12 +64,12 @@ class StreamApiControllerSpec extends Specification {
 
 	void "successful stream create json api call"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.json = [name: "Test stream", description: "Test stream", localId: "my-stream-id"]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
-		withFilters([action:'create']) {
-			controller.create()
+		withFilters([action:'save']) {
+			controller.save()
 		}
 		then:
 		response.json.success
@@ -84,12 +84,12 @@ class StreamApiControllerSpec extends Specification {
 
 	void "invalid stream create json api call credentials"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:wrongSecret")
+		request.addHeader("Authorization", "Token wrongKey")
 		request.json = [name: "Test stream", description: "Test stream", localId: "my-stream-id"]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create'
-		withFilters([action:'create']) {
-			controller.create()
+		withFilters([action:'save']) {
+			controller.save()
 		}
 		then:
 		response.json.success == false
@@ -98,47 +98,14 @@ class StreamApiControllerSpec extends Specification {
 
 	void "invalid stream create json api call values"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
+		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create'
-		withFilters([action:'create']) {
-			controller.create()
+		withFilters([action:'save']) {
+			controller.save()
 		}
 		then:
 		response.json.success == false
 		response.status == 400
-	}
-
-
-	void "successful stream lookup by localId"() {
-		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
-
-		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
-		request.json = [localId: stream.localId]
-		request.method = 'POST'
-		request.requestURI = '/api/v1/stream/lookup'
-		withFilters([action:'lookup']) {
-			controller.lookup()
-		}
-		then:
-		response.status == 200
-		response.json.stream == stream.uuid
-	}
-
-	void "unsuccessful stream lookup by localId"() {
-		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
-
-		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}:${user.apiSecret}")
-		request.json = [localId: "wrong local id"]
-		request.method = 'POST'
-		request.requestURI = '/api/v1/stream/lookup'
-		withFilters([action:'lookup']) {
-			controller.lookup()
-		}
-		then:
-		response.status == 404
-		response.json.success == false
 	}
 }

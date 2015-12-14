@@ -85,19 +85,14 @@ class UnifinaSecurityService {
 	}
 	
 	/**
-	 * Looks up a user based on api keys. Returns null if the keys do not match a user.
+	 * Looks up a user based on api key. Returns null if the keys do not match a user.
 	 * @param apiKey
-	 * @param apiSecret
 	 * @return
 	 */
-	SecUser getUserByApiKey(String apiKey, String apiSecret) {
-		if (!apiKey || !apiSecret)
+	SecUser getUserByApiKey(String apiKey) {
+		if (!apiKey)
 			return null
-			
-		SecUser user = SecUser.findByApiKey(apiKey)
-		if (!user || user.apiSecret != apiSecret)
-			return null
-		else return user
+		return SecUser.findByApiKey(apiKey)
 	}
 	
 	def passwordValidator = { String password, command ->

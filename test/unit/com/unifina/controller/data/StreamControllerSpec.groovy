@@ -27,7 +27,7 @@ class StreamControllerSpec extends Specification {
 		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
 		
 		// Users
-		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
+		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate:false)
 		
 	}

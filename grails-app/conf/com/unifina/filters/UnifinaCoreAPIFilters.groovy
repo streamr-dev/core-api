@@ -49,21 +49,18 @@ class UnifinaCoreAPIFilters {
 	}
 
 	/**
-	 * Parses apiKey and apiSecret from Authorization token
+	 * Parses apiKey from Authorization token
 	 *
-	 * @param s "Authorization: Token a:b"
-	 * @return ["a", "b"] on success, null on failure
+	 * @param s "Authorization: Token apiKey"
+	 * @return ["apiKey"] on success, null on failure
 	 */
 	@CompileStatic
-	private static String[] parseAuthorizationHeader(String s) {
+	private static String parseAuthorizationHeader(String s) {
 		s = s?.trim()
 		if (s != null && !s.isEmpty()) {
 			String[] parts = s.split("\\s+")
 			if (parts.length == 2 && parts[0].toLowerCase() == "token") {
-				String[] keyParts = parts[1].split(":")
-				if (keyParts.length == 2) {
-					return keyParts
-				}
+				return parts[1]
 			}
 		}
 		return null
@@ -74,19 +71,19 @@ class UnifinaCoreAPIFilters {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
-				def result = parseAuthorizationHeader(request.getHeader("Authorization"))
+				def apiKey = parseAuthorizationHeader(request.getHeader("Authorization"))
 				
-				if (!result) {
+				if (!apiKey) {
 					render (status: 400, text: [
 						success: false,
-						error: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token key:secret' ?"
+						error: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
 					] as JSON)
 					return false
 				}
 
 				SecUser user = null
-				if (result[0] && result[1]) {
-					user = unifinaSecurityService.getUserByApiKey(result[0], result[1])
+				if (apiKey) {
+					user = unifinaSecurityService.getUserByApiKey(apiKey)
 				}
 
 				if (!user && annotation.requiresAuthentication()) {

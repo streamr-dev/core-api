@@ -54,8 +54,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("userDetailsService").grailsApplication = grailsApplication
 		
 		// Users
-		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
-		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret")
+		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
+		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey")
 		me.save(validate:false)
 		anotherUser.save(validate:false)
 		
@@ -148,7 +148,7 @@ class UnifinaSecurityServiceSpec extends Specification {
 	
 	void "looking up a user based on correct api keys"() {
 		when:
-		def user = service.getUserByApiKey("apiKey", "apiSecret")
+		def user = service.getUserByApiKey("apiKey")
 		
 		then:
 		user.username == me.username
@@ -156,13 +156,13 @@ class UnifinaSecurityServiceSpec extends Specification {
 	
 	void "looking up a user with incorrect api keys"() {
 		when:
-		def user = service.getUserByApiKey("apiKey", "wrong secret")
+		def user = service.getUserByApiKey("incorrectApiKey")
 		
 		then:
 		!user
 		
 		when:
-		user = service.getUserByApiKey("wrong api key", "apiSecret")
+		user = service.getUserByApiKey("wrong api key")
 		
 		then:
 		!user
