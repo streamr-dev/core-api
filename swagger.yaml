@@ -10,8 +10,7 @@ basePath: /api/v1
 produces:
   - application/json
 paths:
-
-  /stream:
+  /streams:
     get:
       summary: List streams
       description: |
@@ -31,7 +30,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Stream'
-              
     post:
       summary: Create a new stream
       description: |
@@ -42,7 +40,7 @@ paths:
           description: Stream object
           required: true
           schema:
-            $ref: '#/definitions/Stream'
+            $ref: '#/definitions/StreamCreateRequest'
       tags:
         - Stream
       responses:
@@ -50,245 +48,162 @@ paths:
           description: The stream that was created
           schema:
             $ref: '#/definitions/Stream'
-            
-  /estimates/price:
+  
+  /canvases:
     get:
-      summary: Price Estimates
-      description: >
-        The Price Estimates endpoint returns an estimated price range
-
-        for each product offered at a given location. The price estimate is
-
-        provided as a formatted string with the full price range and the
-        localized
-
-        currency symbol.<br><br>The response also includes low and high
-        estimates,
-
-        and the [ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code
-        for
-
-        situations requiring currency conversion. When surge is active for
-        a particular
-
-        product, its surge_multiplier will be greater than 1, but the price
-        estimate
-
-        already factors in this multiplier.
+      summary: List saved canvases
+      description: |
+        Lists saved canvases from your archive.
       parameters:
-        - name: start_latitude
+        - name: name
           in: query
-          description: Latitude component of start location.
-          required: true
-          type: number
-          format: double
-        - name: start_longitude
-          in: query
-          description: Longitude component of start location.
-          required: true
-          type: number
-          format: double
-        - name: end_latitude
-          in: query
-          description: Latitude component of end location.
-          required: true
-          type: number
-          format: double
-        - name: end_longitude
-          in: query
-          description: Longitude component of end location.
-          required: true
-          type: number
-          format: double
-      tags:
-        - Estimates
+          description: Filter results by canvas name.
+          required: false
+          type: string
       responses:
         '200':
-          description: An array of price estimates by product
+          description: An array of canvases
           schema:
             type: array
             items:
-              $ref: '#/definitions/PriceEstimate'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /estimates/time:
-    get:
-      summary: Time Estimates
-      description: 'The Time Estimates endpoint returns ETAs for all products offered at a given location, with the responses expressed as integers in seconds. We recommend that this endpoint be called every minute to provide the most accurate, up-to-date ETAs.'
+              $ref: '#/definitions/Canvas'
+    post:
+      summary: Create a new canvas
+      description: |
+        Creates a new canvas.
       parameters:
-        - name: start_latitude
-          in: query
-          description: Latitude component of start location.
+        - name: body
+          in: body
+          description: Canvas object
           required: true
-          type: number
-          format: double
-        - name: start_longitude
-          in: query
-          description: Longitude component of start location.
-          required: true
-          type: number
-          format: double
-        - name: customer_uuid
-          in: query
-          type: string
-          format: uuid
-          description: Unique customer identifier to be used for experience customization.
-        - name: product_id
-          in: query
-          type: string
-          description: 'Unique identifier representing a specific product for a given latitude & longitude.'
+          schema:
+            $ref: '#/definitions/Canvas'
       tags:
-        - Estimates
+        - Stream
       responses:
         '200':
-          description: An array of products
+          description: The canvas that was created
+          schema:
+            $ref: '#/definitions/Canvas'
+      
+  /live:
+    get:
+      summary: List live canvases
+      description: |
+        Lists live canvases.
+      parameters:
+        - name: state
+          in: query
+          description: Filter results by state.
+          required: false
+          type: string
+          enum: [running, stopped]
+        - name: name
+          in: query
+          description: Filter results by canvas name.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of canvases
           schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me:
-    get:
-      summary: User Profile
-      description: The User Profile endpoint returns information about the Uber user that has authorized with the application.
-      tags:
-        - User
-      responses:
-        '200':
-          description: Profile information for a user
-          schema:
-            $ref: '#/definitions/Profile'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /history:
-    get:
-      summary: User Activity
-      description: "The User Activity endpoint returns data about a user's lifetime activity with Uber. The response will include pickup locations and times, dropoff locations and times, the distance of past requests, and information about which products were requested.<br><br>The history array in the response will have a maximum length based on the limit parameter. The response value count may exceed limit, therefore subsequent API requests may be necessary."
+              $ref: '#/definitions/Canvas'
+    post:
+      summary: Create and start a new live canvas
+      description: |
+        Create and start a new live canvas.
       parameters:
-        - name: offset
-          in: query
-          type: integer
-          format: int32
-          description: Offset the list of returned results by this amount. Default is zero.
-        - name: limit
-          in: query
-          type: integer
-          format: int32
-          description: 'Number of items to retrieve. Default is 5, maximum is 100.'
+        - name: body
+          in: body
+          description: Canvas object
+          required: true
+          schema:
+            $ref: '#/definitions/Canvas'
       tags:
-        - User
+        - Stream
       responses:
         '200':
-          description: History information for the given user
+          description: The canvas that was started
           schema:
-            $ref: '#/definitions/Activities'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Canvas'
+
 definitions:
   Stream:
     type: object
     properties:
       id:
         type: string
-        description: 'Unique identifier for this stream.'
-      type:
-        type: string
-        description: 'TODO'
+        description: Unique identifier for this stream.
       name:
         type: string
-        description: 'Name of this stream.'
+        description: Name of this stream.
       description:
         type: string
-        description: 'Description of this stream.'
+        description: Description of this stream.
       auth:
         type: string
-        description: 'Auth key needed to produce data to this stream.'
-      config:
-        type: map
-        description: 'Stream field config.'
-  PriceEstimate:
+        description: Auth key needed to produce data to this stream.
+      streamConfig:
+        $ref: '#/definitions/StreamConfig'
+        description: Stream configuration
+  
+  StreamCreateRequest:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of this stream.
+      description:
+        type: string
+        description: Description of this stream.
+      streamConfig:
+        $ref: '#/definitions/StreamConfig'
+        description: Stream configuration
+  
+  StreamConfig:
     type: object
     properties:
-      product_id:
-        type: string
-        description: 'Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles'
-      currency_code:
-        type: string
-        description: '[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code.'
-      display_name:
-        type: string
-        description: Display name of product.
-      estimate:
-        type: string
-        description: 'Formatted string of estimate in local currency of the start location. Estimate could be a range, a single number (flat rate) or "Metered" for TAXI.'
-      low_estimate:
-        type: number
-        description: Lower bound of the estimated price.
-      high_estimate:
-        type: number
-        description: Upper bound of the estimated price.
-      surge_multiplier:
-        type: number
-        description: Expected surge multiplier. Surge is active if surge_multiplier is greater than 1. Price estimate already factors in the surge multiplier.
-  Profile:
-    type: object
-    properties:
-      first_name:
-        type: string
-        description: First name of the Uber user.
-      last_name:
-        type: string
-        description: Last name of the Uber user.
-      email:
-        type: string
-        description: Email address of the Uber user
-      picture:
-        type: string
-        description: Image URL of the Uber user.
-      promo_code:
-        type: string
-        description: Promo code of the Uber user.
-  Activity:
-    type: object
-    properties:
-      uuid:
-        type: string
-        description: Unique identifier for the activity
-  Activities:
-    type: object
-    properties:
-      offset:
-        type: integer
-        format: int32
-        description: Position in pagination.
-      limit:
-        type: integer
-        format: int32
-        description: Number of items to retrieve (100 max).
-      count:
-        type: integer
-        format: int32
-        description: Total number of items available.
-      history:
-        type: array
-        items:
-          $ref: '#/definitions/Activity'
-  Error:
-    type: object
-    properties:
-      code:
-        type: integer
-        format: int32
-      message:
-        type: string
       fields:
+        type: array
+        default: []
+        description: An array containing field definitions for this stream.
+        items:
+          $ref: '#/definitions/FieldDef'
+  
+  FieldDef:
+    type: object
+    required:
+      - name
+      - type
+    properties:
+      name:
         type: string
+        description: name of the field
+      type:
+        type: string
+        description: type of the field
+        enum: [number, string, boolean, list, map]
+
+  Canvas:
+    type: object
+    required:
+      - modules
+    properties:
+      modules:
+        type: array
+        default: []
+        items:
+          $ref: '#/definitions/Module'
+      settings:
+        $ref: '#/definitions/CanvasSettings'
+
+  CanvasSettings:
+    type: object
+    
+  Module:
+    type: object
+    
