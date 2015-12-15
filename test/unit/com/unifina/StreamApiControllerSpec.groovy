@@ -35,7 +35,7 @@ class StreamApiControllerSpec extends Specification {
 		streamService.createUserStream([name: "atream"], user)
 	}
 
-	void "find all user's streams"() {
+	void "find all streams of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.method = "GET"
@@ -48,7 +48,7 @@ class StreamApiControllerSpec extends Specification {
 		response.json.length() == 3
 	}
 
-	void "search user's streams by name"() {
+	void "find streams by name of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.name = "stream"
@@ -65,11 +65,14 @@ class StreamApiControllerSpec extends Specification {
 		response.json[0].apiKey.length() == 22
 		response.json[0].name == "stream"
 		response.json[0].feedId > 0
-		response.json[0].streamConfig.length() > 5
+		response.json[0].config == [
+		    topic: response.json[0].uuid,
+			fields: []
+		]
 		response.json[0].description == "description"
 	}
 
-	void "successful stream create json api call"() {
+	void "create a new stream for currently logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.json = [name: "Test stream", description: "Test stream"]
@@ -79,16 +82,55 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.success
-		response.json.stream instanceof String
-		response.json.auth instanceof String
+		response.json.id > 0
+		response.json.uuid.length() == 22
+		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
+		response.json.feedId > 0
+		response.json.config == [
+			topic: response.json.uuid,
+			fields: []
+		]
 		response.json.description == "Test stream"
 		Stream.count() == 4
-		Stream.list()[0].user == user
+		Stream.findById(response.json.id).user == user
 	}
 
-	void "invalid stream create json api call credentials"() {
+	void "create a new stream (with fields) for currently logged in user"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.json = [
+			name: "Test stream",
+			description: "Test stream",
+			fields: [
+			    [name: "profit", type: "number"],
+				[name: "keyword", type: "string"]
+			]
+		]
+		request.method = 'POST'
+		request.requestURI = '/api/v1/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
+		withFilters([action:'save']) {
+			controller.save()
+		}
+		then:
+		response.json.id > 0
+		response.json.uuid.length() == 22
+		response.json.apiKey.length() == 22
+		response.json.name == "Test stream"
+		response.json.feedId > 0
+		response.json.config == [
+			topic: response.json.uuid,
+			fields: [
+				[name: "profit", type: "number"],
+				[name: "keyword", type: "string"]
+			]
+		]
+		response.json.description == "Test stream"
+		Stream.count() == 4
+		Stream.findById(response.json.id).user == user
+	}
+
+	void "creating stream fails given invalid token"() {
 		when:
 		request.addHeader("Authorization", "Token wrongKey")
 		request.json = [name: "Test stream", description: "Test stream"]
@@ -102,7 +144,7 @@ class StreamApiControllerSpec extends Specification {
 		response.status == 401
 	}
 
-	void "invalid stream create json api call values"() {
+	void "creating stream fails when required parameters are missing"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.method = 'POST'

@@ -1,6 +1,7 @@
 package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
+import groovy.json.JsonSlurper
 
 class Stream implements Comparable {
 	Long id
@@ -47,7 +48,7 @@ class Stream implements Comparable {
 			apiKey: apiKey,
 			name: name,
 			feedId: feed.id,
-			streamConfig: config,
+			config: config == null || config.empty ? config : new JsonSlurper().parseText(config),
 			description: description
 		]
 	}
