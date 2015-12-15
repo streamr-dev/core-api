@@ -30,7 +30,7 @@ class StreamApiControllerSpec extends Specification {
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
 
-		streamService.createUserStream([name: "stream"], user)
+		streamService.createUserStream([name: "stream", description: "description"], user)
 		streamService.createUserStream([name: "ztream"], user)
 		streamService.createUserStream([name: "atream"], user)
 	}
@@ -60,6 +60,13 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.json.length() == 1
+		response.json[0].id > 0
+		response.json[0].uuid.length() == 22
+		response.json[0].apiKey.length() == 22
+		response.json[0].name == "stream"
+		response.json[0].feedId > 0
+		response.json[0].streamConfig.length() > 5
+		response.json[0].description == "description"
 	}
 
 	void "successful stream create json api call"() {

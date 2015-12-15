@@ -7,7 +7,7 @@ class Stream implements Comparable {
 	String uuid
 	String apiKey
 	SecUser user
-	
+
 	String name
 	Feed feed
 	String streamConfig
@@ -15,7 +15,7 @@ class Stream implements Comparable {
 	
 	Date firstHistoricalDay
 	Date lastHistoricalDay
-	
+
 	static constraints = {
 		name(blank:false)
 		
@@ -39,6 +39,18 @@ class Stream implements Comparable {
 	public String toString() {
 		return name
 	}
+
+	def toMap() {
+		[
+			id: id,
+			uuid: uuid,
+			apiKey: apiKey,
+			name: name,
+			feedId: feed.id,
+			streamConfig: streamConfig,
+			description: description
+		]
+	}
 	
 	@Override
 	public int compareTo(Object arg0) {
@@ -55,5 +67,4 @@ class Stream implements Comparable {
 	public boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
-	
 }

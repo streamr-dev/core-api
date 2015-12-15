@@ -18,7 +18,7 @@ class StreamApiController {
 		} else {
 			streams = Stream.findAllByUser(request.apiUser)
 		}
-		render(streams as JSON)
+		render(streams.collect { it.toMap() } as JSON)
 	}
 
 	@StreamrApi
