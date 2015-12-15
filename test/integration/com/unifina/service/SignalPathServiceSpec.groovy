@@ -66,7 +66,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 
 		// Create stream
 		stream = streamService.createUserStream([name: "serializationTestStream"], user)
-		stream.streamConfig = (
+		stream.config = (
 			[
 				fields: [
 					[name: "a", type: "number"],

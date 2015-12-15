@@ -32,7 +32,7 @@ class KafkaServiceTests {
 		feed.save(validate:false)
 		assert Feed.count()==1
 		
-		stream = new Stream(feed: feed, name: "testfeed", streamConfig: "{'topic':'test'}")
+		stream = new Stream(feed: feed, name: "testfeed", config: "{'topic':'test'}")
 		stream.save(validate:false)
 		assert Stream.count()==1
 		assert Stream.findByFeed(feed)==stream

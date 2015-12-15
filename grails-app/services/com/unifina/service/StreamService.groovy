@@ -19,7 +19,7 @@ class StreamService {
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
 		stream.feed = Feed.load(7L) // API stream
-		stream.streamConfig = ([fields: fields, topic: stream.uuid] as JSON)
+		stream.config = ([fields: fields, topic: stream.uuid] as JSON)
 		
 		stream.save()
 		

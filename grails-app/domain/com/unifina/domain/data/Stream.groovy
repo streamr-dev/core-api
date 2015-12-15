@@ -10,7 +10,7 @@ class Stream implements Comparable {
 
 	String name
 	Feed feed
-	String streamConfig
+	String config
 	String description
 	
 	Date firstHistoricalDay
@@ -19,7 +19,7 @@ class Stream implements Comparable {
 	static constraints = {
 		name(blank:false)
 		
-		streamConfig(nullable:true)
+		config(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
@@ -32,7 +32,7 @@ class Stream implements Comparable {
 		name index:"name_idx"
 		uuid index: "uuid_idx"
 		feed lazy:false
-		streamConfig type: 'text'
+		config type: 'text'
 	}
 	
 	@Override
@@ -47,7 +47,7 @@ class Stream implements Comparable {
 			apiKey: apiKey,
 			name: name,
 			feedId: feed.id,
-			streamConfig: streamConfig,
+			streamConfig: config,
 			description: description
 		]
 	}

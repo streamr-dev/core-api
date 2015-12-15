@@ -14,7 +14,7 @@
         		var client = new StreamrClient({
 					server: "${grailsApplication.config.streamr.ui.server}"
 				})
-        		var streamConfig = ${raw(stream.streamConfig ?: "{}")}
+        		var streamConfig = ${raw(stream.config ?: "{}")}
         		
         		listView = new ListView({
         			el: $("#stream-fields"),

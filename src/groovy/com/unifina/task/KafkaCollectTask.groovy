@@ -2,14 +2,10 @@ package com.unifina.task;
 
 import grails.converters.JSON
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.text.SimpleDateFormat
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-
-import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.task.Task
 import com.unifina.feed.kafka.KafkaFeedFileName
@@ -44,7 +40,7 @@ public class KafkaCollectTask extends AbstractTask {
 		final long beginTime = (config.beginDate instanceof String ? df.parse(config.beginDate).time : config.beginDate)
 		final long endTime = (config.endDate instanceof String ? df.parse(config.endDate).time : config.endDate)
 		String beginTimeAsString = new Date(beginTime).toString()
-		Map streamConfig = JSON.parse(stream.streamConfig)
+		Map streamConfig = JSON.parse(stream.config)
 		String topic = streamConfig.topic
 		
 		String name = config.filename
