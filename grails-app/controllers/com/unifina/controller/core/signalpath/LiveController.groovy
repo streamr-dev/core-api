@@ -71,7 +71,8 @@ class LiveController {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 
 		Map signalPathData = JSON.parse(rsp.json)
-		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication))
+		// Reconstruct as rsp.user
+		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication, rsp.user))
 		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
 		
 		render result as JSON
