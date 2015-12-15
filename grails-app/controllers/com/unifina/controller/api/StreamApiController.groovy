@@ -33,7 +33,13 @@ class StreamApiController {
 			log.info(stream.errors)
 			render(status: 400, text: [success: false, error: "validation error", details: stream.errors] as JSON)
 		} else {
-			render([success: true, stream: stream.uuid, auth: stream.apiKey, name: stream.name, description: stream.description, localId: stream.localId] as JSON)
+			render([
+				success: true,
+				stream: stream.uuid,
+				auth: stream.apiKey,
+				name: stream.name,
+				description: stream.description
+			] as JSON)
 		}
 	}
 }

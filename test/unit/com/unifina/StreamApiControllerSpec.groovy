@@ -30,9 +30,9 @@ class StreamApiControllerSpec extends Specification {
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
 
-		streamService.createUserStream([name: "stream", localId: "localId1"], user)
-		streamService.createUserStream([name: "ztream", localId: "localId2"], user)
-		streamService.createUserStream([name: "atream", localId: "localId2"], user)
+		streamService.createUserStream([name: "stream"], user)
+		streamService.createUserStream([name: "ztream"], user)
+		streamService.createUserStream([name: "atream"], user)
 	}
 
 	void "find all user's streams"() {
@@ -65,7 +65,7 @@ class StreamApiControllerSpec extends Specification {
 	void "successful stream create json api call"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		request.json = [name: "Test stream", description: "Test stream", localId: "my-stream-id"]
+		request.json = [name: "Test stream", description: "Test stream"]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
 		withFilters([action:'save']) {
@@ -77,7 +77,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json.auth instanceof String
 		response.json.name == "Test stream"
 		response.json.description == "Test stream"
-		response.json.localId == "my-stream-id"
 		Stream.count() == 4
 		Stream.list()[0].user == user
 	}
@@ -85,7 +84,7 @@ class StreamApiControllerSpec extends Specification {
 	void "invalid stream create json api call credentials"() {
 		when:
 		request.addHeader("Authorization", "Token wrongKey")
-		request.json = [name: "Test stream", description: "Test stream", localId: "my-stream-id"]
+		request.json = [name: "Test stream", description: "Test stream"]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create'
 		withFilters([action:'save']) {

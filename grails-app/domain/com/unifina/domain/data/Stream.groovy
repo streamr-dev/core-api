@@ -11,8 +11,6 @@ class Stream implements Comparable {
 	String name
 	Feed feed
 	String streamConfig
-	// An id local to the Feed
-	String localId
 	String description
 	
 	Date firstHistoricalDay
@@ -32,7 +30,6 @@ class Stream implements Comparable {
 	
 	static mapping = {
 		name index:"name_idx"
-		localId index: 'localId_idx'
 		uuid index: "uuid_idx"
 		feed lazy:false
 		streamConfig type: 'text'

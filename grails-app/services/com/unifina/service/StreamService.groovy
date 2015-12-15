@@ -18,9 +18,6 @@ class StreamService {
 		stream.uuid = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
-		if (stream.localId==null)
-			stream.localId = stream.name
-		
 		stream.feed = Feed.load(7L) // API stream
 		stream.streamConfig = ([fields: fields, topic: stream.uuid] as JSON)
 		

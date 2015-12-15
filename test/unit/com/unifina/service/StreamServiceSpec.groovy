@@ -35,12 +35,11 @@ class StreamServiceSpec extends Specification {
 
 	void "createUserStream results in persisted Stream"() {
 		when:
-		service.createUserStream([name: "name", localId: "localId"], null)
+		service.createUserStream([name: "name"], null)
 
 		then:
 		Stream.count() == 1
 		Stream.list().first().name == "name"
-		Stream.list().first().localId == "localId"
 	}
 
 	void "createUserStream calls kafkaService.createTopics"() {
