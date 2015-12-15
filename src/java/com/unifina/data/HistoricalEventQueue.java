@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -17,11 +16,11 @@ import com.unifina.feed.AbstractHistoricalFeed;
 import com.unifina.utils.Globals;
 import com.unifina.utils.TimeOfDayUtil;
 
-public class BacktestEventQueue extends DataSourceEventQueue {
+public class HistoricalEventQueue extends DataSourceEventQueue {
 	
-	private static final Logger log = Logger.getLogger(BacktestEventQueue.class);
+	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
 	
-	public BacktestEventQueue(Globals globals, DataSource dataSource) {
+	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
 		super(globals, dataSource);
 	}
 

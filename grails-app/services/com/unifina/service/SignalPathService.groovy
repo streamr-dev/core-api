@@ -19,7 +19,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
-import com.unifina.datasource.BacktestDataSource
+import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
@@ -125,7 +125,7 @@ class SignalPathService {
 
 		// Return the historical DataSource by default
 		if (signalPathContext.live==null || !signalPathContext.live)
-			return new BacktestDataSource(globals)
+			return new HistoricalDataSource(globals)
 		else return new RealtimeDataSource(globals)
 		
 	}
