@@ -1,4 +1,6 @@
 package com.unifina.filters
+
+import com.unifina.security.TokenAuthenticator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -18,7 +20,8 @@ import com.unifina.security.StreamrApi
  */
 
 class UnifinaCoreAPIFilters {
-	
+
+	def springSecurityService
 	def unifinaSecurityService
 	GrailsApplication grailsApplication
 	
@@ -47,43 +50,28 @@ class UnifinaCoreAPIFilters {
 		}
 		else return annotation
 	}
-
-	/**
-	 * Parses apiKey from Authorization token
-	 *
-	 * @param s "Authorization: Token apiKey"
-	 * @return ["apiKey"] on success, null on failure
-	 */
-	@CompileStatic
-	private static String parseAuthorizationHeader(String s) {
-		s = s?.trim()
-		if (s != null && !s.isEmpty()) {
-			String[] parts = s.split("\\s+")
-			if (parts.length == 2 && parts[0].toLowerCase() == "token") {
-				return parts[1]
-			}
-		}
-		return null
-	}
 	
 	def filters = {
 		authenticationFilter(uri: '/api/**') {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
-				def apiKey = parseAuthorizationHeader(request.getHeader("Authorization"))
-				
-				if (!apiKey) {
-					render (status: 400, text: [
-						success: false,
-						error: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
-					] as JSON)
+				TokenAuthenticator authenticator = new TokenAuthenticator(unifinaSecurityService)
+				SecUser user = authenticator.authenticate(request)
+
+				if (authenticator.lastAuthenticationMalformed()) {
+					render (
+						status: 400,
+						text: [
+							success: false,
+							error: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
+						] as JSON
+					)
 					return false
 				}
 
-				SecUser user = null
-				if (apiKey) {
-					user = unifinaSecurityService.getUserByApiKey(apiKey)
+				if (!user) {
+					user = springSecurityService.getCurrentUser()
 				}
 
 				if (!user && annotation.requiresAuthentication()) {
@@ -93,7 +81,6 @@ class UnifinaCoreAPIFilters {
 					request.apiUser = user
 					return true
 				}
-
 			}
 		}
 	}
