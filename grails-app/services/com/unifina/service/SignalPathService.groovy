@@ -251,7 +251,7 @@ class SignalPathService {
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (rsp.isNotSerialized()) {
+		if (rsp.isNotSerialized() || rsp.adhoc) {
 			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
 			log.info("Creating new signalPath connections " + rsp.id)
 		} else {
