@@ -409,11 +409,14 @@ definitions:
   Canvas:
     type: object
     required:
+      - name
       - modules
     properties:
+      name:
+        type: string
+        example: My canvas
       modules:
         type: array
-        default: []
         items:
           $ref: '#/definitions/Module'
       settings:
@@ -431,6 +434,15 @@ definitions:
       loadState:
         type: boolean
         default: true
+        example: true
         description: If true, an attempt to load a saved state will be made. If false, the canvas will start with initial state.
 
+  Error:
+    type: object
+    required:
+      - error
+    properties:
+      error:
+        type: string
+        description: A message describing the error
     
