@@ -1,14 +1,32 @@
 swagger: '2.0'
 info:
   title: Streamr API
-  description: Move your app forward with the Uber API
+  # description: Streamr API
   version: 1.0.0
 host: www.streamr.com
 schemes:
   - https
+host: streamr.com
 basePath: /api/v1
 produces:
   - application/json
+
+securityDefinitions:
+  token:
+    type: apiKey
+    name: Authorization
+    in: header
+    
+security:
+  - token: []
+  
+tags:
+  - name: Stream
+    description: Streams
+  - name: Canvas
+    description: Saved canvases in your archive
+  - name: Live
+    description: Running canvases
 paths:
   /streams:
     get:
@@ -30,6 +48,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Stream'
+        # TODO: error codes              
     post:
       summary: Create a new stream
       description: |
@@ -48,12 +67,69 @@ paths:
           description: The stream that was created
           schema:
             $ref: '#/definitions/Stream'
+        # TODO: error codes
   
+  /streams/{id}:
+    get:
+      summary: Get stream by id
+      description: Returns a stream by id
+      tags:
+        - Stream
+      parameters:
+        - in: path
+          name: id
+          description: ID of the stream to be fetched
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Stream'
+        # TODO: error codes
+    put:
+      summary: Update a stream
+      description: Updates a stream. The *id* and *auth* fields can not be updated.
+      tags:
+        - Stream
+      parameters:
+        - in: path
+          name: id
+          description: ID of the stream to be updated
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Stream object
+          required: true
+          schema:
+            $ref: '#/definitions/Stream'
+      responses:
+        '204':
+          description: Success (no content)
+        # TODO: error codes
+    delete:
+      summary: Delete a stream
+      description: Deletes a stream by id. This will also delete all data for this stream. Use with caution!
+      tags:
+        - Stream
+      parameters:
+        - in: path
+          name: id
+          description: ID of the stream to be deleted
+          required: true
+          type: string
+      responses:
+        '204':
+          description: Success (no content)
+        # TODO: error codes
+          
   /canvases:
     get:
       summary: List saved canvases
-      description: |
-        Lists saved canvases from your archive.
+      description: Lists saved canvases in your archive.
+      tags:
+        - Canvas
       parameters:
         - name: name
           in: query
@@ -67,10 +143,12 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Canvas'
+        # TODO: error codes
     post:
-      summary: Create a new canvas
-      description: |
-        Creates a new canvas.
+      summary: Create a canvas
+      description: Creates a new canvas into your archive.
+      tags:
+        - Canvas
       parameters:
         - name: body
           in: body
@@ -78,19 +156,76 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Canvas'
-      tags:
-        - Stream
       responses:
         '200':
           description: The canvas that was created
           schema:
             $ref: '#/definitions/Canvas'
-      
+        # TODO: error codes
+
+  /canvases/{id}:
+    get:
+      summary: Get canvas by id
+      description: Returns a canvas by id
+      tags:
+        - Canvas
+      parameters:
+        - in: path
+          name: id
+          description: ID of the canvas to be fetched
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Canvas'
+        # TODO: error codes
+    put:
+      summary: Update a canvas.
+      description: Updates a canvas. The *id* field can not be updated.
+      tags:
+        - Canvas
+      parameters:
+        - in: path
+          name: id
+          description: ID of the canvas to be updated
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Canvas object
+          required: true
+          schema:
+            $ref: '#/definitions/Canvas'
+      responses:
+        '204':
+          description: Success (no content)
+        # TODO: error codes
+    delete:
+      summary: Delete a canvas
+      description: Deletes a canvas by id
+      tags:
+        - Canvas
+      parameters:
+        - in: path
+          name: id
+          description: ID of the canvas to be deleted
+          required: true
+          type: integer
+      responses:
+        '204':
+          description: Success (no content)
+        # TODO: error codes
+            
+
   /live:
     get:
       summary: List live canvases
       description: |
         Lists live canvases.
+      tags:
+        - Live
       parameters:
         - name: state
           in: query
@@ -110,6 +245,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Canvas'
+        # TODO: error codes
     post:
       summary: Create and start a new live canvas
       description: |
@@ -122,12 +258,92 @@ paths:
           schema:
             $ref: '#/definitions/Canvas'
       tags:
-        - Stream
+        - Live
       responses:
         '200':
           description: The canvas that was started
           schema:
             $ref: '#/definitions/Canvas'
+        # TODO: error codes
+
+  /live/{id}:
+    get:
+      summary: Get live canvas by id
+      description: Returns a live canvas by id
+      tags:
+        - Live
+      parameters:
+        - in: path
+          name: id
+          description: ID of the live canvas to be fetched
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Canvas'
+        # TODO: error codes
+    delete:
+      summary: Delete a live canvas
+      description: Delete a live canvas. The canvas must be in stopped state.
+      parameters:
+        - in: path
+          name: id
+          description: ID of the live canvas to be deleted
+          required: true
+          type: integer
+      tags:
+        - Live
+      responses:
+        '204':
+          description: Success
+        # TODO: error codes
+            
+  /live/{id}/resume:
+    post:
+      summary: Resumes a stopped live canvas
+      description: Resumes a live canvas that is currently stopped.
+      tags:
+        - Live
+      parameters:
+        - in: path
+          name: id
+          description: ID of the live canvas to be resumed
+          required: true
+          type: integer
+        - name: body
+          in: body
+          description: Resume request object
+          required: true
+          schema:
+            $ref: '#/definitions/ResumeRequest'
+          
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Canvas'
+        # TODO: error codes
+        
+  /live/{id}/stop:
+    post:
+      summary: Stop a live canvas
+      description: Stops a live canvas that is currently running.
+      tags:
+        - Live
+      parameters:
+        - in: path
+          name: id
+          description: ID of the live canvas to be fetched
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Canvas'
+        # TODO: error codes
 
 definitions:
   Stream:
@@ -157,9 +373,11 @@ definitions:
       name:
         type: string
         description: Name of this stream.
+        example: 'My stream'
       description:
         type: string
         description: Description of this stream.
+        example: 'My stream description'
       streamConfig:
         $ref: '#/definitions/StreamConfig'
         description: Stream configuration
@@ -172,9 +390,9 @@ definitions:
         default: []
         description: An array containing field definitions for this stream.
         items:
-          $ref: '#/definitions/FieldDef'
+          $ref: '#/definitions/FieldDefinition'
   
-  FieldDef:
+  FieldDefinition:
     type: object
     required:
       - name
@@ -182,7 +400,7 @@ definitions:
     properties:
       name:
         type: string
-        description: name of the field
+        description: name of the fieldf
       type:
         type: string
         description: type of the field
@@ -206,4 +424,13 @@ definitions:
     
   Module:
     type: object
+    
+  ResumeRequest:
+    type: object
+    properties:
+      loadState:
+        type: boolean
+        default: true
+        description: If true, an attempt to load a saved state will be made. If false, the canvas will start with initial state.
+
     
