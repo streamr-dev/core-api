@@ -80,8 +80,9 @@ class KafkaCollectTaskSpec extends Specification {
 		task.feedFileService = feedFileService
 		
 		when: "the task is run"
-			task.run()
+			boolean success = task.run()
 		then: "correct number of events must be written and writer closed"
+			success
 			4 * mockedWriter.write(_)
 			1 * mockedWriter.close()
 		then: "feedFileService.createFeedFile must be called"

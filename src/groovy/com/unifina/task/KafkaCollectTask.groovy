@@ -80,6 +80,8 @@ public class KafkaCollectTask extends AbstractTask {
 		
 		// Clean up the temp files
 		writer.deleteFile()
+
+		return true
 	}
 	
 	protected UnifinaKafkaIterator createIterator(String topic, Date from, Date to) {
