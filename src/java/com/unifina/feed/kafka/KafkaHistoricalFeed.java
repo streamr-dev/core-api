@@ -1,5 +1,6 @@
 package com.unifina.feed.kafka;
 
+import com.unifina.utils.TimeOfDayUtil;
 import grails.converters.JSON;
 
 import java.io.Closeable;
@@ -22,6 +23,7 @@ import com.unifina.kafkaclient.UnifinaKafkaIterator;
 import com.unifina.kafkaclient.UnifinaKafkaMessage;
 import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
+import org.apache.commons.lang.time.DateUtils;
 
 public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 
@@ -65,7 +67,9 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 		FeedEventIterator iterator = super.getNextIterator(recipient);
 		
 		Stream stream = getStream(recipient);
-		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && globals.time.before(globals.getEndDate())) {
+
+		// Only check Kafka for further messages if the latest message was not on the end date
+		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && !TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate()))) {
 			kafkaIteratorReturnedForStream.put(stream, true);
 
 			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
