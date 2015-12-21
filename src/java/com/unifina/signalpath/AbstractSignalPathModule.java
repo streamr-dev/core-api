@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.unifina.utils.HibernateHelper;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -665,6 +666,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * Override to handle steps before serialization
 	 */
 	public void beforeSerialization() {
+		domainObject = HibernateHelper.deproxy(domainObject, Module.class);
 	}
 
 	/**
