@@ -132,7 +132,10 @@ modules = {
 	mathjax {
 		resource url:'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
 	}
-	
+	switcher {
+		resource url:[dir:'js/pixel-admin', file:'switcher.js', plugin:'unifina-core']
+	}
+
 	/**
 	 * In-house widgets and resources
 	 */
@@ -192,6 +195,18 @@ modules = {
 		dependsOn 'jquery,highstock'
 		resource url:[dir:'js/unifina/streamr-chart', file:'streamr-chart.js', plugin: 'unifina-core']
 	}
+	'streamr-button' {
+		dependsOn 'jquery'
+		resource url:[dir:'js/unifina/streamr-button', file:'streamr-button.js', plugin: 'unifina-core']
+	}
+	'streamr-switcher' {
+		dependsOn 'jquery, switcher'
+		resource url:[dir:'js/unifina/streamr-switcher', file:'streamr-switcher.js', plugin: 'unifina-core']
+	}
+	'streamr-text-input' {
+		dependsOn 'jquery'
+		resource url:[dir:'js/unifina/streamr-text-input', file:'streamr-text-input.js', plugin: 'unifina-core']
+	}
 	'streamr-heatmap' {
 		dependsOn 'jquery, leaflet'
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'heatmap.min.js', plugin: 'unifina-core']
@@ -202,7 +217,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
+		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, streamr-button, streamr-switcher, streamr-text-input, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
@@ -213,6 +228,11 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'buttonModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'switcherModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'textInputModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
@@ -221,7 +241,6 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
-		
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
