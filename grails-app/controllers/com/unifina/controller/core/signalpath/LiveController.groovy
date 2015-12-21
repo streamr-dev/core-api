@@ -64,22 +64,6 @@ class LiveController {
 		
 		[rsp:rsp]
 	}
-	
-	@Secured("ROLE_USER")
-	def getListJson() {
-		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(springSecurityService.currentUser, false)
-		List runningSignalPathMaps = runningSignalPaths.collect {rsp->
-			[
-				id: rsp.id,
-				name: rsp.name,
-				state: rsp.state,
-				uiChannels: rsp.uiChannels.collect {uiChannel->
-					[id: uiChannel.id, name: uiChannel.name, module: (uiChannel.module ? [id:uiChannel.module.id] : null)]
-				}
-			]
-		}
-		render runningSignalPathMaps as JSON
-	}
 
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def getModuleJson() {
