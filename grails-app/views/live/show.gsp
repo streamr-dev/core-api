@@ -31,7 +31,7 @@
 		});
 		
 		SignalPath.loadSignalPath({
-			url: '${createLink(action:"getJson", id:rsp.id)}'
+			url: '${createLink(controller: "liveApi", action:"show", id:rsp.id)}'
 		}, function(saveData, signalPathData, signalPathContext, runData) {
 		
 			<g:if test="${rsp.state=='running'}">

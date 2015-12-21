@@ -65,19 +65,6 @@ class LiveController {
 		[rsp:rsp]
 	}
 	
-	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
-	def getJson() {
-		// Access checked by beforeInterceptor
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-
-		Map signalPathData = JSON.parse(rsp.json)
-		// Reconstruct as rsp.user
-		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication, rsp.user))
-		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
-		
-		render result as JSON
-	}
-	
 	@Secured("ROLE_USER")
 	def getListJson() {
 		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(springSecurityService.currentUser, false)
@@ -257,7 +244,7 @@ class LiveController {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
-			tmp.url = createLink(controller:"live",action:"getJson",params:[id:it[0]])
+			tmp.url = createLink(controller:"liveApi",action:"show",params:[id:it[0]])
 			tmp.command = params.command
 			tmp.offset = offset++
 			result.signalPaths.add(tmp)

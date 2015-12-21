@@ -24,5 +24,6 @@ class UnifinaCorePluginUrlMappings {
 
 		// API v1 url mappings
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
+		"/api/v1/running-signal-paths"(resources: "liveApi", excludes: ["create", "edit"])
 	}
 }
