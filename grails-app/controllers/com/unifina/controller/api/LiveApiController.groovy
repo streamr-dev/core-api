@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
 import com.unifina.utils.GlobalsFactory
@@ -26,7 +27,7 @@ class LiveApiController {
 			}
 			return true
 		},
-		except:['index',]
+		except:['index', 'getModuleJson']
 	]
 
 	@StreamrApi
@@ -47,6 +48,28 @@ class LiveApiController {
 			]
 		}
 		render runningSignalPathMaps as JSON
+	}
+
+	@StreamrApi(requiresAuthentication = false)
+	def getModuleJson() {
+		response.setHeader('Access-Control-Allow-Origin', '*')
+
+		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
+		RunningSignalPath rsp = ui.runningSignalPath
+
+		if (!unifinaSecurityService.canAccess(rsp, request.apiUser)) {
+			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")
+			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
+		} else {
+			Map signalPathData = JSON.parse(rsp.json)
+			Map moduleJson = signalPathData.modules.find { it.hash.toString() == ui.hash.toString() }
+
+			if (!moduleJson) {
+				render(status: 404, text: 'Module not found.')
+			} else {
+				render moduleJson as JSON
+			}
+		}
 	}
 
 	@StreamrApi

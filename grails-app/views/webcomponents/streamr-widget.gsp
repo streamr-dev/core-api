@@ -74,7 +74,7 @@
 				// Get JSON from the server to initialize options
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(controller:'live', action:'getModuleJson', absolute:'true')}",
+					url: "${createLink(controller:'liveApi', action:'getModuleJson', absolute:'true')}",
 					data: {
 						channel: this.channel
 					},
