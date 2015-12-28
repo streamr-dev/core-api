@@ -290,7 +290,7 @@ class SignalPathService {
 		
 		// Use the link generator to get the protocol and port, but use network IP address
 		// as the host to get the address of this individual server
-		String link = grailsLinkGenerator.link(controller:'live', action:'request', absolute:true)
+		String link = grailsLinkGenerator.link(controller: "liveApi", action: "request", absolute: true)
 		URL url = new URL(link)
 		
 		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()

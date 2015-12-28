@@ -4,7 +4,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
-import com.unifina.security.TokenAuthenticator
+import com.unifina.signalpath.RuntimeResponse
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -27,7 +27,7 @@ class LiveApiController {
 			}
 			return true
 		},
-		except:['index', 'getModuleJson']
+		except: ["index", "getModuleJson", "request"],
 	]
 
 	@StreamrApi
@@ -90,5 +90,51 @@ class LiveApiController {
 		]
 
 		render result as JSON
+	}
+
+	@StreamrApi
+	def request() {
+		RunningSignalPath rsp
+		UiChannel ui = null
+		Integer hash = null
+		SecUser user = request.apiUser
+
+		def json = request.JSON
+
+		/**
+		 * Provide as parameter:
+		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
+		 * 2) RSP.id for messages intended for the RSP itself
+		 */
+		if (json?.channel) {
+			ui = UiChannel.findById(json?.channel, [fetch: [runningSignalPath: 'join']])
+			rsp = ui.runningSignalPath
+			if (ui.hash)
+				hash = Integer.parseInt(ui.hash)
+		} else if (json?.id) {
+			rsp = RunningSignalPath.get(json?.id)
+			if (json?.hash != null)
+				hash = json?.hash
+		} else {
+			log.warn("request: no channel and no id given. Request json: $json")
+			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
+		}
+
+		if (!unifinaSecurityService.canAccess(rsp, user)) {
+			log.warn("request: access to rsp ${rsp?.id} denied for user ${user?.id}")
+			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
+		} else {
+			Map msg = json?.msg
+			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, json?.local ? true : false)
+
+			log.info("request: responding with $rr")
+
+			if (rr.containsKey("success") && rr.containsKey("response"))
+				render rr as JSON
+			else {
+				Map result = [success: rr.isSuccess(), id: rsp.id, hash: hash, response: rr]
+				render result as JSON
+			}
+		}
 	}
 }

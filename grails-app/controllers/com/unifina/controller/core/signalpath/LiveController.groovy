@@ -31,7 +31,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
+		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -63,56 +63,6 @@ class LiveController {
 			flash.error = message(code:'runningSignalPath.ping.error')
 		
 		[rsp:rsp]
-	}
-	
-	@StreamrApi(requiresAuthentication = false)
-	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
-	def request() {
-		RunningSignalPath rsp
-		UiChannel ui = null
-		Integer hash = null
-		SecUser user = request.apiUser ?: springSecurityService.currentUser
-		
-		def json = request.JSON
-		
-		/**
-		 * Provide as parameter:
-		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
-		 * 2) RSP.id for messages intended for the RSP itself
-		 */
-		if (json?.channel) {
-			ui = UiChannel.findById(json?.channel, [fetch: [runningSignalPath: 'join']])
-			rsp = ui.runningSignalPath
-			if (ui.hash)
-				hash = Integer.parseInt(ui.hash)
-		}
-		else if (json?.id) {
-			rsp = RunningSignalPath.get(json?.id)
-			if (json?.hash != null)
-				hash = json?.hash
-		}
-		else {
-			log.warn("request: no channel and no id given. Request json: $json")
-			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
-		}
-		
-		if (!unifinaSecurityService.canAccess(rsp, user)) {
-			log.warn("request: access to rsp ${rsp?.id} denied for user ${user?.id}")
-			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
-		}
-		else {
-			Map msg = json?.msg
-			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, json?.local ? true : false)
-			
-			log.info("request: responding with $rr")
-			
-			if (rr.containsKey("success") && rr.containsKey("response"))
-				render rr as JSON
-			else {
-				Map result = [success: rr.isSuccess(), id: rsp.id, hash: hash, response: rr]
-				render result as JSON
-			}
-		}
 	}
 	
 	@Secured("ROLE_USER")

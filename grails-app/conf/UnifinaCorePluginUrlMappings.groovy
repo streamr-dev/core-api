@@ -16,14 +16,11 @@ class UnifinaCorePluginUrlMappings {
 		"500"(view:'/error')
 		
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
-		
-		// API url mappings
-		//"/api/stream/create"(controller: "stream", action: "apiCreate")
-		//"/api/stream/lookup"(controller: "stream", action: "apiLookup")
-		"/api/live/request"(controller: "live", action: "request")
 
 		// API v1 url mappings
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/running-signal-paths"(resources: "liveApi", excludes: ["create", "edit"])
+		"/api/v1/running-signal-paths/request"(controller: "liveApi", action: "request")
+		"/api/v1/running-signal-paths/getModuleJson"(controller: "liveApi", action: "getModuleJson")
 	}
 }
