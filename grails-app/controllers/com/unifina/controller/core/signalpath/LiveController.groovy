@@ -31,7 +31,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent']]
+		except:['index','list','getListJson', 'loadBrowser', 'loadBrowserContent']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -63,35 +63,6 @@ class LiveController {
 			flash.error = message(code:'runningSignalPath.ping.error')
 		
 		[rsp:rsp]
-	}
-	
-	@Secured("ROLE_USER")
-	def ajaxCreate() {
-		def signalPathData
-		if (params.signalPathData)
-			signalPathData = JSON.parse(params.signalPathData);
-		else signalPathData = JSON.parse(SavedSignalPath.get(Integer.parseInt(params.id)).json)
-
-		def signalPathContext =	JSON.parse(params.signalPathContext)
-		
-		RunningSignalPath rsp = signalPathService.createRunningSignalPath(signalPathData, springSecurityService.currentUser, signalPathContext.live ? false : true, true)
-		signalPathService.startLocal(rsp, signalPathContext)
-		
-		Map result = [success:true, id:rsp.id, adhoc:rsp.adhoc, uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }]
-		render result as JSON
-	}
-	
-	@Secured("ROLE_USER")
-	def ajaxStop() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		
-		Map r
-		if (rsp && signalPathService.stopLocal(rsp)) {
-			r = [success:true, id:rsp.id, status:"Stopped"]
-		}
-		else r = [success:false, id:params.id, status:"Running canvas not found"]
-		
-		render r as JSON
 	}
 	
 	@Secured("ROLE_USER")

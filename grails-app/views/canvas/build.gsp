@@ -54,8 +54,8 @@ $(document).ready(function() {
 		notificationHandler: function(data) {
 			Streamr.showInfo(data.msg)
 		},
-		runUrl: Streamr.createLink('live', 'ajaxCreate'),
-		abortUrl: Streamr.createLink('live', 'ajaxStop'),
+		runUrl: Streamr.createLink({"uri": "api/v1/running-signal-paths/ajaxCreate"}),
+		abortUrl: Streamr.createLink({"uri": "api/v1/running-signal-paths/ajaxStop"}),
 		connectionOptions: {
 			server: "${grailsApplication.config.streamr.ui.server}",
 			autoConnect: false,

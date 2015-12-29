@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
 import com.unifina.signalpath.RuntimeResponse
@@ -27,7 +28,7 @@ class LiveApiController {
 			}
 			return true
 		},
-		except: ["index", "getModuleJson", "request"],
+		except: ["index", "getModuleJson", "request", "ajaxCreate"],
 	]
 
 	@StreamrApi
@@ -136,5 +137,42 @@ class LiveApiController {
 				render result as JSON
 			}
 		}
+	}
+
+	@StreamrApi
+	def ajaxCreate() {
+		def signalPathData
+		if (params.signalPathData) {
+			signalPathData = JSON.parse(params.signalPathData);
+		} else {
+			signalPathData = JSON.parse(SavedSignalPath.get(Integer.parseInt(params.id)).json)
+		}
+
+		def signalPathContext =	JSON.parse(params.signalPathContext)
+
+		RunningSignalPath rsp = signalPathService.createRunningSignalPath(signalPathData, request.apiUser, signalPathContext.live ? false : true, true)
+		signalPathService.startLocal(rsp, signalPathContext)
+
+		Map result = [
+			success: true,
+			id: rsp.id,
+			adhoc: rsp.adhoc,
+			uiChannels: rsp.uiChannels.collect { [id: it.id, hash: it.hash] }
+		]
+		render result as JSON
+	}
+
+	@StreamrApi
+	def ajaxStop() {
+		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+
+		Map r
+		if (rsp && signalPathService.stopLocal(rsp)) {
+			r = [success:true, id:rsp.id, status:"Stopped"]
+		} else {
+			r = [success:false, id:params.id, status:"Running canvas not found"]
+		}
+
+		render r as JSON
 	}
 }

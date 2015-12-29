@@ -22,5 +22,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/running-signal-paths"(resources: "liveApi", excludes: ["create", "edit"])
 		"/api/v1/running-signal-paths/request"(controller: "liveApi", action: "request")
 		"/api/v1/running-signal-paths/getModuleJson"(controller: "liveApi", action: "getModuleJson")
+		"/api/v1/running-signal-paths/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
+		"/api/v1/running-signal-paths/ajaxStop"(controller: "liveApi", action: "ajaxStop")
 	}
 }
