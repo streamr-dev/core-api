@@ -4,6 +4,8 @@
 		this.parent = parent
 		this.options = options
 
+		this.value
+
 		this.createButton()
 	}
 
@@ -16,7 +18,7 @@
 		this.changeName()
 
 		this.button.click(function(e){
-			console.log("ButtonValue: "+_this.value)
+			_this.sendValue(_this.value)
 		})
 
 		$(SignalPath).on("started", function() {
@@ -36,12 +38,17 @@
 		}
 	}
 
+	StreamrButton.prototype.sendValue = function(value) {
+		$(this).trigger("input", value)
+		console.log(value)
+	}
+
 	StreamrButton.prototype.changeName = function(name) {
 		if(!name)
 			name = "button"
 		this.name = name
 		this.button.text(name)
-		$(this).trigger("nameChange")
+		$(this).trigger("update")
 	}
 
 	StreamrButton.prototype.changeValue = function(value) {

@@ -1,16 +1,13 @@
-package com.unifina.signalpath.interact;
+package com.unifina.signalpath.input;
 
 
-import com.unifina.signalpath.DoubleParameter;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.StringParameter;
-import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.signalpath.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class ButtonModule extends ModuleWithUI {
+public class ButtonModule extends InputModule {
 
 	StringParameter name = new StringParameter(this, "buttonName", "button");
 
@@ -21,12 +18,6 @@ public class ButtonModule extends ModuleWithUI {
 	String buttonName = null;
 	Double buttonValue = null;
 
-	@Override
-	public void init() {
-		addInput(name);
-		addInput(value);
-		addOutput(out);
-	}
 
 	@Override
 	public void initialize() {
@@ -41,8 +32,20 @@ public class ButtonModule extends ModuleWithUI {
 	}
 
 	@Override
-	public void sendOutput() {
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		config.put("module", "StreamrButton");
+		return config;
+	}
 
+	@Override
+	protected void onInput(RuntimeRequest request, RuntimeResponse response) {
+
+	}
+
+	@Override
+	public void sendOutput() {
+		out.send(buttonValue);
 	}
 
 	@Override

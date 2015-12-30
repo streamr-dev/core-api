@@ -1,4 +1,4 @@
-package com.unifina.signalpath.interact;
+package com.unifina.signalpath.input;
 
 import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.TimeSeriesOutput;

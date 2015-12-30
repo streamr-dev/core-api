@@ -87,7 +87,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * a Parameter is marked as driving and then the Parameter is changed
 	 * at runtime.
 	 */
-	transient private Propagator uiEventPropagator = null;
+	transient protected Propagator uiEventPropagator = null;
 	
 	public AbstractSignalPathModule() {
 

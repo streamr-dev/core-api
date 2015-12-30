@@ -11,7 +11,7 @@
         })
         this.textArea = $("<textarea/>", {
             class: "form-control",
-            style: "height:34px;"
+            style: "height:31px;"
         })
         this.sendButton = $("<button/>", {
             class: "btn btn-primary",

@@ -3,7 +3,7 @@
 	function StreamrSwitcher(parent, options) {
 		this.parent = parent
 		this.options = options
-		this.checked = options.checked
+		this.checked = options.value
 
 		this.sendOutput = false
 
@@ -15,9 +15,11 @@
 		this.switcher = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
 		this.switcher.attr("checked", this.checked)
 		this.switcher.change(function(){
-			_this.changeValue(_this.getValue())
+			//if(_this.sendOutput)
+				_this.sendValue(_this.getValue())
 		})
 		this.parent.append(this.switcher)
+		this.parent.addClass("switcher-container")
 		this.switcher.switcher({
 			theme: 'square',
 			on_state_content: "1",
@@ -37,11 +39,14 @@
 		return this.switcher.prop('checked')
 	}
 
-	StreamrSwitcher.prototype.changeValue = function(value) {
-		$(this).trigger("valueChange", value)
-		// TODO: do something
-		if(this.sendOutput)
-			console.log(value)
+	StreamrSwitcher.prototype.getData = function() {
+		return {
+			value: this.getValue
+		}
+	}
+
+	StreamrSwitcher.prototype.sendValue = function(value) {
+		$(this).trigger("input", value)
 	}
 
 	StreamrSwitcher.prototype.receiveResponse = function(p) {

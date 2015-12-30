@@ -4,3 +4,4 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/streamr-chart.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
 <link rel="import" href="${createLink(uri:"/webcomponents/streamr-heatmap.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
 <link rel="import" href="${createLink(uri:"/webcomponents/streamr-table.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
+<link rel="import" href="${createLink(uri:"/webcomponents/streamr-button.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
