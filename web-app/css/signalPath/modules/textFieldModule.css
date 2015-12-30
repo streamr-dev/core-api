@@ -1,0 +1,13 @@
+
+.text-field div.form-inline {
+    margin: 10px;
+}
+
+.text-field textarea.form-control {
+    height: 34px;
+    margin-right: 10px;
+}
+
+.text-field .btn.send-btn {
+    height: 34px;
+}

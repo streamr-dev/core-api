@@ -5,8 +5,6 @@
 		this.options = options
 		this.checked = options.value
 
-		this.sendOutput = false
-
 		this.createSwitcher()
 	}
 
@@ -15,8 +13,7 @@
 		this.switcher = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
 		this.switcher.attr("checked", this.checked)
 		this.switcher.change(function(){
-			//if(_this.sendOutput)
-				_this.sendValue(_this.getValue())
+			_this.sendValue(_this.getValue())
 		})
 		this.parent.append(this.switcher)
 		this.parent.addClass("switcher-container")
@@ -25,14 +22,6 @@
 			on_state_content: "1",
 			off_state_content: "0"
 		})
-
-		$(SignalPath).on("started", function(){
-			_this.sendOutput = true
-		})
-
-		$(SignalPath).on("stopped", function(){
-			_this.sendOutput = false
-		})
 	}
 
 	StreamrSwitcher.prototype.getValue = function() {
@@ -40,9 +29,10 @@
 	}
 
 	StreamrSwitcher.prototype.getData = function() {
-		return {
-			value: this.getValue
+		var data = {
+			value: this.getValue()
 		}
+		return data
 	}
 
 	StreamrSwitcher.prototype.sendValue = function(value) {

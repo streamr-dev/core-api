@@ -203,9 +203,10 @@ modules = {
 		dependsOn 'jquery, switcher'
 		resource url:[dir:'js/unifina/streamr-switcher', file:'streamr-switcher.js', plugin: 'unifina-core']
 	}
-	'streamr-text-input' {
+	'streamr-text-field' {
 		dependsOn 'jquery'
-		resource url:[dir:'js/unifina/streamr-text-input', file:'streamr-text-input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-text-field', file:'streamr-text-field.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'textFieldModule.css', plugin: 'unifina-core']
 	}
 	'streamr-heatmap' {
 		dependsOn 'jquery, leaflet'
@@ -217,7 +218,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, streamr-button, streamr-switcher, streamr-text-input, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
+		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, streamr-button, streamr-switcher, streamr-text-field, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

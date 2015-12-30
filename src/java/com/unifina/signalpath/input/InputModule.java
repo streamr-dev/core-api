@@ -6,6 +6,9 @@ import com.unifina.signalpath.Propagator;
 import com.unifina.signalpath.RuntimeRequest;
 import com.unifina.signalpath.RuntimeResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class InputModule extends ModuleWithUI {
 	@Override
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
@@ -23,6 +26,17 @@ public abstract class InputModule extends ModuleWithUI {
 			}
 			response.setSuccess(true);
 		}
+	}
+
+	protected void putToModuleOptions(Map<String, Object> config, String name, Object obj) {
+		Map<String, Object> opts;
+		if(config.get("moduleOptions") == null) {
+			opts = new HashMap<>();
+			config.put("moduleOptions", opts);
+		} else {
+			opts = (Map<String, Object>) config.get("moduleOptions");
+		}
+		opts.put(name, obj);
 	}
 
 	protected abstract void onInput(RuntimeRequest request, RuntimeResponse response);
