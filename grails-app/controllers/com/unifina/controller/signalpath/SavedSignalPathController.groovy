@@ -110,7 +110,6 @@ class SavedSignalPathController {
 	def loadBrowser() {
 		def result = [
 			browserId: params.browserId,
-			headers: ["Id","Name"],
 			contentUrl: createLink(
 				controller: "savedSignalPath",
 				action: "loadBrowserContent",
@@ -129,16 +128,17 @@ class SavedSignalPathController {
 		def offset = params.int("offset") ?: 0
 		def ssp 
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.type = :type order by sp.id asc", [type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH], [max: max, offset: offset])
+			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name, sp.dateCreated from SavedSignalPath sp where sp.type = :type order by sp.id asc", [type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH], [max: max, offset: offset])
 		} else {
-			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name, sp.dateCreated from SavedSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
 		}
 		
-		def result = [signalPaths:[]]
+		def result = [signalPaths:[], timezone: springSecurityService.currentUser.timezone]
 		ssp.each {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
+			tmp.dateCreated = it[2]
 			tmp.url = createLink(controller:"savedSignalPath",action:"load",params:[id:it[0]])
 			tmp.command = params.command
 			tmp.offset = offset++

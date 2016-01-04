@@ -1,10 +1,10 @@
 <g:each in="${signalPaths}">
 	<tr class="selectable has-offset" data-url="${it.url}" data-offset="${it.offset}">
 		<td>
-			${it.id}
+			${it.name}
 		</td>
 		<td>
-			${it.name}
+			${ formatDate(format: "yyyy-MM-dd HH:mm:ss", date:it.dateCreated, timeZone: timezone )}
 		</td>
 	</tr>
 </g:each>
