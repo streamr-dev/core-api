@@ -77,7 +77,7 @@ class LiveController {
 			flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
 		} catch (SerializationException ex) {
 			flash.error = message(code: "runningSignalPath.deserialization.error", args:[rsp.name])
-			log.error("failed to resume runningSignalPath", ex)
+			log.error("Failed to resume runningSignalPath " + rsp.id + " :", ex)
 		}
 
 		redirect(action:"show", id:rsp.id)

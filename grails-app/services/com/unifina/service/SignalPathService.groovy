@@ -507,7 +507,14 @@ class SignalPathService {
 	def saveState(SignalPath sp) {
 		RunningSignalPath rsp = sp.runningSignalPath
 		rsp = rsp.attach()
-		rsp.serialized = serializationService.serialize(sp)
+
+		try {
+			rsp.serialized = serializationService.serialize(sp)
+		} catch (SerializationException ex) {
+			log.error("Serialization of runningSignalPath " + rsp.id + " failed")
+			throw ex
+		}
+
 		rsp.serializationTime = sp.globals.time
 		rsp.save(failOnError: true)
 		log.info("RunningSignalPath " + rsp.id + " serialized")
