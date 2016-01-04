@@ -148,7 +148,8 @@ $inputValues
 	private def initDf() {
 		if (df == null) {
 			df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-			df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()))
+			if (globals.getUser()!=null)
+				df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()))
 		}
 	}
 

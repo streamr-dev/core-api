@@ -59,7 +59,8 @@ public class DateConversion extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		tz.receive(globals.getUser().getTimezone());
+		if (globals.getUser()!=null)
+			tz.receive(globals.getUser().getTimezone());
 	}
 	
 	@Override
@@ -102,12 +103,16 @@ public class DateConversion extends AbstractSignalPathModule {
 	private void ensureState() {
 		if (cal == null) {
 			cal = Calendar.getInstance();
-			cal.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+
+			if (globals.getUser()!=null)
+				cal.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
 		}
 
 		if (df == null) {
 			df = new SimpleDateFormat();
-			df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+
+			if (globals.getUser()!=null)
+				df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
 		}
 	}
 

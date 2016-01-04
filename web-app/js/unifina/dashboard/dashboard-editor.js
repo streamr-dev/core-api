@@ -284,6 +284,8 @@ var DashboardItemView = Backbone.View.extend({
 })
 
 var SidebarView = Backbone.View.extend({
+	template: _.template($("#sidebar-template").html()),
+
 	events: {
 		"checked" : "updateDIList",
 		"unchecked" : "updateDIList",
@@ -349,36 +351,13 @@ var SidebarView = Backbone.View.extend({
 	},
 
 	render: function () {
-		this.title = $("<div/>", {
-			class: "menu-content",
-			html: "<label>Dashboard name</label>"
-		})
-		this.titleInput = $("<input/>", {
-			class: "dashboard-name title-input form-control",
-			type: "text",
-			name: "dashboard-name",
-			value: this.dashboard.get("name"),
-			placeholder: "Dashboard name"
-		})
-		this.rspTitle = $("<li/>", {
-			class: "rsp-title",
-			html: "<label>Running Signalpaths</label>"
-		})
-		this.list = $("<ul/>", {
-			class: "navigation",
-			id: "rsp-list"
-		})
-		var buttonTemplate = _.template($("#button-template").html())
-		this.buttons = $(buttonTemplate(this.dashboard.toJSON()))
-		this.$el.append(this.title)
-		this.title.append(this.titleInput)
-		this.$el.append(this.list)
-		this.list.append(this.rspTitle)
+		this.$el.append(this.template(this.dashboard.toJSON()))
+		this.titleInput = this.$el.find("input.dashboard-name.title-input")
+		this.list = this.$el.find("#rsp-list")
 		_.each(this.rspCollection.models, function(item) {
 			this.list.append(this.renderRSP(item).el)
 		}, this)
-		this.$el.append(this.buttons)
-		new Toolbar(this.buttons.find("form"))
+		new Toolbar(this.$el.find("#deleteDashboardForm"))
 	},
 
 	renderRSP: function(item) {

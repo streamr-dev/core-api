@@ -71,7 +71,8 @@ class LiveController {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
 
 		Map signalPathData = JSON.parse(rsp.json)
-		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication))
+		// Reconstruct as rsp.user
+		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication, rsp.user))
 		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
 		
 		render result as JSON
@@ -208,7 +209,7 @@ class LiveController {
 			flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
 		} catch (SerializationException ex) {
 			flash.error = message(code: "runningSignalPath.deserialization.error", args:[rsp.name])
-			log.error("failed to resume runningSignalPath", ex)
+			log.error("Failed to resume runningSignalPath " + rsp.id + " :", ex)
 		}
 
 		redirect(action:"show", id:rsp.id)

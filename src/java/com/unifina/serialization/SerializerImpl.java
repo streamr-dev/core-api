@@ -9,6 +9,7 @@ import com.unifina.domain.signalpath.SavedSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
+import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.grails.datastore.gorm.GormStaticApi;
@@ -34,12 +35,14 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(Double.class, new DoubleSerializer(), true);
 		conf.registerSerializer(SpecialValueDouble.class, new SpecialValueDoubleSerializer(), true);
 		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
-		conf.registerSerializer(Feed.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(Module.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(Stream.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), true);
+		conf.registerSerializer(JSONArray.class, new JSONArraySerializer(), true);
+
+		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(Stream.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), false);
 	}
 
 	public SerializerImpl(ClassLoader classLoader) {
@@ -237,6 +240,27 @@ public class SerializerImpl implements Serializer {
 								  FSTClazzInfo.FSTFieldInfo referencee,
 								  int streamPosition) throws Exception {
 			return new JSONObject(in.readStringUTF());
+		}
+	}
+
+	private static class JSONArraySerializer extends FSTBasicObjectSerializer {
+
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			out.writeUTF(toWrite.toString());
+		}
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			return new JSONArray(in.readStringUTF());
 		}
 	}
 
