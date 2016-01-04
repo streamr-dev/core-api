@@ -4,7 +4,6 @@ SignalPath.StreamModule = function(data,canvas,prot) {
 
 	var super_getHelp = prot.getHelp
 
-	prot.resultHelpText
 	prot.getHelp = function(extended, cb) {
 		super_getHelp(extended, function(html){
 			if(pub.getInput("stream").getValue() != null) {
