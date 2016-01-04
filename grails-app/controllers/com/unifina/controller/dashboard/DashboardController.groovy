@@ -56,14 +56,7 @@ class DashboardController {
 						title: item.title,
 						ord:item.ord,
 						size:item.size,
-						uiChannel: [
-								id: item.uiChannel.id,
-								name: item.uiChannel.name,
-								module: [
-										id:item.uiChannel.module.id,
-										webcomponent:item.uiChannel.module.webcomponent
-								]
-						]
+						uiChannel: item.uiChannel.toMap()
 				]
 			}
 		]
