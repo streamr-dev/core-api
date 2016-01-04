@@ -19,10 +19,15 @@ class UnifinaCorePluginUrlMappings {
 
 		// API v1 url mappings
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
+
 		"/api/v1/running-signal-paths"(resources: "liveApi", excludes: ["create", "edit"])
 		"/api/v1/running-signal-paths/request"(controller: "liveApi", action: "request")
 		"/api/v1/running-signal-paths/getModuleJson"(controller: "liveApi", action: "getModuleJson")
 		"/api/v1/running-signal-paths/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
 		"/api/v1/running-signal-paths/ajaxStop"(controller: "liveApi", action: "ajaxStop")
+
+		"/api/v1/saved-signal-paths"(resource: "savedSignalPathApi", excludes: ["create", "edit"])
+		"/api/v1/saved-signal-paths/load"(controller: "savedSignalPathApi", action: "load")
+		"/api/v1/saved-signal-paths/save"(controller: "savedSignalPathApi", action: "save")
 	}
 }

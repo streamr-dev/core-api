@@ -1,54 +1,66 @@
-package com.unifina.controller.signalpath
-
-import com.unifina.security.StreamrApi
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-import grails.util.GrailsUtil
-
-import org.apache.log4j.Logger
+package com.unifina.controller.api
 
 import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.security.StreamrApi
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import grails.util.GrailsUtil
+import org.apache.log4j.Logger
 
-@Secured(["ROLE_USER"])
-class SavedSignalPathController {
-	
+@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
+class SavedSignalPathApiController {
+
 	def signalPathService
 	def springSecurityService
 	def grailsApplication
-	
 	def unifinaSecurityService
-	def beforeInterceptor = [action:{
-			if (params.id!=null && !unifinaSecurityService.canAccess(SavedSignalPath.get(params.id), actionName=='load')) {
-				if (request.xhr)
-					redirect(controller:'login', action:'ajaxDenied')
-				else
-					redirect(controller:'login', action:'denied')
-					
-				return false
+
+	def beforeInterceptor = [
+		action: {
+			if (params.id != null) {
+				def savedSignalPath = SavedSignalPath.get(Integer.parseInt(params.id))
+				if (savedSignalPath != null && !unifinaSecurityService.canAccess(savedSignalPath, actionName == 'load', request.apiUser)) {
+					if (request.xhr)
+						redirect(controller: 'login', action: 'ajaxDenied')
+					else
+						redirect(controller: 'login', action: 'denied')
+
+					return false
+				}
 			}
-			else return true
-		},only:['load', 'save']]
-	
-	private static final Logger log = Logger.getLogger(SavedSignalPathController)
-	
+			return true
+
+		},
+		only: ['load', 'save']
+	]
+
+	private static final Logger log = Logger.getLogger(SavedSignalPathApiController)
+
 	def createSaveData(SavedSignalPath ssp) {
 		return [isSaved:true, url:createLink(controller:"savedSignalPathApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
 	}
-	
+
+	@StreamrApi
 	def load() {
 		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
-		
+
 		def ssp = SavedSignalPath.get(Integer.parseInt(params.id))
-		Map json = JSON.parse(ssp.json);
+		if (ssp == null) {
+			def errorResult = [error: "Saved signal path with id $params.id not found.", code: "NOT_FOUND"]
+			render errorResult as JSON
+			return
+		}
+
+		Map json = JSON.parse(ssp.json)
 
 		// Reconstruct to bring the path up to date
 		json.signalPathData.name = ssp.name
-		
+
 		Map result = json
-		
+
 		try {
 			result = signalPathService.reconstruct(json,globals)
 		} catch (Throwable e) {
@@ -66,17 +78,18 @@ class SavedSignalPathController {
 		}
 	}
 
+	@StreamrApi
 	def save() {
 		SavedSignalPath ssp
 		if (params.id)
 			ssp = SavedSignalPath.get(params.id)
-		else 
+		else
 			ssp = new SavedSignalPath()
-		
+
 		ssp.properties = params
 
 		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
-		
+
 		try {
 			// Make sure the name is set
 			Map json = JSON.parse(params.json)
@@ -88,13 +101,12 @@ class SavedSignalPathController {
 
 			ssp.hasExports = sp.hasExports()
 
-//			ssp.live = json.signalPathContext.live
-			ssp.user = springSecurityService.currentUser
+			ssp.user = request.apiUser
 			ssp.save(flush:true, failOnError:true)
 
 			if (ssp.id==null)
 				throw new Exception("Internal error: Returned id was null!")
-			
+
 			def res = createSaveData(ssp)
 			render res as JSON
 		} catch (Exception e) {
@@ -107,46 +119,4 @@ class SavedSignalPathController {
 			globals.destroy()
 		}
 	}
-	
-	def loadBrowser() {
-		def result = [
-			browserId: params.browserId,
-			headers: ["Id","Name"],
-			contentUrl: createLink(
-				controller: "savedSignalPath",
-				action: "loadBrowserContent",
-				params: [
-					browserId: params.browserId,
-					command: params.command
-				]
-			)
-		]
-		
-		render(template: "loadBrowser", model: result)
-	}
-	
-	def loadBrowserContent() {
-		def max = params.int("max") ?: 100
-		def offset = params.int("offset") ?: 0
-		def ssp 
-		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.type = :type order by sp.id asc", [type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH], [max: max, offset: offset])
-		} else {
-			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
-		}
-		
-		def result = [signalPaths:[]]
-		ssp.each {
-			def tmp = [:]
-			tmp.id = it[0]
-			tmp.name = it[1]
-			tmp.url = createLink(controller:"savedSignalPathApi",action:"load",params:[id:it[0]])
-			tmp.command = params.command
-			tmp.offset = offset++
-			result.signalPaths.add(tmp)
-		}
-		return result
-	}
-
-	
 }
