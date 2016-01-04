@@ -27,12 +27,6 @@ class ToLowerCaseSpec extends Specification {
 			lowerCaseText: ["foo", "bah", "foobah"]
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

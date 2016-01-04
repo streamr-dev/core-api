@@ -1,11 +1,12 @@
 package com.unifina.signalpath;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Endpoint<T> {
+public abstract class Endpoint<T> implements Serializable {
 	public AbstractSignalPathModule owner;
 	protected String name;
 	protected String displayName;

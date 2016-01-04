@@ -18,6 +18,8 @@ class RunningSignalPath {
 	Boolean shared
 	Boolean adhoc
 	String state
+	String serialized
+	Date serializationTime
 	
 	static hasMany = [uiChannels: UiChannel]
 	
@@ -28,12 +30,18 @@ class RunningSignalPath {
 		shared(nullable:true)
 		state(nullable:true)
 		adhoc(nullable:true)
+		serialized(nullable:true)
+		serializationTime(nullable: true)
 	}
 	
 	static mapping = {
 		json type: 'text'
 		runner index: 'runner_idx'
 		uiChannels cascade: 'all-delete-orphan'
+		serialized type: 'text'
 	}
-	
+
+	boolean isNotSerialized() {
+		serialized == null || serialized.empty
+	}
 }

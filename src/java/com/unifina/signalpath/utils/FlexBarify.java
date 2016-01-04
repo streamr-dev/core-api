@@ -5,6 +5,8 @@ import com.unifina.signalpath.IntegerParameter;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
+import java.io.Serializable;
+
 public class FlexBarify extends AbstractSignalPathModule {
 	
 	IntegerParameter barLength = new IntegerParameter(this,"barLength",5000);
@@ -96,7 +98,7 @@ public class FlexBarify extends AbstractSignalPathModule {
 		}
 	}
 
-	class Bar {
+	public static class Bar implements Serializable {
 		public Double start;
 		public Double current;
 		public Double open;

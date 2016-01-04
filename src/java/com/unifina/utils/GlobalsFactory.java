@@ -27,20 +27,25 @@ public class GlobalsFactory {
 	private static final Logger log = Logger.getLogger(GlobalsFactory.class);
 	
 	public static Globals createInstance(Map signalPathContext, GrailsApplication grailsApplication) {
-		return new GlobalsFactory().create(signalPathContext, grailsApplication);
+		return new GlobalsFactory().create(signalPathContext, grailsApplication, null);
 	}
-	
-	public Globals create(Map signalPathContext, GrailsApplication grailsApplication) {
+
+	public static Globals createInstance(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
+		return new GlobalsFactory().create(signalPathContext, grailsApplication, user);
+	}
+
+	public Globals create(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
 		try {
 			String className = MapTraversal.getString(grailsApplication.getConfig(), "unifina.globals.className");
 			Class clazz = this.getClass().getClassLoader().loadClass(className!=null ? className : "com.unifina.utils.Globals");
-			SecUser user = null;
-			try {
-				user = (SecUser) ((SpringSecurityService)grailsApplication.getMainContext().getBean("springSecurityService")).getCurrentUser();
-			} catch (Exception e) {
-				if (Environment.getCurrent()!=Environment.TEST) {
-					log.warn("create: springSecurityService is not defined, current user is null!");
-	//				return null; // Commented out, this was perhaps not intended?
+
+			if (user==null) {
+				try {
+					user = (SecUser) ((SpringSecurityService) grailsApplication.getMainContext().getBean("springSecurityService")).getCurrentUser();
+				} catch (Exception e) {
+					if (Environment.getCurrent() != Environment.TEST) {
+						log.warn("create: springSecurityService is not defined, current user is null!");
+					}
 				}
 			}
 			Constructor<Globals> c = clazz.getConstructor(Map.class, GrailsApplication.class, SecUser.class);

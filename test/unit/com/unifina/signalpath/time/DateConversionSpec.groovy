@@ -1,5 +1,6 @@
 package com.unifina.signalpath.time
 
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -13,22 +14,68 @@ import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
 class DateConversionSpec extends Specification {
-	
+
+	def final static format = "yyyy-MM-dd HH:mm:ss";
+
 	Globals globals
 	DateConversion module
-	
+
     def setup() {
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:"UTC", username: "username"))
+		initContext()
+    }
+
+	private void initContext(String timezone="UTC") {
+		initContextWithUser(new SecUser(timezone:timezone, username:"username"))
+	}
+
+	private void initContextWithUser(SecUser user) {
 		module = new DateConversion()
+		globals = new Globals([:], grailsApplication, user)
 		module.globals = globals
 		module.init()
 		module.connectionsReady()
-    }
+	}
 
-    def cleanup() {
-		
-    }
-	
+	void "dateConversion gives the right answer"() {
+		initContext(TimeZone.getDefault().ID) // to/from system timezone
+		when:
+		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
+		Map inputValues = [
+			date: [
+				new Date(2015 - 1900, 9, 15, 10, 35, 10),
+				"2000-01-01 12:45:55",
+				Double.valueOf(1000 * 60 * 15) // +15 minutes to epoch
+			],
+		]
+		Map outputValues = [
+			date: [
+				new Date(2015 - 1900, 9, 15, 10, 35, 10).format(format),
+				new Date(2000 - 1900, 0, 1, 12, 45, 55).format(format),
+				new Date(1000 * 60 * 15).format(format),
+			],
+			ts: [
+				new Date(2015 - 1900, 9, 15, 10, 35, 10).getTime(),
+				new Date(2000 - 1900, 0, 1, 12, 45, 55).getTime(),
+				1000 * 60 * 15
+			].collect { it?.doubleValue() },
+			dayOfWeek: ["Thu", "Sat", "Thu"],
+			years: [2015, 2000, 1970].collect { it?.doubleValue() },
+			months: [10, 1, 1].collect { it?.doubleValue() },
+			days: [15, 1, 1].collect { it?.doubleValue() },
+			hours: [10,
+					Date.parse("HH", "00").format("HH").toInteger(),
+					new Date(1000 * 60 * 15).format("HH").toInteger()
+			].collect { it?.doubleValue() },
+			minutes: [35, 45, 15].collect { it?.doubleValue() },
+			seconds: [10, 55, 0].collect { it?.doubleValue() },
+			milliseconds: [0, 0, 0].collect { it?.doubleValue() }
+		]
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.test()
+	}
+
 	void "timestamp output must be correct from date input"() {
 		when: "time is set and asked"
 		Date date = new Date()
@@ -237,6 +284,11 @@ class DateConversionSpec extends Specification {
 		
 		then: "the values are correct"
 		module.getOutput("hours").getValue() == 4
+	}
+
+	void "can be created without user"() {
+		expect:
+			initContextWithUser(null)
 	}
 	
 }

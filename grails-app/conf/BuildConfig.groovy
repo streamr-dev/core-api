@@ -30,7 +30,7 @@ grails.project.dependency.resolver = "maven" // or ivy
 //]
 grails.project.fork = [
     run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
+    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
 grails.project.dependency.resolution = {
@@ -68,6 +68,7 @@ grails.project.dependency.resolution = {
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
         runtime('com.opencsv:opencsv:3.3')
+        runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		

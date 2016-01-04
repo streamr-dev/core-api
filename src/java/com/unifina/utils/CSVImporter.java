@@ -174,12 +174,9 @@ public class CSVImporter implements Iterable<LineValues> {
 			    	// On subsequent lines, try to detect the format of each individual column
 			    	else {
 			    		String[] columns = parser.parseLine(line);
-			    		
-			    		if (columns.length != entries.length) {
-							throw new RuntimeException("Unexpected number of columns on row "+lineCount);
-						}
-			    		
-			    		for (int i=0;i<columns.length;i++) {
+
+						// Ignore extra columns or missing columns (columns.length != entries.length)
+			    		for (int i=0;i<columns.length && i<entries.length;i++) {
 			    			// Is the type of this field still undetected?
 			    			if (entries[i]==null) {
 			    				if(timestampColumnIndex != null && i == timestampColumnIndex){
@@ -203,11 +200,13 @@ public class CSVImporter implements Iterable<LineValues> {
 			    if (undetectedSchemaEntries>0) {
 			    	StringBuilder sb = new StringBuilder("Format could not be detected for the following columns: ");
 			    	for (int i=0;i<headers.length;i++) {
-			    		if (entries[i]==null)
-			    			sb.append(headers[i]);
-			    			sb.append(",");
+			    		if (entries[i]==null) {
+							sb.append(headers[i]);
+							sb.append(",");
+						}
 			    	}
-			    	throw new RuntimeException(sb.toString());
+					log.warn(sb.toString());
+			    	// throw new RuntimeException(sb.toString());
 			    }
 			}
 		    finally {
@@ -269,36 +268,38 @@ public class CSVImporter implements Iterable<LineValues> {
 			String[] values = parser.parseLine(line);
 			Object[] parsed = new Object[values.length];
 
-    		if (values.length != entries.length) {
-				throw new RuntimeException("Unexpected number of columns on line: "+line);
-			}
-			
-			for (int i=0; i<values.length; i++) {
-				// The timestamp column cannot be empty
-				if (i == timestampColumnIndex) {
-					Date d = entries[i].dateFormat.parse(values[i]);
-					if(lastDate != null && d.before(lastDate)) {
-						throw new RuntimeException("The lines must be in a chronological order!");
+			int i=0;
+			// Ignore missing or extra columns
+			try {
+				for (i=0; i < values.length && i < entries.length; i++) {
+					// The timestamp column cannot be empty
+					if (i == timestampColumnIndex) {
+						Date d = entries[i].dateFormat.parse(values[i]);
+						if (lastDate != null && d.before(lastDate)) {
+							throw new RuntimeException("The lines must be in a chronological order!");
+						}
+						parsed[i] = d;
+						lastDate = d;
 					}
-					parsed[i] = d;
-					lastDate = d;
+					// Check for empty fields
+					else if (values[i] == null || values[i].length() == 0)
+						parsed[i] = null;
+						// Parse date field
+					else if (entries[i].dateFormat != null) {
+						parsed[i] = entries[i].dateFormat.parse(values[i]);
+					}
+					// Parse number
+					else if (entries[i].type.equals("number"))
+						parsed[i] = Double.parseDouble(values[i]);
+						// Parse boolean
+					else if (entries[i].type.equals("boolean"))
+						parsed[i] = Boolean.parseBoolean(values[i]);
+						// String
+					else if (entries[i].type.equals("string"))
+						parsed[i] = values[i];
 				}
-				// Check for empty fields
-				else if (values[i]==null || values[i].length()==0)
-					parsed[i] = null;
-				// Parse date field
-				else if (entries[i].dateFormat != null) {
-					parsed[i] = entries[i].dateFormat.parse(values[i]);
-				}
-				// Parse number
-				else if (entries[i].type.equals("number"))
-					parsed[i] = Double.parseDouble(values[i]);
-				// Parse boolean
-				else if (entries[i].type.equals("boolean"))
-					parsed[i] = Boolean.parseBoolean(values[i]);
-				// String
-				else if (entries[i].type.equals("string"))
-					parsed[i] = values[i];
+			} catch (NumberFormatException e) {
+				throw new RuntimeException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type);
 			}
 			
 			return new LineValues(schema, parsed);

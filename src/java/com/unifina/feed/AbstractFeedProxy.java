@@ -279,6 +279,10 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 		catchupState = CatchupState.CATCHUP_UNSYNC_READY;
 	}
 
+	public MessageHub<R, T> getHub() {
+		return hub;
+	}
+
 	public void sessionBroken() {
 		// TODO Auto-generated method stub
 		

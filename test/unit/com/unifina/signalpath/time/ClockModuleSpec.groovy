@@ -1,5 +1,6 @@
 package com.unifina.signalpath.time
 
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -13,19 +14,55 @@ import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
 class ClockModuleSpec extends Specification {
-	
+
+	Globals globals
 	ClockModule module
 	
     def setup() {
-		def globals = new Globals([:], grailsApplication, new SecUser(timezone:"UTC", username: "username"))
+		initContext([:], new SecUser(timezone:"UTC", username: "username"))
+    }
+
+	private void initContext(Map context, SecUser user = new SecUser(timezone:"UTC", username: "username")) {
+		globals = new Globals(context, grailsApplication, user)
 		module = new ClockModule()
 		module.globals = globals
 		module.init()
-    }
+		module.connectionsReady()
+	}
 
-    def cleanup() {
-		
-    }
+
+	void "clockModule gives the right answer"() {
+		when:
+		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
+		Map inputValues = [:]
+		Map outputValues = [
+			date: [
+				"1970-01-01 00:00:00",
+				"1970-01-01 01:00:00",
+				"1970-01-02 02:00:00",
+				"1970-01-08 00:00:00"
+			],
+			timestamp: [
+				0,
+				1000 * 60 * 60,
+				1000 * 60 * 60 * (24 + 2),
+				1000 * 60 * 60 * 24 * 7
+			].collect { it?.doubleValue() },
+		]
+		Map ticks = [
+			1: new Date(0),
+			2: new Date(1000 * 60 * 60),            // 1 hour since epoch
+			3: new Date(1000 * 60 * 60 * (24 + 2)), // a day + 2 hours since epoch
+			4: new Date(1000 * 60 * 60 * 24 * 7)    // 1 week since epoch
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.ticks(ticks)
+			.extraIterationsAfterInput(5)
+			.test()
+	}
 	
 	void "timestamp output must be correct"() {
 		when: "time is set and asked"
@@ -75,6 +112,11 @@ class ClockModuleSpec extends Specification {
 		
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/01/15 07:32"
+	}
+
+	void "can be instantiated without a user"() {
+		expect:
+			initContext([:], null)
 	}
 	
 }

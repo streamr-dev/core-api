@@ -1,6 +1,7 @@
 package com.unifina.signalpath.modeling;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -101,6 +102,18 @@ public class ARIMA extends AbstractSignalPathModule {
 		// Initial values for prediction errors are zero
 		for (int i=0;i<MA;i++)
 			prevErrors.add(0.0);
+
+		// Re-calculate initial diff chain
+		if (I>0) {
+			diffChain = new DiffChain();
+			DiffChain dc = diffChain;
+			for (int i=1;i<I;i++) {
+				dc.next = new DiffChain();
+				dc.next.previous = dc;
+				dc = dc.next;
+			}
+			intChain = dc;
+		}
 	}
 
 	@Override
@@ -165,7 +178,7 @@ public class ARIMA extends AbstractSignalPathModule {
 		}
 	}
 	
-	public class DiffChain {
+	public class DiffChain implements Serializable {
 		Double previousInput = null;
 		Double input = null;
 		Double output = null;

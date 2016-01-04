@@ -20,7 +20,7 @@ public class SpearmansRankCorrelation extends AbstractSignalPathModule {
 	SlidingDoubleArray xValues;
 	SlidingDoubleArray yValues;
 
-	SpearmansCorrelation correlation = new SpearmansCorrelation();
+	transient SpearmansCorrelation correlation;
 
 	@Override
 	public void init() {
@@ -45,9 +45,13 @@ public class SpearmansRankCorrelation extends AbstractSignalPathModule {
 		yValues.add(y.value);
 
 		if (xValues.isFull()) {
+			if (correlation == null) {
+				correlation = new SpearmansCorrelation();
+			}
+
 			double corr = correlation.correlation(xValues.getValues(), yValues.getValues());
 
-			if (corr==Double.NaN)
+			if (corr == Double.NaN)
 				corr = 0;
 
 			out.send(corr);
