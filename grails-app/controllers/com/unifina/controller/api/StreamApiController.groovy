@@ -37,6 +37,7 @@ class StreamApiController {
 		}
 	}
 
+	
 	@StreamrApi
 	def show() {
 		def stream = Stream.findById(params.id)
