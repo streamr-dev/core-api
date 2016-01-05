@@ -70,7 +70,7 @@ class SavedSignalPathApiController {
 			result.message = message(code:"signalpath.load.error", args:[e.message])
 		} finally {
 			// Examples can not be saved in place by others than those who have real access to it
-			if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH || unifinaSecurityService.canAccess(ssp))
+			if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH || unifinaSecurityService.canAccess(ssp, request.apiUser))
 				result.saveData = createSaveData(ssp)
 
 			render result as JSON
