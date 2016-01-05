@@ -157,4 +157,35 @@ class StreamApiControllerSpec extends Specification {
 		response.json.success == false
 		response.status == 400
 	}
+
+	void "find a stream of logged in user"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 1
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
+
+		then:
+		response.status == 200
+		response.json.id == 1
+		response.json.feedId == 7
+		response.json.name == "stream"
+	}
+
+	void "cannot find a stream of logged in user"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 666
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
+
+		then:
+		response.status == 404
+	}
 }
