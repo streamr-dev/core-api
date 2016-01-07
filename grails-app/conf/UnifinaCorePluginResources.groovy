@@ -189,7 +189,7 @@ modules = {
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
-		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core'], disposition:'head'
+		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'streamr-chart' {
 		dependsOn 'jquery,highstock'

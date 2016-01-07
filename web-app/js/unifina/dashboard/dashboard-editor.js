@@ -168,31 +168,24 @@ var DashboardItemView = Backbone.View.extend({
 		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
 		this.largeClass = "large-size col-xs-12 col-centered"
 
-		var type = this.model.get("uiChannel").module.id
+		var webcomponent = this.model.get("uiChannel").module.webcomponent
 		this.$el.html(this.template(this.model.toJSON()))
-		if(type == 67) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
-		}
-		else if(type == 142) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.tableTemplate(this.model.toJSON()))
-		}
-		else if(type == 145) {
+		if(webcomponent == "streamr-label") {
 			if(!this.model.get("size"))
 				this.model.set("size", "small")
-			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
-		}
-		else if(type == 196) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
 		else {
-			throw new Error("Module id not recognized!");
+			if(!this.model.get("size"))
+				this.model.set("size", "medium")
 		}
+		if(this.model.get("uiChannel").module.webcomponent !== undefined) {
+			var templateName = "#" + this.model.get("uiChannel").module.webcomponent + "-template"
+			var template = _.template($(templateName).html())
+			this.$el.find(".widget-content").append(template(this.model.toJSON()))
+		} else {
+			throw new Error("No webcomponent defined for module "+this.model.get("uiChannel").module.id+"!")
+		}
+
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
 		this.$el.find(".title").append(titlebar)
 		this.initSize()
