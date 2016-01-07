@@ -38,8 +38,8 @@ public class EmailModuleSpec extends Specification {
 		module = new EmailModule()
 	}
 	
-	private void initContext(Map context) {
-		globals = new Globals(context, grailsApplication, new SecUser(timezone:"Europe/Helsinki", username: "username"))
+	private void initContext(Map context, SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
+		globals = new Globals(context, grailsApplication, user)
 		globals.time = new Date()
 		
 		module.globals = globals
@@ -137,7 +137,7 @@ value2: test value
 """), module.parentSignalPath.uiChannelId)
 	}
 	
-	void "If trying to send emails too often send notification to warn about it"(){
+	void "If trying to send emails too often send notification to warn about it"() {
 		initContext([live:true])
 		
 		module = new EmailModule(){
@@ -183,6 +183,10 @@ value2: test value
 			0 * globals.uiChannel.push(new NotificationMessage("Tried to send emails too often"), module.parentSignalPath.uiChannelId)
 	}
 
+	void "EmailModule can be instantiated without a user"() {
+		expect:
+			initContext([:], null)
+	}
 
 }
 

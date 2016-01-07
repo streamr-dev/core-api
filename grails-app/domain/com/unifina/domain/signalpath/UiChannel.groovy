@@ -18,4 +18,15 @@ class UiChannel implements Serializable {
 		module nullable:true
 		name nullable:true
 	}
+
+	Map<String, Object> toMap() {
+		return	[
+				id: id,
+				name: name,
+				module: [
+						id: module.id,
+						webcomponent: module.webcomponent
+				]
+		]
+	}
 }

@@ -40,13 +40,17 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	@Override
 	public void connectionsReady() {
 		super.connectionsReady();
-		instance.connectionsReady();
+		if (instance != null) {
+			instance.connectionsReady();
+		}
 	}
 
 	@Override
 	public void setClearState(boolean clearState) {
 		super.setClearState(clearState);
-		instance.setClearState(clearState);
+		if (instance != null) {
+			instance.setClearState(clearState);
+		}
 	}
 
 	@Override

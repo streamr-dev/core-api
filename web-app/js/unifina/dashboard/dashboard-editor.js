@@ -168,31 +168,24 @@ var DashboardItemView = Backbone.View.extend({
 		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
 		this.largeClass = "large-size col-xs-12 col-centered"
 
-		var type = this.model.get("uiChannel").module.id
+		var webcomponent = this.model.get("uiChannel").module.webcomponent
 		this.$el.html(this.template(this.model.toJSON()))
-		if(type == 67) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
-		}
-		else if(type == 142) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.tableTemplate(this.model.toJSON()))
-		}
-		else if(type == 145) {
+		if(webcomponent == "streamr-label") {
 			if(!this.model.get("size"))
 				this.model.set("size", "small")
-			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
-		}
-		else if(type == 196) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
 		else {
-			throw new Error("Module id not recognized!");
+			if(!this.model.get("size"))
+				this.model.set("size", "medium")
 		}
+		if(this.model.get("uiChannel").module.webcomponent !== undefined) {
+			var templateName = "#" + this.model.get("uiChannel").module.webcomponent + "-template"
+			var template = _.template($(templateName).html())
+			this.$el.find(".widget-content").append(template(this.model.toJSON()))
+		} else {
+			throw new Error("No webcomponent defined for module "+this.model.get("uiChannel").module.id+"!")
+		}
+
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
 		this.$el.find(".title").append(titlebar)
 		this.initSize()
@@ -291,6 +284,8 @@ var DashboardItemView = Backbone.View.extend({
 })
 
 var SidebarView = Backbone.View.extend({
+	template: _.template($("#sidebar-template").html()),
+
 	events: {
 		"checked" : "updateDIList",
 		"unchecked" : "updateDIList",
@@ -356,36 +351,13 @@ var SidebarView = Backbone.View.extend({
 	},
 
 	render: function () {
-		this.title = $("<div/>", {
-			class: "menu-content",
-			html: "<label>Dashboard name</label>"
-		})
-		this.titleInput = $("<input/>", {
-			class: "dashboard-name title-input form-control",
-			type: "text",
-			name: "dashboard-name",
-			value: this.dashboard.get("name"),
-			placeholder: "Dashboard name"
-		})
-		this.rspTitle = $("<li/>", {
-			class: "rsp-title",
-			html: "<label>Running Signalpaths</label>"
-		})
-		this.list = $("<ul/>", {
-			class: "navigation",
-			id: "rsp-list"
-		})
-		var buttonTemplate = _.template($("#button-template").html())
-		this.buttons = $(buttonTemplate(this.dashboard.toJSON()))
-		this.$el.append(this.title)
-		this.title.append(this.titleInput)
-		this.$el.append(this.list)
-		this.list.append(this.rspTitle)
+		this.$el.append(this.template(this.dashboard.toJSON()))
+		this.titleInput = this.$el.find("input.dashboard-name.title-input")
+		this.list = this.$el.find("#rsp-list")
 		_.each(this.rspCollection.models, function(item) {
 			this.list.append(this.renderRSP(item).el)
 		}, this)
-		this.$el.append(this.buttons)
-		new Toolbar(this.buttons.find("form"))
+		new Toolbar(this.$el.find("#deleteDashboardForm"))
 	},
 
 	renderRSP: function(item) {

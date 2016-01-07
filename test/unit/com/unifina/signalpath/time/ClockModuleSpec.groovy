@@ -19,11 +19,17 @@ class ClockModuleSpec extends Specification {
 	ClockModule module
 	
     def setup() {
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:"UTC", username: "username"))
+		initContext([:], new SecUser(timezone:"UTC", username: "username"))
+    }
+
+	private void initContext(Map context, SecUser user = new SecUser(timezone:"UTC", username: "username")) {
+		globals = new Globals(context, grailsApplication, user)
 		module = new ClockModule()
 		module.globals = globals
 		module.init()
-    }
+		module.connectionsReady()
+	}
+
 
 	void "clockModule gives the right answer"() {
 		when:
@@ -106,6 +112,11 @@ class ClockModuleSpec extends Specification {
 		
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/01/15 07:32"
+	}
+
+	void "can be instantiated without a user"() {
+		expect:
+			initContext([:], null)
 	}
 	
 }
