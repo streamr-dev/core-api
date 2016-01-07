@@ -2,6 +2,7 @@ package com.unifina.signalpath.utils
 
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
@@ -21,7 +22,7 @@ class RateLimitSpec extends Specification {
 
 	def setTimeAndValue(Long time, value) {
 		globals.time = new Date(time)
-		module.getInput("input").receive(value)
+		module.getInput("in").receive(value)
 		module.sendOutput()
 	}
 
@@ -31,22 +32,22 @@ class RateLimitSpec extends Specification {
 		module.getInput("rate").receive(1)
 
 		when: "first message sent"
-		setTimeAndValue(1450000000000, "value")
+		setTimeAndValue(0, "value")
 
 		then: "the value gets through"
-		module.getOutput("output").getValue() == "value"
+		module.getOutput("out").getValue() == "value"
 
 		when: "second message is sent just far enough from the first one"
-		setTimeAndValue(1450000001000, "value2")
+		setTimeAndValue(1000, "value2")
 
 		then: "the value gets through"
-		module.getOutput("output").getValue() == "value2"
+		module.getOutput("out").getValue() == "value2"
 
 		when: "third message is sent way far enough from the second one"
-		setTimeAndValue(1450000003000, "value3")
+		setTimeAndValue(3000, "value3")
 
 		then: "the value gets through"
-		module.getOutput("output").getValue() == "value3"
+		module.getOutput("out").getValue() == "value3"
 	}
 
 	void "the module doesn't let message through if there are too many messages is set time"() {
@@ -55,28 +56,28 @@ class RateLimitSpec extends Specification {
 		module.getInput("rate").receive(2)
 
 		when: "first message sent"
-		setTimeAndValue(1450000000000, "value")
+		setTimeAndValue(0, "value")
 
 		then: "the value gets through"
-		module.getOutput("output").getValue() == "value"
+		module.getOutput("out").getValue() == "value"
 
 		when: "second message is sent"
-		setTimeAndValue(1450000000300, "value2")
+		setTimeAndValue(300, "value2")
 
 		then: "the value gets through"
-		module.getOutput("output").getValue() == "value2"
+		module.getOutput("out").getValue() == "value2"
 
 		when: "third message is sent too close to the first one"
-		setTimeAndValue(1450000000600, "value3")
+		setTimeAndValue(600, "value3")
 
 		then: "the value doesn't get through"
-		module.getOutput("output").getValue() == "value2"
+		module.getOutput("out").getValue() == "value2"
 
 		when: "fourth message is sent far away from the first one"
-		setTimeAndValue(1450000001000, "value4")
+		setTimeAndValue(1300, "value4")
 
 		then: "the value gets through"
-		module.getOutput("output").getValue() == "value4"
+		module.getOutput("out").getValue() == "value4"
 	}
 
 	void "the module outputs right values to the limitExceeded? output"() {
@@ -85,25 +86,25 @@ class RateLimitSpec extends Specification {
 		module.getInput("rate").receive(2)
 
 		when: "first message sent"
-		setTimeAndValue(1450000000000, "value")
+		setTimeAndValue(0, "value")
 
 		then: "not limited"
 		module.getOutput("limitExceeded?").getValue() == 0
 
 		when: "second message is sent"
-		setTimeAndValue(1450000000300, "value2")
+		setTimeAndValue(300, "value2")
 
 		then: "not limited"
 		module.getOutput("limitExceeded?").getValue() == 0
 
 		when: "third message is sent too close to the first one"
-		setTimeAndValue(1450000000600, "value3")
+		setTimeAndValue(600, "value3")
 
 		then: "limited"
 		module.getOutput("limitExceeded?").getValue() == 1
 
 		when: "fourth message is sent far away from the first one"
-		setTimeAndValue(1450000001000, "value4")
+		setTimeAndValue(1300, "value4")
 
 		then: "not limited"
 		module.getOutput("limitExceeded?").getValue() == 0
@@ -112,19 +113,65 @@ class RateLimitSpec extends Specification {
 	void "the module works correctly with a bigger and different input"() {
 		setup:
 		module.getInput("timeInMillis").receive(100)
-		module.getInput("rate").receive(5)
-		def times = [1450000000010, 1450000000020, 145000000030, 1450000000040, 1450000000050, 1450000000060, 1450000000130, 1450000000140, 1450000000145, 14500000000160]
-		def values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-		def outputValues = [1, 2, 3, 4, 5, 5, 7, 8, 8, 10]
-		def limitExceededValues = [0, 0, 0, 0, 0, 1, 0, 0, 1, 0]
+		module.getInput("rate").receive(2)
 
-		for(int i = 0; i < 10; i++) {
-			when: "set time and value found from times[i] and values[i]"
-			setTimeAndValue(times[i], values[i])
+		def timeToFurther = [60, 50, 30, 30, 70]
 
-			then: "outputs found from the outputValues[i] and limitExceededValues[i] are correct"
-			module.getOutput("output").getValue() == outputValues[i]
-			module.getOutput("limitExceeded?").getValue() == limitExceededValues[i]
-		}
+		Map inputValues = [
+				in: [1, 2, 3, 4, 5, 6].collect { it?.doubleValue() }
+		]
+
+		Map outputValues = [
+				"out": [1, 2, 3, 3, 3, 6].collect { it?.doubleValue() },
+				"limitExceeded?": [0, 0, 0, 1, 1, 0].collect { it?.doubleValue() },
+		]
+
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.timeToFurtherPerIteration(timeToFurther)
+				.test()
+	}
+
+	void "if rate is 0 no values should be sent out"() {
+		setup:
+		globals.time = new Date(0)
+		module.getInput("timeInMillis").receive(100)
+		module.getInput("rate").receive(0)
+
+		def timeToFurther = [0, 0, 1, 2, 3, 10, 20, 100, 1000, 1000].collect { it?.intValue() }
+
+		Map inputValues = [
+				in: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() }
+		]
+
+		Map outputValues = [
+				"out": [null, null, null, null, null, null, null, null, null, null],
+				"limitExceeded?": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1].collect { it?.doubleValue() },
+		]
+
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.timeToFurtherPerIteration(timeToFurther)
+				.test()
+	}
+
+	void "if time is 0 every value should be sent out"() {
+		setup:
+		globals.time = new Date(0)
+		module.getInput("timeInMillis").receive(0)
+		module.getInput("rate").receive(1)
+
+		def timeToFurther = [0, 0, 1, 2, 3, 10, 20, 100, 1000, 1000].collect { it?.intValue() }
+
+		Map inputValues = [
+				in: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() }
+		]
+
+		Map outputValues = [
+				"out": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() },
+				"limitExceeded?": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0].collect { it?.doubleValue() },
+		]
+
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.timeToFurtherPerIteration(timeToFurther)
+				.test()
 	}
 }

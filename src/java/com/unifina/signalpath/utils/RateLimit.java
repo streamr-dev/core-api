@@ -4,46 +4,47 @@ import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 
 import java.util.ArrayList;
+import java.util.*;
 
 public class RateLimit extends AbstractSignalPathModule {
 
-	Input<Object> input = new Input<>(this, "input", "object");
+	Input<Object> in = new Input<>(this, "in", "Object");
 
 	IntegerParameter time = new IntegerParameter(this, "timeInMillis", 1000);
 	IntegerParameter rate = new IntegerParameter(this, "rate", 1);
 
-	Output<Object> output = new Output<>(this, "output", "object");
+	Output<Object> out = new Output<>(this, "out", "Object");
 	TimeSeriesOutput limit = new TimeSeriesOutput(this, "limitExceeded?");
 
-	ArrayList<Long> times = null;
 
-	public void init() {
-		times = new ArrayList<>();
-		this.addInput(input);
-		this.addInput(time);
-		this.addInput(rate);
+	List<Long> times = new ArrayList<>();
 
-		this.addOutput(output);
-		this.addOutput(limit);
-	}
 
 	@Override
 	public void sendOutput() {
-		if(times.size() < rate.getValue() ||
-				globals.time.getTime() - times.get(0) >= time.getValue()) {
-			if(times.size() >= rate.getValue()) {
+		times.add(globals.time.getTime());
+		while(true) {
+			long leftHandSide = globals.time.getTime() - times.get(0);
+			long rightHandSide = time.getValue().longValue();
+			if(leftHandSide < rightHandSide)
+				break;
+			else {
 				times.remove(0);
+				if(times.size() == 0)
+					break;
 			}
-			times.add(globals.time.getTime());
-			output.send(input.getValue());
+		}
+		if(times.size() <= rate.getValue()) {
+			out.send(in.getValue());
 			limit.send(0);
 		} else {
+			times.remove(0);
 			limit.send(1);
 		}
 	}
 
 	@Override
 	public void clearState() {
-		times = null;
+		times = new ArrayList<>();
 	}
 }
