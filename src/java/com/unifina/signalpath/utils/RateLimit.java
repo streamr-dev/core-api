@@ -16,15 +16,13 @@ public class RateLimit extends AbstractSignalPathModule {
 	Output<Object> out = new Output<>(this, "out", "Object");
 	TimeSeriesOutput limit = new TimeSeriesOutput(this, "limitExceeded?");
 
-
-	List<Long> times = new ArrayList<>();
-
+	List<Number> times = new ArrayList<>();
 
 	@Override
 	public void sendOutput() {
 		times.add(globals.time.getTime());
 		while(true) {
-			long leftHandSide = globals.time.getTime() - times.get(0);
+			long leftHandSide = globals.time.getTime() - times.get(0).longValue();
 			long rightHandSide = time.getValue().longValue();
 			if(leftHandSide < rightHandSide)
 				break;
