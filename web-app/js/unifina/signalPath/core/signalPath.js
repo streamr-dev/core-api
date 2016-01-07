@@ -46,9 +46,9 @@ var SignalPath = (function () {
 		allowRuntimeChanges: true,
 		runUrl: undefined,
 		abortUrl: undefined,
-		getModuleUrl: Streamr.projectWebroot+'module/jsonGetModule',
-		getModuleHelpUrl: Streamr.projectWebroot+'module/jsonGetModuleHelp',
-		requestUrl: Streamr.projectWebroot+"api/live/request",
+		getModuleUrl: Streamr.createLink("module", "jsonGetModule"),
+		getModuleHelpUrl: Streamr.createLink("module", "jsonGetModuleHelp"),
+		requestUrl: Streamr.createLink({"uri": "api/v1/running-signal-paths/request"}),
 		connectionOptions: {},
 		resendOptions: {resend_all:true},
 		zoom: 1

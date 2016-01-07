@@ -82,7 +82,7 @@
 				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(uri:'/api/live/request', absolute:'true')}",
+					url: "${createLink(controller: 'liveApi', action: 'request', absolute:'true')}",
 					data: JSON.stringify({
 						channel: this.channel,
 						msg: msg
