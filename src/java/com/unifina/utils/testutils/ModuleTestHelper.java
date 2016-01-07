@@ -101,7 +101,15 @@ public class ModuleTestHelper {
 		 * How many milliseconds to further <code>globals.time</code> after each round. (default = 0)
 		 */
 		public Builder timeToFurtherPerIteration(int timeStep) {
-			testHelper.timeStep = timeStep;
+			testHelper.timeSteps = Arrays.asList(timeStep);
+			return this;
+		}
+
+		/**
+		 * How many milliseconds to further <code>globals.time</code> after each round by round.
+		 */
+		public Builder timeToFurtherPerIteration(List<Integer> timeSteps) {
+			testHelper.timeSteps = timeSteps;
 			return this;
 		}
 
@@ -185,7 +193,7 @@ public class ModuleTestHelper {
 	private Map<Integer, Date> ticks;
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
-	private int timeStep = 0;
+	private List<Integer> timeSteps = Arrays.asList(0);
 	private boolean feedNullInputs = false;
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
@@ -247,7 +255,7 @@ public class ModuleTestHelper {
 			}
 
 			// Further global time
-			furtherTime();
+			furtherTime(i);
 		}
 
 		// Test ui channel messages
@@ -321,7 +329,13 @@ public class ModuleTestHelper {
 		throw new TestHelperException(String.format(msg, outputName, outputIndex, i, value, target), this);
 	}
 
-	private void furtherTime() {
+	private void furtherTime(int i) {
+		if (i >= timeSteps.size()) {
+			i = timeSteps.size() - 1;
+		}
+
+		int timeStep = timeSteps.get(i);
+
 		if (timeStep != 0) {
 			module.globals.time = new Date(module.globals.time.getTime() + timeStep);
 		}
