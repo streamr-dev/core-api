@@ -47,6 +47,26 @@ class StreamApiController {
 	}
 
 	@StreamrApi
+	def update() {
+		Stream newStream = new Stream(request.JSON)
+		getAuthorizedStream(params.id) { Stream stream ->
+			if (newStream.name != null) {
+				stream.name = newStream.name
+			}
+			if (newStream.description != null) {
+				stream.description = newStream.description
+			}
+			if (newStream.config != null) {
+				stream.config = newStream.config
+			}
+
+			stream.save(failOnError: true)
+
+			render(status: 204)
+		}
+	}
+
+	@StreamrApi
 	def delete() {
 		getAuthorizedStream(params.id) { Stream stream ->
 			stream.delete()

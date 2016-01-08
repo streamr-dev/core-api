@@ -210,6 +210,57 @@ class StreamApiControllerSpec extends Specification {
 		response.status == 403
 	}
 
+	void "update a Stream of logged in user"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 1
+		request.method = "PUT"
+		request.json = '{name: "newName", description: "newDescription"}'
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
+
+		then:
+		response.status == 204
+
+		then:
+		def stream = Stream.findById(1)
+		stream.name == "newName"
+		stream.description == "newDescription"
+		stream.config != null
+	}
+
+	void "cannot update non-existent Stream"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 666
+		request.method = "PUT"
+		request.json = '{name: "newName", description: "newDescription"}'
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
+
+		then:
+		response.status == 404
+	}
+
+	void "cannot update other user's Stream"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 4
+		request.method = "PUT"
+		request.json = '{name: "newName", description: "newDescription"}'
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
+
+		then:
+		response.status == 403
+	}
+
 	void "delete a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
