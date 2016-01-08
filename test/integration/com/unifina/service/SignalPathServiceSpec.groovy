@@ -65,7 +65,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 		user = SecUser.load(1L)
 
 		// Create stream
-		stream = streamService.createUserStream([name: "serializationTestStream"], user)
+		stream = streamService.createUserStream([name: "serializationTestStream"], user, null)
 		stream.config = (
 			[
 				fields: [

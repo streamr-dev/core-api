@@ -77,7 +77,7 @@ class StreamController {
 			[stream:new Stream()]
 		else {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user)
+			Stream stream = streamService.createUserStream(params, user, null)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)
