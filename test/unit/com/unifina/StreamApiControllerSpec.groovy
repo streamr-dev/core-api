@@ -22,18 +22,25 @@ class StreamApiControllerSpec extends Specification {
 	SecUser user
 
 	def streamService
+	def unifinaSecurityService
 
 	def setup() {
 		streamService = mainContext.getBean(StreamService)
+		unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
+
 		controller.streamService = streamService
 		controller.streamService.kafkaService = Mock(KafkaService)
+		controller.unifinaSecurityService = unifinaSecurityService
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
 
+		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
+
 		streamService.createUserStream([name: "stream", description: "description"], user)
 		streamService.createUserStream([name: "ztream"], user)
 		streamService.createUserStream([name: "atream"], user)
+		streamService.createUserStream([name: "otherUserStream"], otherUser)
 	}
 
 	void "find all streams of logged in user"() {
@@ -93,7 +100,7 @@ class StreamApiControllerSpec extends Specification {
 			fields: []
 		]
 		response.json.description == "Test stream"
-		Stream.count() == 4
+		Stream.count() == 5
 		Stream.findById(response.json.id).user == user
 	}
 
@@ -127,7 +134,7 @@ class StreamApiControllerSpec extends Specification {
 			]
 		]
 		response.json.description == "Test stream"
-		Stream.count() == 4
+		Stream.count() == 5
 		Stream.findById(response.json.id).user == user
 	}
 
@@ -158,7 +165,7 @@ class StreamApiControllerSpec extends Specification {
 		response.status == 400
 	}
 
-	void "find a stream of logged in user"() {
+	void "show a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		params.id = 1
@@ -175,7 +182,7 @@ class StreamApiControllerSpec extends Specification {
 		response.json.name == "stream"
 	}
 
-	void "cannot find a stream of logged in user"() {
+	void "cannot shown non-existent Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		params.id = 666
@@ -187,5 +194,19 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.status == 404
+	}
+
+	void "cannot show other user's Stream"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 4
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
+
+		then:
+		response.status == 403
 	}
 }

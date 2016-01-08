@@ -9,6 +9,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class StreamApiController {
 
 	def streamService
+	def unifinaSecurityService
 
 	@StreamrApi
 	def index() {
@@ -43,6 +44,8 @@ class StreamApiController {
 		def stream = Stream.findById(params.id)
 		if (stream == null) {
 			render(status: 404, text: [error: "Stream not found with id " + params.id, code: "NOT_FOUND"] as JSON)
+		} else if (!unifinaSecurityService.canAccess(stream, request.apiUser)) {
+			render(status: 403, text: [error: "Not authorized to access Stream " + params.id, code: "FORBIDDEN"] as JSON)
 		} else {
 			render(stream.toMap() as JSON)
 		}
