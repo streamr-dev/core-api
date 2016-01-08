@@ -1,12 +1,13 @@
 (function(exports) {
 
-	function StreamrButton(parent, options) {
-		this.parent = parent
+	function StreamrButton(parent, data, options) {
+		this.parent = $(parent)
 		this.options = options
 
-		this.value
-
 		this.createButton()
+
+		if(this.options && this.options.alwaysEnabled)
+			this.enable()
 	}
 
 	StreamrButton.prototype.createButton = function() {
@@ -18,29 +19,17 @@
 		this.changeName()
 
 		this.button.click(function(e){
-			_this.sendValue(_this.value)
-		})
-
-		$(SignalPath).on("started", function() {
-			_this.enable()
-		})
-
-		$(SignalPath).on("stopped", function() {
-			_this.disable()
+			_this.sendValue()
 		})
 	}
 
 	StreamrButton.prototype.receiveResponse = function(p) {
 		if(p["buttonName"] !== undefined)
 			this.changeName(p["buttonName"])
-		if(p["value"] !== undefined) {
-			this.changeValue(p["value"])
-		}
 	}
 
-	StreamrButton.prototype.sendValue = function(value) {
-		$(this).trigger("input", value)
-		console.log(value)
+	StreamrButton.prototype.sendValue = function() {
+		$(this).trigger("input")
 	}
 
 	StreamrButton.prototype.changeName = function(name) {
@@ -51,17 +40,13 @@
 		$(this).trigger("update")
 	}
 
-	StreamrButton.prototype.changeValue = function(value) {
-		this.value = value
-		$(this).trigger("valueChange")
-	}
-
 	StreamrButton.prototype.enable = function() {
 		this.button.removeClass("disabled")
 	}
 
 	StreamrButton.prototype.disable = function() {
-		this.button.addClass("disabled")
+		if(!this.alwaysEnabled)
+			this.button.addClass("disabled")
 	}
 
 exports.StreamrButton = StreamrButton

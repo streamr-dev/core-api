@@ -4,7 +4,8 @@
 }
 
 .text-field textarea.form-control {
-    height: 34px;
+    height: 90px;
+    width: 200px;
     margin-right: 10px;
 }
 

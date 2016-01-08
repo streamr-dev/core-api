@@ -1,9 +1,9 @@
 (function(exports) {
 
-	function StreamrSwitcher(parent, options) {
+	function StreamrSwitcher(parent, data, options) {
 		this.parent = parent
 		this.options = options
-		this.checked = options.value
+		this.checked = data.value
 
 		this.createSwitcher()
 	}
@@ -28,11 +28,10 @@
 		return this.switcher.prop('checked')
 	}
 
-	StreamrSwitcher.prototype.getData = function() {
-		var data = {
+	StreamrSwitcher.prototype.toJSON = function() {
+		return {
 			value: this.getValue()
 		}
-		return data
 	}
 
 	StreamrSwitcher.prototype.sendValue = function(value) {

@@ -23,14 +23,14 @@
 			},
 			ready: function() {			
 				var _this = this
-				this.bindEvents(_this.$.container)
+				this.bindEvents(_this.$["streamr-widget-container"])
 
-				this.$.container.setAttribute("style", "min-height:400px")
+				this.$["streamr-widget-container"].setAttribute("style", "min-height:400px")
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
 
-					_this.map = new StreamrHeatMap(_this.$.container, {
+					_this.map = new StreamrHeatMap(_this.$["streamr-widget-container"], {
 						lifeTime: this.lifeTime,
 						fadeInTime: this.fadeInTime,
 						fadeOutTime: this.fadeOutTime,

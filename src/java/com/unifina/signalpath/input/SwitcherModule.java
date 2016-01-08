@@ -25,15 +25,15 @@ public class SwitcherModule extends InputModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		if((config.get("moduleOptions")) != null) {
-			value = (boolean)((Map)config.get("moduleOptions")).get("value");
+		if((config.get("moduleData")) != null) {
+			value = (boolean)((Map)config.get("moduleData")).get("value");
 		}
 	}
 
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		putToModuleOptions(config, "value", value);
+		putToModuleData(config, "value", value);
 		config.put("module", "StreamrSwitcher");
 		return config;
 	}

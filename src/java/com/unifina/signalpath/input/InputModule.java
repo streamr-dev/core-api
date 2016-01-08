@@ -28,13 +28,13 @@ public abstract class InputModule extends ModuleWithUI {
 		}
 	}
 
-	protected void putToModuleOptions(Map<String, Object> config, String name, Object obj) {
+	protected void putToModuleData(Map<String, Object> config, String name, Object obj) {
 		Map<String, Object> opts;
-		if(config.get("moduleOptions") == null) {
+		if(config.get("moduleData") == null) {
 			opts = new HashMap<>();
-			config.put("moduleOptions", opts);
+			config.put("moduleData", opts);
 		} else {
-			opts = (Map<String, Object>) config.get("moduleOptions");
+			opts = (Map<String, Object>) config.get("moduleData");
 		}
 		opts.put(name, obj);
 	}

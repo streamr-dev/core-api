@@ -7,11 +7,24 @@ SignalPath.InputModule = function(data,canvas,prot) {
 	var super_createDiv = prot.createDiv;
 	prot.createDiv = function() {
 		super_createDiv();
-		var options = prot.jsonData.moduleOptions
 		if(!prot.jsonData.module)
 			throw "prot.jsonData.module must be defined!"
 		var moduleName = eval(prot.jsonData.module)
-		module = new moduleName(prot.body, options)
+		module = new moduleName(
+				prot.body,
+				prot.jsonData.moduleData,
+				prot.jsonData.moduleOptions
+		)
+
+		$(SignalPath).on("started", function() {
+			if(module.enable)
+				module.enable()
+		})
+
+		$(SignalPath).on("stopped", function() {
+			if(module.disable)
+				module.disable()
+		})
 
 		$(module).on("update", function() {
 			prot.redraw()
@@ -24,10 +37,10 @@ SignalPath.InputModule = function(data,canvas,prot) {
 
 	var super_toJSON = pub.toJSON
 	pub.toJSON = function () {
-		var json = super_toJSON()
-		if(module.getData)
-			json.data = module.getData()
-		return json
+		prot.jsonData = super_toJSON()
+		if(module.toJSON)
+			prot.jsonData.data = module.toJSON()
+		return prot.jsonData
 	}
 	
 	pub.receiveResponse = function(p) {

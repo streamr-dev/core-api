@@ -17113,6 +17113,12 @@ body.dashboard-show #dashboard-view .dashboarditem streamr-chart .container {
 body.dashboard-show #dashboard-view .dashboarditem streamr-chart .container .chartDrawArea {
   width: 100%;
 }
+body.dashboard-show #dashboard-view .dashboarditem streamr-button .streamr-widget-container {
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
 body.dashboard-show:not(.editing) .panel-heading-controls,
 body.dashboard-show:not(.editing) .titlebar-clickable {
   display: none;

@@ -11,7 +11,7 @@
 			ready: function() {
 				var _this = this
 				
-				this.bindEvents(this.$.container)
+				this.bindEvents(this.$["streamr-widget-container"])
 				this.subscribe(
 					function(message) {
 						_this.value = message.value

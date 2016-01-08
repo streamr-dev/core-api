@@ -1,11 +1,14 @@
 (function(exports) {
 
-    function StreamrTextField(parent, options) {
+    function StreamrTextField(parent, data, options) {
         var _this = this
 
         this.parent = parent
         this.options = options
-        this.value = options.value || ""
+        this.value = data.value || ""
+
+        this.width
+        this.height
 
         this.render()
 
@@ -13,6 +16,8 @@
     }
 
     StreamrTextField.prototype.render = function() {
+        var _this = this
+
         this.container = $("<div/>", {
             class: "form-inline"
         })
@@ -28,6 +33,9 @@
         this.container.append(this.sendButton)
         this.parent.append(this.container)
         this.parent.addClass("text-field")
+
+        this.width = this.textArea.outerWidth()
+        this.height = this.textArea.outerHeight()
     }
 
     StreamrTextField.prototype.bindEvents = function() {
@@ -38,13 +46,21 @@
         this.sendButton.click(function() {
             _this.sendValue(_this.value)
         })
+
+        this.textArea.mouseup(function(){
+            if (  $(this).outerWidth()  != _this.width || $(this).outerHeight() != _this.height ) {
+                $(_this).trigger("update")
+            }
+            _this.width = $(this).outerWidth()
+            _this.height = $(this).outerHeight()
+        })
     }
 
     StreamrTextField.prototype.sendValue = function(value) {
         $(this).trigger("input", value)
     }
 
-    StreamrTextField.prototype.getData = function() {
+    StreamrTextField.prototype.toJSON = function() {
         return {
             value: this.value
         }

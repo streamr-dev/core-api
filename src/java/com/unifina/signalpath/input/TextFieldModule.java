@@ -31,7 +31,7 @@ public class TextFieldModule extends InputModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		putToModuleOptions(config, "value", value);
+		putToModuleData(config, "value", value);
 		config.put("module", "StreamrTextField");
 		return config;
 	}
