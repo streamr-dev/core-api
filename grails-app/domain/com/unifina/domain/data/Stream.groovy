@@ -47,7 +47,6 @@ class Stream implements Comparable {
 			uuid: uuid,
 			apiKey: apiKey,
 			name: name,
-			feedId: feed.id,
 			config: config == null || config.empty ? config : new JsonSlurper().parseText(config),
 			description: description
 		]

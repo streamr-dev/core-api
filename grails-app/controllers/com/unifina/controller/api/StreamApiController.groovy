@@ -24,12 +24,8 @@ class StreamApiController {
 
 	@StreamrApi
 	def save() {
-		Stream stream
-		if (request.JSON.fields) {
-			stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.fields)
-		} else {
-			stream = streamService.createUserStream(request.JSON, request.apiUser)
-		}
+		Stream stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.config?.fields)
+
 		if (stream.hasErrors()) {
 			log.info(stream.errors)
 			render(status: 400, text: [success: false, error: "validation error", details: stream.errors] as JSON)
@@ -40,24 +36,24 @@ class StreamApiController {
 
 
 	@StreamrApi
-	def show() {
-		getAuthorizedStream(params.id) { Stream stream ->
+	def show(long id) {
+		getAuthorizedStream(id) { Stream stream ->
 			render(stream.toMap() as JSON)
 		}
 	}
 
 	@StreamrApi
-	def update() {
+	def update(long id) {
 		Stream newStream = new Stream(request.JSON)
-		getAuthorizedStream(params.id) { Stream stream ->
+		getAuthorizedStream(id) { Stream stream ->
 			if (newStream.name != null) {
 				stream.name = newStream.name
 			}
 			if (newStream.description != null) {
 				stream.description = newStream.description
 			}
-			if (newStream.config != null) {
-				stream.config = newStream.config
+			if (request.JSON.config) {
+				stream.config = request.JSON.config.toString()
 			}
 
 			stream.save(failOnError: true)
@@ -67,8 +63,8 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def delete() {
-		getAuthorizedStream(params.id) { Stream stream ->
+	def delete(long id) {
+		getAuthorizedStream(id) { Stream stream ->
 			stream.delete()
 			render(status: 204)
 		}

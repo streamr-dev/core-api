@@ -37,10 +37,10 @@ class StreamApiControllerSpec extends Specification {
 
 		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
 
-		streamService.createUserStream([name: "stream", description: "description"], user)
-		streamService.createUserStream([name: "ztream"], user)
-		streamService.createUserStream([name: "atream"], user)
-		streamService.createUserStream([name: "otherUserStream"], otherUser)
+		streamService.createUserStream([name: "stream", description: "description"], user, null)
+		streamService.createUserStream([name: "ztream"], user, null)
+		streamService.createUserStream([name: "atream"], user, null)
+		streamService.createUserStream([name: "otherUserStream"], otherUser, null)
 	}
 
 	void "find all streams of logged in user"() {
@@ -72,7 +72,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json[0].uuid.length() == 22
 		response.json[0].apiKey.length() == 22
 		response.json[0].name == "stream"
-		response.json[0].feedId > 0
 		response.json[0].config == [
 		    topic: response.json[0].uuid,
 			fields: []
@@ -94,7 +93,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json.uuid.length() == 22
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
-		response.json.feedId > 0
 		response.json.config == [
 			topic: response.json.uuid,
 			fields: []
@@ -110,9 +108,11 @@ class StreamApiControllerSpec extends Specification {
 		request.json = [
 			name: "Test stream",
 			description: "Test stream",
-			fields: [
-			    [name: "profit", type: "number"],
-				[name: "keyword", type: "string"]
+			config: [
+				fields: [
+					[name: "profit", type: "number"],
+					[name: "keyword", type: "string"]
+				]
 			]
 		]
 		request.method = 'POST'
@@ -125,7 +125,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json.uuid.length() == 22
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
-		response.json.feedId > 0
 		response.json.config == [
 			topic: response.json.uuid,
 			fields: [
@@ -178,7 +177,6 @@ class StreamApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json.id == 1
-		response.json.feedId == 7
 		response.json.name == "stream"
 	}
 
