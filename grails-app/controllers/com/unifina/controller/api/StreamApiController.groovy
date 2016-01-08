@@ -41,13 +41,27 @@ class StreamApiController {
 
 	@StreamrApi
 	def show() {
-		def stream = Stream.findById(params.id)
-		if (stream == null) {
-			render(status: 404, text: [error: "Stream not found with id " + params.id, code: "NOT_FOUND"] as JSON)
-		} else if (!unifinaSecurityService.canAccess(stream, request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Stream " + params.id, code: "FORBIDDEN"] as JSON)
-		} else {
+		getAuthorizedStream(params.id) { Stream stream ->
 			render(stream.toMap() as JSON)
+		}
+	}
+
+	@StreamrApi
+	def delete() {
+		getAuthorizedStream(params.id) { Stream stream ->
+			stream.delete()
+			render(status: 204)
+		}
+	}
+
+	private def getAuthorizedStream(long id, Closure<Stream> successHandler) {
+		def stream = Stream.findById(id)
+		if (stream == null) {
+			render(status: 404, text: [error: "Stream not found with id " + id, code: "NOT_FOUND"] as JSON)
+		} else if (!unifinaSecurityService.canAccess(stream, request.apiUser)) {
+			render(status: 403, text: [error: "Not authorized to access Stream " + id, code: "FORBIDDEN"] as JSON)
+		} else {
+			successHandler.call(stream)
 		}
 	}
 }

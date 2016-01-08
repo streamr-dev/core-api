@@ -209,4 +209,46 @@ class StreamApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 	}
+
+	void "delete a Stream of logged in user"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 1
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "delete"]) {
+			controller.delete()
+		}
+
+		then:
+		response.status == 204
+	}
+
+	void "cannot delete non-existent Stream"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 666
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "delete"]) {
+			controller.delete()
+		}
+
+		then:
+		response.status == 404
+	}
+
+	void "cannot delete other user's Stream"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = 4
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "delete"]) {
+			controller.delete()
+		}
+
+		then:
+		response.status == 403
+	}
 }
