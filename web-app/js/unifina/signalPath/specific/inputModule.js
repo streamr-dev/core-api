@@ -14,6 +14,7 @@ SignalPath.InputModule = function(data,canvas,prot) {
 			prot.body,
 			prot.jsonData
 		)
+		widget.render()
 
 		$(SignalPath).on("started", function() {
 			if(widget.enable)

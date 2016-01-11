@@ -20,6 +20,7 @@ describe('streamr-switcher', function() {
 
 	afterEach(function() {
 		$("body").empty()
+		switcher = undefined
 	})
 
 	it('must set the parent, options and data right and call createButton when creating button', function() {
@@ -38,22 +39,17 @@ describe('streamr-switcher', function() {
 		assert.equal(switcher3.checked, true)
 	})
 
-	it('must call createSwitcher when created', function(done) {
-		var superCreateSwitcher = StreamrSwitcher.prototype.createSwitcher
-		StreamrSwitcher.prototype.createSwitcher = function() {
-			done()
-		}
-		switcher = new StreamrSwitcher("#parent", {}, {})
-		StreamrSwitcher.prototype.createSwitcher = superCreateSwitcher
-	})
-
-	describe('createSwitcher', function() {
-		it('must create the switcher correctly', function() {
+	describe('render', function() {
+		beforeEach(function() {
 			switcher = new StreamrSwitcher("#parent", {})
+		})
+		it('must create the switcher correctly', function() {
+			switcher.render()
 			assert.equal($("#parent input").length, 1)
 		})
 		it('must check the checkbox if data.switcherValue == true', function() {
 			switcher = new StreamrSwitcher("#parent", {switcherValue: true})
+			switcher.render()
 			assert.equal($("#parent input").attr("checked"), "checked")
 		})
 		it('must call $.fn.switcher when created', function(done) {
@@ -63,7 +59,7 @@ describe('streamr-switcher', function() {
 				assert.equal(data.off_state_content, "0")
 				done()
 			}
-			switcher = new StreamrSwitcher("#parent", {})
+			switcher.render()
 		})
 	})
 
@@ -77,6 +73,7 @@ describe('streamr-switcher', function() {
 	describe('getValue', function() {
 		beforeEach(function() {
 			switcher = new StreamrSwitcher("#parent", {}, {})
+			switcher.render()
 		})
 		it('must return true if the checkbox is checked', function() {
 			$("#parent input").prop("checked", true)
@@ -92,6 +89,7 @@ describe('streamr-switcher', function() {
 	describe('toJSON', function() {
 		it('must return the JSON right', function() {
 			switcher = new StreamrSwitcher("#parent", {}, {})
+			switcher.render()
 			assert.equal(switcher.toJSON().toString(), {
 				switcherValue: false
 			}.toString())

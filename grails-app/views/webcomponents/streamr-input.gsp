@@ -15,6 +15,7 @@
                 this.getModuleJson(function(json) {
                     var resendOptions = _this.getResendOptions(json)
                     _this.widget = _this.createWidget(json)
+                    _this.widget.render()
                     $(_this.widget).on("input", function(e, value) {
                         _this.sendRequest({
                             type: "uiEvent",

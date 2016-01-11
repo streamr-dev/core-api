@@ -4,11 +4,9 @@
 		this.parent = $(parent)
 		if(json)
 			this.checked = json.switcherValue
-
-		this.createSwitcher()
 	}
 
-	StreamrSwitcher.prototype.createSwitcher = function() {
+	StreamrSwitcher.prototype.render = function() {
 		var _this = this
 		this.switcher = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
 		this.switcher.attr("checked", this.checked)

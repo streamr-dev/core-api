@@ -7,4 +7,4 @@
 <link rel="import" href="${createLink(uri:"/webcomponents/streamr-table.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
 <link rel="import" href="${createLink(uri:"/webcomponents/streamr-button.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
 <link rel="import" href="${createLink(uri:"/webcomponents/streamr-switcher.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
-<link rel="import" href="${createLink(uri:"/webcomponents/streamr-textfield.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">
+<link rel="import" href="${createLink(uri:"/webcomponents/streamr-text-field.html?${params.lightDOM ? 'lightDOM=true' : ''}&${params.noDependencies ? 'noDependencies=true' : ''}", plugin:"unifina-core")}">

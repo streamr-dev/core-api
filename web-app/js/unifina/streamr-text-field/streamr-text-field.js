@@ -3,15 +3,9 @@
     function StreamrTextField(parent, data) {
         this.parent = $(parent)
         this.value = data && data.textFieldValue ? data.textFieldValue : ""
-
-        this.render()
-
-        this.bindEvents()
     }
 
     StreamrTextField.prototype.render = function() {
-        var _this = this
-
         this.container = $("<div/>", {
             class: "form-inline"
         })
@@ -30,6 +24,8 @@
 
         this.width = this.textArea.outerWidth()
         this.height = this.textArea.outerHeight()
+
+        this.bindEvents()
     }
 
     StreamrTextField.prototype.bindEvents = function() {

@@ -17119,18 +17119,18 @@ body.dashboard-show #dashboard-view .dashboarditem streamr-button .streamr-widge
   margin-bottom: 10px;
   margin-top: 10px;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-textfield .streamr-widget-container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container {
   margin-left: 20px;
   margin-right: 20px;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-textfield .streamr-widget-container .form-inline {
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline {
   margin: 0px;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-textfield .streamr-widget-container .form-inline textarea.form-control {
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline textarea.form-control {
   width: 100%;
   resize: vertical;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-textfield .streamr-widget-container .form-inline .send-btn {
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline .send-btn {
   margin-top: 10px;
 }
 body.dashboard-show:not(.editing) .panel-heading-controls,

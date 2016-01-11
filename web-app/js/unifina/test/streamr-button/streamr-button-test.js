@@ -20,6 +20,7 @@ describe('streamr-button', function() {
 
 	afterEach(function() {
 		$("body").empty()
+		button = undefined
 	})
 
 	it('must set the parent, options and data right and call createButton when creating button', function() {
@@ -43,44 +44,38 @@ describe('streamr-button', function() {
 		assert.equal(button3.data, data)
 	})
 
-	it('must call enable if options.alwaysEnabled == true', function(done) {
-		var superEnable = StreamrButton.prototype.enable
-		StreamrButton.prototype.enable = function() {
-			done()
-		}
-		button = new StreamrButton("#parent", {}, {
-			alwaysEnabled: true
-		})
-		StreamrButton.prototype.enable = superEnable
-	})
-
-	describe("createButton", function() {
+	describe("render", function() {
 		beforeEach(function() {
 			button = new StreamrButton("#parent", {}, {})
 		})
 
-		it('must create the button', function() {
+		it('must create the button and add class "disabled" to it', function() {
+			button.render()
 			assert.equal($("#parent .button-module-button").length, 1)
+			assert($("#parent .button-module-button").hasClass("disabled"))
 		})
 
 		it('must call getButtonNameFromData and setName', function(done) {
 			var getButtonNameFromDataCalled = false
-			var superGetButtonNameFromData = StreamrButton.prototype.getButtonNameFromData
-			StreamrButton.prototype.getButtonNameFromData = function() {
+			button.getButtonNameFromData = function() {
 				getButtonNameFromDataCalled = true
 			}
-			var superSetName = StreamrButton.prototype.setName
-			StreamrButton.prototype.setName = function() {
+			button.setName = function() {
 				if(getButtonNameFromDataCalled === true) {
-					StreamrButton.prototype.getButtonNameFromData = superGetButtonNameFromData
-					StreamrButton.prototype.setName = superSetName
 					done()
 				}
 			}
-			button.createButton()
+			button.render()
+		})
+
+		it('must not add class "disabled" if button.alwaysEnabled == true', function(){
+			button.alwaysEnabled = true
+			button.render()
+			assert(!($("#parent .button-module-button").hasClass("disabled")))
 		})
 
 		it('must bind sendValue to button.click', function(done) {
+			button.render()
 			var superSendValue = StreamrButton.prototype.sendValue
 			StreamrButton.prototype.sendValue = function() {
 				StreamrButton.prototype.sendValue = superSendValue
@@ -145,22 +140,18 @@ describe('streamr-button', function() {
 		})
 
 		it('must not call setName if the response does not have key buttonName', function() {
-			var superSetName = StreamrButton.prototype.setName
-			StreamrButton.prototype.setName = function() {
+			button.setName = function() {
 				assert(false, "setName call when shouldn't!")
 			}
 			button.receiveResponse({
 				a: 1,
 				b: 2
 			})
-			StreamrButton.prototype.setName = superSetName
 		})
 
 		it('must call setName with correct value if there is buttonName in the payload', function(done) {
-			var superSetName = StreamrButton.prototype.setName
-			StreamrButton.prototype.setName = function(name) {
+			button.setName = function(name) {
 				assert.equal(name, "test")
-				StreamrButton.prototype.setName = superSetName
 				done()
 			}
 			button.receiveResponse({
@@ -186,6 +177,7 @@ describe('streamr-button', function() {
 		beforeEach(function() {
 			button = new StreamrButton("#parent", {}, {})
 			button.name = ""
+			button.render()
 		})
 
 		it('must set the name to "button" if undefined', function() {
@@ -213,11 +205,13 @@ describe('streamr-button', function() {
 			button = new StreamrButton("#parent", {}, {
 				alwaysEnabled: true
 			})
+			button.render()
 			button.disable()
 			assert(!($("#parent .button-module-button").hasClass("disabled")))
 		})
 		it('must add class "disabled" to the button', function() {
 			button = new StreamrButton("#parent", {}, {})
+			button.render()
 			button.disable()
 			assert($("#parent .button-module-button").hasClass("disabled"))
 		})
@@ -226,6 +220,7 @@ describe('streamr-button', function() {
 	describe("enable", function() {
 		it('must remove the class "disabled" when called', function() {
 			button = new StreamrButton("#parent", {}, {})
+			button.render()
 			button.disable()
 			button.enable()
 			assert(!$("#parent .button-module-button").hasClass("disabled"))

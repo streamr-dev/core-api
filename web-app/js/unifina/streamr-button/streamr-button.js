@@ -5,18 +5,16 @@
 		this.options = options
 		this.data = data
 
-		this.createButton()
-
 		if(this.options && this.options.alwaysEnabled) {
 			this.alwaysEnabled = this.options.alwaysEnabled
-			this.enable()
 		}
 	}
 
-	StreamrButton.prototype.createButton = function() {
+	StreamrButton.prototype.render = function() {
 		var _this = this
+		var c = 'button-module-button btn btn-lg btn-primary btn-block ' + (_this.alwaysEnabled ? "" : 'disabled')
 		this.button = $("<button/>", {
-			class: 'button-module-button btn btn-lg btn-primary btn-block disabled'
+			class: c
 		})
 		this.parent.append(this.button);
 		this.setName(this.getButtonNameFromData())
