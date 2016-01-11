@@ -35,7 +35,7 @@ class LiveControllerSpec extends Specification {
 		setup: "runningSignalPath has been incorrectly serialized to database"
 		def rsp = new RunningSignalPath(
 			name: "name",
-			adhoc: true,
+			adhoc: false,
 			serialized: "{invalid: 'serialization'}"
 		)
 		rsp.save(failOnError: true, validate: false)
