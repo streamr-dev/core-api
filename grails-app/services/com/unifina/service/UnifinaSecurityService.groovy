@@ -38,7 +38,7 @@ class UnifinaSecurityService {
 		}
 		
 		// Is this a protected instance?
-		if (instance.hasProperty("user") && instance.user?.id!=null) {
+		if (instance.hasProperty("user") && instance.user?.id != null) {
 			boolean result = instance.user.id == user?.id
 			if (!result && logIfDenied) {
 				log.warn("User ${user?.id} tried to access $instance owned by user $instance.user.id!")

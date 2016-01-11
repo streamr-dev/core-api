@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.security.Access
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService;
@@ -19,12 +21,15 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 
+import com.unifina.domain.security.Access
+import com.unifina.domain.dashboard.Dashboard
+
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(UnifinaSecurityService)
-@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser])
+@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Access, Dashboard])
 class UnifinaSecurityServiceSpec extends Specification {
 
 	SecUser me
@@ -36,7 +41,12 @@ class UnifinaSecurityServiceSpec extends Specification {
 	Module modRestricted
 	Module modOwned
 	ModulePackageUser allowedPermission
-	
+
+	Dashboard dashAllowed
+	Dashboard dashRestricted
+	Dashboard dashOwned
+	Access dashAccess
+
     def setup() {
 		
 		defineBeans {
@@ -68,9 +78,15 @@ class UnifinaSecurityServiceSpec extends Specification {
 		modAllowed = new Module(name:"modAllowed", modulePackage:allowed).save(validate:false)
 		modRestricted = new Module(name:"modRestricted", modulePackage:restricted).save(validate:false)
 		modOwned = new Module(name:"modOwned", modulePackage:owned).save(validate:false)
-		
-		// Set up the permission to the allowed package
+
+		// Dashboards
+		dashAllowed = new Dashboard(name:"allowed", user:anotherUser).save(validate:false)
+		dashRestricted = new Dashboard(name:"restricted", user:anotherUser).save(validate:false)
+		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
+
+		// Set up the permission to the allowed resources
 		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
+		dashAccess = new Access(user:me, clazz:"Dashboard", longId:dashAllowed.id, operation:"read")
 		
 		// Configure SpringSecurity fields
 		def userLookup = [:]
@@ -145,7 +161,14 @@ class UnifinaSecurityServiceSpec extends Specification {
 			!service.canAccess(modRestricted)
 		}
 	}
-	
+
+	void "granting access to restricted object based supplied user"() {
+		expect:
+		service.canAccess(owned, me)
+		!service.canAccess(restricted, me)
+		!service.canAccess(owned, anotherUser)
+	}
+
 	void "looking up a user based on correct api keys"() {
 		when:
 		def user = service.getUserByApiKey("apiKey", "apiSecret")
@@ -167,15 +190,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 		then:
 		!user
 	}
-	
-	void "granting access to restricted object based supplied user"() {
-		expect:
-		service.canAccess(owned, me)
-		!service.canAccess(restricted,me)
-		!service.canAccess(owned, anotherUser)
-	}
 
-	void "censoring errors with checkErrors() works properly"(){
+	void "censoring errors with checkErrors() works properly"() {
 		List checkedErrors
 		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]
 
