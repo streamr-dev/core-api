@@ -188,9 +188,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		clearModule()
 	}
 
-	var superClose = pub.close
-	pub.close = function(){
-		superClose()
+	pub.onClose = function() {
 		clearModule()
 	}
 
