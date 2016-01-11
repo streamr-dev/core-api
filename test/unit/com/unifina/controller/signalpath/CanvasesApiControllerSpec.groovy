@@ -57,6 +57,22 @@ class CanvasesApiControllerSpec extends Specification {
 			}
 		] as SignalPathService
 	}
+
+	void "can list all my SignalPaths"() {
+		when:
+			request.addHeader("Authorization", "Token myApiKey")
+			request.method = "GET"
+			request.requestURI = "/api/v1/canvases/"
+			withFilters([action: "index"]) {
+				if (controller.beforeInterceptor.action.doCall()) {
+					controller.index()
+				}
+			}
+		then:
+			response.json.size() == 2
+			response.json.collect { it.name } == ["mine", "my example"]
+
+	}
 	
 	void "must be able to load my own SignalPath"() {
 		when:
@@ -64,7 +80,7 @@ class CanvasesApiControllerSpec extends Specification {
 			request.addHeader("Authorization", "Token myApiKey")
 			request.method = "GET"
 			webRequest.actionName = "load"
-			request.requestURI = "/api/v1/saved-signal-paths/load"
+			request.requestURI = "/api/v1/canvases/load"
 			withFilters([action: "load"]) {
 				if (controller.beforeInterceptor.action.doCall()) {
 					controller.load()
@@ -82,7 +98,7 @@ class CanvasesApiControllerSpec extends Specification {
 			params.json = ssp1.json
 			request.method = "POST"
 			webRequest.actionName = "save"
-			request.requestURI = "/api/v1/saved-signal-paths/save"
+			request.requestURI = "/api/v1/canvases/save"
 			withFilters([action: "save"]) {
 				if (controller.beforeInterceptor.action.doCall()) {
 					controller.save()
@@ -98,7 +114,7 @@ class CanvasesApiControllerSpec extends Specification {
 			params.id = "2"
 			request.method = "GET"
 			webRequest.actionName = "load"
-			request.requestURI = "/api/v1/saved-signal-paths/load"
+			request.requestURI = "/api/v1/canvases/load"
 		then:
 			withFilters([action: "load"]) {
 				!controller.beforeInterceptor.action.doCall()
@@ -111,7 +127,7 @@ class CanvasesApiControllerSpec extends Specification {
 			params.id = "3"
 			request.method = "GET"
 			webRequest.actionName = "load"
-			request.requestURI = "/api/v1/saved-signal-paths/load"
+			request.requestURI = "/api/v1/canvases/load"
 			withFilters([action: "load"]) {
 				if (controller.beforeInterceptor.action.doCall()) {
 					controller.load()
@@ -129,7 +145,7 @@ class CanvasesApiControllerSpec extends Specification {
 			params.id = "4"
 			request.method = "GET"
 			webRequest.actionName = "load"
-			request.requestURI = "/api/v1/saved-signal-paths/load"
+			request.requestURI = "/api/v1/canvases/load"
 			withFilters([action: "load"]) {
 				if (controller.beforeInterceptor.action.doCall()) {
 					controller.load()
@@ -148,7 +164,7 @@ class CanvasesApiControllerSpec extends Specification {
 			params.json = ssp1.json
 			request.method = "POST"
 			webRequest.actionName = "save"
-			request.requestURI = "/api/v1/saved-signal-paths/save"
+			request.requestURI = "/api/v1/canvases/save"
 			withFilters([action: "save"]) {
 				if (controller.beforeInterceptor.action.doCall())
 					controller.save()
