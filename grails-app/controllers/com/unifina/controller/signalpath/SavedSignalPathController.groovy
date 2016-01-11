@@ -1,6 +1,5 @@
 package com.unifina.controller.signalpath
 
-import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
@@ -35,7 +34,7 @@ class SavedSignalPathController {
 	private static final Logger log = Logger.getLogger(SavedSignalPathController)
 	
 	def createSaveData(SavedSignalPath ssp) {
-		return [isSaved:true, url:createLink(controller:"savedSignalPathApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
+		return [isSaved:true, url:createLink(controller:"canvasesApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
 	}
 	
 	def load() {
@@ -140,7 +139,7 @@ class SavedSignalPathController {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
-			tmp.url = createLink(controller:"savedSignalPathApi",action:"load",params:[id:it[0]])
+			tmp.url = createLink(controller:"canvasesApi",action:"load",params:[id:it[0]])
 			tmp.command = params.command
 			tmp.offset = offset++
 			result.signalPaths.add(tmp)

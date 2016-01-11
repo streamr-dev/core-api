@@ -1,6 +1,6 @@
 package com.unifina.domain.signalpath
 
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.security.SecUser
 
 class SavedSignalPath {
 	
@@ -29,6 +29,14 @@ class SavedSignalPath {
 	@Override
 	public String toString() {
 		return "$name $id"
+	}
+
+	def toMap() {
+		[
+			name: name,
+			json: json,
+			type: type
+		]
 	}
 		
 }

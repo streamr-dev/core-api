@@ -26,8 +26,8 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/running-signal-paths/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
 		"/api/v1/running-signal-paths/ajaxStop"(controller: "liveApi", action: "ajaxStop")
 
-		"/api/v1/saved-signal-paths"(resource: "savedSignalPathApi", excludes: ["create", "edit"])
-		"/api/v1/saved-signal-paths/load"(controller: "savedSignalPathApi", action: "load")
-		"/api/v1/saved-signal-paths/save"(controller: "savedSignalPathApi", action: "save")
+		"/api/v1/canvases"(resource: "canvasesApi", excludes: ["create", "edit"])
+		"/api/v1/canvases/load"(controller: "canvasesApi", action: "load")
+		"/api/v1/canvases/save"(controller: "canvasesApi", action: "save")
 	}
 }

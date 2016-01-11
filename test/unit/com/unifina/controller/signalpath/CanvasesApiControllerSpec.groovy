@@ -1,14 +1,10 @@
 package com.unifina.controller.signalpath
 
-import com.unifina.controller.api.SavedSignalPathApiController
+import com.unifina.controller.api.CanvasesApiController
 import grails.test.mixin.web.FiltersUnitTestMixin
-
-import static org.junit.Assert.*
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.support.*
-import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
 import com.unifina.domain.security.SecUser
@@ -19,10 +15,10 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.filters.UnifinaCoreAPIFilters
 
-@TestFor(SavedSignalPathApiController)
+@TestFor(CanvasesApiController)
 @Mixin(FiltersUnitTestMixin)
 @Mock([SecUser, SavedSignalPath, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
-class SavedSignalPathApiControllerSpec extends Specification {
+class CanvasesApiControllerSpec extends Specification {
 
 	SavedSignalPath ssp1
 	SavedSignalPath ssp2

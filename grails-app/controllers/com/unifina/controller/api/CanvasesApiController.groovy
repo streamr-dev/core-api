@@ -11,7 +11,7 @@ import grails.util.GrailsUtil
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-class SavedSignalPathApiController {
+class CanvasesApiController {
 
 	def signalPathService
 	def springSecurityService
@@ -37,10 +37,21 @@ class SavedSignalPathApiController {
 		only: ['load', 'save']
 	]
 
-	private static final Logger log = Logger.getLogger(SavedSignalPathApiController)
+	private static final Logger log = Logger.getLogger(CanvasesApiController)
 
 	def createSaveData(SavedSignalPath ssp) {
-		return [isSaved:true, url:createLink(controller:"savedSignalPathApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
+		return [isSaved:true, url:createLink(controller:"canvasesApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
+	}
+
+	@StreamrApi
+	def index() {
+		List<SavedSignalPath> savedSignalPaths
+		if (request.query) {
+			savedSignalPaths = SavedSignalPath.findAllByUserAndName(request.apiUser, query)
+		} else {
+			savedSignalPaths = SavedSignalPath.findAllByUser(request.apiUser)
+		}
+		render(savedSignalPaths.collect { it.toMap() } as JSON)
 	}
 
 	@StreamrApi

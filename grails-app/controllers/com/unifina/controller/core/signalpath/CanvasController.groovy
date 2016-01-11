@@ -3,19 +3,13 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-
-import java.security.AccessControlException
-
 import org.atmosphere.cpr.BroadcasterFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
 
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
-import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
@@ -40,7 +34,7 @@ class CanvasController {
 		def load = null
 		
 		if (params.load!=null) {
-			load = createLink(controller:"savedSignalPathApi",action:"load",params:[id:params.load])
+			load = createLink(controller:"canvasesApi",action:"load",params:[id:params.load])
 		}
 		
 		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
