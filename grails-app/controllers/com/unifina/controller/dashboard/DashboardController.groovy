@@ -51,7 +51,13 @@ class DashboardController {
 			id: dashboard.id,
 			name: dashboard.name,
 			items: dashboard.items.collect {item->
-				[id:item.id, title: item.title, ord:item.ord, size:item.size, uiChannel: [id: item.uiChannel.id, name: item.uiChannel.name, module: [id:item.uiChannel.module.id]]]
+				[
+						id:item.id,
+						title: item.title,
+						ord:item.ord,
+						size:item.size,
+						uiChannel: item.uiChannel.toMap()
+				]
 			}
 		]
 		render dashboardMap as JSON

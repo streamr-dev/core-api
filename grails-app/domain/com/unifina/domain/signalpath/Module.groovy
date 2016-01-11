@@ -11,6 +11,7 @@ class Module implements Comparable {
 	Boolean hide
 	ModulePackage modulePackage
 	String jsonHelp
+	String webcomponent
 	
 	SortedSet params
 	static belongsTo = [category: ModuleCategory]
@@ -24,6 +25,7 @@ class Module implements Comparable {
 		modulePackage(nullable:true)
 		jsonHelp(nullable:true)
 		alternativeNames(nullable:true)
+		webcomponent(nullable:true)
     }
 	
 	static mapping = {

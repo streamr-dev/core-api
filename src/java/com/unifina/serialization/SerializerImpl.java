@@ -36,12 +36,13 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(SpecialValueDouble.class, new SpecialValueDoubleSerializer(), true);
 		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
 		conf.registerSerializer(JSONArray.class, new JSONArraySerializer(), true);
-		conf.registerSerializer(Feed.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(Module.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(Stream.class, new DomainClassSerializer(), true);
-		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), true);
+
+		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(Stream.class, new DomainClassSerializer(), false);
+		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), false);
 	}
 
 	public SerializerImpl(ClassLoader classLoader) {

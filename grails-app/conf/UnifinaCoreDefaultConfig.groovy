@@ -182,7 +182,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev.unifina:8889"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
@@ -192,7 +192,7 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.unifina:8888"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
