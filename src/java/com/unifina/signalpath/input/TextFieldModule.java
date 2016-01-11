@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class TextFieldModule extends InputModule {
 
-	StringOutput out = new StringOutput(this, "output");
+	StringOutput out = new StringOutput(this, "out");
 
 	String value = "";
 
@@ -23,16 +23,15 @@ public class TextFieldModule extends InputModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		if((config.get("moduleData")) != null) {
-			value = (String)((Map)config.get("moduleData")).get("value");
+		if (config.containsKey("textFieldValue")) {
+			value = (String) config.get("textFieldValue");
 		}
 	}
 
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		putToModuleData(config, "value", value);
-		config.put("module", "StreamrTextField");
+		config.put("textFieldValue", value);
 		return config;
 	}
 
@@ -51,5 +50,8 @@ public class TextFieldModule extends InputModule {
 		value = "";
 	}
 
-
+	@Override
+	protected String getWidgetName() {
+		return "StreamrTextField";
+	}
 }

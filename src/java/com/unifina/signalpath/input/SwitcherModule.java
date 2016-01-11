@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class SwitcherModule extends InputModule {
 
-	TimeSeriesOutput out = new TimeSeriesOutput(this, "output");
+	TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
 
 	boolean value = false;
 
@@ -25,17 +25,20 @@ public class SwitcherModule extends InputModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		if((config.get("moduleData")) != null) {
-			value = (boolean)((Map)config.get("moduleData")).get("value");
-		}
+		if(config.containsKey("switcherValue"))
+			value = (boolean)config.get("switcherValue");
 	}
 
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		putToModuleData(config, "value", value);
-		config.put("module", "StreamrSwitcher");
+		config.put("switcherValue", value);
 		return config;
+	}
+
+	@Override
+	protected String getWidgetName() {
+		return "StreamrSwitcher";
 	}
 
 	@Override

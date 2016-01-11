@@ -1,14 +1,8 @@
 (function(exports) {
 
-    function StreamrTextField(parent, data, options) {
-        var _this = this
-
-        this.parent = parent
-        this.options = options
-        this.value = data.value || ""
-
-        this.width
-        this.height
+    function StreamrTextField(parent, data) {
+        this.parent = $(parent)
+        this.value = data && data.textFieldValue ? data.textFieldValue : ""
 
         this.render()
 
@@ -62,7 +56,7 @@
 
     StreamrTextField.prototype.toJSON = function() {
         return {
-            value: this.value
+            textFieldValue: this.value
         }
     }
 

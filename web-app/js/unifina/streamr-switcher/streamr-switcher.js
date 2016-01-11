@@ -1,9 +1,9 @@
 (function(exports) {
 
-	function StreamrSwitcher(parent, data, options) {
-		this.parent = parent
-		this.options = options
-		this.checked = data.value
+	function StreamrSwitcher(parent, json) {
+		this.parent = $(parent)
+		if(json)
+			this.checked = json.switcherValue
 
 		this.createSwitcher()
 	}
@@ -24,22 +24,22 @@
 		})
 	}
 
+	StreamrSwitcher.prototype.getDragCancelAreas = function() {
+		return ["div.switcher-inner"]
+	}
+
 	StreamrSwitcher.prototype.getValue = function() {
 		return this.switcher.prop('checked')
 	}
 
 	StreamrSwitcher.prototype.toJSON = function() {
 		return {
-			value: this.getValue()
+			switcherValue: this.getValue()
 		}
 	}
 
 	StreamrSwitcher.prototype.sendValue = function(value) {
 		$(this).trigger("input", value)
-	}
-
-	StreamrSwitcher.prototype.receiveResponse = function(p) {
-
 	}
 
 exports.StreamrSwitcher = StreamrSwitcher

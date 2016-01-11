@@ -3,11 +3,14 @@
 	function StreamrButton(parent, data, options) {
 		this.parent = $(parent)
 		this.options = options
+		this.data = data
 
 		this.createButton()
 
-		if(this.options && this.options.alwaysEnabled)
+		if(this.options && this.options.alwaysEnabled) {
+			this.alwaysEnabled = this.options.alwaysEnabled
 			this.enable()
+		}
 	}
 
 	StreamrButton.prototype.createButton = function() {
@@ -16,23 +19,37 @@
 			class: 'button-module-button btn btn-lg btn-primary btn-block disabled'
 		})
 		this.parent.append(this.button);
-		this.changeName()
+		this.setName(this.getButtonNameFromData())
 
 		this.button.click(function(e){
 			_this.sendValue()
 		})
 	}
 
+	StreamrButton.prototype.getButtonNameFromData = function(data) {
+		var name = undefined
+		if(!data)
+			data = this.data
+		if(data.params)
+			data.params.forEach(function(param) {
+				if(param.name === "buttonName") {
+					this.name = param.value
+					name = param.value
+				}
+			})
+		return name
+	}
+
 	StreamrButton.prototype.receiveResponse = function(p) {
 		if(p["buttonName"] !== undefined)
-			this.changeName(p["buttonName"])
+			this.setName(p["buttonName"])
 	}
 
 	StreamrButton.prototype.sendValue = function() {
 		$(this).trigger("input")
 	}
 
-	StreamrButton.prototype.changeName = function(name) {
+	StreamrButton.prototype.setName = function(name) {
 		if(!name)
 			name = "button"
 		this.name = name
@@ -45,8 +62,9 @@
 	}
 
 	StreamrButton.prototype.disable = function() {
-		if(!this.alwaysEnabled)
+		if(this.alwaysEnabled === undefined || this.alwaysEnabled === false) {
 			this.button.addClass("disabled")
+		}
 	}
 
 exports.StreamrButton = StreamrButton

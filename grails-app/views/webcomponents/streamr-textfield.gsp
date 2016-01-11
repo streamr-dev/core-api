@@ -7,36 +7,17 @@
     <r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-button" extends="streamr-widget">
+<polymer-element name="streamr-textfield" extends="streamr-input">
     <template>
         <shadow></shadow>
     </template>
 
     <script>
         Polymer('streamr-textfield', {
-            ready: function() {
-                var _this = this
-                this.bindEvents(_this.$["streamr-widget-container"])
-
-                this.getModuleJson(function(json) {
-                    var resendOptions = _this.getResendOptions(json)
-
-                    _this.textfield = new StreamrTextField(_this.$["streamr-widget-container"], {}, {
-
-                    })
-
-                    _this.subscribe(
-                        function(message) {
-                            _this.textfield.receiveResponse(message)
-                        },
-                        resendOptions
-                    )
-                })
-
+            createWidget: function(json) {
+                return new StreamrTextField(this.$["streamr-widget-container"], json)
             },
-            getButton: function() {
-                return this.textfield
-            },
+
             <g:if test="${params.lightDOM}">
             parseDeclaration: function(elementElement) {
                 return this.lightFromTemplate(this.fetchTemplate(elementElement))

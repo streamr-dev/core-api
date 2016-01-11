@@ -7,7 +7,7 @@
     <r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-button" extends="streamr-widget">
+<polymer-element name="streamr-button" extends="streamr-input">
     <template>
         <shadow></shadow>
     </template>
@@ -16,27 +16,19 @@
         Polymer('streamr-button', {
             ready: function() {
                 var _this = this
-                this.bindEvents(_this.$["streamr-widget-container"])
 
-                this.getModuleJson(function(json) {
-                    var resendOptions = _this.getResendOptions(json)
-
-                    _this.button = new StreamrButton(_this.$["streamr-widget-container"], {}, {
-                        alwaysEnabled: true
-                    })
-
-                    _this.subscribe(
-                        function(message) {
-                            _this.button.receiveResponse(message)
-                        },
-                        resendOptions
-                    )
+                _this.module = new StreamrButton(_this.$["streamr-widget-container"], {}, {
+                    alwaysEnabled: true
                 })
+                $(this.module).on("input", function(e, value) {
+                    _this.sendValue(value)
+                })
+            },
 
+            createButton: function(json) {
+                return new StreamrButton(_this.$["streamr-widget-container"], json)
             },
-            getButton: function() {
-                return this.button
-            },
+
             <g:if test="${params.lightDOM}">
             parseDeclaration: function(elementElement) {
                 return this.lightFromTemplate(this.fetchTemplate(elementElement))

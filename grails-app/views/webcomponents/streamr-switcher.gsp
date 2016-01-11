@@ -7,7 +7,7 @@
     <r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-switcher" extends="streamr-widget">
+<polymer-element name="streamr-switcher" extends="streamr-input">
     <template>
         <shadow></shadow>
     </template>
@@ -16,26 +16,10 @@
         Polymer('streamr-switcher', {
             ready: function() {
                 var _this = this
-                this.bindEvents(_this.$["streamr-widget-container"])
-
-                this.getModuleJson(function(json) {
-                    var resendOptions = _this.getResendOptions(json)
-
-                    _this.switcher = new StreamrSwitcher(_this.$["streamr-widget-container"], {}, {
-
-                    })
-
-                    _this.subscribe(
-                        function(message) {
-                            _this.switcher.receiveResponse(message)
-                        },
-                        resendOptions
-                    )
+                this.module = new StreamrSwitcher(this.$["streamr-widget-container"], {}, {})
+                $(this.module).on("input", function(e, value) {
+                    _this.sendValue(value)
                 })
-
-            },
-            getSwitcher: function() {
-                return this.switcher
             },
             <g:if test="${params.lightDOM}">
             parseDeclaration: function(elementElement) {

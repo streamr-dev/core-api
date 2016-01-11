@@ -9,67 +9,37 @@ import java.util.Map;
 
 public class ButtonModule extends InputModule {
 
-	StringParameter name = new StringParameter(this, "buttonName", "button");
+	StringParameter buttonName = new StringParameter(this, "buttonName", "button");
 
-	DoubleParameter value = new DoubleParameter(this, "outputValue", 0d);
+	DoubleParameter buttonValue = new DoubleParameter(this, "buttonValue", 0d);
 
-	TimeSeriesOutput out = new TimeSeriesOutput(this, "output");
-
-	String buttonName = null;
-	Double buttonValue = null;
+	TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
 
 
 	@Override
-	public void initialize() {
-		if (globals.getUiChannel()!=null) {
-			Map<String,Object> buttonMsg = new HashMap<>();
-			buttonMsg.put("buttonName", name.getValue());
-			buttonName = name.getValue();
-			buttonMsg.put("value", value.getValue());
-			buttonValue = value.getValue();
-			globals.getUiChannel().push(buttonMsg, uiChannelId);
-		}
+	public void init() {
+		super.init();
+		canClearState = false;
+		resendAll = false;
+		resendLast = 0;
+
+		out.canBeNoRepeat = false;
 	}
 
 	@Override
-	public Map<String, Object> getConfiguration() {
-		Map<String, Object> config = super.getConfiguration();
-		config.put("module", "StreamrButton");
-		return config;
-	}
-
-	@Override
-	protected void onInput(RuntimeRequest request, RuntimeResponse response) {
-
-	}
+	protected void onInput(RuntimeRequest request, RuntimeResponse response) {}
 
 	@Override
 	public void sendOutput() {
-		out.send(buttonValue);
+		out.send(buttonValue.getValue());
 	}
 
 	@Override
-	public void trySendOutput() {
-		super.trySendOutput();
+	public void clearState() {}
 
-		boolean nameHasChanged = !name.getValue().equals(buttonName);
-		boolean valueHasChanged = value.getValue() != buttonValue;
-
-		if(nameHasChanged || valueHasChanged) {
-			Map<String,Object> buttonMsg = new HashMap<>();
-			if(nameHasChanged) {
-				buttonMsg.put("buttonName", name.getValue());
-			}
-			if(valueHasChanged) {
-				buttonMsg.put("value", value.getValue());
-			}
-			globals.getUiChannel().push(buttonMsg, uiChannelId);
-		}
-	}
 
 	@Override
-	public void clearState() {
-		buttonName = null;
-		buttonValue = null;
+	protected String getWidgetName() {
+		return "StreamrButton";
 	}
 }

@@ -2,49 +2,57 @@ SignalPath.InputModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.GenericModule(data,canvas,prot)
 
-	var module;
+	var widget;
 	
 	var super_createDiv = prot.createDiv;
 	prot.createDiv = function() {
 		super_createDiv();
-		if(!prot.jsonData.module)
-			throw "prot.jsonData.module must be defined!"
-		var moduleName = eval(prot.jsonData.module)
-		module = new moduleName(
-				prot.body,
-				prot.jsonData.moduleData,
-				prot.jsonData.moduleOptions
+		if(!prot.jsonData.widget)
+			throw "prot.jsonData.widget must be defined!"
+		var widgetName = eval(prot.jsonData.widget)
+		widget = new widgetName(
+			prot.body,
+			prot.jsonData
 		)
 
 		$(SignalPath).on("started", function() {
-			if(module.enable)
-				module.enable()
+			if(widget.enable)
+				widget.enable()
 		})
 
 		$(SignalPath).on("stopped", function() {
-			if(module.disable)
-				module.disable()
+			if(widget.disable)
+				widget.disable()
 		})
 
-		$(module).on("update", function() {
+		$(widget).on("update", function() {
 			prot.redraw()
 		})
 
-		$(module).on("input", function(e, value) {
+		$(widget).on("input", function(e, value) {
 			prot.sendValue(value)
 		})
+
+		if(widget.getDragCancelAreas !== undefined) {
+			var list = prot.div.draggable("option", "cancel")
+			widget.getDragCancelAreas().forEach(function(area) {
+				list += "," + area
+			})
+			prot.div.draggable("option", "cancel", list)
+		}
 	}
 
 	var super_toJSON = pub.toJSON
 	pub.toJSON = function () {
 		prot.jsonData = super_toJSON()
-		if(module.toJSON)
-			prot.jsonData.data = module.toJSON()
+		if (widget.toJSON)
+			$.extend(prot.jsonData, widget.toJSON())
 		return prot.jsonData
 	}
 	
 	pub.receiveResponse = function(p) {
-		module.receiveResponse(p)
+		if(widget.receiveResponse)
+			widget.receiveResponse(p)
 	}
 
 	prot.sendValue = function(value) {
