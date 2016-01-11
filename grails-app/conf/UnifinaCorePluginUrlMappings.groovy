@@ -20,11 +20,11 @@ class UnifinaCorePluginUrlMappings {
 		// API v1 url mappings
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 
-		"/api/v1/running-signal-paths"(resources: "liveApi", excludes: ["create", "edit"])
-		"/api/v1/running-signal-paths/request"(controller: "liveApi", action: "request")
-		"/api/v1/running-signal-paths/getModuleJson"(controller: "liveApi", action: "getModuleJson")
-		"/api/v1/running-signal-paths/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
-		"/api/v1/running-signal-paths/ajaxStop"(controller: "liveApi", action: "ajaxStop")
+		"/api/v1/live"(resources: "liveApi", excludes: ["create", "edit"])
+		"/api/v1/live/request"(controller: "liveApi", action: "request")
+		"/api/v1/live/getModuleJson"(controller: "liveApi", action: "getModuleJson")
+		"/api/v1/live/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
+		"/api/v1/live/ajaxStop"(controller: "liveApi", action: "ajaxStop")
 
 		"/api/v1/canvases"(resource: "canvasesApi", excludes: ["create", "edit"])
 		"/api/v1/canvases/load"(controller: "canvasesApi", action: "load")
