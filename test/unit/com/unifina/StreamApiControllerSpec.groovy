@@ -68,7 +68,6 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.json.length() == 1
-		response.json[0].id > 0
 		response.json[0].uuid.length() == 22
 		response.json[0].apiKey.length() == 22
 		response.json[0].name == "stream"
@@ -89,7 +88,6 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.id > 0
 		response.json.uuid.length() == 22
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
@@ -99,7 +97,7 @@ class StreamApiControllerSpec extends Specification {
 		]
 		response.json.description == "Test stream"
 		Stream.count() == 5
-		Stream.findById(response.json.id).user == user
+		Stream.findByUuid(response.json.uuid).user == user
 	}
 
 	void "create a new stream (with fields) for currently logged in user"() {
@@ -121,7 +119,6 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.id > 0
 		response.json.uuid.length() == 22
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
@@ -134,7 +131,7 @@ class StreamApiControllerSpec extends Specification {
 		]
 		response.json.description == "Test stream"
 		Stream.count() == 5
-		Stream.findById(response.json.id).user == user
+		Stream.findByUuid(response.json.uuid).user == user
 	}
 
 	void "creating stream fails given invalid token"() {
@@ -176,7 +173,6 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.id == 1
 		response.json.name == "stream"
 	}
 
