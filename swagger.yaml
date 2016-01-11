@@ -48,7 +48,7 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Stream'
-        # TODO: error codes              
+        # TODO: error codes
     post:
       summary: Create a new stream
       description: |
@@ -86,10 +86,17 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Stream'
-        # TODO: error codes
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
     put:
       summary: Update a stream
-      description: Updates a stream. The *id* and *auth* fields can not be updated.
+      description: Updates a stream.
       tags:
         - Stream
       parameters:
@@ -100,14 +107,21 @@ paths:
           type: string
         - name: body
           in: body
-          description: Stream object
+          description: StreamUpdateRequest object
           required: true
           schema:
-            $ref: '#/definitions/Stream'
+            $ref: '#/definitions/StreamUpdateRequest'
       responses:
         '204':
           description: Success (no content)
-        # TODO: error codes
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       summary: Delete a stream
       description: Deletes a stream by id. This will also delete all data for this stream. Use with caution!
@@ -122,8 +136,15 @@ paths:
       responses:
         '204':
           description: Success (no content)
-        # TODO: error codes
-          
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+
   /canvases:
     get:
       summary: List saved canvases
@@ -349,7 +370,7 @@ definitions:
   Stream:
     type: object
     properties:
-      id:
+      uuid:
         type: string
         description: Unique identifier for this stream.
       name:
@@ -358,10 +379,10 @@ definitions:
       description:
         type: string
         description: Description of this stream.
-      auth:
+      apiKey:
         type: string
-        description: Auth key needed to produce data to this stream.
-      streamConfig:
+        description: Api key needed to produce data to this stream.
+      config:
         $ref: '#/definitions/StreamConfig'
         description: Stream configuration
   
@@ -378,10 +399,23 @@ definitions:
         type: string
         description: Description of this stream.
         example: 'My stream description'
-      streamConfig:
+      config:
         $ref: '#/definitions/StreamConfig'
         description: Stream configuration
-  
+
+  StreamUpdateRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of this stream.
+      description:
+        type: string
+        description: Description of this stream.
+      config:
+        $ref: '#/definitions/StreamConfig'
+        description: Stream configuration
+
   StreamConfig:
     type: object
     properties:
@@ -445,4 +479,6 @@ definitions:
       error:
         type: string
         description: A message describing the error
-    
+      code:
+        type: string
+        description: Error code (NOT_FOUND) for programmatic use

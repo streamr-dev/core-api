@@ -43,7 +43,6 @@ class Stream implements Comparable {
 
 	def toMap() {
 		[
-			id: id,
 			uuid: uuid,
 			apiKey: apiKey,
 			name: name,
