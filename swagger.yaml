@@ -423,19 +423,16 @@ definitions:
 
   Canvas:
     type: object
-    required:
-      - name
-      - modules
-    properties:
-      name:
-        type: string
-        example: My canvas
-      modules:
-        type: array
-        items:
-          $ref: '#/definitions/Module'
-      settings:
-        $ref: '#/definitions/CanvasSettings'
+    allOf:
+      - $ref: '#/definitions/CanvasCreateRequest'
+      - type: object
+        properties:
+          uuid:
+            type: string
+            description: Unique identifier for Canvas
+          hasExports:
+            type: boolean
+            description: whether module uses exported inputs or outputs
 
   CanvasCreateRequest:
     type: object
