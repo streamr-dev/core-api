@@ -20,16 +20,19 @@ class UnifinaSecurityService {
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 
-	/** Test if given user can read given resource */
+	/** Test if given user can read given resource instance */
 	boolean canRead(resource, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
-
 		if (!resource) {
 			log.warn("canRead: missing resource domain object!")
 			return false
 		}
+		if (!user?.id) {
+			log.warn("canRead: missing user; none authenticated or specified!")
+			return false
+		}
 
-		// owner of a resource has all rights
-		if (resource.hasProperty("user") && resource.user?.id != null && resource.user.id == user?.id) {
+		// resource owner has all rights
+		if (resource.hasProperty("user") && resource.user?.id != null && resource.user.id == user.id) {
 			return true
 		}
 
@@ -40,15 +43,37 @@ class UnifinaSecurityService {
 		}
 
 		if (!perms && logIfDenied) {
-			log.warn("${user?.name}(id ${user?.id}) tried to access $resource without Permission!")
+			log.warn("${user?.username}(id ${user?.id}) tried to access $resource without Permission!")
 			if (resource.user) {
-				log.warn("||-> $resource is owned by ${resource.user.name} (id ${resource.user.id})")
+				log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 			}
 		}
 
-		// any permissions are good for read access
+		// any permissions imply read access
 		return perms != []
 		//return perms.find { it.operation == "read" } as boolean
+	}
+
+	/** Get all resources of given type that the user has read access to */
+	public List getAllReadable(String resourceClassName, SecUser _user=springSecurityService.getCurrentUser()) {
+		Class Resource = grailsApplication.getDomainClass(resourceClassName)?.clazz
+		if (!Resource) {
+			log.warn("getAllReadable: Resource type not found: $resourceClassName")
+			return []
+		}
+
+		// any permissions imply read access
+		def readableIds = Permission.findAll {
+			user == _user && clazz == resourceClassName
+		}*.longId
+
+		return Resource.withCriteria {
+			or {
+				eq "user", _user		// resource owner gets all access rights
+				"in" "id", readableIds
+			}
+		}
+		//Resource.findAll { user == _user || id in readableIds }  //MissingPropertyException: No such property: id for class: grails.gorm.DetachedCriteria
 	}
 
 	/**

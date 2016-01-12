@@ -45,6 +45,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 	Dashboard dashOwned
 	Permission dashReadPermission
 
+	final String DashboardClassName = "com.unifina.domain.dashboard.Dashboard"
+
     def setup() {
 		
 		defineBeans {
@@ -85,7 +87,7 @@ class UnifinaSecurityServiceSpec extends Specification {
 
 		// Set up the permission to the allowed resources
 		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
-		dashReadPermission = new Permission(user:me, clazz:"com.unifina.domain.dashboard.Dashboard", longId:dashAllowed.id, operation:"read").save(validate:false)
+		dashReadPermission = new Permission(user:me, clazz:DashboardClassName, longId:dashAllowed.id, operation:"read").save(validate:false)
 		
 		// Configure SpringSecurity fields
 		def userLookup = [:]
@@ -198,10 +200,29 @@ class UnifinaSecurityServiceSpec extends Specification {
 		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashOwned) }
 	}
 
+	void "canRead returns false on no-user"() {
+		expect:
+		!service.canRead(dashAllowed)
+	}
+
+	void "retrieve all readable Dashboards correctly"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") { service.getAllReadable(DashboardClassName) == [dashOwned, dashAllowed] }
+		service.getAllReadable(DashboardClassName, anotherUser) == [dashAllowed, dashRestricted]
+		SpringSecurityUtils.doWithAuth("stranger") { service.getAllReadable(DashboardClassName) == [] }
+	}
+
+	void "getAllReadable returns empty on bad inputs"() {
+		expect:
+		service.getAllReadable("Foobar", me) == []
+		service.getAllReadable(DashboardClassName, new SecUser()) == []
+		service.getAllReadable(DashboardClassName) == []	// user == null
+	}
+
 	void "looking up a user based on correct api keys"() {
 		when:
 		def user = service.getUserByApiKey("apiKey", "apiSecret")
-		
+
 		then:
 		user.username == me.username
 	}
