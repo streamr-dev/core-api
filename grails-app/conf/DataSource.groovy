@@ -8,7 +8,7 @@ dataSource {
 hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = false
-    cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory'
+	cache.region.factory_class = 'org.hibernate.cache.SingletonEhCacheRegionFactory'
 }
 // environment specific settings
 environments {
@@ -17,7 +17,7 @@ environments {
         dataSource {
 			username = "unifina-dev"
 			password = "2PpJA2vJ"
-            dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
+            dbCreate = "validate" // one of 'create', 'create-drop', 'update', 'validate', ''
             url = "jdbc:mysql://192.168.10.21:3306/core_dev?useLegacyDatetimeCode=false"
         }
     }
@@ -34,7 +34,7 @@ environments {
 			
 			username = "unifina-test"
 			password = "HqTQK9kB"
-            dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
+            dbCreate = "validate" // one of 'create', 'create-drop', 'update', 'validate', ''
             url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
         }
     }
