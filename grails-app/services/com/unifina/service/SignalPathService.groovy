@@ -251,7 +251,7 @@ class SignalPathService {
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (rsp.isNotSerialized()) {
+		if (rsp.isNotSerialized() || rsp.adhoc) {
 			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
 			log.info("Creating new signalPath connections " + rsp.id)
 		} else {
@@ -511,14 +511,14 @@ class SignalPathService {
 
 		try {
 			rsp.serialized = serializationService.serialize(sp)
+			rsp.serializationTime = sp.globals.time
+			RunningSignalPath.executeUpdate("update RunningSignalPath rsp set rsp.serialized = ?, rsp.serializationTime = ? where rsp.id = ?",
+				[rsp.serialized, rsp.serializationTime, rsp.id])
+			log.info("RunningSignalPath " + rsp.id + " serialized")
 		} catch (SerializationException ex) {
 			log.error("Serialization of runningSignalPath " + rsp.id + " failed")
 			throw ex
 		}
-
-		rsp.serializationTime = sp.globals.time
-		rsp.save(failOnError: true)
-		log.info("RunningSignalPath " + rsp.id + " serialized")
 	}
 
 	@Transactional

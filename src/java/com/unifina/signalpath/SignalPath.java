@@ -347,6 +347,22 @@ public class SignalPath extends ModuleWithUI {
 		}
 	}
 
+	@Override
+	public void afterSerialization() {
+		super.afterSerialization();
+		for (AbstractSignalPathModule module : mods) {
+			module.afterSerialization();
+		}
+	}
+
+	@Override
+	public void afterDeserialization() {
+		super.afterDeserialization();
+		for (AbstractSignalPathModule module : mods) {
+			module.afterDeserialization();
+		}
+	}
+
 	class InputConnection {
 		public Input input;
 		public String connectedTo;
