@@ -115,7 +115,7 @@ class RateLimitSpec extends Specification {
 		module.getInput("timeInMillis").receive(100)
 		module.getInput("rate").receive(2)
 
-		def timeToFurther = [60, 50, 30, 30, 70]
+		def timeToFurther = [60, 50, 30, 10, 70]
 
 		Map inputValues = [
 				in: [1, 2, 3, 4, 5, 6].collect { it?.doubleValue() }
@@ -128,6 +128,25 @@ class RateLimitSpec extends Specification {
 
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 				.timeToFurtherPerIteration(timeToFurther)
+				.test()
+	}
+
+	void "the module works with a solid time between the events"() {
+		setup:
+		module.getInput("timeInMillis").receive(100)
+		module.getInput("rate").receive(1)
+
+		Map inputValues = [
+				in: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() }
+		]
+
+		Map outputValues = [
+				"out": [1, 1, 1, 1, 5, 5, 5, 5, 9, 9].collect { it?.doubleValue() },
+				"limitExceeded?": [0, 1, 1, 1, 0, 1, 1, 1, 0, 1].collect { it?.doubleValue() },
+		]
+
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.timeToFurtherPerIteration(30)
 				.test()
 	}
 

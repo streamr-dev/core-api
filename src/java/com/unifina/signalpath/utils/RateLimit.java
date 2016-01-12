@@ -20,23 +20,17 @@ public class RateLimit extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		times.add(globals.time.getTime());
-		while(true) {
-			long leftHandSide = globals.time.getTime() - times.get(0).longValue();
-			long rightHandSide = time.getValue().longValue();
-			if(leftHandSide < rightHandSide)
-				break;
-			else {
+		if (time.getValue() != 0) {
+			times.add(globals.time.getTime());
+			while (globals.time.getTime() - times.get(0).longValue() >= time.getValue().longValue()) {
 				times.remove(0);
-				if(times.size() == 0)
-					break;
 			}
 		}
-		if(times.size() <= rate.getValue()) {
+		if (times.size() <= rate.getValue()) {
 			out.send(in.getValue());
 			limit.send(0);
 		} else {
-			times.remove(0);
+			times.remove(times.size()-1);
 			limit.send(1);
 		}
 	}
