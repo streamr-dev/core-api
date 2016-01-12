@@ -64,9 +64,7 @@ class CanvasesApiControllerSpec extends Specification {
 			request.method = "GET"
 			request.requestURI = "/api/v1/canvases/"
 			withFilters([action: "index"]) {
-				if (controller.beforeInterceptor.action.doCall()) {
-					controller.index()
-				}
+				controller.index()
 			}
 		then:
 			response.json.size() == 2
@@ -82,9 +80,7 @@ class CanvasesApiControllerSpec extends Specification {
 			webRequest.actionName = "load"
 			request.requestURI = "/api/v1/canvases/load"
 			withFilters([action: "load"]) {
-				if (controller.beforeInterceptor.action.doCall()) {
-					controller.load()
-				}
+				controller.load()
 			}
 		then:
 			response.json.signalPathData.name == "mine"
@@ -100,9 +96,7 @@ class CanvasesApiControllerSpec extends Specification {
 			webRequest.actionName = "save"
 			request.requestURI = "/api/v1/canvases/save"
 			withFilters([action: "save"]) {
-				if (controller.beforeInterceptor.action.doCall()) {
-					controller.save()
-				}
+				controller.save()
 			}
 		then:
 			response.json.isSaved
@@ -115,10 +109,12 @@ class CanvasesApiControllerSpec extends Specification {
 			request.method = "GET"
 			webRequest.actionName = "load"
 			request.requestURI = "/api/v1/canvases/load"
-		then:
 			withFilters([action: "load"]) {
-				!controller.beforeInterceptor.action.doCall()
+				controller.load()
 			}
+		then:
+			response.status == 403
+			response.json.code == "FORBIDDEN"
 	}
 	
 	void "must be able to load example, even if it's not mine"() {
@@ -129,9 +125,7 @@ class CanvasesApiControllerSpec extends Specification {
 			webRequest.actionName = "load"
 			request.requestURI = "/api/v1/canvases/load"
 			withFilters([action: "load"]) {
-				if (controller.beforeInterceptor.action.doCall()) {
-					controller.load()
-				}
+				controller.load()
 			}
 		then:
 			response.json.signalPathData.name == "not mine but example"
@@ -147,9 +141,7 @@ class CanvasesApiControllerSpec extends Specification {
 			webRequest.actionName = "load"
 			request.requestURI = "/api/v1/canvases/load"
 			withFilters([action: "load"]) {
-				if (controller.beforeInterceptor.action.doCall()) {
-					controller.load()
-				}
+				controller.load()
 			}
 		then:
 			response.json.signalPathData.name == "my example"
@@ -166,8 +158,7 @@ class CanvasesApiControllerSpec extends Specification {
 			webRequest.actionName = "save"
 			request.requestURI = "/api/v1/canvases/save"
 			withFilters([action: "save"]) {
-				if (controller.beforeInterceptor.action.doCall())
-					controller.save()
+				controller.save()
 			}
 		then:
 			response.json.isSaved
@@ -181,9 +172,12 @@ class CanvasesApiControllerSpec extends Specification {
 			params.name = "new name"
 			params.json = ssp1.json
 			request.method = "POST"
-			webRequest.actionName = "save"
+			withFilters([action: "save"]) {
+				controller.save()
+			}
 		then:
-			!controller.beforeInterceptor.action.doCall()
+			response.status == 403
+			response.json.code == "FORBIDDEN"
 	}
 
 }

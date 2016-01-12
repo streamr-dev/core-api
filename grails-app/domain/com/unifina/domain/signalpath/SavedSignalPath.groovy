@@ -34,8 +34,7 @@ class SavedSignalPath {
 	def toMap() {
 		[
 			name: name,
-			json: json,
-			type: type
+			json: json
 		]
 	}
 		
