@@ -390,5 +390,4 @@ public class SignalPath extends ModuleWithUI {
 	public void setRunningSignalPath(RunningSignalPath runningSignalPath) {
 		this.runningSignalPath = runningSignalPath;
 	}
-
 }

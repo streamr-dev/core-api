@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.serialization.SerializationException
 import grails.converters.JSON
 import grails.transaction.Transactional
@@ -49,37 +50,41 @@ class SignalPathService {
 	
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
-	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot) {
+	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
+
 		SignalPath sp = new SignalPath(isRoot)
 		sp.globals = globals
 		sp.init()		
-		sp.configure(signalPathData)
+		sp.configure(signalPathMap)
 		
 		if (connectionsReady)
 			sp.connectionsReady()
 		return sp
 	}
 	
-	public Map signalPathToJson(SignalPath sp) {
-		return  [name: sp.name, modules:sp.modules.collect {it.getConfiguration()}]
+	public Map signalPathToMap(SignalPath sp) {
+		return  [
+			name: sp.name,
+			modules: sp.modules.collect { it.getConfiguration() },
+			settings: sp.globals.signalPathContext,
+			hasExports: sp.hasExports()
+		]
 	}
 	
 	/**
-	 * Rebuilds a saved representation of a SignalPath along with its context.
+	 * Rebuilds a saved representation of a SignalPath along with its context.a
 	 * Potentially modifies the map given as parameter.
 	 * @param json
 	 * @return
 	 */
-	public Map reconstruct(Map json, Globals globals) {
-		SignalPath sp = jsonToSignalPath(json.signalPathData, true, globals, true)
+	public Map reconstruct(Map signalPathMap, Globals globals) {
+		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
 		
 		// TODO: remove backwards compatibility
-		if (json.timeOfDayFilter)
-			json.signalPathContext.timeOfDayFilter = json.timeOfDayFilter
-		
-		json.signalPathData = signalPathToJson(sp)
-		
-		return json
+		if (signalPathMap.timeOfDayFilter)
+			signalPathMap.signalPathContext.timeOfDayFilter = signalPathMap.timeOfDayFilter
+
+		return signalPathToMap(sp)
 	}
 	
 	public byte[] compress(String s) {
@@ -128,30 +133,6 @@ class SignalPathService {
 			return new BacktestDataSource(globals)
 		else return new RealtimeDataSource(globals)
 		
-	}
-	
-	public List<RunningSignalPath> launch(List<Map> signalPathData, Map signalPathContext, SecUser user, boolean adhoc) {
-		
-		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		globals.uiChannel = new KafkaPushChannel(kafkaService)
-		
-		// Create the runner thread
-		SignalPathRunner runner = new SignalPathRunner(signalPathData, globals, adhoc)
-		String runnerId = runner.runnerId
-		
-		// Abort on client disconnect
-		globals.uiChannel.addEventListener(new PushChannelEventListener() {
-			public void onClientDisconnected() {
-				runner.abort()
-			}
-		})
-		
-		// Start the runner thread
-		runner.start()
-		
-		// Save reference to running SignalPaths to the database
-		return createRunningSignalPathReferences(runner, user, adhoc)
 	}
 	
 	/**

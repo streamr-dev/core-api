@@ -47,12 +47,12 @@ public class SignalPathRunner extends Thread {
 		}
 	}
 
-	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
+	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean deleteOnStop = true) {
 		this(globals, deleteOnStop)
 
 		// Instantiate SignalPaths from JSON
-		for (int i=0;i<signalPathData.size();i++) {
-			SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,true)
+		for (int i=0; i<signalPathMaps.size(); i++) {
+			SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMaps[i],false,globals,true)
 			signalPaths.add(signalPath)
 		}
 	}

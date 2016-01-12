@@ -21,7 +21,12 @@ class CanvasesApiController {
 	private static final Logger log = Logger.getLogger(CanvasesApiController)
 
 	def createSaveData(SavedSignalPath ssp) {
-		return [isSaved:true, url:createLink(controller:"canvasesApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
+		return [
+			isSaved: true,
+			url: createLink(controller:"canvasesApi", action:"save", params:[id:ssp.id]),
+			name: ssp.name,
+			target: "Archive id "+ssp.id
+		]
 	}
 
 	@StreamrApi
@@ -86,29 +91,24 @@ class CanvasesApiController {
 			}
 		}
 
-		ssp.properties = params
-
-		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
+		def settings = params.json.settings ?: [:]
+		Globals globals = GlobalsFactory.createInstance(settings, grailsApplication)
 
 		try {
-			// Make sure the name is set
-			Map json = JSON.parse(params.json)
-			json.signalPathData.name = params.name
 			// Rebuild the json to check it's ok and up to date
-			SignalPath sp = signalPathService.jsonToSignalPath(json.signalPathData, true, globals, true)
-			json.signalPathData = signalPathService.signalPathToJson(sp)
-			ssp.json = (json as JSON)
+			def signalPathAsMap = signalPathService.reconstruct(params.json, globals)
+			signalPathAsMap.uuid = ssp.uuid
 
-			ssp.hasExports = sp.hasExports()
+			def signalPathAsJson = (signalPathAsMap as JSON)
 
+			ssp.name = signalPathAsMap.name
+			ssp.json = signalPathAsJson
+			ssp.hasExports = signalPathAsMap.hasExports
 			ssp.user = request.apiUser
 			ssp.save(flush: true, failOnError: true)
 
-			if (ssp.id == null)
-				throw new Exception("Internal error: Returned id was null!")
 
-			def res = createSaveData(ssp)
-			render res as JSON
+			render signalPathAsJson
 		} catch (Exception e) {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Save failed", e)

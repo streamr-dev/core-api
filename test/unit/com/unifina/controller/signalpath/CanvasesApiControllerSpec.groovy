@@ -20,6 +20,7 @@ import com.unifina.filters.UnifinaCoreAPIFilters
 @Mock([SecUser, SavedSignalPath, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
 class CanvasesApiControllerSpec extends Specification {
 
+
 	SavedSignalPath ssp1
 	SavedSignalPath ssp2
 	SavedSignalPath ssp3
@@ -48,13 +49,10 @@ class CanvasesApiControllerSpec extends Specification {
 		controller.unifinaSecurityService.springSecurityService = controller.springSecurityService*/
 		controller.unifinaSecurityService = mainContext.getBean("unifinaSecurityService")
 		controller.signalPathService = [
-			reconstruct: {json, globals -> return json},
-			jsonToSignalPath: {Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot->
-				return new SignalPath()
+			reconstruct: { json, globals ->
+				json.hasExports = false
+				return json
 			},
-			signalPathToJson: {SignalPath sp->
-				return [:]
-			}
 		] as SignalPathService
 	}
 
@@ -90,8 +88,10 @@ class CanvasesApiControllerSpec extends Specification {
 	void "must be able to save a new SignalPath"() {
 		when:
 			request.addHeader("Authorization", "Token myApiKey")
-			params.name = "new sp"
-			params.json = ssp1.json
+			params.json = [
+			    name: "brand new SavedSignalPath",
+				modules: [],
+			]
 			request.method = "POST"
 			webRequest.actionName = "save"
 			request.requestURI = "/api/v1/canvases/save"
@@ -99,7 +99,7 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.save()
 			}
 		then:
-			response.json.isSaved
+			response.json.uuid.size() > 10
 	}
 	
 	void "must not be able to load others' SignalPath"() {
@@ -152,8 +152,10 @@ class CanvasesApiControllerSpec extends Specification {
 		when:
 			request.addHeader("Authorization", "Token myApiKey")
 			params.id = "1"
-			params.name = "new name"
-			params.json = ssp1.json
+			params.json = [
+				name: "updated, new name",
+				modules: [],
+			]
 			request.method = "POST"
 			webRequest.actionName = "save"
 			request.requestURI = "/api/v1/canvases/save"
@@ -161,8 +163,7 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.save()
 			}
 		then:
-			response.json.isSaved
-			SavedSignalPath.get(1).name == "new name"
+			SavedSignalPath.get(1).name == "updated, new name"
 	}
 	
 	void "must not be able overwrite others' SignalPath"() {
