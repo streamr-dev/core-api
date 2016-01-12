@@ -97,8 +97,6 @@ class CanvasesApiController {
 		try {
 			// Rebuild the json to check it's ok and up to date
 			def signalPathAsMap = signalPathService.reconstruct(params.json, globals)
-			signalPathAsMap.uuid = ssp.uuid
-
 			def signalPathAsJson = (signalPathAsMap as JSON)
 
 			ssp.name = signalPathAsMap.name
@@ -107,8 +105,7 @@ class CanvasesApiController {
 			ssp.user = request.apiUser
 			ssp.save(flush: true, failOnError: true)
 
-
-			render signalPathAsJson
+			render ssp.toMap() as JSON
 		} catch (Exception e) {
 			e = GrailsUtil.deepSanitize(e)
 			log.error("Save failed", e)

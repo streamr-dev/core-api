@@ -2,6 +2,7 @@ package com.unifina.domain.signalpath
 
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
+import grails.converters.JSON
 
 class SavedSignalPath {
 	
@@ -34,9 +35,14 @@ class SavedSignalPath {
 	}
 
 	def toMap() {
-		[
+		Map map = JSON.parse(json)
+		return [
+			uuid: uuid,
 			name: name,
-			json: json
+			modules: map?.modules,
+			settings: map?.settings,
+			hasExports: map?.hasExports,
+
 		]
 	}
 		
