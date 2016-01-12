@@ -64,7 +64,7 @@ class LiveController {
 		
 		[rsp:rsp]
 	}
-	
+
 	@Secured("ROLE_USER")
 	def start() {
 		RunningSignalPath rsp = RunningSignalPath.get(params.id)
