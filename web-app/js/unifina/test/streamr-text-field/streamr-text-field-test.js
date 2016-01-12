@@ -139,5 +139,4 @@ describe('streamr-text-field', function() {
             }.toString())
         })
     })
-
 })

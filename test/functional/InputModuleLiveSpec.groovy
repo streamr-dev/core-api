@@ -9,11 +9,9 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 	def setupSpec() {
 		super.login()
 		to LiveListPage
-
-		addAndWaitModule()
 	}
 	
-	void "the buttonModule can be added"() {
+	void "the buttonModule can be pressed and the message is sent"() {
 
 	}
 }

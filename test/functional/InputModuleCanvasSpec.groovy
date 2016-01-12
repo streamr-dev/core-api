@@ -13,10 +13,14 @@ class InputModuleCanvasSpec extends LoginTester1Spec {
 		super.login()
 		waitFor { at CanvasPage }
 
-		addAndWaitModule()
+		addAndWaitModule("Chart")
 	}
 	
 	void "the buttonModule can be added"() {
+		when: "buttonModule is added"
+		addAndWaitModule("Button")
+
+		then: "The button appears"
 
 	}
 }
