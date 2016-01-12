@@ -30,8 +30,8 @@ import com.unifina.domain.dashboard.Dashboard
 @Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard])
 class UnifinaSecurityServiceSpec extends Specification {
 
-	SecUser me
-	SecUser anotherUser
+	SecUser me, anotherUser, stranger
+
 	ModulePackage allowed
 	ModulePackage restricted
 	ModulePackage owned
@@ -62,11 +62,10 @@ class UnifinaSecurityServiceSpec extends Specification {
 		grailsApplication.mainContext.getBean("userDetailsService").grailsApplication = grailsApplication
 		
 		// Users
-		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
-		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret")
-		me.save(validate:false)
-		anotherUser.save(validate:false)
-		
+		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
+		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret").save(validate:false)
+		stranger = new SecUser(username: "stranger", password: "x", apiKey: "strangeApiKey", apiSecret: "strangeApiSecret").save(validate:false)
+
 		// ModulePackages
 		allowed = new ModulePackage(name:"allowed", user:anotherUser).save(validate:false)
 		restricted = new ModulePackage(name:"restricted", user:anotherUser).save(validate:false)
@@ -76,6 +75,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 		modAllowed = new Module(name:"modAllowed", modulePackage:allowed).save(validate:false)
 		modRestricted = new Module(name:"modRestricted", modulePackage:restricted).save(validate:false)
 		modOwned = new Module(name:"modOwned", modulePackage:owned).save(validate:false)
+
+		// TODO: Test Permission mechanism both with a resource with longId and with stringId
 
 		// Dashboards
 		dashAllowed = new Dashboard(name:"allowed", user:anotherUser).save(validate:false)
@@ -110,7 +111,7 @@ class UnifinaSecurityServiceSpec extends Specification {
 
 	void "test setup"() {
 		expect:
-		SecUser.count()==2
+		SecUser.count()==3
 		ModulePackage.count()==3
 		Module.count()==3
 		ModulePackageUser.count()==1
@@ -188,6 +189,13 @@ class UnifinaSecurityServiceSpec extends Specification {
 		SpringSecurityUtils.doWithAuth("me") {
 			service.canRead(dashOwned)
 		}
+	}
+
+	void "non-permitted third-parties have no access to resources"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashAllowed) }
+		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashRestricted) }
+		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashOwned) }
 	}
 
 	void "looking up a user based on correct api keys"() {

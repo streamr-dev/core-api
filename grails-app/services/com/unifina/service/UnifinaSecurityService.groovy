@@ -20,30 +20,29 @@ class UnifinaSecurityService {
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 
-	private List<Permission> permissions(resource, SecUser user) {
-		if (!resource) {
-			log.warn("Listing permissions: missing resource domain object!")
-			return []
-		}
-
-		return Permission.withCriteria {
-			eq("clazz", resource.class.name)
-			eq("longId", resource.id)		// TODO: handle stringId
-		}
-	}
-
+	/** Test if given user can read given resource */
 	boolean canRead(resource, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
+
+		if (!resource) {
+			log.warn("canRead: missing resource domain object!")
+			return false
+		}
 
 		// owner of a resource has all rights
 		if (resource.hasProperty("user") && resource.user?.id != null && resource.user.id == user?.id) {
-			return true;
+			return true
 		}
 
-		def perms = permissions(resource, user)
+		def perms = Permission.withCriteria {
+			eq("user", user)
+			eq("clazz", resource.class.name)
+			eq("longId", resource.id)		// TODO: handle stringId
+		}
+
 		if (!perms && logIfDenied) {
-			log.warn("User ${user?.id} tried to access $resource without Permission!")
-			if (resource.user?.id) {
-				log.warn("||-> $resource is owned by user $resource.user.id")
+			log.warn("${user?.name}(id ${user?.id}) tried to access $resource without Permission!")
+			if (resource.user) {
+				log.warn("||-> $resource is owned by ${resource.user.name} (id ${resource.user.id})")
 			}
 		}
 
