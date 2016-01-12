@@ -1,7 +1,5 @@
 package com.unifina.service
 
-import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.security.Access
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService;
@@ -21,7 +19,7 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 
-import com.unifina.domain.security.Access
+import com.unifina.domain.security.Permission
 import com.unifina.domain.dashboard.Dashboard
 
 /**
@@ -29,7 +27,7 @@ import com.unifina.domain.dashboard.Dashboard
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(UnifinaSecurityService)
-@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Access, Dashboard])
+@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard])
 class UnifinaSecurityServiceSpec extends Specification {
 
 	SecUser me
@@ -45,7 +43,7 @@ class UnifinaSecurityServiceSpec extends Specification {
 	Dashboard dashAllowed
 	Dashboard dashRestricted
 	Dashboard dashOwned
-	Access dashAccess
+	Permission dashReadPermission
 
     def setup() {
 		
@@ -86,7 +84,7 @@ class UnifinaSecurityServiceSpec extends Specification {
 
 		// Set up the permission to the allowed resources
 		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
-		dashAccess = new Access(user:me, clazz:"Dashboard", longId:dashAllowed.id, operation:"read")
+		dashReadPermission = new Permission(user:me, clazz:"com.unifina.domain.dashboard.Dashboard", longId:dashAllowed.id, operation:"read").save(validate:false)
 		
 		// Configure SpringSecurity fields
 		def userLookup = [:]
@@ -120,6 +118,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 		ModulePackage.findAllByUser(anotherUser).size()==2
 		ModulePackage.findAllByUser(me).size()==1
 		ModulePackageUser.findByUserAndModulePackage(me, allowed)==allowedPermission
+
+		Permission.count()==1
 		
 		SpringSecurityUtils.doWithAuth("me") {
 			grailsApplication.mainContext.getBean("springSecurityService").currentUser == me
@@ -167,6 +167,27 @@ class UnifinaSecurityServiceSpec extends Specification {
 		service.canAccess(owned, me)
 		!service.canAccess(restricted, me)
 		!service.canAccess(owned, anotherUser)
+	}
+
+	void "access granted to permitted Dashboard"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") {
+			service.canRead(dashAllowed)
+		}
+	}
+
+	void "access denied to non-permitted Dashboard"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") {
+			!service.canRead(dashRestricted)
+		}
+	}
+
+	void "access granted to own Dashboard"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") {
+			service.canRead(dashOwned)
+		}
 	}
 
 	void "looking up a user based on correct api keys"() {

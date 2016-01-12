@@ -2,7 +2,6 @@ package com.unifina.service
 
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
-import org.apache.commons.collections.Unmodifiable
 import org.apache.log4j.Logger
 
 import com.unifina.domain.security.SecUser
@@ -13,11 +12,45 @@ import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import org.springframework.validation.FieldError
 
+import com.unifina.domain.security.Permission
+
 class UnifinaSecurityService {
 
 	def grailsApplication
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
+
+	private List<Permission> permissions(resource, SecUser user) {
+		if (!resource) {
+			log.warn("Listing permissions: missing resource domain object!")
+			return []
+		}
+
+		return Permission.withCriteria {
+			eq("clazz", resource.class.name)
+			eq("longId", resource.id)		// TODO: handle stringId
+		}
+	}
+
+	boolean canRead(resource, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
+
+		// owner of a resource has all rights
+		if (resource.hasProperty("user") && resource.user?.id != null && resource.user.id == user?.id) {
+			return true;
+		}
+
+		def perms = permissions(resource, user)
+		if (!perms && logIfDenied) {
+			log.warn("User ${user?.id} tried to access $resource without Permission!")
+			if (resource.user?.id) {
+				log.warn("||-> $resource is owned by user $resource.user.id")
+			}
+		}
+
+		// any permissions are good for read access
+		return perms != []
+		//return perms.find { it.operation == "read" } as boolean
+	}
 
 	/**
 	 * Checks if the given user has access to the given instance.
