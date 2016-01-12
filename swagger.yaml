@@ -107,10 +107,10 @@ paths:
           type: string
         - name: body
           in: body
-          description: StreamUpdateRequest object
+          description: StreamCreateRequest object
           required: true
           schema:
-            $ref: '#/definitions/StreamUpdateRequest'
+            $ref: '#/definitions/StreamCreateRequest'
       responses:
         '204':
           description: Success (no content)
@@ -176,7 +176,7 @@ paths:
           description: Canvas object
           required: true
           schema:
-            $ref: '#/definitions/Canvas'
+            $ref: '#/definitions/CanvasCreateRequest'
       responses:
         '200':
           description: The canvas that was created
@@ -238,7 +238,7 @@ paths:
         '204':
           description: Success (no content)
         # TODO: error codes
-            
+
 
   /live:
     get:
@@ -320,7 +320,7 @@ paths:
         '204':
           description: Success
         # TODO: error codes
-            
+
   /live/{id}/resume:
     post:
       summary: Resumes a stopped live canvas
@@ -339,14 +339,14 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ResumeRequest'
-          
+
       responses:
         '200':
           description: Success
           schema:
             $ref: '#/definitions/Canvas'
         # TODO: error codes
-        
+
   /live/{id}/stop:
     post:
       summary: Stop a live canvas
@@ -369,23 +369,17 @@ paths:
 definitions:
   Stream:
     type: object
-    properties:
-      uuid:
-        type: string
-        description: Unique identifier for this stream.
-      name:
-        type: string
-        description: Name of this stream.
-      description:
-        type: string
-        description: Description of this stream.
-      apiKey:
-        type: string
-        description: Api key needed to produce data to this stream.
-      config:
-        $ref: '#/definitions/StreamConfig'
-        description: Stream configuration
-  
+    allOf:
+      - $ref: '#/definitions/StreamCreateRequest'
+      - type: object
+        properties:
+          uuid:
+            type: string
+            description: Unique identifier for this stream.
+          apiKey:
+            type: string
+            description: Api key needed to produce data to this stream.
+
   StreamCreateRequest:
     type: object
     required:
@@ -403,19 +397,6 @@ definitions:
         $ref: '#/definitions/StreamConfig'
         description: Stream configuration
 
-  StreamUpdateRequest:
-    type: object
-    properties:
-      name:
-        type: string
-        description: Name of this stream.
-      description:
-        type: string
-        description: Description of this stream.
-      config:
-        $ref: '#/definitions/StreamConfig'
-        description: Stream configuration
-
   StreamConfig:
     type: object
     properties:
@@ -425,7 +406,7 @@ definitions:
         description: An array containing field definitions for this stream.
         items:
           $ref: '#/definitions/FieldDefinition'
-  
+
   FieldDefinition:
     type: object
     required:
@@ -441,6 +422,22 @@ definitions:
         enum: [number, string, boolean, list, map]
 
   Canvas:
+    type: object
+    required:
+      - name
+      - modules
+    properties:
+      name:
+        type: string
+        example: My canvas
+      modules:
+        type: array
+        items:
+          $ref: '#/definitions/Module'
+      settings:
+        $ref: '#/definitions/CanvasSettings'
+
+  CanvasCreateRequest:
     type: object
     required:
       - name
