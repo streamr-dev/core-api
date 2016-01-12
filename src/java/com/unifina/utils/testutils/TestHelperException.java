@@ -19,6 +19,6 @@ public class TestHelperException extends RuntimeException {
 
 	private static String moduleStateAsString(ModuleTestHelper testHelper) {
 		return " (clearState=" + testHelper.isClearStateCalled() +
-				", serialized=" + testHelper.isSerializationMode() + ")";
+				", serialized=" + testHelper.getSerializationMode() + ")";
 	}
 }
