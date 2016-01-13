@@ -107,7 +107,7 @@ grails.project.dependency.resolution = {
 			  
 		// Required by cached-resources but transitive dependency declaration is missing	  
 		compile ":cache-headers:1.1.7"
-		
+		runtime ':database-migration:1.4.0'
         runtime ":spring-security-core:2.0-RC4"
         runtime ":jquery:1.11.1"
         runtime ":jquery-ui:1.10.3"
