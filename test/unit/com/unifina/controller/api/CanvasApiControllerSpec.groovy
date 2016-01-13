@@ -1,4 +1,4 @@
-package com.unifina.controller.signalpath
+package com.unifina.controller.api
 
 import com.unifina.controller.api.CanvasApiController
 import grails.test.mixin.web.FiltersUnitTestMixin

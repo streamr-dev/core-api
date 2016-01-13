@@ -1,9 +1,9 @@
-package com.unifina
+package com.unifina.controller.api
 
-import com.unifina.controller.api.StreamApiController
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
 import com.unifina.service.UnifinaSecurityService
@@ -11,7 +11,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
-import com.unifina.filters.UnifinaCoreAPIFilters
 import spock.lang.Specification
 
 @TestFor(StreamApiController)
