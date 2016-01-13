@@ -50,7 +50,7 @@ class Stream implements Comparable {
 			description: description
 		]
 	}
-	
+
 	@Override
 	public int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
@@ -66,4 +66,5 @@ class Stream implements Comparable {
 	public boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
+	
 }
