@@ -1,17 +1,15 @@
 package com.unifina.controller.api
 
-import com.unifina.controller.api.CanvasApiController
-import grails.test.mixin.web.FiltersUnitTestMixin
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.SignalPathService
+import com.unifina.service.UnifinaSecurityService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
-
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.SavedSignalPath
-import com.unifina.service.SignalPathService
-import com.unifina.service.UnifinaSecurityService
-import com.unifina.filters.UnifinaCoreAPIFilters
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
@@ -25,8 +23,6 @@ class CanvasApiControllerSpec extends Specification {
 	SavedSignalPath ssp4
 
 	void setup() {
-		// Populate db
-
 		SecUser me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
 
@@ -65,12 +61,6 @@ class CanvasApiControllerSpec extends Specification {
 		assert SecUser.count() == 2
 		assert SavedSignalPath.count() == 4
 
-		// Mock services or use real ones
-
-		/*
-		controller.unifinaSecurityService = new UnifinaSecurityService()
-		controller.springSecurityService = [getCurrentUser: {-> me}] as SpringSecurityService
-		controller.unifinaSecurityService.springSecurityService = controller.springSecurityService*/
 		controller.unifinaSecurityService = mainContext.getBean("unifinaSecurityService")
 		controller.signalPathService = [
 			reconstruct: { json, globals ->
@@ -85,7 +75,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/"
-		withFilters([action: "index"]) {
+		withFilters(action: "index") {
 			controller.index()
 		}
 		then:
@@ -102,7 +92,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.method = "GET"
 		webRequest.actionName = "load"
 		request.requestURI = "/api/v1/canvases/load"
-		withFilters([action: "load"]) {
+		withFilters(action: "load") {
 			controller.load()
 		}
 		then:
@@ -123,7 +113,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.method = "POST"
 		webRequest.actionName = "save"
 		request.requestURI = "/api/v1/canvases/save"
-		withFilters([action: "save"]) {
+		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
@@ -138,7 +128,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.method = "GET"
 		webRequest.actionName = "load"
 		request.requestURI = "/api/v1/canvases/load"
-		withFilters([action: "load"]) {
+		withFilters(action: "load") {
 			controller.load()
 		}
 		then:
@@ -153,7 +143,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.method = "GET"
 		webRequest.actionName = "load"
 		request.requestURI = "/api/v1/canvases/load"
-		withFilters([action: "load"]) {
+		withFilters(action: "load") {
 			controller.load()
 		}
 		then:
@@ -168,7 +158,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.method = "GET"
 		webRequest.actionName = "load"
 		request.requestURI = "/api/v1/canvases/load"
-		withFilters([action: "load"]) {
+		withFilters(action: "load") {
 			controller.load()
 		}
 		then:
@@ -187,7 +177,7 @@ class CanvasApiControllerSpec extends Specification {
 		request.method = "POST"
 		webRequest.actionName = "save"
 		request.requestURI = "/api/v1/canvases/save"
-		withFilters([action: "save"]) {
+		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
@@ -201,7 +191,7 @@ class CanvasApiControllerSpec extends Specification {
 		params.name = "new name"
 		params.json = ssp1.json
 		request.method = "POST"
-		withFilters([action: "save"]) {
+		withFilters(action: "save") {
 			controller.save()
 		}
 		then:
