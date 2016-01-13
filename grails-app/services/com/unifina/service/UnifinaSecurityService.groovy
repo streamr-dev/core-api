@@ -21,13 +21,13 @@ class UnifinaSecurityService {
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 
 	/** Test if given user can read given resource instance */
-	boolean canRead(resource, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
+	boolean canRead(SecUser user, resource, boolean logIfDenied=true) {
 		if (!resource) {
 			log.warn("canRead: missing resource domain object!")
 			return false
 		}
 		if (!user?.id) {
-			log.warn("canRead: missing user; none authenticated or specified!")
+			log.warn("canRead: missing user!")
 			return false
 		}
 
@@ -55,10 +55,10 @@ class UnifinaSecurityService {
 	}
 
 	/** Get all resources of given type that the user has read access to */
-	public List getAllReadable(String resourceClassName, SecUser _user=springSecurityService.getCurrentUser()) {
-		Class Resource = grailsApplication.getDomainClass(resourceClassName)?.clazz
-		if (!Resource) {
-			log.warn("getAllReadable: Resource type not found: $resourceClassName")
+	public <T> List<T> getAllReadable(SecUser _user, Class<T> resourceClass) {
+		def resourceClassName = resourceClass?.name;
+		if (!resourceClassName || !grailsApplication.isDomainClass(resourceClass)) {
+			log.warn("getAllReadable: Not a resource type: $resourceClassName")
 			return []
 		}
 
@@ -67,13 +67,12 @@ class UnifinaSecurityService {
 			user == _user && clazz == resourceClassName
 		}*.longId
 
-		return Resource.withCriteria {
+		return resourceClass.withCriteria {
 			or {
 				eq "user", _user		// resource owner gets all access rights
 				"in" "id", readableIds
 			}
 		}
-		//Resource.findAll { user == _user || id in readableIds }  //MissingPropertyException: No such property: id for class: grails.gorm.DetachedCriteria
 	}
 
 	/**

@@ -5,7 +5,8 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService;
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
-
+import org.codehaus.groovy.grails.orm.hibernate.AbstractGrailsHibernateDomainClass
+import org.junit.Ignore
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
 import org.springframework.security.core.userdetails.cache.NullUserCache
@@ -174,49 +175,46 @@ class UnifinaSecurityServiceSpec extends Specification {
 
 	void "access granted to permitted Dashboard"() {
 		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canRead(dashAllowed)
-		}
+		service.canRead(me, dashAllowed)
 	}
 
 	void "access denied to non-permitted Dashboard"() {
 		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			!service.canRead(dashRestricted)
-		}
+		!service.canRead(me, dashRestricted)
 	}
 
 	void "access granted to own Dashboard"() {
 		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canRead(dashOwned)
-		}
+		service.canRead(me, dashOwned)
 	}
 
 	void "non-permitted third-parties have no access to resources"() {
 		expect:
-		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashAllowed) }
-		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashRestricted) }
-		SpringSecurityUtils.doWithAuth("stranger") { !service.canRead(dashOwned) }
+		!service.canRead(stranger, dashAllowed)
+		!service.canRead(stranger, dashRestricted)
+		!service.canRead(stranger, dashOwned)
 	}
 
-	void "canRead returns false on no-user"() {
+	void "canRead returns false on bad inputs"() {
 		expect:
-		!service.canRead(dashAllowed)
+		!service.canRead(null, dashAllowed)
+		!service.canRead(me, new Dashboard())
+		!service.canRead(me, null)
 	}
 
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
-		SpringSecurityUtils.doWithAuth("me") { service.getAllReadable(DashboardClassName) == [dashOwned, dashAllowed] }
-		service.getAllReadable(DashboardClassName, anotherUser) == [dashAllowed, dashRestricted]
-		SpringSecurityUtils.doWithAuth("stranger") { service.getAllReadable(DashboardClassName) == [] }
+		service.getAllReadable(me, Dashboard) == [dashOwned, dashAllowed]
+		service.getAllReadable(anotherUser, Dashboard) == [dashAllowed, dashRestricted]
+		service.getAllReadable(stranger, Dashboard) == []
 	}
 
 	void "getAllReadable returns empty on bad inputs"() {
 		expect:
-		service.getAllReadable("Foobar", me) == []
-		service.getAllReadable(DashboardClassName, new SecUser()) == []
-		service.getAllReadable(DashboardClassName) == []	// user == null
+		service.getAllReadable(me, java.lang.Object) == []
+		service.getAllReadable(me, null) == []
+		service.getAllReadable(new SecUser(), Dashboard) == []
+		service.getAllReadable(null, Dashboard) == []
 	}
 
 	void "looking up a user based on correct api keys"() {
