@@ -240,29 +240,43 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
+	public void afterSerialization() {
+		super.afterSerialization();
+		// Need to restore values after serialization
+		restoreInstanceAfterSerialization();
+	}
+
+	@Override
 	public void afterDeserialization() {
 		super.afterDeserialization();
 		try {
 			compileAndRegister(className, fullCode);
 			instance = (AbstractCustomModule) serializationService().deserialize(serializedInstance, classLoader);
-
-			instance.copyStateFromWrapper(parentSignalPath,
-					inputs,
-					inputsByName,
-					outputs,
-					outputsByName,
-					drivingInputs,
-					globals);
-
-
-			storedEndpointFields.restoreFields(instance);
-			storedEndpointFields = null;
-
-			changeOwnerOfEndpoints(instance);
-
+			// Need to restore values after deserialization
+			restoreInstanceAfterSerialization();
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Exception " + e);
 		}
+	}
+
+	/**
+	 * Restores variables of the underlying instance after the
+	 * hacks needed to successfully serialize and deserialize the
+	 * instance.
+	 */
+	private void restoreInstanceAfterSerialization() {
+		instance.copyStateFromWrapper(parentSignalPath,
+				inputs,
+				inputsByName,
+				outputs,
+				outputsByName,
+				drivingInputs,
+				globals);
+
+		storedEndpointFields.restoreFields(instance);
+		storedEndpointFields = null;
+
+		changeOwnerOfEndpoints(instance);
 	}
 
 	private void changeOwnerOfEndpoints(AbstractSignalPathModule newOwner) {

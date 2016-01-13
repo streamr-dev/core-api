@@ -1,31 +1,37 @@
 package com.unifina.service
 
 import com.unifina.serialization.SerializationException
+import com.unifina.serialization.Serializer
 import com.unifina.serialization.SerializerImpl
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.MapTraversal
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.Assert
 
+@CompileStatic
 class SerializationService {
 
 	final static String INTERVAL_CONFIG_KEY = "unifina.serialization.intervalInMillis"
 
-	def grailsApplication
-	def serializer = new SerializerImpl()
+	GrailsApplication grailsApplication
+	Serializer serializer = new SerializerImpl()
 
 	String serialize(AbstractSignalPathModule module) throws SerializationException {
 		module.beforeSerialization()
-		serializer.serializeToString(module)
+		String result = serializer.serializeToString(module)
+		module.afterSerialization()
+		return result
 	}
 
-	def deserialize(String data) throws SerializationException {
-		AbstractSignalPathModule module = serializer.deserializeFromString(data)
+	AbstractSignalPathModule deserialize(String data) throws SerializationException {
+		AbstractSignalPathModule module = (AbstractSignalPathModule) serializer.deserializeFromString(data)
 		module.afterDeserialization()
 		return module
 	}
 
-	def deserialize(String data, ClassLoader classLoader) throws SerializationException {
-		AbstractSignalPathModule module = new SerializerImpl(classLoader).deserializeFromString(data)
+	AbstractSignalPathModule deserialize(String data, ClassLoader classLoader) throws SerializationException {
+		AbstractSignalPathModule module = (AbstractSignalPathModule) new SerializerImpl(classLoader).deserializeFromString(data)
 		module.afterDeserialization()
 		return module
 	}
