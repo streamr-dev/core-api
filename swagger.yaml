@@ -182,6 +182,10 @@ paths:
           description: The canvas that was created
           schema:
             $ref: '#/definitions/Canvas'
+        '500':
+          description: Failed to construct Canvas
+          schema:
+            $ref: "#/definitions/Error"
         # TODO: error codes
 
   /canvases/{id}:
@@ -201,6 +205,18 @@ paths:
           description: successful operation
           schema:
             $ref: '#/definitions/Canvas'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Failed to re-construct Canvas
+          schema:
+            $ref: "#/definitions/Error"
         # TODO: error codes
     put:
       summary: Update a canvas.
@@ -452,10 +468,10 @@ definitions:
 
   CanvasSettings:
     type: object
-    
+
   Module:
     type: object
-    
+
   ResumeRequest:
     type: object
     properties:
@@ -468,7 +484,7 @@ definitions:
   Error:
     type: object
     required:
-      - error
+      - code
     properties:
       error:
         type: string

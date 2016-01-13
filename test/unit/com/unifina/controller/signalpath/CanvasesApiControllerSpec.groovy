@@ -1,6 +1,7 @@
 package com.unifina.controller.signalpath
 
 import com.unifina.controller.api.CanvasesApiController
+import com.unifina.utils.IdGenerator
 import grails.test.mixin.web.FiltersUnitTestMixin
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -32,10 +33,37 @@ class CanvasesApiControllerSpec extends Specification {
 		SecUser me = new SecUser(id:1, apiKey: "myApiKey").save(validate:false)
 		SecUser other = new SecUser(id:2, apiKey: "otherApiKey").save(validate:false)
 		
-		ssp1 = new SavedSignalPath(id:1, user:me, name:"mine", json:"{\"signalPathData\":{\"name\":\"mine\"}}", type:SavedSignalPath.TYPE_USER_SIGNAL_PATH).save(validate:false)
-		ssp2 = new SavedSignalPath(id:2, user:other, name:"not mine", json:"{\"signalPathData\":{\"name\":\"not mine\"}}", type:SavedSignalPath.TYPE_USER_SIGNAL_PATH).save(validate:false)
-		ssp3 = new SavedSignalPath(id:3, user:other, name:"not mine but example", json:"{\"signalPathData\":{\"name\":\"not mine but example\"}}", type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH).save(validate:false)
-		ssp4 = new SavedSignalPath(id:4, user:me, name:"my example", json:"{\"signalPathData\":{\"name\":\"not mine but example\"}}", type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH).save(validate:false)
+		ssp1 = new SavedSignalPath(
+			user: me,
+			name: "mine",
+			json: '{name: "mine", modules: []}',
+			type: SavedSignalPath.TYPE_USER_SIGNAL_PATH,
+			hasExports: false
+		).save(validate: true, failOnError: true)
+
+		ssp2 = new SavedSignalPath(
+			user: other,
+			name: "not mine",
+			json: '{name: "not mine", modules: []}',
+			type:SavedSignalPath.TYPE_USER_SIGNAL_PATH,
+			hasExports: false
+		).save(validate: true, failOnError: true)
+
+		ssp3 = new SavedSignalPath(
+			user: other,
+			name: "not mine but example",
+			json: '{name: "not mine but example", modules: []}',
+			type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH,
+			hasExports: false
+		).save(validate: true, failOnError: true)
+
+		ssp4 = new SavedSignalPath(
+			user: me,
+			name: "my example",
+			json: '{name: "not mine but example", modules: []}',
+			type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH,
+			hasExports: false
+		).save(validate: true, failOnError: true)
 		
 		assert SecUser.count()==2
 		assert SavedSignalPath.count()==4
@@ -65,6 +93,7 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.index()
 			}
 		then:
+			response.status == 200
 			response.json.size() == 2
 			response.json.collect { it.name } == ["mine", "my example"]
 
@@ -81,8 +110,11 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.load()
 			}
 		then:
-			response.json.signalPathData.name == "mine"
-			response.json.saveData.isSaved == true
+			response.status == 200
+			response.json.uuid.size() == 22
+			response.json.name == "mine"
+			response.json.modules == []
+			!response.json.hasExports
 	}
 	
 	void "must be able to save a new SignalPath"() {
@@ -99,6 +131,7 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.save()
 			}
 		then:
+			response.status == 200
 			response.json.uuid.size() > 10
 	}
 	
@@ -128,9 +161,8 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.load()
 			}
 		then:
-			response.json.signalPathData.name == "not mine but example"
-		then: "it must not have saveData.isSaved==true"
-			!response.json.saveData?.isSaved
+			response.status == 200
+			response.json.name == "not mine but example"
 	}
 	
 	void "my own example must have saveData"() {
@@ -144,8 +176,8 @@ class CanvasesApiControllerSpec extends Specification {
 				controller.load()
 			}
 		then:
-			response.json.signalPathData.name == "my example"
-			response.json.saveData.isSaved
+			response.status == 200
+			response.json.name == "my example"
 	}
 	
 	void "must be able to overwrite my own SignalPath"() {
