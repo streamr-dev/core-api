@@ -27,7 +27,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/live/ajaxStop"(controller: "liveApi", action: "ajaxStop")
 
 		"/api/v1/canvases"(resource: "canvasesApi", excludes: ["create", "edit"])
-		"/api/v1/canvases/load"(controller: "canvasesApi", action: "load")
-		"/api/v1/canvases/save"(controller: "canvasesApi", action: "save")
+		"/api/v1/canvases/load"(controller: "canvasApi", action: "load")
+		"/api/v1/canvases/save"(controller: "canvasApi", action: "save")
 	}
 }

@@ -15,10 +15,6 @@ class SavedSignalPathController {
 	
 	private static final Logger log = Logger.getLogger(SavedSignalPathController)
 	
-	def createSaveData(SavedSignalPath ssp) {
-		return [isSaved:true, url:createLink(controller:"canvasesApi",action:"save",params:[id:ssp.id]), name:ssp.name, target: "Archive id "+ssp.id]
-	}
-	
 	def loadBrowser() {
 		def result = [
 			browserId: params.browserId,
@@ -51,7 +47,7 @@ class SavedSignalPathController {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
-			tmp.url = createLink(controller:"canvasesApi",action:"load",params:[id:it[0]])
+			tmp.url = createLink(controller:"canvasApi",action:"load",params:[id:it[0]])
 			tmp.command = params.command
 			tmp.offset = offset++
 			result.signalPaths.add(tmp)

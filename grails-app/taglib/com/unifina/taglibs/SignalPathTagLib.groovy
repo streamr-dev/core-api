@@ -300,7 +300,7 @@ class SignalPathTagLib {
 							return;
 	
 						var saveData = {
-							url: '${ createLink(controller: "canvasesApi", action: "save") }',
+							url: '${ createLink(controller: "canvasApi", action: "save") }',
 							target: "Archive as new",
 							name: saveAsName
 						}

@@ -1,7 +1,6 @@
 package com.unifina.controller.signalpath
 
-import com.unifina.controller.api.CanvasesApiController
-import com.unifina.utils.IdGenerator
+import com.unifina.controller.api.CanvasApiController
 import grails.test.mixin.web.FiltersUnitTestMixin
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -12,14 +11,12 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
-import com.unifina.signalpath.SignalPath
-import com.unifina.utils.Globals
 import com.unifina.filters.UnifinaCoreAPIFilters
 
-@TestFor(CanvasesApiController)
+@TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
 @Mock([SecUser, SavedSignalPath, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
-class CanvasesApiControllerSpec extends Specification {
+class CanvasApiControllerSpec extends Specification {
 
 
 	SavedSignalPath ssp1

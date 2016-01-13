@@ -34,7 +34,7 @@ class CanvasController {
 		def load = null
 		
 		if (params.load!=null) {
-			load = createLink(controller:"canvasesApi",action:"load",params:[id:params.load])
+			load = createLink(controller:"canvasApi",action:"load",params:[id:params.load])
 		}
 		
 		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]

@@ -10,19 +10,19 @@ import grails.util.GrailsUtil
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-class CanvasesApiController {
+class CanvasApiController {
 
 	def signalPathService
 	def springSecurityService
 	def grailsApplication
 	def unifinaSecurityService
 
-	private static final Logger log = Logger.getLogger(CanvasesApiController)
+	private static final Logger log = Logger.getLogger(CanvasApiController)
 
 	def createSaveData(SavedSignalPath ssp) {
 		return [
 			isSaved: true,
-			url: createLink(controller:"canvasesApi", action:"save", params:[id:ssp.id]),
+			url: createLink(controller:"canvasApi", action:"save", params:[id:ssp.id]),
 			name: ssp.name,
 			target: "Archive id "+ssp.id
 		]
