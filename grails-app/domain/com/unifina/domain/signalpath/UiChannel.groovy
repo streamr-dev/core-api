@@ -20,13 +20,13 @@ class UiChannel implements Serializable {
 	}
 
 	Map<String, Object> toMap() {
-		return	[
-				id: id,
-				name: name,
-				module: [
-						id: module.id,
-						webcomponent: module.webcomponent
-				]
-		]
+		def map = [id: id, name: name]
+		if (module != null) {
+			map["module"] = [
+				id: module.id,
+				webcomponent: module.webcomponent
+			]
+		}
+		return map
 	}
 }

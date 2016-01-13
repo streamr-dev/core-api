@@ -39,7 +39,11 @@ class LiveApiController {
 				id: rsp.id,
 				name: rsp.name,
 				state: rsp.state,
-				uiChannels: rsp.uiChannels.collect { it.toMap() }
+				uiChannels: rsp.uiChannels.findAll { uiChannel ->
+					uiChannel.module != null && uiChannel.module.webcomponent != null
+				}.collect { uiChannel ->
+					[id: uiChannel.id, name: uiChannel.name, module: [id: uiChannel.module.id, webcomponent: uiChannel.module.webcomponent]]
+				}
 			]
 		}
 		render runningSignalPathMaps as JSON
