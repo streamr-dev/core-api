@@ -299,5 +299,32 @@ class RegisterControllerSpec extends Specification {
 			reauthenticated == username
 	}
 
+	void "forgotPassword returns emailSent=true but does not send email if the user does not exist"() {
+		EmailCommand cmd = new EmailCommand()
+
+		when: "requested new password"
+		cmd.username = "test@streamr.com"
+		request.method = "POST"
+		def model = controller.forgotPassword(cmd)
+		then:
+		!mailSent
+		model.emailSent
+	}
+
+	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
+		EmailCommand cmd = new EmailCommand()
+		SecUser me = new SecUser()
+		me.username = "test@streamr.com"
+		me.save(validate: false)
+
+		when: "requested new password"
+		cmd.username = "test@streamr.com"
+		request.method = "POST"
+		def model = controller.forgotPassword(cmd)
+		then:
+		mailSent
+		model.emailSent
+	}
+
 
 }
