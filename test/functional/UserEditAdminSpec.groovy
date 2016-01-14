@@ -1,12 +1,39 @@
 import core.LoginTesterAdminSpec
-import core.pages.UserCreatePage
-import core.pages.UserEditPage
-import core.pages.UserSearchPage
-import core.pages.UserSearchResultPage
+import core.pages.*
 
 public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	// The order of the tests is requisite
+
+	String specUserName = "user-edit-admin-spec@streamr.com"
+	String specUserPwd = "user-edit-admin-spec"
+
+	private void goChangeUserPassword(String userNameToChange, String newPassword) {
+		to UserSearchPage
+		username = userNameToChange
+		searchButton.click()
+
+		waitFor { at UserSearchResultPage }
+		waitFor {
+			searchResult.displayed
+		}
+		searchResult.click()
+
+		waitFor { at UserEditPage }
+		password = newPassword
+		saveButton.click()
+		waitFor {
+			at UserEditPage
+		}
+	}
+
+	private void loginAs(String loginUsername, String loginPassword) {
+		waitFor { at LoginPage }
+		username = loginUsername
+		password = loginPassword
+		loginButton.click()
+		waitFor { at CanvasPage }
+	}
 
 	def setup(){
 		to UserSearchPage
@@ -20,9 +47,9 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 		at UserCreatePage
 
 		when: "data is given and the user is created"
-		username = "user-edit-admin-spec@streamr.com"
+		username = specUserName
 		name = "Test"
-		password = "user-edit-admin-spec"
+		password = specUserPwd
 		timezone = "Europe/Helsinki"
 
 		roleUser.click()
@@ -37,56 +64,37 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	def "the just created user can be searched"(){
 		when: "search for the username"
-		username = "user-edit-admin-spec@streamr.com"
+		username = specUserName
 		searchButton.click()
 
 		then: "the user is found"
 		at UserSearchResultPage
 		searchResult.size() == 1
-		searchResult.text() == "user-edit-admin-spec@streamr.com"
+		searchResult.text() == specUserName
 	}
 
 	def "the user password can be changed"() {
-		when: "search for and go to the user page"
-		username = "user-edit-admin-spec@streamr.com"
-		searchButton.click()
-		at UserSearchResultPage
-		waitFor {
-			searchResult.displayed
-		}
-		searchResult.click()
+		goChangeUserPassword(specUserName, "test-pwd")
 
-		then: "go to the user edit page"
-		at UserEditPage
+		when: "logout and relogin with new password"
+			logoutLink.click()
+			loginAs(specUserName, "test-pwd")
+		then: "successful login"
+			waitFor { at CanvasPage }
 
-		when: "new password typed and saved"
-		password = "test-pwd"
-		saveButton.click()
-		then: "the user saves"
-		waitFor {
-			at UserSearchPage
-		}
-		when: "logged out"
-		navSettingsLink.click()
-		navLogoutLink.click()
-		then: "go to loginPage"
-		waitFor {
-			at LoginPage
-		}
-		when: "username and pwd typed"
-		username = "user-edit-admin-spec@streamr.com"
-		password = "test-pwd"
-		login.click()
-		then: "tester can log in with the new pwd"
-		waitFor {
-			at CanvasPage
-		}
-
+		when: "log out"
+			navbar.navSettingsLink.click()
+			navbar.navLogoutLink.click()
+			loginAs(testerUsername, testerPassword)
+		then: "successful login"
+			waitFor { at CanvasPage }
+			// Change back the user password
+			goChangeUserPassword(specUserName, specUserPwd)
 	}
 
 	def "the user can be edited"() {
 		when: "search for and go to the user page"
-		username = "user-edit-admin-spec@streamr.com"
+		username = specUserName
 		searchButton.click()
 		at UserSearchResultPage
 		waitFor {
