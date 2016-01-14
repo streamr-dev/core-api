@@ -36,16 +36,16 @@ class StreamApiController {
 
 
 	@StreamrApi
-	def show(long id) {
-		getAuthorizedStream(id) { Stream stream ->
+	def show(String uuid) {
+		getAuthorizedStream(uuid) { Stream stream ->
 			render(stream.toMap() as JSON)
 		}
 	}
 
 	@StreamrApi
-	def update(long id) {
+	def update(String uuid) {
 		Stream newStream = new Stream(request.JSON)
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(uuid) { Stream stream ->
 			if (newStream.name != null) {
 				stream.name = newStream.name
 			}
@@ -63,19 +63,19 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def delete(long id) {
-		getAuthorizedStream(id) { Stream stream ->
+	def delete(String uuid) {
+		getAuthorizedStream(uuid) { Stream stream ->
 			stream.delete()
 			render(status: 204)
 		}
 	}
 
-	private def getAuthorizedStream(long id, Closure<Stream> successHandler) {
-		def stream = Stream.findById(id)
+	private def getAuthorizedStream(String uuid, Closure<Stream> successHandler) {
+		def stream = Stream.findByUuid(uuid)
 		if (stream == null) {
-			render(status: 404, text: [error: "Stream not found with id " + id, code: "NOT_FOUND"] as JSON)
+			render(status: 404, text: [error: "Stream not found with uuid " + uuid, code: "NOT_FOUND"] as JSON)
 		} else if (!unifinaSecurityService.canAccess(stream, request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Stream " + id, code: "FORBIDDEN"] as JSON)
+			render(status: 403, text: [error: "Not authorized to access Stream " + uuid, code: "FORBIDDEN"] as JSON)
 		} else {
 			successHandler.call(stream)
 		}

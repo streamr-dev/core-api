@@ -23,6 +23,11 @@ class StreamApiControllerSpec extends Specification {
 	def streamService
 	def unifinaSecurityService
 
+	def streamOneUuid
+	def streamTwoUuid
+	def streamThreeUuid
+	def streamFourUuid
+
 	def setup() {
 		streamService = mainContext.getBean(StreamService)
 		unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
@@ -36,10 +41,10 @@ class StreamApiControllerSpec extends Specification {
 
 		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
 
-		streamService.createUserStream([name: "stream", description: "description"], user, null)
-		streamService.createUserStream([name: "ztream"], user, null)
-		streamService.createUserStream([name: "atream"], user, null)
-		streamService.createUserStream([name: "otherUserStream"], otherUser, null)
+		streamOneUuid = streamService.createUserStream([name: "stream", description: "description"], user, null).uuid
+		streamTwoUuid = streamService.createUserStream([name: "ztream"], user, null).uuid
+		streamThreeUuid = streamService.createUserStream([name: "atream"], user, null).uuid
+		streamFourUuid = streamService.createUserStream([name: "otherUserStream"], otherUser, null).uuid
 	}
 
 	void "find all streams of logged in user"() {
@@ -163,7 +168,7 @@ class StreamApiControllerSpec extends Specification {
 	void "show a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 1
+		params.uuid = streamOneUuid
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "show"]) {
@@ -178,7 +183,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot shown non-existent Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 666
+		params.uuid = "666-666-666"
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "show"]) {
@@ -192,7 +197,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot show other user's Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 4
+		params.uuid = streamFourUuid
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "show"]) {
@@ -206,7 +211,7 @@ class StreamApiControllerSpec extends Specification {
 	void "update a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 1
+		params.uuid = streamOneUuid
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
 		request.requestURI = "/api/v1/stream"
@@ -227,7 +232,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot update non-existent Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 666
+		params.uuid = "666-666-666"
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
 		request.requestURI = "/api/v1/stream"
@@ -242,7 +247,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot update other user's Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 4
+		params.uuid = streamFourUuid
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
 		request.requestURI = "/api/v1/stream"
@@ -257,7 +262,7 @@ class StreamApiControllerSpec extends Specification {
 	void "delete a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 1
+		params.uuid = streamOneUuid
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "delete"]) {
@@ -271,7 +276,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot delete non-existent Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 666
+		params.uuid = "666-666-666"
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "delete"]) {
@@ -285,7 +290,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot delete other user's Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = 4
+		params.uuid = streamFourUuid
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "delete"]) {
