@@ -46,6 +46,44 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 		searchResult.text() == "user-edit-admin-spec@streamr.com"
 	}
 
+	def "the user password can be changed"() {
+		when: "search for and go to the user page"
+		username = "user-edit-admin-spec@streamr.com"
+		searchButton.click()
+		at UserSearchResultPage
+		waitFor {
+			searchResult.displayed
+		}
+		searchResult.click()
+
+		then: "go to the user edit page"
+		at UserEditPage
+
+		when: "new password typed and saved"
+		password = "test-pwd"
+		saveButton.click()
+		then: "the user saves"
+		waitFor {
+			at UserSearchPage
+		}
+		when: "logged out"
+		navSettingsLink.click()
+		navLogoutLink.click()
+		then: "go to loginPage"
+		waitFor {
+			at LoginPage
+		}
+		when: "username and pwd typed"
+		username = "user-edit-admin-spec@streamr.com"
+		password = "test-pwd"
+		login.click()
+		then: "tester can log in with the new pwd"
+		waitFor {
+			at CanvasPage
+		}
+
+	}
+
 	def "the user can be edited"() {
 		when: "search for and go to the user page"
 		username = "user-edit-admin-spec@streamr.com"
