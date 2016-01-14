@@ -23,13 +23,13 @@ class StreamController {
 	
 	static defaultAction = "list"
 	
-	def unifinaSecurityService
+	def permissionService
 	def feedFileService
 	def kafkaService
 	def streamService
 	
 	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(Stream.get(params.long("id")))) {
+			if (!permissionService.canAccess(Stream.get(params.long("id")))) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else

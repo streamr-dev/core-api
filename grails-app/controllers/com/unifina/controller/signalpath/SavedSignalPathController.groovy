@@ -18,9 +18,9 @@ class SavedSignalPathController {
 	def springSecurityService
 	def grailsApplication
 	
-	def unifinaSecurityService
+	def permissionService
 	def beforeInterceptor = [action:{
-			if (params.id!=null && !unifinaSecurityService.canAccess(SavedSignalPath.get(params.id), actionName=='load')) {
+			if (params.id!=null && !permissionService.canAccess(SavedSignalPath.get(params.id), actionName=='load')) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else
@@ -57,7 +57,7 @@ class SavedSignalPathController {
 			result.message = message(code:"signalpath.load.error", args:[e.message])
 		} finally {
 			// Examples can not be saved in place by others than those who have real access to it
-			if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH || unifinaSecurityService.canAccess(ssp))
+			if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH || permissionService.canAccess(ssp))
 				result.saveData = createSaveData(ssp)
 
 			render result as JSON

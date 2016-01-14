@@ -5,8 +5,6 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService;
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.codehaus.groovy.grails.orm.hibernate.AbstractGrailsHibernateDomainClass
-import org.junit.Ignore
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
 import org.springframework.security.core.userdetails.cache.NullUserCache
@@ -27,9 +25,9 @@ import com.unifina.domain.dashboard.Dashboard
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestMixin(GrailsUnitTestMixin)
-@TestFor(UnifinaSecurityService)
+@TestFor(PermissionService)
 @Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard])
-class UnifinaSecurityServiceSpec extends Specification {
+class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
 

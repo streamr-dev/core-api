@@ -10,10 +10,10 @@ import com.unifina.domain.dashboard.DashboardItem
 class DashboardController {
 	def grailsApplication
 	def springSecurityService
-	def unifinaSecurityService
+	def permissionService
 	
 	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(Dashboard.get(params.long("id")))) {
+			if (!permissionService.canAccess(Dashboard.get(params.long("id")))) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else

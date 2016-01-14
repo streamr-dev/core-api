@@ -12,7 +12,7 @@ class UserService {
     
 	def grailsApplication
     def springSecurityService
-    def unifinaSecurityService
+    def permissionService
 	
     def createUser(Map properties, List<SecRole> roles=null, List<Feed> feeds=null, List<ModulePackage> packages=null) {
         def secConf = grailsApplication.config.grails.plugin.springsecurity
@@ -28,12 +28,12 @@ class UserService {
         user.enabled = true
         
         if (!user.validate()) {
-            log.warn(unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
-            throw new UserCreationFailedException("Registration user validation failed: "+unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
+            log.warn(permissionService.checkErrors(user.errors.getAllErrors()))
+            throw new UserCreationFailedException("Registration user validation failed: "+permissionService.checkErrors(user.errors.getAllErrors()))
         }
 
         if (!user.save(flush:true)) {
-            log.warn("Failed to save user data: "+unifinaSecurityService.checkErrors(user.errors.getAllErrors()))
+            log.warn("Failed to save user data: "+permissionService.checkErrors(user.errors.getAllErrors()))
             throw new UserCreationFailedException()
         } else {
             // Save roles, feeds and module packages

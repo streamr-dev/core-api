@@ -5,12 +5,11 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
@@ -20,7 +19,7 @@ import spock.lang.Specification
 @Mock([Stream, Feed])
 class SendToStreamSpec extends Specification {
 
-	static class FakeUnifinaSecurityService extends UnifinaSecurityService {
+	static class FakePermissionService extends PermissionService {
 		@Override
 		boolean canAccess(Object instance) {
 			true
@@ -44,7 +43,7 @@ class SendToStreamSpec extends Specification {
 		defineBeans {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
-			unifinaSecurityService(FakeUnifinaSecurityService)
+			permissionService(FakePermissionService)
 		}
 
 		def feed = new Feed()

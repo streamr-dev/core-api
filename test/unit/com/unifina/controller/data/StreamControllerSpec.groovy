@@ -3,7 +3,6 @@ package com.unifina.controller.data
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.web.ControllerUnitTestMixin
 import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
@@ -13,11 +12,11 @@ import com.unifina.domain.security.SecUser
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 
 @TestFor(StreamController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters, UnifinaSecurityService, StreamService])
+@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters, PermissionService, StreamService])
 class StreamControllerSpec extends Specification {
 	
 	SecUser user
@@ -26,7 +25,7 @@ class StreamControllerSpec extends Specification {
 		// Mock services or use real ones
 		controller.streamService = grailsApplication.mainContext.getBean("streamService")
 		controller.streamService.kafkaService = Mock(KafkaService)
-		controller.unifinaSecurityService = grailsApplication.mainContext.getBean("unifinaSecurityService")
+		controller.permissionService = grailsApplication.mainContext.getBean("permissionService")
 		
 		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
 		
@@ -42,7 +41,7 @@ class StreamControllerSpec extends Specification {
 			encodePassword: {String pw-> pw+"-encoded" }
 		] as SpringSecurityService
 		controller.springSecurityService = springSecurityService
-		controller.unifinaSecurityService.springSecurityService = springSecurityService
+		controller.permissionService.springSecurityService = springSecurityService
 	}
 
 	void "successful stream create json api call"() {

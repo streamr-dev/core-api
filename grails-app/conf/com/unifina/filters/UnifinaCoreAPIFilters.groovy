@@ -19,7 +19,7 @@ import com.unifina.security.StreamrApi
 
 class UnifinaCoreAPIFilters {
 	
-	def unifinaSecurityService
+	def permissionService
 	GrailsApplication grailsApplication
 	
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
@@ -60,7 +60,7 @@ class UnifinaCoreAPIFilters {
 				else {
 					SecUser user = null
 					if (request.JSON?.key && request.JSON?.secret) {
-						user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
+						user = permissionService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
 					}
 						
 					if (!user && annotation.requiresAuthentication()) {

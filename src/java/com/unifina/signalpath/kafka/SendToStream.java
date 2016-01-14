@@ -1,5 +1,6 @@
 package com.unifina.signalpath.kafka;
 
+import com.unifina.service.PermissionService;
 import grails.converters.JSON;
 
 import java.security.AccessControlException;
@@ -12,7 +13,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.KafkaService;
-import com.unifina.service.UnifinaSecurityService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ListInput;
@@ -29,7 +29,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	transient protected JSONObject streamConfig = null;
 	
 	transient protected KafkaService kafkaService = null;
-	transient protected UnifinaSecurityService unifinaSecurityService = null;
+	transient protected PermissionService permissionService = null;
 	
 	protected boolean historicalWarningShown = false;
 	private Stream authenticatedStream = null;
@@ -37,7 +37,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
-		unifinaSecurityService = (UnifinaSecurityService) globals.getGrailsApplication().getMainContext().getBean("unifinaSecurityService");
+		permissionService = (PermissionService) globals.getGrailsApplication().getMainContext().getBean("permissionService");
 		
 		addInput(streamParameter);
 		
@@ -83,7 +83,7 @@ public class SendToStream extends AbstractSignalPathModule {
 			return;
 		
 		// Check access to this Stream
-		if (unifinaSecurityService.canAccess(stream))
+		if (permissionService.canAccess(stream))
 			authenticatedStream = stream;
 		else throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
 		

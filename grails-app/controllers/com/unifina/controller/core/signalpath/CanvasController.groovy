@@ -3,19 +3,13 @@ package com.unifina.controller.core.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-
-import java.security.AccessControlException
-
 import org.atmosphere.cpr.BroadcasterFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
 
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
-import com.unifina.service.UnifinaSecurityService
-import com.unifina.signalpath.SignalPathRunner
+import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
@@ -27,7 +21,7 @@ class CanvasController {
 	GrailsApplication grailsApplication
 	SpringSecurityService springSecurityService
 	SignalPathService signalPathService
-	UnifinaSecurityService unifinaSecurityService
+	PermissionService permissionService
 	
 	def index() {
 		redirect(action: "build", params:params)

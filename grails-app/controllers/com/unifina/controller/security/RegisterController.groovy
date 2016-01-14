@@ -17,7 +17,7 @@ class RegisterController {
     static defaultAction = 'index'
 
     def mailService
-    def unifinaSecurityService
+    def permissionService
     def springSecurityService
     def signupCodeService
     def userService
@@ -58,7 +58,7 @@ class RegisterController {
         cmd.username = invite.username
 
         if (cmd.hasErrors()) {
-            log.warn("Registration command has errors: "+unifinaSecurityService.checkErrors(cmd.errors.getAllErrors()))
+            log.warn("Registration command has errors: "+permissionService.checkErrors(cmd.errors.getAllErrors()))
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
@@ -271,7 +271,7 @@ class RegisterCommand {
     String tosConfirmed
     Integer pwdStrength
 	
-    def unifinaSecurityService
+    def permissionService
 
     static constraints = {
         importFrom SecUser
@@ -287,10 +287,10 @@ class RegisterCommand {
         name blank: false
 				
         password validator: {String password, RegisterCommand command ->
-            return command.unifinaSecurityService.passwordValidator(password, command)
+            return command.permissionService.passwordValidator(password, command)
         }
         password2 validator: {value, RegisterCommand command ->
-            return command.unifinaSecurityService.password2Validator(value, command)
+            return command.permissionService.password2Validator(value, command)
         }
 
     }
@@ -302,14 +302,14 @@ class ResetPasswordCommand {
     String password2
     Integer pwdStrength
 
-    def unifinaSecurityService
+    def permissionService
 	
     static constraints = {
         password validator: {String password, ResetPasswordCommand command ->
-            return command.unifinaSecurityService.passwordValidator(password, command)
+            return command.permissionService.passwordValidator(password, command)
         }
         password2 validator: {value, ResetPasswordCommand command ->
-            return command.unifinaSecurityService.password2Validator(value, command)
+            return command.permissionService.password2Validator(value, command)
         }
     }
 }

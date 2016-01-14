@@ -16,12 +16,12 @@ import com.unifina.utils.GlobalsFactory
 class LiveController {
 	
 	def springSecurityService
-	def unifinaSecurityService
+	def permissionService
 	def signalPathService
 	def grailsApplication
 	
 	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))) {
+			if (!permissionService.canAccess(RunningSignalPath.get(params.long("id")))) {
 				if (request.xhr) 
 					redirect(controller:'login', action:'ajaxDenied')
 				else 
@@ -103,7 +103,7 @@ class LiveController {
 		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
 		RunningSignalPath rsp = ui.runningSignalPath
 		
-		if (!unifinaSecurityService.canAccess(rsp)) {
+		if (!permissionService.canAccess(rsp)) {
 			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")
 			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		}
@@ -149,7 +149,7 @@ class LiveController {
 			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
 		}
 		
-		if (!unifinaSecurityService.canAccess(rsp, user)) {
+		if (!permissionService.canAccess(rsp, user)) {
 			log.warn("request: access to rsp ${rsp?.id} denied for user ${user?.id}")
 			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		}

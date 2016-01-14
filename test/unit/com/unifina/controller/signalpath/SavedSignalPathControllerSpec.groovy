@@ -1,17 +1,14 @@
 package com.unifina.controller.signalpath
 
-import static org.junit.Assert.*
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.support.*
-import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 
@@ -41,9 +38,9 @@ class SavedSignalPathControllerSpec extends Specification {
 		
 		// Mock services or use real ones
 		
-		controller.unifinaSecurityService = new UnifinaSecurityService()
+		controller.permissionService = new PermissionService()
 		controller.springSecurityService = [getCurrentUser: {-> me}] as SpringSecurityService
-		controller.unifinaSecurityService.springSecurityService = controller.springSecurityService
+		controller.permissionService.springSecurityService = controller.springSecurityService
 		controller.signalPathService = [
 			reconstruct: {json, globals -> return json},
 			jsonToSignalPath: {Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot->

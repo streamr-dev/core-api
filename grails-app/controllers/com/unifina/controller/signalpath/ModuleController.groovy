@@ -3,8 +3,6 @@ package com.unifina.controller.signalpath
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
-import groovy.json.JsonSlurper
-
 import org.apache.log4j.Logger
 
 import com.unifina.domain.signalpath.Module
@@ -21,7 +19,7 @@ class ModuleController {
 	def moduleService
 	def grailsApplication
 	def springSecurityService
-	def unifinaSecurityService
+	def permissionService
 	
 	static defaultAction = "list"
 	
@@ -137,7 +135,7 @@ class ModuleController {
 		
 		try {
 			Module domainObject = Module.get(params.id)
-			if (!unifinaSecurityService.canAccess(domainObject)) {
+			if (!permissionService.canAccess(domainObject)) {
 				throw new Exception("Access denied for user $springSecurityService.currentUser.username to requested module")
 			}
 			
@@ -182,7 +180,7 @@ class ModuleController {
 	
 	def jsonGetModuleHelp() {
 		Module module = Module.get(params.id)
-		if (!unifinaSecurityService.canAccess(module)) {
+		if (!permissionService.canAccess(module)) {
 			throw new Exception("User $springSecurityService.currentUser does not have access to module $module.name")
 		}
 		else {

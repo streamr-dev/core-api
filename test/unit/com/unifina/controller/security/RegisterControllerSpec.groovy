@@ -17,12 +17,12 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.service.BootService
 import com.unifina.service.SignupCodeService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 import com.unifina.service.UserService
 
 @TestFor(RegisterController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
-		Feed, FeedUser, ModulePackage, ModulePackageUser, UnifinaSecurityService])
+		Feed, FeedUser, ModulePackage, ModulePackageUser, PermissionService])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
@@ -54,8 +54,8 @@ class RegisterControllerSpec extends Specification {
 		
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
-		controller.unifinaSecurityService = new UnifinaSecurityService()
-		controller.unifinaSecurityService.grailsApplication = grailsApplication
+		controller.permissionService = new PermissionService()
+		controller.permissionService.grailsApplication = grailsApplication
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication

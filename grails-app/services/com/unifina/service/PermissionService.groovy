@@ -7,20 +7,19 @@ import org.apache.log4j.Logger
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
 import org.springframework.validation.FieldError
 
 import com.unifina.domain.security.Permission
 
-class UnifinaSecurityService {
+class PermissionService {
 
 	def grailsApplication
 	SpringSecurityService springSecurityService
-	Logger log = Logger.getLogger(UnifinaSecurityService)
+	Logger log = Logger.getLogger(PermissionService)
 
-	final ownerPermissions = ["read", "write", "share", "all"]
+	final ownerPermissions = ["read", "write", "share"]
 
 	public List<String> getPermittedOperations(SecUser user, resource) {
 		if (!resource) {
