@@ -20,38 +20,44 @@ class UnifinaSecurityService {
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
 
-	/** Test if given user can read given resource instance */
-	boolean canRead(SecUser user, resource, boolean logIfDenied=true) {
+	final ownerPermissions = ["read", "write", "share", "all"]
+
+	public List<String> getPermittedOperations(SecUser user, resource) {
 		if (!resource) {
 			log.warn("canRead: missing resource domain object!")
-			return false
+			return []
 		}
 		if (!user?.id) {
 			log.warn("canRead: missing user!")
-			return false
+			return []
 		}
 
 		// resource owner has all rights
 		if (resource.hasProperty("user") && resource.user?.id != null && resource.user.id == user.id) {
-			return true
+			return ownerPermissions
 		}
 
-		def perms = Permission.withCriteria {
+		return Permission.withCriteria {
 			eq("user", user)
 			eq("clazz", resource.class.name)
 			eq("longId", resource.id)		// TODO: handle stringId
-		}
+		}*.operation;
+	}
+
+	/** Test if given user can read given resource instance */
+	boolean canRead(SecUser user, resource, boolean logIfDenied=true) {
+		def perms = getPermittedOperations(user, resource)
 
 		if (!perms && logIfDenied) {
-			log.warn("${user?.username}(id ${user?.id}) tried to access $resource without Permission!")
-			if (resource.user) {
+			log.warn("${user?.username}(id ${user?.id}) tried to read $resource without Permission!")
+			if (resource?.user) {
 				log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 			}
 		}
 
 		// any permissions imply read access
 		return perms != []
-		//return perms.find { it.operation == "read" } as boolean
+		//return "read" in perms
 	}
 
 	/** Get all resources of given type that the user has read access to */
@@ -75,71 +81,38 @@ class UnifinaSecurityService {
 		}
 	}
 
-	/**
-	 * Checks if the given user has access to the given instance.
-	 * If no user is provided, the user identified by api keys or the current logged in user (as returned by springSecurityService.currentUser) is used
-	 * (in that order of precedence).
-	 * 
-	 * Access to instance is granted if the instance has a field called "user",
-	 * and the user id it points to equals the user id being checked against.
-	 * 
-	 * @param instance
-	 * @param user
-	 * @return
-	 */
-	private boolean checkUser(instance, SecUser user=springSecurityService.getCurrentUser(), boolean logIfDenied=true) {
-		if (!instance) {
-			log.warn("checkUser: domain object instance is null, denying access for user ${user?.id}")
-			return false
-		}
-		
-		// Is this a protected instance?
-		if (instance.hasProperty("user") && instance.user?.id != null) {
-			boolean result = instance.user.id == user?.id
-			if (!result && logIfDenied) {
-				log.warn("User ${user?.id} tried to access $instance owned by user $instance.user.id!")
-			}
-			return result
-		}
-		// TODO: For unprotected instances, return true. Safe?
-		else return true
+	@Deprecated
+	@CompileStatic
+	boolean canAccess(Object instance, SecUser user=springSecurityService.getCurrentUser()) {
+		return canRead(user, instance)
 	}
 
 	@CompileStatic
-	boolean canAccess(Object instance, SecUser user=springSecurityService.getCurrentUser()) {
-		return checkUser(instance, user) 
+	boolean canAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
+		return canRead(user, modulePackage)
 	}
 
 	@CompileStatic
 	boolean canAccess(Module module, SecUser user=springSecurityService.getCurrentUser()) {
 		return canAccess(module.modulePackage, user)
 	}
-	
-	@CompileStatic
-	boolean canAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
-		// Everyone who has been granted access to a ModulePackage can access it
-		return checkModulePackageAccess(modulePackage, user) || checkUser(modulePackage, user)
-	}
-	
+
+	@Deprecated
 	@CompileStatic 
 	boolean canAccess(RunningSignalPath rsp, SecUser user=springSecurityService.getCurrentUser()) {
 		// Shared RunningSignalPaths can be accessed by everyone
-		return rsp?.shared || checkUser(rsp, user)
+		return rsp?.shared || canRead(user, rsp)
 	}
-	
+
+	@Deprecated
 	@CompileStatic
 	boolean canAccess(SavedSignalPath ssp, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
-		if (isLoad && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+		if (isLoad && ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
 			return true
-		else return canAccess(ssp, user)
+		else return canRead(user, ssp)
 	}
-	
-	private boolean checkModulePackageAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
-		ModulePackageUser mpu = ModulePackageUser.findByUserAndModulePackage(user, modulePackage)
-		return mpu != null
-	}
-	
+
 	/**
 	 * Looks up a user based on api keys. Returns null if the keys do not match a user.
 	 * @param apiKey

@@ -40,13 +40,12 @@ class UnifinaSecurityServiceSpec extends Specification {
 	Module modRestricted
 	Module modOwned
 	ModulePackageUser allowedPermission
+	Permission allowedPermission2
 
 	Dashboard dashAllowed
 	Dashboard dashRestricted
 	Dashboard dashOwned
 	Permission dashReadPermission
-
-	final String DashboardClassName = "com.unifina.domain.dashboard.Dashboard"
 
     def setup() {
 		
@@ -88,7 +87,8 @@ class UnifinaSecurityServiceSpec extends Specification {
 
 		// Set up the permission to the allowed resources
 		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
-		dashReadPermission = new Permission(user:me, clazz:DashboardClassName, longId:dashAllowed.id, operation:"read").save(validate:false)
+		allowedPermission2 = new Permission(user:me, clazz:ModulePackage.name, longId:allowed.id, operation:"read").save(validate:false)
+		dashReadPermission = new Permission(user:me, clazz:Dashboard.name, longId:dashAllowed.id, operation:"read").save(validate:false)
 		
 		// Configure SpringSecurity fields
 		def userLookup = [:]
@@ -123,7 +123,7 @@ class UnifinaSecurityServiceSpec extends Specification {
 		ModulePackage.findAllByUser(me).size()==1
 		ModulePackageUser.findByUserAndModulePackage(me, allowed)==allowedPermission
 
-		Permission.count()==1
+		Permission.count()==2
 		
 		SpringSecurityUtils.doWithAuth("me") {
 			grailsApplication.mainContext.getBean("springSecurityService").currentUser == me
