@@ -21,9 +21,13 @@ public class ButtonModule extends InputModule {
 		super.init();
 		canClearState = false;
 		resendAll = false;
-		resendLast = 0;
+		resendLast = 1;
 
+		buttonName.setDrivingInput(true);
+
+		out.noRepeat = false;
 		out.canBeNoRepeat = false;
+
 	}
 
 	@Override
@@ -31,7 +35,16 @@ public class ButtonModule extends InputModule {
 
 	@Override
 	public void sendOutput() {
-		out.send(buttonValue.getValue());
+		if (drivingInputs.contains(buttonName)) {
+			if (globals.getUiChannel()!=null) {
+				Map<String,Object> msg = new HashMap<String,Object>();
+				msg.put("buttonName", buttonName.getValue());
+				globals.getUiChannel().push(msg, uiChannelId);
+			}
+		}
+		if (uiEventSendPending) {
+			out.send(buttonValue.getValue());
+		}
 	}
 
 	@Override

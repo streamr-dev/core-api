@@ -10,19 +10,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class InputModule extends ModuleWithUI {
+
+	protected boolean uiEventSendPending = false;
+
 	@Override
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		super.handleRequest(request, response);
 		if (request.getType().equals("uiEvent")) {
 			onInput(request, response);
 			setSendPending(true);
+			uiEventSendPending = true;
 			if (uiEventPropagator==null) {
 				uiEventPropagator = new Propagator();
 				uiEventPropagator.addModule(this);
+				uiEventPropagator.initialize();
 			}
 			trySendOutput();
 			if (wasReady()) {
 				uiEventPropagator.propagate();
+				uiEventSendPending = false;
 			}
 			response.setSuccess(true);
 		}

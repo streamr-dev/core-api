@@ -60,6 +60,11 @@ public class SwitcherModule extends InputModule {
 	@Override
 	public void sendOutput() {
 		out.send(value ? 1d : 0d);
+		if (globals.getUiChannel()!=null) {
+			Map<String,Object> msg = new HashMap<String,Object>();
+			msg.put("switcherValue", value);
+			globals.getUiChannel().push(msg, uiChannelId);
+		}
 	}
 
 	@Override

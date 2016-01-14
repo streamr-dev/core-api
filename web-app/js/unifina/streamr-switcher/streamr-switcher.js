@@ -40,6 +40,13 @@
 		$(this).trigger("input", value)
 	}
 
+	StreamrSwitcher.prototype.receiveResponse = function(p) {
+		if (p["switcherValue"] === true && !this.getValue())
+			this.switcher.switcher("on")
+		else if (p["switcherValue"] === false && this.getValue())
+			this.switcher.switcher("off")
+	}
+
 exports.StreamrSwitcher = StreamrSwitcher
 
 })(typeof(exports) !== 'undefined' ? exports : window)
