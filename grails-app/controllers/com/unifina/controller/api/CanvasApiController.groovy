@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.security.StreamrApi
 import com.unifina.utils.Globals
@@ -33,54 +32,50 @@ class CanvasApiController {
 
 	@StreamrApi
 	def show(long id) {
-		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id, request.apiUser)
-		if (ssp == null) {
-			return
-		}
+		getAuthorizedSavedSignalPath(id) { SavedSignalPath ssp ->
 
-		Map signalPathMap = JSON.parse(ssp.json)
-		def settings = signalPathMap.settings ?: [:]
-		Globals globals = GlobalsFactory.createInstance(settings, grailsApplication)
+			Map signalPathMap = JSON.parse(ssp.json)
+			def settings = signalPathMap.settings ?: [:]
+			Globals globals = GlobalsFactory.createInstance(settings, grailsApplication)
 
-		try {
-			def result = signalPathService.reconstruct(signalPathMap, globals)
-			render ssp.toMap() as JSON
-		} catch (Throwable e) {
-			e = GrailsUtil.deepSanitize(e)
-			log.error("Error loading SignalPath", e)
-			render(
-				status: 500,
-				text: [
-					error: message(code: "signalpath.load.error", args: [e.message]),
-					code : "FAILED_TO_LOAD_SIGNAL_PATH"
-				] as JSON
-			)
-		} finally {
-			globals.destroy()
+			try {
+				def result = signalPathService.reconstruct(signalPathMap, globals)
+				render ssp.toMap() as JSON
+			} catch (Throwable e) {
+				e = GrailsUtil.deepSanitize(e)
+				log.error("Error loading SignalPath", e)
+				render(
+					status: 500,
+					text: [
+						error: message(code: "signalpath.load.error", args: [e.message]),
+						code : "FAILED_TO_LOAD_SIGNAL_PATH"
+					] as JSON
+				)
+			} finally {
+				globals.destroy()
+			}
 		}
 	}
 
 	@StreamrApi
 	def update(long id) {
-		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id, request.apiUser)
-		if (ssp != null) {
+		getAuthorizedSavedSignalPath(id) { SavedSignalPath ssp ->
 			if (ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH) {
-				render(status: 403, text:[error: "cannot update common example", code: "FORBIDDEN"] as JSON)
+				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				readAndSave(ssp, params.json, request.apiUser)
+				readAndSave(ssp, params.json)
 			}
 		}
 	}
 
 	@StreamrApi
 	def save() {
-		readAndSave(new SavedSignalPath(), params.json, request.apiUser)
+		readAndSave(new SavedSignalPath(), params.json)
 	}
 
 	@StreamrApi
 	def delete(long id) {
-		def ssp = getAuthorizedSavedSignalPath(id, request.apiUser)
-		if (ssp != null) {
+		getAuthorizedSavedSignalPath(id) { SavedSignalPath ssp ->
 			if (ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH) {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -89,7 +84,7 @@ class CanvasApiController {
 		}
 	}
 
-	private void readAndSave(SavedSignalPath ssp, Map signalPathMap, SecUser user) {
+	private void readAndSave(SavedSignalPath ssp, Map signalPathMap) {
 		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication)
 
 		try {
@@ -100,7 +95,7 @@ class CanvasApiController {
 			ssp.name = signalPathAsMap.name
 			ssp.json = signalPathAsJson
 			ssp.hasExports = signalPathAsMap.hasExports
-			ssp.user = user
+			ssp.user = request.apiUser
 			ssp.save(flush: true, failOnError: true)
 
 			render ssp.toMap() as JSON
@@ -119,16 +114,15 @@ class CanvasApiController {
 		}
 	}
 
-	private SavedSignalPath getAuthorizedSavedSignalPath(long id, SecUser currentUser) {
+	private void getAuthorizedSavedSignalPath(long id, Closure successHandler) {
 		def ssp = SavedSignalPath.get(id)
 		if (ssp == null) {
 			render(status: 404, text: [error: "Canvas with id $id not found.", code: "NOT_FOUND"] as JSON)
 		} else if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH &&
-			!unifinaSecurityService.canAccess(ssp, actionName == 'load', currentUser)) {
+			!unifinaSecurityService.canAccess(ssp, actionName == 'load', request.apiUser)) {
 			render(status: 403, text: [error: "Not authorized to access Canvas " + id, code: "FORBIDDEN"] as JSON)
 		} else {
-			return ssp
+			successHandler.call(ssp)
 		}
-		return null
 	}
 }
