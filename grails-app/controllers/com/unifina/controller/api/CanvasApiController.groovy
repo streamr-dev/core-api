@@ -40,6 +40,7 @@ class CanvasApiController {
 
 			try {
 				def result = signalPathService.reconstruct(signalPathMap, globals)
+				ssp.json = result as JSON
 				render ssp.toMap() as JSON
 			} catch (Throwable e) {
 				e = GrailsUtil.deepSanitize(e)
