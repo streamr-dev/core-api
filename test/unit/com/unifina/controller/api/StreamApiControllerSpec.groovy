@@ -226,7 +226,7 @@ class StreamApiControllerSpec extends Specification {
 		def stream = Stream.findById(1)
 		stream.name == "newName"
 		stream.description == "newDescription"
-		stream.config != null
+		stream.config == null
 	}
 
 	void "cannot update non-existent Stream"() {

@@ -46,18 +46,10 @@ class StreamApiController {
 	def update(String uuid) {
 		Stream newStream = new Stream(request.JSON)
 		getAuthorizedStream(uuid) { Stream stream ->
-			if (newStream.name != null) {
-				stream.name = newStream.name
-			}
-			if (newStream.description != null) {
-				stream.description = newStream.description
-			}
-			if (request.JSON.config) {
-				stream.config = request.JSON.config.toString()
-			}
-
+			stream.name = newStream.name
+			stream.description = newStream.description
+			stream.config = newStream.config
 			stream.save(failOnError: true)
-
 			render(status: 204)
 		}
 	}
