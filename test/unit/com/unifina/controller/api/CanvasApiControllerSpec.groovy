@@ -73,11 +73,11 @@ class CanvasApiControllerSpec extends Specification {
 	void "can list all my SignalPaths"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
-		request.method = "GET"
 		request.requestURI = "/api/v1/canvases/"
 		withFilters(action: "index") {
 			controller.index()
 		}
+
 		then:
 		response.status == 200
 		response.json.size() == 2
@@ -89,12 +89,11 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		params.id = "1"
 		request.addHeader("Authorization", "Token myApiKey")
-		request.method = "GET"
-		webRequest.actionName = "load"
-		request.requestURI = "/api/v1/canvases/load"
-		withFilters(action: "load") {
-			controller.load()
+		request.requestURI = "/api/v1/canvases/show"
+		withFilters(action: "show") {
+			controller.show()
 		}
+
 		then:
 		response.status == 200
 		response.json.uuid.size() == 22
@@ -116,6 +115,7 @@ class CanvasApiControllerSpec extends Specification {
 		withFilters(action: "save") {
 			controller.save()
 		}
+
 		then:
 		response.status == 200
 		response.json.uuid.size() > 10
@@ -125,12 +125,11 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
-		request.method = "GET"
-		webRequest.actionName = "load"
-		request.requestURI = "/api/v1/canvases/load"
-		withFilters(action: "load") {
-			controller.load()
+		request.requestURI = "/api/v1/canvases/show"
+		withFilters(action: "show") {
+			controller.show()
 		}
+
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
@@ -140,12 +139,11 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "3"
-		request.method = "GET"
-		webRequest.actionName = "load"
-		request.requestURI = "/api/v1/canvases/load"
-		withFilters(action: "load") {
-			controller.load()
+		request.requestURI = "/api/v1/canvases/show"
+		withFilters(action: "show") {
+			controller.show()
 		}
+
 		then:
 		response.status == 200
 		response.json.name == "not mine but example"
@@ -155,12 +153,11 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "4"
-		request.method = "GET"
-		webRequest.actionName = "load"
-		request.requestURI = "/api/v1/canvases/load"
-		withFilters(action: "load") {
-			controller.load()
+		request.requestURI = "/api/v1/canvases/show"
+		withFilters(action: "show") {
+			controller.show()
 		}
+
 		then:
 		response.status == 200
 		response.json.name == "my example"
@@ -174,12 +171,11 @@ class CanvasApiControllerSpec extends Specification {
 			name   : "updated, new name",
 			modules: [],
 		]
-		request.method = "POST"
-		webRequest.actionName = "save"
-		request.requestURI = "/api/v1/canvases/save"
-		withFilters(action: "save") {
-			controller.save()
+		request.requestURI = "/api/v1/canvases/update"
+		withFilters(action: "update") {
+			controller.update()
 		}
+
 		then:
 		SavedSignalPath.get(1).name == "updated, new name"
 	}
@@ -187,16 +183,32 @@ class CanvasApiControllerSpec extends Specification {
 	void "must not be able overwrite others' SignalPath"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
-		params.id = "3"
-		params.name = "new name"
-		params.json = ssp1.json
-		request.method = "POST"
-		withFilters(action: "save") {
-			controller.save()
+		params.id = "2"
+		params.json = [
+			name: "me me me",
+			modules: []
+		]
+		withFilters(action: "update") {
+			controller.update()
 		}
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
 	}
 
+	void "must not be able overwrite example"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "3"
+		params.json = [
+		    name: "me me me",
+			modules: []
+		]
+		withFilters(action: "update") {
+			controller.update()
+		}
+		then:
+		response.status == 403
+		response.json.code == "FORBIDDEN"
+	}
 }

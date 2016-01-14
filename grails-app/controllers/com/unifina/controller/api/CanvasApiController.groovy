@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.security.StreamrApi
 import com.unifina.utils.Globals
@@ -7,6 +8,7 @@ import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
+import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -40,8 +42,8 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def load() {
-		SavedSignalPath ssp = getAuthorizedSavedSignalPath(params.id)
+	def show(long id) {
+		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id)
 		if (ssp == null) {
 			return
 		}
@@ -69,27 +71,34 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def save() {
-		SavedSignalPath ssp = new SavedSignalPath()
-		if (params.id) {
-			ssp = getAuthorizedSavedSignalPath(params.id)
-			if (ssp == null) {
-				return
+	def update(long id) {
+		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id)
+		if (ssp != null) {
+			if (ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH) {
+				render(status: 403, text:[error: "cannot update common example", code: "FORBIDDEN"] as JSON)
+			} else {
+			readAndSave(ssp, params.json, request.apiUser)
 			}
 		}
+	}
 
-		def settings = params.json.settings ?: [:]
-		Globals globals = GlobalsFactory.createInstance(settings, grailsApplication)
+	@StreamrApi
+	def save() {
+		readAndSave(new SavedSignalPath(), params.json, request.apiUser)
+	}
+
+	private void readAndSave(SavedSignalPath ssp, Map signalPathMap, SecUser user) {
+		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication)
 
 		try {
 			// Rebuild the json to check it's ok and up to date
-			def signalPathAsMap = signalPathService.reconstruct(params.json, globals)
+			def signalPathAsMap = signalPathService.reconstruct(signalPathMap, globals)
 			def signalPathAsJson = (signalPathAsMap as JSON)
 
 			ssp.name = signalPathAsMap.name
 			ssp.json = signalPathAsJson
 			ssp.hasExports = signalPathAsMap.hasExports
-			ssp.user = request.apiUser
+			ssp.user = user
 			ssp.save(flush: true, failOnError: true)
 
 			render ssp.toMap() as JSON
@@ -108,12 +117,12 @@ class CanvasApiController {
 		}
 	}
 
-	private SavedSignalPath getAuthorizedSavedSignalPath(String id) {
-		def ssp = SavedSignalPath.get(Integer.parseInt(params.id))
+	private SavedSignalPath getAuthorizedSavedSignalPath(long id) {
+		def ssp = SavedSignalPath.get(id)
 		if (ssp == null) {
-			render(status: 404, text: [error: "Canvas with id $params.id not found.", code: "NOT_FOUND"] as JSON)
-		} else if (!unifinaSecurityService.canAccess(ssp, actionName == 'load', request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Canvas " + params.id, code: "FORBIDDEN"] as JSON)
+			render(status: 404, text: [error: "Canvas with id $id not found.", code: "NOT_FOUND"] as JSON)
+		} else if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH && !unifinaSecurityService.canAccess(ssp, actionName == 'load', request.apiUser)) {
+			render(status: 403, text: [error: "Not authorized to access Canvas " + id, code: "FORBIDDEN"] as JSON)
 		} else {
 			return ssp
 		}
