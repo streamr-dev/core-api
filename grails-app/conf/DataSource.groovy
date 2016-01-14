@@ -17,7 +17,6 @@ environments {
         dataSource {
 			username = "unifina-dev"
 			password = "2PpJA2vJ"
-            dbCreate = "validate" // one of 'create', 'create-drop', 'update', 'validate', ''
             url = "jdbc:mysql://192.168.10.21:3306/core_dev?useLegacyDatetimeCode=false"
         }
     }
@@ -34,7 +33,6 @@ environments {
 			
 			username = "unifina-test"
 			password = "HqTQK9kB"
-            dbCreate = "validate" // one of 'create', 'create-drop', 'update', 'validate', ''
             url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
         }
     }
