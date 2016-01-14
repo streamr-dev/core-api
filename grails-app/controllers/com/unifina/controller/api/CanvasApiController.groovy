@@ -8,7 +8,6 @@ import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
-import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -20,15 +19,6 @@ class CanvasApiController {
 	def unifinaSecurityService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
-
-	def createSaveData(SavedSignalPath ssp) {
-		return [
-			isSaved: true,
-			url: createLink(controller:"canvasApi", action:"save", params:[id:ssp.id]),
-			name: ssp.name,
-			target: "Archive id "+ssp.id
-		]
-	}
 
 	@StreamrApi
 	def index() {
@@ -43,7 +33,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def show(long id) {
-		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id)
+		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id, request.apiUser)
 		if (ssp == null) {
 			return
 		}
@@ -72,12 +62,12 @@ class CanvasApiController {
 
 	@StreamrApi
 	def update(long id) {
-		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id)
+		SavedSignalPath ssp = getAuthorizedSavedSignalPath(id, request.apiUser)
 		if (ssp != null) {
 			if (ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH) {
 				render(status: 403, text:[error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-			readAndSave(ssp, params.json, request.apiUser)
+				readAndSave(ssp, params.json, request.apiUser)
 			}
 		}
 	}
@@ -85,6 +75,18 @@ class CanvasApiController {
 	@StreamrApi
 	def save() {
 		readAndSave(new SavedSignalPath(), params.json, request.apiUser)
+	}
+
+	@StreamrApi
+	def delete(long id) {
+		def ssp = getAuthorizedSavedSignalPath(id, request.apiUser)
+		if (ssp != null) {
+			if (ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH) {
+				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
+			} else {
+				ssp.delete(flush: true)
+			}
+		}
 	}
 
 	private void readAndSave(SavedSignalPath ssp, Map signalPathMap, SecUser user) {
@@ -117,11 +119,12 @@ class CanvasApiController {
 		}
 	}
 
-	private SavedSignalPath getAuthorizedSavedSignalPath(long id) {
+	private SavedSignalPath getAuthorizedSavedSignalPath(long id, SecUser currentUser) {
 		def ssp = SavedSignalPath.get(id)
 		if (ssp == null) {
 			render(status: 404, text: [error: "Canvas with id $id not found.", code: "NOT_FOUND"] as JSON)
-		} else if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH && !unifinaSecurityService.canAccess(ssp, actionName == 'load', request.apiUser)) {
+		} else if (ssp.type != SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH &&
+			!unifinaSecurityService.canAccess(ssp, actionName == 'load', currentUser)) {
 			render(status: 403, text: [error: "Not authorized to access Canvas " + id, code: "FORBIDDEN"] as JSON)
 		} else {
 			return ssp

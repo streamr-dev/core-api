@@ -110,7 +110,6 @@ class CanvasApiControllerSpec extends Specification {
 			modules: [],
 		]
 		request.method = "POST"
-		webRequest.actionName = "save"
 		request.requestURI = "/api/v1/canvases/save"
 		withFilters(action: "save") {
 			controller.save()
@@ -188,6 +187,7 @@ class CanvasApiControllerSpec extends Specification {
 			name: "me me me",
 			modules: []
 		]
+		request.requestURI = "/api/v1/canvases/update"
 		withFilters(action: "update") {
 			controller.update()
 		}
@@ -204,8 +204,48 @@ class CanvasApiControllerSpec extends Specification {
 		    name: "me me me",
 			modules: []
 		]
+		request.requestURI = "/api/v1/canvases/update"
 		withFilters(action: "update") {
 			controller.update()
+		}
+		then:
+		response.status == 403
+		response.json.code == "FORBIDDEN"
+	}
+
+	void "must be able to delete my own SignalPath"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		request.requestURI = "/api/v1/canvases/delete"
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+
+		then:
+		SavedSignalPath.get(1) == null
+	}
+
+	void "must not be able delete others' SignalPath"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "2"
+		request.requestURI = "/api/v1/canvases/delete"
+		withFilters(action: "delete") {
+			controller.delete()
+		}
+		then:
+		response.status == 403
+		response.json.code == "FORBIDDEN"
+	}
+
+	void "must not be able delete example"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "3"
+		request.requestURI = "/api/v1/canvases/delete"
+		withFilters(action: "delete") {
+			controller.delete()
 		}
 		then:
 		response.status == 403
