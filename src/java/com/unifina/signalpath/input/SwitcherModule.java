@@ -17,7 +17,6 @@ public class SwitcherModule extends InputModule {
 		super.init();
 		canClearState = false;
 		resendAll = false;
-		resendLast = 1;
 
 		out.canBeNoRepeat = false;
 	}
@@ -34,6 +33,15 @@ public class SwitcherModule extends InputModule {
 		Map<String, Object> config = super.getConfiguration();
 		config.put("switcherValue", value);
 		return config;
+	}
+
+	@Override
+	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
+		super.handleRequest(request, response);
+		if (request.getType().equals("getState")) {
+			response.put("state", value);
+			response.setSuccess(true);
+		}
 	}
 
 	@Override

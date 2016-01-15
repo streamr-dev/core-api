@@ -25,7 +25,11 @@ describe('streamr-text-field', function() {
     it('must set the parent, options and data right and call createButton when creating textField', function() {
         var parent = $("#parent")
         var parent2 = parent[0]
-        var data = {textFieldValue: "test"}
+        var data = {
+            textFieldValue: "test",
+            textFieldWidth: 100,
+            textFieldHeight: 200
+        }
         textField = new StreamrTextField("#parent")
         var textField2 = new StreamrTextField(parent)
         var textField3 = new StreamrTextField(parent2, data)
@@ -38,11 +42,16 @@ describe('streamr-text-field', function() {
 
         assert.equal(textField3.parent[0], parent[0])
         assert.equal(textField3.value, "test")
+        assert.equal(textField3.width, 100)
+        assert.equal(textField3.height, 200)
     })
 
     describe('render', function() {
         beforeEach(function() {
-            textField = new StreamrTextField("#parent", {})
+            textField = new StreamrTextField("#parent", {
+                textFieldWidth: 200,
+                textFieldHeight: 100
+            })
         })
 
         it('must create the elements', function() {
@@ -57,10 +66,13 @@ describe('streamr-text-field', function() {
             assert($("#parent").hasClass("text-field"))
         })
 
-        it('must save the width and height of the textarea', function() {
+        it('must set the width and height of the textarea', function(done) {
+            textField.setSize = function(width, height) {
+                assert.equal(width, 200)
+                assert.equal(height, 100)
+                done()
+            }
             textField.render()
-            assert.equal($("textarea").css("height"), textField.height+"px")
-            assert.equal($("textarea").css("width"), textField.width+"px")
         })
 
         it('must call bindEvents', function(done) {
@@ -103,6 +115,45 @@ describe('streamr-text-field', function() {
             $("textarea").mouseup()
             assert.equal(textField.width, 200)
             assert.equal(textField.height, 100)
+        })
+    })
+
+    describe('updateState', function() {
+        it('must set the given value to the value of textArea', function() {
+            textField = new StreamrTextField("#parent")
+            textField.render()
+            textField.updateState("test")
+            assert.equal($("textarea").val(), "test")
+        })
+    })
+
+    describe('setSize', function() {
+        beforeEach(function() {
+            textField = new StreamrTextField("#parent")
+            textField.render()
+        })
+
+        it('must call textArea.width and textArea.height when setSize called', function(done) {
+            var widthCalled = false
+            textField.textArea.width = function(width) {
+                if(width === 100)
+                    widthCalled = true
+            }
+            textField.textArea.height = function(height) {
+                if(widthCalled && height === 100)
+                    done()
+            }
+            textField.setSize(100, 100)
+        })
+
+        it('must not call anything if the values are not set', function() {
+            textField.textArea.width = function() {
+                assert(false, "width() called!")
+            }
+            textField.textArea.height = function() {
+                assert(false, "height() called!")
+            }
+            textField.setSize()
         })
     })
 

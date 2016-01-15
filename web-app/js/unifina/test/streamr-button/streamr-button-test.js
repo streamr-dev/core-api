@@ -85,6 +85,17 @@ describe('streamr-button', function() {
 		})
 	})
 
+	describe("updateState", function() {
+		it('must call setName with the given state', function(done) {
+			button = new StreamrButton("#parent", {}, {})
+			button.setName = function(state) {
+				if(state === "test")
+					done()
+			}
+			button.updateState("test")
+		})
+	})
+
 	describe("getButtonNameFromData", function() {
 		beforeEach(function() {
 			button = new StreamrButton("#parent", {}, {})

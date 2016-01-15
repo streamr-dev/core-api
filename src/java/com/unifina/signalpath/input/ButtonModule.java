@@ -21,7 +21,6 @@ public class ButtonModule extends InputModule {
 		super.init();
 		canClearState = false;
 		resendAll = false;
-		resendLast = 1;
 
 		buttonName.setDrivingInput(true);
 
@@ -32,6 +31,15 @@ public class ButtonModule extends InputModule {
 
 	@Override
 	protected void onInput(RuntimeRequest request, RuntimeResponse response) {}
+
+	@Override
+	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
+		super.handleRequest(request, response);
+		if (request.getType().equals("getState")) {
+			response.put("state", buttonName.getValue());
+			response.setSuccess(true);
+		}
+	}
 
 	@Override
 	public void sendOutput() {

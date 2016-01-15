@@ -24,6 +24,10 @@
 		})
 	}
 
+	StreamrButton.prototype.updateState = function(state) {
+		this.setName(state)
+	}
+
 	StreamrButton.prototype.getButtonNameFromData = function(data) {
 		var name = undefined
 		if(!data)

@@ -3,6 +3,8 @@
     function StreamrTextField(parent, data) {
         this.parent = $(parent)
         this.value = data && data.textFieldValue ? data.textFieldValue : ""
+        this.width = data && data.textFieldWidth ? data.textFieldWidth : undefined
+        this.height = data && data.textFieldHeight ? data.textFieldHeight : undefined
     }
 
     StreamrTextField.prototype.render = function() {
@@ -22,8 +24,7 @@
         this.parent.append(this.container)
         this.parent.addClass("text-field")
 
-        this.width = this.textArea.outerWidth()
-        this.height = this.textArea.outerHeight()
+        this.setSize(this.width, this.height)
 
         this.bindEvents()
     }
@@ -46,13 +47,26 @@
         })
     }
 
+    StreamrTextField.prototype.updateState = function(state) {
+        this.textArea.val(state)
+    }
+
+    StreamrTextField.prototype.setSize = function(width, height) {
+        if(width)
+            this.textArea.width(width)
+        if(height)
+            this.textArea.height(height)
+    }
+
     StreamrTextField.prototype.sendValue = function(value) {
         $(this).trigger("input", value)
     }
 
     StreamrTextField.prototype.toJSON = function() {
         return {
-            textFieldValue: this.value
+            textFieldValue: this.value,
+            textFieldWidth: this.textArea.width(),
+            textFieldHeight: this.textArea.height()
         }
     }
 

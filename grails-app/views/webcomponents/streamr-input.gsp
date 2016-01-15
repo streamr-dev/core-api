@@ -23,6 +23,12 @@
                         })
                     })
 
+                    _this.sendrequest({
+                        type: "getState"
+                    }, function(response) {
+                        _this.widget.updateState(response.state)
+                    })
+
                     _this.subscribe(
                         function(message) {
                             if(_this.widget && _this.widget.receiveResponse)

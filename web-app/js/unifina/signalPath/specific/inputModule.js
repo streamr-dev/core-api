@@ -19,11 +19,15 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		$(SignalPath).on("started", function() {
 			if(widget.enable)
 				widget.enable()
+			$(widget).trigger("started")
+			$(pub).trigger("started")
 		})
 
 		$(SignalPath).on("stopped", function() {
 			if(widget.disable)
 				widget.disable()
+			$(widget).trigger("stopped")
+			$(pub).trigger("stopped")
 		})
 
 		$(widget).on("update", function() {
@@ -40,6 +44,15 @@ SignalPath.InputModule = function(data,canvas,prot) {
 				list += "," + area
 			})
 			prot.div.draggable("option", "cancel", list)
+		}
+		$(pub).on("started", requestState)
+	}
+
+	function requestState (e, runData){
+		if (!runData || !runData.adhoc) {
+			SignalPath.sendRequest(prot.hash, {type:'getState'}, function(response) {
+				widget.updateState(response.state)
+			})
 		}
 	}
 
