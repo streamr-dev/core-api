@@ -16,7 +16,7 @@
         Polymer('streamr-text-field', {
             createWidget: function(json) {
                 return new StreamrTextField(this.$["streamr-widget-container"], json, {
-                    widthLocked: true;
+                    widthLocked: true
                 })
             },
 
