@@ -14,17 +14,23 @@
 	(function(){
 		var streamrClient
 
-		function createClient(cb) {
+		function createClient(cb, element) {
 			if (streamrClient) {
 				cb(streamrClient)
 			}
-			else if (typeof StreamrClient !== 'undefined') {
-				streamrClient = new StreamrClient()
+			else if (typeof StreamrClient !== 'undefined' && element.server) {
+				var myOptions = {
+					server: element.server,
+					autoConnect: (element.autoconnect != null ? element.autoconnect : true),
+					autoDisconnect: (element.autodisconnect != null ? element.autodisconnect : true)
+				}
+
+				streamrClient = new StreamrClient(myOptions)
 				cb(streamrClient)
 			}
 			else {
 				setTimeout(function() {
-					createClient(cb)
+					createClient(cb, element)
 				}, 100)
 			}
 		}
@@ -39,24 +45,10 @@
 			},
 			// This function is executed multiple times, once for each element!
 			ready: function() {
-				createClient(function(client) {
-					// This should hold true for only one <streamr-client> element instance on the page
-					if (this.server) {
-						var myOptions = {
-							server: this.server,
-							autoConnect: this.autoconnect,
-							autoDisconnect: this.autodisconnect
-						}
-						Object.keys(myOptions).forEach(function(key) {
-							if (myOptions[key]!=null) {
-								client.options[key] = myOptions[key]
-							}
-						})
-					}
-				})
+				createClient(function(client) {}, this)
 			},
 			getClient: function(cb) {
-				createClient(cb)
+				createClient(cb, this)
 			},
 			<g:if test="${params.lightDOM}">
 				parseDeclaration: function(elementElement) {
