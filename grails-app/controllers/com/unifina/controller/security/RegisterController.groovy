@@ -178,7 +178,7 @@ class RegisterController {
             from grailsApplication.config.unifina.email.sender
             to user.username
 			subject grailsApplication.config.unifina.email.forgotPassword.subject
-			html g.render(template:"email_forgot_password", model:[user: user, url:url], plugin:'unifina-core')
+			html g.render(template:"email_forgot_password", model:[token:registrationCode.token], plugin:'unifina-core')
         }
 
         [emailSent: true]
