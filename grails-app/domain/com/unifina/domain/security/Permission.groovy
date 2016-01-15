@@ -5,17 +5,19 @@ package com.unifina.domain.security
  */
 class Permission {
 
-	SecUser user
+	static belongsTo = [user: SecUser]
 
 	/** class of the resource, e.g. "Dashboard" */
 	String clazz
 
-	String stringId	// UUID
+	// either stringId (UUID) or longId (autoincrement or similar) is used to refer to a resource, depending on resource type
+	String stringId
 	long longId
 
 	/** type of operation that this ACL item allows e.g. "read" */
 	String operation
 
 	static constraints = {
+		stringId(nullable: true)
 	}
 }

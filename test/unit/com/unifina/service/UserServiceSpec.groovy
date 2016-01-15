@@ -1,12 +1,11 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.user.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
@@ -18,7 +17,7 @@ import spock.lang.Specification
 import javax.swing.Spring
 
 @TestFor(UserService)
-@Mock([Feed, SecUser, SecRole, ModulePackage, ModulePackageUser, SecUserSecRole, FeedUser, Module])
+@Mock([Feed, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
     void createData(){

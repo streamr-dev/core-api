@@ -1,12 +1,12 @@
 
 package com.unifina.controller.security
 
+import com.unifina.domain.security.Permission
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
 import com.unifina.domain.security.RegistrationCode
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -14,7 +14,6 @@ import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.service.BootService
 import com.unifina.service.SignupCodeService
 import com.unifina.service.PermissionService
@@ -22,7 +21,7 @@ import com.unifina.service.UserService
 
 @TestFor(RegisterController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
-		Feed, FeedUser, ModulePackage, ModulePackageUser, PermissionService])
+		Feed, ModulePackage, PermissionService, Permission])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
@@ -290,8 +289,7 @@ class RegisterControllerSpec extends Specification {
 			SecUser.findByUsername(username)
 			SecUser.findByUsername(username).timezone == 'NoContinent/NoPlace'
 			SecUser.findByUsername(username).password == 'fooBar123!-encoded'
-			ModulePackageUser.count() == grailsApplication.config.streamr.user.defaultModulePackages.size()
-			FeedUser.count() == grailsApplication.config.streamr.user.defaultFeeds.size()
+			Permission.count() == grailsApplication.config.streamr.user.defaultModulePackages.size() + grailsApplication.config.streamr.user.defaultFeeds.size()
 			response.redirectedUrl != null
 		then: "welcome email should be sent"
 			mailSent

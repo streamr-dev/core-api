@@ -9,6 +9,7 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.SavedSignalPath
+import org.hibernate.proxy.HibernateProxyHelper
 import org.springframework.validation.FieldError
 
 import com.unifina.domain.security.Permission
@@ -36,9 +37,11 @@ class PermissionService {
 			return ownerPermissions
 		}
 
+		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
+		def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
 		return Permission.withCriteria {
 			eq("user", user)
-			eq("clazz", resource.class.name)
+			eq("clazz", clazz)
 			eq("longId", resource.id)		// TODO: handle stringId
 		}*.operation;
 	}
@@ -60,21 +63,25 @@ class PermissionService {
 	}
 
 	/** Get all resources of given type that the user has read access to */
-	public <T> List<T> getAllReadable(SecUser _user, Class<T> resourceClass) {
+	public static <T> List<T> getAllReadable(SecUser user, Class<T> resourceClass) {
 		def resourceClassName = resourceClass?.name;
-		if (!resourceClassName || !grailsApplication.isDomainClass(resourceClass)) {
-			log.warn("getAllReadable: Not a resource type: $resourceClassName")
+		if (!resourceClassName /*|| !grailsApplication.isDomainClass(resourceClass)*/) {
+			//log.warn("getAllReadable: Not a resource type: $resourceClassName")
 			return []
 		}
 
 		// any permissions imply read access
-		def readableIds = Permission.findAll {
-			user == _user && clazz == resourceClassName
+		def readableIds = Permission.withCriteria {
+			eq "user", user
+			eq "clazz", resourceClassName
 		}*.longId
 
 		return resourceClass.withCriteria {
 			or {
-				eq "user", _user		// resource owner gets all access rights
+				// resources that specify an "owner" automatically give that user all access rights
+				if (resourceClass.properties["declaredFields"].any { it.name == "user" }) {
+					eq "user", user
+				}
 				"in" "id", readableIds
 			}
 		}
@@ -94,6 +101,7 @@ class PermissionService {
 	@CompileStatic
 	boolean canAccess(Module module, SecUser user=springSecurityService.getCurrentUser()) {
 		return canAccess(module.modulePackage, user)
+		//return canAccess(ModulePackage.load(module.modulePackageId), user)
 	}
 
 	@Deprecated

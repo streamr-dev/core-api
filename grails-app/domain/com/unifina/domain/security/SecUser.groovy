@@ -1,9 +1,8 @@
 package com.unifina.domain.security
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
+import com.unifina.service.PermissionService
 import com.unifina.utils.IdGenerator;
 
 class SecUser {
@@ -20,6 +19,8 @@ class SecUser {
 	
 	String name
 	String timezone
+
+	static hasMany = [permissions: Permission]
 	
 	static constraints = {
 		username blank: false, unique: true, email: true
@@ -32,6 +33,7 @@ class SecUser {
 	static mapping = {
 		password column: '`password`'
 		apiKey index: 'apiKey_index'
+		permissions cascade: 'all-delete-orphan'
 	}
 
 	Set<SecRole> getAuthorities() {
@@ -39,10 +41,10 @@ class SecUser {
 	}
 
 	Set<ModulePackage> getModulePackages() {
-		ModulePackageUser.findAllByUser(this).collect { it.modulePackage } as Set
+		PermissionService.getAllReadable(this, ModulePackage) as Set
 	}
 	
 	Set<Feed> getFeeds() {
-		FeedUser.findAllByUser(this).collect { it.feed } as Set
+		PermissionService.getAllReadable(this, Feed) as Set
 	}
 }

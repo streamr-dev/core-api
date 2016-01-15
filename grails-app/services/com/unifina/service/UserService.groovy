@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
@@ -71,8 +72,10 @@ class UserService {
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
 
+		// add "read" permission to each selected feed
+		// TODO: decide default permissions (that make sense with feeds)
         feeds.each { feed ->
-            new FeedUser(user: user, feed: feed).save(flush: true, failOnError: true)
+			new Permission(user: user, clazz: Feed.class.name, longId: feed.id, operation: "read").save(flush: true, failOnError: true)
         }
     }
 
@@ -83,8 +86,10 @@ class UserService {
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }
 
+		// add "read" permission to each selected modulepackage
+		// TODO: decide default permissions (that make sense with modpacks)
         packages.each { modulePackage ->
-            new ModulePackageUser(user: user, modulePackage: modulePackage).save(flush: true, failOnError: true)
+			new Permission(user: user, clazz: ModulePackage.class.name, longId: modulePackage.id, operation: "read").save(flush: true, failOnError: true)
         }
     }
 }

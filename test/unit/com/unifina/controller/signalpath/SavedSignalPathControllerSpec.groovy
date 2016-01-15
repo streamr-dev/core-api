@@ -1,5 +1,6 @@
 package com.unifina.controller.signalpath
 
+import com.unifina.domain.security.Permission
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -13,7 +14,7 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 
 @TestFor(SavedSignalPathController)
-@Mock([SecUser, SavedSignalPath])
+@Mock([SecUser, SavedSignalPath, Permission])
 class SavedSignalPathControllerSpec extends Specification {
 
 	SavedSignalPath ssp1

@@ -33,6 +33,14 @@ databaseChangeLog = {
 		}
 	}
 
+	// migrate data
+	// old system was ModulePackageUser and FeedUser connecting users (beyond modulePackage.user) that can access the resource
+	// new system is Permission table that combines all those
+	changeSet(author: "jtakalai (generated)", id: "1452674923112-4") {
+		sql("INSERT INTO permission SELECT NULL, 0, 'com.unifina.domain.signalpath.ModulePackage', module_package_id, 'read', '', user_id FROM module_package_user")
+		sql("INSERT INTO permission SELECT NULL, 0, 'com.unifina.domain.data.Feed', feed_id, 'read', '', user_id FROM feed_user")
+	}
+
 	changeSet(author: "jtakalai (generated)", id: "1452674923112-3") {
 		createIndex(indexName: "FKE125C5CF60701D32", tableName: "permission") {
 			column(name: "user_id")
@@ -43,5 +51,7 @@ databaseChangeLog = {
 		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "permission", constraintName: "FKE125C5CF60701D32", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "sec_user", referencesUniqueColumn: "false")
 	}
 
-
+	changeSet(author: "jtakalai (generated)", id: "1452674923112-5") {
+		dropNotNullConstraint(columnDataType: "varchar(255)", columnName: "string_id", tableName: "permission")
+	}
 }
