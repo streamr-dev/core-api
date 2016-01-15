@@ -1,3 +1,5 @@
+package core
+
 databaseChangeLog = {
 
 	changeSet(author: "eric", id: "1452696039238-1") {
