@@ -1,7 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
@@ -13,53 +13,54 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, SavedSignalPath, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
+@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
 class CanvasApiControllerSpec extends Specification {
 
-
-	SavedSignalPath ssp1
-	SavedSignalPath ssp2
-	SavedSignalPath ssp3
-	SavedSignalPath ssp4
+	Canvas canvas1
+	Canvas canvas2
+	Canvas canvas3
+	Canvas canvas4
 
 	void setup() {
+
 		SecUser me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
 
-		ssp1 = new SavedSignalPath(
+		canvas1 = new Canvas(
 			user: me,
 			name: "mine",
 			json: '{name: "mine", modules: []}',
-			type: SavedSignalPath.TYPE_USER_SIGNAL_PATH,
+			type: Canvas.Type.TEMPLATE,
 			hasExports: false
-		).save(validate: true, failOnError: true)
+		)
+		canvas1.save(validate: true, failOnError: true)
 
-		ssp2 = new SavedSignalPath(
+		canvas2 = new Canvas(
 			user: other,
 			name: "not mine",
 			json: '{name: "not mine", modules: []}',
-			type: SavedSignalPath.TYPE_USER_SIGNAL_PATH,
+			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
-		ssp3 = new SavedSignalPath(
+		canvas3 = new Canvas(
 			user: other,
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
-			type: SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH,
+			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
-		ssp4 = new SavedSignalPath(
+		canvas4 = new Canvas(
 			user: me,
 			name: "my example",
 			json: '{name: "not mine but example", modules: []}',
-			type: SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH,
+			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
 		assert SecUser.count() == 2
-		assert SavedSignalPath.count() == 4
+		assert Canvas.count() == 4
 
 		controller.unifinaSecurityService = mainContext.getBean("unifinaSecurityService")
 		controller.signalPathService = [
@@ -96,7 +97,7 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.uuid.size() == 22
+		response.json.id.size() == 22
 		response.json.name == "mine"
 		response.json.modules == []
 		!response.json.hasExports
@@ -176,7 +177,7 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		SavedSignalPath.get(1).name == "updated, new name"
+		Canvas.get(1).name == "updated, new name"
 	}
 
 	void "must not be able overwrite others' SignalPath"() {

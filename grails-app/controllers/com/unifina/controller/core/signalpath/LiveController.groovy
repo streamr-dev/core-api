@@ -1,8 +1,7 @@
 package com.unifina.controller.core.signalpath
 
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.RuntimeResponse
@@ -16,7 +15,7 @@ class LiveController {
 	def grailsApplication
 	
 	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(RunningSignalPath.get(params.long("id")))) {
+			if (!unifinaSecurityService.canAccess(Canvas.get(params.id))) {
 				if (request.xhr) 
 					redirect(controller:'login', action:'ajaxDenied')
 				else 
@@ -35,7 +34,7 @@ class LiveController {
 	
 	@Secured("ROLE_USER")
 	def list() {
-		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
+		List<Canvas> canvases = Canvas.createCriteria().list() {
 			eq("user",springSecurityService.currentUser)
 			eq("adhoc",false)
 			if (params.term) {
@@ -43,55 +42,56 @@ class LiveController {
 			}
 			
 		}
-		[running: rsps, user:springSecurityService.currentUser]
+		[running: canvases, user:springSecurityService.currentUser]
 	}
 	
 	// Can be accessed anonymously for embedding the show view in iframes (eg. the landing page)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def show() {
 		// Access checked by beforeInterceptor
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas canvas = Canvas.get(params.id)
 		
 		// Ping the running SignalPath to check that it's alive
-		def alive = rsp.state!='running' || signalPathService.ping(rsp, springSecurityService.currentUser)
-		if (!alive)
+		def alive = canvas.state != Canvas.Type.RUNNING || signalPathService.ping(canvas, springSecurityService.currentUser)
+		if (!alive) {
 			flash.error = message(code:'runningSignalPath.ping.error')
-		
-		[rsp:rsp]
+		}
+
+		[rsp:canvas]
 	}
 
 	@Secured("ROLE_USER")
 	def start() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas canvas = Canvas.get(params.id)
 		if (params.clear) {
-			signalPathService.clearState(rsp)
+			signalPathService.clearState(canvas)
 		}
 
 		try {
-			signalPathService.startLocal(rsp, [live: true])
-			flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
+			signalPathService.startLocal(canvas, [live: true])
+			flash.message = message(code:"runningSignalPath.started", args:[canvas.name])
 		} catch (SerializationException ex) {
-			flash.error = message(code: "runningSignalPath.deserialization.error", args:[rsp.name])
-			log.error("Failed to resume runningSignalPath " + rsp.id + " :", ex)
+			flash.error = message(code: "runningSignalPath.deserialization.error", args:[canvas.name])
+			log.error("Failed to resume runningSignalPath " + canvas.id + " :", ex)
 		}
 
-		redirect(action:"show", id:rsp.id)
+		redirect(action:"show", id:canvas.id)
 	}
 	
 	@Secured("ROLE_USER") 
 	def stop() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas canvas = Canvas.get(params.id)
 		
-		RuntimeResponse result = signalPathService.stopRemote(rsp, springSecurityService.currentUser)
+		RuntimeResponse result = signalPathService.stopRemote(canvas, springSecurityService.currentUser)
 		if (!result.isSuccess()) {
-			log.error("stop: RSP $rsp.id could not be stopped due to: $result.error, marking RSP as stopped")
+			log.error("stop: RSP $canvas.id could not be stopped due to: $result.error, marking RSP as stopped")
 			flash.error = message(code:'runningSignalPath.stop.error')
-			signalPathService.updateState(rsp.runner, "stopped")
+			signalPathService.updateState(canvas.runner, "stopped")
 		}
 		else {
 			flash.message = message(code:'runningSignalPath.stopped')
 		}
-		redirect(action:"show", id:rsp.id)
+		redirect(action:"show", id:canvas.id)
 	}
 	
 	@Secured("ROLE_USER")
@@ -115,7 +115,8 @@ class LiveController {
 	def loadBrowserContent() {
 		def max = params.int("max") ?: 100
 		def offset = params.int("offset") ?: 0
-		def ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from RunningSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+		def ssp = Canvas.executeQuery("select c.id, c.name from Canvas c where c.user = :user order by c.id desc",
+			[user:springSecurityService.currentUser], [max: max, offset: offset])
 		
 		def result = [signalPaths:[]]
 		ssp.each {
@@ -132,20 +133,20 @@ class LiveController {
 	
 	@Secured("ROLE_USER")
 	def delete() {
-		def rspInstance = RunningSignalPath.get(params.id)
-		if (rspInstance) {
+		def canvasInstance = Canvas.get(params.id)
+		if (canvasInstance) {
 			try {
-				def uicIds = UiChannel.executeQuery("SELECT uic.id FROM UiChannel uic WHERE uic.runningSignalPath =?", [rspInstance])
+				def uicIds = UiChannel.executeQuery("SELECT uic.id FROM UiChannel uic WHERE uic.canvas =?", [canvasInstance])
 				uicIds.each({String id ->
 					DashboardItem.executeUpdate("DELETE FROM DashboardItem di WHERE di.uiChannel.id = ?", [id])
 				})
-				UiChannel.executeUpdate("delete from UiChannel uic where uic.runningSignalPath = ?", [rspInstance])
-				rspInstance.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), rspInstance.name])}"
+				UiChannel.executeUpdate("delete from UiChannel uic where uic.canvas = ?", [canvasInstance])
+				canvasInstance.delete(flush: true)
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), canvasInstance.name])}"
 				redirect(action: "list")
 			}
 			catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), rspInstance.name])}"
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), canvasInstance.name])}"
 				redirect(action: "show", id: params.id)
 			}
 		}

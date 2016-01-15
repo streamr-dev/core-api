@@ -1,14 +1,8 @@
 package com.unifina.signalpath
 
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
+import com.unifina.domain.signalpath.Canvas
 
-import com.unifina.domain.signalpath.SavedSignalPath;
-
-
-class SignalPathParameter extends Parameter<SavedSignalPath> {
+class SignalPathParameter extends Parameter<Canvas> {
 	
 	public SignalPathParameter(AbstractSignalPathModule owner, String name) {
 		super(owner, name, null, "Canvas");
@@ -59,9 +53,9 @@ class SignalPathParameter extends Parameter<SavedSignalPath> {
 	}
 
 	@Override
-	SavedSignalPath parseValue(String s) {
+	Canvas parseValue(String s) {
 		try {
-			return SavedSignalPath.get(Long.parseLong(s));
+			return Canvas.get(s);
 		} catch (NumberFormatException e) {
 			return null
 		}

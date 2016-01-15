@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.serialization.SerializationException
 import grails.converters.JSON
 import grails.transaction.Transactional
@@ -25,10 +25,8 @@ import com.unifina.datasource.DataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.push.KafkaPushChannel
-import com.unifina.push.PushChannelEventListener
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
@@ -136,8 +134,8 @@ class SignalPathService {
 	}
 	
 	/**
-	 * Creates RunningSignalPath domain objects into the database with initial state "starting".
-	 * The RunningSignalPaths can be subsequently started by calling startLocal() or startRemote().
+	 * Creates Canvas domain objects into the database with initial state "starting".
+	 * The Canvas can be subsequently started by calling startLocal() or startRemote().
 	 * @param signalPathData
 	 * @param user
 	 * @param adhoc
@@ -145,7 +143,7 @@ class SignalPathService {
 	 * @return
 	 */
 	@Transactional
-	public RunningSignalPath createRunningSignalPath(Map sp, SecUser user, boolean adhoc, boolean resetUiChannelIds) {
+	public Canvas createRunningCanvas(Map sp, SecUser user, boolean adhoc, boolean resetUiChannelIds) {
 		if (resetUiChannelIds) {
 			sp.uiChannel = [id:IdGenerator.get(), name: "Notifications"]
 			sp.modules.each {
@@ -154,16 +152,16 @@ class SignalPathService {
 			}
 		}
 		
-		RunningSignalPath rsp = new RunningSignalPath()
-		rsp.name = sp.name ?: "(unsaved canvas)"
-		rsp.user = user
-		rsp.json = (sp as JSON)
-		rsp.state = "starting"
-		rsp.adhoc = adhoc
+		Canvas canvas = new Canvas()
+		canvas.name = sp.name ?: "(unsaved canvas)"
+		canvas.user = user
+		canvas.json = (sp as JSON)
+		canvas.state = Canvas.State.STARTING
+		canvas.adhoc = adhoc
 		
 		UiChannel rspUi = new UiChannel()
 		rspUi.id = sp.uiChannel.id
-		rsp.addToUiChannels(rspUi)
+		canvas.addToUiChannels(rspUi)
 		
 		for (Map it : sp.modules) { 
 			if (it.uiChannel) {
@@ -173,26 +171,26 @@ class SignalPathService {
 				ui.module = Module.load(it.id)
 				ui.name = it.uiChannel.name
 				
-				rsp.addToUiChannels(ui)
+				canvas.addToUiChannels(ui)
 			}
 		}
 		
-		rsp.save(flush:true, failOnError:true)
-		
-		return rsp
+		canvas.save(flush:true, failOnError:true)
+		return canvas
 	}
 	
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
 		// Delayed-delete the topics in one hour
-		List<UiChannel> channels = UiChannel.findAll { runningSignalPath.runner == runner.getRunnerId()}
+		List<UiChannel> channels = UiChannel.findAll { canvas.runner == runner.getRunnerId()}
 		kafkaService.createDeleteTopicTask(channels.collect{it.id}, 60*60*1000)
 		
-		List uiIds = UiChannel.executeQuery("select ui.id from UiChannel ui where ui.runningSignalPath.runner = ?", [runner.getRunnerId()])
-		if (!uiIds.isEmpty())
+		List uiIds = UiChannel.executeQuery("select ui.id from UiChannel ui where ui.canvas.runner = ?", [runner.getRunnerId()])
+		if (!uiIds.isEmpty()) {
 			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiIds])
-			
-		RunningSignalPath.executeUpdate("delete from RunningSignalPath r where r.runner = ?", [runner.getRunnerId()])
+		}
+
+		Canvas.executeUpdate("delete from Canvas c where c.runner = ?", [runner.getRunnerId()])
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -225,20 +223,20 @@ class SignalPathService {
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
-	void startLocal(RunningSignalPath rsp, Map signalPathContext) throws SerializationException {
+	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
+		globals.uiChannel = new KafkaPushChannel(kafkaService, canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (rsp.isNotSerialized() || rsp.adhoc) {
-			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
-			log.info("Creating new signalPath connections " + rsp.id)
+		if (canvas.isNotSerialized() || canvas.adhoc) {
+			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
+			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
 		} else {
-			SignalPath sp = serializationService.deserialize(rsp.serialized)
-			runner = new SignalPathRunner(sp, globals, rsp.adhoc)
-			log.info("De-serializing existing signalPath " + rsp.id)
+			SignalPath sp = serializationService.deserialize(canvas.serialized)
+			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
+			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 		}
 
 		runner.addStartListener({
@@ -254,7 +252,7 @@ class SignalPathService {
 		})
 
 		runner.signalPaths.each {
-			it.runningSignalPath = rsp
+			it.canvas = canvas
 		}
 		String runnerId = runner.runnerId
 		
@@ -263,66 +261,68 @@ class SignalPathService {
 		
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
-		if (!runner.getRunning())
+		if (!runner.getRunning()) {
 			log.error("Timed out while waiting for runner $runnerId to start!")
-		
-		rsp.runner = runnerId
-		rsp.state = "running"
+		}
+
+		canvas.runner = runnerId
+		canvas.state = Canvas.State.RUNNING
 		
 		// Use the link generator to get the protocol and port, but use network IP address
 		// as the host to get the address of this individual server
 		String link = grailsLinkGenerator.link(controller: "liveApi", action: "request", absolute: true)
 		URL url = new URL(link)
 		
-		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/live/request")
+		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
+		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/live/request")
 		
-		rsp.save()
+		canvas.save()
 	}
 	
-	boolean stopLocal(RunningSignalPath rsp) {
-		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(rsp.runner)
+	boolean stopLocal(Canvas canvas) {
+		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(canvas.runner)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
 			
 			// Wait for runner to be stopped state
 			runner.waitRunning(false)
 			if (runner.getRunning()) {
-				log.error("Timed out while waiting for runner $rsp.runner to stop!")
+				log.error("Timed out while waiting for runner $canvas.runner to stop!")
 				return false
+			} else {
+				return true
 			}
-			else return true
 		}
 		else {
-			log.error("stopLocal: could not find runner $rsp.runner!")
-			updateState(rsp.runner, "stopped")
+			log.error("stopLocal: could not find runner $canvas.runner!")
+			updateState(canvas.runner, Canvas.State.STOPPED)
 			return false
 		}
 	}
 	
 	@CompileStatic
-	RuntimeResponse stopRemote(RunningSignalPath rsp, SecUser user) {
-		return runtimeRequest([type:"stopRequest"], rsp, null, user)
+	RuntimeResponse stopRemote(Canvas canvas, SecUser user) {
+		return runtimeRequest([type:"stopRequest"], canvas, null, user)
 	}
 	
 	@CompileStatic
-	boolean ping(RunningSignalPath rsp, SecUser user) {
-		RuntimeResponse response = runtimeRequest([type:'ping'], rsp, null, user)
+	boolean ping(Canvas canvas, SecUser user) {
+		RuntimeResponse response = runtimeRequest([type:'ping'], canvas, null, user)
 		return response.isSuccess()
 	}
 	
 	@CompileStatic
-	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
-		def req = Unirest.post(rsp.requestUrl)
+	RuntimeResponse sendRemoteRequest(Map msg, Canvas canvas, Integer hash, SecUser user) {
+		def req = Unirest.post(canvas.requestUrl)
 		def json = [
 			local: true,
 			msg: msg,
-			id: rsp.id
+			id: canvas.id
 		]
-		
-		if (hash)
+
+		if (hash) {
 			json.hash = hash
-			
+		}
 		if (user) {
 			json.key = user.apiKey
 		}
@@ -342,10 +342,10 @@ class SignalPathService {
 		}
 	}
 	
-	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, boolean localOnly = false) {
-		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
+	RuntimeResponse runtimeRequest(Map msg, Canvas canvas, Integer hash, SecUser user, boolean localOnly = false) {
+		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(canvas.runner)
 		
-		log.info("runtimeRequest: $msg, RunningSignalPath: $rsp.id, module: $hash, localOnly: $localOnly")
+		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $hash, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
@@ -355,20 +355,20 @@ class SignalPathService {
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
-				return sendRemoteRequest(msg, rsp, hash, user)
+				return sendRemoteRequest(msg, canvas, hash, user)
 			} catch (Exception e) {
-				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl")
+				log.error("Unable to contact remote Canvas id $canvas.id at $canvas.requestUrl")
 				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
 			}
 		}
 		// If runner found
 		else {
 			SignalPath sp = spr.signalPaths.find {
-				it.runningSignalPath.id == rsp.id
+				it.canvas.id == canvas.id
 			}
 			
 			if (!sp) {
-				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $rsp, module: $hash")
+				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $canvas, module: $hash")
 				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
 			}
 			else {				
@@ -379,15 +379,15 @@ class SignalPathService {
 				 * Requests for the runner thread
 				 */
 				if (request.type=="stopRequest") {
-					if (!request.isAuthenticated())
+					if (!request.isAuthenticated()) {
 						throw new AccessControlException("stopRequest requires authentication!");
-		
-					stopLocal(rsp);
-					
-					return new RuntimeResponse(true, [request:request])
-				}
-				else if (request.type=="ping") {
-					if (!rsp.shared && !request.isAuthenticated())
+					}
+
+					stopLocal(canvas);
+
+					return new RuntimeResponse(true, [request: request])
+				} else if (request.type=="ping") {
+					if (!canvas.shared && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
 					
 					return new RuntimeResponse(true, [request:request])
@@ -420,8 +420,8 @@ class SignalPathService {
 		
 	}
 	
-	void updateState(String runnerId, String state) {
-		RunningSignalPath.executeUpdate("update RunningSignalPath rsp set rsp.state = ? where rsp.runner = ?", [state, runnerId])
+	void updateState(String runnerId, Canvas.State state) {
+		Canvas.executeUpdate("update Canvas c set c.state = ? where c.runner = ?", [state, runnerId])
 	}
 	
 	@Deprecated
@@ -486,25 +486,25 @@ class SignalPathService {
 
 	@Transactional
 	def saveState(SignalPath sp) {
-		RunningSignalPath rsp = sp.runningSignalPath
-		rsp = rsp.attach()
+		Canvas canvas = sp.canvas
+		canvas = canvas.attach()
 
 		try {
-			rsp.serialized = serializationService.serialize(sp)
-			rsp.serializationTime = sp.globals.time
-			RunningSignalPath.executeUpdate("update RunningSignalPath rsp set rsp.serialized = ?, rsp.serializationTime = ? where rsp.id = ?",
-				[rsp.serialized, rsp.serializationTime, rsp.id])
-			log.info("RunningSignalPath " + rsp.id + " serialized")
+			canvas.serialized = serializationService.serialize(sp)
+			canvas.serializationTime = sp.globals.time
+			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
+				[canvas.serialized, canvas.serializationTime, canvas.id])
+			log.info("Canvas " + canvas.id + " serialized.")
 		} catch (SerializationException ex) {
-			log.error("Serialization of runningSignalPath " + rsp.id + " failed")
+			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
 		}
 	}
 
 	@Transactional
-	def clearState(RunningSignalPath rsp) {
-		rsp.serialized = null
-		rsp.save(failOnError: true)
-		log.info("RunningSignalPath " + rsp.id + " state cleared")
+	def clearState(Canvas canvas) {
+		canvas.serialized = null
+		canvas.save(failOnError: true)
+		log.info("Canvas " + canvas.id + " serialized state cleared.")
 	}
 }

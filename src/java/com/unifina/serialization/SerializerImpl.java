@@ -3,16 +3,14 @@ package com.unifina.serialization;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
+import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.domain.signalpath.RunningSignalPath;
-import com.unifina.domain.signalpath.SavedSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
-import org.grails.datastore.gorm.GormStaticApi;
 import org.nustaq.serialization.*;
 import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
 
@@ -37,12 +35,11 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
 		conf.registerSerializer(JSONArray.class, new JSONArraySerializer(), true);
 
+		conf.registerSerializer(Canvas.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
-		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Stream.class, new DomainClassSerializer(), false);
-		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), false);
 	}
 
 	public SerializerImpl(ClassLoader classLoader) {

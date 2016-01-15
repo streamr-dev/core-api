@@ -1,8 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
 import com.unifina.signalpath.RuntimeResponse
@@ -21,8 +20,8 @@ class LiveApiController {
 	def beforeInterceptor = [
 		action: {
 			SecUser user = request.apiUser
-			RunningSignalPath rsp = RunningSignalPath.get(params.long("id"))
-			if (!unifinaSecurityService.canAccess(rsp, user)) {
+			Canvas canvas = Canvas.get(params.long("id"))
+			if (!unifinaSecurityService.canAccess(canvas, user)) {
 				redirect(controller:'login', action:'ajaxDenied')
 				return false
 			}
@@ -33,20 +32,20 @@ class LiveApiController {
 
 	@StreamrApi
 	def index() {
-		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(request.apiUser, false)
-		List runningSignalPathMaps = runningSignalPaths.collect {RunningSignalPath rsp ->
+		def canvases = Canvas.findAllByUserAndAdhoc(request.apiUser, false)
+		List maps = canvases.collect { Canvas canvas ->
 			[
-				id: rsp.id,
-				name: rsp.name,
-				state: rsp.state,
-				uiChannels: rsp.uiChannels.findAll { uiChannel ->
+				id: canvas.id,
+				name: canvas.name,
+				state: canvas.state,
+				uiChannels: canvas.uiChannels.findAll { uiChannel ->
 					uiChannel.module != null && uiChannel.module.webcomponent != null
 				}.collect { uiChannel ->
 					[id: uiChannel.id, name: uiChannel.name, module: [id: uiChannel.module.id, webcomponent: uiChannel.module.webcomponent]]
 				}
 			]
 		}
-		render runningSignalPathMaps as JSON
+		render maps as JSON
 	}
 
 	@StreamrApi(requiresAuthentication = false)
@@ -54,13 +53,13 @@ class LiveApiController {
 		response.setHeader('Access-Control-Allow-Origin', '*')
 
 		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
-		RunningSignalPath rsp = ui.runningSignalPath
+		Canvas canvas = ui.canvas
 
-		if (!unifinaSecurityService.canAccess(rsp, request.apiUser)) {
-			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")
+		if (!unifinaSecurityService.canAccess(canvas, request.apiUser)) {
+			log.warn("request: access to ui ${ui?.id}, canvas ${canvas?.id} denied")
 			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		} else {
-			Map signalPathData = JSON.parse(rsp.json)
+			Map signalPathData = JSON.parse(canvas.json)
 			Map moduleJson = signalPathData.modules.find { it.hash.toString() == ui.hash.toString() }
 
 			if (!moduleJson) {
@@ -74,18 +73,18 @@ class LiveApiController {
 	@StreamrApi
 	def show() {
 		// Access checked by beforeInterceptor
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas canvas = Canvas.get(params.id)
 
 		// Reconstruct as rsp.user
-		Map signalPathData = JSON.parse(rsp.json)
+		Map signalPathData = JSON.parse(canvas.json)
 		Map result = signalPathService.reconstruct(
 			[signalPathData: signalPathData],
-			GlobalsFactory.createInstance([live: true], grailsApplication, rsp.user)
+			GlobalsFactory.createInstance([live: true], grailsApplication, canvas.user)
 		)
 
 		result.runData = [
-			uiChannels: rsp.uiChannels.collect { [id: it.id, hash: it.hash] },
-			id: rsp.id
+			uiChannels: canvas.uiChannels.collect { [id: it.id, hash: it.hash] },
+			id: canvas.id
 		]
 
 		render result as JSON
@@ -93,7 +92,7 @@ class LiveApiController {
 
 	@StreamrApi
 	def request() {
-		RunningSignalPath rsp
+		Canvas canvas
 		UiChannel ui = null
 		Integer hash = null
 		SecUser user = request.apiUser
@@ -102,16 +101,16 @@ class LiveApiController {
 
 		/**
 		 * Provide as parameter:
-		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
-		 * 2) RSP.id for messages intended for the RSP itself
+		 * 1) Either the UI channel or Canvas.id & module.hash combo for messages intended for modules, or
+		 * 2) Canvas.id for messages intended for the Canvas itself
 		 */
 		if (json?.channel) {
 			ui = UiChannel.findById(json?.channel, [fetch: [runningSignalPath: 'join']])
-			rsp = ui.runningSignalPath
+			canvas = ui.canvas
 			if (ui.hash)
 				hash = Integer.parseInt(ui.hash)
 		} else if (json?.id) {
-			rsp = RunningSignalPath.get(json?.id)
+			canvas = Canvas.get(json?.id)
 			if (json?.hash != null)
 				hash = json?.hash
 		} else {
@@ -119,19 +118,19 @@ class LiveApiController {
 			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
 		}
 
-		if (!unifinaSecurityService.canAccess(rsp, user)) {
-			log.warn("request: access to rsp ${rsp?.id} denied for user ${user?.id}")
+		if (!unifinaSecurityService.canAccess(canvas, user)) {
+			log.warn("request: access to rsp ${canvas?.id} denied for user ${user?.id}")
 			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		} else {
 			Map msg = json?.msg
-			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, json?.local ? true : false)
+			RuntimeResponse rr = signalPathService.runtimeRequest(msg, canvas, hash, user, json?.local ? true : false)
 
 			log.info("request: responding with $rr")
 
 			if (rr.containsKey("success") && rr.containsKey("response"))
 				render rr as JSON
 			else {
-				Map result = [success: rr.isSuccess(), id: rsp.id, hash: hash, response: rr]
+				Map result = [success: rr.isSuccess(), id: canvas.id, hash: hash, response: rr]
 				render result as JSON
 			}
 		}
@@ -143,26 +142,26 @@ class LiveApiController {
 		if (params.signalPathData) {
 			signalPathData = JSON.parse(params.signalPathData);
 		} else {
-			signalPathData = JSON.parse(SavedSignalPath.get(Integer.parseInt(params.id)).json)
+			signalPathData = JSON.parse(Canvas.get(params.id).json)
 		}
 
 		def signalPathContext =	JSON.parse(params.signalPathContext)
 
-		RunningSignalPath rsp = signalPathService.createRunningSignalPath(signalPathData, request.apiUser, signalPathContext.live ? false : true, true)
-		signalPathService.startLocal(rsp, signalPathContext)
+		Canvas canvas = signalPathService.createRunningCanvas(signalPathData, request.apiUser, signalPathContext.live ? false : true, true)
+		signalPathService.startLocal(canvas, signalPathContext)
 
 		Map result = [
 			success: true,
-			id: rsp.id,
-			adhoc: rsp.adhoc,
-			uiChannels: rsp.uiChannels.collect { [id: it.id, hash: it.hash] }
+			id: canvas.id,
+			adhoc: canvas.adhoc,
+			uiChannels: canvas.uiChannels.collect { [id: it.id, hash: it.hash] }
 		]
 		render result as JSON
 	}
 
 	@StreamrApi
 	def ajaxStop() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas rsp = Canvas.get(params.id)
 
 		Map r
 		if (rsp && signalPathService.stopLocal(rsp)) {

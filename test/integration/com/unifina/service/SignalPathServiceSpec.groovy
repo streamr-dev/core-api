@@ -128,7 +128,7 @@ class SignalPathServiceSpec extends IntegrationSpec {
 
 	private RunningSignalPath createAndRun(Map<String, Object> savedStructure, SecUser user) {
 		def data = savedStructure["signalPathData"]
-		RunningSignalPath rsp = signalPathService.createRunningSignalPath(data, user, false, true)
+		RunningSignalPath rsp = signalPathService.createRunningCanvas(data, user, false, true)
 
 		signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
 

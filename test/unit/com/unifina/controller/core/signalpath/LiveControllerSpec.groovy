@@ -1,8 +1,8 @@
 package com.unifina.controller.core.signalpath
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.service.SerializationService
 import com.unifina.service.SignalPathService
@@ -11,7 +11,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(LiveController)
-@Mock([SecUser, RunningSignalPath, Module, UiChannel])
+@Mock([SecUser, Canvas, Module, UiChannel])
 class LiveControllerSpec extends Specification {
 	void setup() {
 		defineBeans {
@@ -22,16 +22,16 @@ class LiveControllerSpec extends Specification {
 	}
 
 	void "deserialization failure results in error message"() {
-		setup: "runningSignalPath has been incorrectly serialized to database"
-		def rsp = new RunningSignalPath(
+		setup: "canvas has been incorrectly serialized to database"
+		def canvas = new Canvas(
 			name: "name",
 			adhoc: false,
 			serialized: "{invalid: 'serialization'}"
 		)
-		rsp.save(failOnError: true, validate: false)
+		canvas.save(failOnError: true, validate: false)
 
 		when: "runningSignalPath is started"
-		params.id = rsp.id
+		params.id = canvas.id
 		controller.start()
 
 		then: "error flash message is shown"

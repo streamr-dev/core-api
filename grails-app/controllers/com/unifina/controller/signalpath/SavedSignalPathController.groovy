@@ -1,19 +1,14 @@
 package com.unifina.controller.signalpath
 
-import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.Canvas
 import grails.plugin.springsecurity.annotation.Secured
-import org.apache.log4j.Logger
 
 @Secured(["ROLE_USER"])
 class SavedSignalPathController {
-	
-	def signalPathService
+
 	def springSecurityService
 	def grailsApplication
-	
 	def unifinaSecurityService
-	
-	private static final Logger log = Logger.getLogger(SavedSignalPathController)
 	
 	def loadBrowser() {
 		def result = [
@@ -31,15 +26,16 @@ class SavedSignalPathController {
 		
 		render(template: "loadBrowser", model: result)
 	}
-	
+
+	// TODO: refactor to Canvas fully
 	def loadBrowserContent() {
 		def max = params.int("max") ?: 100
 		def offset = params.int("offset") ?: 0
 		def ssp 
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.type = :type order by sp.id asc", [type:SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.type = :type order by sp.id asc", [type: Canvas.Type.EXAMPLE.id], [max: max, offset: offset])
 		} else {
-			ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from SavedSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
 		}
 		
 		def result = [signalPaths:[]]

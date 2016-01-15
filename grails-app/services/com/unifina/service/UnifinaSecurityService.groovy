@@ -1,16 +1,13 @@
 package com.unifina.service
 
-import grails.plugin.springsecurity.SpringSecurityService
-import groovy.transform.CompileStatic
-import org.apache.commons.collections.Unmodifiable
-import org.apache.log4j.Logger
-
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
+import grails.plugin.springsecurity.SpringSecurityService
+import groovy.transform.CompileStatic
+import org.apache.log4j.Logger
 import org.springframework.validation.FieldError
 
 class UnifinaSecurityService {
@@ -66,17 +63,18 @@ class UnifinaSecurityService {
 	}
 	
 	@CompileStatic 
-	boolean canAccess(RunningSignalPath rsp, SecUser user=springSecurityService.getCurrentUser()) {
-		// Shared RunningSignalPaths can be accessed by everyone
-		return rsp?.shared || checkUser(rsp, user)
+	boolean canAccess(Canvas canvas, SecUser user=springSecurityService.getCurrentUser()) {
+		return canvas?.shared || checkUser(canvas, user) // Shared Canvas can be accessed by everyone
 	}
 	
 	@CompileStatic
-	boolean canAccess(SavedSignalPath ssp, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
+	boolean canAccess(Canvas canvas, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
-		if (isLoad && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+		if (isLoad && canvas.type.equals(Canvas.Type.EXAMPLE)) {
 			return true
-		else return canAccess(ssp, user)
+		} else {
+			return canAccess(canvas, user)
+		}
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
