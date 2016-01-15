@@ -25,7 +25,7 @@ environments {
 
 			username = "unifina-dev"
 			password = "2PpJA2vJ"
-            url = "jdbc:mysql://192.168.10.21:3306/core_dev?useLegacyDatetimeCode=false"
+            url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
         }
     }
     test {
