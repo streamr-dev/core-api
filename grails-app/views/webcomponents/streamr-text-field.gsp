@@ -15,7 +15,9 @@
     <script>
         Polymer('streamr-text-field', {
             createWidget: function(json) {
-                return new StreamrTextField(this.$["streamr-widget-container"], json)
+                return new StreamrTextField(this.$["streamr-widget-container"], json, {
+                    widthLocked: true;
+                })
             },
 
             <g:if test="${params.lightDOM}">

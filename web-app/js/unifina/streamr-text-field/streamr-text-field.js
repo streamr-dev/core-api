@@ -1,10 +1,11 @@
 (function(exports) {
 
-    function StreamrTextField(parent, data) {
+    function StreamrTextField(parent, data, options) {
         this.parent = $(parent)
         this.value = data && data.textFieldValue ? data.textFieldValue : ""
         this.width = data && data.textFieldWidth ? data.textFieldWidth : undefined
         this.height = data && data.textFieldHeight ? data.textFieldHeight : undefined
+        this.widthLocked = options && options.widthLocked ? options.widthLocked : undefined
     }
 
     StreamrTextField.prototype.render = function() {
@@ -52,7 +53,7 @@
     }
 
     StreamrTextField.prototype.setSize = function(width, height) {
-        if(width)
+        if(width && !this.widthLocked)
             this.textArea.width(width)
         if(height)
             this.textArea.height(height)

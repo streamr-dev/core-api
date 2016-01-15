@@ -14,19 +14,18 @@
 
     <script>
         Polymer('streamr-button', {
-            ready: function() {
+            onReady: function() {
                 var _this = this
 
-                _this.module = new StreamrButton(_this.$["streamr-widget-container"], {}, {
-                    alwaysEnabled: true
-                })
-                $(this.module).on("input", function(e, value) {
+                $(this.widget).on("input", function(e, value) {
                     _this.sendValue(value)
                 })
             },
 
-            createButton: function(json) {
-                return new StreamrButton(_this.$["streamr-widget-container"], json)
+            createWidget: function(json) {
+                return new StreamrButton(this.$["streamr-widget-container"], json, {
+                    alwaysEnabled: true
+                })
             },
 
             <g:if test="${params.lightDOM}">

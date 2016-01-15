@@ -23,7 +23,7 @@
                         })
                     })
 
-                    _this.sendrequest({
+                    _this.sendRequest({
                         type: "getState"
                     }, function(response) {
                         _this.widget.updateState(response.state)
@@ -37,7 +37,8 @@
                         resendOptions
                     )
                 })
-
+                if(this.onReady)
+                    this.onReady()
             },
             <g:if test="${params.lightDOM}">
             parseDeclaration: function(elementElement) {

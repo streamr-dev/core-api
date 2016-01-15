@@ -14,13 +14,18 @@
 
     <script>
         Polymer('streamr-switcher', {
-            ready: function() {
+            onReady: function() {
                 var _this = this
-                this.module = new StreamrSwitcher(this.$["streamr-widget-container"], {}, {})
-                $(this.module).on("input", function(e, value) {
+
+                $(this.widget).on("input", function(e, value) {
                     _this.sendValue(value)
                 })
             },
+
+            createWidget: function(json) {
+                return new StreamrSwitcher(this.$["streamr-widget-container"], json)
+            },
+
             <g:if test="${params.lightDOM}">
             parseDeclaration: function(elementElement) {
                 return this.lightFromTemplate(this.fetchTemplate(elementElement))

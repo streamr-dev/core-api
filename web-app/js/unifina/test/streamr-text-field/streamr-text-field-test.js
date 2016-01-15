@@ -30,15 +30,20 @@ describe('streamr-text-field', function() {
             textFieldWidth: 100,
             textFieldHeight: 200
         }
+        var options = {
+            widthLocked: true
+        }
         textField = new StreamrTextField("#parent")
-        var textField2 = new StreamrTextField(parent)
+        var textField2 = new StreamrTextField(parent, undefined, options)
         var textField3 = new StreamrTextField(parent2, data)
 
         assert.equal(textField.parent[0], parent[0])
         assert.equal(textField.value, "")
+        assert.equal(textField.widthLocked, undefined)
 
         assert.equal(textField2.parent[0], parent[0])
         assert.equal(textField2.value, "")
+        assert.equal(textField2.widthLocked, true)
 
         assert.equal(textField3.parent[0], parent[0])
         assert.equal(textField3.value, "test")
@@ -142,6 +147,14 @@ describe('streamr-text-field', function() {
             textField.textArea.height = function(height) {
                 if(widthCalled && height === 100)
                     done()
+            }
+            textField.setSize(100, 100)
+        })
+
+        it('must not call textArea.width if textField.widthLocked === true', function() {
+            textField.widthLocked = true
+            textField.textArea.width = function(width) {
+                assert(false, "width() called!")
             }
             textField.setSize(100, 100)
         })
