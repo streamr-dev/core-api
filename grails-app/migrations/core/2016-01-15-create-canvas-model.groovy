@@ -1,6 +1,8 @@
 package core
 
 import com.unifina.utils.IdGenerator
+import groovy.json.*
+import grails.converters.JSON
 
 databaseChangeLog = {
 
@@ -117,6 +119,13 @@ databaseChangeLog = {
 						VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 					"""
 
+					// Harmonize JSON
+					def oldJson = JSON.parse(row.json)
+					def settings = oldJson["signalPathContext"]
+					def newJson = oldJson["signalPathData"]
+					newJson.settings = settings
+					newJson.uiChannel = [:]
+
 					sql.execute(insertStatement,
 						IdGenerator.get(),
 						0,
@@ -124,7 +133,7 @@ databaseChangeLog = {
 						row.date_created,
 						row.last_updated,
 						row.name,
-						row.json,
+						new JsonBuilder(newJson).toString(),
 						row.type,
 						row.has_exports
 					)
@@ -139,6 +148,10 @@ databaseChangeLog = {
 						VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 					"""
 
+					// Harmonize JSON
+					def newJson = JSON.parse(row.json)
+					newJson.settings = [:]
+
 					def canvasId = IdGenerator.get()
 
 					sql.execute(insertStatement,
@@ -148,7 +161,7 @@ databaseChangeLog = {
 						row.date_created,
 						row.last_updated,
 						row.name,
-						row.json,
+						new JsonBuilder(newJson).toString(),
 						2,
 						false,
 						row.runner,
