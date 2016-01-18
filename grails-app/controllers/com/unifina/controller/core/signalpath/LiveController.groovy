@@ -86,7 +86,7 @@ class LiveController {
 		if (!result.isSuccess()) {
 			log.error("stop: RSP $canvas.id could not be stopped due to: $result.error, marking RSP as stopped")
 			flash.error = message(code:'runningSignalPath.stop.error')
-			signalPathService.updateState(canvas.runner, "stopped")
+			signalPathService.updateState(canvas.runner, Canvas.State.STOPPED)
 		}
 		else {
 			flash.message = message(code:'runningSignalPath.stopped')

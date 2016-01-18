@@ -5,7 +5,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
 import com.unifina.kafkaclient.UnifinaKafkaMessage
@@ -47,8 +47,8 @@ class SignalPathServiceSpec extends IntegrationSpec {
 		// A bit dirty, but we must do this because otherwise rsp.save() will be called in another thread
 		// which causes exception related to transactions.
 		signalPathService.metaClass.saveState = { SignalPath sp ->
-			RunningSignalPath rsp = sp.runningSignalPath
-			rsp.serialized = serializationService.serialize(sp)
+			Canvas liveCanvas = sp.canvas
+			liveCanvas.serialized = serializationService.serialize(sp)
 		}
 
 		kafkaService = new FakeKafkaService()
@@ -126,22 +126,22 @@ class SignalPathServiceSpec extends IntegrationSpec {
 		s
 	}
 
-	private RunningSignalPath createAndRun(Map<String, Object> savedStructure, SecUser user) {
+	private Canvas createAndRun(Map<String, Object> savedStructure, SecUser user) {
 		def data = savedStructure["signalPathData"]
-		RunningSignalPath rsp = signalPathService.createRunningCanvas(data, user, false, true)
+		Canvas canvas = signalPathService.createRunningCanvas(data, user, false, true)
 
-		signalPathService.startLocal(rsp, savedStructure["signalPathContext"])
+		signalPathService.startLocal(canvas, savedStructure["signalPathContext"])
 
-		globals = kafkaService.globals = getGlobalsFrom(rsp)
-		rsp
+		globals = kafkaService.globals = getGlobalsFrom(canvas)
+		canvas
 	}
 
-	private Globals getGlobalsFrom(RunningSignalPath rsp) {
-		signalPathService.servletContext["signalPathRunners"][rsp.runner].globals
+	private Globals getGlobalsFrom(Canvas canvas) {
+		signalPathService.servletContext["signalPathRunners"][canvas.runner].globals
 	}
 
-	private List<AbstractSignalPathModule> modules(RunningSignalPath rsp) {
-		List<SignalPath> signalPaths = signalPathService.servletContext["signalPathRunners"][rsp.runner].signalPaths
+	private List<AbstractSignalPathModule> modules(Canvas canvas) {
+		List<SignalPath> signalPaths = signalPathService.servletContext["signalPathRunners"][canvas.runner].signalPaths
 		assert signalPaths.size() == 1
 		signalPaths[0].mods
 	}

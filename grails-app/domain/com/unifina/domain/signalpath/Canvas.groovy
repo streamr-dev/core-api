@@ -40,7 +40,7 @@ class Canvas {
 	Type type
 
 	// SavedSignalPath
-	Boolean hasExports
+	Boolean hasExports = false
 
 	// RunningSignalPath
 	String runner
@@ -64,7 +64,7 @@ class Canvas {
 	}
 
 	static mapping = {
-		id generator: 'assigned'
+		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
 		hasExports defaultValue: false
 		runner index: 'runner_idx'
@@ -73,10 +73,6 @@ class Canvas {
 	}
 
 	static hasMany = [uiChannels: UiChannel]
-
-	def beforeInsert() {
-		id = IdGenerator.get()
-	}
 
 	boolean isNotSerialized() {
 		serialized == null || serialized.empty

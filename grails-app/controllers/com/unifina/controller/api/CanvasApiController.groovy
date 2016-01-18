@@ -71,7 +71,9 @@ class CanvasApiController {
 
 	@StreamrApi
 	def save() {
-		readAndSave(new Canvas(), params.json)
+		Canvas canvas = new Canvas()
+		canvas.type = Canvas.Type.TEMPLATE
+		readAndSave(canvas, params.json)
 	}
 
 	@StreamrApi

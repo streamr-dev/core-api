@@ -1,5 +1,6 @@
 package com.unifina.signalpath
 
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
@@ -168,7 +169,7 @@ public class SignalPathRunner extends Thread {
 		
 		if (deleteOnStop)
 			signalPathService.deleteRunningSignalPathReferences(this)
-		else signalPathService.updateState(getRunnerId(), "stopped")
+		else signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 	}
 	
 	public void abort() {

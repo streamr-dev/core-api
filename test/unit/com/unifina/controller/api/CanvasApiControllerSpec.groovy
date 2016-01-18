@@ -33,7 +33,7 @@ class CanvasApiControllerSpec extends Specification {
 			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		)
-		canvas1.save(validate: true, failOnError: true)
+		canvas1.save(validate: false, failOnError: true)
 
 		canvas2 = new Canvas(
 			user: other,
@@ -47,7 +47,7 @@ class CanvasApiControllerSpec extends Specification {
 			user: other,
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
-			type: Canvas.Type.TEMPLATE,
+			type: Canvas.Type.EXAMPLE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -55,7 +55,7 @@ class CanvasApiControllerSpec extends Specification {
 			user: me,
 			name: "my example",
 			json: '{name: "not mine but example", modules: []}',
-			type: Canvas.Type.TEMPLATE,
+			type: Canvas.Type.EXAMPLE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -71,7 +71,7 @@ class CanvasApiControllerSpec extends Specification {
 		] as SignalPathService
 	}
 
-	void "can list all my SignalPaths"() {
+	void "can list all my Canvases"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/canvases/"
@@ -86,7 +86,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	}
 
-	void "must be able to load my own SignalPath"() {
+	void "must be able to load my own Canvas"() {
 		when:
 		params.id = "1"
 		request.addHeader("Authorization", "Token myApiKey")
@@ -97,17 +97,17 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.id.size() == 22
+		response.json.id != null
 		response.json.name == "mine"
 		response.json.modules == []
 		!response.json.hasExports
 	}
 
-	void "must be able to save a new SignalPath"() {
+	void "must be able to save a new Canvas"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.json = [
-			name   : "brand new SavedSignalPath",
+			name   : "brand new Canvas",
 			modules: [],
 		]
 		request.method = "POST"
@@ -118,10 +118,11 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.uuid.size() > 10
+		response.json.id != null
+		response.json.name == "brand new Canvas"
 	}
 
-	void "must not be able to load others' SignalPath"() {
+	void "must not be able to load others' Canvases"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
@@ -149,7 +150,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.json.name == "not mine but example"
 	}
 
-	void "my own example must have saveData"() {
+	void "my own example must have Canvas data"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "4"
@@ -163,7 +164,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.json.name == "my example"
 	}
 
-	void "must be able to overwrite my own SignalPath"() {
+	void "must be able to overwrite my own Canvas"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
@@ -180,7 +181,7 @@ class CanvasApiControllerSpec extends Specification {
 		Canvas.get(1).name == "updated, new name"
 	}
 
-	void "must not be able overwrite others' SignalPath"() {
+	void "must not be able overwrite others' Canvases"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
@@ -214,7 +215,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.json.code == "FORBIDDEN"
 	}
 
-	void "must be able to delete my own SignalPath"() {
+	void "must be able to delete my own Canvas"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
@@ -224,10 +225,10 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		SavedSignalPath.get(1) == null
+		Canvas.get("1") == null
 	}
 
-	void "must not be able delete others' SignalPath"() {
+	void "must not be able delete others' Canvases"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"

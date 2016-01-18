@@ -153,12 +153,13 @@ class SignalPathService {
 		}
 		
 		Canvas canvas = new Canvas()
+		canvas.type = Canvas.Type.RUNNING
 		canvas.name = sp.name ?: "(unsaved canvas)"
 		canvas.user = user
 		canvas.json = (sp as JSON)
 		canvas.state = Canvas.State.STARTING
 		canvas.adhoc = adhoc
-		
+
 		UiChannel rspUi = new UiChannel()
 		rspUi.id = sp.uiChannel.id
 		canvas.addToUiChannels(rspUi)

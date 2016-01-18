@@ -271,8 +271,8 @@ public class SerializerImpl implements Serializer {
 								int streamPosition) throws IOException {
 			try {
 				Method method = toWrite.getClass().getMethod("getId");
-				Long id = (Long) method.invoke(toWrite);
-				out.writeLong(id);
+				Object id = method.invoke(toWrite);
+				out.writeObject(id);
 			} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
@@ -284,7 +284,7 @@ public class SerializerImpl implements Serializer {
 										   FSTClazzInfo serializationInfo,
 										   FSTClazzInfo.FSTFieldInfo referencee,
 										   int streamPosition) throws Exception {
-			return InvokerHelper.invokeMethod(objectClass, "get", in.readLong());
+			return InvokerHelper.invokeMethod(objectClass, "get", in.readObject());
 		}
 	}
 }
