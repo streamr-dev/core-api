@@ -748,102 +748,102 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-27") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "dashboard", baseTableSchemaName: "core_dev", constraintName: "FKC18AEA9460701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "dashboard", /* baseTableSchemaName: "core_dev", */constraintName: "FKC18AEA9460701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-28") {
-		addForeignKeyConstraint(baseColumnNames: "dashboard_id", baseTableName: "dashboard_item", baseTableSchemaName: "core_dev", constraintName: "FKF4B0C5DE70E281EB", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "dashboard", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "dashboard_id", baseTableName: "dashboard_item", /* baseTableSchemaName: "core_dev", */constraintName: "FKF4B0C5DE70E281EB", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "dashboard", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-29") {
-		addForeignKeyConstraint(baseColumnNames: "ui_channel_id", baseTableName: "dashboard_item", baseTableSchemaName: "core_dev", constraintName: "FKF4B0C5DE8A8883E5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "ui_channel", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "ui_channel_id", baseTableName: "dashboard_item", /* baseTableSchemaName: "core_dev", */constraintName: "FKF4B0C5DE8A8883E5", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "ui_channel", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-30") {
-		addForeignKeyConstraint(baseColumnNames: "module_id", baseTableName: "feed", baseTableSchemaName: "core_dev", constraintName: "FK2FE59EB6140F06", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "module_id", baseTableName: "feed", /* baseTableSchemaName: "core_dev", */constraintName: "FK2FE59EB6140F06", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-31") {
-		addForeignKeyConstraint(baseColumnNames: "feed_id", baseTableName: "feed_file", baseTableSchemaName: "core_dev", constraintName: "FK9DFF9B7D72507A49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "feed", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "feed_id", baseTableName: "feed_file", /* baseTableSchemaName: "core_dev", */constraintName: "FK9DFF9B7D72507A49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "feed", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-32") {
-		addForeignKeyConstraint(baseColumnNames: "stream_id", baseTableName: "feed_file", baseTableSchemaName: "core_dev", constraintName: "FK9DFF9B7D86527F49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "stream", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "stream_id", baseTableName: "feed_file", /* baseTableSchemaName: "core_dev", */constraintName: "FK9DFF9B7D86527F49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "stream", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-33") {
-		addForeignKeyConstraint(baseColumnNames: "feed_id", baseTableName: "feed_user", baseTableSchemaName: "core_dev", constraintName: "FK9E0691CC72507A49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "feed", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "feed_id", baseTableName: "feed_user", /* baseTableSchemaName: "core_dev", */constraintName: "FK9E0691CC72507A49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "feed", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-34") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "feed_user", baseTableSchemaName: "core_dev", constraintName: "FK9E0691CC60701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "feed_user", /* baseTableSchemaName: "core_dev", */constraintName: "FK9E0691CC60701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-35") {
-		addForeignKeyConstraint(baseColumnNames: "category_id", baseTableName: "module", baseTableSchemaName: "core_dev", constraintName: "FKC04BA66C28AB0672", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_category", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "category_id", baseTableName: "module", /* baseTableSchemaName: "core_dev", */constraintName: "FKC04BA66C28AB0672", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_category", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-36") {
-		addForeignKeyConstraint(baseColumnNames: "module_package_id", baseTableName: "module", baseTableSchemaName: "core_dev", constraintName: "FKC04BA66C96E04B35", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_package", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "module_package_id", baseTableName: "module", /* baseTableSchemaName: "core_dev", */constraintName: "FKC04BA66C96E04B35", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_package", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-37") {
-		addForeignKeyConstraint(baseColumnNames: "module_package_id", baseTableName: "module_category", baseTableSchemaName: "core_dev", constraintName: "FK1AD2C171FEDA9555", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_package", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "module_package_id", baseTableName: "module_category", /* baseTableSchemaName: "core_dev", */constraintName: "FK1AD2C171FEDA9555", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_package", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-38") {
-		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "module_category", baseTableSchemaName: "core_dev", constraintName: "FK1AD2C171DFB80526", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_category", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "parent_id", baseTableName: "module_category", /* baseTableSchemaName: "core_dev", */constraintName: "FK1AD2C171DFB80526", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_category", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-39") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "module_package", baseTableSchemaName: "core_dev", constraintName: "FK8E99557360701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "module_package", /* baseTableSchemaName: "core_dev", */constraintName: "FK8E99557360701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-40") {
-		addForeignKeyConstraint(baseColumnNames: "module_package_id", baseTableName: "module_package_user", baseTableSchemaName: "core_dev", constraintName: "FK7EA2BF17FEDA9555", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_package", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "module_package_id", baseTableName: "module_package_user", /* baseTableSchemaName: "core_dev", */constraintName: "FK7EA2BF17FEDA9555", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module_package", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-41") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "module_package_user", baseTableSchemaName: "core_dev", constraintName: "FK7EA2BF1760701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "module_package_user", /* baseTableSchemaName: "core_dev", */constraintName: "FK7EA2BF1760701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-42") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "running_signal_path", baseTableSchemaName: "core_dev", constraintName: "FKE44264DC60701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "running_signal_path", /* baseTableSchemaName: "core_dev", */constraintName: "FKE44264DC60701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-43") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "saved_signal_path", baseTableSchemaName: "core_dev", constraintName: "FK6A6ED1A460701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "saved_signal_path", /* baseTableSchemaName: "core_dev", */constraintName: "FK6A6ED1A460701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-44") {
-		addForeignKeyConstraint(baseColumnNames: "sec_role_id", baseTableName: "sec_user_sec_role", baseTableSchemaName: "core_dev", constraintName: "FK6630E2AE201DB64", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_role", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "sec_role_id", baseTableName: "sec_user_sec_role", /* baseTableSchemaName: "core_dev", */constraintName: "FK6630E2AE201DB64", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_role", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-45") {
-		addForeignKeyConstraint(baseColumnNames: "sec_user_id", baseTableName: "sec_user_sec_role", baseTableSchemaName: "core_dev", constraintName: "FK6630E2A872C9F44", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "sec_user_id", baseTableName: "sec_user_sec_role", /* baseTableSchemaName: "core_dev", */constraintName: "FK6630E2A872C9F44", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-46") {
-		addForeignKeyConstraint(baseColumnNames: "feed_id", baseTableName: "stream", baseTableSchemaName: "core_dev", constraintName: "FKCAD54F8072507A49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "feed", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "feed_id", baseTableName: "stream", /* baseTableSchemaName: "core_dev", */constraintName: "FKCAD54F8072507A49", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "feed", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-47") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "stream", baseTableSchemaName: "core_dev", constraintName: "FKCAD54F8060701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "stream", /* baseTableSchemaName: "core_dev", */constraintName: "FKCAD54F8060701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-48") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "task", baseTableSchemaName: "core_dev", constraintName: "FK36358560701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "task", /* baseTableSchemaName: "core_dev", */constraintName: "FK36358560701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-49") {
-		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "tour_user", baseTableSchemaName: "core_dev", constraintName: "FK2ED7F15260701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "tour_user", /* baseTableSchemaName: "core_dev", */constraintName: "FK2ED7F15260701D32", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "sec_user", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-50") {
-		addForeignKeyConstraint(baseColumnNames: "module_id", baseTableName: "ui_channel", baseTableSchemaName: "core_dev", constraintName: "FK2E3D5E58B6140F06", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "module_id", baseTableName: "ui_channel", /* baseTableSchemaName: "core_dev", */constraintName: "FK2E3D5E58B6140F06", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "module", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 
 	changeSet(author: "admin (generated)", id: "1452621480175-51") {
-		addForeignKeyConstraint(baseColumnNames: "running_signal_path_id", baseTableName: "ui_channel", baseTableSchemaName: "core_dev", constraintName: "FK2E3D5E58E9AA551E", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "running_signal_path", referencedTableSchemaName: "core_dev", referencesUniqueColumn: "false")
+		addForeignKeyConstraint(baseColumnNames: "running_signal_path_id", baseTableName: "ui_channel", /* baseTableSchemaName: "core_dev", */constraintName: "FK2E3D5E58E9AA551E", deferrable: "false", initiallyDeferred: "false", onDelete: "NO ACTION", onUpdate: "NO ACTION", referencedColumnNames: "id", referencedTableName: "running_signal_path", /* referencedTableSchemaName: "core_dev", */ referencesUniqueColumn: "false")
 	}
 }

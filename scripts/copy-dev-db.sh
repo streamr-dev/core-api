@@ -4,7 +4,7 @@ set -e
 
 if ! [ -n "$1" ]
 then
-	echo "Usage: scripts/copy-test-db.sh <YOUR_SUFFIX>"
+	echo "Usage: scripts/copy-dev-db.sh <YOUR_SUFFIX>"
 	exit 1
 fi
 
@@ -15,9 +15,9 @@ fi
 
 DBHOST="dev.streamr"
 MYSQL_PW=Trez2tuV
-DBSOURCE=core_test
+DBSOURCE=core_dev
 DBNAME=`echo $DBSOURCE'_'$1 | cut -c1-64 | sed 's/[-.]/_/g'` # max db name length is 64 chars
-DBUSER="unifina-test"
+DBUSER="unifina-dev"
 
 mysql=`which mysql`
 mysql="$mysql --host=$DBHOST -u root --password=$MYSQL_PW"
