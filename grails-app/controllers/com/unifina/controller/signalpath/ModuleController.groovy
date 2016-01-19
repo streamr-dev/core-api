@@ -30,7 +30,7 @@ class ModuleController {
 	}
 	
 	def jsonSearchModule() {
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
+		Set<ModulePackage> allowedPackages = permissionService.getAllReadable(springSecurityService.currentUser, ModulePackage) ?: new HashSet<>()
 		List<Module> mods = []
 		
 		if (!allowedPackages.isEmpty()) {
@@ -61,7 +61,7 @@ class ModuleController {
 	} 
 	
 	def jsonGetModules() {
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
+		Set<ModulePackage> allowedPackages = permissionService.getAllReadable(springSecurityService.currentUser, ModulePackage) ?: new HashSet<>()
 		List<Module> mods = []
 		
 		if (!allowedPackages.isEmpty()) {
@@ -82,7 +82,7 @@ class ModuleController {
 	def jsonGetModuleTree() {
 		def categories = ModuleCategory.findAllByParentIsNullAndHideIsNull([sort:"sortOrder"])
 
-		Set<ModulePackage> allowedPackages = springSecurityService.currentUser?.modulePackages ?: new HashSet<>()
+		Set<ModulePackage> allowedPackages = permissionService.getAllReadable(springSecurityService.currentUser, ModulePackage) ?: new HashSet<>()
 		allowedPackages.addAll(ModulePackage.findAllByUser(springSecurityService.currentUser))
 		
 		Set<Long> allowedPackageIds = allowedPackages.collect {it.id} as Set

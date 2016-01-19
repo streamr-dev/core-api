@@ -97,7 +97,9 @@ class PermissionService {
 				if (resourceClass.properties["declaredFields"].any { it.name == "user" }) {
 					eq "user", user
 				}
-				"in" "id", resourceIds
+				if (resourceIds.size() > 0) {
+					"in" "id", resourceIds
+				}
 			}
 		}
 		return criteria.list(resourceFilter)
