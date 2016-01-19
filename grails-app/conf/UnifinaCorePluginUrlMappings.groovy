@@ -18,6 +18,7 @@ class UnifinaCorePluginUrlMappings {
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 
 		// API v1 url mappings
+		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 
 		"/api/v1/live"(resources: "liveApi", excludes: ["create", "edit"])
@@ -26,8 +27,5 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/live/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
 		"/api/v1/live/ajaxStop"(controller: "liveApi", action: "ajaxStop")
 
-		"/api/v1/canvases"(resource: "canvasesApi", excludes: ["create", "edit"])
-		"/api/v1/canvases/load"(controller: "canvasApi", action: "load")
-		"/api/v1/canvases/save"(controller: "canvasApi", action: "save")
 	}
 }

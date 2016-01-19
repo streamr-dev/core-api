@@ -106,8 +106,8 @@ class CanvasApiControllerSpec extends Specification {
 	void "must be able to save a new Canvas"() {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
-		params.json = [
-			name   : "brand new Canvas",
+		request.JSON = [
+			name: "brand new Canvas",
 			modules: [],
 		]
 		request.method = "POST"
@@ -168,7 +168,7 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
-		params.json = [
+		request.JSON = [
 			name   : "updated, new name",
 			modules: [],
 		]
@@ -185,7 +185,7 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "2"
-		params.json = [
+		request.JSON = [
 			name: "me me me",
 			modules: []
 		]

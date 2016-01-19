@@ -64,7 +64,7 @@ class CanvasApiController {
 			if (canvas.type == Canvas.Type.EXAMPLE) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				readAndSave(canvas, params.json)
+				readAndSave(canvas, request.JSON)
 			}
 		}
 	}
@@ -73,7 +73,7 @@ class CanvasApiController {
 	def save() {
 		Canvas canvas = new Canvas()
 		canvas.type = Canvas.Type.TEMPLATE
-		readAndSave(canvas, params.json)
+		readAndSave(canvas, request.JSON)
 	}
 
 	@StreamrApi
