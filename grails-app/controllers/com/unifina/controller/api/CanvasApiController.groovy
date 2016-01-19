@@ -66,7 +66,7 @@ class CanvasApiController {
 			if (canvas.type == Canvas.Type.EXAMPLE) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				readAndSave(canvas, request.JSON)
+				readAndSave(canvas)
 			}
 		}
 	}
@@ -74,9 +74,7 @@ class CanvasApiController {
 	@StreamrApi
 	def save() {
 		// TODO: if type = running, create uiChannel
-		Canvas canvas = new Canvas()
-		canvas.type = Canvas.Type.TEMPLATE
-		readAndSave(canvas, request.JSON)
+		readAndSave(new Canvas())
 	}
 
 	@StreamrApi
@@ -90,15 +88,17 @@ class CanvasApiController {
 		}
 	}
 
-	private void readAndSave(Canvas canvas, Map signalPathMap) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication)
+	private void readAndSave(Canvas canvas) {
+		Globals globals = GlobalsFactory.createInstance(request.JSON.settings ?: [:], grailsApplication)
 
 		try {
 			// Rebuild the json to check it's ok and up to date
-			def signalPathAsMap = signalPathService.reconstruct(signalPathMap, globals)
+			def signalPathAsMap = signalPathService.reconstruct(request.JSON, globals)
 			def signalPathAsJson = (signalPathAsMap as JSON)
 
 			canvas.name = signalPathAsMap.name
+			canvas.type = Canvas.Type.valueOf(request.JSON.type.toUpperCase())
+			canvas.adhoc = request.JSON.adhoc
 			canvas.json = signalPathAsJson
 			canvas.hasExports = signalPathAsMap.hasExports
 			canvas.user = request.apiUser

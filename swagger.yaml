@@ -405,7 +405,6 @@ definitions:
     required:
       - name
       - type
-      - adhoc
       - modules
     properties:
       name:

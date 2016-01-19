@@ -2,6 +2,7 @@ package com.unifina.service
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import org.codehaus.groovy.grails.web.json.JSONElement
 
 class CanvasService {
 	public List<Canvas> findAllBy(SecUser currentUser,
