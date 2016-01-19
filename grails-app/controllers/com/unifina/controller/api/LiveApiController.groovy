@@ -38,14 +38,25 @@ class LiveApiController {
 				id: canvas.id,
 				name: canvas.name,
 				state: canvas.state,
-				uiChannels: canvas.uiChannels.findAll { uiChannel ->
-					uiChannel.module != null && uiChannel.module.webcomponent != null
-				}.collect { uiChannel ->
-					[id: uiChannel.id, name: uiChannel.name, module: [id: uiChannel.module.id, webcomponent: uiChannel.module.webcomponent]]
-				}
+				uiChannels: findUiChannels(canvas)
 			]
 		}
 		render maps as JSON
+	}
+
+	def findUiChannels(Canvas canvas) {
+		canvas.uiChannels.findAll { uiChannel ->
+			uiChannel.module != null && uiChannel.module.webcomponent != null
+		}.collect { uiChannel ->
+			[
+				id: uiChannel.id,
+				name: uiChannel.name,
+				module: [
+					id: uiChannel.module.id,
+					webcomponent: uiChannel.module.webcomponent
+				]
+			]
+		}
 	}
 
 	@StreamrApi(requiresAuthentication = false)

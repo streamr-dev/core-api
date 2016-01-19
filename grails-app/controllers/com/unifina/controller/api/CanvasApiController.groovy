@@ -21,6 +21,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def index() {
+		// TODO: if type = running, create uiChannel
 		List<Canvas> canvases
 		if (request.query) {
 			canvases = Canvas.findAllByUserAndName(request.apiUser, query)
@@ -31,7 +32,7 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def show(long id) {
+	def show(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 
 			Map signalPathMap = JSON.parse(canvas.json)
@@ -59,7 +60,7 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def update(long id) {
+	def update(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			if (canvas.type == Canvas.Type.EXAMPLE) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
@@ -77,7 +78,7 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def delete(long id) {
+	def delete(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			if (canvas.type == Canvas.Type.EXAMPLE) {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
@@ -117,7 +118,7 @@ class CanvasApiController {
 		}
 	}
 
-	private void getAuthorizedCanvas(long id, Closure successHandler) {
+	private void getAuthorizedCanvas(String id, Closure successHandler) {
 		def canvas = Canvas.get(id)
 		if (canvas == null) {
 			render(status: 404, text: [error: "Canvas (id=$id) not found.", code: "NOT_FOUND"] as JSON)

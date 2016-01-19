@@ -24,9 +24,7 @@ tags:
   - name: Stream
     description: Streams
   - name: Canvas
-    description: Saved canvases in your archive
-  - name: Live
-    description: Running canvases
+    description: Saved and running Canvases
 paths:
   /streams:
     get:
@@ -255,98 +253,16 @@ paths:
           description: Success (no content)
         # TODO: error codes
 
-
-  /live:
-    get:
-      summary: List live canvases
-      description: |
-        Lists live canvases.
-      tags:
-        - Live
-      parameters:
-        - name: state
-          in: query
-          description: Filter results by state.
-          required: false
-          type: string
-          enum: [running, stopped]
-        - name: name
-          in: query
-          description: Filter results by canvas name.
-          required: false
-          type: string
-      responses:
-        '200':
-          description: An array of canvases
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Canvas'
-        # TODO: error codes
+  /canvases/{id}/start:
     post:
-      summary: Create and start a new live canvas
-      description: |
-        Create and start a new live canvas.
-      parameters:
-        - name: body
-          in: body
-          description: Canvas object
-          required: true
-          schema:
-            $ref: '#/definitions/Canvas'
+      summary: Starts a live canvas
+      description: Starts a live canvas, i.e., a canvas of type 'running' or 'stopped'.
       tags:
-        - Live
-      responses:
-        '200':
-          description: The canvas that was started
-          schema:
-            $ref: '#/definitions/Canvas'
-        # TODO: error codes
-
-  /live/{id}:
-    get:
-      summary: Get live canvas by id
-      description: Returns a live canvas by id
-      tags:
-        - Live
+        - Canvas
       parameters:
         - in: path
           name: id
-          description: ID of the live canvas to be fetched
-          required: true
-          type: integer
-      responses:
-        '200':
-          description: Success
-          schema:
-            $ref: '#/definitions/Canvas'
-        # TODO: error codes
-    delete:
-      summary: Delete a live canvas
-      description: Delete a live canvas. The canvas must be in stopped state.
-      parameters:
-        - in: path
-          name: id
-          description: ID of the live canvas to be deleted
-          required: true
-          type: integer
-      tags:
-        - Live
-      responses:
-        '204':
-          description: Success
-        # TODO: error codes
-
-  /live/{id}/resume:
-    post:
-      summary: Resumes a stopped live canvas
-      description: Resumes a live canvas that is currently stopped.
-      tags:
-        - Live
-      parameters:
-        - in: path
-          name: id
-          description: ID of the live canvas to be resumed
+          description: ID of the live canvas to be started
           required: true
           type: integer
         - name: body
@@ -355,24 +271,26 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ResumeRequest'
-
       responses:
         '200':
           description: Success
           schema:
             $ref: '#/definitions/Canvas'
-        # TODO: error codes
+        '500':
+          description: Invalid canvas type
+        '501':
+          description: Canvas already running
 
-  /live/{id}/stop:
+  /canvases/{id}/stop:
     post:
       summary: Stop a live canvas
-      description: Stops a live canvas that is currently running.
+      description: Stops a live canvas (a canvas of type 'running' or 'stopped') that is currently running.
       tags:
-        - Live
+        - Canvas
       parameters:
         - in: path
           name: id
-          description: ID of the live canvas to be fetched
+          description: ID of the live canvas to be stopped
           required: true
           type: integer
       responses:
@@ -443,22 +361,46 @@ definitions:
       - $ref: '#/definitions/CanvasCreateRequest'
       - type: object
         properties:
-          uuid:
+          id:
             type: string
             description: Unique identifier for Canvas
+          created:
+            type: dateTime
+            description: when Canvas was created
+          updated:
+            type: dateTime
+            description: when Canvas was last updated
           hasExports:
             type: boolean
             description: whether module uses exported inputs or outputs
+          uiChannel:
+            type: object
+            description: The UI Channel for this Canvas
+          state:
+            type: string
+            description: current state of live canvas
+            enum: [starting, running, stopped]
+          serialized:
+            type: boolean
+            description: indicates whether there exists a serialization of this canvas
 
   CanvasCreateRequest:
     type: object
     required:
       - name
+      - type
+      - adhoc
       - modules
     properties:
       name:
         type: string
         example: My canvas
+      type:
+        type: string
+        description: type of Canvas
+        enum: [template, example, running]
+      adhoc:
+        type: boolean
       modules:
         type: array
         items:

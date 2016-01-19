@@ -83,8 +83,15 @@ class Canvas {
 		return [
 			id: id,
 			name: name,
+			created: dateCreated,
+			updated: lastUpdated,
+			type: type.toString().toLowerCase(),
+			adhoc: adhoc,
+			state: state.toString(),
+			serialized: !isNotSerialized(),
 			modules: map?.modules,
 			settings: map?.settings,
+			uiChannel: map?.uiChannel,
 			hasExports: map?.hasExports,
 		]
 	}
