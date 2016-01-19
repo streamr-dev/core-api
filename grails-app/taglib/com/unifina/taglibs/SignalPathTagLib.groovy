@@ -165,7 +165,7 @@ class SignalPathTagLib {
 	}
 	
 	/**
-	 * Renders a module run button that calls SignalPath.run(). The body of the element will become the button text.
+	 * Renders a module run button that calls SignalPath.start(). The body of the element will become the button text.
 	 *
 	 * @attr buttonId REQUIRED id of the button
 	 */
@@ -189,12 +189,12 @@ class SignalPathTagLib {
 
 			jQuery('#$id').click(function() {
 				if (!running) {
-					SignalPath.run()
+					SignalPath.start()
 					running = true
 					jQuery('#$id').html('Abort <span class="fa fa-spin fa-spinner"></span>')
 				}
 				else
-					SignalPath.abort()
+					SignalPath.stop()
 			})
 		"""
 		
@@ -241,28 +241,6 @@ class SignalPathTagLib {
 	}
 		
 	/**
-	 * Renders a dropdown choice of workspace modes
-	 * 
-	 * @attr id REQURED id of the select
-	 * @attr optionValues a list of values for the workspaces
-	 * @attr optionNames a list of names corresponding to optionValues
-	 */
-	def workspaceDropdown = {attrs,body->
-		def optionValues = attrs.optionValues ?: ['normal','dashboard']
-		def optionNames = attrs.optionNames ?: ['Normal view','Dashboard view']
-		
-		out << "<select id='$attrs.id' style='${attrs.style ?: ""}'>"
-		for (int i=0;i<optionValues.size();i++)
-			out << "<option value='${optionValues[i]}'>${optionNames[i]}</option>"
-		out << "</select>"
-		
-		writeScriptHeader(out)
-		out << "jQuery('#${attrs.id}').change(function() { SignalPath.setWorkspace(jQuery(this).val()); });"
-		out << "jQuery(SignalPath).on('workspaceChanged', function(event, workspace) { jQuery('#${attrs.id}').val(workspace); });"
-		writeScriptFooter(out)
-	}
-
-	/**
 	 * Renders a button dropdown that will show 'save/save as' links
 	 */
 	def saveButtonDropdown = {attrs,body->
@@ -271,44 +249,35 @@ class SignalPathTagLib {
 		def str = """
 			\$('#saveButton').click(function() {
 				if (SignalPath.isSaved()) {
-					SignalPath.saveSignalPath()
+					SignalPath.save()
 				}
-				else alert('No savedata - use Save As')
+				else alert('Not saved - use Save As')
 			})
 
-			\$(SignalPath).on('loaded', function(event,saveData) {
-				if (saveData.isSaved) {
+			\$(SignalPath).on('loaded', function(event,savedJson) {
+				if (SignalPath.isSaved()) {
 					\$('#saveButton').parent().removeClass('disabled')
-					\$('#saveButton').html('Save to '+saveData.target)
+					\$('#saveButton').html('Save')
 				}
 				else {
 					\$('#saveButton').parent().addClass('disabled')
 				}
 			})
 
-			\$(SignalPath).on('saved', function(event,saveData) {
+			\$(SignalPath).on('saved', function(event,savedJson) {
 				\$('#saveButton').parent().removeClass('disabled')
-				\$('#saveButton').html('Save to '+saveData.target)
+				\$('#saveButton').html('Save')
 			})
 
 			// save as
 			\$('#saveAsButton').click(function() {
 				bootbox.prompt({
-					title: 'Save to Archive as..', 
+					title: 'Save As..',
 					callback: function(saveAsName) {
 						if (!saveAsName)
 							return;
-	
-						var saveData = {
-							url: '${ createLink(controller: "canvasApi", action: "save") }',
-							target: "Archive as new",
-							name: saveAsName
-						}
-					
-						SignalPath.saveSignalPath(saveData, function(sd) {
-							if (sd.showUrl)
-								window.location = sd.showUrl
-						})
+
+						SignalPath.saveAs(saveAsName)
 					},
 					className: 'save-as-name-dialog' 
 				})
@@ -354,85 +323,27 @@ class SignalPathTagLib {
 		def str = """
 			jQuery('#$id').click(function() {
 				if (SignalPath.isSaved()) {
-					SignalPath.saveSignalPath();
+					SignalPath.save();
 				}
-				else alert('No savedata - use Save As');
+				else alert('Not saved - use Save As');
 			});
 
-			jQuery(SignalPath).on('loaded', function(event,saveData) {
-				if (saveData.isSaved) {
+			jQuery(SignalPath).on('loaded', function(event, loadedData) {
+				if (SignalPath.isSaved()) {
 					jQuery('#$id').button("enable");
-					jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
+					jQuery('#$id .ui-button-text').html("Save");
 				}
 			});
 
-			jQuery(SignalPath).on('saved', function(event,saveData) {
+			jQuery(SignalPath).on('saved', function(event, savedData) {
 				jQuery('#$id').button("enable");
-				jQuery('#$id .ui-button-text').html("Save to "+saveData.target);
+				jQuery('#$id .ui-button-text').html("Save");
 			});
 		"""
 		out << str
 		writeScriptFooter(out)
 	}
-	
-	/**
-	 * Renders a button that will open a save as dialog for the current signalpath.
-	 *
-	 * @attr buttonId REQUIRED id of the button to be created
-	 * @attr dialogId REQUIRED id of the dialog to be created
-	 * @attr url default: create url from controller and action names
-	 * @attr controller default: "savedSignalPath"
-	 * @attr action default: "save"
-	 * @attr name the default name if the signalpath is not saved. default: empty string
-	 * @attr targetName default: "Archive"
-	 * @attr style default: ""
-	 * @attr class default: ""
-	 * @attr title default: ""
-	 */
-	def saveAsButton = {attrs,body->
-		def id = attrs.buttonId
-		def dialogId = attrs.dialogId
-		def controller = attrs.controller ?: "savedSignalPath"
-		def action = attrs.action ?: "save"
-		def targetName = attrs.targetName ?: "Archive"
-		def cls = attrs["class"] ?: ""
-		def style = attrs.style ?: ""
-		def title = attrs.title ?: ""
-		
-		out << button(attrs,body)
 
-		def url = attrs.url ?: createLink(controller:controller,action:action)
-		def dialogTitle = "Save to $targetName as.."
-		def name = attrs.name ?: ""
-		
-		writeScriptHeader(out)
-		def str = """
-			jQuery('#$id').click(function() {
-				bootbox.prompt({
-					title: '$dialogTitle', 
-					callback: function(saveAsName) {
-						if (!saveAsName)
-							return;
-	
-						var saveData = {
-							url: "$url",
-							target: "$targetName as new",
-							name: saveAsName
-						};
-					
-						SignalPath.saveSignalPath(saveData, function(sd) {
-							if (sd.showUrl)
-								window.location = sd.showUrl;
-						});
-					},
-					className: 'save-as-name-dialog'
-				});
-			});
-		"""
-		out << str
-		writeScriptFooter(out)
-	}
-	
 	/**
 	 * Fetches SP parameters as JSON from given URL and renders them as a table.
 	 *

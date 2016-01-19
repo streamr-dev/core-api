@@ -28,7 +28,7 @@ $('#moduleTree').bind('loaded.jstree', function() {
 
 $(document).ready(function() {
 
-	function getSignalPathContext() {
+	function settings() {
 		var tz = jstz();
 		
 		return {
@@ -46,16 +46,14 @@ $(document).ready(function() {
 	}
 
 	SignalPath.init({
-		canvas: 'canvas',
-		signalPathContext: getSignalPathContext,
+		parentElement: $('#canvas'),
+		settings: settings,
 		errorHandler: function(data) {
 			Streamr.showError(data.msg)
 		},
 		notificationHandler: function(data) {
 			Streamr.showInfo(data.msg)
 		},
-		runUrl: Streamr.createLink({"uri": "api/v1/live/ajaxCreate"}),
-		abortUrl: Streamr.createLink({"uri": "api/v1/live/ajaxStop"}),
 		connectionOptions: {
 			server: "${grailsApplication.config.streamr.ui.server}",
 			autoConnect: false,
@@ -67,36 +65,26 @@ $(document).ready(function() {
 		$('#modal-spinner').show()
 	})
 
-	$(SignalPath).on('loaded', function(event,saveData,data,signalPathContext) {	
+	$(SignalPath).on('loaded', function(event, json) {
 		$('#modal-spinner').hide()
-		
-		if (signalPathContext.beginDate) {
-			$("#beginDate").val(signalPathContext.beginDate).trigger("change")
-		}
-		if (signalPathContext.endDate)
-			$("#endDate").val(signalPathContext.endDate).trigger("change")
 
-		if (signalPathContext.timeOfDayFilter) {
-			$("#timeOfDayStart").val(signalPathContext.timeOfDayFilter.timeOfDayStart).trigger("change")
-			$("#timeOfDayEnd").val(signalPathContext.timeOfDayFilter.timeOfDayEnd).trigger("change")
+		var settings = json.settings
+		if (settings.beginDate) {
+			$("#beginDate").val(settings.beginDate).trigger("change")
+		}
+		if (settings.endDate)
+			$("#endDate").val(settings.endDate).trigger("change")
+
+		if (settings.timeOfDayFilter) {
+			$("#timeOfDayStart").val(settings.timeOfDayFilter.timeOfDayStart).trigger("change")
+			$("#timeOfDayEnd").val(settings.timeOfDayFilter.timeOfDayEnd).trigger("change")
 		}
 
-		$("#speed").val(signalPathContext.speed!=null ? signalPathContext.speed : 0).trigger("change")		
-	});
-	
-	$(SignalPath).on('workspaceChanged', function(event, mode) {
-		if (mode=="dashboard") {
-			$("#controls").hide();
-			$("#topButtons").addClass("showOnHover");
-		}
-		else {
-			$("#controls").show();
-			$("#topButtons").removeClass("showOnHover");
-		}
+		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")		
 	});
 	
 	<g:if test="${load}">
-		SignalPath.loadSignalPath({url:"${load}"});
+		SignalPath.load(load);
 	</g:if>
 
 	$(SignalPath).on('error', function(error) {
@@ -108,10 +96,10 @@ $(document).ready(function() {
 		$('#modal-spinner').show()
 	})
 
-	$(SignalPath).on('saved', function(event,data) {
+	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
-		Streamr.showSuccess('${message(code:"signalpath.saved.to")} '+data.target+'.', '${message(code:"signalpath.saved.title")}')
-	});
+		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+	})
 
 	// show search control
 	new SearchControl(
@@ -125,20 +113,20 @@ $(document).ready(function() {
     })
 
 	loadBrowser = new SignalPathBrowser()
-		.tab('Archive', '${ createLink(controller: "savedSignalPath", \
+		.tab('Archive', '${ createLink(controller: "canvas", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
 
 		<%-- Don't show the live tab without ROLE_LIVE --%>
 		<sec:ifAllGranted roles="ROLE_LIVE">
-			.tab('Live', '${ createLink(controller: "live", \
+			.tab('Live', '${ createLink(controller: "canvas", \
 				action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
 		</sec:ifAllGranted>
 		
-		.tab('Examples', '${ createLink(controller: "savedSignalPath", \
+		.tab('Examples', '${ createLink(controller: "canvas", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
 			
-		.onSelect(function(url) {
-			SignalPath.loadSignalPath({ url: url })
+		.onSelect(function(id) {
+			SignalPath.load(id)
 		})
 
 	<%-- Show examples loader if requested --%>

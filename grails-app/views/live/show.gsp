@@ -19,7 +19,7 @@
 <r:script>
 	$(document).ready(function() {
 		SignalPath.init({
-			canvas: "canvas",
+			parentElement: $("#canvas"),
 			zoom: ${params.zoom ?: 1},
 			connectionOptions: {
 				server: "${grailsApplication.config.streamr.ui.server}"
@@ -30,12 +30,10 @@
 			}
 		});
 		
-		SignalPath.loadSignalPath({
-			url: '${createLink(controller: "liveApi", action:"show", id:rsp.id)}'
-		}, function(saveData, signalPathData, signalPathContext, runData) {
+		SignalPath.load(${rsp.id}, function() {
 		
 			<g:if test="${rsp.state=='running'}">
-				SignalPath.subscribe(runData, true);
+				SignalPath.subscribe(true);
 			</g:if>
 			
 			<g:if test="${params.embedded}">

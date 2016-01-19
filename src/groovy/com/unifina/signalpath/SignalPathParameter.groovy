@@ -38,7 +38,8 @@ class SignalPathParameter extends Parameter<Canvas> {
 					property 'name', 'name'
 				}
 			}
-			signalPaths = SavedSignalPath.createCriteria().list(proj << crit)
+			// TODO: Use permissionService to query Canvases accessible to this user once that branch is landed
+			signalPaths = Canvas.createCriteria().list(proj << crit)
 		}
 		else signalPaths = []
 

@@ -1,5 +1,6 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
@@ -72,5 +73,48 @@ class CanvasController {
 	def debug() {
 		return [runners: servletContext["signalPathRunners"], returnChannels: servletContext["returnChannels"], broadcasters: BroadcasterFactory.getDefault().lookupAll()]
 	}
+
+	def loadBrowser() {
+		def result = [
+				browserId: params.browserId,
+				headers: ["Id","Name"],
+				contentUrl: createLink(
+						controller: "canvas",
+						action: "loadBrowserContent",
+						params: [
+								browserId: params.browserId,
+								command: params.command
+						]
+				)
+		]
+
+		render(template: "loadBrowser", model: result)
+	}
+
+	def loadBrowserContent() {
+		def max = params.int("max") ?: 100
+		def offset = params.int("offset") ?: 0
+		def ssp
+		// TODO: do queries via permissionService once that branch is ready
+		if (params.browserId == 'examplesLoadBrowser') {
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.type = :type order by sp.dateCreated asc", [type: Canvas.Type.EXAMPLE], [max: max, offset: offset])
+		} else if (params.browserId == 'archiveLoadBrowser') {
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user and sp.type = :type order by sp.dateCreated desc", [type: Canvas.Type.TEMPLATE, user:springSecurityService.currentUser], [max: max, offset: offset])
+		} else if (params.browserId == 'liveLoadBrowser') {
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user and sp.type = :type order by sp.dateCreated desc", [type: Canvas.Type.RUNNING, user:springSecurityService.currentUser], [max: max, offset: offset])
+		}
+
+		def result = [signalPaths:[]]
+		ssp.each {
+			def tmp = [:]
+			tmp.id = it[0]
+			tmp.name = it[1]
+			tmp.command = params.command
+			tmp.offset = offset++
+			result.signalPaths.add(tmp)
+		}
+		return result
+	}
+
 	
 }

@@ -93,44 +93,7 @@ class LiveController {
 		}
 		redirect(action:"show", id:canvas.id)
 	}
-	
-	@Secured("ROLE_USER")
-	def loadBrowser() {
-		def result = [
-			browserId: params.browserId,
-			headers: ["Id", "Name"],
-			contentUrl: createLink(
-				controller: "live",
-				action: "loadBrowserContent",
-				params: [
-					browserId: params.browserId,
-					command: params.command
-				]
-			)
-		]
-		render(template:"/savedSignalPath/loadBrowser",model:result)
-	}
-	
-	@Secured("ROLE_USER")
-	def loadBrowserContent() {
-		def max = params.int("max") ?: 100
-		def offset = params.int("offset") ?: 0
-		def ssp = Canvas.executeQuery("select c.id, c.name from Canvas c where c.user = :user order by c.id desc",
-			[user:springSecurityService.currentUser], [max: max, offset: offset])
-		
-		def result = [signalPaths:[]]
-		ssp.each {
-			def tmp = [:]
-			tmp.id = it[0]
-			tmp.name = it[1]
-			tmp.url = createLink(controller:"liveApi",action:"show",params:[id:it[0]])
-			tmp.command = params.command
-			tmp.offset = offset++
-			result.signalPaths.add(tmp)
-		}
-		render(view:"/savedSignalPath/loadBrowserContent",model:result)
-	}
-	
+
 	@Secured("ROLE_USER")
 	def delete() {
 		def canvasInstance = Canvas.get(params.id)
