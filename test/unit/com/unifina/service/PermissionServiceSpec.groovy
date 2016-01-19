@@ -85,6 +85,7 @@ class PermissionServiceSpec extends Specification {
 
 		// Set up the permission to the allowed resources
 		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
+		//allowedPermission2 = service.grant(anotherUser, allowed, me)
 		allowedPermission2 = new Permission(user:me, clazz:ModulePackage.name, longId:allowed.id, operation:"read").save(validate:false)
 		dashReadPermission = new Permission(user:me, clazz:Dashboard.name, longId:dashAllowed.id, operation:"read").save(validate:false)
 		
@@ -126,49 +127,6 @@ class PermissionServiceSpec extends Specification {
 		SpringSecurityUtils.doWithAuth("me") {
 			grailsApplication.mainContext.getBean("springSecurityService").currentUser == me
 		}
-	}
-	
-    void "access denied when no user logged in"() {
-		expect:
-		!service.canAccess(owned)
-		!service.canAccess(modOwned)
-    }
-	
-	void "access granted to owned module and package"() {
-		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(owned)
-		}
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(modOwned)
-		}
-	}
-	
-	void "access granted to permitted module and package"() {
-		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(allowed)
-		}
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(modAllowed)
-		}
-	}
-	
-	void "access denied to restricted module and package"() {
-		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			!service.canAccess(restricted)
-		}
-		SpringSecurityUtils.doWithAuth("me") {
-			!service.canAccess(modRestricted)
-		}
-	}
-
-	void "granting access to restricted object based supplied user"() {
-		expect:
-		service.canAccess(owned, me)
-		!service.canAccess(restricted, me)
-		!service.canAccess(owned, anotherUser)
 	}
 
 	void "access granted to permitted Dashboard"() {
@@ -214,6 +172,67 @@ class PermissionServiceSpec extends Specification {
 		service.getAllReadable(new SecUser(), Dashboard) == []
 		service.getAllReadable(null, Dashboard) == []
 	}
+
+	void "getAllReadable closure filtering works as expected"() {
+		expect:
+		service.getAllReadable(me, Dashboard) { like("name", "%ll%") } == [dashAllowed]
+	}
+
+	void "getAllShareable closure filtering works as expected"() {
+		expect:
+		service.getAllShareable(me, Dashboard) == [dashOwned]
+		service.getAllShareable(me, Dashboard) { like("name", "%ll%") } == []
+	}
+
+	//----------------------------------
+	// (soon to be) deprecated canAccess methods
+	// once these are dumped, also SpringSecurityUtils dependency is gone from tester; no need to defineBeans
+
+	void "access denied when no user logged in"() {
+		expect:
+		!service.canAccess(owned)
+		!service.canAccess(modOwned)
+	}
+
+	void "access granted to owned module and package"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") {
+			service.canAccess(owned)
+		}
+		SpringSecurityUtils.doWithAuth("me") {
+			service.canAccess(modOwned)
+		}
+	}
+
+	void "access granted to permitted module and package"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") {
+			service.canAccess(allowed)
+		}
+		SpringSecurityUtils.doWithAuth("me") {
+			service.canAccess(modAllowed)
+		}
+	}
+
+	void "access denied to restricted module and package"() {
+		expect:
+		SpringSecurityUtils.doWithAuth("me") {
+			!service.canAccess(restricted)
+		}
+		SpringSecurityUtils.doWithAuth("me") {
+			!service.canAccess(modRestricted)
+		}
+	}
+
+	void "granting access to restricted object based supplied user"() {
+		expect:
+		service.canAccess(owned, me)
+		!service.canAccess(restricted, me)
+		!service.canAccess(owned, anotherUser)
+	}
+
+	//----------------------------------
+	// Completely unrelated set of methods from UnifinaSecurityService
 
 	void "looking up a user based on correct api keys"() {
 		when:

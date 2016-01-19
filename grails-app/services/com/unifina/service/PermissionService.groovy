@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import grails.gorm.DetachedCriteria
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
@@ -14,15 +15,30 @@ import org.springframework.validation.FieldError
 
 import com.unifina.domain.security.Permission
 
+import java.security.AccessControlException
+
 class PermissionService {
 
 	def grailsApplication
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(PermissionService)
 
-	final ownerPermissions = ["read", "write", "share"]
+	final allOperations = ["read", "write", "share"]
+	final ownerPermissions = allOperations
 
-	public List<String> getPermittedOperations(SecUser user, resource) {
+	// cascade some revocations to "higher" rights too
+	//   to ensure a meaningful combination (e.g. "write" without "read" makes no sense)
+	final alsoRevoke = ["read": ["write", "share"]]
+
+	/** ownership (if applicable) is stored in each Resource as "user" attribute */
+	private boolean isOwner(SecUser user, resource) {
+		return resource?.hasProperty("user") &&
+				user?.id != null &&
+				resource.user?.id != null &&
+				resource.user.id == user.id
+	}
+
+	private List<Permission> getNonOwnerPermissions(SecUser user, resource) {
 		if (!resource) {
 			log.warn("canRead: missing resource domain object!")
 			return []
@@ -32,38 +48,34 @@ class PermissionService {
 			return []
 		}
 
-		// resource owner has all rights
-		if (resource.hasProperty("user") && resource.user?.id != null && resource.user.id == user.id) {
-			return ownerPermissions
-		}
-
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
+		//   hence, class.name of a proxy object won't match the class.name in database
 		def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
 		return Permission.withCriteria {
 			eq("user", user)
 			eq("clazz", clazz)
 			eq("longId", resource.id)		// TODO: handle stringId
-		}*.operation;
+		}
+	}
+
+	public List<String> getPermittedOperations(SecUser user, resource) {
+		if (isOwner(user, resource)) { return ownerPermissions }
+		return getNonOwnerPermissions(user, resource)*.operation;
 	}
 
 	/** Test if given user can read given resource instance */
-	boolean canRead(SecUser user, resource, boolean logIfDenied=true) {
-		def perms = getPermittedOperations(user, resource)
-
-		if (!perms && logIfDenied) {
-			log.warn("${user?.username}(id ${user?.id}) tried to read $resource without Permission!")
-			if (resource?.user) {
-				log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
-			}
-		}
-
+	boolean canRead(SecUser user, resource) {
 		// any permissions imply read access
-		return perms != []
-		//return "read" in perms
+		return getPermittedOperations(user, resource) != []
+		//return "read" in getPermittedOperations(user, resource)
 	}
 
-	/** Get all resources of given type that the user has read access to */
-	public static <T> List<T> getAllReadable(SecUser user, Class<T> resourceClass) {
+	/** Test if given user can share given resource instance, that is, grant other users read/share rights */
+	boolean canShare(SecUser user, resource) {
+		return "share" in getPermittedOperations(user, resource)
+	}
+
+	private static <T> List<T> getWithCriteria(SecUser user, Class<T> resourceClass, Closure resourceFilter, Closure permissionFilter) {
 		def resourceClassName = resourceClass?.name;
 		if (!resourceClassName /*|| !grailsApplication.isDomainClass(resourceClass)*/) {
 			//log.warn("getAllReadable: Not a resource type: $resourceClassName")
@@ -71,20 +83,128 @@ class PermissionService {
 		}
 
 		// any permissions imply read access
-		def readableIds = Permission.withCriteria {
+		def resourceIds = Permission.withCriteria {
 			eq "user", user
 			eq "clazz", resourceClassName
+
+			permissionFilter.delegate = delegate
+			permissionFilter()
 		}*.longId
 
-		return resourceClass.withCriteria {
+		def criteria = new DetachedCriteria(resourceClass).build {
 			or {
 				// resources that specify an "owner" automatically give that user all access rights
 				if (resourceClass.properties["declaredFields"].any { it.name == "user" }) {
 					eq "user", user
 				}
-				"in" "id", readableIds
+				"in" "id", resourceIds
 			}
 		}
+		return criteria.list(resourceFilter)
+	}
+
+	/** Get all resources of given type that the user has read access to */
+	public static <T> List<T> getAllReadable(SecUser user, Class<T> resourceClass, Closure resourceFilter = {}) {
+		return getWithCriteria(user, resourceClass, resourceFilter) {}
+	}
+
+	/** Get all resources of given type that the user can grant access to for others */
+	public static <T> List<T> getAllShareable(SecUser user, Class<T> resourceClass, Closure resourceFilter = {}) {
+		return getWithCriteria(user, resourceClass, resourceFilter) {
+			eq "operation", "share"
+		}
+	}
+
+	/**
+	 * Grant a Permission to another SecUser to access a resource
+	 * @param grantor user that has "share" rights to the resource
+	 * @param resource to be shared
+	 * @param target user that will receive the access
+	 * @param operation "read", "write", "share"
+	 * @return Permission object that was created
+	 * @throws AccessControlException if grantor doesn't have the 'share' permission
+	 * @throws IllegalArgumentException if trying to give resource owner "more" access permissions
+     */
+	public Permission grant(SecUser grantor, resource, SecUser target, String operation="read", boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+		// owner already has all access, can't give "more" access
+		if (isOwner(user, resource)) {
+			throw IllegalArgumentException("Can't add access permissions to $resource for owner (${revoker?.username}, id ${revoker?.id})!")
+		}
+
+		if (canShare(grantor, resource)) {		// TODO: check grantor himself has the right he's granting (e.g. "write")
+			return systemGrant(target, resource, operation)
+		} else {
+			if (logIfDenied) {
+				log.warn("${grantor?.username}(id ${grantor?.id}) tried to share $resource without Permission!")
+				if (resource?.user) {
+					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
+				}
+			}
+		}
+		throw AccessControlException("${grantor?.username}(id ${grantor?.id}) has no 'share' permission to $resource!")
+	}
+
+	/**
+	 * "Internal" version of Permission granting; not done as any specific SecUser
+	 * @param target user that will receive the access
+	 * @param resource to be shared
+	 * @param operation "read", "write", "share"
+     * @return
+     */
+	public Permission systemGrant(SecUser target, resource, String operation="read") {
+		if (operation in allOperations) {
+			// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
+			//   hence, class.name of a proxy object won't match the class.name in database
+			def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
+			return new Permission(user: target, clazz: clazz, longId: resource.id, operation: operation).save(flush: true, failOnError: true)
+		} else {
+			throw new IllegalArgumentException("Operation should be one of " + allOperations)
+		}
+	}
+
+	/**
+	 * Revoke a Permission from another SecUser to access a resource
+	 * @param revoker needs a "share" Permission to the resource (or else, is the owner)
+	 * @param resource to be revoked from target
+	 * @param target user whose Permission is revoked
+	 * @param operation includes also all "higher" operations, e.g. "read" also revokes "share"
+	 * @returns Permission objects that were deleted
+     */
+	public List<Permission> revoke(SecUser revoker, resource, SecUser target, String operation="read", boolean logIfDenied=true) throws AccessControlException {
+		// can't revoke ownership
+		if (isOwner(user, resource)) {
+			throw AccessControlException("Can't revoke owner's (${revoker?.username}, id ${revoker?.id}) access to $resource!")
+		}
+
+		if (canShare(revoker, resource)) {
+			return systemRevoke(target, resource, operation)
+		} else {
+			if (logIfDenied) {
+				log.warn("${revoker?.username}(id ${revoker?.id}) tried to revoke $resource without 'share' Permission!")
+				if (resource?.user) {
+					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
+				}
+			}
+		}
+	}
+
+	/**
+	 * "Internal" version of Permission revocation; not done as any specific SecUser
+	 * @param target user whose Permission is revoked
+	 * @param resource to be revoked from target
+	 * @param operation includes also all "higher" operations, e.g. "read" also revokes "share"
+     * @return Permission objects that were deleted
+     */
+	public List<Permission> systemRevoke(SecUser target, resource, String operation="read") {
+		def ret = []
+		def perms = getNonOwnerPermissions(target, resource)
+		def revokeOp = { String op -> perms.findAll { it.operation == op }.each {
+			ret.add(it)
+			it.delete()
+		} }
+		revokeOp operation
+		alsoRevoke.get(operation).each revokeOp
+		return ret
 	}
 
 	@Deprecated
@@ -101,7 +221,6 @@ class PermissionService {
 	@CompileStatic
 	boolean canAccess(Module module, SecUser user=springSecurityService.getCurrentUser()) {
 		return canAccess(module.modulePackage, user)
-		//return canAccess(ModulePackage.load(module.modulePackageId), user)
 	}
 
 	@Deprecated
