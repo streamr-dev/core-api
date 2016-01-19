@@ -19,6 +19,7 @@ class UserController {
 
 	def userService
 	def userCache
+	def permissionService
 
 	static defaultAction = 'userSearch'
 
@@ -204,7 +205,10 @@ class UserController {
 			}
 		}
 
-		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted]
+		def feeds = permissionService.getAllReadable(user, Feed)
+		def mps = permissionService.getAllReadable(user, ModulePackage)
+
+		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted, userFeeds: feeds, userModulePackages: mps]
 	}
     
     def delete() {

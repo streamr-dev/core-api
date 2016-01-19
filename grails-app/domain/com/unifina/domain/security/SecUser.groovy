@@ -39,12 +39,4 @@ class SecUser {
 	Set<SecRole> getAuthorities() {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
-
-	Set<ModulePackage> getModulePackages() {
-		PermissionService.getAllReadable(this, ModulePackage) as Set
-	}
-	
-	Set<Feed> getFeeds() {
-		PermissionService.getAllReadable(this, Feed) as Set
-	}
 }

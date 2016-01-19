@@ -56,7 +56,7 @@ class UserService {
 
         if(roles == null) {
             roles = roleClass.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
-            if(roles.size() != secConf.ui.register.defaultRoleNames.size())
+            if (roles.size() != secConf.ui.register.defaultRoleNames.size())
                 throw new RuntimeException("Roles not found: "+secConf.ui.register.defaultRoleNames)
         }
 
@@ -68,14 +68,13 @@ class UserService {
     def addFeeds(user, List<Feed> feeds=null) {
         if(feeds == null) {
             feeds = Feed.findAllByIdInList(grailsApplication.config.streamr.user.defaultFeeds.collect {it.longValue()})
-            if(feeds.size() != grailsApplication.config.streamr.user.defaultFeeds.size())
+            if (feeds.size() != grailsApplication.config.streamr.user.defaultFeeds.size())
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
 
-		// add "read" permission to each selected feed
 		// TODO: decide default permissions (that make sense with feeds)
         feeds.each { feed ->
-			new Permission(user: user, clazz: Feed.class.name, longId: feed.id, operation: "read").save(flush: true, failOnError: true)
+			permissionService.systemGrant(user, feed, "read")
         }
     }
 
@@ -86,10 +85,9 @@ class UserService {
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }
 
-		// add "read" permission to each selected modulepackage
 		// TODO: decide default permissions (that make sense with modpacks)
         packages.each { modulePackage ->
-			new Permission(user: user, clazz: ModulePackage.class.name, longId: modulePackage.id, operation: "read").save(flush: true, failOnError: true)
+			permissionService.systemGrant(user, modulePackage, "read")
         }
     }
 }

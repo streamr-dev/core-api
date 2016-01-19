@@ -54,6 +54,8 @@ class UserServiceSpec extends Specification {
         }
     }
 
+	def permissionService
+
     def setup() {
         // This is normally run in UnifinaCoreGrailsPlugin.groovy -> doWithSpring,
         // but unit test environment doesn't execute that
@@ -61,10 +63,13 @@ class UserServiceSpec extends Specification {
         defineBeans {
             passwordEncoder(PlaintextPasswordEncoder)
             springSecurityService(SpringSecurityService)
+			permissionService(PermissionService)
         }
         // Do some wiring that should be done automatically but for some reason is not (in unit tests)
         grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
         grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
+		permissionService = mainContext.getBean(PermissionService)
+		permissionService.grailsApplication = grailsApplication
     }
 
     def "the user is created when called"() {
@@ -86,11 +91,11 @@ class UserServiceSpec extends Specification {
         user.getAuthorities().toArray()[0].authority == "ROLE_USER"
         user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
 
-        user.getModulePackages().size() == 1
-        user.getModulePackages().toArray()[0].id == 1
+		permissionService.getAllReadable(user, ModulePackage).size() == 1
+		permissionService.getAllReadable(user, ModulePackage)[0].id == 1
 
-        user.getFeeds().size() == 1
-        user.getFeeds().toArray()[0].id == 7
+		permissionService.getAllReadable(user, Feed).size() == 1
+		permissionService.getAllReadable(user, Feed)[0].id == 7
     }
 
     def "if the roles, feeds and modulePackages are given, it should use them"() {
@@ -114,12 +119,11 @@ class UserServiceSpec extends Specification {
         user.getAuthorities().size() == 1
         user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-        user.getFeeds().size() == 0
+		permissionService.getAllReadable(user, Feed).size() == 0
 
-        user.getModulePackages().size() == 2
-        user.getModulePackages().toArray()[0].id == 1
-        user.getModulePackages().toArray()[1].id == 2
-
+		permissionService.getAllReadable(user, ModulePackage).size() == 2
+		permissionService.getAllReadable(user, ModulePackage)[0].id == 1
+		permissionService.getAllReadable(user, ModulePackage)[1].id == 2
     }
 
     def "it should fail if the default roles, feeds of modulePackages are not found"() {

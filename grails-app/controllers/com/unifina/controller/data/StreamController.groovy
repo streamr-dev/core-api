@@ -161,7 +161,7 @@ class StreamController {
 	def search() {
 		List<Map> streams = []
 		SecUser user = springSecurityService.currentUser
-		Set<Feed> allowedFeeds = user.feeds ?: new HashSet<>()
+		Set<Feed> allowedFeeds = permissionService.getAllReadable(user, Feed) ?: new HashSet<>()
 
 		if (!allowedFeeds.isEmpty()) {
 			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+

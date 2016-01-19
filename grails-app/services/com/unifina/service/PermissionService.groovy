@@ -75,10 +75,10 @@ class PermissionService {
 		return "share" in getPermittedOperations(user, resource)
 	}
 
-	private static <T> List<T> getWithCriteria(SecUser user, Class<T> resourceClass, Closure resourceFilter, Closure permissionFilter) {
+	private <T> List<T> getWithCriteria(SecUser user, Class<T> resourceClass, Closure resourceFilter, Closure permissionFilter) {
 		def resourceClassName = resourceClass?.name;
-		if (!resourceClassName /*|| !grailsApplication.isDomainClass(resourceClass)*/) {
-			//log.warn("getAllReadable: Not a resource type: $resourceClassName")
+		if (!resourceClassName || !grailsApplication.isDomainClass(resourceClass)) {
+			log.warn("getAllReadable: Not a resource type: $resourceClassName")
 			return []
 		}
 
@@ -104,12 +104,12 @@ class PermissionService {
 	}
 
 	/** Get all resources of given type that the user has read access to */
-	public static <T> List<T> getAllReadable(SecUser user, Class<T> resourceClass, Closure resourceFilter = {}) {
+	public <T> List<T> getAllReadable(SecUser user, Class<T> resourceClass, Closure resourceFilter = {}) {
 		return getWithCriteria(user, resourceClass, resourceFilter) {}
 	}
 
 	/** Get all resources of given type that the user can grant access to for others */
-	public static <T> List<T> getAllShareable(SecUser user, Class<T> resourceClass, Closure resourceFilter = {}) {
+	public <T> List<T> getAllShareable(SecUser user, Class<T> resourceClass, Closure resourceFilter = {}) {
 		return getWithCriteria(user, resourceClass, resourceFilter) {
 			eq "operation", "share"
 		}
@@ -127,8 +127,8 @@ class PermissionService {
      */
 	public Permission grant(SecUser grantor, resource, SecUser target, String operation="read", boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		// owner already has all access, can't give "more" access
-		if (isOwner(user, resource)) {
-			throw IllegalArgumentException("Can't add access permissions to $resource for owner (${revoker?.username}, id ${revoker?.id})!")
+		if (isOwner(target, resource)) {
+			throw new IllegalArgumentException("Can't add access permissions to $resource for owner (${target?.username}, id ${target?.id})!")
 		}
 
 		if (canShare(grantor, resource)) {		// TODO: check grantor himself has the right he's granting (e.g. "write")
@@ -140,8 +140,8 @@ class PermissionService {
 					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 				}
 			}
+			throw new AccessControlException("${grantor?.username}(id ${grantor?.id}) has no 'share' permission to $resource!")
 		}
-		throw AccessControlException("${grantor?.username}(id ${grantor?.id}) has no 'share' permission to $resource!")
 	}
 
 	/**
@@ -172,8 +172,8 @@ class PermissionService {
      */
 	public List<Permission> revoke(SecUser revoker, resource, SecUser target, String operation="read", boolean logIfDenied=true) throws AccessControlException {
 		// can't revoke ownership
-		if (isOwner(user, resource)) {
-			throw AccessControlException("Can't revoke owner's (${revoker?.username}, id ${revoker?.id}) access to $resource!")
+		if (isOwner(target, resource)) {
+			throw new AccessControlException("Can't revoke owner's (${target?.username}, id ${target?.id}) access to $resource!")
 		}
 
 		if (canShare(revoker, resource)) {
@@ -185,6 +185,7 @@ class PermissionService {
 					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 				}
 			}
+			throw new AccessControlException("${revoker?.username}(id ${revoker?.id}) has no 'share' permission to $resource!")
 		}
 	}
 

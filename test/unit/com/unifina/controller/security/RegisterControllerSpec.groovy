@@ -44,7 +44,6 @@ class RegisterControllerSpec extends Specification {
 	void setup() {
 		mailSent = false
 
-
 		controller.mailService = [
 			sendMail: {
 				mailSent = true
@@ -58,7 +57,7 @@ class RegisterControllerSpec extends Specification {
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication
-		
+		controller.userService.permissionService = controller.permissionService
 	}
 
 	void "index should not be available"() {

@@ -21,6 +21,8 @@ import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.security.Permission
 import com.unifina.domain.dashboard.Dashboard
 
+import java.security.AccessControlException
+
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
@@ -85,9 +87,8 @@ class PermissionServiceSpec extends Specification {
 
 		// Set up the permission to the allowed resources
 		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
-		//allowedPermission2 = service.grant(anotherUser, allowed, me)
-		allowedPermission2 = new Permission(user:me, clazz:ModulePackage.name, longId:allowed.id, operation:"read").save(validate:false)
-		dashReadPermission = new Permission(user:me, clazz:Dashboard.name, longId:dashAllowed.id, operation:"read").save(validate:false)
+		allowedPermission2 = service.grant(anotherUser, allowed, me)
+		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
 		
 		// Configure SpringSecurity fields
 		def userLookup = [:]
@@ -167,7 +168,7 @@ class PermissionServiceSpec extends Specification {
 
 	void "getAllReadable returns empty on bad inputs"() {
 		expect:
-		//service.getAllReadable(me, java.lang.Object) == []
+		service.getAllReadable(me, java.lang.Object) == []
 		service.getAllReadable(me, null) == []
 		service.getAllReadable(new SecUser(), Dashboard) == []
 		service.getAllReadable(null, Dashboard) == []
@@ -182,6 +183,102 @@ class PermissionServiceSpec extends Specification {
 		expect:
 		service.getAllShareable(me, Dashboard) == [dashOwned]
 		service.getAllShareable(me, Dashboard) { like("name", "%ll%") } == []
+	}
+
+	void "granting and revoking read rights"() {
+		when:
+		service.grant(me, dashOwned, stranger)
+		then:
+		service.getAllReadable(stranger, Dashboard) == [dashOwned]
+
+		when:
+		service.revoke(me, dashOwned, stranger)
+		then:
+		service.getAllReadable(stranger, Dashboard) == []
+	}
+
+	void "grant and revoke throw for non-'share'-access users"() {
+		when:
+		service.grant(me, dashAllowed, stranger)
+		then:
+		thrown AccessControlException
+
+		when:
+		service.revoke(stranger, dashRestricted, me)
+		then:
+		thrown AccessControlException
+
+		when:
+		service.grant(anotherUser, dashAllowed, me, "share")
+		service.revoke(me, dashAllowed, anotherUser)
+		then: "Y U try to revoke owner's access?! That should never be generated from the UI!"
+		thrown AccessControlException
+	}
+
+	void "sharing read rights to others"() {
+		when:
+		service.grant(me, dashOwned, stranger, "share")
+		then:
+		service.getAllReadable(stranger, Dashboard) == [dashOwned]
+		service.getAllShareable(stranger, Dashboard) == [dashOwned]
+
+		expect:
+		!(dashOwned in service.getAllReadable(anotherUser, Dashboard))
+
+		when: "stranger shares read access"
+		service.grant(stranger, dashOwned, anotherUser)
+		then:
+		dashOwned in service.getAllReadable(anotherUser, Dashboard)
+		!(dashOwned in service.getAllShareable(anotherUser, Dashboard))
+
+		when:
+		service.revoke(stranger, dashOwned, anotherUser)
+		then:
+		!(dashOwned in service.getAllReadable(anotherUser, Dashboard))
+
+		when: "of course, it's silly to revoke 'share' access since it might already been re-shared..."
+		service.revoke(me, dashOwned, stranger)
+		service.grant(stranger, dashOwned, anotherUser)
+		then:
+		thrown AccessControlException
+	}
+
+	void "revocation is granular"() {
+		setup:
+		service.grant(me, dashOwned, stranger, "read")
+		service.grant(me, dashOwned, stranger, "share")
+		when:
+		service.revoke(me, dashOwned, stranger, "share")
+		then: "only 'share' access is revoked"
+		service.getAllReadable(stranger, Dashboard) == [dashOwned]
+		service.getAllShareable(stranger, Dashboard) == []
+	}
+
+	void "default revocation is all access"() {
+		setup:
+		service.grant(me, dashOwned, stranger, "read")
+		service.grant(me, dashOwned, stranger, "share")
+		when:
+		service.revoke(me, dashOwned, stranger)
+		then: "by default, revoke all access"
+		service.getAllReadable(stranger, Dashboard) == []
+		service.getAllShareable(stranger, Dashboard) == []
+	}
+
+	void "granting works (roughly) idempotently"() {
+		expect:
+		service.getAllReadable(stranger, Dashboard) == []
+		when:
+		service.grant(me, dashOwned, stranger)
+		then: "now you see it..."
+		service.getAllReadable(stranger, Dashboard) == [dashOwned]
+		when:
+		service.grant(me, dashOwned, stranger)
+		service.grant(me, dashOwned, stranger)
+		service.grant(me, dashOwned, stranger)
+		service.revoke(me, dashOwned, stranger)
+		then: "now you don't."
+		service.getAllReadable(stranger, Dashboard) == []
 	}
 
 	//----------------------------------
