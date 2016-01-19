@@ -1,8 +1,5 @@
 package com.unifina.domain.security
 
-import com.unifina.domain.data.Feed
-import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.service.PermissionService
 import com.unifina.utils.IdGenerator;
 
 class SecUser {
