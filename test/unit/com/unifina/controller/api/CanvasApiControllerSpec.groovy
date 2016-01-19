@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.CanvasService
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
 import grails.plugin.springsecurity.SpringSecurityService
@@ -13,7 +14,7 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
+@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService, CanvasService])
 class CanvasApiControllerSpec extends Specification {
 
 	Canvas canvas1
@@ -22,6 +23,7 @@ class CanvasApiControllerSpec extends Specification {
 	Canvas canvas4
 
 	void setup() {
+		controller.canvasService = mainContext.getBean(CanvasService)
 
 		SecUser me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
