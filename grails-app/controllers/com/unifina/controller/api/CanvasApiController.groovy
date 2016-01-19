@@ -12,6 +12,7 @@ import org.apache.log4j.Logger
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
 
+	def canvasService
 	def signalPathService
 	def springSecurityService
 	def grailsApplication
@@ -21,14 +22,14 @@ class CanvasApiController {
 
 	@StreamrApi
 	def index() {
-		// TODO: if type = running, create uiChannel
-		List<Canvas> canvases
-		if (request.query) {
-			canvases = Canvas.findAllByUserAndName(request.apiUser, query)
-		} else {
-			canvases = Canvas.findAllByUser(request.apiUser)
-		}
-		render(canvases.collect { it.toMap() } as JSON)
+		List<Canvas> canvases = canvasService.findAllBy(
+			request.apiUser,
+			params.name,
+			params.boolean("adhoc"),
+			params.type ? Canvas.Type.valueOf(params.type.toUpperCase()) : null,
+			params.state ? Canvas.State.valueOf(params.state.toUpperCase()) : null
+		)
+		render(canvases*.toMap() as JSON)
 	}
 
 	@StreamrApi
@@ -72,6 +73,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def save() {
+		// TODO: if type = running, create uiChannel
 		Canvas canvas = new Canvas()
 		canvas.type = Canvas.Type.TEMPLATE
 		readAndSave(canvas, request.JSON)

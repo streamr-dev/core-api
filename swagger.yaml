@@ -145,8 +145,8 @@ paths:
 
   /canvases:
     get:
-      summary: List saved canvases
-      description: Lists saved canvases in your archive.
+      summary: List canvases
+      description: Lists and possibly filter canvases in your archive.
       tags:
         - Canvas
       parameters:
@@ -155,6 +155,22 @@ paths:
           description: Filter results by canvas name.
           required: false
           type: string
+        - name: type
+          in: query
+          description: Filter results by canvas type.
+          required: false
+          type: string
+        - name: state
+          in: query
+          description: Filter results by canvas state (implies canvas type running).
+          required: false
+          type: string
+        - name: adhoc
+          in: query
+          description: Filter adhoc canvases (implies canvas type running).
+          required: false
+          type: boolean
+
       responses:
         '200':
           description: An array of canvases
@@ -365,11 +381,13 @@ definitions:
             type: string
             description: Unique identifier for Canvas
           created:
-            type: dateTime
+            type: string
             description: when Canvas was created
+            format: dateTime
           updated:
-            type: dateTime
+            type: string
             description: when Canvas was last updated
+            format: dateTime
           hasExports:
             type: boolean
             description: whether module uses exported inputs or outputs
@@ -377,9 +395,7 @@ definitions:
             type: object
             description: The UI Channel for this Canvas
           state:
-            type: string
-            description: current state of live canvas
-            enum: [starting, running, stopped]
+            $ref: '#/definitions/CanvasState'
           serialized:
             type: boolean
             description: indicates whether there exists a serialization of this canvas
@@ -396,9 +412,7 @@ definitions:
         type: string
         example: My canvas
       type:
-        type: string
-        description: type of Canvas
-        enum: [template, example, running]
+        $ref: '#/definitions/CanvasType'
       adhoc:
         type: boolean
       modules:
@@ -407,6 +421,14 @@ definitions:
           $ref: '#/definitions/Module'
       settings:
         $ref: '#/definitions/CanvasSettings'
+
+  CanvasType:
+    type: string
+    enum: [template, example, running]
+
+  CanvasState:
+    type: string
+    enum: [starting, running, stopped]
 
   CanvasSettings:
     type: object
