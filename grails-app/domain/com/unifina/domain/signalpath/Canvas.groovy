@@ -6,22 +6,9 @@ import grails.converters.JSON
 
 class Canvas {
 
-	enum Type {
-		TEMPLATE(0),
-		EXAMPLE(1),
-		RUNNING(2)
-
-		Integer id
-
-		Type(Integer id) {
-			this.id = id
-		}
-	}
-
 	enum State {
-		STARTING("starting"),
-		RUNNING("running"),
-		STOPPED("stopped")
+		STOPPED("stopped"),
+		RUNNING("running")
 
 		String id
 
@@ -37,10 +24,11 @@ class Canvas {
 
 	String name
 	String json
-	Type type
+	State state
 
 	// SavedSignalPath
 	Boolean hasExports = false
+	Boolean example = false
 
 	// RunningSignalPath
 	String runner
@@ -48,7 +36,6 @@ class Canvas {
 	String requestUrl
 	Boolean shared
 	Boolean adhoc
-	State state
 	String serialized
 	Date serializationTime
 
@@ -67,6 +54,7 @@ class Canvas {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 		json type: 'text'
 		hasExports defaultValue: false
+		example defaultValue: false
 		runner index: 'runner_idx'
 		uiChannels cascade: 'all-delete-orphan'
 		serialized type: 'text'
@@ -85,7 +73,6 @@ class Canvas {
 			name: name,
 			created: dateCreated,
 			updated: lastUpdated,
-			type: type.toString().toLowerCase(),
 			adhoc: adhoc,
 			state: state.toString(),
 			serialized: !isNotSerialized(),

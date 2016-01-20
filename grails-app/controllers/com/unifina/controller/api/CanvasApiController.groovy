@@ -3,13 +3,11 @@ package com.unifina.controller.api
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
-import com.unifina.service.CanvasService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
-import grails.validation.Validateable
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -29,7 +27,6 @@ class CanvasApiController {
 			request.apiUser,
 			params.name,
 			params.boolean("adhoc"),
-			params.type ? Canvas.Type.valueOf(params.type.toUpperCase()) : null,
 			params.state ? Canvas.State.valueOf(params.state.toUpperCase()) : null
 		)
 		render(canvases*.toMap() as JSON)
@@ -73,7 +70,7 @@ class CanvasApiController {
 	@StreamrApi
 	def update(String id, SaveCanvasCommand command) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
-			if (canvas.type == Canvas.Type.EXAMPLE) {
+			if (canvas.example) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				canvasService.updateExisting(canvas, command, request.apiUser)
@@ -85,7 +82,7 @@ class CanvasApiController {
 	@StreamrApi
 	def delete(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
-			if (canvas.type == Canvas.Type.EXAMPLE) {
+			if (canvas.example) {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				canvas.delete(flush: true)
@@ -97,8 +94,7 @@ class CanvasApiController {
 		def canvas = Canvas.get(id)
 		if (canvas == null) {
 			render(status: 404, text: [error: "Canvas (id=$id) not found.", code: "NOT_FOUND"] as JSON)
-		} else if (canvas.type != Canvas.Type.EXAMPLE &&
-			!unifinaSecurityService.canAccess(canvas, actionName == 'load', request.apiUser)) {
+		} else if (!canvas.example && !unifinaSecurityService.canAccess(canvas, actionName == 'load', request.apiUser)) {
 			render(status: 403, text: [error: "Not authorized to access Canvas (id=$id)", code: "FORBIDDEN"] as JSON)
 		} else {
 			successHandler.call(canvas)

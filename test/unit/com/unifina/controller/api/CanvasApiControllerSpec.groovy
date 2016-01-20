@@ -34,7 +34,6 @@ class CanvasApiControllerSpec extends Specification {
 			user: me,
 			name: "mine",
 			json: '{name: "mine", modules: []}',
-			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		)
 		canvas1.save(validate: false, failOnError: true)
@@ -43,7 +42,6 @@ class CanvasApiControllerSpec extends Specification {
 			user: other,
 			name: "not mine",
 			json: '{name: "not mine", modules: []}',
-			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -51,7 +49,7 @@ class CanvasApiControllerSpec extends Specification {
 			user: other,
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
-			type: Canvas.Type.EXAMPLE,
+			example: true,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -59,7 +57,7 @@ class CanvasApiControllerSpec extends Specification {
 			user: me,
 			name: "my example",
 			json: '{name: "not mine but example", modules: []}',
-			type: Canvas.Type.EXAMPLE,
+			example: true,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 

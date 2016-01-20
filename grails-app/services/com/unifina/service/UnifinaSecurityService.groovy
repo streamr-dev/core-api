@@ -70,7 +70,7 @@ class UnifinaSecurityService {
 	@CompileStatic
 	boolean canAccess(Canvas canvas, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
-		if (isLoad && canvas.type.equals(Canvas.Type.EXAMPLE)) {
+		if (isLoad && canvas.example) {
 			return true
 		} else {
 			return canAccess(canvas, user)

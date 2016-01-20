@@ -5,7 +5,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import grails.validation.Validateable
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 
@@ -17,7 +16,6 @@ class CanvasService {
 	public List<Canvas> findAllBy(SecUser currentUser,
 								  String nameFilter,
 								  Boolean adhocFilter,
-								  Canvas.Type typeFilter,
 								  Canvas.State stateFilter) {
 
 		def query = Canvas.where { user == currentUser }
@@ -30,11 +28,6 @@ class CanvasService {
 		if (adhocFilter != null) {
 			query = query.where {
 				adhoc == adhocFilter
-			}
-		}
-		if (typeFilter) {
-			query = query.where {
-				type == typeFilter
 			}
 		}
 		if (stateFilter) {
@@ -53,14 +46,13 @@ class CanvasService {
 		return canvas
 	}
 
-	@CompileStatic
 	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user) {
 		Map signalPathAsMap = reconstruct(command.name, command.modules, command.settings)
 		def signalPathAsJson = new JsonBuilder(signalPathAsMap).toString()
 
 		canvas.name = signalPathAsMap.name
 		canvas.hasExports = signalPathAsMap.hasExports
-		canvas.type = Canvas.Type.RUNNING
+		canvas.state = Canvas.State.STOPPED
 		canvas.json = signalPathAsJson
 		canvas.user = user
 		canvas.save(flush: true, failOnError: true)
