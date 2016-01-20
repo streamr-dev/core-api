@@ -66,7 +66,8 @@ class CanvasApiController {
 			if (canvas.type == Canvas.Type.EXAMPLE) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				readAndSave(canvas)
+				canvasService.updateExisting(canvas, request.JSON, request.apiUser)
+				render canvas as JSON
 			}
 		}
 	}
@@ -74,7 +75,8 @@ class CanvasApiController {
 	@StreamrApi
 	def save() {
 		// TODO: if type = running, create uiChannel
-		readAndSave(new Canvas())
+		Canvas canvas = canvasService.createNew(request.JSON, request.apiUser)
+		render canvas as JSON
 	}
 
 	@StreamrApi
@@ -85,38 +87,6 @@ class CanvasApiController {
 			} else {
 				canvas.delete(flush: true)
 			}
-		}
-	}
-
-	private void readAndSave(Canvas canvas) {
-		Globals globals = GlobalsFactory.createInstance(request.JSON.settings ?: [:], grailsApplication)
-
-		try {
-			// Rebuild the json to check it's ok and up to date
-			def signalPathAsMap = signalPathService.reconstruct(request.JSON, globals)
-			def signalPathAsJson = (signalPathAsMap as JSON)
-
-			canvas.name = signalPathAsMap.name
-			canvas.type = Canvas.Type.valueOf(request.JSON.type.toUpperCase())
-			canvas.adhoc = request.JSON.adhoc
-			canvas.json = signalPathAsJson
-			canvas.hasExports = signalPathAsMap.hasExports
-			canvas.user = request.apiUser
-			canvas.save(flush: true, failOnError: true)
-
-			render canvas.toMap() as JSON
-		} catch (Exception e) {
-			e = GrailsUtil.deepSanitize(e)
-			log.error("Save failed", e)
-			render(
-				status: 500,
-				text: [
-					error: message(code: "signalpath.save.error", args: [e.message]),
-					code : "FAILED_TO_SAVE_SIGNAL_PATH"
-				] as JSON
-			)
-		} finally {
-			globals.destroy()
 		}
 	}
 

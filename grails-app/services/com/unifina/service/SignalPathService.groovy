@@ -79,8 +79,9 @@ class SignalPathService {
 		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
 		
 		// TODO: remove backwards compatibility
-		if (signalPathMap.timeOfDayFilter)
+		if (signalPathMap.timeOfDayFilter) {
 			signalPathMap.signalPathContext.timeOfDayFilter = signalPathMap.timeOfDayFilter
+		}
 
 		return signalPathToMap(sp)
 	}
