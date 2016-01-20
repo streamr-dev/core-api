@@ -26,6 +26,5 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/live/getModuleJson"(controller: "liveApi", action: "getModuleJson")
 		"/api/v1/live/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
 		"/api/v1/live/ajaxStop"(controller: "liveApi", action: "ajaxStop")
-
 	}
 }

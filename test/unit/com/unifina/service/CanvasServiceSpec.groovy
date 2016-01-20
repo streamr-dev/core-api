@@ -2,12 +2,14 @@ package com.unifina.service
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas])
+@Mock([SecUser, Canvas, ModuleService, SpringSecurityService, SignalPathService])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me

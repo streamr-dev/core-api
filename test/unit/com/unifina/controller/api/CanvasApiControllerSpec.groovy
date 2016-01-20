@@ -112,7 +112,6 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "brand new Canvas",
-			type: "template",
 			modules: [],
 		]
 		request.method = "POST"
@@ -175,7 +174,6 @@ class CanvasApiControllerSpec extends Specification {
 		params.id = "1"
 		request.JSON = [
 			name: "updated, new name",
-			type: "running",
 			modules: [],
 		]
 		request.requestURI = "/api/v1/canvases/update"
@@ -193,7 +191,6 @@ class CanvasApiControllerSpec extends Specification {
 		params.id = "2"
 		request.JSON = [
 			name: "me me me",
-			type: "running",
 			modules: []
 		]
 		request.requestURI = "/api/v1/canvases/update"
@@ -211,7 +208,6 @@ class CanvasApiControllerSpec extends Specification {
 		params.id = "3"
 		params.json = [
 		    name: "me me me",
-			type: "example",
 			modules: []
 		]
 		request.requestURI = "/api/v1/canvases/update"

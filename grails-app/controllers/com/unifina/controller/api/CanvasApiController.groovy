@@ -1,12 +1,15 @@
 package com.unifina.controller.api
 
+import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
+import com.unifina.service.CanvasService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
+import grails.validation.Validateable
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -61,22 +64,22 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def update(String id) {
+	def save(SaveCanvasCommand command) {
+		// TODO: create uiChannel
+		Canvas canvas = canvasService.createNew(command, request.apiUser)
+		render canvas.toMap() as JSON
+	}
+
+	@StreamrApi
+	def update(String id, SaveCanvasCommand command) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			if (canvas.type == Canvas.Type.EXAMPLE) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				canvasService.updateExisting(canvas, request.JSON, request.apiUser)
-				render canvas as JSON
+				canvasService.updateExisting(canvas, command, request.apiUser)
+				render canvas.toMap() as JSON
 			}
 		}
-	}
-
-	@StreamrApi
-	def save() {
-		// TODO: if type = running, create uiChannel
-		Canvas canvas = canvasService.createNew(request.JSON, request.apiUser)
-		render canvas as JSON
 	}
 
 	@StreamrApi
