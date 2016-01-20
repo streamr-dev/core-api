@@ -42,6 +42,7 @@ class SavedSignalPathControllerSpec extends Specification {
 		controller.permissionService = new PermissionService()
 		controller.springSecurityService = [getCurrentUser: {-> me}] as SpringSecurityService
 		controller.permissionService.springSecurityService = controller.springSecurityService
+		controller.permissionService.grailsApplication = grailsApplication
 		controller.signalPathService = [
 			reconstruct: {json, globals -> return json},
 			jsonToSignalPath: {Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot->
