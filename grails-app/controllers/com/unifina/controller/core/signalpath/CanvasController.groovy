@@ -25,20 +25,29 @@ class CanvasController {
 	UnifinaSecurityService unifinaSecurityService
 	
 	def index() {
-		redirect(action: "build", params:params)
+		redirect(action: "editor", params:params)
 	}
 
-	def build() {
+	def list() {
+		// TODO: replace query with permissionService method once that branch is ready
+		List<Canvas> canvases = Canvas.createCriteria().list() {
+			eq("user",springSecurityService.currentUser)
+			eq("adhoc",false)
+			if (params.term) {
+				like("name","%${params.term}%")
+			}
+			if (params.state) {
+				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})
+			}
+		}
+		[canvases: canvases, user:springSecurityService.currentUser, stateFilter: params.state ? params.list("state") : []]
+	}
+
+	def editor() {
 		def beginDate = new Date()-1
 		def endDate = new Date()-1
-		
-		def load = null
-		
-		if (params.load!=null) {
-			load = createLink(controller:"canvasApi",action:"load",params:[id:params.load])
-		}
-		
-		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+
+		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
 	}
 	
 	def reconstruct() {

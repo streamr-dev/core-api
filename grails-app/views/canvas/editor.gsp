@@ -83,8 +83,8 @@ $(document).ready(function() {
 		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")		
 	});
 	
-	<g:if test="${load}">
-		SignalPath.load(load);
+	<g:if test="${id}">
+		SignalPath.load('${id}');
 	</g:if>
 
 	$(SignalPath).on('error', function(error) {
