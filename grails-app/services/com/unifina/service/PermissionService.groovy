@@ -39,13 +39,17 @@ class PermissionService {
 	}
 
 	private List<Permission> getNonOwnerPermissions(SecUser user, resource) {
-		if (!resource) {
-			log.warn("canRead: missing resource domain object!")
-			return []
+		if (!resource) { throw new IllegalArgumentException("Missing resource class") }
+		if (!grailsApplication.isDomainClass(resource.getClass())) {
+			throw new IllegalArgumentException("$resource is not a Grails domain object")
 		}
-		if (!user?.id) {
-			log.warn("canRead: missing user!")
-			return []
+		if (!user?.id) { throw new IllegalArgumentException("Missing user") }
+
+		def idProp = resource.hasProperty("id")
+		if (idProp == null) { throw new IllegalArgumentException("$resource doesn't have an 'id' field!") }
+		def hasStringId = idProp.type == String
+		if (!hasStringId && idProp.type != Long) {
+			throw new IllegalArgumentException("$resource doesn't have an 'id' field of type either Long or String!")
 		}
 
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
@@ -54,7 +58,11 @@ class PermissionService {
 		return Permission.withCriteria {
 			eq("user", user)
 			eq("clazz", clazz)
-			eq("longId", resource.id)		// TODO: handle stringId
+			if (hasStringId) {
+				eq("stringId", resource.id)
+			} else {
+				eq("longId", resource.id)
+			}
 		}
 	}
 
@@ -65,6 +73,9 @@ class PermissionService {
 
 	/** Test if given user can read given resource instance */
 	boolean canRead(SecUser user, resource) {
+		if (!resource) { return false; }
+		// TODO: check first if resource is "public" i.e. always readable, also to null user
+		if (!user) { return false; }
 		// any permissions imply read access
 		return getPermittedOperations(user, resource) != []
 		//return "read" in getPermittedOperations(user, resource)
@@ -72,24 +83,36 @@ class PermissionService {
 
 	/** Test if given user can share given resource instance, that is, grant other users read/share rights */
 	boolean canShare(SecUser user, resource) {
+		if (!resource || !user) { return false; }
 		return "share" in getPermittedOperations(user, resource)
 	}
 
 	private <T> List<T> getWithCriteria(SecUser user, Class<T> resourceClass, Closure resourceFilter, Closure permissionFilter) {
+		// TODO: return resources that are "public" i.e. always readable, also to null user
+		if (!user) { return [] }
+
 		def resourceClassName = resourceClass?.name;
-		if (!resourceClassName || !grailsApplication.isDomainClass(resourceClass)) {
-			log.warn("getAllReadable: Not a resource type: $resourceClassName")
-			return []
+		if (!resourceClassName) { throw new IllegalArgumentException("Missing resource class") }
+		if (!grailsApplication.isDomainClass(resourceClass)) {
+			throw new IllegalArgumentException("$resourceClass is not a Grails domain class")
+		}
+
+		def idProp = resourceClass.properties["declaredFields"].find { it.name == "id" }
+		if (idProp == null) { throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field!") }
+		def hasStringId = idProp.type == String
+		if (!hasStringId && idProp.type != Long) {
+			throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field of type either Long or String!")
 		}
 
 		// any permissions imply read access
-		def resourceIds = Permission.withCriteria {
+		def perms = Permission.withCriteria {
 			eq "user", user
 			eq "clazz", resourceClassName
 
 			permissionFilter.delegate = delegate
 			permissionFilter()
-		}*.longId
+		}
+		def resourceIds = hasStringId ? perms*.stringId : perms*.longId;
 
 		def criteria = new DetachedCriteria(resourceClass).build {
 			or {
@@ -97,6 +120,7 @@ class PermissionService {
 				if (resourceClass.properties["declaredFields"].any { it.name == "user" }) {
 					eq "user", user
 				}
+				// empty in-list will work with Mock but fail with SQL
 				if (resourceIds.size() > 0) {
 					"in" "id", resourceIds
 				}
@@ -133,7 +157,8 @@ class PermissionService {
 			throw new IllegalArgumentException("Can't add access permissions to $resource for owner (${target?.username}, id ${target?.id})!")
 		}
 
-		if (canShare(grantor, resource)) {		// TODO: check grantor himself has the right he's granting (e.g. "write")
+		// TODO CORE-498: check grantor himself has the right he's granting (e.g. "write")
+		if (canShare(grantor, resource)) {
 			return systemGrant(target, resource, operation)
 		} else {
 			if (logIfDenied) {
@@ -156,9 +181,17 @@ class PermissionService {
 	public Permission systemGrant(SecUser target, resource, String operation="read") {
 		if (operation in allOperations) {
 			// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
-			//   hence, class.name of a proxy object won't match the class.name in database
-			def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
-			return new Permission(user: target, clazz: clazz, longId: resource.id, operation: operation).save(flush: true, failOnError: true)
+			//   hence, class.name of a proxy object won't match later class.name queries
+			def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+			def idProp = clazz.properties["declaredFields"].find { it.name == "id" }
+			if (idProp == null) { throw new IllegalArgumentException("$clazz doesn't have an 'id' field!") }
+			if (idProp.type == Long) {
+				return new Permission(user: target, clazz: clazz.name, longId: resource.id, operation: operation).save(flush: true, failOnError: true)
+			} else if (idProp.type == String) {
+				return new Permission(user: target, clazz: clazz.name, stringId: resource.id, operation: operation).save(flush: true, failOnError: true)
+			} else {
+				throw new IllegalArgumentException("$clazz doesn't have an 'id' field of type either Long or String!")
+			}
 		} else {
 			throw new IllegalArgumentException("Operation should be one of " + allOperations)
 		}

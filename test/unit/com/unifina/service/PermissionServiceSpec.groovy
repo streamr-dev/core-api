@@ -1,5 +1,8 @@
 package com.unifina.service
 
+import com.unifina.domain.signalpath.RunningSignalPath
+import com.unifina.domain.signalpath.UiChannel
+import com.unifina.utils.IdGenerator
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService;
@@ -28,24 +31,21 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard])
+@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard, RunningSignalPath, UiChannel])
 class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
 
-	ModulePackage allowed
-	ModulePackage restricted
-	ModulePackage owned
-	Module modAllowed
-	Module modRestricted
-	Module modOwned
+	ModulePackage modPackAllowed, modPackRestricted, modPackOwned
+	Module modAllowed, modRestricted, modOwned
 	ModulePackageUser allowedPermission
 	Permission allowedPermission2
 
-	Dashboard dashAllowed
-	Dashboard dashRestricted
-	Dashboard dashOwned
+	Dashboard dashAllowed, dashRestricted, dashOwned
 	Permission dashReadPermission
+
+	UiChannel uicAllowed, uicRestricted // UiChannels don't have an owner
+	Permission uicReadPermission
 
     def setup() {
 		
@@ -69,14 +69,14 @@ class PermissionServiceSpec extends Specification {
 		stranger = new SecUser(username: "stranger", password: "x", apiKey: "strangeApiKey", apiSecret: "strangeApiSecret").save(validate:false)
 
 		// ModulePackages
-		allowed = new ModulePackage(name:"allowed", user:anotherUser).save(validate:false)
-		restricted = new ModulePackage(name:"restricted", user:anotherUser).save(validate:false)
-		owned = new ModulePackage(name:"owned", user:me).save(validate:false)
+		modPackAllowed = new ModulePackage(name:"allowed", user:anotherUser).save(validate:false)
+		modPackRestricted = new ModulePackage(name:"restricted", user:anotherUser).save(validate:false)
+		modPackOwned = new ModulePackage(name:"owned", user:me).save(validate:false)
 		
 		// Modules
-		modAllowed = new Module(name:"modAllowed", modulePackage:allowed).save(validate:false)
-		modRestricted = new Module(name:"modRestricted", modulePackage:restricted).save(validate:false)
-		modOwned = new Module(name:"modOwned", modulePackage:owned).save(validate:false)
+		modAllowed = new Module(name:"modAllowed", modulePackage:modPackAllowed).save(validate:false)
+		modRestricted = new Module(name:"modRestricted", modulePackage:modPackRestricted).save(validate:false)
+		modOwned = new Module(name:"modOwned", modulePackage:modPackOwned).save(validate:false)
 
 		// TODO: Test Permission mechanism both with a resource with longId and with stringId
 
@@ -85,10 +85,20 @@ class PermissionServiceSpec extends Specification {
 		dashRestricted = new Dashboard(name:"restricted", user:anotherUser).save(validate:false)
 		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
 
+		// Ui channels (have stringId, have no "user")
+		def rsp = new RunningSignalPath(id: 1, user: anotherUser, adhoc: false).save(validate: false)
+		uicAllowed = new UiChannel(runningSignalPath: 1, name:"allowed")
+		uicRestricted = new UiChannel(runningSignalPath: 1, name:"restricted")
+		uicAllowed.id = IdGenerator.get()
+		uicRestricted.id = IdGenerator.get()
+		uicAllowed.save(validate: false)
+		uicRestricted.save(validate: false)
+
 		// Set up the permission to the allowed resources
-		allowedPermission = new ModulePackageUser(user:me, modulePackage:allowed).save()
-		allowedPermission2 = service.grant(anotherUser, allowed, me)
+		allowedPermission = new ModulePackageUser(user:me, modulePackage:modPackAllowed).save()
+		allowedPermission2 = service.grant(anotherUser, modPackAllowed, me)
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
+		uicReadPermission = service.systemGrant(me, uicAllowed)
 		
 		// Configure SpringSecurity fields
 		def userLookup = [:]
@@ -118,12 +128,12 @@ class PermissionServiceSpec extends Specification {
 		ModulePackage.count()==3
 		Module.count()==3
 		ModulePackageUser.count()==1
-		Module.findByModulePackage(allowed)==modAllowed
+		Module.findByModulePackage(modPackAllowed)==modAllowed
 		ModulePackage.findAllByUser(anotherUser).size()==2
 		ModulePackage.findAllByUser(me).size()==1
-		ModulePackageUser.findByUserAndModulePackage(me, allowed)==allowedPermission
+		ModulePackageUser.findByUserAndModulePackage(me, modPackAllowed)==allowedPermission
 
-		Permission.count()==2
+		Permission.count()==3
 		
 		SpringSecurityUtils.doWithAuth("me") {
 			grailsApplication.mainContext.getBean("springSecurityService").currentUser == me
@@ -166,10 +176,40 @@ class PermissionServiceSpec extends Specification {
 		service.getAllReadable(stranger, Dashboard) == []
 	}
 
-	void "getAllReadable returns empty on bad inputs"() {
+	void "retrieve all readable UiChannels correctly"() {
 		expect:
-		service.getAllReadable(me, java.lang.Object) == []
-		service.getAllReadable(me, null) == []
+		service.getAllReadable(me, UiChannel) == [uicAllowed]
+		service.getAllReadable(stranger, UiChannel) == []
+	}
+
+	void "grant and revoke work for UiChannels"() {
+		when:
+		service.systemGrant(anotherUser, uicRestricted)
+		then:
+		service.getAllReadable(me, UiChannel) == [uicAllowed]
+		service.getAllReadable(anotherUser, UiChannel) == [uicRestricted]
+
+		when:
+		service.systemRevoke(anotherUser, uicRestricted)
+		then:
+		service.getAllReadable(me, UiChannel) == [uicAllowed]
+		service.getAllReadable(anotherUser, UiChannel) == []
+	}
+
+	void "getAllReadable returns throws IllegalArgumentException on invalid resource"() {
+		when:
+		service.getAllReadable(me, java.lang.Object)
+		then:
+		thrown IllegalArgumentException
+
+		when:
+		service.getAllReadable(me, null)
+		then:
+		thrown IllegalArgumentException
+	}
+
+	void "getAllReadable returns public resources on bad/null user"() {
+		expect:
 		service.getAllReadable(new SecUser(), Dashboard) == []
 		service.getAllReadable(null, Dashboard) == []
 	}
@@ -287,14 +327,14 @@ class PermissionServiceSpec extends Specification {
 
 	void "access denied when no user logged in"() {
 		expect:
-		!service.canAccess(owned)
+		!service.canAccess(modPackOwned)
 		!service.canAccess(modOwned)
 	}
 
 	void "access granted to owned module and package"() {
 		expect:
 		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(owned)
+			service.canAccess(modPackOwned)
 		}
 		SpringSecurityUtils.doWithAuth("me") {
 			service.canAccess(modOwned)
@@ -304,7 +344,7 @@ class PermissionServiceSpec extends Specification {
 	void "access granted to permitted module and package"() {
 		expect:
 		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(allowed)
+			service.canAccess(modPackAllowed)
 		}
 		SpringSecurityUtils.doWithAuth("me") {
 			service.canAccess(modAllowed)
@@ -314,7 +354,7 @@ class PermissionServiceSpec extends Specification {
 	void "access denied to restricted module and package"() {
 		expect:
 		SpringSecurityUtils.doWithAuth("me") {
-			!service.canAccess(restricted)
+			!service.canAccess(modPackRestricted)
 		}
 		SpringSecurityUtils.doWithAuth("me") {
 			!service.canAccess(modRestricted)
@@ -323,9 +363,9 @@ class PermissionServiceSpec extends Specification {
 
 	void "granting access to restricted object based supplied user"() {
 		expect:
-		service.canAccess(owned, me)
-		!service.canAccess(restricted, me)
-		!service.canAccess(owned, anotherUser)
+		service.canAccess(modPackOwned, me)
+		!service.canAccess(modPackRestricted, me)
+		!service.canAccess(modPackOwned, anotherUser)
 	}
 
 	//----------------------------------

@@ -12,12 +12,13 @@ class Permission {
 
 	// either stringId (UUID) or longId (autoincrement or similar) is used to refer to a resource, depending on resource type
 	String stringId
-	long longId
+	Long longId
 
 	/** type of operation that this ACL item allows e.g. "read" */
 	String operation
 
 	static constraints = {
 		stringId(nullable: true)
+		longId(nullable: true)
 	}
 }
