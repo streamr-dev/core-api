@@ -110,7 +110,6 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		sendBtn.click()
 		then: "The table gets the message"
 		waitFor {
-			$("table.event-table-module-content tbody tr").size() == 2
 			$("table.event-table-module-content tbody tr td", text: "textFieldTest2").displayed
 		}
 	}
@@ -124,7 +123,6 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		switcher.click()
 		then: "The table gets the message"
 		waitFor {
-			$("table.event-table-module-content tbody tr").size() == 3
 			$("table.event-table-module-content tbody tr td", text: "1.0").displayed
 		}
 
