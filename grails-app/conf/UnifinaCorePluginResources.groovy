@@ -163,6 +163,10 @@ modules = {
 		dependsOn 'bootbox, mustache'
 		resource url:[dir:'js/unifina/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
 	}
+	'sharing-dialog' {
+		dependsOn 'bootbox, backbone'
+		resource url: [dir: 'js/unifina/sharing-dialog', file: 'sharing-dialog.js', plugin: 'unifina-core']
+	}
 	'signalpath-browser' {
 		dependsOn 'remote-tabs'
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']

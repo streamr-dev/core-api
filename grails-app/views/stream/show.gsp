@@ -5,6 +5,7 @@
         <r:require module="dropzone"/>
 		<r:require module="toolbar"/>
 		<r:require module="bootstrap-datepicker"/>
+		<r:require module="sharing-dialog"/>
 		<r:script>
 			$(document).ready(function() {
 		 		new Toolbar($("#stream-delete-form"))
@@ -49,7 +50,8 @@
 			</div>
 			
 			<g:include action="details" id="${stream.id}"/>
-		
+
+			<button class="share-button btn btn-primary" onclick="new SharingDialog({resourceUrl: '${createLink(uri: "/api/v1/stream/" + stream.uuid)}'})"> Share </button>
 		</div>
 		
     </body>

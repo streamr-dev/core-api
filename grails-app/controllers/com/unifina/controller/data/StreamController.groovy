@@ -1,5 +1,7 @@
 package com.unifina.controller.data
 
+import com.unifina.domain.security.Permission
+import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -49,7 +51,8 @@ class StreamController {
 	def show() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream]
+		List<String> ops = permissionService.getPermittedOperations(springSecurityService.currentUser, stream)
+		[stream:stream, permissions:ops]
 	}
 	
 	// Can be extended to handle more types
