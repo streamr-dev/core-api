@@ -4,6 +4,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CanvasService
+import com.unifina.service.ModuleService
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
 import grails.plugin.springsecurity.SpringSecurityService
@@ -14,7 +15,8 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService, CanvasService])
+@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService,
+	ModuleService, SignalPathService, CanvasService])
 class CanvasApiControllerSpec extends Specification {
 
 	Canvas canvas1
@@ -32,7 +34,6 @@ class CanvasApiControllerSpec extends Specification {
 			user: me,
 			name: "mine",
 			json: '{name: "mine", modules: []}',
-			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		)
 		canvas1.save(validate: false, failOnError: true)
@@ -41,7 +42,6 @@ class CanvasApiControllerSpec extends Specification {
 			user: other,
 			name: "not mine",
 			json: '{name: "not mine", modules: []}',
-			type: Canvas.Type.TEMPLATE,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -49,7 +49,7 @@ class CanvasApiControllerSpec extends Specification {
 			user: other,
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
-			type: Canvas.Type.EXAMPLE,
+			example: true,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -57,7 +57,7 @@ class CanvasApiControllerSpec extends Specification {
 			user: me,
 			name: "my example",
 			json: '{name: "not mine but example", modules: []}',
-			type: Canvas.Type.EXAMPLE,
+			example: true,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -110,7 +110,6 @@ class CanvasApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "brand new Canvas",
-			type: "template",
 			modules: [],
 		]
 		request.method = "POST"
@@ -173,7 +172,6 @@ class CanvasApiControllerSpec extends Specification {
 		params.id = "1"
 		request.JSON = [
 			name: "updated, new name",
-			type: "running",
 			modules: [],
 		]
 		request.requestURI = "/api/v1/canvases/update"
@@ -191,7 +189,6 @@ class CanvasApiControllerSpec extends Specification {
 		params.id = "2"
 		request.JSON = [
 			name: "me me me",
-			type: "running",
 			modules: []
 		]
 		request.requestURI = "/api/v1/canvases/update"
@@ -209,7 +206,6 @@ class CanvasApiControllerSpec extends Specification {
 		params.id = "3"
 		params.json = [
 		    name: "me me me",
-			type: "example",
 			modules: []
 		]
 		request.requestURI = "/api/v1/canvases/update"

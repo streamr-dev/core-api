@@ -1,16 +1,21 @@
 package com.unifina.service
 
+import com.unifina.api.SaveCanvasCommand
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import org.codehaus.groovy.grails.web.json.JSONElement
+import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
+import grails.converters.JSON
+import groovy.json.JsonBuilder
+import groovy.transform.CompileStatic
 
 class CanvasService {
-	public List<Canvas> findAllBy(SecUser currentUser,
-								  String nameFilter,
-								  Boolean adhocFilter,
-								  Canvas.Type typeFilter,
-								  Canvas.State stateFilter) {
 
+	def grailsApplication
+	def signalPathService
+
+	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter) {
 		def query = Canvas.where { user == currentUser }
 
 		if (nameFilter) {
@@ -23,11 +28,6 @@ class CanvasService {
 				adhoc == adhocFilter
 			}
 		}
-		if (typeFilter) {
-			query = query.where {
-				type == typeFilter
-			}
-		}
 		if (stateFilter) {
 			query = query.where {
 				state == stateFilter
@@ -35,5 +35,47 @@ class CanvasService {
 		}
 
 		return query.findAll()
+	}
+
+	@CompileStatic
+	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
+		// TODO: create uiChannel
+		Canvas canvas = new Canvas(user: user)
+		updateExisting(canvas, command)
+		return canvas
+	}
+
+	public void updateExisting(Canvas canvas, SaveCanvasCommand command) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
+		Map signalPathAsMap = reconstruct(command.name, command.modules, command.settings)
+		def signalPathAsJson = new JsonBuilder(signalPathAsMap).toString()
+
+		canvas.name = signalPathAsMap.name
+		canvas.hasExports = signalPathAsMap.hasExports
+		canvas.state = Canvas.State.STOPPED
+		canvas.json = signalPathAsJson
+		canvas.save(flush: true, failOnError: true)
+	}
+
+
+	public Map reconstruct(Canvas canvas) {
+		Map signalPathMap = JSON.parse(canvas.json)
+		return reconstruct(signalPathMap.name, signalPathMap.modules, signalPathMap.settings)
+	}
+
+	/**
+	 * Rebuild JSON to check it is ok and up-to-date
+	 */
+	public Map reconstruct(String name, List modules, Map settings) {
+		Globals globals = GlobalsFactory.createInstance(settings ?: [:], grailsApplication)
+		try {
+			return signalPathService.reconstruct([name: name, modules: modules, settings: settings], globals)
+		} catch (Exception e) {
+			throw e
+		} finally {
+			globals.destroy()
+		}
 	}
 }

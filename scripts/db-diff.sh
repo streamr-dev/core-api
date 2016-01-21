@@ -11,7 +11,7 @@ FILENAME="core/$DATE-$1.groovy"
 echo $FILENAME
 
 # Run the migration diff script
-grails dbm-gorm-diff $FILENAME --add
+grails dbm-gorm-diff $FILENAME --add $2
 
 # Add package to beginning of file
 { printf "package core\n"; cat grails-app/migrations/$FILENAME; } > grails-app/migrations/$FILENAME.new

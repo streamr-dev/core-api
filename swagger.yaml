@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: Streamr API
-  # description: Streamr API
+  description: Create streams and canvases, and let the real-time data flow right through it all.
   version: 1.0.0
 host: www.streamr.com
 schemes:
@@ -16,10 +16,10 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
-    
+
 security:
   - token: []
-  
+
 tags:
   - name: Stream
     description: Streams
@@ -66,7 +66,7 @@ paths:
           schema:
             $ref: '#/definitions/Stream'
         # TODO: error codes
-  
+
   /streams/{uuid}:
     get:
       summary: Get stream by id
@@ -146,7 +146,7 @@ paths:
   /canvases:
     get:
       summary: List canvases
-      description: Lists and possibly filter canvases in your archive.
+      description: Lists (and possibly filters) canvases in your archive.
       tags:
         - Canvas
       parameters:
@@ -155,19 +155,14 @@ paths:
           description: Filter results by canvas name.
           required: false
           type: string
-        - name: type
-          in: query
-          description: Filter results by canvas type.
-          required: false
-          type: string
         - name: state
           in: query
-          description: Filter results by canvas state (implies canvas type running).
+          description: Filter results by canvas state.
           required: false
           type: string
         - name: adhoc
           in: query
-          description: Filter adhoc canvases (implies canvas type running).
+          description: Filter canvases by their adhoc-ness.
           required: false
           type: boolean
 
@@ -245,14 +240,17 @@ paths:
           type: string
         - name: body
           in: body
-          description: Canvas object
+          description: New canvas details
           required: true
           schema:
-            $ref: '#/definitions/Canvas'
+            $ref: '#/definitions/CanvasCreateRequest'
       responses:
         '204':
           description: Success (no content)
-        # TODO: error codes
+        '403':
+          description: Not authorized to update canvas
+        '404':
+          description: Canvas not found
     delete:
       summary: Delete a canvas
       description: Deletes a canvas by id
@@ -267,12 +265,15 @@ paths:
       responses:
         '204':
           description: Success (no content)
-        # TODO: error codes
+        '403':
+          description: Not authorized to delete canvas
+        '404':
+          description: Canvas not found
 
   /canvases/{id}/start:
     post:
-      summary: Starts a live canvas
-      description: Starts a live canvas, i.e., a canvas of type 'running' or 'stopped'.
+      summary: Starts a canvas
+      description: Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.
       tags:
         - Canvas
       parameters:
@@ -292,6 +293,10 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Canvas'
+        '403':
+          description: Not authorized to start canvas
+        '404':
+          description: Canvas not found
         '500':
           description: Invalid canvas type
         '501':
@@ -299,8 +304,8 @@ paths:
 
   /canvases/{id}/stop:
     post:
-      summary: Stop a live canvas
-      description: Stops a live canvas (a canvas of type 'running' or 'stopped') that is currently running.
+      summary: Stop a currently running canvas.
+      description: Stops a canvas that is currently running.
       tags:
         - Canvas
       parameters:
@@ -314,7 +319,13 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Canvas'
-        # TODO: error codes
+        '403':
+          description: Not allowed to stop canvas
+        '404':
+          description: Canvas not found
+        '500':
+          description: Canvas is not in state running
+
 
 definitions:
   Stream:
@@ -396,6 +407,8 @@ definitions:
             description: The UI Channel for this Canvas
           state:
             $ref: '#/definitions/CanvasState'
+          adhoc:
+            type: boolean
           serialized:
             type: boolean
             description: indicates whether there exists a serialization of this canvas
@@ -404,16 +417,11 @@ definitions:
     type: object
     required:
       - name
-      - type
       - modules
     properties:
       name:
         type: string
         example: My canvas
-      type:
-        $ref: '#/definitions/CanvasType'
-      adhoc:
-        type: boolean
       modules:
         type: array
         items:
@@ -421,13 +429,9 @@ definitions:
       settings:
         $ref: '#/definitions/CanvasSettings'
 
-  CanvasType:
-    type: string
-    enum: [template, example, running]
-
   CanvasState:
     type: string
-    enum: [starting, running, stopped]
+    enum: [running, stopped]
 
   CanvasSettings:
     type: object
@@ -449,9 +453,9 @@ definitions:
     required:
       - code
     properties:
-      error:
-        type: string
-        description: A message describing the error
       code:
         type: string
-        description: Error code (NOT_FOUND) for programmatic use
+        description: Error code (e.g. "NOT_FOUND") for programmatic use.
+      message:
+        type: string
+        description: A human-readable message describing the error.
