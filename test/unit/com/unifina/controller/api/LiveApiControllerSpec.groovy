@@ -41,16 +41,14 @@ class LiveApiControllerSpec extends Specification {
 		c1 = new Canvas(
 			name: "canvas-1",
 			user: me,
-			type: Canvas.Type.RUNNING,
 			json: "{}",
 			adhoc: false,
-			state: Canvas.State.STARTING
+			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
 		c2 = new Canvas(
 			name: "canvas-2",
 			user: me,
-			type: Canvas.Type.RUNNING,
 			json: "{}",
 			adhoc: false,
 			state: Canvas.State.STOPPED
@@ -59,16 +57,14 @@ class LiveApiControllerSpec extends Specification {
 		Canvas c3 = new Canvas(
 			name: "canvas-3",
 			user: me,
-			type: Canvas.Type.RUNNING,
 			json: "{}",
 			adhoc: true,
-			state: Canvas.State.STARTING
+			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
 		Canvas c4 = new Canvas(
 			name: "canvas-4",
 			user: me,
-			type: Canvas.Type.RUNNING,
 			json: "{}",
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
@@ -76,14 +72,12 @@ class LiveApiControllerSpec extends Specification {
 		Canvas c5 = new Canvas(
 			name: "canvas-5",
 			user: me,
-			type: Canvas.Type.TEMPLATE,
 			json: "{}"
 		).save(failOnError: true)
 
 		Canvas c6 = new Canvas(
 			name: "canvas-6",
 			user: someoneElse,
-			type: Canvas.Type.RUNNING,
 			json: "{}",
 			adhoc: false,
 			state: Canvas.State.STOPPED
@@ -92,7 +86,6 @@ class LiveApiControllerSpec extends Specification {
 		Canvas c7 = new Canvas(
 			name: "canvas-7",
 			user: someoneElse,
-			type: Canvas.Type.EXAMPLE,
 			json: "{}"
 		).save(failOnError: true)
 

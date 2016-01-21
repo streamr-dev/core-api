@@ -6,6 +6,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
+import grails.converters.JSON
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 
@@ -58,10 +59,16 @@ class CanvasService {
 		canvas.save(flush: true, failOnError: true)
 	}
 
+
+	public Map reconstruct(Canvas canvas) {
+		Map signalPathMap = JSON.parse(canvas.json)
+		return reconstruct(signalPathMap.name, signalPathMap.modules, signalPathMap.settings)
+	}
+
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	private Map reconstruct(String name, List modules, Map settings) {
+	public Map reconstruct(String name, List modules, Map settings) {
 		Globals globals = GlobalsFactory.createInstance(settings ?: [:], grailsApplication)
 		try {
 			return signalPathService.reconstruct([name: name, modules: modules, settings: settings], globals)

@@ -3,11 +3,8 @@ package com.unifina.controller.api
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import grails.util.GrailsUtil
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -35,28 +32,9 @@ class CanvasApiController {
 	@StreamrApi
 	def show(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
-
-			Map signalPathMap = JSON.parse(canvas.json)
-			def settings = signalPathMap.settings ?: [:]
-			Globals globals = GlobalsFactory.createInstance(settings, grailsApplication)
-
-			try {
-				def result = signalPathService.reconstruct(signalPathMap, globals)
-				canvas.json = result as JSON
-				render canvas.toMap() as JSON
-			} catch (Throwable e) {
-				e = GrailsUtil.deepSanitize(e)
-				log.error("Error loading SignalPath", e)
-				render(
-					status: 500,
-					text: [
-						error: message(code: "signalpath.load.error", args: [e.message]),
-						code : "FAILED_TO_LOAD_SIGNAL_PATH"
-					] as JSON
-				)
-			} finally {
-				globals.destroy()
-			}
+			Map result = canvasService.reconstruct(canvas)
+			canvas.json = result as JSON
+			render canvas.toMap() as JSON
 		}
 	}
 

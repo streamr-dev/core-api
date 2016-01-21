@@ -142,7 +142,7 @@ class CanvasServiceSpec extends Specification {
 		c.serialized == null
 		c.serializationTime == null
 
-		c.uiChannels.size() == 0
+		c.uiChannels == null
 	}
 
 	def "updateExisting updates existing Canvas"() {
