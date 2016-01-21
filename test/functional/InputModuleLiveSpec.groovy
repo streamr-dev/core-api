@@ -55,7 +55,7 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		switcher.click()
 		then: "table gets value 1.0"
 		waitFor {
-			table.find("tr", 0).find("td", 1).text() == "1.0"
+			table.find("tr td", text: "1.0").displayed
 		}
 
 		when: "switcher is clicked again"
@@ -63,7 +63,7 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		then: "table gets value 0.0"
 		waitFor {
 			table.find("tr").size() == 2
-			table.find("tr", 0).find("td", 1).text() == "0.0"
+			table.find("tr td", text: "0.0").displayed
 		}
 	}
 
@@ -79,7 +79,7 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		sendButton.click()
 		then: "table gets value 'testing'"
 		waitFor {
-			table.find("tr", 0).find("td", 1).text() == "testing"
+			table.find("tr td", text: "testing").displayed
 		}
 	}
 
@@ -134,7 +134,7 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		then: "button also sends the message"
 		waitFor {
 			table.find("tr").size() == 1
-			table.find("tr", 0).find("td", 1).text() == "0.0"
+			table.find("tr td", text: "0.0").displayed
 		}
 		then: "then name of the button changes"
 		button.text() == "test"
