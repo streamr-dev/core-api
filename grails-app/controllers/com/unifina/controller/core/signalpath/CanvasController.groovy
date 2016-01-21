@@ -25,20 +25,29 @@ class CanvasController {
 	UnifinaSecurityService unifinaSecurityService
 	
 	def index() {
-		redirect(action: "build", params:params)
+		redirect(action: "editor", params:params)
 	}
 
-	def build() {
+	def list() {
+		// TODO: replace query with permissionService method once that branch is ready
+		List<Canvas> canvases = Canvas.createCriteria().list() {
+			eq("user",springSecurityService.currentUser)
+			eq("adhoc",false)
+			if (params.term) {
+				like("name","%${params.term}%")
+			}
+			if (params.state) {
+				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})
+			}
+		}
+		[canvases: canvases, user:springSecurityService.currentUser, stateFilter: params.state ? params.list("state") : []]
+	}
+
+	def editor() {
 		def beginDate = new Date()-1
 		def endDate = new Date()-1
-		
-		def load = null
-		
-		if (params.load!=null) {
-			load = createLink(controller:"canvasApi",action:"load",params:[id:params.load])
-		}
-		
-		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+
+		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
 	}
 	
 	def reconstruct() {
@@ -97,11 +106,9 @@ class CanvasController {
 		def ssp
 		// TODO: do queries via permissionService once that branch is ready
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.type = :type order by sp.dateCreated asc", [type: Canvas.Type.EXAMPLE], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
 		} else if (params.browserId == 'archiveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user and sp.type = :type order by sp.dateCreated desc", [type: Canvas.Type.TEMPLATE, user:springSecurityService.currentUser], [max: max, offset: offset])
-		} else if (params.browserId == 'liveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user and sp.type = :type order by sp.dateCreated desc", [type: Canvas.Type.RUNNING, user:springSecurityService.currentUser], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.example = false and sp.user = :user order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
 		}
 
 		def result = [signalPaths:[]]

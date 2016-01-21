@@ -16489,7 +16489,7 @@ body.build-page .load-save-group {
 }
 body.build-page .load-save-group > .btn,
 body.build-page .load-save-group > .btn-group {
-  width: 50%;
+  width: 33.33%;
 }
 body.build-page .load-save-group > .btn-group > .btn {
   width: 100%;
@@ -16638,6 +16638,10 @@ body.module-list .help-text .math-jax-ready span.mn,
 body.module-list .help-text .math-jax-ready span.mtext {
   font-size: 14px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+body.canvas-list-page .panel-heading-controls .input-group {
+  width: 300px;
+  margin-left: 15px;
 }
 table {
   background-color: transparent;

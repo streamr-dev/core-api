@@ -264,6 +264,10 @@ class SignalPathTagLib {
 				}
 			})
 
+			\$(SignalPath).on('new', function(event) {
+				\$('#saveButton').parent().addClass('disabled')
+			})
+
 			\$(SignalPath).on('saved', function(event,savedJson) {
 				\$('#saveButton').parent().removeClass('disabled')
 				\$('#saveButton').html('Save')
@@ -299,9 +303,8 @@ class SignalPathTagLib {
 		
 		out << """
 			<div id="save-dropdown" class="btn-group">
-				<button id="save-dropdown-button" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+				<button id="save-dropdown-button" title="Save Canvas" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 					<i class="fa fa-save"></i>
-					Save
 					<span class="caret"></span>
 				</button>
 			</div>

@@ -22,10 +22,10 @@ Tour.list(function(tourList) {
 	
 				<sec:ifLoggedIn>
 					<li>
-						<a id="navBuildLink" href="${createLink(controller:"canvas")}"><g:message code="build.label"/></a>
+						<a id="navEditorLink" href="${createLink(controller:"canvas", action:"editor")}"><g:message code="editor.label"/></a>
 					</li>
 					<li>
-						<a id="navLiveLink" href="${createLink(controller:"live")}"><g:message code="live.label"/></a>
+						<a id="navCanvasesLink" href="${createLink(controller:"canvas", action:"list")}"><g:message code="canvases.label"/></a>
 					</li>
 					<li>
 						<a id="navDashboardsLink" href="${createLink(controller:"dashboard")}"><g:message code="dashboards.label"/></a>
