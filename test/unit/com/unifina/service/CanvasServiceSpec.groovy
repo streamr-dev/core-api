@@ -141,18 +141,20 @@ class CanvasServiceSpec extends Specification {
 		!c.adhoc
 		c.serialized == null
 		c.serializationTime == null
+
+		c.uiChannels.size() == 0
 	}
 
 	def "updateExisting updates existing Canvas"() {
 		def command = new SaveCanvasCommand(name: "my_updated_canvas", modules: [], settings: ["a" : "b"])
 
 		when:
-		service.updateExisting(myFirstCanvas, command, me)
+		service.updateExisting(myFirstCanvas, command)
 		Canvas c = Canvas.findById(myFirstCanvas.id)
 
 		then:
+		c.user == me
 		c.name == "my_updated_canvas"
 		c.json == '{"name":"my_updated_canvas","modules":[],"settings":{"a":"b"},"hasExports":false}'
 	}
-
 }

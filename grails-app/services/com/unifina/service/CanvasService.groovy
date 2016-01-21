@@ -38,12 +38,13 @@ class CanvasService {
 
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
-		Canvas canvas = new Canvas()
-		updateExisting(canvas, command, user)
+		// TODO: create uiChannel
+		Canvas canvas = new Canvas(user: user)
+		updateExisting(canvas, command)
 		return canvas
 	}
 
-	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user) {
+	public void updateExisting(Canvas canvas, SaveCanvasCommand command) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -54,7 +55,6 @@ class CanvasService {
 		canvas.hasExports = signalPathAsMap.hasExports
 		canvas.state = Canvas.State.STOPPED
 		canvas.json = signalPathAsJson
-		canvas.user = user
 		canvas.save(flush: true, failOnError: true)
 	}
 

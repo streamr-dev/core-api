@@ -62,7 +62,6 @@ class CanvasApiController {
 
 	@StreamrApi
 	def save(SaveCanvasCommand command) {
-		// TODO: create uiChannel
 		Canvas canvas = canvasService.createNew(command, request.apiUser)
 		render canvas.toMap() as JSON
 	}
@@ -73,7 +72,7 @@ class CanvasApiController {
 			if (canvas.example) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				canvasService.updateExisting(canvas, command, request.apiUser)
+				canvasService.updateExisting(canvas, command)
 				render canvas.toMap() as JSON
 			}
 		}
