@@ -72,10 +72,6 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "harbu1 (generated)", id: "1453299053074-3") {
-		dropForeignKeyConstraint(baseTableName: "permission", constraintName: "FKE125C5CF60701D32")
-	}
-
 	changeSet(author: "harbu1 (generated)", id: "1453299053074-4") {
 		dropForeignKeyConstraint(baseTableName: "running_signal_path", constraintName: "FKE44264DC60701D32")
 	}
@@ -183,10 +179,6 @@ databaseChangeLog = {
 
 	changeSet(author: "harbu1 (generated)", id: "1453299053074-13") {
 		dropColumn(columnName: "running_signal_path_id", tableName: "ui_channel")
-	}
-
-	changeSet(author: "harbu1 (generated)", id: "1453299053074-14") {
-		dropTable(tableName: "permission")
 	}
 
 	changeSet(author: "harbu1 (generated)", id: "1453299053074-15") {
