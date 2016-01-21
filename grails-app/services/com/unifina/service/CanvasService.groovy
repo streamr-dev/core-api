@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.Globals
@@ -13,11 +14,7 @@ class CanvasService {
 	def grailsApplication
 	def signalPathService
 
-	public List<Canvas> findAllBy(SecUser currentUser,
-								  String nameFilter,
-								  Boolean adhocFilter,
-								  Canvas.State stateFilter) {
-
+	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter) {
 		def query = Canvas.where { user == currentUser }
 
 		if (nameFilter) {
@@ -47,6 +44,9 @@ class CanvasService {
 	}
 
 	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user) {
+		if (!command.validate()) {
+			throw new ValidationException(command.errors)
+		}
 		Map signalPathAsMap = reconstruct(command.name, command.modules, command.settings)
 		def signalPathAsJson = new JsonBuilder(signalPathAsMap).toString()
 

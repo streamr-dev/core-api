@@ -6,7 +6,7 @@ import grails.validation.Validateable
 class SaveCanvasCommand {
 	String name
 	List<Object> modules
-	Map settings
+	Map settings = [:]
 
 	static constraints = {
 		name(blank: false)
