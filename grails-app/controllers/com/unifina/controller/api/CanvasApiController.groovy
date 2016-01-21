@@ -11,7 +11,6 @@ import org.apache.log4j.Logger
 class CanvasApiController {
 
 	def canvasService
-	def signalPathService
 	def springSecurityService
 	def grailsApplication
 	def unifinaSecurityService

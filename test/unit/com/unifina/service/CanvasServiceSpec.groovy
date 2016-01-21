@@ -93,7 +93,7 @@ class CanvasServiceSpec extends Specification {
 
 	def "#findAllBy can filter by adhoc"() {
 		expect:
-		service.findAllBy(me, null, false, null)*.name == ["my_canvas_3", "my_canvas_6"]
+		service.findAllBy(me, null, false, null)*.name == [1,2,3,6].collect { "my_canvas_" + it }
 		service.findAllBy(me, null, true, null)*.name == ["my_canvas_4", "my_canvas_5"]
 	}
 

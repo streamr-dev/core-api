@@ -4,8 +4,11 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.UiChannel
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
@@ -39,7 +42,6 @@ class CanvasService {
 
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
-		// TODO: create uiChannel
 		Canvas canvas = new Canvas(user: user)
 		updateExisting(canvas, command)
 		return canvas
@@ -49,7 +51,7 @@ class CanvasService {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		Map signalPathAsMap = reconstruct(command.name, command.modules, command.settings)
+		Map signalPathAsMap = reconstructFrom(command.name, command.modules, command.settings)
 		def signalPathAsJson = new JsonBuilder(signalPathAsMap).toString()
 
 		canvas.name = signalPathAsMap.name
@@ -59,16 +61,37 @@ class CanvasService {
 		canvas.save(flush: true, failOnError: true)
 	}
 
+	private void createAndAttachUiChannels(Canvas canvas) {
+
+		// Main UiChannel
+		UiChannel rspUi = new UiChannel()
+		rspUi.id = IdGenerator.get()
+		canvas.addToUiChannels(rspUi)
+
+		// Modules' uiChannels
+		for (Map it : sp.modules) {
+			if (it.uiChannel) {
+				UiChannel ui = new UiChannel()
+				ui.id = it.uiChannel.id
+				ui.hash = it.hash.toString()
+				ui.module = Module.load(it.id)
+				ui.name = it.uiChannel.name
+
+				canvas.addToUiChannels(ui)
+			}
+		}
+	}
+
 
 	public Map reconstruct(Canvas canvas) {
 		Map signalPathMap = JSON.parse(canvas.json)
-		return reconstruct(signalPathMap.name, signalPathMap.modules, signalPathMap.settings)
+		return reconstructFrom(signalPathMap.name, signalPathMap.modules, signalPathMap.settings)
 	}
 
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	public Map reconstruct(String name, List modules, Map settings) {
+	private Map reconstructFrom(String name, List modules, Map settings) {
 		Globals globals = GlobalsFactory.createInstance(settings ?: [:], grailsApplication)
 		try {
 			return signalPathService.reconstruct([name: name, modules: modules, settings: settings], globals)

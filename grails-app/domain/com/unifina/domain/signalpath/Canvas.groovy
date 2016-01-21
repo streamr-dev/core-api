@@ -24,18 +24,16 @@ class Canvas {
 
 	String name
 	String json
-	State state
+	State state = State.STOPPED
 
-	// SavedSignalPath
 	Boolean hasExports = false
 	Boolean example = false
+	Boolean shared = false
+	Boolean adhoc = false
 
-	// RunningSignalPath
 	String runner
 	String server
 	String requestUrl
-	Boolean shared
-	Boolean adhoc
 	String serialized
 	Date serializationTime
 
@@ -43,9 +41,6 @@ class Canvas {
 		runner(nullable: true)
 		server(nullable: true)
 		requestUrl(nullable: true)
-		shared(nullable: true)
-		adhoc(nullable: true)
-		state(nullable: true)
 		serialized(nullable: true)
 		serializationTime(nullable: true)
 	}
@@ -55,6 +50,8 @@ class Canvas {
 		json type: 'text'
 		hasExports defaultValue: false
 		example defaultValue: false
+		shared defaultValue: false
+		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		uiChannels cascade: 'all-delete-orphan'
 		serialized type: 'text'
@@ -75,11 +72,11 @@ class Canvas {
 			updated: lastUpdated,
 			adhoc: adhoc,
 			state: state.toString(),
+			hasExports: hasExports,
 			serialized: !isNotSerialized(),
 			modules: map?.modules,
 			settings: map?.settings,
 			uiChannel: map?.uiChannel,
-			hasExports: map?.hasExports,
 		]
 	}
 }

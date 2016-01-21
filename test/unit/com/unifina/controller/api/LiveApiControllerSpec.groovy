@@ -18,8 +18,7 @@ import spock.lang.Specification
 @Mock([SecUser, Canvas, UnifinaCoreAPIFilters, Module, UiChannel, UnifinaSecurityService, SpringSecurityService])
 class LiveApiControllerSpec extends Specification {
 
-	Canvas c1
-	Canvas c2
+	Canvas c1, c2, c3, c4, c5, c6, c7
 
 	void setup() {
 		SecUser me = new SecUser(
@@ -54,7 +53,7 @@ class LiveApiControllerSpec extends Specification {
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
-		Canvas c3 = new Canvas(
+		c3 = new Canvas(
 			name: "canvas-3",
 			user: me,
 			json: "{}",
@@ -62,20 +61,20 @@ class LiveApiControllerSpec extends Specification {
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
-		Canvas c4 = new Canvas(
+		c4 = new Canvas(
 			name: "canvas-4",
 			user: me,
 			json: "{}",
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
-		Canvas c5 = new Canvas(
+		c5 = new Canvas(
 			name: "canvas-5",
 			user: me,
 			json: "{}"
 		).save(failOnError: true)
 
-		Canvas c6 = new Canvas(
+		c6 = new Canvas(
 			name: "canvas-6",
 			user: someoneElse,
 			json: "{}",
@@ -83,7 +82,7 @@ class LiveApiControllerSpec extends Specification {
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
-		Canvas c7 = new Canvas(
+		c7 = new Canvas(
 			name: "canvas-7",
 			user: someoneElse,
 			json: "{}"
@@ -118,11 +117,11 @@ class LiveApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.json.size() == 2
-		response.json.collect { it.id } == [c1.id, c2.id]
-		response.json.collect { it.name } == [c1.name, c2.name]
-		response.json.collect { it.state.name } == [c1.state.name(), c2.state.name()]
-		response.json.collect { it.uiChannels }.size() == 2
+		response.json.size() == 4
+		response.json.collect { it.id } == [c1.id, c2.id, c4.id, c5.id]
+		response.json.collect { it.name } == [c1.name, c2.name, c4.name, c5.name]
+		response.json.collect { it.state.name } == [c1.state.name(), c2.state.name(), c4.state.name(), c5.state.name()]
+		response.json.collect { it.uiChannels }.size() == 4
 	}
 
 	void "index doesn't return the uiChannels without module or module.webcomponent"() {

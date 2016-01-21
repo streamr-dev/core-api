@@ -1,47 +1,53 @@
 package com.unifina.controller.api
 
+import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CanvasService
-import com.unifina.service.ModuleService
-import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
+import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
+import groovy.json.JsonBuilder
+import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService,
-	ModuleService, SignalPathService, CanvasService])
+@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
 class CanvasApiControllerSpec extends Specification {
 
+	CanvasService canvasService
+	SecUser me
 	Canvas canvas1
 	Canvas canvas2
 	Canvas canvas3
 	Canvas canvas4
 
 	void setup() {
-		controller.canvasService = mainContext.getBean(CanvasService)
+		controller.canvasService = canvasService = Mock(CanvasService)
+		controller.unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
 
-		SecUser me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
+		me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
 
 		canvas1 = new Canvas(
 			user: me,
 			name: "mine",
-			json: '{name: "mine", modules: []}',
+			json: new JsonBuilder([name: "mine", modules: [], settings: [:]]).toString(),
+			state: Canvas.State.STOPPED,
 			hasExports: false
 		)
-		canvas1.save(validate: false, failOnError: true)
+		canvas1.save(validate: true, failOnError: true)
 
 		canvas2 = new Canvas(
 			user: other,
 			name: "not mine",
 			json: '{name: "not mine", modules: []}',
+			state: Canvas.State.STOPPED,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
@@ -49,28 +55,13 @@ class CanvasApiControllerSpec extends Specification {
 			user: other,
 			name: "not mine but example",
 			json: '{name: "not mine but example", modules: []}',
-			example: true,
-			hasExports: false
-		).save(validate: true, failOnError: true)
-
-		canvas4 = new Canvas(
-			user: me,
-			name: "my example",
-			json: '{name: "not mine but example", modules: []}',
+			state: Canvas.State.STOPPED,
 			example: true,
 			hasExports: false
 		).save(validate: true, failOnError: true)
 
 		assert SecUser.count() == 2
-		assert Canvas.count() == 4
-
-		controller.unifinaSecurityService = mainContext.getBean("unifinaSecurityService")
-		controller.signalPathService = [
-			reconstruct: { json, globals ->
-				json.hasExports = false
-				return json
-			},
-		] as SignalPathService
+		assert Canvas.count() == 3
 	}
 
 	void "can list all my Canvases"() {
@@ -83,8 +74,9 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.size() == 2
-		response.json.collect { it.name } == ["mine", "my example"]
+		response.json.size() == 3
+		1 * canvasService.findAllBy(me, null, null, null) >> [canvas1, canvas2, canvas3]
+		0 * canvasService._
 
 	}
 
@@ -99,10 +91,22 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.id != null
-		response.json.name == "mine"
-		response.json.modules == []
-		!response.json.hasExports
+		response.json == [
+			id: "1",
+			name: "mine",
+			state: "STOPPED",
+			hasExports: false,
+			serialized: false,
+			settings: [:],
+			modules: [],
+			adhoc: false,
+			updated: JSONObject.NULL,
+			created: JSONObject.NULL,
+			uiChannel: JSONObject.NULL,
+		]
+
+		1 * canvasService.reconstruct(canvas1) >> { Canvas c -> JSON.parse(c.json) }
+		0 * canvasService._
 	}
 
 	void "must be able to save a new Canvas"() {
@@ -120,8 +124,12 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.id != null
-		response.json.name == "brand new Canvas"
+		1 * canvasService.createNew(_, me) >> { SaveCanvasCommand command, SecUser user ->
+			assert command.name == "brand new Canvas"
+			assert command.modules == []
+			return new Canvas(json: "{}")
+		}
+		0 * canvasService._
 	}
 
 	void "must not be able to load others' Canvases"() {
@@ -136,6 +144,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
+		0 * canvasService._
 	}
 
 	void "must be able to load example, even if it's not mine"() {
@@ -149,21 +158,9 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json.name == "not mine but example"
-	}
-
-	void "my own example must have Canvas data"() {
-		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		params.id = "4"
-		request.requestURI = "/api/v1/canvases/show"
-		withFilters(action: "show") {
-			controller.show()
-		}
-
-		then:
-		response.status == 200
-		response.json.name == "my example"
+		response.json == JSON.parse(new JsonBuilder(canvas3.toMap()).toString())
+		1 * canvasService.reconstruct(canvas3) >> { Canvas c -> JSON.parse(c.json) }
+		0 * canvasService._
 	}
 
 	void "must be able to overwrite my own Canvas"() {
@@ -180,7 +177,11 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		Canvas.get(1).name == "updated, new name"
+		1 * canvasService.updateExisting(canvas1, _) >> { Canvas canvas, SaveCanvasCommand command ->
+			assert command.name == "updated, new name"
+			assert command.modules == []
+		}
+		0 * canvasService._
 	}
 
 	void "must not be able overwrite others' Canvases"() {
