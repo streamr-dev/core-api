@@ -16489,7 +16489,7 @@ body.build-page .load-save-group {
 }
 body.build-page .load-save-group > .btn,
 body.build-page .load-save-group > .btn-group {
-  width: 50%;
+  width: 33.33%;
 }
 body.build-page .load-save-group > .btn-group > .btn {
   width: 100%;

@@ -106,11 +106,9 @@ class CanvasController {
 		def ssp
 		// TODO: do queries via permissionService once that branch is ready
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.type = :type order by sp.dateCreated asc", [type: Canvas.Type.EXAMPLE], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
 		} else if (params.browserId == 'archiveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user and sp.type = :type order by sp.dateCreated desc", [type: Canvas.Type.TEMPLATE, user:springSecurityService.currentUser], [max: max, offset: offset])
-		} else if (params.browserId == 'liveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.user = :user and sp.type = :type order by sp.dateCreated desc", [type: Canvas.Type.RUNNING, user:springSecurityService.currentUser], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.example = false and sp.user = :user order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
 		}
 
 		def result = [signalPaths:[]]

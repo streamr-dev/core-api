@@ -113,15 +113,9 @@ $(document).ready(function() {
     })
 
 	loadBrowser = new SignalPathBrowser()
-		.tab('Archive', '${ createLink(controller: "canvas", \
+		.tab('My Canvases', '${ createLink(controller: "canvas", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
 
-		<%-- Don't show the live tab without ROLE_LIVE --%>
-		<sec:ifAllGranted roles="ROLE_LIVE">
-			.tab('Live', '${ createLink(controller: "canvas", \
-				action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
-		</sec:ifAllGranted>
-		
 		.tab('Examples', '${ createLink(controller: "canvas", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
 			
@@ -138,14 +132,18 @@ $(document).ready(function() {
 		}, 0)
 	</g:if>
 
+	$('#newSignalPath').click(function() {
+		SignalPath.clear()
+	})
+
 	$('#loadSignalPath').click(function() {
 		loadBrowser.modal()
 	})
-	
+
 	$(document).bind('keyup', 'alt+r', function() {
 		SignalPath.run();
 	});
-	
+
 	$('#csv').click(function() {
 		var ctx = {
 			csv: true,
@@ -156,23 +154,23 @@ $(document).ready(function() {
 				lastOfDayOnly: $("#csvLastOfDayOnly").attr("checked") ? true : false
 			}
 		}
-		
+
 		SignalPath.run(ctx);
 	});
-	
+
 	$('#runLiveModalButton').click(function() {
 		if (SignalPath.getName())
 			$('#runLiveName').val(SignalPath.getName())
 	})
-	
+
 	$('#runLiveButton').click(function() {
 		var name = $('#runLiveName').val()
 		SignalPath.setName(name)
-		
+
 		var ctx = {
 			live: true
 		}
-		
+
 		SignalPath.run(ctx, false, function(data) {
 			var url_root = '${createLink(controller:"live", action:"show")}'
 			Streamr.showInfo("Live Canvas launced:"+name)
@@ -201,9 +199,12 @@ $(document).unload(function () {
 		<div id="main-menu-inner">
 			<div id="toolbar-buttons" class="menu-content" style="overflow: visible;">
 				<div class="btn-group load-save-group">
-					<button id="loadSignalPath" class="btn btn-default">
+					<button id="newSignalPath" title="New Canvas" class="btn btn-default">
+						<i class="fa fa-file-o"></i>
+					</button>
+
+					<button id="loadSignalPath" title="Load Canvas" class="btn btn-default">
 						<i class="fa fa-folder-open"></i>
-						<g:message code="signalPath.loadSignalPath.label" default="Load" />
 					</button>
 		
 					<sp:saveButtonDropdown/>
