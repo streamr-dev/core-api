@@ -22,12 +22,12 @@ class UnifinaCorePluginUrlMappings {
 
 		// API v1 url mappings
 		"/api/v1/canvases"(resources: "canvasApi", excludes: ["create", "edit"])
+		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
+		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
+
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 
-		"/api/v1/live"(resources: "liveApi", excludes: ["create", "edit"])
 		"/api/v1/live/request"(controller: "liveApi", action: "request")
 		"/api/v1/live/getModuleJson"(controller: "liveApi", action: "getModuleJson")
-		"/api/v1/live/ajaxCreate"(controller: "liveApi", action: "ajaxCreate")
-		"/api/v1/live/ajaxStop"(controller: "liveApi", action: "ajaxStop")
 	}
 }

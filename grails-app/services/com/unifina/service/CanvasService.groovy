@@ -40,6 +40,12 @@ class CanvasService {
 		return query.findAll()
 	}
 
+
+	public Map reconstruct(Canvas canvas) {
+		Map signalPathMap = JSON.parse(canvas.json)
+		return reconstructFrom(signalPathMap)
+	}
+
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
 		Canvas canvas = new Canvas(user: user)
@@ -63,6 +69,17 @@ class CanvasService {
 		canvas.state = Canvas.State.STOPPED
 		canvas.save(flush: true, failOnError: true)
 	}
+
+	public void start(Canvas canvas) {
+		// TODO: adhoc
+		signalPathService.startLocal(canvas, canvas.toMap().settings)
+	}
+
+	public void stop(Canvas canvas) {
+		// TODO: handle return value
+		boolean result = signalPathService.stopLocal(canvas)
+	}
+
 
 	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, boolean resetUi) {
 		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]
@@ -106,11 +123,6 @@ class CanvasService {
 		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
 			element.uiChannelData.id = IdGenerator.get()
 		}
-	}
-
-	public Map reconstruct(Canvas canvas) {
-		Map signalPathMap = JSON.parse(canvas.json)
-		return reconstructFrom(signalPathMap)
 	}
 
 	/**

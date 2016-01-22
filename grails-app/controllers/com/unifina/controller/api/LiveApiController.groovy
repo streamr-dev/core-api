@@ -5,31 +5,15 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
 import com.unifina.signalpath.RuntimeResponse
-import com.unifina.utils.GlobalsFactory
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LiveApiController {
 
-	def canvasService
 	def springSecurityService
 	def unifinaSecurityService
 	def signalPathService
-
-
-	def beforeInterceptor = [
-		action: {
-			SecUser user = request.apiUser
-			Canvas canvas = Canvas.get(params.long("id"))
-			if (!unifinaSecurityService.canAccess(canvas, user)) {
-				redirect(controller:'login', action:'ajaxDenied')
-				return false
-			}
-			return true
-		},
-		except: ["getModuleJson", "request", "ajaxCreate"],
-	]
 
 	@StreamrApi(requiresAuthentication = false)
 	def getModuleJson() {
@@ -97,42 +81,5 @@ class LiveApiController {
 				render result as JSON
 			}
 		}
-	}
-
-	@StreamrApi
-	def ajaxCreate() {
-		def signalPathData
-		if (params.signalPathData) {
-			signalPathData = JSON.parse(params.signalPathData);
-		} else {
-			signalPathData = JSON.parse(Canvas.get(params.id).json)
-		}
-
-		def signalPathContext =	JSON.parse(params.signalPathContext)
-
-		Canvas canvas = signalPathService.createRunningCanvas(signalPathData, request.apiUser, signalPathContext.live ? false : true, true)
-		signalPathService.startLocal(canvas, signalPathContext)
-
-		Map result = [
-			success: true,
-			id: canvas.id,
-			adhoc: canvas.adhoc,
-			uiChannels: canvas.uiChannels.collect { [id: it.id, hash: it.hash] }
-		]
-		render result as JSON
-	}
-
-	@StreamrApi
-	def ajaxStop() {
-		Canvas rsp = Canvas.get(params.id)
-
-		Map r
-		if (rsp && signalPathService.stopLocal(rsp)) {
-			r = [success:true, id:rsp.id, status:"Stopped"]
-		} else {
-			r = [success:false, id:params.id, status:"Running canvas not found"]
-		}
-
-		render r as JSON
 	}
 }

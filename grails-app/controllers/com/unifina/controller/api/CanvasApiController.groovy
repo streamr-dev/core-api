@@ -69,6 +69,30 @@ class CanvasApiController {
 		}
 	}
 
+	@StreamrApi
+	def start(String id) {
+		getAuthorizedCanvas(id) { Canvas canvas ->
+			if (canvas.example) {
+				render(status: 403, text:[error: "cannot start common example", code: "FORBIDDEN"] as JSON)
+			} else {
+				canvasService.start(canvas)
+				render canvas.toMap() as JSON
+			}
+		}
+	}
+
+	@StreamrApi
+	def stop(String id) {
+		getAuthorizedCanvas(id) { Canvas canvas ->
+			if (canvas.example) {
+				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
+			} else {
+				canvasService.stop(canvas)
+				render canvas.toMap() as JSON
+			}
+		}
+	}
+
 	private void getAuthorizedCanvas(String id, Closure successHandler) {
 		def canvas = Canvas.get(id)
 		if (canvas == null) {
