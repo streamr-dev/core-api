@@ -15,14 +15,7 @@ class UiChannelIterator implements Iterable<Element> {
 		def modules = signalPathMap.modules.findAll { it.uiChannel }
 
 		if (hasRootElement(signalPathMap)) {
-			def fakeRootModule = [
-				id       : null,
-				hash     : null,
-				uiChannel: [
-					id  : signalPathMap.uiChannel.id,
-					name: signalPathMap.uiChannel.name
-				]
-			]
+			def fakeRootModule = [id: null, hash: null, uiChannel: signalPathMap.uiChannel]
 			modules = [fakeRootModule] + modules
 		}
 		moduleIter = modules.iterator()

@@ -15,6 +15,14 @@ class Canvas {
 		State(String id) {
 			this.id = id
 		}
+
+		static State fromValue(String value) {
+			if (value == null) {
+				return null
+			} else {
+				valueOf(value.toUpperCase())
+			}
+		}
 	}
 
 	String id

@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
@@ -19,14 +20,16 @@ class CanvasApiController {
 
 	@StreamrApi
 	def index() {
-		List<Canvas> canvases = canvasService.findAllBy(
-			request.apiUser,
-			params.name,
-			params.boolean("adhoc"),
-			params.state ? Canvas.State.valueOf(params.state.toUpperCase()) : null
-		)
+		SecUser user = request.apiUser
+		String name = params.name
+		Boolean adhoc = params.boolean("adhoc")
+		Canvas.State state = Canvas.State.fromValue(params.state)
+
+		def canvases = canvasService.findAllBy(user, name, adhoc, state)
 		render(canvases*.toMap() as JSON)
 	}
+
+	// TODO: /canvases/{id}/uiChannels (webcomponent?)
 
 	@StreamrApi
 	def show(String id) {
