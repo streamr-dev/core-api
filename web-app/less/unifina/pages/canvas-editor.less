@@ -1,10 +1,14 @@
 // BUILD PAGE STYLES
-body.build-page {
+body.canvas-editor-page {
 	overflow: hidden;
 	height: 100%;
 	width: 100%;
 	.form-group-period .input-group-addon {
 		width: 60px;
+	}
+
+	&.selected-theme .breadcrumb-page {
+		margin-top: 0px;
 	}
 
 	.load-save-group {
@@ -19,6 +23,10 @@ body.build-page {
 
 	#save-dropdown-menu .disabled {
 		display: none;
+	}
+
+	.nav-tabs.run-mode-tabs.nav-tabs-xs > li > a {
+		padding: 6px 0px;
 	}
 
 	#run {
