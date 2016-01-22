@@ -403,7 +403,7 @@ definitions:
             type: boolean
             description: whether module uses exported inputs or outputs
           uiChannel:
-            type: object
+            $ref: '#/definitions/UiChannel'
             description: The UI Channel for this Canvas
           state:
             $ref: '#/definitions/CanvasState'
@@ -438,6 +438,19 @@ definitions:
 
   Module:
     type: object
+
+  UiChannel:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+        example: 8YV4urkpTy6ZkrKqO_aDFw
+      name:
+        type: string
+        example: Notifications
 
   ResumeRequest:
     type: object
