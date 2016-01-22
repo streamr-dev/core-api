@@ -12,6 +12,7 @@ import grails.plugin.springsecurity.annotation.Secured
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class LiveApiController {
 
+	def canvasService
 	def springSecurityService
 	def unifinaSecurityService
 	def signalPathService
@@ -27,37 +28,8 @@ class LiveApiController {
 			}
 			return true
 		},
-		except: ["index", "getModuleJson", "request", "ajaxCreate"],
+		except: ["getModuleJson", "request", "ajaxCreate"],
 	]
-
-	@StreamrApi
-	def index() {
-		def canvases = Canvas.findAllByUserAndAdhoc(request.apiUser, false)
-		List maps = canvases.collect { Canvas canvas ->
-			[
-				id: canvas.id,
-				name: canvas.name,
-				state: canvas.state,
-				uiChannels: findUiChannels(canvas)
-			]
-		}
-		render maps as JSON
-	}
-
-	def findUiChannels(Canvas canvas) {
-		canvas.uiChannels.findAll { uiChannel ->
-			uiChannel.module != null && uiChannel.module.webcomponent != null
-		}.collect { uiChannel ->
-			[
-				id: uiChannel.id,
-				name: uiChannel.name,
-				module: [
-					id: uiChannel.module.id,
-					webcomponent: uiChannel.module.webcomponent
-				]
-			]
-		}
-	}
 
 	@StreamrApi(requiresAuthentication = false)
 	def getModuleJson() {
@@ -79,26 +51,6 @@ class LiveApiController {
 				render moduleJson as JSON
 			}
 		}
-	}
-
-	@StreamrApi
-	def show() {
-		// Access checked by beforeInterceptor
-		Canvas canvas = Canvas.get(params.id)
-
-		// Reconstruct as rsp.user
-		Map signalPathData = JSON.parse(canvas.json)
-		Map result = signalPathService.reconstruct(
-			[signalPathData: signalPathData],
-			GlobalsFactory.createInstance([live: true], grailsApplication, canvas.user)
-		)
-
-		result.runData = [
-			uiChannels: canvas.uiChannels.collect { [id: it.id, hash: it.hash] },
-			id: canvas.id
-		]
-
-		render result as JSON
 	}
 
 	@StreamrApi
