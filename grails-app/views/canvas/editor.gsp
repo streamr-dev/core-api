@@ -45,6 +45,10 @@ $(document).ready(function() {
 		}
 	}
 
+	function updateCanvasName() {
+		$(".current-canvas-name").html(SignalPath.getName() != null ? SignalPath.getName() : "Untitled canvas")
+	}
+
 	SignalPath.init({
 		parentElement: $('#canvas'),
 		settings: settings,
@@ -60,7 +64,7 @@ $(document).ready(function() {
 			autoDisconnect: true
 		}
 	});
-	
+
 	$(SignalPath).on('loading', function() {
 		$('#modal-spinner').show()
 	})
@@ -80,7 +84,9 @@ $(document).ready(function() {
 			$("#timeOfDayEnd").val(settings.timeOfDayFilter.timeOfDayEnd).trigger("change")
 		}
 
-		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")		
+		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")
+
+		updateCanvasName()
 	});
 	
 	<g:if test="${id}">
@@ -99,6 +105,7 @@ $(document).ready(function() {
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+		updateCanvasName()
 	})
 
 	// show search control
@@ -134,6 +141,7 @@ $(document).ready(function() {
 
 	$('#newSignalPath').click(function() {
 		SignalPath.clear()
+		updateCanvasName()
 	})
 
 	$('#loadSignalPath').click(function() {
@@ -194,7 +202,7 @@ $(document).unload(function () {
 
 </head>
 
-<body class="build-page main-menu-fixed">
+<body class="canvas-editor-page main-menu-fixed">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
 			<div id="toolbar-buttons" class="menu-content" style="overflow: visible;">
@@ -212,47 +220,69 @@ $(document).unload(function () {
 			</div>
 
 			<div class="menu-content">
-			
-				<div class="menu-content-header">
-					<label>Run Options</label>
-					<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Show More Options" data-toggle="modal" data-target="#runOptionsModal">
-						<i class="fa fa-cog"></i>
-					</a>
+
+				<ul class="nav nav-tabs nav-tabs-xs run-mode-tabs">
+					<li class="active">
+						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
+					</li>
+					<li class="">
+						<a href="#tab-realtime" role="tab" data-toggle="tab">Realtime</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<!-- Historical run controls -->
+					<div role="tabpanel" class="tab-pane active" id="tab-historical">
+
+						<div class="menu-content-header">
+							<!-- <label>Historical Run Options</label>-->
+							<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Historical Run Options" data-toggle="modal" data-target="#historicalOptionsModal">
+								<i class="fa fa-cog"></i>
+							</a>
+						</div>
+
+						<form onsubmit="return false;">
+							<g:hiddenField name="defaultBeginDate" value="${formatDate(date:beginDate,format:"yyyy-MM-dd")}"/>
+							<g:hiddenField name="defaultEndDate" value="${formatDate(date:endDate,format:"yyyy-MM-dd")}"/>
+
+							<div class="form-group form-group-period">
+								<div class="input-group">
+									<span class="input-group-addon">From</span>
+									<ui:datePicker name="beginDate" value="${beginDate}" class="form-control"/>
+								</div>
+								<div class="input-group">
+									<span class="input-group-addon">To</span>
+									<ui:datePicker name="endDate" value="${endDate}" class="form-control"/>
+								</div>
+							</div>
+
+							<div id="run-group" class="btn-group btn-block">
+								<sp:runButton buttonId="run" class="btn-primary col-xs-10">
+									<i class="fa fa-play"></i>
+									Run
+								</sp:runButton>
+								<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
+										data-toggle="dropdown">
+									<span class="caret"></span>
+									<span class="sr-only">Toggle Dropdown</span>
+								</button>
+								<ul class="dropdown-menu" role="menu">
+									<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
+								</ul>
+							</div>
+						</form>
+					</div>
+
+					<!-- Realtime run controls -->
+					<div role="tabpanel" class="tab-pane" id="tab-realtime">
+						<div class="menu-content-header">
+							<!--<label>Realtime Run Options</label>-->
+							<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
+								<i class="fa fa-cog"></i>
+							</a>
+						</div>
+					</div>
 				</div>
-			
-				<form onsubmit="return false;">
-					<g:hiddenField name="defaultBeginDate" value="${formatDate(date:beginDate,format:"yyyy-MM-dd")}"/>
-					<g:hiddenField name="defaultEndDate" value="${formatDate(date:endDate,format:"yyyy-MM-dd")}"/>
-
-					<div class="form-group form-group-period">
-						<div class="input-group">
-							<span class="input-group-addon">From</span>
-							<ui:datePicker name="beginDate" value="${beginDate}" class="form-control"/>
-						</div>
-						<div class="input-group">
-							<span class="input-group-addon">To</span>
-							<ui:datePicker name="endDate" value="${endDate}" class="form-control"/>
-						</div>
-					</div>
-
-					<div id="run-group" class="btn-group btn-block">
-						<sp:runButton buttonId="run" class="btn-primary col-xs-10">
-							<i class="fa fa-play"></i>
-							Run
-						</sp:runButton>
-						<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
-							data-toggle="dropdown">
-							<span class="caret"></span> 
-							<span class="sr-only">Toggle Dropdown</span>
-						</button>
-						<ul class="dropdown-menu" role="menu">
-							<sec:ifAllGranted roles="ROLE_LIVE">
-								<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
-							</sec:ifAllGranted>
-							<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
-						</ul>
-					</div>
-				</form>
 			</div>
 			
 			<div id="search-control" class="menu-content" style="overflow: visible">
@@ -278,6 +308,11 @@ $(document).unload(function () {
 	</div> <!-- / #main-menu -->
 
 	<div id="content-wrapper">
+		<ui:breadcrumb>
+			<li class="active">
+				<span class="current-canvas-name">Untitled canvas</span>
+			</li>
+		</ui:breadcrumb>
 		<div id="canvas" class="scrollable"></div>
 	</div>
 
@@ -355,12 +390,12 @@ $(document).unload(function () {
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 	
-	<div id="runOptionsModal" class="modal fade">
+	<div id="historicalOptionsModal" class="modal fade">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        <h4 class="modal-title">Advanced Run Options</h4>
+	        <h4 class="modal-title">Historical Run Options</h4>
 	      </div>
 	      <div class="modal-body">
 				<div class="form-group">
@@ -386,6 +421,23 @@ $(document).unload(function () {
 	      </div>
 	    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
+	<div id="realtimeOptionsModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Realtime Run Options</h4>
+				</div>
+				<div class="modal-body">
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
 	<ul id="save-dropdown-menu" class="dropdown-menu" role="menu">
