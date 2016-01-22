@@ -340,6 +340,11 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
+	public String getUiChannelName() {
+		return "Notifications";
+	}
+
+	@Override
 	public void beforeSerialization() {
 		super.beforeSerialization();
 		for (AbstractSignalPathModule module : mods) {

@@ -4,8 +4,8 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
@@ -43,58 +43,83 @@ class CanvasService {
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
 		Canvas canvas = new Canvas(user: user)
-		updateExisting(canvas, command)
+		updateExisting(canvas, command, true)
 		return canvas
 	}
 
-	public void updateExisting(Canvas canvas, SaveCanvasCommand command) {
+	public void updateExisting(Canvas canvas, SaveCanvasCommand command, boolean resetUi = false) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
-		Map signalPathAsMap = reconstructFrom(command.name, command.modules, command.settings)
-		def signalPathAsJson = new JsonBuilder(signalPathAsMap).toString()
 
-		canvas.name = signalPathAsMap.name
-		canvas.hasExports = signalPathAsMap.hasExports
+		Map oldSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : null
+		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, resetUi)
+
+		updateUiChannels(canvas, oldSignalPathMap, newSignalPathMap)
+
+		canvas.name = newSignalPathMap.name
+		canvas.hasExports = newSignalPathMap.hasExports
+		canvas.json = new JsonBuilder(newSignalPathMap).toString()
 		canvas.state = Canvas.State.STOPPED
-		canvas.json = signalPathAsJson
 		canvas.save(flush: true, failOnError: true)
 	}
 
-	private void createAndAttachUiChannels(Canvas canvas) {
+	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, boolean resetUi) {
+		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]
 
-		// Main UiChannel
-		UiChannel rspUi = new UiChannel()
-		rspUi.id = IdGenerator.get()
-		canvas.addToUiChannels(rspUi)
+		inputSignalPathMap.name = command.name
+		inputSignalPathMap.modules = command.modules
+		inputSignalPathMap.settings = command.settings
 
-		// Modules' uiChannels
-		for (Map it : sp.modules) {
-			if (it.uiChannel) {
-				UiChannel ui = new UiChannel()
-				ui.id = it.uiChannel.id
-				ui.hash = it.hash.toString()
-				ui.module = Module.load(it.id)
-				ui.name = it.uiChannel.name
+		if (resetUi) {
+			resetUiChannels(inputSignalPathMap)
+		}
 
-				canvas.addToUiChannels(ui)
+		return reconstructFrom(inputSignalPathMap)
+	}
+
+	private void updateUiChannels(Canvas canvas, Map oldSignalPathMap, Map newSignalPathMap) {
+
+		// Add new, previously unseen UiChannels
+		def foundIds = UiChannelIterator.over(newSignalPathMap).collect { UiChannelIterator.Element element ->
+			if (UiChannel.findById(element.id) == null) {
+				canvas.addToUiChannels(element.toUiChannel())
+			}
+			element.id
+		}
+
+		// Remove no longer occurring UiChannels
+		if (oldSignalPathMap != null) {
+			UiChannelIterator.over(oldSignalPathMap).collect { UiChannelIterator.Element element ->
+				if (!foundIds.contains(element.id)) {
+					UiChannel uiChannel = canvas.uiChannels.find { it.id == element.id }
+					if (uiChannel) {
+						canvas.removeFromUiChannels(uiChannel)
+						uiChannel.delete()
+					}
+				}
 			}
 		}
 	}
 
+	private static void resetUiChannels(Map signalPathMap) {
+		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
+			element.uiChannelData.id = IdGenerator.get()
+		}
+	}
 
 	public Map reconstruct(Canvas canvas) {
 		Map signalPathMap = JSON.parse(canvas.json)
-		return reconstructFrom(signalPathMap.name, signalPathMap.modules, signalPathMap.settings)
+		return reconstructFrom(signalPathMap)
 	}
 
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	private Map reconstructFrom(String name, List modules, Map settings) {
-		Globals globals = GlobalsFactory.createInstance(settings ?: [:], grailsApplication)
+	private Map reconstructFrom(Map signalPathMap) {
+		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication)
 		try {
-			return signalPathService.reconstruct([name: name, modules: modules, settings: settings], globals)
+			return signalPathService.reconstruct(signalPathMap, globals)
 		} catch (Exception e) {
 			throw e
 		} finally {

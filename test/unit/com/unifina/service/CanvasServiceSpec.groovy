@@ -4,27 +4,51 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.UiChannel
+import com.unifina.signalpath.UiChannelIterator
+import com.unifina.signalpath.charts.Heatmap
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, ModuleService, SpringSecurityService, SignalPathService])
+@Mock([SecUser, Canvas, Module, UiChannel, ModuleService, SpringSecurityService, SignalPathService])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
 	SecUser someoneElse
 	Canvas myFirstCanvas
 
+	Module moduleWithUi
+
 	def setup() {
+		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
+
 		me = new SecUser(username: "me@me.com", apiKey: "myKey").save(validate: false)
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
 			user: me,
-			json: "{}",
-		).save(failOnError: true)
+			json: new JsonBuilder([
+			    name: "my_canvas_1",
+				hasExports: false,
+				modules: [],
+				settings: [:],
+				uiChannel: [
+				    id: "666",
+					name: "Notifications"
+				]
+			]).toString(),
+		)
+
+		UiChannel ui = new UiChannel(name: "Notifications")
+		ui.id = "666"
+		myFirstCanvas.addToUiChannels(ui)
+
+		myFirstCanvas.save(failOnError: true)
 
 		new Canvas(
 			name: "my_canvas_2",
@@ -129,7 +153,7 @@ class CanvasServiceSpec extends Specification {
 		c.id != null
 		c.user == me
 		c.name == "my_new_canvas"
-		c.json == '{"name":"my_new_canvas","modules":[],"settings":{},"hasExports":false}'
+		c.json != null // TODO: JSON Schema validation
 		c.state == Canvas.State.STOPPED
 		!c.hasExports
 		!c.example
@@ -142,11 +166,17 @@ class CanvasServiceSpec extends Specification {
 		c.serialized == null
 		c.serializationTime == null
 
-		c.uiChannels == null
+		c.uiChannels.size() == 1
+		c.uiChannels[0].id != null
+		c.uiChannels[0].name == "Notifications"
 	}
 
-	def "updateExisting updates existing Canvas"() {
-		def command = new SaveCanvasCommand(name: "my_updated_canvas", modules: [], settings: ["a" : "b"])
+	def "updateExisting updates existing Canvas keeping existing uiChannelIds intact"() {
+		def command = new SaveCanvasCommand(
+			name: "my_updated_canvas",
+			modules: [],
+			settings: ["a" : "b"]
+		)
 
 		when:
 		service.updateExisting(myFirstCanvas, command)
@@ -155,6 +185,70 @@ class CanvasServiceSpec extends Specification {
 		then:
 		c.user == me
 		c.name == "my_updated_canvas"
-		c.json == '{"name":"my_updated_canvas","modules":[],"settings":{"a":"b"},"hasExports":false}'
+		c.json != null // TODO: JSON Schema validation
+
+		c.uiChannels.size() == 1
+		c.uiChannels[0].id == "666"
+	}
+
+	def "updateExisting creates uiChannels for new modules and keeps old ones intact"() {
+		def createCommand = new SaveCanvasCommand(
+			name: "my_canvas_with_modules",
+			modules: [
+			    [id: moduleWithUi.id, params: [], inputs: [], outputs: []],
+				[id: moduleWithUi.id, params: [], inputs: [], outputs: []],
+				[id: moduleWithUi.id, params: [], inputs: [], outputs: []]
+			]
+		)
+		def canvas = service.createNew(createCommand, me)
+		def modules = canvas.toMap().modules
+
+		def existingUiChannelIds = uiChannelIdsFromMap(canvas.toMap())
+		assert existingUiChannelIds.size() == 4
+
+		when:
+		def newModules = [
+		    [id: moduleWithUi.id, params: [], inputs: [], outputs: []],
+			[id: moduleWithUi.id, params: [], inputs: [], outputs: []]
+		]
+		def updateCommand = new SaveCanvasCommand(
+			name: "my_canvas_with_modules",
+			modules: newModules + modules
+		)
+		service.updateExisting(canvas, updateCommand)
+
+		then:
+		canvas.uiChannels.size() == 6
+		uiChannelIdsFromMap(canvas.toMap()).containsAll(existingUiChannelIds)
+	}
+
+	def "createNew always generates new uiChannels"() {
+		def createCommand = new SaveCanvasCommand(
+			name: "my_canvas_with_modules",
+			modules: [
+				[id: moduleWithUi.id, params: [], inputs: [], outputs: []],
+				[id: moduleWithUi.id, params: [], inputs: [], outputs: []],
+				[id: moduleWithUi.id, params: [], inputs: [], outputs: []]
+			]
+		)
+		def canvas = service.createNew(createCommand, me)
+		def modules = canvas.toMap().modules
+
+		def existingUiChannelIds = uiChannelIdsFromMap(canvas.toMap()) as Set
+		assert existingUiChannelIds.size() == 4
+
+		when:
+		def create2ndCommand = new SaveCanvasCommand(name: "my_canvas_with_modules", modules: modules)
+		def newCanvas = service.createNew(create2ndCommand, me)
+
+		then:
+		newCanvas.uiChannels.size() == 4
+		canvas.uiChannels.size() == 4
+		existingUiChannelIds.plus(uiChannelIdsFromMap(newCanvas.toMap())).size() == 8
+		existingUiChannelIds.intersect(uiChannelIdsFromMap(newCanvas.toMap())).empty
+	}
+
+	def uiChannelIdsFromMap(Map signalPathMap) {
+		UiChannelIterator.over(signalPathMap).collect { it.id }
 	}
 }

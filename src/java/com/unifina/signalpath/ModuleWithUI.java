@@ -34,6 +34,13 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	public String getUiChannelName() {
 		return getName();
 	}
+
+	public Map getUiChannelMap() {
+		Map uiChannel = new HashMap<String,Object>();
+		uiChannel.put("id", getUiChannelId());
+		uiChannel.put("name", getUiChannelName());
+		return uiChannel;
+	}
 	
 	/**
 	 * Override this method if a webcomponent is available for this module. The
@@ -47,9 +54,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		Map uiChannel = new HashMap<String,Object>();
-		uiChannel.put("id", getUiChannelId());
-		uiChannel.put("name", getUiChannelName());
+		Map uiChannel = getUiChannelMap();
 		
 		if (getWebcomponentName()!=null && globals.isRealtime())
 			uiChannel.put("webcomponent", getWebcomponentName());

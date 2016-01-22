@@ -49,14 +49,15 @@ class SignalPathService {
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
 	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
-
 		SignalPath sp = new SignalPath(isRoot)
+
 		sp.globals = globals
 		sp.init()		
 		sp.configure(signalPathMap)
-		
-		if (connectionsReady)
+		if (connectionsReady) {
 			sp.connectionsReady()
+		}
+
 		return sp
 	}
 	
@@ -65,7 +66,8 @@ class SignalPathService {
 			name: sp.name,
 			modules: sp.modules.collect { it.getConfiguration() },
 			settings: sp.globals.signalPathContext,
-			hasExports: sp.hasExports()
+			hasExports: sp.hasExports(),
+			uiChannel: sp.getUiChannelMap()
 		]
 	}
 	
@@ -77,12 +79,6 @@ class SignalPathService {
 	 */
 	public Map reconstruct(Map signalPathMap, Globals globals) {
 		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
-		
-		// TODO: remove backwards compatibility
-		if (signalPathMap.timeOfDayFilter) {
-			signalPathMap.signalPathContext.timeOfDayFilter = signalPathMap.timeOfDayFilter
-		}
-
 		return signalPathToMap(sp)
 	}
 	
