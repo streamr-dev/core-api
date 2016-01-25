@@ -130,7 +130,7 @@ class CanvasServiceSpec extends Specification {
 		service.findAllBy(me, null, null, Canvas.State.RUNNING)*.name == ["my_canvas_3", "my_canvas_4"]
 	}
 
-	def "createNew throws error when given null command object"() {
+	def "createNew() throws error when given null command object"() {
 		when:
 		service.createNew(null, me)
 
@@ -138,7 +138,7 @@ class CanvasServiceSpec extends Specification {
 		thrown(NullPointerException)
 	}
 
-	def "createNew throws error when given incomplete command object"() {
+	def "createNew() throws error when given incomplete command object"() {
 		when:
 		service.createNew(new SaveCanvasCommand(), me)
 
@@ -146,7 +146,7 @@ class CanvasServiceSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	def "createNew creates a new Canvas"() {
+	def "createNew() creates a new Canvas"() {
 		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [])
 
 		when:
@@ -173,6 +173,17 @@ class CanvasServiceSpec extends Specification {
 		c.uiChannels.size() == 1
 		c.uiChannels[0].id != null
 		c.uiChannels[0].name == "Notifications"
+	}
+
+	def "createNew() creates a new adhoc Canvas when given adhoc setting"() {
+		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [], settings: [adhoc: true])
+
+		when:
+		def newId = service.createNew(command, me).id
+		Canvas c = Canvas.findById(newId)
+
+		then:
+		c.adhoc
 	}
 
 	def "updateExisting updates existing Canvas keeping existing uiChannelIds intact"() {

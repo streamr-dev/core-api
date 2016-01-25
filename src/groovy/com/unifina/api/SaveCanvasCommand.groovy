@@ -13,4 +13,8 @@ class SaveCanvasCommand {
 		modules(nullable: false)
 		settings(nullable: false)
 	}
+
+	boolean isAdhoc() {
+		settings.adhoc
+	}
 }

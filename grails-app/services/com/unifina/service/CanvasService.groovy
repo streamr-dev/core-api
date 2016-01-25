@@ -48,7 +48,6 @@ class CanvasService {
 
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
-		// TODO: adhoc
 		Canvas canvas = new Canvas(user: user)
 		updateExisting(canvas, command, true)
 		return canvas
@@ -68,6 +67,7 @@ class CanvasService {
 		canvas.hasExports = newSignalPathMap.hasExports
 		canvas.json = new JsonBuilder(newSignalPathMap).toString()
 		canvas.state = Canvas.State.STOPPED
+		canvas.adhoc = command.isAdhoc()
 		canvas.save(flush: true, failOnError: true)
 	}
 
