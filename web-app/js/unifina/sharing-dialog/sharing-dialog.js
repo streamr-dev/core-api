@@ -61,8 +61,8 @@
             this.$permissions = $('<div class="btn-group" data-toggle="buttons">').appendTo(this.$el)
             this.$readLabel = $(this.checkboxTemplate({op: "read", text: "READ"})).appendTo(this.$permissions)
             //this.$readCheckbox = this.$readLabel.find("input")
-            this.$writeLabel = $(this.checkboxTemplate({op: "write", text: "WRITE"})).appendTo(this.$permissions).find("input")
-            this.$shareLabel = $(this.checkboxTemplate({op: "share", text: "SHARE"})).appendTo(this.$permissions).find("input")
+            this.$writeLabel = $(this.checkboxTemplate({op: "write", text: "WRITE"})).appendTo(this.$permissions)
+            this.$shareLabel = $(this.checkboxTemplate({op: "share", text: "SHARE"})).appendTo(this.$permissions)
             this.$deleteButton = $('<button class="btn btn-danger" id="delete-button">').text("Delete").on("click", function() { model.destroy() }).appendTo(this.$el)
 
             this.listenTo(model, 'change', this.render)
