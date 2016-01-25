@@ -41,7 +41,14 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
-	def save(SaveCanvasCommand command) {
+	def save() {
+
+		// Ideally this would be done straight in argument list without explicitly binding data. Unfortunately Grails
+		// uses Google's GSON to deserialize data which doesn't fully deserialize integers but instead leaves them as
+		// "LazilyParsedNumber" which cannot be cast to type Integer.
+		def command = new SaveCanvasCommand()
+		bindData(command, request.JSON)
+
 		Canvas canvas = canvasService.createNew(command, request.apiUser)
 		render canvas.toMap() as JSON
 	}
