@@ -71,8 +71,10 @@ class CanvasService {
 		canvas.save(flush: true, failOnError: true)
 	}
 
-	public void start(Canvas canvas) {
-		// TODO: clearing
+	public void start(Canvas canvas, boolean clearSerialization) {
+		if (clearSerialization) {
+			signalPathService.clearState(canvas)
+		}
 		signalPathService.startLocal(canvas, canvas.toMap().settings)
 	}
 

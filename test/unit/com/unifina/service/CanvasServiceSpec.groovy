@@ -268,9 +268,22 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 
 		when:
-		service.start(myFirstCanvas)
+		service.start(myFirstCanvas, false)
 
 		then:
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		0 * signalPathService._
+	}
+
+	def "start() invokes SignalPathService's startLocal() and clearState() given clear argument true"() {
+		def signalPathService = Mock(SignalPathService)
+		service.signalPathService = signalPathService
+
+		when:
+		service.start(myFirstCanvas, true)
+
+		then:
+		1 * signalPathService.clearState(myFirstCanvas)
 		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
 		0 * signalPathService._
 	}

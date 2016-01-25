@@ -25,7 +25,6 @@ class CanvasApiControllerSpec extends Specification {
 	Canvas canvas1
 	Canvas canvas2
 	Canvas canvas3
-	Canvas canvas4
 
 	void setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
@@ -199,6 +198,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
+		0 * canvasService._
 	}
 
 	void "must not be able overwrite example"() {
@@ -216,6 +216,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
+		0 * canvasService._
 	}
 
 	void "must be able to delete my own Canvas"() {
@@ -242,6 +243,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
+		0 * canvasService._
 	}
 
 	void "must not be able delete example"() {
@@ -255,5 +257,80 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
+		0 * canvasService._
+	}
+
+	void "must be able to start my own Canvas"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		request.requestURI = "/api/v1/canvases/start"
+		withFilters(action: "start") {
+			controller.start()
+		}
+
+		then:
+		response.status == 200
+		1 * canvasService.start(canvas1, false)
+		0 * canvasService._
+	}
+
+	void "must be able to start my own Canvas with clearing enabled"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		params.clearState = true
+		request.requestURI = "/api/v1/canvases/start"
+		withFilters(action: "start") {
+			controller.start()
+		}
+
+		then:
+		response.status == 200
+		1 * canvasService.start(canvas1, true)
+		0 * canvasService._
+	}
+
+	void "must not be able start others' Canvases"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "2"
+		request.requestURI = "/api/v1/canvases/start"
+		withFilters(action: "start") {
+			controller.start()
+		}
+		then:
+		response.status == 403
+		response.json.code == "FORBIDDEN"
+		0 * canvasService._
+	}
+
+	void "must be able to stop my own Canvas"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		request.requestURI = "/api/v1/canvases/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
+
+		then:
+		response.status == 200
+		1 * canvasService.stop(canvas1)
+		0 * canvasService._
+	}
+
+	void "must not be able stop others' Canvases"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "2"
+		request.requestURI = "/api/v1/canvases/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
+		then:
+		response.status == 403
+		response.json.code == "FORBIDDEN"
+		0 * canvasService._
 	}
 }
