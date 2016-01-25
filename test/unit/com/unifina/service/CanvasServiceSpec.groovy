@@ -36,7 +36,11 @@ class CanvasServiceSpec extends Specification {
 			    name: "my_canvas_1",
 				hasExports: false,
 				modules: [],
-				settings: [:],
+				settings: [
+					speed: 0,
+					beginDate: "2016-01-25",
+					endDate: "2016-01-26",
+				],
 				uiChannel: [
 				    id: "666",
 					name: "Notifications"
@@ -246,6 +250,30 @@ class CanvasServiceSpec extends Specification {
 		canvas.uiChannels.size() == 4
 		existingUiChannelIds.plus(uiChannelIdsFromMap(newCanvas.toMap())).size() == 8
 		existingUiChannelIds.intersect(uiChannelIdsFromMap(newCanvas.toMap())).empty
+	}
+
+	def "start() invokes SignalPathService.startLocal()"() {
+		def signalPathService = Mock(SignalPathService)
+		service.signalPathService = signalPathService
+
+		when:
+		service.start(myFirstCanvas)
+
+		then:
+		1 * signalPathService.startLocal(myFirstCanvas, [speed: 0, beginDate: "2016-01-25", endDate: "2016-01-26"])
+		0 * signalPathService._
+	}
+
+	def "stop() invokes SignalPathService.stopLocal()"() {
+		def signalPathService = Mock(SignalPathService)
+		service.signalPathService = signalPathService
+
+		when:
+		service.stop(myFirstCanvas)
+
+		then:
+		1 * signalPathService.stopLocal(myFirstCanvas)
+		0 * signalPathService._
 	}
 
 	def uiChannelIdsFromMap(Map signalPathMap) {

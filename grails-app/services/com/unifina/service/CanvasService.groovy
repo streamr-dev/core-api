@@ -48,6 +48,7 @@ class CanvasService {
 
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
+		// TODO: adhoc
 		Canvas canvas = new Canvas(user: user)
 		updateExisting(canvas, command, true)
 		return canvas
@@ -71,7 +72,7 @@ class CanvasService {
 	}
 
 	public void start(Canvas canvas) {
-		// TODO: adhoc
+		// TODO: clearing
 		signalPathService.startLocal(canvas, canvas.toMap().settings)
 	}
 
