@@ -166,6 +166,7 @@ modules = {
 	'sharing-dialog' {
 		dependsOn 'bootbox, backbone'
 		resource url: [dir: 'js/unifina/sharing-dialog', file: 'sharing-dialog.js', plugin: 'unifina-core']
+		resource url: [dir: 'css/sharing-dialog', file:'sharing-dialog.css', plugin: 'unifina-core']
 	}
 	'signalpath-browser' {
 		dependsOn 'remote-tabs'
