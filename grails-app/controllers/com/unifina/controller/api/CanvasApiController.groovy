@@ -75,7 +75,7 @@ class CanvasApiController {
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot start common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				canvasService.start(canvas, params.boolean("clearState", false))
+				canvasService.start(canvas, request.JSON?.clearState ?: false)
 				render canvas.toMap() as JSON
 			}
 		}

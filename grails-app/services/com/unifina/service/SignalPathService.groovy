@@ -501,6 +501,7 @@ class SignalPathService {
 	@Transactional
 	def clearState(Canvas canvas) {
 		canvas.serialized = null
+		canvas.serializationTime = null
 		canvas.save(failOnError: true)
 		log.info("Canvas " + canvas.id + " serialized state cleared.")
 	}

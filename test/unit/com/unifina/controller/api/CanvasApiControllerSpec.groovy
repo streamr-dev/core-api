@@ -279,7 +279,7 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		params.id = "1"
-		params.clearState = true
+		request.JSON = [clearState: true]
 		request.requestURI = "/api/v1/canvases/start"
 		withFilters(action: "start") {
 			controller.start()
