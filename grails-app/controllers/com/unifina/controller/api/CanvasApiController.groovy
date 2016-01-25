@@ -6,6 +6,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
@@ -42,24 +43,17 @@ class CanvasApiController {
 
 	@StreamrApi
 	def save() {
-
-		// Ideally this would be done straight in argument list without explicitly binding data. Unfortunately Grails
-		// uses Google's GSON to deserialize data which doesn't fully deserialize integers but instead leaves them as
-		// "LazilyParsedNumber" which cannot be cast to type Integer.
-		def command = new SaveCanvasCommand()
-		bindData(command, request.JSON)
-
-		Canvas canvas = canvasService.createNew(command, request.apiUser)
+		Canvas canvas = canvasService.createNew(readSaveCommand(), request.apiUser)
 		render canvas.toMap() as JSON
 	}
 
 	@StreamrApi
-	def update(String id, SaveCanvasCommand command) {
+	def update(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
-				canvasService.updateExisting(canvas, command)
+				canvasService.updateExisting(canvas, readSaveCommand())
 				render canvas.toMap() as JSON
 			}
 		}
@@ -99,6 +93,17 @@ class CanvasApiController {
 				render canvas.toMap() as JSON
 			}
 		}
+	}
+
+	private SaveCanvasCommand readSaveCommand() {
+
+		// Ideally, this would be done straight in parameter lists of actions thereby implicitly binding data.
+		// Unfortunately Grails uses Google's GSON to deserialize data which doesn't fully deserialize integers but
+		// instead leaves them as "LazilyParsedNumber"(s) which cannot be cast to type Integer.
+
+		def command = new SaveCanvasCommand()
+		bindData(command, request.JSON)
+		return command
 	}
 
 	private void getAuthorizedCanvas(String id, Closure successHandler) {
