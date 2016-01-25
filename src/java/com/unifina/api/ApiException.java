@@ -1,6 +1,6 @@
 package com.unifina.api;
 
-public abstract  class ApiException extends RuntimeException {
+public class ApiException extends RuntimeException {
 
 	private final int statusCode;
 	private final String code;

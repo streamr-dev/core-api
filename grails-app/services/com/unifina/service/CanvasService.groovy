@@ -1,11 +1,13 @@
 package com.unifina.service
 
+import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
@@ -80,7 +82,13 @@ class CanvasService {
 		if (clearSerialization) {
 			signalPathService.clearState(canvas)
 		}
-		signalPathService.startLocal(canvas, canvas.toMap().settings)
+
+		try {
+			signalPathService.startLocal(canvas, canvas.toMap().settings)
+		} catch (SerializationException ex) {
+			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
+			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
+		}
 	}
 
 	public void stop(Canvas canvas) {

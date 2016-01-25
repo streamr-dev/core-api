@@ -302,6 +302,20 @@ class CanvasServiceSpec extends Specification {
 		thrown(InvalidStateException)
 	}
 
+	def "start() raises ApiException about serialization if deserializing canvas fails"() {
+		def signalPathService = Mock(SignalPathService)
+		service.signalPathService = signalPathService
+		myFirstCanvas.serialized = "serialized_content_be_here"
+		myFirstCanvas.serializationTime = new Date()
+		myFirstCanvas.save(failOnError: true)
+
+		when:
+		service.start(myFirstCanvas, false)
+
+		then:
+		true
+	}
+
 	def "stop() invokes SignalPathService.stopLocal()"() {
 		def signalPathService = Mock(SignalPathService)
 		service.signalPathService = signalPathService
