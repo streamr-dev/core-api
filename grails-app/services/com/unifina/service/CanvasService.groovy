@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
@@ -72,6 +73,10 @@ class CanvasService {
 	}
 
 	public void start(Canvas canvas, boolean clearSerialization) {
+		if (canvas.state == Canvas.State.RUNNING) {
+			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
+		}
+
 		if (clearSerialization) {
 			signalPathService.clearState(canvas)
 		}
@@ -79,6 +84,9 @@ class CanvasService {
 	}
 
 	public void stop(Canvas canvas) {
+		if (canvas.state != Canvas.State.RUNNING) {
+			throw new InvalidStateException("Canvas $canvas.id not currently running.")
+		}
 		// TODO: handle return value
 		boolean result = signalPathService.stopLocal(canvas)
 	}

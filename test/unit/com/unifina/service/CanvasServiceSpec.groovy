@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
@@ -288,9 +289,24 @@ class CanvasServiceSpec extends Specification {
 		0 * signalPathService._
 	}
 
+	def "start() raises InvalidStateException if canvas running"() {
+		def signalPathService = Mock(SignalPathService)
+		service.signalPathService = signalPathService
+		myFirstCanvas.state = Canvas.State.RUNNING
+		myFirstCanvas.save(failOnError: true)
+
+		when:
+		service.start(myFirstCanvas, false)
+
+		then:
+		thrown(InvalidStateException)
+	}
+
 	def "stop() invokes SignalPathService.stopLocal()"() {
 		def signalPathService = Mock(SignalPathService)
 		service.signalPathService = signalPathService
+		myFirstCanvas.state = Canvas.State.RUNNING
+		myFirstCanvas.save(failOnError: true)
 
 		when:
 		service.stop(myFirstCanvas)
@@ -298,6 +314,17 @@ class CanvasServiceSpec extends Specification {
 		then:
 		1 * signalPathService.stopLocal(myFirstCanvas)
 		0 * signalPathService._
+	}
+
+	def "stop() raises InvalidStateException if canvas not running"() {
+		def signalPathService = Mock(SignalPathService)
+		service.signalPathService = signalPathService
+
+		when:
+		service.stop(myFirstCanvas)
+
+		then:
+		thrown(InvalidStateException)
 	}
 
 	def uiChannelIdsFromMap(Map signalPathMap) {

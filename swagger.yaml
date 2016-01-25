@@ -298,8 +298,6 @@ paths:
         '404':
           description: Canvas not found
         '500':
-          description: Invalid canvas type
-        '501':
           description: Canvas already running
 
   /canvases/{id}/stop:
@@ -324,7 +322,7 @@ paths:
         '404':
           description: Canvas not found
         '500':
-          description: Canvas is not in state running
+          description: Canvas is not running
 
 
 definitions:
