@@ -36,16 +36,16 @@ class StreamApiController {
 
 
 	@StreamrApi
-	def show(String uuid) {
-		getAuthorizedStream(uuid) { Stream stream ->
+	def show(String id) {
+		getAuthorizedStream(id) { Stream stream ->
 			render(stream.toMap() as JSON)
 		}
 	}
 
 	@StreamrApi
-	def update(String uuid) {
+	def update(String id) {
 		Stream newStream = new Stream(request.JSON)
-		getAuthorizedStream(uuid) { Stream stream ->
+		getAuthorizedStream(id) { Stream stream ->
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = newStream.config
@@ -55,14 +55,14 @@ class StreamApiController {
 	}
 
 	@StreamrApi
-	def delete(String uuid) {
-		getAuthorizedStream(uuid) { Stream stream ->
+	def delete(String id) {
+		getAuthorizedStream(id) { Stream stream ->
 			stream.delete()
 			render(status: 204)
 		}
 	}
 
-	private def getAuthorizedStream(String uuid, Closure<Stream> successHandler) {
+	private def getAuthorizedStream(String uuid, Closure successHandler) {
 		def stream = Stream.findByUuid(uuid)
 		if (stream == null) {
 			render(status: 404, text: [error: "Stream not found with uuid " + uuid, code: "NOT_FOUND"] as JSON)
