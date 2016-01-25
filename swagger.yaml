@@ -284,10 +284,10 @@ paths:
           type: integer
         - name: body
           in: body
-          description: Resume request object
+          description: runtime options
           required: true
           schema:
-            $ref: '#/definitions/ResumeRequest'
+            $ref: '#/definitions/StartRequest'
       responses:
         '200':
           description: Success
@@ -435,6 +435,10 @@ definitions:
 
   CanvasSettings:
     type: object
+    properties:
+      adhoc:
+        type: boolean
+        description: set to true for adhoc canvas
 
   Module:
     type: object
@@ -452,14 +456,14 @@ definitions:
         type: string
         example: Notifications
 
-  ResumeRequest:
+  StartRequest:
     type: object
     properties:
-      loadState:
+      clearState:
         type: boolean
-        default: true
+        default: false
         example: true
-        description: If true, an attempt to load a saved state will be made. If false, the canvas will start with initial state.
+        description: If true, previously saved state will be cleared before starting canvas.
 
   Error:
     type: object
