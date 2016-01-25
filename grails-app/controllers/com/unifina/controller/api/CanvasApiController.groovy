@@ -88,6 +88,7 @@ class CanvasApiController {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				canvasService.stop(canvas)
+				canvas.refresh() // Canvas updated in separate thread
 				render canvas.toMap() as JSON
 			}
 		}
