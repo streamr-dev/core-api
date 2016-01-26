@@ -470,7 +470,7 @@ var SignalPath = (function () {
 			setName(json.name)
 			savedJson = $.extend({}, json, toJSON())
 
-			if (json.state === 'running')
+			if (json.state.toLowerCase() === 'running')
 				runningJson = json
 
 			if (callback)

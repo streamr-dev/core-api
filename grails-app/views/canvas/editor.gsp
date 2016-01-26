@@ -42,6 +42,9 @@ $(document).ready(function() {
 				timeZone: tz.timezone_name,
 				timeZoneOffset: tz.utc_offset,
 				timeZoneDst: tz.uses_dst
+			},
+			editorState: {
+				runTab: $("#tab-historical").is(":visible") ? "#tab-historical" : "#tab-realtime"
 			}
 		}
 	}
@@ -82,6 +85,17 @@ $(document).ready(function() {
 		}
 
 		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")
+
+		if (settings.editorState && settings.editorState.runTab)
+			$("a[href="+settings.editorState.runTab+"]").tab('show')
+
+	});
+
+	// Show realtime tab when a running SignalPath is loaded
+	$(SignalPath).on('loaded', function(event, json) {
+		if (SignalPath.isRunning()) {
+			$("a[href=#tab-realtime]").tab('show')
+		}
 	});
 	
 	<g:if test="${id}">

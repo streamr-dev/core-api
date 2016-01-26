@@ -10,6 +10,11 @@ var CanvasStartButton = Backbone.View.extend({
         this.clearState = options.clearState || false
         this.$clickElement = options.clickElement || this.$el
 
+        $(this.signalPath).on('loaded', function() {
+            if (!_this.adhoc)
+                _this.setRunning(_this.signalPath.isRunning())
+        })
+
         $(this.signalPath).on('error stopped stopping', function() {
             _this.setRunning(false);
         })
