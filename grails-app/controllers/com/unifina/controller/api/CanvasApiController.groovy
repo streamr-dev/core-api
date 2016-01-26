@@ -7,6 +7,7 @@ import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.apache.log4j.Logger
+import org.hibernate.UnresolvableObjectException
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
@@ -87,9 +88,16 @@ class CanvasApiController {
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
+				// Updates canvas in another thread, so canvas needs to be refreshed
 				canvasService.stop(canvas)
-				canvas.refresh() // Canvas updated in separate thread
-				render canvas.toMap() as JSON
+
+				try {
+					// Adhoc canvases are deleted on stop, in which case refresh() will fail with UnresolvableObjectException
+					canvas.refresh()
+					render canvas.toMap() as JSON
+				} catch (UnresolvableObjectException) {
+					render (status: 204)
+				}
 			}
 		}
 	}

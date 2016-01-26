@@ -45,6 +45,7 @@ var SignalPath = (function () {
 		},
 		allowRuntimeChanges: true,
 		apiUrl: Streamr.createLink({"uri": "api/v1"}),
+		requestUrl: Streamr.createLink({"uri": "api/v1/live/request"}),
 		getModuleUrl: Streamr.createLink("module", "jsonGetModule"),
 		getModuleHelpUrl: Streamr.createLink("module", "jsonGetModuleHelp"),
 		connectionOptions: {},
@@ -64,7 +65,7 @@ var SignalPath = (function () {
 
     // set in init()
     var parentElement;
-    var name;
+    var name = "Untitled canvas"
     
 	// Public
 	var pub = {};
@@ -90,6 +91,9 @@ var SignalPath = (function () {
 	    })
 		pub.setZoom(opts.zoom)
 		pub.jsPlumb = jsPlumb
+
+		$(pub).on('started', subscribe)
+		$(pub).on('stopped', disconnect)
 	};
 	pub.unload = function() {
 		jsPlumb.reset();
@@ -98,14 +102,14 @@ var SignalPath = (function () {
 		}
 	};
 	pub.sendRequest = function(hash,msg,callback) {
-		if (runData) {
+		if (runningJson) {
 			
 			// Include UI channel if exists
 			var channel
-			for (var i=0;i<runData.uiChannels.length;i++) {
+			for (var i=0;i<runningJson.modules.length;i++) {
 				// using == on purpose
-				if (runData.uiChannels[i].hash==hash) {
-					channel = runData.uiChannels[i].id
+				if (runningJson.modules[i].hash==hash) {
+					channel = runningJson.modules[i].uiChannel.id
 					break
 				}
 			}
@@ -114,7 +118,7 @@ var SignalPath = (function () {
 				type: 'POST',
 				url: options.requestUrl,
 				data: JSON.stringify({
-					id: runData.id,
+					id: runningJson.id,
 					hash: hash,
 					channel: channel,
 					msg: msg
@@ -352,7 +356,7 @@ var SignalPath = (function () {
 	 * Checks if this SignalPath has unsaved changes
 	 */
 	function isDirty() {
-		return _.isEqual(toJSON(), savedJson)
+		return _.isEqual(savedJson, $.extend({}, savedJson, toJSON()))
 
 	}
 	pub.isDirty = isDirty
@@ -444,7 +448,8 @@ var SignalPath = (function () {
 		moduleHashGenerator = 0;
 		
 		parentElement.empty()
-		
+
+		name = "Untitled canvas"
 		savedJson = {}
 		
 		jsPlumb.reset();		
@@ -462,8 +467,8 @@ var SignalPath = (function () {
 		function doLoad(json) {
 			loadJSON(json);
 
-			savedJson = json
 			setName(json.name)
+			savedJson = $.extend({}, json, toJSON())
 
 			if (json.state === 'running')
 				runningJson = json
@@ -491,14 +496,14 @@ var SignalPath = (function () {
 	}
 	pub.load = load;
 	
-	function start(startRequest, callback) {
+	function start(startRequest, callback, ignoreDirty) {
 		startRequest = startRequest || {}
 
 		if (isRunning()) {
 			handleError("Canvas is already running.")
 			return
 		}
-		if (isDirty()) {
+		if (!ignoreDirty && isDirty()) {
 			handleError("Canvas has unsaved changes. Please save it before starting.")
 			return
 		}
@@ -540,10 +545,10 @@ var SignalPath = (function () {
 
 	function startAdhoc(callback) {
 		var json = toJSON()
-		json.adhoc = true
+		json.settings.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
-			start({loadState:false}, callback)
+			start({clearState:false}, callback, true)
 		})
 	}
 	pub.startAdhoc = startAdhoc
@@ -591,9 +596,10 @@ var SignalPath = (function () {
 		}
 		else if (message.type=="D") {
 			$(pub).trigger("done")
+			$(pub).trigger("stopped")
 		}
 		else if (message.type=="E") {
-			disconnect();
+			$(pub).trigger("stopped")
 			handleError(message.error)
 		}
 		else if (message.type=="N") {
@@ -602,27 +608,26 @@ var SignalPath = (function () {
 	}
 	
 	function disconnect() {
-		connection.disconnect()
+		if (connection && connection.isConnected())
+			connection.disconnect()
 	}
 	pub.disconnect = disconnect;
 	
 	function isRunning() {
-		return runningJson!=null && runningJson.state === 'started'
+		return runningJson!=null && runningJson.state!==undefined && runningJson.state.toLowerCase() === 'running'
 	}
 	pub.isRunning = isRunning;
 	
 	function stop() {
-		if (isRunning()) {
-			$(pub).trigger('stopping')
+		$(pub).trigger('stopping')
 
+		if (isRunning()) {
 			$.ajax({
 				type: 'POST',
 				url: options.apiUrl + '/canvases/' + runningJson.id + '/stop',
 				dataType: 'json',
 				success: function(data) {
-					// Ignore errors on stop
-					if (data.error) {}
-
+					// data may be undefined if the canvas was deleted on stop
 					runningJson = null
 					$(pub).trigger('stopped');
 				},
@@ -631,7 +636,9 @@ var SignalPath = (function () {
 				}
 			});
 		}
-		disconnect();
+		else {
+			$(pub).trigger('stopped')
+		}
 	}
 	pub.stop = stop;
 	

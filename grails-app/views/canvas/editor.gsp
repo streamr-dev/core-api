@@ -16,6 +16,7 @@
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
 		<r:require module="detect-timezone"/>
+		<r:require module="canvas-controls"/>
 
 		<r:script>
 
@@ -30,23 +31,19 @@ $(document).ready(function() {
 
 	function settings() {
 		var tz = jstz();
-		
+
 		return {
 			beginDate: $("#beginDate").val(),
 			endDate: $("#endDate").val(),
 			speed: $("#speed").val(),
 			timeOfDayFilter: {
 				timeOfDayStart: $("#timeOfDayStart").val(),
-				timeOfDayEnd: $("#timeOfDayEnd").val(),	
+				timeOfDayEnd: $("#timeOfDayEnd").val(),
 				timeZone: tz.timezone_name,
 				timeZoneOffset: tz.utc_offset,
 				timeZoneDst: tz.uses_dst
 			}
 		}
-	}
-
-	function updateCanvasName() {
-		$(".current-canvas-name").html(SignalPath.getName() != null ? SignalPath.getName() : "Untitled canvas")
 	}
 
 	SignalPath.init({
@@ -85,8 +82,6 @@ $(document).ready(function() {
 		}
 
 		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")
-
-		updateCanvasName()
 	});
 	
 	<g:if test="${id}">
@@ -105,7 +100,6 @@ $(document).ready(function() {
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
-		updateCanvasName()
 	})
 
 	// show search control
@@ -141,7 +135,6 @@ $(document).ready(function() {
 
 	$('#newSignalPath').click(function() {
 		SignalPath.clear()
-		updateCanvasName()
 	})
 
 	$('#loadSignalPath').click(function() {
@@ -185,6 +178,45 @@ $(document).ready(function() {
     		window.location = url_root + "/" + data.id
 		});
 	})
+
+	// Historical run button
+	new CanvasStartButton({
+		el: $("#run-historical-button"),
+		signalPath: SignalPath,
+        settings: settings,
+        startContent: '<i class="fa fa-play"></i> Run',
+        stopContent: '<i class="fa fa-spin fa-spinner"></i> Abort',
+        adhoc: true,
+        clearState: true
+	})
+
+	// Realtime run button
+	new CanvasStartButton({
+		el: $("#run-realtime-button"),
+		signalPath: SignalPath,
+        settings: settings,
+        startContent: '<i class="fa fa-play"></i> Start',
+        stopContent: '<i class="fa fa-stop"></i> Stop',
+        adhoc: false,
+        clearState: false
+	})
+
+	// Run and clear link
+	new CanvasStartButton({
+		el: $("#run-realtime-button"),
+		signalPath: SignalPath,
+        settings: settings,
+        startContent: '<i class="fa fa-play"></i> Start',
+        stopContent: '<i class="fa fa-stop"></i> Stop',
+        adhoc: false,
+        clearState: true,
+        clickElement: $("#run-realtime-clear")
+	})
+
+	new CanvasNameEditor({
+		el: $("#canvas-name-editor"),
+		signalPath: SignalPath
+	})
 })
 
 $(document).unload(function () {
@@ -221,7 +253,7 @@ $(document).unload(function () {
 
 			<div class="menu-content">
 
-				<ul class="nav nav-tabs nav-tabs-xs run-mode-tabs">
+				<ul class="nav nav-tabs nav-justified nav-tabs-xs run-mode-tabs">
 					<li class="active">
 						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
 					</li>
@@ -233,13 +265,6 @@ $(document).unload(function () {
 				<div class="tab-content">
 					<!-- Historical run controls -->
 					<div role="tabpanel" class="tab-pane active" id="tab-historical">
-
-						<div class="menu-content-header">
-							<!-- <label>Historical Run Options</label>-->
-							<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Historical Run Options" data-toggle="modal" data-target="#historicalOptionsModal">
-								<i class="fa fa-cog"></i>
-							</a>
-						</div>
 
 						<form onsubmit="return false;">
 							<g:hiddenField name="defaultBeginDate" value="${formatDate(date:beginDate,format:"yyyy-MM-dd")}"/>
@@ -254,13 +279,17 @@ $(document).unload(function () {
 									<span class="input-group-addon">To</span>
 									<ui:datePicker name="endDate" value="${endDate}" class="form-control"/>
 								</div>
+								<a href="#" id="historical-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Historical Run Options" data-toggle="modal" data-target="#historicalOptionsModal">
+									<i class="fa fa-cog"></i>
+									Options
+								</a>
 							</div>
 
-							<div id="run-group" class="btn-group btn-block">
-								<sp:runButton buttonId="run" class="btn-primary col-xs-10">
+							<div class="btn-group btn-block run-group">
+								<button id="run-historical-button" class="btn btn-primary col-xs-10 run-button">
 									<i class="fa fa-play"></i>
 									Run
-								</sp:runButton>
+								</button>
 								<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
 										data-toggle="dropdown">
 									<span class="caret"></span>
@@ -277,9 +306,24 @@ $(document).unload(function () {
 					<div role="tabpanel" class="tab-pane" id="tab-realtime">
 						<div class="menu-content-header">
 							<!--<label>Realtime Run Options</label>-->
-							<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
+							<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
 								<i class="fa fa-cog"></i>
+								Options
 							</a>
+						</div>
+						<div class="btn-group btn-block run-group">
+							<button id="run-realtime-button" class="btn btn-primary col-xs-10 run-button">
+								<i class="fa fa-play"></i>
+								<g:message code="canvas.start.label"/>
+							</button>
+							<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
+									data-toggle="dropdown">
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li><a id="run-realtime-clear" href="#"><g:message code="canvas.clearAndStart.label"/></a></li>
+							</ul>
 						</div>
 					</div>
 				</div>
@@ -310,7 +354,7 @@ $(document).unload(function () {
 	<div id="content-wrapper">
 		<ui:breadcrumb>
 			<li class="active">
-				<span class="current-canvas-name">Untitled canvas</span>
+				<span id="canvas-name-editor"></span>
 			</li>
 		</ui:breadcrumb>
 		<div id="canvas" class="scrollable"></div>

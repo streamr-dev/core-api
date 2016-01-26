@@ -27,7 +27,7 @@ class UnifinaCorePluginUrlMappings {
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 
-		"/api/v1/live/request"(controller: "liveApi", action: "request")
-		"/api/v1/live/getModuleJson"(controller: "liveApi", action: "getModuleJson")
+		"/api/v1/live/request"(controller: "live", action: "request")
+		"/api/v1/live/getModuleJson"(controller: "live", action: "getModuleJson")
 	}
 }

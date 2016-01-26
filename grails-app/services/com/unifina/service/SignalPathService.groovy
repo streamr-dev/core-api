@@ -178,13 +178,13 @@ class SignalPathService {
 	
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
+		// TODO: UiChannels might not yet be flushed to database, in which case this will fail. (How is this possible?!) Can usually be repeated by running an empty canvas.
 		// Delayed-delete the topics in one hour
-		List<UiChannel> channels = UiChannel.findAll { canvas.runner == runner.getRunnerId()}
-		kafkaService.createDeleteTopicTask(channels.collect{it.id}, 60*60*1000)
-		
-		List uiIds = UiChannel.executeQuery("select ui.id from UiChannel ui where ui.canvas.runner = ?", [runner.getRunnerId()])
-		if (!uiIds.isEmpty()) {
-			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiIds])
+		List<UiChannel> uiChannelIds = UiChannel.findAll { canvas.runner == runner.getRunnerId()}.collect {it.id}
+		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
+
+		if (!uiChannelIds.isEmpty()) {
+			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiChannelIds])
 		}
 
 		Canvas.executeUpdate("delete from Canvas c where c.runner = ?", [runner.getRunnerId()])
@@ -267,7 +267,7 @@ class SignalPathService {
 		
 		// Use the link generator to get the protocol and port, but use network IP address
 		// as the host to get the address of this individual server
-		String link = grailsLinkGenerator.link(controller: "liveApi", action: "request", absolute: true)
+		String link = grailsLinkGenerator.link(controller: "live", action: "request", absolute: true)
 		URL url = new URL(link)
 		
 		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()

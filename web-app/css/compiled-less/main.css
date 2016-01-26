@@ -16500,13 +16500,14 @@ body.canvas-editor-page .load-save-group > .btn-group > .btn {
 body.canvas-editor-page #save-dropdown-menu .disabled {
   display: none;
 }
-body.canvas-editor-page .nav-tabs.run-mode-tabs.nav-tabs-xs > li > a {
-  padding: 6px 0px;
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:hover,
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:active {
+  color: #999;
 }
-body.canvas-editor-page #run i.fa {
+body.canvas-editor-page .run-button i.fa {
   margin-right: 5px;
 }
-body.canvas-editor-page #run-group button.dropdown-toggle {
+body.canvas-editor-page .run-group button.dropdown-toggle {
   padding-left: 0px;
   padding-right: 0px;
 }
@@ -16522,6 +16523,16 @@ body.canvas-editor-page #moduleTree {
 }
 body.canvas-editor-page #main-menu .twitter-typeahead {
   width: 100%;
+}
+body.canvas-editor-page #canvas-name-editor.editing .canvas-name {
+  display: none;
+}
+body.canvas-editor-page #canvas-name-editor:not(.editing) input,
+body.canvas-editor-page #canvas-name-editor:not(.editing) button {
+  display: none;
+}
+body.canvas-editor-page #canvas-name-editor .canvas-name {
+  cursor: pointer;
 }
 .login-page .btn-sign-up {
   display: none;

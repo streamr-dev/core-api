@@ -317,6 +317,8 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Canvas'
+        '204':
+          description: Success, and Canvas was set to delete on stop, and thus is was deleted
         '403':
           description: Not allowed to stop canvas
         '404':

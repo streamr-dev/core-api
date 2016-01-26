@@ -283,6 +283,7 @@ class SignalPathTagLib {
 
 						SignalPath.saveAs(saveAsName)
 					},
+					value: SignalPath.getName(),
 					className: 'save-as-name-dialog' 
 				})
 			})

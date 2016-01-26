@@ -25,17 +25,20 @@ body.canvas-editor-page {
 		display: none;
 	}
 
-	.nav-tabs.run-mode-tabs.nav-tabs-xs > li > a {
-		padding: 6px 0px;
+	.nav-tabs.run-mode-tabs {
+		& > li > a:hover,
+		& > li > a:active {
+			color: #999;
+		}
 	}
 
-	#run {
+	.run-button {
 		i.fa {
 			margin-right: 5px;
 		}
 	}
 
-	#run-group {
+	.run-group {
 		button.dropdown-toggle {
 			padding-left: 0px;
 			padding-right: 0px; 
@@ -56,5 +59,22 @@ body.canvas-editor-page {
 
 	#main-menu .twitter-typeahead {
 		width: 100%;
+	}
+	
+	#canvas-name-editor {
+		&.editing {
+			.canvas-name {
+				display:none;
+			}
+		}
+		&:not(.editing) {
+			input, button {
+				display: none;
+			}
+		}
+
+		.canvas-name {
+			cursor: pointer;
+		}
 	}
 }
