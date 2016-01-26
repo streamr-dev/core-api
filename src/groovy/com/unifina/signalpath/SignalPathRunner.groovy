@@ -53,7 +53,7 @@ public class SignalPathRunner extends Thread {
 
 		// Instantiate SignalPaths from JSON
 		for (int i=0; i<signalPathMaps.size(); i++) {
-			SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMaps[i],false,globals,true)
+			SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMaps[i], false, globals, true)
 			signalPaths.add(signalPath)
 		}
 	}

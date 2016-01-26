@@ -1,0 +1,272 @@
+{
+  "modules": [
+    {
+      "canClearState": true,
+      "clearState": false,
+      "hash": 0,
+      "id": 147,
+      "inputs": [],
+      "jsModule": "GenericModule",
+      "layout": {
+        "position": {
+          "left": "167px",
+          "top": "100px"
+        }
+      },
+      "name": "Stream",
+      "outputs": [
+        {
+          "canBeNoRepeat": true,
+          "canConnect": true,
+          "connected": true,
+          "id": "myId_0_1453732943659",
+          "longName": "Stream.numero",
+          "name": "numero",
+          "noRepeat": false,
+          "targets": [
+            "myId_1_1453732947381"
+          ],
+          "type": "Double"
+        },
+        {
+          "canConnect": true,
+          "connected": true,
+          "id": "myId_0_1453732943666",
+          "longName": "Stream.sana",
+          "name": "sana",
+          "targets": [
+            "myId_3_1453732965012"
+          ],
+          "type": "String"
+        }
+      ],
+      "params": [
+        {
+          "acceptedTypes": [
+            "Stream",
+            "String"
+          ],
+          "canConnect": true,
+          "canToggleDrivingInput": false,
+          "checkModuleId": true,
+          "connected": false,
+          "defaultValue": null,
+          "drivingInput": false,
+          "feed": 7,
+          "id": "myId_0_1453732943631",
+          "longName": "Stream.stream",
+          "name": "stream",
+          "requiresConnection": false,
+          "streamName": "Miun datavirta",
+          "type": "Stream",
+          "value": "STREAM_ID"
+        }
+      ],
+      "type": "module"
+    },
+    {
+      "canClearState": true,
+      "clearState": false,
+      "hash": 1,
+      "id": 100,
+      "inputs": [
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canBeFeedback": true,
+          "canConnect": true,
+          "canHaveInitialValue": true,
+          "canToggleDrivingInput": true,
+          "connected": true,
+          "drivingInput": true,
+          "feedback": false,
+          "id": "myId_1_1453732947381",
+          "longName": "Add.in1",
+          "name": "in1",
+          "requiresConnection": true,
+          "sourceId": "myId_0_1453732943659",
+          "type": "Double"
+        },
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canBeFeedback": true,
+          "canConnect": true,
+          "canHaveInitialValue": true,
+          "canToggleDrivingInput": true,
+          "connected": true,
+          "drivingInput": true,
+          "feedback": false,
+          "id": "myId_1_1453732947389",
+          "longName": "Add.in2",
+          "name": "in2",
+          "requiresConnection": true,
+          "sourceId": "myId_3_1453732965016",
+          "type": "Double"
+        }
+      ],
+      "jsModule": "GenericModule",
+      "layout": {
+        "position": {
+          "left": "620px",
+          "top": "54px"
+        }
+      },
+      "name": "Add",
+      "options": {
+        "inputs": {
+          "type": "int",
+          "value": 2
+        }
+      },
+      "outputs": [
+        {
+          "canBeNoRepeat": true,
+          "canConnect": true,
+          "connected": true,
+          "id": "myId_1_1453732947395",
+          "longName": "Add.sum",
+          "name": "sum",
+          "noRepeat": true,
+          "targets": [
+            "myId_2_1453732957323"
+          ],
+          "type": "Double"
+        }
+      ],
+      "params": [],
+      "type": "module"
+    },
+    {
+      "canClearState": true,
+      "clearState": false,
+      "hash": 2,
+      "id": 53,
+      "inputs": [
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canBeFeedback": true,
+          "canConnect": true,
+          "canHaveInitialValue": true,
+          "canToggleDrivingInput": true,
+          "connected": true,
+          "drivingInput": true,
+          "feedback": false,
+          "id": "myId_2_1453732957323",
+          "longName": "Sum.in",
+          "name": "in",
+          "requiresConnection": true,
+          "sourceId": "myId_1_1453732947395",
+          "type": "Double"
+        }
+      ],
+      "jsModule": "GenericModule",
+      "layout": {
+        "position": {
+          "left": "870px",
+          "top": "141px"
+        }
+      },
+      "name": "Sum",
+      "outputs": [
+        {
+          "canBeNoRepeat": true,
+          "canConnect": true,
+          "connected": false,
+          "id": "myId_2_1453732957328",
+          "longName": "Sum.out",
+          "name": "out",
+          "noRepeat": true,
+          "type": "Double"
+        }
+      ],
+      "params": [
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canConnect": true,
+          "canToggleDrivingInput": true,
+          "connected": false,
+          "defaultValue": 0,
+          "drivingInput": false,
+          "id": "myId_2_1453732957310",
+          "longName": "Sum.windowLength",
+          "name": "windowLength",
+          "requiresConnection": false,
+          "type": "Double",
+          "value": "0"
+        },
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canConnect": true,
+          "canToggleDrivingInput": true,
+          "connected": false,
+          "defaultValue": 1,
+          "drivingInput": false,
+          "id": "myId_2_1453732957317",
+          "longName": "Sum.minSamples",
+          "name": "minSamples",
+          "requiresConnection": false,
+          "type": "Double",
+          "value": "1"
+        }
+      ],
+      "type": "module"
+    },
+    {
+      "canClearState": true,
+      "clearState": false,
+      "hash": 3,
+      "id": 200,
+      "inputs": [
+        {
+          "acceptedTypes": [
+            "String"
+          ],
+          "canConnect": true,
+          "canToggleDrivingInput": true,
+          "connected": true,
+          "drivingInput": true,
+          "id": "myId_3_1453732965012",
+          "longName": "TextLength.text",
+          "name": "text",
+          "requiresConnection": true,
+          "sourceId": "myId_0_1453732943666",
+          "type": "String"
+        }
+      ],
+      "jsModule": "GenericModule",
+      "layout": {
+        "position": {
+          "left": "455px",
+          "top": "173px"
+        }
+      },
+      "name": "TextLength",
+      "outputs": [
+        {
+          "canBeNoRepeat": true,
+          "canConnect": true,
+          "connected": true,
+          "id": "myId_3_1453732965016",
+          "longName": "TextLength.length",
+          "name": "length",
+          "noRepeat": true,
+          "targets": [
+            "myId_1_1453732947389"
+          ],
+          "type": "Double"
+        }
+      ],
+      "params": [],
+      "type": "module"
+    }
+  ]
+}

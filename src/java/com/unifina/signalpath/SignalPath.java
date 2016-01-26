@@ -239,9 +239,10 @@ public class SignalPath extends ModuleWithUI {
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (sp!=null && sp.value!=null) {
-			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())).getJSONObject("signalPathData"));
+			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())));
+		} else {
+			initFromRepresentation(config);
 		}
-		else initFromRepresentation(config);
 	}
 	
 	@Override
