@@ -9,8 +9,8 @@
       "jsModule": "GenericModule",
       "layout": {
         "position": {
-          "left": "167px",
-          "top": "100px"
+          "left": "98px",
+          "top": "132px"
         }
       },
       "name": "Stream",
@@ -19,25 +19,24 @@
           "canBeNoRepeat": true,
           "canConnect": true,
           "connected": true,
-          "id": "myId_0_1453732943659",
+          "id": "myId_0_1453815974997",
           "longName": "Stream.numero",
           "name": "numero",
           "noRepeat": false,
           "targets": [
-            "myId_1_1453732947381"
+            "myId_2_1453816012451"
           ],
           "type": "Double"
         },
         {
+          "canBeNoRepeat": true,
           "canConnect": true,
-          "connected": true,
-          "id": "myId_0_1453732943666",
-          "longName": "Stream.sana",
-          "name": "sana",
-          "targets": [
-            "myId_3_1453732965012"
-          ],
-          "type": "String"
+          "connected": false,
+          "id": "myId_0_1453815975004",
+          "longName": "Stream.areWeDoneYet",
+          "name": "areWeDoneYet",
+          "noRepeat": false,
+          "type": "Double"
         }
       ],
       "params": [
@@ -53,7 +52,7 @@
           "defaultValue": null,
           "drivingInput": false,
           "feed": 7,
-          "id": "myId_0_1453732943631",
+          "id": "myId_0_1453815974975",
           "longName": "Stream.stream",
           "name": "stream",
           "requiresConnection": false,
@@ -68,81 +67,6 @@
       "canClearState": true,
       "clearState": false,
       "hash": 1,
-      "id": 100,
-      "inputs": [
-        {
-          "acceptedTypes": [
-            "Double"
-          ],
-          "canBeFeedback": true,
-          "canConnect": true,
-          "canHaveInitialValue": true,
-          "canToggleDrivingInput": true,
-          "connected": true,
-          "drivingInput": true,
-          "feedback": false,
-          "id": "myId_1_1453732947381",
-          "longName": "Add.in1",
-          "name": "in1",
-          "requiresConnection": true,
-          "sourceId": "myId_0_1453732943659",
-          "type": "Double"
-        },
-        {
-          "acceptedTypes": [
-            "Double"
-          ],
-          "canBeFeedback": true,
-          "canConnect": true,
-          "canHaveInitialValue": true,
-          "canToggleDrivingInput": true,
-          "connected": true,
-          "drivingInput": true,
-          "feedback": false,
-          "id": "myId_1_1453732947389",
-          "longName": "Add.in2",
-          "name": "in2",
-          "requiresConnection": true,
-          "sourceId": "myId_3_1453732965016",
-          "type": "Double"
-        }
-      ],
-      "jsModule": "GenericModule",
-      "layout": {
-        "position": {
-          "left": "620px",
-          "top": "54px"
-        }
-      },
-      "name": "Add",
-      "options": {
-        "inputs": {
-          "type": "int",
-          "value": 2
-        }
-      },
-      "outputs": [
-        {
-          "canBeNoRepeat": true,
-          "canConnect": true,
-          "connected": true,
-          "id": "myId_1_1453732947395",
-          "longName": "Add.sum",
-          "name": "sum",
-          "noRepeat": true,
-          "targets": [
-            "myId_2_1453732957323"
-          ],
-          "type": "Double"
-        }
-      ],
-      "params": [],
-      "type": "module"
-    },
-    {
-      "canClearState": true,
-      "clearState": false,
-      "hash": 2,
       "id": 53,
       "inputs": [
         {
@@ -156,19 +80,19 @@
           "connected": true,
           "drivingInput": true,
           "feedback": false,
-          "id": "myId_2_1453732957323",
+          "id": "myId_1_1453815990310",
           "longName": "Sum.in",
           "name": "in",
           "requiresConnection": true,
-          "sourceId": "myId_1_1453732947395",
+          "sourceId": "myId_2_1453816012459",
           "type": "Double"
         }
       ],
       "jsModule": "GenericModule",
       "layout": {
         "position": {
-          "left": "870px",
-          "top": "141px"
+          "left": "631px",
+          "top": "197px"
         }
       },
       "name": "Sum",
@@ -177,7 +101,7 @@
           "canBeNoRepeat": true,
           "canConnect": true,
           "connected": false,
-          "id": "myId_2_1453732957328",
+          "id": "myId_1_1453815990315",
           "longName": "Sum.out",
           "name": "out",
           "noRepeat": true,
@@ -194,12 +118,12 @@
           "connected": false,
           "defaultValue": 0,
           "drivingInput": false,
-          "id": "myId_2_1453732957310",
+          "id": "myId_1_1453815990298",
           "longName": "Sum.windowLength",
           "name": "windowLength",
           "requiresConnection": false,
           "type": "Double",
-          "value": "0"
+          "value": 0
         },
         {
           "acceptedTypes": [
@@ -210,12 +134,12 @@
           "connected": false,
           "defaultValue": 1,
           "drivingInput": false,
-          "id": "myId_2_1453732957317",
+          "id": "myId_1_1453815990304",
           "longName": "Sum.minSamples",
           "name": "minSamples",
           "requiresConnection": false,
           "type": "Double",
-          "value": "1"
+          "value": 1
         }
       ],
       "type": "module"
@@ -223,49 +147,120 @@
     {
       "canClearState": true,
       "clearState": false,
-      "hash": 3,
-      "id": 200,
+      "hash": 2,
+      "id": 1,
       "inputs": [
         {
           "acceptedTypes": [
-            "String"
+            "Double"
           ],
+          "canBeFeedback": true,
           "canConnect": true,
+          "canHaveInitialValue": true,
           "canToggleDrivingInput": true,
           "connected": true,
           "drivingInput": true,
-          "id": "myId_3_1453732965012",
-          "longName": "TextLength.text",
-          "name": "text",
+          "feedback": false,
+          "id": "myId_2_1453816012451",
+          "longName": "Multiply.A",
+          "name": "A",
           "requiresConnection": true,
-          "sourceId": "myId_0_1453732943666",
-          "type": "String"
+          "sourceId": "myId_0_1453815974997",
+          "type": "Double"
+        },
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canBeFeedback": true,
+          "canConnect": true,
+          "canHaveInitialValue": true,
+          "canToggleDrivingInput": true,
+          "connected": true,
+          "drivingInput": true,
+          "feedback": false,
+          "id": "myId_2_1453816012456",
+          "initialValue": 2.0,
+          "longName": "Multiply.B",
+          "name": "B",
+          "requiresConnection": true,
+          "sourceId": "myId_3_1453816023857",
+          "type": "Double"
         }
       ],
       "jsModule": "GenericModule",
       "layout": {
         "position": {
-          "left": "455px",
-          "top": "173px"
+          "left": "341px",
+          "top": "202px"
         }
       },
-      "name": "TextLength",
+      "name": "Multiply",
       "outputs": [
         {
           "canBeNoRepeat": true,
           "canConnect": true,
           "connected": true,
-          "id": "myId_3_1453732965016",
-          "longName": "TextLength.length",
-          "name": "length",
+          "id": "myId_2_1453816012459",
+          "longName": "Multiply.A*B",
+          "name": "A*B",
           "noRepeat": true,
           "targets": [
-            "myId_1_1453732947389"
+            "myId_1_1453815990310"
           ],
           "type": "Double"
         }
       ],
       "params": [],
+      "type": "module"
+    },
+    {
+      "canClearState": true,
+      "clearState": false,
+      "hash": 3,
+      "id": 5,
+      "inputs": [],
+      "jsModule": "GenericModule",
+      "layout": {
+        "position": {
+          "left": "89px",
+          "top": "303px"
+        }
+      },
+      "name": "Constant",
+      "outputs": [
+        {
+          "canBeNoRepeat": true,
+          "canConnect": true,
+          "connected": true,
+          "id": "myId_3_1453816023857",
+          "longName": "Constant.out",
+          "name": "out",
+          "noRepeat": true,
+          "targets": [
+            "myId_2_1453816012456"
+          ],
+          "type": "Double"
+        }
+      ],
+      "params": [
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canConnect": true,
+          "canToggleDrivingInput": true,
+          "connected": false,
+          "defaultValue": 0.0,
+          "drivingInput": true,
+          "id": "myId_3_1453816023852",
+          "longName": "Constant.constant",
+          "name": "constant",
+          "requiresConnection": false,
+          "type": "Double",
+          "value": 2.0
+        }
+      ],
       "type": "module"
     }
   ]

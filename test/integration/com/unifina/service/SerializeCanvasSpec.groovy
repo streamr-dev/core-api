@@ -26,7 +26,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.nio.charset.Charset
 
-class SignalPathServiceIntegrationSpec extends IntegrationSpec {
+class SerializeCanvasSpec extends IntegrationSpec {
 
 	static final String SIGNAL_PATH_FILE = "signal-path-data.json"
 
