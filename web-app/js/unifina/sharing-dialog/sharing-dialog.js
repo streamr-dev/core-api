@@ -25,58 +25,81 @@
             share: false
         },
 
-        toggle: function(op) {
-            var self = this
-            var oldState = this.get(op)
-            if (typeof oldState !== "boolean") { return; }
-            this.set(op, !oldState)
-            if (oldState === false) { _(this.alsoAdd[op]).each(function(op2) { self.set(op2, true) }) }
-            if (oldState === true) { _(this.alsoRemove[op]).each(function(op2) { self.set(op2, false) }) }
+        /** maps user-visible options to the 0..3 Permissions */
+        options: {
+            none: { description: "has no access", permissions: "" },
+            read: { description: "can read", permissions: "r" },
+            write: { description: "can edit", permissions: "rw" },
+            share: { description: "can share", permissions: "rws" },
         },
-        alsoAdd: {"write": ["read"], "share": ["read"]},
-        alsoRemove: {"read": ["write", "share"]},
+
+        setAccess: function(opt) {
+            var selected = this.options[opt]
+            if (!selected) { throw "Bad access selection: " + opt }
+            this.set("read", selected.permissions.indexOf("r") > -1)
+            this.set("write", selected.permissions.indexOf("w") > -1)
+            this.set("share", selected.permissions.indexOf("s") > -1)
+        },
+
+        getAccessDescription: function() {
+            return  this.get("share") ? this.options.share.description :
+                    this.get("write") ? this.options.write.description :
+                    this.get("read")  ? this.options.read.description :
+                                        this.options.none.description
+        }
     })
 
-    /** Access is shown as a row: username, operations (R, W, S), delete */
+    var accessTemplate = _.template(
+        '<button class="btn btn-danger user-delete-button">Delete</button>' +
+        '<div class="input-group user-access-row">' +
+            '<div class="user-label form-control"><%= user %></div>' +
+            '<div class="input-group-btn">' +
+                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                    '<span class="access-description"><%= state %></span> <span class="caret"></span>' +
+                '</button>' +
+                '<ul class="dropdown-menu">' +
+                    '<li data-opt="read"><a href="#">make read-only</a></li>' +
+                    '<li data-opt="write"><a href="#">make editable</a></li>' +
+                    '<li data-opt="share"><a href="#">make shareable</a></li>' +
+                    '<li role="separator" class="divider"></li>' +
+                    '<li><a href="#">give ownership</a></li>' +
+                '</ul>' +
+            '</div>' +
+        '</div>'
+    )
+
+    /** Access is shown as a row: username, access description, delete */
     var AccessView = Backbone.View.extend({
         events: {
-            "click .toggle-permission": "togglePermission",
             "click .delete-button": function() { this.model.destroy() },
         },
-        togglePermission: function(e) {
-            var op = e.currentTarget.dataset.op || "read"
-            this.model.toggle(op)
-        },
-
-        checkboxTemplate: _.template(
-            '<label class="btn toggle-permission" data-op="<%= op %>">' +
-                '<input type="checkbox"> <%= text %>' +
-            '</label>'
-        ),
 
         initialize: function() {
-            var model = this.model
+            var self = this
 
-            this.$userLabel = $('<div id="user">').appendTo(this.$el)
-            this.$permissions = $('<div class="btn-group" data-toggle="buttons">').appendTo(this.$el)
-            this.$readLabel = $(this.checkboxTemplate({op: "read", text: "READ"})).appendTo(this.$permissions)
-            //this.$readCheckbox = this.$readLabel.find("input")
-            this.$writeLabel = $(this.checkboxTemplate({op: "write", text: "WRITE"})).appendTo(this.$permissions)
-            this.$shareLabel = $(this.checkboxTemplate({op: "share", text: "SHARE"})).appendTo(this.$permissions)
-            this.$deleteButton = $('<button class="btn btn-danger" id="delete-button">').text("Delete").on("click", function() { model.destroy() }).appendTo(this.$el)
+            this.$el.html(accessTemplate({
+                user: "",
+                state: self.model.options.read.description
+            }))
+            this.$userLabel = this.$(".user-label")
+            this.$accessDescription = this.$(".access-description")
 
-            this.listenTo(model, 'change', this.render)
-            this.listenTo(model, 'destroy', this.remove)
+            this.$(".user-delete-button").on("click", function() {
+                self.model.destroy()
+            })
+
+            this.$("li[data-opt]").on("click", function(e) {
+                var selection = e.currentTarget.dataset.opt
+                self.model.setAccess(selection)
+            });
+
+            this.listenTo(self.model, 'change', self.render)
+            this.listenTo(self.model, 'destroy', self.remove)
         },
 
         render: function() {
             this.$userLabel.text(this.model.get("user"))
-            this.$readLabel.toggleClass("active", this.model.get("read"))
-            this.$writeLabel.toggleClass("active", this.model.get("write"))
-            this.$shareLabel.toggleClass("active", this.model.get("share"))
-            //this.$readCheckbox.prop("checked", this.model.get("read"))
-            //this.$writeCheckbox.prop("checked", this.model.get("write"))
-            //this.$shareCheckbox.prop("checked", this.model.get("share"))
+            this.$accessDescription.text(this.model.getAccessDescription())
             return this
         },
     })
@@ -87,45 +110,77 @@
     })
     var accessList = new AccessList()
 
+    var accessListTemplate = _.template(
+        '<div class="input-group">' +
+            '<span class="input-group-addon">Owner</span>' +
+            '<span class="form-control owner-label"><%= owner %></span>' +
+        '</div>' +
+        '<div class="access-list"></div>' +
+        '<div class="input-group">' +
+            '<input type="text" class="new-user-field form-control" placeholder="Enter username" autofocus>' +
+            '<span class="input-group-btn">' +
+                '<button class="new-user-button btn btn-success" type="button">Add</button>' +
+            '</span>' +
+        '</div>'
+    )
+
     var AccessListView = Backbone.View.extend({
         events: {
-            "click #new-user-button": "finishUserInput",
-            "keypress #new-user": function(e) { if (e.which === KEY_ENTER) { this.finishUserInput() } }
+            "click .new-user-button": "finishUserInput",
+            "keypress .new-user-field": "keyHandler"
+        },
+        keyHandler: function(e) {
+            if (e.which === KEY_ENTER) {
+                this.finishUserInput()
+            } else if (e.which === KEY_ESC) {
+                if (this.$newUserField.val()) {
+                    this.$newUserField.val("")
+                } else {
+                    // TODO: close dialog ("Cancel") on ESC
+                }
+            }
         },
         finishUserInput: function() {
             var newUser = this.$newUserField.val()
-            //TODO: check that user exists(?)
             if (newUser) {
+                //TODO: check that user exists(?)
                 accessList.create({
                     user: newUser,
                     read: true,
                 })
                 this.$newUserField.val("")
+            } else {
+                // TODO: close & save dialog ("Done") on ENTER if username input is empty
             }
         },
 
         initialize: function(args) {
-            this.$el.html("")
-            this.$ownerLabel = $("<p>Owner: <span id='owner-label'>Lorem Ipsum</span></p>").appendTo(this.$el)
-            // TODO: add existing Permissions
-            this.$accessList = $("<div id='access-list'>").appendTo(this.$el)
-            this.$newUserField = $("<input id='new-user' placeholder='Enter username' autofocus>").appendTo(this.$el)
-            this.$newUserButton = $("<button class='btn btn-success' id='new-user-button'>").text("Add").appendTo(this.$el)
+            this.$el.html(accessListTemplate({
+                owner: "Omistelija"
+            }))
+            this.$ownerLabel = this.$(".owner-label")
+            this.$accessList = this.$(".access-list")
+            this.$newUserField = this.$(".new-user-field")
 
             this.listenTo(accessList, 'add', this.createAccessView)
-            //this.listenTo(accessList, 'reset', this.addAll)  // initial
+            this.listenTo(accessList, 'reset', this.addAll)
         },
 
         createAccessView: function(accessRow) {
             var view = new AccessView({model: accessRow})
             this.$accessList.append(view.render().$el)
         },
+
+        addAll: function() {
+            //this.$accessList.html()
+            accessList.each(this.createAccessView, this)
+        }
     })
 
     /** Entry point */
     function openSharingDialog(resourceUrl) {
         var sharingDialog = bootbox.dialog({
-            title: "Share " + resourceUrl.split("/").slice(-2).join(" "),
+            title: "Set permissions for <b>" + resourceUrl.split("/").slice(-2).join(" ") + "</b>",
             message: "<div id='access-list-div'>Loading...</div>",
             size: 'large',
             buttons: {
