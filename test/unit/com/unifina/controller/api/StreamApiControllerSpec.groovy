@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
@@ -148,7 +149,6 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.success == false
 		response.status == 401
 	}
 
@@ -161,8 +161,7 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.success == false
-		response.status == 400
+		thrown(ValidationException)
 	}
 
 	void "show a Stream of logged in user"() {

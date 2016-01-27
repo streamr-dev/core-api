@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
@@ -19,7 +20,7 @@ class StreamApiController {
 		} else {
 			streams = Stream.findAllByUser(request.apiUser)
 		}
-		render(streams.collect { it.toMap() } as JSON)
+		render(streams*.toMap() as JSON)
 	}
 
 	@StreamrApi
@@ -27,8 +28,7 @@ class StreamApiController {
 		Stream stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.config?.fields)
 
 		if (stream.hasErrors()) {
-			log.info(stream.errors)
-			render(status: 400, text: [success: false, error: "validation error", details: stream.errors] as JSON)
+			throw new ValidationException(stream.errors)
 		} else {
 			render(stream.toMap() as JSON)
 		}
@@ -49,8 +49,12 @@ class StreamApiController {
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = newStream.config
-			stream.save(failOnError: true)
-			render(status: 204)
+			if (stream.validate()) {
+				stream.save(failOnError: true)
+				render(status: 204)
+			} else {
+				throw new ValidationException(stream.errors)
+			}
 		}
 	}
 
