@@ -101,14 +101,12 @@ public class RealtimeDataSource extends DataSource {
 					if (canvas.getAdhoc()) {
 						log.info("Canvas " + canvas.getId() + " is adhoc and thus won't be serialized.");
 					} else {
-						Date fiveSecsFromNow = new Date(now.getTime() + (5000 - (now.getTime()%1000)));
-
 						secTimer.scheduleAtFixedRate(new TimerTask() {
 							@Override
 							public void run() {
 								eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
 							}
-						}, fiveSecsFromNow, serializationService.serializationIntervalInMillis());
+						}, 0, serializationService.serializationIntervalInMillis());
 					}
 				}
 

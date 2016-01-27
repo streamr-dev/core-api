@@ -65,6 +65,7 @@
 		 grails.reload.enabled = true
 		 disable.auto.recompile = false // Recompilation of Java Sources
 		 grails.gsp.enable.reload = true // Recompilation of GSPs
+		 grails.resources.processing.enabled = false
 	 }
  }
  

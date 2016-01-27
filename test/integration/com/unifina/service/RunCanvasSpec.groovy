@@ -8,8 +8,9 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
 import org.apache.commons.logging.LogFactory
+
+import static com.unifina.service.CanvasTestHelper.*
 
 /**
  * Verifies that Canvases can be created, run, fed data through Kafka, and that the fed data be processed.
@@ -19,8 +20,6 @@ class RunCanvasSpec extends IntegrationSpec {
 	def static final SUM_FROM_1_TO_100_TIMES_2 = "10100.0"
 
 	static final String MODULES_LIST_FILE = "modules.json"
-
-	def log = LogFactory.getLog(getClass())
 
 	def canvasService
 	def kafkaService
@@ -53,9 +52,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		).save(failOnError: true)
 
 		// Read modules from file
-		String txt = new File(getClass().getResource(MODULES_LIST_FILE).path).text
-		txt = txt.replaceAll("STREAM_ID", stream.id.toString())
-		def modules = new JsonSlurper().parseText(txt).modules
+		def modules = readCanvasJsonAndReplaceStreamId(getClass(), MODULES_LIST_FILE, stream).modules
 
 		// Create new canvas
 		SaveCanvasCommand command = new SaveCanvasCommand(
@@ -88,9 +85,9 @@ class RunCanvasSpec extends IntegrationSpec {
 
 		def actual = null
 		for (int i=0; i < 500; ++i) {
-			actual = modules()*.outputs*.toString()
+			actual = modules(canvasService, canvas)*.outputs*.toString()
 
-			boolean areWeDoneYet = modules()*.outputs[0][1].previousValue == 1.0
+			boolean areWeDoneYet = modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0
 			if (areWeDoneYet) {
 				break
 			} else if (i < 499) {
@@ -108,13 +105,5 @@ class RunCanvasSpec extends IntegrationSpec {
 		actual[2] == "[(out) Multiply.A*B: 0.0]"
 		actual[3] == "[(out) Constant.out: null]"
 
-	}
-
-	def modules() {
-		canvasService.signalPathService.servletContext["signalPathRunners"][canvas.runner].signalPaths[0].mods
-	}
-
-	def globals() {
-		canvasService.signalPathService.servletContext["signalPathRunners"][canvas.runner].globals
 	}
 }
