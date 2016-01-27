@@ -439,6 +439,19 @@ definitions:
       adhoc:
         type: boolean
         description: set to true for adhoc canvas
+      live:
+        type: boolean
+        description: set to true for live canvas (not historical)
+      speed:
+        type: string
+      beginDate:
+        type: string
+        format: date
+        description: begin date (historical mode) to start feeding from
+      endDate:
+        type: string
+        format: date
+        description: end date (historical mode) to stop feeding at
 
   Module:
     type: object
