@@ -14,7 +14,7 @@ import org.apache.log4j.Logger
  */
 public class SignalPathRunner extends Thread {
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
-	private boolean deleteOnStop
+	private boolean adhoc
 	
 	String runnerId
 	
@@ -30,17 +30,17 @@ public class SignalPathRunner extends Thread {
 	private List<Runnable> startListeners = []
 	private List<Runnable> stopListeners = []
 
-	private SignalPathRunner(Globals globals, boolean deleteOnStop) {
+	private SignalPathRunner(Globals globals, boolean adhoc) {
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
-		this.deleteOnStop = deleteOnStop
+		this.adhoc = adhoc
 
 		runnerId = "s-"+new Date().getTime()
 
 		/**
 		 * Instantiate the SignalPaths
 		 */
-		globals.dataSource = signalPathService.createDataSource(globals.signalPathContext, globals)
+		globals.dataSource = signalPathService.createDataSource(adhoc, globals)
 		globals.init()
 
 		if (globals.signalPathContext.csv) {
@@ -48,8 +48,8 @@ public class SignalPathRunner extends Thread {
 		}
 	}
 
-	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean deleteOnStop = true) {
-		this(globals, deleteOnStop)
+	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean adhoc = true) {
+		this(globals, adhoc)
 
 		// Instantiate SignalPaths from JSON
 		for (int i=0; i<signalPathMaps.size(); i++) {
@@ -58,8 +58,8 @@ public class SignalPathRunner extends Thread {
 		}
 	}
 
-	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean deleteOnStop = true) {
-		this(globals, deleteOnStop)
+	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc = true) {
+		this(globals, adhoc)
 		signalPath.globals = globals
 		for (AbstractSignalPathModule module : signalPath.getModules()) {
 			module.globals = globals
@@ -167,7 +167,7 @@ public class SignalPathRunner extends Thread {
 		signalPaths.each {it.destroy()}
 		globals.destroy()
 		
-		if (deleteOnStop)
+		if (adhoc)
 			signalPathService.deleteRunningSignalPathReferences(this)
 		else signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 	}

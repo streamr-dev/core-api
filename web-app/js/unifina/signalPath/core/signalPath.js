@@ -49,7 +49,6 @@ var SignalPath = (function () {
 		getModuleUrl: Streamr.createLink("module", "jsonGetModule"),
 		getModuleHelpUrl: Streamr.createLink("module", "jsonGetModuleHelp"),
 		connectionOptions: {},
-		resendOptions: {resend_all:true},
 		zoom: 1
     };
     
@@ -94,6 +93,10 @@ var SignalPath = (function () {
 
 		$(pub).on('started', subscribe)
 		$(pub).on('stopped', disconnect)
+		$(pub).on('loaded', function() {
+			if (isRunning())
+				subscribe()
+		})
 	};
 	pub.unload = function() {
 		jsPlumb.reset();
@@ -149,9 +152,8 @@ var SignalPath = (function () {
 		clear();
 
 		jsPlumb.setSuspendDrawing(true);
-		
-		// Instantiate modules TODO: remove backwards compatibility
-		$(data.signalPathData ? data.signalPathData.modules : data.modules).each(function(i,mod) {
+
+		$(data.modules).each(function(i,mod) {
 			createModuleFromJSON(mod);
 		});
 
@@ -356,8 +358,8 @@ var SignalPath = (function () {
 	 * Checks if this SignalPath has unsaved changes
 	 */
 	function isDirty() {
-		return _.isEqual(savedJson, $.extend({}, savedJson, toJSON()))
-
+		var currentJson = $.extend(true, {}, savedJson, toJSON())
+		return !_.isEqual(savedJson, currentJson)
 	}
 	pub.isDirty = isDirty
 
@@ -371,7 +373,7 @@ var SignalPath = (function () {
 		$(pub).trigger('saving')
 
 		function onSuccess(json) {
-			savedJson = json
+			savedJson = $.extend(true, {}, json) // deep copy
 
 			if (callback)
 				callback(json);
@@ -437,7 +439,7 @@ var SignalPath = (function () {
 	}
 	
 	function clear() {
-		if (isRunning())
+		if (isRunning() && runningJson.adhoc)
 			stop();
 		
 		getModules().forEach(function(module) {
@@ -468,7 +470,7 @@ var SignalPath = (function () {
 			loadJSON(json);
 
 			setName(json.name)
-			savedJson = $.extend({}, json, toJSON())
+			savedJson = $.extend(true, {}, toJSON(), json) // deep copy
 
 			if (json.state.toLowerCase() === 'running')
 				runningJson = json
@@ -562,9 +564,9 @@ var SignalPath = (function () {
 
 		// SignalPath uiChannel
 		if (runningJson.uiChannel) {
-			connection.subscribe(runningJson.uiChannel.id, processMessage, options.resendOptions)
+			connection.subscribe(runningJson.uiChannel.id, processMessage, runningJson.adhoc ? {resend_all:true} : {})
 		}
-		
+
 		// Module uiChannels
 		runningJson.modules.forEach(function(moduleJson) {
 			if (moduleJson.uiChannel) {
@@ -596,7 +598,9 @@ var SignalPath = (function () {
 		}
 		else if (message.type=="D") {
 			$(pub).trigger("done")
-			$(pub).trigger("stopped")
+
+			if (runningJson.adhoc)
+				$(pub).trigger("stopped")
 		}
 		else if (message.type=="E") {
 			$(pub).trigger("stopped")

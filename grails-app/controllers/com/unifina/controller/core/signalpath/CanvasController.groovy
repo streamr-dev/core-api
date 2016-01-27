@@ -86,7 +86,7 @@ class CanvasController {
 	def loadBrowser() {
 		def result = [
 				browserId: params.browserId,
-				headers: ["Id","Name"],
+				headers: ["Name", "State"],
 				contentUrl: createLink(
 						controller: "canvas",
 						action: "loadBrowserContent",
@@ -106,9 +106,9 @@ class CanvasController {
 		def ssp
 		// TODO: do queries via permissionService once that branch is ready
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
 		} else if (params.browserId == 'archiveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name from Canvas sp where sp.example = false and sp.user = :user order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = false and sp.user = :user and sp.adhoc = false order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
 		}
 
 		def result = [signalPaths:[]]
@@ -116,6 +116,7 @@ class CanvasController {
 			def tmp = [:]
 			tmp.id = it[0]
 			tmp.name = it[1]
+			tmp.state = it[2]
 			tmp.command = params.command
 			tmp.offset = offset++
 			result.signalPaths.add(tmp)

@@ -120,11 +120,11 @@ class SignalPathService {
 		return new String(unzipped,StandardCharsets.UTF_8)
 	}
 	
-	public DataSource createDataSource(Map signalPathContext, Globals globals) {
+	public DataSource createDataSource(boolean adhoc, Globals globals) {
 		// Read the DataSource class from signalPathContext
 
 		// Return the historical DataSource by default
-		if (signalPathContext.live==null || !signalPathContext.live)
+		if (adhoc)
 			return new BacktestDataSource(globals)
 		else return new RealtimeDataSource(globals)
 		
