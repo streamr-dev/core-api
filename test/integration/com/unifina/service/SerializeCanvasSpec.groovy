@@ -94,8 +94,10 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			kafkaService.sendMessage(stream, stream.uuid, [a: i, b: i * 2.5, c: i % 3 == 0])
 			sleep(25)
 
+			// Synchronize with thread
+			waitFor { modules(canvasService, canvas)[3].inputs[0].value == i }
+
 			// Log states of modules' outputs
-			while (modules(canvasService, canvas)[3].inputs[0].value != i) {}
 			log.info(modules(canvasService, canvas)*.outputs*.toString().join(" "))
 
 			// On every 25th message stop and start Canvas

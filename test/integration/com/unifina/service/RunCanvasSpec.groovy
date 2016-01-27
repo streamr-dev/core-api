@@ -84,19 +84,10 @@ class RunCanvasSpec extends IntegrationSpec {
 		kafkaService.sendMessage(stream, stream.uuid, [numero: 0, areWeDoneYet: true])
 
 		def actual = null
-		for (int i=0; i < 500; ++i) {
+		waitFor {
 			actual = modules(canvasService, canvas)*.outputs*.toString()
-
-			boolean areWeDoneYet = modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0
-			if (areWeDoneYet) {
-				break
-			} else if (i < 499) {
-				sleep(100)
-			} else {
-				throw new RuntimeException("Stream not updated in expected time!")
-			}
+			return modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0
 		}
-
 
 		then:
 		actual.size() == 4

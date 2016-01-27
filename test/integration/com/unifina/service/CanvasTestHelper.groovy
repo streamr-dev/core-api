@@ -19,4 +19,19 @@ class CanvasTestHelper {
 	static def globals(CanvasService canvasService, Canvas canvas) {
 		canvasService.signalPathService.servletContext["signalPathRunners"][canvas.runner].globals
 	}
+
+	static def waitFor(Closure<Boolean> condition) {
+		int numOfTries = 1000
+		int sleepBetweenTries = 10
+
+		for (int j = 0; j < numOfTries; ++j) {
+			if (condition.call()) {
+				break
+			} else if (j <= numOfTries - 1) {
+				sleep(sleepBetweenTries)
+			} else {
+				throw new RuntimeException("Test failed")
+			}
+		}
+	}
 }
