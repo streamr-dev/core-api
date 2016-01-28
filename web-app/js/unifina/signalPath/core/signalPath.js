@@ -547,7 +547,7 @@ var SignalPath = (function () {
 
 	function startAdhoc(callback) {
 		var json = toJSON()
-		json.settings.adhoc = true
+		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
 			start({clearState:false}, callback, true)
@@ -622,7 +622,7 @@ var SignalPath = (function () {
 	}
 	pub.isRunning = isRunning;
 	
-	function stop() {
+	function stop(callback) {
 		$(pub).trigger('stopping')
 
 		if (isRunning()) {
@@ -634,6 +634,8 @@ var SignalPath = (function () {
 					// data may be undefined if the canvas was deleted on stop
 					runningJson = null
 					$(pub).trigger('stopped');
+					if (callback)
+						callback()
 				},
 				error: function(jqXHR,textStatus,errorThrown) {
 					handleError(textStatus+"\n"+errorThrown)

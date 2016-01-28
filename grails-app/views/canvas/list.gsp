@@ -74,7 +74,7 @@
 								${fieldValue(bean: canvas, field: "name")}
 							</ui:td>
 							<ui:td>
-								${canvas.state?.toString()?.toLowerCase()}
+								<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
 							</ui:td>
 							<ui:td><g:formatDate date="${canvas.dateCreated}"
 									timeZone="${user.timezone}" /></ui:td>

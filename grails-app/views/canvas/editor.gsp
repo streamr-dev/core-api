@@ -173,28 +173,8 @@ $(document).ready(function() {
 		SignalPath.run(ctx);
 	});
 
-	$('#runLiveModalButton').click(function() {
-		if (SignalPath.getName())
-			$('#runLiveName').val(SignalPath.getName())
-	})
-
-	$('#runLiveButton').click(function() {
-		var name = $('#runLiveName').val()
-		SignalPath.setName(name)
-
-		var ctx = {
-			live: true
-		}
-
-		SignalPath.run(ctx, false, function(data) {
-			var url_root = '${createLink(controller:"live", action:"show")}'
-			Streamr.showInfo("Live Canvas launced:"+name)
-    		window.location = url_root + "/" + data.id
-		});
-	})
-
 	// Historical run button
-	new CanvasStartButton({
+	var historicalRunButton = new CanvasStartButton({
 		el: $("#run-historical-button"),
 		signalPath: SignalPath,
         settings: settings,
@@ -205,7 +185,7 @@ $(document).ready(function() {
 	})
 
 	// Realtime run button
-	new CanvasStartButton({
+	var realtimeRunButton = new CanvasStartButton({
 		el: $("#run-realtime-button"),
 		signalPath: SignalPath,
         settings: settings,
@@ -214,9 +194,15 @@ $(document).ready(function() {
         adhoc: false,
         clearState: false
 	})
+	realtimeRunButton.on('start-confirmed', function() {
+		Streamr.showSuccess('${message(code:"canvas.started")}: '.replace('{0}', SignalPath.getName()))
+	})
+	realtimeRunButton.on('stop-confirmed', function() {
+		Streamr.showSuccess('${message(code:"canvas.stopped")}: '.replace('{0}', SignalPath.getName()))
+	})
 
 	// Run and clear link
-	new CanvasStartButton({
+	var realtimeRunAndClearButton = new CanvasStartButton({
 		el: $("#run-realtime-button"),
 		signalPath: SignalPath,
         settings: settings,

@@ -1,3 +1,8 @@
+/**
+ * Events triggered on the button:
+ * start-confirmed
+ * stop-confirmed
+ */
 var CanvasStartButton = Backbone.View.extend({
     initialize: function(options) {
         var _this = this
@@ -38,18 +43,44 @@ var CanvasStartButton = Backbone.View.extend({
     },
 
     start: function() {
+        var _this = this
+
+        var callback = function() {
+            _this.trigger('start-confirmed')
+        }
+
         if (this.adhoc) {
-            SignalPath.startAdhoc()
+            this.signalPath.startAdhoc(callback)
         }
         else {
-            SignalPath.start({
+            this.signalPath.start({
                 clearState: this.clearState
-            })
+            }, callback)
         }
     },
 
     stop: function() {
-        SignalPath.stop()
+        var _this = this
+
+        var callback = function() {
+            _this.trigger('stop-confirmed')
+        }
+
+        if (this.adhoc) {
+            this.signalPath.stop(callback)
+        }
+        else {
+            // Ask for confirmation
+            bootbox.confirm({
+                message: "Are you sure you want to stop canvas "+this.signalPath.getName()+"?",
+                callback: function(result) {
+                    if (result) {
+                        _this.signalPath.stop(callback)
+                    }
+                },
+                className: "bootbox-sm"
+            });
+        }
     },
 
     setRunning: function(running) {

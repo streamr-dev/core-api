@@ -78,9 +78,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var tooltipOptions = {
 			animation: false,
 			trigger: 'manual',
-			container: '#'+SignalPath.options.canvas,
+			container: SignalPath.getParentElement(),
 			viewport: {
-				selector: '#'+SignalPath.options.canvas,
+				selector: SignalPath.getParentElement(),
 				padding: 0
 			},
 			html: true,
@@ -101,8 +101,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 						if ($tt.length) {
 							var top = $tt.offset().top
 							// Workaround for CORE-216: tooltip is shown under main navbar
-							if (top < 40 && $tt.hasClass("top")) {
-								console.log("Destroying and replacing tooltip")
+							if (top < 75 && $tt.hasClass("top")) {
 								helpLink.tooltip("destroy")
 								helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
 								helpLink.tooltip("show")

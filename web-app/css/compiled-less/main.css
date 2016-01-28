@@ -16534,6 +16534,9 @@ body.canvas-editor-page #canvas-name-editor:not(.editing) button {
 body.canvas-editor-page #canvas-name-editor .canvas-name {
   cursor: pointer;
 }
+body.canvas-editor-page .breadcrumb {
+  margin-bottom: 0px;
+}
 .login-page .btn-sign-up {
   display: none;
 }
