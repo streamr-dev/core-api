@@ -38,12 +38,16 @@ class PermissionService {
 				resource.user.id == user.id
 	}
 
-	private List<Permission> getNonOwnerPermissions(SecUser user, resource) {
-		if (!resource) { throw new IllegalArgumentException("Missing resource class") }
+	/**
+	 * In addition, owner has all access, which you must remember to test separately!
+	 * @param user if null, query all users for this resource
+     * @return List of Permissions that have been granted by the resource owner
+     */
+	public List<Permission> getNonOwnerPermissions(SecUser user, resource) {
+		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
 		if (!grailsApplication.isDomainClass(resource.getClass())) {
 			throw new IllegalArgumentException("$resource is not a Grails domain object")
 		}
-		if (!user?.id) { throw new IllegalArgumentException("Missing user") }
 
 		def idProp = resource.hasProperty("id")
 		if (idProp == null) { throw new IllegalArgumentException("$resource doesn't have an 'id' field!") }
@@ -56,7 +60,9 @@ class PermissionService {
 		//   hence, class.name of a proxy object won't match the class.name in database
 		def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
 		return Permission.withCriteria {
-			eq("user", user)
+			if (user != null) {
+				eq("user", user)
+			}
 			eq("clazz", clazz)
 			if (hasStringId) {
 				eq("stringId", resource.id)
@@ -67,15 +73,29 @@ class PermissionService {
 	}
 
 	public List<String> getPermittedOperations(SecUser user, resource) {
+		if (!user?.id) { throw new IllegalArgumentException("Missing user") }
 		if (isOwner(user, resource)) { return ownerPermissions }
 		return getNonOwnerPermissions(user, resource)*.operation;
 	}
 
+	/**
+	 * System function, use responsibly! Check first that whoever asks canShare the resource!
+	 * @param resource whose potential accessors are listed
+	 * @return [secUser: ["read", "write", "share"]]
+	 */
+	public Map<SecUser, List<String>> getPermittedOperationsGroupedByUser(resource) {
+		Map perms = getNonOwnerPermissions(null, resource)
+				.groupBy { it.user }
+				.collectEntries { u, ps -> [u, ps*.operation] }
+		if (resource.user) { perms[resource.user] = ownerPermissions }
+		return perms
+	}
+
 	/** Test if given user can read given resource instance */
 	boolean canRead(SecUser user, resource) {
-		if (!resource) { return false; }
+		if (!resource?.id) { return false; }
 		// TODO: check first if resource is "public" i.e. always readable, also to null user
-		if (!user) { return false; }
+		if (!user?.id) { return false; }
 		// any permissions imply read access
 		return getPermittedOperations(user, resource) != []
 		//return "read" in getPermittedOperations(user, resource)
@@ -83,7 +103,7 @@ class PermissionService {
 
 	/** Test if given user can share given resource instance, that is, grant other users read/share rights */
 	boolean canShare(SecUser user, resource) {
-		if (!resource || !user) { return false; }
+		if (!resource?.id || !user?.id) { return false; }
 		return "share" in getPermittedOperations(user, resource)
 	}
 
@@ -337,5 +357,4 @@ class PermissionService {
 		}
 		return finalErrors
 	}
-
 }
