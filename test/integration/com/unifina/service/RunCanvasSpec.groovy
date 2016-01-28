@@ -8,7 +8,6 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
-import org.apache.commons.logging.LogFactory
 
 import static com.unifina.service.CanvasTestHelper.*
 
@@ -76,13 +75,18 @@ class RunCanvasSpec extends IntegrationSpec {
 
 		// Produce data
 		(1..100).each {
-			kafkaService.sendMessage(stream, stream.uuid, [numero: it.intValue(), areWeDoneYet: false])
-			sleep(10)
+			kafkaService.sendMessage(stream, stream.uuid, [numero: it, areWeDoneYet: false])
+
+			// Synchronization
+			waitFor {
+				modules(canvasService, canvas)[0].outputs[0].value == it
+			}
 		}
 
 		// Last data package with areWeDone indicator set to true
 		kafkaService.sendMessage(stream, stream.uuid, [numero: 0, areWeDoneYet: true])
 
+		// Synchronization
 		def actual = null
 		waitFor {
 			actual = modules(canvasService, canvas)*.outputs*.toString()

@@ -54,16 +54,16 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			liveCanvas.serializationTime = new Date()
 		}
 
+		// Update feed 7 to use fake message source in place of real one
+		Feed feed = Feed.get(7L)
+		feed.messageSourceClass = FakeMessageSource.canonicalName
+		feed.save(flush: true, failOnError: true)
+
 		// Wire up classes
 		kafkaService = new FakeKafkaService()
 		signalPathService.servletContext = [:]
 		signalPathService.kafkaService = kafkaService
 		canvasService.signalPathService = signalPathService
-
-		// Update feed 7 to use fake message source in place of real one
-		Feed feed = Feed.get(7L)
-		feed.messageSourceClass = FakeMessageSource.canonicalName
-		feed.save(failOnError: true)
 
 		// Load user
 		user = SecUser.load(1L)

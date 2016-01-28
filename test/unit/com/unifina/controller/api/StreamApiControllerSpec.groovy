@@ -64,7 +64,7 @@ class StreamApiControllerSpec extends Specification {
 	void "find streams by name of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		request.name = "stream"
+		params.name = "stream"
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: 'index']) {

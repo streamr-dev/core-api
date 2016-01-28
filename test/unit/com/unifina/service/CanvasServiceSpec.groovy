@@ -177,7 +177,7 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "createNew() creates a new adhoc Canvas when given adhoc setting"() {
-		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [], settings: [adhoc: true])
+		def command = new SaveCanvasCommand(name: "my_new_canvas", modules: [], adhoc: true)
 
 		when:
 		def newId = service.createNew(command, me).id
