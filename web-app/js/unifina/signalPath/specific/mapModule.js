@@ -3,12 +3,12 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	var pub = SignalPath.GenericModule(data,canvas,prot)
 
 	var $container = null
-	var heatmap = null
+	var map = null
 
 	prot.enableIONameChange = false;	
 		
 	// Dragging in the chart container or the controls must not move the module
-	prot.dragOptions.cancel = ".heatmap-container"
+	prot.dragOptions.cancel = ".map-container"
 	
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
@@ -16,19 +16,20 @@ SignalPath.MapModule = function(data,canvas,prot) {
 
 		prot.body.css("height", "100%")
 		
-		container = $("<div class='heatmap-container' style='width: 500px; height: 400px;'></div>")
+
+		container = $("<div class='map-container' style='width: 500px; height: 400px;'></div>")
 		prot.body.append(container)
 
-		var heatMapOptions = {}
+		var mapOptions = {}
 		if (prot.jsonData.options) {
 			Object.keys(prot.jsonData.options).forEach(function(key) {
-				heatMapOptions[key] = prot.jsonData.options[key].value
+				mapOptions[key] = prot.jsonData.options[key].value
 			})
 		}
-		if (heatMapOptions.centerLat!==undefined && heatMapOptions.centerLng!==undefined)
-			heatMapOptions.center = [heatMapOptions.centerLat, heatMapOptions.centerLng]
+		if (mapOptions.centerLat!==undefined && mapOptions.centerLng!==undefined)
+			mapOptions.center = [mapOptions.centerLat, mapOptions.centerLng]
 
-		heatmap = new StreamrMap(container, heatMapOptions)
+		map = new StreamrMap(container, mapOptions)
 
 		prot.initResizable({
 			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
@@ -41,21 +42,21 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	prot.createDiv = createDiv;	
 	
 	function updateSize() {
-		if (heatmap) {
+		if (map) {
 			var width = container.parent().width()
 			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight() - 20
-			heatmap.resize(width, height)
+			map.resize(width, height)
 		}
 	}
 
 	pub.receiveResponse = function(d) {
-		heatmap.handleMessage(d)
+		map.handleMessage(d)
 	}
 	
 	var superClean = pub.clean;
 	pub.clean = function() {
-		if (heatmap)
-			heatmap.clear()
+		if (map)
+			map.clear()
 	}
 
 	var super_redraw = pub.redraw

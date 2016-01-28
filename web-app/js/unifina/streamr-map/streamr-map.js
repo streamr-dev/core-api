@@ -40,8 +40,6 @@ var MAP
         if (!this.parent.attr("id"))
             this.parent.attr("id", "heatmap-"+Date.now())
 
-        this.data = []
-
         var baseLayer = L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
                 attribution: '© OpenStreetMap contributors, Streamr',
@@ -95,6 +93,10 @@ var MAP
     }
 
     StreamrMap.prototype.resize = function() {
+
+    }
+
+    StreamrMap.prototype.clear = function() {
 
     }
 

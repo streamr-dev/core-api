@@ -17,6 +17,7 @@ public class Map extends ModuleWithUI {
 	public void init() {
 		super.init();
 		this.canClearState = false;
+		this.resendAll = false;
 		latitude.setDrivingInput(true);
 		latitude.canToggleDrivingInput = false;
 		latitude.canHaveInitialValue = false;
@@ -33,7 +34,7 @@ public class Map extends ModuleWithUI {
 	@Override
 	public void sendOutput() {
 		if (globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new MapPoint(latitude.getValue(), longitude.getValue(), id.getValue()), uiChannelId);
+			globals.getUiChannel().push(new MapPoint(id.getValue(), latitude.getValue(), longitude.getValue()), uiChannelId);
 		}
 	}
 
