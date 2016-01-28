@@ -470,7 +470,6 @@ var SignalPath = (function () {
 			loadJSON(json);
 
 			setName(json.name)
-			savedJson = $.extend(true, {}, toJSON(), json) // deep copy
 
 			if (json.state.toLowerCase() === 'running')
 				runningJson = json
@@ -480,6 +479,9 @@ var SignalPath = (function () {
 
 			// Trigger loaded on pub and parentElement
 			$(pub).add(parentElement).trigger('loaded', [json]);
+
+			// It is important that savedJson is written after the loaded event has been fired, because it may affect canvas settings
+			savedJson = $.extend(true, {}, toJSON(), json) // deep copy
 		}
 
 		// Fetch from api by id
