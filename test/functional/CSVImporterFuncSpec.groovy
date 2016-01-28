@@ -83,7 +83,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		moduleShouldAppearOnCanvas("Label")
 		
 		connectEndpoints(findOutput("Stream", "price"), findInput("Label", "label"))
-		runButton.click()
+		runHistoricalButton.click()
 		
 		then: "The label module has some content -> stream has data"
 		waitFor(15){ $(".module .modulebody .modulelabel").text() != "" }

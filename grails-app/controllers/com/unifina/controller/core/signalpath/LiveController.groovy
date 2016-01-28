@@ -55,7 +55,7 @@ class LiveController {
 		Canvas canvas = Canvas.get(params.id)
 		
 		// Ping the running SignalPath to check that it's alive
-		def alive = canvas.state != Canvas.Type.RUNNING || signalPathService.ping(canvas, springSecurityService.currentUser)
+		def alive = canvas.state != Canvas.State.RUNNING || signalPathService.ping(canvas, springSecurityService.currentUser)
 		if (!alive) {
 			flash.error = message(code:'runningSignalPath.ping.error')
 		}
