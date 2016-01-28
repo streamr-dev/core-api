@@ -124,6 +124,7 @@ modules = {
 	}
 	leaflet {
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-realtime.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet-0.7.3', file:'leaflet-0.7.3.css', plugin: 'unifina-core']
 	}
 	dropzone {
@@ -198,11 +199,15 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'leaflet-heatmap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'streamr-heatmap.js', plugin: 'unifina-core']
 	}
+	'streamr-map' {
+		dependsOn 'jquery, leaflet'
+		resource url:[dir:'js/unifina/streamr-map', file:'streamr-map.js', plugin: 'unifina-core']
+	}
 	'streamr-table' {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
-		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
+		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, streamr-map, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
@@ -213,6 +218,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
