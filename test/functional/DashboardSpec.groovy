@@ -3,6 +3,7 @@ import spock.lang.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
+import core.mixins.DashboardMixin
 import core.pages.CanvasPage
 import core.pages.DashboardCreatePage
 import core.pages.DashboardListPage
@@ -17,6 +18,7 @@ class DashboardSpec extends LoginTester1Spec {
 		// @Mixin is buggy, use runtime mixins instead
 		this.class.metaClass.mixin(CanvasMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(DashboardMixin)
 		
 		super.login()
 		waitFor { at CanvasPage }
@@ -39,18 +41,6 @@ class DashboardSpec extends LoginTester1Spec {
 		$("#navSettingsLink").click()
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
-	}
-	
-	def findRunningSignalPath(String name) {
-		return $("#main-menu .navigation .runningsignalpath", text: contains(name))
-	}
-	
-	def findDashboardItem(String name) {
-		return $("#dashboard-view .dashboarditem .title", text:contains(name)).parents(".dashboarditem")
-	}
-	
-	def findTitleInput(String title) {
-		return $("#dashboard-view .dashboarditem input", value: title)
 	}
 	
 	void "the flow of creating, modifying and deleting a dashboard works correctly"() {

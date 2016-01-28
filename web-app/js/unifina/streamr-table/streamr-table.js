@@ -15,7 +15,6 @@ function StreamrTable(parent, options) {
 		this.options = {}
 		this.options.maxRows = 0
 	}
-
 }
 
 StreamrTable.prototype.initTable = function (headers) {
