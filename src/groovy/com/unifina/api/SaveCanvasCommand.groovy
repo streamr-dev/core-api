@@ -7,14 +7,11 @@ class SaveCanvasCommand {
 	String name
 	List<Object> modules
 	Map settings = [:]
+	boolean adhoc
 
 	static constraints = {
 		name(blank: false)
 		modules(nullable: false)
 		settings(nullable: false)
-	}
-
-	boolean isAdhoc() {
-		settings.adhoc
 	}
 }

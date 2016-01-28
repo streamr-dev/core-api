@@ -484,7 +484,6 @@ class SignalPathService {
 	@Transactional
 	def saveState(SignalPath sp) {
 		Canvas canvas = sp.canvas
-		canvas = canvas.attach()
 
 		try {
 			canvas.serialized = serializationService.serialize(sp)
