@@ -78,7 +78,7 @@ var CanvasStartButton = Backbone.View.extend({
                         _this.signalPath.stop(callback)
                     }
                 },
-                className: "bootbox-sm"
+                className: "stop-confirmation-dialog bootbox-sm"
             });
         }
     },
