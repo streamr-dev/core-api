@@ -547,7 +547,7 @@ var SignalPath = (function () {
 
 	function startAdhoc(callback) {
 		var json = toJSON()
-		json.settings.adhoc = true
+		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
 			start({clearState:false}, callback, true)
