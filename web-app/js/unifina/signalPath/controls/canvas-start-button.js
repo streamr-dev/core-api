@@ -92,7 +92,9 @@ var CanvasStartButton = Backbone.View.extend({
                     },
                 });
             }
-
+            else {
+                doStart()
+            }
 
         }
     },
