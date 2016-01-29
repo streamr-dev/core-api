@@ -1,17 +1,14 @@
 package com.unifina.controller.core.signalpath
 
-import com.unifina.serialization.SerializationException
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
+import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.RuntimeResponse
-import com.unifina.utils.GlobalsFactory
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
 
 class LiveController {
 	
@@ -21,7 +18,7 @@ class LiveController {
 	def grailsApplication
 	
 	def beforeInterceptor = [action:{
-			if (!permissionService.canAccess(RunningSignalPath.get(params.long("id")))) {
+			if (!permissionService.canAccess(Canvas.get(params.id))) {
 				if (request.xhr) 
 					redirect(controller:'login', action:'ajaxDenied')
 				else 
@@ -31,7 +28,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list','getListJson', 'ajaxCreate', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
+		except:['index','list', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
 	
 	@Secured("ROLE_USER")
 	def index() {
@@ -40,7 +37,7 @@ class LiveController {
 	
 	@Secured("ROLE_USER")
 	def list() {
-		List<RunningSignalPath> rsps = RunningSignalPath.createCriteria().list() {
+		List<Canvas> canvases = Canvas.createCriteria().list() {
 			eq("user",springSecurityService.currentUser)
 			eq("adhoc",false)
 			if (params.term) {
@@ -48,247 +45,153 @@ class LiveController {
 			}
 			
 		}
-		[running: rsps, user:springSecurityService.currentUser]
+		[running: canvases, user:springSecurityService.currentUser]
 	}
 	
 	// Can be accessed anonymously for embedding the show view in iframes (eg. the landing page)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def show() {
 		// Access checked by beforeInterceptor
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas canvas = Canvas.get(params.id)
 		
 		// Ping the running SignalPath to check that it's alive
-		def alive = rsp.state!='running' || signalPathService.ping(rsp, springSecurityService.currentUser)
-		if (!alive)
+		def alive = canvas.state != Canvas.State.RUNNING || signalPathService.ping(canvas, springSecurityService.currentUser)
+		if (!alive) {
 			flash.error = message(code:'runningSignalPath.ping.error')
-		
-		[rsp:rsp]
-	}
-	
-	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
-	def getJson() {
-		// Access checked by beforeInterceptor
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-
-		Map signalPathData = JSON.parse(rsp.json)
-		// Reconstruct as rsp.user
-		Map result = signalPathService.reconstruct([signalPathData:signalPathData], GlobalsFactory.createInstance([live:true], grailsApplication, rsp.user))
-		result.runData = [uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }, id: rsp.id]
-		
-		render result as JSON
-	}
-	
-	@Secured("ROLE_USER")
-	def getListJson() {
-		def runningSignalPaths = RunningSignalPath.findAllByUserAndAdhoc(springSecurityService.currentUser, false)
-		List runningSignalPathMaps = runningSignalPaths.collect {rsp->
-			[
-				id: rsp.id,
-				name: rsp.name,
-				state: rsp.state,
-				uiChannels: rsp.uiChannels.findAll { uiChannel ->
-					uiChannel.module != null && uiChannel.module.webcomponent != null
-				}.collect { uiChannel ->
-					uiChannel.toMap()
-				}
-			]
 		}
-		render (runningSignalPathMaps as JSON)
+
+		[rsp:canvas]
 	}
 
-	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
-	def getModuleJson() {
-		response.setHeader('Access-Control-Allow-Origin', '*')
-		
-		UiChannel ui = UiChannel.findById(params.channel, [fetch: [runningSignalPath: 'join']])
-		RunningSignalPath rsp = ui.runningSignalPath
-		
-		if (!permissionService.canAccess(rsp)) {
-			log.warn("request: access to ui ${ui?.id}, rsp ${rsp?.id} denied")
-			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
-		}
-		else {
-			Map signalPathData = JSON.parse(rsp.json)
-			Map moduleJson = signalPathData.modules.find { it.hash.toString() == ui.hash.toString() }
-			
-			if (!moduleJson) {
-				render(status: 404, text: 'Module not found.')
-			}
-			else render moduleJson as JSON
-		}
-	}
-	
-	@StreamrApi(requiresAuthentication = false)
-	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
-	def request() {
-		RunningSignalPath rsp
-		UiChannel ui = null
-		Integer hash = null
-		SecUser user = request.apiUser ?: springSecurityService.currentUser
-		
-		def json = request.JSON
-		
-		/**
-		 * Provide as parameter:
-		 * 1) Either the UI channel or RSP.id & module.hash combo for messages intended for modules, or
-		 * 2) RSP.id for messages intended for the RSP itself
-		 */
-		if (json?.channel) {
-			ui = UiChannel.findById(json?.channel, [fetch: [runningSignalPath: 'join']])
-			rsp = ui.runningSignalPath
-			if (ui.hash)
-				hash = Integer.parseInt(ui.hash)
-		}
-		else if (json?.id) {
-			rsp = RunningSignalPath.get(json?.id)
-			if (json?.hash != null)
-				hash = json?.hash
-		}
-		else {
-			log.warn("request: no channel and no id given. Request json: $json")
-			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
-		}
-		
-		if (!permissionService.canAccess(rsp, user)) {
-			log.warn("request: access to rsp ${rsp?.id} denied for user ${user?.id}")
-			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
-		}
-		else {
-			Map msg = json?.msg
-			RuntimeResponse rr = signalPathService.runtimeRequest(msg, rsp, hash, user, json?.local ? true : false)
-			
-			log.info("request: responding with $rr")
-			
-			if (rr.containsKey("success") && rr.containsKey("response"))
-				render rr as JSON
-			else {
-				Map result = [success: rr.isSuccess(), id: rsp.id, hash: hash, response: rr]
-				render result as JSON
-			}
-		}
-	}
-	
-	@Secured("ROLE_USER")
-	def ajaxCreate() {
-		def signalPathData
-		if (params.signalPathData)
-			signalPathData = JSON.parse(params.signalPathData);
-		else signalPathData = JSON.parse(SavedSignalPath.get(Integer.parseInt(params.id)).json)
-
-		def signalPathContext =	JSON.parse(params.signalPathContext)
-		
-		RunningSignalPath rsp = signalPathService.createRunningSignalPath(signalPathData, springSecurityService.currentUser, signalPathContext.live ? false : true, true)
-		signalPathService.startLocal(rsp, signalPathContext)
-		
-		Map result = [success:true, id:rsp.id, adhoc:rsp.adhoc, uiChannels:rsp.uiChannels.collect { [id:it.id, hash:it.hash] }]
-		render result as JSON
-	}
-	
-	@Secured("ROLE_USER")
-	def ajaxStop() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		
-		Map r
-		if (rsp && signalPathService.stopLocal(rsp)) {
-			r = [success:true, id:rsp.id, status:"Stopped"]
-		}
-		else r = [success:false, id:params.id, status:"Running canvas not found"]
-		
-		render r as JSON
-	}
-	
 	@Secured("ROLE_USER")
 	def start() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
+		Canvas canvas = Canvas.get(params.id)
 		if (params.clear) {
-			signalPathService.clearState(rsp)
+			signalPathService.clearState(canvas)
 		}
 
 		try {
-			signalPathService.startLocal(rsp, [live: true])
-			flash.message = message(code:"runningSignalPath.started", args:[rsp.name])
+			signalPathService.startLocal(canvas, [live: true])
+			flash.message = message(code:"runningSignalPath.started", args:[canvas.name])
 		} catch (SerializationException ex) {
-			flash.error = message(code: "runningSignalPath.deserialization.error", args:[rsp.name])
-			log.error("Failed to resume runningSignalPath " + rsp.id + " :", ex)
+			flash.error = message(code: "runningSignalPath.deserialization.error", args:[canvas.name])
+			log.error("Failed to resume runningSignalPath " + canvas.id + " :", ex)
 		}
 
-		redirect(action:"show", id:rsp.id)
+		redirect(action:"show", id:canvas.id)
 	}
-	
-	@Secured("ROLE_USER") 
+
+	@Secured("ROLE_USER")
 	def stop() {
-		RunningSignalPath rsp = RunningSignalPath.get(params.id)
-		
-		RuntimeResponse result = signalPathService.stopRemote(rsp, springSecurityService.currentUser)
+		Canvas canvas = Canvas.get(params.id)
+
+		RuntimeResponse result = signalPathService.stopRemote(canvas, springSecurityService.currentUser)
 		if (!result.isSuccess()) {
-			log.error("stop: RSP $rsp.id could not be stopped due to: $result.error, marking RSP as stopped")
+			log.error("stop: RSP $canvas.id could not be stopped due to: $result.error, marking RSP as stopped")
 			flash.error = message(code:'runningSignalPath.stop.error')
-			signalPathService.updateState(rsp.runner, "stopped")
+			signalPathService.updateState(canvas.runner, Canvas.State.STOPPED)
 		}
 		else {
 			flash.message = message(code:'runningSignalPath.stopped')
 		}
-		redirect(action:"show", id:rsp.id)
+		redirect(action:"show", id:canvas.id)
 	}
-	
-	@Secured("ROLE_USER")
-	def loadBrowser() {
-		def result = [
-			browserId: params.browserId,
-			headers: ["Id", "Name"],
-			contentUrl: createLink(
-				controller: "live",
-				action: "loadBrowserContent",
-				params: [
-					browserId: params.browserId,
-					command: params.command
-				]
-			)
-		]
-		render(template:"/savedSignalPath/loadBrowser",model:result)
-	}
-	
-	@Secured("ROLE_USER")
-	def loadBrowserContent() {
-		def max = params.int("max") ?: 100
-		def offset = params.int("offset") ?: 0
-		def ssp = SavedSignalPath.executeQuery("select sp.id, sp.name from RunningSignalPath sp where sp.user = :user order by sp.id desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
-		
-		def result = [signalPaths:[]]
-		ssp.each {
-			def tmp = [:]
-			tmp.id = it[0]
-			tmp.name = it[1]
-			tmp.url = createLink(controller:"live",action:"getJson",params:[id:it[0]])
-			tmp.command = params.command
-			tmp.offset = offset++
-			result.signalPaths.add(tmp)
-		}
-		render(view:"/savedSignalPath/loadBrowserContent",model:result)
-	}
-	
+
 	@Secured("ROLE_USER")
 	def delete() {
-		def rspInstance = RunningSignalPath.get(params.id)
-		if (rspInstance) {
+		def canvasInstance = Canvas.get(params.id)
+		if (canvasInstance) {
 			try {
-				def uicIds = UiChannel.executeQuery("SELECT uic.id FROM UiChannel uic WHERE uic.runningSignalPath =?", [rspInstance])
+				def uicIds = UiChannel.executeQuery("SELECT uic.id FROM UiChannel uic WHERE uic.canvas =?", [canvasInstance])
 				uicIds.each({String id ->
 					DashboardItem.executeUpdate("DELETE FROM DashboardItem di WHERE di.uiChannel.id = ?", [id])
 				})
-				UiChannel.executeUpdate("delete from UiChannel uic where uic.runningSignalPath = ?", [rspInstance])
-				rspInstance.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), rspInstance.name])}"
+				UiChannel.executeUpdate("delete from UiChannel uic where uic.canvas = ?", [canvasInstance])
+				canvasInstance.delete(flush: true)
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), canvasInstance.name])}"
 				redirect(action: "list")
 			}
 			catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), rspInstance.name])}"
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), canvasInstance.name])}"
 				redirect(action: "show", id: params.id)
 			}
 		}
 		else {
 			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'runningSignalPath.label', default: 'RunningSignalPath'), params.id])}"
 			redirect(action: "list")
+		}
+	}
+
+	// TODO: refactor out of here
+	@StreamrApi(requiresAuthentication = false)
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def getModuleJson() {
+		response.setHeader('Access-Control-Allow-Origin', '*')
+
+		UiChannel ui = UiChannel.findById(params.channel, [fetch: [canvas: 'join']])
+		Canvas canvas = ui.canvas
+
+		if (!permissionService.canAccess(canvas, request.apiUser)) {
+			log.warn("request: access to ui ${ui?.id}, canvas ${canvas?.id} denied")
+			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
+		} else {
+			Map signalPathData = JSON.parse(canvas.json)
+			Map moduleJson = signalPathData.modules.find { it.hash.toString() == ui.hash.toString() }
+
+			if (!moduleJson) {
+				render(status: 404, text: 'Module not found.')
+			} else {
+				render moduleJson as JSON
+			}
+		}
+	}
+
+	// TODO: refactor out of here
+	@StreamrApi
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def request() {
+		Canvas canvas
+		UiChannel ui = null
+		Integer hash = null
+		SecUser user = request.apiUser
+
+		def json = request.JSON
+
+
+		/**
+		 * Provide as parameter:
+		 * 1) Either the UI channel or Canvas.id & module.hash combo for messages intended for modules, or
+		 * 2) Canvas.id for messages intended for the Canvas itself
+		 */
+		if (json?.channel) {
+			ui = UiChannel.findById(json?.channel, [fetch: [canvas: 'join']])
+			canvas = ui.canvas
+			if (ui.hash)
+				hash = Integer.parseInt(ui.hash)
+		} else if (json?.id) {
+			canvas = Canvas.get(json?.id)
+			if (json?.hash != null)
+				hash = json?.hash
+		} else {
+			log.warn("request: no channel and no id given. Request json: $json")
+			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
+		}
+		
+		if (!permissionService.canAccess(canvas, user)) {
+			log.warn("request: access to rsp ${canvas?.id} denied for user ${user?.id}")
+			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
+		} else {
+			Map msg = json?.msg
+			RuntimeResponse rr = signalPathService.runtimeRequest(msg, canvas, hash, user, json?.local ? true : false)
+
+			log.info("request: responding with $rr")
+
+			if (rr.containsKey("success") && rr.containsKey("response"))
+				render rr as JSON
+			else {
+				Map result = [success: rr.isSuccess(), id: canvas.id, hash: hash, response: rr]
+				render result as JSON
+			}
 		}
 	}
 }

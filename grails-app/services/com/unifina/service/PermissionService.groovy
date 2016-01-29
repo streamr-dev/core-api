@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.signalpath.Canvas
 import grails.gorm.DetachedCriteria
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
@@ -280,37 +281,27 @@ class PermissionService {
 	}
 
 	@Deprecated
-	@CompileStatic 
-	boolean canAccess(RunningSignalPath rsp, SecUser user=springSecurityService.getCurrentUser()) {
-		// Shared RunningSignalPaths can be accessed by everyone
-		return rsp?.shared || canRead(user, rsp)
+	@CompileStatic
+	boolean canAccess(Canvas canvas, SecUser user=springSecurityService.getCurrentUser()) {
+		// Shared Canvas can be accessed by everyone
+		return canvas?.shared || canRead(user, canvas)
 	}
 
 	@Deprecated
 	@CompileStatic
-	boolean canAccess(SavedSignalPath ssp, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
+	boolean canAccess(Canvas canvas, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
-		if (isLoad && ssp.type == SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
-			return true
-		else return canRead(user, ssp)
+		return isLoad && canvas?.example || canRead(user, canvas)
 	}
 
 	/**
-	 * Looks up a user based on api keys. Returns null if the keys do not match a user.
-	 * @param apiKey
-	 * @param apiSecret
-	 * @return
+	 * Looks up a user based on api key. Returns null if the keys do not match a user.
 	 */
-	SecUser getUserByApiKey(String apiKey, String apiSecret) {
-		if (!apiKey || !apiSecret)
-			return null
-			
-		SecUser user = SecUser.findByApiKey(apiKey)
-		if (!user || user.apiSecret != apiSecret)
-			return null
-		else return user
+	SecUser getUserByApiKey(String apiKey) {
+		if (!apiKey) { return null }
+		return SecUser.findByApiKey(apiKey)
 	}
-	
+
 	def passwordValidator = { String password, command ->
 		// Check password score
 		if (command.pwdStrength < 1) {

@@ -27,7 +27,7 @@ class StreamServiceSpec extends Specification {
 	void "createUserStream must not call kafkaService.createTopics() if input incomplete"() {
 		
 		when:
-		service.createUserStream([:], null)
+		service.createUserStream([:], null, null)
 
 		then:
 		0 * kafkaService.createTopics(_)
@@ -35,19 +35,18 @@ class StreamServiceSpec extends Specification {
 
 	void "createUserStream results in persisted Stream"() {
 		when:
-		service.createUserStream([name: "name", localId: "localId"], null)
+		service.createUserStream([name: "name"], null, null)
 
 		then:
 		Stream.count() == 1
 		Stream.list().first().name == "name"
-		Stream.list().first().localId == "localId"
 	}
 
 	void "createUserStream calls kafkaService.createTopics"() {
 		Stream stream
 
 		when:
-		stream = service.createUserStream([name: "name", localId: "localId"], null)
+		stream = service.createUserStream([name: "name", localId: "localId"], null, null)
 
 		then:
 		1 * kafkaService.createTopics(_)

@@ -48,7 +48,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// Read position and width/height if saved
 		if (prot.jsonData.layout) {
-			loadPosition(SignalPath.getWorkspace());
+			loadPosition();
 		} 
 		// Else add to default position in viewport
 		else {
@@ -78,9 +78,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var tooltipOptions = {
 			animation: false,
 			trigger: 'manual',
-			container: '#'+SignalPath.options.canvas,
+			container: SignalPath.getParentElement(),
 			viewport: {
-				selector: '#'+SignalPath.options.canvas,
+				selector: SignalPath.getParentElement(),
 				padding: 0
 			},
 			html: true,
@@ -101,8 +101,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 						if ($tt.length) {
 							var top = $tt.offset().top
 							// Workaround for CORE-216: tooltip is shown under main navbar
-							if (top < 40 && $tt.hasClass("top")) {
-								console.log("Destroying and replacing tooltip")
+							if (top < 75 && $tt.hasClass("top")) {
 								helpLink.tooltip("destroy")
 								helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
 								helpLink.tooltip("show")
@@ -226,12 +225,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		
 		// A module is focused by default when it is created
 		prot.addFocus(true);
-		
-		// Move modules on workspace change
-		$(SignalPath).on("workspaceChanged", function(event, workspace, oldWorkspace) {
-			writePosition(oldWorkspace)
-			loadPosition(workspace, true)
-		})
 
 		$(SignalPath).trigger('moduleAdded', [ prot.jsonData, prot.div ])
 
@@ -239,68 +232,37 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	prot.createDiv = createDiv;
 	
-	function writePosition(workspace) {
+	function writePosition() {
 		prot.jsonData.layout = jQuery.extend(prot.jsonData.layout || {}, {
 			position: {
 				top: prot.div.css('top'),
 				left: prot.div.css('left')
 			}
 		});
-		
-		// Currently only save workspace position for dashboard modules
-		if (prot.div.hasClass("dashboard")) {
-			if (!prot.jsonData.layout.workspaces)
-				prot.jsonData.layout.workspaces = {};
-			
-			if (workspace === "dashboard" && prot.div.css('top') == prot.jsonData.layout.workspaces.normal.top)
-				console.log("Here we are!");
-			
-			prot.jsonData.layout.workspaces[workspace] = {
-				position: {
-					top: prot.div.css('top'),
-					left: prot.div.css('left')
-				}
-			}
-		}
 	}
 	prot.writePosition = writePosition;
 	
-	function loadPosition(workspace, animate) {
+	function loadPosition() {
 		var item = prot.jsonData.layout;
-		
-		// Width and height do not change in different workspaces
+
 		if (item.width)
 			prot.div.css('width',item.width);
 		if (item.height)
 			prot.div.css('height',item.height);
-		
-		// If workspace supplied then try to read position from there
-		if (workspace && item.workspaces && item.workspaces[workspace])
-			item = item.workspaces[workspace];
-		
-		// don't animate on transition to normal workspace, as jsPlumb won't keep up
-		// TODO: maybe fix that some day
-		if (animate && workspace=="dashboard") {
-			prot.div.animate({
-			    top: item.position.top,
-			    left: item.position.left
-			  }, 200);
-		}
-		else {
-			prot.div.css('top',item.position.top);
-			prot.div.css('left',item.position.left);
-		}
+
+		prot.div.css('top',item.position.top);
+		prot.div.css('left',item.position.left);
 	}
 	prot.loadPosition = loadPosition;
 	
 	function setLayoutData(layout) {
 		prot.jsonData.layout = layout;
-		prot.loadPosition(SignalPath.getWorkspace(),false);
+		prot.loadPosition()
 	}
 	pub.setLayoutData = setLayoutData;
 	
 	function getLayoutData() {
-		prot.writePosition(SignalPath.getWorkspace());
+		prot.writePosition();
 		return prot.jsonData.layout;
 	}
 	pub.getLayoutData = getLayoutData;
@@ -486,7 +448,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.onClose = function() {};
 	
 	function toJSON() {
-		writePosition(SignalPath.getWorkspace());
+		writePosition();
 		if (prot.resizable) {
 			prot.jsonData.layout.width = prot.div.css('width');
 			prot.jsonData.layout.height = prot.div.css('height');	
@@ -568,10 +530,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.hash = null;
 		cloneData.layout.position.left = parseInt(cloneData.layout.position.left, 10) + 30 + 'px'
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
-		if (cloneData.layout.workspaces && cloneData.layout.workspaces[SignalPath.getWorkspace()]) {
-			cloneData.layout.workspaces[SignalPath.getWorkspace()].position.left = cloneData.layout.position.left
-			cloneData.layout.workspaces[SignalPath.getWorkspace()].position.top = cloneData.layout.position.top
-		}
 	}
 	prot.prepareCloneData = prepareCloneData;
 	
@@ -627,16 +585,4 @@ $(SignalPath).on("loaded",function() {
 	 $(".component").each(function(i,c) {
 		 $(c).data("spObject").removeFocus();
 	 });
-});
-
-$(SignalPath).on("workspaceChanged", function(event, name) {
-	if (name=="dashboard") {
-		// Hide components that do not have the dashboard class
-		$(".component:not(.dashboard)").hide();
-		$(".component.dashboard").addClass("dashboardEnabled");
-	}
-	else {
-		$(".component").show();
-		$(".component.dashboard").removeClass("dashboardEnabled");
-	}
 });

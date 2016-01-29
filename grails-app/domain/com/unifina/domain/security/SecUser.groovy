@@ -11,8 +11,7 @@ class SecUser {
 	boolean accountLocked
 	boolean passwordExpired
 	
-	String apiKey = IdGenerator.get()
-	String apiSecret = IdGenerator.get()
+	String apiKey = IdGenerator.get() + IdGenerator.get()
 	
 	String name
 	String timezone
@@ -24,7 +23,6 @@ class SecUser {
 		password blank: false
 		name blank: false
 		apiKey nullable:true, unique: true
-		apiSecret nullable:true
 	}
 
 	static mapping = {

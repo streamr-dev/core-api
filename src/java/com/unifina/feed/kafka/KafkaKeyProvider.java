@@ -17,7 +17,7 @@ public class KafkaKeyProvider extends AbstractKeyProvider {
 
 	@Override
 	public Object getSubscriberKey(Object subscriber) {
-		return ((Map)JSON.parse(((IStreamRequirement)subscriber).getStream().getStreamConfig())).get("topic").toString();
+		return ((Map)JSON.parse(((IStreamRequirement)subscriber).getStream().getConfig())).get("topic").toString();
 	}
 
 	@Override

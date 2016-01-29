@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.utils.IdGenerator
@@ -31,7 +32,7 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard, RunningSignalPath, UiChannel])
+@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard, Canvas, UiChannel])
 class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
@@ -86,7 +87,7 @@ class PermissionServiceSpec extends Specification {
 		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
 
 		// Ui channels (have stringId, have no "user")
-		def rsp = new RunningSignalPath(id: 1, user: anotherUser, adhoc: false).save(validate: false)
+		def canvas = new Canvas(user: anotherUser).save(validate: false)
 		uicAllowed = new UiChannel(runningSignalPath: 1, name:"allowed")
 		uicRestricted = new UiChannel(runningSignalPath: 1, name:"restricted")
 		uicAllowed.id = IdGenerator.get()
@@ -371,23 +372,17 @@ class PermissionServiceSpec extends Specification {
 	//----------------------------------
 	// Completely unrelated set of methods from UnifinaSecurityService
 
-	void "looking up a user based on correct api keys"() {
+	void "looking up a user based on correct api key"() {
 		when:
-		def user = service.getUserByApiKey("apiKey", "apiSecret")
+		def user = service.getUserByApiKey("apiKey")
 
 		then:
 		user.username == me.username
 	}
 	
-	void "looking up a user with incorrect api keys"() {
+	void "looking up a user with incorrect api key"() {
 		when:
-		def user = service.getUserByApiKey("apiKey", "wrong secret")
-		
-		then:
-		!user
-		
-		when:
-		user = service.getUserByApiKey("wrong api key", "apiSecret")
+		def user = service.getUserByApiKey("wrong api key")
 		
 		then:
 		!user

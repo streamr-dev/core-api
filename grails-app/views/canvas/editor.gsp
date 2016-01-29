@@ -16,6 +16,7 @@
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
 		<r:require module="detect-timezone"/>
+		<r:require module="canvas-controls"/>
 
 		<r:script>
 
@@ -28,75 +29,77 @@ $('#moduleTree').bind('loaded.jstree', function() {
 
 $(document).ready(function() {
 
-	function getSignalPathContext() {
+	function settings() {
 		var tz = jstz();
-		
+
 		return {
 			beginDate: $("#beginDate").val(),
 			endDate: $("#endDate").val(),
 			speed: $("#speed").val(),
 			timeOfDayFilter: {
 				timeOfDayStart: $("#timeOfDayStart").val(),
-				timeOfDayEnd: $("#timeOfDayEnd").val(),	
+				timeOfDayEnd: $("#timeOfDayEnd").val(),
 				timeZone: tz.timezone_name,
 				timeZoneOffset: tz.utc_offset,
 				timeZoneDst: tz.uses_dst
+			},
+			editorState: {
+				runTab: $("#tab-historical").is(":visible") ? "#tab-historical" : "#tab-realtime"
 			}
 		}
 	}
 
 	SignalPath.init({
-		canvas: 'canvas',
-		signalPathContext: getSignalPathContext,
+		parentElement: $('#canvas'),
+		settings: settings,
 		errorHandler: function(data) {
 			Streamr.showError(data.msg)
 		},
 		notificationHandler: function(data) {
 			Streamr.showInfo(data.msg)
 		},
-		runUrl: Streamr.createLink('live', 'ajaxCreate'),
-		abortUrl: Streamr.createLink('live', 'ajaxStop'),
 		connectionOptions: {
 			server: "${grailsApplication.config.streamr.ui.server}",
 			autoConnect: false,
 			autoDisconnect: true
 		}
 	});
-	
+
 	$(SignalPath).on('loading', function() {
 		$('#modal-spinner').show()
 	})
 
-	$(SignalPath).on('loaded', function(event,saveData,data,signalPathContext) {	
+	$(SignalPath).on('loaded', function(event, json) {
 		$('#modal-spinner').hide()
-		
-		if (signalPathContext.beginDate) {
-			$("#beginDate").val(signalPathContext.beginDate).trigger("change")
-		}
-		if (signalPathContext.endDate)
-			$("#endDate").val(signalPathContext.endDate).trigger("change")
 
-		if (signalPathContext.timeOfDayFilter) {
-			$("#timeOfDayStart").val(signalPathContext.timeOfDayFilter.timeOfDayStart).trigger("change")
-			$("#timeOfDayEnd").val(signalPathContext.timeOfDayFilter.timeOfDayEnd).trigger("change")
+		var settings = json.settings
+		if (settings.beginDate) {
+			$("#beginDate").val(settings.beginDate).trigger("change")
+		}
+		if (settings.endDate)
+			$("#endDate").val(settings.endDate).trigger("change")
+
+		if (settings.timeOfDayFilter) {
+			$("#timeOfDayStart").val(settings.timeOfDayFilter.timeOfDayStart).trigger("change")
+			$("#timeOfDayEnd").val(settings.timeOfDayFilter.timeOfDayEnd).trigger("change")
 		}
 
-		$("#speed").val(signalPathContext.speed!=null ? signalPathContext.speed : 0).trigger("change")		
+		$("#speed").val(settings.speed!=null ? settings.speed : 0).trigger("change")
+
+		if (settings.editorState && settings.editorState.runTab)
+			$("a[href="+settings.editorState.runTab+"]").tab('show')
+
+	});
+
+	// Show realtime tab when a running SignalPath is loaded
+	$(SignalPath).on('loaded', function(event, json) {
+		if (SignalPath.isRunning()) {
+			$("a[href=#tab-realtime]").tab('show')
+		}
 	});
 	
-	$(SignalPath).on('workspaceChanged', function(event, mode) {
-		if (mode=="dashboard") {
-			$("#controls").hide();
-			$("#topButtons").addClass("showOnHover");
-		}
-		else {
-			$("#controls").show();
-			$("#topButtons").removeClass("showOnHover");
-		}
-	});
-	
-	<g:if test="${load}">
-		SignalPath.loadSignalPath({url:"${load}"});
+	<g:if test="${id}">
+		SignalPath.load('${id}');
 	</g:if>
 
 	$(SignalPath).on('error', function(error) {
@@ -108,10 +111,10 @@ $(document).ready(function() {
 		$('#modal-spinner').show()
 	})
 
-	$(SignalPath).on('saved', function(event,data) {
+	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
-		Streamr.showSuccess('${message(code:"signalpath.saved.to")} '+data.target+'.', '${message(code:"signalpath.saved.title")}')
-	});
+		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+	})
 
 	// show search control
 	new SearchControl(
@@ -125,20 +128,14 @@ $(document).ready(function() {
     })
 
 	loadBrowser = new SignalPathBrowser()
-		.tab('Archive', '${ createLink(controller: "savedSignalPath", \
+		.tab('My Canvases', '${ createLink(controller: "canvas", \
 			action: "loadBrowser", params: [ browserId: "archiveLoadBrowser" ]) }')
 
-		<%-- Don't show the live tab without ROLE_LIVE --%>
-		<sec:ifAllGranted roles="ROLE_LIVE">
-			.tab('Live', '${ createLink(controller: "live", \
-				action: "loadBrowser", params: [ browserId: "liveLoadBrowser" ]) }')
-		</sec:ifAllGranted>
-		
-		.tab('Examples', '${ createLink(controller: "savedSignalPath", \
+		.tab('Examples', '${ createLink(controller: "canvas", \
 			action: "loadBrowser", params: [ browserId: "examplesLoadBrowser" ]) }')
 			
-		.onSelect(function(url) {
-			SignalPath.loadSignalPath({ url: url })
+		.onSelect(function(id) {
+			SignalPath.load(id)
 		})
 
 	<%-- Show examples loader if requested --%>
@@ -150,14 +147,18 @@ $(document).ready(function() {
 		}, 0)
 	</g:if>
 
+	$('#newSignalPath').click(function() {
+		SignalPath.clear()
+	})
+
 	$('#loadSignalPath').click(function() {
 		loadBrowser.modal()
 	})
-	
+
 	$(document).bind('keyup', 'alt+r', function() {
 		SignalPath.run();
 	});
-	
+
 	$('#csv').click(function() {
 		var ctx = {
 			csv: true,
@@ -168,28 +169,53 @@ $(document).ready(function() {
 				lastOfDayOnly: $("#csvLastOfDayOnly").attr("checked") ? true : false
 			}
 		}
-		
+
 		SignalPath.run(ctx);
 	});
-	
-	$('#runLiveModalButton').click(function() {
-		if (SignalPath.getName())
-			$('#runLiveName').val(SignalPath.getName())
+
+	// Historical run button
+	var historicalRunButton = new CanvasStartButton({
+		el: $("#run-historical-button"),
+		signalPath: SignalPath,
+        settings: settings,
+        startContent: '<i class="fa fa-play"></i> Run',
+        stopContent: '<i class="fa fa-spin fa-spinner"></i> Abort',
+        adhoc: true,
+        clearState: true
 	})
-	
-	$('#runLiveButton').click(function() {
-		var name = $('#runLiveName').val()
-		SignalPath.setName(name)
-		
-		var ctx = {
-			live: true
-		}
-		
-		SignalPath.run(ctx, false, function(data) {
-			var url_root = '${createLink(controller:"live", action:"show")}'
-			Streamr.showInfo("Live Canvas launced:"+name)
-    		window.location = url_root + "/" + data.id
-		});
+
+	// Realtime run button
+	var realtimeRunButton = new CanvasStartButton({
+		el: $("#run-realtime-button"),
+		signalPath: SignalPath,
+        settings: settings,
+        startContent: '<i class="fa fa-play"></i> Start',
+        stopContent: '<i class="fa fa-stop"></i> Stop',
+        adhoc: false,
+        clearState: false
+	})
+	realtimeRunButton.on('start-confirmed', function() {
+		Streamr.showSuccess('${message(code:"canvas.started")}: '.replace('{0}', SignalPath.getName()))
+	})
+	realtimeRunButton.on('stop-confirmed', function() {
+		Streamr.showSuccess('${message(code:"canvas.stopped")}: '.replace('{0}', SignalPath.getName()))
+	})
+
+	// Run and clear link
+	var realtimeRunAndClearButton = new CanvasStartButton({
+		el: $("#run-realtime-button"),
+		signalPath: SignalPath,
+        settings: settings,
+        startContent: '<i class="fa fa-play"></i> Start',
+        stopContent: '<i class="fa fa-stop"></i> Stop',
+        adhoc: false,
+        clearState: true,
+        clickElement: $("#run-realtime-clear")
+	})
+
+	new CanvasNameEditor({
+		el: $("#canvas-name-editor"),
+		signalPath: SignalPath
 	})
 })
 
@@ -208,14 +234,17 @@ $(document).unload(function () {
 
 </head>
 
-<body class="build-page main-menu-fixed">
+<body class="canvas-editor-page main-menu-fixed">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
 			<div id="toolbar-buttons" class="menu-content" style="overflow: visible;">
 				<div class="btn-group load-save-group">
-					<button id="loadSignalPath" class="btn btn-default">
+					<button id="newSignalPath" title="New Canvas" class="btn btn-default">
+						<i class="fa fa-file-o"></i>
+					</button>
+
+					<button id="loadSignalPath" title="Load Canvas" class="btn btn-default">
 						<i class="fa fa-folder-open"></i>
-						<g:message code="signalPath.loadSignalPath.label" default="Load" />
 					</button>
 		
 					<sp:saveButtonDropdown/>
@@ -223,47 +252,81 @@ $(document).unload(function () {
 			</div>
 
 			<div class="menu-content">
-			
-				<div class="menu-content-header">
-					<label>Run Options</label>
-					<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Show More Options" data-toggle="modal" data-target="#runOptionsModal">
-						<i class="fa fa-cog"></i>
-					</a>
+
+				<ul class="nav nav-tabs nav-justified nav-tabs-xs run-mode-tabs">
+					<li class="active">
+						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
+					</li>
+					<li class="">
+						<a href="#tab-realtime" role="tab" data-toggle="tab">Realtime</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<!-- Historical run controls -->
+					<div role="tabpanel" class="tab-pane active" id="tab-historical">
+
+						<form onsubmit="return false;">
+							<g:hiddenField name="defaultBeginDate" value="${formatDate(date:beginDate,format:"yyyy-MM-dd")}"/>
+							<g:hiddenField name="defaultEndDate" value="${formatDate(date:endDate,format:"yyyy-MM-dd")}"/>
+
+							<div class="form-group form-group-period">
+								<div class="input-group">
+									<span class="input-group-addon">From</span>
+									<ui:datePicker name="beginDate" value="${beginDate}" class="form-control"/>
+								</div>
+								<div class="input-group">
+									<span class="input-group-addon">To</span>
+									<ui:datePicker name="endDate" value="${endDate}" class="form-control"/>
+								</div>
+								<a href="#" id="historical-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Historical Run Options" data-toggle="modal" data-target="#historicalOptionsModal">
+									<i class="fa fa-cog"></i>
+									Options
+								</a>
+							</div>
+
+							<div class="btn-group btn-block run-group">
+								<button id="run-historical-button" class="btn btn-primary col-xs-10 run-button">
+									<i class="fa fa-play"></i>
+									Run
+								</button>
+								<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
+										data-toggle="dropdown">
+									<span class="caret"></span>
+									<span class="sr-only">Toggle Dropdown</span>
+								</button>
+								<ul class="dropdown-menu" role="menu">
+									<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
+								</ul>
+							</div>
+						</form>
+					</div>
+
+					<!-- Realtime run controls -->
+					<div role="tabpanel" class="tab-pane" id="tab-realtime">
+						<div class="menu-content-header">
+							<!--<label>Realtime Run Options</label>-->
+							<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
+								<i class="fa fa-cog"></i>
+								Options
+							</a>
+						</div>
+						<div class="btn-group btn-block run-group">
+							<button id="run-realtime-button" class="btn btn-primary col-xs-10 run-button">
+								<i class="fa fa-play"></i>
+								<g:message code="canvas.start.label"/>
+							</button>
+							<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
+									data-toggle="dropdown">
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li><a id="run-realtime-clear" href="#"><g:message code="canvas.clearAndStart.label"/></a></li>
+							</ul>
+						</div>
+					</div>
 				</div>
-			
-				<form onsubmit="return false;">
-					<g:hiddenField name="defaultBeginDate" value="${formatDate(date:beginDate,format:"yyyy-MM-dd")}"/>
-					<g:hiddenField name="defaultEndDate" value="${formatDate(date:endDate,format:"yyyy-MM-dd")}"/>
-
-					<div class="form-group form-group-period">
-						<div class="input-group">
-							<span class="input-group-addon">From</span>
-							<ui:datePicker name="beginDate" value="${beginDate}" class="form-control"/>
-						</div>
-						<div class="input-group">
-							<span class="input-group-addon">To</span>
-							<ui:datePicker name="endDate" value="${endDate}" class="form-control"/>
-						</div>
-					</div>
-
-					<div id="run-group" class="btn-group btn-block">
-						<sp:runButton buttonId="run" class="btn-primary col-xs-10">
-							<i class="fa fa-play"></i>
-							Run
-						</sp:runButton>
-						<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
-							data-toggle="dropdown">
-							<span class="caret"></span> 
-							<span class="sr-only">Toggle Dropdown</span>
-						</button>
-						<ul class="dropdown-menu" role="menu">
-							<sec:ifAllGranted roles="ROLE_LIVE">
-								<li><a id="runLiveModalButton" href="#" data-toggle="modal" data-target="#runLiveModal">Launch Live..</a></li>
-							</sec:ifAllGranted>
-							<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
-						</ul>
-					</div>
-				</form>
 			</div>
 			
 			<div id="search-control" class="menu-content" style="overflow: visible">
@@ -289,6 +352,11 @@ $(document).unload(function () {
 	</div> <!-- / #main-menu -->
 
 	<div id="content-wrapper">
+		<ui:breadcrumb>
+			<li class="active">
+				<span id="canvas-name-editor"></span>
+			</li>
+		</ui:breadcrumb>
 		<div id="canvas" class="scrollable"></div>
 	</div>
 
@@ -366,12 +434,12 @@ $(document).unload(function () {
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 	
-	<div id="runOptionsModal" class="modal fade">
+	<div id="historicalOptionsModal" class="modal fade">
 	  <div class="modal-dialog">
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        <h4 class="modal-title">Advanced Run Options</h4>
+	        <h4 class="modal-title">Historical Run Options</h4>
 	      </div>
 	      <div class="modal-body">
 				<div class="form-group">
@@ -397,6 +465,23 @@ $(document).unload(function () {
 	      </div>
 	    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
+	<div id="realtimeOptionsModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title">Realtime Run Options</h4>
+				</div>
+				<div class="modal-body">
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
 	<ul id="save-dropdown-menu" class="dropdown-menu" role="menu">

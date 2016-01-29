@@ -8,9 +8,9 @@ SignalPathBrowser.prototype = Object.create(RemoteTabs.prototype)
 SignalPathBrowser.prototype.onTabShown = function($tabBody) {
 	var that = this
 
-	$('.signalpath-browser', $tabBody).on('selected', function(e, url) {
+	$('.signalpath-browser', $tabBody).on('selected', function(e, id) {
 		that.close()
-		that._onSelect(url)
+		that._onSelect(id)
 	})
 }
 SignalPathBrowser.prototype.onSelect = function(fn) {
@@ -50,7 +50,7 @@ SignalPathBrowser.contentAppender = function contentAppender(browser, url) {
 				$('tr.selectable', browser).click(function(e) {
 					e.stopPropagation()
 					e.preventDefault()
-					$(browser).trigger('selected', $(this).data('url'))
+					$(browser).trigger('selected', $(this).data('id'))
 				})
 			}
 		)
