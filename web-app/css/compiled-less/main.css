@@ -17182,6 +17182,13 @@ body.dashboard-show #sidebar-view .rsp-title {
 body.dashboard-show .titlebar-clickable {
   cursor: pointer;
 }
+.map-container div.streamr-map-icon {
+  color: #e95b15;
+  padding-top: 4px;
+}
+.map-container div.streamr-map-icon:before {
+  margin-left: -4px;
+}
 .widget-notifications .notification {
   position: relative;
   padding: 7px 12px;

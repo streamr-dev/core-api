@@ -1,15 +1,12 @@
 package com.unifina.signalpath.charts;
 
-import com.unifina.signalpath.ModuleOption;
-import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.TimeSeriesInput;
+import com.unifina.signalpath.*;
 
 import java.util.LinkedHashMap;
 
 public class Map extends ModuleWithUI {
 
-	TimeSeriesInput id = new TimeSeriesInput(this, "id");
+	Input<Object> id = new Input<>(this, "id", "Double String");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
 	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
 
@@ -77,8 +74,11 @@ public class Map extends ModuleWithUI {
 	}
 
 	class MapPoint extends LinkedHashMap<String,Object> {
-		public MapPoint(Double id, Double latitude, Double longitude) {
+		public MapPoint(Object id, Double latitude, Double longitude) {
 			super();
+			if (!(id instanceof Double || id instanceof String)) {
+				throw new RuntimeException("Id must be Double or String!");
+			}
 			put("t", "p");
 			put("lat", latitude);
 			put("long", longitude);
