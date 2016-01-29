@@ -49,9 +49,9 @@ var CanvasStartButton = Backbone.View.extend({
 
         var callback = function(response, err) {
             if (err)
-                _this.trigger('start-confirmed')
-            else
                 _this.trigger('start-error', err)
+            else
+                _this.trigger('start-confirmed')
         }
 
         if (this.adhoc) {

@@ -366,7 +366,9 @@ var SignalPath = (function () {
 
 	function saveAs(name, callback) {
 		setName(name)
-		save(callback, true)
+		save(function(json) {
+			load(json)
+		}, true)
 	}
 	pub.saveAs = saveAs
 
@@ -388,9 +390,8 @@ var SignalPath = (function () {
 		if (isSaved() && !forceCreateNew) {
 			_update(json, onSuccess)
 		}
-		// Otherwise create new (template)
+		// Otherwise create new
 		else {
-			json.type = 'template'
 			_create(json, onSuccess)
 		}
 	}
@@ -631,19 +632,34 @@ var SignalPath = (function () {
 		$(pub).trigger('stopping')
 
 		if (isRunning()) {
+			var onStopped = function() {
+				runningJson = null
+				$(pub).trigger('stopped');
+			}
+
 			$.ajax({
 				type: 'POST',
 				url: options.apiUrl + '/canvases/' + runningJson.id + '/stop',
 				dataType: 'json',
 				success: function(data) {
+					onStopped()
+
 					// data may be undefined if the canvas was deleted on stop
-					runningJson = null
-					$(pub).trigger('stopped');
 					if (callback)
-						callback(data, data.error ? data : undefined)
+						callback(data)
 				},
 				error: function(jqXHR,textStatus,errorThrown) {
-					handleError(textStatus+"\n"+errorThrown)
+					// Handle the case where the canvas is dead and can't be reached by the stop request
+					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_STOP_FAILED') {
+						onStopped()
+					}
+
+					if (callback) {
+						callback(undefined, jqXHR.responseJSON)
+					}
+					else {
+						handleError(textStatus + "\n" + errorThrown)
+					}
 				}
 			});
 		}

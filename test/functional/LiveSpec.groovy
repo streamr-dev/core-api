@@ -141,7 +141,8 @@ public class LiveSpec extends LoginTester1Spec {
 			waitForConfirmation(".stop-confirmation-dialog")
 		when: "Clicked OK"
 			acceptConfirmation(".stop-confirmation-dialog")
-
+		then:
+			true
 		// TODO: test canvas delete functionality once it's implemented
 	}
 	
