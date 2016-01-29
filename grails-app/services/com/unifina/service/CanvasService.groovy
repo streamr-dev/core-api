@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
@@ -91,12 +92,14 @@ class CanvasService {
 		}
 	}
 
-	public void stop(Canvas canvas) {
+	public void stop(Canvas canvas, SecUser user) {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
-		// TODO: handle return value
-		boolean result = signalPathService.stopLocal(canvas)
+
+		RuntimeResponse response = signalPathService.stopRemote(canvas, user)
+		if (!response.isSuccess())
+			throw new ApiException(500, "CANVAS_STOP_FAILED", "Canvas $canvas.id did not respond to stop request.")
 	}
 
 

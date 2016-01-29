@@ -1,5 +1,4 @@
 import pages.*
-import spock.lang.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
@@ -7,7 +6,7 @@ import core.pages.CanvasPage
 import core.pages.DashboardCreatePage
 import core.pages.DashboardListPage
 import core.pages.DashboardShowPage
-import core.pages.LiveListPage
+import core.pages.CanvasListPage
 import core.pages.LiveShowPage
 import core.pages.LoginPage
 
@@ -22,8 +21,8 @@ class DashboardSpec extends LoginTester1Spec {
 		waitFor { at CanvasPage }
 		
 		// Go start the RunningSignalPath related to this spec
-		to LiveListPage
-		waitFor { at LiveListPage }
+		to CanvasListPage
+		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
 		waitFor { at LiveShowPage }
 		if (stopButton.displayed) {

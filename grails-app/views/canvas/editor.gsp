@@ -97,10 +97,16 @@ $(document).ready(function() {
 			$("a[href=#tab-realtime]").tab('show')
 		}
 	});
-	
-	<g:if test="${id}">
-		SignalPath.load('${id}');
-	</g:if>
+
+	// Try to ping a running SignalPath on load, and show error if it can't be reached
+	$(SignalPath).on('loaded', function(event, json) {
+		if (SignalPath.isRunning()) {
+			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
+				if (err)
+					Streamr.showError('${message(code:'canvas.ping.error')}')
+			})
+		}
+	});
 
 	$(SignalPath).on('error', function(error) {
 		console.error(error)
@@ -200,6 +206,9 @@ $(document).ready(function() {
 	realtimeRunButton.on('stop-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.stopped")}: '.replace('{0}', SignalPath.getName()))
 	})
+	realtimeRunButton.on('stop-error', function() {
+		Streamr.showError('${message(code:"canvas.stop.error")}')
+	})
 
 	// Run and clear link
 	var realtimeRunAndClearButton = new CanvasStartButton({
@@ -217,6 +226,11 @@ $(document).ready(function() {
 		el: $("#canvas-name-editor"),
 		signalPath: SignalPath
 	})
+
+
+	<g:if test="${id}">
+		SignalPath.load('${id}');
+	</g:if>
 })
 
 $(document).unload(function () {
