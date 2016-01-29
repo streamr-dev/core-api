@@ -366,7 +366,9 @@ var SignalPath = (function () {
 
 	function saveAs(name, callback) {
 		setName(name)
-		save(callback, true)
+		save(function(json) {
+			load(json)
+		}, true)
 	}
 	pub.saveAs = saveAs
 
@@ -388,9 +390,8 @@ var SignalPath = (function () {
 		if (isSaved() && !forceCreateNew) {
 			_update(json, onSuccess)
 		}
-		// Otherwise create new (template)
+		// Otherwise create new
 		else {
-			json.type = 'template'
 			_create(json, onSuccess)
 		}
 	}
