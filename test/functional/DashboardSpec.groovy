@@ -1,14 +1,7 @@
-import pages.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.CanvasPage
-import core.pages.DashboardCreatePage
-import core.pages.DashboardListPage
-import core.pages.DashboardShowPage
-import core.pages.CanvasListPage
-import core.pages.LiveShowPage
-import core.pages.LoginPage
+import core.pages.*
 
 class DashboardSpec extends LoginTester1Spec {
 
@@ -24,18 +17,14 @@ class DashboardSpec extends LoginTester1Spec {
 		to CanvasListPage
 		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
-		waitFor { at LiveShowPage }
-		if (stopButton.displayed) {
-			stopButton.click()
-			waitForConfirmation()
-			acceptConfirmation()
-			waitFor { startButton.displayed }
-		}
-		
-		startButton.click()
-		waitFor { stopButton.displayed }
-		
+		waitFor { at CanvasPage  }
+
+		stopCanvasIfRunning()
+		ensureRealtimeTabDisplayed()
+		startCanvas()
+
 		$("#navSettingsLink").click()
+		$("#navSettingsLink").parent(".dropdown-menu").displayed
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}
