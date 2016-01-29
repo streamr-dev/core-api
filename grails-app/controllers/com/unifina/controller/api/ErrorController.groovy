@@ -12,7 +12,7 @@ class ErrorController {
 		try {
 			ApiException e = request.exception.cause
 			response.status = e.statusCode
-			render([code: e.code, message: e.message] as JSON)
+			render(e.toMap() as JSON)
 		} catch (GroovyCastException e) {
 			response.status = 500
 			render([code: "UNEXPECTED_ERROR", message: e.message] as JSON)

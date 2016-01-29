@@ -24,7 +24,7 @@ class DashboardSpec extends LoginTester1Spec {
 		startCanvas()
 
 		$("#navSettingsLink").click()
-		$("#navSettingsLink").parent(".dropdown").displayed
+		$("#navSettingsLink").parent(".dropdown-menu").displayed
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}

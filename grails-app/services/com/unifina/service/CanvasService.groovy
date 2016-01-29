@@ -14,6 +14,7 @@ import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import grails.transaction.NotTransactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 
@@ -92,14 +93,19 @@ class CanvasService {
 		}
 	}
 
+	@NotTransactional
 	public void stop(Canvas canvas, SecUser user) {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
 
 		RuntimeResponse response = signalPathService.stopRemote(canvas, user)
-		if (!response.isSuccess())
+		if (!response.isSuccess()) {
+			canvas.state = Canvas.State.STOPPED
+			canvas.save(failOnError: true, flush: true)
+			//Canvas.executeUpdate("update Canvas c set c.state = ? where c.id = ?", [Canvas.State.STOPPED, canvas.id])
 			throw new ApiException(500, "CANVAS_STOP_FAILED", "Canvas $canvas.id did not respond to stop request.")
+		}
 	}
 
 
