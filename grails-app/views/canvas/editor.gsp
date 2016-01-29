@@ -221,6 +221,9 @@ $(document).ready(function() {
         clearState: true,
         clickElement: $("#run-realtime-clear")
 	})
+	realtimeRunAndClearButton.on('start-confirmed', function() {
+		Streamr.showSuccess('${message(code:"canvas.clearAndStarted")}: '.replace('{0}', SignalPath.getName()))
+	})
 
 	new CanvasNameEditor({
 		el: $("#canvas-name-editor"),
