@@ -455,6 +455,7 @@ var SignalPath = (function () {
 
 		name = "Untitled canvas"
 		savedJson = {}
+		runningJson = null
 		
 		jsPlumb.reset();		
 		
@@ -475,6 +476,8 @@ var SignalPath = (function () {
 
 			if (json.state.toLowerCase() === 'running')
 				runningJson = json
+			else
+				runningJson = null
 
 			if (callback)
 				callback(json);
