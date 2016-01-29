@@ -54,7 +54,8 @@ var UiChannelView = Backbone.View.extend({
 
 var RunningSignalPath = Backbone.Model.extend({
 	initialize: function (){
-		this.uiChannelCollection = new UiChannelList(this.get("uiChannels"))
+		var uiChannels = _.pluck(this.modules, "uiChannel")
+		this.uiChannelCollection = new UiChannelList(uiChannels)
 	},
 	getCheckedCount: function () {
 		var howManyChecked = 0
@@ -298,14 +299,12 @@ var SidebarView = Backbone.View.extend({
 		this.allRSPs = options.RSPs
 		this.menuToggle = options.menuToggle
 
-		this.RSPs = []
-		_.each(this.allRSPs, function(rsp){
-			rsp.uiChannels = _.filter(rsp.uiChannels, function(uic){
-				return uic.module
+		// Keep canvases that contain at least one module with webcomponent
+		this.RSPs = _.filter(this.allRSPs, function(rsp) {
+			return _.find(rsp.modules, function(module) {
+				return module.uiChannel  && module.uiChannel.webcomponent != null
 			})
-			if(rsp.uiChannels.length)
-				this.RSPs.push(rsp)
-		},this)
+		})
 		this.setData(this.RSPs, this.dashboard.get("items"))
 		this.listenTo(this.dashboard.get("items"), "remove", function(DI){
 			this.uncheck(DI.get("uiChannel").id)
@@ -342,9 +341,9 @@ var SidebarView = Backbone.View.extend({
 			checked[item.get("uiChannel").id] = true
 		})
 		_.each(RSPs, function(rsp) {
-			_.each(rsp.uiChannels, function(uiChannel) {
-				if (checked[uiChannel.id])
-					uiChannel.checked = true
+			_.each(rsp.models, function(model) {
+				if (checked[model.uiChannel.id])
+					model.uiChannel.checked = true
 			})
 		})
 		this.rspCollection = new RunningSignalPathList(RSPs)

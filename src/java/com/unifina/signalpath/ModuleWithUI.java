@@ -39,6 +39,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		Map uiChannel = new HashMap<String,Object>();
 		uiChannel.put("id", getUiChannelId());
 		uiChannel.put("name", getUiChannelName());
+		uiChannel.put("webcomponent", getWebcomponentName());
 		return uiChannel;
 	}
 	
@@ -48,7 +49,11 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	 * @return The name of the webcomponent.
 	 */
 	public String getWebcomponentName() {
-		return null;
+		if (domainObject == null) {
+			return null;
+		} else {
+			return domainObject.getWebcomponent();
+		}
 	}
 	
 	@Override

@@ -1,3 +1,5 @@
+import core.pages.CanvasListPage
+import grails.util.Mixin
 import pages.*
 import spock.lang.*
 import core.LoginTester1Spec
@@ -7,8 +9,6 @@ import core.pages.CanvasPage
 import core.pages.DashboardCreatePage
 import core.pages.DashboardListPage
 import core.pages.DashboardShowPage
-import core.pages.LiveListPage
-import core.pages.LiveShowPage
 import core.pages.LoginPage
 
 class DashboardSpec extends LoginTester1Spec {
@@ -22,21 +22,17 @@ class DashboardSpec extends LoginTester1Spec {
 		waitFor { at CanvasPage }
 		
 		// Go start the RunningSignalPath related to this spec
-		to LiveListPage
-		waitFor { at LiveListPage }
+		to CanvasListPage
+		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
-		waitFor { at LiveShowPage }
-		if (stopButton.displayed) {
-			stopButton.click()
-			waitForConfirmation()
-			acceptConfirmation()
-			waitFor { startButton.displayed }
-		}
-		
-		startButton.click()
-		waitFor { stopButton.displayed }
-		
+		waitFor { at CanvasPage  }
+
+		stopCanvasIfRunning()
+		ensureRealtimeTabDisplayed()
+		startCanvas()
+
 		$("#navSettingsLink").click()
+		$("#navSettingsLink").parent(".dropdown").displayed
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}
