@@ -104,7 +104,8 @@ var SignalPath = (function () {
 			connection.disconnect()
 		}
 	};
-	pub.sendRequest = function(hash,msg,callback) {
+	// hash argument can be undefined if the request is aimed at the canvas/runner
+	pub.sendRequest = function(hash, msg, callback) {
 		if (runningJson) {
 			
 			// Include UI channel if exists
@@ -129,11 +130,11 @@ var SignalPath = (function () {
 				dataType: 'json',
 				contentType: 'application/json; charset=utf-8',
 				success: function(data) {
-					if (!data.success) {
+					if (callback)
+						callback(data.response, (data.success ? undefined : data))
+					else if (!data.success) {
 						handleError(data.error || data.response.error)
 					}
-					else if (callback)
-						callback(data.response)
 				}
 			});
 			return true;
@@ -477,11 +478,13 @@ var SignalPath = (function () {
 			if (callback)
 				callback(json);
 
-			// Trigger loaded on pub and parentElement
-			$(pub).add(parentElement).trigger('loaded', [json]);
-
-			// It is important that savedJson is written after the loaded event has been fired, because it may affect canvas settings
 			savedJson = $.extend(true, {}, toJSON(), json) // deep copy
+
+			// Trigger loaded on pub and parentElement
+			$(pub).add(parentElement).trigger('loaded', [savedJson]);
+
+			// It is important that savedJson is rewritten after the loaded event has been fired, because it may affect canvas settings
+			savedJson = $.extend(true, savedJson, toJSON()) // deep copy
 		}
 
 		// Fetch from api by id
@@ -637,7 +640,7 @@ var SignalPath = (function () {
 					runningJson = null
 					$(pub).trigger('stopped');
 					if (callback)
-						callback()
+						callback(data, data.error ? data : undefined)
 				},
 				error: function(jqXHR,textStatus,errorThrown) {
 					handleError(textStatus+"\n"+errorThrown)
