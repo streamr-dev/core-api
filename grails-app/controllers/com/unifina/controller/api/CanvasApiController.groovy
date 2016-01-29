@@ -89,7 +89,7 @@ class CanvasApiController {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				// Updates canvas in another thread, so canvas needs to be refreshed
-				canvasService.stop(canvas)
+				canvasService.stop(canvas, request.apiUser)
 
 				try {
 					// Adhoc canvases are deleted on stop, in which case refresh() will fail with UnresolvableObjectException

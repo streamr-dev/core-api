@@ -1,15 +1,7 @@
-import core.pages.CanvasListPage
-import grails.util.Mixin
-import pages.*
-import spock.lang.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.CanvasPage
-import core.pages.DashboardCreatePage
-import core.pages.DashboardListPage
-import core.pages.DashboardShowPage
-import core.pages.LoginPage
+import core.pages.*
 
 class DashboardSpec extends LoginTester1Spec {
 

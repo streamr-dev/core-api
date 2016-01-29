@@ -316,7 +316,7 @@ class CanvasApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		1 * canvasService.stop(canvas1)
+		1 * canvasService.stop(canvas1, me)
 		0 * canvasService._
 	}
 
