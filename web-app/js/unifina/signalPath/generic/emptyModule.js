@@ -127,7 +127,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 					onEscape: function() { return true },
 					animate: false,
 					title: prot.jsonData.name,
-					show: false
+					show: false,
+					className: "module-help-dialog"
 				})
 				bb.on("shown.bs.modal", function(){
 					MathJax.Hub.Queue(["Typeset",MathJax.Hub,bb.find(".modal-body")[0]]);

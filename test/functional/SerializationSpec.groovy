@@ -7,7 +7,7 @@ import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.LiveShowPage
+import core.pages.CanvasPage
 import grails.test.mixin.TestFor
 import grails.util.Holders
 import spock.lang.Shared
@@ -69,8 +69,8 @@ class SerializationSpec extends LoginTester1Spec {
 		when: "Name for live canvas is given and it is launched"
 			$("#runLiveName") << liveName
 			$("#runLiveButton").click()
-		then: "LiveShowPage is opened and Label shows data"
-			waitFor(30) { at LiveShowPage }
+		then: "CanvasPage is opened and Label shows data"
+			waitFor(30) { at CanvasPage }
 			stopButton.displayed
 			!$(".alert").displayed
 
@@ -95,7 +95,7 @@ class SerializationSpec extends LoginTester1Spec {
 
 		when: "Clicked OK"
 			acceptConfirmation()
-		then: "The LiveShowPage is opened again, now with the start and delete -buttons and info alert"
+		then: "The CanvasPage is opened again, now with the start and delete -buttons and info alert"
 			waitFor(30) {
 				startButton.displayed
 				deleteButton.displayed
@@ -104,8 +104,8 @@ class SerializationSpec extends LoginTester1Spec {
 
 		when: "Started again"
 			startButton.click()
-		then: "The LiveShowPage is opened and data must change"
-			waitFor { at LiveShowPage }
+		then: "The CanvasPage is opened and data must change"
+			waitFor { at CanvasPage }
 
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
@@ -125,7 +125,7 @@ class SerializationSpec extends LoginTester1Spec {
 
 		when: "Clicked OK"
 			acceptConfirmation()
-		then: "The LiveShowPage is opened again, now with the start and delete -buttons and info alert"
+		then: "The CanvasPage is opened again, now with the start and delete -buttons and info alert"
 			waitFor(30) {
 				startButton.displayed
 				deleteButton.displayed
@@ -144,8 +144,8 @@ class SerializationSpec extends LoginTester1Spec {
 
 		when: "Clicked OK"
 			acceptConfirmation()
-		then: "LiveShowPage is opened and Label shows data counted from empty state"
-			waitFor(30) { at LiveShowPage }
+		then: "CanvasPage is opened and Label shows data counted from empty state"
+			waitFor(30) { at CanvasPage }
 			stopButton.displayed
 			//!$(".alert").displayed
 

@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -331,6 +332,22 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 403
 		response.json.code == "FORBIDDEN"
+		0 * canvasService._
+	}
+
+	void "must render an error if the canvas can't be reached for stopping"() {
+		when:
+		request.addHeader("Authorization", "Token myApiKey")
+		params.id = "1"
+		request.requestURI = "/api/v1/canvases/stop"
+		withFilters(action: "stop") {
+			controller.stop()
+		}
+
+		then:
+		response.status == 500
+		response.json.code == "CANVAS_STOP_FAILED"
+		1 * canvasService.stop(canvas1, me) >> { throw new ApiException(500, "CANVAS_STOP_FAILED", "") }
 		0 * canvasService._
 	}
 }

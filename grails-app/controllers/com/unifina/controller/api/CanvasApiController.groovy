@@ -96,6 +96,7 @@ class CanvasApiController {
 					canvasService.stop(canvas, request.apiUser)
 				} catch (ApiException e) {
 					render(status: e.statusCode, text: e.toMap() as JSON)
+					return
 				}
 
 				try {

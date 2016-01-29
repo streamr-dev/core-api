@@ -26,7 +26,7 @@ var CanvasStartButton = Backbone.View.extend({
             _this.setRunning(false);
         })
 
-        $(this.signalPath).on('starting', function() {
+        $(this.signalPath).on('starting started', function() {
             _this.setRunning(true)
         })
 

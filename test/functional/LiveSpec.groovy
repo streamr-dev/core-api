@@ -9,8 +9,7 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.pages.CanvasListPage
-import core.pages.LiveShowPage
-
+import core.pages.CanvasPage
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
@@ -21,10 +20,6 @@ public class LiveSpec extends LoginTester1Spec {
 	static UnifinaKafkaProducer kafka
 	
 	def setupSpec() {
-
-		// For some reason the annotations don't work so need the below.
-		LiveSpec.metaClass.mixin(CanvasMixin)
-		LiveSpec.metaClass.mixin(ConfirmationMixin)
 
 		BootService.mergeDefaultConfig(grailsApplication)
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));
@@ -46,6 +41,12 @@ public class LiveSpec extends LoginTester1Spec {
 		timer = new Timer()
 		timer.schedule(task, 1000L, 1000L)
 	}
+
+	def setup() {
+		// For some reason the annotations don't work so need the below.
+		LiveSpec.metaClass.mixin(CanvasMixin)
+		LiveSpec.metaClass.mixin(ConfirmationMixin)
+	}
 	
 	def cleanupSpec() {
 		timer.cancel()
@@ -64,25 +65,25 @@ public class LiveSpec extends LoginTester1Spec {
 			moduleShouldAppearOnCanvas("Stream")
 			searchAndClick("Label")
 			moduleShouldAppearOnCanvas("Label")
-			interact {
-				clickAndHold(findModuleOnCanvas("Label"))
-				moveByOffset(0, 200)
-			}
+			moveModuleBy("Label", 200, 200)
 			
 			connectEndpoints(findOutput("Stream", "rand"), findInput("Label", "label"))
-			runTabRealtime.click()
+
+			setCanvasName(liveName)
+
+			realtimeTabLink.click()
 			runRealtimeButton.click()
 
-		then: "A notification is shown that the canvas must be saved"
-			waitFor { $(".ui-pnotify", text: contains("save")).displayed }
+		then: "A modal is shown that the canvas must be saved"
+			waitForConfirmation(".save-on-start-confirmation-dialog")
 
-		when: "The canvas is saved and then launched"
-			saveCanvasAs("LiveSpec")
-			runRealtimeButton.click()
+		when: "The modal is accepted"
+			acceptConfirmation(".save-on-start-confirmation-dialog")
 		then: "The button text show show Stop"
-			runRealtimeButton.text().contains("Stop")
-		then: "A notification should appear"
+			waitFor { runRealtimeButton.text().contains("Stop") }
+		then: "A notification should appear and disappear"
 			waitFor { $(".ui-pnotify", text: contains("started")).displayed }
+			waitFor { !$(".ui-pnotify").displayed }
 		then: "Some data should appear"
 			// Wait for data, sometimes takes more than 30sec to come
 			waitFor(30){ $(".modulelabel").text() != "" }
@@ -92,14 +93,14 @@ public class LiveSpec extends LoginTester1Spec {
 			findModuleOnCanvas("Label").find(".modulebutton .help").click()
 		then: "Dialog is opened with webcomponent tag shown"
 			waitFor {
-				$(".modal-dialog .modulehelp", text:contains("streamr-label"))
+				$(".module-help-dialog .modulehelp", text:contains("streamr-label"))
 			}
 			
 		when: "Help dialog close button is clicked"
-			$(".modal-dialog button.close").click()
+			$(".module-help-dialog button.close").click()
 		then: "Dialog exits"
 			waitFor {
-				$(".modal-dialog").size()==0
+				$(".module-help-dialog").size()==0
 			}	
 		
 		when: "Stop button is clicked"
@@ -163,31 +164,31 @@ public class LiveSpec extends LoginTester1Spec {
 		
 		when: "selecting running canvas"
 			$(".table .td", text:"LiveSpec stopped").click()
-		then: "navigate to show page"
+		then: "connection must not be connected"
 			waitFor {at CanvasPage}
 			waitFor {findModuleOnCanvas("Label")}
 			!js.exec("return SignalPath.getConnection().isConnected()")
 	}
 
-	def "stopping non-running signalpaths must mark them as stopped and show a flash message"() {
+	def "stopping non-running signalpaths must mark them as stopped and show a notification"() {
 		to CanvasListPage
 		waitFor{ at CanvasListPage }
 		
-		when: "selecting running canvas"
+		when: "selecting a dead canvas"
 			$(".table .td", text:"LiveSpec dead").click()
-		then: "navigate to show page with correct run button state"
-			waitFor {at CanvasPage}
-			waitFor {}
+		then: "navigate to editor page with correct run button state"
+			waitFor {
+				at CanvasPage
+				runRealtimeButton.text().contains("Stop")
+			}
 
 		when: "stop button is clicked"
 			runRealtimeButton.click()
 		then: "confirmation is shown"
 			waitForConfirmation(".stop-confirmation-dialog")
-			//waitFor { $(".modal-dialog").displayed } // WHY does waitForConfirmation() from ConfirmationMixin give groovy.lang.MissingMethodException here??!
 			
 		when: "confirmation accepted"
 			acceptConfirmation(".stop-confirmation-dialog")
-			//$(".modal-dialog .btn-primary").click() // WHY does acceptConfirmation() from ConfirmationMixin give groovy.lang.MissingMethodException here??!
 		then: "must show alert and start button"
 			waitFor {
 				$(".alert.alert-danger").displayed
@@ -197,7 +198,7 @@ public class LiveSpec extends LoginTester1Spec {
 		when: "canvas is resumed"
 			runRealtimeButton.click()
 		then: "info alert and stop button must be displayed"
-			waitFor { $(".alert.alert-info").displayed }
+			waitFor { $(".alert.alert-success").displayed }
 	}
 
 }

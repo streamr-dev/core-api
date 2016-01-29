@@ -360,14 +360,21 @@ var SignalPath = (function () {
 	 */
 	function isDirty() {
 		var currentJson = $.extend(true, {}, savedJson, toJSON())
-		return !_.isEqual(savedJson, currentJson)
+		var dirty = !_.isEqual(savedJson, currentJson)
+		if (dirty) {
+			console.log(JSON.stringify(savedJson))
+			console.log(JSON.stringify(currentJson))
+		}
+		return dirty
 	}
 	pub.isDirty = isDirty
 
 	function saveAs(name, callback) {
 		setName(name)
 		save(function(json) {
-			load(json)
+			load(json, function() {
+				setTimeout(callback, 0)
+			})
 		}, true)
 	}
 	pub.saveAs = saveAs
@@ -376,7 +383,7 @@ var SignalPath = (function () {
 		$(pub).trigger('saving')
 
 		function onSuccess(json) {
-			savedJson = $.extend(true, {}, json) // deep copy
+			setSavedJson(json)
 
 			if (callback)
 				callback(json);
@@ -471,8 +478,8 @@ var SignalPath = (function () {
 
 		function doLoad(json) {
 			loadJSON(json);
-
 			setName(json.name)
+			setSavedJson(json)
 
 			if (json.state.toLowerCase() === 'running')
 				runningJson = json
@@ -481,8 +488,6 @@ var SignalPath = (function () {
 
 			if (callback)
 				callback(json);
-
-			savedJson = $.extend(true, {}, toJSON(), json) // deep copy
 
 			// Trigger loaded on pub and parentElement
 			$(pub).add(parentElement).trigger('loaded', [savedJson]);
@@ -541,6 +546,9 @@ var SignalPath = (function () {
 				}
 
 				runningJson = response
+
+				if (!response.adhoc)
+					savedJson = runningJson
 
 				if (callback)
 					callback(response)
@@ -630,12 +638,19 @@ var SignalPath = (function () {
 		return runningJson!=null && runningJson.state!==undefined && runningJson.state.toLowerCase() === 'running'
 	}
 	pub.isRunning = isRunning;
-	
+
+	function setSavedJson(data) {
+		savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
+	}
+
 	function stop(callback) {
 		$(pub).trigger('stopping')
 
 		if (isRunning()) {
-			var onStopped = function() {
+			var onStopped = function(data) {
+				if (data)
+					setSavedJson(data)
+
 				runningJson = null
 				$(pub).trigger('stopped');
 			}
@@ -645,7 +660,7 @@ var SignalPath = (function () {
 				url: options.apiUrl + '/canvases/' + runningJson.id + '/stop',
 				dataType: 'json',
 				success: function(data) {
-					onStopped()
+					onStopped(data)
 
 					// data may be undefined if the canvas was deleted on stop
 					if (callback)
@@ -654,6 +669,7 @@ var SignalPath = (function () {
 				error: function(jqXHR,textStatus,errorThrown) {
 					// Handle the case where the canvas is dead and can't be reached by the stop request
 					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_STOP_FAILED') {
+						savedJson.state = 'STOPPED'
 						onStopped()
 					}
 

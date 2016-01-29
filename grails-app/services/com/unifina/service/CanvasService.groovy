@@ -15,6 +15,7 @@ import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import grails.transaction.NotTransactional
+import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 
@@ -93,8 +94,8 @@ class CanvasService {
 		}
 	}
 
-	@NotTransactional
-	public void stop(Canvas canvas, SecUser user) {
+	@Transactional(noRollbackFor=[ApiException])
+	public void stop(Canvas canvas, SecUser user) throws ApiException {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}

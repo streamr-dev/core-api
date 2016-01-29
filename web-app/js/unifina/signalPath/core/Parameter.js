@@ -120,7 +120,9 @@ SignalPath.ParamRenderers = {
 			},
 			getValue: function(module,data,input) {
 				var hidden = $(input).find("input.streamId");
-				return hidden.val();
+				if (hidden.val()==="")
+					return null
+				else return parseInt(hidden.val())
 			},
 			getValueName: function(module,data,input) {
 				var text = $(input).find("span.streamName a").text();
