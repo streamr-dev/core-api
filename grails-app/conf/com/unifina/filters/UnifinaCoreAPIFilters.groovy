@@ -14,7 +14,7 @@ import com.unifina.security.StreamrApi
 
 
 /**
- * API methods should be use the @ApiMethod annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
+ * API methods should be use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
  * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated SecUser can be referenced
  * by request.apiUser.
  */

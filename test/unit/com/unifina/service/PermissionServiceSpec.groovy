@@ -118,6 +118,18 @@ class PermissionServiceSpec extends Specification {
 		!service.canRead(me, null)
 	}
 
+	void "getPermissionsTo returns all permissions for the given resource"() {
+		setup:
+		def perm = service.grant(me, dashOwned, stranger, "read")
+		expect:
+		service.getPermissionsTo(dashOwned).size() == 4
+		service.getPermissionsTo(dashOwned)[0] == perm
+		service.getPermissionsTo(dashAllowed).size() == 4
+		service.getPermissionsTo(dashAllowed)[0] == dashReadPermission
+		service.getPermissionsTo(dashRestricted).size() == 3
+		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
+	}
+
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
 		service.getAllReadable(me, Dashboard) == [dashOwned, dashAllowed]

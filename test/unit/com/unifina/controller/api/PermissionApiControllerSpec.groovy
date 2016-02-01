@@ -1,20 +1,124 @@
 package com.unifina.controller.api
 
+import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.service.PermissionService
+import com.unifina.service.UserService
+import com.unifina.filters.UnifinaCoreAPIFilters
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import grails.test.mixin.web.FiltersUnitTestMixin
 import spock.lang.Specification
 
-/**
- * See the API for {@link grails.test.mixin.web.ControllerUnitTestMixin} for usage instructions
- */
 @TestFor(PermissionApiController)
+@Mixin(FiltersUnitTestMixin)
+@Mock([Permission, Stream, SecUser, Canvas, UnifinaCoreAPIFilters, UserService])
 class PermissionApiControllerSpec extends Specification {
+	def permissionService
 
-    def setup() {
+	// Canvas and Stream chosen because one has string id and one has long id
+	Canvas canvasOwned, canvasShared, canvasRestricted
+	Stream streamOwned, streamShared, streamRestricted
+
+	SecUser me, other
+	Permission canvasPermission, streamPermission
+
+	def setup() {
+		controller.permissionService = permissionService = Mock(PermissionService)
+
+		me = new SecUser(id: 1, username: "me", apiKey: "myApiKey").save(validate: false)
+		other = new SecUser(id: 2, username: "other", apiKey: "otherApiKey").save(validate: false)
+
+		canvasOwned = new Canvas(user: me).save(validate: false)
+		canvasShared = new Canvas(user: other).save(validate: false)
+		canvasRestricted = new Canvas(user: other).save(validate: false)
+		streamOwned = new Stream(id: 1, user: me).save(validate: false)
+		streamShared = new Stream(id: 2, user: other).save(validate: false)
+		streamRestricted = new Stream(id: 3, user: other).save(validate: false)
+
+		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, longId: 0, stringId: canvasShared.id, operation: "share").save(validate: false)
+		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: "share").save(validate: false)
+
+		new Permission(id: 1, user: me, clazz: Canvas.name, longId: 0, stringId: canvasRestricted.id, operation: "read").save(validate: false)
+		new Permission(id: 2, user: me, clazz: Stream.name, longId: streamRestricted.id, operation: "read").save(validate: false)
     }
 
-    def cleanup() {
+	void "validate setup"() {
+		expect:
+		Canvas.count() == 3
+		Stream.count() == 3
+		Permission.count() == 4
+		SecUser.count() == 2
+	}
+
+    void "index returns list of permissions to shared resource"() {
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/${canvasShared.id}"
+		params.id = canvasShared.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasShared.id
+		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+
+		when:
+		withFilters(action: "index") { controller.index() }
+		then:
+		response.status == 200
+		response.json.size() == 4
+		response.json[0].id == canvasPermission.id
+		response.json[0].user == "me"
+		response.json[0].operation == "share"
+		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
+		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions
+		1 * permissionService.canShare(me, _) >> true
+		0 * permissionService._
     }
 
-    void "test something"() {
-    }
+	void "show returns one specific permission row to shared resource"() {
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions/${canvasPermission.id}"
+		params.id = canvasPermission.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasShared.id
+		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+
+		when:
+		withFilters(action: "show") { controller.show("${canvasPermission.id}") }
+		then:
+		response.status == 200
+		response.json.id == 1
+		response.json.user == "me"
+		response.json.operation == "share"
+		// matching with _ instead of canvasOwned because it's not "the same" after saving and get(id):ing
+		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions
+		1 * permissionService.canShare(me, _) >> true
+		0 * permissionService._
+	}
+
+	void "index won't show list of permissions without 'share' permission (string id)"() {
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/allowed"
+		params.id = canvasRestricted.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasRestricted.id
+
+		when:
+		withFilters(action: "index") { controller.index() }
+		then:
+		response.status == 403
+	}
+
+	void "index won't show list of permissions without 'share' permission (long id)"() {
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/allowed"
+		params.id = streamRestricted.id
+		params.resourceClass = Canvas
+		params.resourceId = streamRestricted.id
+
+		when:
+		withFilters(action: "index") { controller.index() }
+		then:
+		response.status == 403
+	}
 }

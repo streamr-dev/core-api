@@ -29,6 +29,30 @@ class PermissionService {
 	//   to ensure a meaningful combination (e.g. "write" without "read" makes no sense)
 	final alsoRevoke = ["read": ["write", "share"]]
 
+	/**
+	 * Execute a closure body using a specific resource
+	 * @param action Closure that takes three arguments: resourceClassName, resourceId, boolean hasStringId
+	 */
+	private useResource(resource, Closure action) {
+		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
+		if (!grailsApplication.isDomainClass(resource.getClass())) {
+			throw new IllegalArgumentException("$resource is not a Grails domain object")
+		}
+
+		def idProp = resource.hasProperty("id")
+		if (idProp == null) { throw new IllegalArgumentException("$resource doesn't have an 'id' field!") }
+		boolean hasStringId = idProp.type == String
+		if (!hasStringId && idProp.type != Long) {
+			throw new IllegalArgumentException("$resource doesn't have an 'id' field of type either Long or String!")
+		}
+
+		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
+		//   hence, class.name of a proxy object won't match the class.name in database
+		def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
+
+		action(clazz, resource.id, hasStringId)
+	}
+
 	/** ownership (if applicable) is stored in each Resource as "user" attribute */
 	private boolean isOwner(SecUser user, resource) {
 		return resource?.hasProperty("user") &&
@@ -42,39 +66,47 @@ class PermissionService {
 	 * @param user if null, query all users for this resource
      * @return List of Permissions that have been granted by the resource owner
      */
-	public List<Permission> getNonOwnerPermissions(SecUser user, resource) {
-		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
-		if (!grailsApplication.isDomainClass(resource.getClass())) {
-			throw new IllegalArgumentException("$resource is not a Grails domain object")
-		}
-
-		def idProp = resource.hasProperty("id")
-		if (idProp == null) { throw new IllegalArgumentException("$resource doesn't have an 'id' field!") }
-		def hasStringId = idProp.type == String
-		if (!hasStringId && idProp.type != Long) {
-			throw new IllegalArgumentException("$resource doesn't have an 'id' field of type either Long or String!")
-		}
-
-		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
-		//   hence, class.name of a proxy object won't match the class.name in database
-		def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource).name
-		return Permission.withCriteria {
-			if (user != null) {
-				eq("user", user)
-			}
-			eq("clazz", clazz)
-			if (hasStringId) {
-				eq("stringId", resource.id)
-			} else {
-				eq("longId", resource.id)
+	private List<Permission> getNonOwnerPermissions(SecUser user, resource) {
+		useResource(resource) { clazz, id, idIsString ->
+			Permission.withCriteria {
+				if (user != null) {
+					eq("user", user)
+				}
+				eq("clazz", clazz)
+				if (idIsString) {
+					eq("stringId", id)
+				} else {
+					eq("longId", id)
+				}
 			}
 		}
 	}
 
+	/**
+     * @return List of operations (e.g. "read") that are permitted for given user to given resource
+     */
 	public List<String> getPermittedOperations(SecUser user, resource) {
 		if (!user?.id) { throw new IllegalArgumentException("Missing user") }
 		if (isOwner(user, resource)) { return ownerPermissions }
 		return getNonOwnerPermissions(user, resource)*.operation;
+	}
+
+	/**
+	 * @return List of all Permissions granted to a specific resource
+     */
+	public List<Permission> getPermissionsTo(resource) {
+		useResource(resource) { clazz, id, idIsString ->
+			List<Permission> perms = getNonOwnerPermissions(null, resource).toList()
+			// Generated non-saved "dummy permissions"
+			if (resource.user) {
+				ownerPermissions.each {
+					perms.add(idIsString ?
+						new Permission(id: null, user: resource.user, clazz: clazz, operation: it, longId: 0, stringId: resource.id) :
+						new Permission(id: null, user: resource.user, clazz: clazz, operation: it, longId: resource.id))
+				}
+			}
+			perms
+		}
 	}
 
 	/**

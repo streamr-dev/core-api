@@ -21,4 +21,16 @@ class Permission {
 		stringId(nullable: true)
 		longId(nullable: true)
 	}
+
+	/**
+	 * Resource is not indicated because API caller will have it in the URL
+	 * @return map to be shown to the API callers
+     */
+	public Map toMap() {
+		[
+			id: id,
+			user: user.username,
+			operation: operation
+		]
+	}
 }
