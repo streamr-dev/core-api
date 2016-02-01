@@ -2,20 +2,21 @@ package com.unifina.security;
 
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.PermissionService;
+import com.unifina.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
-	private final PermissionService permissionService;
+	private final UserService userService;
 	private boolean lastAuthenticationMalformed = false;
 
-	public TokenAuthenticator(PermissionService permissionService) {
-		this.permissionService = permissionService;
+	public TokenAuthenticator(UserService userService) {
+		this.userService = userService;
 	}
 
 	public SecUser authenticate(HttpServletRequest request) {
 		String apiKey = parseAuthorizationHeader(request.getHeader("Authorization"));
-		return permissionService.getUserByApiKey(apiKey);
+		return userService.getUserByApiKey(apiKey);
 	}
 
 	public boolean lastAuthenticationMalformed() {

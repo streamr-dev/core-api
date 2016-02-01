@@ -1,28 +1,19 @@
 package com.unifina.service
 
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.UiChannel
-import com.unifina.utils.IdGenerator
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.userdetails.GormUserDetailsService;
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.springframework.security.authentication.AuthenticationTrustResolverImpl
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
-import org.springframework.security.core.userdetails.cache.NullUserCache
-import org.springframework.validation.FieldError
 import spock.lang.Specification
 
-import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.security.SecUserSecRole
+import com.unifina.domain.security.Permission
+
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
-
-import com.unifina.domain.security.Permission
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.UiChannel
 import com.unifina.domain.dashboard.Dashboard
+
+import com.unifina.utils.IdGenerator
+import grails.test.mixin.*
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.security.AccessControlException
 
@@ -31,15 +22,15 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, SecRole, SecUserSecRole, Module, ModulePackage, ModulePackageUser, Permission, Dashboard, Canvas, UiChannel])
+@Mock([SecUser, Module, ModulePackage, Permission, Dashboard, Canvas, UiChannel])
 class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
 
 	ModulePackage modPackAllowed, modPackRestricted, modPackOwned
 	Module modAllowed, modRestricted, modOwned
-	ModulePackageUser allowedPermission
-	Permission allowedPermission2
+
+	Permission modPackReadPermission
 
 	Dashboard dashAllowed, dashRestricted, dashOwned
 	Permission dashReadPermission
@@ -48,21 +39,7 @@ class PermissionServiceSpec extends Specification {
 	Permission uicReadPermission
 
     def setup() {
-		
-		defineBeans {
-			userDetailsService(GormUserDetailsService)
-			authenticationTrustResolver(AuthenticationTrustResolverImpl)
-			passwordEncoder(PlaintextPasswordEncoder)
-			userCache(NullUserCache)
-			springSecurityService(SpringSecurityService)
-		}
-		
-		// Do some wiring that should be done automatically but for some reason is not (in unit tests)
-		grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
-		grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
-		grailsApplication.mainContext.getBean("springSecurityService").authenticationTrustResolver = grailsApplication.mainContext.getBean("authenticationTrustResolver")
-		grailsApplication.mainContext.getBean("userDetailsService").grailsApplication = grailsApplication
-		
+
 		// Users
 		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
 		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret").save(validate:false)
@@ -78,8 +55,6 @@ class PermissionServiceSpec extends Specification {
 		modRestricted = new Module(name:"modRestricted", modulePackage:modPackRestricted).save(validate:false)
 		modOwned = new Module(name:"modOwned", modulePackage:modPackOwned).save(validate:false)
 
-		// TODO: Test Permission mechanism both with a resource with longId and with stringId
-
 		// Dashboards
 		dashAllowed = new Dashboard(name:"allowed", user:anotherUser).save(validate:false)
 		dashRestricted = new Dashboard(name:"restricted", user:anotherUser).save(validate:false)
@@ -94,50 +69,24 @@ class PermissionServiceSpec extends Specification {
 		uicAllowed.save(validate: false)
 		uicRestricted.save(validate: false)
 
-		// Set up the permission to the allowed resources
-		allowedPermission = new ModulePackageUser(user:me, modulePackage:modPackAllowed).save()
-		allowedPermission2 = service.grant(anotherUser, modPackAllowed, me)
+		// Set up the Permissions to the allowed resources
+		modPackReadPermission = service.grant(anotherUser, modPackAllowed, me)
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
 		uicReadPermission = service.systemGrant(me, uicAllowed)
-		
-		// Configure SpringSecurity fields
-		def userLookup = [:]
-		def authority = [:]
-		userLookup.userDomainClassName = SecUser.class.getName()
-		userLookup.usernamePropertyName = 'username'
-		userLookup.enabledPropertyName = 'enabled'
-		userLookup.passwordPropertyName = 'password'
-		userLookup.authoritiesPropertyName = 'authorities'
-		userLookup.accountExpiredPropertyName = 'accountExpired'
-		userLookup.accountLockedPropertyName = 'accountLocked'
-		userLookup.passwordExpiredPropertyName = 'passwordExpired'
-		userLookup.authorityJoinClassName = 'SecUserSecRole'
-		authority.className = 'SecRole'
-		authority.nameField = 'authority'
-		
-		SpringSecurityUtils.securityConfig = [userLookup:userLookup, authority:authority]
-		SpringSecurityUtils.setApplication(grailsApplication)
-    }
-
-    def cleanup() {
     }
 
 	void "test setup"() {
 		expect:
-		SecUser.count()==3
-		ModulePackage.count()==3
-		Module.count()==3
-		ModulePackageUser.count()==1
+		SecUser.count() == 3
+		ModulePackage.count() == 3
+		Module.count() == 3
+		Dashboard.count() == 3
+		UiChannel.count() == 2
 		Module.findByModulePackage(modPackAllowed)==modAllowed
 		ModulePackage.findAllByUser(anotherUser).size()==2
 		ModulePackage.findAllByUser(me).size()==1
-		ModulePackageUser.findByUserAndModulePackage(me, modPackAllowed)==allowedPermission
 
 		Permission.count()==3
-		
-		SpringSecurityUtils.doWithAuth("me") {
-			grailsApplication.mainContext.getBean("springSecurityService").currentUser == me
-		}
 	}
 
 	void "access granted to permitted Dashboard"() {
@@ -325,92 +274,10 @@ class PermissionServiceSpec extends Specification {
 	// (soon to be) deprecated canAccess methods
 	// once these are dumped, also SpringSecurityUtils dependency is gone from tester; no need to defineBeans
 
-	void "access denied when no user logged in"() {
-		expect:
-		!service.canAccess(modPackOwned)
-		!service.canAccess(modOwned)
-	}
-
-	void "access granted to owned module and package"() {
-		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(modPackOwned)
-		}
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(modOwned)
-		}
-	}
-
-	void "access granted to permitted module and package"() {
-		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(modPackAllowed)
-		}
-		SpringSecurityUtils.doWithAuth("me") {
-			service.canAccess(modAllowed)
-		}
-	}
-
-	void "access denied to restricted module and package"() {
-		expect:
-		SpringSecurityUtils.doWithAuth("me") {
-			!service.canAccess(modPackRestricted)
-		}
-		SpringSecurityUtils.doWithAuth("me") {
-			!service.canAccess(modRestricted)
-		}
-	}
-
 	void "granting access to restricted object based supplied user"() {
 		expect:
 		service.canAccess(modPackOwned, me)
 		!service.canAccess(modPackRestricted, me)
 		!service.canAccess(modPackOwned, anotherUser)
 	}
-
-	//----------------------------------
-	// Completely unrelated set of methods from UnifinaSecurityService
-
-	void "looking up a user based on correct api key"() {
-		when:
-		def user = service.getUserByApiKey("apiKey")
-
-		then:
-		user.username == me.username
-	}
-	
-	void "looking up a user with incorrect api key"() {
-		when:
-		def user = service.getUserByApiKey("wrong api key")
-		
-		then:
-		!user
-	}
-
-	void "censoring errors with checkErrors() works properly"() {
-		List checkedErrors
-		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]
-
-		when: "given list of fieldErrors"
-		List<FieldError> errorList = new ArrayList<>()
-		errorList.add(new FieldError(
-				this.getClass().name, 'password', 'rejectedPassword', false, null, ['null', 'null', 'rejectedPassword'].toArray(), null
-		))
-		errorList.add(new FieldError(
-				this.getClass().name, 'username', 'rejectedUsername', false, null, ['null', 'null', 'rejectedUsername'].toArray(), null
-		))
-		checkedErrors = service.checkErrors(errorList)
-
-		then: "the rejected password is hidden but the rejected username is not"
-		checkedErrors.get(0).getField() == "username"
-		checkedErrors.get(0).getRejectedValue() == "rejectedUsername"
-		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedUsername']
-
-		checkedErrors.get(1).getField() == "password"
-		checkedErrors.get(1).getRejectedValue() == "***"
-		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
-
-
-	}
-
 }

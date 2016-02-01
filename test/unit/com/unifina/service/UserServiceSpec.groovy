@@ -9,9 +9,11 @@ import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.Module
 import com.unifina.user.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
+import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 import javax.swing.Spring
@@ -134,4 +136,46 @@ class UserServiceSpec extends Specification {
         then:
         thrown RuntimeException
     }
+
+	void "looking up a user based on correct api key"() {
+		when:
+		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
+		def user = service.getUserByApiKey("apiKey")
+
+		then:
+		user.username == "me"
+	}
+
+	void "looking up a user with incorrect api key"() {
+		when:
+		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
+		def user = service.getUserByApiKey("wrong api key")
+
+		then:
+		!user
+	}
+
+	void "censoring errors with checkErrors() works properly"() {
+		List checkedErrors
+		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]
+
+		when: "given list of fieldErrors"
+		List<FieldError> errorList = new ArrayList<>()
+		errorList.add(new FieldError(
+				this.getClass().name, 'password', 'rejectedPassword', false, null, ['null', 'null', 'rejectedPassword'].toArray(), null
+		))
+		errorList.add(new FieldError(
+				this.getClass().name, 'username', 'rejectedUsername', false, null, ['null', 'null', 'rejectedUsername'].toArray(), null
+		))
+		checkedErrors = service.checkErrors(errorList)
+
+		then: "the rejected password is hidden but the rejected username is not"
+		checkedErrors.get(0).getField() == "username"
+		checkedErrors.get(0).getRejectedValue() == "rejectedUsername"
+		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedUsername']
+
+		checkedErrors.get(1).getField() == "password"
+		checkedErrors.get(1).getRejectedValue() == "***"
+		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
+	}
 }

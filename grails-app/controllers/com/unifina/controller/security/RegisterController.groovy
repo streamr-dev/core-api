@@ -17,10 +17,9 @@ class RegisterController {
     static defaultAction = 'index'
 
     def mailService
-    def permissionService
+    def userService
     def springSecurityService
     def signupCodeService
-    def userService
 
     def saltSource
 
@@ -58,7 +57,7 @@ class RegisterController {
         cmd.username = invite.username
 
         if (cmd.hasErrors()) {
-            log.warn("Registration command has errors: "+permissionService.checkErrors(cmd.errors.getAllErrors()))
+            log.warn("Registration command has errors: "+userService.checkErrors(cmd.errors.getAllErrors()))
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
@@ -271,7 +270,7 @@ class RegisterCommand {
     String tosConfirmed
     Integer pwdStrength
 	
-    def permissionService
+    def userService
 
     static constraints = {
         importFrom SecUser
@@ -287,10 +286,10 @@ class RegisterCommand {
         name blank: false
 				
         password validator: {String password, RegisterCommand command ->
-            return command.permissionService.passwordValidator(password, command)
+            return command.userService.passwordValidator(password, command)
         }
         password2 validator: {value, RegisterCommand command ->
-            return command.permissionService.password2Validator(value, command)
+            return command.userService.password2Validator(value, command)
         }
 
     }
@@ -302,14 +301,14 @@ class ResetPasswordCommand {
     String password2
     Integer pwdStrength
 
-    def permissionService
+    def userService
 	
     static constraints = {
         password validator: {String password, ResetPasswordCommand command ->
-            return command.permissionService.passwordValidator(password, command)
+            return command.userService.passwordValidator(password, command)
         }
         password2 validator: {value, ResetPasswordCommand command ->
-            return command.permissionService.password2Validator(value, command)
+            return command.userService.password2Validator(value, command)
         }
     }
 }

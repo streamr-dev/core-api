@@ -5,7 +5,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 import com.unifina.domain.security.SecUser
-import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 
 @TestFor(ProfileController)
 @Mock([SecUser])
@@ -45,7 +45,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar123!", password: 'barbar123!', password2: 'barbar123!', pwdStrength: 3)
 			cmd.springSecurityService = springSecurityService
-			cmd.permissionService = new PermissionService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "password must be changed"
@@ -62,7 +62,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted with invalid password"
 			def cmd = new ChangePasswordCommand(currentpassword: "invalid", password: 'barbar123!', password2: 'barbar123!')
 			cmd.springSecurityService = springSecurityService
-			cmd.permissionService = new PermissionService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
@@ -78,7 +78,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted with invalid new password"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar", password: 'asd', password2: 'asd', pwdStrength: 0)
 			cmd.springSecurityService = springSecurityService
-			cmd.permissionService = new PermissionService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
@@ -94,7 +94,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted with invalid new password"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: 'asd', password2: 'asd', pwdStrength: 0)
 			cmd.springSecurityService = springSecurityService
-			cmd.permissionService = new PermissionService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"

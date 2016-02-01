@@ -9,6 +9,7 @@ import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
 import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -17,7 +18,7 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, PermissionService, SpringSecurityService, StreamService])
+@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService])
 class StreamApiControllerSpec extends Specification {
 
 	SecUser user

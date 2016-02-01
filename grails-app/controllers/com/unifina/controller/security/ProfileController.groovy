@@ -8,7 +8,7 @@ import com.unifina.domain.security.SecUser
 class ProfileController {
 	
 	def springSecurityService
-	def permissionService
+	def userService
 	
 	static defaultAction = "edit"
 	
@@ -25,7 +25,7 @@ class ProfileController {
 		
 		if (!user.save()) {
 			flash.error = "Profile not updated!"
-			log.warn("Update failed due to validation errors: "+permissionService.checkErrors(user.errors.getAllErrors()))
+			log.warn("Update failed due to validation errors: "+userService.checkErrors(user.errors.getAllErrors()))
 			return render(view: 'edit', model: [user: user])
 		}
 		else {
@@ -63,7 +63,7 @@ class ProfileController {
 class ChangePasswordCommand {
 	
 	def springSecurityService
-	def permissionService
+	def userService
 	
 	String currentpassword
 	String password
@@ -77,10 +77,10 @@ class ChangePasswordCommand {
 			return encoder.isPasswordValid(encodedPassword, pwd, null /*salt*/)
 		}
 		password validator: {String password, ChangePasswordCommand command ->
-			return command.permissionService.passwordValidator(password, command)
+			return command.userService.passwordValidator(password, command)
 		}
 		password2 validator: {value, ChangePasswordCommand command ->
-			return command.permissionService.password2Validator(value, command)
+			return command.userService.password2Validator(value, command)
 		}
 	}
 }

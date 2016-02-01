@@ -21,7 +21,7 @@ import com.unifina.service.UserService
 
 @TestFor(RegisterController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
-		Feed, ModulePackage, PermissionService, Permission])
+		Feed, ModulePackage, PermissionService, Permission, UserService])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
@@ -40,7 +40,7 @@ class RegisterControllerSpec extends Specification {
 				reauthenticated = username
 			}
 	]
-	
+
 	void setup() {
 		mailSent = false
 
@@ -49,15 +49,15 @@ class RegisterControllerSpec extends Specification {
 				mailSent = true
 			}
 		]
-		
+
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
-		controller.permissionService = new PermissionService()
-		controller.permissionService.grailsApplication = grailsApplication
+		def permissionService = new PermissionService()
+		permissionService.grailsApplication = grailsApplication
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication
-		controller.userService.permissionService = controller.permissionService
+		controller.userService.permissionService = permissionService
 	}
 
 	void "index should not be available"() {

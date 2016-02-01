@@ -7,6 +7,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CanvasService
 import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -18,7 +19,7 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, PermissionService, SpringSecurityService])
+@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService])
 class CanvasApiControllerSpec extends Specification {
 
 	PermissionService permissionService

@@ -21,7 +21,7 @@ import com.unifina.security.StreamrApi
 
 class UnifinaCoreAPIFilters {
 	
-	def permissionService
+	def userService
 	def springSecurityService
 
 	GrailsApplication grailsApplication
@@ -57,7 +57,7 @@ class UnifinaCoreAPIFilters {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
-				TokenAuthenticator authenticator = new TokenAuthenticator(permissionService)
+				TokenAuthenticator authenticator = new TokenAuthenticator(userService)
 				SecUser user = authenticator.authenticate(request)
 
 				if (authenticator.lastAuthenticationMalformed()) {
