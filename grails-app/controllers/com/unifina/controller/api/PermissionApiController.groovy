@@ -1,14 +1,11 @@
 package com.unifina.controller.api
 
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import grails.rest.RestfulController
-import grails.util.GrailsNameUtils
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class PermissionApiController {
@@ -16,29 +13,35 @@ class PermissionApiController {
 	SpringSecurityService springSecurityService
 	PermissionService permissionService
 
-	def resource = "modulepackage"
-	def id = 1
+	/**
+	 * Execute a Controller action using a domain class with access control ("resource")
+	 * Checks Permissions for current user first, and blocks the action if access hasn't been granted
+	 * @param action Closure that takes up to one argument: the specified resource
+     */
+	private useResource(Class resourceClass, resourceId, Closure action) {
+		def user = request.apiUser
 
-	private withResource(String resourceType, resourceId, Closure action) {
-		def user = springSecurityService.currentUser
-
-		Class resourceClass = grailsApplication.domainClasses*.clazz.find { it.simpleName.toLowerCase() == resourceType }
-		if (!resourceClass) { throw new IllegalArgumentException("$resourceClass is not a domain class!") }
+		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 		def res = resourceClass.get(resourceId)
-		if (!res) { throw new IllegalArgumentException("$resourceType (id $resourceId) not found!") }
+		if (!res) { throw new IllegalArgumentException("${resourceClass.simpleName} (id $resourceId) not found!") }
 
 		if (!permissionService.canShare(user, res)) {
-			render(status: 403, text: "Not authorized to query the Permissions for $resourceType id $resourceId!")
+			render(status: 403, text: "Not authorized to query the Permissions for ${resourceClass.simpleName} $resourceId")
 		} else {
 			action(res)
 		}
 	}
 
-	private withPermission(String resourceType, resourceId, Long permissionId, Closure<Permission> action) {
-		withResource(resourceType, resourceId) { res ->
+	/**
+	 * Execute a Controller action using a Permission object
+	 * Checks Permissions to the resource for current user first, and blocks the action if access hasn't been granted
+	 * @param action Closure that takes up to two arguments: Permission object, and the resource that Permission applies to
+     */
+	private usePermission(Class resourceClass, resourceId, Long permissionId, Closure action) {
+		useResource(resourceClass, resourceId) { res ->
 			def p = permissionService.getNonOwnerPermissions(null, res).find { it.id == permissionId }
 			if (!p) {
-				render(status: 404, text: "$resource id $id had no permission with id $permissionId!")
+				render status: 404, text: [error: "${resourceClass.simpleName} id $resourceId had no permission with id $permissionId!"] as JSON
 			} else {
 				action(p, res)
 			}
@@ -47,7 +50,7 @@ class PermissionApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def index() {
-		withResource(resource, id) { res ->
+		useResource(params.resourceClass, params.resourceId) { res ->
 			def perms = permissionService.getNonOwnerPermissions(null, res).collect {[
 				id: it.id,
 				user: it.user.username,
@@ -62,44 +65,47 @@ class PermissionApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def show(String permissionId) {
-		log.debug("Show $id: ${params.resource} ${params.id}")
+		log.debug("Show permission $permissionId of ${params.resourceClass.simpleName} ${params.resourceId}")
 		permissionId = params.id		// TODO: this comes from URL
-		withPermission(resource, id, permissionId as Long) { p ->
-			render([id: p.id, user: p.user.username, operation: p.operation] as JSON)
-		}
-	}
 
-	@StreamrApi(requiresAuthentication = false)
-	def delete(String permissionId) {
-		log.debug("Delete $id: ${params.resource} ${params.id}")
-		permissionId = params.id		// TODO: this comes from URL
-		withPermission(resource, id, permissionId as Long) { p, res ->
-			def revoker = springSecurityService.currentUser
-			permissionService.revoke(revoker, res, p.user, p.operation)
-			render([id: p.id, user: p.user.username, operation: p.operation] as JSON)
+		usePermission(params.resourceClass, params.resourceId, permissionId as Long) { p, res ->
+			render status: 200, text: [id: p.id, user: p.user.username, operation: p.operation] as JSON
 		}
 	}
 
 	@StreamrApi(requiresAuthentication = false)
 	def save() {
-		log.debug("Save: ${params.resource} ${params.id}")
-
-		String username = params.id		// TODO: this comes from POST body
-		String op = "read"				// TODO: this comes from POST body
+		log.debug("Grant new permission to ${params.resourceClass.simpleName} ${params.resourceId}")
+		String username = request.JSON.user
+		String op = request.JSON.operation
 
 		def user = SecUser.findByUsername(username)
 		if (!user) {
-			render status: 400, text: [text: "User '$username' not found!"] as JSON
+			render status: 400, text: [error: "User '$username' not found!"] as JSON
 		} else if (!permissionService.allOperations.contains(op)) {
-			render status: 400, text: [text: "Faulty operation '$op'. Try with 'read', 'write' or 'share' instead."] as JSON
+			render status: 400, text: [error: "Faulty operation '$op'. Try with 'read', 'write' or 'share' instead."] as JSON
 		} else {
-			withResource(resource, id) { res ->
-				def grantor = springSecurityService.currentUser
+			useResource(params.resourceClass, params.resourceId) { res ->
+				def grantor = request.apiUser
 				def newP = permissionService.grant(grantor, res, user, op)
-				header "Location", "/api/v1/$resource/$id/permissions/${newP.id}"
+				header "Location", "${request.forwardURI}/${newP.id}"
 				render status: 201, text: [text: "Successfully granted", user: username, operation: op] as JSON
 			}
 		}
 	}
+
+	@StreamrApi(requiresAuthentication = false)
+	def delete() {
+		log.debug("Delete permission ${params.id} of ${params.resourceClass.simpleName} ${params.resourceId}")
+		usePermission(params.resourceClass, params.resourceId, params.id as Long) { p, res ->
+			def revoker = request.apiUser
+			permissionService.revoke(revoker, res, p.user, p.operation)
+			// https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7 says DELETE may return "an entity describing the status", that is:
+			return index()
+			// it's also possible to send no body
+			//render status: 204
+		}
+	}
+
 
 }
