@@ -22,7 +22,9 @@ SignalPath.ParamRenderers = {
 				}
 			},
 			getValue: function(module,data,input) {
-				return $(input).val();
+				if (data.type === "Double" || data.type === "Integer" || data.type === "Number")
+					return parseFloat($(input).val())
+				else return $(input).val();
 			},
 			getValueName: function(module,data,input) {
 				return $(input).val();

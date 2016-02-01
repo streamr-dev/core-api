@@ -33,6 +33,14 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		prot.table.initTable(headers)
 	}
 
+	function sendInitRequest() {
+		if (SignalPath.isRunning()) {
+			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
+				prot.table.receiveResponse(response.initRequest)
+			})
+		}
+	}
+
 	pub.receiveResponse = function(d) {
 		prot.table.receiveResponse(d)
 	}
@@ -46,18 +54,18 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	var superClose = pub.close;
 	pub.close = function() {
 		$(SignalPath).off("started", startFunction)
+		$(SignalPath).off("loaded", sendInitRequest)
 		superClose()
 	}
 
-	function startFunction (e, runData){
-		if (!runData || !runData.adhoc) {
-			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
-				prot.table.receiveResponse(response.initRequest)
-			})
+	function startFunction (e, canvas){
+		if (!canvas || !canvas.adhoc) {
+			sendInitRequest()
 		}
 	}
 
 	$(SignalPath).on("started", startFunction)
+	$(SignalPath).on("loaded", sendInitRequest)
 	
 	return pub;
 }

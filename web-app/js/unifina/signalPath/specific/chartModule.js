@@ -114,7 +114,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 	}
 
-	var startFunction = function(e, runData) {
+	var startFunction = function(e, canvas) {
 		// Reset all series indices
 		pub.getInputs().forEach(function(input) {
 			input.seriesIndex = null
@@ -125,10 +125,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		for (var i=0; i<connectedInputs.length; i++) {
 			connectedInputs[i].seriesIndex = i
 		}
-		if (!runData || !runData.adhoc) {
-			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
-				prot.chart.handleMessage(response.initRequest)
-			})
+		if (!canvas || !canvas.adhoc) {
+			sendInitRequest()
 		}
 	}
 
@@ -160,10 +158,22 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 	}
 
+	function sendInitRequest() {
+		if (SignalPath.isRunning()) {
+			SignalPath.sendRequest(prot.hash, {type: 'initRequest'}, function (response, err) {
+				if (err)
+					console.error("Runtime request failed: %o", err)
+				else
+					prot.chart.handleMessage(response.initRequest)
+			})
+		}
+	}
+
 	var superClose = pub.close;
 	pub.close = function() {
 		$(SignalPath).off("started", startFunction)
 		$(SignalPath).off("stopped", stopFunction)
+		$(SignalPath).off("loaded", sendInitRequest)
 		superClose()
 	}
 	
@@ -188,8 +198,9 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	/**
 	 * On SignalPath stopped, check that all series are shown properly in relation to chart yaxis range
 	 */
-	
 	$(SignalPath).on("stopped", stopFunction)
+
+	$(SignalPath).on("loaded", sendInitRequest)
 	
 	return pub;
 }
