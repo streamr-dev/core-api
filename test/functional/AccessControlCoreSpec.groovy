@@ -97,7 +97,7 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 	def "user shouldn't see 'Launch live' -button in the launch-dropdown"(){
 		when: "Dropdown is opened"
 			at CanvasPage
-			runDropdownButton.click()
+			runRealtimeDropdownButton.click()
 		then:
 			$("#runLiveModalButton").size() == 0
 	}
