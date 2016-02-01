@@ -17,12 +17,13 @@ class KafkaServiceSpec extends IntegrationSpec {
 
 		when:
 		kafkaService.createTopics([topic])
+		sleep(1000)
 		then:
 		kafkaService.topicExists(topic)
 
 		when:
 		kafkaService.deleteTopics([topic])
-		sleep(2000)
+		sleep(4000)
 		then:
 		!kafkaService.topicExists(topic)
 	}
