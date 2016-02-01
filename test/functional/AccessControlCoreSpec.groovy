@@ -92,14 +92,4 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li").size()==2
 			$("#archiveLoadBrowser").parents(".remote-tabs-content").find("ul.nav-tabs li", text:"Live").size()==0
 	}
-	
-	
-	def "user shouldn't see 'Launch live' -button in the launch-dropdown"(){
-		when: "Dropdown is opened"
-			at CanvasPage
-			runRealtimeDropdownButton.click()
-		then:
-			$("#runLiveModalButton").size() == 0
-	}
-	
 }
