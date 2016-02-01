@@ -9,8 +9,6 @@ import org.apache.log4j.Logger
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
 import org.hibernate.proxy.HibernateProxyHelper
 import org.springframework.validation.FieldError
 
@@ -207,9 +205,9 @@ class PermissionService {
 			def idProp = clazz.properties["declaredFields"].find { it.name == "id" }
 			if (idProp == null) { throw new IllegalArgumentException("$clazz doesn't have an 'id' field!") }
 			if (idProp.type == Long) {
-				return new Permission(user: target, clazz: clazz.name, longId: resource.id, operation: operation).save(flush: true, failOnError: true)
+				return new Permission(user: target, clazz: clazz.name, longId: resource.id, stringId: null, operation: operation).save(flush: true, failOnError: true)
 			} else if (idProp.type == String) {
-				return new Permission(user: target, clazz: clazz.name, stringId: resource.id, operation: operation).save(flush: true, failOnError: true)
+				return new Permission(user: target, clazz: clazz.name, longId: 0, stringId: resource.id, operation: operation).save(flush: true, failOnError: true)
 			} else {
 				throw new IllegalArgumentException("$clazz doesn't have an 'id' field of type either Long or String!")
 			}
