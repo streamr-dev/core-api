@@ -251,7 +251,7 @@ $(document).unload(function () {
 
 </head>
 
-<body class="canvas-editor-page main-menu-fixed">
+<body class="canvas-editor-page main-menu-fixed ${embedded ? 'embedded' : ''}">
 	<div id="main-menu" role="navigation">
 		<div id="main-menu-inner">
 			<div id="toolbar-buttons" class="menu-content" style="overflow: visible;">
@@ -374,32 +374,10 @@ $(document).unload(function () {
 				<span id="canvas-name-editor"></span>
 			</li>
 		</ui:breadcrumb>
-		<div id="canvas" class="scrollable"></div>
+		<div id="canvas" class="scrollable embeddable"></div>
 	</div>
 
 	<div id="main-menu-bg"></div>
-	
-	<div id="runLiveModal" class="modal fade">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        <h4 class="modal-title">Launch Live Options</h4>
-	      </div>
-	      <div class="modal-body">
-				<div class="form-group">
-					<label>Name</label>
-					
-					<input type="text" name="name" id="runLiveName" class="form-control">
-				</div>
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="runLiveButton" class="btn btn-primary" data-dismiss="modal">Launch</button>
-	      </div>
-	    </div><!-- /.modal-content -->
-	  </div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
 
 	<div id="csvModal" class="modal fade">
 	  <div class="modal-dialog">

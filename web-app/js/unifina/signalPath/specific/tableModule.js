@@ -35,8 +35,11 @@ SignalPath.TableModule = function(data,canvas,prot) {
 
 	function sendInitRequest() {
 		if (SignalPath.isRunning()) {
-			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
-				prot.table.receiveResponse(response.initRequest)
+			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response, err) {
+				if (err)
+					console.error("Failed initRequest for TableModule: %o", err)
+				else
+					prot.table.receiveResponse(response.initRequest)
 			})
 		}
 	}

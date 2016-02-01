@@ -34,7 +34,7 @@ class CanvasApiController {
 
 	// TODO: /canvases/{id}/uiChannels (webcomponent?)
 
-	@StreamrApi
+	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			Map result = canvasService.reconstruct(canvas)
