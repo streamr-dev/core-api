@@ -21,10 +21,10 @@ class DashboardSpec extends LoginTester1Spec {
 
 		stopCanvasIfRunning()
 		ensureRealtimeTabDisplayed()
-		startCanvas()
+		startCanvas(true)
 
 		$("#navSettingsLink").click()
-		$("#navSettingsLink").parent(".dropdown-menu").displayed
+		$("#navLogoutLink").displayed
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}
@@ -89,11 +89,11 @@ class DashboardSpec extends LoginTester1Spec {
 		when: "clicked to edit the title"
 			findDashboardItem("Label").find(".titlebar-clickable").click()
 		then: "title changes to input"
-			waitFor { findTitleInput("Label").displayed }
+			waitFor { findTitleInput("Label (Stream.temperature)").displayed }
 		
 		// Edit the title of the module
 		when: "dashboarditem title changed"
-			findTitleInput("Label").firstElement().clear()
+			findTitleInput("Label (Stream.temperature)").firstElement().clear()
 			findTitleInput("") << "Foo"
 			// Focus lost
 			nameInput.click()
@@ -121,7 +121,7 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		when: "clicked the new dashboard to open"
 			$(".table .td", text:dashboardName + "2").click()
-			then: "the dashboard should open in non-edit-mode"
+		then: "the dashboard should open in non-edit-mode"
 			waitFor { at DashboardShowPage }
 			waitFor { js.exec("return \$('#main-menu').width()") == 0 }
 			waitFor { js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true }

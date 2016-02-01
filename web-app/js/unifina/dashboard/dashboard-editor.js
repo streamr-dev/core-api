@@ -54,7 +54,11 @@ var UiChannelView = Backbone.View.extend({
 
 var RunningSignalPath = Backbone.Model.extend({
 	initialize: function (){
-		var uiChannels = _.pluck(this.modules, "uiChannel")
+		var uiChannels = _.pluck(this.attributes.modules, "uiChannel")
+		uiChannels = _.filter(uiChannels, function(uiChannel) {
+			return uiChannel != null
+		})
+		this.set("uiChannels", uiChannels)
 		this.uiChannelCollection = new UiChannelList(uiChannels)
 	},
 	getCheckedCount: function () {
@@ -169,7 +173,7 @@ var DashboardItemView = Backbone.View.extend({
 		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
 		this.largeClass = "large-size col-xs-12 col-centered"
 
-		var webcomponent = this.model.get("uiChannel").module.webcomponent
+		var webcomponent = this.model.get("uiChannel").webcomponent
 		this.$el.html(this.template(this.model.toJSON()))
 		if(webcomponent == "streamr-label") {
 			if(!this.model.get("size"))
@@ -179,8 +183,8 @@ var DashboardItemView = Backbone.View.extend({
 			if(!this.model.get("size"))
 				this.model.set("size", "medium")
 		}
-		if(this.model.get("uiChannel").module.webcomponent !== undefined) {
-			var templateName = "#" + this.model.get("uiChannel").module.webcomponent + "-template"
+		if(this.model.get("uiChannel").webcomponent !== undefined) {
+			var templateName = "#" + this.model.get("uiChannel").webcomponent + "-template"
 			var template = _.template($(templateName).html())
 			this.$el.find(".widget-content").append(template(this.model.toJSON()))
 		} else {
