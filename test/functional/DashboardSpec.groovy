@@ -18,8 +18,9 @@ class DashboardSpec extends LoginTester1Spec {
 		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
 		waitFor { at CanvasPage  }
+		// Wait for the canvas to load
+		waitFor { findModuleOnCanvas("Chart") }
 
-		stopCanvasIfRunning()
 		ensureRealtimeTabDisplayed()
 		startCanvas(true)
 
