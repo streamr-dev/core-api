@@ -46,22 +46,15 @@ class SerializeCanvasSpec extends IntegrationSpec {
 	Stream stream
 
 	def setup() {
-		// A bit dirty, but we must do this because otherwise rsp.save() will be called in another thread
-		// which causes exception related to transactions.
-		signalPathService.metaClass.saveState = { SignalPath sp ->
-			Canvas liveCanvas = sp.canvas
-			liveCanvas.serialized = serializationService.serialize(sp)
-			liveCanvas.serializationTime = new Date()
-		}
+		hackServiceForTestFriendliness(signalPathService)
 
 		// Update feed 7 to use fake message source in place of real one
 		Feed feed = Feed.get(7L)
 		feed.messageSourceClass = FakeMessageSource.canonicalName
-		feed.save(flush: true, failOnError: true)
+		feed.save(failOnError: true)
 
 		// Wire up classes
 		kafkaService = new FakeKafkaService()
-		signalPathService.servletContext = [:]
 		signalPathService.kafkaService = kafkaService
 		canvasService.signalPathService = signalPathService
 
@@ -103,7 +96,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			// On every 25th message stop and start Canvas
 			if (i != 0 && i % 25 == 0) {
 				sleep(300 + serializationService.serializationIntervalInMillis())
-				canvasService.stop(canvas)
+				canvasService.stop(canvas, user)
 				canvas.state = Canvas.State.STOPPED
 				canvasService.start(canvas, false)
 				globals = kafkaService.globals = globals(canvasService, canvas)
@@ -118,7 +111,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		}
 
 		// Stop canvas
-		canvasService.stop(canvas)
+		canvasService.stop(canvas, user)
 
 		then: "output values are as expected if no restarts had happened"
 		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], [Add: [300.0]]]
