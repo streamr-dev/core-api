@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.RunningSignalPath
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.utils.IdGenerator
 import grails.plugin.springsecurity.SpringSecurityService
@@ -88,8 +87,8 @@ class PermissionServiceSpec extends Specification {
 
 		// Ui channels (have stringId, have no "user")
 		def canvas = new Canvas(user: anotherUser).save(validate: false)
-		uicAllowed = new UiChannel(runningSignalPath: 1, name:"allowed")
-		uicRestricted = new UiChannel(runningSignalPath: 1, name:"restricted")
+		uicAllowed = new UiChannel(id: "allowed_ui_channel", canvas: 1, name:"allowed")
+		uicRestricted = new UiChannel(id: "restricted_ui_channel", canvas: 1, name:"restricted")
 		uicAllowed.id = IdGenerator.get()
 		uicRestricted.id = IdGenerator.get()
 		uicAllowed.save(validate: false)
