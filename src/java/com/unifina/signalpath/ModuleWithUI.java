@@ -61,7 +61,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		Map<String, Object> config = super.getConfiguration();
 		Map uiChannel = getUiChannelMap();
 		
-		if (getWebcomponentName()!=null && globals.isRealtime())
+		if (getWebcomponentName() != null && globals.isRealtime())
 			uiChannel.put("webcomponent", getWebcomponentName());
 		
 		config.put("uiChannel", uiChannel);

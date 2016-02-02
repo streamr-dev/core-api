@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ApiException
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
