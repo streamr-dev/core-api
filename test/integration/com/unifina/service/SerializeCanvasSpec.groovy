@@ -11,12 +11,10 @@ import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.signalpath.SignalPath
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeMessageSource
 import grails.converters.JSON
-import grails.test.mixin.integration.Integration
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
 import kafka.javaapi.consumer.SimpleConsumer
@@ -26,6 +24,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.nio.charset.Charset
 
+import static com.unifina.TestHelper.waitFor
 import static com.unifina.service.CanvasTestHelper.*
 
 class SerializeCanvasSpec extends IntegrationSpec {
@@ -89,7 +88,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			sleep(25)
 
 			// Synchronize with thread
-			waitFor { modules(canvasService, canvas)[3].inputs[0].value == i }
+			waitFor(true) { modules(canvasService, canvas)[3].inputs[0].value == i }
 
 			// Log states of modules' outputs
 			log.info(modules(canvasService, canvas)*.outputs*.toString().join(" "))

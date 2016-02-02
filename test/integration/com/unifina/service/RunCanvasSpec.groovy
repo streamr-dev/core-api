@@ -7,11 +7,10 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.FeedFactory
 import com.unifina.utils.IdGenerator
-import grails.test.mixin.integration.Integration
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
-import org.springframework.test.annotation.Rollback
 
+import static com.unifina.TestHelper.*
 import static com.unifina.service.CanvasTestHelper.*
 
 /**
@@ -83,7 +82,7 @@ class RunCanvasSpec extends IntegrationSpec {
 			kafkaService.sendMessage(stream, stream.uuid, [numero: it, areWeDoneYet: false])
 
 			// Synchronization
-			waitFor {
+			waitFor(true) {
 				modules(canvasService, canvas)[0].outputs[0].value == it
 			}
 		}
@@ -93,9 +92,9 @@ class RunCanvasSpec extends IntegrationSpec {
 
 		// Synchronization
 		def actual = null
-		waitFor {
+		waitFor(true) {
 			actual = modules(canvasService, canvas)*.outputs*.toString()
-			return modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0
+			return (modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0)
 		}
 
 		then:
