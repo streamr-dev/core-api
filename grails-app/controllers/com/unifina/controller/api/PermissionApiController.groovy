@@ -70,7 +70,7 @@ class PermissionApiController {
 				def grantor = request.apiUser
 				def newP = permissionService.grant(grantor, res, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
-				render status: 201, text: [text: "Successfully granted", id: newP.id, user: username, operation: op] as JSON
+				render status: 201, text: newP.toMap() + [text: "Successfully granted"] as JSON
 			}
 		}
 	}
