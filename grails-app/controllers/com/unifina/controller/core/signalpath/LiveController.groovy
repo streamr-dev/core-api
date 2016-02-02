@@ -86,12 +86,14 @@ class LiveController {
 				id: rsp.id,
 				name: rsp.name,
 				state: rsp.state,
-				uiChannels: rsp.uiChannels.collect {uiChannel->
-					[id: uiChannel.id, name: uiChannel.name, module: (uiChannel.module ? [id:uiChannel.module.id] : null)]
+				uiChannels: rsp.uiChannels.findAll { uiChannel ->
+					uiChannel.module != null && uiChannel.module.webcomponent != null
+				}.collect { uiChannel ->
+					uiChannel.toMap()
 				}
 			]
 		}
-		render runningSignalPathMaps as JSON
+		render (runningSignalPathMaps as JSON)
 	}
 
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")

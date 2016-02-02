@@ -663,7 +663,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	/**
-	 * Override to handle steps before serialization
+	 * Override to handle steps before serialization.
+	 * Don't forget to call super.beforeSerialization()!
 	 */
 	public void beforeSerialization() {
 		domainObject = HibernateHelper.deproxy(domainObject, Module.class);
@@ -671,6 +672,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	/**
 	 * Override to handle steps after serialization
+	 */
+	public void afterSerialization() {}
+
+	/**
+	 * Override to handle steps after deserialization
 	 */
 	public void afterDeserialization() {
 	}
