@@ -63,8 +63,8 @@ class UnifinaCoreAPIFilters {
 					render (
 						status: 400,
 						text: [
-							success: false,
-							error: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
+							code: "MALFORMED_TOKEN",
+							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
 						] as JSON
 					)
 					return false
@@ -75,7 +75,13 @@ class UnifinaCoreAPIFilters {
 				}
 
 				if (!user && annotation.requiresAuthentication()) {
-					render (status:401, text: [success:false, error: "authentication error"] as JSON)
+					render (
+						status: 401,
+						text: [
+							code: "NOT_AUTHENTICATED",
+							message: "Not authenticated via token or cookie"
+						] as JSON
+					)
 					return false
 				} else {
 					request.apiUser = user
