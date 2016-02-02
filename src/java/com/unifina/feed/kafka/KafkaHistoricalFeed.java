@@ -54,7 +54,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
 			InputStream inputStream, IEventRecipient recipient) {
 		try {
-			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
+			Map streamConfig = getStream(recipient).getStreamConfigAsMap();
 			return new KafkaHistoricalIterator(inputStream,streamConfig.get("topic").toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);

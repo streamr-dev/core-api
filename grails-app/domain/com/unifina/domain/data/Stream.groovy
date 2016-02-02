@@ -1,6 +1,7 @@
 package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
+import grails.converters.JSON
 
 class Stream implements Comparable {
 	Long id
@@ -60,5 +61,11 @@ class Stream implements Comparable {
 	public boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
-	
+
+	public Map<String, Object> getStreamConfigAsMap() {
+		if (streamConfig!=null)
+			return ((Map)JSON.parse(streamConfig));
+		else return [:]
+	}
+
 }
