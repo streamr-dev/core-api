@@ -19,6 +19,7 @@ class UserController {
 
 	def userService
 	def userCache
+	def springSecurityService
 
 	static defaultAction = 'userSearch'
 
@@ -131,18 +132,18 @@ class UserController {
 	}
 
 	def update() {
-		String passwordFieldName = SpringSecurityUtils.securityConfig.userLookup.passwordPropertyName
 		def user = findById()
 		if (!user) return
 		if (!versionCheck('user.label', 'User', user, [user: user])) {
 			return
 		}
 
-		def oldPassword = user."$passwordFieldName"
+		def oldPassword = user.password
 		user.properties = params
+
+		// If the password is left unchanged, params.password contains the old (hashed) password
 		if (params.password && !params.password.equals(oldPassword)) {
-			String salt = saltSource instanceof NullSaltSource ? null : params.username
-			user."$passwordFieldName" = springSecurityUiService.encodePassword(params.password, salt)
+			user.password = springSecurityService.encodePassword(params.password)
 		}
 
 		if (!user.save(flush: true)) {
