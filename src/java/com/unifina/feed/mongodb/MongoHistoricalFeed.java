@@ -1,11 +1,5 @@
 package com.unifina.feed.mongodb;
 
-import com.mongodb.AuthenticationMechanism;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoDatabase;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
@@ -13,12 +7,13 @@ import com.unifina.feed.AbstractHistoricalFeed;
 import com.unifina.feed.FeedEventIterator;
 import com.unifina.feed.StreamEventRecipient;
 import com.unifina.utils.Globals;
-import com.unifina.utils.MapTraversal;
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.bson.Document;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Example streamConfig:
@@ -26,9 +21,13 @@ import java.util.*;
  * 	{
  * 		"mongodb": {
  * 			"host": "dev.streamr",
+ * 			"port": 27017, // optional
+ * 			"username: "", // optional
+ * 			"password: "", // optional
  * 			"database": "test",
  * 			"collection": "MongoHistoricalIteratorSpec",
- * 			"timestampKey": "time"
+ * 			"timestampKey": "time",
+ *	 		"query": "{ \"ue_id\": ObjectId(\"5649955225b568505b60bc31\") }" // optional - must be a string, as this is not valid JSON!
  * 		}
  * 	}
  */
