@@ -1,6 +1,7 @@
 
 package com.unifina.controller.security
 
+import com.unifina.signalpath.messaging.MockMailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -43,14 +44,7 @@ class RegisterControllerSpec extends Specification {
 	]
 	
 	void setup() {
-		mailSent = false
-
-
-		controller.mailService = [
-			sendMail: {
-				mailSent = true
-			}
-		]
+		controller.mailService = new MockMailService()
 		
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
@@ -88,7 +82,7 @@ class RegisterControllerSpec extends Specification {
 			model.signupOk
 			view == '/register/signup'
 		then: "signup email should be sent"
-			mailSent
+			controller.mailService.mailSent
 			
 	}
 
@@ -98,7 +92,7 @@ class RegisterControllerSpec extends Specification {
 			controller.sendInvite()
 		then: "should error"
 			flash.message.contains('not found')
-			mailSent == false
+			!controller.mailService.mailSent
 			response.redirectedUrl == '/register/list'
 	}
 
@@ -108,8 +102,8 @@ class RegisterControllerSpec extends Specification {
 			params.code = inv.code
 			controller.sendInvite()
 		then: "should send mail"
-			inv.sent == true
-			mailSent == true
+			inv.sent
+			controller.mailService.mailSent
 			response.redirectedUrl == '/register/list'
 	}
 
@@ -294,9 +288,38 @@ class RegisterControllerSpec extends Specification {
 			FeedUser.count() == grailsApplication.config.streamr.user.defaultFeeds.size()
 			response.redirectedUrl != null
 		then: "welcome email should be sent"
-			mailSent
+			controller.mailService.mailSent
 		then: "user must be (re)authenticated"
 			reauthenticated == username
+	}
+
+	void "forgotPassword returns emailSent=true but does not send email if the user does not exist"() {
+		EmailCommand cmd = new EmailCommand()
+
+		when: "requested new password"
+		cmd.username = "test@streamr.com"
+		request.method = "POST"
+		def model = controller.forgotPassword(cmd)
+		then:
+		!controller.mailService.mailSent
+		model.emailSent
+	}
+
+	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
+		EmailCommand cmd = new EmailCommand()
+		SecUser me = new SecUser()
+		me.username = "test@streamr.com"
+		me.save(validate: false)
+
+		when: "requested new password"
+		cmd.username = "test@streamr.com"
+		request.method = "POST"
+		def model = controller.forgotPassword(cmd)
+		then:
+		controller.mailService.mailSent
+		// The text of the html contains the link
+		controller.mailService.html.contains("register/resetPassword")
+		model.emailSent
 	}
 
 
