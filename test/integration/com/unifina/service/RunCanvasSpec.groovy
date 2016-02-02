@@ -5,9 +5,12 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.feed.FeedFactory
 import com.unifina.utils.IdGenerator
+import grails.test.mixin.integration.Integration
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
+import org.springframework.test.annotation.Rollback
 
 import static com.unifina.service.CanvasTestHelper.*
 
@@ -64,6 +67,10 @@ class RunCanvasSpec extends IntegrationSpec {
 			]
 		)
 		canvas = canvasService.createNew(command, user)
+	}
+
+	def cleanup() {
+		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
 	}
 
 	def "should be able to start a canvas, send data to it via Kafka, and received expected processed output values"() {

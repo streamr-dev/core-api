@@ -16,6 +16,7 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeMessageSource
 import grails.converters.JSON
+import grails.test.mixin.integration.Integration
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
 import kafka.javaapi.consumer.SimpleConsumer
@@ -46,12 +47,12 @@ class SerializeCanvasSpec extends IntegrationSpec {
 	Stream stream
 
 	def setup() {
-		hackServiceForTestFriendliness(signalPathService)
-
 		// Update feed 7 to use fake message source in place of real one
 		Feed feed = Feed.get(7L)
 		feed.messageSourceClass = FakeMessageSource.canonicalName
 		feed.save(failOnError: true)
+
+		hackServiceForTestFriendliness(signalPathService)
 
 		// Wire up classes
 		kafkaService = new FakeKafkaService()
