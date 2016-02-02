@@ -101,7 +101,15 @@ public class ModuleTestHelper {
 		 * How many milliseconds to further <code>globals.time</code> after each round. (default = 0)
 		 */
 		public Builder timeToFurtherPerIteration(int timeStep) {
-			testHelper.timeStep = timeStep;
+			testHelper.timeSteps = Arrays.asList(timeStep);
+			return this;
+		}
+
+		/**
+		 * How many milliseconds to further <code>globals.time</code> after each round by round.
+		 */
+		public Builder timeToFurtherPerIteration(List<Integer> timeSteps) {
+			testHelper.timeSteps = timeSteps;
 			return this;
 		}
 
@@ -185,7 +193,7 @@ public class ModuleTestHelper {
 	private Map<Integer, Date> ticks;
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
-	private int timeStep = 0;
+	private List<Integer> timeSteps = Arrays.asList(0);
 	private boolean feedNullInputs = false;
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
@@ -194,7 +202,12 @@ public class ModuleTestHelper {
 	private int inputValueCount;
 	private int outputValueCount;
 	private boolean clearStateCalled = false;
-	private boolean serializationMode = false;
+
+	public enum SerializationMode {
+		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+	}
+	private SerializationMode serializationMode = SerializationMode.NONE;
+
 	private Serializer serializer = new SerializerImpl();
 
 	private ModuleTestHelper() {}
@@ -208,10 +221,14 @@ public class ModuleTestHelper {
 			boolean b = runTestCase();      // Test that clearState() works
 
 			clearModuleAndCollectorsAndChannels();
-			serializationMode = true;
-			boolean c = runTestCase();       // Test that serialization works
+			serializationMode = SerializationMode.SERIALIZE;
+			boolean c = runTestCase();       // Test that serialization works and has no side effects
 
-			return a && b && c;
+			clearModuleAndCollectorsAndChannels();
+			serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
+			boolean d = runTestCase();       // Test that serialization + deserialization works
+
+			return a && b && c && d;
 		} catch (TestHelperException ex) {
 			throw ex;
 		} catch (Exception ex) {
@@ -229,25 +246,25 @@ public class ModuleTestHelper {
 
 			// Set input values
 			if (i < inputValueCount) {
-				serializeAndDeserializeModel();
+				serializeAndDeserializeModule();
 				feedInputs(i);
 			} else {
 				module.setSendPending(true); // TODO: hack, isn't concern of user of module!
 			}
 
 			// Activate module
-			serializeAndDeserializeModel();
+			serializeAndDeserializeModule();
 			activateModule(i);
 
 			// Test outputs
-			serializeAndDeserializeModel();
+			serializeAndDeserializeModule();
 			if (shouldValidateOutput(i, skip)) {
 				validateOutput(outputIndex, i);
 				++outputIndex;
 			}
 
 			// Further global time
-			furtherTime();
+			furtherTime(i);
 		}
 
 		// Test ui channel messages
@@ -263,7 +280,7 @@ public class ModuleTestHelper {
 		return clearStateCalled;
 	}
 
-	public boolean isSerializationMode() {
+	public SerializationMode getSerializationMode() {
 		return serializationMode;
 	}
 
@@ -321,7 +338,13 @@ public class ModuleTestHelper {
 		throw new TestHelperException(String.format(msg, outputName, outputIndex, i, value, target), this);
 	}
 
-	private void furtherTime() {
+	private void furtherTime(int i) {
+		if (i >= timeSteps.size()) {
+			i = timeSteps.size() - 1;
+		}
+
+		int timeStep = timeSteps.get(i);
+
 		if (timeStep != 0) {
 			module.globals.time = new Date(module.globals.time.getTime() + timeStep);
 		}
@@ -380,22 +403,24 @@ public class ModuleTestHelper {
 		return ticks != null;
 	}
 
-	private void serializeAndDeserializeModel() throws IOException, ClassNotFoundException {
-		if (serializationMode) {
+	private void serializeAndDeserializeModule() throws IOException, ClassNotFoundException {
+		if (serializationMode != SerializationMode.NONE) {
 			validateThatModuleDoesNotHaveKnownSerializationIssues();
 
-			// Globals is rather tricky to serialize so temporarily pull out
+			// Globals is transient, we need to restore it after deserialization
 			Globals globalsTempHolder = module.globals;
 
 			module.beforeSerialization();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			serializer.serialize(module, out);
-			//serializer.serializeToFile(module, "temp.json");
+			module.afterSerialization();
 
-			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-			module = (AbstractSignalPathModule) serializer.deserialize(in);
-			module.globals = globalsTempHolder;
-			module.afterDeserialization();
+			if (serializationMode == SerializationMode.SERIALIZE_DESERIALIZE) {
+				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+				module = (AbstractSignalPathModule) serializer.deserialize(in);
+				module.globals = globalsTempHolder;
+				module.afterDeserialization();
+			}
 		}
 	}
 

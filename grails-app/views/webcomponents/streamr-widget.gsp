@@ -21,8 +21,11 @@
 				resendAll: undefined
 			},
 			bindEvents: function(container) {
-				container.parentNode.addEventListener("remove", function(){
-					this.$.client.streamrClient.unsubscribe(this.sub)
+				container.parentNode.addEventListener("remove", function() {
+					var _this = this
+					this.$.client.getClient(function(client) {
+						client.unsubscribe(_this.sub)
+					})
 				})
 				container.parentNode.addEventListener("resize", function() {
 					container.dispatchEvent(new Event('resize'))
@@ -31,20 +34,13 @@
 			subscribe: function(messageHandler, resendOptions) {
 				var _this = this
 
-				var trySubscribe = function() {
-					if(_this.$.client.streamrClient) {
-						var client = _this.$.client.streamrClient
-						_this.sub = client.subscribe(
-						    _this.channel, 
-						    messageHandler,
-						    resendOptions
-						)
-					}
-					else {
-						setTimeout(trySubscribe, 200)
-					}
-				}
-				trySubscribe()
+				this.$.client.getClient(function(client) {
+					_this.sub = client.subscribe(
+							_this.channel,
+							messageHandler,
+							resendOptions
+					)
+				})
 			},
 			getResendOptions: function(json) {
 				// Default resend options

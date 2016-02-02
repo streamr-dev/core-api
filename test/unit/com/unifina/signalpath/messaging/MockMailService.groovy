@@ -7,6 +7,7 @@ class MockMailService {
 	def to
 	def subject
 	def body
+	def html
 	
 	public MockMailService() {
 	
@@ -25,6 +26,7 @@ class MockMailService {
 		to = null
 		subject = null
 		body = null
+		html = null
 	}
 
 	public class MailDelegate {
@@ -39,6 +41,9 @@ class MockMailService {
 		}
 		def body(s) {
 			body = s
+		}
+		def html(s) {
+			html = s
 		}
 	}
 }

@@ -8,17 +8,24 @@ dataSource {
 hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = false
-    cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory'
+	cache.region.factory_class = 'org.hibernate.cache.SingletonEhCacheRegionFactory'
 }
 // environment specific settings
 environments {
     development {
-		// use the test db in dev as well
         dataSource {
+			// if grails.dev.database not defined, throw an exception
+			def dbDefaultName = 'core_dev'
+			def dbName = System.getProperty('grails.dev.database') ?: dbDefaultName
+
+			println "Using database: $dbName"
+
+			if (!System.getProperty('grails.dev.database'))
+				throw new RuntimeException("Please run scripts/copy-dev-db.sh YOURNAME to make a personal copy of the dev db, then run grails with this command line argument: -Dgrails.dev.database=${dbDefaultName}_YOURNAME")
+
 			username = "unifina-dev"
 			password = "2PpJA2vJ"
-            dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
-            url = "jdbc:mysql://192.168.10.21:3306/core_dev?useLegacyDatetimeCode=false"
+            url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
         }
     }
     test {
@@ -27,7 +34,7 @@ environments {
 			def dbDefaultName = 'core_test'
 			def dbName = System.getProperty('grails.test.database') ?: dbDefaultName
 			def testPhase = System.getProperty('grails.test.phase')
-			
+
 			println "Using database: $dbName"
 			println "Test phase: $testPhase"
 
@@ -36,7 +43,6 @@ environments {
 			
 			username = "unifina-test"
 			password = "HqTQK9kB"
-            dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
             url = "jdbc:mysql://192.168.10.21:3306/${dbName}?useLegacyDatetimeCode=false"
         }
     }

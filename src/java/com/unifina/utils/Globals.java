@@ -101,8 +101,12 @@ public class Globals {
 		
 		return grailsApplication;
 	}
-	
+
+
 	// TODO: risky to keep these here, should be out of sight of user code
+	/**
+	 * Returns the SecUser for this Globals instance, or null if the user is anonymous/unknown.
+     */
 	public SecUser getUser() {
 		if (System.getSecurityManager()!=null)
 			AccessController.checkPermission(new UserPermission());

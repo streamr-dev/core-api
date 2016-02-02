@@ -12,6 +12,8 @@ class Stream implements Comparable {
 	Feed feed
 	String streamConfig
 	// An id local to the Feed
+
+	@Deprecated
 	String localId
 	String description
 	
@@ -20,7 +22,7 @@ class Stream implements Comparable {
 	
 	static constraints = {
 		name(blank:false)
-		
+		localId(nullable:true)
 		streamConfig(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)

@@ -128,8 +128,9 @@
 		 grails.logging.jul.usebridge = false
 	 }
  }
- 
- 
+
+grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
  
 /**
  * API & CORS config
@@ -182,7 +183,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev.unifina:8889"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
@@ -192,7 +193,7 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.unifina:8888"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
@@ -301,3 +302,4 @@ unifina.email.signup.subject = "Thanks for signing up for Streamr"
 unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
+unifina.email.forgotPassword.subject = "Streamr Password Reset"

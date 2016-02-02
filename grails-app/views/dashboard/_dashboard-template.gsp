@@ -1,3 +1,21 @@
+<script id="sidebar-template" type="text/template">
+    <div class="menu-content">
+        <label>Dashboard Name</label>
+        <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="Dashboard Name" value="{{ name }}" />
+    </div>
+    <ul class="navigation" id="rsp-list">
+        <li class="rsp-title">
+            <label>Live Canvases</label>
+        </li>
+    </ul>
+    <div class="menu-content">
+        <button class='save-button btn btn-block btn-primary' title='Save dashboard'>Save</button>
+        <form method="post" role="form" id="deleteDashboardForm">
+            <g:hiddenField name="id" value="${params.id}" />
+            <button id='deleteButton' class='delete-button btn btn-block btn-default confirm' data-action="${createLink(action:'delete')}" data-confirm="Really delete dashboard {{ name }}?" title='Delete dashboard'>Delete</button>
+        </form>
+    </div>
+</script>
 <script id="rsp-template" type="text/template">
     <a class="rsp-title" title="{{state != 'running' ? state : ''}}">
         <span class="mm-text mmc-dropdown-delay animated fadeIn">{{ name }}</span>
@@ -82,14 +100,4 @@
                 </div>   
                 <button class="delete-btn btn btn-xs btn-outline dark" title="Remove"><i class="fa fa-times"></i></button>
         </div>
-</script>
-
-<script id="button-template" type="text/template">
-    <div class="menu-content">
-        <button class='save-button btn btn-block btn-primary' title='Save dashboard'>Save</button>
-        <form method="post" role="form" id="deleteDashboardForm">
-            <g:hiddenField name="id" value="${params.id}" />
-            <button id='deleteButton' class='delete-button btn btn-block btn-default confirm' data-action="${createLink(action:'delete')}" data-confirm="Really delete dashboard {{ name }}?" title: 'Delete dashboard'>Delete</button>
-        </form>
-    </div>
 </script>
