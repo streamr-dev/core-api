@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.unifina.domain.signalpath.RunningSignalPath;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
@@ -95,16 +96,23 @@ public class RealtimeDataSource extends DataSource {
 			SerializationService serializationService = globals.getBean(SerializationService.class);
 
 			for (final SignalPath signalPath : getSignalPaths()) {
-				Date fiveSecsFromNow = new Date(now.getTime() + (5000 - (now.getTime()%1000)));
+				RunningSignalPath rsp = signalPath.getRunningSignalPath();
 
-				secTimer.scheduleAtFixedRate(new TimerTask() {
-					@Override
-					public void run() {
-						if (signalPath.getRunningSignalPath() != null) {
-							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
-						}
+				if (rsp != null) {
+					if (rsp.getAdhoc()) {
+						log.info("RunningSignalPath " + rsp.getId() + " is adhoc and thus won't be serialized.");
+					} else {
+						Date fiveSecsFromNow = new Date(now.getTime() + (5000 - (now.getTime()%1000)));
+
+						secTimer.scheduleAtFixedRate(new TimerTask() {
+							@Override
+							public void run() {
+								eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+							}
+						}, fiveSecsFromNow, serializationService.serializationIntervalInMillis());
 					}
-				}, fiveSecsFromNow, serializationService.serializationIntervalInMillis());
+				}
+
 			}
 
 
