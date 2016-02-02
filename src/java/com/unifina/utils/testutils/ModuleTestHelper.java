@@ -194,7 +194,12 @@ public class ModuleTestHelper {
 	private int inputValueCount;
 	private int outputValueCount;
 	private boolean clearStateCalled = false;
-	private boolean serializationMode = false;
+
+	public enum SerializationMode {
+		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
+	}
+	private SerializationMode serializationMode = SerializationMode.NONE;
+
 	private Serializer serializer = new SerializerImpl();
 
 	private ModuleTestHelper() {}
@@ -208,10 +213,14 @@ public class ModuleTestHelper {
 			boolean b = runTestCase();      // Test that clearState() works
 
 			clearModuleAndCollectorsAndChannels();
-			serializationMode = true;
-			boolean c = runTestCase();       // Test that serialization works
+			serializationMode = SerializationMode.SERIALIZE;
+			boolean c = runTestCase();       // Test that serialization works and has no side effects
 
-			return a && b && c;
+			clearModuleAndCollectorsAndChannels();
+			serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
+			boolean d = runTestCase();       // Test that serialization + deserialization works
+
+			return a && b && c && d;
 		} catch (TestHelperException ex) {
 			throw ex;
 		} catch (Exception ex) {
@@ -229,18 +238,18 @@ public class ModuleTestHelper {
 
 			// Set input values
 			if (i < inputValueCount) {
-				serializeAndDeserializeModel();
+				serializeAndDeserializeModule();
 				feedInputs(i);
 			} else {
 				module.setSendPending(true); // TODO: hack, isn't concern of user of module!
 			}
 
 			// Activate module
-			serializeAndDeserializeModel();
+			serializeAndDeserializeModule();
 			activateModule(i);
 
 			// Test outputs
-			serializeAndDeserializeModel();
+			serializeAndDeserializeModule();
 			if (shouldValidateOutput(i, skip)) {
 				validateOutput(outputIndex, i);
 				++outputIndex;
@@ -263,7 +272,7 @@ public class ModuleTestHelper {
 		return clearStateCalled;
 	}
 
-	public boolean isSerializationMode() {
+	public SerializationMode getSerializationMode() {
 		return serializationMode;
 	}
 
@@ -380,22 +389,24 @@ public class ModuleTestHelper {
 		return ticks != null;
 	}
 
-	private void serializeAndDeserializeModel() throws IOException, ClassNotFoundException {
-		if (serializationMode) {
+	private void serializeAndDeserializeModule() throws IOException, ClassNotFoundException {
+		if (serializationMode != SerializationMode.NONE) {
 			validateThatModuleDoesNotHaveKnownSerializationIssues();
 
-			// Globals is rather tricky to serialize so temporarily pull out
+			// Globals is transient, we need to restore it after deserialization
 			Globals globalsTempHolder = module.globals;
 
 			module.beforeSerialization();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			serializer.serialize(module, out);
-			//serializer.serializeToFile(module, "temp.json");
+			module.afterSerialization();
 
-			ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-			module = (AbstractSignalPathModule) serializer.deserialize(in);
-			module.globals = globalsTempHolder;
-			module.afterDeserialization();
+			if (serializationMode == SerializationMode.SERIALIZE_DESERIALIZE) {
+				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+				module = (AbstractSignalPathModule) serializer.deserialize(in);
+				module.globals = globalsTempHolder;
+				module.afterDeserialization();
+			}
 		}
 	}
 

@@ -24,16 +24,20 @@ class DateConversionSpec extends Specification {
 		initContext()
     }
 
-	private def initContext(timezone = "UTC") {
+	private void initContext(String timezone="UTC") {
+		initContextWithUser(new SecUser(timezone:timezone, username:"username"))
+	}
+
+	private void initContextWithUser(SecUser user) {
 		module = new DateConversion()
-		globals = new Globals([:], grailsApplication, new SecUser(timezone:timezone, username: "username"))
+		globals = new Globals([:], grailsApplication, user)
 		module.globals = globals
 		module.init()
 		module.connectionsReady()
 	}
 
 	void "dateConversion gives the right answer"() {
-		initContext(TimeZone.getDefault().ID)
+		initContext(TimeZone.getDefault().ID) // to/from system timezone
 		when:
 		module.getInput("format").receive("yyyy-MM-dd HH:mm:ss")
 		Map inputValues = [
@@ -280,6 +284,11 @@ class DateConversionSpec extends Specification {
 		
 		then: "the values are correct"
 		module.getOutput("hours").getValue() == 4
+	}
+
+	void "can be created without user"() {
+		expect:
+			initContextWithUser(null)
 	}
 	
 }

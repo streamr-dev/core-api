@@ -128,7 +128,7 @@
                 <nobr>
                     <div id='loginLinkContainer'>
                         <sec:ifLoggedIn>
-                            Logged in as <sec:username/> (<g:link controller='logout'>Logout</g:link>)
+                            Logged in as <sec:username/> (<g:link elementId='logout-link' controller='logout'>Logout</g:link>)
                         </sec:ifLoggedIn>
                         <sec:ifNotLoggedIn>
                             <a href='#' id='loginLink'>Login</a>
