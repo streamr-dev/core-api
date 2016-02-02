@@ -19,22 +19,22 @@ class LiveController {
 	
 	def beforeInterceptor = [action:{
 			if (!permissionService.canAccess(Canvas.get(params.id))) {
-				if (request.xhr) 
+				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
-				else 
+				else
 					redirect(controller:'login', action:'denied')
-					
+
 				return false
 			}
 			else return true
 		},
 		except:['index','list', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
-	
+
 	@Secured("ROLE_USER")
 	def index() {
 		redirect(action:'list')
 	}
-	
+
 	@Secured("ROLE_USER")
 	def list() {
 		List<Canvas> canvases = Canvas.createCriteria().list() {
@@ -43,17 +43,17 @@ class LiveController {
 			if (params.term) {
 				like("name","%${params.term}%")
 			}
-			
+
 		}
 		[running: canvases, user:springSecurityService.currentUser]
 	}
-	
+
 	// Can be accessed anonymously for embedding the show view in iframes (eg. the landing page)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def show() {
 		// Access checked by beforeInterceptor
 		Canvas canvas = Canvas.get(params.id)
-		
+
 		// Ping the running SignalPath to check that it's alive
 		def alive = canvas.state != Canvas.State.RUNNING || signalPathService.ping(canvas, springSecurityService.currentUser)
 		if (!alive) {
@@ -147,7 +147,7 @@ class LiveController {
 	}
 
 	// TODO: refactor out of here
-	@StreamrApi
+	@StreamrApi(requiresAuthentication = false)
 	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
 	def request() {
 		Canvas canvas

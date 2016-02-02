@@ -1,11 +1,13 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
 import org.hibernate.UnresolvableObjectException
 
@@ -32,7 +34,7 @@ class CanvasApiController {
 
 	// TODO: /canvases/{id}/uiChannels (webcomponent?)
 
-	@StreamrApi
+	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			Map result = canvasService.reconstruct(canvas)
@@ -83,20 +85,26 @@ class CanvasApiController {
 	}
 
 	@StreamrApi
+	@NotTransactional
 	def stop(String id) {
 		getAuthorizedCanvas(id) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				// Updates canvas in another thread, so canvas needs to be refreshed
-				canvasService.stop(canvas)
+				try {
+					canvasService.stop(canvas, request.apiUser)
+				} catch (ApiException e) {
+					render(status: e.statusCode, text: e.toMap() as JSON)
+					return
+				}
 
 				try {
 					// Adhoc canvases are deleted on stop, in which case refresh() will fail with UnresolvableObjectException
 					canvas.refresh()
 					render canvas.toMap() as JSON
 				} catch (UnresolvableObjectException) {
-					render (status: 204)
+					render(status: 204)
 				}
 			}
 		}

@@ -59,11 +59,18 @@ table.sortable th {
 body.embedded {
 	background-color: transparent;
 
-	#main-navbar {
+	#main-navbar,
+	#main-menu,
+	#main-menu-bg {
 		display: none;
 	}
+
+	.mme #main-wrapper, #main-wrapper {
+		padding-left: 0px;
+	}
+
 	#content-wrapper {
-		padding: 0;
+		padding: 0 !important;
 	}
 	#content-wrapper > :not(.embeddable) {
 		display:none;

@@ -16464,11 +16464,17 @@ table.sortable th {
 body.embedded {
   background-color: transparent;
 }
-body.embedded #main-navbar {
+body.embedded #main-navbar,
+body.embedded #main-menu,
+body.embedded #main-menu-bg {
   display: none;
 }
+body.embedded .mme #main-wrapper,
+body.embedded #main-wrapper {
+  padding-left: 0px;
+}
 body.embedded #content-wrapper {
-  padding: 0;
+  padding: 0 !important;
 }
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;

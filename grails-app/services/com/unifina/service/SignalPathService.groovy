@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.unifina.datasource.IStartListener
+import com.unifina.datasource.IStopListener
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.serialization.SerializationException
 import grails.converters.JSON
@@ -129,7 +131,7 @@ class SignalPathService {
 		else return new RealtimeDataSource(globals)
 		
 	}
-	
+
 	/**
 	 * Creates Canvas domain objects into the database with initial state "starting".
 	 * The Canvas can be subsequently started by calling startLocal() or startRemote().
@@ -236,16 +238,21 @@ class SignalPathService {
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 		}
 
-		runner.addStartListener({
-
-			if (!servletContext["signalPathRunners"]) {
-				servletContext["signalPathRunners"] = [:]
+		runner.addStartListener(new IStartListener() {
+			@Override
+			void onStart() {
+				if (!servletContext["signalPathRunners"]) {
+					servletContext["signalPathRunners"] = [:]
+				}
+				servletContext["signalPathRunners"].put(runner.runnerId, runner)
 			}
-			servletContext["signalPathRunners"].put(runner.runnerId, runner)
 		})
 
-		runner.addStopListener({
-			servletContext["signalPathRunners"].remove(runner.runnerId)
+		runner.addStopListener(new IStopListener() {
+			@Override
+			void onStop() {
+				servletContext["signalPathRunners"].remove(runner.runnerId)
+			}
 		})
 
 		runner.signalPaths.each {

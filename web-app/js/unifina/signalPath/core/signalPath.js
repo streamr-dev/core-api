@@ -104,7 +104,8 @@ var SignalPath = (function () {
 			connection.disconnect()
 		}
 	};
-	pub.sendRequest = function(hash,msg,callback) {
+	// hash argument can be undefined if the request is aimed at the canvas/runner
+	pub.sendRequest = function(hash, msg, callback) {
 		if (runningJson) {
 			
 			// Include UI channel if exists
@@ -129,11 +130,11 @@ var SignalPath = (function () {
 				dataType: 'json',
 				contentType: 'application/json; charset=utf-8',
 				success: function(data) {
-					if (!data.success) {
+					if (callback)
+						callback(data.response, (data.success ? undefined : data))
+					else if (!data.success) {
 						handleError(data.error || data.response.error)
 					}
-					else if (callback)
-						callback(data.response)
 				}
 			});
 			return true;
@@ -359,13 +360,22 @@ var SignalPath = (function () {
 	 */
 	function isDirty() {
 		var currentJson = $.extend(true, {}, savedJson, toJSON())
-		return !_.isEqual(savedJson, currentJson)
+		var dirty = !_.isEqual(savedJson, currentJson)
+		if (dirty) {
+			console.log(JSON.stringify(savedJson))
+			console.log(JSON.stringify(currentJson))
+		}
+		return dirty
 	}
 	pub.isDirty = isDirty
 
 	function saveAs(name, callback) {
 		setName(name)
-		save(callback, true)
+		save(function(json) {
+			load(json, function() {
+				setTimeout(callback, 0)
+			})
+		}, true)
 	}
 	pub.saveAs = saveAs
 
@@ -373,7 +383,7 @@ var SignalPath = (function () {
 		$(pub).trigger('saving')
 
 		function onSuccess(json) {
-			savedJson = $.extend(true, {}, json) // deep copy
+			setSavedJson(json)
 
 			if (callback)
 				callback(json);
@@ -387,9 +397,8 @@ var SignalPath = (function () {
 		if (isSaved() && !forceCreateNew) {
 			_update(json, onSuccess)
 		}
-		// Otherwise create new (template)
+		// Otherwise create new
 		else {
-			json.type = 'template'
 			_create(json, onSuccess)
 		}
 	}
@@ -453,6 +462,7 @@ var SignalPath = (function () {
 
 		name = "Untitled canvas"
 		savedJson = {}
+		runningJson = null
 		
 		jsPlumb.reset();		
 		
@@ -468,20 +478,22 @@ var SignalPath = (function () {
 
 		function doLoad(json) {
 			loadJSON(json);
-
 			setName(json.name)
+			setSavedJson(json)
 
 			if (json.state.toLowerCase() === 'running')
 				runningJson = json
+			else
+				runningJson = null
 
 			if (callback)
 				callback(json);
 
 			// Trigger loaded on pub and parentElement
-			$(pub).add(parentElement).trigger('loaded', [json]);
+			$(pub).add(parentElement).trigger('loaded', [savedJson]);
 
-			// It is important that savedJson is written after the loaded event has been fired, because it may affect canvas settings
-			savedJson = $.extend(true, {}, toJSON(), json) // deep copy
+			// It is important that savedJson is rewritten after the loaded event has been fired, because it may affect canvas settings
+			savedJson = $.extend(true, savedJson, toJSON()) // deep copy
 		}
 
 		// Fetch from api by id
@@ -534,6 +546,9 @@ var SignalPath = (function () {
 				}
 
 				runningJson = response
+
+				if (!response.adhoc)
+					savedJson = runningJson
 
 				if (callback)
 					callback(response)
@@ -623,24 +638,47 @@ var SignalPath = (function () {
 		return runningJson!=null && runningJson.state!==undefined && runningJson.state.toLowerCase() === 'running'
 	}
 	pub.isRunning = isRunning;
-	
+
+	function setSavedJson(data) {
+		savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
+	}
+
 	function stop(callback) {
 		$(pub).trigger('stopping')
 
 		if (isRunning()) {
+			var onStopped = function(data) {
+				if (data)
+					setSavedJson(data)
+
+				runningJson = null
+				$(pub).trigger('stopped');
+			}
+
 			$.ajax({
 				type: 'POST',
 				url: options.apiUrl + '/canvases/' + runningJson.id + '/stop',
 				dataType: 'json',
 				success: function(data) {
+					onStopped(data)
+
 					// data may be undefined if the canvas was deleted on stop
-					runningJson = null
-					$(pub).trigger('stopped');
 					if (callback)
-						callback()
+						callback(data)
 				},
 				error: function(jqXHR,textStatus,errorThrown) {
-					handleError(textStatus+"\n"+errorThrown)
+					// Handle the case where the canvas is dead and can't be reached by the stop request
+					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_STOP_FAILED') {
+						savedJson.state = 'STOPPED'
+						onStopped()
+					}
+
+					if (callback) {
+						callback(undefined, jqXHR.responseJSON)
+					}
+					else {
+						handleError(textStatus + "\n" + errorThrown)
+					}
 				}
 			});
 		}

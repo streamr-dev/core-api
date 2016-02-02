@@ -1,5 +1,7 @@
 package com.unifina.signalpath
 
+import com.unifina.datasource.IStartListener
+import com.unifina.datasource.IStopListener
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
@@ -26,9 +28,6 @@ public class SignalPathRunner extends Thread {
 	boolean running = false
 	
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
-
-	private List<Runnable> startListeners = []
-	private List<Runnable> stopListeners = []
 
 	private SignalPathRunner(Globals globals, boolean adhoc) {
 		this.globals = globals
@@ -90,12 +89,12 @@ public class SignalPathRunner extends Thread {
 		return running
 	}
 
-	public void addStartListener(Runnable r) {
-		startListeners << r
+	public void addStartListener(IStartListener listener) {
+		globals.dataSource.addStartListener(listener)
 	}
 
-	public void addStopListener(Runnable r) {
-		stopListeners << r
+	public void addStopListener(IStopListener listener) {
+		globals.dataSource.addStopListener(listener)
 	}
 
 	public synchronized void waitRunning(boolean target=true) {
@@ -106,9 +105,6 @@ public class SignalPathRunner extends Thread {
 	
 	@Override
 	public void run() {
-		startListeners.each {
-			it.run()
-		}
 		Throwable reportException = null
 		setName("SignalPathRunner");
 		
@@ -116,8 +112,13 @@ public class SignalPathRunner extends Thread {
 		try {
 			for (SignalPath it : signalPaths)
 				it.connectionsReady()
-				
-			setRunning(true)
+
+			globals.dataSource.addStartListener(new IStartListener() {
+				@Override
+				void onStart() {
+					setRunning(true)
+				}
+			})
 			
 			if (!signalPaths.isEmpty())
 				signalPathService.runSignalPaths(signalPaths)
@@ -161,9 +162,6 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	public void destroy() {
-		stopListeners.each {
-			it.run()
-		}
 		signalPaths.each {it.destroy()}
 		globals.destroy()
 		

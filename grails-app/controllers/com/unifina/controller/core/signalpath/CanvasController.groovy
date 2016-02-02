@@ -49,6 +49,12 @@ class CanvasController {
 
 		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
 	}
+
+	// Can be accessed anonymously for embedding canvases in iframes (eg. the landing page)
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def embed() {
+		[id:params.id]
+	}
 	
 	def reconstruct() {
 		Map json = [signalPathContext: (params.signalPathContext ? JSON.parse(params.signalPathContext) : [:]), signalPathData: JSON.parse(params.signalPathData)]

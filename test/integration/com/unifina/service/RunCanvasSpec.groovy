@@ -28,14 +28,14 @@ class RunCanvasSpec extends IntegrationSpec {
 	Stream stream
 
 	def setup() {
-		canvasService.signalPathService.servletContext = [:]
+		hackServiceForTestFriendliness(canvasService.signalPathService)
 
 		user = SecUser.load(1L)
 
 		// Create stream
 		String uuid = IdGenerator.get()
 		stream = new Stream(
-			name: "stream-test",
+			name: "run-canvas-spec-stream",
 			feed: Feed.load(7L),
 			user: user,
 			description: "Data stream for ${RunCanvasSpec.name}",
@@ -69,9 +69,7 @@ class RunCanvasSpec extends IntegrationSpec {
 	def "should be able to start a canvas, send data to it via Kafka, and received expected processed output values"() {
 		when:
 		// Start canvas
-		canvasService.start(canvas, false)
-
-		sleep(500)
+		canvasService.start(canvas, true)
 
 		// Produce data
 		(1..100).each {
@@ -100,5 +98,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		actual[2] == "[(out) Multiply.A*B: 0.0]"
 		actual[3] == "[(out) Constant.out: null]"
 
+		cleanup:
+		canvasService.stop(canvas, user)
 	}
 }
