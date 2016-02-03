@@ -55,24 +55,24 @@ describe('dashboard-editor', function() {
 			id: 1,
 			name: "Test",
 			items: [
-				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', module: {id:67, webcomponent: "streamr-chart"}}, size:"medium"}, //chart
-				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', module: {id:145, webcomponent: "streamr-label"}}, size:"small"}  //label
+				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', webcomponent: "streamr-chart"}, size:"medium"}, //chart
+				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', webcomponent: "streamr-label"}, size:"small"}  //label
 			]
 		}
 
 		runningSignalPathsJson = [
-			{id: 1, state: 'running', name: "RSP1", uiChannels: [
-				{name: "uiChannel-1", checked: true, id: "uiChannel-id-1", module: {id: 67, webcomponent: "streamr-chart"}}
+			{id: 1, state: 'running', name: "RSP1", modules: [
+				{uiChannel: {name: "uiChannel-1", checked: true, id: "uiChannel-id-1", webcomponent: "streamr-chart"}}
 				]},
-			{id: 2, state: 'running', name: "RSP2", uiChannels: [
-				{name: "uiChannel-3", checked: false, id: "uiChannel-id-3", module: {id: 145, webcomponent: "streamr-label"}},
-				{name: "uiChannel-4", checked: false, id: "uiChannel-id-4", module: {id: 196, webcomponent: "streamr-heatmap"}}
+			{id: 2, state: 'running', name: "RSP2", modules: [
+				{uiChannel: {name: "uiChannel-3", checked: false, id: "uiChannel-id-3", webcomponent: "streamr-label"}},
+				{uiChannel: {name: "uiChannel-4", checked: false, id: "uiChannel-id-4", webcomponent: "streamr-heatmap"}}
 				]},
-			{id: 3, state: 'stopped', name: "RSP3", uiChannels: [
-				{name: "uiChannel-2", checked: true, id: "uiChannel-id-2", module: {id: 145, webcomponent: "streamr-label"}}
+			{id: 3, state: 'stopped', name: "RSP3", modules: [
+				{uiChannel: {name: "uiChannel-2", checked: true, id: "uiChannel-id-2", webcomponent: "streamr-label"}}
 			]},			
-			{id: 4, state: 'running', name: "RSP4", uiChannels: [
-				{name: "uiChannel-5", checked: false, id: "uiChannel-id-5", module: {id: 67, webcomponent: "streamr-chart"}}
+			{id: 4, state: 'running', name: "RSP4", modules: [
+				{uiChannel: {name: "uiChannel-5", checked: false, id: "uiChannel-id-5", webcomponent: "streamr-chart"}}
 				]}
 		]
 
@@ -104,14 +104,14 @@ describe('dashboard-editor', function() {
 		it('should throw error when trying to create module without webcomponent', function () {
 			assert.throws(
 				function() {
-					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:1}}, size:"medium"})
+					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', webcomponent: null}, size:"medium"})
 				}, Error);
 		})
 
 		it('should render the amount of dashboardItems should be correct when added', function (){
 			assert.equal($(".streamr-widget").length, 2)
 			assert.equal(dashboardView.$el.children().length, 2)
-			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:67, webcomponent:"streamr-chart"}}, size:"medium"})
+			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', webcomponent:"streamr-chart"}, size:"medium"})
 			assert.equal($(".streamr-widget").length, 3)
 			assert.equal(dashboardView.$el.children().length, 3)
 		})
