@@ -11,7 +11,7 @@ class StartCanvasApiSpec extends Specification {
 
 	def canvasId = "jklads9812jlsdf09dfgjoaq"
 
-	def "GET /canvases/id/resume returns error if canvas cannot be loaded"() {
+	def "Resuming canvas returns error if canvas cannot be deserialized"() {
 		setup:
 		authenticatedPost(API_URL + "canvases/$canvasId/stop")
 
