@@ -35,9 +35,9 @@ class PermissionApiControllerSpec extends Specification {
 		canvasOwned = new Canvas(user: me).save(validate: false)
 		canvasShared = new Canvas(user: other).save(validate: false)
 		canvasRestricted = new Canvas(user: other).save(validate: false)
-		streamOwned = new Stream(id: 1, user: me).save(validate: false)
-		streamShared = new Stream(id: 2, user: other).save(validate: false)
-		streamRestricted = new Stream(id: 3, user: other).save(validate: false)
+		streamOwned = new Stream(id: 1, uuid: "own", user: me).save(validate: false)
+		streamShared = new Stream(id: 2, uuid: "shared", user: other).save(validate: false)
+		streamRestricted = new Stream(id: 3, uuid: "restricted", user: other).save(validate: false)
 
 		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, longId: 0, stringId: canvasShared.id, operation: "share").save(validate: false)
 		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: "share").save(validate: false)
@@ -77,12 +77,12 @@ class PermissionApiControllerSpec extends Specification {
 		0 * permissionService._
     }
 
-	void "index returns list of permissions to shared resource (long id)"() {
+	void "index returns list of permissions to shared resource (Stream using uuid)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamShared.id}"
-		params.id = streamShared.id
+		request.requestURI = "/api/v1/streams/${streamShared.uuid}"
+		params.id = streamShared.uuid
 		params.resourceClass = Stream
-		params.resourceId = streamShared.id
+		params.resourceId = streamShared.uuid
 		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
 
 		when:
@@ -120,12 +120,12 @@ class PermissionApiControllerSpec extends Specification {
 		0 * permissionService._
 	}
 
-	void "show returns one specific permission row to shared resource (long id)"() {
+	void "show returns one specific permission row to shared resource (Stream using uuid)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamShared.id}/permissions/${streamPermission.id}"
+		request.requestURI = "/api/v1/streams/${streamShared.uuid}/permissions/${streamPermission.id}"
 		params.id = streamPermission.id
 		params.resourceClass = Stream
-		params.resourceId = streamShared.id
+		params.resourceId = streamShared.uuid
 		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
 
 		when:
@@ -154,12 +154,12 @@ class PermissionApiControllerSpec extends Specification {
 		response.status == 403
 	}
 
-	void "index won't show list of permissions without 'share' permission (long id)"() {
+	void "index won't show list of permissions without 'share' permission (Stream using uuid)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/allowed"
-		params.id = streamRestricted.id
-		params.resourceClass = Canvas
-		params.resourceId = streamRestricted.id
+		request.requestURI = "/api/v1/streams/${streamRestricted.uuid}"
+		params.id = streamRestricted.uuid
+		params.resourceClass = Stream
+		params.resourceId = streamRestricted.uuid
 
 		when:
 		withFilters(action: "index") { controller.index() }
@@ -169,13 +169,12 @@ class PermissionApiControllerSpec extends Specification {
 
 	void "save grants Permissions"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/allowed"
-		params.id = streamOwned.id
+		request.requestURI = "/api/v1/canvases/${canvasOwned.id}"
+		params.id = canvasOwned.id
 		params.resourceClass = Canvas
-		params.resourceId = streamOwned.id
+		params.resourceId = canvasOwned.id
 
 		when:
-		//request.JSON = """{"user":"${other.username}","operation":"read"}"""
 		request.JSON = [user: other.username, operation: "read"] as JSON
 		withFilters(action: "save") { controller.save() }
 		then:
@@ -188,19 +187,19 @@ class PermissionApiControllerSpec extends Specification {
 
 	void "delete revokes permissions"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamShared.id}/permissions/${streamPermission.id}"
-		params.id = streamPermission.id
-		params.resourceClass = Stream
-		params.resourceId = streamShared.id
+		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions/${canvasPermission.id}"
+		params.id = canvasPermission.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasShared.id
 		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
 
 		when:
-		withFilters(action: "delete") { controller.delete("${streamPermission.id}") }
+		withFilters(action: "delete") { controller.delete("${canvasPermission.id}") }
 		then:
 		response.status == 200
 		2 * permissionService.canShare(me, _) >> true
-		2 * permissionService.getPermissionsTo(_) >> [streamPermission, opR, opW, opS]	// owner-permissions
-		1 * permissionService.revoke(me, _, streamPermission.user, streamPermission.operation)
+		2 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions
+		1 * permissionService.revoke(me, _, canvasPermission.user, canvasPermission.operation)
 		0 * permissionService._
 	}
 }

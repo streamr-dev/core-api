@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
@@ -20,7 +21,8 @@ class PermissionApiController {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
-		def res = resourceClass.get(resourceId)
+		// TODO: remove kludge when Stream has String id instead of String uuid
+		def res = (resourceClass == Stream ? Stream.find { uuid == resourceId } : resourceClass.get(resourceId))
 		if (!res) { throw new IllegalArgumentException("${resourceClass.simpleName} (id $resourceId) not found!") }
 
 		if (!permissionService.canShare(request.apiUser, res)) {
