@@ -125,12 +125,12 @@
     var AccessListView = Backbone.View.extend({
         events: {
             "click .new-user-button": "finishUserInput",
-            "keypress .new-user-field": "keyHandler"
+            "keyup .new-user-field": "keyHandler"
         },
         keyHandler: function(e) {
-            if (e.which === KEY_ENTER) {
+            if (e.keyCode === KEY_ENTER) {
                 this.finishUserInput()
-            } else if (e.which === KEY_ESC) {
+            } else if (e.keyCode === KEY_ESC) {
                 if (this.$newUserField.val()) {
                     this.$newUserField.val("")
                 } else {
@@ -225,6 +225,9 @@
                 }
             })
             $(".resource-name-label").text(resourceName || urlToResourceName(resourceUrl))
+
+            // TODO: find out who is stealing the focus, then remove this kludge...
+            setTimeout(function() { $(".new-user-field").focus() }, 500)
 
             listView = new AccessListView({
                 el: ".modal-body",
@@ -346,6 +349,7 @@
     exports.sharePopup.cancelChanges = function() {
         if (!sharingDialog) { throw "Cannot close sharePopup, try opening it first!" }
         listView.remove()
+        sharingDialog.modal("hide")
         sharingDialog = null
     }
 
