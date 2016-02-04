@@ -1,22 +1,23 @@
 package api
 
+import geb.spock.GebReportingSpec
 import grails.plugins.rest.client.ErrorResponse
 import grails.plugins.rest.client.RestBuilder
 import org.springframework.http.HttpStatus
-import spock.lang.Specification
 
-class StartCanvasApiSpec extends Specification {
 
-	static final String API_URL = "http://localhost:8081/unifina-core/api/v1/"
+// Kind of stupid to extend from GebReportingSpec because it opens a unnecessary web browser but it may fix test
+// reporting problems.
+class StartCanvasApiSpec extends GebReportingSpec {
 
 	def canvasId = "jklads9812jlsdf09dfgjoaq"
 
 	def "Resuming canvas returns error if canvas cannot be deserialized"() {
 		setup:
-		authenticatedPost(API_URL + "canvases/$canvasId/stop")
+		authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/stop")
 
 		when:
-		ErrorResponse response = (ErrorResponse) authenticatedPost(API_URL + "canvases/$canvasId/start")
+		ErrorResponse response = (ErrorResponse) authenticatedPost(baseUrl + "/api/v1/canvases/$canvasId/start")
 
 		then:
 		response.statusCode == HttpStatus.INTERNAL_SERVER_ERROR
