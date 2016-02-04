@@ -50,11 +50,10 @@
     })
 
     var accessTemplate = _.template(
-        '<button class="btn btn-danger user-delete-button">Delete</button>' +
-        '<div class="input-group user-access-row">' +
-            '<div class="user-label form-control"><%= user %></div>' +
-            '<div class="input-group-btn">' +
-                '<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+        '<div class="form-inline access-row">' +
+            '<div class="form-group user-label"><%= user %></div>' +
+            '<div class="form-group permission-dropdown btn-group">' +
+                '<button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
                     '<span class="access-description"><%= state %></span> <span class="caret"></span>' +
                 '</button>' +
                 '<ul class="dropdown-menu">' +
@@ -65,6 +64,7 @@
                     '<li><a href="#">give ownership</a></li>' +
                 '</ul>' +
             '</div>' +
+            '<button class="form-group user-delete-button btn btn-default btn-labeled"><span class="btn-label icon fa fa-trash-o"></span> Delete</button>' +
         '</div>'
     )
 
@@ -111,15 +111,15 @@
     var accessList = new AccessList()
 
     var accessListTemplate = _.template(
-        '<div class="input-group">' +
-            '<span class="input-group-addon">Owner</span>' +
-            '<span class="form-control owner-label"><%= owner %></span>' +
+        '<div class="owner-row">' +
+            '<span>Owner: </span>' +
+            '<span class="owner-label"><%= owner %></span>' +
         '</div>' +
         '<div class="access-list"></div>' +
         '<div class="input-group">' +
             '<input type="text" class="new-user-field form-control" placeholder="Enter username" autofocus>' +
             '<span class="input-group-btn">' +
-                '<button class="new-user-button btn btn-success" type="button">Add</button>' +
+                '<button class="new-user-button btn btn-default" type="button">Add</button>' +
             '</span>' +
         '</div>'
     )
@@ -211,18 +211,16 @@
             sharingDialog = bootbox.dialog({
                 title: "Set permissions for <b>" + urlToResourceName(resourceUrl) + "</b>",
                 message: "Loading...",
-                size: "large",
                 backdrop: true,     // The backdrop is displayed, and clicking on it dismisses the dialog
                 //onEscape: true,
                 buttons: {
                     cancel: {
                         label: "Cancel",
-                        className: "btn-danger",
                         callback: sharePopup.cancelChanges
                     },
                     save: {
                         label: "Save",
-                        className: "btn-success",
+                        className: "btn-primary",
                         callback: sharePopup.saveChanges
                     }
                 }
