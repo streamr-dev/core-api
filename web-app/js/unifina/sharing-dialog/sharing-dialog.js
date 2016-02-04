@@ -64,7 +64,7 @@
                     '<li><a href="#">give ownership</a></li>' +
                 '</ul>' +
             '</div>' +
-            '<button class="form-group user-delete-button btn btn-default btn-labeled"><span class="btn-label icon fa fa-trash-o"></span> Delete</button>' +
+            '<button class="form-group user-delete-button btn btn-danger"><span class="icon fa fa-trash-o"></span></button>' +
         '</div>'
     )
 
@@ -116,11 +116,9 @@
             '<span class="owner-label"><%= owner %></span>' +
         '</div>' +
         '<div class="access-list"></div>' +
-        '<div class="input-group">' +
-            '<input type="text" class="new-user-field form-control" placeholder="Enter username" autofocus>' +
-            '<span class="input-group-btn">' +
-                '<button class="new-user-button btn btn-default" type="button">Add</button>' +
-            '</span>' +
+        '<div class="form-inline new-user-row">' +
+            '<input type="text" class="new-user-field form-group" placeholder="Enter username" autofocus>' +
+            '<button class="new-user-button btn btn-default" type="button"><span class="icon fa fa-plus"></span></button>' +
         '</div>'
     )
 
