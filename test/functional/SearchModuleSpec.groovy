@@ -22,9 +22,6 @@ class SearchModuleSpec extends LoginTester1Spec {
 	void "the order of the results should be correct"() {
 		when: "typed the partial name of a module"
 			$("#search") << "if"
-			waitFor {
-				$('.tt-suggestion', text:iContains(name))
-			}
 		then: "the first result begins with the search term"
 			waitFor {
 				$(".tt-suggestion-name", 0).text() == "IfThenElse"
