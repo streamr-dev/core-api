@@ -70,20 +70,9 @@ public class LiveSpec extends LoginTester1Spec {
 			connectEndpoints(findOutput("Stream", "rand"), findInput("Label", "label"))
 
 			setCanvasName(liveName)
-
-			realtimeTabLink.click()
-			runRealtimeButton.click()
-
-		then: "A modal is shown that the canvas must be saved"
-			waitForConfirmation(".save-on-start-confirmation-dialog")
-
-		when: "The modal is accepted"
-			acceptConfirmation(".save-on-start-confirmation-dialog")
-		then: "The button text show show Stop"
-			waitFor { runRealtimeButton.text().contains("Stop") }
-		then: "A notification should appear and disappear"
-			waitFor { $(".ui-pnotify", text: contains("started")).displayed }
-			waitFor { !$(".ui-pnotify").displayed }
+			ensureRealtimeTabDisplayed()
+			startCanvas(true)
+			noNotificationsVisible()
 		then: "Some data should appear"
 			// Wait for data, sometimes takes more than 30sec to come
 			waitFor(30){ $(".modulelabel").text() != "" }
@@ -104,20 +93,11 @@ public class LiveSpec extends LoginTester1Spec {
 			}	
 		
 		when: "Stop button is clicked"
-			runRealtimeButton.click()
-		then: "The confirmation dialog is shown"
-			waitForConfirmation(".stop-confirmation-dialog")
-			
-		when: "Click OK"
-			acceptConfirmation(".stop-confirmation-dialog")
-		then: "The button resets and a notification is shown"
-			waitFor(30) {
-				runRealtimeButton.text().contains("Start")
-				$(".ui-pnotify", text: contains("stopped")).displayed
-			}
-		
-		when: "Starting again"
-			runRealtimeButton.click()
+			stopCanvas()
+		and: "Starting again"
+			ensureRealtimeTabDisplayed()
+			startCanvas()
+
 		then: "Data must change"
 			waitFor(30){ $(".modulelabel").text() != oldLabel }
 		
@@ -137,11 +117,7 @@ public class LiveSpec extends LoginTester1Spec {
 			waitFor { runRealtimeButton.text().contains("Stop") }
 
 		when: "Click to stop"
-			runRealtimeButton.click()
-		then: "The confirmation dialog is shown"
-			waitForConfirmation(".stop-confirmation-dialog")
-		when: "Clicked OK"
-			acceptConfirmation(".stop-confirmation-dialog")
+			stopCanvas()
 		then:
 			true
 		// TODO: test canvas delete functionality once it's implemented
