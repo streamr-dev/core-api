@@ -12,6 +12,7 @@ import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.nustaq.serialization.*;
+import org.nustaq.serialization.coders.Unknown;
 import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
 
 import java.io.*;
@@ -91,6 +92,9 @@ public class SerializerImpl implements Serializer {
 			FSTObjectInput fstInput = conf.getObjectInput(in);
 			Object object = fstInput.readObject();
 			in.close();
+			if (object instanceof Unknown) {
+				throw new ClassNotFoundException("Deserialization failed");
+			}
 			return object;
 		} catch (ClassNotFoundException | IOException | NullPointerException e) {
 			throw new SerializationException("Failed to deserialize", e);

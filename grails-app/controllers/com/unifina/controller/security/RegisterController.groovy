@@ -173,17 +173,11 @@ class RegisterController {
 
         String url = generateLink('resetPassword', [t: registrationCode.token])
 
-        def conf = SpringSecurityUtils.securityConfig
-        def body = conf.ui.forgotPassword.emailBody
-        if (body.contains('$')) {
-            body = evaluate(body, [user: user, url: url])
-        }
-
         mailService.sendMail {
             from grailsApplication.config.unifina.email.sender
             to user.username
-            subject conf.ui.forgotPassword.emailSubject
-            html body.toString()
+			subject grailsApplication.config.unifina.email.forgotPassword.subject
+			html g.render(template:"email_forgot_password", model:[token:registrationCode.token], plugin:'unifina-core')
         }
 
         [emailSent: true]

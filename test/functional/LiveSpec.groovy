@@ -134,6 +134,7 @@ public class LiveSpec extends LoginTester1Spec {
 		then: "The canvas is loaded"
 			waitFor { findModuleOnCanvas("Label") }
 		then: "The button is in running state"
+			sleep(2000) // TODO: ugly, but doesn't run on jenkins machine
 			runRealtimeButton.text().contains("Stop")
 		
 		when: "Click to stop"

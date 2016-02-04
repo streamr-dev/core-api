@@ -11,7 +11,6 @@ import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeedProxy
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.signalpath.SignalPath
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeMessageSource
@@ -25,6 +24,7 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.nio.charset.Charset
 
+import static com.unifina.TestHelper.waitFor
 import static com.unifina.service.CanvasTestHelper.*
 
 class SerializeCanvasSpec extends IntegrationSpec {
@@ -46,12 +46,12 @@ class SerializeCanvasSpec extends IntegrationSpec {
 	Stream stream
 
 	def setup() {
-		hackServiceForTestFriendliness(signalPathService)
-
 		// Update feed 7 to use fake message source in place of real one
 		Feed feed = Feed.get(7L)
 		feed.messageSourceClass = FakeMessageSource.canonicalName
 		feed.save(failOnError: true)
+
+		hackServiceForTestFriendliness(signalPathService)
 
 		// Wire up classes
 		kafkaService = new FakeKafkaService()
@@ -88,7 +88,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			sleep(25)
 
 			// Synchronize with thread
-			waitFor { modules(canvasService, canvas)[3].inputs[0].value == i }
+			waitFor(true) { modules(canvasService, canvas)[3].inputs[0].value == i }
 
 			// Log states of modules' outputs
 			log.info(modules(canvasService, canvas)*.outputs*.toString().join(" "))

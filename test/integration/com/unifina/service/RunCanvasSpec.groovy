@@ -5,10 +5,12 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.feed.FeedFactory
 import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
 
+import static com.unifina.TestHelper.*
 import static com.unifina.service.CanvasTestHelper.*
 
 /**
@@ -66,6 +68,10 @@ class RunCanvasSpec extends IntegrationSpec {
 		canvas = canvasService.createNew(command, user)
 	}
 
+	def cleanup() {
+		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
+	}
+
 	def "should be able to start a canvas, send data to it via Kafka, and received expected processed output values"() {
 		when:
 		// Start canvas
@@ -76,7 +82,7 @@ class RunCanvasSpec extends IntegrationSpec {
 			kafkaService.sendMessage(stream, stream.uuid, [numero: it, areWeDoneYet: false])
 
 			// Synchronization
-			waitFor {
+			waitFor(true) {
 				modules(canvasService, canvas)[0].outputs[0].value == it
 			}
 		}
@@ -86,9 +92,9 @@ class RunCanvasSpec extends IntegrationSpec {
 
 		// Synchronization
 		def actual = null
-		waitFor {
+		waitFor(true) {
 			actual = modules(canvasService, canvas)*.outputs*.toString()
-			return modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0
+			return (modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0)
 		}
 
 		then:

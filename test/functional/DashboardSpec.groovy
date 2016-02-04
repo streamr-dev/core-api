@@ -24,6 +24,7 @@ class DashboardSpec extends LoginTester1Spec {
 		ensureRealtimeTabDisplayed()
 		startCanvas(true)
 
+		noNotificationsVisible()
 		$("#navSettingsLink").click()
 		$("#navLogoutLink").displayed
 		$("#navLogoutLink").click()

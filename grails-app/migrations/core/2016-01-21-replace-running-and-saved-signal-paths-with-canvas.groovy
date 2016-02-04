@@ -204,6 +204,34 @@ databaseChangeLog = {
 	changeSet(author: "eric", id: "1453384829304-15") {
 		addForeignKeyConstraint(baseColumnNames: "canvas_id", baseTableName: "ui_channel", constraintName: "FK2E3D5E583D649786", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "canvas", referencesUniqueColumn: "false")
 	}
+
+	changeSet(author: "eric", id: "14533384829304-16") {
+		grailsChange {
+			change {
+				sql.executeInsert("INSERT INTO canvas (id, version, adhoc, date_created, example, has_exports, json," +
+					"last_updated, name, request_url, runner, serialization_time, serialized, server, shared, state," +
+					"user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					'jklads9812jlsdf09dfgjoaq',
+					3,
+					false,
+					'2015-11-15 18:09:59',
+					false,
+					false,
+					'{"settings": {}, "modules": [], "name": "BrokenSerialization"}',
+					'2016-02-01 15:29:45',
+					'BrokenSerialization',
+					'http://192.168.11.42:8081/unifina-core/api/live/request',
+					's-1454340584152',
+					'2016-02-01 15:37:30',
+					'{\"serialization\": \"is broken\"}',
+					'192.168.11.42',
+					false,
+					'stopped',
+					1
+				)
+			}
+		}
+	}
 }
 
 def generateId() {
