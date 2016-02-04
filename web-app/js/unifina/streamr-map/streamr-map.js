@@ -12,6 +12,13 @@ var MAP
 
         this.untouched = true
 
+        this.markers = {}
+        this.pendingMarkerUpdates = {}
+        this.pendingLineUpdates = []
+        this.allLineUpdates = []
+
+        this.animationFrameRequested = false
+
         // Default options
         this.options = $.extend({}, {
             min: 0,
@@ -24,8 +31,6 @@ var MAP
 
         if (!this.parent.attr("id"))
             this.parent.attr("id", "map-"+Date.now())
-
-        this.markers = {}
 
         this.baseLayer = L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
@@ -45,36 +50,83 @@ var MAP
             _this.untouched = false
         })
 
-        this.extLayers = []
-        //this.extLayers.push(this.createTraceLayer())
+        this.createBigPointLayer()
+
+
+        //for (var i=0;i<1;i++) {
+        //    _this.addMarker({
+        //        id: i.toString(),
+        //        lat: Math.random()*90,
+        //        long: Math.random()*90
+        //    })
+        //}
+        //
+        //setInterval(function() {
+        //    for (var i=0;i<1;i++) {
+        //        var current = _this.markers[i.toString()].getLatLng()
+        //        _this.handleMessage({
+        //            t: "p",
+        //            id: i.toString(),
+        //            lat: current.lat + (Math.random() - 0.5)/1000,
+        //            long: current.lng + (Math.random() - 0.5)/1000,
+        //            color: 'rgb('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+')'
+        //        })
+        //    }
+        //})
+
     }
 
-    //StreamrMap.prototype.createTraceLayer = function(){
-    //    var _this = this
-    //
-    //    var paths = {};
-    //    this.pathsLayer = L.featureGroup().addTo(this.map);
-    //
-    //    this.realtime.on('update', function(e) {
-    //        for(var key in e.enter) {
-    //            var pl = L.polyline([this.getLayer(key).getLatLng()])
-    //            paths[key] = pl
-    //            paths[key].addTo(_this.pathsLayer)
-    //            if(_this.untouched) {
-    //                _this.map.fitBounds(pl.getBounds(), {
-    //                    maxZoom: 13
-    //                })
-    //                _this.untouched = false
-    //            }
-    //        }
-    //        for(var key in e.update) {
-    //            // FIXME this currently stores the pixel-level positions
-    //            paths[key].addLatLng(this.getLayer(key).getLatLng());
-    //        }
-    //    })
-    //
-    //    return this.pathsLayer
-    //}
+    StreamrMap.prototype.createBigPointLayer = function() {
+        var _this = this
+        this.circles = []
+        var BigPointLayer = L.CanvasLayer.extend({
+            //initialize: function() {
+            //    this.cC = []
+            //},
+            renderCircle: function(ctx, point, radius, color) {
+                color = color || 'rgba(255,0,0,1)'
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2.0, true, true);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                _this.circles.push(ctx)
+            },
+
+            render: function(changesOnly) {
+                // TODO: remove this
+                console.log("Render called")
+                var start = Date.now()
+                var bigPointLayer = this
+                var canvas = this.getCanvas();
+                var ctx = canvas.getContext('2d');
+
+                var updates
+                if (changesOnly) {
+                    updates = _this.pendingLineUpdates
+                }
+                else {
+                    updates = _this.allLineUpdates
+                    // clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+
+                updates.forEach(function(update) {
+                    // get center from the map (projected)
+                    var point = bigPointLayer._map.latLngToContainerPoint(update.latlng);
+                    bigPointLayer.renderCircle(ctx, point, 3, update.color)
+                })
+
+                console.log("Render took "+ (Date.now()-start)+"ms, pendingLineUpdates.length: "+_this.pendingLineUpdates.length)
+                _this.pendingLineUpdates = []
+            }
+        })
+
+        this.lineLayer = new BigPointLayer().addTo(this.map)
+        return this.lineLayer
+    }
 
     StreamrMap.prototype.setCenter = function(coords) {
         this.map.setView(new L.LatLng(coords[0],coords[1]))
@@ -84,7 +136,16 @@ var MAP
         var _this = this
 
         var id = attr.id
-        var latlng = L.latLng(attr.lat, attr.long)
+        var lat = attr.lat
+        var lng = attr.long
+        var color = attr.color
+        var latlng = new L.LatLng(lat, lng)
+
+        if(this.untouched) {
+            this.setCenter([lat,lng])
+            this.untouched = false
+        }
+
         var marker = this.markers[id]
         if(marker === undefined) {
             var marker = L.marker(latlng, {
@@ -106,18 +167,65 @@ var MAP
             marker.on("mouseout", function() {
                 marker.closePopup()
             })
+            marker.addTo(this.map)
             this.markers[id] = marker
-            this.map.addLayer(marker)
+            this.addLinePoint(id, lat, lng, color)
         } else {
-            marker.setLatLng(latlng)
+            this.moveMarker(id, lat, lng, color)
         }
-
-        $(this).trigger("addPoint", id, latlng)
 
         return marker
     }
 
+    StreamrMap.prototype.moveMarker = function(id, lat, lng, color) {
+        var latlng = L.latLng(lat,lng)
+        this.pendingMarkerUpdates[id] = latlng
+        this.addLinePoint(id, lat, lng, color)
+        this.requestUpdate()
+    }
+
+    StreamrMap.prototype.requestUpdate = function() {
+        if (!this.animationFrameRequested) {
+            this.requestUpdateStart = Date.now()
+            console.log("RequestUpdate called")
+            L.Util.requestAnimFrame(this.animate, this, true);
+            this.animationFrameRequested = true;
+        }
+    }
+
+    StreamrMap.prototype.animate = function() {
+        var _this = this
+        Object.keys(this.pendingMarkerUpdates).forEach(function(id) {
+            var latlng = _this.pendingMarkerUpdates[id]
+
+            // Update marker position
+            _this.markers[id].setLatLng(latlng)
+        })
+
+        this.lineLayer.render(true)
+
+        this.pendingMarkerUpdates = {}
+        this.animationFrameRequested = false
+        console.log("Animate, took "+(Date.now() - this.requestUpdateStart))
+    }
+
+    StreamrMap.prototype.addLinePoint = function(id, lat, lng, color) {
+        var latlng = L.latLng(lat,lng)
+        var update = {
+            latlng: latlng,
+            color: color
+        }
+        this.pendingLineUpdates.push(update)
+        this.allLineUpdates.push(update)
+    }
+    var counter = 0
+    setInterval(function() {
+        console.log(counter+ " msg/sec")
+        counter = 0
+    },1000)
     StreamrMap.prototype.handleMessage = function(d) {
+        counter++
+
         if(d.t && d.t == "p") {
             this.addMarker({
                 id: d.id,
@@ -138,6 +246,11 @@ var MAP
         $.each(this.markers, function(k, v) {
             _this.map.removeLayer(v)
         })
+        if(this.circles.length) {
+            var ctx = this.circles[0]
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        }
+        this.circles = []
         this.markers = {}
     }
 

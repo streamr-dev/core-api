@@ -61,9 +61,6 @@ public class Map extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("maxOpacity", 0.8, ModuleOption.OPTION_DOUBLE));
 		options.addIfMissing(new ModuleOption("scaleRadius", false, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("useLocalExtrema", false, ModuleOption.OPTION_BOOLEAN));
-		options.addIfMissing(new ModuleOption("lifeTime", 7*1000, ModuleOption.OPTION_INTEGER));
-		options.addIfMissing(new ModuleOption("fadeInTime", 500, ModuleOption.OPTION_INTEGER));
-		options.addIfMissing(new ModuleOption("fadeOutTime", 500, ModuleOption.OPTION_INTEGER));
 
 		return config;
 	}
