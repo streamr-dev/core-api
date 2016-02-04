@@ -23,10 +23,10 @@ class PermissionApiController {
 
 		// TODO: remove kludge when Stream has String id instead of String uuid
 		def res = (resourceClass == Stream ? Stream.find { uuid == resourceId } : resourceClass.get(resourceId))
-		if (!res) { throw new IllegalArgumentException("${resourceClass.simpleName} (id $resourceId) not found!") }
-
-		if (!permissionService.canShare(request.apiUser, res)) {
-			render(status: 403, text: "Not authorized to query the Permissions for ${resourceClass.simpleName} $resourceId")
+		if (!res) {
+			render status: 404, text: [error: "${resourceClass.simpleName} (id $resourceId) not found!", code: "NOTFOUND", fault: resourceClass.simpleName, id: resourceId] as JSON
+		} else if (!permissionService.canShare(request.apiUser, res)) {
+			render status: 403, text: [error: "Not authorized to query the Permissions for ${resourceClass.simpleName} $resourceId", code: "FORBIDDEN", fault: "permissions", user: request.apiUser.username] as JSON
 		} else {
 			action(res)
 		}
@@ -41,7 +41,7 @@ class PermissionApiController {
 		useResource(resourceClass, resourceId) { res ->
 			def p = permissionService.getPermissionsTo(res).find { it.id == permissionId }
 			if (!p) {
-				render status: 404, text: [error: "${resourceClass.simpleName} id $resourceId had no permission with id $permissionId!"] as JSON
+				render status: 404, text: [error: "${resourceClass.simpleName} $resourceId had no permission with id $permissionId!", code: "NOTFOUND", fault: "permissions"] as JSON
 			} else {
 				action(p, res)
 			}
@@ -64,15 +64,15 @@ class PermissionApiController {
 
 		def user = SecUser.findByUsername(username)
 		if (!user) {
-			render status: 400, text: [error: "User '$username' not found!"] as JSON
+			render status: 400, text: [error: "User '$username' not found!", code: "NOTFOUND", fault: "user", user: username] as JSON, contentType: "application/json"
 		} else if (!permissionService.allOperations.contains(op)) {
-			render status: 400, text: [error: "Faulty operation '$op'. Try with 'read', 'write' or 'share' instead."] as JSON
+			render status: 400, text: [error: "Invalid operation '$op'. Try with 'read', 'write' or 'share' instead.", code: "INVALID", fault: "operation", operation: op] as JSON, contentType: "application/json"
 		} else {
 			useResource(params.resourceClass, params.resourceId) { res ->
 				def grantor = request.apiUser
 				def newP = permissionService.grant(grantor, res, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
-				render status: 201, text: newP.toMap() + [text: "Successfully granted"] as JSON
+				render status: 201, text: newP.toMap() + [text: "Successfully granted"] as JSON, contentType: "application/json"
 			}
 		}
 	}
@@ -80,7 +80,7 @@ class PermissionApiController {
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			render status: 200, text: p.toMap() as JSON
+			render status: 200, text: p.toMap() as JSON, contentType: "application/json"
 		}
 	}
 
@@ -91,8 +91,9 @@ class PermissionApiController {
 			def revoker = request.apiUser
 			permissionService.revoke(revoker, res, p.user, p.operation)
 			// https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7 says DELETE may return "an entity describing the status", that is:
-			return index()
-			// it's also possible to send no body
+			def newPerms = permissionService.getPermissionsTo(res)*.toMap()
+			render status: 200, text: p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON
+			// it's also possible to send no body at all
 			//render status: 204
 		}
 	}
