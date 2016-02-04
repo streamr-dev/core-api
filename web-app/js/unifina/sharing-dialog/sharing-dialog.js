@@ -2,7 +2,7 @@
  * Dialog that shows users and their permissions to given resource
  *
  * Can be spawned with something like
- *  <button onclick="sharePopup('${createLink(uri: "/api/v1/stream/" + stream.uuid)}')"> Share </button>
+ *  <button onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}')"> Share </button>
  *
  * @create_date 2016-01-21
  */
@@ -136,7 +136,7 @@
                 if (this.$newUserField.val()) {
                     this.$newUserField.val("")
                 } else {
-                    // TODO: close dialog ("Cancel") on ESC
+                    sharePopup.cancelChanges()
                 }
             }
         },
@@ -150,13 +150,13 @@
                 })
                 this.$newUserField.val("")
             } else {
-                // TODO: close & save dialog ("Done") on ENTER if username input is empty
+                sharePopup.saveChanges()
             }
         },
 
         initialize: function(args) {
             this.$el.html(accessListTemplate({
-                owner: "Omistelija"
+                owner: args.owner
             }))
             this.$ownerLabel = this.$(".owner-label")
             this.$accessList = this.$(".access-list")
@@ -166,9 +166,11 @@
             this.listenTo(accessList, 'reset', this.addAll)
         },
 
+        accessViews: [],
         createAccessView: function(accessRow) {
             var view = new AccessView({model: accessRow})
             this.$accessList.append(view.render().$el)
+            this.accessViews.push(view)
         },
 
         addAll: function() {
@@ -177,38 +179,176 @@
         }
     })
 
+    // de-pluralizes the collection name, e.g. "canvases" -> "canvas"
+    // TODO: use the .name property somehow?
+    function urlToResourceName(url) {
+        var resAndId = url.split("/").slice(-2)
+        var res = resAndId[0]
+        var id = resAndId[1]
+        res = res.slice(0, res.endsWith("ses") ? -2 : -1)
+        return res + " " + id
+    }
+
+    var sharingDialog;
+    var listView;
+    var resourceUrl;
+    var originalPermissions = {};   // { username: { operation: Permission object } }
+    var originalOwner;
+
     /** Entry point */
-    function openSharingDialog(resourceUrl) {
-        var sharingDialog = bootbox.dialog({
-            title: "Set permissions for <b>" + resourceUrl.split("/").slice(-2).join(" ") + "</b>",
-            message: "<div id='access-list-div'>Loading...</div>",
-            size: 'large',
-            buttons: {
-                cancel: {
-                    label: "Cancel",
-                    className: "btn-danger",
-                    callback: function() {
-                        listView.remove()
-                    }
-                },
-                save: {
-                    label: "Save",
-                    className: "btn-success",
-                    callback: function() {
-                        listView.remove()
-                        //TODO: save for realz
-                        Streamr.showSuccess("Successfully threw away your hard work.")
+    exports.sharePopup = function(url) {
+        resourceUrl = url
+
+        // get current permissions
+        var originalPermissionList = []
+        $.getJSON(resourceUrl + "/permissions").success(function(data) {
+            originalOwner = _.chain(data)
+                .filter(function(p) { return p.operation === "share" && !p.id })
+                .pluck("user")
+                .first().value()
+            originalPermissionList = _(data).filter(function(p) { return !!p.id })
+        }).always(function() {
+            sharingDialog = bootbox.dialog({
+                title: "Set permissions for <b>" + urlToResourceName(resourceUrl) + "</b>",
+                message: "Loading...",
+                size: "large",
+                backdrop: true,     // The backdrop is displayed, and clicking on it dismisses the dialog
+                //onEscape: true,
+                buttons: {
+                    cancel: {
+                        label: "Cancel",
+                        className: "btn-danger",
+                        callback: sharePopup.cancelChanges
+                    },
+                    save: {
+                        label: "Save",
+                        className: "btn-success",
+                        callback: sharePopup.saveChanges
                     }
                 }
-            }
-        })
+            })
 
-        var listView = new AccessListView({
-            el: "#access-list-div",
-            id: "access-list",
+            listView = new AccessListView({
+                el: ".modal-body",
+                id: "access-list",
+                owner: originalOwner
+            })
+
+            // map list of Permissions to list of Access rows on the form (combine)
+            originalPermissions = {}
+            var initialAccessMap = {}
+            _(originalPermissionList).each(function(p) {
+                if (!p || !p.user || !p.operation) { return }
+                if (!originalPermissions[p.user]) {
+                    originalPermissions[p.user] = {}
+                    initialAccessMap[p.user] = { user: p.user }
+                }
+                originalPermissions[p.user][p.operation] = p
+                initialAccessMap[p.user][p.operation] = true
+            })
+            accessList.reset(_.values(initialAccessMap))
         })
     }
 
-    exports.sharePopup = openSharingDialog
+    exports.sharePopup.saveChanges = function() {
+        if (!sharingDialog) { throw "Cannot close sharePopup, try opening it first!" }
+
+        _(listView.accessViews).each(function(view) {
+            view.$(".user-access-row").removeClass("has-error")
+        })
+
+        // find changes
+        var addedPermissions = []
+        var removedPermissions = []
+        var testedUsers = {}
+        accessList.each(function(accessModel) {
+            var user = accessModel.attributes.user
+            var before = originalPermissions[user] || {}
+            var after = accessModel.attributes
+            if (before.read  && !after.read)  { removedPermissions.push(before.read.id) }
+            if (before.write && !after.write) { removedPermissions.push(before.write.id) }
+            if (before.share && !after.share) { removedPermissions.push(before.share.id) }
+            if (!before.share && after.share) { addedPermissions.push({user: user, operation: "share"}) }
+            if (!before.write && after.write) { addedPermissions.push({user: user, operation: "write"}) }
+            if (!before.read  && after.read)  { addedPermissions.push({user: user, operation: "read"}) }
+            testedUsers[user] = true;
+        })
+        // completely removed users don't show up in accessList, need to be tested separately
+        _(originalPermissions).each(function (before, user) {
+            if (user in testedUsers) { return }    // continue
+            if (before.read)  { removedPermissions.push(before.read.id) }
+            if (before.write) { removedPermissions.push(before.write.id) }
+            if (before.share) { removedPermissions.push(before.share.id) }
+        })
+
+        if (addedPermissions.length == 0 && removedPermissions.length == 0) {
+            listView.remove()
+            return true;                // close modal
+        }
+
+        // generate one API call for each change
+        var started = 0
+        var successful = 0
+        var failed = 0
+        var changedUsers = {}
+        var errorMessages = []
+        _(addedPermissions).each(function(permission) {
+            started += 1
+            $.ajax({
+                url: resourceUrl + "/permissions",
+                method: "POST",
+                data: JSON.stringify(permission),
+                contentType: "application/json",
+                success: onSuccess,
+                error: onError
+            })
+        })
+        _(removedPermissions).each(function(id) {
+            started += 1
+            $.ajax({
+                url: resourceUrl + "/permissions/" + id,
+                method: "DELETE",
+                contentType: "application/json",
+                success: onSuccess,
+                error: onError
+            })
+        })
+        function onSuccess(response) {
+            successful += 1
+            changedUsers[response.user] = true
+            if (successful + failed === started) { onDone() }
+        }
+        function onError(e) {
+            failed += 1
+            errorMessages.push(e.responseJSON.error)
+            if (e.responseJSON.fault === "user") {
+                // find Access row with bad username and highlight
+                _(listView.accessViews).each(function(view) {
+                    if (view.model.get("user") === e.responseJSON.user) {
+                        view.$(".user-access-row").addClass("has-error")
+                    }
+                })
+            }
+            if (successful + failed === started) { onDone() }
+        }
+        function onDone() {
+            if (successful === started) {
+                Streamr.showSuccess("Changed sharing to " + _.keys(changedUsers).join(", "))
+                listView.remove()
+                sharingDialog.modal("hide")     // close after successful save
+                delete sharingDialog
+            } else {
+                Streamr.showError("Errors during saving:\n * " + errorMessages.join("\n * "))
+            }
+        }
+
+        return false;                           // don't close the dialog yet, saving is still in progress...
+    }
+
+    exports.sharePopup.cancelChanges = function() {
+        if (!sharingDialog) { throw "Cannot close sharePopup, try opening it first!" }
+        listView.remove()
+        delete sharingDialog
+    }
 
 })(window)
