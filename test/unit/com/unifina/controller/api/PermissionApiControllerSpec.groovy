@@ -178,6 +178,7 @@ class PermissionApiControllerSpec extends Specification {
 		request.JSON = [user: other.username, operation: "read"] as JSON
 		withFilters(action: "save") { controller.save() }
 		then:
+		1 * permissionService.getAllOperations() >> ["read", "write", "share"]
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.grant(me, _, _, "read") >> new Permission(user: other, operation: "read")
 		response.status == 201

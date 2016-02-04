@@ -22,8 +22,9 @@ class PermissionService {
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(PermissionService)
 
-	final allOperations = ["read", "write", "share"]
-	final ownerPermissions = allOperations
+	public final List<String> allOperations = ["read", "write", "share"]
+	public final List<String> ownerPermissions = allOperations
+	public List<String> getAllOperations() { return allOperations }
 
 	// cascade some revocations to "higher" rights too
 	//   to ensure a meaningful combination (e.g. "write" without "read" makes no sense)

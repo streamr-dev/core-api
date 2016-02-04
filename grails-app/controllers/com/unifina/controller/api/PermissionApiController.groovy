@@ -65,7 +65,7 @@ class PermissionApiController {
 		def user = SecUser.findByUsername(username)
 		if (!user) {
 			render status: 400, text: [error: "User '$username' not found!", code: "NOTFOUND", fault: "user", user: username] as JSON, contentType: "application/json"
-		} else if (!permissionService.allOperations.contains(op)) {
+		} else if (!permissionService.getAllOperations().contains(op)) {
 			render status: 400, text: [error: "Invalid operation '$op'. Try with 'read', 'write' or 'share' instead.", code: "INVALID", fault: "operation", operation: op] as JSON, contentType: "application/json"
 		} else {
 			useResource(params.resourceClass, params.resourceId) { res ->
