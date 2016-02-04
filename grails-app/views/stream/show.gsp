@@ -34,6 +34,8 @@
 						</div>
 					</div>
 					<div class="panel-body">
+						<button class="share-button btn" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
+
 						<ui:labeled label="${message(code:"stream.name.label")}">
 					    	${stream.name}
 						</ui:labeled>
@@ -51,7 +53,6 @@
 			
 			<g:include action="details" id="${stream.id}"/>
 
-			<button class="share-button btn btn-primary" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
 		</div>
 		
     </body>

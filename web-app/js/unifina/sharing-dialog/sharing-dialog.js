@@ -2,7 +2,7 @@
  * Dialog that shows users and their permissions to given resource
  *
  * Can be spawned with something like
- *  <button onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}')"> Share </button>
+ *  <button onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
  *
  * @create_date 2016-01-21
  */
@@ -195,7 +195,10 @@
 
     /** Entry point */
     exports.sharePopup = function(url, resourceName) {
-        if (!!sharingDialog) { throw "Cannot open sharePopup, already open!" }
+        // if button was on top of a link, disable a-href redirect
+        event.preventDefault()
+
+        if (!!sharingDialog) { console.error("Cannot open sharePopup, already open!"); return false }
         resourceUrl = url
 
         // get current permissions
@@ -208,9 +211,9 @@
             originalPermissionList = _(data).filter(function(p) { return !!p.id })
         }).always(function() {
             sharingDialog = bootbox.dialog({
-                title: "Set permissions for <span class='resource-name-label'></span>",
+                title: "Share <span class='resource-name-label'></span>",
                 message: "Loading...",
-                backdrop: true,     // The backdrop is displayed, and clicking on it dismisses the dialog
+                closeButton: false, // won't call cancelChanges; bad... TODO: listen to close event
                 //onEscape: true,
                 buttons: {
                     cancel: {
@@ -249,10 +252,12 @@
             })
             accessList.reset(_.values(initialAccessMap))
         })
+
+        return false
     }
 
     exports.sharePopup.saveChanges = function() {
-        if (!sharingDialog) { throw "Cannot close sharePopup, try opening it first!" }
+        if (!sharingDialog) { console.error("Cannot close sharePopup, try opening it first!"); return }
 
         _(listView.accessViews).each(function(view) {
             view.$(".user-access-row").removeClass("has-error")
@@ -347,7 +352,7 @@
     }
 
     exports.sharePopup.cancelChanges = function() {
-        if (!sharingDialog) { throw "Cannot close sharePopup, try opening it first!" }
+        if (!sharingDialog) { console.error("Cannot close sharePopup, try opening it first!"); return }
         listView.remove()
         sharingDialog.modal("hide")
         sharingDialog = null

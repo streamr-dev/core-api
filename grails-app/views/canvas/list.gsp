@@ -2,6 +2,7 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="canvas.list.label" /></title>
+		<r:require module="sharing-dialog"/>
         <r:script>
         	$(function() {
 				function applyFilter() {
@@ -76,8 +77,10 @@
 							<ui:td>
 								<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
 							</ui:td>
-							<ui:td><g:formatDate date="${canvas.dateCreated}"
-									timeZone="${user.timezone}" /></ui:td>
+							<ui:td>
+								<g:formatDate date="${canvas.dateCreated}" timeZone="${user.timezone}" />
+								<span class="fa fa-share share-button" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + canvas.id)}', 'Canvas ${canvas.name}')"></span>
+							</ui:td>
 						</ui:tr>
 					</g:each>
 				</ui:tbody>
