@@ -96,7 +96,7 @@ public class LiveSpec extends LoginTester1Spec {
 			stopCanvas()
 		and: "Starting again"
 			ensureRealtimeTabDisplayed()
-			startCanvas()
+			startCanvas(true)
 
 		then: "Data must change"
 			waitFor(30){ $(".modulelabel").text() != oldLabel }
