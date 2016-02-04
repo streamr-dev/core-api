@@ -128,8 +128,9 @@
 		 grails.logging.jul.usebridge = false
 	 }
  }
- 
- 
+
+grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
  
 /**
  * API & CORS config
@@ -301,3 +302,4 @@ unifina.email.signup.subject = "Thanks for signing up for Streamr"
 unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
+unifina.email.forgotPassword.subject = "Streamr Password Reset"
