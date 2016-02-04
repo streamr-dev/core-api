@@ -92,7 +92,7 @@ class PermissionApiController {
 			permissionService.revoke(revoker, res, p.user, p.operation)
 			// https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7 says DELETE may return "an entity describing the status", that is:
 			def newPerms = permissionService.getPermissionsTo(res)*.toMap()
-			render status: 200, text: p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON
+			render status: 200, text: p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON, contentType: "application/json"
 			// it's also possible to send no body at all
 			//render status: 204
 		}
