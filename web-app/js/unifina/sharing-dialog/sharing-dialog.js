@@ -196,7 +196,8 @@
     var originalOwner;
 
     /** Entry point */
-    exports.sharePopup = function(url) {
+    exports.sharePopup = function(url, resourceName) {
+        if (!!sharingDialog) { throw "Cannot open sharePopup, already open!" }
         resourceUrl = url
 
         // get current permissions
@@ -209,7 +210,7 @@
             originalPermissionList = _(data).filter(function(p) { return !!p.id })
         }).always(function() {
             sharingDialog = bootbox.dialog({
-                title: "Set permissions for <b>" + urlToResourceName(resourceUrl) + "</b>",
+                title: "Set permissions for <span class='resource-name-label'></span>",
                 message: "Loading...",
                 backdrop: true,     // The backdrop is displayed, and clicking on it dismisses the dialog
                 //onEscape: true,
@@ -225,6 +226,7 @@
                     }
                 }
             })
+            $(".resource-name-label").text(resourceName || urlToResourceName(resourceUrl))
 
             listView = new AccessListView({
                 el: ".modal-body",
@@ -334,7 +336,7 @@
                 Streamr.showSuccess("Changed sharing to " + _.keys(changedUsers).join(", "))
                 listView.remove()
                 sharingDialog.modal("hide")     // close after successful save
-                delete sharingDialog
+                sharingDialog = null
             } else {
                 Streamr.showError("Errors during saving:\n * " + errorMessages.join("\n * "))
             }
@@ -346,7 +348,7 @@
     exports.sharePopup.cancelChanges = function() {
         if (!sharingDialog) { throw "Cannot close sharePopup, try opening it first!" }
         listView.remove()
-        delete sharingDialog
+        sharingDialog = null
     }
 
 })(window)

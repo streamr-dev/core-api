@@ -51,7 +51,7 @@
 			
 			<g:include action="details" id="${stream.id}"/>
 
-			<button class="share-button btn btn-primary" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}')"> Share </button>
+			<button class="share-button btn btn-primary" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
 		</div>
 		
     </body>
