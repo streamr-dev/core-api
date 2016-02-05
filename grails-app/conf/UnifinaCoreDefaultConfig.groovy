@@ -36,8 +36,8 @@
  
  // What URL patterns should be processed by the resources plugin
  grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*",
-									"/js/leaflet-0.7.3", "/swagger/*"]
- grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/swagger/**']
+									"/js/leaflet-0.7.3", "/misc/*"]
+ grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
  
  grails.resources.processing.enabled = true
  
