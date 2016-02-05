@@ -20,7 +20,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		container = $("<div class='map-container' style='width: 500px; height: 400px;'></div>")
 		prot.body.append(container)
 
-		var mapOptions = {}
+		var mapOptions = {
+			center: [prot.jsonData.centerLat, prot.jsonData.centerLng],
+			zoom: prot.jsonData.zoom
+		}
 		if (prot.jsonData.options) {
 			Object.keys(prot.jsonData.options).forEach(function(key) {
 				mapOptions[key] = prot.jsonData.options[key].value
@@ -63,6 +66,14 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	pub.redraw = function() {
 		super_redraw()
 		updateSize()
+	}
+
+	var superToJSON = pub.toJSON;
+	pub.toJSON = function() {
+		prot.jsonData = superToJSON();
+		var json = map.toJSON()
+		$.extend(true, prot.jsonData, json)
+		return prot.jsonData
 	}
 	
 	return pub;

@@ -52,23 +52,22 @@ var MAP
 
         this.createBigPointLayer()
 
-
-        //for (var i=0;i<1;i++) {
+        //for (var i=0;i<100;i++) {
         //    _this.addMarker({
         //        id: i.toString(),
         //        lat: Math.random()*90,
-        //        long: Math.random()*90
+        //        lng: Math.random()*90
         //    })
         //}
         //
         //setInterval(function() {
-        //    for (var i=0;i<1;i++) {
+        //    for (var i=0;i<100;i++) {
         //        var current = _this.markers[i.toString()].getLatLng()
         //        _this.handleMessage({
         //            t: "p",
         //            id: i.toString(),
-        //            lat: current.lat + (Math.random() - 0.5)/1000,
-        //            long: current.lng + (Math.random() - 0.5)/1000,
+        //            lat: current.lat + (Math.random() - 0.5)*2,
+        //            lng: current.lng + (Math.random() - 0.5)*2,
         //            color: 'rgb('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+')'
         //        })
         //    }
@@ -80,9 +79,6 @@ var MAP
         var _this = this
         this.circles = []
         var BigPointLayer = L.CanvasLayer.extend({
-            //initialize: function() {
-            //    this.cC = []
-            //},
             renderCircle: function(ctx, point, radius, color) {
                 color = color || 'rgba(255,0,0,1)'
                 ctx.fillStyle = color;
@@ -116,7 +112,7 @@ var MAP
                 updates.forEach(function(update) {
                     // get center from the map (projected)
                     var point = bigPointLayer._map.latLngToContainerPoint(update.latlng);
-                    bigPointLayer.renderCircle(ctx, point, 3, update.color)
+                    bigPointLayer.renderCircle(ctx, point, 2, update.color)
                 })
 
                 console.log("Render took "+ (Date.now()-start)+"ms, pendingLineUpdates.length: "+_this.pendingLineUpdates.length)
@@ -137,7 +133,7 @@ var MAP
 
         var id = attr.id
         var lat = attr.lat
-        var lng = attr.long
+        var lng = attr.lng
         var color = attr.color
         var latlng = new L.LatLng(lat, lng)
 
@@ -218,20 +214,10 @@ var MAP
         this.pendingLineUpdates.push(update)
         this.allLineUpdates.push(update)
     }
-    var counter = 0
-    setInterval(function() {
-        console.log(counter+ " msg/sec")
-        counter = 0
-    },1000)
-    StreamrMap.prototype.handleMessage = function(d) {
-        counter++
 
+    StreamrMap.prototype.handleMessage = function(d) {
         if(d.t && d.t == "p") {
-            this.addMarker({
-                id: d.id,
-                lat: d.lat,
-                long: d.long
-            })
+            this.addMarker(d)
         }
     }
 
@@ -239,6 +225,17 @@ var MAP
         this.parent.css("width", width+"px")
         this.parent.css("height", height+"px")
         this.map.invalidateSize()
+    }
+
+    StreamrMap.prototype.toJSON = function() {
+        // Added this 'cause I think it's nice that the map remembers these things.
+        // (Even though the heatmap doesn't do so)
+        // There's still some problem with transferring the data
+        return {
+            centerLat: this.map.getCenter().lat,
+            centerLng: this.map.getCenter().lng,
+            zoom: this.map.getZoom()
+        }
     }
 
     StreamrMap.prototype.clear = function() {

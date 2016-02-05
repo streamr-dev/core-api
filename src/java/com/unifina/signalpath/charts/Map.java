@@ -1,6 +1,7 @@
 package com.unifina.signalpath.charts;
 
 import com.unifina.signalpath.*;
+import com.unifina.utils.Color;
 
 import java.util.LinkedHashMap;
 
@@ -9,10 +10,14 @@ public class Map extends ModuleWithUI {
 	Input<Object> id = new Input<>(this, "id", "Double String");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
 	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
+	Input<Color> color = new Input<>(this, "color", "Color");
 
 	@Override
 	public void init() {
-		super.init();
+		addInput(id);
+		addInput(latitude);
+		addInput(longitude);
+		addInput(color);
 		this.canClearState = false;
 		this.resendAll = false;
 		latitude.setDrivingInput(true);
@@ -23,6 +28,9 @@ public class Map extends ModuleWithUI {
 		longitude.canToggleDrivingInput = false;
 		longitude.canHaveInitialValue = false;
 		longitude.canBeFeedback = false;
+		color.setDrivingInput(true);
+		color.canToggleDrivingInput = false;
+		color.canBeFeedback = false;
 		id.setDrivingInput(true);
 		id.canToggleDrivingInput = false;
 		id.canBeFeedback = false;
@@ -31,7 +39,7 @@ public class Map extends ModuleWithUI {
 	@Override
 	public void sendOutput() {
 		if (globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new MapPoint(id.getValue(), latitude.getValue(), longitude.getValue()), uiChannelId);
+			globals.getUiChannel().push(new MapPoint(id.getValue(), latitude.getValue(), longitude.getValue(), color.getValue()), uiChannelId);
 		}
 	}
 
@@ -57,10 +65,6 @@ public class Map extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("zoom", 2, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("minZoom", 2, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("maxZoom", 18, ModuleOption.OPTION_INTEGER));
-		options.addIfMissing(new ModuleOption("radius", 30, ModuleOption.OPTION_DOUBLE));
-		options.addIfMissing(new ModuleOption("maxOpacity", 0.8, ModuleOption.OPTION_DOUBLE));
-		options.addIfMissing(new ModuleOption("scaleRadius", false, ModuleOption.OPTION_BOOLEAN));
-		options.addIfMissing(new ModuleOption("useLocalExtrema", false, ModuleOption.OPTION_BOOLEAN));
 
 		return config;
 	}
@@ -71,15 +75,16 @@ public class Map extends ModuleWithUI {
 	}
 
 	class MapPoint extends LinkedHashMap<String,Object> {
-		public MapPoint(Object id, Double latitude, Double longitude) {
+		public MapPoint(Object id, Double latitude, Double longitude, Color color) {
 			super();
 			if (!(id instanceof Double || id instanceof String)) {
 				throw new RuntimeException("Id must be Double or String!");
 			}
 			put("t", "p");
 			put("lat", latitude);
-			put("long", longitude);
+			put("lng", longitude);
 			put("id", id);
+			put("color", color.toString());
 		}
 	}
 }

@@ -126,6 +126,26 @@ SignalPath.ParamRenderers = {
 				var text = $(input).find("span.streamName a").text();
 				return text;
 			}
+		},
+		"Color": {
+			create: function(module, data) {
+				var inputContainer = $("<div class='color-input-container'></div>")
+				var colorInput = $("<input type='text' class='parameterInput colorInput form-control'/>");
+				inputContainer.append(colorInput)
+				colorInput.spectrum({
+					preferredFormat: "rgb",
+					showInput: true,
+					showButtons: false
+				})
+				colorInput.spectrum("set", data.value)
+				return inputContainer
+			},
+			getValue: function(module, data, input) {
+				return $(input).find(".colorInput").spectrum("get").toRgbString()
+			},
+			getValueName: function(module, data, input) {
+				return this.getValue(module, data, input)
+			}
 		}
 }
 
