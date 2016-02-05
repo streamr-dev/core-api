@@ -28,7 +28,7 @@ import com.unifina.utils.Globals;
  * files it obtains via DataService.
  * @author Henri
  */
-public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed {
+public abstract class AbstractHistoricalFileFeed<MessageType> extends AbstractHistoricalFeed<MessageType> {
 	
 	protected HashMap<IEventRecipient,Integer> counts = new HashMap<>();
 	protected HashMap<IEventRecipient, FeedFileService.StreamResponse> streams = new HashMap<>();
@@ -67,7 +67,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	}
 
 	private FeedEventIterator createIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient) {
-		Iterator<? extends Object> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
+		Iterator<MessageType> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
 		return new FeedEventIterator(contentIterator, this, recipient);
 	}
 	
@@ -78,7 +78,7 @@ public abstract class AbstractHistoricalFileFeed extends AbstractHistoricalFeed 
 	 * @param recipient
 	 * @return
 	 */
-	protected abstract Iterator<? extends Object> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient);
+	protected abstract Iterator<MessageType> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient);
 	
 	/**
 	 * Retrieves a StreamResponse from FileFeedService and creates a FeedEventIterator for the stream.

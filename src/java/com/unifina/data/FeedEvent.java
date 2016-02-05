@@ -5,9 +5,9 @@ import java.util.Iterator;
 
 import com.unifina.feed.AbstractFeed;
 
-public class FeedEvent implements Comparable<FeedEvent> {
+public class FeedEvent<ContentType> implements Comparable<FeedEvent> {
 	public Date timestamp;
-	public Object content;
+	public ContentType content;
 	public IEventRecipient recipient;
 	public AbstractFeed feed;
 	public Iterator<FeedEvent> iterator;
@@ -18,7 +18,7 @@ public class FeedEvent implements Comparable<FeedEvent> {
 		
 	}
 	
-	public FeedEvent(Object content, Date timestamp, IEventRecipient recipient) {
+	public FeedEvent(ContentType content, Date timestamp, IEventRecipient recipient) {
 		this.content = content;
 		this.timestamp = timestamp;
 		this.recipient = recipient;

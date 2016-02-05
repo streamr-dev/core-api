@@ -19,11 +19,11 @@ import com.unifina.utils.Globals;
  * stream as well as matching the events and their IEventRecipients.
  * @author Henri
  */
-public abstract class AbstractFeed {
+public abstract class AbstractFeed<ModuleClass, MessageType> {
 
 	protected IEventQueue eventQueue;
 	
-	protected Set<Object> subscribers = new HashSet<Object>();
+	protected Set<ModuleClass> subscribers = new HashSet<>();
 	
 	protected ArrayList<IEventRecipient> eventRecipients = new ArrayList<>();
 	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
@@ -32,7 +32,7 @@ public abstract class AbstractFeed {
 	protected TimeZone timeZone;
 
 	protected Feed domainObject;
-	protected AbstractKeyProvider keyProvider;
+	protected AbstractKeyProvider<ModuleClass, MessageType> keyProvider;
 	
 	public AbstractFeed(Globals globals, Feed domainObject) {
 		this.globals = globals;
@@ -56,7 +56,7 @@ public abstract class AbstractFeed {
 	 * @param subscriber
 	 * @return
 	 */
-	protected IEventRecipient createEventRecipient(Object subscriber) {
+	protected IEventRecipient createEventRecipient(ModuleClass subscriber) {
 		try {
 			Class eventRecipientClass = this.getClass().getClassLoader().loadClass(domainObject.getEventRecipientClass());
 
@@ -75,12 +75,12 @@ public abstract class AbstractFeed {
 		}
 	}
 	
-	protected IEventRecipient getEventRecipientForMessage(Object message) {
+	protected IEventRecipient getEventRecipientForMessage(MessageType message) {
 		return eventRecipientsByKey.get(keyProvider.getMessageKey(message));
 	}
 	
-	public boolean isSubscribed(Object item) {
-		return subscribers.contains(item);
+	public boolean isSubscribed(ModuleClass subscriber) {
+		return subscribers.contains(subscriber);
 	}	
 	
 	/**
@@ -89,7 +89,7 @@ public abstract class AbstractFeed {
 	 * false if the object was already subscribed. Throws an IllegalArgumentException
 	 * if the subscription is of the wrong type.
 	 */
-	public boolean subscribe(Object subscriber) {
+	public boolean subscribe(ModuleClass subscriber) {
 
 		// Don't subscribe the same object twice
 		if (!isSubscribed(subscriber)) {

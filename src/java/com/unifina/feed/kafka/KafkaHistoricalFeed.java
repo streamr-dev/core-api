@@ -25,7 +25,7 @@ import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.time.DateUtils;
 
-public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
+public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<KafkaMessage> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
 	Properties kafkaProperties;
@@ -40,9 +40,9 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	}
 
 	@Override
-	protected Date getTimestamp(Object eventContent,
-			Iterator<? extends Object> contentIterator) {
-		return ((KafkaMessage)eventContent).timestamp;
+	protected Date getTimestamp(KafkaMessage eventContent,
+			Iterator<KafkaMessage> contentIterator) {
+		return eventContent.timestamp;
 	}
 
 	@Override

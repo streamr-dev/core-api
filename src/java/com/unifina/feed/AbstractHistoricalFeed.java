@@ -16,9 +16,10 @@ import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 
 /**
- * Implements a basic interface for getting FeedEvents from a historical feed via getNext()
+ * Implements a basic interface for iterating over FeedEvents from a historical feed. The FeedEvent have
+ * a content of type MessageType.
  */
-public abstract class AbstractHistoricalFeed extends AbstractFeed implements Iterator<FeedEvent> {
+public abstract class AbstractHistoricalFeed<MessageType> extends AbstractFeed<MessageType> implements Iterator<FeedEvent> {
 	
 	/**
 	 * The queue orders FeedEvents from multiple streams in their natural order (timestamp, queue insertion order)
@@ -136,6 +137,6 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 	 * @param contentIterator the contentIterator that produced the eventContent
 	 * @return
 	 */
-	protected abstract Date getTimestamp(Object eventContent, Iterator<? extends Object> contentIterator);
+	protected abstract Date getTimestamp(MessageType eventContent, Iterator<MessageType> contentIterator);
 	
 }

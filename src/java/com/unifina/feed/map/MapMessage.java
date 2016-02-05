@@ -6,12 +6,12 @@ import java.util.Map;
 public class MapMessage {
 	public Date timestamp;
 	public Date receiveTime;
-	public Map content;
+	public Map payload;
 	
 	public MapMessage(Date timestamp, Date receiveTime,
-			Map content) {
+			Map payload) {
 		this.timestamp = timestamp;
 		this.receiveTime = receiveTime;
-		this.content = content;
+		this.payload = payload;
 	}
 }

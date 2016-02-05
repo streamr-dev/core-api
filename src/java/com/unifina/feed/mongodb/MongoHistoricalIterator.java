@@ -6,8 +6,9 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.map.MapMessage;
 import org.bson.Document;
 
 import java.io.Closeable;
@@ -17,7 +18,7 @@ import java.util.*;
 /**
  * Created by henripihkala on 02/02/16.
  */
-public class MongoHistoricalIterator implements Iterator<Document>, Closeable {
+public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable {
 
 	private final Stream stream;
 	private final Date startDate;
@@ -67,7 +68,7 @@ public class MongoHistoricalIterator implements Iterator<Document>, Closeable {
 		endDateFilter.put("$lte", endDate);
 		query.append(timestampKey, endDateFilter);
 
-		FindIterable<Document> iterable = db.getCollection(mongoConfig.get("collection").toString()).find(query);
+		FindIterable<Document> iterable = db.getCollection(mongoConfig.get("collection").toString()).find(query).sort(Sorts.ascending(timestampKey));
 		this.mongoCursor = iterable.iterator();
 	}
 	
@@ -99,8 +100,10 @@ public class MongoHistoricalIterator implements Iterator<Document>, Closeable {
 	}
 
 	@Override
-	public Document next() {
-		return mongoCursor.next();
+	public MapMessage next() {
+		Document document = mongoCursor.next();
+		Date timestamp = document.getDate(timestampKey);
+		return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
 	}
 
 	@Override

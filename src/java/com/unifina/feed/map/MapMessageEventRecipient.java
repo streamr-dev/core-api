@@ -21,7 +21,7 @@ import com.unifina.utils.Globals;
  * Note that the type of value is unchecked and must match with the output type.
  * @author Henri
  */
-public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule> {
+public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSignalPathModule, MapMessage> {
 
 	Map<String, List<Output>> outputsByName = null;
 	
@@ -44,11 +44,11 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 	}
 	
 	@Override
-	protected void sendOutputFromModules(FeedEvent event) {
+	protected void sendOutputFromModules(FeedEvent<MapMessage> event) {
 		if (outputsByName==null)
 			initCacheMap();
 		
-		Map msg = ((MapMessage) event.content).content;
+		Map msg = event.content.payload;
 		
 		for (String name : outputsByName.keySet()) {
 			if (msg.containsKey(name)) {

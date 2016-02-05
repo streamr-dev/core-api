@@ -8,9 +8,10 @@ import com.unifina.utils.Globals;
  * instantiated in AbstractFeed. The class name can be defined in the database.
  * @author Henri
  *
- * @param <T>
+ * @param <ModuleClass>
+ * @param <MessageType>
  */
-public abstract class StreamEventRecipient<T> extends AbstractEventRecipient<T> {
+public abstract class StreamEventRecipient<ModuleClass, MessageType> extends AbstractEventRecipient<ModuleClass, MessageType> {
 
 	private Stream stream;
 

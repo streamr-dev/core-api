@@ -3,7 +3,13 @@ package com.unifina.feed;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 
-public abstract class AbstractKeyProvider {
+/**
+ * Establishes a common key that can be extracted from both the subscriber object
+ * as well as the messages. The key will be used to pair these together.
+ * @param <Subscriber>
+ * @param <Message>
+ */
+public abstract class AbstractKeyProvider<Subscriber, Message> {
 	
 	protected Globals globals;
 	protected Feed feed;
@@ -15,17 +21,17 @@ public abstract class AbstractKeyProvider {
 	
 	/**
 	 * Extracts a key object that will be used to match incoming
-	 * messages to the IEventRecipient associated with this key.
+	 * messages to the subscriber associated with this key.
 	 * @param subscriber
 	 * @return
 	 */
-	public abstract Object getSubscriberKey(Object subscriber);
+	public abstract Object getSubscriberKey(Subscriber subscriber);
 	
 	/**
 	 * Extracts a key from a message that can be used to find the correct 
-	 * IEventRecipient.
+	 * subscriber.
 	 * @param message
 	 * @return
 	 */
-	public abstract Object getMessageKey(Object message);
+	public abstract Object getMessageKey(Message message);
 }
