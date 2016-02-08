@@ -4,6 +4,8 @@
  * Can be spawned with something like
  *  <button onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
  *
+ * TODO: Split into parts: one file for each Backbone object, one file for the non-Backbone part (exports)
+ *
  * @create_date 2016-01-21
  */
 
@@ -177,6 +179,11 @@
         }
     })
 
+    // -------------------------------------------------------------
+    //  Non-Backbone part that handles the sharingDialog lifecycle
+    //      as well as communication with the backend
+    // -------------------------------------------------------------
+
     // de-pluralizes the collection name, e.g. "canvases" -> "canvas"
     // TODO: use the .name property somehow?
     function urlToResourceName(url) {
@@ -198,8 +205,9 @@
         // if button was on top of a link, disable a-href redirect
         event.preventDefault()
 
-        if (!!sharingDialog) { console.error("Cannot open sharePopup, already open!"); return false }
+        if (dialogIsOpen()) { console.error("Cannot open sharePopup, already open!"); return false }
         resourceUrl = url
+        savingChanges = false
 
         // get current permissions
         var originalPermissionList = []
@@ -221,8 +229,8 @@
                         callback: sharePopup.cancelChanges
                     },
                     save: {
-                        label: "Save",
-                        className: "btn-primary",
+                        label: "Save", //'<span class="spinner"><i class="icon-spin icon-refresh"></i></span>Save',
+                        className: "btn-primary", // has-spinner",
                         callback: sharePopup.saveChanges
                     }
                 }
@@ -256,8 +264,16 @@
         return false
     }
 
+    // see http://stackoverflow.com/questions/19674701/can-i-check-if-bootstrap-modal-shown-hidden
+    function dialogIsOpen() {
+        return sharingDialog && sharingDialog.hasClass("in")
+    }
+
+    var savingChanges = false
     exports.sharePopup.saveChanges = function() {
-        if (!sharingDialog) { console.error("Cannot close sharePopup, try opening it first!"); return }
+        if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
+        if (savingChanges) { console.error("Already saving changes, please wait!"); return false; }
+        savingChanges = true
 
         _(listView.accessViews).each(function(view) {
             view.$(".user-access-row").removeClass("has-error")
@@ -288,6 +304,7 @@
         })
 
         if (addedPermissions.length == 0 && removedPermissions.length == 0) {
+            savingChanges = false
             listView.remove()
             return true;                // close modal
         }
@@ -305,8 +322,13 @@
                 method: "POST",
                 data: JSON.stringify(permission),
                 contentType: "application/json",
-                success: onSuccess,
-                error: onError
+                error: onError,
+                success: function(response) {
+                    // update state so that the next diff goes correctly
+                    if (!originalPermissions[response.user]) { originalPermissions[response.user] = {} }
+                    originalPermissions[response.user][response.operation] = response
+                    onSuccess(response)
+                }
             })
         })
         _(removedPermissions).each(function(id) {
@@ -315,8 +337,12 @@
                 url: resourceUrl + "/permissions/" + id,
                 method: "DELETE",
                 contentType: "application/json",
-                success: onSuccess,
-                error: onError
+                error: onError,
+                success: function(response) {
+                    // update state so that the next diff goes correctly
+                    delete originalPermissions[response.user][response.operation]
+                    onSuccess(response)
+                }
             })
         })
         function onSuccess(response) {
@@ -338,11 +364,14 @@
             if (successful + failed === started) { onDone() }
         }
         function onDone() {
-            if (successful === started) {
+            savingChanges = false
+            if (successful > 0) {
                 Streamr.showSuccess("Changed sharing to " + _.keys(changedUsers).join(", "))
+            }
+            if (successful === started) {
+                // close after completely successful save
                 listView.remove()
-                sharingDialog.modal("hide")     // close after successful save
-                sharingDialog = null
+                sharingDialog.modal("hide")
             } else {
                 Streamr.showError("Errors during saving:\n * " + errorMessages.join("\n * "))
             }
@@ -352,10 +381,11 @@
     }
 
     exports.sharePopup.cancelChanges = function() {
-        if (!sharingDialog) { console.error("Cannot close sharePopup, try opening it first!"); return }
+        if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
         listView.remove()
         sharingDialog.modal("hide")
-        sharingDialog = null
     }
+
+    exports.sharePopup.isOpen = dialogIsOpen
 
 })(window)
