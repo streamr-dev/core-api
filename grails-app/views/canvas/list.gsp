@@ -79,7 +79,7 @@
 							</ui:td>
 							<ui:td>
 								<g:formatDate date="${canvas.dateCreated}" timeZone="${user.timezone}" />
-								<span class="fa fa-share share-button" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + canvas.id)}', 'Canvas ${canvas.name}')"></span>
+								<span class="fa fa-users share-button" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + canvas.id)}', 'Canvas ${canvas.name}')"></span>
 							</ui:td>
 						</ui:tr>
 					</g:each>

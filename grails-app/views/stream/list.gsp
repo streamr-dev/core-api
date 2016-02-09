@@ -30,7 +30,7 @@
 				            <ui:td>${fieldValue(bean: stream.feed, field: "name")}</ui:td>
 				            <ui:td>
 								${fieldValue(bean: stream, field: "description")}
-								<span class="fa fa-share share-button" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"></span>
+								<span class="fa fa-users share-button" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"></span>
 							</ui:td>
 						</ui:tr>
 					</g:each>
