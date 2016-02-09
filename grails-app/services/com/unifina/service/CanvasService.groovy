@@ -77,6 +77,11 @@ class CanvasService {
 		canvas.json = new JsonBuilder(newSignalPathMap).toString()
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
+
+		// clear serialization
+		canvas.serialized = null
+		canvas.serializationTime = null
+
 		canvas.save(flush: true, failOnError: true)
 	}
 

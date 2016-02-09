@@ -240,10 +240,10 @@ class CanvasServiceSpec extends Specification {
 		uiChannelIdsFromMap(canvas.toMap()).containsAll(existingUiChannelIds)
 	}
 
-	def "updateExisting throws error if trying to update running canvas"() {
-		setup: "set canvas state to running"
-		Canvas myCanvas2 = Canvas.findByName("my_canvas_2")
-		myCanvas2.state = Canvas.State.RUNNING
+	def "updateExisting clears serialization"() {
+		setup:
+		myFirstCanvas.serialized = "{}"
+		myFirstCanvas.serializationTime = new Date()
 
 		when:
 		def command = new SaveCanvasCommand(
@@ -251,7 +251,26 @@ class CanvasServiceSpec extends Specification {
 			modules: [],
 			settings: ["a" : "b"]
 		)
-		service.updateExisting(myCanvas2, command)
+		service.updateExisting(myFirstCanvas, command)
+
+		then:
+		Canvas c = Canvas.findById(myFirstCanvas.id)
+		c.serialized == null
+		c.serializationTime == null
+
+	}
+
+	def "updateExisting throws error if trying to update running canvas"() {
+		setup:
+		myFirstCanvas.state = Canvas.State.RUNNING
+
+		when:
+		def command = new SaveCanvasCommand(
+			name: "my_updated_canvas",
+			modules: [],
+			settings: ["a" : "b"]
+		)
+		service.updateExisting(myFirstCanvas, command)
 
 		then:
 		thrown(InvalidStateException)
