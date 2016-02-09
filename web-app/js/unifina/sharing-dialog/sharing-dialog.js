@@ -352,14 +352,16 @@
         }
         function onError(e) {
             failed += 1
-            errorMessages.push(e.responseJSON.error)
-            if (e.responseJSON.fault === "user") {
-                // find Access row with bad username and highlight
-                _(listView.accessViews).each(function(view) {
-                    if (view.model.get("user") === e.responseJSON.user) {
-                        view.$(".user-access-row").addClass("has-error")
-                    }
-                })
+            if (e && e.responseJSON) {
+                errorMessages.push(e.responseJSON.error)
+                if (e.responseJSON.fault === "user") {
+                    // find Access row with bad username and highlight
+                    _(listView.accessViews).each(function (view) {
+                        if (view.model.get("user") === e.responseJSON.user) {
+                            view.$(".user-label").addClass("has-error")
+                        }
+                    })
+                }
             }
             if (successful + failed === started) { onDone() }
         }
