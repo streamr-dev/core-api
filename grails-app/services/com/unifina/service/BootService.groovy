@@ -14,13 +14,11 @@ import com.unifina.utils.NetworkInterfaceUtils
 /**
  * The onInit and onDestroy methods should be triggered from conf/BootStrap.groovy of the app.
  * This works around the fact that BootStrap.groovy of a plugin can't be executed.
- * @author admin
- *
+ * @author Henri
  */
 class BootService {
 	
 	def grailsApplication
-	def feedService
 	def servletContext
 	
 	private static final Logger log = Logger.getLogger(BootService.class)
@@ -30,8 +28,6 @@ class BootService {
 	}
 	
 	def onInit() {
-		mergeDefaultConfig(grailsApplication)
-		
 		/**
 		 * Workaround for GRAILS-8895
 		 * https://jira.grails.org/browse/GRAILS-8895
@@ -99,17 +95,6 @@ class BootService {
 		else {
 			log.info("onInit: Task workers and listeners not started due to reduced environment: "+Environment.getCurrent()+", grails.test.phase: "+System.getProperty("grails.test.phase"))
 		}
-	}
-	
-	// Run from UnifinaCoreGrailsPlugin.groovy -> doWithSpring
-	// as well as some unit tests that require config.
-	// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
-	static void mergeDefaultConfig(GrailsApplication app) {
-		log.info("mergeDefaultConfig: Merging...")
-		ConfigObject currentConfig = app.config
-		ConfigSlurper slurper = new ConfigSlurper(Environment.getCurrent().getName());
-		ConfigObject secondaryConfig = slurper.parse(app.classLoader.loadClass("UnifinaCoreDefaultConfig"))
-		currentConfig.putAll(secondaryConfig.merge(currentConfig))
 	}
 	
 	def onDestroy() {

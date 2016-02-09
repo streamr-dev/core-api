@@ -6,7 +6,6 @@ import org.codehaus.groovy.grails.plugins.GrailsPlugin
 import com.unifina.security.MyPolicy
 import com.unifina.security.MySecurityManager
 import com.unifina.security.PackageAccessHelper
-import com.unifina.service.BootService
 
 class UnifinaCoreGrailsPlugin {
     // the plugin version
@@ -114,9 +113,7 @@ class UnifinaCoreGrailsPlugin {
     }
 
     def doWithSpring = {
-		// from http://swestfall.blogspot.fi/2011/08/grails-plugins-and-default-configs.html
-		// Should not be called any later than this, otherwise plugins might startup with missing config
-		BootService.mergeDefaultConfig(application)
+
     }
 	
     def doWithDynamicMethods = { ctx ->
