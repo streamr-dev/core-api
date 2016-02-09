@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 public class RuntimeRequest extends LinkedHashMap<String, Object> {
-	
+
 	Future<RuntimeResponse> future = null;
 	boolean authenticated = false;
 	
 	public RuntimeRequest(Map<String, Object> msg) {
 		super();
-		
+
 		if (msg.get("type")==null)
 			throw new IllegalArgumentException("RuntimeRequests must contain the key 'type', with a String value identifying the type of request.");
 		

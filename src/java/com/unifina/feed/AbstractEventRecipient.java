@@ -20,7 +20,7 @@ import com.unifina.utils.Globals;
  *
  * @param <ModuleClass> The type of objects than can be registered
  */
-public abstract class AbstractEventRecipient<ModuleClass,MessageType> implements IEventRecipient, IStartListener {
+public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends ITimestamped> implements IEventRecipient, IStartListener {
 
 	protected ArrayList<ModuleClass> modules = new ArrayList<>();
 	protected int moduleSize = 0;
@@ -84,6 +84,6 @@ public abstract class AbstractEventRecipient<ModuleClass,MessageType> implements
 	 * modules. Propagation will take place immediately after calling this method.
 	 * @param event
 	 */
-	protected abstract void sendOutputFromModules(FeedEvent<MessageType> event);
+	protected abstract void sendOutputFromModules(FeedEvent<MessageClass, ? extends IEventRecipient> event);
 	
 }

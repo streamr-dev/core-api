@@ -5,11 +5,13 @@ import com.unifina.utils.Globals;
 
 /**
  * Establishes a common key that can be extracted from both the subscriber object
- * as well as the messages. The key will be used to pair these together.
- * @param <Subscriber>
- * @param <Message>
+ * as well as the messages. The key will be used to pair these together and to subscribe
+ * the MessageSource.
+ * @param <ModuleClass>
+ * @param <MessageClass>
+ * @param <KeyClass>
  */
-public abstract class AbstractKeyProvider<Subscriber, Message> {
+public abstract class AbstractKeyProvider<ModuleClass, MessageClass, KeyClass> {
 	
 	protected Globals globals;
 	protected Feed feed;
@@ -25,7 +27,7 @@ public abstract class AbstractKeyProvider<Subscriber, Message> {
 	 * @param subscriber
 	 * @return
 	 */
-	public abstract Object getSubscriberKey(Subscriber subscriber);
+	public abstract KeyClass getSubscriberKey(ModuleClass subscriber);
 	
 	/**
 	 * Extracts a key from a message that can be used to find the correct 
@@ -33,5 +35,5 @@ public abstract class AbstractKeyProvider<Subscriber, Message> {
 	 * @param message
 	 * @return
 	 */
-	public abstract Object getMessageKey(Message message);
+	public abstract KeyClass getMessageKey(MessageClass message);
 }

@@ -28,7 +28,7 @@ import com.unifina.utils.Globals;
  * files it obtains via DataService.
  * @author Henri
  */
-public abstract class AbstractHistoricalFileFeed<MessageType> extends AbstractHistoricalFeed<MessageType> {
+public abstract class AbstractHistoricalFileFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient> extends AbstractHistoricalFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass> {
 	
 	protected HashMap<IEventRecipient,Integer> counts = new HashMap<>();
 	protected HashMap<IEventRecipient, FeedFileService.StreamResponse> streams = new HashMap<>();
@@ -41,8 +41,8 @@ public abstract class AbstractHistoricalFileFeed<MessageType> extends AbstractHi
 	}
 
 	@Override
-	protected IEventRecipient createEventRecipient(Object subscriber) {
-		IEventRecipient r = super.createEventRecipient(subscriber);
+	protected EventRecipientClass createEventRecipient(ModuleClass subscriber) {
+		EventRecipientClass r = super.createEventRecipient(subscriber);
 		counts.put(r,0);
 		return r;
 	}
@@ -66,9 +66,9 @@ public abstract class AbstractHistoricalFileFeed<MessageType> extends AbstractHi
 		return feedFileService.getUnits(beginDate, endDate, feeds);
 	}
 
-	private FeedEventIterator createIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient) {
-		Iterator<MessageType> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
-		return new FeedEventIterator(contentIterator, this, recipient);
+	private FeedEventIterator<MessageClass, EventRecipientClass> createIterator(FeedFile feedFile, Date day, InputStream inputStream, EventRecipientClass recipient) {
+		Iterator<MessageClass> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
+		return new FeedEventIterator<>(contentIterator, this, recipient);
 	}
 	
 	/**
@@ -78,7 +78,7 @@ public abstract class AbstractHistoricalFileFeed<MessageType> extends AbstractHi
 	 * @param recipient
 	 * @return
 	 */
-	protected abstract Iterator<MessageType> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, IEventRecipient recipient);
+	protected abstract Iterator<MessageClass> createContentIterator(FeedFile feedFile, Date day, InputStream inputStream, EventRecipientClass recipient);
 	
 	/**
 	 * Retrieves a StreamResponse from FileFeedService and creates a FeedEventIterator for the stream.
@@ -89,7 +89,7 @@ public abstract class AbstractHistoricalFileFeed<MessageType> extends AbstractHi
 	 * @throws Exception
 	 */
 	@Override
-	protected FeedEventIterator getNextIterator(IEventRecipient recipient) throws IOException {
+	protected FeedEventIterator<MessageClass, EventRecipientClass> getNextIterator(EventRecipientClass recipient) throws IOException {
 		while (true) {
 			Integer cnt = counts.get(recipient);
 			

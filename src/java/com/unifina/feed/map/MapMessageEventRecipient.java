@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.StreamEventRecipient;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -44,7 +45,7 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 	}
 	
 	@Override
-	protected void sendOutputFromModules(FeedEvent<MapMessage> event) {
+	protected void sendOutputFromModules(FeedEvent<MapMessage, ? extends IEventRecipient> event) {
 		if (outputsByName==null)
 			initCacheMap();
 		

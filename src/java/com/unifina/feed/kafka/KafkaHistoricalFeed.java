@@ -1,5 +1,6 @@
 package com.unifina.feed.kafka;
 
+import com.unifina.data.IStreamRequirement;
 import com.unifina.utils.TimeOfDayUtil;
 import grails.converters.JSON;
 
@@ -25,7 +26,7 @@ import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.time.DateUtils;
 
-public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<KafkaMessage> {
+public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
 	Properties kafkaProperties;
@@ -37,12 +38,6 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<KafkaMessage
 		kafkaProperties = new Properties();
 		for (String s : kafkaConfig.keySet())
 			kafkaProperties.setProperty(s, kafkaConfig.get(s).toString());
-	}
-
-	@Override
-	protected Date getTimestamp(KafkaMessage eventContent,
-			Iterator<KafkaMessage> contentIterator) {
-		return eventContent.timestamp;
 	}
 
 	@Override

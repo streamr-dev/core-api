@@ -6,29 +6,29 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
 
 /**
  * This singleton class serves two purposes:
- * - Distribute incoming feed data (type T) to instance-specific feed proxies
- * - Preprocess raw feed data (Message -> T) to avoid repeating the same work in each feed proxy
+ * - Distribute incoming feed data (type RawMessageClass) to instance-specific feed proxies
+ * - Preprocess raw feed data (Message -> MessageClass) to avoid repeating the same work in each feed proxy
  * @author Henri
  *
- * @param <T>
+ * @param <RawMessageClass>
+ * @param <MessageClass>
+ * @param <KeyClass>
  */
-public class MessageHub<R,T> extends Thread implements MessageRecipient {
+public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread implements MessageRecipient {
 
 	protected MessageSource source;
-	protected MessageParser<R,T> parser;
+	protected MessageParser<RawMessageClass, MessageClass> parser;
 	protected IFeedCache cache;
 	
 	protected ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000*1000);
 	protected ArrayList<MessageRecipient> proxies = new ArrayList<>();
-	protected HashMap<Object, List<MessageRecipient>> proxiesByKey = new HashMap<>();
+	protected HashMap<KeyClass, List<MessageRecipient>> proxiesByKey = new HashMap<>();
 	
 	protected MessageRecipient[] proxiesByPriority = new MessageRecipient[0];
 	protected Comparator<MessageRecipient> proxyPriorityComparator = new Comparator<MessageRecipient>() {
@@ -42,7 +42,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 	private static final Logger log = Logger.getLogger(MessageHub.class);
 
 	
-	protected MessageHub(MessageSource source, MessageParser<R,T> parser, IFeedCache cache) {
+	protected MessageHub(MessageSource source, MessageParser<RawMessageClass, MessageClass> parser, IFeedCache cache) {
 		this.source = source;
 		this.cache = cache;
 		this.parser = parser;
@@ -58,7 +58,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 //		start(); not safe to start Thread in constructor! Started in FeedFactory
 	}
 	
-	public MessageParser<R,T> getParser() {
+	public MessageParser<RawMessageClass, MessageClass> getParser() {
 		return parser;
 	}
 	
@@ -69,7 +69,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 	@Override
 	public void run() {
 		while (!quit) {
-			Message m;
+			Message<MessageClass, KeyClass> m;
 
 			// Blocks if empty
 			try {
@@ -78,10 +78,10 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 				throw new RuntimeException(e);
 			}
 			
-			Message parsedMessage = null;
+			ParsedMessage<RawMessageClass, MessageClass, KeyClass> parsedMessage = null;
 			try {
 				// Preprocess here to avoid repeating something in each feed proxy
-				parsedMessage = new Message(m.counter, parser.parse((R) m.message), m.message);
+				parsedMessage = new ParsedMessage(m.counter, parser.parse((RawMessageClass) m.message), m.message);
 				parsedMessage.checkCounter = m.checkCounter; 				// TODO: make cleaner
 			} catch (Exception e) {
 				log.error("Failed to parse message "+m.message.toString(),e);
@@ -207,7 +207,7 @@ public class MessageHub<R,T> extends Thread implements MessageRecipient {
 	 * @param key
 	 * @param proxy
 	 */
-	public void subscribe(Object key, MessageRecipient proxy) {
+	public void subscribe(KeyClass key, MessageRecipient proxy) {
 		
 		synchronized(proxiesByKey) {
 			if (!proxiesByKey.containsKey(key))

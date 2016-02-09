@@ -9,9 +9,9 @@ import com.unifina.utils.Globals;
  * @author Henri
  *
  * @param <ModuleClass>
- * @param <MessageType>
+ * @param <MessageClass>
  */
-public abstract class StreamEventRecipient<ModuleClass, MessageType> extends AbstractEventRecipient<ModuleClass, MessageType> {
+public abstract class StreamEventRecipient<ModuleClass, MessageClass extends ITimestamped> extends AbstractEventRecipient<ModuleClass, MessageClass> {
 
 	private Stream stream;
 
