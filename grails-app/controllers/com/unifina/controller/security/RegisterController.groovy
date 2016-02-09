@@ -39,8 +39,9 @@ class RegisterController {
         def invite = SignupInvite.findByCode(cmd.invite)
         if (!invite || invite.used || !invite.sent) {
             flash.message = "Sorry, that is not a valid invitation code"
-            if(invite)
-                flash.message+=". Code: $invite.code"
+            if (invite) {
+				flash.message += ". Code: $invite.code"
+			}
             redirect action: 'signup'
             return
         }
@@ -93,13 +94,14 @@ class RegisterController {
         if (request.method != "POST") {
             return [ user: new EmailCommand() ]
         }
-
         if (cmd.hasErrors()) {
             render view: 'signup', model: [ user: cmd ]
             return
         }
+
         SignupInvite invite
-        if(Environment.current == Environment.TEST){
+        if (Environment.current == Environment.TEST) {
+			// kludge needed for RegisterSpec."registering can now be done correctly"()
             invite = new SignupInvite(
                 username: cmd.username,
                 code: cmd.username.replaceAll("@", "_"),
