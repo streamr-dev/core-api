@@ -30,7 +30,7 @@ class RegisterControllerSpec extends Specification {
 	String reauthenticated = null
 
 	void setupSpec() {
-		BootService.mergeDefaultConfig(grailsApplication)
+
 	}
 
 	def springSecurityService = [

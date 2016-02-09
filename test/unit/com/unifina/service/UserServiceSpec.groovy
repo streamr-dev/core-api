@@ -59,9 +59,6 @@ class UserServiceSpec extends Specification {
 	def permissionService
 
     def setup() {
-        // This is normally run in UnifinaCoreGrailsPlugin.groovy -> doWithSpring,
-        // but unit test environment doesn't execute that
-        BootService.mergeDefaultConfig(grailsApplication)
         defineBeans {
             passwordEncoder(PlaintextPasswordEncoder)
             springSecurityService(SpringSecurityService)
