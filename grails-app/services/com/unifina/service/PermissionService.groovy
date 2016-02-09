@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Canvas
 import grails.gorm.DetachedCriteria
 import grails.plugin.springsecurity.SpringSecurityService
@@ -16,6 +17,19 @@ import com.unifina.domain.security.Permission
 
 import java.security.AccessControlException
 
+/**
+ * grant and revoke functions that ensure the Access Control Lists (ACLs) made up of Permissions are valid
+ *
+ * Complexities:
+ * 		- in addition to Permissions, "resource owner" (i.e. resource.user if exists) has all access to that resource
+ * 			=> there doesn't always exist a Permission object in database for each "access right"
+ * 			=> hence functions like getNonOwnerPermissions vs getPermittedOperations (also for the owner)
+ * 		- resources can be pointed with longId or stringId
+ * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
+ * 			=> following is supported for both: grant, revoke, systemGrant, systemRevoke, getPermissionsTo
+ * 		- combinations of read/write/share (RWS) should be restricted, e.g. to disallow write without read?
+ * 			TODO: discuss... current implementation with alsoRevoke but no alsoGrant is conservative but lopsided
+ */
 class PermissionService {
 
 	def grailsApplication
@@ -29,6 +43,7 @@ class PermissionService {
 	// cascade some revocations to "higher" rights too
 	//   to ensure a meaningful combination (e.g. "write" without "read" makes no sense)
 	final alsoRevoke = ["read": ["write", "share"]]
+	//final alsoGrant = ["write": ["read"], "share": ["read"]]
 
 	/**
 	 * Execute a closure body using a specific resource
@@ -67,11 +82,17 @@ class PermissionService {
 	 * @param user if null, query all users for this resource
      * @return List of Permissions that have been granted by the resource owner
      */
-	private List<Permission> getNonOwnerPermissions(SecUser user, resource) {
+	private List<Permission> getNonOwnerPermissions(user, resource) {
 		useResource(resource) { clazz, id, idIsString ->
 			Permission.withCriteria {
 				if (user != null) {
-					eq("user", user)
+					if (user instanceof SecUser) {
+						eq("user", user)
+					} else if (user instanceof SignupInvite) {
+						eq("invite", user)
+					} else {
+						throw new IllegalArgumentException("Permission owner must be a user or a sign-up-invitation!")
+					}
 				}
 				eq("clazz", clazz)
 				if (idIsString) {
@@ -99,28 +120,15 @@ class PermissionService {
 		useResource(resource) { clazz, id, idIsString ->
 			List<Permission> perms = getNonOwnerPermissions(null, resource).toList()
 			// Generated non-saved "dummy permissions"
-			if (resource.user) {
+			if (resource.hasProperty("user")) {
 				ownerPermissions.each {
 					perms.add(idIsString ?
-						new Permission(id: null, user: resource.user, clazz: clazz, operation: it, longId: 0, stringId: resource.id) :
+						new Permission(id: null, user: resource.user, clazz: clazz, operation: it, stringId: resource.id) :
 						new Permission(id: null, user: resource.user, clazz: clazz, operation: it, longId: resource.id))
 				}
 			}
 			perms
 		}
-	}
-
-	/**
-	 * System function, use responsibly! Check first that whoever asks canShare the resource!
-	 * @param resource whose potential accessors are listed
-	 * @return [secUser: ["read", "write", "share"]]
-	 */
-	public Map<SecUser, List<String>> getPermittedOperationsGroupedByUser(resource) {
-		Map perms = getNonOwnerPermissions(null, resource)
-				.groupBy { it.user }
-				.collectEntries { u, ps -> [u, ps*.operation] }
-		if (resource.user) { perms[resource.user] = ownerPermissions }
-		return perms
 	}
 
 	/** Test if given user can read given resource instance */
@@ -203,9 +211,9 @@ class PermissionService {
 	 * @throws AccessControlException if grantor doesn't have the 'share' permission
 	 * @throws IllegalArgumentException if trying to give resource owner "more" access permissions
      */
-	public Permission grant(SecUser grantor, resource, SecUser target, String operation="read", boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+	public Permission grant(SecUser grantor, resource, target, String operation="read", boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		// owner already has all access, can't give "more" access
-		if (isOwner(target, resource)) {
+		if (target instanceof SecUser && isOwner(target, resource)) {
 			throw new IllegalArgumentException("Can't add access permissions to $resource for owner (${target?.username}, id ${target?.id})!")
 		}
 
@@ -215,7 +223,7 @@ class PermissionService {
 		} else {
 			if (logIfDenied) {
 				log.warn("${grantor?.username}(id ${grantor?.id}) tried to share $resource without Permission!")
-				if (resource?.user) {
+				if (resource?.hasProperty("user")) {
 					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 				}
 			}
@@ -225,27 +233,39 @@ class PermissionService {
 
 	/**
 	 * "Internal" version of Permission granting; not done as any specific SecUser
-	 * @param target user that will receive the access
+	 * @param target SecUser (or transiently SignupInvite) that will receive the access
 	 * @param resource to be shared
 	 * @param operation "read", "write", "share"
      * @return
      */
-	public Permission systemGrant(SecUser target, resource, String operation="read") {
-		if (operation in allOperations) {
-			// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
-			//   hence, class.name of a proxy object won't match later class.name queries
-			def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
-			def idProp = clazz.properties["declaredFields"].find { it.name == "id" }
-			if (idProp == null) { throw new IllegalArgumentException("$clazz doesn't have an 'id' field!") }
-			if (idProp.type == Long) {
-				return new Permission(user: target, clazz: clazz.name, longId: resource.id, stringId: null, operation: operation).save(flush: true, failOnError: true)
-			} else if (idProp.type == String) {
-				return new Permission(user: target, clazz: clazz.name, longId: 0, stringId: resource.id, operation: operation).save(flush: true, failOnError: true)
+	public Permission systemGrant(target, resource, String operation="read") {
+		if (!(operation in allOperations)) {
+			throw new IllegalArgumentException("Operation should be one of " + allOperations)
+		}
+		def targetIsInvite = target instanceof SignupInvite
+		if (!targetIsInvite && !(target instanceof SecUser)) {
+			throw new IllegalArgumentException("Permission grant target must be a user or a sign-up-invitation!")
+		}
+
+		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
+		//   hence, class.name of a proxy object won't match later class.name queries
+		def clazz = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+		def idProp = clazz.properties["declaredFields"].find { it.name == "id" }
+		if (idProp == null) { throw new IllegalArgumentException("$clazz doesn't have an 'id' field!") }
+		if (idProp.type == Long) {
+			if (targetIsInvite) {
+				return new Permission(invite: target, clazz: clazz.name, longId: resource.id, stringId: null, operation: operation).save(flush: true, failOnError: true)
 			} else {
-				throw new IllegalArgumentException("$clazz doesn't have an 'id' field of type either Long or String!")
+				return new Permission(user: target, clazz: clazz.name, longId: resource.id, stringId: null, operation: operation).save(flush: true, failOnError: true)
+			}
+		} else if (idProp.type == String) {
+			if (targetIsInvite) {
+				return new Permission(invite: target, clazz: clazz.name, stringId: resource.id, operation: operation).save(flush: true, failOnError: true)
+			} else {
+				return new Permission(user: target, clazz: clazz.name, stringId: resource.id, operation: operation).save(flush: true, failOnError: true)
 			}
 		} else {
-			throw new IllegalArgumentException("Operation should be one of " + allOperations)
+			throw new IllegalArgumentException("$clazz doesn't have an 'id' field of type either Long or String!")
 		}
 	}
 
@@ -257,9 +277,9 @@ class PermissionService {
 	 * @param operation includes also all "higher" operations, e.g. "read" also revokes "share"
 	 * @returns Permission objects that were deleted
      */
-	public List<Permission> revoke(SecUser revoker, resource, SecUser target, String operation="read", boolean logIfDenied=true) throws AccessControlException {
+	public List<Permission> revoke(SecUser revoker, resource, target, String operation="read", boolean logIfDenied=true) throws AccessControlException {
 		// can't revoke ownership
-		if (isOwner(target, resource)) {
+		if (target instanceof SecUser && isOwner(target, resource)) {
 			throw new AccessControlException("Can't revoke owner's (${target?.username}, id ${target?.id}) access to $resource!")
 		}
 
@@ -268,7 +288,7 @@ class PermissionService {
 		} else {
 			if (logIfDenied) {
 				log.warn("${revoker?.username}(id ${revoker?.id}) tried to revoke $resource without 'share' Permission!")
-				if (resource?.user) {
+				if (resource?.hasProperty("user")) {
 					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 				}
 			}
@@ -283,7 +303,12 @@ class PermissionService {
 	 * @param operation includes also all "higher" operations, e.g. "read" also revokes "share"
      * @return Permission objects that were deleted
      */
-	public List<Permission> systemRevoke(SecUser target, resource, String operation="read") {
+	public List<Permission> systemRevoke(target, resource, String operation="read") {
+		def targetIsInvite = target instanceof SignupInvite
+		if (!targetIsInvite && !(target instanceof SecUser)) {
+			throw new IllegalArgumentException("Permission grant target must be a user or a sign-up-invitation!")
+		}
+
 		def ret = []
 		def perms = getNonOwnerPermissions(target, resource)
 		def revokeOp = { String op -> perms.findAll { it.operation == op }.each {

@@ -5,9 +5,11 @@ package com.unifina.domain.security
  */
 class Permission {
 
-	static belongsTo = [user: SecUser]
+	// Permission "belongs to" either a SecUser or (transiently) a SignupInvite
+	SecUser user
+	SignupInvite invite
 
-	/** class of the resource, e.g. "Dashboard" */
+	/** full class name of the resource, e.g. "com.unifina.domain.dashboard.Dashboard" */
 	String clazz
 
 	// either stringId (UUID) or longId (autoincrement or similar) is used to refer to a resource, depending on resource type
@@ -20,17 +22,19 @@ class Permission {
 	static constraints = {
 		stringId(nullable: true)
 		longId(nullable: true)
+		user(nullable: true)
+		invite(nullable: true)
 	}
 
 	/**
-	 * Resource is not indicated because API caller will have it in the URL
+	 * Client-side representation of Permission object
+	 * Resource type/id is not indicated because API caller will have it in the URL
 	 * @return map to be shown to the API callers
+	 *
      */
-	public Map toMap() {
-		[
-			id: id,
-			user: user.username,
-			operation: operation
-		]
-	}
+	public Map toMap() {[
+		id: id,
+		user: user?.username ?: invite?.username,
+		operation: operation
+	]}
 }

@@ -119,7 +119,7 @@
         '</div>' +
         '<div class="access-list"></div>' +
         '<div class="form-inline new-user-row">' +
-            '<input type="text" class="new-user-field form-group" placeholder="Enter username" autofocus>' +
+            '<input type="text" class="new-user-field form-group" placeholder="Enter email address" autofocus>' +
             '<button class="new-user-button btn btn-default" type="button"><span class="icon fa fa-plus"></span></button>' +
         '</div>'
     )

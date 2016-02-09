@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.security.SignupInvite
 import spock.lang.Specification
 
 import com.unifina.domain.security.SecUser
@@ -22,10 +23,11 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, Module, ModulePackage, Permission, Dashboard, Canvas, UiChannel])
+@Mock([SecUser, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas, UiChannel])
 class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
+	SignupInvite invite
 
 	ModulePackage modPackAllowed, modPackRestricted, modPackOwned
 	Module modAllowed, modRestricted, modOwned
@@ -44,6 +46,9 @@ class PermissionServiceSpec extends Specification {
 		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
 		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret").save(validate:false)
 		stranger = new SecUser(username: "stranger", password: "x", apiKey: "strangeApiKey", apiSecret: "strangeApiSecret").save(validate:false)
+
+		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
+		invite = new SignupInvite(username: "friend", code: "sikritCode", sent: true, used: false).save(validate:false)
 
 		// ModulePackages
 		modPackAllowed = new ModulePackage(name:"allowed", user:anotherUser).save(validate:false)
@@ -269,7 +274,8 @@ class PermissionServiceSpec extends Specification {
 	void "granting works (roughly) idempotently"() {
 		expect:
 		service.getAllReadable(stranger, Dashboard) == []
-		when:
+		when: "double-granting still has the same effect: there exists a permission for user to resource"
+		service.grant(me, dashOwned, stranger)
 		service.grant(me, dashOwned, stranger)
 		then: "now you see it..."
 		service.getAllReadable(stranger, Dashboard) == [dashOwned]
@@ -280,6 +286,32 @@ class PermissionServiceSpec extends Specification {
 		service.revoke(me, dashOwned, stranger)
 		then: "now you don't."
 		service.getAllReadable(stranger, Dashboard) == []
+	}
+
+	void "signup invitation can be granted and revoked of permissions just like normal users"() {
+		expect:
+		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
+		!service.getPermissionsTo(uicRestricted).find { it.invite == invite }
+
+		when:
+		service.grant(me, dashOwned, invite)
+		then:
+		service.getPermissionsTo(dashOwned).find { it.invite == invite }
+
+		when:
+		service.revoke(me, dashOwned, invite)
+		then:
+		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
+
+		when:
+		service.systemGrant(invite, uicRestricted)
+		then:
+		service.getPermissionsTo(uicRestricted).find { it.invite == invite }
+
+		when:
+		service.systemRevoke(invite, uicRestricted)
+		then:
+		!service.getPermissionsTo(uicRestricted).find { it.invite == invite }
 	}
 
 	//----------------------------------

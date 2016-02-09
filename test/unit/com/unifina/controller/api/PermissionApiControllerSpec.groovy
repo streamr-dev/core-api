@@ -39,11 +39,11 @@ class PermissionApiControllerSpec extends Specification {
 		streamShared = new Stream(id: 2, uuid: "shared", user: other).save(validate: false)
 		streamRestricted = new Stream(id: 3, uuid: "restricted", user: other).save(validate: false)
 
-		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, longId: 0, stringId: canvasShared.id, operation: "share").save(validate: false)
+		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasShared.id, operation: "share").save(validate: false)
 		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: "share").save(validate: false)
 
 		// read permission doesn't mean you're allowed to peek into sharing-dialog
-		new Permission(id: 1, user: me, clazz: Canvas.name, longId: 0, stringId: canvasRestricted.id, operation: "read").save(validate: false)
+		new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: "read").save(validate: false)
 		new Permission(id: 2, user: me, clazz: Stream.name, longId: streamRestricted.id, operation: "read").save(validate: false)
     }
 
