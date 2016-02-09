@@ -240,6 +240,23 @@ class CanvasServiceSpec extends Specification {
 		uiChannelIdsFromMap(canvas.toMap()).containsAll(existingUiChannelIds)
 	}
 
+	def "updateExisting throws error if trying to update running canvas"() {
+		setup: "set canvas state to running"
+		Canvas myCanvas2 = Canvas.findByName("my_canvas_2")
+		myCanvas2.state = Canvas.State.RUNNING
+
+		when:
+		def command = new SaveCanvasCommand(
+			name: "my_updated_canvas",
+			modules: [],
+			settings: ["a" : "b"]
+		)
+		service.updateExisting(myCanvas2, command)
+
+		then:
+		thrown(InvalidStateException)
+	}
+
 	def "createNew always generates new uiChannels"() {
 		def createCommand = new SaveCanvasCommand(
 			name: "my_canvas_with_modules",
