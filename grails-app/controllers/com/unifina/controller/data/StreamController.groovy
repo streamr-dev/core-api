@@ -1,5 +1,6 @@
 package com.unifina.controller.data
 
+import com.unifina.data.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -59,10 +60,13 @@ class StreamController {
 		def model = [stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
 		
 		// User streams
-		if (stream.feed.id==7) {
-			render(template:"userStreamDetails", model:model)
+		if (stream.feed.isKafkaFeed()) {
+			render(template: "userStreamDetails", model: model)
+		} else if (stream.feed.isMongoFeed()) {
+			render(template: "mongoStreamDetails", model: model)
+		}  else {
+			render ""
 		}
-		else render ""
 	}
 
 	def update() {
@@ -123,6 +127,24 @@ class StreamController {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
 		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+	}
+
+	def configureMongo() {
+		Stream stream = Stream.get(params.id)
+		[stream: stream, mongo: stream.retrieveMongoDbConfig()]
+	}
+
+	def updateMongo(MongoDbConfig config) {
+		Stream stream = Stream.get(params.id)
+
+		if (config.validate()) {
+			stream.updateMongoDbConfig(config)
+			stream.save(flush: true, failOnError: true)
+			redirect(action: "show", id: stream.id)
+		} else {
+			flash.error = "Missing / incorrect fields"
+			render(view: "configureMongo", model: [stream: stream, mongo: config])
+		}
 	}
 	
 	def delete() {

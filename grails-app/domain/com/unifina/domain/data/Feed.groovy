@@ -55,4 +55,12 @@ class Feed implements Serializable {
 	public boolean equals(Object obj) {
 		return obj instanceof Feed && obj.id == this.id
 	}
+
+	public boolean isKafkaFeed() {
+		return id == 7
+	}
+
+	public boolean isMongoFeed() {
+		return id == 8
+	}
 }

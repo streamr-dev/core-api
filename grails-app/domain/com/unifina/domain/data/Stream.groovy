@@ -1,7 +1,9 @@
 package com.unifina.domain.data
 
+import com.unifina.data.MongoDbConfig
 import com.unifina.domain.security.SecUser
 import grails.converters.JSON
+import groovy.json.JsonBuilder
 
 class Stream implements Comparable {
 	Long id
@@ -68,4 +70,15 @@ class Stream implements Comparable {
 		else return [:]
 	}
 
+
+	public MongoDbConfig retrieveMongoDbConfig() {
+		def mongoMap = getStreamConfigAsMap()["mongodb"]
+		return mongoMap == null ? null : new MongoDbConfig(mongoMap)
+	}
+
+	public void updateMongoDbConfig(MongoDbConfig mongoDbConfig) {
+		def config = getStreamConfigAsMap()
+		config["mongodb"] = mongoDbConfig.toMap()
+		streamConfig = new JsonBuilder(config).toString()
+	}
 }
