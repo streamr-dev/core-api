@@ -241,4 +241,21 @@ modules = {
 		resource url: "https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
 		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
 	}
+	'swagger' {
+		dependsOn 'jquery, underscore, jquery-migrate'
+		//resource url:[dir: 'js/swagger/lib/', file: 'jquery-1.8.0.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
+		//resource url:[dir: 'js/swagger/lib/', file: 'underscore-min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/', file: 'swagger-ui.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jsoneditor.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'marked.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'swagger-oauth.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
+	}
 }

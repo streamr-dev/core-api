@@ -63,6 +63,9 @@ class CanvasService {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
+		if (canvas.state != Canvas.State.STOPPED) {
+			throw new InvalidStateException("Cannot update state with state " + canvas.state)
+		}
 
 		Map oldSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : null
 		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, resetUi)
@@ -74,6 +77,11 @@ class CanvasService {
 		canvas.json = new JsonBuilder(newSignalPathMap).toString()
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
+
+		// clear serialization
+		canvas.serialized = null
+		canvas.serializationTime = null
+
 		canvas.save(flush: true, failOnError: true)
 	}
 

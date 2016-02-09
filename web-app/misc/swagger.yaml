@@ -6,7 +6,7 @@ info:
 host: www.streamr.com
 schemes:
   - https
-host: streamr.com
+
 basePath: /api/v1
 produces:
   - application/json
@@ -356,7 +356,6 @@ definitions:
         example: 'My stream description'
       config:
         $ref: '#/definitions/StreamConfig'
-        description: Stream configuration
 
   StreamConfig:
     type: object
@@ -404,7 +403,6 @@ definitions:
             description: whether module uses exported inputs or outputs
           uiChannel:
             $ref: '#/definitions/UiChannel'
-            description: The UI Channel for this Canvas
           state:
             $ref: '#/definitions/CanvasState'
           adhoc:

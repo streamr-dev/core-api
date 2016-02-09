@@ -240,6 +240,42 @@ class CanvasServiceSpec extends Specification {
 		uiChannelIdsFromMap(canvas.toMap()).containsAll(existingUiChannelIds)
 	}
 
+	def "updateExisting clears serialization"() {
+		setup:
+		myFirstCanvas.serialized = "{}"
+		myFirstCanvas.serializationTime = new Date()
+
+		when:
+		def command = new SaveCanvasCommand(
+			name: "my_updated_canvas",
+			modules: [],
+			settings: ["a" : "b"]
+		)
+		service.updateExisting(myFirstCanvas, command)
+
+		then:
+		Canvas c = Canvas.findById(myFirstCanvas.id)
+		c.serialized == null
+		c.serializationTime == null
+
+	}
+
+	def "updateExisting throws error if trying to update running canvas"() {
+		setup:
+		myFirstCanvas.state = Canvas.State.RUNNING
+
+		when:
+		def command = new SaveCanvasCommand(
+			name: "my_updated_canvas",
+			modules: [],
+			settings: ["a" : "b"]
+		)
+		service.updateExisting(myFirstCanvas, command)
+
+		then:
+		thrown(InvalidStateException)
+	}
+
 	def "createNew always generates new uiChannels"() {
 		def createCommand = new SaveCanvasCommand(
 			name: "my_canvas_with_modules",
