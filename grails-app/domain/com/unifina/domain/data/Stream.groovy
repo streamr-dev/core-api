@@ -10,23 +10,19 @@ class Stream implements Comparable {
 	String uuid
 	String apiKey
 	SecUser user
-	
+
 	String name
 	Feed feed
-	String streamConfig
-	// An id local to the Feed
-
-	@Deprecated
-	String localId
+	String config
 	String description
 	
 	Date firstHistoricalDay
 	Date lastHistoricalDay
-	
+
 	static constraints = {
 		name(blank:false)
-		localId(nullable:true)
-		streamConfig(nullable:true)
+
+		config(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
@@ -37,17 +33,26 @@ class Stream implements Comparable {
 	
 	static mapping = {
 		name index:"name_idx"
-		localId index: 'localId_idx'
 		uuid index: "uuid_idx"
 		feed lazy:false
-		streamConfig type: 'text'
+		config type: 'text'
 	}
 	
 	@Override
 	public String toString() {
 		return name
 	}
-	
+
+	def toMap() {
+		[
+			uuid: uuid,
+			apiKey: apiKey,
+			name: name,
+			config: config == null || config.empty ? config : JSON.parse(config),
+			description: description
+		]
+	}
+
 	@Override
 	public int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0
@@ -65,8 +70,8 @@ class Stream implements Comparable {
 	}
 
 	public Map<String, Object> getStreamConfigAsMap() {
-		if (streamConfig!=null)
-			return ((Map)JSON.parse(streamConfig));
+		if (config!=null)
+			return ((Map)JSON.parse(config));
 		else return [:]
 	}
 
@@ -77,8 +82,8 @@ class Stream implements Comparable {
 	}
 
 	public void updateMongoDbConfig(MongoDbConfig mongoDbConfig) {
-		def config = getStreamConfigAsMap()
-		config["mongodb"] = mongoDbConfig.toMap()
-		streamConfig = new JsonBuilder(config).toString()
+		def newConfig = getStreamConfigAsMap()
+		newConfig["mongodb"] = mongoDbConfig.toMap()
+		config = new JsonBuilder(newConfig).toString()
 	}
 }

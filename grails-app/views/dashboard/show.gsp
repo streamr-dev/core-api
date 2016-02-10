@@ -29,7 +29,7 @@
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 					
-					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
+					$.getJSON("${createLink(controller:'canvasApi', action:'index', params: [state: "running", adhoc: false])}", {}, function(rspJson) {
 						var sidebar = new SidebarView({
 							edit: ${params.edit ? "true" : "undefined"},
 							dashboard: dashboard, 

@@ -1,8 +1,8 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.domain.signalpath.RunningSignalPath;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
@@ -32,7 +32,7 @@ public class SignalPath extends ModuleWithUI {
 	List<Input> exportedInputs = new ArrayList<Input>();
 	List<Output> exportedOutputs = new ArrayList<Output>();
 	
-	RunningSignalPath runningSignalPath = null;
+	Canvas canvas = null;
 	Map representation = null;
 	Map<Integer,AbstractSignalPathModule> modulesByHash = new HashMap<>();
 	
@@ -239,9 +239,10 @@ public class SignalPath extends ModuleWithUI {
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (sp!=null && sp.value!=null) {
-			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())).getJSONObject("signalPathData"));
+			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())));
+		} else {
+			initFromRepresentation(config);
 		}
-		else initFromRepresentation(config);
 	}
 	
 	@Override
@@ -340,6 +341,11 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
+	public String getUiChannelName() {
+		return "Notifications";
+	}
+
+	@Override
 	public void beforeSerialization() {
 		super.beforeSerialization();
 		for (AbstractSignalPathModule module : mods) {
@@ -399,12 +405,11 @@ public class SignalPath extends ModuleWithUI {
 		this.exportedOutputs = exportedOutputs;
 	}
 
-	public RunningSignalPath getRunningSignalPath() {
-		return runningSignalPath;
+	public Canvas getCanvas() {
+		return canvas;
 	}
 
-	public void setRunningSignalPath(RunningSignalPath runningSignalPath) {
-		this.runningSignalPath = runningSignalPath;
+	public void setCanvas(Canvas canvas) {
+		this.canvas = canvas;
 	}
-
 }

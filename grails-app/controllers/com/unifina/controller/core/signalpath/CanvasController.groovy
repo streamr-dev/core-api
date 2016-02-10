@@ -1,21 +1,16 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-
-import java.security.AccessControlException
-
 import org.atmosphere.cpr.BroadcasterFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
 
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
 import com.unifina.service.UnifinaSecurityService
-import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
@@ -30,20 +25,35 @@ class CanvasController {
 	UnifinaSecurityService unifinaSecurityService
 	
 	def index() {
-		redirect(action: "build", params:params)
+		redirect(action: "editor", params:params)
 	}
 
-	def build() {
+	def list() {
+		// TODO: replace query with permissionService method once that branch is ready
+		List<Canvas> canvases = Canvas.createCriteria().list() {
+			eq("user",springSecurityService.currentUser)
+			eq("adhoc",false)
+			if (params.term) {
+				like("name","%${params.term}%")
+			}
+			if (params.state) {
+				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})
+			}
+		}
+		[canvases: canvases, user:springSecurityService.currentUser, stateFilter: params.state ? params.list("state") : []]
+	}
+
+	def editor() {
 		def beginDate = new Date()-1
 		def endDate = new Date()-1
-		
-		def load = null
-		
-		if (params.load!=null) {
-			load = createLink(controller:"savedSignalPath",action:"load",params:[id:params.load])
-		}
-		
-		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+
+		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+	}
+
+	// Can be accessed anonymously for embedding canvases in iframes (eg. the landing page)
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def embed() {
+		[id:params.id]
 	}
 	
 	def reconstruct() {
@@ -78,5 +88,47 @@ class CanvasController {
 	def debug() {
 		return [runners: servletContext["signalPathRunners"], returnChannels: servletContext["returnChannels"], broadcasters: BroadcasterFactory.getDefault().lookupAll()]
 	}
+
+	def loadBrowser() {
+		def result = [
+				browserId: params.browserId,
+				headers: ["Name", "State"],
+				contentUrl: createLink(
+						controller: "canvas",
+						action: "loadBrowserContent",
+						params: [
+								browserId: params.browserId,
+								command: params.command
+						]
+				)
+		]
+
+		render(template: "loadBrowser", model: result)
+	}
+
+	def loadBrowserContent() {
+		def max = params.int("max") ?: 100
+		def offset = params.int("offset") ?: 0
+		def ssp
+		// TODO: do queries via permissionService once that branch is ready
+		if (params.browserId == 'examplesLoadBrowser') {
+			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
+		} else if (params.browserId == 'archiveLoadBrowser') {
+			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = false and sp.user = :user and sp.adhoc = false order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+		}
+
+		def result = [signalPaths:[]]
+		ssp.each {
+			def tmp = [:]
+			tmp.id = it[0]
+			tmp.name = it[1]
+			tmp.state = it[2]
+			tmp.command = params.command
+			tmp.offset = offset++
+			result.signalPaths.add(tmp)
+		}
+		return result
+	}
+
 	
 }

@@ -16464,11 +16464,17 @@ table.sortable th {
 body.embedded {
   background-color: transparent;
 }
-body.embedded #main-navbar {
+body.embedded #main-navbar,
+body.embedded #main-menu,
+body.embedded #main-menu-bg {
   display: none;
 }
+body.embedded .mme #main-wrapper,
+body.embedded #main-wrapper {
+  padding-left: 0px;
+}
 body.embedded #content-wrapper {
-  padding: 0;
+  padding: 0 !important;
 }
 body.embedded #content-wrapper > :not(.embeddable) {
   display: none;
@@ -16476,46 +16482,66 @@ body.embedded #content-wrapper > :not(.embeddable) {
 .math-tex:not(.math-jax-ready) {
   display: none;
 }
-body.build-page {
+body.canvas-editor-page {
   overflow: hidden;
   height: 100%;
   width: 100%;
 }
-body.build-page .form-group-period .input-group-addon {
+body.canvas-editor-page .form-group-period .input-group-addon {
   width: 60px;
 }
-body.build-page .load-save-group {
+body.canvas-editor-page.selected-theme .breadcrumb-page {
+  margin-top: 0px;
+}
+body.canvas-editor-page .load-save-group {
   width: 100%;
 }
-body.build-page .load-save-group > .btn,
-body.build-page .load-save-group > .btn-group {
-  width: 50%;
+body.canvas-editor-page .load-save-group > .btn,
+body.canvas-editor-page .load-save-group > .btn-group {
+  width: 33.33%;
 }
-body.build-page .load-save-group > .btn-group > .btn {
+body.canvas-editor-page .load-save-group > .btn-group > .btn {
   width: 100%;
 }
-body.build-page #save-dropdown-menu .disabled {
+body.canvas-editor-page #save-dropdown-menu .disabled {
   display: none;
 }
-body.build-page #run i.fa {
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:hover,
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:active {
+  color: #999;
+}
+body.canvas-editor-page .run-button i.fa {
   margin-right: 5px;
 }
-body.build-page #run-group button.dropdown-toggle {
+body.canvas-editor-page .run-group button.dropdown-toggle {
   padding-left: 0px;
   padding-right: 0px;
 }
-body.build-page #content-wrapper {
+body.canvas-editor-page #content-wrapper {
   padding-top: 38px;
   padding-left: 0px;
   padding-right: 0px;
   padding-bottom: 0px;
 }
-body.build-page #moduleTree {
+body.canvas-editor-page #moduleTree {
   max-height: 300px;
   overflow: auto;
 }
-body.build-page #main-menu .twitter-typeahead {
+body.canvas-editor-page #main-menu .twitter-typeahead {
   width: 100%;
+}
+body.canvas-editor-page #canvas-name-editor.editing .canvas-name {
+  display: none;
+}
+body.canvas-editor-page #canvas-name-editor:not(.editing) input,
+body.canvas-editor-page #canvas-name-editor:not(.editing) button {
+  display: none;
+}
+body.canvas-editor-page #canvas-name-editor .canvas-name {
+  cursor: pointer;
+}
+body.canvas-editor-page .breadcrumb {
+  margin-bottom: 0px;
 }
 .login-page .btn-sign-up {
   display: none;
@@ -16638,6 +16664,10 @@ body.module-list .help-text .math-jax-ready span.mn,
 body.module-list .help-text .math-jax-ready span.mtext {
   font-size: 14px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+body.canvas-list-page .panel-heading-controls .input-group {
+  width: 300px;
+  margin-left: 15px;
 }
 table {
   background-color: transparent;

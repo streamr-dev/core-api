@@ -75,7 +75,7 @@ class CanvasSpec extends LoginTester1Spec {
 	
 	def "clicking a canvas in the load browser should load the signalpath"() {
 		when: "load button is clicked"
-			loadSignalPath '1'
+			loadSignalPath 'CanvasSpec test loading a SignalPath'
 		then: "signalpath content must be loaded"
 			waitFor {
 				$("#module_2")
@@ -93,7 +93,7 @@ class CanvasSpec extends LoginTester1Spec {
 	
 	def "saved canvases should show the save in place option"() {
 		when: "load button is clicked"
-			loadSignalPath '1'
+			loadSignalPath 'CanvasSpec test loading a SignalPath'
 		then: "signalpath content must be loaded"
 			waitFor {
 				$("#module_2")
@@ -108,7 +108,7 @@ class CanvasSpec extends LoginTester1Spec {
 	
 	def "begin- and end date datepickers"() {
 		when: "a signalpath is loaded"
-			loadSignalPath("1")
+			loadSignalPath("CanvasSpec test loading a SignalPath")
 		then: "begin date and end date are loaded"
 			waitFor {
 				beginDate.value() == "2015-07-02"
@@ -143,19 +143,19 @@ class CanvasSpec extends LoginTester1Spec {
 			moduleShouldAppearOnCanvas('Table')
 			
 		when: "run button is clicked"
-			runButton.click()
+			runHistoricalButton.click()
 		then: "output should be produced"
 			waitFor(30) {
-				$('#run', text: contains('Abort'))
+				runHistoricalButton.text().contains("Abort")
 				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
 			}
 			
 		when: "abort button is clicked"
-			$('#run', text: contains('Abort')).click()
+			runHistoricalButton.click()
 			sleepForNSeconds(2) // Allow some time for server-side stuff to clean up
 		then: "button must change back to run"
 			waitFor {
-				$('#run', text: 'Run')
+				runHistoricalButton.text().contains("Run")
 			}
 	}
 	

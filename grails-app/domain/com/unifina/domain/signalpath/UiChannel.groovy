@@ -7,26 +7,24 @@ class UiChannel implements Serializable {
 	
 	Module module
 	
-	static belongsTo = [runningSignalPath: RunningSignalPath]
+	static belongsTo = [canvas: Canvas]
 	
 	static mapping = {
 		id generator: 'assigned'
 	}
 	
 	static constraints = {
-		hash nullable: true
-		module nullable:true
-		name nullable:true
+		hash(nullable: true)
+		module(nullable: true)
+		name(nullable: true)
 	}
 
 	Map<String, Object> toMap() {
-		return	[
-				id: id,
-				name: name,
-				module: [
-						id: module.id,
-						webcomponent: module.webcomponent
-				]
-		]
+		def map = [id: id, name: name]
+		if (module == null) {
+			return map
+		} else {
+			return map + [moduleId: module.id, webcomponent: module.webcomponent]
+		}
 	}
 }

@@ -1,15 +1,7 @@
-import pages.*
-import spock.lang.*
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.CanvasPage
-import core.pages.DashboardCreatePage
-import core.pages.DashboardListPage
-import core.pages.DashboardShowPage
-import core.pages.LiveListPage
-import core.pages.LiveShowPage
-import core.pages.LoginPage
+import core.pages.*
 
 class DashboardSpec extends LoginTester1Spec {
 
@@ -22,21 +14,19 @@ class DashboardSpec extends LoginTester1Spec {
 		waitFor { at CanvasPage }
 		
 		// Go start the RunningSignalPath related to this spec
-		to LiveListPage
-		waitFor { at LiveListPage }
+		to CanvasListPage
+		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
-		waitFor { at LiveShowPage }
-		if (stopButton.displayed) {
-			stopButton.click()
-			waitForConfirmation()
-			acceptConfirmation()
-			waitFor { startButton.displayed }
-		}
-		
-		startButton.click()
-		waitFor { stopButton.displayed }
-		
+		waitFor { at CanvasPage  }
+		// Wait for the canvas to load
+		waitFor { findModuleOnCanvas("Chart") }
+
+		ensureRealtimeTabDisplayed()
+		startCanvas(true)
+
+		noNotificationsVisible()
 		$("#navSettingsLink").click()
+		$("#navLogoutLink").displayed
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}
@@ -101,11 +91,11 @@ class DashboardSpec extends LoginTester1Spec {
 		when: "clicked to edit the title"
 			findDashboardItem("Label").find(".titlebar-clickable").click()
 		then: "title changes to input"
-			waitFor { findTitleInput("Label").displayed }
+			waitFor { findTitleInput("Label (Stream.temperature)").displayed }
 		
 		// Edit the title of the module
 		when: "dashboarditem title changed"
-			findTitleInput("Label").firstElement().clear()
+			findTitleInput("Label (Stream.temperature)").firstElement().clear()
 			findTitleInput("") << "Foo"
 			// Focus lost
 			nameInput.click()
@@ -133,7 +123,7 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		when: "clicked the new dashboard to open"
 			$(".table .td", text:dashboardName + "2").click()
-			then: "the dashboard should open in non-edit-mode"
+		then: "the dashboard should open in non-edit-mode"
 			waitFor { at DashboardShowPage }
 			waitFor { js.exec("return \$('#main-menu').width()") == 0 }
 			waitFor { js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true }

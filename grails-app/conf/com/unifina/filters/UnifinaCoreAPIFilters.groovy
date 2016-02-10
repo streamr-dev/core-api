@@ -1,4 +1,6 @@
 package com.unifina.filters
+
+import com.unifina.security.TokenAuthenticator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -18,7 +20,8 @@ import com.unifina.security.StreamrApi
  */
 
 class UnifinaCoreAPIFilters {
-	
+
+	def springSecurityService
 	def unifinaSecurityService
 	GrailsApplication grailsApplication
 	
@@ -52,25 +55,37 @@ class UnifinaCoreAPIFilters {
 		authenticationFilter(uri: '/api/**') {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
-				
-				if (!request.JSON || request.JSON.isEmpty()) {
-					render (status:400, text: [success:false, error: "Invalid request. Did you set Content-Type to application/json?"] as JSON)
+
+				TokenAuthenticator authenticator = new TokenAuthenticator(unifinaSecurityService)
+				SecUser user = authenticator.authenticate(request)
+
+				if (authenticator.lastAuthenticationMalformed()) {
+					render (
+						status: 400,
+						text: [
+							code: "MALFORMED_TOKEN",
+							message: "Invalid request. Did you pass a HTTP header of the form 'Authorization: Token apiKey' ?"
+						] as JSON
+					)
 					return false
 				}
-				else {
-					SecUser user = null
-					if (request.JSON?.key && request.JSON?.secret) {
-						user = unifinaSecurityService.getUserByApiKey(request.JSON?.key, request.JSON?.secret)
-					}
-						
-					if (!user && annotation.requiresAuthentication()) {
-						render (status:401, text: [success:false, error: "authentication error"] as JSON)
-						return false
-					}
-					else {
-						request.apiUser = user
-						return true
-					}
+
+				if (!user) {
+					user = springSecurityService.getCurrentUser()
+				}
+
+				if (!user && annotation.requiresAuthentication()) {
+					render (
+						status: 401,
+						text: [
+							code: "NOT_AUTHENTICATED",
+							message: "Not authenticated via token or cookie"
+						] as JSON
+					)
+					return false
+				} else {
+					request.apiUser = user
+					return true
 				}
 			}
 		}

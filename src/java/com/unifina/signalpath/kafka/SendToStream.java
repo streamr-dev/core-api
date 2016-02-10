@@ -92,10 +92,10 @@ public class SendToStream extends AbstractSignalPathModule {
 			throw new IllegalArgumentException("Can not send to this feed type!");
 		}
 		
-		if (stream.getStreamConfig()==null)
+		if (stream.getConfig()==null)
 			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
 		
-		streamConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
+		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
 		

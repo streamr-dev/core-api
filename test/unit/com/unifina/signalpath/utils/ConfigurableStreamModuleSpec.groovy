@@ -5,7 +5,6 @@ import com.unifina.service.FeedService
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
@@ -25,7 +24,7 @@ class ConfigurableStreamModuleSpec extends Specification {
 		0.upto(4) {
 			def s = new Stream()
 			s.name = "stream-" + it
-			s.streamConfig = [fields: [[name: "out", type: "string"]]]
+			s.config = [fields: [[name: "out", type: "string"]]]
 			s.save(false)
 		}
 
