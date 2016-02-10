@@ -16672,16 +16672,6 @@ body.canvas-list-page .panel-heading-controls .input-group {
   width: 300px;
   margin-left: 15px;
 }
-body.canvas-list-page .share-button {
-  float: right;
-  padding-top: 0;
-  height: 20px;
-}
-.stream-list-page .share-button {
-  float: right;
-  padding-top: 0;
-  height: 20px;
-}
 table {
   background-color: transparent;
 }
@@ -17202,6 +17192,19 @@ body.dashboard-show #sidebar-view .rsp-title {
 body.dashboard-show .titlebar-clickable {
   cursor: pointer;
 }
+/** Compact and discrete form, can be used in lists etc. */
+.share-button-20px {
+  float: right;
+  padding-top: 0;
+  height: 20px;
+  padding-left: 5px;
+  padding-right: 7px;
+}
+.share-button-20px:before {
+  font-family: FontAwesome;
+  content: "+\f007";
+}
+/** @see sharing-dialog.js */
 .modal-body {
   /* bootstrap would add margin-bottom for narrow viewports */
 }

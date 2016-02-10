@@ -1,3 +1,17 @@
+/** Compact and discrete form, can be used in lists etc. */
+.share-button-20px {
+  &:before {
+    font-family: FontAwesome;
+    content: "+\f007";
+  }
+  float: right;
+  padding-top: 0;
+  height: 20px;
+  padding-left: 4px;
+  padding-right: 7px;
+}
+
+/** @see sharing-dialog.js */
 .modal-body {
 
   .resource-name-label {
@@ -25,6 +39,10 @@
   .user-label {
     font-weight: bold;
     flex-grow: 1;
+
+    .has-error {
+      color: #ff0000;
+    }
   }
 
   .user-delete-button {
@@ -42,9 +60,4 @@
   .new-user-button {
     margin-left: 10pt;
   }
-
-  .has-error .form-control {
-    background-color: #ffdddd;
-  }
-
 }
