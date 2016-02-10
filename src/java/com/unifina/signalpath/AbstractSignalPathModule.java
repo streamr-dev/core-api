@@ -548,10 +548,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 */
 	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
 		// Add event to message queue, don't do it right away 
-		FeedEvent fe = new FeedEvent();
-		fe.content = request;
-		fe.recipient = this;
-		fe.timestamp = globals.time;
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, globals.isRealtime() ? request.getTimestamp() : globals.time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);

@@ -392,7 +392,7 @@ class SignalPathService {
 				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
 			}
 			else {				
-				RuntimeRequest request = new RuntimeRequest(msg)
+				RuntimeRequest request = new RuntimeRequest(msg, new Date())
 				request.setAuthenticated(user != null)
 				
 				/**

@@ -112,7 +112,7 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			
 			// Register the subscription with the event recipient
 			if (recipient instanceof AbstractEventRecipient) {
-				((AbstractEventRecipient<ModuleClass>)recipient).register(subscriber);
+				((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
 			}
 			
 		}

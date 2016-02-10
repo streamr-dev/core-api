@@ -1,6 +1,8 @@
 package com.unifina.feed.kafka;
 
 import com.unifina.data.IStreamRequirement;
+import com.unifina.feed.ITimestamped;
+import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.utils.TimeOfDayUtil;
 import grails.converters.JSON;
 
@@ -26,7 +28,7 @@ import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.time.DateUtils;
 
-public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String> {
+public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String, MapMessageEventRecipient> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
 	Properties kafkaProperties;
@@ -47,7 +49,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 
 	@Override
 	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
-			InputStream inputStream, IEventRecipient recipient) {
+			InputStream inputStream, MapMessageEventRecipient recipient) {
 		try {
 			Map streamConfig = getStream(recipient).getStreamConfigAsMap();
 			return new KafkaHistoricalIterator(inputStream,streamConfig.get("topic").toString());
@@ -57,9 +59,9 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 	}
 
 	@Override
-	protected FeedEventIterator getNextIterator(IEventRecipient recipient)
+	protected FeedEventIterator<KafkaMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient)
 			throws IOException {
-		FeedEventIterator iterator = super.getNextIterator(recipient);
+		FeedEventIterator<KafkaMessage, MapMessageEventRecipient> iterator = super.getNextIterator(recipient);
 		
 		Stream stream = getStream(recipient);
 
@@ -72,7 +74,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 			
 			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages, 
 			// so need to wrap it with a parsing iterator
-			iterator = new FeedEventIterator(new ParsingKafkaIterator(kafkaIterator), this, recipient);
+			iterator = new FeedEventIterator<>(new ParsingKafkaIterator(kafkaIterator), this, recipient);
 		}
 		
 		return iterator;
