@@ -1,6 +1,7 @@
 package com.unifina.api;
 
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 public class ValidationException extends ApiException {
@@ -10,9 +11,9 @@ public class ValidationException extends ApiException {
 	}
 
 	private static String turnToMessage(Errors errors) {
-		String msg = "";
-		for (ObjectError error : errors.getAllErrors()) {
-			msg += error.toString() + "\n";
+		String msg = "Validation failed for fields:\n";
+		for (FieldError error : errors.getFieldErrors()) {
+			msg += error.getField() + " (" + error.getCode() + ")\n";
 		}
 		return msg;
 	}

@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ValidationException
+import com.unifina.data.MongoDbConfig
 import com.unifina.domain.data.Stream
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
@@ -48,7 +49,7 @@ class StreamApiController {
 		getAuthorizedStream(id) { Stream stream ->
 			stream.name = newStream.name
 			stream.description = newStream.description
-			stream.config = newStream.config
+			stream.config = readConfig()
 			if (stream.validate()) {
 				stream.save(failOnError: true)
 				render(status: 204)
@@ -56,6 +57,17 @@ class StreamApiController {
 				throw new ValidationException(stream.errors)
 			}
 		}
+	}
+
+	private String readConfig() {
+		Map config = request.JSON.config
+		if (config.mongodb) {
+			def configObject = new MongoDbConfig(config.mongodb)
+			if (!configObject.validate()) {
+				throw new ValidationException(configObject.errors)
+			}
+		}
+		return config
 	}
 
 	@StreamrApi
