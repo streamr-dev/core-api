@@ -5,8 +5,8 @@ package com.unifina.feed;
  */
 public abstract class AbstractMessageSource<RawMessageClass, KeyClass> implements MessageSource<RawMessageClass, KeyClass> {
 
-	private MessageRecipient recipient;
-	private long expected = 0;
+	protected MessageRecipient recipient;
+	protected long expected = 0;
 
 	public AbstractMessageSource(MessageRecipient<RawMessageClass, KeyClass> recipient) {
 		this.recipient = recipient;

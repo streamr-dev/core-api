@@ -1,4 +1,4 @@
-import com.unifina.feed.MessageParser;
+package com.unifina.feed;
 
 /**
  * Utility class for Feeds that do not have a raw message type that needs to be parsed.
