@@ -61,7 +61,7 @@ class StreamApiController {
 
 	private String readConfig() {
 		Map config = request.JSON.config
-		if (config.mongodb) {
+		if (config?.mongodb) {
 			def configObject = new MongoDbConfig(config.mongodb)
 			if (!configObject.validate()) {
 				throw new ValidationException(configObject.errors)
