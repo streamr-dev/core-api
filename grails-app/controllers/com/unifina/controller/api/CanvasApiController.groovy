@@ -3,13 +3,13 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
-import org.hibernate.UnresolvableObjectException
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
@@ -36,7 +36,7 @@ class CanvasApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getCanvasWithAccess(id, Operation.READ) { Canvas canvas ->
 			Map result = canvasService.reconstruct(canvas)
 			canvas.json = result as JSON
 			render canvas.toMap() as JSON
@@ -51,7 +51,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def update(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -63,7 +63,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -74,7 +74,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def start(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot start common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -87,7 +87,7 @@ class CanvasApiController {
 	@StreamrApi
 	@NotTransactional
 	def stop(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -121,12 +121,12 @@ class CanvasApiController {
 		return command
 	}
 
-	private void getAuthorizedCanvas(String id, Closure successHandler) {
+	private void getCanvasWithAccess(String id, Operation op, Closure successHandler) {
 		def canvas = Canvas.get(id)
-		if (canvas == null) {
+		if (!canvas) {
 			render(status: 404, text: [error: "Canvas (id=$id) not found.", code: "NOT_FOUND"] as JSON)
-		} else if (!canvas.example && !permissionService.canAccess(canvas, actionName == 'load', request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Canvas (id=$id)", code: "FORBIDDEN"] as JSON)
+		} else if (!permissionService.check(request.apiUser, canvas, op) && !(op == Operation.READ && canvas.example)) {
+			render(status: 403, text: [error: "Not authorized to ${op.id} Canvas (id=$id)", code: "FORBIDDEN", fault: "op", op: op.id] as JSON)
 		} else {
 			successHandler.call(canvas)
 		}

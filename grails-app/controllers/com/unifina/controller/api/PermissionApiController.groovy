@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
 import com.unifina.security.StreamrApi
@@ -64,12 +65,18 @@ class PermissionApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def save() {
-		//log.debug("Grant new permission to ${params.resourceClass.simpleName} ${params.resourceId}")
-		String username = request.JSON.user
-		String op = request.JSON.operation
+		if (!request.hasProperty("JSON")) {
+			render status: 400, text: [error: "JSON body expected"] as JSON, contentType: "application/json"
+			return
+		}
 
-		if (!permissionService.getAllOperations().contains(op)) {
-			render status: 400, text: [error: "Invalid operation '$op'. Try with 'read', 'write' or 'share' instead.", code: "INVALID", fault: "operation", operation: op] as JSON, contentType: "application/json"
+		String username = request.JSON.user
+		String opId = request.JSON.operation
+
+		Operation op = Operation.enumConstants.find { it.id == opId }
+		if (!op) {
+			render status: 400, text: [error: "Invalid operation '$opId'. Try with 'read', 'write' or 'share' instead.", code: "INVALID", fault: "operation", operation: opId] as JSON, contentType: "application/json"
+			return
 		}
 
 		// TODO: check that username is a valid email address?

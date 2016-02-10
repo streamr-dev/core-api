@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
@@ -70,9 +71,9 @@ class UserService {
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
 
-		// TODO: decide default permissions (that make sense with feeds)
+		// TODO: Permissions, decide defaults that make sense with feeds
         feeds.each { feed ->
-			permissionService.systemGrant(user, feed, "read")
+			permissionService.systemGrant(user, feed)
         }
     }
 
@@ -83,9 +84,9 @@ class UserService {
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }
 
-		// TODO: decide default permissions (that make sense with modpacks)
+		// TODO: Permissions, decide defaults that make sense with modpacks
         packages.each { modulePackage ->
-			permissionService.systemGrant(user, modulePackage, "read")
+			permissionService.systemGrant(user, modulePackage)
         }
     }
 

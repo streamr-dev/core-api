@@ -1,7 +1,6 @@
 package com.unifina.controller.data
 
-import com.unifina.domain.security.Permission
-import com.unifina.service.PermissionService
+import com.unifina.domain.security.Permission.Operation
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -30,7 +29,8 @@ class StreamController {
 	def streamService
 	
 	def beforeInterceptor = [action:{
-			if (!permissionService.canAccess(Stream.get(params.long("id")))) {
+		// TODO: READ probably should not be enough for e.g. delete()...
+			if (!permissionService.canRead(springSecurityService.currentUser, Stream.get(params.long("id")))) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else
@@ -43,15 +43,14 @@ class StreamController {
 		except:['list','search','create','apiCreate','apiLookup']]
 	
 	def list() {
-		List<Stream> streams = Stream.findAllByUser(springSecurityService.currentUser)
+		List<Stream> streams = permissionService.getAll(Stream, springSecurityService.currentUser)
 		[streams:streams]
 	}
 	
 	def show() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		List<String> ops = permissionService.getPermittedOperations(springSecurityService.currentUser, stream)
-		[stream:stream, permissions:ops]
+		[stream:stream]
 	}
 	
 	// Can be extended to handle more types
@@ -141,7 +140,7 @@ class StreamController {
 	def search() {
 		List<Map> streams = []
 		SecUser user = springSecurityService.currentUser
-		Set<Feed> allowedFeeds = permissionService.getAllReadable(user, Feed) ?: new HashSet<>()
+		Set<Feed> allowedFeeds = permissionService.getAll(Feed, user) ?: new HashSet<>()
 
 		if (!allowedFeeds.isEmpty()) {
 			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+

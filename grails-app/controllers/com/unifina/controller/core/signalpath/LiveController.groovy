@@ -17,8 +17,9 @@ class LiveController {
 	def signalPathService
 	def grailsApplication
 	
-	def beforeInterceptor = [action:{
-			if (!permissionService.canAccess(Canvas.get(params.id))) {
+	def beforeInterceptor = [action: {
+		// TODO: Permissions, maybe read shouldn't be enough for start/stop?
+			if (!permissionService.canRead(request.apiUser, Canvas.get(params.id))) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else
@@ -28,7 +29,7 @@ class LiveController {
 			}
 			else return true
 		},
-		except:['index','list', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
+		except:['index', 'list', 'loadBrowser', 'loadBrowserContent', 'request', 'getModuleJson']]
 
 	@Secured("ROLE_USER")
 	def index() {
@@ -131,7 +132,7 @@ class LiveController {
 		UiChannel ui = UiChannel.findById(params.channel, [fetch: [canvas: 'join']])
 		Canvas canvas = ui.canvas
 
-		if (!permissionService.canAccess(canvas, request.apiUser)) {
+		if (!permissionService.canRead(request.apiUser, canvas)) {
 			log.warn("request: access to ui ${ui?.id}, canvas ${canvas?.id} denied")
 			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		} else {
@@ -177,7 +178,7 @@ class LiveController {
 			render (status:400, text: [success:false, error: "Must give id and hash or channel in request"] as JSON)
 		}
 		
-		if (!permissionService.canAccess(canvas, user)) {
+		if (!permissionService.canRead(request.apiUser, canvas)) {
 			log.warn("request: access to rsp ${canvas?.id} denied for user ${user?.id}")
 			render (status:403, text: [success:false, error: "User identified but not authorized to request this resource"] as JSON)
 		} else {

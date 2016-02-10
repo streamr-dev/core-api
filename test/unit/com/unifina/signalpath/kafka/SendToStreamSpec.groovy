@@ -3,6 +3,7 @@ package com.unifina.signalpath.kafka
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
 import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
@@ -20,10 +21,7 @@ import spock.lang.Specification
 class SendToStreamSpec extends Specification {
 
 	static class FakePermissionService extends PermissionService {
-		@Override
-		boolean canAccess(Object instance) {
-			true
-		}
+		@Override boolean canRead(SecUser user, resource) { return true }
 	}
 
 	static class FakeKafkaService extends KafkaService {

@@ -1,5 +1,6 @@
 package com.unifina.controller.dashboard
 
+import com.unifina.domain.security.Permission.Operation
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -13,7 +14,8 @@ class DashboardController {
 	def permissionService
 	
 	def beforeInterceptor = [action:{
-			if (!permissionService.canAccess(Dashboard.get(params.long("id")))) {
+		// TODO: READ probably should not be enough for e.g. delete()...
+			if (!permissionService.canRead(springSecurityService.currentUser, Dashboard.get(params.long("id")))) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else
@@ -28,21 +30,20 @@ class DashboardController {
 	static defaultAction = "list"
 	
 	def list() {
-		def dashboards = Dashboard.findAllByUser(springSecurityService.currentUser)
+		def dashboards = permissionService.getAll(Dashboard, springSecurityService.currentUser)
 		return [dashboards:dashboards]
 	}
 	
 	def create() {
-		if (request.method=="GET")
+		if (request.method=="GET") {
 			Dashboard dashboard = new Dashboard()
-		else {
+		} else {
 			Dashboard dashboard = new Dashboard()
 			dashboard.name = params.name
 			dashboard.user = springSecurityService.currentUser
 			dashboard.save(flush:true, failOnError:true)
 			redirect(action:"show", id:dashboard.id)
 		}
-		
 	}
 	
 	def getJson() {

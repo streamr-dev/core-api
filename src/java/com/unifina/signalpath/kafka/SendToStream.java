@@ -83,17 +83,20 @@ public class SendToStream extends AbstractSignalPathModule {
 			return;
 		
 		// Check access to this Stream
-		if (permissionService.canAccess(stream))
+		if (permissionService.canRead(globals.getUser(), stream)) {
 			authenticatedStream = stream;
-		else throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
+		} else {
+			throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
+		}
 		
 		// TODO: don't rely on static ids
 		if (stream.getFeed().getId()!=7) {
 			throw new IllegalArgumentException("Can not send to this feed type!");
 		}
 		
-		if (stream.getConfig()==null)
-			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
+		if (stream.getConfig()==null) {
+			throw new IllegalStateException("Stream " + stream.getName() + " is not properly configured!");
+		}
 		
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 

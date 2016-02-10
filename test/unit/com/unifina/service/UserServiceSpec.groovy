@@ -7,16 +7,12 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.Module
-import com.unifina.user.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
 import org.springframework.validation.FieldError
 import spock.lang.Specification
-
-import javax.swing.Spring
 
 @TestFor(UserService)
 @Mock([Feed, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
@@ -90,11 +86,11 @@ class UserServiceSpec extends Specification {
         user.getAuthorities().toArray()[0].authority == "ROLE_USER"
         user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
 
-		permissionService.getAllReadable(user, ModulePackage).size() == 1
-		permissionService.getAllReadable(user, ModulePackage)[0].id == 1
+		permissionService.getAll(ModulePackage, user).size() == 1
+		permissionService.getAll(ModulePackage, user)[0].id == 1
 
-		permissionService.getAllReadable(user, Feed).size() == 1
-		permissionService.getAllReadable(user, Feed)[0].id == 7
+		permissionService.getAll(Feed, user).size() == 1
+		permissionService.getAll(Feed, user)[0].id == 7
     }
 
     def "if the roles, feeds and modulePackages are given, it should use them"() {
@@ -118,11 +114,11 @@ class UserServiceSpec extends Specification {
         user.getAuthorities().size() == 1
         user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		permissionService.getAllReadable(user, Feed).size() == 0
+		permissionService.getAll(Feed, user).size() == 0
 
-		permissionService.getAllReadable(user, ModulePackage).size() == 2
-		permissionService.getAllReadable(user, ModulePackage)[0].id == 1
-		permissionService.getAllReadable(user, ModulePackage)[1].id == 2
+		permissionService.getAll(ModulePackage, user).size() == 2
+		permissionService.getAll(ModulePackage, user)[0].id == 1
+		permissionService.getAll(ModulePackage, user)[1].id == 2
     }
 
     def "it should fail if the default roles, feeds of modulePackages are not found"() {

@@ -38,7 +38,6 @@ class StreamControllerSpec extends Specification {
 			encodePassword: {String pw-> pw+"-encoded" }
 		] as SpringSecurityService
 		controller.springSecurityService = springSecurityService
-		controller.permissionService.springSecurityService = springSecurityService
 	}
 
 	void "stream create form"() {

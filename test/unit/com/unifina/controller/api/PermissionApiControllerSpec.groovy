@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.PermissionService
@@ -39,12 +40,12 @@ class PermissionApiControllerSpec extends Specification {
 		streamShared = new Stream(id: 2, uuid: "shared", user: other).save(validate: false)
 		streamRestricted = new Stream(id: 3, uuid: "restricted", user: other).save(validate: false)
 
-		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasShared.id, operation: "share").save(validate: false)
-		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: "share").save(validate: false)
+		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasShared.id, operation: Operation.SHARE).save(validate: false)
+		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: Operation.SHARE).save(validate: false)
 
 		// read permission doesn't mean you're allowed to peek into sharing-dialog
-		new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: "read").save(validate: false)
-		new Permission(id: 2, user: me, clazz: Stream.name, longId: streamRestricted.id, operation: "read").save(validate: false)
+		new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: Operation.READ).save(validate: false)
+		new Permission(id: 2, user: me, clazz: Stream.name, longId: streamRestricted.id, operation: Operation.READ).save(validate: false)
     }
 
 	void "validate setup"() {
@@ -178,9 +179,8 @@ class PermissionApiControllerSpec extends Specification {
 		request.JSON = [user: other.username, operation: "read"] as JSON
 		withFilters(action: "save") { controller.save() }
 		then:
-		1 * permissionService.getAllOperations() >> ["read", "write", "share"]
 		1 * permissionService.canShare(me, _) >> true
-		1 * permissionService.grant(me, _, _, "read") >> new Permission(user: other, operation: "read")
+		1 * permissionService.grant(me, _, _, Operation.READ) >> new Permission(user: other, operation: Operation.READ)
 		response.status == 201
 		response.json.user == other.username
 		response.json.operation == "read"
@@ -199,7 +199,7 @@ class PermissionApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json.user == canvasPermission.user.username
-		response.json.operation == canvasPermission.operation
+		response.json.operation == canvasPermission.operation.id
 		response.json.changedPermissions.size() == 3
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions

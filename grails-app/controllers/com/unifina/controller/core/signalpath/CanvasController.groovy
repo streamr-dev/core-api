@@ -1,5 +1,6 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
@@ -29,12 +30,10 @@ class CanvasController {
 	}
 
 	def list() {
-		// TODO: replace query with permissionService method once that branch is ready
-		List<Canvas> canvases = Canvas.createCriteria().list() {
-			eq("user",springSecurityService.currentUser)
-			eq("adhoc",false)
+		List<Canvas> canvases = permissionService.getAll(Canvas, springSecurityService.currentUser, Operation.READ) {
+			eq("adhoc", false)
 			if (params.term) {
-				like("name","%${params.term}%")
+				like("name", "%${params.term}%")
 			}
 			if (params.state) {
 				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})

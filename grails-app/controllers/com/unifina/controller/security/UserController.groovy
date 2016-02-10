@@ -1,12 +1,11 @@
 package com.unifina.controller.security
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.user.UserCreationFailedException
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
@@ -213,8 +212,7 @@ class UserController {
         if (!user) return
         
         SecUserSecRole.executeUpdate("delete from SecUserSecRole ss where ss.secUser = ?", [user])
-        FeedUser.executeUpdate("delete from FeedUser fu where fu.user = ?", [user])
-        ModulePackageUser.executeUpdate("delete from ModulePackageUser mu where mu.user = ?", [user])
+        Permission.executeUpdate("delete from Permission p where p.user = ?", [user])
         SignupInvite.executeUpdate("delete from SignupInvite si where si.username = ?", [user.username])
 
 		String usernameFieldName = SpringSecurityUtils.securityConfig.userLookup.usernamePropertyName

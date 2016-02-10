@@ -17,7 +17,18 @@ class Permission {
 	Long longId
 
 	/** type of operation that this ACL item allows e.g. "read" */
-	String operation
+	enum Operation {
+		READ("read"),
+		WRITE("write"),
+		SHARE("share")
+
+		String id
+
+		Operation(String id) {
+			this.id = id
+		}
+	}
+	Operation operation = Operation.READ
 
 	static constraints = {
 		stringId(nullable: true)
@@ -35,6 +46,6 @@ class Permission {
 	public Map toMap() {[
 		id: id,
 		user: user?.username ?: invite?.username,
-		operation: operation
+		operation: operation.id
 	]}
 }

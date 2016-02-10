@@ -5,6 +5,7 @@ import spock.lang.Specification
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.Permission.Operation
 
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
@@ -125,7 +126,7 @@ class PermissionServiceSpec extends Specification {
 
 	void "getPermissionsTo returns all permissions for the given resource"() {
 		setup:
-		def perm = service.grant(me, dashOwned, stranger, "read")
+		def perm = service.grant(me, dashOwned, stranger, Operation.READ)
 		expect:
 		service.getPermissionsTo(dashOwned).size() == 4
 		service.getPermissionsTo(dashOwned)[0] == perm
@@ -137,70 +138,115 @@ class PermissionServiceSpec extends Specification {
 
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
-		service.getAllReadable(me, Dashboard) == [dashOwned, dashAllowed]
-		service.getAllReadable(anotherUser, Dashboard) == [dashAllowed, dashRestricted]
-		service.getAllReadable(stranger, Dashboard) == []
+		service.getAll(Dashboard, me) == [dashOwned, dashAllowed]
+		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted]
+		service.getAll(Dashboard, stranger) == []
 	}
 
 	void "retrieve all readable UiChannels correctly"() {
 		expect:
-		service.getAllReadable(me, UiChannel) == [uicAllowed]
-		service.getAllReadable(stranger, UiChannel) == []
+		service.getAll(UiChannel, me) == [uicAllowed]
+		service.getAll(UiChannel, stranger) == []
 	}
 
 	void "grant and revoke work for UiChannels"() {
 		when:
 		service.systemGrant(anotherUser, uicRestricted)
 		then:
-		service.getAllReadable(me, UiChannel) == [uicAllowed]
-		service.getAllReadable(anotherUser, UiChannel) == [uicRestricted]
+		service.getAll(UiChannel, me) == [uicAllowed]
+		service.getAll(UiChannel, anotherUser) == [uicRestricted]
 
 		when:
 		service.systemRevoke(anotherUser, uicRestricted)
 		then:
-		service.getAllReadable(me, UiChannel) == [uicAllowed]
-		service.getAllReadable(anotherUser, UiChannel) == []
+		service.getAll(UiChannel, me) == [uicAllowed]
+		service.getAll(UiChannel, anotherUser) == []
 	}
 
-	void "getAllReadable returns throws IllegalArgumentException on invalid resource"() {
+	void "getAll returns throws IllegalArgumentException on invalid resource"() {
 		when:
-		service.getAllReadable(me, java.lang.Object)
+		service.getAll(java.lang.Object, me)
 		then:
 		thrown IllegalArgumentException
 
 		when:
-		service.getAllReadable(me, null)
+		service.getAll(null, me)
 		then:
 		thrown IllegalArgumentException
 	}
 
-	void "getAllReadable returns public resources on bad/null user"() {
+	void "getAll returns public resources on bad/null user"() {
 		expect:
-		service.getAllReadable(new SecUser(), Dashboard) == []
-		service.getAllReadable(null, Dashboard) == []
+		service.getAll(Dashboard, new SecUser()) == []
+		service.getAll(Dashboard, null) == []
 	}
 
-	void "getAllReadable closure filtering works as expected"() {
+	void "getAll closure filtering works as expected"() {
 		expect:
-		service.getAllReadable(me, Dashboard) { like("name", "%ll%") } == [dashAllowed]
-	}
-
-	void "getAllShareable closure filtering works as expected"() {
-		expect:
-		service.getAllShareable(me, Dashboard) == [dashOwned]
-		service.getAllShareable(me, Dashboard) { like("name", "%ll%") } == []
+		service.getAll(Dashboard, me) { like("name", "%ll%") } == [dashAllowed]
+		service.getAll(Dashboard, me, Operation.SHARE) == [dashOwned]
+		service.getAll(Dashboard, me, Operation.SHARE) { like("name", "%ll%") } == []
 	}
 
 	void "granting and revoking read rights"() {
 		when:
 		service.grant(me, dashOwned, stranger)
 		then:
-		service.getAllReadable(stranger, Dashboard) == [dashOwned]
+		service.getAll(Dashboard, stranger) == [dashOwned]
 
 		when:
 		service.revoke(me, dashOwned, stranger)
 		then:
-		service.getAllReadable(stranger, Dashboard) == []
+		service.getAll(Dashboard, stranger) == []
+
+		/* TBD
+		when: "granted a write, also reading is granted"
+		service.grant(me, dashOwned, stranger, Operation.WRITE)
+		then:
+		service.getAll(Dashboard, stranger) == [dashOwned]
+
+		when: "granted a share, also reading is granted"
+		service.revoke(me, dashOwned, stranger, Operation.WRITE)
+		service.grant(me, dashOwned, stranger, Operation.SHARE)
+		then:
+		service.getAll(Dashboard, stranger) == [dashOwned]
+		*/
+	}
+
+	void "granting and revoking write rights"() {
+		when:
+		service.grant(me, dashOwned, stranger, Operation.WRITE)
+		then:
+		service.getAll(Dashboard, stranger, Operation.WRITE) == [dashOwned]
+
+		when:
+		service.revoke(me, dashOwned, stranger, Operation.WRITE)
+		then:
+		service.getAll(Dashboard, stranger, Operation.WRITE) == []
+
+		when: "revoking read also revokes write"
+		service.grant(me, dashOwned, stranger, Operation.WRITE)
+		service.revoke(me, dashOwned, stranger)
+		then:
+		service.getAll(Dashboard, stranger, Operation.WRITE) == []
+	}
+
+	void "granting and revoking share rights"() {
+		when:
+		service.grant(me, dashOwned, stranger, Operation.SHARE)
+		then:
+		service.getAll(Dashboard, stranger, Operation.SHARE) == [dashOwned]
+
+		when:
+		service.revoke(me, dashOwned, stranger, Operation.SHARE)
+		then:
+		service.getAll(Dashboard, stranger, Operation.SHARE) == []
+
+		when: "revoking read also revokes share"
+		service.grant(me, dashOwned, stranger, Operation.SHARE)
+		service.revoke(me, dashOwned, stranger)
+		then:
+		service.getAll(Dashboard, stranger, Operation.SHARE) == []
 	}
 
 	void "grant and revoke throw for non-'share'-access users"() {
@@ -215,7 +261,7 @@ class PermissionServiceSpec extends Specification {
 		thrown AccessControlException
 
 		when:
-		service.grant(anotherUser, dashAllowed, me, "share")
+		service.grant(anotherUser, dashAllowed, me, Operation.SHARE)
 		service.revoke(me, dashAllowed, anotherUser)
 		then: "Y U try to revoke owner's access?! That should never be generated from the UI!"
 		thrown AccessControlException
@@ -223,24 +269,25 @@ class PermissionServiceSpec extends Specification {
 
 	void "sharing read rights to others"() {
 		when:
-		service.grant(me, dashOwned, stranger, "share")
+		service.grant(me, dashOwned, stranger, Operation.READ)
+		service.grant(me, dashOwned, stranger, Operation.SHARE)
 		then:
-		service.getAllReadable(stranger, Dashboard) == [dashOwned]
-		service.getAllShareable(stranger, Dashboard) == [dashOwned]
+		service.getAll(Dashboard, stranger) == [dashOwned]
+		service.getAll(Dashboard, stranger, Operation.SHARE) == [dashOwned]
 
 		expect:
-		!(dashOwned in service.getAllReadable(anotherUser, Dashboard))
+		!(dashOwned in service.getAll(Dashboard, anotherUser))
 
 		when: "stranger shares read access"
 		service.grant(stranger, dashOwned, anotherUser)
 		then:
-		dashOwned in service.getAllReadable(anotherUser, Dashboard)
-		!(dashOwned in service.getAllShareable(anotherUser, Dashboard))
+		dashOwned in service.getAll(Dashboard, anotherUser)
+		!(dashOwned in service.getAll(Dashboard, anotherUser, Operation.SHARE))
 
 		when:
 		service.revoke(stranger, dashOwned, anotherUser)
 		then:
-		!(dashOwned in service.getAllReadable(anotherUser, Dashboard))
+		!(dashOwned in service.getAll(Dashboard, anotherUser))
 
 		when: "of course, it's silly to revoke 'share' access since it might already been re-shared..."
 		service.revoke(me, dashOwned, stranger)
@@ -251,41 +298,41 @@ class PermissionServiceSpec extends Specification {
 
 	void "revocation is granular"() {
 		setup:
-		service.grant(me, dashOwned, stranger, "read")
-		service.grant(me, dashOwned, stranger, "share")
+		service.grant(me, dashOwned, stranger, Operation.READ)
+		service.grant(me, dashOwned, stranger, Operation.SHARE)
 		when:
-		service.revoke(me, dashOwned, stranger, "share")
+		service.revoke(me, dashOwned, stranger, Operation.SHARE)
 		then: "only 'share' access is revoked"
-		service.getAllReadable(stranger, Dashboard) == [dashOwned]
-		service.getAllShareable(stranger, Dashboard) == []
+		service.getAll(Dashboard, stranger) == [dashOwned]
+		service.getAll(Dashboard, stranger, Operation.SHARE) == []
 	}
 
 	void "default revocation is all access"() {
 		setup:
-		service.grant(me, dashOwned, stranger, "read")
-		service.grant(me, dashOwned, stranger, "share")
+		service.grant(me, dashOwned, stranger, Operation.READ)
+		service.grant(me, dashOwned, stranger, Operation.SHARE)
 		when:
 		service.revoke(me, dashOwned, stranger)
 		then: "by default, revoke all access"
-		service.getAllReadable(stranger, Dashboard) == []
-		service.getAllShareable(stranger, Dashboard) == []
+		service.getAll(Dashboard, stranger) == []
+		service.getAll(Dashboard, stranger, Operation.SHARE) == []
 	}
 
 	void "granting works (roughly) idempotently"() {
 		expect:
-		service.getAllReadable(stranger, Dashboard) == []
+		service.getAll(Dashboard, stranger) == []
 		when: "double-granting still has the same effect: there exists a permission for user to resource"
 		service.grant(me, dashOwned, stranger)
 		service.grant(me, dashOwned, stranger)
 		then: "now you see it..."
-		service.getAllReadable(stranger, Dashboard) == [dashOwned]
+		service.getAll(Dashboard, stranger) == [dashOwned]
 		when:
 		service.grant(me, dashOwned, stranger)
 		service.grant(me, dashOwned, stranger)
 		service.grant(me, dashOwned, stranger)
 		service.revoke(me, dashOwned, stranger)
 		then: "now you don't."
-		service.getAllReadable(stranger, Dashboard) == []
+		service.getAll(Dashboard, stranger) == []
 	}
 
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {
@@ -314,14 +361,17 @@ class PermissionServiceSpec extends Specification {
 		!service.getPermissionsTo(uicRestricted).find { it.invite == invite }
 	}
 
-	//----------------------------------
-	// (soon to be) deprecated canAccess methods
-	// once these are dumped, also SpringSecurityUtils dependency is gone from tester; no need to defineBeans
-
-	void "granting access to restricted object based supplied user"() {
+	void "signup invitations are converted correctly"() {
 		expect:
-		service.canAccess(modPackOwned, me)
-		!service.canAccess(modPackRestricted, me)
-		!service.canAccess(modPackOwned, anotherUser)
+		!service.canRead(stranger, dashOwned)
+		!service.canRead(stranger, uicRestricted)
+
+		when: "pretend stranger was just created"
+		service.grant(me, dashOwned, invite)
+		service.systemGrant(invite, uicRestricted)
+		service.convertSignupInvite(invite, stranger)
+		then:
+		service.canRead(stranger, dashOwned)
+		service.canRead(stranger, uicRestricted)
 	}
 }

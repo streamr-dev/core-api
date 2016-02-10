@@ -2,6 +2,7 @@ package com.unifina.controller.api
 
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -14,12 +15,11 @@ class StreamApiController {
 
 	@StreamrApi
 	def index() {
-		def streams
-		if (params.name) {
-			streams = Stream.findAllByUserAndName(request.apiUser, params.name)
-		} else {
-			streams = Stream.findAllByUser(request.apiUser)
-		}
+		def streams = permissionService.getAll(Stream, request.apiUser, Operation.READ, {
+			if (params.name) {
+				eq "name", params.name
+			}
+		})
 		render(streams*.toMap() as JSON)
 	}
 
@@ -37,15 +37,15 @@ class StreamApiController {
 
 	@StreamrApi
 	def show(String id) {
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			render(stream.toMap() as JSON)
 		}
 	}
 
 	@StreamrApi
 	def update(String id) {
-		Stream newStream = new Stream(request.JSON)
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			Stream newStream = new Stream(request.JSON)
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = newStream.config
@@ -60,18 +60,18 @@ class StreamApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			stream.delete()
 			render(status: 204)
 		}
 	}
 
-	private def getAuthorizedStream(String uuid, Closure successHandler) {
+	private def getAuthorizedStream(String uuid, Operation op, Closure successHandler) {
 		def stream = Stream.findByUuid(uuid)
 		if (stream == null) {
 			render(status: 404, text: [error: "Stream not found with uuid " + uuid, code: "NOT_FOUND"] as JSON)
-		} else if (!permissionService.canAccess(stream, request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Stream " + uuid, code: "FORBIDDEN"] as JSON)
+		} else if (!permissionService.check(request.apiUser, stream, op)) {
+			render(status: 403, text: [error: "Not authorized to ${op.id} Stream " + uuid, code: "FORBIDDEN", fault: "op", op: op.id] as JSON)
 		} else {
 			successHandler.call(stream)
 		}
