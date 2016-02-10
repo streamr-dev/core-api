@@ -4,6 +4,9 @@ import com.unifina.domain.signalpath.Module;
 
 class Feed implements Serializable {
 
+	static final long KAFKA_ID = 7L
+	static final long MONGO_ID = 8L
+
 	Long id
 	String name
 	String backtestFeed // TODO: rename?
@@ -57,10 +60,10 @@ class Feed implements Serializable {
 	}
 
 	public boolean isKafkaFeed() {
-		return id == 7
+		return id == KAFKA_ID
 	}
 
 	public boolean isMongoFeed() {
-		return id == 8
+		return id == MONGO_ID
 	}
 }
