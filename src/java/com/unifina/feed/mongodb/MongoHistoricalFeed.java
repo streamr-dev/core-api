@@ -28,6 +28,7 @@ import java.util.*;
  * 			"database": "test",
  * 			"collection": "MongoHistoricalIteratorSpec",
  * 			"timestampKey": "time",
+ * 			"pollIntervalMillis": 100,
  *	 		"query": "{ \"ue_id\": ObjectId(\"5649955225b568505b60bc31\") }" // optional - must be a string, as this is not valid JSON!
  * 		}
  * 	}

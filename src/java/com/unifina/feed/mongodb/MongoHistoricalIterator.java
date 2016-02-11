@@ -4,6 +4,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
@@ -38,25 +39,14 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 	}
 
 	private void connect() {
-		Map<String, Object> mongoConfig = (Map<String, Object>) stream.getStreamConfigAsMap().get("mongodb");
-		this.timestampKey = mongoConfig.get("timestampKey").toString();
+		Map<String, Object> mongoConfig = MongoConfig.getMongoConfig(stream);
+		timestampKey = MongoConfig.getTimestampKey(mongoConfig);
+		mongoClient = MongoConfig.getMongoClient(mongoConfig);
+		MongoDatabase db = MongoConfig.getMongoDatabase(mongoClient, mongoConfig);
+		MongoCollection collection = MongoConfig.getCollection(db, mongoConfig);
 
-		ServerAddress serverAddress = new ServerAddress(mongoConfig.get("host").toString(), mongoConfig.containsKey("port") ? (int) mongoConfig.get("port") : 27017);
-		List<MongoCredential> credentials = new ArrayList<>();
-		if (mongoConfig.containsKey("username")) {
-			MongoCredential credential = MongoCredential.createCredential(mongoConfig.get("username").toString(),
-					mongoConfig.get("database").toString(),
-					mongoConfig.containsKey("password") ? mongoConfig.get("password").toString().toCharArray() : "".toCharArray());
-			credentials.add(credential);
-		}
-
-		mongoClient = new MongoClient(serverAddress, credentials);
-		MongoDatabase db = mongoClient.getDatabase(mongoConfig.get("database").toString());
-
-		// Add static filters from streamConfig
-		Document query = new Document();
-		if (mongoConfig.containsKey("query"))
-			query.putAll(Document.parse(mongoConfig.get("query").toString()));
+		// Add static filters from mongoConfig
+		Document query = MongoConfig.getQuery(mongoConfig);
 
 		// Filter by startDate
 		Document startDateFilter = new Document();
@@ -68,7 +58,7 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 		endDateFilter.put("$lte", endDate);
 		query.append(timestampKey, endDateFilter);
 
-		FindIterable<Document> iterable = db.getCollection(mongoConfig.get("collection").toString()).find(query).sort(Sorts.ascending(timestampKey));
+		FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(timestampKey));
 		this.mongoCursor = iterable.iterator();
 	}
 	
