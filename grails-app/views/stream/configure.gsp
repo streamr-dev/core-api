@@ -82,19 +82,12 @@
     
 		<ui:flashMessage/>
 
-		<div class="col-sm-8">
+		<div class="col-sm-8 col-sm-offset-2">
 			<ui:panel title="${message(code:"stream.configure.label", args:[stream.name])}">
 				<button class="btn btn-lg" id="autodetect">Autodetect</button>
 							
 				<div id="stream-fields"></div>
 			</ui:panel>
 		</div>
-		
-		<div class="col-sm-4">
-			<ui:panel title="HTTP API credentials">
-				<g:render template="userStreamCredentials" model="[stream:stream]"/>
-			</ui:panel>
-		</div>
-		
     </body>
 </html>
