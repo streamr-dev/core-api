@@ -1,17 +1,18 @@
 <html>
 <head>
-    <meta name="layout" content="main" />
-    <title><g:message code="stream.configureMongo.label" args="[stream.name]"/></title>
+	<meta name="layout" content="main"/>
+	<title><g:message code="stream.configureMongo.label" args="[stream.name]"/></title>
 </head>
+
 <body>
 <ui:breadcrumb>
-    <g:render template="/stream/breadcrumbList" />
-    <g:render template="/stream/breadcrumbShow" />
-    <li class="active">
-        <g:link controller="stream" action="configureMongo" params="[id: stream.id]">
-            <g:message code="stream.configureMongo.label" args="[stream.name]"/>
-        </g:link>
-    </li>
+	<g:render template="/stream/breadcrumbList"/>
+	<g:render template="/stream/breadcrumbShow"/>
+	<li class="active">
+		<g:link controller="stream" action="configureMongo" params="[id: stream.id]">
+			<g:message code="stream.configureMongo.label" args="[stream.name]"/>
+		</g:link>
+	</li>
 </ui:breadcrumb>
 
 <ui:flashMessage/>
@@ -58,47 +59,62 @@
 </r:script>
 
 <div class="col-xs-12 col-md-8 col-md-offset-2">
-    <ui:panel title="${message(code:"stream.configureMongo.label", args:[stream.name])}">
-        <g:form name="configure-mongo-form">
+	<ui:panel title="${message(code: "stream.configureMongo.label", args: [stream.name])}">
+		<g:form name="configure-mongo-form">
 
-            <g:renderErrors bean="${mongo}"/>
+			<g:renderErrors bean="${mongo}"/>
 
-            <div class="form-group">
-                <label for="host-input">${message(code:"stream.config.mongodb.host")}</label>
-                <input id="host-input" class="form-control" type="text" placeholder="Host" name="host" value="${mongo.host}" required>
-            </div>
-            <div class="form-group">
-                <label for="port-input">${message(code:"stream.config.mongodb.port")}</label>
-                <input id="port-input" class="form-control" type="text" placeholder="1234" name="port" value="${mongo.port}" required>
-            </div>
-            <div class="form-group">
-                <label for="username-input">${message(code:"stream.config.mongodb.username")}</label>
-                <input id="username-input" class="form-control" type="text" placeholder="username" name="username" value="${mongo.username}" required>
-            </div>
-            <div class="form-group">
-                <label for="password-input">${message(code:"stream.config.mongodb.password")}</label>
-                <input id="password-input" class="form-control" type="text" placeholder="password" name="password" value="${mongo.password}">
-            </div>
-            <div class="form-group">
-                <label for="database-input">${message(code:"stream.config.mongodb.database")}</label>
-                <input id="database-input" class="form-control" type="text" placeholder="database" name="database" value="${mongo.database}" required>
-            </div>
-            <div class="form-group">
-                <label for="collection-input">${message(code:"stream.config.mongodb.collection")}</label>
-                <input id="collection-input" class="form-control" type="text" placeholder="collection" name="collection" value="${mongo.collection}" required>
-            </div>
-            <div class="form-group">
-                <label for="timestampKey-input">${message(code:"stream.config.mongodb.timestampKey")}</label>
-                <input id="timestampKey-input" class="form-control" type="text" placeholder="timestampKey" name="timestampKey" value="${mongo.timestampKey}" required>
-            </div>
-            <div class="form-group">
-                <label for="query-input">${message(code:"stream.config.mongodb.query")} (optional)</label>
-                <textarea id="query-input" class="form-control" placeholder="" name="query">${mongo.query}</textarea>
-            </div>
+			<div class="form-group">
+				<label for="host-input">${message(code: "stream.config.mongodb.host")}</label>
+				<input id="host-input" class="form-control" type="text" placeholder="Host" name="host"
+					   value="${mongo.host}" required>
+			</div>
 
-            <g:submitButton name="submit" class="btn btn-lg btn-primary" value="${message(code:"stream.update.label")}" />
-        </g:form>
-    </ui:panel>
+			<div class="form-group">
+				<label for="port-input">${message(code: "stream.config.mongodb.port")}</label>
+				<input id="port-input" class="form-control" type="text" placeholder="1234" name="port"
+					   value="${mongo.port}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="username-input">${message(code: "stream.config.mongodb.username")}</label>
+				<input id="username-input" class="form-control" type="text" placeholder="username" name="username"
+					   value="${mongo.username}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="password-input">${message(code: "stream.config.mongodb.password")}</label>
+				<input id="password-input" class="form-control" type="text" placeholder="password" name="password"
+					   value="${mongo.password}">
+			</div>
+
+			<div class="form-group">
+				<label for="database-input">${message(code: "stream.config.mongodb.database")}</label>
+				<input id="database-input" class="form-control" type="text" placeholder="database" name="database"
+					   value="${mongo.database}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="collection-input">${message(code: "stream.config.mongodb.collection")}</label>
+				<input id="collection-input" class="form-control" type="text" placeholder="collection" name="collection"
+					   value="${mongo.collection}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="timestampKey-input">${message(code: "stream.config.mongodb.timestampKey")}</label>
+				<input id="timestampKey-input" class="form-control" type="text" placeholder="timestampKey"
+					   name="timestampKey" value="${mongo.timestampKey}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="query-input">${message(code: "stream.config.mongodb.query")} (optional)</label>
+				<textarea id="query-input" class="form-control" placeholder="" name="query">${mongo.query}</textarea>
+			</div>
+
+			<g:submitButton name="submit" class="btn btn-lg btn-primary"
+							value="${message(code: "stream.update.label")}"/>
+		</g:form>
+	</ui:panel>
 </div>
 
 </body>

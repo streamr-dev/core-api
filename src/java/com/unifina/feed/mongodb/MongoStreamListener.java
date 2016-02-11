@@ -19,4 +19,7 @@ public class MongoStreamListener extends AbstractStreamListener {
 
 	@Override
 	public void afterStreamSaved(Stream stream) {}
+
+	@Override
+	public void beforeDelete(Stream stream) {}
 }

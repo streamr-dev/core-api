@@ -36,7 +36,6 @@ class StreamApiControllerSpec extends Specification {
 		unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
 
 		controller.streamService = streamService
-		controller.streamService.kafkaService = Mock(KafkaService)
 		controller.unifinaSecurityService = unifinaSecurityService
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")

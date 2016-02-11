@@ -1,4 +1,5 @@
 package core
+
 databaseChangeLog = {
 
 	changeSet(author: "eric", id: "mongodb-feed-1") {

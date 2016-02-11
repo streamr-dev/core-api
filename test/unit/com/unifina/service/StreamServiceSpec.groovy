@@ -1,12 +1,14 @@
 package com.unifina.service
 
-import com.unifina.feed.NoOpStreamListener
-import grails.test.mixin.*
-import grails.test.mixin.web.ControllerUnitTestMixin
-import spock.lang.Specification
-
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.feed.mongodb.MongoStreamListener
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
+import spock.lang.Specification
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
@@ -16,33 +18,29 @@ import com.unifina.domain.data.Stream
 @Mock([Stream, Feed])
 class StreamServiceSpec extends Specification {
 
-	Feed feed = new Feed(streamListenerClass: NoOpStreamListener.class)
+	Feed feed
 
-	void "createStream must not call kafkaService.createTopics() if input incomplete"() {
-		
-		when:
-		service.createStream([:], null, null)
-
-		then:
-		0 * kafkaService.createTopics(_)
+	def setup() {
+		feed = new Feed(streamListenerClass: MongoStreamListener.name).save(validate: false)
 	}
 
-	void "createUserStream results in persisted Stream"() {
+	void "createStream throws ValidationException input incomplete"() {
+
 		when:
-		service.createStream([name: "name"], null, null)
+		service.createStream([feed: feed], null, null)
+
+		then:
+		thrown(ValidationException)
+	}
+
+	void "createStream results in persisted Stream"() {
+		when:
+		service.createStream([name: "name", feed: feed], null, null)
 
 		then:
 		Stream.count() == 1
 		Stream.list().first().name == "name"
 	}
 
-	void "createUserStream calls kafkaService.createTopics"() {
-		Stream stream
-
-		when:
-		stream = service.createStream([name: "name", localId: "localId"], null, null)
-
-		then:
-		1 * kafkaService.createTopics(_)
-	}
+	// TODO: test calls to AbstractStreamListener
 }
