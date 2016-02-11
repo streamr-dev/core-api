@@ -1,8 +1,6 @@
-import core.pages.CanvasPage
 import grails.test.mixin.TestFor
 import com.unifina.controller.core.signalpath.LiveController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.BootService
 import com.unifina.utils.MapTraversal
 
 import core.LoginTester1Spec
@@ -25,7 +23,6 @@ public class LiveSpec extends LoginTester1Spec {
 		LiveSpec.metaClass.mixin(CanvasMixin)
 		LiveSpec.metaClass.mixin(ConfirmationMixin)
 
-		BootService.mergeDefaultConfig(grailsApplication)
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));
 		Properties properties = new Properties();
 		for (String s : kafkaConfig.keySet())

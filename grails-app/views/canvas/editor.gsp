@@ -201,10 +201,10 @@ $(document).ready(function() {
         clearState: false
 	})
 	realtimeRunButton.on('start-confirmed', function() {
-		Streamr.showSuccess('${message(code:"canvas.started")}: '.replace('{0}', SignalPath.getName()))
+		Streamr.showSuccess('${message(code:"canvas.started")}'.replace('{0}', SignalPath.getName()))
 	})
 	realtimeRunButton.on('stop-confirmed', function() {
-		Streamr.showSuccess('${message(code:"canvas.stopped")}: '.replace('{0}', SignalPath.getName()))
+		Streamr.showSuccess('${message(code:"canvas.stopped")}'.replace('{0}', SignalPath.getName()))
 	})
 	realtimeRunButton.on('stop-error', function() {
 		Streamr.showError('${message(code:"canvas.stop.error")}')
