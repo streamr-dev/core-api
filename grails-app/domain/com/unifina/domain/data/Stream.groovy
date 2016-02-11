@@ -75,16 +75,4 @@ class Stream implements Comparable {
 			return ((Map)JSON.parse(config));
 		else return [:]
 	}
-
-
-	public MongoDbConfig retrieveMongoDbConfig() {
-		def mongoMap = getStreamConfigAsMap()["mongodb"]
-		return mongoMap == null ? null : new MongoDbConfig(mongoMap)
-	}
-
-	public void updateMongoDbConfig(MongoDbConfig mongoDbConfig) {
-		def newConfig = getStreamConfigAsMap()
-		newConfig["mongodb"] = mongoDbConfig.toMap()
-		config = new JsonBuilder(newConfig).toString()
-	}
 }

@@ -100,20 +100,7 @@ class StreamController {
 
 	def configureMongo() {
 		Stream stream = Stream.get(params.id)
-		[stream: stream, mongo: stream.retrieveMongoDbConfig()]
-	}
-
-	def updateMongo(MongoDbConfig config) {
-		Stream stream = Stream.get(params.id)
-
-		if (config.validate()) {
-			stream.updateMongoDbConfig(config)
-			stream.save(flush: true, failOnError: true)
-			redirect(action: "show", id: stream.id)
-		} else {
-			flash.error = "Missing / incorrect fields"
-			render(view: "configureMongo", model: [stream: stream, mongo: config])
-		}
+		[stream: stream, mongo: MongoDbConfig.readFromStream(stream)]
 	}
 	
 	def delete() {

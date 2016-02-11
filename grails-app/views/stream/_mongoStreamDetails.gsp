@@ -11,7 +11,7 @@
 		</div>
 
 		<div class="panel-body">
-			<g:set var="mongo" value="${stream.retrieveMongoDbConfig()}"/>
+			<g:set var="mongo" value="${com.unifina.data.MongoDbConfig.readFromStream(stream)}"/>
 			<ui:labeled label="${message(code: "stream.config.mongodb.host")}">
 				${mongo.host}
 			</ui:labeled>

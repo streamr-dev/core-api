@@ -1,5 +1,6 @@
 package com.unifina.data
 
+import com.unifina.domain.data.Stream
 import grails.validation.Validateable;
 
 @Validateable
@@ -23,6 +24,11 @@ public class MongoDbConfig {
 		collection(blank: false)
 		timestampKey(blank: false)
 		query(nullable: true)
+	}
+
+	static MongoDbConfig readFromStream(Stream stream) {
+		def mongoMap = stream.getStreamConfigAsMap()["mongodb"]
+		return mongoMap == null ? null : new MongoDbConfig(mongoMap)
 	}
 
 	def toMap() {
