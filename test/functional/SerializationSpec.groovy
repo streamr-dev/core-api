@@ -22,7 +22,6 @@ class SerializationSpec extends LoginTester1Spec {
 	@Shared long serializationIntervalInMillis
 
 	def setupSpec() {
-		BootService.mergeDefaultConfig(grailsApplication)
 		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
 
 		// For some reason the annotations don't work so need the below.
