@@ -28,6 +28,8 @@ class Feed implements Serializable {
 	
 	String eventRecipientClass
 	String keyProviderClass
+	String streamListenerClass
+	String streamPageTemplate
 	
 	Module module
 	
@@ -57,13 +59,5 @@ class Feed implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Feed && obj.id == this.id
-	}
-
-	public boolean isKafkaFeed() {
-		return id == KAFKA_ID
-	}
-
-	public boolean isMongoFeed() {
-		return id == MONGO_ID
 	}
 }

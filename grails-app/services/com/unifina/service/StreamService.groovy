@@ -1,36 +1,38 @@
 package com.unifina.service
 
-import grails.converters.JSON
-
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.AbstractStreamListener
 import com.unifina.utils.IdGenerator
+import grails.converters.JSON
 
 class StreamService {
-	
+
+	def grailsApplication
 	def kafkaService
 	def feedFileService
 	
-	Stream createUserStream(params, SecUser user, fields) {
+	Stream createStream(params, SecUser user, fields) {
 		Stream stream = new Stream(params)
 		stream.uuid = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
-		stream.feed = Feed.load(Feed.KAFKA_ID) // API stream
-		stream.config = ([fields: fields == null ? [] : fields, topic: stream.uuid] as JSON)
-		
+
+		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
+		AbstractStreamListener streamListener = clazz.newInstance(grailsApplication)
+		Map config = [fields: fields != null ? fields : []]
+		streamListener.addToConfiguration(config, stream)
+		stream.config = config as JSON
+
 		stream.save()
-		
-		if (!stream.hasErrors()) {
-			kafkaService.createTopics([stream.uuid])
-		}
+		streamListener.afterStreamSaved(stream)
 		return stream
 	}
 	
 	void deleteStream(Stream stream) {
-		if (stream.feed.id==7) {
+		if (stream.feed.id==Feed.KAFKA_ID) {
 			def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
 			feedFiles.each {
 				feedFileService.deleteFile(it)

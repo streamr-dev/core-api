@@ -57,15 +57,7 @@ class StreamController {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
 		def model = [stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
-		
-		// User streams
-		if (stream.feed.isKafkaFeed()) {
-			render(template: "userStreamDetails", model: model)
-		} else if (stream.feed.isMongoFeed()) {
-			render(template: "mongoStreamDetails", model: model)
-		}  else {
-			render ""
-		}
+		render(template: stream.feed.streamPageTemplate, model: model)
 	}
 
 	def update() {
@@ -77,11 +69,11 @@ class StreamController {
 	}
 	
 	def create() {
-		if (request.method=="GET")
-			[stream:new Stream()]
-		else {
+		if (request.method=="GET") {
+			[stream: new Stream(), feeds: Feed.findAll(), defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+		} else {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user, null)
+			Stream stream = streamService.createStream(params, user, null)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)

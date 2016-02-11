@@ -1,9 +1,8 @@
 package com.unifina.service
 
+import com.unifina.feed.NoOpStreamListener
 import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import grails.validation.ValidationException
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
@@ -17,17 +16,12 @@ import com.unifina.domain.data.Stream
 @Mock([Stream, Feed])
 class StreamServiceSpec extends Specification {
 
-	def kafkaService
-	
-	def setup() {
-		kafkaService = Mock(KafkaService)
-		service.kafkaService = kafkaService
-	}
+	Feed feed = new Feed(streamListenerClass: NoOpStreamListener.class)
 
-	void "createUserStream must not call kafkaService.createTopics() if input incomplete"() {
+	void "createStream must not call kafkaService.createTopics() if input incomplete"() {
 		
 		when:
-		service.createUserStream([:], null, null)
+		service.createStream([:], null, null)
 
 		then:
 		0 * kafkaService.createTopics(_)
@@ -35,7 +29,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createUserStream results in persisted Stream"() {
 		when:
-		service.createUserStream([name: "name"], null, null)
+		service.createStream([name: "name"], null, null)
 
 		then:
 		Stream.count() == 1
@@ -46,7 +40,7 @@ class StreamServiceSpec extends Specification {
 		Stream stream
 
 		when:
-		stream = service.createUserStream([name: "name", localId: "localId"], null, null)
+		stream = service.createStream([name: "name", localId: "localId"], null, null)
 
 		then:
 		1 * kafkaService.createTopics(_)

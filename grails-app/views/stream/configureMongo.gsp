@@ -65,15 +65,15 @@
 
             <div class="form-group">
                 <label for="host-input">${message(code:"stream.config.mongodb.host")}</label>
-                <input id="host-input" class="form-control" type="text" placeholder="Host" name="host" value="${mongo.host}">
+                <input id="host-input" class="form-control" type="text" placeholder="Host" name="host" value="${mongo.host}" required>
             </div>
             <div class="form-group">
                 <label for="port-input">${message(code:"stream.config.mongodb.port")}</label>
-                <input id="port-input" class="form-control" type="text" placeholder="1234" name="port" value="${mongo.port}">
+                <input id="port-input" class="form-control" type="text" placeholder="1234" name="port" value="${mongo.port}" required>
             </div>
             <div class="form-group">
                 <label for="username-input">${message(code:"stream.config.mongodb.username")}</label>
-                <input id="username-input" class="form-control" type="text" placeholder="username" name="username" value="${mongo.username}">
+                <input id="username-input" class="form-control" type="text" placeholder="username" name="username" value="${mongo.username}" required>
             </div>
             <div class="form-group">
                 <label for="password-input">${message(code:"stream.config.mongodb.password")}</label>
@@ -81,15 +81,15 @@
             </div>
             <div class="form-group">
                 <label for="database-input">${message(code:"stream.config.mongodb.database")}</label>
-                <input id="database-input" class="form-control" type="text" placeholder="database" name="database" value="${mongo.database}">
+                <input id="database-input" class="form-control" type="text" placeholder="database" name="database" value="${mongo.database}" required>
             </div>
             <div class="form-group">
                 <label for="collection-input">${message(code:"stream.config.mongodb.collection")}</label>
-                <input id="collection-input" class="form-control" type="text" placeholder="collection" name="collection" value="${mongo.collection}">
+                <input id="collection-input" class="form-control" type="text" placeholder="collection" name="collection" value="${mongo.collection}" required>
             </div>
             <div class="form-group">
                 <label for="timestampKey-input">${message(code:"stream.config.mongodb.timestampKey")}</label>
-                <input id="timestampKey-input" class="form-control" type="text" placeholder="timestampKey" name="timestampKey" value="${mongo.timestampKey}">
+                <input id="timestampKey-input" class="form-control" type="text" placeholder="timestampKey" name="timestampKey" value="${mongo.timestampKey}" required>
             </div>
             <div class="form-group">
                 <label for="query-input">${message(code:"stream.config.mongodb.query")} (optional)</label>

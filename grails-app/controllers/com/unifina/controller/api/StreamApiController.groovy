@@ -26,7 +26,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def save() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.config?.fields)
+		Stream stream = streamService.createStream(request.JSON, request.apiUser, request.JSON.config?.fields)
 
 		if (stream.hasErrors()) {
 			throw new ValidationException(stream.errors)
