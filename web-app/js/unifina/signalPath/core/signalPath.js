@@ -91,8 +91,12 @@ var SignalPath = (function () {
 		pub.setZoom(opts.zoom)
 		pub.jsPlumb = jsPlumb
 
+		$(pub).on('new', disconnect)
 		$(pub).on('started', subscribe)
-		$(pub).on('stopped', disconnect)
+		$(pub).on('stopped', function() {
+			runningJson = null
+			disconnect()
+		})
 		$(pub).on('loaded', function() {
 			if (isRunning())
 				subscribe()
@@ -651,7 +655,6 @@ var SignalPath = (function () {
 				if (data)
 					setSavedJson(data)
 
-				runningJson = null
 				$(pub).trigger('stopped');
 			}
 
