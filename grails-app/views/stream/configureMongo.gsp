@@ -34,8 +34,11 @@
                 // (flat) form to JSON
                 var mongoConfig = {}
                 $form.serializeArray().map(function(x) { mongoConfig[x.name] = x.value })
-                if (mongoConfig.port){
+                if (mongoConfig.port) {
                     mongoConfig.port = parseInt(mongoConfig.port, 10)
+                }
+                if (mongoConfig.pollIntervalMillis) {
+                	mongoConfig.pollIntervalMillis = parseInt(mongoConfig.pollIntervalMillis, 10)
                 }
 
                 streamData.config.mongodb = mongoConfig
@@ -104,6 +107,12 @@
 				<label for="timestampKey-input">${message(code: "stream.config.mongodb.timestampKey")}</label>
 				<input id="timestampKey-input" class="form-control" type="text" placeholder="timestampKey"
 					   name="timestampKey" value="${mongo.timestampKey}" required>
+			</div>
+
+			<div class="form-group">
+				<label for="pollIntervalMillis-input">${message(code: "stream.config.mongodb.pollIntervalMillis")}</label>
+				<input id="pollIntervalMillis-input" class="form-control" type="text" placeholder="1000"
+					   name="pollIntervalMillis" value="${mongo.pollIntervalMillis}" required>
 			</div>
 
 			<div class="form-group">

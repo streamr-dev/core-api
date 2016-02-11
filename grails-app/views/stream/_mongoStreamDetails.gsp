@@ -4,8 +4,9 @@
 			<span class="panel-title">MongoDB Settings</span>
 
 			<div class="panel-heading-controls">
-				<g:link action="configureMongo" id="${stream.id}"><span class="btn btn-sm"
-																		id="edit-mongodb-button">Edit</span></g:link>
+				<g:link action="configureMongo" id="${stream.id}">
+					<span class="btn btn-sm" id="edit-mongodb-button">Edit</span>
+				</g:link>
 			</div>
 		</div>
 
@@ -37,6 +38,10 @@
 
 			<ui:labeled label="${message(code: "stream.config.mongodb.timestampKey")}">
 				${mongo.timestampKey}
+			</ui:labeled>
+
+			<ui:labeled label="${message(code: "stream.config.mongodb.pollIntervalMillis")}">
+				${mongo.pollIntervalMillis}
 			</ui:labeled>
 
 			<ui:labeled label="${message(code: "stream.config.mongodb.query")}">

@@ -11,6 +11,7 @@ public class MongoDbConfig {
 	String database
 	String collection
 	String timestampKey
+	Long pollIntervalMillis
 	String query
 
 	static constraints = {
@@ -33,6 +34,7 @@ public class MongoDbConfig {
 			database: database,
 			collection: collection,
 			timestampKey: timestampKey,
+			pollIntervalMillis: pollIntervalMillis,
 			query: query,
 		]
 	}
