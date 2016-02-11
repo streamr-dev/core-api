@@ -1,6 +1,6 @@
 package com.unifina.domain.data
 
-import com.unifina.data.MongoDbConfig
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.security.SecUser
 import grails.converters.JSON
 import groovy.json.JsonBuilder

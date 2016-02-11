@@ -33,7 +33,11 @@
 
                 // (flat) form to JSON
                 var mongoConfig = {}
-                $form.serializeArray().map(function(x) { mongoConfig[x.name] = x.value })
+                $form.serializeArray().forEach(function(x) {
+                	if (x.value != null && x.value !== "") {
+                		mongoConfig[x.name] = x.value
+                	}
+                })
                 if (mongoConfig.port) {
                     mongoConfig.port = parseInt(mongoConfig.port, 10)
                 }
@@ -69,55 +73,55 @@
 
 			<div class="form-group">
 				<label for="host-input">${message(code: "stream.config.mongodb.host")}</label>
-				<input id="host-input" class="form-control" type="text" placeholder="Host" name="host"
+				<input id="host-input" class="form-control" type="text" name="host"
 					   value="${mongo.host}" required>
 			</div>
 
 			<div class="form-group">
 				<label for="port-input">${message(code: "stream.config.mongodb.port")}</label>
-				<input id="port-input" class="form-control" type="text" placeholder="1234" name="port"
-					   value="${mongo.port}" required>
+				<input id="port-input" class="form-control" type="text" name="port"
+					   value="${mongo.port ?: com.unifina.feed.mongodb.MongoConfigHelper.DEFAULT_PORT}">
 			</div>
 
 			<div class="form-group">
-				<label for="username-input">${message(code: "stream.config.mongodb.username")}</label>
-				<input id="username-input" class="form-control" type="text" placeholder="username" name="username"
-					   value="${mongo.username}" required>
+				<label for="username-input">${message(code: "stream.config.mongodb.username")} (optional)</label>
+				<input id="username-input" class="form-control" type="text" name="username"
+					   value="${mongo.username}">
 			</div>
 
 			<div class="form-group">
-				<label for="password-input">${message(code: "stream.config.mongodb.password")}</label>
-				<input id="password-input" class="form-control" type="text" placeholder="password" name="password"
+				<label for="password-input">${message(code: "stream.config.mongodb.password")} (optional)</label>
+				<input id="password-input" class="form-control" type="text" name="password"
 					   value="${mongo.password}">
 			</div>
 
 			<div class="form-group">
 				<label for="database-input">${message(code: "stream.config.mongodb.database")}</label>
-				<input id="database-input" class="form-control" type="text" placeholder="database" name="database"
+				<input id="database-input" class="form-control" type="text" name="database"
 					   value="${mongo.database}" required>
 			</div>
 
 			<div class="form-group">
 				<label for="collection-input">${message(code: "stream.config.mongodb.collection")}</label>
-				<input id="collection-input" class="form-control" type="text" placeholder="collection" name="collection"
+				<input id="collection-input" class="form-control" type="text" name="collection"
 					   value="${mongo.collection}" required>
 			</div>
 
 			<div class="form-group">
 				<label for="timestampKey-input">${message(code: "stream.config.mongodb.timestampKey")}</label>
-				<input id="timestampKey-input" class="form-control" type="text" placeholder="timestampKey"
+				<input id="timestampKey-input" class="form-control" type="text"
 					   name="timestampKey" value="${mongo.timestampKey}" required>
 			</div>
 
 			<div class="form-group">
 				<label for="pollIntervalMillis-input">${message(code: "stream.config.mongodb.pollIntervalMillis")}</label>
 				<input id="pollIntervalMillis-input" class="form-control" type="text" placeholder="1000"
-					   name="pollIntervalMillis" value="${mongo.pollIntervalMillis}" required>
+					   name="pollIntervalMillis" value="${mongo.pollIntervalMillis ?: com.unifina.feed.mongodb.MongoConfigHelper.DEFAULT_POLL_INTERVAL}" required>
 			</div>
 
 			<div class="form-group">
 				<label for="query-input">${message(code: "stream.config.mongodb.query")} (optional)</label>
-				<textarea id="query-input" class="form-control" placeholder="" name="query">${mongo.query}</textarea>
+				<textarea id="query-input" class="form-control" name="query">${mongo.query ?: "{}"}</textarea>
 			</div>
 
 			<g:submitButton name="submit" class="btn btn-lg btn-primary"

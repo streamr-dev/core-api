@@ -16,7 +16,10 @@ import java.util.Map;
 /**
  * Created by henripihkala on 10/02/16.
  */
-public class MongoConfig {
+public class MongoConfigHelper {
+	public static final int DEFAULT_PORT = 27017;
+	public static final long DEFAULT_POLL_INTERVAL = 1000;
+
 	public static Map<String, Object> getMongoConfig(Stream stream) {
 		return (Map<String, Object>) stream.getStreamConfigAsMap().get("mongodb");
 	}
@@ -28,12 +31,12 @@ public class MongoConfig {
 	public static long getPollIntervalMillis(Map<String, Object> mongoConfig) {
 		Long interval = MapTraversal.getLong(mongoConfig, "pollIntervalMillis");
 		if (interval == null)
-			interval = 1000L; // default
+			interval = DEFAULT_POLL_INTERVAL;
 		return interval;
 	}
 
 	public static MongoClient getMongoClient(Map<String, Object> mongoConfig) {
-		ServerAddress serverAddress = new ServerAddress(mongoConfig.get("host").toString(), mongoConfig.containsKey("port") ? (int) mongoConfig.get("port") : 27017);
+		ServerAddress serverAddress = new ServerAddress(mongoConfig.get("host").toString(), mongoConfig.containsKey("port") ? (int) mongoConfig.get("port") : DEFAULT_PORT);
 		List<MongoCredential> credentials = new ArrayList<>();
 		if (mongoConfig.containsKey("username")) {
 			MongoCredential credential = MongoCredential.createCredential(mongoConfig.get("username").toString(),

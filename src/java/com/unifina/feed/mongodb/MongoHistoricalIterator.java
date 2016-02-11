@@ -1,8 +1,6 @@
 package com.unifina.feed.mongodb;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -39,14 +37,14 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 	}
 
 	private void connect() {
-		Map<String, Object> mongoConfig = MongoConfig.getMongoConfig(stream);
-		timestampKey = MongoConfig.getTimestampKey(mongoConfig);
-		mongoClient = MongoConfig.getMongoClient(mongoConfig);
-		MongoDatabase db = MongoConfig.getMongoDatabase(mongoClient, mongoConfig);
-		MongoCollection collection = MongoConfig.getCollection(db, mongoConfig);
+		Map<String, Object> mongoConfig = MongoConfigHelper.getMongoConfig(stream);
+		timestampKey = MongoConfigHelper.getTimestampKey(mongoConfig);
+		mongoClient = MongoConfigHelper.getMongoClient(mongoConfig);
+		MongoDatabase db = MongoConfigHelper.getMongoDatabase(mongoClient, mongoConfig);
+		MongoCollection collection = MongoConfigHelper.getCollection(db, mongoConfig);
 
 		// Add static filters from mongoConfig
-		Document query = MongoConfig.getQuery(mongoConfig);
+		Document query = MongoConfigHelper.getQuery(mongoConfig);
 
 		// Filter by startDate
 		Document startDateFilter = new Document();

@@ -79,7 +79,7 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		stream.config = (config as JSON)
 		stream.save()
 
-		mongoClient = MongoConfig.getMongoClient(MongoConfig.getMongoConfig(stream))
+		mongoClient = MongoConfigHelper.getMongoClient(MongoConfigHelper.getMongoConfig(stream))
 		MongoDatabase db = mongoClient.getDatabase("test")
 
 		when:

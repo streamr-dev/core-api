@@ -1,4 +1,4 @@
-package com.unifina.data
+package com.unifina.feed.mongodb
 
 import com.unifina.domain.data.Stream
 import grails.validation.Validateable;
@@ -18,7 +18,7 @@ public class MongoDbConfig {
 	static constraints = {
 		host(blank: false)
 		port(min: 0, max: 65535)
-		username(blank: false)
+		username(nullable: true)
 		password(nullable: true)
 		database(blank: false)
 		collection(blank: false)

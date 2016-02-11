@@ -1,6 +1,6 @@
 package com.unifina.controller.data
 
-import com.unifina.data.MongoDbConfig
+import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -70,7 +70,8 @@ class StreamController {
 	
 	def create() {
 		if (request.method=="GET") {
-			[stream: new Stream(), feeds: Feed.findAll(), defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+			SecUser user = springSecurityService.currentUser
+			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
 		} else {
 			SecUser user = springSecurityService.currentUser
 			Stream stream = streamService.createStream(params, user, null)

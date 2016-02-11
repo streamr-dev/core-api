@@ -1,7 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ValidationException
-import com.unifina.data.MongoDbConfig
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
 import com.unifina.security.StreamrApi
 import grails.converters.JSON

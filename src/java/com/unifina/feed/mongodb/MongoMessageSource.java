@@ -29,21 +29,21 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 		final Stream stream = subscriber;
 		return new Poller() {
 
-			private final Map<String, Object> mongoConfig = MongoConfig.getMongoConfig(stream);
-			private final String timestampKey = MongoConfig.getTimestampKey(mongoConfig);
-			private final MongoClient mongoClient = MongoConfig.getMongoClient(mongoConfig);
-			private final MongoDatabase db = MongoConfig.getMongoDatabase(mongoClient, mongoConfig);
-			private final MongoCollection collection = MongoConfig.getCollection(db, mongoConfig);
+			private final Map<String, Object> mongoConfig = MongoConfigHelper.getMongoConfig(stream);
+			private final String timestampKey = MongoConfigHelper.getTimestampKey(mongoConfig);
+			private final MongoClient mongoClient = MongoConfigHelper.getMongoClient(mongoConfig);
+			private final MongoDatabase db = MongoConfigHelper.getMongoDatabase(mongoClient, mongoConfig);
+			private final MongoCollection collection = MongoConfigHelper.getCollection(db, mongoConfig);
 
 			// Add static filters from mongoConfig
 			private final Document startDateFilter = new Document();
-			private final Document query = MongoConfig.getQuery(mongoConfig).append(timestampKey, startDateFilter);
+			private final Document query = MongoConfigHelper.getQuery(mongoConfig).append(timestampKey, startDateFilter);
 			private Date lastDate = new Date();
 			private long counter = 0;
 
 			@Override
 			public long getPollInterval() {
-				return MongoConfig.getPollIntervalMillis(mongoConfig);
+				return MongoConfigHelper.getPollIntervalMillis(mongoConfig);
 			}
 
 			@Override
