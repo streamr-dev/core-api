@@ -15,8 +15,7 @@ class UnifinaCorePluginUrlMappings {
 		// 403 would be handled by Spring Security Core by default, but due to 
 		// https://jira.grails.org/browse/GPSPRINGSECURITYCORE-253 it needs to be specified explicitly
 		"403"(controller: "login", action: "denied")
-		"500"(view:'/error')
-		"500"(controller: "error", action: "index", exception: ApiException)
+		"500"(controller: "error", action: "index", exception: Exception)
 		
 		"/webcomponents/$view"(controller: "webcomponents", action: "index")
 

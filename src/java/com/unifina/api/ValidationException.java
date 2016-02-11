@@ -3,10 +3,10 @@ package com.unifina.api;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 
-public class ValidationException extends ApiException {
+public class ValidationException extends RuntimeException {
 
 	public ValidationException(Errors errors) {
-		super(422, "VALIDATION_ERROR", turnToMessage(errors));
+		super(turnToMessage(errors));
 	}
 
 	private static String turnToMessage(Errors errors) {

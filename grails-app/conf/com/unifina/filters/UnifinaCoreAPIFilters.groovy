@@ -56,6 +56,8 @@ class UnifinaCoreAPIFilters {
 			before = {
 				StreamrApi annotation = getApiAnnotation(controllerName, actionName)
 
+				request.isApiAction = true
+
 				TokenAuthenticator authenticator = new TokenAuthenticator(unifinaSecurityService)
 				SecUser user = authenticator.authenticate(request)
 

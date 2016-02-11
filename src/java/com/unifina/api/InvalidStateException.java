@@ -1,7 +1,7 @@
 package com.unifina.api;
 
-public class InvalidStateException extends ApiException {
+public class InvalidStateException extends RuntimeException {
 	public InvalidStateException(String message) {
-		super(500, "STATE_NOT_ALLOWED", message);
+		super(message);
 	}
 }
