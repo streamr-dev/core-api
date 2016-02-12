@@ -30,16 +30,15 @@
         			if (autodetecting) {
         				listView.clear()
 
-						Object.keys(fields).forEach(function(key) {
-							var type = fields[key]
-							
-							console.log("Field: "+ key +", type: " + type)
+        				fields.forEach(function(field) {
+
+							console.log("Field: "+ field.name +", type: " + field.type)
 
 							listView.collection.add({
-								name: key,
-								type: type
+								name: field.name,
+								type: field.type
 							})
-						})
+        				})
 						
 						autodetecting = false
 						$("#autodetect").removeAttr("disabled").html("Autodetect")
