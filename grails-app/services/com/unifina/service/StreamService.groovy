@@ -45,10 +45,19 @@ class StreamService {
 		stream.delete(flush:true)
 	}
 
-	Map autodetectFields(Stream stream, boolean flattenHierarchies) {
+	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
 		FieldDetector fieldDetector = instantiateDetector(stream)
 		fieldDetector.setFlattenMap(flattenHierarchies)
-		return fieldDetector?.detectFields(stream)
+		def fields = fieldDetector?.detectFields(stream)
+		if (fields) {
+			Map config = stream.getStreamConfigAsMap()
+			config.fields = fields
+			stream.config = config as JSON
+			stream.save(flush: true, failOnError: true)
+			return true
+		} else {
+			return false
+		}
 	}
 
 	// TODO: move to FeedService

@@ -12,12 +12,12 @@
         		var autodetecting = false
         		var streamConfig = ${raw(stream.config ?: "{}")}
 
-		listView = new ListView({
-            el: $("#stream-fields"),
-            id: ${stream.id}
-		});
-        listView.on('saved', function() {
-            window.location = '${createLink(action:"show", id:stream.id)}'
+				listView = new ListView({
+					el: $("#stream-fields"),
+					id: ${stream.id}
+				});
+        		listView.on('saved', function() {
+            		window.location = '${createLink(action:"show", id:stream.id)}'
         		})
         		
         		if (streamConfig && streamConfig.fields) {
@@ -25,17 +25,18 @@
         			listView.render()
         		}
         	
-        		function handleMessage(message) {
+        		function updateWithNewStreamData(stream) {
+        			var fields = stream.config.fields
         			if (autodetecting) {
         				listView.clear()
 
-        				
-						Object.keys(message).forEach(function(key) {
-							var type = message[key]
+						Object.keys(fields).forEach(function(key) {
+							var type = fields[key]
 							
-							console.log("Detected field: "+key+", type: "+type)
+							console.log("Field: "+ key +", type: " + type)
+
 							listView.collection.add({
-								name: key, 
+								name: key,
 								type: type
 							})
 						})
@@ -51,8 +52,8 @@
         				$(this).attr("disabled","disabled")
 						$(this).html("Waiting for data...")
 
-						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.uuid])}', function(data) {
-							handleMessage(data)
+						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.uuid])}', function(stream) {
+							updateWithNewStreamData(stream)
 						})
         			}
         		})
