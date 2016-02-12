@@ -1,3 +1,4 @@
+<%@ page import="com.unifina.feed.mongodb.MongoDbConfig" %>
 <div class="col-sm-6 col-md-4">
 	<div class="panel ">
 		<div class="panel-heading">
@@ -11,7 +12,7 @@
 		</div>
 
 		<div class="panel-body">
-			<g:set var="mongo" value="${com.unifina.data.MongoDbConfig.readFromStream(stream)}"/>
+			<g:set var="mongo" value="${com.unifina.feed.mongodb.MongoDbConfig.readFromStream(stream)}"/>
 			<ui:labeled label="${message(code: "stream.config.mongodb.host")}">
 				${mongo.host}
 			</ui:labeled>

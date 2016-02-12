@@ -1,5 +1,6 @@
 package com.unifina.controller.data
 
+import com.unifina.api.ApiException
 import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -242,6 +243,16 @@ class StreamController {
 			flash.message = "The format of the timestamp is not correct"
 		}
 		redirect(action:"show", id:params.id)
+	}
+
+	def detectFields() {
+		Stream stream = Stream.get(params.id)
+		Map fields = streamService.autodetectFields(stream, params.boolean("flatten", false))
+		if (fields) {
+			render(fields as JSON)
+		} else {
+			throw new ApiException(500, "FIELD_DETECTION_FAILED", "Failed to autodetect fields of Stream $stream.id")
+		}
 	}
 	
 	private void importCsv(CSVImporter csv, Stream stream) {

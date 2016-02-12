@@ -2,6 +2,7 @@ package com.unifina.feed;
 
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.map.MapMessage;
+import com.unifina.utils.MapTraversal;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.HashMap;
@@ -13,20 +14,28 @@ import java.util.Map;
  */
 public abstract class FieldDetector {
 	protected final GrailsApplication grailsApplication;
-	private boolean flattenMap;
+	private boolean flattenMap = false;
 
 	public FieldDetector(GrailsApplication grailsApplication) {
 		this.grailsApplication = grailsApplication;
 	}
 
-	public Map<String, String> detectFields(Stream stream) {
-		MapMessage map = fetchExampleMessage(stream);
-		Map<String, String> fields = new HashMap<>();
+	public void setFlattenMap(boolean flattenMap) {
+		this.flattenMap = flattenMap;
+	}
 
-		for (Object key : map.payload.keySet()) {
-			fields.put(key.toString(), detectType(map.payload.get(key)));
+	public Map<String, String> detectFields(Stream stream) {
+		MapMessage mapMessage = fetchExampleMessage(stream);
+		Map map = mapMessage.payload;
+
+		if (flattenMap) {
+			map = MapTraversal.flatten(map);
 		}
 
+		Map<String, String> fields = new HashMap<>();
+		for (Object key : map.keySet()) {
+			fields.put(key.toString(), detectType(map.get(key)));
+		}
 		return fields;
 	}
 

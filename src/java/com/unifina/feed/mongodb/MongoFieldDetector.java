@@ -38,8 +38,13 @@ public class MongoFieldDetector extends FieldDetector {
 		MongoCursor<Document> mongoCursor = iterable.iterator();
 
 		// Perform query and build MapMessage
-		Document document = mongoCursor.next();
-		Date timestamp = document.getDate(timestampKey);
-		return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+		if (mongoCursor.hasNext()) {
+			Document document = mongoCursor.next();
+			Date timestamp = document.getDate(timestampKey);
+			return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+		} else {
+			String msg = String.format("No data found %s@%s", collection.getNamespace(), mongoClient.getConnectPoint());
+			throw new MongoException(msg);
+		}
 	}
 }
