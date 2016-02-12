@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -152,7 +153,7 @@ class PermissionApiControllerSpec extends Specification {
 		when:
 		withFilters(action: "index") { controller.index() }
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 
 	void "index won't show list of permissions without 'share' permission (Stream using uuid)"() {
@@ -165,7 +166,7 @@ class PermissionApiControllerSpec extends Specification {
 		when:
 		withFilters(action: "index") { controller.index() }
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 
 	void "save grants Permissions"() {
@@ -203,7 +204,7 @@ class PermissionApiControllerSpec extends Specification {
 		response.json.changedPermissions.size() == 3
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions
-		1 * permissionService.revoke(me, _, canvasPermission.user, canvasPermission.operation)
+		1 * permissionService._
 		1 * permissionService.getPermissionsTo(_) >> [opR, opW, opS]
 		0 * permissionService._
 	}

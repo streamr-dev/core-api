@@ -348,8 +348,7 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 500
-		response.json.code == "CANVAS_STOP_FAILED"
+		thrown ApiException
 		1 * canvasService.stop(canvas1, me) >> { throw new ApiException(500, "CANVAS_STOP_FAILED", "") }
 		0 * canvasService._
 	}

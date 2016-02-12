@@ -370,7 +370,7 @@ class CanvasServiceSpec extends Specification {
 
 	}
 
-	def "stop() throws ApiException is canvas cannot be reached"() {
+	def "stop() throws InvalidStateException if canvas cannot be reached"() {
 		def signalPathService = Stub(SignalPathService)
 		service.signalPathService = signalPathService
 
@@ -380,7 +380,7 @@ class CanvasServiceSpec extends Specification {
 		service.stop(myFirstCanvas, me)
 
 		then:
-		thrown(ApiException)
+		thrown InvalidStateException
 	}
 
 	def uiChannelIdsFromMap(Map signalPathMap) {

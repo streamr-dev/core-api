@@ -93,15 +93,20 @@ class PermissionService {
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
 		//   hence, class.name of a proxy object won't match the class.name in database
 		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
-		String idProp = getIdPropertyName(resourceClass)
+		return hasPermission(user, resourceClass, resource.id, op)
+	}
 
+	private boolean hasPermission(user, Class resourceClass, resourceId, Operation op) {
+		String userProp = getUserPropertyName(user)
+		String idProp = getIdPropertyName(resourceClass)
 		return !Permission.withCriteria {
-			eq "user", user
+			eq userProp, user
 			eq "clazz", resourceClass.name
-			eq idProp, resource.id
+			eq idProp, resourceId
 			eq "operation", op
 		}.empty
 	}
+
 	// TODO: does WRITE imply READ?
 	boolean canRead(SecUser user, resource)  { return check(user, resource, Operation.READ) }
 	boolean canWrite(SecUser user, resource) { return check(user, resource, Operation.WRITE) }
@@ -166,7 +171,7 @@ class PermissionService {
 	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter) {
 		return getAll(resourceClass, user, Operation.READ, resourceFilter)
 	}
-
+//"Can't add access permissions to com.unifina.domain.signalpath.Canvas : cnwgfBFKTSqjJavFOe3Aqw for owner (tester1@streamr.com, id 1)!"
 	/**
 	 * Grant a Permission to another SecUser to access a resource
 	 * @param grantor user that has SHARE rights to the resource
@@ -177,9 +182,9 @@ class PermissionService {
 	 * @throws IllegalArgumentException if trying to give resource owner "more" access permissions
      */
 	public Permission grant(SecUser grantor, resource, target, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
-		// owner already has all access, can't give "more" access
 		if (target instanceof SecUser && isOwner(target, resource)) {
-			throw new IllegalArgumentException("Can't add access permissions to $resource for owner (${target?.username}, id ${target?.id})!")
+			// owner already has all access, can't give "more" access
+			throw new IllegalArgumentException("Can't grant permissions for owner of $resource!")
 		}
 
 		// TODO CORE-498: check grantor himself has the right he's granting (e.g. "write")
@@ -226,21 +231,21 @@ class PermissionService {
 	 * @returns Permission objects that were deleted
      */
 	public List<Permission> revoke(SecUser revoker, resource, target, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException {
-		// can't revoke ownership
 		if (target instanceof SecUser && isOwner(target, resource)) {
-			throw new AccessControlException("Can't revoke owner's (${target?.username}, id ${target?.id}) access to $resource!")
+			throw new AccessControlException("Can't revoke owner's access to $resource!")
 		}
 
 		if (canShare(revoker, resource)) {
 			return systemRevoke(target, resource, operation)
 		} else {
+			String violator = "${revoker?.username}(id ${revoker?.id})"
 			if (logIfDenied) {
-				log.warn("${revoker?.username}(id ${revoker?.id}) tried to revoke $resource without 'share' Permission!")
-				if (resource?.hasProperty("user")) {
+				log.warn("$violator tried to revoke $resource without 'share' Permission!")
+				if (resource.hasProperty("user")) {
 					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
 				}
 			}
-			throw new AccessControlException("${revoker?.username}(id ${revoker?.id}) has no 'share' permission to $resource!")
+			throw new AccessControlException("$violator has no 'share' permission to $resource!")
 		}
 	}
 
@@ -260,11 +265,38 @@ class PermissionService {
 		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
 		String idProp = getIdPropertyName(resourceClass)
 
+		return performRevoke(userProp, target, resourceClass.name, idProp, resource.id, operation)
+	}
+
+	/**
+	 * Shortcut for removing a given Permission. Doesn't need to load the resource at all if there's a share permission
+     */
+	public List<Permission> revoke(SecUser revoker, Permission p, boolean logIfDenied=true) {
+		Class resourceClass = grailsApplication.getDomainClass(p.clazz)
+		def resourceId = p.stringId ?: p.longId
+
+		if (hasPermission(revoker, resourceClass, resourceId, Operation.SHARE)) {
+			return systemRevoke(p)
+		} else {
+			// fall back to loading the resource (so that ownership can be tested)
+			return revoke(revoker, resourceClass.get(resourceId), p.user, p.operation, logIfDenied)
+		}
+	}
+
+	/**
+	 * "Internal" version of revoke shortcut
+     */
+	public List<Permission> systemRevoke(Permission p) {
+		if (!p) { throw new IllegalArgumentException("Missing Permission object!") }
+		return performRevoke(p.user ? "user" : "invite", p.user ?: p.invite, p.clazz, p.stringId ? "stringId" : "longId", p.stringId ?: p.longId, p.operation)
+	}
+
+	private List<Permission> performRevoke(String userProp, target, String clazz, String idProp, resourceId, Operation operation) {
 		def ret = []
 		def perms = Permission.withCriteria {
 			eq(userProp, target)
-			eq("clazz", resourceClass.name)
-			eq(idProp, resource.id)
+			eq("clazz", clazz)
+			eq(idProp, resourceId)
 		}
 		def revokeOp = { Operation op -> perms.findAll { it.operation == op }.each {
 			ret.add(it)
@@ -276,15 +308,16 @@ class PermissionService {
 	}
 
 	/**
-	 * Convert signup-invitation Permissions created when sharing resources to non-users
-	 * This should be called when a new user registers
-	 * @param invite that was consumed
-	 * @param user that was produced
+	 * Convert signup-invitation Permissions that have been created when sharing resources to non-users
+	 * @param user that was just created from sign-up invite
      * @return List of Permissions the invite had that the new user received
      */
-	public List<Permission> convertSignupInvite(SignupInvite invite, SecUser user) {
+	public List<Permission> transferInvitePermissionsTo(SecUser user) {
+		// { invite { eq "username", user.username } } won't do: some invite are null => NullPointerException
 		return Permission.withCriteria {
-			eq "invite", invite
+			isNotNull "invite"
+		}.findAll {
+			it.invite.username == user.username
 		}.collect { p ->
 			p.invite = null
 			p.user = user

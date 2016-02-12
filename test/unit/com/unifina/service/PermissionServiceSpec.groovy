@@ -49,7 +49,7 @@ class PermissionServiceSpec extends Specification {
 		stranger = new SecUser(username: "stranger", password: "x", apiKey: "strangeApiKey", apiSecret: "strangeApiSecret").save(validate:false)
 
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
-		invite = new SignupInvite(username: "friend", code: "sikritCode", sent: true, used: false).save(validate:false)
+		invite = new SignupInvite(username: "him", code: "sikritCode", sent: true, used: false).save(validate:false)
 
 		// ModulePackages
 		modPackAllowed = new ModulePackage(name:"allowed", user:anotherUser).save(validate:false)
@@ -91,6 +91,9 @@ class PermissionServiceSpec extends Specification {
 		Module.findByModulePackage(modPackAllowed)==modAllowed
 		ModulePackage.findAllByUser(anotherUser).size()==2
 		ModulePackage.findAllByUser(me).size()==1
+
+		and: "anotherUser has an invitation"
+		invite.username == anotherUser.username
 
 		Permission.count()==3
 	}
@@ -363,15 +366,15 @@ class PermissionServiceSpec extends Specification {
 
 	void "signup invitations are converted correctly"() {
 		expect:
-		!service.canRead(stranger, dashOwned)
-		!service.canRead(stranger, uicRestricted)
+		!service.canRead(anotherUser, dashOwned)
+		!service.canRead(anotherUser, uicRestricted)
 
-		when: "pretend stranger was just created"
+		when: "pretend anotherUser was just created"
 		service.grant(me, dashOwned, invite)
 		service.systemGrant(invite, uicRestricted)
-		service.convertSignupInvite(invite, stranger)
+		service.transferInvitePermissionsTo(anotherUser)
 		then:
-		service.canRead(stranger, dashOwned)
-		service.canRead(stranger, uicRestricted)
+		service.canRead(anotherUser, dashOwned)
+		service.canRead(anotherUser, uicRestricted)
 	}
 }

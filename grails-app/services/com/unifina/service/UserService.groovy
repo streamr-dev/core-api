@@ -40,6 +40,8 @@ class UserService {
             addRoles(user, roles)
             addFeeds(user, feeds)
             addModulePackages(user, packages)
+			// Transfer permissions that were attached to sign-up invitation before user existed
+			permissionService.transferInvitePermissionsTo(user)
         }
         log.info("Created user for "+user.username)
         

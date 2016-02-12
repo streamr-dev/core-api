@@ -1,5 +1,9 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
+import com.unifina.api.InvalidArgumentsException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -31,9 +35,9 @@ class PermissionApiController {
 		// TODO: remove kludge when Stream has String id instead of String uuid
 		def res = (resourceClass == Stream ? Stream.find { uuid == resourceId } : resourceClass.get(resourceId))
 		if (!res) {
-			render status: 404, text: [error: "${resourceClass.simpleName} (id $resourceId) not found!", code: "NOTFOUND", fault: resourceClass.simpleName, id: resourceId] as JSON, contentType: "application/json"
+			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (!permissionService.canShare(request.apiUser, res)) {
-			render status: 403, text: [error: "Not authorized to query the Permissions for ${resourceClass.simpleName} $resourceId", code: "FORBIDDEN", fault: "permissions", user: request?.apiUser?.username] as JSON, contentType: "application/json"
+			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString())
 		} else {
 			action(res)
 		}
@@ -48,7 +52,7 @@ class PermissionApiController {
 		useResource(resourceClass, resourceId) { res ->
 			def p = permissionService.getPermissionsTo(res).find { it.id == permissionId }
 			if (!p) {
-				render status: 404, text: [error: "${resourceClass.simpleName} $resourceId had no permission with id $permissionId!", code: "NOTFOUND", fault: "permissions"] as JSON, contentType: "application/json"
+				throw new NotFoundException("permissions", permissionId.toString())
 			} else {
 				action(p, res)
 			}
@@ -65,19 +69,13 @@ class PermissionApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def save() {
-		if (!request.hasProperty("JSON")) {
-			render status: 400, text: [error: "JSON body expected"] as JSON, contentType: "application/json"
-			return
-		}
+		if (!request.hasProperty("JSON")) { throw new InvalidArgumentsException("JSON body expected") }
 
 		String username = request.JSON.user
 		String opId = request.JSON.operation
 
 		Operation op = Operation.enumConstants.find { it.id == opId }
-		if (!op) {
-			render status: 400, text: [error: "Invalid operation '$opId'. Try with 'read', 'write' or 'share' instead.", code: "INVALID", fault: "operation", operation: opId] as JSON, contentType: "application/json"
-			return
-		}
+		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'. Try e.g. 'read' instead.", "operation", opId) }
 
 		// TODO: check that username is a valid email address?
 
@@ -89,8 +87,6 @@ class PermissionApiController {
 				invite = signupCodeService.create(username)
 				def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
 				// TODO: react to MailSendException if invite.username is not valid a e-mail address
-				// 			containing a com.sun.mail.smtp.SMTPAddressFailedException: 553 5.1.2 The recipient address <derp> is not a valid RFC-5321 address. ll9sm33538336wjc.29 - gsmtp
-				//			from SMTP server response
 				mailService.sendMail {
 					from grailsApplication.config.unifina.email.sender
 					to invite.username
@@ -113,26 +109,26 @@ class PermissionApiController {
 			def grantor = request.apiUser
 			def newP = permissionService.grant(grantor, res, user, op)
 			header "Location", request.forwardURI + "/" + newP.id
-			render status: 201, text: newP.toMap() + [text: "Successfully granted"] as JSON, contentType: "application/json"
+			response.status = 201
+			render(newP.toMap() + [text: "Successfully granted"] as JSON)
 		}
 	}
 
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			render status: 200, text: p.toMap() as JSON, contentType: "application/json"
+			render(p.toMap() as JSON)
 		}
 	}
 
 	@StreamrApi(requiresAuthentication = false)
 	def delete(String id) {
-		//log.debug("Delete permission ${params.id} of ${params.resourceClass.simpleName} ${params.resourceId}")
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			def revoker = request.apiUser
-			permissionService.revoke(revoker, res, p.user, p.operation)
+			// share-permission has been tested in usePermission
+			permissionService.systemRevoke(p)
 			// https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7 says DELETE may return "an entity describing the status", that is:
 			def newPerms = permissionService.getPermissionsTo(res)*.toMap()
-			render status: 200, text: p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON, contentType: "application/json"
+			render(p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON)
 			// it's also possible to send no body at all
 			//render status: 204
 		}
