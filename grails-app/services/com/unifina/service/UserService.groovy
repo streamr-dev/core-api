@@ -1,7 +1,6 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
@@ -38,8 +37,8 @@ class UserService {
         } else {
             // Save roles, feeds and module packages
             addRoles(user, roles)
-            addFeeds(user, feeds)
-            addModulePackages(user, packages)
+            setFeeds(user, feeds)
+            setModulePackages(user, packages)
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
         }
@@ -66,30 +65,32 @@ class UserService {
         }
     }
 
-    def addFeeds(user, List<Feed> feeds=null) {
+	/** Adds/removes Feed read permissions so that user's permissions match given ones, or defaults if null given */
+    def setFeeds(user, List<Feed> feeds=null) {
         if(feeds == null) {
             feeds = Feed.findAllByIdInList(grailsApplication.config.streamr.user.defaultFeeds.collect {it.longValue()})
             if (feeds.size() != grailsApplication.config.streamr.user.defaultFeeds.size())
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
 
-		// TODO: Permissions, decide defaults that make sense with feeds
-        feeds.each { feed ->
-			permissionService.systemGrant(user, feed)
-        }
+		List<Feed> existing = permissionService.getAll(Feed, user)
+        feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
+		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
+		return feeds
     }
 
-    def addModulePackages(user, List<ModulePackage> packages=null) {
+	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones, or defaults if null given */
+	def setModulePackages(user, List<ModulePackage> packages =null) {
         if (packages == null) {
             packages = ModulePackage.findAllByIdInList(grailsApplication.config.streamr.user.defaultModulePackages.collect {it.longValue()})
             if(packages.size() != grailsApplication.config.streamr.user.defaultModulePackages.size())
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }
 
-		// TODO: Permissions, decide defaults that make sense with modpacks
-        packages.each { modulePackage ->
-			permissionService.systemGrant(user, modulePackage)
-        }
+		List<ModulePackage> existing = permissionService.getAll(ModulePackage, user)
+		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
+		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
+		return packages
     }
 
 

@@ -19,6 +19,7 @@ class UserController {
 	def userService
 	def userCache
 	def springSecurityService
+	def permissionService
 
 	static defaultAction = 'userSearch'
 
@@ -157,9 +158,9 @@ class UserController {
 		def roles = SecRole.findAllByAuthorityInList(params.list("role"))
 		userService.addRoles(user, roles)
 		def feeds = Feed.findAllByIdInList(params.list("feed").collect{ Long.parseLong(it) })
-		userService.addFeeds(user, feeds)
+		userService.setFeeds(user, feeds)
 		def packages = ModulePackage.findAllByIdInList(params.list("modulePackage").collect{ Long.parseLong(it) })
-		userService.addModulePackages(user, packages)
+		userService.setModulePackages(user, packages)
 		userCache.removeUserFromCache user[usernameFieldName]
 		flash.message = "${message(code: 'default.updated.message', args: [message(code: 'user.label', default: 'User'), user.id])}"
 		redirect action: 'edit', id: user.id
@@ -204,7 +205,10 @@ class UserController {
 			}
 		}
 
-		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted]
+		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted,
+				userModulePackages: permissionService.getAll(ModulePackage, user),
+				ownedModulePackages: ModulePackage.findAllByUser(user),
+				userFeeds: permissionService.getAll(Feed, user)]
 	}
     
     def delete() {

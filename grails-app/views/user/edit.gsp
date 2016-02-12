@@ -80,7 +80,7 @@ if (isOpenId) {
 	<h2>Module Packages</h2>
 		<g:each var="p" in="${ModulePackage.list()}">
 		<div>
-			<g:checkBox name="modulePackage" value="${p.id}" checked="${userModulePackages.contains(p)}"/>
+			<g:checkBox name="modulePackage" value="${p.id}" checked="${userModulePackages.contains(p)}" disabled="${ownedModulePackages.contains(p)}"/>
 			${p.name.encodeAsHTML()}
 		</div>
 		</g:each>
