@@ -17197,7 +17197,7 @@ body.dashboard-show .titlebar-clickable {
   float: right;
   padding-top: 0;
   height: 20px;
-  padding-left: 5px;
+  padding-left: 4px;
   padding-right: 7px;
 }
 .share-button-20px:before {
@@ -17228,9 +17228,6 @@ body.dashboard-show .titlebar-clickable {
   font-weight: bold;
   flex-grow: 1;
 }
-.modal-body .user-label .has-error {
-  color: #ff0000;
-}
 .modal-body .user-delete-button {
   margin-left: 10pt;
 }
@@ -17239,6 +17236,9 @@ body.dashboard-show .titlebar-clickable {
 }
 .modal-body .new-user-field {
   flex-grow: 1;
+}
+.modal-body .new-user-field.has-error {
+  color: #ff0000;
 }
 .modal-body .new-user-button {
   margin-left: 10pt;

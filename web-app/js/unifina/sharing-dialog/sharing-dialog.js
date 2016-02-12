@@ -12,11 +12,7 @@
 (function(exports) {
     var KEY_ENTER = 13;
     var KEY_ESC = 27;
-
-    Backbone.sync = function(method, model, options) {
-        console.log("Sync request: " + method + ", " + model + ", " + options)
-        return undefined
-    }
+    var emailRegex = /^[^ ]*@[^ ]*\.[^ ]*$/   // something@something.something, no spaces in between
 
     /** Access by a user to a resource is defined by 0..3 Permissions */
     var Access = Backbone.Model.extend({
@@ -130,6 +126,7 @@
             "keyup .new-user-field": "keyHandler"
         },
         keyHandler: function(e) {
+            this.$newUserField.removeClass("has-error")
             if (e.keyCode === KEY_ENTER) {
                 this.finishUserInput()
             } else if (e.keyCode === KEY_ESC) {
@@ -141,14 +138,19 @@
             }
         },
         finishUserInput: function() {
-            var newUser = this.$newUserField.val()
+            var newUser = this.$newUserField.val().trim()
             if (newUser) {
-                //TODO: check that user exists(?)
-                accessList.create({
-                    user: newUser,
-                    read: true,
-                })
-                this.$newUserField.val("")
+                if (newUser.match(emailRegex)) {
+                    accessList.create({
+                        user: newUser,
+                        read: true,
+                    })
+                    this.$newUserField.val("")
+                } else {
+                    this.$newUserField.addClass("has-error")
+                    shake(this.$newUserField)
+                    Streamr.showError("Please enter an email-address!", null, 1000)
+                }
             } else {
                 sharePopup.saveChanges()
             }
@@ -179,6 +181,23 @@
         }
     })
 
+    Backbone.sync = function(method, model, options) {
+        console.log("Sync request: " + method + ", " + model + ", " + options)
+        return undefined
+    }
+
+    function shake($element) {
+        if ($element.is(":animated")) { return }    // let's not mess with anyone else's animation...
+        var ml = $element.css("margin-left")
+        var mr = $element.css("margin-right")
+        var d = 30;
+        for (var i = 0; i < 10; i++) {
+            d *= -0.7
+            $element.animate({'margin-left': "+=" + d + 'px', 'margin-right': "-=" + d + 'px'}, 60);
+        }
+        $element.animate({'margin-left': ml, 'margin-right': mr}, 60);
+    }
+
     // -------------------------------------------------------------
     //  Non-Backbone part that handles the sharingDialog lifecycle
     //      as well as communication with the backend
@@ -207,7 +226,6 @@
 
         if (dialogIsOpen()) { console.error("Cannot open sharePopup, already open!"); return false }
         resourceUrl = url
-        savingChanges = false
 
         // get current permissions
         var originalPermissionList = []
@@ -269,11 +287,18 @@
         return sharingDialog && sharingDialog.hasClass("in")
     }
 
-    var savingChanges = false
+    var pendingRequests = []
+    function savingChanges() {
+        pendingRequests = _(pendingRequests).filter(function(deferred) { return deferred.state() === "pending" })
+        return pendingRequests.length > 0
+    }
+
     exports.sharePopup.saveChanges = function() {
         if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
-        if (savingChanges) { console.error("Already saving changes, please wait!"); return false; }
-        savingChanges = true
+        if (savingChanges()) {
+            Streamr.showInfo("Closing and saving changes, please wait...")
+            return false;
+        }
 
         _(listView.accessViews).each(function(view) {
             view.$(".user-access-row").removeClass("has-error")
@@ -304,7 +329,6 @@
         })
 
         if (addedPermissions.length == 0 && removedPermissions.length == 0) {
-            savingChanges = false
             listView.remove()
             return true;                // close modal
         }
@@ -313,62 +337,59 @@
         var started = 0
         var successful = 0
         var failed = 0
-        var changedUsers = {}
+        var grantedTo = {}
+        var revokedFrom = {}
         var errorMessages = []
         _(addedPermissions).each(function(permission) {
             started += 1
-            $.ajax({
+            pendingRequests.push($.ajax({
                 url: resourceUrl + "/permissions",
                 method: "POST",
                 data: JSON.stringify(permission),
                 contentType: "application/json",
                 error: onError,
                 success: function(response) {
+                    grantedTo[response.user] = true
                     // update state so that the next diff goes correctly
                     if (!originalPermissions[response.user]) { originalPermissions[response.user] = {} }
                     originalPermissions[response.user][response.operation] = response
                     onSuccess(response)
                 }
-            })
+            }))
         })
         _(removedPermissions).each(function(id) {
             started += 1
-            $.ajax({
+            pendingRequests.push($.ajax({
                 url: resourceUrl + "/permissions/" + id,
                 method: "DELETE",
                 contentType: "application/json",
                 error: onError,
                 success: function(response) {
+                    revokedFrom[response.user] = true
                     // update state so that the next diff goes correctly
                     delete originalPermissions[response.user][response.operation]
                     onSuccess(response)
                 }
-            })
+            }))
         })
         function onSuccess(response) {
             successful += 1
-            changedUsers[response.user] = true
             if (successful + failed === started) { onDone() }
         }
         function onError(e) {
             failed += 1
-            if (e && e.responseJSON) {
-                errorMessages.push(e.responseJSON.error)
-                if (e.responseJSON.fault === "user") {
-                    // find Access row with bad username and highlight
-                    _(listView.accessViews).each(function (view) {
-                        if (view.model.get("user") === e.responseJSON.user) {
-                            view.$(".user-label").addClass("has-error")
-                        }
-                    })
-                }
-            }
+            errorMessages.push(e && e.responseJSON ? e.responseJSON.message : "Unknown error")
             if (successful + failed === started) { onDone() }
         }
         function onDone() {
-            savingChanges = false
+            if (savingChanges()) { console.error("Requests not finished!") }
             if (successful > 0) {
-                Streamr.showSuccess("Changed sharing to " + _.keys(changedUsers).join(", "))
+                if (_.size(revokedFrom) > 0) {
+                    Streamr.showSuccess("Successfully revoked access from " + _.keys(revokedFrom).join(", "))
+                }
+                if (_.size(grantedTo) > 0) {
+                    Streamr.showSuccess("Successfully shared to " + _.keys(grantedTo).join(", "))
+                }
             }
             if (successful === started) {
                 // close after completely successful save
