@@ -3,6 +3,9 @@ package com.unifina.api;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents error object that will be sent to API user
+ */
 public class ApiError {
 	private final int statusCode;
 	private final Map<String, String> map = new HashMap<>();
@@ -17,6 +20,7 @@ public class ApiError {
 		map.put(key, value);
 	}
 
+	/** JSON object that is returned as message body */
 	public Map<String, String> toMap() {
 		return map;
 	}

@@ -1,5 +1,11 @@
 package com.unifina.api;
 
+/**
+ * Exceptions thrown by ApiControllers
+ *
+ * These exceptions know how they want to be presented to API user.
+ * They can directly manipulate the ApiError before it is sent.
+ */
 public class ApiException extends RuntimeException {
 
 	private final int statusCode;

@@ -1,9 +1,11 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CanvasService
 import com.unifina.service.UnifinaSecurityService
@@ -345,9 +347,8 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 500
-		response.json.code == "CANVAS_STOP_FAILED"
-		1 * canvasService.stop(canvas1, me) >> { throw new ApiException(500, "CANVAS_STOP_FAILED", "") }
+		thrown(CanvasUnreachableException)
+		1 * canvasService.stop(canvas1, me) >> { throw new CanvasUnreachableException("Test message") }
 		0 * canvasService._
 	}
 }

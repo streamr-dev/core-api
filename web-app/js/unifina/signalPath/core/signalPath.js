@@ -671,7 +671,7 @@ var SignalPath = (function () {
 				},
 				error: function(jqXHR,textStatus,errorThrown) {
 					// Handle the case where the canvas is dead and can't be reached by the stop request
-					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_STOP_FAILED') {
+					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_UNREACHABLE') {
 						savedJson.state = 'STOPPED'
 						onStopped()
 					}
