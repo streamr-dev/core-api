@@ -128,32 +128,34 @@
         keyHandler: function(e) {
             this.$newUserField.removeClass("has-error")
             if (e.keyCode === KEY_ENTER) {
-                this.finishUserInput()
+                if (this.$newUserField.val()) {
+                    this.finishUserInput()
+                } else {
+                    sharePopup.closeAndSaveChanges()
+                }
             } else if (e.keyCode === KEY_ESC) {
                 if (this.$newUserField.val()) {
                     this.$newUserField.val("")
                 } else {
-                    sharePopup.cancelChanges()
+                    sharePopup.closeAndDiscardChanges()
                 }
             }
         },
         finishUserInput: function() {
             var newUser = this.$newUserField.val().trim()
-            if (newUser) {
-                if (newUser.match(emailRegex)) {
-                    accessList.create({
-                        user: newUser,
-                        read: true,
-                    })
-                    this.$newUserField.val("")
-                } else {
-                    this.$newUserField.addClass("has-error")
-                    shake(this.$newUserField)
-                    Streamr.showError("Please enter an email-address!", null, 1000)
-                }
-            } else {
-                sharePopup.saveChanges()
+            if (!newUser) { return; }
+            if (!newUser.match(emailRegex)) {
+                this.$newUserField.addClass("has-error")
+                shake(this.$newUserField)
+                Streamr.showError("Please enter an email-address!", null, 1000)
+                return;
             }
+
+            accessList.create({
+                user: newUser,
+                read: true,
+            })
+            this.$newUserField.val("")
         },
 
         initialize: function(args) {
@@ -239,17 +241,17 @@
             sharingDialog = bootbox.dialog({
                 title: "Share <span class='resource-name-label'></span>",
                 message: "Loading...",
-                closeButton: false, // won't call cancelChanges; bad... TODO: listen to close event
+                closeButton: true,
                 //onEscape: true,
                 buttons: {
                     cancel: {
                         label: "Cancel",
-                        callback: sharePopup.cancelChanges
+                        //callback: sharePopup.closeAndDiscardChanges
                     },
                     save: {
                         label: "Save", //'<span class="spinner"><i class="icon-spin icon-refresh"></i></span>Save',
                         className: "btn-primary", // has-spinner",
-                        callback: sharePopup.saveChanges
+                        callback: saveChanges
                     }
                 }
             })
@@ -293,8 +295,7 @@
         return pendingRequests.length > 0
     }
 
-    exports.sharePopup.saveChanges = function() {
-        if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
+    function saveChanges() {
         if (savingChanges()) {
             Streamr.showInfo("Closing and saving changes, please wait...")
             return false;
@@ -328,10 +329,8 @@
             if (before.share) { removedPermissions.push(before.share.id) }
         })
 
-        if (addedPermissions.length == 0 && removedPermissions.length == 0) {
-            listView.remove()
-            return true;                // close modal
-        }
+        // close modal directly if no changes
+        if (addedPermissions.length == 0 && removedPermissions.length == 0) { return true; }
 
         // generate one API call for each change
         var started = 0
@@ -393,19 +392,25 @@
             }
             if (successful === started) {
                 // close after completely successful save
-                listView.remove()
                 sharingDialog.modal("hide")
             } else {
                 Streamr.showError("Errors during saving:\n * " + errorMessages.join("\n * "))
             }
         }
 
-        return false;                           // don't close the dialog yet, saving is still in progress...
+        // don't close the dialog yet, saving is still in progress...
+        return false;
     }
 
-    exports.sharePopup.cancelChanges = function() {
+    exports.sharePopup.closeAndSaveChanges = function() {
         if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
-        listView.remove()
+        if (saveChanges()) {
+            sharingDialog.modal("hide")
+        }
+    }
+
+    exports.sharePopup.closeAndDiscardChanges = function() {
+        if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
         sharingDialog.modal("hide")
     }
 
