@@ -7,6 +7,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.UiChannelIterator
@@ -113,7 +114,7 @@ class CanvasService {
 			canvas.state = Canvas.State.STOPPED
 			canvas.save(failOnError: true, flush: true)
 			//Canvas.executeUpdate("update Canvas c set c.state = ? where c.id = ?", [Canvas.State.STOPPED, canvas.id])
-			throw new ApiException(500, "CANVAS_STOP_FAILED", "Canvas $canvas.id did not respond to stop request.")
+			throw new CanvasUnreachableException("Canvas $canvas.id did not respond to stop request.")
 		}
 	}
 
