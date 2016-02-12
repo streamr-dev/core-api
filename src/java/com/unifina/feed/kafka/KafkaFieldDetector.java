@@ -32,9 +32,11 @@ public class KafkaFieldDetector extends FieldDetector {
 		UnifinaKafkaMessage latestMessage = null;
 		for (PartitionInfo pi : partitions) {
 			long offset = util.getLastOffset(stream.getUuid(), pi.partition());
-			UnifinaKafkaMessage msg = util.getMessage(stream.getUuid(), pi.partition(), offset);
-			if (msg != null && (latestMessage == null || msg.getTimestamp() > latestMessage.getTimestamp()))
-				latestMessage = msg;
+			if (offset > 0) {
+				UnifinaKafkaMessage msg = util.getMessage(stream.getUuid(), pi.partition(), offset - 1);
+				if (msg != null && (latestMessage == null || msg.getTimestamp() > latestMessage.getTimestamp()))
+					latestMessage = msg;
+			}
 		}
 
 		// Also closes the KafkaConsumer c
