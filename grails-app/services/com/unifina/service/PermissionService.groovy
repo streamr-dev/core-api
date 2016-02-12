@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.data.Stream
 import grails.gorm.DetachedCriteria
 import org.apache.log4j.Logger
 
@@ -71,6 +72,11 @@ class PermissionService {
 		} else {
 			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
 		}
+	}
+
+	def getResource(clazz, id) {
+		// TODO: remove kludge when Stream has String id instead of String uuid
+		return (clazz == Stream) ? Stream.find { uuid == resourceId } : resourceClass.get(resourceId)
 	}
 
 	/** ownership (if applicable) is stored in each Resource as "user" attribute */
@@ -153,7 +159,7 @@ class PermissionService {
 		}
 		def resourceIds = perms.collect { it[idProp] }
 
-		def criteria = new DetachedCriteria(resourceClass).build {
+		new DetachedCriteria(resourceClass).build {
 			or {
 				// resources that specify an "owner" automatically give that user all access rights
 				if (resourceClass.properties["declaredFields"].any { it.name == "user" }) {
@@ -164,8 +170,7 @@ class PermissionService {
 					"in" "id", resourceIds
 				}
 			}
-		}
-		return criteria.list(resourceFilter)
+		}.build(resourceFilter).list()
 	}
 	/** Overload to allow leaving out the op but including the filter... */
 	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter) {
@@ -273,13 +278,15 @@ class PermissionService {
      */
 	public List<Permission> revoke(SecUser revoker, Permission p, boolean logIfDenied=true) {
 		Class resourceClass = grailsApplication.getDomainClass(p.clazz)
-		def resourceId = p.stringId ?: p.longId
+		String idProp = getIdPropertyName(resourceClass)
+		def resourceId = p[idProp]
 
 		if (hasPermission(revoker, resourceClass, resourceId, Operation.SHARE)) {
 			return systemRevoke(p)
 		} else {
 			// fall back to loading the resource (so that ownership can be tested)
-			return revoke(revoker, resourceClass.get(resourceId), p.user, p.operation, logIfDenied)
+			def resource = getResource(resourceClass, resourceId)
+			return revoke(revoker, resource, p.user, p.operation, logIfDenied)
 		}
 	}
 

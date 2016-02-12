@@ -30,16 +30,17 @@ class CanvasController {
 	}
 
 	def list() {
-		List<Canvas> canvases = permissionService.getAll(Canvas, springSecurityService.currentUser, Operation.READ) {
-			eq("adhoc", false)
+		def user = springSecurityService.currentUser
+		List<Canvas> canvases = permissionService.getAll(Canvas, user, Operation.READ) {
+			eq "adhoc", false
 			if (params.term) {
-				like("name", "%${params.term}%")
+				like "name", "%${params.term}%"
 			}
 			if (params.state) {
-				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})
+				inList "state", params.list("state").collect { String param -> Canvas.State.fromValue(param) }
 			}
 		}
-		[canvases: canvases, user:springSecurityService.currentUser, stateFilter: params.state ? params.list("state") : []]
+		[canvases: canvases, user: user, stateFilter: params.state ? params.list("state") : []]
 	}
 
 	def editor() {
