@@ -2,6 +2,7 @@ package com.unifina.feed;
 
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.map.MapMessage;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,12 @@ import java.util.Map;
  * Automatically detects fields of given Stream by analyzing recent data.
  */
 public abstract class FieldDetector {
+	protected final GrailsApplication grailsApplication;
 	private boolean flattenMap;
+
+	public FieldDetector(GrailsApplication grailsApplication) {
+		this.grailsApplication = grailsApplication;
+	}
 
 	public Map<String, String> detectFields(Stream stream) {
 		MapMessage map = fetchExampleMessage(stream);

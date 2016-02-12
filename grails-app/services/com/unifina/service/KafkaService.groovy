@@ -54,6 +54,10 @@ class KafkaService {
 		}
 		return producer
 	}
+
+	@CompileStatic KafkaOffsetUtil getOffsetUtil() {
+		return new KafkaOffsetUtil(getProperties())
+	}
 	
 	@CompileStatic
 	private ZkUtils createZkUtils() {

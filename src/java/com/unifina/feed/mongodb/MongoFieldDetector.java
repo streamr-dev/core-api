@@ -10,24 +10,30 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
 import com.unifina.feed.map.MapMessage;
 import org.bson.Document;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.Date;
 import java.util.Map;
 
 @SuppressWarnings("unused")
 public class MongoFieldDetector extends FieldDetector {
+
+	public MongoFieldDetector(GrailsApplication grailsApplication) {
+		super(grailsApplication);
+	}
+
 	@Override
 	protected MapMessage fetchExampleMessage(Stream stream) {
 
 		// Connect to MongoDB and open connection
-		Map<String, Object> mongoConfig = MongoConfig.getMongoConfig(stream);
-		String timestampKey = MongoConfig.getTimestampKey(mongoConfig);
-		MongoClient mongoClient = MongoConfig.getMongoClient(mongoConfig);
-		MongoDatabase db = MongoConfig.getMongoDatabase(mongoClient, mongoConfig);
-		MongoCollection collection = MongoConfig.getCollection(db, mongoConfig);
+		Map<String, Object> mongoConfig = MongoConfigHelper.getMongoConfig(stream);
+		String timestampKey = MongoConfigHelper.getTimestampKey(mongoConfig);
+		MongoClient mongoClient = MongoConfigHelper.getMongoClient(mongoConfig);
+		MongoDatabase db = MongoConfigHelper.getMongoDatabase(mongoClient, mongoConfig);
+		MongoCollection collection = MongoConfigHelper.getCollection(db, mongoConfig);
 
 		// Build query
-		Document query = MongoConfig.getQuery(mongoConfig);
+		Document query = MongoConfigHelper.getQuery(mongoConfig);
 		FindIterable<Document> iterable = collection.find(query).sort(Sorts.descending(timestampKey)).limit(1);
 		MongoCursor<Document> mongoCursor = iterable.iterator();
 
