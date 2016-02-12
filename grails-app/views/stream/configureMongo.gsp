@@ -114,6 +114,17 @@
 			</div>
 
 			<div class="form-group">
+				<label for="timestampType">${message(code: "stream.config.mongodb.timestampType")}</label>
+				<g:select
+						class="form-control input-lg"
+						name="timestampType"
+						optionValue="humanReadableForm"
+						from="${com.unifina.feed.mongodb.MongoDbConfig.TimestampType.values()}"
+						value="${mongo.timestampType}"
+				/>
+			</div>
+
+			<div class="form-group">
 				<label for="pollIntervalMillis-input">${message(code: "stream.config.mongodb.pollIntervalMillis")}</label>
 				<input id="pollIntervalMillis-input" class="form-control" type="text" placeholder="1000"
 					   name="pollIntervalMillis" value="${mongo.pollIntervalMillis ?: com.unifina.feed.mongodb.MongoConfigHelper.DEFAULT_POLL_INTERVAL}" required>

@@ -38,7 +38,7 @@
 			</ui:labeled>
 
 			<ui:labeled label="${message(code: "stream.config.mongodb.timestampKey")}">
-				${mongo.timestampKey}
+				${mongo.timestampKey} (${mongo.timestampType?.humanReadableForm})
 			</ui:labeled>
 
 			<ui:labeled label="${message(code: "stream.config.mongodb.pollIntervalMillis")}">

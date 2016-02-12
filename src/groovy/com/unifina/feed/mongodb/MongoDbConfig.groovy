@@ -5,6 +5,16 @@ import grails.validation.Validateable;
 
 @Validateable
 public class MongoDbConfig {
+
+	enum TimestampType {
+		DATETIME,
+		LONG
+
+		public String getHumanReadableForm() {
+			return toString().toLowerCase()
+		}
+	}
+
 	String host
 	Integer port
 	String username
@@ -12,6 +22,8 @@ public class MongoDbConfig {
 	String database
 	String collection
 	String timestampKey
+	TimestampType timestampType
+
 	Long pollIntervalMillis
 	String query
 
@@ -40,6 +52,7 @@ public class MongoDbConfig {
 			database: database,
 			collection: collection,
 			timestampKey: timestampKey,
+			timestampType: timestampType,
 			pollIntervalMillis: pollIntervalMillis,
 			query: query,
 		]
