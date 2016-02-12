@@ -245,16 +245,6 @@ class StreamController {
 		redirect(action:"show", id:params.id)
 	}
 
-	def detectFields() {
-		Stream stream = Stream.get(params.id)
-		Map fields = streamService.autodetectFields(stream, params.boolean("flatten", false))
-		if (fields) {
-			render(fields as JSON)
-		} else {
-			throw new ApiException(500, "FIELD_DETECTION_FAILED", "Failed to autodetect fields of Stream $stream.id")
-		}
-	}
-	
 	private void importCsv(CSVImporter csv, Stream stream) {
 		kafkaService.createFeedFilesFromCsv(csv, stream)
 		

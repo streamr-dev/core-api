@@ -25,6 +25,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
+		"/api/v1/streams/$id/detectFields"(controller: "streamApi", action: "detectFields")
 
 		"/api/v1/live/request"(controller: "live", action: "request")
 		"/api/v1/live/getModuleJson"(controller: "live", action: "getModuleJson")

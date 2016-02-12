@@ -51,7 +51,7 @@
         				$(this).attr("disabled","disabled")
 						$(this).html("Waiting for data...")
 
-						$.get('${createLink(controller: "stream", action: "detectFields", params: [id: stream.id])}', function(data) {
+						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.uuid])}', function(data) {
 							handleMessage(data)
 						})
         			}

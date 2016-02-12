@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.ValidationException
 import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
@@ -53,6 +54,19 @@ class StreamApiController {
 			}
 		}
 	}
+
+	@StreamrApi
+	def detectFields(String id) {
+		getAuthorizedStream(id) { Stream stream ->
+			Map fields = streamService.autodetectFields(stream, params.boolean("flatten", false))
+			if (fields) {
+				render(fields as JSON)
+			} else {
+				throw new ApiException(500, "NO_FIELDS_FOUND", "No fields found for Stream (id=$stream.id)")
+			}
+		}
+	}
+
 
 	private String readConfig() {
 		Map config = request.JSON.config
