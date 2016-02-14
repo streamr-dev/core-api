@@ -40,7 +40,7 @@ class SerializationSpec extends LoginTester1Spec {
 	def "resuming paused live canvas retains modules' states"() {
 		String canvasName = "SerializationSpec" + new Date().getTime()
 
-		when: "Modules are added and clicked 'Launch live'"
+		when: "Modules are added and canvas started"
 			// The stream
 			searchAndClick("SerializationSpec")
 			moduleShouldAppearOnCanvas("Stream")
@@ -63,10 +63,10 @@ class SerializationSpec extends LoginTester1Spec {
 			setCanvasName(canvasName)
 			startCanvas(true)
 
-		then: "CanvasPage is opened and Label shows data"
-			waitFor(30) { at CanvasPage }
+		then: "Button is in correct state"
 			runRealtimeButton.text().contains("Stop")
 
+		when: "Data is sent"
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -75,21 +75,21 @@ class SerializationSpec extends LoginTester1Spec {
 					sleep(150)
 				}
 			}
-
+		then: "Label should show correct value"
 			// Wait for enough data, sometimes takes more than 30 sec to come
 			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
 			sleep(serializationIntervalInMillis + 200)
 			def oldVal = $(".modulelabel").text().toDouble()
 
 		when: "Live canvas is stopped"
+			noNotificationsVisible()
 			stopCanvas()
 
 		and: "Started again"
-			startCanvas(true)
+			noNotificationsVisible()
+			startCanvas(false) // saving would reset serialized state
 
-		then: "The CanvasPage is opened and data must change"
-			waitFor { at CanvasPage }
-
+		and: "Data is sent"
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -98,15 +98,15 @@ class SerializationSpec extends LoginTester1Spec {
 					sleep(150)
 				}
 			}
-
+		then: "Label must change"
 			waitFor(30){ $(".modulelabel").text().toDouble() == (oldVal + 5 + 255).toDouble()}
 
 		when: "Live canvas is stopped"
 			stopCanvas()
 		and: "canvas started with 'reset' setting"
+			noNotificationsVisible()
 			resetAndStartCanvas(true)
-		then: "CanvasPage is opened and Label shows data counted from empty state"
-
+		and: "Data is sent"
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -115,10 +115,13 @@ class SerializationSpec extends LoginTester1Spec {
 					sleep(150)
 				}
 			}
-
+		then: "Label must show correct value"
 			// Wait for enough data, sometimes takes more than 30 sec to come
 			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
-		}
+
+		cleanup:
+			stopCanvas()
+	}
 
 	private def makeKafkaConfiguration() {
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));

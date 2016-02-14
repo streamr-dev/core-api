@@ -65,7 +65,7 @@ class CanvasService {
 			throw new ValidationException(command.errors)
 		}
 		if (canvas.state != Canvas.State.STOPPED) {
-			throw new InvalidStateException("Cannot update state with state " + canvas.state)
+			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
 		Map oldSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : null
@@ -103,7 +103,7 @@ class CanvasService {
 		}
 	}
 
-	@Transactional(noRollbackFor=[ApiException])
+	@Transactional(noRollbackFor=[CanvasUnreachableException])
 	public void stop(Canvas canvas, SecUser user) throws ApiException {
 		if (canvas.state != Canvas.State.RUNNING) {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
