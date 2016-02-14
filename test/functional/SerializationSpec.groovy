@@ -41,22 +41,6 @@ class SerializationSpec extends LoginTester1Spec {
 		}
 	}
 
-	def cleanup() {
-		WebDriver driver = browser.getDriver()
-
-		LogEntries logEntries = driver.manage().logs().get(LogType.BROWSER);
-
-		def logLines = logEntries.getAll()
-
-		if (logLines.size()>0) {
-			println("Browser console log:")
-			for (LogEntry eachEntry : logLines){
-				println(eachEntry.toString());
-			}
-			println("(End of browser console log)")
-		}
-	}
-
 	def "resuming paused live canvas retains modules' states"() {
 		String canvasName = "SerializationSpec" + new Date().getTime()
 
