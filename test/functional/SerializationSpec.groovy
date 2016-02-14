@@ -120,7 +120,7 @@ class SerializationSpec extends LoginTester1Spec {
 			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
 
 		cleanup:
-			stopCanvas()
+			stopCanvasIfRunning()
 	}
 
 	private def makeKafkaConfiguration() {
