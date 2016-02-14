@@ -364,8 +364,7 @@ var SignalPath = (function () {
 	 */
 	function isDirty() {
 		var currentJson = $.extend(true, {}, savedJson, toJSON())
-		var dirty = (JSON.stringify(savedJson) === JSON.stringify(currentJson))
-		
+		var dirty = (JSON.stringify(savedJson) !== JSON.stringify(currentJson))
 		return dirty
 	}
 	pub.isDirty = isDirty
