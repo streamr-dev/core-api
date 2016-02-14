@@ -10,6 +10,10 @@ import core.mixins.ConfirmationMixin
 import core.pages.CanvasPage
 import grails.test.mixin.TestFor
 import grails.util.Holders
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.logging.LogEntries
+import org.openqa.selenium.logging.LogEntry
+import org.openqa.selenium.logging.LogType
 import spock.lang.Shared
 
 @Mixin(CanvasMixin)
@@ -34,6 +38,22 @@ class SerializationSpec extends LoginTester1Spec {
 	def cleanupSpec() {
 		synchronized(kafka) {
 			kafka.close()
+		}
+	}
+
+	def cleanup() {
+		WebDriver driver = browser.getDriver()
+
+		LogEntries logEntries = driver.manage().logs().get(LogType.BROWSER);
+
+		def logLines = logEntries.getAll()
+
+		if (logLines.size()>0) {
+			println("Browser console log:")
+			for (LogEntry eachEntry : logLines){
+				println(eachEntry.toString());
+			}
+			println("(End of browser console log)")
 		}
 	}
 
@@ -67,6 +87,7 @@ class SerializationSpec extends LoginTester1Spec {
 			runRealtimeButton.text().contains("Stop")
 
 		when: "Data is sent"
+			noNotificationsVisible()
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -88,7 +109,7 @@ class SerializationSpec extends LoginTester1Spec {
 		and: "Started again"
 			noNotificationsVisible()
 			startCanvas(false) // saving would reset serialized state
-
+			noNotificationsVisible()
 		and: "Data is sent"
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
@@ -106,6 +127,7 @@ class SerializationSpec extends LoginTester1Spec {
 		and: "canvas started with 'reset' setting"
 			noNotificationsVisible()
 			resetAndStartCanvas(true)
+			noNotificationsVisible()
 		and: "Data is sent"
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
