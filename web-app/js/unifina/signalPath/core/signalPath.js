@@ -364,23 +364,8 @@ var SignalPath = (function () {
 	 */
 	function isDirty() {
 		var currentJson = $.extend(true, {}, savedJson, toJSON())
-		var dirty = !_.isEqual(savedJson, currentJson)
-
-		// TODO: remove debug stuff
-		var debug = $("<div style='display:none' data-time='"+new Date()+"'/>")
-		var saved = $("<div class='saved'/>")
-		var current = $("<div class='current'/>")
-		debug.append(saved)
-		debug.append(current)
-		saved.html(JSON.stringify(savedJson))
-		current.html(JSON.stringify(currentJson))
-		$("body").append(debug)
-
-		if (dirty) {
-			debug.addClass("dirty")
-			console.log(JSON.stringify(savedJson))
-			console.log(JSON.stringify(currentJson))
-		}
+		var dirty = (JSON.stringify(savedJson) === JSON.stringify(currentJson))
+		
 		return dirty
 	}
 	pub.isDirty = isDirty
