@@ -12,8 +12,8 @@ class ShareSpec extends LoginTester1Spec {
 		then:
 		!$(".bootbox.modal")
 
-		when: "open 'CanvasSpec' Stream"
-		$(".tr", "data-id": "1").find("button").click()
+		when: "open 'ShareSpec' Stream"
+		$(".tr", "data-id": "134").find("button").click()
 		then:
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -47,7 +47,7 @@ class ShareSpec extends LoginTester1Spec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		$(".tr", "data-id": "1").find("button").click()
+		$(".tr", "data-id": "134").find("button").click()
 		then: "access row from last time was discarded"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -72,7 +72,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 
 		when: "re-open once more"
-		$(".tr", "data-id": "1").find("button").click()
+		$(".tr", "data-id": "134").find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -87,7 +87,7 @@ class ShareSpec extends LoginTester1Spec {
 		// REMOVE PERMISSION
 
 		when: "Move to Stream page, revoke permission"
-		$(".tr", "data-id": "1").click()
+		$(".tr", "data-id": "134").click()
 		then:
 		waitFor { at StreamShowPage }
 		waitFor { shareButton.displayed }
@@ -148,16 +148,17 @@ class ShareSpec extends LoginTester1Spec {
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
+		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
+
 		when:
 		to CanvasListPage
 		then:
 		!$(".bootbox.modal")
 		waitFor { at CanvasListPage }
-		def $canvasRow = $("a.tr", "data-id": "C4ZeJojwQXa9w_sMSEuUrQ")
-		waitFor { $canvasRow.displayed }
+		waitFor { getCanvasRow().displayed }
 
-		when: "open 'InputModuleLiveSpec' Canvas"
-		$canvasRow.find("button").click()
+		when: "open 'ShareSpec' Canvas"
+		getCanvasRow().find("button").click()
 		then:
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -191,7 +192,7 @@ class ShareSpec extends LoginTester1Spec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		$canvasRow.find("button").click()
+		getCanvasRow().find("button").click()
 		then: "access row from last time was discarded"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -216,7 +217,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 
 		when: "re-open once more"
-		$canvasRow.find("button").click()
+		getCanvasRow().find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -232,7 +233,7 @@ class ShareSpec extends LoginTester1Spec {
 		// REMOVE PERMISSION
 
 		when: "Move to Canvas info page, revoke permission"
-		$canvasRow.click()
+		getCanvasRow().click()
 		then:
 		waitFor { at CanvasShowPage }
 		waitFor { shareButton.displayed }
@@ -258,7 +259,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open"
 		//shareButton.click()
-		$canvasRow.find("button").click()
+		getCanvasRow().find("button").click()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -282,7 +283,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "re-open"
 		//shareButton.click()
-		$canvasRow.find("button").click()
+		getCanvasRow().find("button").click()
 		then: "...to double-check it's gone"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
