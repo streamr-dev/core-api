@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
@@ -370,9 +371,10 @@ class CanvasServiceSpec extends Specification {
 
 	}
 
-	def "stop() throws InvalidStateException if canvas cannot be reached"() {
+	def "stop() throws CanvasUnreachableException is canvas cannot be reached"() {
 		def signalPathService = Stub(SignalPathService)
 		service.signalPathService = signalPathService
+		myFirstCanvas.state = Canvas.State.RUNNING
 
 		signalPathService.stopRemote(myFirstCanvas, me) >> new RuntimeResponse(false, [:])
 
@@ -380,7 +382,21 @@ class CanvasServiceSpec extends Specification {
 		service.stop(myFirstCanvas, me)
 
 		then:
-		thrown InvalidStateException
+		thrown(CanvasUnreachableException)
+	}
+
+	def "stop() throws InvalidStateException if canvas is not running"() {
+		def signalPathService = Stub(SignalPathService)
+		service.signalPathService = signalPathService
+		myFirstCanvas.state = Canvas.State.STOPPED
+
+		signalPathService.stopRemote(myFirstCanvas, me) >> new RuntimeResponse(false, [:])
+
+		when:
+		service.stop(myFirstCanvas, me)
+
+		then:
+		thrown(InvalidStateException)
 	}
 
 	def uiChannelIdsFromMap(Map signalPathMap) {

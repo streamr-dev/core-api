@@ -119,11 +119,10 @@ public class LiveSpec extends LoginTester1Spec {
 		then: "The button is in running state"
 			waitFor { runRealtimeButton.text().contains("Stop") }
 
-		when: "Click to stop"
-			stopCanvas()
-		then:
-			true
 		// TODO: test canvas delete functionality once it's implemented
+
+		cleanup:
+			stopCanvasIfRunning()
 	}
 	
 	def "an alert must be shown if running canvas cannot be pinged"() {

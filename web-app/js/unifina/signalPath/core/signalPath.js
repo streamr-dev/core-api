@@ -91,8 +91,12 @@ var SignalPath = (function () {
 		pub.setZoom(opts.zoom)
 		pub.jsPlumb = jsPlumb
 
+		$(pub).on('new', disconnect)
 		$(pub).on('started', subscribe)
-		$(pub).on('stopped', disconnect)
+		$(pub).on('stopped', function() {
+			runningJson = null
+			disconnect()
+		})
 		$(pub).on('loaded', function() {
 			if (isRunning())
 				subscribe()
@@ -360,11 +364,7 @@ var SignalPath = (function () {
 	 */
 	function isDirty() {
 		var currentJson = $.extend(true, {}, savedJson, toJSON())
-		var dirty = !_.isEqual(savedJson, currentJson)
-		if (dirty) {
-			console.log(JSON.stringify(savedJson))
-			console.log(JSON.stringify(currentJson))
-		}
+		var dirty = (JSON.stringify(savedJson) !== JSON.stringify(currentJson))
 		return dirty
 	}
 	pub.isDirty = isDirty
@@ -651,7 +651,6 @@ var SignalPath = (function () {
 				if (data)
 					setSavedJson(data)
 
-				runningJson = null
 				$(pub).trigger('stopped');
 			}
 
@@ -668,7 +667,7 @@ var SignalPath = (function () {
 				},
 				error: function(jqXHR,textStatus,errorThrown) {
 					// Handle the case where the canvas is dead and can't be reached by the stop request
-					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_STOP_FAILED') {
+					if (jqXHR.responseJSON && jqXHR.responseJSON.code === 'CANVAS_UNREACHABLE') {
 						savedJson.state = 'STOPPED'
 						onStopped()
 					}
