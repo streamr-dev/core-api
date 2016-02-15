@@ -67,7 +67,7 @@ public class MongoDbConfig {
 			database: database,
 			collection: collection,
 			timestampKey: timestampKey,
-			timestampType: timestampType,
+			timestampType: timestampType.toString(),
 			pollIntervalMillis: pollIntervalMillis,
 		]
 

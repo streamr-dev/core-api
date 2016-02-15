@@ -11,7 +11,6 @@ import com.unifina.feed.FieldDetector
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import grails.test.spock.IntegrationSpec
-import groovy.transform.CompileStatic
 import org.bson.Document
 
 class MongoFieldDetectorSpec extends IntegrationSpec {
@@ -40,8 +39,10 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	def cleanup() {
 		stream.delete()
-		if (mongoClient)
+		if (mongoClient) {
+			mongoClient.getDatabase("test").getCollection(collectionName).drop()
 			mongoClient.close()
+		}
 	}
 
 	def "throws exception given no connection details"() {
@@ -151,8 +152,35 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 			[name: "_id", type: "string"],
 			[name: "a", type: "number"],
 			[name: "b", type: "number"],
-			[name: "time", type: "string"],
 			[name: "d", type: "string"]
+		]
+	}
+
+	def "can handle timestamps of type long"() {
+		def db = openDbWith([
+				host: "dev.streamr",
+				port: 27017,
+				database: "test",
+				collection: getClass().simpleName,
+				timestampKey: "time",
+				timestampType: MongoDbConfig.TimestampType.LONG
+		])
+
+		def collection = db.getCollection(collectionName)
+		collection.insertOne(new Document([a: 0, b: 666, time: 0L]))
+		collection.insertOne(new Document([a: 3, b: 666, time: System.currentTimeMillis(), d: "hello world"]))
+		collection.insertOne(new Document([a: 5, b: 13, time: 100L]))
+		collection.insertOne(new Document([a: "hello", b: "world"]))
+
+		when:
+		def result = fieldDetector.detectFields(stream)
+
+		then:
+		result == [
+				[name: "_id", type: "string"],
+				[name: "a", type: "number"],
+				[name: "b", type: "number"],
+				[name: "d", type: "string"]
 		]
 	}
 
