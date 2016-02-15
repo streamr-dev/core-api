@@ -79,7 +79,9 @@
 							</ui:td>
 							<ui:td>
 								<g:formatDate date="${canvas.dateCreated}" timeZone="${user.timezone}" />
-								<button class="btn share-button-20px" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + canvas.id)}', 'Canvas ${canvas.name}')"></button>
+								<g:if test="${shareable.contains(canvas)}">
+									<button class="btn share-button-20px" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + canvas.id)}', 'Canvas ${canvas.name}')"></button>
+								</g:if>
 							</ui:td>
 						</ui:tr>
 					</g:each>

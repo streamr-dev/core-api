@@ -31,7 +31,8 @@ class DashboardController {
 	
 	def list() {
 		def dashboards = permissionService.getAll(Dashboard, springSecurityService.currentUser)
-		return [dashboards:dashboards]
+		def shareable = permissionService.getAll(Dashboard, springSecurityService.currentUser, Operation.SHARE)
+		return [dashboards:dashboards, shareable:shareable]
 	}
 	
 	def create() {

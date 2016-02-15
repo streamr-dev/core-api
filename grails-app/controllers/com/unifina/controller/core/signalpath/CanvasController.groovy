@@ -31,7 +31,7 @@ class CanvasController {
 
 	def list() {
 		def user = springSecurityService.currentUser
-		List<Canvas> canvases = permissionService.getAll(Canvas, user, Operation.READ) {
+		Closure criteriaFilter = {
 			eq "adhoc", false
 			if (params.term) {
 				like "name", "%${params.term}%"
@@ -40,7 +40,9 @@ class CanvasController {
 				inList "state", params.list("state").collect { String param -> Canvas.State.fromValue(param) }
 			}
 		}
-		[canvases: canvases, user: user, stateFilter: params.state ? params.list("state") : []]
+		List<Canvas> readableCanvases = permissionService.getAll(Canvas, user, Operation.READ, criteriaFilter)
+		List<Canvas> shareableCanvases = permissionService.getAll(Canvas, user, Operation.SHARE, criteriaFilter)
+		[canvases: readableCanvases, shareable: shareableCanvases, user: user, stateFilter: params.state ? params.list("state") : []]
 	}
 
 	def editor() {

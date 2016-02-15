@@ -28,29 +28,32 @@ class StreamController {
 	def kafkaService
 	def streamService
 	
-	def beforeInterceptor = [action:{
-		// TODO: READ probably should not be enough for e.g. delete()...
-			if (!permissionService.canRead(springSecurityService.currentUser, Stream.get(params.long("id")))) {
-				if (request.xhr)
-					redirect(controller:'login', action:'ajaxDenied')
-				else
-					redirect(controller:'login', action:'denied')
-					
-				return false
+	def beforeInterceptor = [
+		action: {
+			// TODO: READ probably should not be enough for e.g. delete()...
+			SecUser user = springSecurityService.currentUser
+			Stream stream = Stream.get(params.long("id"))
+			boolean permitted = permissionService.canRead(user, stream)
+			if (!permitted) {
+				redirect controller: 'login', action: (request.xhr ? 'ajaxDenied' : 'denied')
 			}
-			else return true
+			return permitted
 		},
-		except:['list','search','create','apiCreate','apiLookup']]
+		except: ['list', 'search', 'create', 'apiCreate', 'apiLookup']
+	]
 	
 	def list() {
 		List<Stream> streams = permissionService.getAll(Stream, springSecurityService.currentUser)
-		[streams:streams]
+		List<Stream> shareable = permissionService.getAll(Stream, springSecurityService.currentUser, Operation.SHARE)
+		[streams:streams, shareable:shareable]
 	}
 	
 	def show() {
 		// Access checked by beforeInterceptor
-		Stream stream = Stream.get(params.id)
-		[stream:stream]
+		SecUser user = springSecurityService.currentUser
+		Stream stream = Stream.get(params.long("id"))
+		boolean shareable = permissionService.canShare(user, stream)
+		[stream: stream, shareable: shareable]
 	}
 	
 	// Can be extended to handle more types

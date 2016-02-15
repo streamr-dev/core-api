@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.domain.data.Stream
 import grails.gorm.DetachedCriteria
 import org.apache.log4j.Logger
 
@@ -72,11 +71,6 @@ class PermissionService {
 		} else {
 			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
 		}
-	}
-
-	def getResource(clazz, id) {
-		// TODO: remove kludge when Stream has String id instead of String uuid
-		return (clazz == Stream) ? Stream.find { uuid == resourceId } : resourceClass.get(resourceId)
 	}
 
 	/** ownership (if applicable) is stored in each Resource as "user" attribute */
@@ -196,13 +190,7 @@ class PermissionService {
 		if (canShare(grantor, resource)) {
 			return systemGrant(target, resource, operation)
 		} else {
-			if (logIfDenied) {
-				log.warn("${grantor?.username}(id ${grantor?.id}) tried to share $resource without Permission!")
-				if (resource?.hasProperty("user")) {
-					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
-				}
-			}
-			throw new AccessControlException("${grantor?.username}(id ${grantor?.id}) has no 'share' permission to $resource!")
+			accessDeniedHandler(grantor, resource, logIfDenied)
 		}
 	}
 
@@ -243,14 +231,7 @@ class PermissionService {
 		if (canShare(revoker, resource)) {
 			return systemRevoke(target, resource, operation)
 		} else {
-			String violator = "${revoker?.username}(id ${revoker?.id})"
-			if (logIfDenied) {
-				log.warn("$violator tried to revoke $resource without 'share' Permission!")
-				if (resource.hasProperty("user")) {
-					log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
-				}
-			}
-			throw new AccessControlException("$violator has no 'share' permission to $resource!")
+			accessDeniedHandler(revoker, resource, logIfDenied)
 		}
 	}
 
@@ -274,7 +255,8 @@ class PermissionService {
 	}
 
 	/**
-	 * Shortcut for removing a given Permission. Doesn't need to load the resource at all if there's a share permission
+	 * Shortcut for removing a given Permission.
+	 * Doesn't need to load the resource at all if revoker has a share permission
      */
 	public List<Permission> revoke(SecUser revoker, Permission p, boolean logIfDenied=true) {
 		Class resourceClass = grailsApplication.getDomainClass(p.clazz)
@@ -284,9 +266,13 @@ class PermissionService {
 		if (hasPermission(revoker, resourceClass, resourceId, Operation.SHARE)) {
 			return systemRevoke(p)
 		} else {
-			// fall back to loading the resource (so that ownership can be tested)
-			def resource = getResource(resourceClass, resourceId)
-			return revoke(revoker, resource, p.user, p.operation, logIfDenied)
+			// fall back to loading the resource and test ownership
+			def resource = resourceClass.get(resourceId)
+			if (isOwner(revoker, resource)) {
+				return systemRevoke(p)
+			} else {
+				accessDeniedHandler(revoker, resource, logIfDenied)
+			}
 		}
 	}
 
@@ -312,6 +298,16 @@ class PermissionService {
 		revokeOp operation
 		alsoRevoke.get(operation.id).each revokeOp
 		return ret
+	}
+
+	private accessDeniedHandler(SecUser violator, resource, loggingEnabled) {
+		if (loggingEnabled) {
+			log.warn("${violator?.username}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
+			if (resource?.hasProperty("user")) {
+				log.warn("||-> $resource is owned by ${resource.user.username} (id ${resource.user.id})")
+			}
+		}
+		throw new AccessControlException("${violator?.username}(id ${violator?.id}) has no 'share' permission to $resource!")
 	}
 
 	/**
