@@ -44,17 +44,26 @@ public class MongoDbConfig {
 	}
 
 	def toMap() {
-		[
+		Map map = [
 		    host: host,
 			port: port,
-			username: username,
-			password: password,
 			database: database,
 			collection: collection,
 			timestampKey: timestampKey,
 			timestampType: timestampType,
 			pollIntervalMillis: pollIntervalMillis,
-			query: query,
 		]
+
+		if (username) {
+			map.username = username
+		}
+		if (password) {
+			map.password = password
+		}
+		if (query) {
+			map.query = query
+		}
+
+		return map
 	}
 }

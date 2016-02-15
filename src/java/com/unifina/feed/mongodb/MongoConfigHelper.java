@@ -1,6 +1,7 @@
 package com.unifina.feed.mongodb;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
@@ -19,6 +20,8 @@ import java.util.Map;
 public class MongoConfigHelper {
 	public static final int DEFAULT_PORT = 27017;
 	public static final long DEFAULT_POLL_INTERVAL = 1000;
+	public static final int DEFAULT_TIMEOUT = 30;
+	public static int timeout = DEFAULT_TIMEOUT;
 
 	public static Map<String, Object> getMongoConfig(Stream stream) {
 		return (Map<String, Object>) stream.getStreamConfigAsMap().get("mongodb");
@@ -26,6 +29,10 @@ public class MongoConfigHelper {
 
 	public static String getTimestampKey(Map<String, Object> mongoConfig) {
 		return mongoConfig.get("timestampKey").toString();
+	}
+
+	public static MongoDbConfig.TimestampType getTimestampType(Map<String, Object> mongoConfig) {
+		return MongoDbConfig.TimestampType.valueOf(((Map)mongoConfig.get("timestampType")).get("name").toString());
 	}
 
 	public static long getPollIntervalMillis(Map<String, Object> mongoConfig) {
@@ -45,7 +52,12 @@ public class MongoConfigHelper {
 			credentials.add(credential);
 		}
 
-		return new MongoClient(serverAddress, credentials);
+		MongoClientOptions options = MongoClientOptions
+			.builder()
+			.serverSelectionTimeout(timeout)
+			.build();
+
+		return new MongoClient(serverAddress, credentials, options);
 	}
 
 	public static MongoDatabase getMongoDatabase(MongoClient mongoClient, Map<String, Object> mongoConfig) {

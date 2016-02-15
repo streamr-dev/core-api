@@ -1,6 +1,7 @@
 package com.unifina.feed.mongodb;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -40,7 +41,15 @@ public class MongoFieldDetector extends FieldDetector {
 		// Perform query and build MapMessage
 		if (mongoCursor.hasNext()) {
 			Document document = mongoCursor.next();
-			Date timestamp = document.getDate(timestampKey);
+			MongoDbConfig.TimestampType timestampType = MongoConfigHelper.getTimestampType(mongoConfig);
+
+			Date timestamp;
+			if (timestampType.equals(MongoDbConfig.TimestampType.DATETIME)) {
+				timestamp = document.getDate(timestampKey);
+			} else {
+				timestamp = new Date(document.getLong(timestampKey));
+			}
+
 			return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
 		} else {
 			String msg = String.format("No data found %s@%s", collection.getNamespace(), mongoClient.getConnectPoint());
