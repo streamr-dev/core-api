@@ -29,21 +29,20 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 		final Stream stream = subscriber;
 		return new Poller() {
 
-			private final Map<String, Object> mongoConfig = MongoConfigHelper.getMongoConfig(stream);
-			private final String timestampKey = MongoConfigHelper.getTimestampKey(mongoConfig);
-			private final MongoClient mongoClient = MongoConfigHelper.getMongoClient(mongoConfig);
-			private final MongoDatabase db = MongoConfigHelper.getMongoDatabase(mongoClient, mongoConfig);
-			private final MongoCollection collection = MongoConfigHelper.getCollection(db, mongoConfig);
+			private final MongoDbConfig config = MongoDbConfig.readFromStream(stream);
+			private final MongoClient mongoClient = config.createMongoClient();
+			private final MongoDatabase db = mongoClient.getDatabase(config.getDatabase());
+			private final MongoCollection collection = db.getCollection(config.getCollection());
 
 			// Add static filters from mongoConfig
 			private final Document startDateFilter = new Document();
-			private final Document query = MongoConfigHelper.getQuery(mongoConfig).append(timestampKey, startDateFilter);
+			private final Document query = config.createQuery().append(config.getTimestampKey(), startDateFilter);
 			private Date lastDate = new Date();
 			private long counter = 0;
 
 			@Override
 			public long getPollInterval() {
-				return MongoConfigHelper.getPollIntervalMillis(mongoConfig);
+				return config.getPollIntervalMillis();
 			}
 
 			@Override
@@ -58,9 +57,9 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 				startDateFilter.put("$gt", lastDate);
 
 				List<Message<MapMessage, Stream>> list = new LinkedList<>();
-				FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(timestampKey));
+				FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(config.getTimestampKey()));
 				for (Document document : iterable) {
-					Date timestamp = document.getDate(timestampKey);
+					Date timestamp = config.getTimestamp(document);
 					MapMessage mapMsg = new MapMessage(timestamp, new Date(), new DocumentFromStream(document, stream));
 					Message<MapMessage, Stream> msg = new Message<>(stream, counter++, mapMsg);
 					list.add(msg);

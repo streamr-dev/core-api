@@ -24,7 +24,7 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 	private final Date endDate;
 	private MongoCursor<Document> mongoCursor;
 	private MongoClient mongoClient;
-	private String timestampKey;
+	private MongoDbConfig config;
 	private boolean closed = false;
 
 	public MongoHistoricalIterator(Stream stream, Date startDate, Date endDate) {
@@ -32,54 +32,34 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 		this.startDate = startDate;
 		this.endDate = endDate;
 
-		validateStreamConfig(stream);
 		connect();
 	}
 
 	private void connect() {
-		Map<String, Object> mongoConfig = MongoConfigHelper.getMongoConfig(stream);
-		timestampKey = MongoConfigHelper.getTimestampKey(mongoConfig);
-		mongoClient = MongoConfigHelper.getMongoClient(mongoConfig);
-		MongoDatabase db = MongoConfigHelper.getMongoDatabase(mongoClient, mongoConfig);
-		MongoCollection collection = MongoConfigHelper.getCollection(db, mongoConfig);
+		config = MongoDbConfig.readFromStream(stream);
+		mongoClient = config.createMongoClient();
+		MongoDatabase db = mongoClient.getDatabase(config.getDatabase());
+		MongoCollection collection = db.getCollection(config.getCollection());
 
 		// Add static filters from mongoConfig
-		Document query = MongoConfigHelper.getQuery(mongoConfig);
+		Document query = config.createQuery();
 
 		// Filter by startDate
 		Document startDateFilter = new Document();
 		startDateFilter.put("$gte", startDate);
-		query.append(timestampKey, startDateFilter);
+		query.append(config.getTimestampKey(), startDateFilter);
 
 		// Filter by endDate
 		Document endDateFilter = new Document();
 		endDateFilter.put("$lte", endDate);
-		query.append(timestampKey, endDateFilter);
+		query.append(config.getTimestampKey(), endDateFilter);
 
-		FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(timestampKey));
+		FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(config.getTimestampKey()));
 		this.mongoCursor = iterable.iterator();
-	}
-	
-	private void validateStreamConfig(Stream stream) {
-		Map streamConfig = stream.getStreamConfigAsMap();
-
-		if (!streamConfig.containsKey("mongodb"))
-			throw new RuntimeException("Stream "+stream.getId()+" config does not contain the 'mongodb' key!");
-
-		Map<String, Object> mongoConfig = (Map<String, Object>) streamConfig.get("mongodb");
-
-		if (!mongoConfig.containsKey("host"))
-			throw new RuntimeException("Stream "+stream.getId()+" config does not contain the 'mongodb.host' key!");
-		if (!mongoConfig.containsKey("database"))
-			throw new RuntimeException("Stream "+stream.getId()+" config does not contain the 'mongodb.database' key!");
-		if (!mongoConfig.containsKey("collection"))
-			throw new RuntimeException("Stream "+stream.getId()+" config does not contain the 'mongodb.collection' key!");
-		if (!mongoConfig.containsKey("timestampKey"))
-			throw new RuntimeException("Stream "+stream.getId()+" config does not contain the 'mongodb.timestampKey' key!");
 	}
 
 	public String getTimestampKey() {
-		return timestampKey;
+		return config.getTimestampKey();
 	}
 
 	@Override
@@ -90,7 +70,7 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 	@Override
 	public MapMessage next() {
 		Document document = mongoCursor.next();
-		Date timestamp = document.getDate(timestampKey);
+		Date timestamp = config.getTimestamp(document);
 		return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
 	}
 

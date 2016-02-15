@@ -6,6 +6,7 @@ import com.mongodb.client.MongoDatabase
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.exceptions.InvalidStreamConfigException
 import com.unifina.feed.FieldDetector
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -21,13 +22,14 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	FieldDetector fieldDetector
 	Stream stream
+	MongoClient mongoClient
 
 	def setupSpec() {
-		MongoConfigHelper.timeout = 1000
+		MongoDbConfig.timeout = 1000
 	}
 
 	def cleanupSpec() {
-		MongoConfigHelper.timeout = MongoConfigHelper.DEFAULT_TIMEOUT
+		MongoDbConfig.timeout = MongoDbConfig.DEFAULT_TIMEOUT
 	}
 
 	def setup() {
@@ -38,6 +40,8 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	def cleanup() {
 		stream.delete()
+		if (mongoClient)
+			mongoClient.close()
 	}
 
 	def "throws exception given no connection details"() {
@@ -45,7 +49,7 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 		fieldDetector.detectFields(stream)
 
 		then:
-		thrown(NullPointerException) // TODO: better exception
+		thrown(InvalidStreamConfigException)
 	}
 
 	def "throws exception if invalid host"() {
@@ -160,11 +164,10 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 		stream.save(failOnError: true)
 	}
 
-	@CompileStatic
 	MongoDatabase openDbWith(Map map) {
 		configureStreamWith(map)
-		Map<String, Object> mongoConfig = MongoConfigHelper.getMongoConfig(stream);
-		MongoClient mongoClient = MongoConfigHelper.getMongoClient(mongoConfig);
-		return MongoConfigHelper.getMongoDatabase(mongoClient, mongoConfig);
+		def mongoDbConfig = new MongoDbConfig(map)
+		mongoClient = mongoDbConfig.createMongoClient()
+		return mongoClient.getDatabase(mongoDbConfig.database)
 	}
 }

@@ -80,7 +80,7 @@
 			<div class="form-group">
 				<label for="port-input">${message(code: "stream.config.mongodb.port")}</label>
 				<input id="port-input" class="form-control" type="text" name="port"
-					   value="${mongo.port ?: com.unifina.feed.mongodb.MongoConfigHelper.DEFAULT_PORT}">
+					   value="${mongo.port}">
 			</div>
 
 			<div class="form-group">
@@ -127,7 +127,7 @@
 			<div class="form-group">
 				<label for="pollIntervalMillis-input">${message(code: "stream.config.mongodb.pollIntervalMillis")}</label>
 				<input id="pollIntervalMillis-input" class="form-control" type="text" placeholder="1000"
-					   name="pollIntervalMillis" value="${mongo.pollIntervalMillis ?: com.unifina.feed.mongodb.MongoConfigHelper.DEFAULT_POLL_INTERVAL}" required>
+					   name="pollIntervalMillis" value="${mongo.pollIntervalMillis}" required>
 			</div>
 
 			<div class="form-group">

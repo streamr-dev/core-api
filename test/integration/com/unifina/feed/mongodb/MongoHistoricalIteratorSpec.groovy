@@ -24,7 +24,7 @@ class MongoHistoricalIteratorSpec extends IntegrationSpec {
 	}
 
 	def "it should retrieve all Documents in collection for given time span" () {
-		Stream stream = new Stream(streamConfig: """
+		Stream stream = new Stream(config: """
 			{
 				"mongodb": {
 					"host": "dev.streamr",
@@ -50,7 +50,7 @@ class MongoHistoricalIteratorSpec extends IntegrationSpec {
 	}
 
 	def "it should retrieve all documents if the time span exceeds what is available" () {
-		Stream stream = new Stream(streamConfig: """
+		Stream stream = new Stream(config: """
 			{
 				"mongodb": {
 					"host": "dev.streamr",
@@ -76,7 +76,7 @@ class MongoHistoricalIteratorSpec extends IntegrationSpec {
 	}
 
 	def "it should use a query defined in streamConfig" () {
-		Stream stream = new Stream(streamConfig: """
+		Stream stream = new Stream(config: """
 			{
 				"mongodb": {
 					"host": "dev.streamr",
