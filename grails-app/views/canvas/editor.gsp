@@ -17,6 +17,7 @@
 		<r:require module="touchpunch"/>
 		<r:require module="detect-timezone"/>
 		<r:require module="canvas-controls"/>
+		<r:require module="sharing-dialog"/>
 
 		<r:script>
 
@@ -362,9 +363,18 @@ $(document).unload(function () {
 					<i class="fa fa-plus"></i>
 					<g:message code="signalPath.addModule.label" default="Add Module" />
 				</sp:moduleAddButton>
-				
-
 			</div>
+
+			<%-- TODO: test if Canvas is shareable
+			<g:if test="${shareable}">
+			--%>
+				<div class="menu-content">
+					<button class="btn btn-block share-button" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + id)}', SignalPath.getName())"> Share </button>
+				</div>
+			<%--
+			</g:if>
+			--%>
+
 		</div> <!-- / #main-menu-inner -->
 	</div> <!-- / #main-menu -->
 
