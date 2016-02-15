@@ -67,7 +67,7 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	def "throws exception if non-existent database"() {
 		configureStreamWith([
-			host: "127.0.0.1",
+			host: "dev.streamr",
 			port: 27017,
 			database: "test" + IdGenerator.get(),
 			collection: collectionName,
@@ -84,7 +84,7 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	def "throws exception if non-existent collection"() {
 		configureStreamWith([
-			host: "127.0.0.1",
+			host: "dev.streamr",
 			port: 27017,
 			database: "test",
 			collection: collectionName + IdGenerator.get(),
@@ -101,7 +101,7 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	def "throws exception if collection is empty"() {
 		def db = openDbWith([
-			host: "127.0.0.1",
+			host: "dev.streamr",
 			port: 27017,
 			database: "test",
 			collection: collectionName,
@@ -125,7 +125,7 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 
 	def "uses latest (w.r.t timestamp) data entry to detect fields"() {
 		def db = openDbWith([
-			host: "127.0.0.1",
+			host: "dev.streamr",
 			port: 27017,
 			database: "test",
 			collection: getClass().simpleName,
