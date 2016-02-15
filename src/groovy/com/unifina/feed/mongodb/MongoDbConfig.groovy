@@ -4,6 +4,7 @@ import com.mongodb.MongoClient
 import com.mongodb.MongoClientOptions
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
+import com.mongodb.client.MongoCollection
 import com.unifina.domain.data.Stream
 import com.unifina.exceptions.InvalidStreamConfigException
 import grails.validation.Validateable
@@ -12,9 +13,9 @@ import org.bson.Document;
 
 @Validateable
 public class MongoDbConfig {
-
-	public static final int DEFAULT_TIMEOUT = 30;
-	public static int timeout = DEFAULT_TIMEOUT;
+	public static final int DEFAULT_PORT = 27017
+	public static final int DEFAULT_TIMEOUT = 1000 * 30
+	public static int timeout = DEFAULT_TIMEOUT
 
 	enum TimestampType {
 		DATETIME,
@@ -50,7 +51,7 @@ public class MongoDbConfig {
 
 	static MongoDbConfig readFromStream(Stream stream) {
 		def mongoMap = stream.getStreamConfigAsMap()["mongodb"]
-		if (!mongoMap)
+		if (mongoMap == null)
 			throw new InvalidStreamConfigException("Stream "+stream.getId()+" config does not contain the 'mongodb' key!");
 
 		MongoDbConfig config = new MongoDbConfig(mongoMap)
@@ -58,6 +59,14 @@ public class MongoDbConfig {
 			throw new InvalidStreamConfigException("Stream "+stream.getId()+" does not have a valid MongoDB configuration!");
 
 		return config
+	}
+
+	static MongoDbConfig readFromStreamOrElseEmptyObject(Stream stream) {
+		try {
+			return readFromStream(stream)
+		} catch (InvalidStreamConfigException e) {
+			return new MongoDbConfig()
+		}
 	}
 
 	public Map<String, Object> toMap() {
@@ -99,6 +108,12 @@ public class MongoDbConfig {
 				.build();
 
 		return new MongoClient(serverAddress, credentials, options);
+	}
+
+	@CompileStatic
+	public MongoCollection<Document> openCollection() {
+		def client = createMongoClient()
+		return client.getDatabase(database).getCollection(collection)
 	}
 
 	public Document createQuery() {

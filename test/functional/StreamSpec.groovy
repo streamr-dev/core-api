@@ -1,4 +1,9 @@
+import com.mongodb.MongoClient
+import com.mongodb.client.MongoCollection
+import com.unifina.feed.mongodb.MongoDbConfig
 import core.pages.ConfigureMongoPage
+import org.bson.Document
+import spock.lang.Shared
 
 import java.nio.file.Paths
 
@@ -15,10 +20,28 @@ import core.pages.StreamShowPage
 
 class StreamSpec extends LoginTester1Spec {
 
+	@Shared def mongoDbConfig = new MongoDbConfig([
+		host: "dev.streamr",
+		port: 27017,
+		database: "test",
+		collection: "streamSpec",
+		timestampKey: "time",
+		timestampType: MongoDbConfig.TimestampType.DATETIME
+	])
+
 	def setupSpec() {
 		// @Mixin is buggy, don't use it
 		StreamSpec.metaClass.mixin(StreamMixin)
 		StreamSpec.metaClass.mixin(ConfirmationMixin)
+
+		def client = mongoDbConfig.createMongoClient()
+		mongoDbConfig.openCollection().drop()
+		client.getDatabase("test").createCollection("streamSpec")
+		mongoDbConfig.openCollection().insertOne(new Document([a: "hello world", b: 10, c: new Date(0)]))
+	}
+
+	def cleanupSpec() {
+		mongoDbConfig.openCollection().drop()
 	}
 	
 	private File getFile(String filename) {
@@ -175,6 +198,20 @@ class StreamSpec extends LoginTester1Spec {
 		mongoTimestampKey.text() == "time (datetime)"
 		mongoPollIntervalMillis.text() == "5500"
 		mongoQuery.text() == "{}"
+
+		when: "Configure Fields button is clicked"
+		configureFieldsButton.click()
+		then: "Navigate to configure page"
+		waitFor { at StreamConfigurePage }
+
+		when: "Autodetect button is clicked"
+		autodetectButton.click()
+		then:
+		waitFor {
+			$("input", name: "field_name").size() == 4 && $("select", name: "field_type").size() == 4
+		}
+		$("input", name:"field_name").collect { it.value() } == ["_id", "a", "b", "c"]
+		$("select", name:"field_type").collect { it.value() } == ["string", "string", "number", "string"]
 
 		cleanup: "delete stream"
 		to(StreamListPage)

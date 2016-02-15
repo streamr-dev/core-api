@@ -102,7 +102,7 @@ class StreamController {
 
 	def configureMongo() {
 		Stream stream = Stream.get(params.id)
-		[stream: stream, mongo: MongoDbConfig.readFromStream(stream)]
+		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
 	}
 	
 	def delete() {
