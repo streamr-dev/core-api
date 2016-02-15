@@ -135,7 +135,7 @@ class ModuleController {
 		try {
 			def user = springSecurityService.currentUser
 			Module domainObject = Module.get(params.long("id"))
-			if (!permissionService.canRead(user, domainObject)) {
+			if (!permissionService.canRead(user, domainObject.modulePackage)) {
 				throw new Exception("Access denied for user $user.username to requested module")
 			}
 			
