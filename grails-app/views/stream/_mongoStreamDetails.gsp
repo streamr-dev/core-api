@@ -13,39 +13,39 @@
 
 		<div class="panel-body">
 			<g:set var="mongo" value="${com.unifina.feed.mongodb.MongoDbConfig.readFromStream(stream)}"/>
-			<ui:labeled label="${message(code: "stream.config.mongodb.host")}">
+			<ui:labeled class="mongo-host" label="${message(code: "stream.config.mongodb.host")}">
 				${mongo.host}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.port")}">
+			<ui:labeled class="mongo-port" label="${message(code: "stream.config.mongodb.port")}">
 				${mongo.port}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.username")}">
+			<ui:labeled class="mongo-username" label="${message(code: "stream.config.mongodb.username")}">
 				${mongo.username}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.password")}">
+			<ui:labeled class="mongo-password" label="${message(code: "stream.config.mongodb.password")}">
 				${mongo.password}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.database")}">
+			<ui:labeled class="mongo-database" label="${message(code: "stream.config.mongodb.database")}">
 				${mongo.database}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.collection")}">
+			<ui:labeled class="mongo-collection" label="${message(code: "stream.config.mongodb.collection")}">
 				${mongo.collection}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.timestampKey")}">
+			<ui:labeled class="mongo-timestampKey" label="${message(code: "stream.config.mongodb.timestampKey")}">
 				${mongo.timestampKey} (${mongo.timestampType?.humanReadableForm})
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.pollIntervalMillis")}">
+			<ui:labeled class="mongo-pollIntervalMillis" label="${message(code: "stream.config.mongodb.pollIntervalMillis")}">
 				${mongo.pollIntervalMillis}
 			</ui:labeled>
 
-			<ui:labeled label="${message(code: "stream.config.mongodb.query")}">
+			<ui:labeled class="mongo-query" label="${message(code: "stream.config.mongodb.query")}">
 				${mongo.query}
 			</ui:labeled>
 		</div>

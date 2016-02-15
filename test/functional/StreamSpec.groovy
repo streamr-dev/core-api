@@ -1,3 +1,5 @@
+import core.pages.ConfigureMongoPage
+
 import java.nio.file.Paths
 
 import com.unifina.kafkaclient.UnifinaKafkaProducer
@@ -117,6 +119,71 @@ class StreamSpec extends LoginTester1Spec {
 		then: "must navigate to list page and show message"
 			waitFor { at StreamListPage }
 			$(".alert-info").displayed
+	}
+
+	void "creating a mongo stream and autodetecting its fields work"() {
+		setup:
+		def streamName = "StreamSpec_Mongo_"+System.currentTimeMillis()
+		to StreamListPage
+		waitFor { at StreamListPage }
+
+		when: "create stream button is clicked"
+		createButton.click()
+		then: "must go to stream create page"
+		waitFor { at StreamCreatePage }
+
+		when: "name, description are entered, mongo chosen from list, and then next button is clicked"
+		name << streamName
+		description << streamName + " description"
+		feed.click()
+		feed.find("option").find { it.value() == "8" }.click()
+		nextButton.click()
+
+		then: "must navigate to stream show page, showing info about non-configured stream"
+		waitFor { at StreamShowPage }
+		$(".alert-info", text: contains('configure'))
+
+		when: "mongodb edit button is clicked"
+		editMongoDbButton.click()
+		then: "arrive at mongodb configuration page"
+		waitFor { at ConfigureMongoPage }
+
+		when: "filling in configuration details"
+		host << "dev.streamr"
+		port.value("27017")
+		username << ""
+		password << ""
+		database << "test"
+		collection << "streamSpec"
+		timestampKey << "time"
+		pollIntervalMillis.value("5500")
+		query.value("{}")
+
+		and: "pressing submit"
+		submit.click()
+
+		then: "back at stream show page"
+		waitFor { at StreamShowPage }
+
+		and: "mongodb configurations visible"
+		mongoHost.text() == "dev.streamr"
+		mongoPort.text() == "27017"
+		mongoUsername.text().empty
+		mongoPassword.text().empty
+		mongoDatabase.text() == "test"
+		mongoCollection.text() == "streamSpec"
+		mongoTimestampKey.text() == "time (datetime)"
+		mongoPollIntervalMillis.text() == "5500"
+		mongoQuery.text() == "{}"
+
+		cleanup: "delete stream"
+		to(StreamListPage)
+		openStream(streamName)
+		deleteStreamButton.click()
+		waitFor { $(".modal-dialog").displayed }
+		$(".modal-dialog .btn-primary").click()
+		waitFor { at StreamListPage }
+		$(".alert-info").text().contains("deleted")
 	}
 	
 }
