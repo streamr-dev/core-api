@@ -111,25 +111,36 @@ class CanvasController {
 	def loadBrowserContent() {
 		def max = params.int("max") ?: 100
 		def offset = params.int("offset") ?: 0
-		def ssp
-		// TODO: do queries via permissionService once that branch is ready
+
+		def canvases = []
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
+			// bypass Permission check; examples are public (make sure example-bit can't be set through API!)
+			canvases = Canvas.withCriteria {
+				eq "example", true
+				order "dateCreated", "asc"
+				maxResults max
+				firstResult offset
+			}
 		} else if (params.browserId == 'archiveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = false and sp.user = :user and sp.adhoc = false order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+			def user = springSecurityService.currentUser
+			canvases = permissionService.getAll(Canvas, user, Operation.READ) {
+				eq "example", false
+				eq "adhoc", false
+				order "dateCreated", "desc"
+				maxResults max
+				firstResult offset
+			}
 		}
 
-		def result = [signalPaths:[]]
-		ssp.each {
-			def tmp = [:]
-			tmp.id = it[0]
-			tmp.name = it[1]
-			tmp.state = it[2]
-			tmp.command = params.command
-			tmp.offset = offset++
-			result.signalPaths.add(tmp)
-		}
-		return result
+		return [
+			canvases: canvases.collect {[
+				id: it.id,
+				name: it.name,
+				state: it.state,
+				command: params.command,
+				offset: offset++
+			]}
+		]
 	}
 
 

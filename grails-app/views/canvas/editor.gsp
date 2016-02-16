@@ -231,6 +231,21 @@ $(document).ready(function() {
 		signalPath: SignalPath
 	})
 
+	$(SignalPath).on('new', function(e, json) {
+		$("#share-button").attr("disabled", "disabled")
+	})
+
+	$(SignalPath).on('loaded saved', function(e, json) {
+		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
+		// Check share permission by knocking on the /permissions/ API endpoint
+		$.getJSON(canvasUrl + "/permissions").success(function () {
+			$("#share-button").data("url", canvasUrl)
+			$("#share-button").removeAttr("disabled")
+		}).fail(function () {
+			// Forbidden means no permission
+			$("#share-button").attr("disabled", "disabled")
+		})
+	})
 
 	<g:if test="${id}">
 		SignalPath.load('${id}');
@@ -365,15 +380,9 @@ $(document).unload(function () {
 				</sp:moduleAddButton>
 			</div>
 
-			<%-- TODO: test if Canvas is shareable
-			<g:if test="${shareable}">
-			--%>
-				<div class="menu-content">
-					<button class="btn btn-block share-button" onclick="sharePopup('${createLink(uri: "/api/v1/canvases/" + id)}', SignalPath.getName())"> Share </button>
-				</div>
-			<%--
-			</g:if>
-			--%>
+			<div class="menu-content">
+				<button id="share-button" class="btn btn-block share-button" onclick="sharePopup($(this).data('url'), SignalPath.getName())" disabled="disabled"> Share </button>
+			</div>
 
 		</div> <!-- / #main-menu-inner -->
 	</div> <!-- / #main-menu -->

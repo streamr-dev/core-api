@@ -1,9 +1,11 @@
 package com.unifina.service
 
 import grails.gorm.DetachedCriteria
+import grails.orm.HibernateCriteriaBuilder
 import org.apache.log4j.Logger
 
 import com.unifina.domain.security.SecUser
+import org.hibernate.SessionFactory
 import org.hibernate.proxy.HibernateProxyHelper
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -145,6 +147,7 @@ class PermissionService {
 		if (!user) { return [] }
 
 		String idProp = getIdPropertyName(resourceClass)
+		boolean hasOwner = resourceClass.properties["declaredFields"].any { it.name == "user" }
 
 		def perms = Permission.withCriteria {
 			eq "user", user
@@ -153,10 +156,17 @@ class PermissionService {
 		}
 		def resourceIds = perms.collect { it[idProp] }
 
-		new DetachedCriteria(resourceClass).build {
+		// or-clause in criteria query should become false, and nothing should be returned
+		if (!hasOwner && resourceIds.size() == 0) { return [] }
+
+		// resourceClass.withCriteria can't be found, dynamic Groovy methods only exist for named Classes
+		// DetachedCriteria won't work with maxResults and firstResult (= offset)
+		// see http://grails.github.io/grails-data-mapping/latest/api/grails/orm/HibernateCriteriaBuilder.html
+		def sessionFactory = (SessionFactory)grailsApplication.mainContext.getBean("sessionFactory")
+		new HibernateCriteriaBuilder(resourceClass, sessionFactory).list {
 			or {
 				// resources that specify an "owner" automatically give that user all access rights
-				if (resourceClass.properties["declaredFields"].any { it.name == "user" }) {
+				if (hasOwner) {
 					eq "user", user
 				}
 				// empty in-list will work with Mock but fail with SQL
@@ -164,7 +174,9 @@ class PermissionService {
 					"in" "id", resourceIds
 				}
 			}
-		}.build(resourceFilter).list()
+			resourceFilter.delegate = delegate
+			resourceFilter()
+		}
 	}
 	/** Overload to allow leaving out the op but including the filter... */
 	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter) {
