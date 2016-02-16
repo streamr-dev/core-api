@@ -38,11 +38,9 @@
 					           	<ui:td>${dashboard.dateCreated.format("yyyy-MM-dd")}</ui:td>
 					            <ui:td>
 									${dashboard.lastUpdated.format("yyyy-MM-dd")}
-									<%-- uncomment when /v1/api/dashboards is available
 									<g:if test="${shareable.contains(dashboard)}">
 										<button class="btn share-button-20px" onclick="sharePopup('${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}', 'Dashboard ${dashboard.name}')"></button>
 									</g:if>
-									--%>
 								</ui:td>
 				            </ui:tr>	            	
 						</g:each>
