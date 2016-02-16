@@ -113,7 +113,6 @@ class CanvasService {
 		if (!response.isSuccess()) {
 			canvas.state = Canvas.State.STOPPED
 			canvas.save(failOnError: true, flush: true)
-			//Canvas.executeUpdate("update Canvas c set c.state = ? where c.id = ?", [Canvas.State.STOPPED, canvas.id])
 			throw new CanvasUnreachableException("Canvas $canvas.id did not respond to stop request.")
 		}
 	}

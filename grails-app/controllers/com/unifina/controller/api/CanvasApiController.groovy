@@ -1,6 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -9,14 +8,11 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.NotTransactional
 import org.apache.log4j.Logger
-import org.hibernate.UnresolvableObjectException
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class CanvasApiController {
 
 	def canvasService
-	def springSecurityService
-	def grailsApplication
 	def unifinaSecurityService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
@@ -31,8 +27,6 @@ class CanvasApiController {
 		def canvases = canvasService.findAllBy(user, name, adhoc, state)
 		render(canvases*.toMap() as JSON)
 	}
-
-	// TODO: /canvases/{id}/uiChannels (webcomponent?)
 
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
@@ -93,13 +87,11 @@ class CanvasApiController {
 			} else {
 				// Updates canvas in another thread, so canvas needs to be refreshed
 				canvasService.stop(canvas, request.apiUser)
-
-				try {
-					// Adhoc canvases are deleted on stop, in which case refresh() will fail with UnresolvableObjectException
+				if (canvas.adhoc) {
+					render(status: 204) // Adhoc canvases are deleted on stop.
+				} else {
 					canvas.refresh()
 					render canvas.toMap() as JSON
-				} catch (UnresolvableObjectException) {
-					render(status: 204)
 				}
 			}
 		}

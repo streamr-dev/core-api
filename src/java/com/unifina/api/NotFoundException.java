@@ -1,7 +1,5 @@
 package com.unifina.api;
 
-import java.util.Map;
-
 public class NotFoundException extends ApiException {
 	/** Type of the missing resource */
 	private String type;

@@ -1,11 +1,9 @@
 package com.unifina.controller.core.signalpath
 
-import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.security.StreamrApi
-import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.RuntimeResponse
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -15,7 +13,6 @@ class LiveController {
 	def springSecurityService
 	def unifinaSecurityService
 	def signalPathService
-	def grailsApplication
 
 	// TODO: refactor out of here
 	@StreamrApi(requiresAuthentication = false)
