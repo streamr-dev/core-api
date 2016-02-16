@@ -82,6 +82,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 test {
+		 grails.resources.processing.enabled = false
 		 grails.resources.mappers.bundle.excludes = ['**/*.*']
 		 grails.resources.mappers.hashandcache.excludes = ['**/*.*']
 		 grails.resources.mappers.zip.excludes = ['**/*.*']
@@ -92,13 +93,12 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
 	 }
  }
- 
+
  environments {
 	 test {
 		 grails.reload.enabled = true
 		 disable.auto.recompile = false // Recompilation of Java Sources
 		 grails.gsp.enable.reload = true // Recompilation of GSPs
-		 grails.resources.processing.enabled = false
 	 }
  }
  
