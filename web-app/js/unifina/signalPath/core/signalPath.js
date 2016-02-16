@@ -26,7 +26,6 @@
  * allowRuntimeChanges: boolean for whether runtime parameter changes are allowed
  * apiUrl: base url of Streamr api
  * getModuleUrl: url for module JSON
- * requestUrl: url for POSTing runtime requests
  * connectionOptions: option object passed to StreamrClient
  */
 
@@ -45,7 +44,6 @@ var SignalPath = (function () {
 		},
 		allowRuntimeChanges: true,
 		apiUrl: Streamr.createLink({"uri": "api/v1"}),
-		requestUrl: Streamr.createLink({"uri": "api/v1/live/request"}),
 		getModuleUrl: Streamr.createLink("module", "jsonGetModule"),
 		getModuleHelpUrl: Streamr.createLink("module", "jsonGetModuleHelp"),
 		connectionOptions: {},
@@ -122,22 +120,34 @@ var SignalPath = (function () {
 				}
 			}
 
+			var url = options.apiUrl + '/canvases/'+runningJson.id+(hash==null ? '/request' : '/modules/'+hash+'/request')
 			$.ajax({
 				type: 'POST',
-				url: options.requestUrl,
-				data: JSON.stringify({
-					id: runningJson.id,
-					hash: hash,
-					channel: channel,
-					msg: msg
-				}),
+				url: url,
+				data: JSON.stringify(msg),
 				dataType: 'json',
 				contentType: 'application/json; charset=utf-8',
 				success: function(data) {
 					if (callback)
-						callback(data.response, (data.success ? undefined : data))
-					else if (!data.success) {
-						handleError(data.error || data.response.error)
+						callback(data)
+				},
+				error: function(xhr) {
+					var errorMsg
+					var errorObject
+					try {
+						var response = JSON.parse(xhr.responseText)
+						errorObject = response
+						errorMsg = response.message
+					} catch (err) {
+						errorObject = {message: xhr.responseText}
+						errorMsg = xhr.responseText
+					}
+
+					if (callback) {
+						callback(errorObject, errorMsg)
+					}
+					else {
+						handleError(errorMsg)
 					}
 				}
 			});
@@ -206,6 +216,11 @@ var SignalPath = (function () {
 		return savedJson != null && savedJson.id != null && savedJson.type !== 'example'
 	}
 	pub.isSaved = isSaved
+
+	function getId() {
+		return savedJson ? savedJson.id : undefined
+	}
+	pub.getId = getId
 	
 	function replaceModule(module,id,configuration) {
 		addModule(id,configuration,function(newModule) {

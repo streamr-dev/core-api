@@ -9,13 +9,11 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
-import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
@@ -109,14 +107,14 @@ class CanvasService {
 			throw new InvalidStateException("Canvas $canvas.id not currently running.")
 		}
 
-		RuntimeResponse response = signalPathService.stopRemote(canvas, user)
-		if (!response.isSuccess()) {
+		try {
+			signalPathService.stopRemote(canvas, user)
+		} catch (CanvasUnreachableException e) {
 			canvas.state = Canvas.State.STOPPED
 			canvas.save(failOnError: true, flush: true)
-			throw new CanvasUnreachableException("Canvas $canvas.id did not respond to stop request.")
+			throw e
 		}
 	}
-
 
 	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, boolean resetUi) {
 		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]

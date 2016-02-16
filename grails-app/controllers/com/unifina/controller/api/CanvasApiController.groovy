@@ -14,6 +14,7 @@ class CanvasApiController {
 
 	def canvasService
 	def unifinaSecurityService
+	def signalPathService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
@@ -94,6 +95,38 @@ class CanvasApiController {
 					render canvas.toMap() as JSON
 				}
 			}
+		}
+	}
+
+	/**
+	 * Gets the json of a single module on a canvas
+	 * @param id
+	 * @param moduleId
+     * @return
+     */
+	@StreamrApi(requiresAuthentication = false)
+	def module(String id, Integer moduleId) {
+		getAuthorizedCanvas(id) { Canvas canvas ->
+			Map canvasMap = canvas.toMap()
+			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId.toString() }
+
+			if (!moduleMap) {
+				throw new ApiException(404, "MODULE_NOT_FOUND", "Module $moduleId not found on canvas $id")
+			} else {
+				render moduleMap as JSON
+			}
+
+		}
+	}
+
+	@StreamrApi(requiresAuthentication = false)
+	def request(String id, Integer moduleId) {
+		getAuthorizedCanvas(id) {Canvas canvas ->
+			def msg = request.JSON
+			Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, params.local ? true : false)
+
+			log.info("request: responding with $response")
+			render response as JSON
 		}
 	}
 

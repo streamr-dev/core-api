@@ -69,21 +69,21 @@ class DashboardSpec extends LoginTester1Spec {
 		when: "a rsp clicked to open"
 			findRunningSignalPath("DashboardSpec").click()
 		then: "uichannel-list opens"
-			waitFor { findRunningSignalPath("DashboardSpec").find(".uichannel-title").displayed }
+			waitFor { findRunningSignalPath("DashboardSpec").find(".module-title").displayed }
 		
 		// Add some modules
 		when: "Label added"
-			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Label")).click()
+			findRunningSignalPath("DashboardSpec").find(".module-title", text:contains("Label")).click()
 		then: "Label should be displayed"
 			waitFor { findDashboardItem("Label").displayed }
 		
 		when: "Table added"
-			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Table")).click()
+			findRunningSignalPath("DashboardSpec").find(".module-title", text:contains("Table")).click()
 		then: "Table item should be displayed"
 			waitFor { findDashboardItem("Table").displayed }
 		
 		when: "Chart added"
-			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Chart")).click()
+			findRunningSignalPath("DashboardSpec").find(".module-title", text:contains("Chart")).click()
 		then: "Chart item should be displayed"
 			waitFor { findDashboardItem("Chart").displayed }
 		

@@ -1,19 +1,16 @@
-import core.pages.CanvasPage
-import grails.test.mixin.TestFor
-import com.unifina.controller.core.signalpath.LiveController
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.BootService
 import com.unifina.utils.MapTraversal
-
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
+import grails.test.mixin.TestFor
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-@TestFor(LiveController) // This makes grailsApplication available
+@TestFor(CanvasController) // This makes grailsApplication available
 public class LiveSpec extends LoginTester1Spec {
 
 	static Timer timer
