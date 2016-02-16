@@ -179,7 +179,6 @@ class StreamController {
 	
 	def upload() {
 		// Access checked by beforeInspector
-		
 		File temp
 		boolean deleteFile = true
 		try {
