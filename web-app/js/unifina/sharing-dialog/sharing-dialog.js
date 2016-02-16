@@ -261,7 +261,7 @@
             setTimeout(function() { $(".new-user-field").focus() }, 500)
 
             listView = new AccessListView({
-                el: ".modal-body",
+                el: ".bootbox .modal-body",
                 id: "access-list",
                 owner: originalOwner
             })
