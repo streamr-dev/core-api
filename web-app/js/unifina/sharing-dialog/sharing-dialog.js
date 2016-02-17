@@ -227,6 +227,7 @@
         event.preventDefault()
 
         if (dialogIsOpen()) { console.error("Cannot open sharePopup, already open!"); return false }
+        if (!url) { console.error("Cannot open sharePopup without resource URL!"); return false }
         resourceUrl = url
 
         // get current permissions
