@@ -44,4 +44,11 @@ class StreamService {
 		}
 		else throw new RuntimeException("Unable to delete stream $stream.id, feed: $stream.feed.id")
 	}
+
+
+	Map getDataRange(Stream stream) {
+		def startFile = FeedFile.findByStream(stream, [sort:'beginDate', limit:1])
+		def endFile = FeedFile.findByStream(stream, [sort:'endDate', order:"desc", limit:1])
+		return [beginDate: startFile?.beginDate, endDate: endFile?.endDate]
+	}
 }
