@@ -17,8 +17,8 @@ SignalPath.StreamModule = function(data,canvas,prot) {
 								"</b> to <b>" +
 								$.datepicker.formatDate("yy-mm-dd", endDate) +
 								"</b>.</p>"
-					} else
-						html += "<p>This stream has no history</p>"
+					}
+					
 					cb(html)
 				})
 			} else
