@@ -226,7 +226,7 @@ $(document).unload(function () {
 			
 				<div class="menu-content-header">
 					<label>Run Options</label>
-					<a href="#" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Show More Options" data-toggle="modal" data-target="#runOptionsModal">
+					<a href="#" id="runOptionsButton" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Show More Options" data-toggle="modal" data-target="#runOptionsModal">
 						<i class="fa fa-cog"></i>
 					</a>
 				</div>

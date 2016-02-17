@@ -4,10 +4,10 @@ import java.util.*;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.data.IFeed;
 import com.unifina.data.IFeedRequirement;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
+import com.unifina.feed.AbstractFeed;
 import com.unifina.service.FeedService;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.SignalPath;
@@ -28,7 +28,7 @@ public abstract class DataSource {
 	
 	protected DataSourceEventQueue eventQueue;
 	
-	HashMap<String,IFeed> feedByClass = new HashMap<>();
+	HashMap<String,AbstractFeed> feedByClass = new HashMap<>();
 //	protected List<ITimeListener> timeListeners = []
 //	protected List<IDayListener> dateListeners = []
 	protected List<IStartListener> startListeners = new ArrayList<>();
@@ -82,8 +82,8 @@ public abstract class DataSource {
 
 	}
 
-	protected IFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
-		IFeed feed = createFeed(feedDomain);
+	protected AbstractFeed subscribeToFeed(Object subscriber, Feed feedDomain) {
+		AbstractFeed feed = createFeed(feedDomain);
 		try {
 			log.debug("subscribeToFeed: subscriber "+subscriber+" subscribing to feed "+feedDomain.getName());
 			feed.subscribe(subscriber);
@@ -102,7 +102,7 @@ public abstract class DataSource {
 		stopListeners.add(stopListener);
 	}
 	
-	public IFeed createFeed(Feed domain) {
+	public AbstractFeed createFeed(Feed domain) {
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		if (feedService == null)
 			feedService = new FeedService();
@@ -111,7 +111,7 @@ public abstract class DataSource {
 		String feedClass = feedService.getFeedClass(domain, isHistoricalFeed);
 		
 		// Feed already created?
-		IFeed feed = feedByClass.get(feedClass);
+		AbstractFeed feed = feedByClass.get(feedClass);
 		
 		// Should we instantiate a new feed?
 		if (feed==null) {
@@ -127,7 +127,7 @@ public abstract class DataSource {
 		return feed;
 	}
 	
-	public Collection<IFeed> getFeeds() {
+	public Collection<AbstractFeed> getFeeds() {
 		return feedByClass.values();
 	}
 	

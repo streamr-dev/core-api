@@ -17,8 +17,8 @@ import com.unifina.utils.MapTraversal;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
-import com.unifina.data.IFeed;
 import com.unifina.data.RealtimeEventQueue;
+import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.ICatchupFeed;
 import com.unifina.utils.Globals;
 
@@ -47,7 +47,7 @@ public class RealtimeDataSource extends DataSource {
 		// Check catchup
 		List<ICatchupFeed> catchupFeeds = new ArrayList<>();
 		
-		for (IFeed it : feedByClass.values()) {
+		for (AbstractFeed it : feedByClass.values()) {
 			if (it instanceof ICatchupFeed && ((ICatchupFeed)it).startCatchup())
 				catchupFeeds.add((ICatchupFeed)it);
 		}
@@ -64,7 +64,7 @@ public class RealtimeDataSource extends DataSource {
 		// Let all catchup feeds know that catchup has ended,
 		// even if their startCatchup() returned false and thus
 		// they are not in catchupFeeds
-		for (IFeed it : feedByClass.values()) {
+		for (AbstractFeed it : feedByClass.values()) {
 			if (it instanceof ICatchupFeed)
 				((ICatchupFeed)it).endCatchup();
 		}
@@ -75,7 +75,7 @@ public class RealtimeDataSource extends DataSource {
 			log.info("Catchup complete.");
 		
 		if (!abort) {
-			for (IFeed it : feedByClass.values())
+			for (AbstractFeed it : feedByClass.values())
 				it.startFeed();
 
 			final Date now = new Date();
@@ -165,7 +165,7 @@ public class RealtimeDataSource extends DataSource {
 		secTimer.cancel();
 		secTimer.purge();
 		
-		for (IFeed it : feedByClass.values()) {
+		for (AbstractFeed it : feedByClass.values()) {
 			try {
 				it.stopFeed();
 			} catch (Exception e) {
