@@ -163,9 +163,19 @@ log4j = {
 	 }
  }
 
+/**
+ * Migration config
+ */
 grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
- 
+grails.plugin.databasemigration.updateOnStartContexts = ['default'] // a context needs to be specified, otherwise all changesets will run. changesets with no context will always run.
+
+environments {
+	test {
+		grails.plugin.databasemigration.updateOnStartContexts = ['test'] // changesets with no context will always run.
+	}
+}
+
 /**
  * API & CORS config
  */
