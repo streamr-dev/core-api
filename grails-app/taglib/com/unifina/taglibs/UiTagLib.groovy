@@ -206,10 +206,8 @@ public class UiTagLib {
 	 * Renders a table with clickable rows
 	 */
 	def table = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'clickable-table table table-striped table-hover table-condensed table-bordered')
-		else attrs.put('class', attrs.get('class') + " clickable-table")
-			
+		attrs.class = (attrs['class'] ?: "table table-striped table-hover table-condensed table-bordered") + " clickable-table"
+
 		out << "<div "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -218,10 +216,8 @@ public class UiTagLib {
 	}
 
 	def thead = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'thead')
-		else attrs.put('class', attrs.get('class') + " thead")
-			
+		attrs.class = ((attrs.class ?: "") + ' thead').trim()
+
 		out << "<div "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -230,10 +226,8 @@ public class UiTagLib {
 	}
 	
 	def th = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'th')
-		else attrs.put('class', attrs.get('class') + " th")
-			
+		attrs.class = ((attrs.class ?: "") + ' th').trim()
+
 		out << "<span "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -242,10 +236,8 @@ public class UiTagLib {
 	}
 	
 	def tbody = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'tbody')
-		else attrs.put('class', attrs.get('class') + " tbody")
-			
+		attrs.class = ((attrs.class ?: "") + ' tbody').trim()
+
 		out << "<div "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -254,9 +246,7 @@ public class UiTagLib {
 	}
 	
 	def td = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'td')
-		else attrs.put('class', attrs.get('class') + " td")
+		attrs.class = ((attrs.class ?: "") + ' td').trim()
 			
 		out << "<span "
 		outputAttributes(attrs, out)
@@ -272,10 +262,8 @@ public class UiTagLib {
 	 * @attr link Url that the row links to. If none is given, the row is not rendered as a link.
 	 */
 	def tr = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'tr')
-		else attrs.put('class', attrs.get('class') + " tr")
-	
+		attrs.class = ((attrs.class ?: "") + ' tr').trim()
+
 		def link = attrs.remove('link')
 		if (link) {
 			out << "<a href='${link}' "
