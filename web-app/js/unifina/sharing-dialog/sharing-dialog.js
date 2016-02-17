@@ -128,9 +128,7 @@
         keyHandler: function(e) {
             this.$newUserField.removeClass("has-error")
             if (e.keyCode === KEY_ENTER) {
-                if (this.$newUserField.val()) {
-                    this.finishUserInput()
-                } else {
+                if (this.finishUserInput() === "done") {
                     sharePopup.closeAndSaveChanges()
                 }
             } else if (e.keyCode === KEY_ESC) {
@@ -143,12 +141,13 @@
         },
         finishUserInput: function() {
             var newUser = this.$newUserField.val().trim()
-            if (!newUser) { return; }
+            if (!newUser) { return "done" }
+
             if (!newUser.match(emailRegex)) {
                 this.$newUserField.addClass("has-error")
                 shake(this.$newUserField)
                 Streamr.showError("Please enter an email-address!", null, 1000)
-                return;
+                return "error"
             }
 
             accessList.create({
@@ -156,6 +155,7 @@
                 read: true,
             })
             this.$newUserField.val("")
+            return "added"
         },
 
         initialize: function(args) {
@@ -252,7 +252,9 @@
                     save: {
                         label: "Save", //'<span class="spinner"><i class="icon-spin icon-refresh"></i></span>Save',
                         className: "btn-primary", // has-spinner",
-                        callback: saveChanges
+                        callback: function() {
+                            return listView.finishUserInput() !== "error" && sharePopup.closeAndSaveChanges()
+                        }
                     }
                 }
             })
@@ -400,7 +402,7 @@
         }
 
         // don't close the dialog yet, saving is still in progress...
-        return false;
+        return false
     }
 
     exports.sharePopup.closeAndSaveChanges = function() {
