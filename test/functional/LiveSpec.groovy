@@ -172,6 +172,7 @@ public class LiveSpec extends LoginTester1Spec {
 			}
 
 		when: "canvas is resumed"
+			noNotificationsVisible()
 			runRealtimeButton.click()
 		then: "info alert and stop button must be displayed"
 			waitFor { $(".alert.alert-success").displayed }
