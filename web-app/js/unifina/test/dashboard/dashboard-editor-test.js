@@ -109,43 +109,43 @@ describe('dashboard-editor', function() {
 		})
 
 		it('should render the amount of dashboardItems should be correct when added', function (){
-			assert($(".streamr-widget").length == 2)
-			assert(dashboardView.$el.children().length == 2)
+			assert.equal($(".streamr-widget").length, 2)
+			assert.equal(dashboardView.$el.children().length, 2)
 			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:67, webcomponent:"streamr-chart"}}, size:"medium"})
-			assert($(".streamr-widget").length == 3)
-			assert(dashboardView.$el.children().length == 3)
+			assert.equal($(".streamr-widget").length, 3)
+			assert.equal(dashboardView.$el.children().length, 3)
 		})
 
 		it('must remove a dashboarditem when clicked delete', function (){
-			assert(dashboardView.$el.children().length == 2)
+			assert.equal(dashboardView.$el.children().length, 2)
 			$(dashboardView.$el.children()[0]).find(".btn.delete-btn").click()
-			assert(dashboardView.$el.children().length == 1)
+			assert.equal(dashboardView.$el.children().length, 1)
 			$(dashboardView.$el.children()[0]).find(".btn.delete-btn").click()
 			assert(!dashboardView.$el.children().length)
 		})
 
 		it('must remove a dashboarditem when it is removed from collection', function () {
-			assert(dashboardView.$el.children().length == 2)
+			assert.equal(dashboardView.$el.children().length, 2)
 			var item = dashboard.get("items").models[1]
 			dashboard.get("items").remove(item)
-			assert(dashboardView.$el.children().length == 1)
+			assert.equal(dashboardView.$el.children().length, 1)
 		})
 
 		it('must change the order when indexes changed', function () {
-			assert($(dashboardView.$el.children()[0]).index() == 0)
-			assert($(dashboardView.$el.children()[1]).index() == 1)
-			assert(dashboard.get("items").models[0].get("ord") == 0)
-			assert(dashboard.get("items").models[1].get("ord") == 1)
+			assert.equal($(dashboardView.$el.children()[0]).index(), 0)
+			assert.equal($(dashboardView.$el.children()[1]).index(), 1)
+			assert.equal(dashboard.get("items").models[0].get("ord"), 0)
+			assert.equal(dashboard.get("items").models[1].get("ord"), 1)
 
 			//Simulate jQuery's sortable, which triggers 'drop'-event when dragged to another place
 			$(dashboardView.$el.children()[0]).insertAfter(dashboardView.$el.children()[1])
 			$(dashboardView.$el.children()[0]).trigger('drop')
 
-			assert($(dashboardView.$el.children()[0]).index() == 0)
-			assert($(dashboardView.$el.children()[1]).index() == 1)
+			assert.equal($(dashboardView.$el.children()[0]).index(), 0)
+			assert.equal($(dashboardView.$el.children()[1]).index(), 1)
 			//Ords changed
-			assert(dashboard.get("items").models[0].get("ord") == 1)
-			assert(dashboard.get("items").models[1].get("ord") == 0)
+			assert.equal(dashboard.get("items").models[0].get("ord"), 1)
+			assert.equal(dashboard.get("items").models[1].get("ord"), 0)
 		})
 
 		it('must change the name of a dashboarditem from input', function () {
@@ -160,7 +160,7 @@ describe('dashboard-editor', function() {
 			$(dashboardView.$el.children()[0]).find(".name-input").val("test-name")
 			$(dashboardView.$el.children()[0]).find(".btn.close-edit").click()
 			//should change the dashboarditem's title
-			assert(dashboard.get("items").models[0].get("title") == "test-name")
+			assert.equal(dashboard.get("items").models[0].get("title"), "test-name")
 		})
 
 		it('must also edit the title by clicking titlebar and blurring', function () {
@@ -176,7 +176,7 @@ describe('dashboard-editor', function() {
 			$($(dashboardView.$el.children()[0]).find(".name-input")).trigger("focusout")
 			assert(!($(dashboardView.$el.children()[0]).hasClass("editing")))
 			//should change the dashboarditem's title
-			assert(dashboard.get("items").models[0].get("title") == "test-name")
+			assert.equal(dashboard.get("items").models[0].get("title"), "test-name")
 		})
 
 		it('must also work with enter', function () {
@@ -217,10 +217,6 @@ describe('dashboard-editor', function() {
 	})
 
 	describe("Sidebar", function() {
-
-		beforeEach(function() {
-				
-		})
 
 		it('must render runningsignalpath-elements', function() {
 			assert($("#sidebar-view").find(".runningsignalpath").length == 4)
@@ -310,19 +306,19 @@ describe('dashboard-editor', function() {
 		})
 
 		it('must change the name of the dashboard by name-input with clicking save', function () {
-			assert(dashboard.get("name") == "Test")
+			assert.equal(dashboard.get("name"), "Test")
 			$("input.dashboard-name").val("changed-name")
 
 			//click save button
 			$("#sidebar-view .save-button").click()
 
 			//Dashboard name should have changed
-			assert(dashboard.get("name") == "changed-name")
+			assert.equal(dashboard.get("name"), "changed-name")
 		})
 
 		it('must trigger "resize"-event for all dashboarditems when menuToggle is clicked', function (done) {
-			assert($(".streamr-widget").length == 2)
-			assert(dashboardView.$el.children().length == 2)
+			assert.equal($(".streamr-widget").length, 2)
+			assert.equal(dashboardView.$el.children().length, 2)
 
 			var counter = 0
 			$(".streamr-widget").on('resize', function() {
@@ -336,7 +332,7 @@ describe('dashboard-editor', function() {
 		})
 
 		it('must add the class "stopped" for the runningsignalpaths which have state:stopped', function() {
-			assert($("#sidebar-view").find(".runningsignalpath").length == 4)
+			assert.equal($("#sidebar-view").find(".runningsignalpath").length, 4)
 			assert(!($($("#sidebar-view").find(".runningsignalpath")[0]).hasClass("stopped")))
 			assert(!($($("#sidebar-view").find(".runningsignalpath")[1]).hasClass("stopped")))
 			assert($($("#sidebar-view").find(".runningsignalpath")[2]).hasClass("stopped"))
