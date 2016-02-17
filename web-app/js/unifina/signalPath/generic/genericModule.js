@@ -213,7 +213,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	    		if (names && names.length>0) {
 	    			txt += "<h3>"+title+"</h3>";
 		    		var $t = $("<table></table>");
-		    		$(names).each(function(i,n) {
+				$(names).each(function(i,n) {
 		    			$t.append("<tr><td>"+n+"</td><td>"+valMap[n]+"</td></tr>");
 		    		});
 		    		txt += $t[0].outerHTML;
