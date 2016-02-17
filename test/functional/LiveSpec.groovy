@@ -158,6 +158,7 @@ public class LiveSpec extends LoginTester1Spec {
 			}
 
 		when: "stop button is clicked"
+			noNotificationsVisible()
 			runRealtimeButton.click()
 		then: "confirmation is shown"
 			waitForConfirmation(".stop-confirmation-dialog")
