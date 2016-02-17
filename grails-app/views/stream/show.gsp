@@ -35,7 +35,7 @@
 					</div>
 					<div class="panel-body">
 						<g:if test="${shareable}">
-							<button class="btn share-button" onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
+							<ui:shareButton url="${createLink(uri: "/api/v1/streams/" + stream.uuid)}" name="Stream ${stream.name}"> Share </ui:shareButton>
 						</g:if>
 
 						<ui:labeled label="${message(code:"stream.name.label")}">

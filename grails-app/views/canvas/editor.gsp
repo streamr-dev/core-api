@@ -17,7 +17,6 @@
 		<r:require module="touchpunch"/>
 		<r:require module="detect-timezone"/>
 		<r:require module="canvas-controls"/>
-		<r:require module="sharing-dialog"/>
 
 		<r:script>
 
@@ -381,7 +380,7 @@ $(document).unload(function () {
 			</div>
 
 			<div class="menu-content">
-				<button id="share-button" class="btn btn-block share-button" onclick="sharePopup($(this).data('url'), SignalPath.getName())" disabled="disabled"> Share </button>
+				<ui:shareButton id="share-button" class="btn-block" name="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
 			</div>
 
 		</div> <!-- / #main-menu-inner -->

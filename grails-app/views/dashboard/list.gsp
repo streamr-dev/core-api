@@ -39,7 +39,7 @@
 					            <ui:td>
 									${dashboard.lastUpdated.format("yyyy-MM-dd")}
 									<g:if test="${shareable.contains(dashboard)}">
-										<button class="btn share-button-20px" onclick="sharePopup('${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}', 'Dashboard ${dashboard.name}')"></button>
+										<ui:shareButton class="btn-end-of-row" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" name="Dashboard ${dashboard.name}" />
 									</g:if>
 								</ui:td>
 				            </ui:tr>	            	

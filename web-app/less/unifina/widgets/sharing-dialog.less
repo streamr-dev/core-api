@@ -1,14 +1,19 @@
-/** Compact and discrete form, can be used in lists etc. */
-.share-button-20px {
-  &:before {
-    font-family: FontAwesome;
-    content: "+\f007";
+.share-button {
+  /** plus sign of the plus-guy icon */
+  .superscript {
+    vertical-align: super;
+    font-size: x-small;
+    line-height: 0;
   }
-  float: right;
-  padding-top: 0;
-  height: 20px;
-  padding-left: 4px;
-  padding-right: 7px;
+
+  /** Compact and discrete form, can be used in lists etc. */
+  &.btn-end-of-row {
+    float: right;
+    padding-top: 0;
+    height: 20px;
+    padding-left: 4px;
+    padding-right: 7px;
+  }
 }
 
 /** @see sharing-dialog.js */

@@ -294,6 +294,32 @@ public class UiTagLib {
 	}
 
 	/**
+	 * Renders a button that opens a sharePopup (sharing-dialog.js)
+	 * Remember to add <r:require module="sharing-dialog"/> to <HEAD>!
+	 * @body is button label, just like HTML buttons
+	 * @attr url to the resource to be shared; read from data-url HTML attribute if url and getUrl omitted
+	 * @attr getUrl javascript command that returns the url to the resource
+	 * @attr name of the resource shown in the sharePopup dialog, generated if omitted
+	 */
+	def shareButton = {attrs, body->
+		def extraClass = attrs.remove("class") ?: ""
+		def extraOnClick = attrs.remove("onclick") ?: ""
+		def name = attrs.remove("name") ?: ""	// generated in sharePopup if omitted
+		def url = attrs.remove("url")
+		def urlGetter = attrs.remove("getUrl")
+		def resourceUrl = url ? '"'+url+'"' : (urlGetter ?: '$(this).data("url")')
+
+		out << "<button class='btn share-button $extraClass' "
+		out << "onclick='$extraOnClick;sharePopup($resourceUrl, \"$name\")' "
+		outputAttributes(attrs, out)
+		out << "><span class='superscript'>+</span><span class='fa fa-user'></span>" << body() << "</button>"
+
+		// http://stackoverflow.com/questions/33461034/call-grails-2-rrequire-module-from-a-taglib
+		// should be safe, ResourceTagLib.declareModuleRequiredByPage won't add it second time
+		out << r.require([modules: "sharing-dialog"])
+	}
+
+	/**
 	 * Dump out attributes in HTML compliant fashion.
 	 */
 	@CompileStatic
