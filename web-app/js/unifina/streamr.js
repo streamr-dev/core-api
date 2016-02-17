@@ -3,7 +3,12 @@ if (!Streamr) {
 	var Streamr = {}
 }
 
-$.pnotify.defaults.history = false;
+$.pnotify.defaults.history = false
+$.pnotify.defaults.styling = "fontawesome"
+$.pnotify.defaults.icon = false
+$.pnotify.defaults.closer = true
+$.pnotify.defaults.sticker = false
+$.pnotify.defaults.closer_hover = false
 
 Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController
