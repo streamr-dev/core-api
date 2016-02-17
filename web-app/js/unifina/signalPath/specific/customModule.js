@@ -110,7 +110,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
     +				'<button class="close-btn btn btn-default">Close</button>'
     +			'</div>'
     +   	'</div>'
-	
+
+
 	function createDebugWindow() {
 		if (debug==null) {
 			debug = $(debugWindow);
@@ -188,9 +189,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		clearModule()
 	}
 
-	var superClose = pub.close
-	pub.close = function(){
-		superClose()
+	var super_onClose = pub.onClose;
+	pub.onClose = function() {
+		if(super_onClose)
+			super_onClose()
 		clearModule()
 	}
 
