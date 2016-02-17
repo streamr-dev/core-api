@@ -1,11 +1,8 @@
 package com.unifina.service
 
-import grails.gorm.DetachedCriteria
-import grails.orm.HibernateCriteriaBuilder
 import org.apache.log4j.Logger
 
 import com.unifina.domain.security.SecUser
-import org.hibernate.SessionFactory
 import org.hibernate.proxy.HibernateProxyHelper
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -27,7 +24,7 @@ import java.security.AccessControlException
  * 			-> following is supported for both: grant, revoke, systemGrant, systemRevoke, getPermissionsTo
  * 		- combinations of read/write/share (RWS) should be restricted, e.g. to disallow write without read?
  * 			=> alsoRevoke, alsoGrant
- * 			TODO: discuss... current implementation with alsoRevoke but no alsoGrant is conservative but lopsided
+ * 			TODO: discuss... current implementation with alsoRevoke but no alsoGrant is conservative but unsymmetric
  */
 class PermissionService {
 
@@ -133,9 +130,13 @@ class PermissionService {
 		// Generated non-saved "dummy permissions" for owner
 		if (resource.hasProperty("user")) {
 			Permission.Operation.enumConstants.each {
-				def p = new Permission(id: null, user: resource.user, clazz: resourceClass.name, operation: it)
-				p[idProp] = resource.id
-				perms << p
+				perms << new Permission(
+					id: null,
+					user: resource.user,
+					clazz: resourceClass.name,
+					operation: it,
+					(idProp): resource.id
+				)
 			}
 		}
 		return perms
@@ -159,11 +160,7 @@ class PermissionService {
 		// or-clause in criteria query should become false, and nothing should be returned
 		if (!hasOwner && resourceIds.size() == 0) { return [] }
 
-		// resourceClass.withCriteria can't be found, dynamic Groovy methods only exist for named Classes
-		// DetachedCriteria won't work with maxResults and firstResult (= offset)
-		// see http://grails.github.io/grails-data-mapping/latest/api/grails/orm/HibernateCriteriaBuilder.html
-		def sessionFactory = (SessionFactory)grailsApplication.mainContext.getBean("sessionFactory")
-		new HibernateCriteriaBuilder(resourceClass, sessionFactory).list {
+		resourceClass.withCriteria {
 			or {
 				// resources that specify an "owner" automatically give that user all access rights
 				if (hasOwner) {
@@ -198,12 +195,12 @@ class PermissionService {
 			throw new IllegalArgumentException("Can't grant permissions for owner of $resource!")
 		}
 
-		// TODO CORE-498: check grantor himself has the right he's granting (e.g. "write")
-		if (canShare(grantor, resource)) {
-			return systemGrant(target, resource, operation)
-		} else {
-			accessDeniedHandler(grantor, resource, logIfDenied)
+		// TODO CORE-498: check grantor himself has the right he's granting? (e.g. "write")
+		if (!canShare(grantor, resource)) {
+			throwAccessControlException(grantor, resource, logIfDenied)
 		}
+
+		return systemGrant(target, resource, operation)
 	}
 
 	/**
@@ -221,10 +218,12 @@ class PermissionService {
 		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
 		String idProp = getIdPropertyName(resourceClass)
 
-		def p = new Permission(clazz: resourceClass.name, operation: operation)
-		p[idProp] = resource.id
-		p[userProp] = target
-		p.save(flush: true, failOnError: true)
+		return new Permission(
+			clazz: resourceClass.name,
+			operation: operation,
+			(idProp): resource.id,
+			(userProp): target
+		).save(flush: true, failOnError: true)
 	}
 
 	/**
@@ -240,11 +239,11 @@ class PermissionService {
 			throw new AccessControlException("Can't revoke owner's access to $resource!")
 		}
 
-		if (canShare(revoker, resource)) {
-			return systemRevoke(target, resource, operation)
-		} else {
-			accessDeniedHandler(revoker, resource, logIfDenied)
+		if (!canShare(revoker, resource)) {
+			throwAccessControlException(revoker, resource, logIfDenied)
 		}
+
+		return systemRevoke(target, resource, operation)
 	}
 
 	/**
@@ -275,17 +274,15 @@ class PermissionService {
 		String idProp = getIdPropertyName(resourceClass)
 		def resourceId = p[idProp]
 
-		if (hasPermission(revoker, resourceClass, resourceId, Operation.SHARE)) {
-			return systemRevoke(p)
-		} else {
-			// fall back to loading the resource and test ownership
+		// if revoker has share permission, no need to load resource
+		if (!hasPermission(revoker, resourceClass, resourceId, Operation.SHARE)) {
+			// fall back to loading the resource to test ownership
 			def resource = resourceClass.get(resourceId)
-			if (isOwner(revoker, resource)) {
-				return systemRevoke(p)
-			} else {
-				accessDeniedHandler(revoker, resource, logIfDenied)
+			if (!isOwner(revoker, resource)) {
+				throwAccessControlException(revoker, resource, logIfDenied)
 			}
 		}
+		return systemRevoke(p)
 	}
 
 	/**
@@ -312,7 +309,7 @@ class PermissionService {
 		return ret
 	}
 
-	private accessDeniedHandler(SecUser violator, resource, loggingEnabled) {
+	private throwAccessControlException(SecUser violator, resource, loggingEnabled) {
 		if (loggingEnabled) {
 			log.warn("${violator?.username}(id ${violator?.id}) tried to modify sharing of $resource without SHARE Permission!")
 			if (resource?.hasProperty("user")) {
