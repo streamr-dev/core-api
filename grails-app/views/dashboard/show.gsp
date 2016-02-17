@@ -29,7 +29,7 @@
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 					
-					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false}, function(canvases) {
+					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false, sort:'dateCreated', order:'desc'}, function(canvases) {
 						var sidebar = new SidebarView({
 							edit: ${params.edit ? "true" : "undefined"},
 							dashboard: dashboard, 

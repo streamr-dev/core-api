@@ -28,8 +28,8 @@ class DashboardController {
 	static defaultAction = "list"
 	
 	def list() {
-		def dashboards = Dashboard.findAllByUser(springSecurityService.currentUser)
-		return [dashboards:dashboards]
+		def dashboards = Dashboard.findAllByUser(springSecurityService.currentUser, [sort: "dateCreated", order: "desc"])
+		return [dashboards:dashboards, user: springSecurityService.currentUser]
 	}
 	
 	def create() {

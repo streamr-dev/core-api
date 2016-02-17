@@ -19,7 +19,7 @@ var ModuleList = Backbone.Collection.extend({
 
 var ModuleView = Backbone.View.extend({
 	tagName: "li",
-	className: "uichannel",	
+	className: "module",
 	template: _.template($("#module-template").html()),
 
 	events: {
@@ -75,11 +75,11 @@ var CanvasList = Backbone.Collection.extend({
 
 var CanvasView = Backbone.View.extend({
 	tagName: "li",
-	className: "runningsignalpath mm-dropdown mm-dropdown-root",
-	template: _.template($("#rsp-template").html()),
+	className: "canvas mm-dropdown mm-dropdown-root",
+	template: _.template($("#canvas-template").html()),
 
 	events: {
-		"click .rsp-title" : "openClose"
+		"click .canvas-title" : "openClose"
 	},
 	
 	initialize: function (){
@@ -308,6 +308,14 @@ var SidebarView = Backbone.View.extend({
 		var _this = this
 
 		this.el = options.el
+
+		var requiredOptions = ['dashboard', 'menuToggle', 'canvases']
+
+		requiredOptions.forEach(function(requiredOption) {
+			if (options[requiredOption] === undefined)
+				throw "Required option is missing: "+requiredOption
+		})
+
 		this.dashboard = options.dashboard
 		this.menuToggle = options.menuToggle
 		this.canvases = new CanvasList(options.canvases)

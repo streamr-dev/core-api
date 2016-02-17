@@ -26,7 +26,7 @@ class CanvasApiController {
 		Boolean adhoc = params.boolean("adhoc")
 		Canvas.State state = Canvas.State.fromValue(params.state)
 
-		def canvases = canvasService.findAllBy(user, name, adhoc, state)
+		def canvases = canvasService.findAllBy(user, name, adhoc, state, params.sort ?: "dateCreated", params.order ?: "asc")
 		render(canvases*.toMap() as JSON)
 	}
 

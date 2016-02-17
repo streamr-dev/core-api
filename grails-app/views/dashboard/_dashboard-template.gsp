@@ -4,7 +4,7 @@
         <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="Dashboard Name" value="{{ name }}" />
     </div>
     <ul class="navigation" id="rsp-list">
-        <li class="rsp-title">
+        <li class="canvas-title">
             <label>Live Canvases</label>
         </li>
     </ul>
@@ -16,8 +16,8 @@
         </form>
     </div>
 </script>
-<script id="rsp-template" type="text/template">
-    <a class="rsp-title" title="{{state != 'running' ? state : ''}}">
+<script id="canvas-template" type="text/template">
+    <a class="canvas-title" title="{{state != 'running' ? state : ''}}">
         <span class="mm-text mmc-dropdown-delay animated fadeIn">{{ name }}</span>
         <span class="howmanychecked badge badge-primary"></span>
     </a>

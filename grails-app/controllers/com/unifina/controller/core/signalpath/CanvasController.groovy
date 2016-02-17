@@ -39,6 +39,7 @@ class CanvasController {
 			if (params.state) {
 				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})
 			}
+			order("dateCreated", "desc")
 		}
 		[canvases: canvases, user:springSecurityService.currentUser, stateFilter: params.state ? params.list("state") : []]
 	}

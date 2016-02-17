@@ -23,7 +23,7 @@ class CanvasService {
 	def grailsApplication
 	def signalPathService
 
-	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter) {
+	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
 		def query = Canvas.where { user == currentUser }
 
 		if (nameFilter) {
@@ -42,7 +42,7 @@ class CanvasService {
 			}
 		}
 
-		return query.findAll()
+		return query.order(sort, order).findAll()
 	}
 
 
