@@ -32,8 +32,6 @@ class KafkaCollectTaskSpec extends Specification {
 	static byte CONTENT_TYPE_STRING = 11
 	
     def setup() {
-		BootService.mergeDefaultConfig(grailsApplication)
-		
 		defineBeans {
 			feedFileService(FeedFileService)
 		}
