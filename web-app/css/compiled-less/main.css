@@ -16604,9 +16604,6 @@ body.stream-show .history-start-date,
 body.stream-show .history-end-date {
   font-weight: bold;
 }
-body.stream-show .share-button {
-  float: right;
-}
 body.module-list {
   position: relative;
 }

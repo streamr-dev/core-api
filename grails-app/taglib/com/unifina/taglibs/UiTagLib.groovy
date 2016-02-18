@@ -290,6 +290,7 @@ public class UiTagLib {
 	 * @attr name of the resource shown in the sharePopup dialog, generated if omitted
 	 */
 	def shareButton = {attrs, body->
+		def type = attrs.remove("type") ?: "button"
 		def extraClass = attrs.remove("class") ?: ""
 		def extraOnClick = attrs.remove("onclick") ?: ""
 		def name = attrs.remove("name") ?: ""	// generated in sharePopup if omitted
@@ -297,10 +298,20 @@ public class UiTagLib {
 		def urlGetter = attrs.remove("getUrl")
 		def resourceUrl = url ? '"'+url+'"' : (urlGetter ?: '$(this).data("url")')
 
-		out << "<button class='btn share-button $extraClass' "
-		out << "onclick='$extraOnClick;sharePopup($resourceUrl, \"$name\")' "
+		def open, close
+		if (type == "button") {
+			open = "<button class='btn share-button $extraClass' "
+			close = " </button>"
+		} else if (type == "link") {
+			open = "<a href='#' class='share-button $extraClass' "
+			close = " </a>"
+		} else {
+			throw new IllegalArgumentException("Unknown 'type' for shareButton: $type")
+		}
+
+		out << open << "onclick='$extraOnClick;sharePopup($resourceUrl, \"$name\")' "
 		outputAttributes(attrs, out)
-		out << "><span class='superscript'>+</span><span class='fa fa-user'></span>" << body() << "</button>"
+		out << "><span class='superscript'>+</span><i class='fa fa-user'></i> " << body() << close
 
 		// http://stackoverflow.com/questions/33461034/call-grails-2-rrequire-module-from-a-taglib
 		// should be safe, ResourceTagLib.declareModuleRequiredByPage won't add it second time

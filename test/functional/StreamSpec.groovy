@@ -106,7 +106,12 @@ class StreamSpec extends LoginTester1Spec {
 			waitFor { at StreamShowPage }
 			$(".alert-info").displayed
 			$("#stream-fields tbody tr").size() == 2
-			
+
+		when: "open menu"
+			streamMenuButton.click()
+		then: "delete in menu"
+			waitFor { deleteStreamButton.displayed }
+
 		when: "delete stream button is clicked"
 			deleteStreamButton.click()
 		then: "must show confirmation"
