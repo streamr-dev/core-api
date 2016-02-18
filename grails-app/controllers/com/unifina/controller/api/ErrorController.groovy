@@ -1,8 +1,8 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiError
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
-import com.unifina.api.ApiError
 import com.unifina.api.ValidationException
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.security.StreamrApi

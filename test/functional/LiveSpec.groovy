@@ -1,19 +1,16 @@
-import core.pages.CanvasPage
-import grails.test.mixin.TestFor
-import com.unifina.controller.core.signalpath.LiveController
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.BootService
 import com.unifina.utils.MapTraversal
-
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
+import grails.test.mixin.TestFor
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-@TestFor(LiveController) // This makes grailsApplication available
+@TestFor(CanvasController) // This makes grailsApplication available
 public class LiveSpec extends LoginTester1Spec {
 
 	static Timer timer
@@ -161,6 +158,7 @@ public class LiveSpec extends LoginTester1Spec {
 			}
 
 		when: "stop button is clicked"
+			noNotificationsVisible()
 			runRealtimeButton.click()
 		then: "confirmation is shown"
 			waitForConfirmation(".stop-confirmation-dialog")
@@ -174,6 +172,7 @@ public class LiveSpec extends LoginTester1Spec {
 			}
 
 		when: "canvas is resumed"
+			noNotificationsVisible()
 			runRealtimeButton.click()
 		then: "info alert and stop button must be displayed"
 			waitFor { $(".alert.alert-success").displayed }

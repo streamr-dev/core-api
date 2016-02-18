@@ -72,7 +72,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
 	}
 
-	def "should be able to start a canvas, send data to it via Kafka, and received expected processed output values"() {
+	def "should be able to start a canvas, send data to it via Kafka, and receive expected processed output values"() {
 		when:
 		// Start canvas
 		canvasService.start(canvas, true)

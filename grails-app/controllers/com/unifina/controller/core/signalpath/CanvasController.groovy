@@ -39,6 +39,7 @@ class CanvasController {
 			if (params.state) {
 				inList "state", params.list("state").collect { String param -> Canvas.State.fromValue(param) }
 			}
+			order "dateCreated", "desc"
 		}
 		List<Canvas> readableCanvases = permissionService.getAll(Canvas, user, Operation.READ, criteriaFilter)
 		List<Canvas> shareableCanvases = permissionService.getAll(Canvas, user, Operation.SHARE, criteriaFilter)

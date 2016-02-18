@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
@@ -9,7 +8,6 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.UiChannel
 import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
 import grails.plugin.springsecurity.SpringSecurityService
@@ -366,7 +364,7 @@ class CanvasServiceSpec extends Specification {
 		service.stop(myFirstCanvas, me)
 
 		then:
-		1 * signalPathService.stopRemote(myFirstCanvas, me) >> new RuntimeResponse(true, [:])
+		1 * signalPathService.stopRemote(myFirstCanvas, me) >> [:]
 		0 * signalPathService._
 
 	}
@@ -376,7 +374,7 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.RUNNING
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> new RuntimeResponse(false, [:])
+		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
 
 		when:
 		service.stop(myFirstCanvas, me)
@@ -390,7 +388,7 @@ class CanvasServiceSpec extends Specification {
 		service.signalPathService = signalPathService
 		myFirstCanvas.state = Canvas.State.STOPPED
 
-		signalPathService.stopRemote(myFirstCanvas, me) >> new RuntimeResponse(false, [:])
+		signalPathService.stopRemote(myFirstCanvas, me) >> { throw new CanvasUnreachableException("") }
 
 		when:
 		service.stop(myFirstCanvas, me)

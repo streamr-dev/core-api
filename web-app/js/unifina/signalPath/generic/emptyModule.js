@@ -305,8 +305,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.renderHelp = renderHelp;
 	
 	prot.getEmbedCode = function() {
-		if (prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
-			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" channel='"+prot.jsonData.uiChannel.id+"' /&gt;"
+		if (SignalPath.isSaved() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
+			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" canvas='"+SignalPath.getId()+"' module='"+prot.getHash()+"' /&gt;"
 		}
 		else return undefined;
 	}

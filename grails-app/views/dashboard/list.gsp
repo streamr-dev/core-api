@@ -2,7 +2,6 @@
 <head>
     <meta name="layout" content="main" />
     <title><g:message code="dashboard.list.label"/></title>
-	<r:require module="sharing-dialog"/>
 </head>
 
 <body class="dashboard">
@@ -35,14 +34,13 @@
 					    <g:each in="${dashboards}" status="i" var="dashboard">
 					    	<ui:tr title="Show or edit dashboard" link="${createLink(action: 'show', id:dashboard.id) }" data-id="${dashboard.id}">
 					            <ui:td>${dashboard.name}</ui:td>					        
-					           	<ui:td>${dashboard.dateCreated.format("yyyy-MM-dd")}</ui:td>
-					            <ui:td>
-									${dashboard.lastUpdated.format("yyyy-MM-dd")}
+					           	<ui:td><g:formatDate date="${dashboard.dateCreated}" formatName="default.dateOnly.format" timeZone="${user.timezone}" /></ui:td>
+					            <ui:td><g:formatDate date="${dashboard.lastUpdated}" formatName="default.dateOnly.format" timeZone="${user.timezone}" />
 									<g:if test="${shareable.contains(dashboard)}">
 										<ui:shareButton class="btn-end-of-row" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" name="Dashboard ${dashboard.name}" />
 									</g:if>
 								</ui:td>
-				            </ui:tr>	            	
+				            </ui:tr>
 						</g:each>
 					</ui:tbody>
 				</ui:table>

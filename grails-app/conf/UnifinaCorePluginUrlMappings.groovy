@@ -27,6 +27,9 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/canvases/$id/start"(controller: "canvasApi", action: "start")
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
+		"/api/v1/canvases/$id/request"(controller: "canvasApi", action: "request")
+		"/api/v1/canvases/$id/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
+		"/api/v1/canvases/$id/modules/$moduleId/request"(controller: "canvasApi", action: "request") // for internal use
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }

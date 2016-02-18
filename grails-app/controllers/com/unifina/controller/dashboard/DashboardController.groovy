@@ -30,6 +30,7 @@ class DashboardController {
 	static defaultAction = "list"
 	
 	def list() {
+		// TODO: order by dateCreated desc
 		def dashboards = permissionService.getAll(Dashboard, springSecurityService.currentUser)
 		def shareable = permissionService.getAll(Dashboard, springSecurityService.currentUser, Operation.SHARE)
 		return [dashboards:dashboards, shareable:shareable]
@@ -52,12 +53,14 @@ class DashboardController {
 		Map dashboardMap = [
 			id: dashboard.id,
 			name: dashboard.name,
-			items: dashboard.items.collect {item->
+			items: dashboard.items.collect {DashboardItem item->
 				[
 						id:item.id,
 						title: item.title,
 						ord:item.ord,
 						size:item.size,
+						canvas: item.uiChannel.canvas.id,
+						module: item.uiChannel.hash,
 						uiChannel: item.uiChannel.toMap()
 				]
 			}

@@ -82,6 +82,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 test {
+		 grails.resources.processing.enabled = false
 		 grails.resources.mappers.bundle.excludes = ['**/*.*']
 		 grails.resources.mappers.hashandcache.excludes = ['**/*.*']
 		 grails.resources.mappers.zip.excludes = ['**/*.*']
@@ -92,13 +93,12 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
 	 }
  }
- 
+
  environments {
 	 test {
 		 grails.reload.enabled = true
 		 disable.auto.recompile = false // Recompilation of Java Sources
 		 grails.gsp.enable.reload = true // Recompilation of GSPs
-		 grails.resources.processing.enabled = false
 	 }
  }
  
@@ -163,9 +163,19 @@ log4j = {
 	 }
  }
 
+/**
+ * Migration config
+ */
 grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
- 
+grails.plugin.databasemigration.updateOnStartContexts = ['default'] // a context needs to be specified, otherwise all changesets will run. changesets with no context will always run.
+
+environments {
+	test {
+		grails.plugin.databasemigration.updateOnStartContexts = ['test'] // changesets with no context will always run.
+	}
+}
+
 /**
  * API & CORS config
  */

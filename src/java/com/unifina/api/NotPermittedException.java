@@ -1,7 +1,5 @@
 package com.unifina.api;
 
-import java.util.Map;
-
 public class NotPermittedException extends ApiException {
 	/** User whose access was denied */
 	private String user;

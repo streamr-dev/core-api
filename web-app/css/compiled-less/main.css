@@ -17168,11 +17168,11 @@ body.dashboard-show.editing .stat-row .stat-cell {
 body.dashboard-show.editing .stat-row .titlebar {
   display: none;
 }
-body.dashboard-show.selected-theme #main-menu .navigation .uichannel.checked a {
+body.dashboard-show.selected-theme #main-menu .navigation .module.checked a {
   color: #e95b15;
 }
-body.dashboard-show #main-menu .navigation .uichannel.checked .menu-icon.fa-square,
-body.dashboard-show #main-menu .navigation .uichannel:not(.checked) .menu-icon.fa-check-square {
+body.dashboard-show #main-menu .navigation .module.checked .menu-icon.fa-square,
+body.dashboard-show #main-menu .navigation .module:not(.checked) .menu-icon.fa-check-square {
   display: none;
 }
 body.dashboard-show #main-menu .mm-dropdown > ul > li > a.ui-title {
@@ -17182,10 +17182,10 @@ body.dashboard-show #sidebar-view button.delete-button {
   margin-top: 5px;
   margin-bottom: 200px;
 }
-body.dashboard-show #sidebar-view .runningsignalpath.stopped .rsp-title {
+body.dashboard-show #sidebar-view .canvas.stopped .canvas-title {
   color: #666;
 }
-body.dashboard-show #sidebar-view .rsp-title {
+body.dashboard-show #sidebar-view .canvas-title {
   margin-left: 20px;
   cursor: pointer;
 }

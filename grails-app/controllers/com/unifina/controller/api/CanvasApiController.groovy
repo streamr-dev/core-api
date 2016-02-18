@@ -18,6 +18,7 @@ class CanvasApiController {
 	def springSecurityService
 	def grailsApplication
 	def permissionService
+	def signalPathService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
@@ -28,15 +29,13 @@ class CanvasApiController {
 		Boolean adhoc = params.boolean("adhoc")
 		Canvas.State state = Canvas.State.fromValue(params.state)
 
-		def canvases = canvasService.findAllBy(user, name, adhoc, state)
+		def canvases = canvasService.findAllBy(user, name, adhoc, state, params.sort ?: "dateCreated", params.order ?: "asc")
 		render(canvases*.toMap() as JSON)
 	}
 
-	// TODO: /canvases/{id}/uiChannels (webcomponent?)
-
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
-		getCanvasWithAccess(id, Operation.READ) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
 			Map result = canvasService.reconstruct(canvas)
 			canvas.json = result as JSON
 			render canvas.toMap() as JSON
@@ -51,7 +50,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def update(String id) {
-		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -63,7 +62,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -74,7 +73,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def start(String id) {
-		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot start common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -87,21 +86,51 @@ class CanvasApiController {
 	@StreamrApi
 	@NotTransactional
 	def stop(String id) {
-		getCanvasWithAccess(id, Operation.WRITE) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				// Updates canvas in another thread, so canvas needs to be refreshed
 				canvasService.stop(canvas, request.apiUser)
-
-				try {
-					// Adhoc canvases are deleted on stop, in which case refresh() will fail with UnresolvableObjectException
+				if (canvas.adhoc) {
+					render(status: 204) // Adhoc canvases are deleted on stop.
+				} else {
 					canvas.refresh()
 					render canvas.toMap() as JSON
-				} catch (UnresolvableObjectException) {
-					render(status: 204)
 				}
 			}
+		}
+	}
+
+	/**
+	 * Gets the json of a single module on a canvas
+	 * @param id
+	 * @param moduleId
+     * @return
+     */
+	@StreamrApi(requiresAuthentication = false)
+	def module(String id, Integer moduleId) {
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
+			Map canvasMap = canvas.toMap()
+			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId.toString() }
+
+			if (!moduleMap) {
+				throw new ApiException(404, "MODULE_NOT_FOUND", "Module $moduleId not found on canvas $id")
+			} else {
+				render moduleMap as JSON
+			}
+
+		}
+	}
+
+	@StreamrApi(requiresAuthentication = false)
+	def request(String id, Integer moduleId) {
+		getAuthorizedCanvas(id, Operation.READ) {Canvas canvas ->
+			def msg = request.JSON
+			Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, params.local ? true : false)
+
+			log.info("request: responding with $response")
+			render response as JSON
 		}
 	}
 
@@ -116,7 +145,7 @@ class CanvasApiController {
 		return command
 	}
 
-	private void getCanvasWithAccess(String id, Operation op, Closure successHandler) {
+	private void getAuthorizedCanvas(String id, Operation op, Closure successHandler) {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
 			render(status: 404, text: [error: "Canvas (id=$id) not found.", code: "NOT_FOUND"] as JSON)
