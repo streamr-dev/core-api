@@ -128,64 +128,19 @@ class SignalPathService {
 		
 	}
 	
-	/**
-	 * Creates Canvas domain objects into the database with initial state "starting".
-	 * The Canvas can be subsequently started by calling startLocal() or startRemote().
-	 * @param signalPathData
-	 * @param user
-	 * @param adhoc
-	 * @param resetUiChannelIds
-	 * @return
-	 */
-	@Transactional
-	public Canvas createRunningCanvas(Map sp, SecUser user, boolean adhoc, boolean resetUiChannelIds) {
-		if (resetUiChannelIds) {
-			sp.uiChannel = [id:IdGenerator.get(), name: "Notifications"]
-			sp.modules.each {
-				if (it.uiChannel)
-					it.uiChannel.id = IdGenerator.get()
-			}
-		}
-		
-		Canvas canvas = new Canvas()
-		canvas.name = sp.name ?: "(unsaved canvas)"
-		canvas.user = user
-		canvas.json = (sp as JSON)
-		canvas.state = Canvas.State.RUNNING
-		canvas.adhoc = adhoc
-
-		UiChannel rspUi = new UiChannel()
-		rspUi.id = sp.uiChannel.id
-		canvas.addToUiChannels(rspUi)
-		
-		for (Map it : sp.modules) { 
-			if (it.uiChannel) {
-				UiChannel ui = new UiChannel()
-				ui.id = it.uiChannel.id
-				ui.hash = it.hash.toString()
-				ui.module = Module.load(it.id)
-				ui.name = it.uiChannel.name
-				
-				canvas.addToUiChannels(ui)
-			}
-		}
-		
-		canvas.save(flush:true, failOnError:true)
-		return canvas
-	}
-	
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
-		// TODO: UiChannels might not yet be flushed to database, in which case this will fail. (How is this possible?!) Can usually be repeated by running an empty canvas.
-		// Delayed-delete the topics in one hour
-		List<UiChannel> uiChannelIds = UiChannel.findAll { canvas.runner == runner.getRunnerId()}.collect {it.id}
-		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 
-		if (!uiChannelIds.isEmpty()) {
-			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiChannelIds])
+		def uiChannelIds = []
+
+		runner.signalPaths.each {
+			Canvas canvas = it.canvas.refresh()
+			canvas.uiChannels.each { uiChannelIds << it.id }
+			canvas.delete()
 		}
 
-		Canvas.executeUpdate("delete from Canvas c where c.runner = ?", [runner.getRunnerId()])
+		// Delayed-delete the topics in one hour
+		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -254,7 +209,20 @@ class SignalPathService {
 		runner.signalPaths.each {
 			it.canvas = canvas
 		}
+
 		String runnerId = runner.runnerId
+		canvas.runner = runnerId
+
+		// Use the link generator to get the protocol and port, but use network IP address
+		// as the host to get the address of this individual server
+		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
+		URL url = new URL(root)
+
+		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
+		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
+		canvas.state = Canvas.State.RUNNING
+
+		canvas.save()
 		
 		// Start the runner thread
 		runner.start()
@@ -264,19 +232,6 @@ class SignalPathService {
 		if (!runner.getRunning()) {
 			log.error("Timed out while waiting for runner $runnerId to start!")
 		}
-
-		canvas.runner = runnerId
-		canvas.state = Canvas.State.RUNNING
-		
-		// Use the link generator to get the protocol and port, but use network IP address
-		// as the host to get the address of this individual server
-		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
-		URL url = new URL(root)
-		
-		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
-		
-		canvas.save()
 	}
 
 	boolean stopLocal(Canvas canvas) {
