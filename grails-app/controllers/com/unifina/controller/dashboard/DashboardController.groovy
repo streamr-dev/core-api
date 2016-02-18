@@ -30,10 +30,10 @@ class DashboardController {
 	static defaultAction = "list"
 	
 	def list() {
-		// TODO: order by dateCreated desc
-		def dashboards = permissionService.getAll(Dashboard, springSecurityService.currentUser)
-		def shareable = permissionService.getAll(Dashboard, springSecurityService.currentUser, Operation.SHARE)
-		return [dashboards:dashboards, shareable:shareable]
+		def user = springSecurityService.currentUser
+		def dashboards = permissionService.getAll(Dashboard, user) { order "dateCreated", "desc" }
+		def shareable = permissionService.getAll(Dashboard, user, Operation.SHARE)
+		return [dashboards:dashboards, shareable:shareable, user:user]
 	}
 	
 	def create() {
