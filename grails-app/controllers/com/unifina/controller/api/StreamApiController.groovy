@@ -15,11 +15,11 @@ class StreamApiController {
 
 	@StreamrApi
 	def index() {
-		def streams = permissionService.getAll(Stream, request.apiUser, Operation.READ, {
+		def streams = permissionService.getAll(Stream, request.apiUser) {
 			if (params.name) {
 				eq "name", params.name
 			}
-		})
+		}
 		render(streams*.toMap() as JSON)
 	}
 
