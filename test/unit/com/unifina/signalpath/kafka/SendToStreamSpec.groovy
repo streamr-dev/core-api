@@ -22,6 +22,8 @@ class SendToStreamSpec extends Specification {
 
 	static class FakePermissionService extends PermissionService {
 		@Override boolean canRead(SecUser user, resource) { return true }
+		@Override boolean canWrite(SecUser user, resource) { return true }
+		@Override boolean canShare(SecUser user, resource) { return true }
 	}
 
 	static class FakeKafkaService extends KafkaService {

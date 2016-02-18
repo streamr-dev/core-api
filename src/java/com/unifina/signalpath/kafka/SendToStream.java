@@ -83,7 +83,7 @@ public class SendToStream extends AbstractSignalPathModule {
 			return;
 		
 		// Check access to this Stream
-		if (permissionService.canRead(globals.getUser(), stream)) {
+		if (permissionService.canWrite(globals.getUser(), stream)) {
 			authenticatedStream = stream;
 		} else {
 			throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
