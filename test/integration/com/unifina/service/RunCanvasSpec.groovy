@@ -80,7 +80,10 @@ class RunCanvasSpec extends IntegrationSpec {
 		def results = (1..3).collect { round ->
 
 			// Start a fresh canvas
-			if (round > 1) { canvas = canvasService.createNew(saveCanvasCommand, user) }
+			if (round > 1) {
+				canvasService.stop(canvas, user)
+				canvas = canvasService.createNew(saveCanvasCommand, user)
+			}
 			canvasService.start(canvas, true)
 
 			// Produce data
@@ -102,5 +105,8 @@ class RunCanvasSpec extends IntegrationSpec {
 			finalState[2] == "[(out) Multiply.A*B: 0.0]"
 			finalState[3] == "[(out) Constant.out: null]"
 		}
+
+		cleanup:
+		canvasService.stop(canvas, user)
 	}
 }
