@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 public class TokenAuthenticator {
 	private final UnifinaSecurityService unifinaSecurityService;
 	private boolean lastAuthenticationMalformed = false;
+	private boolean apiKeyPresent = false;
 
 	public TokenAuthenticator(UnifinaSecurityService unifinaSecurityService) {
 		this.unifinaSecurityService = unifinaSecurityService;
@@ -15,11 +16,16 @@ public class TokenAuthenticator {
 
 	public SecUser authenticate(HttpServletRequest request) {
 		String apiKey = parseAuthorizationHeader(request.getHeader("Authorization"));
-		return apiKey == null ? null : unifinaSecurityService.getUserByApiKey(apiKey);
+		apiKeyPresent = apiKey != null;
+		return apiKeyPresent ? unifinaSecurityService.getUserByApiKey(apiKey) : null;
 	}
 
 	public boolean lastAuthenticationMalformed() {
 		return lastAuthenticationMalformed;
+	}
+
+	public boolean isApiKeyPresent() {
+		return apiKeyPresent;
 	}
 
 	/**
