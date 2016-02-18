@@ -21,10 +21,10 @@ import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.commons.logging.LogFactory
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import spock.util.concurrent.PollingConditions
 
 import java.nio.charset.Charset
 
-import static com.unifina.TestHelper.waitFor
 import static com.unifina.service.CanvasTestHelper.*
 
 class SerializeCanvasSpec extends IntegrationSpec {
@@ -77,6 +77,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 	}
 
 	void "(de)serialization works correctly"() {
+		def conditions = new PollingConditions()
 		def savedStructure = readCanvasJsonAndReplaceStreamId(getClass(), SIGNAL_PATH_FILE, stream)
 		def canvas = createAndRun(savedStructure)
 
@@ -88,7 +89,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			sleep(25)
 
 			// Synchronize with thread
-			waitFor(true) { modules(canvasService, canvas)[3].inputs[0].value == i }
+			conditions.within(10) { assert modules(canvasService, canvas)[3].inputs[0].value == i }
 
 			// Log states of modules' outputs
 			log.info(modules(canvasService, canvas)*.outputs*.toString().join(" "))
