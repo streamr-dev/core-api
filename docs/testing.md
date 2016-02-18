@@ -95,8 +95,11 @@ def "it throws exception on foo"() {
 ```
 
 #### Testing threaded code
-Use `sleep` (not optimal) or some synchronization mechanics as discussed in
-<http://www.alexecollins.com/5-tips-unit-testing-threaded-code/>.````````
+
+You might want to checkout [Spock's concurrency helper](http://spockframework.github.io/spock/javadoc/1.0/spock/util/concurrent/package-frame.html).
+
+~~Use `sleep` (not optimal) or some synchronization mechanics as discussed in
+<http://www.alexecollins.com/5-tips-unit-testing-threaded-code/>.~~
 
 ### Gotchas and troubleshooting
 
