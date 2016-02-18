@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -147,8 +148,7 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -202,8 +202,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -220,8 +219,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -247,8 +245,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -261,8 +258,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -306,8 +302,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.start()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -335,8 +330,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.stop()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 

@@ -1,6 +1,8 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission.Operation
@@ -125,7 +127,7 @@ class CanvasApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def request(String id, Integer moduleId) {
-		getAuthorizedCanvas(id, Operation.READ) {Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
 			def msg = request.JSON
 			Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, params.local ? true : false)
 
@@ -148,9 +150,9 @@ class CanvasApiController {
 	private void getAuthorizedCanvas(String id, Operation op, Closure successHandler) {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
-			render(status: 404, text: [error: "Canvas (id=$id) not found.", code: "NOT_FOUND"] as JSON)
+			throw new NotFoundException("Canvas", id)
 		} else if (!permissionService.check(request.apiUser, canvas, op) && !(op == Operation.READ && canvas.example)) {
-			render(status: 403, text: [error: "Not authorized to ${op.id} Canvas (id=$id)", code: "FORBIDDEN", fault: "op", op: op.id] as JSON)
+			throw new NotPermittedException(request.apiUser?.username, "Canvas", id, op.id)
 		} else {
 			successHandler.call(canvas)
 		}
