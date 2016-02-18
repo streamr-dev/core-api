@@ -21,6 +21,7 @@ import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.NetworkInterfaceUtils
 import grails.converters.JSON
+import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
@@ -254,7 +255,8 @@ class SignalPathService {
 			return false
 		}
 	}
-	
+
+	@NotTransactional
 	@CompileStatic
 	Map stopRemote(Canvas canvas, SecUser user) {
 		return runtimeRequest([type:"stopRequest"], canvas, null, user)
