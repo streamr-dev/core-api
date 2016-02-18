@@ -9,8 +9,8 @@ import com.unifina.feed.FeedFactory
 import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
+import spock.util.concurrent.PollingConditions
 
-import static com.unifina.TestHelper.*
 import static com.unifina.service.CanvasTestHelper.*
 
 /**
@@ -76,6 +76,7 @@ class RunCanvasSpec extends IntegrationSpec {
 
 	def "should be able to start a canvas, send data to it via Kafka, and receive expected processed output values"() {
 		when:
+		def conditions = new PollingConditions()
 		def results = (1..3).collect { round ->
 
 			// Start a fresh canvas
@@ -89,7 +90,7 @@ class RunCanvasSpec extends IntegrationSpec {
 			kafkaService.sendMessage(stream, stream.uuid, [numero: 0, areWeDoneYet: true])
 
 			// Synchronization: wait for terminator package
-			waitFor { modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0 }
+			conditions.within(10) { modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0 }
 
 			modules(canvasService, canvas)*.outputs*.toString()
 		}
