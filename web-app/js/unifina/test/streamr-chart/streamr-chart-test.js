@@ -1,6 +1,6 @@
 var assert = require('assert')
 var $ = require('jquery')(require("jsdom").jsdom().parentWindow);
-var StreamrChart = require('../streamr-chart/streamr-chart').StreamrChart
+var StreamrChart = require('../../streamr-chart/streamr-chart').StreamrChart
 
 describe('streamr-chart', function() {
 	var chart

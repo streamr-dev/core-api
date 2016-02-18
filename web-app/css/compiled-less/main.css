@@ -17091,27 +17091,50 @@ body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .btn-
 body.dashboard-show #dashboard-view .dashboarditem .panel-heading-controls .dropdown-menu li:not(.checked) .fa {
   opacity: 0;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-table .container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-table {
   overflow: auto;
   width: 100%;
   height: 100%;
   max-height: 400px;
-  padding: 15px;
-  padding-top: 0px;
+  padding: 0px 15px 15px;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-table .container .table-module-container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container {
   width: 100%;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-chart .container {
+body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container table.event-table-module-content {
+  margin-top: -20px;
+  margin-bottom: -10px;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container table.event-table-module-content thead th,
+body.dashboard-show #dashboard-view .dashboarditem streamr-table .table-module-container table.event-table-module-content tbody td {
+  padding-left: 20px;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-chart .streamr-widget-container {
   overflow: auto;
   width: 100%;
   max-height: 400px;
-  padding: 15px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding: 0px 15px;
+  margin-bottom: -20px;
 }
-body.dashboard-show #dashboard-view .dashboarditem streamr-chart .container .chartDrawArea {
+body.dashboard-show #dashboard-view .dashboarditem streamr-chart .streamr-widget-container .chartDrawArea {
   width: 100%;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-button .streamr-widget-container {
+  margin: 10px 30px;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline {
+  margin: 0px;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline textarea.form-control {
+  width: 100%;
+  resize: vertical;
+}
+body.dashboard-show #dashboard-view .dashboarditem streamr-text-field .streamr-widget-container .form-inline .send-btn {
+  margin-top: 10px;
 }
 body.dashboard-show:not(.editing) .panel-heading-controls,
 body.dashboard-show:not(.editing) .titlebar-clickable {

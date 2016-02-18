@@ -39,7 +39,7 @@ describe('dashboard-editor', function() {
 		templates = fs.readFileSync('grails-app/views/dashboard/_dashboard-template.gsp','utf8') // read content of _dashboard-template.gsp
 		assert.equal($("body").length, 1)
 		$("body").append(templates)
-		db = require('../dashboard/dashboard-editor')
+		db = require('../../dashboard/dashboard-editor')
 
 		global.Toolbar = function(options) {
 			return options

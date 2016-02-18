@@ -65,6 +65,18 @@
     <streamr-table class="streamr-widget non-draggable text-left" channel="{{ uiChannel.id }}"></streamr-table>    
 </script>
 
+<script id="streamr-button-template" type="text/template">
+    <streamr-button class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-button>
+</script>
+
+<script id="streamr-switcher-template" type="text/template">
+    <streamr-switcher class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-switcher>
+</script>
+
+<script id="streamr-text-field-template" type="text/template">
+    <streamr-text-field class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-text-field>
+</script>
+
 <script id="titlebar-template" type="text/template">
         <div class="col-xs-7">
             <span class="titlebar">{{ title ? title : "&nbsp;" }}</span>

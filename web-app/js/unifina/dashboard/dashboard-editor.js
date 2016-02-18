@@ -170,7 +170,9 @@ var DashboardItemView = Backbone.View.extend({
 
 		var webcomponent = this.model.get("uiChannel").module.webcomponent
 		this.$el.html(this.template(this.model.toJSON()))
-		if(webcomponent == "streamr-label") {
+		if(webcomponent == "streamr-label" ||
+			webcomponent == "streamr-button" ||
+			webcomponent == "streamr-switcher") {
 			if(!this.model.get("size"))
 				this.model.set("size", "small")
 		}
