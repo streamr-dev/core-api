@@ -229,6 +229,28 @@ databaseChangeLog = {
 					'stopped',
 					1
 				)
+
+				sql.executeInsert("INSERT INTO canvas (id, version, adhoc, date_created, example, has_exports, json," +
+					"last_updated, name, request_url, runner, serialization_time, serialized, server, shared, state," +
+					"user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+					'kldfaj2309jr9wjf9ashjg9sdgu9',
+					3,
+					false,
+					'2015-11-15 18:09:59',
+					false,
+					false,
+					'{"settings": {}, "modules": [], "name": "StopCanvasApiSpec"}',
+					'2016-02-01 15:29:45',
+					'StopCanvasApiSpec',
+					'http://192.168.10.21:8081/unifina-core/api/live/request',
+					's-1454340584152',
+					null,
+					"",
+					'192.168.10.21',
+					false,
+					'running',
+					1
+				)
 			}
 		}
 	}
