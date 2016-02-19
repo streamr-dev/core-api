@@ -1,24 +1,9 @@
 package com.unifina.task;
 
-import grails.converters.JSON
-
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.text.SimpleDateFormat
-import java.util.zip.GZIPOutputStream
-
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
-import com.unifina.domain.data.FeedFile
-import com.unifina.domain.data.Stream
 import com.unifina.domain.task.Task
-import com.unifina.feed.kafka.KafkaFeedFileName
-import com.unifina.kafkaclient.UnifinaKafkaChannelConsumer
-import com.unifina.kafkaclient.UnifinaKafkaConsumer
-import com.unifina.kafkaclient.UnifinaKafkaMessage
-import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
-//import com.unifina.kafkaclient.UnifinaKafkaUtils;
 import com.unifina.service.KafkaService
 
 /**

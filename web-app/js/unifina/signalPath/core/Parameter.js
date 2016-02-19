@@ -227,10 +227,14 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		
 		return result;
 	}
+
+	pub.getValue = function() {
+		return getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+	}
 	
 	var super_toJSON = pub.toJSON;
 	pub.toJSON = function() {
-		pub.json.value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+		pub.json.value = pub.getValue();
 		return super_toJSON();
 	}
 	

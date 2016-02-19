@@ -154,9 +154,6 @@ public class Globals {
 	public void init() {
 		// Use UTC timezone for beginDate and endDate
 		startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
-		endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
-		time = startDate;
-		
 		// Set time to midnight UTC of the current date if nothing specified
 		if (startDate==null) {
 			Calendar cal = new GregorianCalendar();
@@ -167,7 +164,17 @@ public class Globals {
 			cal.set(Calendar.MILLISECOND,0);
 			time = cal.getTime();
 		}
-		
+		else {
+			time = startDate;
+		}
+
+		// Interpret endDate as one millisecond to the next midnight
+		// Change this if the possibility to enter a time range is added
+		endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
+		if (endDate!=null) {
+			endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
+		}
+
 		String tzString = detectTimeZone();
 		initTimeZone(tzString);
 	}

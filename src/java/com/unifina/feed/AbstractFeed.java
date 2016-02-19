@@ -1,6 +1,7 @@
 package com.unifina.feed;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,7 +9,6 @@ import java.util.TimeZone;
 
 import com.unifina.data.IEventQueue;
 import com.unifina.data.IEventRecipient;
-import com.unifina.data.IFeed;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
@@ -19,11 +19,13 @@ import com.unifina.utils.Globals;
  * stream as well as matching the events and their IEventRecipients.
  * @author Henri
  */
-public abstract class AbstractFeed implements IFeed {
+public abstract class AbstractFeed {
 
 	protected IEventQueue eventQueue;
 	
 	protected Set<Object> subscribers = new HashSet<Object>();
+	
+	protected ArrayList<IEventRecipient> eventRecipients = new ArrayList<>();
 	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
 	
 	protected Globals globals;
@@ -99,6 +101,7 @@ public abstract class AbstractFeed implements IFeed {
 			Object key = keyProvider.getSubscriberKey(subscriber);
 			if (!eventRecipientsByKey.containsKey(key)) {
 				recipient = createEventRecipient(subscriber);
+				eventRecipients.add(recipient);
 				eventRecipientsByKey.put(key, recipient);
 				globals.getDataSource().register(recipient);
 			}
@@ -113,14 +116,15 @@ public abstract class AbstractFeed implements IFeed {
 		return true;
 	}
 
-	@Override
 	public void setEventQueue(IEventQueue queue) {
 		this.eventQueue = queue;
 	}
 
-	@Override
 	public void setTimeZone(TimeZone tz) {
 		this.timeZone = tz;
 	}
+	
+	public abstract void startFeed() throws Exception;
+	public abstract void stopFeed() throws Exception;
 	
 }
