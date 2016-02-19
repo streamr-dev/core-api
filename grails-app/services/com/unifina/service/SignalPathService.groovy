@@ -1,34 +1,17 @@
 package com.unifina.service
 
-import com.unifina.datasource.IStartListener
-import com.unifina.datasource.IStopListener
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.serialization.SerializationException
-import grails.converters.JSON
-import grails.transaction.Transactional
-import groovy.transform.CompileStatic
-
-import java.nio.charset.StandardCharsets
-import java.security.AccessControlException
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
-
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.json.JSONObject
-
-import com.mashape.unirest.http.HttpResponse
-import com.mashape.unirest.http.Unirest
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.DataSource
+import com.unifina.datasource.IStartListener
+import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.UiChannel
+import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
+import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
@@ -37,6 +20,19 @@ import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
 import com.unifina.utils.NetworkInterfaceUtils
+import grails.converters.JSON
+import grails.transaction.NotTransactional
+import grails.transaction.Transactional
+import groovy.transform.CompileStatic
+import org.apache.log4j.Logger
+
+import java.nio.charset.StandardCharsets
+import java.security.AccessControlException
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
 class SignalPathService {
 
@@ -47,7 +43,8 @@ class SignalPathService {
 	def grailsLinkGenerator
 	def kafkaService
 	def serializationService
-	
+	ApiService apiService
+
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
 	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
@@ -128,64 +125,19 @@ class SignalPathService {
 		else return new RealtimeDataSource(globals)
 	}
 
-	/**
-	 * Creates Canvas domain objects into the database with initial state "starting".
-	 * The Canvas can be subsequently started by calling startLocal() or startRemote().
-	 * @param signalPathData
-	 * @param user
-	 * @param adhoc
-	 * @param resetUiChannelIds
-	 * @return
-	 */
-	@Transactional
-	public Canvas createRunningCanvas(Map sp, SecUser user, boolean adhoc, boolean resetUiChannelIds) {
-		if (resetUiChannelIds) {
-			sp.uiChannel = [id:IdGenerator.get(), name: "Notifications"]
-			sp.modules.each {
-				if (it.uiChannel)
-					it.uiChannel.id = IdGenerator.get()
-			}
-		}
-		
-		Canvas canvas = new Canvas()
-		canvas.name = sp.name ?: "(unsaved canvas)"
-		canvas.user = user
-		canvas.json = (sp as JSON)
-		canvas.state = Canvas.State.RUNNING
-		canvas.adhoc = adhoc
-
-		UiChannel rspUi = new UiChannel()
-		rspUi.id = sp.uiChannel.id
-		canvas.addToUiChannels(rspUi)
-		
-		for (Map it : sp.modules) { 
-			if (it.uiChannel) {
-				UiChannel ui = new UiChannel()
-				ui.id = it.uiChannel.id
-				ui.hash = it.hash.toString()
-				ui.module = Module.load(it.id)
-				ui.name = it.uiChannel.name
-				
-				canvas.addToUiChannels(ui)
-			}
-		}
-		
-		canvas.save(flush:true, failOnError:true)
-		return canvas
-	}
-	
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
-		// TODO: UiChannels might not yet be flushed to database, in which case this will fail. (How is this possible?!) Can usually be repeated by running an empty canvas.
-		// Delayed-delete the topics in one hour
-		List<UiChannel> uiChannelIds = UiChannel.findAll { canvas.runner == runner.getRunnerId()}.collect {it.id}
-		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 
-		if (!uiChannelIds.isEmpty()) {
-			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiChannelIds])
+		def uiChannelIds = []
+
+		runner.signalPaths.each {
+			Canvas canvas = it.canvas.refresh()
+			canvas.uiChannels.each { uiChannelIds << it.id }
+			canvas.delete()
 		}
 
-		Canvas.executeUpdate("delete from Canvas c where c.runner = ?", [runner.getRunnerId()])
+		// Delayed-delete the topics in one hour
+		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -254,8 +206,21 @@ class SignalPathService {
 		runner.signalPaths.each {
 			it.canvas = canvas
 		}
+
 		String runnerId = runner.runnerId
-		
+		canvas.runner = runnerId
+
+		// Use the link generator to get the protocol and port, but use network IP address
+		// as the host to get the address of this individual server
+		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
+		URL url = new URL(root)
+
+		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
+		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
+		canvas.state = Canvas.State.RUNNING
+
+		canvas.save()
+
 		// Start the runner thread
 		runner.start()
 		
@@ -264,21 +229,8 @@ class SignalPathService {
 		if (!runner.getRunning()) {
 			log.error("Timed out while waiting for runner $runnerId to start!")
 		}
-
-		canvas.runner = runnerId
-		canvas.state = Canvas.State.RUNNING
-		
-		// Use the link generator to get the protocol and port, but use network IP address
-		// as the host to get the address of this individual server
-		String link = grailsLinkGenerator.link(controller: "live", action: "request", absolute: true)
-		URL url = new URL(link)
-		
-		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/live/request")
-		
-		canvas.save()
 	}
-	
+
 	boolean stopLocal(Canvas canvas) {
 		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(canvas.runner)
 		if (runner!=null && runner.isAlive()) {
@@ -299,66 +251,47 @@ class SignalPathService {
 			return false
 		}
 	}
-	
+
+	@NotTransactional
 	@CompileStatic
-	RuntimeResponse stopRemote(Canvas canvas, SecUser user) {
+	Map stopRemote(Canvas canvas, SecUser user) {
 		return runtimeRequest([type:"stopRequest"], canvas, null, user)
 	}
 	
 	@CompileStatic
 	boolean ping(Canvas canvas, SecUser user) {
-		RuntimeResponse response = runtimeRequest([type:'ping'], canvas, null, user)
-		return response.isSuccess()
+		runtimeRequest([type:'ping'], canvas, null, user)
+		return true
 	}
 	
 	@CompileStatic
-	RuntimeResponse sendRemoteRequest(Map msg, Canvas canvas, Integer hash, SecUser user) {
-		def req = Unirest.post(canvas.requestUrl)
-		def json = [
-			local: true,
-			msg: msg,
-			id: canvas.id
-		]
+	Map sendRemoteRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user) {
+		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
+		String url = canvas.requestUrl + (moduleId == null ? "/request" : "/modules/$moduleId/request") + "?local=true"
+		return apiService.post(url, msg, user)
+	}
 
-		if (hash) {
-			json.hash = hash
-		}
-		if (user) {
-			json.key = user.apiKey
-		}
-
-		req.header("Content-Type", "application/json")
-		
-		log.info("sendRemoteRequest: $json")
-		
-		HttpResponse<String> response = req.body((json as JSON).toString()).asString()
-
-		try {
-			Map map = (JSONObject) JSON.parse(response.getBody())
-			return new RuntimeResponse(map)
-		} catch (ConverterException e) {
-			log.error("sendRemoteRequest: Failed to parse JSON response: "+response.getBody())
-			throw new RuntimeException("Failed to parse JSON response", e)
-		}
+	private SignalPathRunner getLocalRunner(Canvas canvas) {
+		return servletContext["signalPathRunners"]?.get(canvas.runner)
 	}
 	
-	RuntimeResponse runtimeRequest(Map msg, Canvas canvas, Integer hash, SecUser user, boolean localOnly = false) {
-		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(canvas.runner)
+	Map runtimeRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user, boolean localOnly = false) {
+		SignalPathRunner spr = getLocalRunner(canvas)
 		
-		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $hash, localOnly: $localOnly")
+		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $moduleId, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
 			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
-			return new RuntimeResponse([success:false, error: "Canvas does not appear to be running!"])
+			throw new CanvasUnreachableException("Canvas does not appear to be running!")
 		}
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
-				return sendRemoteRequest(msg, canvas, hash, user)
+				return sendRemoteRequest(msg, canvas, moduleId, user)
 			} catch (Exception e) {
 				log.error("Unable to contact remote Canvas id $canvas.id at $canvas.requestUrl")
-				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
+				throw new CanvasUnreachableException("Unable to communicate with remote server!")
 			}
 		}
 		// If runner found
@@ -368,8 +301,8 @@ class SignalPathService {
 			}
 			
 			if (!sp) {
-				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $canvas, module: $hash")
-				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
+				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $canvas, module: $moduleId")
+				throw new CanvasUnreachableException("Canvas not found in runner. This should not happen.")
 			}
 			else {				
 				RuntimeRequest request = new RuntimeRequest(msg, new Date())
@@ -385,12 +318,12 @@ class SignalPathService {
 
 					stopLocal(canvas);
 
-					return new RuntimeResponse(true, [request: request])
+					return request
 				} else if (request.type=="ping") {
 					if (!canvas.shared && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
 					
-					return new RuntimeResponse(true, [request:request])
+					return request
 				}
 				/**
 				 * Requests for SignalPaths and modules
@@ -398,8 +331,8 @@ class SignalPathService {
 				else {
 					// Handle module-specific message
 					Future<RuntimeResponse> future
-					if (hash!=null) {
-						future = sp.getModule(hash).onRequest(request)
+					if (moduleId!=null) {
+						future = sp.getModule(moduleId).onRequest(request)
 					}
 					// Handle signalpath-specific message
 					else {
@@ -411,7 +344,7 @@ class SignalPathService {
 						log.info("runtimeRequest: responding with $resp")
 						return resp
 					} catch (TimeoutException e) {
-						return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+						throw new CanvasUnreachableException("Timed out while waiting for response.")
 					}
 				}
 				

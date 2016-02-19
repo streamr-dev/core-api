@@ -205,7 +205,7 @@ databaseChangeLog = {
 		addForeignKeyConstraint(baseColumnNames: "canvas_id", baseTableName: "ui_channel", constraintName: "FK2E3D5E583D649786", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "canvas", referencesUniqueColumn: "false")
 	}
 
-	changeSet(author: "eric", id: "14533384829304-16") {
+	changeSet(author: "eric", id: "14533384829304-16", context: "test") {
 		grailsChange {
 			change {
 				sql.executeInsert("INSERT INTO canvas (id, version, adhoc, date_created, example, has_exports, json," +

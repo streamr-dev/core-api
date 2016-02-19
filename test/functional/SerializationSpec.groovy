@@ -1,24 +1,17 @@
-import com.unifina.controller.core.signalpath.LiveController
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.BootService
 import com.unifina.service.SerializationService
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.CanvasPage
 import grails.test.mixin.TestFor
 import grails.util.Holders
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.logging.LogEntries
-import org.openqa.selenium.logging.LogEntry
-import org.openqa.selenium.logging.LogType
 import spock.lang.Shared
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-@TestFor(LiveController)
+@TestFor(CanvasController) // makes grailsApplication available
 class SerializationSpec extends LoginTester1Spec {
 
 	static UnifinaKafkaProducer kafka

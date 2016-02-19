@@ -9,8 +9,8 @@ import com.unifina.feed.FeedFactory
 import com.unifina.utils.IdGenerator
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
+import spock.util.concurrent.PollingConditions
 
-import static com.unifina.TestHelper.*
 import static com.unifina.service.CanvasTestHelper.*
 
 /**
@@ -28,6 +28,8 @@ class RunCanvasSpec extends IntegrationSpec {
 	Canvas canvas
 	SecUser user
 	Stream stream
+
+	SaveCanvasCommand saveCanvasCommand
 
 	def setup() {
 		hackServiceForTestFriendliness(canvasService.signalPathService)
@@ -56,7 +58,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		def modules = readCanvasJsonAndReplaceStreamId(getClass(), MODULES_LIST_FILE, stream).modules
 
 		// Create new canvas
-		SaveCanvasCommand command = new SaveCanvasCommand(
+		saveCanvasCommand = new SaveCanvasCommand(
 			name: "canvas-test",
 			modules: modules,
 			settings: [
@@ -65,44 +67,44 @@ class RunCanvasSpec extends IntegrationSpec {
 				speed: "0"
 			]
 		)
-		canvas = canvasService.createNew(command, user)
+		canvas = canvasService.createNew(saveCanvasCommand, user)
 	}
 
 	def cleanup() {
 		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
 	}
 
-	def "should be able to start a canvas, send data to it via Kafka, and received expected processed output values"() {
+	def "should be able to start a canvas, send data to it via Kafka, and receive expected processed output values"() {
 		when:
-		// Start canvas
-		canvasService.start(canvas, true)
+		def conditions = new PollingConditions()
+		def results = (1..3).collect { round ->
 
-		// Produce data
-		(1..100).each {
-			kafkaService.sendMessage(stream, stream.uuid, [numero: it, areWeDoneYet: false])
-
-			// Synchronization
-			waitFor(true) {
-				modules(canvasService, canvas)[0].outputs[0].value == it
+			// Start a fresh canvas
+			if (round > 1) {
+				canvasService.stop(canvas, user)
+				canvas = canvasService.createNew(saveCanvasCommand, user)
 			}
+			canvasService.start(canvas, true)
+
+			// Produce data
+			(1..100).each { kafkaService.sendMessage(stream, stream.uuid, [numero: it, areWeDoneYet: false]) }
+
+			// Terminator data package to know when we're done
+			kafkaService.sendMessage(stream, stream.uuid, [numero: 0, areWeDoneYet: true])
+
+			// Synchronization: wait for terminator package
+			conditions.within(10) { modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0 }
+
+			modules(canvasService, canvas)*.outputs*.toString()
 		}
-
-		// Last data package with areWeDone indicator set to true
-		kafkaService.sendMessage(stream, stream.uuid, [numero: 0, areWeDoneYet: true])
-
-		// Synchronization
-		def actual = null
-		waitFor(true) {
-			actual = modules(canvasService, canvas)*.outputs*.toString()
-			return (modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0)
-		}
-
 		then:
-		actual.size() == 4
-		actual[0] == "[(out) Stream.numero: 0.0, (out) Stream.areWeDoneYet: 1.0]"
-		actual[1] == "[(out) Sum.out: $SUM_FROM_1_TO_100_TIMES_2]"
-		actual[2] == "[(out) Multiply.A*B: 0.0]"
-		actual[3] == "[(out) Constant.out: null]"
+		results.every { finalState ->
+			finalState.size() == 4
+			finalState[0] == "[(out) Stream.numero: 0.0, (out) Stream.areWeDoneYet: 1.0]"
+			finalState[1] == "[(out) Sum.out: $SUM_FROM_1_TO_100_TIMES_2]"
+			finalState[2] == "[(out) Multiply.A*B: 0.0]"
+			finalState[3] == "[(out) Constant.out: null]"
+		}
 
 		cleanup:
 		canvasService.stop(canvas, user)

@@ -31,8 +31,8 @@ class DashboardSpec extends LoginTester1Spec {
 		waitFor { at LoginPage }
 	}
 	
-	def findRunningSignalPath(String name) {
-		return $("#main-menu .navigation .runningsignalpath", text: contains(name))
+	def findCanvas(String name) {
+		return $("#main-menu .navigation .canvas .mm-text", text: name).closest(".canvas")
 	}
 	
 	def findDashboardItem(String name) {
@@ -62,28 +62,28 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "go to dashboard show page"
 			waitFor { 
 				at DashboardShowPage
-				findRunningSignalPath("DashboardSpec").displayed
+				findCanvas("DashboardSpec").displayed
 			}
 		
 		// Open a rsp
 		when: "a rsp clicked to open"
-			findRunningSignalPath("DashboardSpec").click()
+			findCanvas("DashboardSpec").click()
 		then: "uichannel-list opens"
-			waitFor { findRunningSignalPath("DashboardSpec").find(".uichannel-title").displayed }
+			waitFor { findCanvas("DashboardSpec").find(".module-title").displayed }
 		
 		// Add some modules
 		when: "Label added"
-			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Label")).click()
+			findCanvas("DashboardSpec").find(".module-title", text:contains("Label")).click()
 		then: "Label should be displayed"
 			waitFor { findDashboardItem("Label").displayed }
 		
 		when: "Table added"
-			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Table")).click()
+			findCanvas("DashboardSpec").find(".module-title", text:contains("Table")).click()
 		then: "Table item should be displayed"
 			waitFor { findDashboardItem("Table").displayed }
 		
 		when: "Chart added"
-			findRunningSignalPath("DashboardSpec").find(".uichannel-title", text:contains("Chart")).click()
+			findCanvas("DashboardSpec").find(".module-title", text:contains("Chart")).click()
 		then: "Chart item should be displayed"
 			waitFor { findDashboardItem("Chart").displayed }
 		
@@ -166,7 +166,7 @@ class DashboardSpec extends LoginTester1Spec {
 			$("#main-menu-toggle").click()
 		then: "the dashboard should be in edit-mode"
 			waitFor { 
-				findRunningSignalPath("DashboardSpec").displayed
+				findCanvas("DashboardSpec").displayed
 				js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
 			}
 			

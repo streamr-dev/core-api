@@ -240,12 +240,10 @@ modules = {
 	}
 	'swagger' {
 		dependsOn 'jquery, underscore, jquery-migrate'
-		//resource url:[dir: 'js/swagger/lib/', file: 'jquery-1.8.0.min.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
-		//resource url:[dir: 'js/swagger/lib/', file: 'underscore-min.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/', file: 'swagger-ui.js', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']

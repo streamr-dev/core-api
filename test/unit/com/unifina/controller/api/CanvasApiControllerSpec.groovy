@@ -1,7 +1,5 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
-import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -70,6 +68,8 @@ class CanvasApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/canvases/"
+		params.sort = "sortField"
+		params.order = "desc"
 		withFilters(action: "index") {
 			controller.index()
 		}
@@ -77,7 +77,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json.size() == 3
-		1 * canvasService.findAllBy(me, null, null, null) >> [canvas1, canvas2, canvas3]
+		1 * canvasService.findAllBy(me, null, null, null, "sortField", "desc") >> [canvas1, canvas2, canvas3]
 		0 * canvasService._
 
 	}
