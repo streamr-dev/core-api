@@ -151,7 +151,8 @@ class CanvasApiController {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
 			throw new NotFoundException("Canvas", id)
-		} else if (!permissionService.check(request.apiUser, canvas, op) && !(op == Operation.READ && canvas.example)) {
+		} else if (!(op == Operation.READ && (canvas.example || canvas.shared)) &&
+				   !permissionService.check(request.apiUser, canvas, op)) {
 			throw new NotPermittedException(request.apiUser?.username, "Canvas", id, op.id)
 		} else {
 			successHandler.call(canvas)
