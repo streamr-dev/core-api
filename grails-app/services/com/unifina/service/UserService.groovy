@@ -95,7 +95,8 @@ class UserService {
 
 
 	/**
-	 * Looks up a user based on api key. Returns null if the keys do not match a user.
+	 * Looks up a user based on api key.
+	 * @returns SecUser user, or null if the keys do not match a user.
 	 */
 	SecUser getUserByApiKey(String apiKey) {
 		if (!apiKey) { return null }

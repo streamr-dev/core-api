@@ -73,7 +73,8 @@ class UnifinaCoreAPIFilters {
 					return false
 				}
 
-				if (!user) {
+				// Use cookie-based authentication if api key was not present in header.
+				if (!authenticator.apiKeyPresent) {
 					user = springSecurityService.getCurrentUser()
 				}
 

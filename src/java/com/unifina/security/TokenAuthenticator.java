@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 public class TokenAuthenticator {
 	private final UserService userService;
 	private boolean lastAuthenticationMalformed = false;
+	private boolean apiKeyPresent = false;
 
 	public TokenAuthenticator(UserService userService) {
 		this.userService = userService;
@@ -16,11 +17,16 @@ public class TokenAuthenticator {
 
 	public SecUser authenticate(HttpServletRequest request) {
 		String apiKey = parseAuthorizationHeader(request.getHeader("Authorization"));
-		return userService.getUserByApiKey(apiKey);
+		apiKeyPresent = apiKey != null;
+		return apiKeyPresent ? userService.getUserByApiKey(apiKey) : null;
 	}
 
 	public boolean lastAuthenticationMalformed() {
 		return lastAuthenticationMalformed;
+	}
+
+	public boolean isApiKeyPresent() {
+		return apiKeyPresent;
 	}
 
 	/**
