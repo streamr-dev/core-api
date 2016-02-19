@@ -5,7 +5,7 @@ import com.unifina.utils.StreamrColor;
 
 import java.util.LinkedHashMap;
 
-public class Map extends ModuleWithUI {
+public class MapModule extends ModuleWithUI {
 
 	Input<Object> id = new Input<>(this, "id", "Double String");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
