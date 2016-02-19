@@ -24,6 +24,7 @@ class RunCanvasSpec extends IntegrationSpec {
 
 	def canvasService
 	def kafkaService
+	def streamService
 
 	Canvas canvas
 	SecUser user
@@ -37,22 +38,16 @@ class RunCanvasSpec extends IntegrationSpec {
 		user = SecUser.load(1L)
 
 		// Create stream
-		String uuid = IdGenerator.get()
-		stream = new Stream(
-			name: "run-canvas-spec-stream",
-			feed: Feed.load(7L),
-			user: user,
-			description: "Data stream for ${RunCanvasSpec.name}",
-			apiKey: "apiKey3185",
-			uuid: uuid,
-			config: new JsonBuilder([
-			    topic: uuid,
-				fields: [
-				    [name: "numero", type: "number"],
-					[name: "areWeDoneYet", type: "boolean"]
-				]
-			]).toString(),
-		).save(failOnError: true)
+		stream = streamService.createStream([
+				name: "run-canvas-spec-stream",
+				feed: Feed.load(7L),
+				description: "Data stream for ${RunCanvasSpec.name}",
+			],
+			user,
+			[
+				[name: "numero", type: "number"],
+				[name: "areWeDoneYet", type: "boolean"]
+			])
 
 		// Read modules from file
 		def modules = readCanvasJsonAndReplaceStreamId(getClass(), MODULES_LIST_FILE, stream).modules
@@ -67,10 +62,12 @@ class RunCanvasSpec extends IntegrationSpec {
 				speed: "0"
 			]
 		)
+
 		canvas = canvasService.createNew(saveCanvasCommand, user)
 	}
 
 	def cleanup() {
+		streamService.deleteStream(stream)
 		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
 	}
 

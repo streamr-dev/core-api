@@ -7,7 +7,6 @@ import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.FieldDetector
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.parser.JSONParser
 import org.springframework.util.Assert
 
 class StreamService {
@@ -32,7 +31,7 @@ class StreamService {
 			throw new ValidationException(stream.errors)
 		}
 
-		stream.save()
+		stream.save(failOnError: true)
 		if (streamListener) {
 			streamListener.afterStreamSaved(stream)
 		}
