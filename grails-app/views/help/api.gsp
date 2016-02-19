@@ -24,23 +24,13 @@
                 window.swaggerUi = new SwaggerUi({
                     spec: data,
                     dom_id: "swagger-ui-container",
-                    onComplete: function(swaggerApi, swaggerUi){
-                        if(typeof initOAuth == "function") {
-                            initOAuth({
-                                clientId: "your-client-id",
-                                clientSecret: "your-client-secret-if-required",
-                                realm: "your-realms",
-                                appName: "your-app-name",
-                                scopeSeparator: ",",
-                                additionalQueryStringParams: {}
-                            });
-                        }
+                    onComplete: function(swaggerApi, swaggerUi) {
 
                         $('pre code').each(function(i, e) {
                             hljs.highlightBlock(e)
                         });
 
-                        addApiKeyAuthorization();
+                        addApiKeyAuthorization("${user?.apiKey}");
                     },
                     onFailure: function(data) {
                         log("Unable to Load SwaggerUI");
@@ -53,8 +43,7 @@
                     validatorUrl: null
                 });
 
-                function addApiKeyAuthorization(){
-                    var key = encodeURIComponent($('#input_apiKey')[0].value);
+                function addApiKeyAuthorization(key){
                     if (key && key.trim() != "") {
                         var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("Authorization", "token " + key, "header")
                         window.swaggerUi.api.clientAuthorizations.add("key", apiKeyAuth);
@@ -62,7 +51,10 @@
                     }
                 }
 
-                $('#input_apiKey').change(addApiKeyAuthorization);
+                $('#input_apiKey').change(function() {
+                    var key = encodeURIComponent($('#input_apiKey')[0].value);
+                    addApiKeyAuthorization(key);
+                });
 
                 // if you have an apiKey you would like to pre-populate on the page for demonstration purposes...
                 /*
