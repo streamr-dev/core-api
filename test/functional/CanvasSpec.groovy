@@ -170,16 +170,16 @@ class CanvasSpec extends LoginTester1Spec {
 			moduleShouldAppearOnCanvas('Table')
 
 		when: "Run options button is clicked"
-			runOptionsButton.click()
+			historicalOptionsButton.click()
 		then: "Speed option must be shown"
 			waitFor { speed.displayed }
 
 		when: "The Full speed option is selected and modal is dismissed"
 			speed.click()
 			speed.find("option").find{ it.value() == "0" }.click()
-			runOptionsModal.find(".btn-primary").click()
+			historicalOptionsModal.find(".btn-primary").click()
 		then: "Modal must disappear"
-			waitFor { !runOptionsModal.displayed }
+			waitFor { !historicalOptionsModal.displayed }
 
 		when: "data is produced and signalpath is run on current date"
 			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
@@ -191,7 +191,7 @@ class CanvasSpec extends LoginTester1Spec {
 			endDate.click()
 			endDate = df.format(new Date())
 			endDate << Keys.TAB
-			runButton.click()
+			runHistoricalButton.click()
 		then: "output should be produced and there should be more rows than what exists for 2015-02-27"
 			waitFor(30) {
 				$('.modulebody .table tr').size() > 554
