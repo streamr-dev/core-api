@@ -90,6 +90,11 @@ class ShareSpec extends LoginTester1Spec {
 		$(".tr", "data-id": "134").click()
 		then:
 		waitFor { at StreamShowPage }
+		waitFor { streamMenuButton.displayed }
+
+		when: "open menu"
+		streamMenuButton.click()
+		then: "sharebutton in menu"
 		waitFor { shareButton.displayed }
 
 		when:
