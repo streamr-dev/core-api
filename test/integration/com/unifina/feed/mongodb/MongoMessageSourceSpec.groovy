@@ -91,7 +91,7 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		)
 
 		then:
-		conditions.within(2) {
+		conditions.within(10) {
 			assert counter == 1
 			assert latestMessage?.message?.timestamp == insertTime
 		}
@@ -105,7 +105,7 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		}
 
 		then:
-		conditions.within(2) {
+		conditions.within(10) {
 			assert counter == 6
 			assert latestMessage?.message?.timestamp == insertTime
 		}
