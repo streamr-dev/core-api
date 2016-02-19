@@ -23,29 +23,30 @@ public class MongoFieldDetector extends FieldDetector {
 
 	@Override
 	protected MapMessage fetchExampleMessage(Stream stream) {
-
 		MongoDbConfig config = MongoDbConfig.readFromStream(stream);
-		MongoClient mongoClient = config.createMongoClient();
-		MongoDatabase db = mongoClient.getDatabase(config.getDatabase());
-		MongoCollection collection = db.getCollection(config.getCollection());
 
 		// Build query
-		Document query = config.createQuery();
-		FindIterable<Document> iterable = collection.find(query).sort(Sorts.descending(config.getTimestampKey())).limit(1);
-		MongoCursor<Document> mongoCursor = iterable.iterator();
+		try (MongoClient mongoClient = config.createMongoClient()) {
+			MongoDatabase db = mongoClient.getDatabase(config.getDatabase());
+			MongoCollection collection = db.getCollection(config.getCollection());
 
-		// Perform query and build MapMessage
-		if (mongoCursor.hasNext()) {
-			Document document = mongoCursor.next();
-			MongoDbConfig.TimestampType timestampType = config.getTimestampType();
+			Document query = config.createQuery();
+			FindIterable<Document> iterable = collection.find(query).sort(Sorts.descending(config.getTimestampKey())).limit(1);
+			MongoCursor<Document> mongoCursor = iterable.iterator();
 
-			Date timestamp = config.getTimestamp(document);
-			// Timestamps are implicit, so remove it from the document before field detection
-			document.remove(config.getTimestampKey());
-			return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
-		} else {
-			String msg = String.format("No data found %s@%s", collection.getNamespace(), mongoClient.getConnectPoint());
-			throw new MongoException(msg);
+			// Perform query and build MapMessage
+			if (mongoCursor.hasNext()) {
+				Document document = mongoCursor.next();
+				MongoDbConfig.TimestampType timestampType = config.getTimestampType();
+
+				Date timestamp = config.getTimestamp(document);
+				// Timestamps are implicit, so remove it from the document before field detection
+				document.remove(config.getTimestampKey());
+				return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+			} else {
+				String msg = String.format("No data found %s@%s", collection.getNamespace(), mongoClient.getConnectPoint());
+				throw new MongoException(msg);
+			}
 		}
 	}
 }
