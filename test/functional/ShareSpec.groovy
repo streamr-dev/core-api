@@ -1,12 +1,19 @@
 import core.LoginTester1Spec
+import core.mixins.LoginMixin
 import core.pages.CanvasListPage
+import core.pages.CanvasPage
+import core.pages.LoginPage
 import core.pages.StreamListPage
 import core.pages.StreamShowPage
+import geb.spock.GebReportingSpec
 import org.openqa.selenium.Keys;
 
-class ShareSpec extends LoginTester1Spec {
+@Mixin(LoginMixin)
+class ShareSpec extends GebReportingSpec {
 
 	void "sharePopup can grant and revoke Stream permissions"() {
+		loginTester1()
+
 		when:
 		to StreamListPage
 		then:
@@ -94,7 +101,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		when: "open menu"
 		streamMenuButton.click()
-		then: "sharebutton in menu"
+		then: "shareButton in menu"
 		waitFor { shareButton.displayed }
 
 		when:
@@ -153,6 +160,7 @@ class ShareSpec extends LoginTester1Spec {
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
+		loginTester1()
 		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 
 		when:
@@ -228,7 +236,6 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
-		/* TODO: add share button to Canvas page
 		when:
 		$("button", text: "Save").click()
 		then: "no changes, so no message displayed"
@@ -249,7 +256,6 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
-		*/
 
 		when: "there should be only one row and only one delete-button..."
 		$(".user-delete-button").click()
@@ -263,8 +269,7 @@ class ShareSpec extends LoginTester1Spec {
 		!$(".ui-pnotify")
 
 		when: "re-open"
-		//shareButton.click()
-		getCanvasRow().find("button").click()
+		shareButton.click()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -287,8 +292,7 @@ class ShareSpec extends LoginTester1Spec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 
 		when: "re-open"
-		//shareButton.click()
-		getCanvasRow().find("button").click()
+		shareButton.click()
 		then: "...to double-check it's gone"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -299,5 +303,9 @@ class ShareSpec extends LoginTester1Spec {
 		then: "...but no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
+	}
+
+	void "read permission allows opening but doesn't show share buttons"() {
+		loginTester1()
 	}
 }
