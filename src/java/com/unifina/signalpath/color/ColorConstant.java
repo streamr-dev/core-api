@@ -2,13 +2,13 @@ package com.unifina.signalpath.color;
 
 
 import com.unifina.signalpath.*;
-import com.unifina.utils.Color;
+import com.unifina.utils.StreamrColor;
 
 public class ColorConstant extends AbstractSignalPathModule {
 	
-	ColorParameter par = new ColorParameter(this, "value", new Color(0,0,0));
+	ColorParameter par = new ColorParameter(this, "value", new StreamrColor(0,0,0));
 
-	Output<Color> out = new Output<>(this,"color", "Color");
+	Output<StreamrColor> out = new Output<>(this,"color", "Color");
 
 	@Override
 	public void initialize() {

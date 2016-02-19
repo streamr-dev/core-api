@@ -1,28 +1,29 @@
 package com.unifina.signalpath.color;
 
-import com.unifina.math.MovingAverage;
 import com.unifina.signalpath.*;
-import com.unifina.utils.Color;
+import com.unifina.utils.StreamrColor;
 
-import java.util.List;
-import java.util.Map;
+import java.awt.Color;
 
 public class Gradient extends AbstractSignalPathModule {
 	
-	DoubleParameter min = new DoubleParameter(this, "minValue", 0d);
-	DoubleParameter max = new DoubleParameter(this, "maxValue", 1d);
+	DoubleParameter minValue = new DoubleParameter(this, "minValue", 0d);
+	DoubleParameter maxValue = new DoubleParameter(this, "maxValue", 1d);
 
 	TimeSeriesInput in = new TimeSeriesInput(this, "in");
 
-	ColorParameter minColor = new ColorParameter(this, "minColor", new Color(255, 255, 255));
-	ColorParameter maxColor = new ColorParameter(this, "maxColor", new Color(0, 0, 0));
+	ColorParameter minColor = new ColorParameter(this, "minColor", new StreamrColor(255, 255, 255));
+	ColorParameter maxColor = new ColorParameter(this, "maxColor", new StreamrColor(0, 0, 0));
 
-	Output<Color> out = new Output<>(this, "color", "Color");
+	Output<StreamrColor> out = new Output<>(this, "color", "Color");
+
+	float[] minHSB;
+	float[] maxHSB;
 
 	@Override
 	public void init() {
-		addInput(min);
-		addInput(max);
+		addInput(minValue);
+		addInput(maxValue);
 		addInput(minColor);
 		addInput(maxColor);
 		addInput(in);
@@ -31,19 +32,48 @@ public class Gradient extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if (in.getValue() <= min.getValue()) {
-			out.send(minColor.getValue());
-		} else if (in.getValue() >= max.getValue()) {
-			out.send(maxColor.getValue());
-		} else {
-			Double ratio = in.getValue() / (min.getValue() + max.getValue());
-			int r = (int)(minColor.getValue().getRed() + (maxColor.getValue().getRed() - minColor.getValue().getRed()) * ratio);
-			int g = (int)(minColor.getValue().getGreen() + (maxColor.getValue().getGreen() - minColor.getValue().getGreen()) * ratio);
-			int b = (int)(minColor.getValue().getBlue() + (maxColor.getValue().getBlue() - minColor.getValue().getBlue()) * ratio);
-			out.send(new Color(r, g, b));
-		}
+		double ymx = 1d;
+		double ymn = 0d;
+		double xmx = maxValue.getValue();
+		double xmn = minValue.getValue();
+		double S = (ymx - ymn)/(xmx - xmn);
+		double D = ymx - S * xmx;
+		float ratio = (float)(in.value * S + D);
+		ratio = (float) Math.min(Math.max(ratio, 0d), 1d);
+
+		minHSB = Color.RGBtoHSB(minColor.getValue().getRed(), minColor.getValue().getGreen(), minColor.getValue().getBlue(), null);
+		maxHSB = Color.RGBtoHSB(maxColor.getValue().getRed(), maxColor.getValue().getGreen(), maxColor.getValue().getBlue(), null);
+
+		float minH = minHSB[0];
+		float maxH = maxHSB[0];
+		float newH = calculateHue(minH, maxH, ratio);
+
+		float minS = minHSB[1];
+		float maxS = maxHSB[1];
+		float newS = calculateBetweenValues(minS, maxS, ratio);
+
+		float minB = minHSB[2];
+		float maxB = maxHSB[2];
+		float newB = calculateBetweenValues(minB, maxB, ratio);
+
+		out.send(new StreamrColor(new Color(Color.HSBtoRGB(newH, newS, newB))));
+
 	}
 	
 	@Override
 	public void clearState() {}
+
+	private float calculateHue(float min, float max, float ratio) {
+		if (max - min > 0.5f) {
+			return ((min + 1.0f) * (1.0f - ratio) + max * ratio) % 1.0f;
+		} else if (min - max > 0.5f) {
+			return (min * (1.0f - ratio) + (max + 1.0f) * ratio) % 1.0f;
+		} else {
+			return calculateBetweenValues(min, max, ratio);
+		}
+	}
+
+	private float calculateBetweenValues(float min, float max, float ratio) {
+		return min * (1.0f - ratio) + max * ratio;
+	}
 }

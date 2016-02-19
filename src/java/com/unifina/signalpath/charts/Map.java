@@ -1,7 +1,7 @@
 package com.unifina.signalpath.charts;
 
 import com.unifina.signalpath.*;
-import com.unifina.utils.Color;
+import com.unifina.utils.StreamrColor;
 
 import java.util.LinkedHashMap;
 
@@ -10,29 +10,25 @@ public class Map extends ModuleWithUI {
 	Input<Object> id = new Input<>(this, "id", "Double String");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
 	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
-	Input<Color> color = new Input<>(this, "color", "Color");
+	ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
+
+	boolean drawTrace = false;
+	boolean autoZoom = true;
 
 	@Override
 	public void init() {
 		addInput(id);
 		addInput(latitude);
 		addInput(longitude);
-		addInput(color);
 		this.canClearState = false;
 		this.resendAll = false;
 		latitude.setDrivingInput(true);
-		latitude.canToggleDrivingInput = false;
 		latitude.canHaveInitialValue = false;
 		latitude.canBeFeedback = false;
 		longitude.setDrivingInput(true);
-		longitude.canToggleDrivingInput = false;
 		longitude.canHaveInitialValue = false;
 		longitude.canBeFeedback = false;
-		color.setDrivingInput(true);
-		color.canToggleDrivingInput = false;
-		color.canBeFeedback = false;
 		id.setDrivingInput(true);
-		id.canToggleDrivingInput = false;
 		id.canBeFeedback = false;
 	}
 	
@@ -65,6 +61,8 @@ public class Map extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("zoom", 2, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("minZoom", 2, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("maxZoom", 18, ModuleOption.OPTION_INTEGER));
+		options.addIfMissing(new ModuleOption("drawTrace", drawTrace, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("autoZoom", autoZoom, ModuleOption.OPTION_BOOLEAN));
 
 		return config;
 	}
@@ -72,10 +70,21 @@ public class Map extends ModuleWithUI {
 	@Override
 	protected void onConfiguration(java.util.Map<String, Object> config) {
 		super.onConfiguration(config);
+		ModuleOptions options = ModuleOptions.get(config);
+
+		if (options.containsKey("drawTrace"))
+			drawTrace = options.getOption("drawTrace").getBoolean();
+
+		if(options.containsKey("autoZoom"))
+			autoZoom = options.getOption("autoZoom").getBoolean();
+
+		if (drawTrace) {
+			addInput(color);
+		}
 	}
 
 	class MapPoint extends LinkedHashMap<String,Object> {
-		public MapPoint(Object id, Double latitude, Double longitude, Color color) {
+		public MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			super();
 			if (!(id instanceof Double || id instanceof String)) {
 				throw new RuntimeException("Id must be Double or String!");

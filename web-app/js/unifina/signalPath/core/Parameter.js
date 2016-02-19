@@ -26,6 +26,12 @@ SignalPath.ParamRenderers = {
 			},
 			getValueName: function(module,data,input) {
 				return $(input).val();
+			},
+			disable: function(input) {
+				input.attr("disabled","disabled");
+			},
+			enable: function(input) {
+				input.removeAttr("disabled");
 			}
 		},
 		"Stream": {
@@ -125,6 +131,12 @@ SignalPath.ParamRenderers = {
 			getValueName: function(module,data,input) {
 				var text = $(input).find("span.streamName a").text();
 				return text;
+			},
+			disable: function(input) {
+				input.attr("disabled","disabled");
+			},
+			enable: function(input) {
+				input.removeAttr("disabled");
 			}
 		},
 		"Color": {
@@ -145,6 +157,12 @@ SignalPath.ParamRenderers = {
 			},
 			getValueName: function(module, data, input) {
 				return this.getValue(module, data, input)
+			},
+			disable: function(input) {
+				$(input).find(".colorInput").spectrum("disable")
+			},
+			enable: function(input) {
+				$(input).find(".colorInput").spectrum("enable")
 			}
 		}
 }
@@ -173,13 +191,15 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		// Assign disabled class to input when the parameter is connected
 		div.bind("spConnect", (function(me) {
 			return function(output) {
-				me.input.attr("disabled","disabled");
+				if(getParamRenderer(me.json).disable)
+					getParamRenderer(me.json).disable(me.input)
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(output) {
-				me.input.removeAttr("disabled");
+				if(getParamRenderer(me.json).enable)
+					getParamRenderer(me.json).enable(me.input)
 			}
 		})(pub));
 		

@@ -15,13 +15,13 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		superCreateDiv();
 
 		prot.body.css("height", "100%")
-		
 
 		container = $("<div class='map-container' style='width: 500px; height: 400px;'></div>")
 		prot.body.append(container)
 
 		var mapOptions = {
-			center: [prot.jsonData.centerLat, prot.jsonData.centerLng],
+			centerLat: prot.jsonData.centerLat,
+			centerLng: prot.jsonData.centerLng,
 			zoom: prot.jsonData.zoom
 		}
 		if (prot.jsonData.options) {
@@ -29,10 +29,15 @@ SignalPath.MapModule = function(data,canvas,prot) {
 				mapOptions[key] = prot.jsonData.options[key].value
 			})
 		}
-		if (mapOptions.centerLat!==undefined && mapOptions.centerLng!==undefined)
-			mapOptions.center = [mapOptions.centerLat, mapOptions.centerLng]
 
 		map = new StreamrMap(container, mapOptions)
+
+		$(map).on("move", function(e, data) {
+			$.each(data, function(k, v) {
+				if(prot.jsonData.options[k] && prot.jsonData.options[k].value)
+					prot.jsonData.options[k].value = v
+			})
+		})
 
 		prot.initResizable({
 			minWidth: parseInt(prot.div.css("min-width").replace("px","")),

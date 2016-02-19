@@ -4,18 +4,20 @@ databaseChangeLog = {
 
 	changeSet(author: "aapeli", id: "145262149100-36") {
 		sql("""
-			INSERT INTO module_category VALUE(
+			INSERT INTO module_category (id, version, hide, module_package_id, name, parent_id, sort_order)
+			VALUE(
 				50,
 				0,
+				NULL,
+				1,
 				"Color",
-				1,
 				3,
-				1,
-				NULL
+				1
 			);
 		""")
 		sql("""
-			INSERT INTO module value(
+			INSERT INTO module (id, version, category_id, implementing_class, name, js_module, hide, type, module_package_id, json_help, alternative_names, webcomponent)
+			VALUES (
 				NULL,
 				1,
 				50,
@@ -28,10 +30,7 @@ databaseChangeLog = {
 				NULL,
 				NULL,
 				NULL
-			);
-		""")
-		sql("""
-			INSERT INTO module value(
+			), (
 				NULL,
 				1,
 				50,

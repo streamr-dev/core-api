@@ -1,11 +1,7 @@
-// TODO: Remove this!
-var MAP
 
 (function(exports) {
 
     function StreamrMap(parent, options) {
-        // TODO: Remove this!
-        MAP = this
 
         var _this = this
         this.parent = $(parent)
@@ -21,9 +17,8 @@ var MAP
 
         // Default options
         this.options = $.extend({}, {
-            min: 0,
-            max: 20,
-            center: [35,15],
+            centerLat: 35,
+            centerLng: 15,
             zoom: 2,
             minZoom: 2,
             maxZoom: 18
@@ -41,8 +36,10 @@ var MAP
         )
 
         this.map = new L.Map(this.parent[0], {
-            center: new L.LatLng(this.options.center[0], this.options.center[1]),
+            center: new L.LatLng(this.options.centerLat, this.options.centerLng),
             zoom: this.options.zoom,
+            minZoom: this.options.minZoom,
+            maxZoom: this.options.maxZoom,
             layers: [this.baseLayer]
         })
 
@@ -50,28 +47,12 @@ var MAP
             _this.untouched = false
         })
 
-        this.createBigPointLayer()
+        this.map.on("moveend", function() {
+            $(_this).trigger("move", _this.getCenterAndZoom())
+        })
 
-        //for (var i=0;i<100;i++) {
-        //    _this.addMarker({
-        //        id: i.toString(),
-        //        lat: Math.random()*90,
-        //        lng: Math.random()*90
-        //    })
-        //}
-        //
-        //setInterval(function() {
-        //    for (var i=0;i<100;i++) {
-        //        var current = _this.markers[i.toString()].getLatLng()
-        //        _this.handleMessage({
-        //            t: "p",
-        //            id: i.toString(),
-        //            lat: current.lat + (Math.random() - 0.5)*2,
-        //            lng: current.lng + (Math.random() - 0.5)*2,
-        //            color: 'rgb('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+')'
-        //        })
-        //    }
-        //})
+        if(this.options.drawTrace)
+            this.lineLayer = this.createBigPointLayer()
 
     }
 
@@ -120,12 +101,12 @@ var MAP
             }
         })
 
-        this.lineLayer = new BigPointLayer().addTo(this.map)
-        return this.lineLayer
+        var layer = new BigPointLayer().addTo(this.map)
+        return layer
     }
 
-    StreamrMap.prototype.setCenter = function(coords) {
-        this.map.setView(new L.LatLng(coords[0],coords[1]))
+    StreamrMap.prototype.setCenter = function(lat, lng) {
+        this.map.setView(new L.LatLng(lat, lng))
     }
 
     StreamrMap.prototype.addMarker = function(attr) {
@@ -137,8 +118,9 @@ var MAP
         var color = attr.color
         var latlng = new L.LatLng(lat, lng)
 
-        if(this.untouched) {
-            this.setCenter([lat,lng])
+        if(this.options.autoZoom && this.untouched) {
+            this.setCenter(lat,lng)
+            this.map.setZoom(10)
             this.untouched = false
         }
 
@@ -198,7 +180,8 @@ var MAP
             _this.markers[id].setLatLng(latlng)
         })
 
-        this.lineLayer.render(true)
+        if(this.lineLayer)
+            this.lineLayer.render(true)
 
         this.pendingMarkerUpdates = {}
         this.animationFrameRequested = false
@@ -228,9 +211,10 @@ var MAP
     }
 
     StreamrMap.prototype.toJSON = function() {
-        // Added this 'cause I think it's nice that the map remembers these things.
-        // (Even though the heatmap doesn't do so)
-        // There's still some problem with transferring the data
+        return this.getCenterAndZoom();
+    }
+
+    StreamrMap.prototype.getCenterAndZoom = function() {
         return {
             centerLat: this.map.getCenter().lat,
             centerLng: this.map.getCenter().lng,
@@ -243,11 +227,12 @@ var MAP
         $.each(this.markers, function(k, v) {
             _this.map.removeLayer(v)
         })
-        if(this.circles.length) {
+        if(this.circles && this.circles.length) {
             var ctx = this.circles[0]
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            this.circles = []
         }
-        this.circles = []
+
         this.markers = {}
     }
 
