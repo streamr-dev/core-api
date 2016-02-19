@@ -106,15 +106,16 @@ class StreamSpec extends LoginTester1Spec {
 		then: "must navigate to stream show page, showing info about non-configured stream"
 			waitFor { at StreamShowPage }
 			$(".alert-info", text: contains('configure'))
-		
+
 		when: "Configure Fields button is clicked"
+			def streamId = $(".stream-id").text()
 			configureFieldsButton.click()
 		then: "Navigate to configure page"
 			waitFor { at StreamConfigurePage }
 
 		when: "Produce an event into the stream and click autodetect button"
 			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
-			kafka.sendJSON($(".stream-id").text(), "", System.currentTimeMillis(), '{"foo":"bar","xyz":45.5}')
+			kafka.sendJSON(streamId, "", System.currentTimeMillis(), '{"foo":"bar","xyz":45.5}')
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
 			waitFor {
