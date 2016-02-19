@@ -17,8 +17,10 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 @CompileStatic
 class ApiService {
 
-	private static final Logger log = Logger.getLogger(ApiService)
+	static transactional = false
 
+	private static final Logger log = Logger.getLogger(ApiService)
+	
 	Map post(String url, Map body, SecUser user) {
 		// TODO: Migrate to Streamr API Java client lib when such a thing is made
 		def req = Unirest.post(url)
