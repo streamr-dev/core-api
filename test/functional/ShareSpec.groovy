@@ -6,10 +6,18 @@ import core.pages.LoginPage
 import core.pages.StreamListPage
 import core.pages.StreamShowPage
 import geb.spock.GebReportingSpec
-import org.openqa.selenium.Keys;
+import org.openqa.selenium.Keys
+import org.openqa.selenium.StaleElementReferenceException;
 
 @Mixin(LoginMixin)
 class ShareSpec extends GebReportingSpec {
+
+	def closePnotify() {
+		$(".ui-pnotify-closer").each {
+			try { it.click() } catch (StaleElementReferenceException e) {}
+		}
+		waitFor { $(".ui-pnotify").size() == 0 }
+	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
@@ -74,12 +82,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").find(".alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
-		when: "close pnotify-popups, otherwise the second pnotify covers the share button..."
-		$(".ui-pnotify-closer").each { it.click() }
-		then:
-		waitFor { $(".ui-pnotify").size() == 0 }
-
 		when: "re-open once more"
+		closePnotify()	// the second pnotify would cover the share button
 		getStreamRow().find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".bootbox.modal") }
@@ -123,6 +127,11 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
+		when: "open menu"
+		streamMenuButton.click()
+		then: "shareButton in menu"
+		waitFor { shareButton.displayed }
+
 		when: "re-open"
 		shareButton.click()
 		then: "check that row hasn't been deleted"
@@ -141,6 +150,11 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").find(".alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
+		when: "open menu"
+		streamMenuButton.click()
+		then: "shareButton in menu"
+		waitFor { shareButton.displayed }
+
 		when: "re-open"
 		shareButton.click()
 		then: "...to double-check it's gone"
@@ -148,12 +162,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
-		when: "close pnotify-popup"
-		$(".ui-pnotify-closer").each { it.click() }
-		then:
-		waitFor { $(".ui-pnotify").size() == 0 }
-
 		when: "save"
+		closePnotify()
 		$(".new-user-field") << Keys.ENTER
 		then: "...but no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
@@ -188,7 +198,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$(".new-user-field") << Keys.ESCAPE
 		then: "esc clears the email"
-		!$(".new-user-field").value()
+		waitFor { !$(".new-user-field").value() }
 
 		when:
 		$(".new-user-field") << "tester2@streamr.com"
@@ -225,12 +235,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").find(".alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
-		when: "close pnotify-popups, otherwise the second pnotify covers the share button..."
-		$(".ui-pnotify-closer").each { it.click() }
-		then:
-		waitFor { $(".ui-pnotify").size() == 0 }
-
 		when: "re-open once more"
+		closePnotify()	// the second pnotify would cover the share button
 		getCanvasRow().find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".bootbox.modal") }
@@ -248,7 +254,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "Move to Canvas info page, revoke permission"
 		getCanvasRow().click()
 		then:
-		waitFor { at CanvasShowPage }
+		waitFor { at CanvasPage }
 		waitFor { shareButton.displayed }
 
 		when:
@@ -287,12 +293,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").find(".alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
-		when: "close 'saving successful'-popup"
-		$(".ui-pnotify-closer").each { it.click() }
-		then:
-		waitFor { $(".ui-pnotify").size() == 0 }
-
 		when: "re-open"
+		closePnotify()
 		shareButton.click()
 		then: "...to double-check it's gone"
 		waitFor { $(".bootbox.modal") }
