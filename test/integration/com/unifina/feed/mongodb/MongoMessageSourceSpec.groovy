@@ -10,6 +10,7 @@ import com.unifina.feed.MessageRecipient
 import com.unifina.feed.map.MapMessage
 import grails.converters.JSON
 import grails.test.spock.IntegrationSpec
+import org.apache.log4j.Logger
 import org.bson.Document
 import spock.util.concurrent.PollingConditions
 
@@ -21,17 +22,24 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 	MongoMessageSource source
 	MongoClient mongoClient
 	DateFormat df
+	String collectionName
+	private static final Logger log = Logger.getLogger(MongoMessageSourceSpec)
 
 	def setup() {
 		df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 		df.setTimeZone(TimeZone.getTimeZone("UTC"))
+		collectionName = this.class.getSimpleName()+System.currentTimeMillis()
+		log.info("collectionName: $collectionName")
 	}
 
 	def cleanup() {
 		if (source != null)
 			source.close()
-		if (mongoClient != null)
+		if (mongoClient != null) {
+			log.info("dropping $collectionName")
+			mongoClient.getDatabase("test").getCollection(collectionName).drop()
 			mongoClient.close()
+		}
 	}
 
 	def "it should fetch new Documents since starting" () {
@@ -72,9 +80,9 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		Map config = [mongodb:[
 			host: "dev.streamr",
 			database: "test",
-			collection: this.class.getSimpleName(),
+			collection: collectionName,
 			timestampKey: "time",
-			pollIntervalMillis: 100
+			pollIntervalMillis: 1000
 		]]
 		stream.config = (config as JSON)
 		stream.save()
@@ -86,12 +94,14 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		when:
 		source.subscribe(stream)
 		Date insertTime = new Date()
-		db.getCollection(this.class.getSimpleName()).insertOne(
+		log.info("Inserting $insertTime")
+		db.getCollection(collectionName).insertOne(
 				new Document().append("time", insertTime)
 		)
 
 		then:
 		conditions.within(10) {
+			log.info("Asserting 1 message. counter: $counter, latestMessage: $latestMessage")
 			assert counter == 1
 			assert latestMessage?.message?.timestamp == insertTime
 		}
@@ -99,20 +109,22 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		when:
 		for (int i=0;i<5;i++) {
 			insertTime = new Date()
-			db.getCollection(this.class.getSimpleName()).insertOne(
+			log.info("Inserting $insertTime")
+			db.getCollection(collectionName).insertOne(
 					new Document().append("time", insertTime)
 			)
 		}
 
 		then:
 		conditions.within(10) {
+			log.info("Asserting 6 messages. counter: $counter, latestMessage: $latestMessage")
 			assert counter == 6
 			assert latestMessage?.message?.timestamp == insertTime
 		}
 
 		when:
 		source.unsubscribe(stream)
-		Thread.sleep(500)
+		Thread.sleep(2000) // sleep for longer than the poll interval to see if any extra messages come through
 
 		then:
 		counter == 6

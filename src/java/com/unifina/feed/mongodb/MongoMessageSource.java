@@ -11,6 +11,7 @@ import com.unifina.feed.Message;
 import com.unifina.feed.Poller;
 import com.unifina.feed.PollingMessageSource;
 import com.unifina.feed.map.MapMessage;
+import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import java.util.*;
@@ -19,6 +20,8 @@ import java.util.*;
  * Created by henripihkala on 09/02/16.
  */
 public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream> {
+
+	private static final Logger log = Logger.getLogger(MongoMessageSource.class);
 
 	public MongoMessageSource(Feed feed, Map<String, Object> config) {
 		super(feed, config);
@@ -65,6 +68,8 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 					list.add(msg);
 					lastDate = timestamp;
 				}
+
+				log.info("Got "+list.size()+" documents");
 
 				return list;
 			}
