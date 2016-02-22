@@ -21,8 +21,6 @@ import java.util.*;
  */
 public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream> {
 
-	private static final Logger log = Logger.getLogger(MongoMessageSource.class);
-
 	public MongoMessageSource(Feed feed, Map<String, Object> config) {
 		super(feed, config);
 	}
@@ -55,8 +53,6 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 
 			@Override
 			public List<Message<MapMessage, Stream>> poll() {
-				log.info("Polling for messages since " + lastDate.getTime());
-
 				// Update the date filter
 				startDateFilter.put("$gt", lastDate);
 
@@ -69,8 +65,6 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 					list.add(msg);
 					lastDate = timestamp;
 				}
-
-				log.info("Got "+list.size()+" documents");
 
 				return list;
 			}
