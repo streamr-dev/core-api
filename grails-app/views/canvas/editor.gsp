@@ -380,7 +380,7 @@ $(document).unload(function () {
 			</div>
 
 			<div class="menu-content">
-				<ui:shareButton id="share-button" class="btn-block" name="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
+				<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
 			</div>
 
 		</div> <!-- / #main-menu-inner -->

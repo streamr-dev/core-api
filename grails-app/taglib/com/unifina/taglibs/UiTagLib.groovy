@@ -287,13 +287,16 @@ public class UiTagLib {
 	 * @body is button label, just like HTML buttons
 	 * @attr url to the resource to be shared; read from data-url HTML attribute if url and getUrl omitted
 	 * @attr getUrl javascript command that returns the url to the resource
-	 * @attr name of the resource shown in the sharePopup dialog, generated if omitted
+	 * @attr name of the resource shown in the sharePopup dialog; generated if name and getName omitted
+	 * @attr getName javascript command that returns the name to the resource
 	 */
 	def shareButton = {attrs, body->
 		def type = attrs.remove("type") ?: "button"
 		def extraClass = attrs.remove("class") ?: ""
 		def extraOnClick = attrs.remove("onclick") ?: ""
-		def name = attrs.remove("name") ?: ""	// generated in sharePopup if omitted
+		def name = attrs.remove("name")
+		def nameGetter = attrs.remove("getName")
+		def resourceName = name ? '"'+name+'"' : nameGetter ?: "" // generated in sharePopup if omitted
 		def url = attrs.remove("url")
 		def urlGetter = attrs.remove("getUrl")
 		def resourceUrl = url ? '"'+url+'"' : (urlGetter ?: '$(this).data("url")')
@@ -309,7 +312,7 @@ public class UiTagLib {
 			throw new IllegalArgumentException("Unknown 'type' for shareButton: $type")
 		}
 
-		out << open << "onclick='$extraOnClick;sharePopup($resourceUrl, \"$name\")' "
+		out << open << "onclick='$extraOnClick;sharePopup($resourceUrl, $resourceName)' "
 		outputAttributes(attrs, out)
 		out << "><span class='superscript'>+</span><i class='fa fa-user'></i> " << body() << close
 
