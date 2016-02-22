@@ -55,6 +55,7 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 
 			@Override
 			public List<Message<MapMessage, Stream>> poll() {
+				log.info("Polling for messages since " + lastDate.getTime());
 
 				// Update the date filter
 				startDateFilter.put("$gt", lastDate);
