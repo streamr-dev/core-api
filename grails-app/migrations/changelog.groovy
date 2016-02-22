@@ -10,4 +10,6 @@ databaseChangeLog = {
 	include file: 'core/2016-02-09-permissions-for-signupinvites.groovy'
 
 	include file: 'core/2016-02-10-remove-feeduser-modulepackageuser.groovy'
+
+	include file: 'core/2016-02-19-add-sharespec-test-data.groovy'
 }

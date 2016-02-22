@@ -12,6 +12,7 @@ import org.openqa.selenium.Keys;
 class ShareSpec extends GebReportingSpec {
 
 	void "sharePopup can grant and revoke Stream permissions"() {
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
 
 		when:
@@ -20,7 +21,7 @@ class ShareSpec extends GebReportingSpec {
 		!$(".bootbox.modal")
 
 		when: "open 'ShareSpec' Stream"
-		$(".tr", "data-id": "134").find("button").click()
+		getStreamRow().find("button").click()
 		then:
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -54,7 +55,7 @@ class ShareSpec extends GebReportingSpec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		$(".tr", "data-id": "134").find("button").click()
+		getStreamRow().find("button").click()
 		then: "access row from last time was discarded"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -79,7 +80,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 
 		when: "re-open once more"
-		$(".tr", "data-id": "134").find("button").click()
+		getStreamRow().find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".bootbox.modal") }
 		waitFor { $(".new-user-field").displayed }
@@ -94,7 +95,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Stream page, revoke permission"
-		$(".tr", "data-id": "134").click()
+		getStreamRow().click()
 		then:
 		waitFor { at StreamShowPage }
 		waitFor { streamMenuButton.displayed }
