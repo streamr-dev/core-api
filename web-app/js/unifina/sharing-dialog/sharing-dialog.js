@@ -224,7 +224,7 @@
     /** Entry point */
     exports.sharePopup = function(url, resourceName) {
         // if button was on top of a link, disable a-href redirect
-        event.preventDefault()
+        if (event) { event.preventDefault() }
 
         if (dialogIsOpen()) { console.error("Cannot open sharePopup, already open!"); return false }
         if (!url) { console.error("Cannot open sharePopup without resource URL!"); return false }
