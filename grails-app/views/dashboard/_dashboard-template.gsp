@@ -10,6 +10,7 @@
     </ul>
     <div class="menu-content">
         <button class='save-button btn btn-block btn-primary' title='Save dashboard'>Save</button>
+        <ui:shareButton id="share-button" class="btn-block" name="Dashboard {{ name }}" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" > Share </ui:shareButton>
         <form method="post" role="form" id="deleteDashboardForm">
             <g:hiddenField name="id" value="${params.id}" />
             <button id='deleteButton' class='delete-button btn btn-block btn-default confirm' data-action="${createLink(action:'delete')}" data-confirm="Really delete dashboard {{ name }}?" title='Delete dashboard'>Delete</button>
