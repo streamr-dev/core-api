@@ -93,6 +93,7 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 
 		when:
 		source.subscribe(stream)
+		Thread.sleep(100)
 		Date insertTime = new Date()
 		log.info("Inserting ${insertTime.time}")
 		db.getCollection(collectionName).insertOne(
