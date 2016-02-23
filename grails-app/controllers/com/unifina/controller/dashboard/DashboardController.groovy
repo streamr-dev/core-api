@@ -81,10 +81,10 @@ class DashboardController {
 			try {
 				DashboardItem.executeUpdate("delete from DashboardItem di where di.dashboard = ?", [dashboard])
 				dashboard.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboardInstance.name])}"
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])}"
 				redirect(action: "list")
 			} catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboardInstance.name])}"
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])}"
 				redirect(action: "show", id: params.id)
 			}
 		}
