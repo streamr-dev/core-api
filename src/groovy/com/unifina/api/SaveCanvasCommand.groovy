@@ -7,7 +7,8 @@ class SaveCanvasCommand {
 	String name
 	List<Object> modules
 	Map settings = [:]
-	boolean adhoc
+	boolean adhoc = false
+	boolean shared = false
 
 	static constraints = {
 		name(blank: false)
