@@ -22,8 +22,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 
 		when:
 		to StreamListPage
@@ -173,8 +173,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 		loginTester1()
+		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 
 		when:
 		to CanvasListPage
