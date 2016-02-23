@@ -17,7 +17,7 @@ class DashboardSpec extends LoginTester1Spec {
 		to CanvasListPage
 		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
-		waitFor { at CanvasPage  }
+		waitFor { at CanvasPage }
 		// Wait for the canvas to load
 		waitFor { findModuleOnCanvas("Chart") }
 
