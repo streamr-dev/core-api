@@ -44,7 +44,10 @@
                     this.get("write") ? this.options.write.description :
                     this.get("read")  ? this.options.read.description :
                                         this.options.none.description
-        }
+        },
+
+        // ignore Backbone sync, handle manually after user presses "Save"
+        sync: function(method, model, options) {}
     })
 
     var accessTemplate = _.template(
@@ -182,12 +185,7 @@
             accessList.each(this.createAccessView, this)
         }
     })
-
-    Backbone.sync = function(method, model, options) {
-        console.log("Sync request: " + method + ", " + model + ", " + options)
-        return undefined
-    }
-
+    
     function shake($element) {
         if ($element.is(":animated")) { return }    // let's not mess with anyone else's animation...
         var ml = $element.css("margin-left")
