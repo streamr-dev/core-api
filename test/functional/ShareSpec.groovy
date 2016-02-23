@@ -1,18 +1,20 @@
-import core.LoginTester1Spec
 import core.mixins.LoginMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
 import core.pages.DashboardListPage
 import core.pages.DashboardShowPage
-import core.pages.LoginPage
 import core.pages.StreamListPage
 import core.pages.StreamShowPage
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Keys
 import org.openqa.selenium.StaleElementReferenceException;
 
-@Mixin(LoginMixin)
 class ShareSpec extends GebReportingSpec {
+
+	def setupSpec() {
+		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(LoginMixin)
+	}
 
 	def closePnotify() {
 		$(".ui-pnotify-closer").each {
@@ -22,8 +24,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
-		loginTester1()
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+		loginTester1()
 
 		when:
 		to StreamListPage
@@ -173,8 +175,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
-		loginTester1()
 		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
+		loginTester1()
 
 		when:
 		to CanvasListPage
