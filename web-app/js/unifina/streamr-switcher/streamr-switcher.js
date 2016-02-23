@@ -1,5 +1,139 @@
 (function(exports) {
 
+	// Copy pasted from pixelAdmin /javascripts/build/plugins_switcher.js
+	var Switcher = function($el, options) {
+		var box_class;
+		if (options == null) {
+			options = {};
+		}
+		this.options = $.extend({}, Switcher.DEFAULTS, options);
+		this.$checkbox = null;
+		this.$box = null;
+		if ($el.is('input[type="checkbox"]')) {
+			box_class = $el.attr('data-class');
+			this.$checkbox = $el;
+			this.$box = $('<div class="switcher"><div class="switcher-toggler"></div><div class="switcher-inner"><div class="switcher-state-on">' + this.options.on_state_content + '</div><div class="switcher-state-off">' + this.options.off_state_content + '</div></div></div>');
+			if (this.options.theme) {
+				this.$box.addClass('switcher-theme-' + this.options.theme);
+			}
+			if (box_class) {
+				this.$box.addClass(box_class);
+			}
+			this.$box.insertAfter(this.$checkbox).prepend(this.$checkbox);
+		} else {
+			this.$box = $el;
+			this.$checkbox = $('input[type="checkbox"]', this.$box);
+		}
+		if (this.$checkbox.prop('disabled')) {
+			this.$box.addClass('disabled');
+		}
+		if (this.$checkbox.is(':checked')) {
+			this.$box.addClass('checked');
+		}
+		this.$checkbox.on('click', function(e) {
+			return e.stopPropagation();
+		});
+		this.$box.on('touchend click', (function(_this) {
+			return function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				return _this.toggle();
+			};
+		})(this));
+		return this;
+	};
+
+
+	/*
+	 * Enable switcher.
+	 *
+	 */
+
+	Switcher.prototype.enable = function() {
+		this.$checkbox.prop('disabled', false);
+		return this.$box.removeClass('disabled');
+	};
+
+
+	/*
+	 * Disable switcher.
+	 *
+	 */
+
+	Switcher.prototype.disable = function() {
+		this.$checkbox.prop('disabled', true);
+		return this.$box.addClass('disabled');
+	};
+
+
+	/*
+	 * Set switcher to true.
+	 *
+	 */
+
+	Switcher.prototype.on = function() {
+		if (!this.$checkbox.is(':checked')) {
+			this.$checkbox.click();
+			return this.$box.addClass('checked');
+		}
+	};
+
+
+	/*
+	 * Set switcher to false.
+	 *
+	 */
+
+	Switcher.prototype.off = function() {
+		if (this.$checkbox.is(':checked')) {
+			this.$checkbox.click();
+			return this.$box.removeClass('checked');
+		}
+	};
+
+
+	/*
+	 * Toggle switcher.
+	 *
+	 */
+
+	Switcher.prototype.toggle = function() {
+		if (this.$checkbox.click().is(':checked')) {
+			return this.$box.addClass('checked');
+		} else {
+			return this.$box.removeClass('checked');
+		}
+	};
+
+	Switcher.DEFAULTS = {
+		theme: null,
+		on_state_content: 'ON',
+		off_state_content: 'OFF'
+	};
+
+	$.fn.switcher = function(options, attrs) {
+		return $(this).each(function() {
+			var $this, sw;
+			$this = $(this);
+			sw = $.data(this, 'Switcher');
+			if (!sw) {
+				return $.data(this, 'Switcher', new Switcher($this, options));
+			} else if (options === 'enable') {
+				return sw.enable();
+			} else if (options === 'disable') {
+				return sw.disable();
+			} else if (options === 'on') {
+				return sw.on();
+			} else if (options === 'off') {
+				return sw.off();
+			} else if (options === 'toggle') {
+				return sw.toggle();
+			}
+		});
+	};
+
+	$.fn.switcher.Constructor = Switcher;
+
 	function StreamrSwitcher(parent, json) {
 		this.parent = $(parent)
 		this.mustSendValue = true
@@ -10,15 +144,15 @@
 
 	StreamrSwitcher.prototype.render = function() {
 		var _this = this
-		this.switcherEl = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
-		this.switcherEl.attr("checked", this.checked)
-		this.switcherEl.change(function() {
+		this.switcher = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
+		this.switcher.attr("checked", this.checked)
+		this.switcher.change(function() {
 			if(_this.mustSendValue === true)
 				_this.sendValue(_this.getValue())
 		})
-		this.parent.append(this.switcherEl)
+		this.parent.append(this.switcher)
 		this.parent.addClass("switcher-container")
-		this.switcher = this.createSwitcher(this.switcherEl,{
+		this.switcher.switcher({
 			theme: 'square',
 			on_state_content: "1",
 			off_state_content: "0"
@@ -30,7 +164,7 @@
 	}
 
 	StreamrSwitcher.prototype.getValue = function() {
-		return this.switcherEl.prop('checked')
+		return this.switcher.prop('checked')
 	}
 
 	StreamrSwitcher.prototype.toJSON = function() {
@@ -42,12 +176,12 @@
 	StreamrSwitcher.prototype.updateState = function(state) {
 		this.mustSendValue = false
 		if(state == true && this.getValue() === false)
-			this.switcher.on()
+			this.switcher.switcher("on")
 		else if(state == false && this.getValue() === true)
-			this.switcher.off()
+			this.switcher.switcher("off")
 		this.mustSendValue = true
 	}
-    //
+
 	StreamrSwitcher.prototype.sendValue = function(value) {
 		$(this).trigger("input", value)
 	}
@@ -55,100 +189,6 @@
 	StreamrSwitcher.prototype.receiveResponse = function(p) {
 		if (p["switcherValue"] === true || p["switcherValue"] === false)
 			this.updateState(p["switcherValue"])
-	}
-
-	StreamrSwitcher.prototype.createSwitcher = function($el, options) {
-		var _this = this
-		var switcher = {}
-		var DEFAULTS = {
-			theme: null,
-			on_state_content: 'ON',
-			off_state_content: 'OFF'
-		}
-		var box_class;
-		if (options == null) {
-			options = {};
-		}
-		switcher.options = $.extend({}, DEFAULTS, options);
-		switcher.$checkbox = null;
-		switcher.$box = null;
-		if ($el.is('input[type="checkbox"]')) {
-			box_class = $el.attr('data-class');
-			switcher.$checkbox = $el;
-			switcher.$box = $(
-					'<div class="switcher">' +
-						'<div class="switcher-toggler"></div>' +
-						'<div class="switcher-inner">' +
-							'<div class="switcher-state-on">' +
-								switcher.options.on_state_content +
-							'</div>' +
-							'<div class="switcher-state-off">'+
-								switcher.options.off_state_content +
-							'</div>' +
-						'</div>' +
-					'</div>'
-			);
-			if (switcher.options.theme) {
-				switcher.$box.addClass('switcher-theme-' + switcher.options.theme);
-			}
-			if (box_class) {
-				switcher.$box.addClass(box_class);
-			}
-			switcher.$box.insertAfter(switcher.$checkbox).prepend(switcher.$checkbox);
-		} else {
-			switcher.$box = $el;
-			switcher.$checkbox = $('input[type="checkbox"]', switcher.$box);
-		}
-		if (switcher.$checkbox.prop('disabled')) {
-			switcher.$box.addClass('disabled');
-		}
-		if (switcher.$checkbox.is(':checked')) {
-			switcher.$box.addClass('checked');
-		}
-		switcher.$checkbox.on('click', function(e) {
-			return e.stopPropagation();
-		});
-		switcher.$box.on('touchend click', (function(_this) {
-			return function(e) {
-				e.stopPropagation();
-				e.preventDefault();
-				return switcher.toggle();
-			};
-		})(switcher));
-
-		switcher.toggle = function() {
-			if (switcher.$checkbox.click().is(':checked')) {
-				return switcher.$box.addClass('checked');
-			} else {
-				return switcher.$box.removeClass('checked');
-			}
-		}
-
-		switcher.enable = function() {
-			_this.switcher.$checkbox.prop('disabled', false);
-			return _this.switcher.$box.removeClass('disabled');
-		}
-
-		switcher.disable = function() {
-			_this.switcher.$checkbox.prop('disabled', true);
-			return _this.switcher.$box.addClass('disabled');
-		}
-
-		switcher.on = function() {
-			if (!_this.switcher.$checkbox.is(':checked')) {
-				_this.switcher.$checkbox.click();
-				return _this.switcher.$box.addClass('checked');
-			}
-		}
-
-		switcher.off = function() {
-			if (_this.switcher.$checkbox.is(':checked')) {
-				_this.switcher.$checkbox.click();
-				return _this.switcher.$box.removeClass('checked');
-			}
-		}
-
-		return switcher;
 	}
 
 exports.StreamrSwitcher = StreamrSwitcher
