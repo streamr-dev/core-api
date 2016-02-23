@@ -4,7 +4,7 @@ databaseChangeLog = {
 
 	changeSet(author: "jtakalai", context: "test", id: "2016021931337-1") {
 		// date format specified in http://www.liquibase.org/documentation/column.html
-		String now = new Date().format("YYYY-MM-DD'T'hh:mm:ss")
+		String now = "2016-02-22T15:00:00"
 		insert(tableName: "stream") {
 			//column(name: "id", valueNumeric: autoincremented?)
 			column(name: "version", valueNumeric: 0)
