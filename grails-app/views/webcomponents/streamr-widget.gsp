@@ -21,6 +21,13 @@
 				resendLast: undefined,
 				resendAll: undefined
 			},
+			detached: function() {
+				var _this = this
+
+				_this.$.client.getClient(function(client) {
+					client.unsubscribe(_this.sub)
+				})
+			},
 			bindEvents: function(container) {
 				container.parentNode.addEventListener("remove", function() {
 					var _this = this
