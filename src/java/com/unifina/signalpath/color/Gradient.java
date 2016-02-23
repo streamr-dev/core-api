@@ -12,8 +12,8 @@ public class Gradient extends AbstractSignalPathModule {
 
 	TimeSeriesInput in = new TimeSeriesInput(this, "in");
 
-	ColorParameter minColor = new ColorParameter(this, "minColor", new StreamrColor(255, 255, 255));
-	ColorParameter maxColor = new ColorParameter(this, "maxColor", new StreamrColor(0, 0, 0));
+	ColorParameter minColor = new ColorParameter(this, "minColor", new StreamrColor(0, 255, 0));
+	ColorParameter maxColor = new ColorParameter(this, "maxColor", new StreamrColor(255, 0, 0));
 
 	Output<StreamrColor> out = new Output<>(this, "color", "Color");
 

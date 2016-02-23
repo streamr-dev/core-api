@@ -21,7 +21,8 @@
             centerLng: 15,
             zoom: 2,
             minZoom: 2,
-            maxZoom: 18
+            maxZoom: 18,
+            traceRadius: 2
         }, options || {})
 
         if (!this.parent.attr("id"))
@@ -52,14 +53,13 @@
         })
 
         if(this.options.drawTrace)
-            this.lineLayer = this.createBigPointLayer()
-
+            this.lineLayer = this.createLinePointLayer()
     }
 
-    StreamrMap.prototype.createBigPointLayer = function() {
+    StreamrMap.prototype.createLinePointLayer = function() {
         var _this = this
         this.circles = []
-        var BigPointLayer = L.CanvasLayer.extend({
+        var LinePointLayer = L.CanvasLayer.extend({
             renderCircle: function(ctx, point, radius, color) {
                 color = color || 'rgba(255,0,0,1)'
                 ctx.fillStyle = color;
@@ -93,7 +93,7 @@
                 updates.forEach(function(update) {
                     // get center from the map (projected)
                     var point = bigPointLayer._map.latLngToContainerPoint(update.latlng);
-                    bigPointLayer.renderCircle(ctx, point, 2, update.color)
+                    bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, update.color)
                 })
 
                 console.log("Render took "+ (Date.now()-start)+"ms, pendingLineUpdates.length: "+_this.pendingLineUpdates.length)
@@ -101,7 +101,7 @@
             }
         })
 
-        var layer = new BigPointLayer().addTo(this.map)
+        var layer = new LinePointLayer().addTo(this.map)
         return layer
     }
 
@@ -115,6 +115,7 @@
         var id = attr.id
         var lat = attr.lat
         var lng = attr.lng
+        // Needed for linePoints
         var color = attr.color
         var latlng = new L.LatLng(lat, lng)
 
@@ -126,28 +127,9 @@
 
         var marker = this.markers[id]
         if(marker === undefined) {
-            var marker = L.marker(latlng, {
-                'icon': L.divIcon({
-                    iconSize:     [19, 48], // size of the icon
-                    iconAnchor:   [11, 47], // point of the icon which will correspond to marker's location
-                    popupAnchor:  [-4, -38], // point from which the popup should open relative to the iconAnchor,
-                    className: "streamr-map-icon fa fa-map-marker fa-4x",
-                })
-            })
-            var popupContent = "<span style='text-align:center;width:100%'><span>"+id+"</span></span>"
-            var popupOptions = {
-                closeButton: false,
-            }
-            marker.bindPopup(popupContent, popupOptions)
-            marker.on("mouseover", function() {
-                marker.openPopup()
-            })
-            marker.on("mouseout", function() {
-                marker.closePopup()
-            })
-            marker.addTo(this.map)
-            this.markers[id] = marker
-            this.addLinePoint(id, lat, lng, color)
+            this.markers[id] = this.createMarker(id, latlng)
+            if(this.options.drawTrace)
+                this.addLinePoint(id, lat, lng, color)
         } else {
             this.moveMarker(id, lat, lng, color)
         }
@@ -155,10 +137,35 @@
         return marker
     }
 
+    StreamrMap.prototype.createMarker = function(id, latlng) {
+        var marker = L.marker(latlng, {
+            icon: L.divIcon({
+                iconSize:     [19, 48], // size of the icon
+                iconAnchor:   [14, 53], // point of the icon which will correspond to marker's location
+                popupAnchor:  [0, -41], // point from which the popup should open relative to the iconAnchor,
+                className: 'streamr-map-icon fa fa-map-marker fa-4x'
+            })
+        })
+        var popupContent = "<span style='text-align:center;width:100%'><span>"+id+"</span></span>"
+        var popupOptions = {
+            closeButton: false,
+        }
+        marker.bindPopup(popupContent, popupOptions)
+        marker.on("mouseover", function() {
+            marker.openPopup()
+        })
+        marker.on("mouseout", function() {
+            marker.closePopup()
+        })
+        marker.addTo(this.map)
+        return marker
+    }
+
     StreamrMap.prototype.moveMarker = function(id, lat, lng, color) {
         var latlng = L.latLng(lat,lng)
         this.pendingMarkerUpdates[id] = latlng
-        this.addLinePoint(id, lat, lng, color)
+        if(this.options.drawTrace)
+            this.addLinePoint(id, lat, lng, color)
         this.requestUpdate()
     }
 

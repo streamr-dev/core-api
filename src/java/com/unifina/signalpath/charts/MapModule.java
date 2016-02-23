@@ -13,7 +13,8 @@ public class MapModule extends ModuleWithUI {
 	ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
 	boolean drawTrace = false;
-	boolean autoZoom = true;
+	boolean autoZoom = false;
+	int traceRadius = 2;
 
 	@Override
 	public void init() {
@@ -54,8 +55,6 @@ public class MapModule extends ModuleWithUI {
 		java.util.Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(new ModuleOption("min", 0, ModuleOption.OPTION_DOUBLE));
-		options.addIfMissing(new ModuleOption("max", 20, ModuleOption.OPTION_DOUBLE));
 		options.addIfMissing(new ModuleOption("centerLat", 35, ModuleOption.OPTION_DOUBLE));
 		options.addIfMissing(new ModuleOption("centerLng", 15, ModuleOption.OPTION_DOUBLE));
 		options.addIfMissing(new ModuleOption("zoom", 2, ModuleOption.OPTION_INTEGER));
@@ -63,6 +62,7 @@ public class MapModule extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("maxZoom", 18, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("drawTrace", drawTrace, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("autoZoom", autoZoom, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("traceRadius", traceRadius, ModuleOption.OPTION_INTEGER));
 
 		return config;
 	}
@@ -77,6 +77,9 @@ public class MapModule extends ModuleWithUI {
 
 		if(options.containsKey("autoZoom"))
 			autoZoom = options.getOption("autoZoom").getBoolean();
+
+		if(options.containsKey("traceRadius"))
+			traceRadius = options.getOption("traceRadius").getInt();
 
 		if (drawTrace) {
 			addInput(color);

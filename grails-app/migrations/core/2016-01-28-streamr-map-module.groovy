@@ -4,13 +4,14 @@ databaseChangeLog = {
 
 	changeSet(author: "aapeli", id: "145262149000-36") {
 		sql("""
-			INSERT INTO module value(
+			INSERT INTO module(id, version, category_id, implementing_class, name, js_module, hide, type, module_package_id, json_help, alternative_names, webcomponent)
+			VALUE(
 				Null,
 				'1',
 				'13',
 				'com.unifina.signalpath.charts.MapModule',
 				'Map',
-				'Map',
+				'MapModule',
 				NULL,
 				'module',
 				'1',

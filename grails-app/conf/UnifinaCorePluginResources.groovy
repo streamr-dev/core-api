@@ -158,7 +158,7 @@ modules = {
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
-		dependsOn 'streamr-client, streamr-chart, streamr-heatmap, streamr-table, streamr-button, streamr-switcher, streamr-text-field'
+		dependsOn 'streamr-client, streamr-chart, streamr-heatmap, streamr-table, streamr-button, streamr-switcher, streamr-text-field, streamr-map'
 	}
 	'stream-fields' {
 		dependsOn 'jquery, backbone'
@@ -222,6 +222,7 @@ modules = {
 	}
 	'streamr-map' {
 		dependsOn 'jquery, leaflet'
+		resource url:[dir:'css/signalPath/widgets/', file:'streamr-map.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-map', file:'streamr-map.js', plugin: 'unifina-core']
 	}
 	'streamr-table' {
