@@ -132,9 +132,6 @@ modules = {
 	mathjax {
 		resource url:'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
 	}
-	switcher {
-		resource url:[dir:'js/pixel-admin', file:'switcher.js', plugin:'unifina-core']
-	}
 
 	/**
 	 * In-house widgets and resources
@@ -200,7 +197,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-button', file:'streamr-button.js', plugin: 'unifina-core']
 	}
 	'streamr-switcher' {
-		dependsOn 'jquery, switcher'
+		dependsOn 'jquery'
 		resource url:[dir:'js/unifina/streamr-switcher', file:'streamr-switcher.js', plugin: 'unifina-core']
 	}
 	'streamr-text-field' {
