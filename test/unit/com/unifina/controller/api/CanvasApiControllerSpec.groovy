@@ -102,6 +102,7 @@ class CanvasApiControllerSpec extends Specification {
 			settings: [:],
 			modules: [],
 			adhoc: false,
+			shared: false,
 			updated: JSONObject.NULL,
 			created: JSONObject.NULL,
 			uiChannel: JSONObject.NULL,
