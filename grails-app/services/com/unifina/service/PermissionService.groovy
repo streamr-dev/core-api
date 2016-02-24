@@ -143,7 +143,7 @@ class PermissionService {
 	}
 
 	/** Get all resources of given type that the user has specified type of access to */
-	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op = Operation.READ, Closure resourceFilter = {}) {
+	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
 		// TODO: return resources that are "public" i.e. always readable, also to null user
 		if (!user) { return [] }
 
@@ -176,7 +176,7 @@ class PermissionService {
 		}
 	}
 	/** Overload to allow leaving out the op but including the filter... */
-	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter) {
+	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter = {}) {
 		return getAll(resourceClass, user, Operation.READ, resourceFilter)
 	}
 //"Can't add access permissions to com.unifina.domain.signalpath.Canvas : cnwgfBFKTSqjJavFOe3Aqw for owner (tester1@streamr.com, id 1)!"
