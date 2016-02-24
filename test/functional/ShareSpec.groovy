@@ -601,4 +601,44 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").find(".alert-success") }
 		waitFor { !$(".bootbox.modal") }
 	}
+
+	void "shared stream is shown in search box"() {
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+
+		loginTester1()
+
+		when: "give tester2 read permission to stream"
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		then: "got the access-row; also it's the only one so we're not mixing things up"
+		waitFor { $(".access-row") }
+		$(".access-row").size() == 1
+
+		when: "save canvas read right"
+		$(".new-user-field") << Keys.ENTER
+		then:
+		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { !$(".bootbox.modal") }
+
+		when: "try search"
+		closePnotify()
+		logout()
+		loginTester2()
+		search << "ShareSp"
+		then: "found!"
+		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+
+		cleanup: "remove tester2 permission"
+		logout()
+		loginTester1()
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".user-delete-button").displayed }
+		$(".user-delete-button").click()
+		waitFor { $(".access-row").size() == 0 }
+		$("button", text: "Save").click()
+		waitFor { $(".ui-pnotify").find(".alert-success") }
+	}
 }
