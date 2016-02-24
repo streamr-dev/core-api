@@ -66,15 +66,15 @@
 </script>
 
 <script id="streamr-button-template" type="text/template">
-    <streamr-button class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-button>
+    <streamr-button class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" canvas="{{ canvas }}" module="{{ module }}"></streamr-button>
 </script>
 
 <script id="streamr-switcher-template" type="text/template">
-    <streamr-switcher class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-switcher>
+    <streamr-switcher class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" canvas="{{ canvas }}" module="{{ module }}"></streamr-switcher>
 </script>
 
 <script id="streamr-text-field-template" type="text/template">
-    <streamr-text-field class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-text-field>
+    <streamr-text-field class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" canvas="{{ canvas }}" module="{{ module }}"></streamr-text-field>
 </script>
 
 <script id="titlebar-template" type="text/template">
