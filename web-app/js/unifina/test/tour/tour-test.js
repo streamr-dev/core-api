@@ -44,7 +44,7 @@ describe('Tour', function() {
 			}
 		}
 
-		Tour = require('../tour/tour').Tour
+		Tour = require('../../tour/tour').Tour
 	})
 
 	beforeEach(function() {

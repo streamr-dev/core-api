@@ -1,11 +1,11 @@
 package com.unifina.service
 
-import com.unifina.data.IFeed
+import groovy.transform.CompileStatic
+
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
-import com.unifina.feed.FeedFactory
+import com.unifina.feed.AbstractFeed
 import com.unifina.feed.FeedNotFoundException
-import com.unifina.feed.MessageHub
 import com.unifina.feed.StreamNotFoundException
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
@@ -14,13 +14,15 @@ class FeedService {
 
 	def grailsApplication
 	
+	@CompileStatic
 	String getFeedClass(Feed domain, boolean historical) {
 		return historical ? domain.backtestFeed : domain.realtimeFeed
 	}
 	
-    IFeed instantiateFeed(Feed domain, boolean historical, Globals globals) {
+	@CompileStatic
+    AbstractFeed instantiateFeed(Feed domain, boolean historical, Globals globals) {
 		String className = getFeedClass(domain,historical)
-		IFeed feed = this.getClass().getClassLoader().loadClass(className).newInstance(globals,domain)
+		AbstractFeed feed = (AbstractFeed) this.getClass().getClassLoader().loadClass(className).newInstance(globals,domain)
 		feed.setTimeZone(TimeZone.getTimeZone(domain.timezone))
 		return feed
     }
@@ -59,6 +61,7 @@ class FeedService {
 			throw new FeedNotFoundException(className)
 		else return result
 	}
+	
 	
 	Feed getFeedByModule(AbstractSignalPathModule m) {
 		Feed result = Feed.createCriteria().get() {

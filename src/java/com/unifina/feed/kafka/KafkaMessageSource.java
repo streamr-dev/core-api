@@ -20,11 +20,11 @@ public class KafkaMessageSource implements MessageSource {
 	
 	private UnifinaKafkaMessageHandler handler = new UnifinaKafkaMessageHandler() {
 		
-		private long offset = 0;
+		private long counter = 0;
 		
 		@Override
-		public void handleMessage(UnifinaKafkaMessage kafkaMessage) {
-			Message msg = new Message(kafkaMessage.getChannel(), offset++, kafkaMessage);
+		public void handleMessage(UnifinaKafkaMessage kafkaMessage, String topic, int partition, long offset) {
+			Message msg = new Message(kafkaMessage.getChannel(), counter++, kafkaMessage);
 			msg.checkCounter = false;
 			recipient.receive(msg);
 		}
@@ -56,7 +56,7 @@ public class KafkaMessageSource implements MessageSource {
 
 	@Override
 	public void subscribe(Object key) {
-		consumer.subscribe(key.toString(), handler, false);
+		consumer.subscribe(key.toString(), handler);
 	}
 
 	@Override

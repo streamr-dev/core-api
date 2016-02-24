@@ -10,7 +10,7 @@
 <polymer-element name="streamr-widget" attributes="canvas module resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
-		<div id="container" class="container"></div>
+		<div id="streamr-widget-container" class="streamr-widget-container"></div>
 	</template>
 	
 	<script>

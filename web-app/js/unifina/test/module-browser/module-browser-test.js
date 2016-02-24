@@ -45,7 +45,7 @@ describe('module-browser-page', function(){
 
 		global.spinnerImg = ""
 
-		mb = require('../module-browser/module-browser')
+		mb = require('../../module-browser/module-browser')
 
 		assert.equal($("body").length, 1)
 	})

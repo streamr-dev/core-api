@@ -24,6 +24,7 @@ class RunCanvasSpec extends IntegrationSpec {
 
 	def canvasService
 	def kafkaService
+	def streamService
 
 	Canvas canvas
 	SecUser user
@@ -38,6 +39,8 @@ class RunCanvasSpec extends IntegrationSpec {
 
 		// Create stream
 		String uuid = IdGenerator.get()
+		// overwrite these parts from mongodb branch on merge
+		kafkaService.createTopics([uuid])
 		stream = new Stream(
 			name: "run-canvas-spec-stream",
 			feed: Feed.load(7L),
@@ -71,6 +74,7 @@ class RunCanvasSpec extends IntegrationSpec {
 	}
 
 	def cleanup() {
+		streamService.deleteStream(stream)
 		FeedFactory.stopAndClearAll() // Do not leave messagehub threads lying around
 	}
 

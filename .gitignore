@@ -11,3 +11,4 @@ unifina-core*.iml
 .slcache/
 out/
 plugin.xml
+hs_err_pid*

@@ -1,14 +1,12 @@
 package com.unifina.service
 
-import com.unifina.datasource.BacktestDataSource
 import com.unifina.datasource.DataSource
+import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.UiChannel
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
@@ -18,7 +16,6 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.IdGenerator
 import com.unifina.utils.NetworkInterfaceUtils
 import grails.converters.JSON
 import grails.transaction.NotTransactional
@@ -44,7 +41,7 @@ class SignalPathService {
 	def kafkaService
 	def serializationService
 	ApiService apiService
-	
+
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
 	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
@@ -124,11 +121,11 @@ class SignalPathService {
 
 		// Return the historical DataSource by default
 		if (adhoc)
-			return new BacktestDataSource(globals)
+			return new HistoricalDataSource(globals)
 		else return new RealtimeDataSource(globals)
 		
 	}
-	
+
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
 
@@ -224,7 +221,7 @@ class SignalPathService {
 		canvas.state = Canvas.State.RUNNING
 
 		canvas.save()
-		
+
 		// Start the runner thread
 		runner.start()
 		
