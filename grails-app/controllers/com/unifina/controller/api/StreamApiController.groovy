@@ -27,7 +27,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def save() {
-		Stream stream = streamService.createStream(request.JSON, request.apiUser, request.JSON.config?.fields)
+		Stream stream = streamService.createStream(request.JSON, request.apiUser)
 		render(stream.toMap() as JSON)
 	}
 

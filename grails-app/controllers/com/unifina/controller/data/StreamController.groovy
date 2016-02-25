@@ -76,7 +76,7 @@ class StreamController {
 			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
 		} else {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createStream(params, user, null)
+			Stream stream = streamService.createStream(params, user)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)

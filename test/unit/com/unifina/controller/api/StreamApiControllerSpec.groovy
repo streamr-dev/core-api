@@ -45,10 +45,10 @@ class StreamApiControllerSpec extends Specification {
 
 		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
 
-		streamOneUuid = streamService.createStream([name: "stream", description: "description", feed: feed], user, null).uuid
-		streamTwoUuid = streamService.createStream([name: "ztream", feed: feed], user, null).uuid
-		streamThreeUuid = streamService.createStream([name: "atream", feed: feed], user, null).uuid
-		streamFourUuid = streamService.createStream([name: "otherUserStream", feed: feed], otherUser, null).uuid
+		streamOneUuid = streamService.createStream([name: "stream", description: "description", feed: feed], user).uuid
+		streamTwoUuid = streamService.createStream([name: "ztream", feed: feed], user).uuid
+		streamThreeUuid = streamService.createStream([name: "atream", feed: feed], user).uuid
+		streamFourUuid = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).uuid
 	}
 
 	void "find all streams of logged in user"() {

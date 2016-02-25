@@ -15,16 +15,20 @@ class StreamService {
 
 	def grailsApplication
 	
-	Stream createStream(params, SecUser user, fields=null) {
+	Stream createStream(params, SecUser user) {
 		Stream stream = new Stream(params)
 		stream.uuid = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
+		stream.config = params.config
 
 		AbstractStreamListener streamListener
 		if (stream.feed != null) {
+			Map config = stream.getStreamConfigAsMap()
+			if (!config.fields) {
+				config.fields = []
+			}
 			streamListener = instantiateListener(stream)
-			Map config = [fields: fields != null ? fields : []]
 			streamListener.addToConfiguration(config, stream)
 			stream.config = config as JSON
 		}

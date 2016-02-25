@@ -14,7 +14,9 @@ public class MongoStreamListener extends AbstractStreamListener {
 
 	@Override
 	public void addToConfiguration(Map configuration, Stream stream) {
-		configuration.put("mongodb", new HashMap<>());
+		if (!configuration.containsKey("mongodb")) {
+			configuration.put("mongodb", new HashMap<>());
+		}
 	}
 
 	@Override

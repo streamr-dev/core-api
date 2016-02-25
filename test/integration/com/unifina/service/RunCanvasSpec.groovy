@@ -39,12 +39,9 @@ class RunCanvasSpec extends IntegrationSpec {
 				name: "run-canvas-spec-stream",
 				feed: Feed.load(7L),
 				description: "Data stream for ${RunCanvasSpec.name}",
-			],
-			user,
-			[
-				[name: "numero", type: "number"],
-				[name: "areWeDoneYet", type: "boolean"]
-			])
+				config: '{"fields": [{"name": "numero", "type": "number"}, {"name": "areWeDoneYet", "type": "boolean"}]}'
+			], user)
+
 
 		// Read modules from file
 		def modules = readCanvasJsonAndReplaceStreamId(getClass(), MODULES_LIST_FILE, stream).modules

@@ -34,7 +34,7 @@ class MongoFieldDetectorSpec extends IntegrationSpec {
 	def setup() {
 		fieldDetector = new MongoFieldDetector(grailsApplication)
 		stream = streamService.createStream([name: "mongoFieldDetectorSpec-stream", feed: Feed.MONGO_ID],
-			SecUser.load(1), null)
+			SecUser.load(1))
 	}
 
 	def cleanup() {

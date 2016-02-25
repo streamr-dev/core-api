@@ -62,7 +62,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		user = SecUser.load(1L)
 
 		// Create stream
-		stream = streamService.createStream([name: "serializationTestStream", feed: 7L], user, null)
+		stream = streamService.createStream([name: "serializationTestStream", feed: 7L], user)
 		stream.config = (
 			[
 				fields: [

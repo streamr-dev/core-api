@@ -31,7 +31,7 @@ class StreamServiceSpec extends Specification {
 	void "createStream throws ValidationException input incomplete"() {
 
 		when:
-		service.createStream([feed: feed], null, null)
+		service.createStream([feed: feed], null)
 
 		then:
 		thrown(ValidationException)
@@ -39,7 +39,7 @@ class StreamServiceSpec extends Specification {
 
 	void "createStream results in persisted Stream"() {
 		when:
-		service.createStream([name: "name", feed: feed], null, null)
+		service.createStream([name: "name", feed: feed], null)
 
 		then:
 		Stream.count() == 1
