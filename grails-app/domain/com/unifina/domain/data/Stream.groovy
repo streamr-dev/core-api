@@ -1,29 +1,26 @@
 package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
+import groovy.json.JsonSlurper
 
 class Stream implements Comparable {
 	Long id
 	String uuid
 	String apiKey
 	SecUser user
-	
+
 	String name
 	Feed feed
-	String streamConfig
-	// An id local to the Feed
-
-	@Deprecated
-	String localId
+	String config
 	String description
 	
 	Date firstHistoricalDay
 	Date lastHistoricalDay
-	
+
 	static constraints = {
 		name(blank:false)
-		localId(nullable:true)
-		streamConfig(nullable:true)
+		
+		config(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
@@ -34,17 +31,26 @@ class Stream implements Comparable {
 	
 	static mapping = {
 		name index:"name_idx"
-		localId index: 'localId_idx'
 		uuid index: "uuid_idx"
 		feed lazy:false
-		streamConfig type: 'text'
+		config type: 'text'
 	}
 	
 	@Override
 	public String toString() {
 		return name
 	}
-	
+
+	def toMap() {
+		[
+			uuid: uuid,
+			apiKey: apiKey,
+			name: name,
+			config: config == null || config.empty ? config : new JsonSlurper().parseText(config),
+			description: description
+		]
+	}
+
 	@Override
 	public int compareTo(Object arg0) {
 		if (!(arg0 instanceof Stream)) return 0

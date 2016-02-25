@@ -54,9 +54,9 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 		super.onConfiguration(config);
 		
 		Stream stream = streamParameter.value;
-		if (stream.getStreamConfig()==null)
+		if (stream.getConfig()==null)
 			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
-		streamConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
+		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
 		

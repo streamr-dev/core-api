@@ -363,7 +363,7 @@ class FeedFileService {
 		feedFile = FeedFile.get(feedFile.id)
 		
 		// Update the existing streams
-		List<Stream> existing = Stream.findAllByFeedAndLocalIdInList(feedFile.feed, foundStreams.collect {it.localId})
+		List<Stream> existing = Stream.findAllByFeedAndIdInList(feedFile.feed, foundStreams.collect {it.id})
 		List existingIds = existing.collect {it.id}
 		Stream.executeUpdate("update Stream s set s.firstHistoricalDay = :day where s.id in (:existingIds) and (s.firstHistoricalDay is null OR s.firstHistoricalDay > :day)", [day:feedFile.day, existingIds:existingIds])
 		Stream.executeUpdate("update Stream s set s.lastHistoricalDay = :day where s.id in (:existingIds) and (s.lastHistoricalDay is null OR s.lastHistoricalDay < :day)", [day:feedFile.day, existingIds:existingIds])
@@ -372,9 +372,9 @@ class FeedFileService {
 		
 		// Save the non-existing streams
 		Set existingSet = new HashSet()
-		existing.each {existingSet.add(it.localId)}
+		existing.each {existingSet.add(it.id)}
 		foundStreams.each {Stream s->
-			if (!existingSet.contains(s.localId)) {
+			if (!existingSet.contains(s.id)) {
 				log.info("New Stream found from FeedFile $feedFile: $s")
 				s.firstHistoricalDay = feedFile.day
 				s.lastHistoricalDay = feedFile.day

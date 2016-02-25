@@ -54,7 +54,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
 			InputStream inputStream, IEventRecipient recipient) {
 		try {
-			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
+			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getConfig()));
 			return new KafkaHistoricalIterator(inputStream,streamConfig.get("topic").toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -72,7 +72,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && !TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate()))) {
 			kafkaIteratorReturnedForStream.put(stream, true);
 
-			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getStreamConfig()));
+			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getConfig()));
 			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
 			
 			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages, 

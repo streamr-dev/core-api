@@ -217,8 +217,13 @@ modules = {
 	'streamr-table' {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
+	'canvas-controls' {
+		dependsOn 'signalpath-core, backbone'
+		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
-		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, streamr-button, streamr-switcher, streamr-text-field, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax'
+		dependsOn 'streamr, streamr-client, streamr-chart, streamr-table, streamr-heatmap, streamr-button, streamr-switcher, streamr-text-field, jsplumb, jstree, highstock, codemirror, tablesorter, bootstrap-contextmenu, typeahead, detect-timezone, raf-polyfill, signalpath-widgets, mathjax, underscore'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
@@ -251,5 +256,20 @@ modules = {
 		dependsOn 'bootstrap'
 		resource url: "https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
 		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
+	}
+	'swagger' {
+		dependsOn 'jquery, underscore, jquery-migrate'
+		resource url:[dir: 'js/swagger/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/', file: 'swagger-ui.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'jsoneditor.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'marked.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/lib/', file: 'swagger-oauth.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
 	}
 }

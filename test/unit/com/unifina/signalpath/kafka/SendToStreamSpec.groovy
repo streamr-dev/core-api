@@ -10,7 +10,6 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
-import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
@@ -54,7 +53,7 @@ class SendToStreamSpec extends Specification {
 		def s = new Stream()
 		s.feed = feed
 		s.name = "stream-0"
-		s.streamConfig = [fields: [
+		s.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
 		]]

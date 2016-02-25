@@ -12,7 +12,6 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
-import com.unifina.security.StreamrApi
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.CSVImporter.Schema
 
@@ -56,7 +55,7 @@ class StreamController {
 	def details() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		def model = [stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		def model = [stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
 		
 		// User streams
 		if (stream.feed.id==7) {
@@ -78,7 +77,7 @@ class StreamController {
 			[stream:new Stream()]
 		else {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user)
+			Stream stream = streamService.createUserStream(params, user, null)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)
@@ -91,38 +90,16 @@ class StreamController {
 		}
 	}
 	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiCreate() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser)
-		if (stream.hasErrors()) {
-			log.info(stream.errors)
-			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
-		}
-		else {
-			render ([success:true, stream:stream.uuid, auth:stream.apiKey, name:stream.name, description:stream.description, localId:stream.localId] as JSON)
-		}
-	}
-	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiLookup() {
-		Stream stream = Stream.findByUserAndLocalId(request.apiUser, request.JSON?.localId)
-		if (!stream)
-			render (status:404, text: [success:false, error: "stream not found"] as JSON)
-		else render ([stream:stream.uuid] as JSON)
-	}
-	
 	def configure() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
 	}
 
 	def edit() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
 	}
 	
 	def delete() {
@@ -143,14 +120,14 @@ class StreamController {
 	def fields() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		Map config = (stream.config ? JSON.parse(stream.config) : [:])
 		if (request.method=="GET") {
 			render (config.fields ?: []) as JSON
 		}
 		else if (request.method=="POST") {
 			def fields = request.JSON
 			config.fields = fields
-			stream.streamConfig = (config as JSON)
+			stream.config = (config as JSON)
 			flash.message = "Stream fields updated."
 			
 			Map result = [success:true, id:stream.id]
@@ -206,7 +183,7 @@ class StreamController {
 			temp = File.createTempFile("csv_upload_", ".csv")
 			file.transferTo(temp)
 
-			Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+			Map config = (stream.config ? JSON.parse(stream.config) : [:])
 			List fields = config.fields ? config.fields : []
 
 			CSVImporter csv = new CSVImporter(temp, fields)
@@ -234,7 +211,7 @@ class StreamController {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
 
-		Map config = stream.streamConfig ? JSON.parse(stream.streamConfig) : [:]
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
 		List fields = config.fields ? config.fields : []
 
 		CSVImporter csv = new CSVImporter(file, fields)
@@ -247,7 +224,7 @@ class StreamController {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
 
-		Map config = stream.streamConfig ? JSON.parse(stream.streamConfig) : [:]
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
 		List fields = config.fields ? config.fields : []
 
 		def format
@@ -269,7 +246,7 @@ class StreamController {
 		kafkaService.createFeedFilesFromCsv(csv, stream)
 		
 		// Autocreate the stream config based on fields in the csv schema
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		Map config = (stream.config ? JSON.parse(stream.config) : [:])
 
 		List fields = []
 
@@ -283,7 +260,7 @@ class StreamController {
 		}
 
 		config.fields = fields
-		stream.streamConfig = (config as JSON)
+		stream.config = (config as JSON)
 	}
 	
 	def deleteFeedFilesUpTo() {

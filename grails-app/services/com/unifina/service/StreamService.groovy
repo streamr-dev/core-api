@@ -13,16 +13,13 @@ class StreamService {
 	def kafkaService
 	def feedFileService
 	
-	Stream createUserStream(params, SecUser user) {
+	Stream createUserStream(params, SecUser user, fields=null) {
 		Stream stream = new Stream(params)
 		stream.uuid = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
-		if (stream.localId==null)
-			stream.localId = stream.name
-		
 		stream.feed = Feed.load(7L) // API stream
-		stream.streamConfig = ([fields:[], topic: stream.uuid] as JSON)
+		stream.config = ([fields: fields == null ? [] : fields, topic: stream.uuid] as JSON)
 		
 		stream.save()
 		

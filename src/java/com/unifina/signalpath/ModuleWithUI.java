@@ -19,6 +19,9 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 
 	@Override
 	public void connectionsReady() {
+		if (getUiChannelId() == null) {
+			throw new NullPointerException("uiChannelId of moduleWithUi " + name + " was unexpectedly null");
+		}
 		if (globals!=null && globals.getUiChannel()!=null) {
 			globals.getUiChannel().addChannel(uiChannelId);
 		}
@@ -34,6 +37,14 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	public String getUiChannelName() {
 		return getName();
 	}
+
+	public Map getUiChannelMap() {
+		Map uiChannel = new HashMap<String,Object>();
+		uiChannel.put("id", getUiChannelId());
+		uiChannel.put("name", getUiChannelName());
+		uiChannel.put("webcomponent", getWebcomponentName());
+		return uiChannel;
+	}
 	
 	/**
 	 * Override this method if a webcomponent is available for this module. The
@@ -41,15 +52,17 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	 * @return The name of the webcomponent.
 	 */
 	public String getWebcomponentName() {
-		return null;
+		if (domainObject == null) {
+			return null;
+		} else {
+			return domainObject.getWebcomponent();
+		}
 	}
 	
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		Map uiChannel = new HashMap<String,Object>();
-		uiChannel.put("id", getUiChannelId());
-		uiChannel.put("name", getUiChannelName());
+		Map uiChannel = getUiChannelMap();
 		
 		if (getWebcomponentName()!=null && globals.isRealtime())
 			uiChannel.put("webcomponent", getWebcomponentName());

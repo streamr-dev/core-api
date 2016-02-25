@@ -4,7 +4,7 @@
         <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="Dashboard Name" value="{{ name }}" />
     </div>
     <ul class="navigation" id="rsp-list">
-        <li class="rsp-title">
+        <li class="canvas-title">
             <label>Live Canvases</label>
         </li>
     </ul>
@@ -16,18 +16,18 @@
         </form>
     </div>
 </script>
-<script id="rsp-template" type="text/template">
-    <a class="rsp-title" title="{{state != 'running' ? state : ''}}">
+<script id="canvas-template" type="text/template">
+    <a class="canvas-title" title="{{state != 'running' ? state : ''}}">
         <span class="mm-text mmc-dropdown-delay animated fadeIn">{{ name }}</span>
         <span class="howmanychecked badge badge-primary"></span>
     </a>
 </script>
 
-<script id="uichannel-template" type="text/template">
-        <a href="#" class="uichannel-title" id="uichannel_{{ id }}">
+<script id="module-template" type="text/template">
+        <a href="#" class="module-title">
             <i class="menu-icon fa fa-square"></i>
             <i class="menu-icon fa fa-check-square"></i>
-            {{ name ? name : id }}
+            {{ uiChannel && uiChannel.name ? uiChannel.name : (name ? name : id) }}
         </a>
 </script>
 
@@ -50,31 +50,31 @@
 </script>
 
 <script id="streamr-label-template" type="text/template">
-    <h1><streamr-label class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-label></h1>
+    <h1><streamr-label class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-label></h1>
 </script>
 
 <script id="streamr-heatmap-template" type="text/template">
-    <streamr-heatmap class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-heatmap>
+    <streamr-heatmap class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-heatmap>
 </script>
 
 <script id="streamr-chart-template" type="text/template">
-    <streamr-chart class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-chart>    
+    <streamr-chart class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-chart>
 </script>
 
 <script id="streamr-table-template" type="text/template">
-    <streamr-table class="streamr-widget non-draggable text-left" channel="{{ uiChannel.id }}"></streamr-table>    
+    <streamr-table class="streamr-widget non-draggable text-left" canvas="{{ canvas }}" module="{{ module }}"></streamr-table>
 </script>
 
 <script id="streamr-button-template" type="text/template">
-    <streamr-button class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-button>
+    <streamr-button class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" canvas="{{ canvas }}" module="{{ module }}"></streamr-button>
 </script>
 
 <script id="streamr-switcher-template" type="text/template">
-    <streamr-switcher class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-switcher>
+    <streamr-switcher class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" canvas="{{ canvas }}" module="{{ module }}"></streamr-switcher>
 </script>
 
 <script id="streamr-text-field-template" type="text/template">
-    <streamr-text-field class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-text-field>
+    <streamr-text-field class="streamr-widget non-draggable" channel="{{ uiChannel.id }}" canvas="{{ canvas }}" module="{{ module }}"></streamr-text-field>
 </script>
 
 <script id="titlebar-template" type="text/template">

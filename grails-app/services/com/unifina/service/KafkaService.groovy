@@ -163,7 +163,7 @@ class KafkaService {
 		}
 		// If never collected, query the first timestamp from Kafka
 		else {
-			Map streamConfig = JSON.parse(stream.streamConfig)
+			Map streamConfig = JSON.parse(stream.config)
 			String topic = streamConfig.topic
 
 			// If getFirstTimestamp(topic) returns null, there is nothing to be collected
