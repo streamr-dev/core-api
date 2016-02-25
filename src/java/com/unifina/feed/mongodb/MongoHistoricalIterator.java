@@ -46,12 +46,12 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 
 		// Filter by startDate
 		Document startDateFilter = new Document();
-		startDateFilter.put("$gte", startDate);
+		startDateFilter.put("$gte", config.convertDateToMongoFormat(startDate));
 		query.append(config.getTimestampKey(), startDateFilter);
 
 		// Filter by endDate
 		Document endDateFilter = new Document();
-		endDateFilter.put("$lte", endDate);
+		endDateFilter.put("$lte", config.convertDateToMongoFormat(endDate));
 		query.append(config.getTimestampKey(), endDateFilter);
 
 		FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(config.getTimestampKey()));

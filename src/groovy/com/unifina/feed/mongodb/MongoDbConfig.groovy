@@ -134,4 +134,13 @@ public class MongoDbConfig {
 		}
 		return timestamp
 	}
+
+	@CompileStatic
+	public Object convertDateToMongoFormat(Date date) {
+		if (timestampType == TimestampType.LONG) {
+			return date.getTime()
+		} else {
+			return date
+		}
+	}
 }
