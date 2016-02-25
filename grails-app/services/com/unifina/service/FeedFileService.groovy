@@ -388,6 +388,14 @@ class FeedFileService {
 		}
 		log.info("Total "+(System.currentTimeMillis()-time)+" ms")
 	}
+
+	public FeedFile getFirstFeedFile(Stream stream) {
+		return FeedFile.findByStream(stream, [sort:'beginDate', limit:1])
+	}
+
+	public FeedFile getLastFeedFile(Stream stream) {
+		return FeedFile.findByStream(stream, [sort:'endDate', order:"desc", limit:1])
+	}
 	
 	/**
 	 * Queries the database for dates between beginDate and endDate for which

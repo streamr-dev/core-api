@@ -90,7 +90,10 @@ class ModuleController {
 		Set<Long> allowedPackageIds = allowedPackages.collect {it.id} as Set
 		
 		def result = []	
-		categories.findAll{allowedPackageIds.contains(it.modulePackage.id)}.each {category->
+		categories.findAll {
+			def a = it
+			allowedPackageIds.contains(it.modulePackage.id)
+		}.each {category->
 			def item = moduleTreeRecurse(category,allowedPackageIds,params.boolean('modulesFirst') ?: false)
 			result.add(item)
 		}

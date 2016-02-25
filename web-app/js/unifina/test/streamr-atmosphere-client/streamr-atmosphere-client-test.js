@@ -1,6 +1,6 @@
 var assert = require('assert')
 
-var StreamrClient = require('../streamr-atmosphere-client/streamr-atmosphere-client').StreamrClient
+var StreamrClient = require('../../streamr-atmosphere-client/streamr-atmosphere-client').StreamrClient
 
 describe('StreamrClient', function() {
 	var client

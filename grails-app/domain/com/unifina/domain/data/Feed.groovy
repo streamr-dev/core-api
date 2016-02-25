@@ -31,6 +31,7 @@ class Feed implements Serializable {
 	String streamListenerClass
 	String streamPageTemplate
 	String fieldDetectorClass
+	String dataRangeProviderClass
 	
 	Module module
 	
@@ -51,6 +52,7 @@ class Feed implements Serializable {
 		startOnDemand(nullable:true)
 		bundledFeedFiles(nullable:true)
 		fieldDetectorClass(nullable: true)
+		dataRangeProviderClass(nullable: true)
 	}
 	
 	@Override

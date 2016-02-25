@@ -58,6 +58,7 @@ class StreamSpec extends LoginTester1Spec {
 			waitFor { at StreamShowPage }
 			fileInput = getFile("test-upload-file.csv")
 			waitFor {
+				at StreamShowPage
 				historyDeleteButton.displayed
 				historyStartDate.text() == "2015-02-23"
 				historyEndDate.text() == "2015-02-25"

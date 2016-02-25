@@ -3,7 +3,9 @@ package com.unifina.service
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.AbstractDataRangeProvider
 import com.unifina.feed.AbstractStreamListener
+import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -13,7 +15,7 @@ class StreamService {
 
 	def grailsApplication
 	
-	Stream createStream(params, SecUser user, fields) {
+	Stream createStream(params, SecUser user, fields=null) {
 		Stream stream = new Stream(params)
 		stream.uuid = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
@@ -75,5 +77,22 @@ class StreamService {
 			return clazz.newInstance(grailsApplication)
 		}
 
+	}
+
+	// TODO: move to FeedService
+	private AbstractDataRangeProvider instantiateDataRangeProvider(Stream stream) {
+		if (stream.feed.dataRangeProviderClass == null) {
+			return null
+		} else {
+			Class clazz = getClass().getClassLoader().loadClass(stream.feed.dataRangeProviderClass)
+			return clazz.newInstance(grailsApplication)
+		}
+	}
+
+	DataRange getDataRange(Stream stream) {
+		AbstractDataRangeProvider provider = instantiateDataRangeProvider(stream)
+		if (provider)
+			return provider.getDataRange(stream)
+		else return null
 	}
 }

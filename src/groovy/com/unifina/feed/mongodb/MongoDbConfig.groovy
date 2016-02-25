@@ -105,6 +105,7 @@ public class MongoDbConfig {
 		MongoClientOptions options = MongoClientOptions
 				.builder()
 				.serverSelectionTimeout(timeout)
+				.connectionsPerHost(1) // limit pool size to 1
 				.build();
 
 		return new MongoClient(serverAddress, credentials, options);

@@ -2,13 +2,12 @@ package com.unifina.service
 
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.DataSource
+import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.UiChannel
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
@@ -18,7 +17,6 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.IdGenerator
 import com.unifina.utils.NetworkInterfaceUtils
 import grails.converters.JSON
 import grails.transaction.NotTransactional
@@ -172,7 +170,7 @@ class SignalPathService {
      */
 	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
 		globals.uiChannel = new KafkaPushChannel(kafkaService, canvas.adhoc)
 
 		SignalPathRunner runner

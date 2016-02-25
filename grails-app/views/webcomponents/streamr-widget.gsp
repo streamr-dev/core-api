@@ -10,7 +10,7 @@
 <polymer-element name="streamr-widget" attributes="canvas module resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
-		<div id="container" class="container"></div>
+		<div id="streamr-widget-container" class="streamr-widget-container"></div>
 	</template>
 	
 	<script>
@@ -20,6 +20,13 @@
 				module: undefined,
 				resendLast: undefined,
 				resendAll: undefined
+			},
+			detached: function() {
+				var _this = this
+
+				_this.$.client.getClient(function(client) {
+					client.unsubscribe(_this.sub)
+				})
 			},
 			bindEvents: function(container) {
 				container.parentNode.addEventListener("remove", function() {

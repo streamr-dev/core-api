@@ -1,6 +1,7 @@
 package com.unifina.controller.data
 
 import com.unifina.api.ApiException
+import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -171,8 +172,8 @@ class StreamController {
 	def files() {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
-		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
-		return [feedFiles: feedFiles, stream:stream]
+		DataRange dataRange = streamService.getDataRange(stream)
+		return [dataRange: dataRange, stream:stream]
 	}
 	
 	def upload() {
@@ -281,7 +282,15 @@ class StreamController {
 		} else {
 			flash.error = "Something went wrong with deleting files"
 		}
+
 		redirect(action:"show", params:[id:params.id])
+	}
+
+	def getDataRange() {
+		Stream stream = Stream.get(params.id)
+		DataRange dataRange = streamService.getDataRange(stream)
+		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
+		render dataRangeMap as JSON
 	}
 	
 }
