@@ -1,6 +1,5 @@
 package com.unifina.feed;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
@@ -16,14 +15,15 @@ import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 
 /**
- * Implements a basic interface for getting FeedEvents from a historical feed via getNext()
+ * Implements a basic interface for iterating over FeedEvents from a historical feed. The FeedEvent have
+ * a content of type MessageClass.
  */
-public abstract class AbstractHistoricalFeed extends AbstractFeed implements Iterator<FeedEvent> {
+public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient> extends AbstractFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass> implements Iterator<FeedEvent> {
 	
 	/**
 	 * The queue orders FeedEvents from multiple streams in their natural order (timestamp, queue insertion order)
 	 */
-	protected PriorityQueue<FeedEvent> queue = new PriorityQueue<>();
+	protected PriorityQueue<FeedEvent<MessageClass, EventRecipientClass>> queue = new PriorityQueue<>();
 	protected boolean started = false;
 	
 	private static final Logger log = Logger.getLogger(AbstractHistoricalFeed.class);
@@ -39,10 +39,10 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 		log.debug("Starting feed with event recipients by key: "+eventRecipientsByKey);
 
 		// For each recipient get an input stream and place the first event in a PriorityQueue
-		for (IEventRecipient recipient : eventRecipients) {
-			FeedEventIterator iterator = getNextIterator(recipient);
+		for (EventRecipientClass recipient : eventRecipients) {
+			FeedEventIterator<MessageClass, EventRecipientClass> iterator = getNextIterator(recipient);
 			if (iterator!=null && iterator.hasNext()) {
-				FeedEvent event = iterator.next();
+				FeedEvent<MessageClass, EventRecipientClass> event = iterator.next();
 				queue.add(event);
 			}
 		}
@@ -56,8 +56,8 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 		
 		// Close all the remaining unclosed sources
 		for (FeedEvent event : queue) {
-			if (event.iterator instanceof Closeable) {
-				((Closeable)event.iterator).close();
+			if (event.iterator != null) {
+				event.iterator.close();
 			}
 		}
 	}
@@ -74,21 +74,20 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
      * @throws NoSuchElementException if the iteration has no more FeedEvents
      */
 	@Override
-	public FeedEvent next() {
-		FeedEvent event = queue.poll();
+	public FeedEvent<MessageClass, EventRecipientClass> next() {
+		FeedEvent<MessageClass, EventRecipientClass> event = queue.poll();
 		
 		if (event==null)
 			throw new NoSuchElementException();
 		
 		// From the same stream, get the next event
-		FeedEventIterator iterator = (FeedEventIterator) event.iterator; // TODO: avoid cast?
+		FeedEventIterator<MessageClass, EventRecipientClass> iterator = event.iterator;
 
 		// No next event, try to get the next stream piece and the next event from there
 		while (!iterator.hasNext() && started) {
 			try {
 				// Close the old feed reader
-				if (iterator instanceof Closeable)
-					((Closeable)iterator).close();
+				iterator.close();
 				
 				iterator = getNextIterator(iterator.getRecipient());
 			} catch (IOException e) {
@@ -114,8 +113,8 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 	}
 
 	/**
-	 * Should return a list of date pairs, where date[0] represents unit
-	 * start datetime and date[1] represents unit end datetime.
+	 * Should return a list of date pairs, over which the calculation can be distributed (units).
+	 * Date[0] represents unit start datetime and date[1] represents unit end datetime.
 
 	 * @param beginDate Earliest unit start datetime than can be returned
 	 * @param endDate Latest unit end datetime that can be returned
@@ -128,14 +127,6 @@ public abstract class AbstractHistoricalFeed extends AbstractFeed implements Ite
 	 * @param recipient
 	 * @return
 	 */
-	protected abstract FeedEventIterator getNextIterator(IEventRecipient recipient) throws IOException;
-	
-	/**
-	 * Extracts a Date from the specified event content.
-	 * @param eventContent the content return by the content iterator, for which a timestamp is needed
-	 * @param contentIterator the contentIterator that produced the eventContent
-	 * @return
-	 */
-	protected abstract Date getTimestamp(Object eventContent, Iterator<? extends Object> contentIterator);
-	
+	protected abstract FeedEventIterator<MessageClass, EventRecipientClass> getNextIterator(EventRecipientClass recipient) throws IOException;
+
 }

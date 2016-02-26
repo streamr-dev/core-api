@@ -1,0 +1,699 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Streamr API",
+        "description": "Create streams and canvases, and let the real-time data flow right through it all.",
+        "version": "1.0.0"
+    },
+    "host": "www.streamr.com",
+    "schemes": [
+        "https"
+    ],
+    "basePath": "/api/v1",
+    "produces": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "token": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    },
+    "security": [
+        {
+            "token": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Stream",
+            "description": "Streams"
+        },
+        {
+            "name": "Canvas",
+            "description": "Saved and running Canvases"
+        }
+    ],
+    "paths": {
+        "/streams": {
+            "get": {
+                "summary": "List streams",
+                "description": "Lists the streams available to the user.\n",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filter results by stream name.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Stream"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of streams",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Stream"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new stream",
+                "description": "Creates a new stream.\n",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Stream object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/StreamCreateRequest"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Stream"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The stream that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Stream"
+                        }
+                    }
+                }
+            }
+        },
+        "/streams/{uuid}": {
+            "get": {
+                "summary": "Get stream by id",
+                "description": "Returns a stream by id",
+                "tags": [
+                    "Stream"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream to be fetched",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Stream"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a stream",
+                "description": "Updates a stream.",
+                "tags": [
+                    "Stream"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream to be updated",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "StreamCreateRequest object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/StreamCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a stream",
+                "description": "Deletes a stream by id. This will also delete all data for this stream. Use with caution!",
+                "tags": [
+                    "Stream"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream to be deleted",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/canvases": {
+            "get": {
+                "summary": "List canvases",
+                "description": "Lists (and possibly filters) canvases in your archive.",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Filter results by canvas name.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "description": "Filter results by canvas state.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "adhoc",
+                        "in": "query",
+                        "description": "Filter canvases by their adhoc-ness.",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of canvases",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Canvas"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a canvas",
+                "description": "Creates a new canvas into your archive.",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Canvas object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CanvasCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The canvas that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Canvas"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to construct Canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/canvases/{id}": {
+            "get": {
+                "summary": "Get canvas by id",
+                "description": "Returns a canvas by id",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/Canvas"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to re-construct Canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a canvas.",
+                "description": "Updates a canvas. The *id* field can not be updated.",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas to be updated",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "New canvas details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CanvasCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "Not authorized to update canvas"
+                    },
+                    "404": {
+                        "description": "Canvas not found"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a canvas",
+                "description": "Deletes a canvas by id",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas to be deleted",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "Not authorized to delete canvas"
+                    },
+                    "404": {
+                        "description": "Canvas not found"
+                    }
+                }
+            }
+        },
+        "/canvases/{id}/start": {
+            "post": {
+                "summary": "Starts a canvas",
+                "description": "Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the live canvas to be started",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "runtime options",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/StartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Canvas"
+                        }
+                    },
+                    "403": {
+                        "description": "Not authorized to start canvas"
+                    },
+                    "404": {
+                        "description": "Canvas not found"
+                    },
+                    "500": {
+                        "description": "Canvas already running"
+                    }
+                }
+            }
+        },
+        "/canvases/{id}/stop": {
+            "post": {
+                "summary": "Stop a currently running canvas.",
+                "description": "Stops a canvas that is currently running.",
+                "tags": [
+                    "Canvas"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the live canvas to be stopped",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Canvas"
+                        }
+                    },
+                    "204": {
+                        "description": "Success, and Canvas was set to delete on stop, and thus is was deleted"
+                    },
+                    "403": {
+                        "description": "Not allowed to stop canvas"
+                    },
+                    "404": {
+                        "description": "Canvas not found"
+                    },
+                    "500": {
+                        "description": "Canvas is not running"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Stream": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/StreamCreateRequest"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "uuid": {
+                            "type": "string",
+                            "description": "Unique identifier for this stream."
+                        },
+                        "apiKey": {
+                            "type": "string",
+                            "description": "Api key needed to produce data to this stream."
+                        }
+                    }
+                }
+            ]
+        },
+        "StreamCreateRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of this stream.",
+                    "example": "My stream"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of this stream.",
+                    "example": "My stream description"
+                },
+                "config": {
+                    "$ref": "#/definitions/StreamConfig"
+                }
+            }
+        },
+        "StreamConfig": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "array",
+                    "default": [],
+                    "description": "An array containing field definitions for this stream.",
+                    "items": {
+                        "$ref": "#/definitions/FieldDefinition"
+                    }
+                }
+            }
+        },
+        "FieldDefinition": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name of the fieldf"
+                },
+                "type": {
+                    "type": "string",
+                    "description": "type of the field",
+                    "enum": [
+                        "number",
+                        "string",
+                        "boolean",
+                        "list",
+                        "map"
+                    ]
+                }
+            }
+        },
+        "Canvas": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/CanvasCreateRequest"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "string",
+                            "description": "Unique identifier for Canvas"
+                        },
+                        "created": {
+                            "type": "string",
+                            "description": "when Canvas was created",
+                            "format": "dateTime"
+                        },
+                        "updated": {
+                            "type": "string",
+                            "description": "when Canvas was last updated",
+                            "format": "dateTime"
+                        },
+                        "hasExports": {
+                            "type": "boolean",
+                            "description": "whether module uses exported inputs or outputs"
+                        },
+                        "uiChannel": {
+                            "$ref": "#/definitions/UiChannel"
+                        },
+                        "state": {
+                            "$ref": "#/definitions/CanvasState"
+                        },
+                        "adhoc": {
+                            "type": "boolean"
+                        },
+                        "serialized": {
+                            "type": "boolean",
+                            "description": "indicates whether there exists a serialization of this canvas"
+                        }
+                    }
+                }
+            ]
+        },
+        "CanvasCreateRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "modules"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "My canvas"
+                },
+                "modules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Module"
+                    }
+                },
+                "settings": {
+                    "$ref": "#/definitions/CanvasSettings"
+                }
+            }
+        },
+        "CanvasState": {
+            "type": "string",
+            "enum": [
+                "running",
+                "stopped"
+            ]
+        },
+        "CanvasSettings": {
+            "type": "object",
+            "properties": {
+                "adhoc": {
+                    "type": "boolean",
+                    "description": "set to true for adhoc canvas"
+                },
+                "live": {
+                    "type": "boolean",
+                    "description": "set to true for live canvas (not historical)"
+                },
+                "speed": {
+                    "type": "string"
+                },
+                "beginDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "begin date (historical mode) to start feeding from"
+                },
+                "endDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "end date (historical mode) to stop feeding at"
+                }
+            }
+        },
+        "Module": {
+            "type": "object"
+        },
+        "UiChannel": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "8YV4urkpTy6ZkrKqO_aDFw"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Notifications"
+                }
+            }
+        },
+        "StartRequest": {
+            "type": "object",
+            "properties": {
+                "clearState": {
+                    "type": "boolean",
+                    "default": false,
+                    "example": true,
+                    "description": "If true, previously saved state will be cleared before starting canvas."
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "Error code (e.g. \"NOT_FOUND\") for programmatic use."
+                },
+                "message": {
+                    "type": "string",
+                    "description": "A human-readable message describing the error."
+                }
+            }
+        }
+    }
+}

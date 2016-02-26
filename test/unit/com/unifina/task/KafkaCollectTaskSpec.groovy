@@ -44,7 +44,7 @@ class KafkaCollectTaskSpec extends Specification {
 	void "test collecting a date range of events from Kafka"() {
 		// Create Stream
 		Stream stream = new Stream(name: 'KafkaCollectTaskSpec', uuid: 'KafkaCollectTaskSpec')
-		stream.streamConfig = ([topic:stream.uuid] as JSON)
+		stream.config = ([topic:stream.uuid] as JSON)
 		stream.save(validate:false, flush:true, failOnError:true)
 		
 		assert Stream.get(stream.id) != null

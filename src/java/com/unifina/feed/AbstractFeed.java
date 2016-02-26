@@ -17,22 +17,25 @@ import com.unifina.utils.Globals;
 /**
  * An AbstractFeed is responsible for starting and stopping an event
  * stream as well as matching the events and their IEventRecipients.
+ * @param <ModuleClass> Describes the kind of subscribers this Feed can take. The subscribers are usually modules that require a certain Stream, and you should use the most general type you can (often the IStreamRequirement interface).
+ * @param <MessageClass> The kind of messages this Feed produces and sends to the relevant IEventRecipients. Must implement ITimestamped.
+ * @param <KeyClass> The key is also used to subscribe the MessageSource with MessageSource#subscribe(key). The key also binds subscribers and messages together.
  * @author Henri
  */
-public abstract class AbstractFeed {
+public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient> {
 
 	protected IEventQueue eventQueue;
 	
-	protected Set<Object> subscribers = new HashSet<Object>();
+	protected Set<ModuleClass> subscribers = new HashSet<>();
 	
-	protected ArrayList<IEventRecipient> eventRecipients = new ArrayList<>();
-	protected HashMap<Object,IEventRecipient> eventRecipientsByKey = new HashMap<>();
+	protected ArrayList<EventRecipientClass> eventRecipients = new ArrayList<>();
+	protected HashMap<KeyClass, EventRecipientClass> eventRecipientsByKey = new HashMap<>();
 	
 	protected Globals globals;
 	protected TimeZone timeZone;
 
 	protected Feed domainObject;
-	protected AbstractKeyProvider keyProvider;
+	protected AbstractKeyProvider<ModuleClass, MessageClass, KeyClass> keyProvider;
 	
 	public AbstractFeed(Globals globals, Feed domainObject) {
 		this.globals = globals;
@@ -40,7 +43,7 @@ public abstract class AbstractFeed {
 		keyProvider = createKeyProvider();
 	}
 
-	protected AbstractKeyProvider createKeyProvider() {
+	protected AbstractKeyProvider<ModuleClass, MessageClass, KeyClass> createKeyProvider() {
 		try {
 			Class keyProviderClass = this.getClass().getClassLoader().loadClass(domainObject.getKeyProviderClass());
 			Constructor constructor = keyProviderClass.getConstructor(Globals.class, Feed.class);
@@ -51,36 +54,36 @@ public abstract class AbstractFeed {
 	}
 	
 	/**
-	 * Creates an IEventRecipient that should be set on FeedEvents 
+	 * Creates an EventRecipientClass that should be set on FeedEvents
 	 * created for this subscriber. 
 	 * @param subscriber
 	 * @return
 	 */
-	protected IEventRecipient createEventRecipient(Object subscriber) {
+	protected EventRecipientClass createEventRecipient(ModuleClass subscriber) {
 		try {
 			Class eventRecipientClass = this.getClass().getClassLoader().loadClass(domainObject.getEventRecipientClass());
 
 			// Construction of StreamEventRecipients (represented by a Stream object in the database)
 			if (subscriber instanceof IStreamRequirement && StreamEventRecipient.class.isAssignableFrom(eventRecipientClass)) {
 				Constructor constructor = eventRecipientClass.getConstructor(Globals.class, Stream.class);
-				return (IEventRecipient) constructor.newInstance(globals, ((IStreamRequirement)subscriber).getStream());
+				return (EventRecipientClass) constructor.newInstance(globals, ((IStreamRequirement)subscriber).getStream());
 			}
 			// Construction of other IEventRecipients (legacy/hardwired)
 			else {
 				Constructor constructor = eventRecipientClass.getConstructor(Globals.class);
-				return (IEventRecipient) constructor.newInstance(globals);
+				return (EventRecipientClass) constructor.newInstance(globals);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Could not create an EventRecipient of class "+domainObject.getEventRecipientClass()+" for subscriber "+subscriber,e);
 		}
 	}
 	
-	protected IEventRecipient getEventRecipientForMessage(Object message) {
+	protected EventRecipientClass getEventRecipientForMessage(MessageClass message) {
 		return eventRecipientsByKey.get(keyProvider.getMessageKey(message));
 	}
 	
-	public boolean isSubscribed(Object item) {
-		return subscribers.contains(item);
+	public boolean isSubscribed(ModuleClass subscriber) {
+		return subscribers.contains(subscriber);
 	}	
 	
 	/**
@@ -89,7 +92,7 @@ public abstract class AbstractFeed {
 	 * false if the object was already subscribed. Throws an IllegalArgumentException
 	 * if the subscription is of the wrong type.
 	 */
-	public boolean subscribe(Object subscriber) {
+	public boolean subscribe(ModuleClass subscriber) {
 
 		// Don't subscribe the same object twice
 		if (!isSubscribed(subscriber)) {
@@ -97,8 +100,8 @@ public abstract class AbstractFeed {
 			subscribers.add(subscriber);
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
-			IEventRecipient recipient;
-			Object key = keyProvider.getSubscriberKey(subscriber);
+			EventRecipientClass recipient;
+			KeyClass key = keyProvider.getSubscriberKey(subscriber);
 			if (!eventRecipientsByKey.containsKey(key)) {
 				recipient = createEventRecipient(subscriber);
 				eventRecipients.add(recipient);
@@ -109,7 +112,7 @@ public abstract class AbstractFeed {
 			
 			// Register the subscription with the event recipient
 			if (recipient instanceof AbstractEventRecipient) {
-				((AbstractEventRecipient)recipient).register(subscriber);
+				((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
 			}
 			
 		}

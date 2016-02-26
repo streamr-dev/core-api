@@ -1,5 +1,8 @@
 package com.unifina.controller.data
 
+import com.unifina.api.ApiException
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -12,7 +15,6 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
-import com.unifina.security.StreamrApi
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.CSVImporter.Schema
 
@@ -56,13 +58,8 @@ class StreamController {
 	def details() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		def model = [stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
-		
-		// User streams
-		if (stream.feed.id==7) {
-			render(template:"userStreamDetails", model:model)
-		}
-		else render ""
+		def model = [stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+		render(template: stream.feed.streamPageTemplate, model: model)
 	}
 
 	def update() {
@@ -74,11 +71,12 @@ class StreamController {
 	}
 	
 	def create() {
-		if (request.method=="GET")
-			[stream:new Stream()]
-		else {
+		if (request.method=="GET") {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user)
+			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+		} else {
+			SecUser user = springSecurityService.currentUser
+			Stream stream = streamService.createStream(params, user)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)
@@ -91,38 +89,21 @@ class StreamController {
 		}
 	}
 	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiCreate() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser)
-		if (stream.hasErrors()) {
-			log.info(stream.errors)
-			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
-		}
-		else {
-			render ([success:true, stream:stream.uuid, auth:stream.apiKey, name:stream.name, description:stream.description, localId:stream.localId] as JSON)
-		}
-	}
-	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiLookup() {
-		Stream stream = Stream.findByUserAndLocalId(request.apiUser, request.JSON?.localId)
-		if (!stream)
-			render (status:404, text: [success:false, error: "stream not found"] as JSON)
-		else render ([stream:stream.uuid] as JSON)
-	}
-	
 	def configure() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
 	}
 
 	def edit() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+	}
+
+	def configureMongo() {
+		Stream stream = Stream.get(params.id)
+		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
 	}
 	
 	def delete() {
@@ -143,14 +124,14 @@ class StreamController {
 	def fields() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		Map config = (stream.config ? JSON.parse(stream.config) : [:])
 		if (request.method=="GET") {
 			render (config.fields ?: []) as JSON
 		}
 		else if (request.method=="POST") {
 			def fields = request.JSON
 			config.fields = fields
-			stream.streamConfig = (config as JSON)
+			stream.config = (config as JSON)
 			flash.message = "Stream fields updated."
 			
 			Map result = [success:true, id:stream.id]
@@ -191,7 +172,7 @@ class StreamController {
 	def files() {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
-		def dataRange = streamService.getDataRange(stream)
+		DataRange dataRange = streamService.getDataRange(stream)
 		return [dataRange: dataRange, stream:stream]
 	}
 	
@@ -206,7 +187,7 @@ class StreamController {
 			temp = File.createTempFile("csv_upload_", ".csv")
 			file.transferTo(temp)
 
-			Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+			Map config = (stream.config ? JSON.parse(stream.config) : [:])
 			List fields = config.fields ? config.fields : []
 
 			CSVImporter csv = new CSVImporter(temp, fields)
@@ -234,7 +215,7 @@ class StreamController {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
 
-		Map config = stream.streamConfig ? JSON.parse(stream.streamConfig) : [:]
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
 		List fields = config.fields ? config.fields : []
 
 		CSVImporter csv = new CSVImporter(file, fields)
@@ -247,7 +228,7 @@ class StreamController {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
 
-		Map config = stream.streamConfig ? JSON.parse(stream.streamConfig) : [:]
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
 		List fields = config.fields ? config.fields : []
 
 		def format
@@ -264,12 +245,12 @@ class StreamController {
 		}
 		redirect(action:"show", id:params.id)
 	}
-	
+
 	private void importCsv(CSVImporter csv, Stream stream) {
 		kafkaService.createFeedFilesFromCsv(csv, stream)
 		
 		// Autocreate the stream config based on fields in the csv schema
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		Map config = (stream.config ? JSON.parse(stream.config) : [:])
 
 		List fields = []
 
@@ -283,7 +264,7 @@ class StreamController {
 		}
 
 		config.fields = fields
-		stream.streamConfig = (config as JSON)
+		stream.config = (config as JSON)
 	}
 	
 	def deleteFeedFilesUpTo() {
@@ -307,8 +288,9 @@ class StreamController {
 
 	def getDataRange() {
 		Stream stream = Stream.get(params.id)
-		Map dataRange = streamService.getDataRange(stream)
-		render dataRange as JSON
+		DataRange dataRange = streamService.getDataRange(stream)
+		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
+		render dataRangeMap as JSON
 	}
 	
 }

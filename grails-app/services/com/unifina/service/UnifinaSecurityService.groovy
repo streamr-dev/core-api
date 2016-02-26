@@ -1,16 +1,13 @@
 package com.unifina.service
 
-import grails.plugin.springsecurity.SpringSecurityService
-import groovy.transform.CompileStatic
-import org.apache.commons.collections.Unmodifiable
-import org.apache.log4j.Logger
-
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
+import grails.plugin.springsecurity.SpringSecurityService
+import groovy.transform.CompileStatic
+import org.apache.log4j.Logger
 import org.springframework.validation.FieldError
 
 class UnifinaSecurityService {
@@ -66,17 +63,18 @@ class UnifinaSecurityService {
 	}
 	
 	@CompileStatic 
-	boolean canAccess(RunningSignalPath rsp, SecUser user=springSecurityService.getCurrentUser()) {
-		// Shared RunningSignalPaths can be accessed by everyone
-		return rsp?.shared || checkUser(rsp, user)
+	boolean canAccess(Canvas canvas, SecUser user=springSecurityService.getCurrentUser()) {
+		return canvas?.shared || checkUser(canvas, user) // Shared Canvas can be accessed by everyone
 	}
 	
 	@CompileStatic
-	boolean canAccess(SavedSignalPath ssp, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
+	boolean canAccess(Canvas canvas, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
-		if (isLoad && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+		if (isLoad && (canvas.example || canvas.shared)) {
 			return true
-		else return canAccess(ssp, user)
+		} else {
+			return canAccess(canvas, user)
+		}
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
@@ -85,19 +83,14 @@ class UnifinaSecurityService {
 	}
 	
 	/**
-	 * Looks up a user based on api keys. Returns null if the keys do not match a user.
+	 * Looks up a user based on api key. Returns null if the keys do not match a user.
 	 * @param apiKey
-	 * @param apiSecret
 	 * @return
 	 */
-	SecUser getUserByApiKey(String apiKey, String apiSecret) {
-		if (!apiKey || !apiSecret)
+	SecUser getUserByApiKey(String apiKey) {
+		if (!apiKey)
 			return null
-			
-		SecUser user = SecUser.findByApiKey(apiKey)
-		if (!user || user.apiSecret != apiSecret)
-			return null
-		else return user
+		return SecUser.findByApiKey(apiKey)
 	}
 	
 	def passwordValidator = { String password, command ->

@@ -1,8 +1,10 @@
 package com.unifina.feed;
 
-public interface MessageSource {
-	public void setRecipient(MessageRecipient recipient);
+import java.io.Closeable;
+
+public interface MessageSource<RawMessageClass, KeyClass>  extends Closeable {
+	public void setRecipient(MessageRecipient<RawMessageClass, KeyClass> recipient);
 	public void setExpectedCounter(long expected);
-	public void subscribe(Object subscriber);
-	public void unsubscribe(Object subscriber);
+	public void subscribe(KeyClass subscriber);
+	public void unsubscribe(KeyClass subscriber);
 }

@@ -14,15 +14,15 @@ import com.unifina.data.IEventRecipient;
  * whose content is pulled from a separate content iterator.
  * @author Henri
  */
-public class FeedEventIterator implements Iterator<FeedEvent>, Closeable {
+public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient> implements Iterator<FeedEvent>, Closeable {
 
-	private Iterator<? extends Object> contentIterator;
-	private IEventRecipient recipient;
+	private Iterator<MessageClass> contentIterator;
+	private EventRecipientClass recipient;
 	private AbstractHistoricalFeed feed;
 	
 	private final Logger log = Logger.getLogger(FeedEventIterator.class);
 	
-	public FeedEventIterator(Iterator<? extends Object> contentIterator, AbstractHistoricalFeed feed, IEventRecipient recipient) {
+	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
 		this.contentIterator = contentIterator;
 		this.recipient = recipient;
 		this.feed = feed;
@@ -34,12 +34,12 @@ public class FeedEventIterator implements Iterator<FeedEvent>, Closeable {
 	}
 
 	@Override
-	public FeedEvent next() {
-		Object content = contentIterator.next();
+	public FeedEvent<MessageClass, EventRecipientClass> next() {
+		MessageClass content = contentIterator.next();
 		if (content==null)
 			return null;
-		
-		FeedEvent fe = new FeedEvent(content, feed.getTimestamp(content, contentIterator), recipient);
+
+		FeedEvent<MessageClass, EventRecipientClass> fe = new FeedEvent<>(content, content.getTimestamp(), recipient);
 		fe.feed = feed;
 		fe.iterator = this;
 		return fe;
@@ -60,7 +60,7 @@ public class FeedEventIterator implements Iterator<FeedEvent>, Closeable {
 			}
 	}
 
-	public IEventRecipient getRecipient() {
+	public EventRecipientClass getRecipient() {
 		return recipient;
 	}
 }

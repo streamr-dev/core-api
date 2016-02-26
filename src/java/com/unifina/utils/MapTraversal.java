@@ -1,5 +1,7 @@
 package com.unifina.utils;
 
+import org.codehaus.groovy.grails.web.json.JSONObject;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,7 +25,7 @@ public class MapTraversal {
 		for (int i=0;i<names.length;i++) {
 			String s = names[i];
 			result = map.get(s);
-			if (result==null) 
+			if (result==null || (map instanceof JSONObject && ((JSONObject)map).isNull(s)))
 				return null;
 			// Not the last entry: result should be a Map
 			if (i<names.length-1) {
