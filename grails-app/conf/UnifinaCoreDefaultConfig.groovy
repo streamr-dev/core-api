@@ -1,13 +1,13 @@
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
- * 
- * Stuff you'll want to configure in the application Config.groovy:
- * 
- * - grails.serverURL in production
  */
 
-
+environments {
+	production {
+		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+	}
+}
 
 /**
  * Logging config
