@@ -44,8 +44,7 @@ public class KafkaCollectTask extends AbstractTask {
 		final long beginTime = (config.beginDate instanceof String ? df.parse(config.beginDate).time : config.beginDate)
 		final long endTime = (config.endDate instanceof String ? df.parse(config.endDate).time : config.endDate)
 		String beginTimeAsString = new Date(beginTime).toString()
-		Map streamConfig = JSON.parse(stream.config)
-		String topic = streamConfig.topic
+		String topic = stream.uuid
 		
 		String name = config.filename
 		

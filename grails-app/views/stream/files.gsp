@@ -1,4 +1,4 @@
-<g:if test="${dataRange.beginDate && dataRange.endDate}">
+<g:if test="${dataRange?.beginDate && dataRange?.endDate}">
 	<div class="history">
 		<ui:labeled label="Range">
   			This stream has archived history from 

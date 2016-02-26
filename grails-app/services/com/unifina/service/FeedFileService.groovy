@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.utils.HibernateHelper
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -267,7 +268,11 @@ class FeedFileService {
 			return null
 		}
 		else log.debug("getStream: starting FeedFile "+feedFile.id+" for stream "+stream.id)
-		
+
+		// Unproxy the feedFile.stream so it can be accessed from other threads with no bound session
+		if (feedFile.stream)
+			feedFile.stream = HibernateHelper.deproxy(feedFile.stream, Stream.class)
+
 		// Instantiate preprocessor and get the preprocessed file name
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(feed)
 		
@@ -382,6 +387,14 @@ class FeedFileService {
 			}
 		}
 		log.info("Total "+(System.currentTimeMillis()-time)+" ms")
+	}
+
+	public FeedFile getFirstFeedFile(Stream stream) {
+		return FeedFile.findByStream(stream, [sort:'beginDate', limit:1])
+	}
+
+	public FeedFile getLastFeedFile(Stream stream) {
+		return FeedFile.findByStream(stream, [sort:'endDate', order:"desc", limit:1])
 	}
 	
 	/**

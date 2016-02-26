@@ -1,5 +1,8 @@
 package com.unifina.controller.data
 
+import com.unifina.api.ApiException
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -56,12 +59,7 @@ class StreamController {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
 		def model = [stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
-		
-		// User streams
-		if (stream.feed.id==7) {
-			render(template:"userStreamDetails", model:model)
-		}
-		else render ""
+		render(template: stream.feed.streamPageTemplate, model: model)
 	}
 
 	def update() {
@@ -73,11 +71,12 @@ class StreamController {
 	}
 	
 	def create() {
-		if (request.method=="GET")
-			[stream:new Stream()]
-		else {
+		if (request.method=="GET") {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user, null)
+			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+		} else {
+			SecUser user = springSecurityService.currentUser
+			Stream stream = streamService.createStream(params, user)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)
@@ -100,6 +99,11 @@ class StreamController {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
 		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+	}
+
+	def configureMongo() {
+		Stream stream = Stream.get(params.id)
+		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
 	}
 	
 	def delete() {
@@ -168,7 +172,7 @@ class StreamController {
 	def files() {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
-		def dataRange = streamService.getDataRange(stream)
+		DataRange dataRange = streamService.getDataRange(stream)
 		return [dataRange: dataRange, stream:stream]
 	}
 	
@@ -241,7 +245,7 @@ class StreamController {
 		}
 		redirect(action:"show", id:params.id)
 	}
-	
+
 	private void importCsv(CSVImporter csv, Stream stream) {
 		kafkaService.createFeedFilesFromCsv(csv, stream)
 		
@@ -284,8 +288,9 @@ class StreamController {
 
 	def getDataRange() {
 		Stream stream = Stream.get(params.id)
-		Map dataRange = streamService.getDataRange(stream)
-		render dataRange as JSON
+		DataRange dataRange = streamService.getDataRange(stream)
+		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
+		render dataRangeMap as JSON
 	}
 	
 }

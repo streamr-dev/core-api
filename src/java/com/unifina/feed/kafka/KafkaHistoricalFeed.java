@@ -1,5 +1,8 @@
 package com.unifina.feed.kafka;
 
+import com.unifina.data.IStreamRequirement;
+import com.unifina.feed.ITimestamped;
+import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.utils.TimeOfDayUtil;
 import grails.converters.JSON;
 
@@ -25,11 +28,11 @@ import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.time.DateUtils;
 
-public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
+public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String, MapMessageEventRecipient> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
 	Properties kafkaProperties;
-	
+
 	public KafkaHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 
@@ -40,46 +43,38 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed {
 	}
 
 	@Override
-	protected Date getTimestamp(Object eventContent,
-			Iterator<? extends Object> contentIterator) {
-		return ((KafkaMessage)eventContent).timestamp;
-	}
-
-	@Override
 	protected Stream getStream(IEventRecipient recipient) {
 		return ((StreamEventRecipient)recipient).getStream();
 	}
 
 	@Override
 	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
-			InputStream inputStream, IEventRecipient recipient) {
+			InputStream inputStream, MapMessageEventRecipient recipient) {
 		try {
-			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getConfig()));
-			return new KafkaHistoricalIterator(inputStream,streamConfig.get("topic").toString());
+			return new KafkaHistoricalIterator(inputStream,feedFile.getStream().getUuid());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	protected FeedEventIterator getNextIterator(IEventRecipient recipient)
+	protected FeedEventIterator<KafkaMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient)
 			throws IOException {
-		FeedEventIterator iterator = super.getNextIterator(recipient);
-		
+		FeedEventIterator<KafkaMessage, MapMessageEventRecipient> iterator = super.getNextIterator(recipient);
+
 		Stream stream = getStream(recipient);
 
 		// Only check Kafka for further messages if the latest message was not on the end date
 		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && !TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate()))) {
 			kafkaIteratorReturnedForStream.put(stream, true);
 
-			Map streamConfig = ((Map)JSON.parse(getStream(recipient).getConfig()));
-			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(streamConfig.get("topic").toString(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
-			
-			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages, 
+			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(recipient.getStream().getUuid(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
+
+			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages,
 			// so need to wrap it with a parsing iterator
-			iterator = new FeedEventIterator(new ParsingKafkaIterator(kafkaIterator), this, recipient);
+			iterator = new FeedEventIterator<>(new ParsingKafkaIterator(kafkaIterator), this, recipient);
 		}
-		
+
 		return iterator;
 	}
 

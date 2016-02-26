@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
@@ -117,13 +118,9 @@ class SignalPathService {
 	}
 	
 	public DataSource createDataSource(boolean adhoc, Globals globals) {
-		// Read the DataSource class from signalPathContext
-
-		// Return the historical DataSource by default
 		if (adhoc)
 			return new HistoricalDataSource(globals)
 		else return new RealtimeDataSource(globals)
-		
 	}
 
 	@Transactional
@@ -306,7 +303,7 @@ class SignalPathService {
 				throw new CanvasUnreachableException("Canvas not found in runner. This should not happen.")
 			}
 			else {				
-				RuntimeRequest request = new RuntimeRequest(msg)
+				RuntimeRequest request = new RuntimeRequest(msg, new Date())
 				request.setAuthenticated(user != null)
 				
 				/**

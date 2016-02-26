@@ -1,27 +1,23 @@
 <html>
-    <head>
-        <meta name="layout" content="main" />
-        <title><g:message code="stream.configure.label" args="[stream.name]"/></title>
-        
-        <r:require module="streamr-client"/>
-        <r:require module="stream-fields"/>
-        
-        <r:script>
+<head>
+	<meta name="layout" content="main" />
+	<title><g:message code="stream.configure.label" args="[stream.name]"/></title>
+
+	<r:require module="stream-fields"/>
+
+	<r:script>
         	var listView
         
         	$(document).ready(function() {
         		var autodetecting = false
-        		var client = new StreamrClient({
-					server: "${grailsApplication.config.streamr.ui.server}"
-				})
         		var streamConfig = ${raw(stream.config ?: "{}")}
-        		
-        		listView = new ListView({
-        			el: $("#stream-fields"),
-        			id: ${stream.id}
-        		});
+
+				listView = new ListView({
+					el: $("#stream-fields"),
+					id: ${stream.id}
+				});
         		listView.on('saved', function() {
-        			window.location = '${createLink(action:"show", id:stream.id)}'
+            		window.location = '${createLink(action:"show", id:stream.id)}'
         		})
         		
         		if (streamConfig && streamConfig.fields) {
@@ -29,72 +25,59 @@
         			listView.render()
         		}
         	
-        		function handleMessage(message) {
+        		function updateWithNewStreamData(stream) {
+        			var fields = stream.config.fields
         			if (autodetecting) {
         				listView.clear()
-        				
-        				// Delete metadata keys
-        				delete message.counter
-        				delete message.channel
-        				
-						Object.keys(message).forEach(function(key) {
-							var type = (typeof message[key])
-							if (type==="object") {
-								type = (Array.isArray(message[key]) ? "list" : "map")
-							}
-							
-							console.log("Detected field: "+key+", type: "+type)
+
+        				fields.forEach(function(field) {
+
+							console.log("Field: "+ field.name +", type: " + field.type)
+
 							listView.collection.add({
-								name: key, 
-								type: type
+								name: field.name,
+								type: field.type
 							})
-						})
+        				})
 						
 						autodetecting = false
-						client.disconnect()
 						$("#autodetect").removeAttr("disabled").html("Autodetect")
 	        		}
         		}
         	
         		$("#autodetect").click(function() {
         			if (!autodetecting) {
-	        			autodetecting = true
-						client.subscribe("${stream.uuid}", handleMessage, {resend_last:1})
-						client.connect()
-						
-						$(this).attr("disabled","disabled")
+        				autodetecting = true
+        				$(this).attr("disabled","disabled")
 						$(this).html("Waiting for data...")
-					}
+
+						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.uuid])}', function(stream) {
+							updateWithNewStreamData(stream)
+						})
+        			}
         		})
         		
         		
         	})
-        </r:script>
-    </head>
-    <body>
-    	<ui:breadcrumb>
-			<g:render template="/stream/breadcrumbList" />
-			<g:render template="/stream/breadcrumbShow" />
-			<li class="active">
-				<g:message code="stream.edit.label" args="[stream.name]"/>
-			</li>
-		</ui:breadcrumb>
-    
-		<ui:flashMessage/>
+	</r:script>
+</head>
+<body>
+<ui:breadcrumb>
+	<g:render template="/stream/breadcrumbList" />
+	<g:render template="/stream/breadcrumbShow" />
+	<li class="active">
+		<g:message code="stream.edit.label" args="[stream.name]"/>
+	</li>
+</ui:breadcrumb>
 
-		<div class="col-sm-8">
-			<ui:panel title="${message(code:"stream.configure.label", args:[stream.name])}">
-				<button class="btn btn-lg" id="autodetect">Autodetect</button>
-							
-				<div id="stream-fields"></div>
-			</ui:panel>
-		</div>
-		
-		<div class="col-sm-4">
-			<ui:panel title="HTTP API credentials">
-				<g:render template="userStreamCredentials" model="[stream:stream]"/>
-			</ui:panel>
-		</div>
-		
-    </body>
+<ui:flashMessage/>
+
+<div class="col-sm-8 col-sm-offset-2">
+	<ui:panel title="${message(code:"stream.configure.label", args:[stream.name])}">
+		<button class="btn btn-lg" id="autodetect">Autodetect</button>
+
+		<div id="stream-fields"></div>
+	</ui:panel>
+</div>
+</body>
 </html>
