@@ -95,12 +95,12 @@ public abstract class Parameter<T> extends Input<T> {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 		
-		config.put("defaultValue",defaultValue);
+		config.put("defaultValue",formatValue(defaultValue));
 		
 		if (value!=null)
-			config.put("value",value);
+			config.put("value",formatValue(value));
 		else 
-			config.put("value",defaultValue);
+			config.put("value",formatValue(defaultValue));
 		
 		if (updateOnChange) {
 			config.put("updateOnChange", true);
@@ -144,7 +144,10 @@ public abstract class Parameter<T> extends Input<T> {
 	 * @return
 	 */
 	public abstract T parseValue(String s);
-	
+	public Object formatValue(T value) {
+		return value;
+	}
+
 	@Override
 	public boolean hasValue() {
 		// Parameters should always (look like they) have a value
