@@ -54,7 +54,7 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 			@Override
 			public List<Message<MapMessage, Stream>> poll() {
 				// Update the date filter
-				startDateFilter.put("$gt", lastDate);
+				startDateFilter.put("$gt", config.convertDateToMongoFormat(lastDate));
 
 				List<Message<MapMessage, Stream>> list = new LinkedList<>();
 				FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(config.getTimestampKey()));
