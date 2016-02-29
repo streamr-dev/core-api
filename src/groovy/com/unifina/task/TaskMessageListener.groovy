@@ -36,7 +36,7 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 		String taskTopic = MapTraversal.getString(grailsApplication.config, "unifina.task.messageQueue")
 
 		// Make sure the task topic exists
-		KafkaService kafkaService = grailsApplication.mainContext.getBean("kafkaService")
+		KafkaService kafkaService = (KafkaService) grailsApplication.mainContext.getBean("kafkaService")
 		kafkaService.createTopics([taskTopic])
 
 		consumer = new UnifinaKafkaConsumer(properties);
