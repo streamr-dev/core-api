@@ -150,7 +150,7 @@ class StreamController {
 				"left outer join s.feed.module "+
 				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "+
 				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "+
-				"and (s.feed.id != 7 OR s.user.id = ${user.id}) " // Quick fix for CORE-452, needs proper ACL
+				"and s.user.id = ${user.id} " // TODO: Throw away when landing permissions branch
 				
 				if (params.feed) {
 					hql += " and s.feed.id="+Feed.load(params.feed).id
