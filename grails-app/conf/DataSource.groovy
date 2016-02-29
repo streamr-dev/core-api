@@ -50,8 +50,8 @@ environments {
 		// The core is only deployed in production for on-site customer installations. (Our cloud deployment uses streamr-webapp)
 		// The settings come from system properties.
 		dataSource {
-			username = System.getProperty('streamr.database.user')
-			password = System.getProperty('streamr.database.password')
+			username = System.getProperty('streamr.database.user') ?: "streamr-prod"
+			password = System.getProperty('streamr.database.password') ?: "Trez2tuV"
 			url = "jdbc:mysql://${System.getProperty('streamr.database.host')}/${System.getProperty('streamr.database.name')}?useLegacyDatetimeCode=false"
 		}
     }

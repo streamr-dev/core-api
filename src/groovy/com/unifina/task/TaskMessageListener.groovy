@@ -1,5 +1,6 @@
 package com.unifina.task
 
+import com.unifina.service.KafkaService
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -31,9 +32,15 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 		Properties properties = new Properties();
 		for (String s : kafkaConfig.keySet())
 			properties.setProperty(s, kafkaConfig.get(s).toString());
-		
+
+		String taskTopic = MapTraversal.getString(grailsApplication.config, "unifina.task.messageQueue")
+
+		// Make sure the task topic exists
+		KafkaService kafkaService = grailsApplication.mainContext.getBean("kafkaService")
+		kafkaService.createTopics([taskTopic])
+
 		consumer = new UnifinaKafkaConsumer(properties);
-		consumer.subscribe(MapTraversal.getString(grailsApplication.config, "unifina.task.messageQueue"),this)
+		consumer.subscribe(taskTopic,this)
 	}
 
 	public void quit() {
