@@ -105,6 +105,7 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 			log.info("Asserting 1 message. counter: $counter, latestMessage: $latestMessage")
 			assert counter == 1
 			assert latestMessage?.message?.timestamp == insertTime
+			assert !latestMessage.checkCounter
 		}
 
 		when:
