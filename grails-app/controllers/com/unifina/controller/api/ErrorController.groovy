@@ -19,11 +19,18 @@ class ErrorController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def index() {
-		Exception exception = request.exception.cause
-		if (request.isApiAction) {
-			renderAsJson(exception)
-		} else {
-			[exception: exception]
+		try {
+			Exception exception = request.exception.cause ?: request.exception
+			if (request.isApiAction) {
+				renderAsJson(exception)
+			} else {
+				[exception: exception]
+			}
+		} catch (Exception e) {
+			// Avoid infinite loop by catching any "error while showing error" -type of situation
+			log.error("Failed to render exception!", e)
+			response.status = 500
+			render ([code: "ERROR_WHILE_RENDERING_EXCEPTION", message: "An error occurred while rendering exception"] as JSON)
 		}
 	}
 
