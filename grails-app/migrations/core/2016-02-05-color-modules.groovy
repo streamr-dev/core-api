@@ -18,7 +18,7 @@ databaseChangeLog = {
 		sql("""
 			INSERT INTO module (id, version, category_id, implementing_class, name, js_module, hide, type, module_package_id, json_help, alternative_names, webcomponent)
 			VALUES (
-				NULL,
+				215,
 				1,
 				50,
 				'com.unifina.signalpath.color.ColorConstant',
@@ -31,7 +31,7 @@ databaseChangeLog = {
 				NULL,
 				NULL
 			), (
-				NULL,
+				216,
 				1,
 				50,
 				'com.unifina.signalpath.color.Gradient',
