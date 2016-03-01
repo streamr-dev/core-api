@@ -241,6 +241,9 @@
         }
 
         this.markers = {}
+        this.pendingMarkerUpdates = {}
+        this.pendingLineUpdates = []
+        this.allLineUpdates = []
     }
 
     exports.StreamrMap = StreamrMap

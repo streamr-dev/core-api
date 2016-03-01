@@ -90,7 +90,7 @@ public class MapModule extends ModuleWithUI {
 		public MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			super();
 			if (!(id instanceof Double || id instanceof String)) {
-				throw new RuntimeException("Id must be Double or String!");
+				id = id.toString();
 			}
 			put("t", "p");
 			put("lat", latitude);
