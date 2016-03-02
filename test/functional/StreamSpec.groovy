@@ -1,5 +1,3 @@
-import com.mongodb.MongoClient
-import com.mongodb.client.MongoCollection
 import com.unifina.feed.mongodb.MongoDbConfig
 import core.pages.ConfigureMongoPage
 import org.bson.Document

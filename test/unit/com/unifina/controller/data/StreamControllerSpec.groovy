@@ -3,6 +3,7 @@ package com.unifina.controller.data
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Module
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.StreamService
 import com.unifina.service.PermissionService
@@ -12,31 +13,34 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(StreamController)
-@Mock([SecUser, Stream, Feed, PermissionService, StreamService])
+@Mock([SecUser, Stream, Feed, Module, PermissionService, StreamService])
 class StreamControllerSpec extends Specification {
 
 	Feed feed
 	SecUser user
+	Stream stream
+	Module module
 	
 	void setup() {
 		// Mock services or use real ones
 		controller.streamService = grailsApplication.mainContext.getBean("streamService")
-		controller.permissionService = grailsApplication.mainContext.getBean("permissionService")
-		
-		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
+		controller.permissionService = [getAll: {clazz, user, closure -> stream}]
 
-		feed = new Feed(streamListenerClass: NoOpStreamListener.name).save(validate: false)
+		mockSpringSecurityService(null)
+
+		module = new Module(id: 1).save(validate: false)
+		feed = new Feed(streamListenerClass: NoOpStreamListener.name, module: module).save(validate: false)
+		stream = new Stream(id: "dummy", name: "dummy", description: "dummy", feed: feed).save(validate: false)
 
 		// Users
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate:false)
-		
 	}
-	
-	private void mockSpringSecurityService(user) {
+
+	private void mockSpringSecurityService(newUser) {
 		def springSecurityService = [
-			getCurrentUser: {-> user },
-			encodePassword: {String pw-> pw+"-encoded" }
+			getCurrentUser: {-> newUser },
+			encodePassword: {String pw -> pw+"-encoded" }
 		] as SpringSecurityService
 		controller.springSecurityService = springSecurityService
 	}
@@ -52,9 +56,21 @@ class StreamControllerSpec extends Specification {
 			request.method = 'POST'
 			controller.create()
 		then:
-			response.redirectedUrl == '/stream/show/1'
-			Stream.count() == 1
-			Stream.list()[0].user == user
+			response.redirectedUrl == '/stream/show/2'
+			Stream.count() == 2
+			Stream.list()[1].user == user
+	}
+
+	void "searching for a stream returns correct module"() {
+		when:
+		controller.search()
+		then:
+		response.json.size() == 1
+		response.json[0].id == stream.id
+		response.json[0].name == stream.name
+		response.json[0].description == stream.description
+		response.json[0].module == module.id
+
 	}
 
 }

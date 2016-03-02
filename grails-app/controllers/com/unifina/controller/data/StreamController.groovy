@@ -58,11 +58,16 @@ class StreamController {
 			}
 			order "name", "asc"
 			maxResults 10
-		} as JSON)
+		}.collect { stream -> [
+			id: stream.id,
+			name: stream.name,
+			description: stream.description,
+			module: stream.feed.moduleId
+		]} as JSON)
 	}
 
 	def create() {
-		if (request.method=="GET") {
+		if (request.method == "GET") {
 			SecUser user = springSecurityService.currentUser
 			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
 		} else {
