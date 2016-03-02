@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.unifina.signalpath.foreach.ForEach;
 import org.apache.log4j.Logger;
 
 import com.unifina.signalpath.charts.TimeSeriesChart;
@@ -28,10 +29,18 @@ public class Propagator implements Serializable {
 	
 	private static final Logger log = Logger.getLogger(Propagator.class);
 	
-	public Propagator() {
-		
+	public Propagator() {}
+
+	public Propagator(Input[] inputs, AbstractSignalPathModule origin) {
+		alwaysPropagate = true;
+		reachable = makeReachableSet(inputs);
+		calculateActivationOrder();
 	}
-	
+
+	public Propagator(List<Input> inputs, AbstractSignalPathModule origin) {
+		this(inputs.toArray(new Input[inputs.size()]), origin);
+	}
+
 	public void addModule(AbstractSignalPathModule module) {
 		boolean newModule = originSet.add(module);
 		if (newModule) { 
@@ -51,12 +60,6 @@ public class Propagator implements Serializable {
 			reachable = makeReachableSet(outputs);
 			calculateActivationOrder();
 		}
-	}
-	
-	public Propagator(Input[] inputs, AbstractSignalPathModule origin) {
-		alwaysPropagate = true;
-		reachable = makeReachableSet(inputs);
-		calculateActivationOrder();
 	}
 	
 //	@Deprecated
