@@ -518,6 +518,9 @@ public class ModuleTestHelper {
 	private void initAndAttachOutputsToModuleInputs() {
 		for (String inputName : inputValuesByName.keySet()) {
 			Input input = module.getInput(inputName);
+			if (input == null) {
+				throw new IllegalArgumentException("No input found with name " + inputName);
+			}
 			Output output = new Output(null, "outputFor" + inputName, input.getTypeName());
 			output.setDisplayName("outputFor" + inputName);
 			output.connect(input);

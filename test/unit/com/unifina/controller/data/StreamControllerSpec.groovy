@@ -1,31 +1,32 @@
 package com.unifina.controller.data
 
+import com.unifina.domain.data.Feed
+import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
+import com.unifina.feed.NoOpStreamListener
+import com.unifina.service.StreamService
+import com.unifina.service.PermissionService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-import com.unifina.domain.data.Feed
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
-import com.unifina.service.KafkaService
-import com.unifina.service.StreamService
-import com.unifina.service.PermissionService
-
 @TestFor(StreamController)
 @Mock([SecUser, Stream, Feed, PermissionService, StreamService])
 class StreamControllerSpec extends Specification {
-	
+
+	Feed feed
 	SecUser user
 	
 	void setup() {
 		// Mock services or use real ones
 		controller.streamService = grailsApplication.mainContext.getBean("streamService")
-		controller.streamService.kafkaService = Mock(KafkaService)
 		controller.permissionService = grailsApplication.mainContext.getBean("permissionService")
 		
 		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
-		
+
+		feed = new Feed(streamListenerClass: NoOpStreamListener.name).save(validate: false)
+
 		// Users
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate:false)
@@ -46,6 +47,7 @@ class StreamControllerSpec extends Specification {
 		when:
 			params.name = "Test stream"
 			params.description = "Test stream"
+			params.feed = feed.id
 			params.format = "html"
 			request.method = 'POST'
 			controller.create()

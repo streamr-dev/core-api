@@ -19,14 +19,14 @@
 			},
 			ready: function() {				
 				var _this = this
-				this.bindEvents(_this.$.container)
+				this.bindEvents(_this.$["streamr-widget-container"])
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
 					var options = {}
 					options.maxRows = _this.maxRows
 
-					_this.table = new StreamrTable(_this.$.container, options)
+					_this.table = new StreamrTable(_this.$["streamr-widget-container"], options)
 					_this.table.initTable()
 
 					_this.sendRequest({type:'initRequest'}, function(response) {

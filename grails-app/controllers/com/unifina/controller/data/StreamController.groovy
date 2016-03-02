@@ -1,6 +1,9 @@
 package com.unifina.controller.data
 
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.api.ApiException
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -59,12 +62,13 @@ class StreamController {
 	}
 
 	def create() {
-		if (request.method == "GET")
-			[stream: new Stream()]
-		else {
+		if (request.method=="GET") {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user, null)
-
+			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+		} else {
+			SecUser user = springSecurityService.currentUser
+			Stream stream = streamService.createStream(params, user)
+			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)
 				return [stream: stream]
@@ -81,18 +85,12 @@ class StreamController {
 			[stream: stream, shareable: permissionService.canShare(user, stream)]
 		}
 	}
-	
+
 	// Can be extended to handle more types
 	def details() {
 		getAuthorizedStream(params.long("id")) { stream, user ->
 			def model = [stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
-
-			// User streams
-			if (stream.feed.id == 7) {
-				render(template: "userStreamDetails", model: model)
-			} else {
-				render ""
-			}
+			render(template: stream.feed.streamPageTemplate, model: model)
 		}
 	}
 
@@ -104,7 +102,7 @@ class StreamController {
 			redirect(action: "show", id: stream.id)
 		}
 	}
-	
+
 	def configure() {
 		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
 			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
@@ -116,7 +114,12 @@ class StreamController {
 			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
 		}
 	}
-	
+
+	def configureMongo() {
+		Stream stream = Stream.get(params.id)
+		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
+	}
+
 	def delete() {
 		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
 			try {
@@ -151,8 +154,8 @@ class StreamController {
 	
 	def files() {
 		getAuthorizedStream(params.long("id")) { stream, user ->
-			def feedFiles = FeedFile.findAllByStream(stream, [sort: 'beginDate'])
-			return [feedFiles: feedFiles, stream: stream]
+			DataRange dataRange = streamService.getDataRange(stream)
+			return [dataRange: dataRange, stream:stream]
 		}
 	}
 	
@@ -219,7 +222,7 @@ class StreamController {
 			redirect(action: "show", id: params.id)
 		}
 	}
-	
+
 	private void importCsv(CSVImporter csv, Stream stream) {
 		kafkaService.createFeedFilesFromCsv(csv, stream)
 		
@@ -256,5 +259,12 @@ class StreamController {
 			redirect(action: "show", params: [id: params.id])
 		}
 	}
-	
+
+	def getDataRange() {
+		Stream stream = Stream.get(params.id)
+		DataRange dataRange = streamService.getDataRange(stream)
+		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
+		render dataRangeMap as JSON
+	}
+
 }

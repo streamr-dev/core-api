@@ -62,6 +62,7 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         runtime 'mysql:mysql-connector-java:5.1.20'
+		compile 'org.mongodb:mongodb-driver:3.2.1'
         compile('log4j:log4j:1.2.16')
 		
         runtime('commons-net:commons-net:3.3')
@@ -72,7 +73,7 @@ grails.project.dependency.resolution = {
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
-        compile('com.unifina:kafka-client:0.1.4') {
+        compile('com.unifina:kafka-client:0.1.12') {
             excludes "slf4j-log4j12"
         }
 		

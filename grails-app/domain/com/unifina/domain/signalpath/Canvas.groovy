@@ -79,6 +79,7 @@ class Canvas {
 			created: dateCreated,
 			updated: lastUpdated,
 			adhoc: adhoc,
+			shared: shared,
 			state: state.toString(),
 			hasExports: hasExports,
 			serialized: !isNotSerialized(),

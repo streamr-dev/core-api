@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.unifina.domain.data.Feed;
+import com.unifina.feed.AbstractMessageSource;
 import com.unifina.feed.Message;
 import com.unifina.feed.MessageRecipient;
 import com.unifina.feed.MessageSource;
@@ -12,55 +13,44 @@ import com.unifina.kafkaclient.UnifinaKafkaMessage;
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler;
 import com.unifina.utils.MapTraversal;
 
-public class KafkaMessageSource implements MessageSource {
+public class KafkaMessageSource extends AbstractMessageSource<UnifinaKafkaMessage, String> {
 
-	private MessageRecipient recipient;
+	private MessageRecipient<UnifinaKafkaMessage, String> recipient;
 
 	private UnifinaKafkaConsumer consumer;
 	
 	private UnifinaKafkaMessageHandler handler = new UnifinaKafkaMessageHandler() {
 		
-		private long offset = 0;
+		private long counter = 0;
 		
 		@Override
-		public void handleMessage(UnifinaKafkaMessage kafkaMessage) {
-			Message msg = new Message(kafkaMessage.getChannel(), offset++, kafkaMessage);
-			msg.checkCounter = false;
-			recipient.receive(msg);
+		public void handleMessage(UnifinaKafkaMessage kafkaMessage, String topic, int partition, long offset) {
+			forward(kafkaMessage, topic, counter++, false);
 		}
 	};
 	
 	public KafkaMessageSource(Feed feed, Map<String,Object> config) {
+		super(feed, config);
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(config, "unifina.kafka"));
 		Properties properties = new Properties();
 		for (String s : kafkaConfig.keySet())
 			properties.setProperty(s, kafkaConfig.get(s).toString());
 		
 		consumer = new UnifinaKafkaConsumer(properties);
-
-	}
-	
-	@Override
-	public void setRecipient(MessageRecipient recipient) {
-		this.recipient = recipient;
 	}
 
 	@Override
-	public void setExpectedCounter(long expected) {
-
-	}
-	
-	public void quit() {
+	public void close() {
 		consumer.close();
 	}
 
 	@Override
-	public void subscribe(Object key) {
-		consumer.subscribe(key.toString(), handler, false);
+	public void subscribe(String key) {
+		consumer.subscribe(key.toString(), handler);
 	}
 
 	@Override
-	public void unsubscribe(Object key) {
+	public void unsubscribe(String key) {
 		consumer.unsubscribe(key.toString());
 	}
 	

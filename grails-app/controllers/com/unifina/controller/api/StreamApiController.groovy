@@ -1,6 +1,8 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiException
 import com.unifina.api.ValidationException
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.security.StreamrApi
@@ -25,13 +27,8 @@ class StreamApiController {
 
 	@StreamrApi
 	def save() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser, request.JSON.config?.fields)
-
-		if (stream.hasErrors()) {
-			throw new ValidationException(stream.errors)
-		} else {
-			render(stream.toMap() as JSON)
-		}
+		Stream stream = streamService.createStream(request.JSON, request.apiUser)
+		render(stream.toMap() as JSON)
 	}
 
 
@@ -48,7 +45,7 @@ class StreamApiController {
 			Stream newStream = new Stream(request.JSON)
 			stream.name = newStream.name
 			stream.description = newStream.description
-			stream.config = newStream.config
+			stream.config = readConfig()
 			if (stream.validate()) {
 				stream.save(failOnError: true)
 				render(status: 204)
@@ -56,6 +53,29 @@ class StreamApiController {
 				throw new ValidationException(stream.errors)
 			}
 		}
+	}
+
+	@StreamrApi
+	def detectFields(String id) {
+		getAuthorizedStream(id) { Stream stream ->
+			if (streamService.autodetectFields(stream, params.boolean("flatten", false))) {
+				render(stream.toMap() as JSON)
+			} else {
+				throw new ApiException(500, "NO_FIELDS_FOUND", "No fields found for Stream (id=$stream.id)")
+			}
+		}
+	}
+
+
+	private String readConfig() {
+		Map config = request.JSON.config
+		if (config?.mongodb) {
+			def configObject = new MongoDbConfig(config.mongodb)
+			if (!configObject.validate()) {
+				throw new ValidationException(configObject.errors)
+			}
+		}
+		return config
 	}
 
 	@StreamrApi

@@ -1,13 +1,13 @@
 package com.unifina.service
 
 import com.unifina.api.SaveCanvasCommand
-import com.unifina.data.IFeed
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
+import com.unifina.feed.AbstractFeed
 import com.unifina.feed.AbstractFeedProxy
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaProducer
@@ -62,7 +62,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		user = SecUser.load(1L)
 
 		// Create stream
-		stream = streamService.createUserStream([name: "serializationTestStream"], user, null)
+		stream = streamService.createStream([name: "serializationTestStream", feed: 7L], user)
 		stream.config = (
 			[
 				fields: [
@@ -141,7 +141,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 
 		@Override
 		void sendMessage(Stream stream, Object key, Map message) {
-			Collection<IFeed> feeds = globals.getDataSource().getFeeds();
+			Collection<AbstractFeed> feeds = globals.getDataSource().getFeeds();
 			if (feeds.size() != 1) {
 				throw new RuntimeException("Feeds was of unexpected size " + feeds.size() + "!= 1")
 			}

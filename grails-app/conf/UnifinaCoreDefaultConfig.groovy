@@ -1,13 +1,13 @@
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
- * 
- * Stuff you'll want to configure in the application Config.groovy:
- * 
- * - grails.serverURL in production
  */
 
-
+environments {
+	production {
+		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+	}
+}
 
 /**
  * Logging config
@@ -38,7 +38,11 @@ log4j = {
 
 	warn   'org.mortbay.log',
 			'org.apache.zookeeper',
-			'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner'
+			'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
+			'kafka.consumer.ConsumerConfig'
+			'org.apache.kafka.clients.consumer.ConsumerConfig'
+			'kafka.producer.ProducerConfig'
+			'org.apache.kafka.clients.producer.ProducerConfig'
 }
 
 /**
@@ -67,10 +71,9 @@ log4j = {
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*",
-									"/js/leaflet-0.7.3", "/misc/*"]
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet", "/misc/*"]
  grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
- 
+
  grails.resources.processing.enabled = true
  
  environments {
@@ -254,8 +257,8 @@ environments {
 /**
  * Kafka config
  */
-unifina.kafka.metadata.broker.list = "192.168.10.21:9092"
-unifina.kafka.zookeeper.connect = "192.168.10.21:2181"
+unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"
+unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2181"
 unifina.kafka.producer.type = "async"
 unifina.kafka.queue.buffering.max.ms = "100"
 unifina.kafka.retry.backoff.ms = "500"
@@ -264,8 +267,8 @@ unifina.kafka.request.required.acks = "0"
 unifina.kafka.group.id = "streamr"
 environments {
 	production {
-		unifina.kafka.metadata.broker.list = "ip-10-16-207-139.ec2.internal:9092"
-		unifina.kafka.zookeeper.connect = "ip-10-16-207-139.ec2.internal:2181"
+		unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
+		unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
 	}
 }
 

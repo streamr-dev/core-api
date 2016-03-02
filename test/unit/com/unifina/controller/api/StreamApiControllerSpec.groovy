@@ -5,6 +5,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission
+import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
@@ -21,6 +22,7 @@ import spock.lang.Specification
 @Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService])
 class StreamApiControllerSpec extends Specification {
 
+	Feed feed
 	SecUser user
 
 	def streamService
@@ -36,18 +38,19 @@ class StreamApiControllerSpec extends Specification {
 		permissionService = mainContext.getBean(PermissionService)
 
 		controller.streamService = streamService
-		controller.streamService.kafkaService = Mock(KafkaService)
 		controller.permissionService = permissionService
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
 
+		feed = new Feed(streamListenerClass: NoOpStreamListener.name).save(validate: false)
+
 		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
 
-		streamOneUuid = streamService.createUserStream([name: "stream", description: "description"], user, null).uuid
-		streamTwoUuid = streamService.createUserStream([name: "ztream"], user, null).uuid
-		streamThreeUuid = streamService.createUserStream([name: "atream"], user, null).uuid
-		streamFourUuid = streamService.createUserStream([name: "otherUserStream"], otherUser, null).uuid
+		streamOneUuid = streamService.createStream([name: "stream", description: "description", feed: feed], user).uuid
+		streamTwoUuid = streamService.createStream([name: "ztream", feed: feed], user).uuid
+		streamThreeUuid = streamService.createStream([name: "atream", feed: feed], user).uuid
+		streamFourUuid = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).uuid
 	}
 
 	void "find all streams of logged in user"() {
@@ -79,7 +82,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json[0].apiKey.length() == 22
 		response.json[0].name == "stream"
 		response.json[0].config == [
-		    topic: response.json[0].uuid,
 			fields: []
 		]
 		response.json[0].description == "description"
@@ -88,7 +90,7 @@ class StreamApiControllerSpec extends Specification {
 	void "create a new stream for currently logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		request.json = [name: "Test stream", description: "Test stream"]
+		request.json = [name: "Test stream", description: "Test stream", feed: feed]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
 		withFilters([action:'save']) {
@@ -99,7 +101,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
 		response.json.config == [
-			topic: response.json.uuid,
 			fields: []
 		]
 		response.json.description == "Test stream"
@@ -113,6 +114,7 @@ class StreamApiControllerSpec extends Specification {
 		request.json = [
 			name: "Test stream",
 			description: "Test stream",
+			feed: feed,
 			config: [
 				fields: [
 					[name: "profit", type: "number"],
@@ -130,7 +132,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
 		response.json.config == [
-			topic: response.json.uuid,
 			fields: [
 				[name: "profit", type: "number"],
 				[name: "keyword", type: "string"]
@@ -144,7 +145,7 @@ class StreamApiControllerSpec extends Specification {
 	void "creating stream fails given invalid token"() {
 		when:
 		request.addHeader("Authorization", "Token wrongKey")
-		request.json = [name: "Test stream", description: "Test stream"]
+		request.json = [name: "Test stream", description: "Test stream", feed: feed]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create'
 		withFilters([action:'save']) {
@@ -228,6 +229,21 @@ class StreamApiControllerSpec extends Specification {
 		stream.name == "newName"
 		stream.description == "newDescription"
 		stream.config == null
+	}
+
+	void "updating Stream with invalid mongodb settings raises validation error"() {
+		when:
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		params.id = streamOneUuid
+		request.method = "PUT"
+		request.json = '{name: "newName", description: "newDescription", config: {mongodb: {host: null}}}'
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "update"]) {
+			controller.update()
+		}
+
+		then:
+		thrown(ValidationException)
 	}
 
 	void "cannot update non-existent Stream"() {

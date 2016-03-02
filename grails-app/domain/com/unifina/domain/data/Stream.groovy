@@ -1,7 +1,9 @@
 package com.unifina.domain.data
 
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.security.SecUser
-import groovy.json.JsonSlurper
+import grails.converters.JSON
+import groovy.json.JsonBuilder
 
 class Stream implements Comparable {
 	Long id
@@ -19,7 +21,7 @@ class Stream implements Comparable {
 
 	static constraints = {
 		name(blank:false)
-		
+
 		config(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
@@ -46,7 +48,8 @@ class Stream implements Comparable {
 			uuid: uuid,
 			apiKey: apiKey,
 			name: name,
-			config: config == null || config.empty ? config : new JsonSlurper().parseText(config),
+			feed: feedId,
+			config: config == null || config.empty ? config : JSON.parse(config),
 			description: description
 		]
 	}
@@ -66,5 +69,10 @@ class Stream implements Comparable {
 	public boolean equals(Object obj) {
 		return obj instanceof Stream && obj.id == this.id
 	}
-	
+
+	public Map<String, Object> getStreamConfigAsMap() {
+		if (config!=null)
+			return ((Map)JSON.parse(config));
+		else return [:]
+	}
 }

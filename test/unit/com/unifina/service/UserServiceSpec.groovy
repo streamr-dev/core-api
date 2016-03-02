@@ -7,6 +7,8 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.Module
+import com.unifina.feed.NoOpStreamListener
+import com.unifina.user.UserCreationFailedException
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -29,7 +31,9 @@ class UserServiceSpec extends Specification {
         feed.module = new Module()
         feed.parserClass = ""
         feed.timezone = "Europe/Minsk"
-        feed.save()
+		feed.streamListenerClass = NoOpStreamListener.name
+		feed.streamPageTemplate = ""
+        feed.save(failOnError: true)
 
         // A modulePackage created with minimum fields required
         def modulePackage = new ModulePackage()

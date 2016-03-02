@@ -1,6 +1,7 @@
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
+import core.mixins.DashboardMixin
 import core.pages.*
 
 class DashboardSpec extends LoginTester1Spec {
@@ -9,11 +10,12 @@ class DashboardSpec extends LoginTester1Spec {
 		// @Mixin is buggy, use runtime mixins instead
 		this.class.metaClass.mixin(CanvasMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
-		
+		this.class.metaClass.mixin(DashboardMixin)
+
 		super.login()
 		waitFor { at CanvasPage }
 		
-		// Go start the RunningSignalPath related to this spec
+		// Go start the Canvas related to this spec
 		to CanvasListPage
 		waitFor { at CanvasListPage }
 		$(".table .td", text:"DashboardSpec").click()
@@ -29,18 +31,6 @@ class DashboardSpec extends LoginTester1Spec {
 		$("#navLogoutLink").displayed
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
-	}
-	
-	def findCanvas(String name) {
-		return $("#main-menu .navigation .canvas .mm-text", text: name).closest(".canvas")
-	}
-	
-	def findDashboardItem(String name) {
-		return $("#dashboard-view .dashboarditem .title", text:contains(name)).parents(".dashboarditem")
-	}
-	
-	def findTitleInput(String title) {
-		return $("#dashboard-view .dashboarditem input", value: title)
 	}
 	
 	void "the flow of creating, modifying and deleting a dashboard works correctly"() {
@@ -68,22 +58,22 @@ class DashboardSpec extends LoginTester1Spec {
 		// Open a rsp
 		when: "a rsp clicked to open"
 			findCanvas("DashboardSpec").click()
-		then: "uichannel-list opens"
+		then: "module list opens"
 			waitFor { findCanvas("DashboardSpec").find(".module-title").displayed }
 		
 		// Add some modules
 		when: "Label added"
-			findCanvas("DashboardSpec").find(".module-title", text:contains("Label")).click()
+			findModule("DashboardSpec", "Label").click()
 		then: "Label should be displayed"
 			waitFor { findDashboardItem("Label").displayed }
 		
 		when: "Table added"
-			findCanvas("DashboardSpec").find(".module-title", text:contains("Table")).click()
+			findModule("DashboardSpec", "Table").click()
 		then: "Table item should be displayed"
 			waitFor { findDashboardItem("Table").displayed }
 		
 		when: "Chart added"
-			findCanvas("DashboardSpec").find(".module-title", text:contains("Chart")).click()
+			findModule("DashboardSpec", "Chart").click()
 		then: "Chart item should be displayed"
 			waitFor { findDashboardItem("Chart").displayed }
 		

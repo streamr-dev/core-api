@@ -1,8 +1,8 @@
 package com.unifina.feed;
 
 
-public interface MessageRecipient {
-	public void receive(Message message);
+public interface MessageRecipient<RawMessageClass, KeyClass> {
+	public void receive(Message<RawMessageClass, KeyClass> message);
 	public void sessionBroken();
 	public void sessionRestored();
 	public void sessionTerminated();

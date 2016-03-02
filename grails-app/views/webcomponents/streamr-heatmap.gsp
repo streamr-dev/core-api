@@ -10,7 +10,7 @@
 <polymer-element name="streamr-heatmap" extends="streamr-widget" attributes="lifeTime fadeInTime fadeOutTime min max radius center zoom minZoom maxZoom">
 	<!-- Using shadow element doesn't work with CSS -->
 	<template>
-		<link rel="stylesheet" href="${r.resource(dir:'/js/leaflet-0.7.3', file:'leaflet-0.7.3.css', plugin:'unifina-core')}">
+		<link rel="stylesheet" href="${r.resource(dir:'/js/leaflet', file:'leaflet.css', plugin:'unifina-core')}">
 		<streamr-client id="client"></streamr-client>
 		<div id="container"></div>
 	</template>
@@ -23,24 +23,29 @@
 			},
 			ready: function() {			
 				var _this = this
-				this.bindEvents(_this.$.container)
+				this.bindEvents(_this.$["streamr-widget-container"])
 
-				this.$.container.setAttribute("style", "min-height:400px")
+				this.$["streamr-widget-container"].setAttribute("style", "min-height:400px")
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
-
-					_this.map = new StreamrHeatMap(_this.$.container, {
-						lifeTime: this.lifeTime,
-						fadeInTime: this.fadeInTime,
-						fadeOutTime: this.fadeOutTime,
-						min: this.min,
-						max: this.max,
-						radius: this.radius,
-						center: (this.center!=null && this.center.length===2 ? this.center : undefined),
-						zoom: this.zoom,
-						minZoom: this.minZoom,
-						maxZoom: this.maxZoom
+					var mapOptions = {}
+					if (json.options) {
+						Object.keys(json.options).forEach(function(key) {
+							mapOptions[key] = json.options[key].value
+						})
+					}
+					_this.map = new StreamrHeatMap(_this.$["streamr-widget-container"], {
+						lifeTime: this.lifeTime !== undefined ? this.lifeTime : mapOptions.lifeTime,
+						fadeInTime: this.fadeInTime !== undefined ? this.fadeInTime : mapOptions.fadeInTime,
+						fadeOutTime: this.fadeOutTime !== undefined ? this.fadeOutTime : mapOptions.fadeOutTime,
+						min: this.min !== undefined ? this.min : mapOptions.min,
+						max: this.max !== undefined ? this.max : mapOptions.max,
+						centerLat: this.centerLat !== undefined ? this.centerLat : mapOptions.centerLat,
+						centerLng: this.centerLng !== undefined ? this.centerLng : mapOptions.centerLng,
+						zoom: this.zoom !== undefined ? this.zoom : mapOptions.zoom,
+						minZoom: this.minZoom !== undefined ? this.minZoom : mapOptions.minZoom,
+						maxZoom: this.maxZoom !== undefined ? this.maxZoom : mapOptions.maxZoom
 					})
 
 					_this.subscribe(

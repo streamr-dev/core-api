@@ -1,0 +1,53 @@
+package com.unifina.feed.kafka
+
+import com.unifina.domain.data.Stream
+import com.unifina.feed.map.MapMessage
+import grails.test.spock.IntegrationSpec
+
+class KafkaFieldDetectorSpec extends IntegrationSpec {
+
+	def grailsApplication
+	def kafkaService
+	KafkaFieldDetector detector
+
+	def setup() {
+		detector = new KafkaFieldDetector(grailsApplication)
+	}
+
+	def cleanup() {
+
+	}
+
+	def "it should return null if the topic contains no messages" () {
+		String topic = "KafkaFieldDetectorSpec-"+System.currentTimeMillis()
+		kafkaService.createTopics([topic])
+		Thread.sleep(2000)
+
+		when:
+		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
+		then:
+		msg == null
+
+		cleanup:
+		kafkaService.deleteTopics([topic])
+	}
+
+	def "it should return the latest message from a topic" () {
+		String topic = "KafkaFieldDetectorSpec-"+System.currentTimeMillis()
+		kafkaService.createTopics([topic])
+		Thread.sleep(2000)
+		for (int i=0;i<10;i++) {
+			kafkaService.sendMessage(topic, "", [i: i])
+		}
+		Thread.sleep(2000)
+
+		when:
+		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
+		then:
+		msg.payload.i == 9
+
+		cleanup:
+		kafkaService.deleteTopics([topic])
+	}
+
+}
