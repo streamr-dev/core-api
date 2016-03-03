@@ -57,7 +57,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def detectFields(String id) {
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			if (streamService.autodetectFields(stream, params.boolean("flatten", false))) {
 				render(stream.toMap() as JSON)
 			} else {
