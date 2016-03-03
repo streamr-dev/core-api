@@ -17,6 +17,7 @@ import java.security.AccessControlException
  * 		- in addition to Permissions, "resource owner" (i.e. resource.user if exists) has all access to that resource
  * 			-> there doesn't always exist a Permission object in database for each "access right"
  * 			=> generate dummy Permission objects with id == null
+ * 		- anonymous Permissions: checked, and listed for resource, but permitted resources not listed for user
  * 		- resources can be pointed with longId or stringId
  * 			=> getIdPropertyName
  * 		- Permission owners and grant/revoke targets can be SecUsers or SignupInvites
@@ -85,21 +86,23 @@ class PermissionService {
 	 */
 	public boolean check(SecUser user, resource, Operation op) {
 		if (!resource?.id) { return false; }
-		// TODO: check first if resource is "public" i.e. always readable, also to null user
-		if (!user?.id) { return false; }
 		if (isOwner(user, resource)) { return true; }		// owner has all access
-
-		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
-		//   hence, class.name of a proxy object won't match the class.name in database
 		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
 		return hasPermission(user, resourceClass, resource.id, op)
 	}
 
 	private boolean hasPermission(user, Class resourceClass, resourceId, Operation op) {
-		String userProp = getUserPropertyName(user)
 		String idProp = getIdPropertyName(resourceClass)
 		return !Permission.withCriteria {
-			eq userProp, user
+			or {
+				eq "anonymous", true
+				try {
+					String userProp = getUserPropertyName(user)
+					eq userProp, user
+				} catch(e) {
+					// throws for e.g. null user; ignore, maybe anonymous check returns something
+				}
+			}
 			eq "clazz", resourceClass.name
 			eq idProp, resourceId
 			eq "operation", op
@@ -142,7 +145,10 @@ class PermissionService {
 		return perms
 	}
 
-	/** Get all resources of given type that the user has specified type of access to */
+	/**
+	 * Get all resources of given type that the user has specified type of access to
+	 *	Note: anonymous permissions will not be listed
+	 */
 	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
 		// TODO: return resources that are "public" i.e. always readable, also to null user
 		if (!user) { return [] }
@@ -222,7 +228,27 @@ class PermissionService {
 			clazz: resourceClass.name,
 			operation: operation,
 			(idProp): resource.id,
-			(userProp): target
+			(userProp): target,
+		).save(flush: true, failOnError: true)
+	}
+
+	public Permission grantAnonymousAccess(SecUser grantor, resource, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+		if (!canShare(grantor, resource)) {
+			throwAccessControlException(grantor, resource, logIfDenied)
+		}
+		return systemGrantAnonymousAccess(resource, operation)
+	}
+
+	public Permission systemGrantAnonymousAccess(resource, Operation operation=Operation.READ) {
+		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
+
+		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+		String idProp = getIdPropertyName(resourceClass)
+		return new Permission(
+			clazz: resourceClass.name,
+			operation: operation,
+			(idProp): resource.id,
+			anonymous: true
 		).save(flush: true, failOnError: true)
 	}
 
@@ -262,7 +288,21 @@ class PermissionService {
 		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
 		String idProp = getIdPropertyName(resourceClass)
 
-		return performRevoke(userProp, target, resourceClass.name, idProp, resource.id, operation)
+		return performRevoke(false, userProp, target, resourceClass.name, idProp, resource.id, operation)
+	}
+
+	public List<Permission> revokeAnonymousAccess(SecUser revoker, resource, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException {
+		if (!canShare(revoker, resource)) {
+			throwAccessControlException(revoker, resource, logIfDenied)
+		}
+		return systemRevokeAnonymousAccess(resource, operation)
+	}
+
+	public List<Permission> systemRevokeAnonymousAccess(resource, Operation operation=Operation.READ) {
+		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
+		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+		String idProp = getIdPropertyName(resourceClass)
+		return performRevoke(true, userProp, target, resourceClass.name, idProp, resource.id, operation)
 	}
 
 	/**
@@ -290,13 +330,25 @@ class PermissionService {
      */
 	public List<Permission> systemRevoke(Permission p) {
 		if (!p) { throw new IllegalArgumentException("Missing Permission object!") }
-		return performRevoke(p.user ? "user" : "invite", p.user ?: p.invite, p.clazz, p.stringId ? "stringId" : "longId", p.stringId ?: p.longId, p.operation)
+		return performRevoke(
+				p.anonymous,	// userProp and target will be ignored if anonymous==true
+				p.user ? "user" : "invite",
+				p.user ?: p.invite,
+				p.clazz,
+				p.stringId ? "stringId" : "longId",
+				p.stringId ?: p.longId,
+				p.operation)
 	}
 
-	private List<Permission> performRevoke(String userProp, target, String clazz, String idProp, resourceId, Operation operation) {
+	/** find Permissions that will be revoked, and cascade according to alsoRevoke map */
+	private List<Permission> performRevoke(boolean anonymous, String userProp, target, String clazz, String idProp, resourceId, Operation operation) {
 		def ret = []
 		def perms = Permission.withCriteria {
-			eq(userProp, target)
+			if (anonymous) {
+				eq("anonymous", true)
+			} else {
+				eq(userProp, target)
+			}
 			eq("clazz", clazz)
 			eq(idProp, resourceId)
 		}

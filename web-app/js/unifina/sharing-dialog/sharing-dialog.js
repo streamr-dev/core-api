@@ -115,6 +115,8 @@
         '<div class="owner-row">' +
             '<span>Owner: </span>' +
             '<span class="owner-label"><%= owner %></span>' +
+            '<input type="checkbox" class="anonymous-switcher" <%= checked ? "checked" : "" %>>' +
+            '<div class="publish-label"> Allow anonymous read access </div>' +
         '</div>' +
         '<div class="access-list"></div>' +
         '<div class="form-inline new-user-row">' +
@@ -124,6 +126,34 @@
     )
 
     var AccessListView = Backbone.View.extend({
+        initialize: function(args) {
+            this.$el.html(accessListTemplate({
+                owner: args.owner,
+                checked: !!originalAnonPermission
+            }))
+            this.$ownerLabel = this.$(".owner-label")
+            this.$accessList = this.$(".access-list")
+            this.$newUserField = this.$(".new-user-field")
+            this.$anonymousCheckbox = this.$(".anonymous-switcher")
+
+            this.$anonymousCheckbox.switcher({
+                on_state_content: '<i class="fa fa-check"></i>',
+                off_state_content: '<i class="fa fa-times"></i>',
+            })
+            this.$(".switcher-toggler").html('<i class="fa fa-globe">')
+
+            this.listenTo(accessList, 'add', this.createAccessView)
+            this.listenTo(accessList, 'reset', this.addAll)
+        },
+        createAccessView: function(accessRow) {
+            var view = new AccessView({model: accessRow})
+            this.$accessList.append(view.render().$el)
+        },
+        addAll: function() {
+            //this.$accessList.html()
+            accessList.each(this.createAccessView, this)
+        },
+
         events: {
             "click .new-user-button": "finishUserInput",
             "keyup .new-user-field": "keyHandler"
@@ -159,30 +189,6 @@
             })
             this.$newUserField.val("")
             return "added"
-        },
-
-        initialize: function(args) {
-            this.$el.html(accessListTemplate({
-                owner: args.owner
-            }))
-            this.$ownerLabel = this.$(".owner-label")
-            this.$accessList = this.$(".access-list")
-            this.$newUserField = this.$(".new-user-field")
-
-            this.listenTo(accessList, 'add', this.createAccessView)
-            this.listenTo(accessList, 'reset', this.addAll)
-        },
-
-        accessViews: [],
-        createAccessView: function(accessRow) {
-            var view = new AccessView({model: accessRow})
-            this.$accessList.append(view.render().$el)
-            this.accessViews.push(view)
-        },
-
-        addAll: function() {
-            //this.$accessList.html()
-            accessList.each(this.createAccessView, this)
         }
     })
     
@@ -218,6 +224,7 @@
     var resourceUrl;
     var originalPermissions = {};   // { username: { operation: Permission object } }
     var originalOwner;
+    var originalAnonPermission;
 
     /** Entry point */
     exports.sharePopup = function(url, resourceName) {
@@ -266,14 +273,19 @@
             // map list of Permissions to list of Access rows on the form (combine)
             originalPermissions = {}
             var initialAccessMap = {}
+            originalAnonPermission = undefined;
             _(originalPermissionList).each(function(p) {
-                if (!p || !p.user || !p.operation) { return }   // continue
-                if (!originalPermissions[p.user]) {
-                    originalPermissions[p.user] = {}
-                    initialAccessMap[p.user] = { user: p.user }
+                if (!p || !p.operation) { return }      // continue
+                if (p.anonymous) {
+                    originalAnonPermission = p;
+                } else if (p.user) {
+                    if (!originalPermissions[p.user]) {
+                        originalPermissions[p.user] = {}
+                        initialAccessMap[p.user] = {user: p.user}
+                    }
+                    originalPermissions[p.user][p.operation] = p
+                    initialAccessMap[p.user][p.operation] = true
                 }
-                originalPermissions[p.user][p.operation] = p
-                initialAccessMap[p.user][p.operation] = true
             })
             accessList.reset(_.values(initialAccessMap))
         })
@@ -297,10 +309,6 @@
             Streamr.showInfo("Closing and saving changes, please wait...")
             return false;
         }
-
-        _(listView.accessViews).each(function(view) {
-            view.$(".user-access-row").removeClass("has-error")
-        })
 
         // find changes
         var addedPermissions = []
@@ -326,8 +334,7 @@
             if (before.share) { removedPermissions.push(before.share.id) }
         })
 
-        // close modal directly if no changes
-        if (addedPermissions.length == 0 && removedPermissions.length == 0) { return true; }
+        var isAnon = listView.$anonymousCheckbox.prop("checked")
 
         // generate one API call for each change
         var started = 0
@@ -336,38 +343,69 @@
         var grantedTo = {}
         var revokedFrom = {}
         var errorMessages = []
-        _(addedPermissions).each(function(permission) {
+        if (addedPermissions.length > 0 || removedPermissions.length > 0) {
+            _(addedPermissions).each(function(permission) {
+                started += 1
+                pendingRequests.push($.ajax({
+                    url: resourceUrl + "/permissions",
+                    method: "POST",
+                    data: JSON.stringify(permission),
+                    contentType: "application/json",
+                    error: onError,
+                    success: function(response) {
+                        grantedTo[response.user] = true
+                        // update state so that the next diff goes correctly
+                        if (!originalPermissions[response.user]) { originalPermissions[response.user] = {} }
+                        originalPermissions[response.user][response.operation] = response
+                        onSuccess(response)
+                    }
+                }))
+            })
+            _(removedPermissions).each(function(id) {
+                started += 1
+                pendingRequests.push($.ajax({
+                    url: resourceUrl + "/permissions/" + id,
+                    method: "DELETE",
+                    contentType: "application/json",
+                    error: onError,
+                    success: function(response) {
+                        revokedFrom[response.user] = true
+                        // update state so that the next diff goes correctly
+                        delete originalPermissions[response.user][response.operation]
+                        onSuccess(response)
+                    }
+                }))
+            })
+        }
+        if (isAnon && !originalAnonPermission) {
             started += 1
             pendingRequests.push($.ajax({
                 url: resourceUrl + "/permissions",
                 method: "POST",
-                data: JSON.stringify(permission),
+                data: JSON.stringify({anonymous: true, operation: "read"}),
                 contentType: "application/json",
                 error: onError,
                 success: function(response) {
-                    grantedTo[response.user] = true
-                    // update state so that the next diff goes correctly
-                    if (!originalPermissions[response.user]) { originalPermissions[response.user] = {} }
-                    originalPermissions[response.user][response.operation] = response
+                    grantedTo["the whole world"] = true
+                    originalAnonPermission = response
                     onSuccess(response)
                 }
             }))
-        })
-        _(removedPermissions).each(function(id) {
+        }
+        if (!isAnon && !!originalAnonPermission) {
             started += 1
             pendingRequests.push($.ajax({
-                url: resourceUrl + "/permissions/" + id,
+                url: resourceUrl + "/permissions/" + originalAnonPermission.id,
                 method: "DELETE",
                 contentType: "application/json",
                 error: onError,
                 success: function(response) {
-                    revokedFrom[response.user] = true
-                    // update state so that the next diff goes correctly
-                    delete originalPermissions[response.user][response.operation]
+                    revokedFrom["anonymous users"] = true
+                    originalAnonPermission = undefined
                     onSuccess(response)
                 }
             }))
-        })
+        }
         function onSuccess(response) {
             successful += 1
             if (successful + failed === started) { onDone() }

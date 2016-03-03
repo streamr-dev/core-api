@@ -30,16 +30,11 @@ class PermissionServiceSpec extends Specification {
 	SecUser me, anotherUser, stranger
 	SignupInvite invite
 
-	ModulePackage modPackAllowed, modPackRestricted, modPackOwned
-	Module modAllowed, modRestricted, modOwned
+	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
+	Permission dashReadPermission, dashAnonymousReadPermission
 
-	Permission modPackReadPermission
-
-	Dashboard dashAllowed, dashRestricted, dashOwned
-	Permission dashReadPermission
-
-	UiChannel uicAllowed, uicRestricted // UiChannels don't have an owner
-	Permission uicReadPermission
+	UiChannel uicAllowed, uicRestricted, uicPublic // UiChannels don't have an owner
+	Permission uicReadPermission, uicAnonymousReadPermission
 
     def setup() {
 
@@ -51,51 +46,39 @@ class PermissionServiceSpec extends Specification {
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
 		invite = new SignupInvite(username: "him", code: "sikritCode", sent: true, used: false).save(validate:false)
 
-		// ModulePackages
-		modPackAllowed = new ModulePackage(name:"allowed", user:anotherUser).save(validate:false)
-		modPackRestricted = new ModulePackage(name:"restricted", user:anotherUser).save(validate:false)
-		modPackOwned = new ModulePackage(name:"owned", user:me).save(validate:false)
-		
-		// Modules
-		modAllowed = new Module(name:"modAllowed", modulePackage:modPackAllowed).save(validate:false)
-		modRestricted = new Module(name:"modRestricted", modulePackage:modPackRestricted).save(validate:false)
-		modOwned = new Module(name:"modOwned", modulePackage:modPackOwned).save(validate:false)
-
 		// Dashboards
 		dashAllowed = new Dashboard(name:"allowed", user:anotherUser).save(validate:false)
 		dashRestricted = new Dashboard(name:"restricted", user:anotherUser).save(validate:false)
 		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
+		dashPublic = new Dashboard(name:"public", user:me).save(validate:false)
 
 		// Ui channels (have stringId, have no "user")
 		def canvas = new Canvas(user: anotherUser).save(validate: false)
-		uicAllowed = new UiChannel(id: "allowed_ui_channel", canvas: 1, name:"allowed")
-		uicRestricted = new UiChannel(id: "restricted_ui_channel", canvas: 1, name:"restricted")
-		uicAllowed.id = IdGenerator.get()
-		uicRestricted.id = IdGenerator.get()
-		uicAllowed.save(validate: false)
-		uicRestricted.save(validate: false)
+		def createUiChannel = { name ->
+			def uic = new UiChannel(canvas: 1, name: name)
+			uic.id = IdGenerator.get()
+			uic.save(validate: false)
+		}
+		uicAllowed = createUiChannel "allowed"
+		uicRestricted = createUiChannel "restricted"
+		uicPublic = createUiChannel "public"
 
 		// Set up the Permissions to the allowed resources
-		modPackReadPermission = service.grant(anotherUser, modPackAllowed, me)
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
+		dashAnonymousReadPermission = service.grantAnonymousAccess(me, dashPublic)
 		uicReadPermission = service.systemGrant(me, uicAllowed)
+		uicAnonymousReadPermission = service.grantAnonymousAccess(me, uicPublic)
     }
 
 	void "test setup"() {
 		expect:
 		SecUser.count() == 3
-		ModulePackage.count() == 3
-		Module.count() == 3
-		Dashboard.count() == 3
-		UiChannel.count() == 2
-		Module.findByModulePackage(modPackAllowed)==modAllowed
-		ModulePackage.findAllByUser(anotherUser).size()==2
-		ModulePackage.findAllByUser(me).size()==1
+		Dashboard.count() == 4
+		UiChannel.count() == 3
+		Permission.count() == 4
 
 		and: "anotherUser has an invitation"
 		invite.username == anotherUser.username
-
-		Permission.count()==3
 	}
 
 	void "access granted to permitted Dashboard"() {
@@ -376,5 +359,15 @@ class PermissionServiceSpec extends Specification {
 		then:
 		service.canRead(anotherUser, dashOwned)
 		service.canRead(anotherUser, uicRestricted)
+	}
+
+	void "stranger can read public resources with anonymous read access"() {
+		expect: "... but not more than read"
+		service.canRead(stranger, dashPublic)
+		service.canRead(stranger, uicPublic)
+		!service.canWrite(stranger, dashPublic)
+		!service.canWrite(stranger, uicPublic)
+		!service.canShare(stranger, dashPublic)
+		!service.canShare(stranger, uicPublic)
 	}
 }

@@ -71,46 +71,58 @@ class PermissionApiController {
 	def save() {
 		if (!request.hasProperty("JSON")) { throw new InvalidArgumentsException("JSON body expected") }
 
+		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+		boolean anonymous = request.JSON.anonymous as boolean
 		String username = request.JSON.user
-		String opId = request.JSON.operation
+		if (anonymous && username) { throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String) }
+		if (!anonymous && !username) { throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!") }
 
+		String opId = request.JSON.operation
 		Operation op = Operation.enumConstants.find { it.id == opId }
 		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'. Try e.g. 'read' instead.", "operation", opId) }
 
-		// TODO: check that username is a valid email address?
-
-		// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-		def user = SecUser.findByUsername(username)
-		if (!user) {
-			def invite = SignupInvite.findByUsername(username)
-			if (!invite) {
-				invite = signupCodeService.create(username)
-				def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
-				// TODO: react to MailSendException if invite.username is not valid a e-mail address
-				mailService.sendMail {
-					from grailsApplication.config.unifina.email.sender
-					to invite.username
-					subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
-					html g.render(
-							template: "/register/email_share_invite",
-							model: [invite: invite, sharer: sharer],
-							plugin: "unifina-core"
-					)
+		if (anonymous) {
+			useResource(params.resourceClass, params.resourceId) { res ->
+				def grantor = request.apiUser
+				def newP = permissionService.grantAnonymousAccess(grantor, res, op)
+				header "Location", request.forwardURI + "/" + newP.id
+				response.status = 201
+				render(newP.toMap() + [text: "Successfully granted"] as JSON)
+			}
+		} else {
+			// TODO: check that username is a valid email address?
+			def user = SecUser.findByUsername(username)
+			if (!user) {
+				def invite = SignupInvite.findByUsername(username)
+				if (!invite) {
+					invite = signupCodeService.create(username)
+					def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
+					// TODO: react to MailSendException if invite.username is not valid a e-mail address
+					mailService.sendMail {
+						from grailsApplication.config.unifina.email.sender
+						to invite.username
+						subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
+						html g.render(
+								template: "/register/email_share_invite",
+								model: [invite: invite, sharer: sharer],
+								plugin: "unifina-core"
+						)
+					}
+					invite.sent = true
+					invite.save()
 				}
-				invite.sent = true
-				invite.save()
+
+				// permissionService handles SecUsers and SignupInvitations equally
+				user = invite
 			}
 
-			// permissionService handles SecUsers and SignupInvitations equally
-			user = invite
-		}
-
-		useResource(params.resourceClass, params.resourceId) { res ->
-			def grantor = request.apiUser
-			def newP = permissionService.grant(grantor, res, user, op)
-			header "Location", request.forwardURI + "/" + newP.id
-			response.status = 201
-			render(newP.toMap() + [text: "Successfully granted"] as JSON)
+			useResource(params.resourceClass, params.resourceId) { res ->
+				def grantor = request.apiUser
+				def newP = permissionService.grant(grantor, res, user, op)
+				header "Location", request.forwardURI + "/" + newP.id
+				response.status = 201
+				render(newP.toMap() + [text: "Successfully granted"] as JSON)
+			}
 		}
 	}
 
