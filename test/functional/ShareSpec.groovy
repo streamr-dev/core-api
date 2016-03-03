@@ -49,7 +49,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$(".new-user-field") << Keys.ESCAPE
 		then: "esc clears the email"
-		!$(".new-user-field").value()
+		waitFor { !$(".new-user-field").value() }
 
 		when:
 		$(".new-user-field") << "tester2@streamr.com"
