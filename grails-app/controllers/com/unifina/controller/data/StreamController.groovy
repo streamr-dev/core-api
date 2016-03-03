@@ -67,22 +67,21 @@ class StreamController {
 	}
 
 	def create() {
-		if (request.method == "GET") {
-			SecUser user = springSecurityService.currentUser
-			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
-		} else {
-			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createStream(params, user)
-			
-			if (stream.hasErrors()) {
-				log.info(stream.errors)
-				return [stream: stream]
-			}
-			else {
-				flash.message = "Your stream has been created! You can start pushing realtime messages to the API or upload a message history from a csv file."
-				redirect(action:"show", id:stream.id)
-			}
+		SecUser user = springSecurityService.currentUser
+
+		boolean justStarted = request.method == "GET"
+		Stream stream = justStarted ? new Stream() : streamService.createStream(params, user);
+
+		if (!justStarted && stream.hasErrors()) { log.info(stream.errors) }
+		if (justStarted || stream.hasErrors()) {
+			return [stream: stream,
+					feeds: permissionService.getAll(Feed, user),
+					defaultFeed: Feed.findById(Feed.KAFKA_ID)]
 		}
+
+		flash.message = "Your stream has been created! " +
+				"You can start pushing realtime messages to the API or upload a message history from a csv file."
+		redirect(action: "show", id: stream.id)
 	}
 
 	def show() {
