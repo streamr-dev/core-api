@@ -124,13 +124,9 @@ class PermissionApiController {
 	@StreamrApi(requiresAuthentication = false)
 	def delete(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			// share-permission has been tested in usePermission
+			// share-permission has been tested in usePermission (calls useResource)
 			permissionService.systemRevoke(p)
-			// https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7 says DELETE may return "an entity describing the status", that is:
-			def newPerms = permissionService.getPermissionsTo(res)*.toMap()
-			render(p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON)
-			// it's also possible to send no body at all
-			//render status: 204
+			render status: 204
 		}
 	}
 

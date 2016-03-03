@@ -198,14 +198,9 @@ class PermissionApiControllerSpec extends Specification {
 		when:
 		withFilters(action: "delete") { controller.delete("${canvasPermission.id}") }
 		then:
-		response.status == 200
-		response.json.user == canvasPermission.user.username
-		response.json.operation == canvasPermission.operation.id
-		response.json.changedPermissions.size() == 3
+		response.status == 204
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions
 		1 * permissionService._
-		1 * permissionService.getPermissionsTo(_) >> [opR, opW, opS]
-		0 * permissionService._
 	}
 }
