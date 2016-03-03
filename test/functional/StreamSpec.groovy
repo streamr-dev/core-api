@@ -221,6 +221,8 @@ class StreamSpec extends LoginTester1Spec {
 		cleanup: "delete stream"
 		to(StreamListPage)
 		openStream(streamName)
+		streamMenuButton.click()
+		waitFor { deleteStreamButton.displayed }
 		deleteStreamButton.click()
 		waitFor { $(".modal-dialog").displayed }
 		$(".modal-dialog .btn-primary").click()
