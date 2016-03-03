@@ -221,14 +221,10 @@
 
     /** Entry point */
     exports.sharePopup = function(url, resourceName) {
-        // if button was on top of a link, disable a-href redirect
-        if (event) { event.preventDefault() }
-
         if (dialogIsOpen()) { console.error("Cannot open sharePopup, already open!"); return false }
         if (!url) { console.error("Cannot open sharePopup without resource URL!"); return false }
         resourceUrl = url
 
-        // get current permissions
         var originalPermissionList = []
         $.getJSON(resourceUrl + "/permissions").success(function(data) {
             originalOwner = _.chain(data)
@@ -271,7 +267,7 @@
             originalPermissions = {}
             var initialAccessMap = {}
             _(originalPermissionList).each(function(p) {
-                if (!p || !p.user || !p.operation) { return }
+                if (!p || !p.user || !p.operation) { return }   // continue
                 if (!originalPermissions[p.user]) {
                     originalPermissions[p.user] = {}
                     initialAccessMap[p.user] = { user: p.user }

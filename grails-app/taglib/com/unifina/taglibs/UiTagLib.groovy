@@ -312,7 +312,7 @@ public class UiTagLib {
 			throw new IllegalArgumentException("Unknown 'type' for shareButton: $type")
 		}
 
-		out << open << "onclick='$extraOnClick;sharePopup($resourceUrl, $resourceName)' "
+		out << open << "onclick='event.preventDefault();$extraOnClick;sharePopup($resourceUrl, $resourceName)' "
 		outputAttributes(attrs, out)
 		out << "><span class='superscript'>+</span><i class='fa fa-user'></i> " << body() << close
 
