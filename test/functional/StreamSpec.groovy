@@ -115,6 +115,7 @@ class StreamSpec extends LoginTester1Spec {
 		when: "Produce an event into the stream and click autodetect button"
 			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
 			kafka.sendJSON(streamId, "", System.currentTimeMillis(), '{"foo":"bar","xyz":45.5}')
+			wait(100)
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
 			waitFor {
