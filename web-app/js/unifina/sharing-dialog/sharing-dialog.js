@@ -261,15 +261,6 @@
             })
             $(".resource-name-label").text(resourceName || urlToResourceName(resourceUrl))
 
-            // TODO: find out who is stealing the focus, then remove this kludge...
-            setTimeout(function() { $(".new-user-field").focus() }, 500)
-
-            listView = new AccessListView({
-                el: ".bootbox .modal-body",
-                id: "access-list",
-                owner: originalOwner
-            })
-
             // map list of Permissions to list of Access rows on the form (combine)
             originalPermissions = {}
             var initialAccessMap = {}
@@ -287,7 +278,16 @@
                     initialAccessMap[p.user][p.operation] = true
                 }
             })
+
+            listView = new AccessListView({
+                el: ".bootbox .modal-body",
+                id: "access-list",
+                owner: originalOwner
+            })
             accessList.reset(_.values(initialAccessMap))
+
+            // TODO: find out who is stealing the focus, then remove this kludge...
+            setTimeout(function() { $(".new-user-field").focus() }, 500)
         })
 
         return false
