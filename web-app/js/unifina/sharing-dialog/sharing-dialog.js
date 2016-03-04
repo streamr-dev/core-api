@@ -318,9 +318,9 @@
             var user = accessModel.attributes.user
             var before = originalPermissions[user] || {}
             var after = accessModel.attributes
-            if (before.read  && !after.read)  { removedPermissions.push(before.read.id) }
-            if (before.write && !after.write) { removedPermissions.push(before.write.id) }
-            if (before.share && !after.share) { removedPermissions.push(before.share.id) }
+            if (before.read  && !after.read)  { removedPermissions.push(before.read) }
+            if (before.write && !after.write) { removedPermissions.push(before.write) }
+            if (before.share && !after.share) { removedPermissions.push(before.share) }
             if (!before.share && after.share) { addedPermissions.push({user: user, operation: "share"}) }
             if (!before.write && after.write) { addedPermissions.push({user: user, operation: "write"}) }
             if (!before.read  && after.read)  { addedPermissions.push({user: user, operation: "read"}) }
@@ -357,22 +357,22 @@
                         // update state so that the next diff goes correctly
                         if (!originalPermissions[response.user]) { originalPermissions[response.user] = {} }
                         originalPermissions[response.user][response.operation] = response
-                        onSuccess(response)
+                        onSuccess()
                     }
                 }))
             })
-            _(removedPermissions).each(function(id) {
+            _(removedPermissions).each(function(p) {
                 started += 1
                 pendingRequests.push($.ajax({
-                    url: resourceUrl + "/permissions/" + id,
+                    url: resourceUrl + "/permissions/" + p.id,
                     method: "DELETE",
                     contentType: "application/json",
                     error: onError,
-                    success: function(response) {
-                        revokedFrom[response.user] = true
+                    success: function() {
+                        revokedFrom[p.user] = true
                         // update state so that the next diff goes correctly
-                        delete originalPermissions[response.user][response.operation]
-                        onSuccess(response)
+                        delete originalPermissions[p.user][p.operation]
+                        onSuccess()
                     }
                 }))
             })
@@ -399,14 +399,14 @@
                 method: "DELETE",
                 contentType: "application/json",
                 error: onError,
-                success: function(response) {
+                success: function() {
                     revokedFrom["anonymous users"] = true
                     originalAnonPermission = undefined
-                    onSuccess(response)
+                    onSuccess()
                 }
             }))
         }
-        function onSuccess(response) {
+        function onSuccess() {
             successful += 1
             if (successful + failed === started) { onDone() }
         }
