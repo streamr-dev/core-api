@@ -41,7 +41,7 @@ class PermissionService {
 	 * Check that resourceClass is a proper resource
 	 * @return name of field in Permission object that refers to the resource's id by type ("stringId" or "longId")
 	 */
-	private String getIdPropertyName(Class resourceClass) {
+	private String getIdPropertyName(Class resourceClass) throws IllegalArgumentException {
 		if (!resourceClass?.name) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("$resourceClass is not a Grails domain class") }
 
@@ -147,24 +147,26 @@ class PermissionService {
 
 	/**
 	 * Get all resources of given type that the user has specified type of access to
-	 *	Note: anonymous permissions will not be listed
+	 * @throws IllegalArgumentException for bad resourceClass
 	 */
-	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
-		// TODO: return resources that are "public" i.e. always readable, also to null user
-		if (!user) { return [] }
+	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, boolean includeAnonymous, Closure resourceFilter = {}) {
+		if (!includeAnonymous && !user?.id) { return [] }
+		String resourceIdProp = getIdPropertyName(resourceClass)	// throws if bad resource class
 
-		String idProp = getIdPropertyName(resourceClass)
-		boolean hasOwner = resourceClass.properties["declaredFields"].any { it.name == "user" }
-
+		// two queries needed because type system has been violated
+		//   in SQL, you could Permission p JOIN ResourceClass r ON p.(resourceIdProp)=r.id
 		def perms = Permission.withCriteria {
-			eq "user", user
+			or {
+				if (includeAnonymous) { eq "anonymous", true }
+				if (user?.id) { eq "user", user }
+			}
 			eq "clazz", resourceClass.name
 			eq "operation", op
 		}
-		def resourceIds = perms.collect { it[idProp] }
 
 		// or-clause in criteria query should become false, and nothing should be returned
-		if (!hasOwner && resourceIds.size() == 0) { return [] }
+		boolean hasOwner = resourceClass.properties["declaredFields"].any { it.name == "user" }
+		if (!hasOwner && perms.size() == 0) { return [] }
 
 		resourceClass.withCriteria {
 			or {
@@ -173,19 +175,23 @@ class PermissionService {
 					eq "user", user
 				}
 				// empty in-list will work with Mock but fail with SQL
-				if (resourceIds.size() > 0) {
-					"in" "id", resourceIds
+				if (perms.size() > 0) {
+					"in" "id", perms.collect { it[resourceIdProp] }
 				}
 			}
 			resourceFilter.delegate = delegate
 			resourceFilter()
 		}
 	}
-	/** Overload to allow leaving out the op but including the filter... */
-	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter = {}) {
-		return getAll(resourceClass, user, Operation.READ, resourceFilter)
+	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
+	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
+		return getAll(resourceClass, user, op, false, resourceFilter)
 	}
-//"Can't add access permissions to com.unifina.domain.signalpath.Canvas : cnwgfBFKTSqjJavFOe3Aqw for owner (tester1@streamr.com, id 1)!"
+	/** Overload to allow leaving out the op and anonymous-include-flag but including the filter */
+	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter = {}) {
+		return getAll(resourceClass, user, Operation.READ, false, resourceFilter)
+	}
+
 	/**
 	 * Grant a Permission to another SecUser to access a resource
 	 * @param grantor user that has SHARE rights to the resource

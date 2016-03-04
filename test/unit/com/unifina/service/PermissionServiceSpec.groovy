@@ -50,7 +50,7 @@ class PermissionServiceSpec extends Specification {
 		dashAllowed = new Dashboard(name:"allowed", user:anotherUser).save(validate:false)
 		dashRestricted = new Dashboard(name:"restricted", user:anotherUser).save(validate:false)
 		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
-		dashPublic = new Dashboard(name:"public", user:me).save(validate:false)
+		dashPublic = new Dashboard(name:"public", user:anotherUser).save(validate:false)
 
 		// Ui channels (have stringId, have no "user")
 		def canvas = new Canvas(user: anotherUser).save(validate: false)
@@ -65,7 +65,7 @@ class PermissionServiceSpec extends Specification {
 
 		// Set up the Permissions to the allowed resources
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
-		dashAnonymousReadPermission = service.grantAnonymousAccess(me, dashPublic)
+		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
 		uicReadPermission = service.systemGrant(me, uicAllowed)
 		uicAnonymousReadPermission = service.systemGrantAnonymousAccess(uicPublic)
     }
@@ -125,7 +125,7 @@ class PermissionServiceSpec extends Specification {
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
 		service.getAll(Dashboard, me) == [dashOwned, dashAllowed]
-		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted]
+		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted, dashPublic]
 		service.getAll(Dashboard, stranger) == []
 	}
 
@@ -133,6 +133,15 @@ class PermissionServiceSpec extends Specification {
 		expect:
 		service.getAll(UiChannel, me) == [uicAllowed]
 		service.getAll(UiChannel, stranger) == []
+	}
+
+	void "public resources are listed if extra flag is specified"() {
+		expect:
+		service.getAll(Dashboard, me, Operation.READ, true) == [dashOwned, dashAllowed, dashPublic]
+		service.getAll(Dashboard, anotherUser, Operation.READ, true) == [dashAllowed, dashRestricted, dashPublic]
+		service.getAll(Dashboard, stranger, Operation.READ, true) == [dashPublic]
+		service.getAll(UiChannel, me, Operation.READ, true) == [uicAllowed, uicPublic]
+		service.getAll(UiChannel, stranger, Operation.READ, true) == [uicPublic]
 	}
 
 	void "grant and revoke work for UiChannels"() {
@@ -149,7 +158,7 @@ class PermissionServiceSpec extends Specification {
 		service.getAll(UiChannel, anotherUser) == []
 	}
 
-	void "getAll returns throws IllegalArgumentException on invalid resource"() {
+	void "getAll throws IllegalArgumentException on invalid resource"() {
 		when:
 		service.getAll(java.lang.Object, me)
 		then:
@@ -165,6 +174,8 @@ class PermissionServiceSpec extends Specification {
 		expect:
 		service.getAll(Dashboard, new SecUser()) == []
 		service.getAll(Dashboard, null) == []
+		service.getAll(Dashboard, new SecUser(), Operation.READ, true) == [dashPublic]
+		service.getAll(Dashboard, null, Operation.READ, true) == [dashPublic]
 	}
 
 	void "getAll closure filtering works as expected"() {

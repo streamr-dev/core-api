@@ -51,7 +51,7 @@ class StreamController {
 	}
 
 	def search() {
-		render(permissionService.getAll(Stream, springSecurityService.currentUser) {
+		render(permissionService.getAll(Stream, springSecurityService.currentUser, Operation.READ, true) {
 			or {
 				like "name", "%${params.term}%"
 				like "description", "%${params.term}%"
