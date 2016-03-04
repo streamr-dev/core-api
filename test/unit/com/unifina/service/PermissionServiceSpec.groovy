@@ -67,7 +67,7 @@ class PermissionServiceSpec extends Specification {
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(me, dashPublic)
 		uicReadPermission = service.systemGrant(me, uicAllowed)
-		uicAnonymousReadPermission = service.grantAnonymousAccess(me, uicPublic)
+		uicAnonymousReadPermission = service.systemGrantAnonymousAccess(uicPublic)
     }
 
 	void "test setup"() {
