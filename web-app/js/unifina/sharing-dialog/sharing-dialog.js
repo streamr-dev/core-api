@@ -329,9 +329,9 @@
         // completely removed users don't show up in accessList, need to be tested separately
         _(originalPermissions).each(function (before, user) {
             if (user in testedUsers) { return }    // continue
-            if (before.read)  { removedPermissions.push(before.read.id) }
-            if (before.write) { removedPermissions.push(before.write.id) }
-            if (before.share) { removedPermissions.push(before.share.id) }
+            if (before.read)  { removedPermissions.push(before.read) }
+            if (before.write) { removedPermissions.push(before.write) }
+            if (before.share) { removedPermissions.push(before.share) }
         })
 
         var isAnon = listView.$anonymousCheckbox.prop("checked")
