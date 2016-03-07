@@ -78,14 +78,4 @@ public abstract class AggregateByKey extends AbstractSignalPathModule {
 			return new HashMap<>();
 		}
 	}
-
-	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
-
-		// Ensure that proper Map type is used after de-serializing.
-		Map<String, Double> oldAggregateByKey = aggregateByKey;
-		aggregateByKey = initializeAggregateMap();
-		aggregateByKey.putAll(oldAggregateByKey);
-	}
 }

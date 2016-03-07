@@ -3,6 +3,7 @@ package com.unifina.signalpath.map;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class ValueSortedMap<K extends Comparable<K>, V extends Comparable<V>> ex
 		return ((ValueComparator<K, V>) comparator()).hashMap;
 	}
 
-	private static class ValueComparator<K extends Comparable<K>, V extends Comparable<V>> implements Comparator<K> {
+	private static class ValueComparator<K extends Comparable<K>, V extends Comparable<V>> implements Comparator<K>, Serializable {
 		final Map<K, V> hashMap = new HashMap<>();
 		final Ordering<V> valueOrdering;
 
