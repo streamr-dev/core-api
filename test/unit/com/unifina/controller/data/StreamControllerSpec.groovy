@@ -63,6 +63,8 @@ class StreamControllerSpec extends Specification {
 
 	void "searching for a stream returns correct module"() {
 		when:
+		mockSpringSecurityService(user)
+		params.term = stream.name[1..2]
 		controller.search()
 		then:
 		response.json.size() == 1
