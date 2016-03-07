@@ -1,4 +1,4 @@
-package com.unifina.signalpath.foreach;
+package com.unifina.signalpath.map;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;

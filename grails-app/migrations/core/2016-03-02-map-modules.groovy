@@ -2,12 +2,12 @@ package core
 
 databaseChangeLog = {
 
-	changeSet(author: "eric", id: "foreach-modules-1") {
+	changeSet(author: "eric", id: "map-modules-1") {
 
 		insert(tableName: "module_category") {
 			column(name: "id", valueNumeric: 51)
 			column(name: "version", valueNumeric: 0)
-			column(name: "name", value: "Iteration")
+			column(name: "name", value: "Map")
 			column(name: "sort_order", valueNumeric: 141)
 			column(name: "module_package_id", valueNumeric: 1)
 		}
@@ -36,7 +36,7 @@ databaseChangeLog = {
 				column(name: "id", valueNumeric: module.id)
 				column(name: "version", valueNumeric: 0)
 				column(name: "category_id", valueNumeric: 51)
-				column(name: "implementing_class", value: "com.unifina.signalpath.foreach.${module.name}")
+				column(name: "implementing_class", value: "com.unifina.signalpath.map.${module.name}")
 				column(name: "name", value: module.name)
 				column(name: "js_module", value: "GenericModule")
 				column(name: "type", value: "module")
@@ -46,13 +46,13 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "eric", id: "foreach-modules-2-test", context: "test") {
+	changeSet(author: "eric", id: "map-modules-2-test", context: "test") {
 		insert(tableName: "stream") {
 			column(name: "version", valueNumeric: 0)
-			column(name: "api_key", value: "foreachmodulesspec-api-key")
-			column(name: "description", value: "Stream for ForEachModulesSpec functional test")
+			column(name: "api_key", value: "mapmodulesspeckey-api-key")
+			column(name: "description", value: "Stream for MapModulesSpec functional test")
 			column(name: "feed_id", valueNumeric: 7)
-			column(name: "name", value: "ForEachModulesSpec")
+			column(name: "name", value: "MapModulesSpec")
 			column(name: "config", value: '{"topic":"pltRMd8rCfkij4mlZsQkJB","fields":[{"name":"key","type":"string"},{"name":"value","type":"number"}]}')
 			column(name: "user_id", valueNumeric: 1)
 			column(name: "uuid", value: "pltRMd8rCfkij4mlZsQkJB")

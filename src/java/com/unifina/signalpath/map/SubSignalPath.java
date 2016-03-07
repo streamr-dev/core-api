@@ -1,4 +1,4 @@
-package com.unifina.signalpath.foreach;
+package com.unifina.signalpath.map;
 
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.Propagator;

@@ -1,4 +1,4 @@
-package com.unifina.signalpath.foreach;
+package com.unifina.signalpath.map;
 
 public class CountByKey extends AggregateByKey {
 	@Override

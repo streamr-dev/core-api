@@ -1,4 +1,4 @@
-package com.unifina.signalpath.foreach;
+package com.unifina.signalpath.map;
 
 import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;

@@ -8,10 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.unifina.signalpath.foreach.ForEach;
 import org.apache.log4j.Logger;
-
-import com.unifina.signalpath.charts.TimeSeriesChart;
 
 @SuppressWarnings("rawtypes")
 public class Propagator implements Serializable {

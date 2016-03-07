@@ -1,9 +1,8 @@
-package com.unifina.signalpath.foreach;
+package com.unifina.signalpath.map;
 
 import com.unifina.math.Sum;
 import com.unifina.signalpath.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

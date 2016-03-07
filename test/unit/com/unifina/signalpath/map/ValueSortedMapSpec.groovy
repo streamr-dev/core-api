@@ -1,4 +1,4 @@
-package com.unifina.signalpath.foreach
+package com.unifina.signalpath.map
 
 import groovy.transform.CompileStatic
 import org.apache.commons.lang3.RandomStringUtils
@@ -8,7 +8,6 @@ class ValueSortedMapSpec extends Specification {
 	def seededRandom = new Random(1234)
 	Map valueSortedMap = new ValueSortedMap<String, Double>(true)
 
-	// TODO: deterministic?
 	void "values are maintained correctly"() {
 		Map<String, Double> expected = [:]
 
@@ -18,7 +17,7 @@ class ValueSortedMapSpec extends Specification {
 			// Put random letter with random value
 			def letter = generateLetter()
 			def value = seededRandom.nextDouble() * 100 - 50 // r \in [-50, 50]
-			expected[letter] = value + expected.get(letter, 0)
+			expected[letter] = expected.get(letter, 0) + value
 			valueSortedMap.put(letter, (valueSortedMap.get(letter) ?: 0d) + value)
 
 			// Remove random letter 10% of the time
@@ -30,7 +29,6 @@ class ValueSortedMapSpec extends Specification {
 
 			// Assert equality
 			assert valueSortedMap == expected
-
 		}
 
 		then:

@@ -12,7 +12,7 @@ import java.text.DecimalFormatSymbols
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-class ForEachModulesSpec extends LoginTester1Spec {
+class MapModulesSpec extends LoginTester1Spec {
 
 	UnifinaKafkaProducer kafka
 
@@ -162,7 +162,7 @@ class ForEachModulesSpec extends LoginTester1Spec {
 	}
 
 	private void addAndConnectModules(String moduleName) {
-		searchAndClick("ForEachModulesSpec")
+		searchAndClick("MapModulesSpec")
 		moduleShouldAppearOnCanvas("Stream")
 		addAndWaitModule(moduleName)
 		moveModuleBy(moduleName, 200, 200, 0, true)
