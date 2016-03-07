@@ -19,8 +19,7 @@ class UserService {
         SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
         // Encode the password
-        if(user.password == null)
-            throw new UserCreationFailedException("The password is empty!")
+        if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
         user.password = springSecurityService.encodePassword(user.password)
 
         // When created, the account is always enabled
@@ -37,8 +36,9 @@ class UserService {
         } else {
             // Save roles, feeds and module packages
             addRoles(user, roles)
-            setFeeds(user, feeds)
-            setModulePackages(user, packages)
+            setFeeds(user, feeds ?: [])
+            setModulePackages(user, packages ?: [])
+
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
         }
@@ -65,34 +65,21 @@ class UserService {
         }
     }
 
-	/** Adds/removes Feed read permissions so that user's permissions match given ones, or defaults if null given */
-    def setFeeds(user, List<Feed> feeds=null) {
-        if(feeds == null) {
-            feeds = Feed.findAllByIdInList(grailsApplication.config.streamr.user.defaultFeeds.collect {it.longValue()})
-            if (feeds.size() != grailsApplication.config.streamr.user.defaultFeeds.size())
-                throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
-        }
-
+	/** Adds/removes Feed read permissions so that user's permissions match given ones */
+    def setFeeds(user, List<Feed> feeds) {
 		List<Feed> existing = permissionService.get(Feed, user)
         feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return feeds
     }
 
-	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones, or defaults if null given */
-	def setModulePackages(user, List<ModulePackage> packages =null) {
-        if (packages == null) {
-            packages = ModulePackage.findAllByIdInList(grailsApplication.config.streamr.user.defaultModulePackages.collect {it.longValue()})
-            if(packages.size() != grailsApplication.config.streamr.user.defaultModulePackages.size())
-                throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
-        }
-
+	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
+	def setModulePackages(user, List<ModulePackage> packages) {
 		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
 		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return packages
     }
-
 
 	/**
 	 * Looks up a user based on api key.

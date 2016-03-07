@@ -286,9 +286,6 @@ environments {
  * Spring security config
  */
 
-streamr.user.defaultFeeds = [7]
-streamr.user.defaultModulePackages = [1]
-
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
 
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'

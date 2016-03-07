@@ -18,4 +18,6 @@ databaseChangeLog = {
 	include file: 'core/2016-02-10-remove-feeduser-modulepackageuser.groovy'
 	include file: 'core/2016-02-19-add-sharespec-test-data.groovy'
 	include file: 'core/2016-03-03-add-anonymous-access.groovy'
+
+	include file: 'core/2016-03-07-replace-default-feed-mpkg-with-anonymous-permissions.groovy'
 }

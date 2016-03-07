@@ -71,30 +71,17 @@ class UserServiceSpec extends Specification {
 		permissionService.grailsApplication = grailsApplication
     }
 
-    def "the user is created when called"() {
-        when:
-        createData()
-        service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
-
-        then:
-        SecUser.count() == 1
-    }
-
-    def "if no roles, feeds or modulePackages are given, it should use the default ones"() {
+    def "the user is created when called, with default roles if none supplied"() {
         when:
         createData()
         SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
 
         then:
-        user.getAuthorities().size() == 2
-        user.getAuthorities().toArray()[0].authority == "ROLE_USER"
-        user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
+        SecUser.count() == 1
 
-		permissionService.getAll(ModulePackage, user).size() == 1
-		permissionService.getAll(ModulePackage, user)[0].id == 1
-
-		permissionService.getAll(Feed, user).size() == 1
-		permissionService.getAll(Feed, user)[0].id == 7
+		user.getAuthorities().size() == 2
+		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
+		user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
     }
 
     def "if the roles, feeds and modulePackages are given, it should use them"() {
