@@ -88,7 +88,7 @@ class ModuleController {
 		
 		def result = []	
 		categories.findAll {
-			def a = it
+			def a = it		// TODO: what is this?
 			allowedPackageIds.contains(it.modulePackage.id)
 		}.each {category->
 			def item = moduleTreeRecurse(category,allowedPackageIds,params.boolean('modulesFirst') ?: false)

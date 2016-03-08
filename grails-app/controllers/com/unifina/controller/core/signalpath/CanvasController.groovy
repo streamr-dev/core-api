@@ -41,8 +41,8 @@ class CanvasController {
 			}
 			order "dateCreated", "desc"
 		}
-		List<Canvas> readableCanvases = permissionService.getAll(Canvas, user, Operation.READ, criteriaFilter)
-		List<Canvas> shareableCanvases = permissionService.getAll(Canvas, user, Operation.SHARE, criteriaFilter)
+		List<Canvas> readableCanvases = permissionService.get(Canvas, user, Operation.READ, criteriaFilter)
+		List<Canvas> shareableCanvases = permissionService.get(Canvas, user, Operation.SHARE, criteriaFilter)
 		[canvases: readableCanvases, shareable: shareableCanvases, user: user, stateFilter: params.state ? params.list("state") : []]
 	}
 
@@ -124,7 +124,7 @@ class CanvasController {
 			}
 		} else if (params.browserId == 'archiveLoadBrowser') {
 			def user = springSecurityService.currentUser
-			canvases = permissionService.getAll(Canvas, user, Operation.READ) {
+			canvases = permissionService.get(Canvas, user, Operation.READ) {
 				eq "example", false
 				eq "adhoc", false
 				order "dateCreated", "desc"

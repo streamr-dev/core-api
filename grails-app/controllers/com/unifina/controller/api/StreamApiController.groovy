@@ -17,7 +17,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def index() {
-		def streams = permissionService.getAll(Stream, request.apiUser) {
+		def streams = permissionService.get(Stream, request.apiUser) {
 			if (params.name) {
 				eq "name", params.name
 			}

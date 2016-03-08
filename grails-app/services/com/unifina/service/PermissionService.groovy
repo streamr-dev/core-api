@@ -11,7 +11,7 @@ import com.unifina.domain.security.SignupInvite
 import java.security.AccessControlException
 
 /**
- * grant and revoke functions that ensure the Access Control Lists (ACLs) made up of Permissions are valid
+ * get, check, grant and revoke functions that query and control the Access Control Lists (ACLs) to resources
  *
  * Complexities handled by PermissionService:
  * 		- in addition to Permissions, "resource owner" (i.e. resource.user if exists) has all access to that resource
@@ -149,7 +149,7 @@ class PermissionService {
 	 * Get all resources of given type that the user has specified type of access to
 	 * @throws IllegalArgumentException for bad resourceClass
 	 */
-	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, boolean includeAnonymous, Closure resourceFilter = {}) {
+	public <T> List<T> get(Class<T> resourceClass, SecUser user, Operation op, boolean includeAnonymous, Closure resourceFilter = {}) {
 		if (!includeAnonymous && !user?.id) { return [] }
 		String resourceIdProp = getIdPropertyName(resourceClass)	// throws if bad resource class
 
@@ -184,12 +184,20 @@ class PermissionService {
 		}
 	}
 	/** Overload to allow leaving out the anonymous-include-flag but including the filter */
-	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
-		return getAll(resourceClass, user, op, false, resourceFilter)
+	public <T> List<T> get(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
+		return get(resourceClass, user, op, false, resourceFilter)
 	}
-	/** Overload to allow leaving out the op and anonymous-include-flag but including the filter */
+	/** Convenience overload, adding a flag for public resources may look cryptic */
+	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Operation op, Closure resourceFilter = {}) {
+		return get(resourceClass, user, op, true, resourceFilter)
+	}
+	/** Overload to allow leaving out the op but including the filter */
+	public <T> List<T> get(Class<T> resourceClass, SecUser user, Closure resourceFilter = {}) {
+		return get(resourceClass, user, Operation.READ, false, resourceFilter)
+	}
+	/** Convenience overload, adding a flag for public resources may look cryptic */
 	public <T> List<T> getAll(Class<T> resourceClass, SecUser user, Closure resourceFilter = {}) {
-		return getAll(resourceClass, user, Operation.READ, false, resourceFilter)
+		return get(resourceClass, user, Operation.READ, true, resourceFilter)
 	}
 
 	/**

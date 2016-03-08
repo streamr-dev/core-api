@@ -206,9 +206,9 @@ class UserController {
 		}
 
 		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted,
-				userModulePackages: permissionService.getAll(ModulePackage, user),
+				userModulePackages: permissionService.get(ModulePackage, user),
 				ownedModulePackages: ModulePackage.findAllByUser(user),
-				userFeeds: permissionService.getAll(Feed, user)]
+				userFeeds: permissionService.get(Feed, user)]
 	}
     
     def delete() {

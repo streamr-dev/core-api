@@ -73,7 +73,7 @@ class UserService {
                 throw new RuntimeException("Feeds not found: "+grailsApplication.config.streamr.user.defaultFeeds)
         }
 
-		List<Feed> existing = permissionService.getAll(Feed, user)
+		List<Feed> existing = permissionService.get(Feed, user)
         feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return feeds
@@ -87,7 +87,7 @@ class UserService {
                 throw new RuntimeException("ModulePackages not found: "+grailsApplication.config.streamr.user.defaultModulePackages)
         }
 
-		List<ModulePackage> existing = permissionService.getAll(ModulePackage, user)
+		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
 		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return packages
