@@ -39,15 +39,14 @@ class DashboardController {
 	}
 	
 	def create() {
-		if (request.method=="GET") {
-			Dashboard dashboard = new Dashboard()
-		} else {
-			Dashboard dashboard = new Dashboard()
-			dashboard.name = params.name
-			dashboard.user = springSecurityService.currentUser
-			dashboard.save(flush:true, failOnError:true)
-			redirect(action:"show", id:dashboard.id)
-		}
+	}
+
+	def save() {
+		Dashboard dashboard = new Dashboard()
+		dashboard.name = params.name
+		dashboard.user = springSecurityService.currentUser
+		dashboard.save(flush:true, failOnError:true)
+		redirect(action:"show", id:dashboard.id)
 	}
 	
 	def getJson() {

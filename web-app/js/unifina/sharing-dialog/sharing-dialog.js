@@ -433,8 +433,8 @@
             }
         }
 
-        // don't close the dialog yet, saving is still in progress...
-        return false
+        // don't close the dialog yet if there was something to save
+        return started == 0
     }
 
     exports.sharePopup.closeAndSaveChanges = function() {

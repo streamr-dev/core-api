@@ -460,10 +460,14 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to stream"
 		to StreamListPage
 		getStreamRow().find("button").click()
+		then:
 		waitFor { $(".new-user-field").displayed }
+		$(".access-row").size() == 0
+
+		when:
 		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
-		waitFor { $(".access-row") }
+		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
 		when: "save stream read right"
@@ -651,15 +655,13 @@ class ShareSpec extends GebReportingSpec {
 
 		loginTester1()
 
-		when:
+		when: "publish it if not public (defensive, but we aren't testing that DB state is correct...)"
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
-		then: "should not be published already"
-		!$(".anonymous-switcher").attr("checked")
-
-		when: "publish stream"
-		$(".modal-body .owner-row .switcher").click()
+		if (!$(".anonymous-switcher").attr("checked")) {
+			$(".modal-body .owner-row .switcher").click()
+		}
 		then:
 		$(".anonymous-switcher").attr("checked")
 
@@ -691,6 +693,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { at StreamShowPage }
 
 		cleanup: "un-publish stream"
+		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
 		logout()
 
 		loginTester1()
@@ -701,5 +704,6 @@ class ShareSpec extends GebReportingSpec {
 		if ($(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
 		}
+		$("button", text: "Save").click()
 	}
 }
