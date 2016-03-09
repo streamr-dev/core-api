@@ -18,12 +18,17 @@ public class NotPermittedException extends ApiException {
 		this.op = op;
 	}
 	public NotPermittedException(String user, String type, String id, String op) {
-		this((user != null ? user : "Non-authenticated user") +
-				" does not have permission to " + op + " " + type + " (id " + id + ")", user, type, id, null);
+		this(generateMessage(user != null ? user : "Non-authenticated user", type, id, op), user, type, id, op);
 	}
-	public NotPermittedException(String user, String type, String id) { this(user, type, id, null); }
+	public NotPermittedException(String user, String type, String id) {
+		this(generateMessage(user != null ? user : "Non-authenticated user", type, id, "access"), user, type, id, null);
+	}
 	public NotPermittedException(String message) {
 		this(message, null, null, null, null);
+	}
+
+	private static String generateMessage(String user, String type, String id, String op) {
+		return user + " does not have permission to " + op + " " + type + " (id " + id + ")";
 	}
 
 	@Override

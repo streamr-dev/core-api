@@ -37,7 +37,7 @@ class PermissionApiController {
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (!permissionService.canShare(request.apiUser, res)) {
-			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString())
+			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
 		}
