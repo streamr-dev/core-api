@@ -80,5 +80,8 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	public static ModuleOption createBoolean(String key, Boolean value) {
 		return new ModuleOption(key, value, OPTION_BOOLEAN);
 	}
-	
+
+	public static ModuleOption createInt(String key, Integer value) {
+		return new ModuleOption(key, value, OPTION_INTEGER);
+	}
 }
