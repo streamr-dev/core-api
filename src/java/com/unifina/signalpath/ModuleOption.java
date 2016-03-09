@@ -76,5 +76,9 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 			return (Boolean) o;
 		else return Boolean.parseBoolean(getString());
 	}
+
+	public static ModuleOption createBoolean(String key, Boolean value) {
+		return new ModuleOption(key, value, OPTION_BOOLEAN);
+	}
 	
 }

@@ -9,10 +9,10 @@ import java.util.TreeMap;
 
 public abstract class AggregateByKey extends AbstractSignalPathModule {
 
-	private BooleanParameter sort = new BooleanParameter(this, "sort", false);
-	private BooleanParameter ascending = new BooleanParameter(this, "ascending", false);
-	private IntegerParameter maxKeyCount = new IntegerParameter(this, "maxKeyCount", 0);
+	private boolean sorted = false;
+	private boolean ascending = false;
 
+	private IntegerParameter maxKeyCount = new IntegerParameter(this, "maxKeyCount", 0);
 	private StringInput key = new StringInput(this, "key");
 
 	private MapOutput map = new MapOutput(this, "map");
@@ -34,8 +34,6 @@ public abstract class AggregateByKey extends AbstractSignalPathModule {
 	public void init() {
 		super.init();
 
-		addInput(sort);
-		addInput(ascending);
 		addInput(maxKeyCount);
 		addInput(key);
 		addOutput(map);
@@ -59,7 +57,7 @@ public abstract class AggregateByKey extends AbstractSignalPathModule {
 
 	private void pruneTreeIfNeeded() {
 		int max = maxKeyCount.getValue();
-		if (sort.getValue() && max > 0 && aggregateByKey.size() > max) {
+		if (sorted && max > 0 && aggregateByKey.size() > max) {
 			String keyToRemove = ((TreeMap<String, Double>) aggregateByKey).lastKey();
 			Double value = aggregateByKey.remove(keyToRemove);
 			onKeyDropped(keyToRemove, value);
@@ -72,10 +70,34 @@ public abstract class AggregateByKey extends AbstractSignalPathModule {
 	}
 
 	private Map<String, Double> initializeAggregateMap() {
-		if (sort.getValue()) {
-			return new ValueSortedMap<>(!ascending.getValue());
+		if (sorted) {
+			return new ValueSortedMap<>(!ascending);
 		} else {
 			return new HashMap<>();
+		}
+	}
+
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String,Object> config = super.getConfiguration();
+
+		ModuleOptions options = ModuleOptions.get(config);
+		options.addIfMissing(ModuleOption.createBoolean("sorted", sorted));
+		options.addIfMissing(ModuleOption.createBoolean("ascending", ascending));
+
+		return config;
+	}
+
+	@Override
+	public void configure(Map<String, Object> config) {
+		super.configure(config);
+
+		ModuleOptions options = ModuleOptions.get(config);
+		if (options.containsKey("sorted")) {
+			sorted = options.getOption("sorted").getBoolean();
+		}
+		if (options.containsKey("ascending")) {
+			ascending = options.getOption("ascending").getBoolean();
 		}
 	}
 }
