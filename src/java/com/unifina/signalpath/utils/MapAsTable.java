@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ViewMapTable extends ModuleWithUI {
+public class MapAsTable extends ModuleWithUI {
 	private MapInput map = new MapInput(this, "map");
 	private boolean headerSent = false;
 
-	public ViewMapTable() {
+	public MapAsTable() {
 		super();
 		resendAll = false;
 		resendLast = 20;
