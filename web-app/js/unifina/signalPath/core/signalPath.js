@@ -109,17 +109,6 @@ var SignalPath = (function () {
 	// hash argument can be undefined if the request is aimed at the canvas/runner
 	pub.sendRequest = function(hash, msg, callback) {
 		if (runningJson) {
-			
-			// Include UI channel if exists
-			var channel
-			for (var i=0;i<runningJson.modules.length;i++) {
-				// using == on purpose
-				if (runningJson.modules[i].hash==hash) {
-					channel = runningJson.modules[i].uiChannel.id
-					break
-				}
-			}
-
 			var url = options.apiUrl + '/canvases/'+runningJson.id+(hash==null ? '/request' : '/modules/'+hash+'/request')
 			$.ajax({
 				type: 'POST',
