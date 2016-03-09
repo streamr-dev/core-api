@@ -497,7 +497,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".new-user-field").displayed }
 		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
-		waitFor { $(".access-row") }
+		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
 		when: "save dashboard read right"
@@ -637,6 +637,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
 
 		cleanup: "remove tester2 permission"
+		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
 		logout()
 
 		loginTester1()
@@ -668,7 +669,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$("button", text: "Save").click()
 		then:
-		waitFor { $(".ui-pnotify .alert-success") }
+		//waitFor { $(".ui-pnotify .alert-success") }	// robustness...
 		waitFor { !$(".bootbox.modal") }
 
 		when: "try search"
