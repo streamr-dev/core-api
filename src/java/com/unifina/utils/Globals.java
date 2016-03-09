@@ -1,29 +1,18 @@
 package com.unifina.utils;
 
-import com.unifina.service.SerializationService;
-import groovy.lang.GroovySystem;
-
-import java.security.AccessController;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
-import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
 import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
-import org.springframework.util.Assert;
+import groovy.lang.GroovySystem;
+import org.apache.log4j.Logger;
+import org.codehaus.groovy.grails.commons.GrailsApplication;
+
+import java.security.AccessController;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 public class Globals {
@@ -77,9 +66,6 @@ public class Globals {
 		this.user = user;
 		
 		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
-		
-		// Use ModuleService classloader as parent to keep all loaded modules in same CL hierarchy
-//		this.classLoader = new ModuleClassLoader(ModuleService.class.getClassLoader())
 	}
 	
 	public void onModuleCreated(AbstractSignalPathModule module) {
@@ -152,27 +138,33 @@ public class Globals {
 	}
 	
 	public void init() {
-		// Use UTC timezone for beginDate and endDate
-		startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
-		// Set time to midnight UTC of the current date if nothing specified
-		if (startDate==null) {
-			Calendar cal = new GregorianCalendar();
-			cal.setTime(new Date());
-			cal.set(Calendar.HOUR_OF_DAY,0);
-			cal.set(Calendar.MINUTE,0);
-			cal.set(Calendar.SECOND,0);
-			cal.set(Calendar.MILLISECOND,0);
-			time = cal.getTime();
-		}
-		else {
-			time = startDate;
-		}
+		try {
+			time = startDate = new Date(MapTraversal.getLong(signalPathContext, "beginDate"));
+			endDate = new Date(MapTraversal.getLong(signalPathContext, "endDate"));
+		} catch (NumberFormatException | NullPointerException e) {
+			// TODO: remove this fallback handling in favor of Long dates in future.
+			// Use UTC timezone for beginDate and endDate
+			startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
 
-		// Interpret endDate as one millisecond to the next midnight
-		// Change this if the possibility to enter a time range is added
-		endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
-		if (endDate!=null) {
-			endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
+			// Set time to midnight UTC of the current date if nothing specified
+			if (startDate==null) {
+				Calendar cal = new GregorianCalendar();
+				cal.setTime(new Date());
+				cal.set(Calendar.HOUR_OF_DAY,0);
+				cal.set(Calendar.MINUTE,0);
+				cal.set(Calendar.SECOND,0);
+				cal.set(Calendar.MILLISECOND,0);
+				time = cal.getTime();
+			} else {
+				time = startDate;
+			}
+
+			// Interpret endDate as one millisecond to the next midnight
+			// Change this if the possibility to enter a time range is added
+			endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
+			if (endDate!=null) {
+				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
+			}
 		}
 
 		String tzString = detectTimeZone();
