@@ -66,8 +66,10 @@ class SumByKeySpec extends Specification {
 	}
 
 	void "sumByKey gives the right answer (with sliding window, sorting and maxKeyCount)"() {
+		module.configure([options: [
+			sorted: [value: true]
+		]])
 		module.getInput("windowLength").receive(2)
-		module.getInput("sort").receive(true)
 		module.getInput("maxKeyCount").receive(3)
 
 		when:

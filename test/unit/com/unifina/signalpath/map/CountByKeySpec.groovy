@@ -13,10 +13,10 @@ class CountByKeySpec extends Specification {
 	def setup() {
 		module = new CountByKey()
 		module.init()
-		module.configure(module.getConfiguration())
 	}
 
 	void "countByKey gives the right answer"() {
+		module.configure(module.getConfiguration())
 
 		when:
 		Map outputValues = [
@@ -40,7 +40,9 @@ class CountByKeySpec extends Specification {
 	}
 
 	void "countByKey gives the right answer (sorting and maxKeyCount enabled)"() {
-		module.getInput("sort").receive(true)
+		module.configure([options: [
+		    sorted: [value: true],
+		]])
 		module.getInput("maxKeyCount").receive(3)
 
 		when:
@@ -65,8 +67,9 @@ class CountByKeySpec extends Specification {
 	}
 
 	void "countByKey gives the right answer (sorting, ascending, and maxKeyCount enabled)"() {
-		module.getInput("sort").receive(true)
-		module.getInput("ascending").receive(true)
+		module.configure([options: [
+			sorted: [value: true], ascending: [value: true]
+		]])
 		module.getInput("maxKeyCount").receive(3)
 
 		when:

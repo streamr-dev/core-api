@@ -23,7 +23,12 @@ public class SortMap extends AbstractSignalPathModule {
 		if (!byValue.getValue()) {
 			target = new TreeMap<>(source);
 		} else {
-			target = copyIntoValueSortedMap(source);
+			target = new ValueSortedMap(true);
+			try {
+				target.putAll(source);
+			} catch (ClassCastException e) {
+				return;
+			}
 		}
 
 		if (target != null) {
@@ -31,29 +36,6 @@ public class SortMap extends AbstractSignalPathModule {
 		}
 	}
 
-	private LinkedHashMap copyIntoValueSortedMap(Map source) {
-		try {
-			List<Map.Entry> list = new LinkedList(source.entrySet());
-			Collections.sort(list, new Comparator<Map.Entry>() {
-				@Override
-				public int compare(Map.Entry o1, Map.Entry o2) {
-					return ((Comparable) o1.getValue()).compareTo(o2.getValue());
-				}
-			});
-
-			LinkedHashMap target = new LinkedHashMap();
-			for (Map.Entry entry : list) {
-				target.put(entry.getKey(), entry.getValue());
-			}
-			return target;
-		} catch (ClassCastException e) {
-			log.debug("Could not sort by value because value was not Comparable.", e);
-			return null;
-		}
-	}
-
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 }
