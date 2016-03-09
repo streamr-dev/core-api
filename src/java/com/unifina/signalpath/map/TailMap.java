@@ -14,6 +14,9 @@ public class TailMap extends LimitMap {
 		}
 	}
 
+	/**
+	 * More efficient variant of handleMap()
+	 */
 	private static Map handleNavigableMap(NavigableMap navigableSource, Integer limit) {
 		Iterator it = navigableSource.descendingKeySet().iterator();
 		int i = 0;
@@ -22,7 +25,7 @@ public class TailMap extends LimitMap {
 			key = it.next();
 			++i;
 		}
-		return navigableSource.tailMap(key); // Wrap as HashMap prevent serialization issues
+		return navigableSource.tailMap(key);
 	}
 
 	private static Map handleMap(Map source, Integer limit) {
