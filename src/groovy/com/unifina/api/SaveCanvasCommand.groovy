@@ -8,7 +8,6 @@ class SaveCanvasCommand {
 	List<Object> modules
 	Map settings = [:]
 	boolean adhoc = false
-	boolean shared = false
 
 	static constraints = {
 		name(blank: false)
