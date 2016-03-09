@@ -29,6 +29,9 @@ databaseChangeLog = {
 			[
 				name: "ValuesToList",
 			],
+			[
+			    name: "NewMap",
+			]
 		]
 
 		modules.eachWithIndex { module, i ->
