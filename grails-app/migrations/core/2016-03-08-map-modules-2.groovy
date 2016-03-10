@@ -34,6 +34,12 @@ databaseChangeLog = {
 			],
 			[
 			    name: "MergeMap",
+			],
+			[
+				name: "RemoveFromMap",
+			],
+			[
+				name: "MapSize",
 			]
 		]
 
