@@ -91,6 +91,8 @@ grails.project.dependency.resolution = {
 		
         runtime('com.github.nkzawa:socket.io-client:0.3.0')
 		runtime('joda-time:joda-time:2.9.3')
+
+		compile('com.udojava:EvalEx:1.3')
     }
 
     plugins {
