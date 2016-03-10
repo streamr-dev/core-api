@@ -31,6 +31,9 @@ databaseChangeLog = {
 			],
 			[
 			    name: "NewMap",
+			],
+			[
+			    name: "MergeMap",
 			]
 		]
 
