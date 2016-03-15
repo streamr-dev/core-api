@@ -19,23 +19,22 @@ class MongoHistoricalIteratorSpec extends IntegrationSpec {
 	}
 
 	def cleanup() {
-		if (iterator!=null)
+		if (iterator != null) {
 			iterator.close()
+		}
 	}
 
 	def "it should retrieve all Documents in collection for given time span" () {
-		Stream stream = new Stream(config: """
-			{
-				"mongodb": {
-					"host": "dev.streamr",
-					"database": "test",
-					"collection": "MongoHistoricalIteratorSpec",
-					"timestampKey": "time"
-				}
+		Stream stream = new Stream(config: """ {
+			"mongodb": {
+				"host": "dev.streamr",
+				"database": "test",
+				"collection": "MongoHistoricalIteratorSpec",
+				"timestampKey": "time"
 			}
-		""")
-		Date startDate = df.parse("2015-11-16T08:35:13.024Z")
-		Date endDate = df.parse("2015-11-16T08:35:32.992Z")
+		}""")
+		Date startDate = df.parse("2015-11-16T09:02:00.000Z")
+		Date endDate = df.parse("2015-11-16T09:03:00.000Z")
 		iterator = new MongoHistoricalIterator(stream, startDate, endDate)
 		int count = 0
 
@@ -46,20 +45,18 @@ class MongoHistoricalIteratorSpec extends IntegrationSpec {
 		}
 
 		then:
-		count == 22
+		count == 60
 	}
 
 	def "it should retrieve all documents if the time span exceeds what is available" () {
-		Stream stream = new Stream(config: """
-			{
-				"mongodb": {
-					"host": "dev.streamr",
-					"database": "test",
-					"collection": "MongoHistoricalIteratorSpec",
-					"timestampKey": "time"
-				}
+		Stream stream = new Stream(config: """ {
+			"mongodb": {
+				"host": "dev.streamr",
+				"database": "test",
+				"collection": "MongoHistoricalIteratorSpec",
+				"timestampKey": "time"
 			}
-		""")
+		}""")
 		Date startDate = df.parse("2010-01-01T00:00:00.000Z")
 		Date endDate = df.parse("2020-01-01T00:00:00.000Z")
 		iterator = new MongoHistoricalIterator(stream, startDate, endDate)
