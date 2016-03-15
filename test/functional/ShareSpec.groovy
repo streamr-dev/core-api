@@ -29,9 +29,11 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			$(".user-delete-button").click()
-			$(".access-row").size() == 0
+		if ($(".user-delete-button").displayed) {
+			waitFor {
+				$(".user-delete-button").click()
+				$(".access-row").size() == 0
+			}
 		}
 		$("button", text: "Save").click()
 		waitFor { !$(".bootbox.modal").displayed }
@@ -41,22 +43,25 @@ class ShareSpec extends GebReportingSpec {
 		to CanvasListPage
 		getCanvasRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			$(".user-delete-button").click()
-			$(".access-row").size() == 0
+		if ($(".user-delete-button").displayed) {
+			waitFor {
+				$(".user-delete-button").click()
+				$(".access-row").size() == 0
+			}
 		}
 		$("button", text: "Save").click()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
 	def removeDashboardPermissions() {
 		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
 		to DashboardListPage
 		getDashboardRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			$(".user-delete-button").click()
-			$(".access-row").size() == 0
+		if ($(".user-delete-button").displayed) {
+			waitFor {
+				$(".user-delete-button").click()
+				$(".access-row").size() == 0
+			}
 		}
 		$("button", text: "Save").click()
 		waitFor { !$(".bootbox.modal").displayed }
