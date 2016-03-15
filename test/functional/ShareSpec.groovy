@@ -23,6 +23,45 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").displayed }
 	}
 
+	/** Cleanup helper */
+	def removeStreamPermissions() {
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		waitFor {
+			$(".user-delete-button").click()
+			$(".access-row").size() == 0
+		}
+		$("button", text: "Save").click()
+		waitFor { !$(".bootbox.modal").displayed }
+	}
+	def removeCanvasPermissions() {
+		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
+		to CanvasListPage
+		getCanvasRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		waitFor {
+			$(".user-delete-button").click()
+			$(".access-row").size() == 0
+		}
+		$("button", text: "Save").click()
+		waitFor { !$(".bootbox.modal").displayed }
+	}
+	def removeDashboardPermissions() {
+		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+
+		to DashboardListPage
+		getDashboardRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		waitFor {
+			$(".user-delete-button").click()
+			$(".access-row").size() == 0
+		}
+		$("button", text: "Save").click()
+		waitFor { !$(".bootbox.modal").displayed }
+	}
+
 	void "sharePopup can grant and revoke Stream permissions"() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
@@ -173,7 +212,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
-		cleanup: "to be extra sure to not leave a mess"
+		cleanup: "just in case..."
 		removeStreamPermissions()
 	}
 
@@ -314,7 +353,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
-		cleanup: "to be extra sure to not leave a mess"
+		cleanup: "just in case..."
 		removeCanvasPermissions()
 	}
 
@@ -455,7 +494,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
-		cleanup: "to be extra sure to not leave a mess"
+		cleanup: "just in case..."
 		removeDashboardPermissions()
 	}
 
@@ -602,16 +641,8 @@ class ShareSpec extends GebReportingSpec {
 		cleanup: "remove tester2 permission"
 		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
 		logout()
-
 		loginTester1()
-
-		to StreamListPage
-		getStreamRow().find("button").click()
-		waitFor { $(".user-delete-button").displayed }
-		$(".user-delete-button").click()
-		waitFor { $(".access-row").size() == 0 }
-		$("button", text: "Save").click()
-		waitFor { $(".ui-pnotify .alert-success") }
+		removeStreamPermissions()
 	}
 
 	void "public stream is visible in search and can be inspected, but won't be shown in list"() {
