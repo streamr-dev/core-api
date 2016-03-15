@@ -23,6 +23,45 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 	}
 
+	/** Cleanup helper */
+	def removeStreamPermissions() {
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		waitFor {
+			$(".user-delete-button").click()
+			$(".access-row").size() == 0
+		}
+		$("button", text: "Save").click()
+		waitFor { !$(".bootbox.modal").displayed }
+	}
+	def removeCanvasPermissions() {
+		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
+		to CanvasListPage
+		getCanvasRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		waitFor {
+			$(".user-delete-button").click()
+			$(".access-row").size() == 0
+		}
+		$("button", text: "Save").click()
+		waitFor { !$(".bootbox.modal").displayed }
+	}
+	def removeDashboardPermissions() {
+		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+
+		to DashboardListPage
+		getDashboardRow().find("button").click()
+		waitFor { $(".new-user-field").displayed }
+		waitFor {
+			$(".user-delete-button").click()
+			$(".access-row").size() == 0
+		}
+		$("button", text: "Save").click()
+		waitFor { !$(".bootbox.modal").displayed }
+	}
+
 	void "sharePopup can grant and revoke Stream permissions"() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
@@ -172,6 +211,9 @@ class ShareSpec extends GebReportingSpec {
 		then: "...but no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
+
+		cleanup: "just in case..."
+		removeStreamPermissions()
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
@@ -310,6 +352,9 @@ class ShareSpec extends GebReportingSpec {
 		then: "...but no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
+
+		cleanup: "just in case..."
+		removeCanvasPermissions()
 	}
 
 	void "sharePopup can grant and revoke Dashboard permissions"() {
@@ -448,6 +493,9 @@ class ShareSpec extends GebReportingSpec {
 		then: "...but no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
+
+		cleanup: "just in case..."
+		removeDashboardPermissions()
 	}
 
 	void "read permission allows opening but doesn't show share buttons"() {
@@ -547,63 +595,13 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { at DashboardShowPage }
 		!$("#share-button")
 
-		// REMOVE ACCESS
+		cleanup: "remove all access to ShareSpec resources"
+		to StreamListPage
 		logout()
 		loginTester1()
-
-		when:
-		to StreamListPage
-		getStreamRow().find("button").click()
-		waitFor { $(".user-delete-button").displayed }
-		then: "got the access-row; also it's the only one so we're not mixing things up"
-		$(".access-row").size() == 1
-
-		when: "there should be only one delete-button..."
-		$(".user-delete-button").click()
-		then: "gone!"
-		waitFor { $(".access-row").size() == 0 }
-
-		when:
-		$("button", text: "Save").click()
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
-
-		when:
-		to CanvasListPage
-		getCanvasRow().find("button").click()
-		waitFor { $(".user-delete-button").displayed }
-		then: "got the access-row; also it's the only one so we're not mixing things up"
-		$(".access-row").size() == 1
-
-		when: "there should be only one delete-button..."
-		$(".user-delete-button").click()
-		then: "gone!"
-		waitFor { $(".access-row").size() == 0 }
-
-		when:
-		$("button", text: "Save").click()
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
-
-		when:
-		to DashboardListPage
-		getDashboardRow().find("button").click()
-		waitFor { $(".user-delete-button").displayed }
-		then: "got the access-row; also it's the only one so we're not mixing things up"
-		$(".access-row").size() == 1
-
-		when: "there should be only one delete-button..."
-		$(".user-delete-button").click()
-		then: "gone!"
-		waitFor { $(".access-row").size() == 0 }
-
-		when:
-		$("button", text: "Save").click()
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		removeStreamPermissions()
+		removeCanvasPermissions()
+		removeDashboardPermissions()
 	}
 
 	void "shared stream is shown in search box"() {
@@ -611,10 +609,14 @@ class ShareSpec extends GebReportingSpec {
 
 		loginTester1()
 
-		when: "give tester2 read permission to stream"
+		when:
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
+		then:
+		$(".access-row").size() == 0
+
+		when: "give tester2 read permission to stream"
 		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
@@ -639,16 +641,8 @@ class ShareSpec extends GebReportingSpec {
 		cleanup: "remove tester2 permission"
 		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
 		logout()
-
 		loginTester1()
-
-		to StreamListPage
-		getStreamRow().find("button").click()
-		waitFor { $(".user-delete-button").displayed }
-		$(".user-delete-button").click()
-		waitFor { $(".access-row").size() == 0 }
-		$("button", text: "Save").click()
-		waitFor { $(".ui-pnotify .alert-success") }
+		removeStreamPermissions()
 	}
 
 	void "public stream is visible in search and can be inspected, but won't be shown in list"() {
