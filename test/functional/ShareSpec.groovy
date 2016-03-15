@@ -17,21 +17,25 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	def closePnotify() {
+		Thread.sleep(10)	// more may pop up...
 		$(".ui-pnotify-closer").each {
 			try { it.click() } catch (StaleElementReferenceException e) {}
 		}
 		waitFor { $(".ui-pnotify").displayed }
 	}
 
-	/** Cleanup helper */
+	// CLEANUP HELPERS: remove ALL (named) permissions in resource called "ShareSpec" of given type
+
 	def removeStreamPermissions() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			$(".user-delete-button").click()
-			$(".access-row").size() == 0
+		if ($(".user-delete-button").displayed) {
+			waitFor {
+				$(".user-delete-button").click()
+				$(".access-row").size() == 0
+			}
 		}
 		$("button", text: "Save").click()
 		waitFor { !$(".bootbox.modal").displayed }
@@ -41,26 +45,31 @@ class ShareSpec extends GebReportingSpec {
 		to CanvasListPage
 		getCanvasRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			$(".user-delete-button").click()
-			$(".access-row").size() == 0
+		if ($(".user-delete-button").displayed) {
+			waitFor {
+				$(".user-delete-button").click()
+				$(".access-row").size() == 0
+			}
 		}
 		$("button", text: "Save").click()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
 	def removeDashboardPermissions() {
 		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
 		to DashboardListPage
 		getDashboardRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			$(".user-delete-button").click()
-			$(".access-row").size() == 0
+		if ($(".user-delete-button").displayed) {
+			waitFor {
+				$(".user-delete-button").click()
+				$(".access-row").size() == 0
+			}
 		}
 		$("button", text: "Save").click()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
+
+	// UNIT TESTS
 
 	void "sharePopup can grant and revoke Stream permissions"() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
@@ -700,45 +709,5 @@ class ShareSpec extends GebReportingSpec {
 			$(".modal-body .owner-row .switcher").click()
 		}
 		$("button", text: "Save").click()
-	}
-
-	// CLEANUP HELPERS: remove ALL (named) permissions in resource called "ShareSpec" of given type
-
-	def removeStreamPermissions() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-		to StreamListPage
-		getStreamRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			if ($(".user-delete-button").displayed) { $(".user-delete-button").click() }
-			$(".access-row").size() == 0
-		}
-		$("button", text: "Save").click()
-		waitFor { !$(".bootbox.modal").displayed }
-	}
-	def removeCanvasPermissions() {
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
-		to CanvasListPage
-		getCanvasRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			if ($(".user-delete-button").displayed) { $(".user-delete-button").click() }
-			$(".access-row").size() == 0
-		}
-		$("button", text: "Save").click()
-		waitFor { !$(".bootbox.modal").displayed }
-	}
-	def removeDashboardPermissions() {
-		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
-		to DashboardListPage
-		getDashboardRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		waitFor {
-			if ($(".user-delete-button").displayed) { $(".user-delete-button").click() }
-			$(".access-row").size() == 0
-		}
-		$("button", text: "Save").click()
-		waitFor { !$(".bootbox.modal").displayed }
 	}
 }
