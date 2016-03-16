@@ -27,7 +27,7 @@ class KafkaFieldDetectorSpec extends IntegrationSpec {
 		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
 		then:
 		msg != null
-		msg.payload == null
+		!msg.payload
 
 		cleanup:
 		kafkaService.deleteTopics([topic])
