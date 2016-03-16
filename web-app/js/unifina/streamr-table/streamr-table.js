@@ -65,7 +65,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 		for (var key in d.nm) {
 			var newRow = $("<tr></tr>");
 			newRow.append("<td>"+(key!=null ? key : "")+"</td>");
-			newRow.append("<td>"+(d.nm[key]!=null ? d.nm[key] : "")+"</td>");
+			newRow.append("<td>"+(d.nm[key]!=null ? JSON.stringify(d.nm[key]) : "")+"</td>");
 			$(this.tableBody).prepend(newRow)
 		}
 	}
