@@ -6,7 +6,6 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.UiChannel
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
@@ -17,7 +16,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, UiChannel, ModuleService, SpringSecurityService, SignalPathService])
+@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
@@ -49,10 +48,6 @@ class CanvasServiceSpec extends Specification {
 				]
 			]).toString(),
 		)
-
-		UiChannel ui = new UiChannel(name: "Notifications")
-		ui.id = "666"
-		myFirstCanvas.addToUiChannels(ui)
 
 		myFirstCanvas.save(failOnError: true)
 
@@ -172,9 +167,9 @@ class CanvasServiceSpec extends Specification {
 		c.serialized == null
 		c.serializationTime == null
 
-		c.uiChannels.size() == 1
-		c.uiChannels[0].id != null
-		c.uiChannels[0].name == "Notifications"
+		List uiChannelIds = uiChannelIdsFromMap(c.toMap())
+		uiChannelIds.size() == 1
+		uiChannelIds[0] != null
 	}
 
 	def "createNew() creates a new adhoc Canvas when given adhoc setting"() {
@@ -204,8 +199,9 @@ class CanvasServiceSpec extends Specification {
 		c.name == "my_updated_canvas"
 		c.json != null // TODO: JSON Schema validation
 
-		c.uiChannels.size() == 1
-		c.uiChannels[0].id == "666"
+		List uiChannelIds = uiChannelIdsFromMap(myFirstCanvas.toMap())
+		uiChannelIds.size() == 1
+		uiChannelIds[0] == "666"
 	}
 
 	def "updateExisting creates uiChannels for new modules and keeps old ones intact"() {
@@ -233,10 +229,11 @@ class CanvasServiceSpec extends Specification {
 			modules: newModules + modules
 		)
 		service.updateExisting(canvas, updateCommand)
+		def updatedUiChannelIds = uiChannelIdsFromMap(canvas.toMap())
 
 		then:
-		canvas.uiChannels.size() == 6
-		uiChannelIdsFromMap(canvas.toMap()).containsAll(existingUiChannelIds)
+		updatedUiChannelIds.size() == 6
+		updatedUiChannelIds.containsAll(existingUiChannelIds)
 	}
 
 	def "updateExisting clears serialization"() {
@@ -293,12 +290,14 @@ class CanvasServiceSpec extends Specification {
 		when:
 		def create2ndCommand = new SaveCanvasCommand(name: "my_canvas_with_modules", modules: modules)
 		def newCanvas = service.createNew(create2ndCommand, me)
+		def newUiChannelIds = uiChannelIdsFromMap(newCanvas.toMap())
 
 		then:
-		newCanvas.uiChannels.size() == 4
-		canvas.uiChannels.size() == 4
-		existingUiChannelIds.plus(uiChannelIdsFromMap(newCanvas.toMap())).size() == 8
-		existingUiChannelIds.intersect(uiChannelIdsFromMap(newCanvas.toMap())).empty
+
+		newUiChannelIds.size() == 4
+		existingUiChannelIds.size() == 4
+		existingUiChannelIds.plus(newUiChannelIds).size() == 8
+		existingUiChannelIds.intersect(newUiChannelIds).empty
 	}
 
 	def "start() invokes SignalPathService.startLocal()"() {

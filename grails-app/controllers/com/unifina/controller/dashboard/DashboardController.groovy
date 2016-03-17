@@ -50,17 +50,7 @@ class DashboardController {
 		Map dashboardMap = [
 			id: dashboard.id,
 			name: dashboard.name,
-			items: dashboard.items.collect {DashboardItem item->
-				[
-						id:item.id,
-						title: item.title,
-						ord:item.ord,
-						size:item.size,
-						canvas: item.uiChannel.canvas.id,
-						module: item.uiChannel.hash,
-						uiChannel: item.uiChannel.toMap()
-				]
-			}
+			items: dashboard.items*.toMap()
 		]
 		render dashboardMap as JSON
 	}
@@ -117,8 +107,6 @@ class DashboardController {
 			}
 			
 			dashboardMap.items?.findAll {it.id==null}.each {
-				DashboardItem item = new DashboardItem(it)
-				//item.uiChannel = UiChannel.load(it.uiChannel.id)
 				toBeAdded.add(it)
 			}
 			

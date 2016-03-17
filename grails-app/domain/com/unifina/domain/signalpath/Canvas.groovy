@@ -61,11 +61,8 @@ class Canvas {
 		shared defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
-		uiChannels cascade: 'all-delete-orphan'
 		serialized type: 'text'
 	}
-
-	static hasMany = [uiChannels: UiChannel]
 
 	boolean isNotSerialized() {
 		serialized == null || serialized.empty

@@ -10,4 +10,5 @@ databaseChangeLog = {
 	include file: 'core/2016-01-21-replace-running-and-saved-signal-paths-with-canvas.groovy'
 	include file: 'core/2016-02-02-mongodb-feed.groovy'
 	include file: 'core/2016-02-25-feed-data-range-provider.groovy'
+	include file: 'core/2016-03-17-drop-ui-channel.groovy'
 }
