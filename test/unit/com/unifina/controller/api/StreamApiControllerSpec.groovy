@@ -4,11 +4,13 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.Permission
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -17,14 +19,14 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService, StreamService])
+@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
 	SecUser user
 
 	def streamService
-	def unifinaSecurityService
+	def permissionService
 
 	def streamOneUuid
 	def streamTwoUuid
@@ -33,10 +35,10 @@ class StreamApiControllerSpec extends Specification {
 
 	def setup() {
 		streamService = mainContext.getBean(StreamService)
-		unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
+		permissionService = mainContext.getBean(PermissionService)
 
 		controller.streamService = streamService
-		controller.unifinaSecurityService = unifinaSecurityService
+		controller.permissionService = permissionService
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)

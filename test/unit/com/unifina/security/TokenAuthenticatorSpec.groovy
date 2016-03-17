@@ -1,15 +1,16 @@
 package com.unifina.security
 
 import com.unifina.domain.security.SecUser
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 import spock.lang.Specification
 
 import javax.servlet.http.HttpServletRequest
 
 class TokenAuthenticatorSpec extends Specification {
 
-	UnifinaSecurityService unifinaSecurityService = Mock(UnifinaSecurityService)
-	TokenAuthenticator authenticator = new TokenAuthenticator(unifinaSecurityService)
+	UserService userService = Mock(UserService)
+	TokenAuthenticator authenticator = new TokenAuthenticator(userService)
 
 	def "no authorization string"() {
 		when:
@@ -43,7 +44,7 @@ class TokenAuthenticatorSpec extends Specification {
 		user == null
 		!authenticator.lastAuthenticationMalformed()
 		authenticator.apiKeyPresent
-		1 * unifinaSecurityService.getUserByApiKey("apiKey")
+		1 * userService.getUserByApiKey("apiKey")
 	}
 
 	def "valid authorization with existent apiKey"() {
@@ -56,6 +57,6 @@ class TokenAuthenticatorSpec extends Specification {
 		user != null
 		!authenticator.lastAuthenticationMalformed()
 		authenticator.apiKeyPresent
-		1 * unifinaSecurityService.getUserByApiKey("apiKey") >> new SecUser()
+		1 * userService.getUserByApiKey("apiKey") >> new SecUser()
 	}
 }

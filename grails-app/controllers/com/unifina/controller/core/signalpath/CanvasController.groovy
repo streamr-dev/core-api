@@ -1,5 +1,6 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
@@ -10,7 +11,7 @@ import org.springframework.util.FileCopyUtils
 
 import com.unifina.domain.security.SecUser
 import com.unifina.service.SignalPathService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
@@ -22,26 +23,27 @@ class CanvasController {
 	GrailsApplication grailsApplication
 	SpringSecurityService springSecurityService
 	SignalPathService signalPathService
-	UnifinaSecurityService unifinaSecurityService
+	PermissionService permissionService
 	
 	def index() {
 		redirect(action: "editor", params:params)
 	}
 
 	def list() {
-		// TODO: replace query with permissionService method once that branch is ready
-		List<Canvas> canvases = Canvas.createCriteria().list() {
-			eq("user",springSecurityService.currentUser)
-			eq("adhoc",false)
+		def user = springSecurityService.currentUser
+		Closure criteriaFilter = {
+			eq "adhoc", false
 			if (params.term) {
-				like("name","%${params.term}%")
+				like "name", "%${params.term}%"
 			}
 			if (params.state) {
-				inList("state", params.list("state").collect {Canvas.State.valueOf(it.toUpperCase())})
+				inList "state", params.list("state").collect { String param -> Canvas.State.fromValue(param) }
 			}
-			order("dateCreated", "desc")
+			order "dateCreated", "desc"
 		}
-		[canvases: canvases, user:springSecurityService.currentUser, stateFilter: params.state ? params.list("state") : []]
+		List<Canvas> readableCanvases = permissionService.get(Canvas, user, Operation.READ, criteriaFilter)
+		List<Canvas> shareableCanvases = permissionService.get(Canvas, user, Operation.SHARE, criteriaFilter)
+		[canvases: readableCanvases, shareable: shareableCanvases, user: user, stateFilter: params.state ? params.list("state") : []]
 	}
 
 	def editor() {
@@ -110,26 +112,37 @@ class CanvasController {
 	def loadBrowserContent() {
 		def max = params.int("max") ?: 100
 		def offset = params.int("offset") ?: 0
-		def ssp
-		// TODO: do queries via permissionService once that branch is ready
+
+		def canvases = []
 		if (params.browserId == 'examplesLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = true order by sp.dateCreated asc", [max: max, offset: offset])
+			// bypass Permission check; examples are public (make sure example-bit can't be set through API!)
+			canvases = Canvas.withCriteria {
+				eq "example", true
+				order "dateCreated", "asc"
+				maxResults max
+				firstResult offset
+			}
 		} else if (params.browserId == 'archiveLoadBrowser') {
-			ssp = Canvas.executeQuery("select sp.id, sp.name, sp.state from Canvas sp where sp.example = false and sp.user = :user and sp.adhoc = false order by sp.dateCreated desc", [user:springSecurityService.currentUser], [max: max, offset: offset])
+			def user = springSecurityService.currentUser
+			canvases = permissionService.get(Canvas, user, Operation.READ) {
+				eq "example", false
+				eq "adhoc", false
+				order "dateCreated", "desc"
+				maxResults max
+				firstResult offset
+			}
 		}
 
-		def result = [signalPaths:[]]
-		ssp.each {
-			def tmp = [:]
-			tmp.id = it[0]
-			tmp.name = it[1]
-			tmp.state = it[2]
-			tmp.command = params.command
-			tmp.offset = offset++
-			result.signalPaths.add(tmp)
-		}
-		return result
+		return [
+			canvases: canvases.collect {[
+				id: it.id,
+				name: it.name,
+				state: it.state,
+				command: params.command,
+				offset: offset++
+			]}
+		]
 	}
 
-	
+
 }

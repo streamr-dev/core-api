@@ -221,7 +221,7 @@ class SignalPathService {
 
 		// Start the runner thread
 		runner.start()
-		
+
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {

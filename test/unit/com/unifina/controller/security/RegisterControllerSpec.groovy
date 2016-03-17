@@ -3,12 +3,12 @@ package com.unifina.controller.security
 
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.signalpath.messaging.MockMailService
+import com.unifina.domain.security.Permission
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
 import com.unifina.domain.security.RegistrationCode
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -16,15 +16,14 @@ import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.service.BootService
 import com.unifina.service.SignupCodeService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 import com.unifina.service.UserService
 
 @TestFor(RegisterController)
 @Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
-		Feed, FeedUser, ModulePackage, ModulePackageUser, UnifinaSecurityService])
+		Feed, ModulePackage, PermissionService, Permission, UserService])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
@@ -43,18 +42,18 @@ class RegisterControllerSpec extends Specification {
 				reauthenticated = username
 			}
 	]
-	
+
 	void setup() {
 		controller.mailService = new MockMailService()
 		
 		controller.springSecurityService = springSecurityService
 		controller.signupCodeService = new SignupCodeService()
-		controller.unifinaSecurityService = new UnifinaSecurityService()
-		controller.unifinaSecurityService.grailsApplication = grailsApplication
+		def permissionService = new PermissionService()
+		permissionService.grailsApplication = grailsApplication
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication
-		
+		controller.userService.permissionService = permissionService
 	}
 
 	void "index should not be available"() {
@@ -287,8 +286,7 @@ class RegisterControllerSpec extends Specification {
 			SecUser.findByUsername(username)
 			SecUser.findByUsername(username).timezone == 'NoContinent/NoPlace'
 			SecUser.findByUsername(username).password == 'fooBar123!-encoded'
-			ModulePackageUser.count() == grailsApplication.config.streamr.user.defaultModulePackages.size()
-			FeedUser.count() == grailsApplication.config.streamr.user.defaultFeeds.size()
+			Permission.count() == grailsApplication.config.streamr.user.defaultModulePackages.size() + grailsApplication.config.streamr.user.defaultFeeds.size()
 			response.redirectedUrl != null
 		then: "welcome email should be sent"
 			controller.mailService.mailSent

@@ -1,12 +1,11 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.domain.signalpath.Module
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.user.UserCreationFailedException
@@ -14,12 +13,11 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
+import org.springframework.validation.FieldError
 import spock.lang.Specification
 
-import javax.swing.Spring
-
 @TestFor(UserService)
-@Mock([Feed, SecUser, SecRole, ModulePackage, ModulePackageUser, SecUserSecRole, FeedUser, Module])
+@Mock([Feed, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
     void createData(){
@@ -58,14 +56,19 @@ class UserServiceSpec extends Specification {
         }
     }
 
+	def permissionService
+
     def setup() {
         defineBeans {
             passwordEncoder(PlaintextPasswordEncoder)
             springSecurityService(SpringSecurityService)
+			permissionService(PermissionService)
         }
         // Do some wiring that should be done automatically but for some reason is not (in unit tests)
         grailsApplication.mainContext.getBean("springSecurityService").grailsApplication = grailsApplication
         grailsApplication.mainContext.getBean("springSecurityService").passwordEncoder = grailsApplication.mainContext.getBean("passwordEncoder")
+		permissionService = mainContext.getBean(PermissionService)
+		permissionService.grailsApplication = grailsApplication
     }
 
     def "the user is created when called"() {
@@ -87,11 +90,11 @@ class UserServiceSpec extends Specification {
         user.getAuthorities().toArray()[0].authority == "ROLE_USER"
         user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
 
-        user.getModulePackages().size() == 1
-        user.getModulePackages().toArray()[0].id == 1
+		permissionService.getAll(ModulePackage, user).size() == 1
+		permissionService.getAll(ModulePackage, user)[0].id == 1
 
-        user.getFeeds().size() == 1
-        user.getFeeds().toArray()[0].id == 7
+		permissionService.getAll(Feed, user).size() == 1
+		permissionService.getAll(Feed, user)[0].id == 7
     }
 
     def "if the roles, feeds and modulePackages are given, it should use them"() {
@@ -115,12 +118,11 @@ class UserServiceSpec extends Specification {
         user.getAuthorities().size() == 1
         user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-        user.getFeeds().size() == 0
+		permissionService.get(Feed, user).size() == 0
 
-        user.getModulePackages().size() == 2
-        user.getModulePackages().toArray()[0].id == 1
-        user.getModulePackages().toArray()[1].id == 2
-
+		permissionService.get(ModulePackage, user).size() == 2
+		permissionService.get(ModulePackage, user)[0].id == 1
+		permissionService.get(ModulePackage, user)[1].id == 2
     }
 
     def "it should fail if the default roles, feeds of modulePackages are not found"() {
@@ -131,4 +133,46 @@ class UserServiceSpec extends Specification {
         then:
         thrown RuntimeException
     }
+
+	void "looking up a user based on correct api key"() {
+		when:
+		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
+		def user = service.getUserByApiKey("apiKey")
+
+		then:
+		user.username == "me"
+	}
+
+	void "looking up a user with incorrect api key"() {
+		when:
+		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
+		def user = service.getUserByApiKey("wrong api key")
+
+		then:
+		!user
+	}
+
+	void "censoring errors with checkErrors() works properly"() {
+		List checkedErrors
+		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]
+
+		when: "given list of fieldErrors"
+		List<FieldError> errorList = new ArrayList<>()
+		errorList.add(new FieldError(
+				this.getClass().name, 'password', 'rejectedPassword', false, null, ['null', 'null', 'rejectedPassword'].toArray(), null
+		))
+		errorList.add(new FieldError(
+				this.getClass().name, 'username', 'rejectedUsername', false, null, ['null', 'null', 'rejectedUsername'].toArray(), null
+		))
+		checkedErrors = service.checkErrors(errorList)
+
+		then: "the rejected password is hidden but the rejected username is not"
+		checkedErrors.get(0).getField() == "username"
+		checkedErrors.get(0).getRejectedValue() == "rejectedUsername"
+		checkedErrors.get(0).getArguments() == ['null', 'null', 'rejectedUsername']
+
+		checkedErrors.get(1).getField() == "password"
+		checkedErrors.get(1).getRejectedValue() == "***"
+		checkedErrors.get(1).getArguments() == ['null', 'null', '***']
+	}
 }

@@ -1,8 +1,11 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
@@ -14,7 +17,9 @@ import org.apache.log4j.Logger
 class CanvasApiController {
 
 	def canvasService
-	def unifinaSecurityService
+	def springSecurityService
+	def grailsApplication
+	def permissionService
 	def signalPathService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
@@ -32,7 +37,7 @@ class CanvasApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
 			Map result = canvasService.reconstruct(canvas)
 			canvas.json = result as JSON
 			render canvas.toMap() as JSON
@@ -47,7 +52,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def update(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -59,7 +64,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -70,7 +75,7 @@ class CanvasApiController {
 
 	@StreamrApi
 	def start(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot start common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -83,7 +88,7 @@ class CanvasApiController {
 	@StreamrApi
 	@NotTransactional
 	def stop(String id) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
 			if (canvas.example) {
 				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
 			} else {
@@ -107,7 +112,7 @@ class CanvasApiController {
      */
 	@StreamrApi(requiresAuthentication = false)
 	def module(String id, Integer moduleId) {
-		getAuthorizedCanvas(id) { Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
 			Map canvasMap = canvas.toMap()
 			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId.toString() }
 
@@ -122,7 +127,7 @@ class CanvasApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def request(String id, Integer moduleId) {
-		getAuthorizedCanvas(id) {Canvas canvas ->
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
 			def msg = request.JSON
 			Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, params.local ? true : false)
 
@@ -142,12 +147,13 @@ class CanvasApiController {
 		return command
 	}
 
-	private void getAuthorizedCanvas(String id, Closure successHandler) {
+	private void getAuthorizedCanvas(String id, Operation op, Closure successHandler) {
 		def canvas = Canvas.get(id)
-		if (canvas == null) {
-			render(status: 404, text: [error: "Canvas (id=$id) not found.", code: "NOT_FOUND"] as JSON)
-		} else if (!canvas.example && !unifinaSecurityService.canAccess(canvas, actionName == 'load', request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Canvas (id=$id)", code: "FORBIDDEN"] as JSON)
+		if (!canvas) {
+			throw new NotFoundException("Canvas", id)
+		} else if (!(op == Operation.READ && (canvas.example || canvas.shared)) &&
+				   !permissionService.check(request.apiUser, canvas, op)) {
+			throw new NotPermittedException(request.apiUser?.username, "Canvas", id, op.id)
 		} else {
 			successHandler.call(canvas)
 		}

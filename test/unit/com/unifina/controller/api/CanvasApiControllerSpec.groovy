@@ -1,12 +1,15 @@
 package com.unifina.controller.api
 
+import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.CanvasService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -18,9 +21,10 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Canvas, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService])
+@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService])
 class CanvasApiControllerSpec extends Specification {
 
+	PermissionService permissionService
 	CanvasService canvasService
 	SecUser me
 	Canvas canvas1
@@ -29,7 +33,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
-		controller.unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
+		controller.permissionService = permissionService = mainContext.getBean(PermissionService)
 
 		me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
@@ -145,8 +149,7 @@ class CanvasApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -200,8 +203,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -218,8 +220,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.update()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -245,8 +246,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -259,8 +259,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.delete()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -304,8 +303,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.start()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 
@@ -333,8 +331,7 @@ class CanvasApiControllerSpec extends Specification {
 			controller.stop()
 		}
 		then:
-		response.status == 403
-		response.json.code == "FORBIDDEN"
+		thrown NotPermittedException
 		0 * canvasService._
 	}
 

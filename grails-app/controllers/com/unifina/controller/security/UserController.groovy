@@ -1,12 +1,11 @@
 package com.unifina.controller.security
 
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.user.UserCreationFailedException
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
@@ -20,6 +19,7 @@ class UserController {
 	def userService
 	def userCache
 	def springSecurityService
+	def permissionService
 
 	static defaultAction = 'userSearch'
 
@@ -158,9 +158,9 @@ class UserController {
 		def roles = SecRole.findAllByAuthorityInList(params.list("role"))
 		userService.addRoles(user, roles)
 		def feeds = Feed.findAllByIdInList(params.list("feed").collect{ Long.parseLong(it) })
-		userService.addFeeds(user, feeds)
+		userService.setFeeds(user, feeds)
 		def packages = ModulePackage.findAllByIdInList(params.list("modulePackage").collect{ Long.parseLong(it) })
-		userService.addModulePackages(user, packages)
+		userService.setModulePackages(user, packages)
 		userCache.removeUserFromCache user[usernameFieldName]
 		flash.message = "${message(code: 'default.updated.message', args: [message(code: 'user.label', default: 'User'), user.id])}"
 		redirect action: 'edit', id: user.id
@@ -205,7 +205,10 @@ class UserController {
 			}
 		}
 
-		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted]
+		return [user: user, authorityList: sortedRoles(), roleMap: granted + notGranted,
+				userModulePackages: permissionService.get(ModulePackage, user),
+				ownedModulePackages: ModulePackage.findAllByUser(user),
+				userFeeds: permissionService.get(Feed, user)]
 	}
     
     def delete() {
@@ -213,8 +216,7 @@ class UserController {
         if (!user) return
         
         SecUserSecRole.executeUpdate("delete from SecUserSecRole ss where ss.secUser = ?", [user])
-        FeedUser.executeUpdate("delete from FeedUser fu where fu.user = ?", [user])
-        ModulePackageUser.executeUpdate("delete from ModulePackageUser mu where mu.user = ?", [user])
+        Permission.executeUpdate("delete from Permission p where p.user = ?", [user])
         SignupInvite.executeUpdate("delete from SignupInvite si where si.username = ?", [user.username])
 
 		String usernameFieldName = SpringSecurityUtils.securityConfig.userLookup.usernamePropertyName
