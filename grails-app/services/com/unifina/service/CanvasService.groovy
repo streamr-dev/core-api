@@ -136,7 +136,7 @@ class CanvasService {
 		// Add new, previously unseen UiChannels
 		HashSet<String> foundIds = new HashSet<>()
 		UiChannelIterator.over(newSignalPathMap).each { UiChannelIterator.Element element ->
-			if (canvas.uiChannels.find {it.id != element.id} == null && !foundIds.contains(element.id)) {
+			if (canvas.uiChannels.find {it.id == element.id} == null && !foundIds.contains(element.id)) {
 				canvas.addToUiChannels(element.toUiChannel())
 			}
 			foundIds.add(element.id)
