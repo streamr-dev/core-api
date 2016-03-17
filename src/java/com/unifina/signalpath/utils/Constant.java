@@ -9,48 +9,50 @@ import com.unifina.signalpath.Pullable;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
-public class Constant extends AbstractSignalPathModule implements Pullable<Double>{
+public class Constant extends AbstractSignalPathModule implements Pullable<Double> {
 
-	DoubleParameter constant = new DoubleParameter(this,"constant",0D);
-	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
-	
+	DoubleParameter constant = new DoubleParameter(this, "constant", 0D);
+	TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
+
 	public Constant() {
 		super();
 //		originatingModule = true;
 		initPriority = 40;
 	}
-	
+
 	@Override
 	public void init() {
 		addInput(constant);
 		constant.setDrivingInput(true);
 		addOutput(out);
 	}
-	
+
 	@Override
 	public void initialize() {
 		for (Input i : out.getTargets()) {
-			if (i instanceof TimeSeriesInput)
-				((TimeSeriesInput)i).setInitialValue(constant.getValue());
-			else if (i instanceof IntegerParameter)
+			if (i instanceof TimeSeriesInput) {
+				((TimeSeriesInput) i).setInitialValue(constant.getValue());
+			} else if (i instanceof IntegerParameter) {
 				((IntegerParameter) i).receive(constant.getValue().intValue());
-			else i.receive(constant.getValue());
-		}		
+			} else {
+				i.receive(constant.getValue());
+			}
+		}
 	}
-	
+
 	@Override
 	public void sendOutput() {
-		out.send(constant.getValue());	
+		out.send(constant.getValue());
 	}
 
 	@Override
 	public void clearState() {
 
 	}
-	
+
 	@Override
 	public Double pullValue(Output output) {
 		return constant.getValue();
 	}
-	
+
 }
