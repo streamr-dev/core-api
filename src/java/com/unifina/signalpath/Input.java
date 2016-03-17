@@ -29,7 +29,7 @@ public class Input<T> extends Endpoint<T> {
 	ArrayList<Input<T>> proxiedInputs = new ArrayList<>();
 	
 	public Input(AbstractSignalPathModule owner, String name, String typeName) {
-		super(owner,name, typeName);
+		super(owner, name, typeName);
 	}
 
 	// The signature could be receive(T value), but then IntegerParameter would be in trouble due to Java generics
