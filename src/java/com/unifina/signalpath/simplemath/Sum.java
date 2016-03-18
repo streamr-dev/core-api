@@ -15,7 +15,7 @@ public class Sum extends AbstractSignalPathModule {
 	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
 
 	LinkedList<Double> values = new LinkedList<>();
-	double sum = 0;
+	com.unifina.math.Sum sum = null;
 	int count = 0;
 	
 	@Override
@@ -28,25 +28,21 @@ public class Sum extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		
-		if (windowLength.getValue() > 0) {
-			while (values.size() >= windowLength.getValue()) {
-				sum -= values.poll();
-			}
-			values.add(input.value);
-		}
-		
-		sum += input.value;
+		if (sum==null)
+			sum = new com.unifina.math.Sum(windowLength.getValue());
+		else sum.setLength(windowLength.getValue());
+
+		sum.add(input.getValue());
 		count++;
 
-		if (count>=minSamples.value)
-			out.send(sum);
+		if (count>=minSamples.getValue())
+			out.send(sum.getValue());
 	}
 
 	@Override
 	public void clearState() {
 		values.clear();
-		sum = 0;
+		sum.clear();
 		count = 0;
 	}
 	

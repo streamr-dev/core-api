@@ -24,21 +24,16 @@
 						el: $("#dashboard-view")
 					})
 					dashboardView.on('error', function(error, itemTitle) {
-						$.pnotify({
-							type: 'error',
-			        		title: 'Error',
-				        	text: itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error,
-				        	delay: 4000
-			    		});
+						Streamr.showError(itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error)
 					})
 
 					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
 					
-					$.getJSON("${createLink(controller:'live', action:'getListJson')}", {}, function(rspJson) {
+					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false, sort:'dateCreated', order:'desc'}, function(canvases) {
 						var sidebar = new SidebarView({
 							edit: ${params.edit ? "true" : "undefined"},
 							dashboard: dashboard, 
-							RSPs: rspJson,
+							canvases: canvases,
 							el: $("#sidebar-view"),
 							menuToggle: $("#main-menu-toggle")
 						})

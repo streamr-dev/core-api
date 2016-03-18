@@ -1,13 +1,11 @@
-import java.nio.file.Paths
-
-import org.openqa.selenium.remote.RemoteWebDriver;
-
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.StreamMixin
 import core.pages.StreamConfirmPage
 import core.pages.StreamListPage
 import core.pages.StreamShowPage
+
+import java.nio.file.Paths
 
 @Mixin(StreamMixin)
 @Mixin(CanvasMixin)
@@ -17,13 +15,20 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		// The test csv files must be available in the local filesystem of the machine where the browser is running.
 		// Note that it's impossible to check here whether the file exists because this code runs on a different machine.
 		boolean inJenkins = (System.getenv('BUILD_NUMBER') != null)
-		return inJenkins ? new File("/vagrant/$filename") : Paths.get(getClass().getResource("files/$filename").toURI()).toFile() 
+		return inJenkins ? new File("/vagrant/$filename") : Paths.get(getClass().getResource("files/$filename").toURI()).toFile()
 	}
-	
+
+	def cleanupSpec() {
+		super.login()
+		// The stream must be left empty
+		emptyStream("CSVImporterFuncSpec")
+	}
+
 	void "uploading data from csv with a non-supported date format to a stream works"() {
 		setup:
+		// Just made sure that the stream is empty
 		emptyStream("CSVImporterFuncSpec")
-		
+
 		when: "Go to StreamListPage"
 		to StreamListPage
 		then: "The previously created testing stream can be found"
@@ -47,8 +52,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		waitFor { $(".history .control-label", text:"Range").displayed }
 		waitFor { $(".history div", text:contains("2015-04-30")).displayed }
 		waitFor { $(".history div", text:contains("2015-05-03")).displayed }
-		
-		//The stream must be left empty
+
 		emptyStream("CSVImporterFuncSpec")
 	}
 	
@@ -83,13 +87,10 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		moduleShouldAppearOnCanvas("Label")
 		
 		connectEndpoints(findOutput("Stream", "price"), findInput("Label", "label"))
-		runButton.click()
+		runHistoricalButton.click()
 		
 		then: "The label module has some content -> stream has data"
 		waitFor(15){ $(".module .modulebody .modulelabel").text() != "" }
-		
-		//The stream must be left empty
-		emptyStream("CSVImporterFuncSpec")
 	}
 	
 }

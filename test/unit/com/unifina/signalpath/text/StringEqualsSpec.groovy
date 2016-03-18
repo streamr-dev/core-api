@@ -29,13 +29,7 @@ class StringEqualsSpec extends Specification {
 			"equals?": [0, 1, 1, 0].collect {it?.doubleValue()}
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 		
 		when:
     	module.onConfiguration([options: [ignoreCase: [value: false]]])
@@ -43,12 +37,6 @@ class StringEqualsSpec extends Specification {
 			"equals?": [0, 1, 0, 0].collect {it?.doubleValue()}
 		]
 		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
-		
-		when:
-		module.clearState()
-		
-		then:
-		new ModuleTestHelper(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

@@ -10,7 +10,7 @@
 <div>
 
 	<s2ui:form width='100%' height='375' elementId='formContainer'
-	           titleCode='spring.security.ui.user.search'>
+	           titleCode='spring.security.ui.user.search' resizeable="false">
 
 	<g:form action='userSearch' name='userSearchForm'>
 
@@ -115,8 +115,6 @@ $(document).ready(function() {
 		source: "${createLink(action: 'ajaxUserSearch')}"
 	});
 });
-
-<s2ui:initCheckboxes/>
 
 </script>
 

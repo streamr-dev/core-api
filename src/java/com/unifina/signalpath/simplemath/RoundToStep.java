@@ -13,42 +13,12 @@ import com.unifina.utils.DU;
 
 public class RoundToStep extends AbstractSignalPathModule {
 
-	private static final int MODE_UP = 1;
-	private static final int MODE_DOWN = 2;
-	private static final int MODE_TOWARDS_ZERO = 3;
-	private static final int MODE_AWAYFROM_ZERO = 4;
+	public static final int MODE_UP = 1;
+	public static final int MODE_DOWN = 2;
+	public static final int MODE_TOWARDS_ZERO = 3;
+	public static final int MODE_AWAYFROM_ZERO = 4;
 	
-	IntegerParameter mode = new IntegerParameter(this, "mode", 1) {
-		@Override
-		public Map<String,Object> getConfiguration() {
-			Map<String,Object> config = super.getConfiguration();
-			
-			ArrayList<Map<String,Object>> possibleValues = new ArrayList<>();
-			
-			HashMap<String,Object> up = new HashMap<>();
-			up.put("name", "up");
-			up.put("value", MODE_UP);
-			possibleValues.add(up);
-			
-			HashMap<String,Object> down = new HashMap<>();
-			down.put("name", "down");
-			down.put("value", MODE_DOWN);
-			possibleValues.add(down);
-			
-			HashMap<String,Object> toZero = new HashMap<>();
-			toZero.put("name", "towards zero");
-			toZero.put("value", MODE_TOWARDS_ZERO);
-			possibleValues.add(toZero);
-			
-			HashMap<String,Object> awayZero = new HashMap<>();
-			awayZero.put("name", "away from zero");
-			awayZero.put("value", MODE_AWAYFROM_ZERO);
-			possibleValues.add(awayZero);
-			
-			config.put("possibleValues", possibleValues);
-			return config;
-		};
-	};
+	IntegerParameter mode = new ModeParameter(this, "mode", 1);
 	
 	DoubleParameter step = new DoubleParameter(this,"precision",0.01);
 	TimeSeriesInput input = new TimeSeriesInput(this,"in");
@@ -87,4 +57,40 @@ public class RoundToStep extends AbstractSignalPathModule {
 
 	}
 
+	private class ModeParameter extends IntegerParameter {
+
+		public ModeParameter(AbstractSignalPathModule owner, String name, Integer defaultValue) {
+			super(owner, name, defaultValue);
+		}
+
+		@Override
+		public Map<String,Object> getConfiguration() {
+			Map<String,Object> config = super.getConfiguration();
+
+			ArrayList<Map<String,Object>> possibleValues = new ArrayList<>();
+
+			HashMap<String,Object> up = new HashMap<>();
+			up.put("name", "up");
+			up.put("value", MODE_UP);
+			possibleValues.add(up);
+
+			HashMap<String,Object> down = new HashMap<>();
+			down.put("name", "down");
+			down.put("value", MODE_DOWN);
+			possibleValues.add(down);
+
+			HashMap<String,Object> toZero = new HashMap<>();
+			toZero.put("name", "towards zero");
+			toZero.put("value", MODE_TOWARDS_ZERO);
+			possibleValues.add(toZero);
+
+			HashMap<String,Object> awayZero = new HashMap<>();
+			awayZero.put("name", "away from zero");
+			awayZero.put("value", MODE_AWAYFROM_ZERO);
+			possibleValues.add(awayZero);
+
+			config.put("possibleValues", possibleValues);
+			return config;
+		}
+	}
 }

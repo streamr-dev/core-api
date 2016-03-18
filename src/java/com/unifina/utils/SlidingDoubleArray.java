@@ -1,6 +1,8 @@
 package com.unifina.utils;
 
-public class SlidingDoubleArray {
+import java.io.Serializable;
+
+public class SlidingDoubleArray implements Serializable {
 	
 	int maxSize;
 	

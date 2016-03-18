@@ -3,7 +3,6 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	var pub = SignalPath.GenericModule(data,canvas,prot)
 
 	var area = null;
-	var options = {};
 	var headers = [];
 	
 	/**
@@ -17,7 +16,14 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	prot.createDiv = createDiv;
 
 	function initTable(){
-		prot.table = new StreamrTable(prot.body, options)
+		var tableOptions = {}
+		if (prot.jsonData.options) {
+			Object.keys(prot.jsonData.options).forEach(function(key) {
+				tableOptions[key] = prot.jsonData.options[key].value
+			})
+		}
+		
+		prot.table = new StreamrTable(prot.body, tableOptions)
 		if (prot.jsonData.options && prot.jsonData.options.maxRows)
 			options = prot.jsonData.options
 
@@ -25,6 +31,17 @@ SignalPath.TableModule = function(data,canvas,prot) {
 			headers = prot.jsonData.tableConfig.headers
 		
 		prot.table.initTable(headers)
+	}
+
+	function sendInitRequest() {
+		if (SignalPath.isRunning()) {
+			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response, err) {
+				if (err)
+					console.error("Failed initRequest for TableModule: %o", err)
+				else
+					prot.table.receiveResponse(response.initRequest)
+			})
+		}
 	}
 
 	pub.receiveResponse = function(d) {
@@ -40,18 +57,18 @@ SignalPath.TableModule = function(data,canvas,prot) {
 	var superClose = pub.close;
 	pub.close = function() {
 		$(SignalPath).off("started", startFunction)
+		$(SignalPath).off("loaded", sendInitRequest)
 		superClose()
 	}
 
-	function startFunction (e, runData){
-		if (!runData || !runData.adhoc) {
-			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response) {
-				prot.table.receiveResponse(response.initRequest)
-			})
+	function startFunction (e, canvas){
+		if (!canvas || !canvas.adhoc) {
+			sendInitRequest()
 		}
 	}
 
 	$(SignalPath).on("started", startFunction)
+	$(SignalPath).on("loaded", sendInitRequest)
 	
 	return pub;
 }

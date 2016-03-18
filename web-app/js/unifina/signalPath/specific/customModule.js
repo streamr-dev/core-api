@@ -42,8 +42,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	function createCodeWindow() {
 		if (dialog==null) {
 			dialog = $(codeWindow);
-			
 			prot.div.parent().append(dialog)
+
+			dialog.css('top',canvas.scrollTop() + 10);
+			dialog.css('left',canvas.scrollLeft() + 10);
 
 			dialog.draggable({
 				cancel: ".modal-body",
@@ -108,13 +110,17 @@ SignalPath.CustomModule = function(data,canvas,prot) {
     +				'<button class="close-btn btn btn-default">Close</button>'
     +			'</div>'
     +   	'</div>'
-	
+
+
 	function createDebugWindow() {
 		if (debug==null) {
 			debug = $(debugWindow);
 			debugTextArea = debug.find(".debugText")
 			
 			prot.div.parent().append(debug)
+
+			debug.css('top',canvas.scrollTop() + 10);
+			debug.css('left',canvas.scrollLeft() + 10);
 
 			debug.draggable({
 				cancel: ".modal-body",
@@ -180,7 +186,17 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	pub.onDelete = function() {
 		if (super_onDelete)
 			super_onDelete();
-		
+		clearModule()
+	}
+
+	var super_onClose = pub.onClose;
+	pub.onClose = function() {
+		if(super_onClose)
+			super_onClose()
+		clearModule()
+	}
+
+	var clearModule = function(){
 		if (dialog!=null) {
 			$(dialog).remove()
 			dialog = null

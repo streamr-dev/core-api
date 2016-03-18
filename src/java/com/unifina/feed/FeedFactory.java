@@ -87,4 +87,14 @@ public class FeedFactory {
 		return instanceByFeed.get(feed.getId());
 	}
 
+	/**
+	 * For testing
+	 */
+	public synchronized static void stopAndClearAll() {
+		for (Long key : instanceByFeed.keySet()) {
+			instanceByFeed.get(key).quit();
+			instanceByFeed.remove(key);
+		}
+	}
+
 }

@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.AccessController;
@@ -14,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
 
+import com.unifina.utils.HibernateHelper;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -33,19 +34,19 @@ import com.unifina.utils.MapTraversal;
  * - Call module.setConfiguration()
  * - Call module.connectionsReady()
  */
-public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener {
+public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
 	private Map<String,Object> json;
-	
+
 	protected SignalPath parentSignalPath;
-	private SignalPath topParentSignalPath;
+	transient private SignalPath cachedTopParentSignalPath;
 	protected Integer initPriority = 50;
 	
-	ArrayList<Input> inputs = new ArrayList<Input>();
-	Map<String,Input> inputsByName = new HashMap<String,Input>();
+	protected ArrayList<Input> inputs = new ArrayList<Input>();
+	protected Map<String,Input> inputsByName = new HashMap<String,Input>();
 	
-	ArrayList<Output> outputs = new ArrayList<Output>();
-	Map<String,Output> outputsByName = new HashMap<String,Output>();
+	protected ArrayList<Output> outputs = new ArrayList<Output>();
+	protected Map<String,Output> outputsByName = new HashMap<String,Output>();
 	
 	private boolean wasReady = false;
 	
@@ -74,7 +75,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	protected String name;
 	protected Integer hash;
 	
-	public Globals globals;
+	transient public Globals globals;
 
 	private boolean initialized;
 	
@@ -86,7 +87,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * a Parameter is marked as driving and then the Parameter is changed
 	 * at runtime.
 	 */
-	private Propagator uiEventPropagator = null;
+	transient protected Propagator uiEventPropagator = null;
 	
 	public AbstractSignalPathModule() {
 
@@ -359,7 +360,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public void trySendOutput() {
-		if (sendPending && allInputsReady()) {
+		if (isSendPending() && allInputsReady()) {
 			wasReady = true;
 			setSendPending(false);
 			sendOutput();
@@ -510,15 +511,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public SignalPath getTopParentSignalPath() {
 		if (parentSignalPath==null) return null;
 		// Return cached value
-		else if (topParentSignalPath!=null) 
-			return topParentSignalPath;
+		else if (cachedTopParentSignalPath !=null)
+			return cachedTopParentSignalPath;
 		// Establish cached value
 		else {
-			topParentSignalPath = parentSignalPath;
-			while (topParentSignalPath.getParentSignalPath()!=null)
-				topParentSignalPath = topParentSignalPath.getParentSignalPath();
+			cachedTopParentSignalPath = parentSignalPath;
+			while (cachedTopParentSignalPath.getParentSignalPath()!=null)
+				cachedTopParentSignalPath = cachedTopParentSignalPath.getParentSignalPath();
 
-			return topParentSignalPath;
+			return cachedTopParentSignalPath;
 		}
 	}
 	
@@ -547,10 +548,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 */
 	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
 		// Add event to message queue, don't do it right away 
-		FeedEvent fe = new FeedEvent();
-		fe.content = request;
-		fe.recipient = this;
-		fe.timestamp = globals.time;
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, globals.isRealtime() ? request.getTimestamp() : globals.time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
@@ -629,7 +627,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}
 	}
 
-	void checkDirtyAndReadyCounters() {
+	public void checkDirtyAndReadyCounters() {
 		// Set the quick dirty/ready counters
 		int readyCount = 0;
 		for (Input i : getInputs()) {
@@ -661,4 +659,22 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		return MapTraversal.getProperty(config, "options."+name+".value");
 	}
 
+	/**
+	 * Override to handle steps before serialization.
+	 * Don't forget to call super.beforeSerialization()!
+	 */
+	public void beforeSerialization() {
+		domainObject = HibernateHelper.deproxy(domainObject, Module.class);
+	}
+
+	/**
+	 * Override to handle steps after serialization
+	 */
+	public void afterSerialization() {}
+
+	/**
+	 * Override to handle steps after deserialization
+	 */
+	public void afterDeserialization() {
+	}
 }

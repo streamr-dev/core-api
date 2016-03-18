@@ -9,11 +9,15 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.unifina.domain.signalpath.Canvas;
+import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.SerializationService;
+import com.unifina.signalpath.SignalPath;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
-import com.unifina.data.IFeed;
 import com.unifina.data.RealtimeEventQueue;
+import com.unifina.feed.AbstractFeed;
 import com.unifina.feed.ICatchupFeed;
 import com.unifina.utils.Globals;
 
@@ -42,7 +46,7 @@ public class RealtimeDataSource extends DataSource {
 		// Check catchup
 		List<ICatchupFeed> catchupFeeds = new ArrayList<>();
 		
-		for (IFeed it : feedByClass.values()) {
+		for (AbstractFeed it : feedByClass.values()) {
 			if (it instanceof ICatchupFeed && ((ICatchupFeed)it).startCatchup())
 				catchupFeeds.add((ICatchupFeed)it);
 		}
@@ -59,7 +63,7 @@ public class RealtimeDataSource extends DataSource {
 		// Let all catchup feeds know that catchup has ended,
 		// even if their startCatchup() returned false and thus
 		// they are not in catchupFeeds
-		for (IFeed it : feedByClass.values()) {
+		for (AbstractFeed it : feedByClass.values()) {
 			if (it instanceof ICatchupFeed)
 				((ICatchupFeed)it).endCatchup();
 		}
@@ -70,7 +74,7 @@ public class RealtimeDataSource extends DataSource {
 			log.info("Catchup complete.");
 		
 		if (!abort) {
-			for (IFeed it : feedByClass.values())
+			for (AbstractFeed it : feedByClass.values())
 				it.startFeed();
 
 			final Date now = new Date();
@@ -87,6 +91,28 @@ public class RealtimeDataSource extends DataSource {
 					new Date(now.getTime() + (1000 - (now.getTime()%1000))), // Time till next even second
 					1000);   // Repeat every second
 
+			// Serialization
+			SerializationService serializationService = globals.getBean(SerializationService.class);
+
+			for (final SignalPath signalPath : getSignalPaths()) {
+				Canvas canvas = signalPath.getCanvas();
+
+				if (canvas != null) {
+					if (canvas.getAdhoc()) {
+						log.info("Canvas " + canvas.getId() + " is adhoc and thus won't be serialized.");
+					} else {
+						secTimer.scheduleAtFixedRate(new TimerTask() {
+							@Override
+							public void run() {
+								eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+							}
+						}, 0, serializationService.serializationIntervalInMillis());
+					}
+				}
+
+			}
+
+
 			// This will block indefinitely until the feed is stopped!
 			eventQueue.start();
 		
@@ -94,7 +120,7 @@ public class RealtimeDataSource extends DataSource {
 		
 		log.info("RealtimeDataSource has stopped.");
 	}
-	
+
 	private void processCatchups(List<ICatchupFeed> feeds) {
 		
 		// Insert first event from each feed into the queue
@@ -136,7 +162,7 @@ public class RealtimeDataSource extends DataSource {
 		secTimer.cancel();
 		secTimer.purge();
 		
-		for (IFeed it : feedByClass.values()) {
+		for (AbstractFeed it : feedByClass.values()) {
 			try {
 				it.stopFeed();
 			} catch (Exception e) {

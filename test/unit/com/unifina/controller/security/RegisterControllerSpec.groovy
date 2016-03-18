@@ -1,35 +1,30 @@
 
 package com.unifina.controller.security
 
-import com.unifina.domain.signalpath.Module
-import com.unifina.service.UserService
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.ui.RegistrationCode
+import com.unifina.feed.NoOpStreamListener
+import com.unifina.signalpath.messaging.MockMailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.springframework.security.authentication.encoding.PlaintextPasswordEncoder
-import org.springframework.security.core.userdetails.UserDetailsService
 import spock.lang.Specification
 
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedUser
+import com.unifina.domain.security.RegistrationCode
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SecUserSecRole
 import com.unifina.domain.security.SignupInvite
-import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
 import com.unifina.service.BootService
 import com.unifina.service.SignupCodeService
 import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.UserService
 
 @TestFor(RegisterController)
-@Mock([SignupInvite,
-		UnifinaSecurityService, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
-		Feed, FeedUser, ModulePackage, ModulePackageUser, UserService, SpringSecurityService])
+@Mock([SignupInvite, SignupCodeService, RegistrationCode, SecUser, SecRole, SecUserSecRole,
+		Feed, FeedUser, ModulePackage, ModulePackageUser, UnifinaSecurityService])
 class RegisterControllerSpec extends Specification {
 
 	def mailSent = false
@@ -37,7 +32,7 @@ class RegisterControllerSpec extends Specification {
 	String reauthenticated = null
 
 	void setupSpec() {
-		BootService.mergeDefaultConfig(grailsApplication)
+
 	}
 
 	def springSecurityService = [
@@ -50,19 +45,16 @@ class RegisterControllerSpec extends Specification {
 	]
 	
 	void setup() {
-		mailSent = false
-
-
-		controller.mailService = [
-			sendMail: {
-				mailSent = true
-			}
-		]
-
+		controller.mailService = new MockMailService()
+		
+		controller.springSecurityService = springSecurityService
+		controller.signupCodeService = new SignupCodeService()
+		controller.unifinaSecurityService = new UnifinaSecurityService()
+		controller.unifinaSecurityService.grailsApplication = grailsApplication
 		controller.userService = new UserService()
 		controller.userService.springSecurityService = springSecurityService
 		controller.userService.grailsApplication = grailsApplication
-		controller.springSecurityService = springSecurityService
+		
 	}
 
 	void "index should not be available"() {
@@ -91,7 +83,7 @@ class RegisterControllerSpec extends Specification {
 			model.signupOk
 			view == '/register/signup'
 		then: "signup email should be sent"
-			mailSent
+			controller.mailService.mailSent
 			
 	}
 
@@ -101,7 +93,7 @@ class RegisterControllerSpec extends Specification {
 			controller.sendInvite()
 		then: "should error"
 			flash.message.contains('not found')
-			mailSent == false
+			!controller.mailService.mailSent
 			response.redirectedUrl == '/register/list'
 	}
 
@@ -111,8 +103,8 @@ class RegisterControllerSpec extends Specification {
 			params.code = inv.code
 			controller.sendInvite()
 		then: "should send mail"
-			inv.sent == true
-			mailSent == true
+			inv.sent
+			controller.mailService.mailSent
 			response.redirectedUrl == '/register/list'
 	}
 
@@ -253,6 +245,8 @@ class RegisterControllerSpec extends Specification {
 			feed.module = new Module()
 			feed.parserClass = ""
 			feed.timezone = "Europe/Minsk"
+			feed.streamListenerClass = NoOpStreamListener.name
+			feed.streamPageTemplate = ""
 			feed.save()
 
 			// A modulePackage created with minimum fields required
@@ -297,9 +291,38 @@ class RegisterControllerSpec extends Specification {
 			FeedUser.count() == grailsApplication.config.streamr.user.defaultFeeds.size()
 			response.redirectedUrl != null
 		then: "welcome email should be sent"
-			mailSent
+			controller.mailService.mailSent
 		then: "user must be (re)authenticated"
 			reauthenticated == username
+	}
+
+	void "forgotPassword returns emailSent=true but does not send email if the user does not exist"() {
+		EmailCommand cmd = new EmailCommand()
+
+		when: "requested new password"
+		cmd.username = "test@streamr.com"
+		request.method = "POST"
+		def model = controller.forgotPassword(cmd)
+		then:
+		!controller.mailService.mailSent
+		model.emailSent
+	}
+
+	void "forgotPassword sends email and returns emailSent=true if the user exists"() {
+		EmailCommand cmd = new EmailCommand()
+		SecUser me = new SecUser()
+		me.username = "test@streamr.com"
+		me.save(validate: false)
+
+		when: "requested new password"
+		cmd.username = "test@streamr.com"
+		request.method = "POST"
+		def model = controller.forgotPassword(cmd)
+		then:
+		controller.mailService.mailSent
+		// The text of the html contains the link
+		controller.mailService.html.contains("register/resetPassword")
+		model.emailSent
 	}
 
 

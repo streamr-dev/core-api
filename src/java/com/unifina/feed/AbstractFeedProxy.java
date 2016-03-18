@@ -3,6 +3,7 @@ package com.unifina.feed;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.unifina.data.IEventRecipient;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -16,7 +17,7 @@ import com.unifina.utils.Globals;
  * there is one feed proxy holding the session's subscriptions. There can be 
  * only one actual feed implementation, which is the hub.
  * 
- * This class receives preprocessed messages (of type T) from the hub,
+ * This class receives preprocessed messages (of type MessageClass) from the hub,
  * filters them using the collection of subscribed objects and creates
  * FeedEvents from the preprocessed message, finally pushing them into
  * the event queue.
@@ -24,17 +25,19 @@ import com.unifina.utils.Globals;
  * @author Henri
  *
  */
-public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements MessageRecipient, ICatchupFeed {
+public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient>
+		extends AbstractFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass>
+		implements MessageRecipient<RawMessageClass, KeyClass>, ICatchupFeed {
 	
 	private int expected = 0;
 	
-	protected MessageHub<R,T> hub;
+	protected MessageHub<RawMessageClass, MessageClass, KeyClass> hub;
 	
 	private Catchup catchup = null;
 	enum CatchupState { CATCHUP, CATCHUP_UNSYNC_READY, CATCHUP_READY };
 	private CatchupState catchupState = CatchupState.CATCHUP; // start in catchup state
 	
-	private ConcurrentLinkedQueue<T> realtimeWaitQueue = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<MessageClass> realtimeWaitQueue = new ConcurrentLinkedQueue<>();
 	private ConcurrentLinkedQueue<Long> realtimeWaitQueueCounter = new ConcurrentLinkedQueue<>();
 	
 	private static final Logger log = Logger.getLogger(AbstractFeedProxy.class);
@@ -49,7 +52,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 		hub = getMessageHub();
 	}
 	
-	protected MessageHub<R,T> getMessageHub() {
+	protected MessageHub<RawMessageClass, MessageClass, KeyClass> getMessageHub() {
 		try {
 			return FeedFactory.getInstance(domainObject, globals.getGrailsApplication().getConfig());
 		} catch (InstantiationException | ClassNotFoundException
@@ -60,7 +63,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	}
 	
 	@Override
-	public boolean subscribe(Object subscriber) {
+	public boolean subscribe(ModuleClass subscriber) {
 		hub.subscribe(keyProvider.getSubscriberKey(subscriber), this);
 		return super.subscribe(subscriber);
 	}
@@ -69,12 +72,10 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	 * This method is called by the hub distribute messages to session-specific proxies.
 	 * It processes the message and adds it to the event queue - or if a catchup is in
 	 * progress, it adds them to the wait queue.
-	 * @param counter
-	 * @param msg
 	 */
 	@Override
 	public void receive(Message parsedMsg) {
-		T msg = (T) parsedMsg.message;
+		MessageClass msg = (MessageClass) parsedMsg.message;
 		// If still waiting for catchup to end, produce to the wait queue
 		if (catchupState==CatchupState.CATCHUP) {
 			realtimeWaitQueue.add(msg);
@@ -130,7 +131,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 			// Is the correct counter in the wait queue?
 			if (!realtimeWaitQueue.isEmpty() && realtimeWaitQueueCounter.peek()==expected) {
 				Long waitCounter = realtimeWaitQueueCounter.poll();
-				T waitMsg = realtimeWaitQueue.poll();
+				MessageClass waitMsg = realtimeWaitQueue.poll();
 				processAndQueue(waitCounter, waitMsg, false);
 				log.info("handleGap: Message processed from wait queue: "+waitCounter);
 			}
@@ -155,7 +156,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 				}
 				else {
 					log.info("handleGap: Message processed from catchup: "+counter);
-					T msg = hub.getParser().parse((R)next);
+					MessageClass msg = hub.getParser().parse((RawMessageClass)next);
 					processAndQueue(counter, msg, false);
 				}
 			}
@@ -168,12 +169,12 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 		return true;
 	}
 	
-	private void processAndQueue(long counter, T msg, boolean checkAge) {
+	private void processAndQueue(long counter, MessageClass msg, boolean checkAge) {
 		if (counter!=expected)
 			throw new IllegalArgumentException("Tried to process messages in invalid order! Counter: "+counter+", expected: "+expected);
 		else {
 			expected++;
-			FeedEvent[] events = process(msg);
+			FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
 
 			// TODO: remove debug
 			if (firstRealQueue==null && checkAge) {
@@ -199,7 +200,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	 * This method is guaranteed to be called in correct order without gaps.
 	 * It should convert the feed message to FeedEvent(s).
 	 */
-	protected abstract FeedEvent[] process(T msg);
+	protected abstract FeedEvent<MessageClass, EventRecipientClass>[] process(MessageClass msg);
 	
 	
 	@Override
@@ -208,7 +209,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 			throw new IllegalStateException("Catchup is not started!");
 		
 		Object line;
-		T msg;
+		MessageClass msg;
 		FeedEvent[] result = null;
 		
 		while(result==null) {
@@ -220,7 +221,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 				return null;
 			}
 			
-			msg = hub.getParser().parse((R)line);
+			msg = hub.getParser().parse((RawMessageClass)line);
 			
 			if (catchupCounter!=expected)
 				throw new IllegalStateException("Gap in catchup! Counter: "+catchupCounter+", expected: "+expected);
@@ -249,7 +250,7 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 	
 	@Override
 	public void stopFeed() throws Exception {
-		for (Object subscriber : subscribers)
+		for (ModuleClass subscriber : subscribers)
 			hub.unsubscribe(keyProvider.getSubscriberKey(subscriber), this);
 		
 		hub.removeRecipient(this);
@@ -277,6 +278,10 @@ public abstract class AbstractFeedProxy<R,T> extends AbstractFeed implements Mes
 		
 		log.info("endCatchup called");
 		catchupState = CatchupState.CATCHUP_UNSYNC_READY;
+	}
+
+	public MessageHub<RawMessageClass, MessageClass, KeyClass> getHub() {
+		return hub;
 	}
 
 	public void sessionBroken() {

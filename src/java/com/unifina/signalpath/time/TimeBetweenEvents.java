@@ -27,6 +27,8 @@ public class TimeBetweenEvents extends AbstractSignalPathModule {
 	
 	@Override
 	public void clearState() {
+		date = null;
+		lastTs = null;
 	}
 	
 	@Override

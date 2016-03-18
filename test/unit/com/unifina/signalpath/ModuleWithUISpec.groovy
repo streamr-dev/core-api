@@ -46,7 +46,7 @@ class ModuleWithUISpec extends Specification {
 			config.uiChannel != null
 			config.uiChannel.id != null
 			config.uiChannel.name == "TestModule"
-			config.uiChannel.webcomponent == null
+			config.uiChannel.webcomponent == module.webcomponentName
 	}
 	
 	def "onConfiguration must read uiChannel id"() {

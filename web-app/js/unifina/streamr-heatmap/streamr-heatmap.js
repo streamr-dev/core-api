@@ -143,6 +143,9 @@
 		return dirty
 	}
 
+	/**
+	 * Synchronizes the data in this.data to the heatmap layer
+	 */
 	StreamrHeatMap.prototype.syncData = function() {
 		var d = {
 			min: this.options.min,

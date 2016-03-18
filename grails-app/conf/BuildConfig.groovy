@@ -19,7 +19,7 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 
 def gebVersion = "0.9.3"
-def seleniumVersion = "2.41.0"
+def seleniumVersion = "2.48.2"
 
 grails.project.dependency.resolver = "maven" // or ivy
 
@@ -30,7 +30,7 @@ grails.project.dependency.resolver = "maven" // or ivy
 //]
 grails.project.fork = [
     run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
-    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
+    test: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 400, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
 grails.project.dependency.resolution = {
@@ -62,16 +62,18 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         runtime 'mysql:mysql-connector-java:5.1.20'
+		compile 'org.mongodb:mongodb-driver:3.2.1'
         compile('log4j:log4j:1.2.16')
 		
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
         runtime('com.opencsv:opencsv:3.3')
+        runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
-        compile('com.unifina:kafka-client:0.1.4') {
+        compile('com.unifina:kafka-client:0.1.12') {
             excludes "slf4j-log4j12"
         }
 		
@@ -101,13 +103,12 @@ grails.project.dependency.resolution = {
         
         compile ":mail:1.0.7"
 
-        // plugins needed at runtime but not for compilation
-        runtime ':hibernate:3.6.10.2'
+	    // plugins needed at runtime but not for compilation
+		runtime ':hibernate:3.6.10.19'
 			  
-        // Required by cached-resources but transitive dependency declaration is missing	  
-        compile ":cache-headers:1.1.7"
-		
-        runtime ":spring-security-ui:1.0-RC2"
+		// Required by cached-resources but transitive dependency declaration is missing	  
+		compile ":cache-headers:1.1.7"
+		runtime ':database-migration:1.4.0'
         runtime ":spring-security-core:2.0-RC4"
         runtime ":jquery:1.11.1"
         runtime ":jquery-ui:1.10.3"

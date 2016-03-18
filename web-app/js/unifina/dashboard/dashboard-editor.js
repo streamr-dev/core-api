@@ -7,23 +7,23 @@ _.templateSettings = {
 	interpolate : /\{\{([\s\S]+?)\}\}/g
 };
 
-var UiChannel = Backbone.Model.extend({
+var Module = Backbone.AssociatedModel.extend({
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
 	}
 })
   
-var UiChannelList = Backbone.Collection.extend({
-	model: UiChannel
+var ModuleList = Backbone.Collection.extend({
+	model: Module
 })
 
-var UiChannelView = Backbone.View.extend({
+var ModuleView = Backbone.View.extend({
 	tagName: "li",
-	className: "uichannel",	
-	template: _.template($("#uichannel-template").html()),
+	className: "module",
+	template: _.template($("#module-template").html()),
 
 	events: {
-		"click .uichannel-title" : "toggleChecked"
+		"click .module-title" : "toggleChecked"
 	},
 
 	initialize: function () {
@@ -52,64 +52,76 @@ var UiChannelView = Backbone.View.extend({
 	}
 })
 
-var RunningSignalPath = Backbone.Model.extend({
-	initialize: function (){
-		this.uiChannelCollection = new UiChannelList(this.get("uiChannels"))
-	},
-	getCheckedCount: function () {
-		var howManyChecked = 0
-		_.each(this.uiChannelCollection.models, function(model){
-			if(model.get("checked"))
-				howManyChecked++
-		},this)
-		return howManyChecked
+var Canvas = Backbone.AssociatedModel.extend({
+	relations: [
+		{
+			type: Backbone.Many,
+			key: 'modules',
+			collectionType: ModuleList,
+			relatedModel: Module
+		}
+	],
+
+	getChecked: function() {
+		return _.filter(this.get('modules').models, function(module) {
+			return module.get('checked')
+		})
 	}
 })
 
-var RunningSignalPathList = Backbone.Collection.extend({
-	model: RunningSignalPath
+var CanvasList = Backbone.Collection.extend({
+	model: Canvas
 })
 
-var RunningSignalPathView = Backbone.View.extend({
+var CanvasView = Backbone.View.extend({
 	tagName: "li",
-	className: "runningsignalpath mm-dropdown mm-dropdown-root",
-	template: _.template($("#rsp-template").html()),
+	className: "canvas mm-dropdown mm-dropdown-root",
+	template: _.template($("#canvas-template").html()),
 
 	events: {
-		"click .rsp-title" : "openClose"
+		"click .canvas-title" : "openClose"
 	},
 	
 	initialize: function (){
-		this.model.uiChannelCollection.on("change:checked", function(model){
+		this.model.get('modules').on("change:checked", function() {
 			this.render()
 		},this)
+		this.render()
 	},
 
 	render: function() {
-		if(!this.$el.children().length) {
+		if (!this.$el.children().length) {
 			this.$el.append(this.template(this.model.toJSON()))
-			this.$el.append(this.renderUIC())
+			this.$el.append(this.renderModules())
 		}
-		if(this.model.getCheckedCount())
-			this.$el.find(".howmanychecked").html(this.model.getCheckedCount())
+
+		if (this.model.getChecked().length)
+			this.$el.find(".howmanychecked").html(this.model.getChecked().length)
 		else 
 			this.$el.find(".howmanychecked").empty()
-		if(this.model.get("state") == 'stopped'){
+
+		if (this.model.get("state") == 'stopped'){
 			this.$el.addClass("stopped")
 		}
 		return this
 	},
 
-	renderUIC: function () {
-		var channels = this.el, list = $("<ul/>", {
+	renderModules: function () {
+		var list = $("<ul/>", {
 			class: "mmc-dropdown-delay animated fadeInLeft"
 		})
-		_.each(this.model.uiChannelCollection.models, function(item){
-			var uiChannelView = new UiChannelView({
-				model: item
+
+		var filteredModules = _.filter(this.model.get('modules').models, function(module) {
+			return module.get('uiChannel') && module.get('uiChannel').webcomponent
+		})
+
+		_.each(filteredModules, function(module) {
+			var moduleView = new ModuleView({
+				model: module
 			})
-			list.append(uiChannelView.render().el)
+			list.append(moduleView.render().el)
 		}, this)
+
 		return list
 	},
 
@@ -168,31 +180,26 @@ var DashboardItemView = Backbone.View.extend({
 		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
 		this.largeClass = "large-size col-xs-12 col-centered"
 
-		var type = this.model.get("uiChannel").module.id
+		var webcomponent = this.model.get("uiChannel").webcomponent
 		this.$el.html(this.template(this.model.toJSON()))
-		if(type == 67) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.chartTemplate(this.model.toJSON()))
-		}
-		else if(type == 142) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.tableTemplate(this.model.toJSON()))
-		}
-		else if(type == 145) {
+		if(webcomponent == "streamr-label" ||
+			webcomponent == "streamr-button" ||
+			webcomponent == "streamr-switcher") {
 			if(!this.model.get("size"))
 				this.model.set("size", "small")
-			this.$el.find(".widget-content").append(this.labelTemplate(this.model.toJSON()))
-		}
-		else if(type == 196) {
-			if(!this.model.get("size"))
-				this.model.set("size", "medium")
-			this.$el.find(".widget-content").append(this.heatmapTemplate(this.model.toJSON()))
 		}
 		else {
-			throw new Error("Module id not recognized!");
+			if(!this.model.get("size"))
+				this.model.set("size", "medium")
 		}
+		if (this.model.get("uiChannel").webcomponent !== undefined) {
+			var templateName = "#" + this.model.get("uiChannel").webcomponent + "-template"
+			var template = _.template($(templateName).html())
+			this.$el.find(".widget-content").append(template(this.model.toJSON()))
+		} else {
+			throw new Error("No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!")
+		}
+
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
 		this.$el.find(".title").append(titlebar)
 		this.initSize()
@@ -200,7 +207,7 @@ var DashboardItemView = Backbone.View.extend({
 		
 		// Pass error events from webcomponents onto the model
 		this.$el.find(".streamr-widget").on('error', function(e) {
-			_this.model.trigger('error', e.originalEvent.detail.error, _this.model.get('title'))
+			_this.model.trigger('error', e.originalEvent.detail.message, _this.model.get('title'))
 		})
 		
 		this.streamrWidget = this.$el.find(".streamr-widget")
@@ -291,113 +298,83 @@ var DashboardItemView = Backbone.View.extend({
 })
 
 var SidebarView = Backbone.View.extend({
+	template: _.template($("#sidebar-template").html()),
+
 	events: {
-		"checked" : "updateDIList",
-		"unchecked" : "updateDIList",
+		"checked" : "syncDashboardItems",
+		"unchecked" : "syncDashboardItems",
 		"click .save-button" : "save"
 	},
 
 	initialize: function (options) {
-		this.el = options.el
-		this.dashboard = options.dashboard
-		this.allRSPs = options.RSPs
-		this.menuToggle = options.menuToggle
-
-		this.RSPs = []
-		_.each(this.allRSPs, function(rsp){
-			rsp.uiChannels = _.filter(rsp.uiChannels, function(uic){
-				return uic.module
-			})
-			if(rsp.uiChannels.length)
-				this.RSPs.push(rsp)
-		},this)
-		this.setData(this.RSPs, this.dashboard.get("items"))
-		this.listenTo(this.dashboard.get("items"), "remove", function(DI){
-			this.uncheck(DI.get("uiChannel").id)
-		})
 		var _this = this
+
+		this.el = options.el
+
+		var requiredOptions = ['dashboard', 'menuToggle', 'canvases']
+
+		requiredOptions.forEach(function(requiredOption) {
+			if (options[requiredOption] === undefined)
+				throw "Required option is missing: "+requiredOption
+		})
+
+		this.dashboard = options.dashboard
+		this.menuToggle = options.menuToggle
+		this.canvases = new CanvasList(options.canvases)
+		this.syncCheckedState()
+
+		this.listenTo(this.dashboard.get("items"), "remove", function(item) {
+			this.syncCheckedState()
+		})
+
 		this.dashboard.get("items").on("change", function () {
 			_this.dashboard.saved = false
 		})
 		this.menuToggle.click(function () {
-			if($("body").hasClass("editing"))
+			if ($("body").hasClass("editing"))
 				_this.setEditMode(false)
 			else
 				_this.setEditMode(true)
 		})
-		if(this.dashboard.get("items").models.length)
+
+		if (this.dashboard.get("items").models.length)
 			this.setEditMode(options.edit)
 		else this.setEditMode(true)
-		this.render()
+
 		this.$el.find(".dashboard-name").change(function () {
 			_this.dashboard.saved = false
 		})
 
 		this.dashboard.on('invalid', function(error) {
 			console.log(error)
-			$.pnotify({
-				type: 'error',
-        		title: 'Invalid value',
-	        	text: _this.dashboard.validationError,
-	        	delay: 4000
-    		});
+			Streamr.showError(_this.dashboard.validationError, 'Invalid value')
 		})
+
+		this.render()
 	},
 
-	setData: function(RSPs, DIList) {
-		this.DIList = DIList
-
+	// Synchronize the "checked" state of sidebar modules from the DashboardItemList
+	syncCheckedState: function() {
 		var checked = {}
-		_.each(this.DIList.models, function(item) {
+		_.each(this.dashboard.get('items').models, function(item) {
 			checked[item.get("uiChannel").id] = true
 		})
-		_.each(RSPs, function(rsp) {
-			_.each(rsp.uiChannels, function(uiChannel) {
-				if (checked[uiChannel.id])
-					uiChannel.checked = true
+		_.each(this.canvases.models, function(canvas) {
+			_.each(canvas.get('modules').models, function(module) {
+				module.set("checked", module.get('uiChannel') && checked[module.get('uiChannel').id])
 			})
 		})
-		this.rspCollection = new RunningSignalPathList(RSPs)
 	},
 
 	render: function () {
-		this.title = $("<div/>", {
-			class: "menu-content",
-			html: "<label>Dashboard name</label>"
-		})
-		this.titleInput = $("<input/>", {
-			class: "dashboard-name title-input form-control",
-			type: "text",
-			name: "dashboard-name",
-			value: this.dashboard.get("name"),
-			placeholder: "Dashboard name"
-		})
-		this.rspTitle = $("<li/>", {
-			class: "rsp-title",
-			html: "<label>Running Signalpaths</label>"
-		})
-		this.list = $("<ul/>", {
-			class: "navigation",
-			id: "rsp-list"
-		})
-		var buttonTemplate = _.template($("#button-template").html())
-		this.buttons = $(buttonTemplate(this.dashboard.toJSON()))
-		this.$el.append(this.title)
-		this.title.append(this.titleInput)
-		this.$el.append(this.list)
-		this.list.append(this.rspTitle)
-		_.each(this.rspCollection.models, function(item) {
-			this.list.append(this.renderRSP(item).el)
+		this.$el.append(this.template(this.dashboard.toJSON()))
+		this.titleInput = this.$el.find("input.dashboard-name.title-input")
+		this.list = this.$el.find("#rsp-list")
+		_.each(this.canvases.models, function(canvas) {
+			var canvasView = new CanvasView({ model: canvas })
+			this.list.append(canvasView.el)
 		}, this)
-		this.$el.append(this.buttons)
-		new Toolbar(this.buttons.find("form"))
-	},
-
-	renderRSP: function(item) {
-		var runningSignalPathView = new RunningSignalPathView({
-			model: item
-		})
-		return runningSignalPathView.render()
+		new Toolbar(this.$el.find("#deleteDashboardForm"))
 	},
 
 	setEditMode: function (active) {		
@@ -418,31 +395,17 @@ var SidebarView = Backbone.View.extend({
     	},this)
 	},
 
-	updateDIList: function(event, uiChannelModel) {
-		if(event.type == "checked") {
-			_.each(this.rspCollection.models, function(runningsignalpath){
-				_.each(runningsignalpath.get("uiChannels"), function(uiChannel) {
-					if(uiChannel.id == uiChannelModel.get("id")) {
-						this.DIList.push({title: uiChannelModel.get("name"), uiChannel: uiChannel})
-					}
-				},this)
-			},this)
+	// When modules become checked or unchecked, sync the dashboard items
+	syncDashboardItems: function(event, module) {
+		if (event.type == "checked") {
+			this.dashboard.get('items').add({title: module.get("uiChannel").name, canvas: module.collection.parents[0].id, module: module.get('hash'), uiChannel: module.get('uiChannel')})
 		}
-		if(event.type == "unchecked") {
-			var list = _.filter(this.DIList.models, function(item) {
-				return item.get("uiChannel").id == uiChannelModel.get("id")
+		if (event.type == "unchecked") {
+			var list = _.filter(this.dashboard.get('items').models, function(item) {
+				return item.get("uiChannel").id == module.get("uiChannel").id
 			}, this)
-			this.DIList.remove(list)
+			this.dashboard.get('items').remove(list)
 		}
-	},
-
-	uncheck: function (id) {
-		_.each(this.rspCollection.models, function(RSP) {
-			_.each(RSP.uiChannelCollection.models, function(uiChannelModel){
-				if(uiChannelModel.get("id") == id)
-					uiChannelModel.set("checked", false)
-			})
-		})
 	},
 
 	updateTitle: function (e) {
@@ -458,28 +421,12 @@ var SidebarView = Backbone.View.extend({
     		success: function() {
 	    		_this.dashboard.saved = true
 	    		document.title = _this.dashboard.get("name")
-
-			    $.pnotify({
-					type: 'success',
-	        		title: 'Saved!',
-		        	text: 'Dashboard ' +_this.dashboard.get("name")+ ' saved successfully',
-		        	delay: 4000
-				});
+				Streamr.showSuccess('Dashboard ' +_this.dashboard.get("name")+ ' saved successfully', "Saved!")
 	    	},
 	    	error: function(model, response) {
-		    	$.pnotify({
-					type: 'error',
-	        		title: 'Error while saving',
-		        	text: response.responseText,
-		        	delay: 4000,
-		        	// addClass: "alert alert-danger alert-dark"
-	    		});
+				Streamr.showError(response.responseText, "Error while saving")
 	    	}
 	    })
-    },
-
-    triggerClassChange: function () {
-    	$("body").trigger("classChange")
     }
 })
 
@@ -538,13 +485,7 @@ var DashboardView = Backbone.View.extend({
 			//editing -> !editing
 			if(!($("body").hasClass("editing"))) {
 				if(!_this.model.saved){
-					$.pnotify({
-						type: 'info',
-		        		title: 'Not saved',
-			        	text: 'The dashboard has changes which are not saved',
-			        	delay: 4000,
-			        	// addClass: "alert alert-danger alert-dark"
-		    		});
+					Streamr.showInfo('The dashboard has changes which are not saved', "Not saved")
 				}
 				_this.disableSortable()
 			//!editing -> editing

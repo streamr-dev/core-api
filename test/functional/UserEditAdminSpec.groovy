@@ -1,12 +1,39 @@
 import core.LoginTesterAdminSpec
-import core.pages.UserCreatePage
-import core.pages.UserEditPage
-import core.pages.UserSearchPage
-import core.pages.UserSearchResultPage
+import core.pages.*
 
 public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	// The order of the tests is requisite
+
+	String specUserName = "user-edit-admin-spec@streamr.com"
+	String specUserPwd = "user-edit-admin-spec"
+
+	private void goChangeUserPassword(String userNameToChange, String newPassword) {
+		to UserSearchPage
+		username = userNameToChange
+		searchButton.click()
+
+		waitFor { at UserSearchResultPage }
+		waitFor {
+			searchResult.displayed
+		}
+		searchResult.click()
+
+		waitFor { at UserEditPage }
+		password = newPassword
+		saveButton.click()
+		waitFor {
+			at UserEditPage
+		}
+	}
+
+	private void loginAs(String loginUsername, String loginPassword) {
+		waitFor { at LoginPage }
+		username = loginUsername
+		password = loginPassword
+		loginButton.click()
+		waitFor { at CanvasPage }
+	}
 
 	def setup(){
 		to UserSearchPage
@@ -14,37 +41,22 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	def "user creation works correctly"(){
 		when: "click to user create page"
-		$("ul.jd_menu li",0).click()
-		$("ul.jd_menu li",0).find("ul li", text:"Create").click()
+		$("ul.jd_menu li",0).find("ul li a", text:"Create").click()
 
 		then:
 		at UserCreatePage
 
 		when: "data is given and the user is created"
-		username = "user-edit-admin-spec@streamr.com"
+		username = specUserName
 		name = "Test"
-		password = "user-edit-admin-spec"
+		password = specUserPwd
 		timezone = "Europe/Helsinki"
 
-		roleTab.click()
-		waitFor {
-			roleUser.displayed
-		}
 		roleUser.click()
-
-		feedTab.click()
-		waitFor {
-			feedUserStream.displayed
-		}
 		feedUserStream.click()
-
-		modulePackageTab.click()
-		waitFor {
-			modulePackageCore.displayed
-		}
 		modulePackageCore.click()
 
-		create.click()
+		createButton.click()
 
 		then:
 		at UserSearchPage
@@ -52,20 +64,42 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 	def "the just created user can be searched"(){
 		when: "search for the username"
-		username = "user-edit-admin-spec@streamr.com"
+		username = specUserName
 		searchButton.click()
 
 		then: "the user is found"
 		at UserSearchResultPage
 		searchResult.size() == 1
-		searchResult.text() == "user-edit-admin-spec@streamr.com"
+		searchResult.text() == specUserName
+	}
+
+	def "the user password can be changed"() {
+		goChangeUserPassword(specUserName, "test-pwd")
+
+		when: "logout and relogin with new password"
+			logoutLink.click()
+			loginAs(specUserName, "test-pwd")
+		then: "successful login"
+			waitFor { at CanvasPage }
+
+		when: "log out"
+			navbar.navSettingsLink.click()
+			navbar.navLogoutLink.click()
+			loginAs(testerUsername, testerPassword)
+		then: "successful login"
+			waitFor { at CanvasPage }
+			// Change back the user password
+			goChangeUserPassword(specUserName, specUserPwd)
 	}
 
 	def "the user can be edited"() {
 		when: "search for and go to the user page"
-		username = "user-edit-admin-spec@streamr.com"
+		username = specUserName
 		searchButton.click()
 		at UserSearchResultPage
+		waitFor {
+			searchResult.displayed
+		}
 		searchResult.click()
 
 		then: "go to the user edit page"
@@ -85,8 +119,10 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 
 		then: "the user is found"
 		at UserSearchResultPage
-		searchResult.size() == 1
-		searchResult.text() == "user-edit-admin-spec2@streamr.com"
+		waitFor {
+			searchResult.size() == 1
+			searchResult.text() == "user-edit-admin-spec2@streamr.com"
+		}
 	}
 
 	def "the user can be removed"() {
@@ -99,16 +135,18 @@ public class UserEditAdminSpec extends LoginTesterAdminSpec {
 		then: "go to the user edit page"
 		at UserEditPage
 
-		when: "click to delete the user"
-		deleteButton.click()
-
-		then:
-		waitFor {
-			deleteConfirmButton.displayed
+		when: "when clicked to delete and then cancel"
+		withConfirm(false) {
+			deleteButton.click()
 		}
 
-		when: "confirmed"
-		deleteConfirmButton.click()
+		then:
+		at UserEditPage
+
+		when: "when clicked to delete and then OK"
+		withConfirm(true) {
+			deleteButton.click()
+		}
 
 		then:
 		at UserSearchPage

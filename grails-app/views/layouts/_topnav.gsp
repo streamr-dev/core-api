@@ -22,10 +22,10 @@ Tour.list(function(tourList) {
 	
 				<sec:ifLoggedIn>
 					<li>
-						<a id="navBuildLink" href="${createLink(controller:"canvas")}"><g:message code="build.label"/></a>
+						<a id="navEditorLink" href="${createLink(controller:"canvas", action:"editor")}"><g:message code="editor.label"/></a>
 					</li>
 					<li>
-						<a id="navLiveLink" href="${createLink(controller:"live")}"><g:message code="live.label"/></a>
+						<a id="navCanvasesLink" href="${createLink(controller:"canvas", action:"list")}"><g:message code="canvases.label"/></a>
 					</li>
 					<li>
 						<a id="navDashboardsLink" href="${createLink(controller:"dashboard")}"><g:message code="dashboards.label"/></a>
@@ -58,6 +58,7 @@ Tour.list(function(tourList) {
 <%--							<li class="divider"></li>--%>
 							<li><g:link elementId="navUserGuideLink" controller="help" action="userGuide">User Guide</g:link></li>
 							<li><g:link elementId="navExamplesLink" controller="canvas" params="[examples:1]">Example Canvases</g:link></li>
+							<li><g:link controller="help" action="api">API documentation</g:link></li>
 							<li><g:link controller="feedback"><g:message code="feedback.label"/></g:link></li>
 						</ul>
 					</li>

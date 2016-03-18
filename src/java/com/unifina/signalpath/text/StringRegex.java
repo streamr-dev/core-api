@@ -25,7 +25,7 @@ public class StringRegex extends AbstractSignalPathModule {
 	ListOutput list = new ListOutput(this,"matchList");
 	
 	Pattern p = null;
-	Matcher m = null;
+	transient Matcher m = null;
 
 	boolean lastIgnoreCase = false;
 	boolean ignoreCase = false;
@@ -47,34 +47,42 @@ public class StringRegex extends AbstractSignalPathModule {
 		if(!s.getValue().isEmpty()){
 			String pattern = s.getValue();
 
-			if(p == null || lastIgnoreCase != ignoreCase || !p.toString().equals(pattern)){
+			// Setup or reset matcher
+			if (p == null || lastIgnoreCase != ignoreCase || !p.toString().equals(pattern)) {
 				lastIgnoreCase = ignoreCase;
-				if(ignoreCase)
+				if (ignoreCase) {
 					p = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-				else
+				} else {
 					p = Pattern.compile(pattern);
+				}
 				m = p.matcher(text);
-			} else
+			} else {
+				if (m == null) {  // m may be null after deserialization
+					m = p.matcher(text);
+				}
 				m.reset(text);
-			
+			}
+
+			// Find and store matches
 			while (m.find()) {
 				matchCount++;
 				matchList.add(m.group());
-				if(!count.isConnected() && !list.isConnected()) {
+
+				if (!count.isConnected() && !list.isConnected()) {
 					break;
 				}
 			}
 
-			if(match.isConnected()) {
-				if(matchCount > 0)
-					match.send(1);
-				else
-					match.send(0);
+			// Send results to outputs
+			if (match.isConnected()) {
+				match.send(matchCount > 0 ? 1 : 0);
 			}
-			if(count.isConnected())
+			if (count.isConnected()) {
 				count.send(matchCount);
-			if(list.isConnected())
+			}
+			if (list.isConnected()) {
 				list.send(matchList);
+			}
 		}
 	}
 

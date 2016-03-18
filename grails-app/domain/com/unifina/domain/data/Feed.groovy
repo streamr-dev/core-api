@@ -2,7 +2,10 @@ package com.unifina.domain.data
 
 import com.unifina.domain.signalpath.Module;
 
-class Feed {
+class Feed implements Serializable {
+
+	static final long KAFKA_ID = 7L
+	static final long MONGO_ID = 8L
 
 	Long id
 	String name
@@ -25,6 +28,10 @@ class Feed {
 	
 	String eventRecipientClass
 	String keyProviderClass
+	String streamListenerClass
+	String streamPageTemplate
+	String fieldDetectorClass
+	String dataRangeProviderClass
 	
 	Module module
 	
@@ -44,6 +51,8 @@ class Feed {
 		discoveryUtilConfig(nullable:true)
 		startOnDemand(nullable:true)
 		bundledFeedFiles(nullable:true)
+		fieldDetectorClass(nullable: true)
+		dataRangeProviderClass(nullable: true)
 	}
 	
 	@Override

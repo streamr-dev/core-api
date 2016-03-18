@@ -1,22 +1,21 @@
 package com.unifina.service
 
-import grails.plugin.springsecurity.SpringSecurityService
-import groovy.transform.CompileStatic
-
-import org.apache.log4j.Logger
-
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.ModulePackageUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
+import grails.plugin.springsecurity.SpringSecurityService
+import groovy.transform.CompileStatic
+import org.apache.log4j.Logger
+import org.springframework.validation.FieldError
 
 class UnifinaSecurityService {
-	
+
+	def grailsApplication
 	SpringSecurityService springSecurityService
 	Logger log = Logger.getLogger(UnifinaSecurityService)
-	
+
 	/**
 	 * Checks if the given user has access to the given instance.
 	 * If no user is provided, the user identified by api keys or the current logged in user (as returned by springSecurityService.currentUser) is used
@@ -64,17 +63,18 @@ class UnifinaSecurityService {
 	}
 	
 	@CompileStatic 
-	boolean canAccess(RunningSignalPath rsp, SecUser user=springSecurityService.getCurrentUser()) {
-		// Shared RunningSignalPaths can be accessed by everyone
-		return rsp?.shared || checkUser(rsp, user)
+	boolean canAccess(Canvas canvas, SecUser user=springSecurityService.getCurrentUser()) {
+		return canvas?.shared || checkUser(canvas, user) // Shared Canvas can be accessed by everyone
 	}
 	
 	@CompileStatic
-	boolean canAccess(SavedSignalPath ssp, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
+	boolean canAccess(Canvas canvas, boolean isLoad, SecUser user=springSecurityService.getCurrentUser()) {
 		// Examples can be read by everyone
-		if (isLoad && ssp.type==SavedSignalPath.TYPE_EXAMPLE_SIGNAL_PATH)
+		if (isLoad && (canvas.example || canvas.shared)) {
 			return true
-		else return canAccess(ssp, user)
+		} else {
+			return canAccess(canvas, user)
+		}
 	}
 	
 	private boolean checkModulePackageAccess(ModulePackage modulePackage, SecUser user=springSecurityService.getCurrentUser()) {
@@ -83,19 +83,14 @@ class UnifinaSecurityService {
 	}
 	
 	/**
-	 * Looks up a user based on api keys. Returns null if the keys do not match a user.
+	 * Looks up a user based on api key. Returns null if the keys do not match a user.
 	 * @param apiKey
-	 * @param apiSecret
 	 * @return
 	 */
-	SecUser getUserByApiKey(String apiKey, String apiSecret) {
-		if (!apiKey || !apiSecret)
+	SecUser getUserByApiKey(String apiKey) {
+		if (!apiKey)
 			return null
-			
-		SecUser user = SecUser.findByApiKey(apiKey)
-		if (!user || user.apiSecret != apiSecret)
-			return null
-		else return user
+		return SecUser.findByApiKey(apiKey)
 	}
 	
 	def passwordValidator = { String password, command ->
@@ -109,6 +104,40 @@ class UnifinaSecurityService {
 		if (command.password != command.password2) {
 			return 'command.password2.error.mismatch'
 		}
+	}
+
+	/**
+	 * Checks if the errors list contains any fields whose values may not be logged
+	 * as plaintext (passwords etc.). The excluded fields are read from
+	 * grails.exceptionresolver.params.exclude config key.
+	 * 
+	 * If any excluded fields are found, their field values are replaced with "***".
+	 * @param errorList
+	 * @return
+	 */
+	List checkErrors(List<FieldError> errorList) {
+		List<String> blackList = (List<String>) grailsApplication.config.grails.exceptionresolver.params.exclude
+		if (blackList == null) {
+			blackList = Collections.emptyList();
+		}
+		List<FieldError> finalErrors = new ArrayList<>()
+		List<FieldError> toBeCensoredList = new ArrayList<>();
+		errorList.each {
+			if(blackList.contains(it.getField()))
+				toBeCensoredList.add(it)
+			else
+				finalErrors.add(it)
+		}
+		toBeCensoredList.each {
+			List arguments = Arrays.asList(it.getArguments())
+			int index = arguments.indexOf(it.getRejectedValue())
+			arguments.set(index, "***")
+			FieldError fieldError = new FieldError(
+					it.getObjectName(), it.getField(), "***", it.isBindingFailure(), it.getCodes(), arguments.toArray(), it.getDefaultMessage()
+			)
+			finalErrors.add(fieldError)
+		}
+		return finalErrors
 	}
 
 }

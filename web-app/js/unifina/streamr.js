@@ -1,6 +1,14 @@
 // the Streamr global object is normally initialized in _layoutHead.gsp.
-if (!Streamr)
+if (!Streamr) {
 	var Streamr = {}
+}
+
+$.pnotify.defaults.history = false
+$.pnotify.defaults.styling = "fontawesome"
+$.pnotify.defaults.icon = false
+$.pnotify.defaults.closer = true
+$.pnotify.defaults.sticker = false
+$.pnotify.defaults.closer_hover = false
 
 Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController
@@ -29,3 +37,30 @@ Streamr.createLink = function(optsOrController, action, id) {
 	return url
 }
 
+Streamr.showError = function(msg, title) {
+	title = title || "Error"
+	$.pnotify({
+		type: 'error',
+		title: title,
+		text: msg,
+		delay: 4000
+	})
+}
+
+Streamr.showInfo = function(msg, title) {
+	$.pnotify({
+		type: 'info',
+		title: title,
+		text: msg,
+		delay: 4000
+	})
+}
+
+Streamr.showSuccess = function(msg, title) {
+	$.pnotify({
+		type: 'success',
+		title: title,
+		text: msg,
+		delay: 4000
+	})
+}

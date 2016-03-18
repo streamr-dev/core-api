@@ -1,5 +1,8 @@
 package com.unifina.controller.data
 
+import com.unifina.api.ApiException
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -12,7 +15,6 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
-import com.unifina.security.StreamrApi
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.CSVImporter.Schema
 
@@ -56,13 +58,8 @@ class StreamController {
 	def details() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		def model = [stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
-		
-		// User streams
-		if (stream.feed.id==7) {
-			render(template:"userStreamDetails", model:model)
-		}
-		else render ""
+		def model = [stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+		render(template: stream.feed.streamPageTemplate, model: model)
 	}
 
 	def update() {
@@ -74,11 +71,12 @@ class StreamController {
 	}
 	
 	def create() {
-		if (request.method=="GET")
-			[stream:new Stream()]
-		else {
+		if (request.method=="GET") {
 			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createUserStream(params, user)
+			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+		} else {
+			SecUser user = springSecurityService.currentUser
+			Stream stream = streamService.createStream(params, user)
 			
 			if (stream.hasErrors()) {
 				log.info(stream.errors)
@@ -91,38 +89,21 @@ class StreamController {
 		}
 	}
 	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiCreate() {
-		Stream stream = streamService.createUserStream(request.JSON, request.apiUser)
-		if (stream.hasErrors()) {
-			log.info(stream.errors)
-			render (status:400, text: [success:false, error: "validation error", details: stream.errors] as JSON)
-		}
-		else {
-			render ([success:true, stream:stream.uuid, auth:stream.apiKey, name:stream.name, description:stream.description, localId:stream.localId] as JSON)
-		}
-	}
-	
-	@StreamrApi
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def apiLookup() {
-		Stream stream = Stream.findByUserAndLocalId(request.apiUser, request.JSON?.localId)
-		if (!stream)
-			render (status:404, text: [success:false, error: "stream not found"] as JSON)
-		else render ([stream:stream.uuid] as JSON)
-	}
-	
 	def configure() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
 	}
 
 	def edit() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])]
+		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+	}
+
+	def configureMongo() {
+		Stream stream = Stream.get(params.id)
+		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
 	}
 	
 	def delete() {
@@ -143,14 +124,14 @@ class StreamController {
 	def fields() {
 		// Access checked by beforeInterceptor
 		Stream stream = Stream.get(params.id)
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
+		Map config = (stream.config ? JSON.parse(stream.config) : [:])
 		if (request.method=="GET") {
 			render (config.fields ?: []) as JSON
 		}
 		else if (request.method=="POST") {
 			def fields = request.JSON
 			config.fields = fields
-			stream.streamConfig = (config as JSON)
+			stream.config = (config as JSON)
 			flash.message = "Stream fields updated."
 			
 			Map result = [success:true, id:stream.id]
@@ -169,7 +150,7 @@ class StreamController {
 				"left outer join s.feed.module "+
 				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "+
 				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "+
-				"and (s.feed.id != 7 OR s.user.id = ${user.id}) " // Quick fix for CORE-452, needs proper ACL
+				"and s.user.id = ${user.id} " // TODO: Throw away when landing permissions branch
 				
 				if (params.feed) {
 					hql += " and s.feed.id="+Feed.load(params.feed).id
@@ -191,8 +172,8 @@ class StreamController {
 	def files() {
 		// Access checked by beforeInspector
 		Stream stream = Stream.get(params.id)
-		def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
-		return [feedFiles: feedFiles, stream:stream]
+		DataRange dataRange = streamService.getDataRange(stream)
+		return [dataRange: dataRange, stream:stream]
 	}
 	
 	def upload() {
@@ -205,8 +186,11 @@ class StreamController {
 			MultipartFile file = request.getFile("file")
 			temp = File.createTempFile("csv_upload_", ".csv")
 			file.transferTo(temp)
-			
-			CSVImporter csv = new CSVImporter(temp)
+
+			Map config = (stream.config ? JSON.parse(stream.config) : [:])
+			List fields = config.fields ? config.fields : []
+
+			CSVImporter csv = new CSVImporter(temp, fields)
 			if (csv.getSchema().timestampColumnIndex==null) {
 				flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
 				response.status = 500
@@ -218,11 +202,11 @@ class StreamController {
 				render ([success:true] as JSON)
 			}
 		} catch (Exception e) {
-				flash.message = "An error occurred while handling file: $e"
+				log.error("Failed to import file", e)
 				response.status = 500
-				render ([success:false, error: e.toString()] as JSON)
+				render ([success:false, error: e.message] as JSON)
 		} finally {
-			if (deleteFile && temp.exists())
+			if (deleteFile && temp!=null && temp.exists())
 				temp.delete()
 		}
 	}
@@ -230,7 +214,11 @@ class StreamController {
 	def confirm() {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
-		CSVImporter csv = new CSVImporter(file)
+
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
+		List fields = config.fields ? config.fields : []
+
+		CSVImporter csv = new CSVImporter(file, fields)
 		Schema schema = csv.getSchema()
 		
 		[schema:schema, file:params.file, stream:stream]
@@ -239,6 +227,10 @@ class StreamController {
 	def confirmUpload() {
 		Stream stream = Stream.get(params.id)
 		File file = new File(params.file)
+
+		Map config = stream.config ? JSON.parse(stream.config) : [:]
+		List fields = config.fields ? config.fields : []
+
 		def format
 		def index
 		if(params.customFormat)
@@ -246,34 +238,33 @@ class StreamController {
 		else format = params.format
 		index = Integer.parseInt(params.timestampIndex)
 		try {
-			CSVImporter csv = new CSVImporter(file, index, format)
-			Schema schema = csv.getSchema()
+			CSVImporter csv = new CSVImporter(file, fields, index, format)
 			importCsv(csv, stream)
 		} catch (Exception e) {
 			flash.message = "The format of the timestamp is not correct"
 		}
 		redirect(action:"show", id:params.id)
 	}
-	
-	private void importCsv(CSVImporter csv, Stream stream) {		
-		List<FeedFile> feedFiles = kafkaService.createFeedFilesFromCsv(csv, stream)
+
+	private void importCsv(CSVImporter csv, Stream stream) {
+		kafkaService.createFeedFilesFromCsv(csv, stream)
 		
 		// Autocreate the stream config based on fields in the csv schema
-		Map config = (stream.streamConfig ? JSON.parse(stream.streamConfig) : [:])
-		if (!config.fields || config.fields.isEmpty()) {
-			List fields = []
-			
-			// The primary timestamp column is implicit, so don't include it in streamConfig
-			for (int i=0;i<csv.schema.entries.length;i++) {
-				if (i!=csv.schema.timestampColumnIndex) {
-					CSVImporter.SchemaEntry e = csv.schema.entries[i]
+		Map config = (stream.config ? JSON.parse(stream.config) : [:])
+
+		List fields = []
+
+		// The primary timestamp column is implicit, so don't include it in streamConfig
+		for (int i=0;i<csv.schema.entries.length;i++) {
+			if (i!=csv.getSchema().timestampColumnIndex) {
+				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
+				if (e!=null)
 					fields << [name:e.name, type:e.type]
-				}
 			}
-			
-			config.fields = fields
-			stream.streamConfig = (config as JSON)
 		}
+
+		config.fields = fields
+		stream.config = (config as JSON)
 	}
 	
 	def deleteFeedFilesUpTo() {
@@ -291,7 +282,15 @@ class StreamController {
 		} else {
 			flash.error = "Something went wrong with deleting files"
 		}
+
 		redirect(action:"show", params:[id:params.id])
+	}
+
+	def getDataRange() {
+		Stream stream = Stream.get(params.id)
+		DataRange dataRange = streamService.getDataRange(stream)
+		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
+		render dataRangeMap as JSON
 	}
 	
 }

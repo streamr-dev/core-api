@@ -31,7 +31,7 @@ import com.unifina.signalpath.TimeSeriesOutput;
 public class ConfigurableStreamModule extends AbstractSignalPathModule implements IStreamRequirement {
 
 	protected StreamParameter streamParameter = new StreamParameter(this,"stream");
-	protected JSONObject streamConfig = null;
+	transient protected JSONObject streamConfig = null;
 	
 	@Override
 	public void init() {
@@ -54,34 +54,29 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 		super.onConfiguration(config);
 		
 		Stream stream = streamParameter.value;
-		if (stream.getStreamConfig()==null)
-			throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!");
-		streamConfig = (JSONObject) JSON.parse(stream.getStreamConfig());
+		if (stream.getConfig() == null) { throw new IllegalStateException("Stream "+stream.getName()+" is not properly configured!"); }
+		streamConfig = (JSONObject)JSON.parse(stream.getConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
 		
 		for (Object o : fields) {
-			JSONObject j = (JSONObject) o;
+			JSONObject j = (JSONObject)o;
 			String type = j.getString("type");
 			String name = j.getString("name");
 			
 			if (type.equalsIgnoreCase("number")) {
-				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
+				TimeSeriesOutput output = new TimeSeriesOutput(this, name);
 				output.noRepeat = false;
 				addOutput(output);
-			}
-			else if (type.equalsIgnoreCase("string")) {
+			} else if (type.equalsIgnoreCase("string")) {
 				addOutput(new StringOutput(this,name));
-			}
-			else if (type.equalsIgnoreCase("boolean")) {
-				TimeSeriesOutput output = new TimeSeriesOutput(this,name);
+			} else if (type.equalsIgnoreCase("boolean")) {
+				TimeSeriesOutput output = new TimeSeriesOutput(this, name);
 				output.noRepeat = false;
 				addOutput(output);
-			}
-			else if (type.equalsIgnoreCase("map")) {
+			} else if (type.equalsIgnoreCase("map")) {
 				addOutput(new MapOutput(this, name));
-			}
-			else if (type.equalsIgnoreCase("list")) {
+			} else if (type.equalsIgnoreCase("list")) {
 				addOutput(new ListOutput(this, name));
 			}
 		}

@@ -1,5 +1,6 @@
 package com.unifina.signalpath.messaging
 
+import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -37,14 +38,43 @@ public class EmailModuleSpec extends Specification {
 		module = new EmailModule()
 	}
 	
-	private void initContext(Map context) {
-		globals = new Globals(context, grailsApplication, new SecUser(timezone:"Europe/Helsinki", username: "username"))
+	private void initContext(Map context, SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
+		globals = new Globals(context, grailsApplication, user)
 		globals.time = new Date()
 		
 		module.globals = globals
 		module.init()
-		module.inputCount = 2
+		module.emailInputCount = 2
 		module.configure(module.getConfiguration())
+	}
+
+	void "emailModule sends the correct email"() {
+		initContext([live:true])
+		globals.dataSource = new RealtimeDataSource()
+		when:
+		Map inputValues = [
+			subject: ["Subject"],
+			message: ["Message"],
+			value1: [1],
+			value2: ["abcd"],
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals {
+				globals.time = new Date(0)
+				globals
+			}
+			.afterEachTestCase {
+				assert ms.mailSent
+				assert ms.from == grailsApplication.config.unifina.email.sender
+				assert ms.to == globals.user.username
+				assert ms.subject == "Subject"
+				assert ms.body == "\nMessage:\nMessage\n\nEvent Timestamp:\n1970-01-01 02:00:00.000\n\nInput Values:\nvalue1: 1\nvalue2: abcd\n\n"
+				ms.clear()
+			}
+			.test()
 	}
 
 	void "module should send an email for a realtime datasource"(){
@@ -107,7 +137,7 @@ value2: test value
 """), module.parentSignalPath.uiChannelId)
 	}
 	
-	void "If trying to send emails too often send notification to warn about it"(){
+	void "If trying to send emails too often send notification to warn about it"() {
 		initContext([live:true])
 		
 		module = new EmailModule(){
@@ -125,7 +155,7 @@ value2: test value
 		globals.uiChannel = Mock(PushChannel)
 		module.globals = globals
 		module.init()
-		module.inputCount = 2	
+		module.emailInputCount = 2
 		module.configure(module.getConfiguration())
 	
 		when: "sent two emails very often"
@@ -153,6 +183,10 @@ value2: test value
 			0 * globals.uiChannel.push(new NotificationMessage("Tried to send emails too often"), module.parentSignalPath.uiChannelId)
 	}
 
+	void "EmailModule can be instantiated without a user"() {
+		expect:
+			initContext([:], null)
+	}
 
 }
 

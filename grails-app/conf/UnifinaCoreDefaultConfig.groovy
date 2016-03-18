@@ -1,13 +1,49 @@
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
- * 
- * Stuff you'll want to configure in the application Config.groovy:
- * 
- * - grails.serverURL in production
- * - AWS credentials
- * - email sending config
  */
+
+environments {
+	production {
+		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+	}
+}
+
+/**
+ * Logging config
+ */
+log4j = {
+	// Example of changing the log pattern for the default console
+	// appender:
+	//
+	appenders {
+		console name:'stdout'
+	}
+
+	root {
+		info 'stdout'
+	}
+
+	error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+			'org.codehaus.groovy.grails.web.pages', //  GSP
+			'org.codehaus.groovy.grails.web.sitemesh', //  layouts
+			'org.codehaus.groovy.grails.web.mapping.filter', // URL mapping
+			'org.codehaus.groovy.grails.web.mapping', // URL mapping
+			'org.codehaus.groovy.grails.commons', // core / classloading
+			'org.codehaus.groovy.grails.plugins', // plugins
+			'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
+			'org.springframework',
+			'org.hibernate',
+			'net.sf.ehcache.hibernate'
+
+	warn   'org.mortbay.log',
+			'org.apache.zookeeper',
+			'org.codehaus.groovy.grails.domain.GrailsDomainClassCleaner',
+			'kafka.consumer.ConsumerConfig'
+			'org.apache.kafka.clients.consumer.ConsumerConfig'
+			'kafka.producer.ProducerConfig'
+			'org.apache.kafka.clients.producer.ProducerConfig'
+}
 
 /**
   * Grails configuration 
@@ -35,9 +71,9 @@
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet-0.7.3"]
- grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**']
- 
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet", "/misc/*"]
+ grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
+
  grails.resources.processing.enabled = true
  
  environments {
@@ -49,6 +85,7 @@
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 test {
+		 grails.resources.processing.enabled = false
 		 grails.resources.mappers.bundle.excludes = ['**/*.*']
 		 grails.resources.mappers.hashandcache.excludes = ['**/*.*']
 		 grails.resources.mappers.zip.excludes = ['**/*.*']
@@ -59,7 +96,7 @@
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
 	 }
  }
- 
+
  environments {
 	 test {
 		 grails.reload.enabled = true
@@ -106,7 +143,7 @@
  grails.spring.bean.packages = []
  // whether to disable processing of multi part requests
  grails.web.disable.multipart=false
- 
+
  // request parameters to mask when logging exceptions
  grails.exceptionresolver.params.exclude = ['password','password2','currentpassword']
  
@@ -128,9 +165,20 @@
 		 grails.logging.jul.usebridge = false
 	 }
  }
- 
- 
- 
+
+/**
+ * Migration config
+ */
+grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
+grails.plugin.databasemigration.updateOnStartContexts = ['default'] // a context needs to be specified, otherwise all changesets will run. changesets with no context will always run.
+
+environments {
+	test {
+		grails.plugin.databasemigration.updateOnStartContexts = ['test'] // changesets with no context will always run.
+	}
+}
+
 /**
  * API & CORS config
  */
@@ -149,8 +197,14 @@ unifina.reports.recipient = "henri.pihkala@streamr.com"
  * Task config
  */
 // How many task worker threads to launch on startup
-unifina.task.workers = 0
+unifina.task.workers = 1
 unifina.task.messageQueue = "streamr-tasks"
+
+environments {
+	development {
+		unifina.task.workers = 0
+	}
+}
 
 /**
  * Data feed config
@@ -162,6 +216,13 @@ unifina.feed.cachedir = System.getProperty("java.io.tmpdir")
 // Default file storage adapter
 unifina.feed.fileStorageAdapter = "com.unifina.feed.file.S3FileStorageAdapter"
 
+/**
+ * com.unifina.feed.file.S3FileStorageAdapter config
+ */
+// The following are used with S3FileStorageAdapter
+unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
+unifina.feed.s3FileStorageAdapter.secretKey = "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"
+unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
 
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
@@ -176,7 +237,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev.unifina:8889"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
@@ -186,7 +247,7 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.unifina:8888"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
@@ -196,8 +257,8 @@ environments {
 /**
  * Kafka config
  */
-unifina.kafka.metadata.broker.list = "192.168.10.21:9092"
-unifina.kafka.zookeeper.connect = "192.168.10.21:2181"
+unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"
+unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2181"
 unifina.kafka.producer.type = "async"
 unifina.kafka.queue.buffering.max.ms = "100"
 unifina.kafka.retry.backoff.ms = "500"
@@ -206,24 +267,19 @@ unifina.kafka.request.required.acks = "0"
 unifina.kafka.group.id = "streamr"
 environments {
 	production {
-		unifina.kafka.metadata.broker.list = "ip-10-16-207-139.ec2.internal:9092"
-		unifina.kafka.zookeeper.connect = "ip-10-16-207-139.ec2.internal:2181"
+		unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
+		unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
 	}
 }
 
+/**
+ * Serialization config
+ */
+unifina.serialization.intervalInMillis = 30 * 1000
 environments {
-	development {
-
-	}
 	test {
-		// Required for functional tests for backtesting
-		unifina.task.workers = 1
+		unifina.serialization.intervalInMillis = 1000
 	}
-	production {
-		// For Amazon
-		unifina.task.workers = 1
-	}
-
 }
 
 /**
@@ -262,6 +318,31 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
 	'/*':				 ['IS_AUTHENTICATED_ANONYMOUSLY']
 ]
 
+
+/**
+ * Email config
+ */
+grails {
+	mail {
+		host = "smtp.gmail.com"
+		port = 465
+		username = "henri.pihkala@streamr.com"
+		password = "gnqxzdmojlkzlxjy"
+		props = ["mail.smtp.auth":"true",
+				 "mail.smtp.socketFactory.port":"465",
+				 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+				 "mail.smtp.socketFactory.fallback":"false"]
+	}
+}
+
+unifina.email.sender = "contact@streamr.com"
+unifina.email.signup.subject = "Thanks for signing up for Streamr"
+unifina.email.invite.subject = "Invitation to Streamr"
+unifina.email.welcome.subject = "Welcome to Streamr"
+unifina.email.feedback.recipient = "contact@streamr.com"
+unifina.email.forgotPassword.subject = "Streamr Password Reset"
+
+
 /**
  * Miscellaneous
  */
@@ -291,12 +372,3 @@ grails {
 	}
 }
 remove this line */
-
-// emails
-// the server settings come from Config.groovy of each project
-
-unifina.email.sender = "contact@streamr.com"
-unifina.email.signup.subject = "Thanks for signing up to Streamr"
-unifina.email.invite.subject = "Invitation to Streamr"
-unifina.email.welcome.subject = "Welcome to Streamr"
-unifina.email.feedback.recipient = "contact@streamr.com"

@@ -1,9 +1,10 @@
 package com.unifina.math;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Sum implements IWindowedOperation {
+public class Sum implements IWindowedOperation, Serializable {
 
 	int length;
 	double sum = 0;
@@ -24,29 +25,39 @@ public class Sum implements IWindowedOperation {
 	
 	public void setLength(int length) {
 		this.length = length;
-		
-		while (values.size() > length) {
-			double removedVal = values.remove(0);
-			sum -= removedVal;
-		}
+
+		// Don't keep values in memory if length is 0 (infinite)
+		if (length==0)
+			values.clear();
+
+		purgeExtraValues();
 	}
 
 	public double add(double p) {
-		values.add(p);
+		// Don't keep values in memory if length is 0 (infinite)
+		if (length > 0)
+			values.add(p);
+
 		sum += p;
 
-		while (values.size() > length) {
-			double removedVal = values.remove(0);
-			sum -= removedVal;
-		}
+		purgeExtraValues();
 		
 		return getValue();
 	}
+
+	protected int purgeExtraValues() {
+		int purged = 0;
+		// Don't remove values if length is 0 (infinite)
+		while (length > 0 && values.size() > length) {
+			double removedVal = values.remove(0);
+			sum -= removedVal;
+			purged++;
+		}
+		return purged;
+	}
 	
 	public double getValue() {
-		if (values.size()>0)
-			return sum;
-		else return 0;
+		return sum;
 	}
 	
 	public void clear() {

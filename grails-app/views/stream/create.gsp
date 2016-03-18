@@ -26,12 +26,11 @@
 			<g:form action="create">
 		
 				<g:render template="form"/>
-				
+
 				<button class="btn btn-primary" name="next">
 					${message(code:"next.button.label")}
 					<i class="fa fa-angle-right"></i>
 				</button>
-			
 			</g:form>
 		</ui:panel>
 		
