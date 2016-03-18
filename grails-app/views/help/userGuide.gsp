@@ -10,6 +10,11 @@
 		// Scrollspy uses only titles to track scrolling. div.help-text elements are not significant for the scrollspy.
 		new UserGuide("#module-help-tree", "#sidebar")
 	</r:script>
+
+	<!-- TODO -->
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
 </head>
 <body class="user-guide">
 
@@ -77,17 +82,17 @@ Yes</code></pre>
 
 			<p>
 				Whatever the reason, Streamr platform can be extended by writing your own specialized custom modules. In
-				this Chapter, we will go through the technology alternatives for doing so.
+				this Chapter, we will go through the different ways of doing so.
 			</p>
 
 			<h2>JavaModule</h2>
 			<p>
-				<code>JavaModule</code> supports programming custom behavior in Java. Simply add the module
+				<code>JavaModule</code> supports writing custom behavior in the Java programming language. Simply add the module
 				to a Canvas and press the "Edit code"-button to open a code editor. The default template code will look
 				as follows.
 			</p>
 
-			<pre><code>
+			<pre><code class="java">
 // Define inputs and outputs here
 // TimeSeriesInput input = new TimeSeriesInput(this,"in");
 // TimeSeriesOutput output = new TimeSeriesOutput(this,"out");
@@ -106,24 +111,29 @@ public void clearState() {
 				</code></pre>
 
 			<p>
-				TODO: some väliteksti
+				You will need to fill in this template with appropriate components for the module to work.
 			</p>
 
 			<p>
-				A module in Streamr consists of <em>inputs</em>, <em>outputs</em>, possibly
+				A module in Streamr consists of <em>inputs</em>, <em>parameters</em>, <em>outputs</em>, possibly
 				<em>state</em>, and <em>methods</em> that need to be overriden for the magic to happen.
+			</p>
+
+			<h3>Tutorial: Writing Your First Custom Module</h3>
+			<p>
+				...
 			</p>
 
 			<h3>Inputs</h3>
 
 			<p>
-				<em>Inputs</em>, visually speaking, are the colored circles found on the left-side of a module on a canvas. For
+				<em>Inputs</em>, visually speaking, are the colored circles and labels found on the left-side of a module on a Canvas. For
 				example, the module <code>Multiply</code> requires inputs <code>A</code> and <code>B</code> to
-				calculate the result of multiplication. The inputs of a model must be <em>connected</em> to compatible
+				calculate the result of multiplication. The inputs of a module must be <em>connected</em> to compatible
 				outputs for data to arrive and for it to be processed.
 			</p>
 
-			<span>TODO: image of Multiplty module</span>
+			<p>TODO: image of Multiplty module</p>
 
 			<p>
 				Inputs can be <em>optional</em> or <em>required</em>. Optional inputs may or may not be connected to an output depending
@@ -138,10 +148,109 @@ public void clearState() {
 				TODO: Driving inputs, Initial value, feedback connections...
 			</p>
 
-			<h3>Tutorial: Writing Your First Custom Module</h3>
 			<p>
-				...
+				Inputs are typed according to the type of data they can receive. The types of inputs are listed below.
 			</p>
+
+			<ul>
+				<li>
+					<code>TimeSeriesInput</code> for receiving floating-point numeric data. Booleans can be represented
+					as 0.0 (false) and 1.0 (true).
+				</li>
+				<li>
+					<code>StringInput</code> for receiving string data.
+				</li>
+				<li>
+					<code>ListInput</code> for receiving multiple values as lists (or arrays) of data.
+				</li>
+				<li>
+					<code>MapInput</code> for receiving map data (think <code>java.util.Map</code> in Java, object or JSON
+					in Javascript, (associative) array in PHP.)
+				</li>
+				<li>
+					<code>Input&lt;Object&gt;</code> for any data. Often used when not interested in content itself,
+					but rather arrival of content.
+				</li>
+			</ul>
+
+			<p>
+				Input types must match output types. In other words, you cannot connect a output that produces strings
+				to an input that expects floating-point numbers.
+			</p>
+
+			<h3>Parameters</h3>
+
+			<p>
+				Parameters are basically just inputs that have default values and that have a distinct visual look on the
+				canvas. A parameter is optional in the sense that no connection to an output is necessary. However, if
+				connected, the module should be written in such a way as to be able to respond to changing parameter
+				values.
+			</p>
+
+			<p>
+				Possible parameter types are delineated below.
+			</p>
+
+			<ul>
+				<li><code>BooleanParameter</code> for true/false values (displayed as drop-down selection)</li>
+				<li><code>DoubleParameter</code> for floating-point numbers (displayed as input)</li>
+				<li><code>IntegerParameter</code>for integers (displayed as input)</li>
+				<li><code>StringParameter</code>for strings (displayed as input)</li>
+				<li><code>ColorParameter</code> for RGB colors (displayed as color selector)</li>
+			</ul>
+
+			<h3>Outputs</h3>
+
+			<p>
+				Outputs reside at the right-hand side of a module and are responsible for sending out computed
+				values after a module has been activated. E.g., the <code>Multiply</code> module, on activation,
+				multiplies the values of its two inputs and then sends the product to an output named <code>A*B</code>.
+				The product will then be passed to 0..n inputs connected to the output.
+			</p>
+
+			<p>
+				Outputs are typed according to the type of data they send out. The types of outputs are listed below.
+			</p>
+
+			<ul>
+				<li>
+					<code>TimeSeriesOutput</code> for sending floating-point numeric data. Booleans can be represented
+				as 0.0 (false) and 1.0 (true).
+				</li>
+				<li>
+					<code>StringOutput</code> for sending string data.
+				</li>
+				<li>
+					<code>ListOutput</code> for sending a list (or array).
+				</li>
+				<li>
+					<code>MapOutput</code> for sending map data (think <code>java.util.Map</code> in Java, object or JSON
+				in Javascript, (associative) array in PHP.)
+				</li>
+				<li>
+					<code>Output&lt;Object&gt;</code> for any data. Often used when not interested in content itself,
+					but rather occurrence of content.
+				</li>
+			</ul>
+
+
+			<h3>State</h3>
+			<p>
+				The state of a module can be kept in its fields (aka instance variables or member variables). For example,
+				the <code>Count</code> module keeps track of the number of received values by having an integer counter
+				as field (<code>private int counter = 0;</code>) Everytime a new value is received, it increments the
+				counter by one and spits the new counter value through its output.
+			</p>
+
+			<p>
+				There is one caveat concerning fields. You should make sure that they are serializable, i.e., their type
+				implements <code>java.io.Serializable</code>. If this is not the case, you can declare the field
+				transient by adding keyword <code>transient</code> to its declaration. However, you need take special
+				precautions when working with transient fields in modules. Specifically, the value of a transient field
+				may suddenly become <code>null</code> at the beginning of <code>sendOutput()</code>.
+			</p>
+
+			<h3>Methods</h3>
 
 			<h1>Using Streams Outside Streamr</h1>
 		</div>
