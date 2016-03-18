@@ -134,6 +134,7 @@
 
 	$.fn.switcher.Constructor = Switcher;
 
+
 	function StreamrSwitcher(parent, json) {
 		this.parent = $(parent)
 		this.mustSendValue = true
