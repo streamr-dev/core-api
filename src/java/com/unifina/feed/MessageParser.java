@@ -1,5 +1,5 @@
 package com.unifina.feed;
 
-public interface MessageParser<T,V> {
-	public V parse(T raw);
+public interface MessageParser<RawMessageType,ParsedMessageType> {
+	ParsedMessageType parse(RawMessageType raw);
 }

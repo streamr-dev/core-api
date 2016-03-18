@@ -28,8 +28,8 @@ class DashboardController {
 	static defaultAction = "list"
 	
 	def list() {
-		def dashboards = Dashboard.findAllByUser(springSecurityService.currentUser)
-		return [dashboards:dashboards]
+		def dashboards = Dashboard.findAllByUser(springSecurityService.currentUser, [sort: "dateCreated", order: "desc"])
+		return [dashboards:dashboards, user: springSecurityService.currentUser]
 	}
 	
 	def create() {
@@ -50,12 +50,14 @@ class DashboardController {
 		Map dashboardMap = [
 			id: dashboard.id,
 			name: dashboard.name,
-			items: dashboard.items.collect {item->
+			items: dashboard.items.collect {DashboardItem item->
 				[
 						id:item.id,
 						title: item.title,
 						ord:item.ord,
 						size:item.size,
+						canvas: item.uiChannel.canvas.id,
+						module: item.uiChannel.hash,
 						uiChannel: item.uiChannel.toMap()
 				]
 			}

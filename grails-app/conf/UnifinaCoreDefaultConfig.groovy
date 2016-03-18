@@ -1,13 +1,13 @@
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
- * 
- * Stuff you'll want to configure in the application Config.groovy:
- * 
- * - grails.serverURL in production
  */
 
-
+environments {
+	production {
+		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+	}
+}
 
 /**
  * Logging config
@@ -71,9 +71,9 @@ log4j = {
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet-0.7.3"]
- grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**']
- 
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet", "/misc/*"]
+ grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
+
  grails.resources.processing.enabled = true
  
  environments {
@@ -85,6 +85,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.*']
 	 }
 	 test {
+		 grails.resources.processing.enabled = false
 		 grails.resources.mappers.bundle.excludes = ['**/*.*']
 		 grails.resources.mappers.hashandcache.excludes = ['**/*.*']
 		 grails.resources.mappers.zip.excludes = ['**/*.*']
@@ -95,7 +96,7 @@ log4j = {
 		 grails.resources.mappers.uglifyjs.excludes = ['**/*.min.js', '**/*-min.js']
 	 }
  }
- 
+
  environments {
 	 test {
 		 grails.reload.enabled = true
@@ -165,9 +166,19 @@ log4j = {
 	 }
  }
 
+/**
+ * Migration config
+ */
 grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy']
- 
+grails.plugin.databasemigration.updateOnStartContexts = ['default'] // a context needs to be specified, otherwise all changesets will run. changesets with no context will always run.
+
+environments {
+	test {
+		grails.plugin.databasemigration.updateOnStartContexts = ['test'] // changesets with no context will always run.
+	}
+}
+
 /**
  * API & CORS config
  */

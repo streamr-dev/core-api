@@ -22,10 +22,18 @@ SignalPath.ParamRenderers = {
 				}
 			},
 			getValue: function(module,data,input) {
-				return $(input).val();
+				if (data.type === "Double" || data.type === "Integer" || data.type === "Number")
+					return parseFloat($(input).val())
+				else return $(input).val();
 			},
 			getValueName: function(module,data,input) {
 				return $(input).val();
+			},
+			disable: function(input) {
+				input.attr("disabled","disabled");
+			},
+			enable: function(input) {
+				input.removeAttr("disabled");
 			}
 		},
 		"Stream": {
@@ -120,11 +128,45 @@ SignalPath.ParamRenderers = {
 			},
 			getValue: function(module,data,input) {
 				var hidden = $(input).find("input.streamId");
-				return hidden.val();
+				if (hidden.val()==="")
+					return null
+				else return parseInt(hidden.val())
 			},
 			getValueName: function(module,data,input) {
 				var text = $(input).find("span.streamName a").text();
 				return text;
+			},
+			disable: function(input) {
+				input.attr("disabled","disabled");
+			},
+			enable: function(input) {
+				input.removeAttr("disabled");
+			}
+		},
+		"Color": {
+			create: function(module, data) {
+				var inputContainer = $("<div class='color-input-container'></div>")
+				var colorInput = $("<input type='text' class='parameterInput colorInput form-control'/>");
+				inputContainer.append(colorInput)
+				colorInput.spectrum({
+					preferredFormat: "rgb",
+					showInput: true,
+					showButtons: false
+				})
+				colorInput.spectrum("set", data.value)
+				return inputContainer
+			},
+			getValue: function(module, data, input) {
+				return $(input).find(".colorInput").spectrum("get").toRgbString()
+			},
+			getValueName: function(module, data, input) {
+				return this.getValue(module, data, input)
+			},
+			disable: function(input) {
+				$(input).find(".colorInput").spectrum("disable")
+			},
+			enable: function(input) {
+				$(input).find(".colorInput").spectrum("enable")
 			}
 		}
 }
@@ -153,13 +195,15 @@ SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
 		// Assign disabled class to input when the parameter is connected
 		div.bind("spConnect", (function(me) {
 			return function(output) {
-				me.input.attr("disabled","disabled");
+				if(getParamRenderer(me.json).disable)
+					getParamRenderer(me.json).disable(me.input)
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(output) {
-				me.input.removeAttr("disabled");
+				if(getParamRenderer(me.json).enable)
+					getParamRenderer(me.json).enable(me.input)
 			}
 		})(pub));
 		

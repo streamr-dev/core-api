@@ -11,7 +11,7 @@ var sidebar
 var dashboard
 var dashboardView
 var dashboardJson
-var runningSignalPathsJson
+var canvases
 var templates
 var db
 
@@ -55,24 +55,24 @@ describe('dashboard-editor', function() {
 			id: 1,
 			name: "Test",
 			items: [
-				{id: 1, title: "Item1", ord:0, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', module: {id:67, webcomponent: "streamr-chart"}}, size:"medium"}, //chart
-				{id: 2, title: "Item2", ord:1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', module: {id:145, webcomponent: "streamr-label"}}, size:"small"}  //label
+				{id: 1, title: "Item1", ord:0, canvas: "canvas-1", module: 1, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', webcomponent: "streamr-chart"}, size:"medium"}, //chart
+				{id: 2, title: "Item2", ord:1, canvas: "canvas-3", module: 1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', webcomponent: "streamr-label"}, size:"small"}  //label
 			]
 		}
 
-		runningSignalPathsJson = [
-			{id: 1, state: 'running', name: "RSP1", uiChannels: [
-				{name: "uiChannel-1", checked: true, id: "uiChannel-id-1", module: {id: 67, webcomponent: "streamr-chart"}}
+		canvases = [
+			{id: "canvas-1", state: 'running', name: "RSP1", modules: [
+				{hash: 1, uiChannel: {name: "uiChannel-1", checked: true, id: "uiChannel-id-1", webcomponent: "streamr-chart"}}
 				]},
-			{id: 2, state: 'running', name: "RSP2", uiChannels: [
-				{name: "uiChannel-3", checked: false, id: "uiChannel-id-3", module: {id: 145, webcomponent: "streamr-label"}},
-				{name: "uiChannel-4", checked: false, id: "uiChannel-id-4", module: {id: 196, webcomponent: "streamr-heatmap"}}
+			{id: "canvas-2", state: 'running', name: "RSP2", modules: [
+				{hash: 1, uiChannel: {name: "uiChannel-3", checked: false, id: "uiChannel-id-3", webcomponent: "streamr-label"}},
+				{hash: 2, uiChannel: {name: "uiChannel-4", checked: false, id: "uiChannel-id-4", webcomponent: "streamr-heatmap"}}
 				]},
-			{id: 3, state: 'stopped', name: "RSP3", uiChannels: [
-				{name: "uiChannel-2", checked: true, id: "uiChannel-id-2", module: {id: 145, webcomponent: "streamr-label"}}
+			{id: "canvas-3", state: 'stopped', name: "RSP3", modules: [
+				{hash: 1, uiChannel: {name: "uiChannel-2", checked: true, id: "uiChannel-id-2", webcomponent: "streamr-label"}}
 			]},			
-			{id: 4, state: 'running', name: "RSP4", uiChannels: [
-				{name: "uiChannel-5", checked: false, id: "uiChannel-id-5", module: {id: 67, webcomponent: "streamr-chart"}}
+			{id: "canvas-4", state: 'running', name: "RSP4", modules: [
+				{hash: 1, uiChannel: {name: "uiChannel-5", checked: false, id: "uiChannel-id-5", webcomponent: "streamr-chart"}}
 				]}
 		]
 
@@ -86,7 +86,7 @@ describe('dashboard-editor', function() {
 		sidebar = new db.SidebarView({
 			el: $("#sidebar-view"),
 			dashboard: dashboard, 
-			RSPs: runningSignalPathsJson,
+			canvases: canvases,
 			menuToggle: $("#main-menu-toggle")
 		})
 	})
@@ -104,14 +104,14 @@ describe('dashboard-editor', function() {
 		it('should throw error when trying to create module without webcomponent', function () {
 			assert.throws(
 				function() {
-					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:1}}, size:"medium"})
+					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', webcomponent: null}, size:"medium"})
 				}, Error);
 		})
 
 		it('should render the amount of dashboardItems should be correct when added', function (){
 			assert.equal($(".streamr-widget").length, 2)
 			assert.equal(dashboardView.$el.children().length, 2)
-			dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', module: {id:67, webcomponent:"streamr-chart"}}, size:"medium"})
+			dashboard.get("items").push({title: "Item3", canvas: "canvas-2", module: 1, uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', webcomponent:"streamr-chart"}, size:"medium"})
 			assert.equal($(".streamr-widget").length, 3)
 			assert.equal(dashboardView.$el.children().length, 3)
 		})
@@ -219,25 +219,26 @@ describe('dashboard-editor', function() {
 	describe("Sidebar", function() {
 
 		it('must render runningsignalpath-elements', function() {
-			assert($("#sidebar-view").find(".runningsignalpath").length == 4)
+			console.log($("#sidebar-view").html())
+			assert.equal($("#sidebar-view").find(".canvas").length, 4)
 		})
 
 		it("must render all runningsignalpaths closed", function () {
-			_.each($(".runningsignalpath"), function(rsp){
+			_.each($(".canvas"), function(rsp){
 				assert(!$(rsp).hasClass("open"))
 			})
 		})
 
-		it('must add class checked to every checked uichannel', function () {
+		it('must add class checked to every checked module', function () {
 			var i = 0
-			_.each(sidebar.rspCollection.models, function (rsp){
+			_.each(sidebar.canvases.models, function (canvas){
 				var j = 0
-				_.each(rsp.uiChannelCollection.models, function(uic){
-					if(uic.get("checked")){
-						assert($($($("#sidebar-view").find(".runningsignalpath")[i]).find(".uichannel")[j]).hasClass("checked"))
+				_.each(canvas.get('modules').models, function(module){
+					if(module.get("checked")){
+						assert($($($("#sidebar-view").find(".canvas")[i]).find(".module")[j]).hasClass("checked"))
 					}
 					else
-						assert(!($($($("#sidebar-view").find(".runningsignalpath")[i]).find(".uichannel")[j]).hasClass("checked")))
+						assert(!($($($("#sidebar-view").find(".canvas")[i]).find(".module")[j]).hasClass("checked")))
 					j++
 				},this)
 				i++
@@ -245,35 +246,36 @@ describe('dashboard-editor', function() {
 		})
 
 		it('must open the rsp when clicked', function () {
-			assert(!($($("#sidebar-view").find(".runningsignalpath")[1]).hasClass("open")))
-			$($("#sidebar-view").find(".runningsignalpath .rsp-title")[1]).click()
-			assert($($("#sidebar-view").find(".runningsignalpath")[1]).hasClass("open"))
+			assert(!($($("#sidebar-view").find(".canvas")[1]).hasClass("open")))
+			$($("#sidebar-view").find(".canvas .canvas-title")[1]).click()
+			assert($($("#sidebar-view").find(".canvas")[1]).hasClass("open"))
 		})
 
-		it('must check clicked uiChannels', function () {
+		it('must check clicked modules', function () {
 			//Wait for 'checked' event
 			var checked = false
 			sidebar.$el.on("checked", function (){
 				checked = true
 			})
-			//First runningsignalpath is closed
-			assert(!($($("#sidebar-view").find(".runningsignalpath")[1]).hasClass("open")))
+			//First canvas is closed
+			assert(!($($("#sidebar-view").find(".canvas")[1]).hasClass("open")))
 			//Clicked to open
-			$($("#sidebar-view").find(".runningsignalpath .rsp-title")[1]).click()
+			$($("#sidebar-view").find(".canvas .canvas-title")[1]).click()
 
-			//First uiChannel and uichannel element are not checked
-			assert(!($($($("#sidebar-view").find(".runningsignalpath")[1]).find(".uichannel")[0]).hasClass("checked")))
-			assert(!(sidebar.rspCollection.models[1].uiChannelCollection.models[0].get("checked")))
-			//Checked
-			$($($("#sidebar-view").find(".runningsignalpath")[1]).find(".uichannel .uichannel-title")[0]).click()
+			//First module and its element are not checked
+			assert(!($($($("#sidebar-view").find(".canvas")[1]).find(".uichannel")[0]).hasClass("checked")))
+			assert(!(sidebar.canvases.models[1].get('modules').models[0].get("checked")))
 
-			//Uichannel-title must get class checked
-			assert($($($("#sidebar-view").find(".runningsignalpath")[1]).find(".uichannel")[0]).hasClass("checked"))
+			//Click on module title
+			$($($("#sidebar-view").find(".canvas")[1]).find(".module .module-title")[0]).click()
 
-			//uiChannel element turns checked
-			assert(sidebar.rspCollection.models[1].uiChannelCollection.models[0].get("checked"))
+			//module must get class checked
+			assert($($($("#sidebar-view").find(".canvas")[1]).find(".module")[0]).hasClass("checked"))
 
-			//Check that 'checked'-ecent has got triggered
+			//module element turns checked
+			assert(sidebar.canvases.models[1].get('modules').models[0].get("checked"))
+
+			//Check that 'checked'-event was triggered
 			assert(checked)
 		})
 
@@ -285,21 +287,21 @@ describe('dashboard-editor', function() {
 			})
 
 			//First runningsignalpath is closed
-			assert(!($($("#sidebar-view").find(".runningsignalpath")[0]).hasClass("open")))
+			assert(!($($("#sidebar-view").find(".canvas")[0]).hasClass("open")))
 			//Clicked to open
-			$($("#sidebar-view").find(".runningsignalpath .rsp-title")[0]).click()
+			$($("#sidebar-view").find(".canvas .canvas-title")[0]).click()
 
 			//First uiChannel and uichannel element are not checked
-			assert($($($("#sidebar-view").find(".runningsignalpath")[0]).find(".uichannel")[0]).hasClass("checked"))
-			assert(sidebar.rspCollection.models[0].uiChannelCollection.models[0].get("checked"))
+			assert($($($("#sidebar-view").find(".canvas")[0]).find(".module")[0]).hasClass("checked"))
+			assert(sidebar.canvases.models[0].get('modules').models[0].get("checked"))
 			//Unchecked
-			$($($("#sidebar-view").find(".runningsignalpath")[0]).find(".uichannel .uichannel-title")[0]).click()
+			$($($("#sidebar-view").find(".canvas")[0]).find(".module .module-title")[0]).click()
 
 			//Class checked of the uichannel must be removed
-			assert(!($($($("#sidebar-view").find(".runningsignalpath")[0]).find(".uichannel")[0]).hasClass("checked")))
+			assert(!($($($("#sidebar-view").find(".canvas")[0]).find(".module")[0]).hasClass("checked")))
 
 			//uiChannel element turns unchecked
-			assert(!(sidebar.rspCollection.models[0].uiChannelCollection.models[0].get("checked")))
+			assert(!(sidebar.canvases.models[0].get('modules').models[0].get("checked")))
 
 			//Check that 'unchecked'-ecent has got triggered
 			assert(unchecked)
@@ -332,11 +334,11 @@ describe('dashboard-editor', function() {
 		})
 
 		it('must add the class "stopped" for the runningsignalpaths which have state:stopped', function() {
-			assert.equal($("#sidebar-view").find(".runningsignalpath").length, 4)
-			assert(!($($("#sidebar-view").find(".runningsignalpath")[0]).hasClass("stopped")))
-			assert(!($($("#sidebar-view").find(".runningsignalpath")[1]).hasClass("stopped")))
-			assert($($("#sidebar-view").find(".runningsignalpath")[2]).hasClass("stopped"))
-			assert(!($($("#sidebar-view").find(".runningsignalpath")[4]).hasClass("stopped")))
+			assert.equal($("#sidebar-view").find(".canvas").length, 4)
+			assert(!($($("#sidebar-view").find(".canvas")[0]).hasClass("stopped")))
+			assert(!($($("#sidebar-view").find(".canvas")[1]).hasClass("stopped")))
+			assert($($("#sidebar-view").find(".canvas")[2]).hasClass("stopped"))
+			assert(!($($("#sidebar-view").find(".canvas")[4]).hasClass("stopped")))
 		})
 	})
 

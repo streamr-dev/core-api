@@ -7,7 +7,7 @@ import com.unifina.datasource.DataSource;
 import com.unifina.datasource.ITimeListener;
 import com.unifina.utils.Globals;
 
-public class MasterClock extends AbstractEventRecipient<ITimeListener> {
+public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestamped> {
 	int i;
 
 	public MasterClock(Globals globals, DataSource dataSource) {

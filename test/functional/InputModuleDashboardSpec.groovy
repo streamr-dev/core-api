@@ -1,4 +1,6 @@
 import core.LoginTester1Spec
+import core.mixins.CanvasListMixin
+import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.mixins.DashboardMixin
 import core.pages.*
@@ -11,29 +13,22 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	def setupSpec() {
 		// @Mixin is buggy, use runtime mixins instead
+		this.class.metaClass.mixin(CanvasListMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
 		this.class.metaClass.mixin(DashboardMixin)
+		this.class.metaClass.mixin(CanvasMixin)
 
 		super.login()
 		waitFor { at CanvasPage }
 
 		// Go start the RunningSignalPath related to this spec
-		to LiveListPage
-		waitFor { at LiveListPage }
-		$(".table .td", text: liveCanvasName).click()
-		waitFor { at LiveShowPage }
-		if (stopButton.displayed) {
-			stopButton.click()
-			waitForConfirmation()
-			acceptConfirmation()
-			waitFor { startButton.displayed }
-		}
+		to CanvasListPage
+		waitFor { at CanvasListPage }
+		clickCanvasRow(liveCanvasName)
+		waitFor { at CanvasPage }
 
-		dropDownButton.click()
-		clearAndStartButton.click()
-		waitForConfirmation()
-		acceptConfirmation()
-		waitFor { stopButton.displayed }
+		ensureRealtimeTabDisplayed()
+		resetAndStartCanvas(true)
 
 		createDashboard(dashboardName)
 
@@ -67,14 +62,21 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		}
 	}
 
-	def cleanup() {
-		save()
-	}
 
 	def cleanupSpec() {
 		// Delete the dashboard
 		super.login()
 		deleteDashboard(dashboardName)
+
+		to CanvasListPage
+		waitFor { at CanvasListPage }
+		clickCanvasRow(liveCanvasName)
+		waitFor { at CanvasPage }
+		stopCanvasIfRunning()
+	}
+
+	def cleanup() {
+		save()
 	}
 
 	void "the button works"() {

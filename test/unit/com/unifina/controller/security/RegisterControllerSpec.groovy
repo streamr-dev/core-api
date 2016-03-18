@@ -1,6 +1,7 @@
 
 package com.unifina.controller.security
 
+import com.unifina.feed.NoOpStreamListener
 import com.unifina.signalpath.messaging.MockMailService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -244,6 +245,8 @@ class RegisterControllerSpec extends Specification {
 			feed.module = new Module()
 			feed.parserClass = ""
 			feed.timezone = "Europe/Minsk"
+			feed.streamListenerClass = NoOpStreamListener.name
+			feed.streamPageTemplate = ""
 			feed.save()
 
 			// A modulePackage created with minimum fields required

@@ -16,11 +16,17 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		)
 		widget.render()
 
-		$(SignalPath).on("started", function() {
-			if(widget.enable)
-				widget.enable()
-			$(widget).trigger("started")
-			$(pub).trigger("started")
+		$(SignalPath).on("started loaded", function() {
+			if (SignalPath.isRunning()) {
+				if (widget.enable)
+					widget.enable()
+				$(widget).trigger("started")
+			}
+		})
+
+		$(SignalPath).on("loaded", function(e, json) {
+			if (SignalPath.isRunning())
+				requestState(json)
 		})
 
 		$(SignalPath).on("stopped", function() {
@@ -45,11 +51,10 @@ SignalPath.InputModule = function(data,canvas,prot) {
 			})
 			prot.div.draggable("option", "cancel", list)
 		}
-		$(pub).on("started", requestState)
 	}
 
-	function requestState (e, runData){
-		if (!runData || !runData.adhoc) {
+	function requestState(json) {
+		if (json && !json.adhoc) {
 			SignalPath.sendRequest(prot.hash, {type:'getState'}, function(response) {
 				widget.updateState(response.state)
 			})

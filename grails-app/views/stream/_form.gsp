@@ -17,3 +17,20 @@
 		</span>
 	</g:hasErrors>
 </ui:labeled>
+
+<ui:labeled label="${message(code: 'stream.feed.label')}">
+	<g:select
+			class="form-control input-lg"
+			name="feed"
+			optionValue="name"
+			optionKey="id"
+			from="${feeds}"
+			value="${defaultFeed.id}"
+	/>
+
+	<g:hasErrors bean="${stream}" field="feed">
+		<span class="text-danger">
+			<g:renderErrors bean="${stream}" field="feed" as="list"/>
+		</span>
+	</g:hasErrors>
+</ui:labeled>

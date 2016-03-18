@@ -3,5 +3,5 @@
 # top-most EditorConfig file
 root = true
 
-[*.{java,groovy}]
+[*.{java,groovy,html,gsp}]
 indent_style = tab

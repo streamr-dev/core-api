@@ -1,10 +1,17 @@
 package com.unifina.serialization
 
 import com.unifina.data.FeedEvent
+import com.unifina.feed.ITimestamped
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.SignalPath
 
-public class SerializationRequest {
+public class SerializationRequest implements ITimestamped {
+
+	Date timestamp
+
+	public SerializationRequest(Date timestamp) {
+		this.timestamp = timestamp
+	}
 
 	public void serialize(SignalPath sp) {
 		SignalPathService service = sp.globals.getBean(SignalPathService)
@@ -12,10 +19,12 @@ public class SerializationRequest {
 	}
 
 	public static FeedEvent makeFeedEvent(SignalPath signalPath) {
-		def serializeEvent = new FeedEvent()
-		serializeEvent.content = new SerializationRequest()
-		serializeEvent.recipient = signalPath
-		serializeEvent.timestamp = new Date()
-		serializeEvent
+		Date timestamp = new Date()
+		return new FeedEvent(new SerializationRequest(timestamp), timestamp, signalPath)
+	}
+
+	@Override
+	Date getTimestamp() {
+		return timestamp
 	}
 }

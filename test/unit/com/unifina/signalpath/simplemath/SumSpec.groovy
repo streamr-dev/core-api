@@ -40,4 +40,19 @@ class SumSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
+
+	void "sum with infinite window"() {
+		when:
+		module.getInput("windowLength").receive(0);
+		module.getInput("minSamples").receive(1);
+		Map inputValues = [
+				in: (1..1000).collect { 1D }
+		]
+		Map outputValues = [
+				"out": (1..1000).collect { it?.doubleValue() }
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
 }
