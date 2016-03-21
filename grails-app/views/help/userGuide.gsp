@@ -524,7 +524,10 @@ public void clearState() {
 				outputs for data to arrive and for it to be processed.
 			</p>
 
-			<p>TODO: image of Multiplty module</p>
+			<figure>
+				<g:img dir="images/user-guide" file="multiply.png" alt="Multiply module" />
+				<figcaption>Multiply module</figcaption>
+			</figure>
 
 			<p>
 				Inputs can be <em>optional</em> or <em>required</em>. Optional inputs may or may not be connected to an output depending
