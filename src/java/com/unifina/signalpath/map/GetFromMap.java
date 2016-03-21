@@ -11,8 +11,6 @@ public class GetFromMap extends AbstractSignalPathModule {
 	private TimeSeriesOutput found = new TimeSeriesOutput(this, "found");
 	private Output<Object> out = new Output<>(this, "out", "Object");
 
-	private EndpointType outputType = EndpointType.NUMBER;
-
 	@Override
 	public void sendOutput() {
 		Map source = in.getValue();
