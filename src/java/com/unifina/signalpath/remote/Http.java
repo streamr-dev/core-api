@@ -3,6 +3,7 @@ import com.unifina.signalpath.*;
 
 import java.util.*;
 import com.google.common.collect.ImmutableMap;
+import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 //import org.apache.log4j.Logger;
@@ -82,16 +83,17 @@ public class Http extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void onConfiguration(Map<String,Object> config) {
+	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		Map options = (Map)config.get("options");
-		int inputCount = (options == null) ? 0 : (int)((Map)options.get("inputCount")).get("value");
-		int outputCount = (options == null) ? 0 : (int)((Map)options.get("outputCount")).get("value");
+		int inputCount = MapTraversal.getInt(config, "options.inputCount.value", 0);
+		int outputCount = MapTraversal.getInt(config, "options.outputCount.value", 0);
 
 		httpInputs = new ArrayList<Input<Object>>(inputCount);
 		for (int i = 0; i < inputCount; i++) {
 			Input<Object> in = new Input<>(this, "in"+(i+1), "Object");
+			in.canToggleDrivingInput = false;
+			in.setDrivingInput(false);
 			addInput(in);
 			httpInputs.add(in);
 		}
@@ -119,7 +121,9 @@ public class Http extends AbstractSignalPathModule {
 					request = new HttpPost(URL.getValue());
 					Map<String, Object> bodyMap = new HashMap<>();
 					for (Input in : httpInputs) {
-						bodyMap.put(in.getDisplayName(), in.getValue());
+						String inputName = in.getDisplayName();
+						if (inputName == null) { inputName = in.getName(); }
+						bodyMap.put(inputName, in.getValue());
 					}
 					String bodyString = new JSONObject(bodyMap).toString();
 					((HttpPost)request).setEntity(new StringEntity(bodyString));

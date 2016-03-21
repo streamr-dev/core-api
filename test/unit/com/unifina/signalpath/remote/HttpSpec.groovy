@@ -20,7 +20,7 @@ class HttpSpec extends Specification {
 		TestableHttp.httpClient = new DefaultHttpClient() {
 			@Override
 			CloseableHttpResponse execute(HttpUriRequest request) throws IOException, ClientProtocolException {
-				return getResponseStub()
+				return getResponseStub(request)
 			}
 		}
 	}
@@ -29,7 +29,7 @@ class HttpSpec extends Specification {
 	def response = { request -> [] }
 
 	/** "Implement" CloseableHttpResponse interface. No extra classes needed, hooray for stubbing */
-	def getResponseStub(request) {
+	def getResponseStub(HttpUriRequest request) {
 		return Stub(CloseableHttpResponse) {
 			getEntity() >> new StringEntity(new JsonBuilder(response(request)).toString())
 		}
@@ -37,7 +37,7 @@ class HttpSpec extends Specification {
 
 	void "no input, no response"() {
 		when:
-		def inputValues = [trigger: [1, true, "lol"]]
+		def inputValues = [trigger: [1, true, "test"]]
 		def outputValues = [error: [null, null, null]]
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
@@ -45,8 +45,8 @@ class HttpSpec extends Specification {
 
 	void "no input, constant response (ignored)"() {
 		when:
-		def inputValues = [trigger: [1]]
-		def outputValues = [error: [null]]
+		def inputValues = [trigger: [1, true, "test"]]
+		def outputValues = [error: [null, null, null]]
 		response = { request -> [foo: 3] }
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
@@ -54,14 +54,61 @@ class HttpSpec extends Specification {
 
 	void "no input, constant response"() {
 		when:
-		module.configure([inputCount: 0, outputCount: 1])
-		module.outputs[0].displayName = "foo"
-		def inputValues = [trigger: [1]]
-		def outputValues = [error: [null]]
+		module.configure([
+			options: [inputCount: [value: 0], outputCount: [value: 1]],
+			outputs: [[name: "out1", displayName: "foo"]]
+		])
+		def inputValues = [trigger: [1, true, "test"]]
+		def outputValues = [error: [null, null, null], out1: [3, 3, 3]]
 		response = { request -> [foo: 3] }
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
+
+	void "one input, empty response"() {
+		when:
+		module.configure([options: [inputCount: [value: 1], outputCount: [value: 0]]])
+		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"]]
+		def outputValues = [error: [null, null, null]]
+		response = { request -> [] }
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	void "one input, constant response"() {
+		when:
+		module.configure([
+			options: [inputCount: [value: 1], outputCount: [value: 1]],
+			outputs: [[name: "out1", displayName: "foo"]]
+		])
+		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"]]
+		def outputValues = [error: [null, null, null], out1: [3, 3, 3]]
+		response = { request -> [foo: 3] }
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	/*
+	void "test GET parameters"() {
+		when:
+		module.configure([
+			options: [inputCount: [value: 2], outputCount: [value: 0]],
+			params: [
+				[name: "URL", value: "localhost"],
+				[name: "verb", value: "GET"],
+				[name: "in1", displayName: "inputput", value: 123],
+				[name: "in2", displayName: "nother", value: false]
+			]
+		])
+		def inputValues = [trigger: [1, true, "test"], in1: [666, "666", 2*333], in2: [1+1==2, true, "true"]]
+		def outputValues = [error: [null, null, null]]
+		response = { HttpUriRequest request ->
+			assert request.URI == "localhost?inputput=666&nother=true"
+		}
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+	*/
 
 	void "empty Http request object"() {
 		when:
