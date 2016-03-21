@@ -1,21 +1,27 @@
 package com.unifina.signalpath.remote;
-
-import com.google.common.collect.ImmutableMap;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mashape.unirest.request.BaseRequest;
-import com.mashape.unirest.request.GetRequest;
-import com.mashape.unirest.request.HttpRequest;
-import com.mashape.unirest.request.HttpRequestWithBody;
 import com.unifina.signalpath.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.*;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
+//import org.apache.log4j.Logger;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import java.io.IOException;
+
 
 public class Http extends AbstractSignalPathModule {
 
@@ -29,7 +35,7 @@ public class Http extends AbstractSignalPathModule {
 	private StringOutput errorOut = new StringOutput(this, "error");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");
 
-	private static final Logger log = Logger.getLogger(Http.class);
+	//private static final Logger log = Logger.getLogger(Http.class);
 
 	@Override
 	public void init() {
@@ -40,6 +46,22 @@ public class Http extends AbstractSignalPathModule {
 		trigger.setDrivingInput(true);
 		addOutput(errorOut);
 	}
+
+	/** This function is overridden in HttpSpec to inject mock HttpClient */
+	protected HttpClient getHttpClient() {
+		if (_httpClient == null) {
+			// commented out: SSL client that supports self-signed certs
+			/*SSLContext sslcontext = SSLContexts.custom()
+				.loadTrustMaterial(null, new TrustSelfSignedStrategy())
+				.build();
+			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);*/
+			_httpClient = HttpClients.createMinimal(); /* .custom()
+				.setSSLSocketFactory(sslsf)
+				.build();*/
+		}
+		return _httpClient;
+	}
+	private transient CloseableHttpClient _httpClient;
 
 	@Override
 	public Map<String,Object> getConfiguration() {
@@ -85,79 +107,77 @@ public class Http extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		List<String> errors = new LinkedList<>();
-		try {
-			/*SSLContext sslcontext = SSLContexts.custom()
-				.loadTrustMaterial(null, new TrustSelfSignedStrategy())
-				.build();
-			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
-			CloseableHttpClient httpclient = HttpClients.custom()
-				.setSSLSocketFactory(sslsf)
-				.build();
-			Unirest.setHttpClient(httpclient);*/
-			//Unirest.setTimeouts(4000, 4000);
 
+		// get from server either JSON object with values for named outputs, or list of output values
+		List<Object> values = new LinkedList<>();
+		JSONObject result = null;
+		try {
 			// build and prepare the HttpRequest
-			HttpRequest request;
+			HttpRequestBase request;
 			switch (verb.getValue()) {
 				case "POST":
-					request = Unirest.post(URL.getValue());
+					request = new HttpPost(URL.getValue());
 					Map<String, Object> bodyMap = new HashMap<>();
 					for (Input in : httpInputs) {
 						bodyMap.put(in.getDisplayName(), in.getValue());
 					}
-					((HttpRequestWithBody)request).body(new JSONObject(bodyMap).toString());
+					String bodyString = new JSONObject(bodyMap).toString();
+					((HttpPost)request).setEntity(new StringEntity(bodyString));
 					break;
 				case "GET": {
-					request = Unirest.get(URL.getValue());
+					request = new HttpGet(URL.getValue());
 					break;
 				}
 				default:
 					throw new RuntimeException("Unexpected " + verb);
 			}
-			//request.header("X-UUID", UUID)
+			//request.addHeader("X-UUID", UUID)
 
 			// send off the HttpRequest to server
-			long startTime = System.currentTimeMillis();
-			HttpResponse<JsonNode> response = request.asJson();
-			log.info("HttpRequest took " + (System.currentTimeMillis() - startTime) + " ms");
+			//long startTime = System.currentTimeMillis();
+			HttpResponse httpResponse = getHttpClient().execute(request);
+			//log.info("HTTP request took " + (System.currentTimeMillis() - startTime) + " ms");
 
-			// parse response into a JSONObject that can be sent forward
-			JSONObject result = null;
-			if (response.getBody().isArray()) {
-				JSONArray arr = response.getBody().getArray();
-				List<Object> values = new LinkedList<>();
-				result = findJSONObjectFromJSONArray(arr, values, httpOutputs.size());
-				if (result == null) {
-					// ...or just send the first |httpOutputs| found values
-					Iterator<Object> iV = values.iterator();
-					Iterator<Output<Object>> iO = httpOutputs.iterator();
-					while (iV.hasNext() && iO.hasNext()) {
-						iO.next().send(iV.next());
-					}
-				}
+			// parse response into a JSONObject (or simple list of values)
+			String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+			JSONTokener parser = new JSONTokener(responseString);
+			Object response = parser.nextValue();
+			if (response instanceof JSONObject) {
+				// TODO: http://jsonapi.org/format/ suggests we should read "data" member if available
+				result = (JSONObject)response;
+			} else if (response instanceof JSONArray) {
+				// array => send first-found object to outputs, or send one primitive for each output if found first
+				result = findJSONObjectFromJSONArray((JSONArray)response, values, httpOutputs.size());
 			} else {
-				result = response.getBody().getObject();
-			}
-
-			// send results through corresponding outputs (ignore extra)
-			if (result != null) {
-				for (Output out : httpOutputs) {
-					String key = out.getDisplayName();
-					if (result.has(key)) {
-						Object value = result.opt(key);
-						out.send(value);
-					} else {
-						errors.add(key + " not found in HTTP response!");
-					}
+				// primitive => send values to outputs as-is
+				values.add(response);
+				while (parser.more() && values.size() < httpOutputs.size()) {
+					values.add(parser.nextValue());
 				}
 			}
-
-		} catch (UnirestException /*| NoSuchAlgorithmException | KeyStoreException | KeyManagementException*/ e) {
-			errors.add(StringUtils.join(e.getStackTrace(), '\n'));
-			e.printStackTrace();
-		} catch (RuntimeException e) {
+		} catch (RuntimeException | JSONException | IOException e) {
 			errors.add(e.getMessage());
 			e.printStackTrace();
+		}
+
+		// send results to outputs, match output names to result object keys (ignore extra result object members)
+		if (result != null) {
+			for (Output out : httpOutputs) {
+				String key = out.getDisplayName();
+				if (result.has(key)) {
+					Object value = result.opt(key);
+					out.send(value);
+				} else {
+					errors.add(key + " not found in HTTP response!");
+				}
+			}
+		} else {
+			// ...or just send the found values in order, one for each output
+			Iterator<Object> iV = values.iterator();
+			Iterator<Output<Object>> iO = httpOutputs.iterator();
+			while (iV.hasNext() && iO.hasNext()) {
+				iO.next().send(iV.next());
+			}
 		}
 
 		if (!errors.isEmpty()) {
@@ -166,19 +186,21 @@ public class Http extends AbstractSignalPathModule {
 	}
 
 	/**
-	 * Walk arrays, grab first found object; or collect primitives as many as there are outputs
-	 * @return JSONObject that was first found, or null if found one primitive for each output first
+	 * Walk arrays, grab first found object; or collect given number of primitives
+	 * @param primitives that were found IF return value is null. If return value is not null, primitives is invalid.
+	 * @return JSONObject that was first found, or null if $maxCount primitives were found first
 	 */
 	private JSONObject findJSONObjectFromJSONArray(JSONArray arr, List<Object> primitives, int maxCount) {
-		for (int i = 0; i < arr.length(); i++) {
+		for (int i = 0; i < arr.length() && primitives.size() < maxCount; i++) {
 			Object ob = arr.opt(i);
 			if (ob instanceof JSONArray) {
-				return findJSONObjectFromJSONArray((JSONArray)ob, primitives, maxCount);
-			} else if (ob instanceof JSONObject) {
-				return (JSONObject)ob;
+				ob = findJSONObjectFromJSONArray((JSONArray)ob, primitives, maxCount);
 			} else {
-				primitives.add(arr);
-				if (primitives.size() >= maxCount) { break; }
+				primitives.add(ob);
+			}
+
+			if (ob instanceof JSONObject) {
+				return (JSONObject)ob;
 			}
 		}
 		return null;
