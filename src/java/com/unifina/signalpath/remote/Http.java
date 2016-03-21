@@ -23,8 +23,8 @@ public class Http extends AbstractSignalPathModule {
 	private StringParameter URL = new StringParameter(this, "URL", "http://localhost");
 
 	// subset of inputs/outputs that correponds to HTTP parameters and response data
-	private List<Input<Object>> httpInputs;
-	private List<Output<Object>> httpOutputs;
+	private List<Input<Object>> httpInputs = new ArrayList<>();
+	private List<Output<Object>> httpOutputs = new ArrayList<>();
 
 	private StringOutput errorOut = new StringOutput(this, "error");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");
@@ -89,14 +89,11 @@ public class Http extends AbstractSignalPathModule {
 			/*SSLContext sslcontext = SSLContexts.custom()
 				.loadTrustMaterial(null, new TrustSelfSignedStrategy())
 				.build();
-
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
-
 			CloseableHttpClient httpclient = HttpClients.custom()
 				.setSSLSocketFactory(sslsf)
 				.build();
-			Unirest.setHttpClient(httpclient);
-			*/
+			Unirest.setHttpClient(httpclient);*/
 			//Unirest.setTimeouts(4000, 4000);
 
 			// build and prepare the HttpRequest
@@ -155,16 +152,10 @@ public class Http extends AbstractSignalPathModule {
 				}
 			}
 
-		} catch (UnirestException e) {
+		} catch (UnirestException /*| NoSuchAlgorithmException | KeyStoreException | KeyManagementException*/ e) {
 			errors.add(StringUtils.join(e.getStackTrace(), '\n'));
 			e.printStackTrace();
-		} /*catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (KeyStoreException e) {
-			e.printStackTrace();
-		} catch (KeyManagementException e) {
-			e.printStackTrace();
-		}*/ catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 			errors.add(e.getMessage());
 			e.printStackTrace();
 		}

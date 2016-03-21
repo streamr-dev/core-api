@@ -9,8 +9,8 @@ class LabelSpec extends Specification {
 
 	def setup() {
 		module = new Label()
-		module.configure([uiChannel: [id: "labelChannel"]])
 		module.init()
+		module.configure([uiChannel: [id: "labelChannel"]])
 	}
 
 	void "label sends correct data to uiChannel"() {
