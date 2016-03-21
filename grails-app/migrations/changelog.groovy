@@ -47,4 +47,5 @@ databaseChangeLog = {
 	include file: 'core/2016-08-19-foreach-module-js.groovy'
 	include file: 'core/2016-08-29-useful-list-modules.groovy'
 	include file: 'core/2016-08-30-test-fixtures-foreach-subcanvas.groovy'
+	include file: 'core/2016-03-21-random-modules.groovy'
 }
