@@ -10,26 +10,30 @@ import java.util.List;
 import java.util.Map;
 
 public class MapTraversal {
-	
-	
+
+	/**
+	 * Fetch given property in the nested map tree,
+	 * @param name e.g. "options.input.value"
+	 * @return given property, or null if not found
+	 */
 	@SuppressWarnings("rawtypes")
-	public static Object getProperty(Map map, String name) {		
-		if (name==null)
-			throw new IllegalArgumentException("Name can not be null!");
-		if (map==null)
-			return null;
-		
+	public static Object getProperty(Map map, String name) {
+		if (name == null) { throw new IllegalArgumentException("Name can not be null!"); }
+		if (map == null) { return null; }
+
 		Object result = null;
-		
 		String[] names = name.split("\\.");
-		for (int i=0;i<names.length;i++) {
+		for (int i = 0; i < names.length; i++) {
 			String s = names[i];
 			result = map.get(s);
-			if (result==null || (map instanceof JSONObject && ((JSONObject)map).isNull(s)))
-				return null;
+
 			// Not the last entry: result should be a Map
-			if (i<names.length-1) {
-				map = (Map) result;
+			if (i < names.length - 1) {
+				if (result instanceof Map) {
+					map = (Map)result;
+				} else {
+					return null;
+				}
 			}
 		}
 		return result;
@@ -44,8 +48,29 @@ public class MapTraversal {
 		Object raw = getProperty(map,name);
 		if (raw==null) return null;
 		else if (raw instanceof Integer)
-			return (Integer) raw;
+			return (Integer)raw;
 		else return Integer.parseInt(raw.toString());
+	}
+
+	/**
+	 * @throws NumberFormatException if value wasn't parseable to integer (e.g. "foo", 3.5)
+	 * @throws NullPointerException if value wasn't found
+     */
+	public static int getInt(Map map, String name) throws NumberFormatException, NullPointerException {
+		Object raw = getProperty(map, name);
+		if (raw instanceof Integer) {
+			return ((Integer)raw).intValue();
+		} else {
+			return Integer.parseInt(raw.toString());
+		}
+	}
+
+	public static int getInt(Map map, String name, int defaultValue) {
+		try {
+			return getInt(map, name);
+		} catch (NumberFormatException | NullPointerException e) {
+			return defaultValue;
+		}
 	}
 
 	public static Long getLong(Map map, String name) {
