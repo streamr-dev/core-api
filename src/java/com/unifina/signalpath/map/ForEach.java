@@ -66,6 +66,7 @@ public class ForEach extends AbstractSignalPathModule {
 		String currentKey = key.getValue();
 		if (!keyToSignalPath.containsKey(currentKey)) {
 			SubSignalPath subSignalPath = makeSubSignalPath(this);
+			subSignalPath.proxyToOutputs(outputsToPropagate);
 			cachedOutputValuesByKey.put(currentKey, instantiateCacheUpdateListeners(subSignalPath));
 			keyToSignalPath.put(currentKey, subSignalPath);
 		}
@@ -79,10 +80,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		subSignalPath.propagate();
 
-		// Read outputs from sub-canvas and pass as this canvas' outputs
-		for (Output output : outputsToPropagate) {
-			output.send(subSignalPath.readOutput(output.getName()));
-		}
+		// Other outputs sent indirectly via proxying
 		map.send(cachedOutputValuesByKey);
 	}
 
