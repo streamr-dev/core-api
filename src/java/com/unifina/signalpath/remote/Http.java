@@ -5,16 +5,17 @@ import java.util.*;
 import com.google.common.collect.ImmutableMap;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 //import org.apache.log4j.Logger;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -103,7 +104,6 @@ public class Http extends AbstractSignalPathModule {
 			addOutput(out);
 			httpOutputs.add(out);
 		}
-
 	}
 
 	@Override
@@ -114,11 +114,12 @@ public class Http extends AbstractSignalPathModule {
 		List<Object> values = new LinkedList<>();
 		JSONObject result = null;
 		try {
-			// build and prepare the HttpRequest
+			// build and prepare the HttpRequest: inputs are added to URL parameter string if body is not available
 			HttpRequestBase request;
 			switch (verb.getValue()) {
 				case "POST":
-					request = new HttpPost(URL.getValue());
+				case "PUT":
+				case "PATCH":
 					Map<String, Object> bodyMap = new HashMap<>();
 					for (Input in : httpInputs) {
 						String inputName = in.getDisplayName();
@@ -126,12 +127,24 @@ public class Http extends AbstractSignalPathModule {
 						bodyMap.put(inputName, in.getValue());
 					}
 					String bodyString = new JSONObject(bodyMap).toString();
-					((HttpPost)request).setEntity(new StringEntity(bodyString));
+					HttpEntityEnclosingRequestBase r =
+							verb.getValue().equalsIgnoreCase("POST") ? new HttpPost(URL.getValue()) :
+							verb.getValue().equalsIgnoreCase("PUT")  ? new HttpPut(URL.getValue()) :
+																	   new HttpPatch(URL.getValue());
+					r.setEntity(new StringEntity(bodyString));
+					request = r;
 					break;
-				case "GET": {
-					request = new HttpGet(URL.getValue());
+				case "GET":
+				case "DELETE":
+					List<NameValuePair> params = new LinkedList<>();
+					for (Input in : httpInputs) {
+						String inputName = in.getDisplayName();
+						if (inputName == null) { inputName = in.getName(); }
+						params.add(new BasicNameValuePair(inputName, in.getValue().toString()));
+					}
+					String url = URL.getValue() + "?" + URLEncodedUtils.format(params, "UTF-8");
+					request = verb.getValue().equalsIgnoreCase("GET") ? new HttpGet(url) : new HttpDelete(url);
 					break;
-				}
 				default:
 					throw new RuntimeException("Unexpected " + verb);
 			}
@@ -220,7 +233,10 @@ public class Http extends AbstractSignalPathModule {
 		private List<PossibleValue> getValueList() {
 			return Arrays.asList(
 				new PossibleValue("GET", "GET"),
-				new PossibleValue("POST", "POST")
+				new PossibleValue("POST", "POST"),
+				new PossibleValue("PUT", "PUT"),
+				new PossibleValue("DELETE", "DELETE"),
+				new PossibleValue("PATCH", "PATCH")
 			);
 		}
 		@Override public Map<String, Object> getConfiguration() {
