@@ -2,6 +2,7 @@ package com.unifina.signalpath.remote
 
 import com.unifina.utils.testutils.ModuleTestHelper
 import groovy.json.JsonBuilder
+import org.apache.http.Header
 import org.apache.http.HttpEntity
 import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -68,24 +69,21 @@ class HttpSpec extends Specification {
 
 
 	void "no input, no response"() {
-		when:
 		def inputValues = [trigger: [1, true, "test"]]
 		def outputValues = [error: [null, null, null]]
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "no input, unexpected object response (ignored)"() {
-		when:
 		def inputValues = [trigger: [1, true, "test"]]
 		def outputValues = [error: [null, null, null]]
 		response = [foo: 3, bar: 2, shutdown: "now"]
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "no input, object response"() {
-		when:
 		module.configure([
 			options: [inputCount: [value: 0], outputCount: [value: 1]],
 			outputs: [[name: "out1", displayName: "foo"]]
@@ -93,22 +91,20 @@ class HttpSpec extends Specification {
 		def inputValues = [trigger: [1, true, "test"]]
 		def outputValues = [error: [null, null, null], out1: [3, 3, 3]]
 		response = [foo: 3]
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "empty response"() {
-		when:
 		module.configure([options: [inputCount: [value: 1], outputCount: [value: 1]]])
 		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"]]
 		def outputValues = [error: [null, null, null]]
 		response = []
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
-	void "one input, identity function response"() {
-		when:
+	void "one input, echo response (just value, no JSON object wrapper)"() {
 		module.configure([
 			options: [inputCount: [value: 1], outputCount: [value: 1]],
 			outputs: [[name: "out1", displayName: "foo"]]
@@ -121,12 +117,11 @@ class HttpSpec extends Specification {
 			def ob = new JSONObject(jsonString)
 			return ob.get("in1")
 		}
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "two inputs, three outputs, array constant response with too many elements (ignored)"() {
-		when:
 		module.configure([
 				options: [inputCount: [value: 2], outputCount: [value: 3]],
 				inputs: [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
@@ -135,12 +130,11 @@ class HttpSpec extends Specification {
 		def outputValues = [error: [null, null, null], out1: [true, true, true],
 							out2: ["developers", "developers", "developers"], out3: [1, 1, 1]]
 		response = { request -> [true, "developers", 1, 2, 3, 4] }
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "two inputs, three outputs, array varying response with too few elements"() {
-		when:
 		module.configure([
 				options: [inputCount: [value: 2], outputCount: [value: 3]],
 				inputs: [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
@@ -148,12 +142,11 @@ class HttpSpec extends Specification {
 		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
 		def outputValues = [error: [null, null, null], out1: [":)", ":|", ":("]]
 		response = [[":)"], [":|"], [":("]]
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "two inputs, three outputs, array varying length response"() {
-		when:
 		module.configure([
 				options: [inputCount: [value: 2], outputCount: [value: 3]],
 				inputs: [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
@@ -162,12 +155,11 @@ class HttpSpec extends Specification {
 		def outputValues = [error: [null, null, null], out1: [":)", ":|", ":("],
 							out2: [null, 8, 7], out3: [null, null, 6]]
 		response = [[":)"], [":|", 8], [":(", 7, 6, 5, 4, 3]]
-		then:
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
 	void "test GET parameters"() {
-		when:
 		module.configure([
 			options: [inputCount: [value: 2], outputCount: [value: 0]],
 			params: [
@@ -182,7 +174,33 @@ class HttpSpec extends Specification {
 		response = { HttpUriRequest request ->
 			assert request.URI.toString().equals("localhost?inputput=666&nother=true")
 		}
-		then:
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	void "test HTTP request headers"() {
+		def headers = [
+			user: [name: "header1", displayName: "user", value: "head"],
+			token: [name: "header2", displayName: "token", value: "bang"],
+			apikey: [name: "header3", displayName: "apikey", value: "er"]
+		]
+		module.configure([
+			options: [inputCount: [value: 0], outputCount: [value: 0], headerCount: [value: headers.size()]],
+			params: headers.values().toList()
+		])
+		def inputValues = [trigger: [1, true, "metal", 666]]
+		def outputValues = [:]
+		response = { HttpUriRequest request ->
+			int found = 0
+			request.allHeaders.each { Header h ->
+				if (headers.containsKey(h.name)) {
+					assert headers[h.name].value == h.value
+					found++
+				}
+			}
+			assert found == headers.size()
+		}
+		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }

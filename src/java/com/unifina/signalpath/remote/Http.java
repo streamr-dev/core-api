@@ -7,7 +7,7 @@ import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-//import org.apache.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.*;
@@ -34,10 +34,13 @@ public class Http extends AbstractSignalPathModule {
 	private List<Input<Object>> httpInputs = new ArrayList<>();
 	private List<Output<Object>> httpOutputs = new ArrayList<>();
 
+	// subset of inputs that corresponds to HTTP headers
+	private List<StringParameter> headers = new ArrayList<>();
+
 	private StringOutput errorOut = new StringOutput(this, "error");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");
 
-	//private static final Logger log = Logger.getLogger(Http.class);
+	private static final Logger log = Logger.getLogger(Http.class);
 
 	@Override
 	public void init() {
@@ -77,6 +80,10 @@ public class Http extends AbstractSignalPathModule {
 				"outputCount", ImmutableMap.of(
 					"value", httpOutputs.size(),
 					"type", "int"
+				),
+				"headerCount", ImmutableMap.of(
+					"value", headers.size(),
+					"type", "int"
 				)
 			)
 		);
@@ -89,8 +96,9 @@ public class Http extends AbstractSignalPathModule {
 
 		int inputCount = MapTraversal.getInt(config, "options.inputCount.value", 0);
 		int outputCount = MapTraversal.getInt(config, "options.outputCount.value", 0);
+		int headerCount = MapTraversal.getInt(config, "options.headerCount.value", 0);
 
-		httpInputs = new ArrayList<Input<Object>>(inputCount);
+		httpInputs = new ArrayList<>(inputCount);
 		for (int i = 0; i < inputCount; i++) {
 			Input<Object> in = new Input<>(this, "in"+(i+1), "Object");
 			in.canToggleDrivingInput = false;
@@ -98,11 +106,19 @@ public class Http extends AbstractSignalPathModule {
 			addInput(in);
 			httpInputs.add(in);
 		}
-		httpOutputs = new ArrayList<Output<Object>>(outputCount);
+		httpOutputs = new ArrayList<>(outputCount);
 		for (int i = 0; i < outputCount; i++) {
 			Output<Object> out = new Output<>(this, "out"+(i+1), "Object");
 			addOutput(out);
 			httpOutputs.add(out);
+		}
+		headers = new ArrayList<>(headerCount);
+		for (int i = 0; i < headerCount; i++) {
+			StringParameter header = new StringParameter(this, "header"+(i+1), "");
+			header.canToggleDrivingInput = false;
+			header.setDrivingInput(false);
+			addInput(header);
+			headers.add(header);
 		}
 	}
 
@@ -148,12 +164,17 @@ public class Http extends AbstractSignalPathModule {
 				default:
 					throw new RuntimeException("Unexpected " + verb);
 			}
-			//request.addHeader("X-UUID", UUID)
+
+			for (StringParameter header : headers) {
+				String headerName = header.getDisplayName();
+				if (headerName == null) { headerName = header.getName(); }
+				request.addHeader(headerName, header.getValue());
+			}
 
 			// send off the HttpRequest to server
-			//long startTime = System.currentTimeMillis();
+			long startTime = System.currentTimeMillis();
 			HttpResponse httpResponse = getHttpClient().execute(request);
-			//log.info("HTTP request took " + (System.currentTimeMillis() - startTime) + " ms");
+			log.info("HTTP request took " + (System.currentTimeMillis() - startTime) + " ms");
 
 			// parse response into a JSONObject (or simple list of values)
 			String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
