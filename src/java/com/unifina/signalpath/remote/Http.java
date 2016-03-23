@@ -17,10 +17,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.codehaus.groovy.grails.web.json.JSONArray;
+import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.codehaus.groovy.grails.web.json.JSONTokener;
 
 import java.io.IOException;
 
@@ -193,7 +192,7 @@ public class Http extends AbstractSignalPathModule {
 					values.add(parser.nextValue());
 				}
 			}
-		} catch (RuntimeException | JSONException | IOException e) {
+		} catch (RuntimeException | IOException e) {
 			errors.add(e.getMessage());
 			e.printStackTrace();
 		}
@@ -202,11 +201,11 @@ public class Http extends AbstractSignalPathModule {
 		if (result != null) {
 			for (Output out : httpOutputs) {
 				String key = out.getDisplayName();
-				if (result.has(key)) {
-					Object value = result.opt(key);
+				Object value = MapTraversal.getProperty(result, key);
+				if (value != null) {
 					out.send(value);
 				} else {
-					errors.add(key + " not found in HTTP response!");
+					errors.add(key + " not found (or was null) in HTTP response!");
 				}
 			}
 		} else {
