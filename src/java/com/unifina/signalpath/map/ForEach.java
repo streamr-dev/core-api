@@ -77,6 +77,8 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Input input : triggeredInputs) {
 			subSignalPath.feedInput(input.getName(), input.getValue());
 		}
+
+		// Clear inputs for next module activation
 		triggeredInputs.clear();
 
 		subSignalPath.propagate();
@@ -132,7 +134,8 @@ public class ForEach extends AbstractSignalPathModule {
 	}
 
 	/**
-	 * Updates an entry of a <code>java.util.Map</code> every time a value is received.
+	 * Connected to an <code>Output</code> so that it updates an entry of a <code>java.util.Map</code> every time a
+	 * value is received.
 	 */
 	private static class CacheUpdaterInput<T> extends Input<T> {
 		private final String outputName;
