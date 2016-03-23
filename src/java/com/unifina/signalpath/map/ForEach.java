@@ -16,8 +16,8 @@ public class ForEach extends AbstractSignalPathModule {
 	private Map signalPathMap;
 	private Map<String, SubSignalPath> keyToSignalPath = new HashMap<>();
 	private Map<String, Map<String, Object>> cachedOutputValuesByKey = new HashMap<>();
-	private List<Input> inputsToPropagate = new ArrayList<>();
 	private List<Output> outputsToPropagate = new ArrayList<>();
+	private final Set<Input> triggeredInputs = new HashSet<>();
 
 	public ForEach() {
 		super();
@@ -51,7 +51,7 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Input input : exportedInputs) {
 			input.setOwner(this);
 			addInput(input);
-			inputsToPropagate.add(input);
+			input.addProxiedInput(new InputTriggerTracker(triggeredInputs, input));
 		}
 		for (Output output : exportedOutputs) {
 			output.setOwner(this);
@@ -74,9 +74,10 @@ public class ForEach extends AbstractSignalPathModule {
 		SubSignalPath subSignalPath = keyToSignalPath.get(currentKey);
 
 		// Pass along inputs to sub-canvas
-		for (Input input : inputsToPropagate) {
+		for (Input input : triggeredInputs) {
 			subSignalPath.feedInput(input.getName(), input.getValue());
 		}
+		triggeredInputs.clear();
 
 		subSignalPath.propagate();
 
@@ -111,6 +112,26 @@ public class ForEach extends AbstractSignalPathModule {
 	}
 
 	/**
+	 * Solely used to keep track of inputs that received values (as opposed to having existing value).
+	 */
+	private static class InputTriggerTracker<T> extends Input<T> {
+
+		private final Set<Input> triggeredInputs;
+		private final Input originalInput;
+
+		public InputTriggerTracker(Set<Input> triggeredInputs, Input originalInput) {
+			super(null, "ValueReceivedTracker-For-" + originalInput.getName(), "Object");
+			this.triggeredInputs = triggeredInputs;
+			this.originalInput = originalInput;
+		}
+
+		@Override
+		public void receive(Object value) {
+			triggeredInputs.add(originalInput);
+		}
+	}
+
+	/**
 	 * Updates an entry of a <code>java.util.Map</code> every time a value is received.
 	 */
 	private static class CacheUpdaterInput<T> extends Input<T> {
@@ -128,5 +149,4 @@ public class ForEach extends AbstractSignalPathModule {
 			cachedOutputValues.put(outputName, value);
 		}
 	}
-
 }

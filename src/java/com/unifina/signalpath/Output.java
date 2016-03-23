@@ -31,18 +31,20 @@ public class Output<T> extends Endpoint<T> {
 	}
 	
 	public void send(T value) {
-		// TODO: null check can be removed?
-		if (value==null)
+		if (value == null) {
 			throw new NullPointerException("Sending a null value is not allowed!");
+		}
 
 		previousValue = value;
 		
 		if (connected) {
-			for (i=0;i<cachedPropagators.length;i++)
+			for (i=0; i < cachedPropagators.length; i++) {
 				cachedPropagators[i].sendPending = true;
-			
-			for (i=0;i<cachedTargets.length;i++)
+			}
+
+			for (i=0 ; i < cachedTargets.length; i++) {
 				cachedTargets[i].receive(value);
+			}
 		}
 
 		for (Output<T> proxy : proxiedOutputs) {
