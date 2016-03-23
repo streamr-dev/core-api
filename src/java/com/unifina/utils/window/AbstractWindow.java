@@ -4,7 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayDeque;
 
 /**
- * Created by henripihkala on 03/03/16.
+ * An abstraction of a sliding window that supports adding new objects of type T and removing old ones.
+ * Subclasses get to determine if any values need to be removed. An integer field called "length" is
+ * always present, but its interpretation is done by the subclass. A length of 0 always means
+ * an infinite window, however.
+ *
+ * Methods on the WindowListener are called when items are added or removed or when the window is cleared.
  */
 public abstract class AbstractWindow<T> implements Serializable {
 	protected WindowListener listener;
