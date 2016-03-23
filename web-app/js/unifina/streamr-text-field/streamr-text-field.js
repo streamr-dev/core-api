@@ -39,7 +39,7 @@
             _this.sendValue(_this.value)
         })
 
-        this.textArea.mouseup(function(){
+        this.textArea.mouseup(function() {
             if (  $(this).outerWidth()  != _this.width || $(this).outerHeight() != _this.height ) {
                 $(_this).trigger("update")
             }

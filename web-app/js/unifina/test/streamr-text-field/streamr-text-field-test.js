@@ -1,5 +1,5 @@
 var assert = require('assert')
-var $ = require('jquery')(require("jsdom").jsdom().parentWindow);
+var $ = require('jquery')(require("jsdom").jsdom().defaultView);
 var StreamrTextField = require('../../streamr-text-field/streamr-text-field').StreamrTextField
 
 
@@ -118,8 +118,8 @@ describe('streamr-text-field', function() {
             $("textarea").width(200)
             $("textarea").height(100)
             $("textarea").mouseup()
-            assert.equal(textField.width, 200)
-            assert.equal(textField.height, 100)
+            assert(textField.width >= 200) // textField.width is outer width
+            assert(textField.height >= 100) // textField.height is outer height
         })
     })
 

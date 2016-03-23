@@ -1,9 +1,8 @@
 var assert = require('assert')
 var fs = require('fs')
 var jsdom = require("jsdom")
-
-var window = jsdom.jsdom().parentWindow
-var $ = require('jquery')(window)
+var window = jsdom.jsdom().defaultView
+var $ = require('jquery')(window);
 var _ = require('underscore')
 
 var moduleTree
