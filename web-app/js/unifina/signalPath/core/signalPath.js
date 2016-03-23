@@ -271,7 +271,7 @@ var SignalPath = (function () {
 	function createModuleFromJSON(data) {
 		if (data.error) {
 			handleError(data.message)
-			return;
+			return undefined;
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
