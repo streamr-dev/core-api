@@ -1,7 +1,5 @@
 package com.unifina.utils;
 
-import org.codehaus.groovy.grails.web.json.JSONObject;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,24 +17,16 @@ public class MapTraversal {
 	@SuppressWarnings("rawtypes")
 	public static Object getProperty(Map map, String name) {
 		if (name == null) { throw new IllegalArgumentException("Name can not be null!"); }
-		if (map == null) { return null; }
 
-		Object result = null;
-		String[] names = name.split("\\.");
-		for (int i = 0; i < names.length; i++) {
-			String s = names[i];
-			result = map.get(s);
-
-			// Not the last entry: result should be a Map
-			if (i < names.length - 1) {
-				if (result instanceof Map) {
-					map = (Map)result;
-				} else {
-					return null;
-				}
+		Object i = map;
+		for (String prop : name.split("\\.")) {
+			if (i instanceof Map) {
+				i = ((Map)i).get(prop);
+			} else {
+				return null;
 			}
 		}
-		return result;
+		return i;
 	}
 	
 	public static String getString(Map map, String name) {
