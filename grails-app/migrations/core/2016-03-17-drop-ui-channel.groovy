@@ -58,15 +58,15 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "henripihkala (generated)", id: "1458240759438-4") {
-		dropForeignKeyConstraint(baseTableName: "dashboard_item", baseTableSchemaName: "core_dev_henri", constraintName: "FKF4B0C5DE8A8883E5")
+		dropForeignKeyConstraint(baseTableName: "dashboard_item", constraintName: "FKF4B0C5DE8A8883E5")
 	}
 
 	changeSet(author: "henripihkala (generated)", id: "1458240759438-5") {
-		dropForeignKeyConstraint(baseTableName: "ui_channel", baseTableSchemaName: "core_dev_henri", constraintName: "FK2E3D5E583D649786")
+		dropForeignKeyConstraint(baseTableName: "ui_channel", constraintName: "FK2E3D5E583D649786")
 	}
 
 	changeSet(author: "henripihkala (generated)", id: "1458240759438-6") {
-		dropForeignKeyConstraint(baseTableName: "ui_channel", baseTableSchemaName: "core_dev_henri", constraintName: "FK2E3D5E58B6140F06")
+		dropForeignKeyConstraint(baseTableName: "ui_channel", constraintName: "FK2E3D5E58B6140F06")
 	}
 
 	changeSet(author: "henripihkala (generated)", id: "1458240759438-8") {
