@@ -287,6 +287,338 @@
 
 			<h2>Building your first Canvas</h2>
 
+			<h1>User guide</h1>
+
+			<h2>Working with Streams</h2>
+
+			<p>
+				All data in Streamr is stored in streams (TODO: ADD A LINK TO “What is a stream?”).  A stream is a
+				timestamped sequence of events.  A stream is capable of receiving and saving new data points, and it
+				will return data in the correct sequence when needed.  In this section, we’ll show how to do the
+				following:
+			</p>
+
+			<ul>
+				<li>Creating and deleting streams.</li>
+				<li>Editing stream details.</li>
+				<li>Uploading historical data.</li>
+				<li>Pushing events to a stream.</li>
+				<li>Subscribing to a stream.</li>
+			</ul>
+
+			<h3>Creating and Deleting Streams</h3>
+
+			<p>
+				You can create new streams either through the user interface or by using the stream API (TODO: ADD A
+				LINK TO STREAM API).  If you want to create a stream manually, go to the Streams section.  There’s a
+				button which looks like this:
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="create-stream.png" alt="Create stream." />
+			</figure>
+
+			<p>
+				A click on the button takes you to a dialog where you’ll fill in the stream name and an optional
+				description.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="create-stream-dialog.png" alt="Create stream dialog." />
+			</figure>
+
+			<p>
+				A new stream is created when you press the “Next” button.  You’ll be shown a stream view that includes
+				the stream details (the name and description), API credentials, configured fields (there’s won’t be any
+				yet), and an overview of stream history (there will be none yet).
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="stream-view.png" alt="Stream view page" />
+			</figure>
+
+			<p>
+				If you want to delete a stream, click on the <strong>Delete stream</strong> button. You’ll be asked to
+				confirm that you really want to go ahead.
+			</p>
+
+			<h3>Editing Stream Details</h3>
+
+			<p>
+				The stream details can be edited by clicking on the <strong>Edit info</strong> button. This is where you
+				rename a stream or modify its description.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="edit-stream-info.png" alt="Stream info edit page" />
+			</figure>
+
+			<p>
+				The stream view also includes the option of configuring the data fields.  If you’ll load real-time data
+				through the API, you’ll need to configure the data fields now.  If you’ll first load historical data
+				from a text file, you can skip this step.  We’ll be in many cases able to to autodetect the field types
+				from the input.
+			</p>
+
+			<p>
+				If you want to configure the data fields manually, the <strong>Configure Fields</strong> button takes
+				you to a setup dialog.  To add a new data field, click on the + Add Field button, give the field a name
+				and change the field type as appropriate.  Remember to save the changes when done.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="configure-stream.png" alt="Configure stream" />
+			</figure>
+
+			<p>
+				You can also add data fields and specify the field types using the stream API (TODO: ADD A LINK TO STREAM API).
+			</p>
+
+			<h3>Uploading Historical Data</h3>
+
+			<p>
+				Batches of historical events can be loaded into a stream by importing a CSV file.  If you click on an
+				existing stream, you’ll see a History panel and a data drop.  This is where you can drop a text file
+				with a batch of event history.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="drop-csv-files.png" alt="Drop .csv files here view" />
+			</figure>
+
+			<p>
+				You can also pick a local file for import by manually by clicking on the data drop.  Either way, Streamr
+				will parse the given CSV file and load the events into the stream.
+			</p>
+
+			<p>
+				As to the format, the CSV file should have the column names on the first row, and use either a comma or
+				a semicolon as the separator.  One of the columns should be a timestamp, where the recommended format is
+				either "yyyy-MM-dd HH:mm:ss" or "yyyy-MM-dd HH:mm:ss.SSS”.  Timestamps must be in a chronological order
+				with earlier events first and the recent events last.
+			</p>
+
+			<p>
+				If Streamr cannot find the event timestamps or doesn’t understand the timestamp format, you will see a
+				dialog box like the one below.  This is where you can manually select the timestamp column and specify
+				the format.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="timestamp-select.png" alt="Selecting timestamp field manually" />
+			</figure>
+
+			<p>
+				We’ll do our best to make sense of the data columns in the CSV file, but the autodetection of field
+				types will not always work.  For instance, a column of telephone numbers may be interpreted as numbers
+				even if you’d probably want to import them as strings.  In such cases, you’ll need to configure the
+				fields manually as shown above.  Mind you, making changes that don’t make sense will cause runtime
+				exceptions due to incompatible data types.
+			</p>
+
+			<p>
+				Let’s now go ahead and upload some sample data.  We’ll import a text file which contains a collection of
+				recent tweets found with the keywords “augmented intelligence”.  This is what the sample tweet data
+				looks like, as at the time of writing, and only four columns and twenty rows shown:
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="sample-tweets.png" alt="Sample data of tweets." />
+			</figure>
+
+			<p>
+				The data file is called “SampleTweets.csv”, and you can download the latest version to your desktop from
+				this <a href="">link</a>.
+			</p>
+
+			<p>
+				If you drag the the sample file to the data drop, the events are uploaded to the stream. Once the
+				process is complete, the stream view is updated to show the extent of the archived history.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="stream-view-2.png" alt="View of stream info" />
+			</figure>
+
+			<h3>Pushing events to a stream</h3>
+
+			<p>
+				Streamr has a simple API which allows you to push events in JSON format to a stream.  The events are
+				immediately processed by any canvas which subscribes to the stream (TODO: ADD A LINK TO “Working with
+				canvases”).  The events are also available for historical playback as soon as they are received by
+				Streamr.
+			</p>
+
+			<p>
+				You can push events to a stream from any programming language. This is the HTTP endpoint for the JSON
+				API:
+			</p>
+
+			<p>
+				<a href="http://data.streamr.com/json">http://data.streamr.com/json</a>
+			</p>
+
+			<p>
+				If you want to send the data via an encrypted connection, use HTTPS instead of HTTP.
+			</p>
+
+			<p>
+				The authentication information is in the request headers, and the actual data payload is in the request
+				body. These are the possible headers:
+			</p>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Header</th>
+						<th>Required</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Stream</td>
+						<td>Yes</td>
+						<td>The stream ID</td>
+					</tr>
+					<tr>
+						<td>Auth</td>
+						<td>Yes</td>
+						<td>The stream authorisation key</td>
+					</tr>
+					<tr>
+						<td>Timestamp</td>
+						<td>No</td>
+						<td>Java/Javascript time</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p>
+				The event timestamp is optional.  If omitted, the current timestamp on the receiving server is used. If
+				you want to include an explicit timestamp, it should be given in milliseconds since January 1, 1970 UTC.
+				In any case, any explicit timestamp only affects the playback.  Each event is processed as soon as it is
+				received.
+			</p>
+
+			<p>Here’s an example of request headers:</p>
+
+			<textarea>
+Stream: -2IwFcsJSzO__9nt0nhc7g
+Auth: cZhdnH7OQpK9ip07rttKSQ
+Timestamp: 1441227869000
+			</textarea>
+
+			<p>And here’s an example of a request body.</p>
+
+			<textarea>
+{
+	"foo": "hello",
+	"bar": 24.5
+}
+			</textarea>
+
+			<p>A fully-formed request example using jquery looks like the following:</p>
+
+			<textarea>
+var msg = {
+	foo: "hello",
+	bar: 24.5
+};
+
+$.ajax({
+	type: "POST",
+	url: "http://data.streamr.com/json",
+	headers: {
+		Stream: "-2IwFcsJSzO__9nt0nhc7g",
+		Auth: "cZhdnH7OQpK9ip07rttKSQ",
+		Timestamp: Date.now()
+	},
+	data: JSON.stringify(msg)
+});
+			</textarea>
+
+			<p>The same example using curl looks like this.</p>
+
+			<textarea>
+curl -i -X POST -H "Stream: -2IwFcsJSzO__9nt0nhc7g" -H "Auth: cZhdnH7OQpK9ip07rttKSQ" -d "{\"foo\":\"hello\",\"bar\":24.5}" http://data.streamr.com/json
+			</textarea>
+
+			<p>
+				If the call is successful, the data API returns the code 204 (i.e. “no content”).  These are the
+				possible return codes:
+			</p>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>204</td>
+						<td>Success</td>
+					</tr>
+					<tr>
+						<td>400</td>
+						<td>Invalid Request</td>
+					</tr>
+					<tr>
+						<td>403</td>
+						<td>Authentication failed</td>
+					</tr>
+					<tr>
+						<td>404</td>
+						<td>Unknown endpoint</td>
+					</tr>
+					<tr>
+						<td>500</td>
+						<td>Unexpected error</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<h3>Subscribing to a Stream</h3>
+			<p>
+				You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process
+				trivially easy: You place a stream module on a digital canvas in Streamr user interface, and the events
+				start flowing downstream for further processing.  You can also subscribe to a stream in external
+				applications with the Streamr API (TODO: ADD A LINK TO JAVASCRIPT API).
+			</p>
+
+			<p>
+				If you want to subscribe to a stream in the user interface, you can either work with a new canvas or
+				load an existing one in the Canvas section.  Start typing in the name of a stream in a text box labeled
+				<strong>Add Stream / Module</strong>.  We’ll find the stream for you as you type.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="canvas-selecting-stream.png" alt="Selecting stream in canvas editor" />
+			</figure>
+
+			<figure style="float: right;">
+				<g:img dir="images/user-guide" file="stream-module.png" alt="Selecting stream in canvas editor" />
+			</figure>
+
+			<p>
+				When you click on the match, the stream module will be placed on the canvas.  The events in the stream
+				are now available at the output endpoints.  In this case, we’ve got data fields for TweetText, TweetID,
+				UserName, UserTimeZone, etc.
+			</p>
+
+			<p>
+				You can next add processing modules and start creating intelligence on top of the real-time data that
+				flows from the stream.  Or you can first place other streams in the canvas and combine different data
+				sources.  See the section on “Working with canvases” (TODO: ADD A LINK HERE) for examples of what you
+				can do.  For now, we’ll just add a chart module to visualise the data.
+			</p>
+
+			<figure>
+				<g:img dir="images/user-guide" file="live-canvas-with-streams.png" alt="Live canvas with tweet data" />
+			</figure>
+
 			<h1>Defining Streams</h1>
 			<h2>API Streams</h2>
 			<h2>Database (MongoDb) poller streams</h2>
