@@ -215,4 +215,21 @@ class HttpSpec extends Specification {
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
+
+	void "JSON object dot notation supports array indexing too"() {
+		module.configure([
+			options: [inputCount: [value: 0], outputCount: [value: 3]],
+			outputs: [
+				[name: "out1", displayName: "seasons[1]"],
+				[name: "out2", displayName: "best.pals.count"],
+				[name: "out3", displayName: "best.pals[1].name"]
+			]
+		])
+		def inputValues = [trigger: [1, true, "test"]]
+		def outputValues = [error: [null, null, null], out1: [3, 3, 3],
+							out2: [2, 2, 2], out3: ["Finn", "Finn", "Finn"]]
+		response = [best: [pals: [[name: "Jake", species: "Dog"], [name: "Finn", species: "Human"]]], seasons: [4,3,2,1]]
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
 }

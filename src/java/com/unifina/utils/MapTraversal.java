@@ -11,7 +11,7 @@ public class MapTraversal {
 
 	/**
 	 * Fetch given property in the nested map tree,
-	 * @param name e.g. "options.input.value"
+	 * @param name e.g. "options.inputs[3].value"
 	 * @return given property, or null if not found
 	 */
 	@SuppressWarnings("rawtypes")
@@ -20,10 +20,28 @@ public class MapTraversal {
 
 		Object i = map;
 		for (String prop : name.split("\\.")) {
-			if (i instanceof Map) {
-				i = ((Map)i).get(prop);
-			} else {
+			if (!(i instanceof Map)) {
+				if (i instanceof List && (prop.equalsIgnoreCase("count") || prop.equalsIgnoreCase("length"))) {
+					return new Integer(((List)i).size());
+				}
 				return null;
+			}
+			// iterate through (possibly nested) List property, e.g. "inputs[3]"
+			// Note: if prop isn't a List, then simply listParts[0] == prop, and loop is skipped
+			String[] listParts = prop.split("\\[");
+			i = ((Map)i).get(listParts[0]);
+			for (int j = 1; j < listParts.length; j++) {
+				if (!(i instanceof List)) { return null; }
+				int len = listParts[j].length();
+				if (len < 2 || listParts[j].charAt(len-1) != ']') {
+					return null;    // malformed, e.g. "inputs[13.value" or "inputs[[3]].value" or "inputs[hax[2]].value"
+				}
+				try {
+					int index = Integer.parseInt(listParts[j].substring(0, len - 1));
+					i = ((List)i).get(index);
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+					return null;
+				}
 			}
 		}
 		return i;
