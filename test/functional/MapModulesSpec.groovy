@@ -1,10 +1,8 @@
-import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
 import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import grails.test.mixin.TestFor
 import grails.util.Holders
 
 import java.text.DecimalFormat
@@ -45,14 +43,10 @@ class MapModulesSpec extends LoginTester1Spec {
 		produceAllDataToKafka()
 
 		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[1].text() == "3.0" }
+		waitFor(10) { $(".modulelabel")[0].text() == "3.0" }
 
-		and: "Label for map shows correct key-count pairs"
-		$(".modulelabel")[0].text().contains("key-1=2.0")
-		$(".modulelabel")[0].text().contains("key-2=2.0")
-		$(".modulelabel")[0].text().contains("key-3=1.0")
-		$(".modulelabel")[0].text().contains("key-4=3.0")
-		$(".modulelabel")[0].text().contains("key-5=1.0")
+		and: "TableAsMap for map shows correct key-count pairs"
+		tableContents() == ["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1",] as Set
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -73,14 +67,10 @@ class MapModulesSpec extends LoginTester1Spec {
 		produceAllDataToKafka()
 
 		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[1].text() == "34.0" }
+		waitFor(10) { $(".modulelabel")[0].text() == "34.0" }
 
-		and: "Label for map shows correct key-count pairs"
-		$(".modulelabel")[0].text().contains("key-1=70.0")
-		$(".modulelabel")[0].text().contains("key-2=-65.0")
-		$(".modulelabel")[0].text().contains("key-3=115.0")
-		$(".modulelabel")[0].text().contains("key-4=34.0")
-		$(".modulelabel")[0].text().contains("key-5=0.0")
+		and: "TableAsMap for map shows correct key-count pairs"
+		tableContents() == ["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0",] as Set
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -121,15 +111,15 @@ class MapModulesSpec extends LoginTester1Spec {
 		addAndConnectModules("ForEach")
 
 		addAndWaitModule("Label")
-		moveModuleBy("Label", 650, 75, 2)
+		moveModuleBy("Label", 650, 75, 1)
 
 		chooseDropdownParameterForModule("ForEach", "canvas", subCanvasName)
 		sleep(500)
 
 		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "A"))
 		connectEndpoints(findOutput("Stream", "value"), findInput("ForEach", "in"))
-		connectEndpoints(findOutput("ForEach", "out"), findInput("Label", "label", 1))
-		connectEndpoints(findOutput("ForEach", "out2"), findInput("Label", "label", 2))
+		connectEndpoints(findOutput("ForEach", "out"), findInput("Label", "label", 0))
+		connectEndpoints(findOutput("ForEach", "out2"), findInput("Label", "label", 1))
 
 		and: "run canvas in realtime"
 		ensureRealtimeTabDisplayed()
@@ -140,9 +130,9 @@ class MapModulesSpec extends LoginTester1Spec {
 		produceAllDataToKafka()
 
 		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[1].text() == (0 * 0 + 1 * 1 + 33 * 33).toString() + ".0" }
+		waitFor(10) { $(".modulelabel")[0].text() == (0 * 0 + 1 * 1 + 33 * 33).toString() + ".0" }
 
-		$(".modulelabel")[2].text() == new DecimalFormat("#.########",
+		$(".modulelabel")[1].text() == new DecimalFormat("#.########",
 			DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(Math.log(33))
 
 		// key-1 2500, log(40) = 3.688879
@@ -150,12 +140,14 @@ class MapModulesSpec extends LoginTester1Spec {
 		// key-3 13225, log(115) = 4.744932
 		// key-4 1090, log(33) = 3.496508
 		// key-5 0, log(0)  = - inf
-		and: "Label for map shows correct key-count pairs"
-		$(".modulelabel")[0].text().contains("key-1={out2=3.68887945, out=2500.0}")
-		$(".modulelabel")[0].text().contains("key-2={out=2725.0}")
-		$(".modulelabel")[0].text().contains("key-3={out2=4.74493213, out=13225.0}")
-		$(".modulelabel")[0].text().contains("key-4={out2=3.49650756, out=1090.0}")
-		$(".modulelabel")[0].text().contains("key-5={out=0.0}")
+		and: "TableAsMap for map shows correct key-count pairs"
+		tableContents() == [
+			'key-1 {"out2":3.68887945,"out":2500}',
+			'key-2 {"out":2725}',
+			'key-3 {"out2":4.74493213,"out":13225}',
+			'key-4 {"out2":3.49650756,"out":1090}',
+			'key-5 {"out":0}'
+		] as Set
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -166,16 +158,16 @@ class MapModulesSpec extends LoginTester1Spec {
 		moduleShouldAppearOnCanvas("Stream")
 		addAndWaitModule(moduleName)
 		moveModuleBy(moduleName, 200, 200, 0, true)
+		addAndWaitModule("MapAsTable")
+		moveModuleBy("MapAsTable", 650, 400)
 		addAndWaitModule("Label")
-		moveModuleBy("Label", 650, 400)
-		addModule("Label")
-		moduleShouldAppearOnCanvas("Label", 1)
-		moveModuleBy("Label", 650, 200, 1)
+		moduleShouldAppearOnCanvas("Label")
+		moveModuleBy("Label", 650, 200)
 
 		connectEndpoints(findOutput("Stream", "key"), findInput(moduleName, "key"))
-		connectEndpoints(findOutput(moduleName, "map"), findInput("Label", "label", 0))
+		connectEndpoints(findOutput(moduleName, "map"), findInput("MapAsTable", "map"))
 		if (moduleName != "ForEach") {
-			connectEndpoints(findOutput(moduleName, "valueOfCurrentKey"), findInput("Label", "label", 1))
+			connectEndpoints(findOutput(moduleName, "valueOfCurrentKey"), findInput("Label", "label", 0))
 		}
 	}
 
@@ -189,6 +181,11 @@ class MapModulesSpec extends LoginTester1Spec {
 		produceToKafka("key-4", 1)
 		produceToKafka("key-5", 0)
 		produceToKafka("key-4", 33)
+	}
+
+	private Set<String> tableContents() {
+		def mapAsTable = findModuleOnCanvas("MapAsTable")
+		return mapAsTable.find(".event-table-module-content tr").collect { it.text() }.toSet()
 	}
 
 	private void produceToKafka(String key, Double value) {
