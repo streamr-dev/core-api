@@ -1,12 +1,70 @@
 (function(exports) {
 
+	function StreamrSwitcher(parent, json) {
+		this.parent = $(parent)
+		this.mustSendValue = true
+		if(json)
+			this.checked = json.switcherValue
+		$(this).on("started", this.startFunction)
+	}
+
+	StreamrSwitcher.prototype.render = function() {
+		var _this = this
+		this.switcher = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
+		this.switcher.attr("checked", this.checked)
+		this.switcher.change(function() {
+			if(_this.mustSendValue === true)
+				_this.sendValue(_this.getValue())
+		})
+		this.parent.append(this.switcher)
+		this.parent.addClass("switcher-container")
+		this.switcher.streamrSwitcherWidget({
+			theme: 'square',
+			on_state_content: "1",
+			off_state_content: "0"
+		})
+	}
+
+	StreamrSwitcher.prototype.getDragCancelAreas = function() {
+		return ["div.switcher-inner"]
+	}
+
+	StreamrSwitcher.prototype.getValue = function() {
+		return this.switcher.prop('checked')
+	}
+
+	StreamrSwitcher.prototype.toJSON = function() {
+		return {
+			switcherValue: this.getValue()
+		}
+	}
+
+	StreamrSwitcher.prototype.updateState = function(state) {
+		this.mustSendValue = false
+		if(state == true && this.getValue() === false)
+			this.switcher.switcher("on")
+		else if(state == false && this.getValue() === true)
+			this.switcher.switcher("off")
+		this.mustSendValue = true
+	}
+
+	StreamrSwitcher.prototype.sendValue = function(value) {
+		$(this).trigger("input", value)
+	}
+
+	StreamrSwitcher.prototype.receiveResponse = function(p) {
+		if (p["switcherValue"] === true || p["switcherValue"] === false)
+			this.updateState(p["switcherValue"])
+	}
+
+
 	// Copy pasted from pixelAdmin /javascripts/build/plugins_switcher.js
-	var Switcher = function($el, options) {
+	var StreamrSwitcherWidget = function($el, options) {
 		var box_class;
 		if (options == null) {
 			options = {};
 		}
-		this.options = $.extend({}, Switcher.DEFAULTS, options);
+		this.options = $.extend({}, StreamrSwitcherWidget.DEFAULTS, options);
 		this.$checkbox = null;
 		this.$box = null;
 		if ($el.is('input[type="checkbox"]')) {
@@ -49,7 +107,7 @@
 	 *
 	 */
 
-	Switcher.prototype.enable = function() {
+	StreamrSwitcherWidget.prototype.enable = function() {
 		this.$checkbox.prop('disabled', false);
 		return this.$box.removeClass('disabled');
 	};
@@ -60,7 +118,7 @@
 	 *
 	 */
 
-	Switcher.prototype.disable = function() {
+	StreamrSwitcherWidget.prototype.disable = function() {
 		this.$checkbox.prop('disabled', true);
 		return this.$box.addClass('disabled');
 	};
@@ -71,7 +129,7 @@
 	 *
 	 */
 
-	Switcher.prototype.on = function() {
+	StreamrSwitcherWidget.prototype.on = function() {
 		if (!this.$checkbox.is(':checked')) {
 			this.$checkbox.click();
 			return this.$box.addClass('checked');
@@ -84,7 +142,7 @@
 	 *
 	 */
 
-	Switcher.prototype.off = function() {
+	StreamrSwitcherWidget.prototype.off = function() {
 		if (this.$checkbox.is(':checked')) {
 			this.$checkbox.click();
 			return this.$box.removeClass('checked');
@@ -97,7 +155,7 @@
 	 *
 	 */
 
-	Switcher.prototype.toggle = function() {
+	StreamrSwitcherWidget.prototype.toggle = function() {
 		if (this.$checkbox.click().is(':checked')) {
 			return this.$box.addClass('checked');
 		} else {
@@ -105,19 +163,19 @@
 		}
 	};
 
-	Switcher.DEFAULTS = {
+	StreamrSwitcherWidget.DEFAULTS = {
 		theme: null,
 		on_state_content: 'ON',
 		off_state_content: 'OFF'
 	};
 
-	$.fn.switcher = function(options, attrs) {
+	$.fn.streamrSwitcherWidget = function(options, attrs) {
 		return $(this).each(function() {
 			var $this, sw;
 			$this = $(this);
 			sw = $.data(this, 'Switcher');
 			if (!sw) {
-				return $.data(this, 'Switcher', new Switcher($this, options));
+				return $.data(this, 'Switcher', new StreamrSwitcherWidget($this, options));
 			} else if (options === 'enable') {
 				return sw.enable();
 			} else if (options === 'disable') {
@@ -132,65 +190,7 @@
 		});
 	};
 
-	$.fn.switcher.Constructor = Switcher;
-
-
-	function StreamrSwitcher(parent, json) {
-		this.parent = $(parent)
-		this.mustSendValue = true
-		if(json)
-			this.checked = json.switcherValue
-		$(this).on("started", this.startFunction)
-	}
-
-	StreamrSwitcher.prototype.render = function() {
-		var _this = this
-		this.switcher = $('<input type="checkbox" data-class="switcher-lg" class="streamr-switcher-checkbox">')
-		this.switcher.attr("checked", this.checked)
-		this.switcher.change(function() {
-			if(_this.mustSendValue === true)
-				_this.sendValue(_this.getValue())
-		})
-		this.parent.append(this.switcher)
-		this.parent.addClass("switcher-container")
-		this.switcher.switcher({
-			theme: 'square',
-			on_state_content: "1",
-			off_state_content: "0"
-		})
-	}
-
-	StreamrSwitcher.prototype.getDragCancelAreas = function() {
-		return ["div.switcher-inner"]
-	}
-
-	StreamrSwitcher.prototype.getValue = function() {
-		return this.switcher.prop('checked')
-	}
-
-	StreamrSwitcher.prototype.toJSON = function() {
-		return {
-			switcherValue: this.getValue()
-		}
-	}
-
-	StreamrSwitcher.prototype.updateState = function(state) {
-		this.mustSendValue = false
-		if(state == true && this.getValue() === false)
-			this.switcher.switcher("on")
-		else if(state == false && this.getValue() === true)
-			this.switcher.switcher("off")
-		this.mustSendValue = true
-	}
-
-	StreamrSwitcher.prototype.sendValue = function(value) {
-		$(this).trigger("input", value)
-	}
-
-	StreamrSwitcher.prototype.receiveResponse = function(p) {
-		if (p["switcherValue"] === true || p["switcherValue"] === false)
-			this.updateState(p["switcherValue"])
-	}
+	$.fn.streamrSwitcherWidget.Constructor = StreamrSwitcherWidget;
 
 exports.StreamrSwitcher = StreamrSwitcher
 
