@@ -28,7 +28,7 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 		List<Double> foundList = new ArrayList<>(outs.size());
 
 		for (Output<Object> out : outs) {
-			String key = out.getDisplayName();
+			String key = out.getEffectiveName();
 			Object value = MapTraversal.getProperty(map, key);
 			if (value == null) {
 				foundList.add(0.0);

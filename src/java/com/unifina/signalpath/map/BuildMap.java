@@ -22,20 +22,12 @@ public class BuildMap extends AbstractSignalPathModule {
 		Map<String, Object> ret = new HashMap<>();
 
 		for (Input<Object> in : ins) {
-			String key = getDisplayNameOrName(in);
+			String key = in.getEffectiveName();
 			Object value = in.getValue();
 			ret.put(key, value);
 		}
 
 		map.send(ret);
-	}
-
-	private static String getDisplayNameOrName(Input<Object> in) {
-		String key = in.getDisplayName();
-		if (key == null) {
-			key = in.getName();
-		}
-		return key;
 	}
 
 	@Override
