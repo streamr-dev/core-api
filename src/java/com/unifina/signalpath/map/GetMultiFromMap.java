@@ -4,6 +4,7 @@ import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 	private MapInput in = new MapInput(this, "in");
 
 	private List<Output<Object>> outs;
-	private ListOutput founds = new ListOutput(this, "founds");
+	private MapOutput founds = new MapOutput(this, "founds");
 
 
 	@Override
@@ -25,15 +26,15 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 	public void sendOutput() {
 		Map map = in.getValue();
 
-		List<Double> foundList = new ArrayList<>(outs.size());
+		Map<String, Double> foundList = new HashMap<>();
 
 		for (Output<Object> out : outs) {
 			String key = out.getEffectiveName();
 			Object value = MapTraversal.getProperty(map, key);
 			if (value == null) {
-				foundList.add(0.0);
+				foundList.put(key, 0.0);
 			} else {
-				foundList.add(1.0);
+				foundList.put(key, 1.0);
 				out.send(value);
 			}
 		}

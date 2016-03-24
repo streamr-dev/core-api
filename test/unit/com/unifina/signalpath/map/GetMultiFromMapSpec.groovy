@@ -37,12 +37,12 @@ class GetMultiFromMapSpec extends Specification {
 			"out-3": [null, [hello: "world"],        42,     3, 3],
 			"out-4": [null,             null,       null, null, "oh, yeah"],
 			founds: [
-			    [0, 0, 0, 0],
-				[1, 0, 1, 0],
-				[0, 1, 1, 0],
-				[1, 1, 1, 0],
-				[0, 0, 0, 1]
-			].collect { it*.doubleValue() }
+				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 0d],
+				[a: 1d, b: 0d, c: 1d, "deep.deep.inside": 0d],
+				[a: 0d, b: 1d, c: 1d, "deep.deep.inside": 0d],
+				[a: 1d, b: 1d, c: 1d, "deep.deep.inside": 0d],
+				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 1d]
+			]
 		]
 
 		expect:
