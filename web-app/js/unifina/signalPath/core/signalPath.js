@@ -446,8 +446,8 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				if (jqXHR.responseText) {
-					var apiError = JSON.parse(jqXHR.responseText);
+				if (jqXHR.responseJSON) {
+					var apiError = jqXHR.responseJSON;
 					if (apiError && apiError.message) {
 						handleError(apiError.message)
 						return;
