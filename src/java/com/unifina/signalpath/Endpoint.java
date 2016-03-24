@@ -53,7 +53,11 @@ public abstract class Endpoint<T> implements Serializable {
 	}
 	
 	public String getLongName() {
-		return (getOwner()!=null ? getOwner().getName()+"." : "") + (getDisplayName()!=null ? getDisplayName() : getName());
+		return (getOwner()!=null ? getOwner().getName()+"." : "") + getEffectiveName();
+	}
+
+	public String getEffectiveName() {
+		return getDisplayName() != null ? getDisplayName() : getName();
 	}
 	
 	public abstract boolean isConnected();

@@ -195,8 +195,8 @@ public class TimeSeriesChart extends Chart {
 		config.put("barify",barify);
 		
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("inputs", tsInputCount, "int"));
-		options.add(new ModuleOption("overnightBreak", overnightBreak, "boolean"));
+		options.add(new ModuleOption("inputs", tsInputCount, ModuleOption.OPTION_INTEGER));
+		options.add(new ModuleOption("overnightBreak", overnightBreak, ModuleOption.OPTION_BOOLEAN));
 		
 		return config;
 	}
