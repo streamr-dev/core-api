@@ -23,7 +23,15 @@ import org.codehaus.groovy.grails.web.json.JSONTokener;
 
 import java.io.IOException;
 
-
+/**
+ * Module that makes HTTP requests and sends forward responses.
+ * It constructs request input from variable number of Inputs, and
+ *    de-constructs response output into specified Outputs using dot-notation names (e.g. values[3].car.id)
+ * This module makes assumptions with input (GET uses URL params, POST uses body) and output (first found object is what we want)
+ *    and is quite lenient with "bad" output (if no object is found, just send values that were found)
+ * @see MapTraversal that does output parsing according to Output displayName
+ * @see Http for a minimally-magical module that gives full control to the user over forming the request and parsing the response
+ */
 public class SimpleHttp extends AbstractSignalPathModule {
 
 	private HttpVerbParameter verb = new HttpVerbParameter(this, "verb");
@@ -51,7 +59,7 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		addOutput(errorOut);
 	}
 
-	/** This function is overridden in HttpSpec to inject mock HttpClient */
+	/** This function is overridden in SimpleHttpSpec to inject mock HttpClient */
 	protected HttpClient getHttpClient() {
 		if (_httpClient == null) {
 			// commented out: SSL client that supports self-signed certs

@@ -2,7 +2,7 @@ package core
 databaseChangeLog = {
 	changeSet(author: "jtakalai", id: "2016031801409-1") {
 		insert(tableName: "module") {
-			column(name: "id", valueNumeric: 225)
+			column(name: "id", valueNumeric: 1000)
 			column(name: "version", valueNumeric: 0)
 			column(name: "category_id", valueNumeric: 3)
 			column(name: "implementing_class", value: "com.unifina.signalpath.remote.SimpleHttp")
