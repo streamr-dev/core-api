@@ -25,7 +25,7 @@ class ModuleService {
 		m.setDomainObject(mod);
 		if (parent != null) { m.parentSignalPath = parent }
 
-		// Make sure the config has up-to-date info about the Module
+		// Make sure the config contains up-to-date info about the Module
 		if (config != null) {
 			config["id"] = mod.id
 			config["jsModule"] = mod.jsModule
