@@ -257,6 +257,8 @@ modules = {
 		dependsOn 'mathjax'
 		dependsOn 'spectrum'
 		dependsOn 'underscore'
+		dependsOn 'backbone'
+		dependsOn 'mustache'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

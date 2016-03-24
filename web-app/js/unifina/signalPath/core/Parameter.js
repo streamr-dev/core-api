@@ -1,4 +1,105 @@
-SignalPath.ParamRenderers = {
+(function() {
+
+	var KeyValuePair = Backbone.Model.extend({
+		defaults: {
+			key: '',
+			value: ''
+		}
+	});
+
+	var KeyValuePairList = Backbone.Collection.extend({
+		model: KeyValuePair,
+
+		fromJSON: function(map) {
+			var _this = this
+			Object.keys(map).forEach(function(key) {
+				_this.add(new KeyValuePair({
+					key: key,
+					value: map[key]
+				}))
+			})
+		},
+
+		toJSON: function() {
+			var map = {}
+			this.models.forEach(function(model) {
+				map[model.get('key')] = model.get('value')
+			})
+			return map
+		}
+	});
+
+	// TODO: how to tab from key to value?
+	var KeyValuePairView = Backbone.View.extend({
+		tagName: 'tr',
+		template: '<td><input type="text" class="form-control input-sm key" name="key" value="{{key}}" placeholder="Key"></td><td><input type="text" class="form-control input-sm value" name="value" value="{{value}}" placeholder="Value"></td><td><i class="fa fa-trash-o delete"></i></td>',
+		events: {
+			'click .delete': 'remove',
+			'change input.key': 'update',
+			'change input.value': 'update',
+		},
+		initialize: function() {
+			this.listenTo(this.model, 'change', this.render)
+			this.listenTo(this.model, 'remove', this.unrender)
+		},
+		render: function() {
+			this.$el.html(Mustache.render(this.template, this.model.attributes))
+			return this
+		},
+		update: function() {
+			this.model.set("key", $(this.el).find("input.key").val())
+			this.model.set("value", $(this.el).find("input.value").val())
+		},
+		unrender: function(){
+			$(this.el).remove();
+		},
+		remove: function(){
+			this.model.collection.remove(this.model);
+		}
+	});
+	Mustache.parse(KeyValuePairView.template)
+
+	var KeyValuePairEditor = Backbone.View.extend({
+		template: "<table class='table table-striped table-condensed'><thead><tr><th>Key</th><th>Value</th><th><button class='btn btn-default btn-sm add'><i class='fa fa-plus'></i></button></th></tr></thead><tbody></tbody></table>",
+		events: {
+			'click .add': 'add'
+		},
+		initialize: function() {
+			this.listenTo(this.collection, 'add', this.append)
+			this.render();
+		},
+		render: function() {
+			var _this = this
+			this.$el.html(Mustache.render(this.template))
+			this.collection.models.forEach(function(model) {
+				_this.append(model);
+			});
+
+			return this
+		},
+		add: function() {
+			var item = new KeyValuePair();
+			this.collection.add(item);
+		},
+		append: function(model) {
+			var view = new KeyValuePairView({
+				model: model
+			});
+			this.$el.find('table tbody').append(view.render().el);
+		},
+		clear: function() {
+			this.collection.remove(this.collection.toArray())
+		},
+		disable: function() {
+			this.$el.hide()
+		},
+		enable: function() {
+			this.$el.show()
+		}
+	});
+	Mustache.parse(KeyValuePairEditor.template)
+
+	SignalPath.ParamRenderers = {
 		"default": {
 			create: function(module,data) {
 				if (data.possibleValues) {
@@ -7,13 +108,13 @@ SignalPath.ParamRenderers = {
 						var option = $("<option></option>");
 						option.attr("value",val.value);
 						option.append(val.name);
-						
+
 						if (data.value==val.value)
 							option.attr("selected","selected");
-						
+
 						select.append(option);
 					});
-					
+
 					return select;
 				}
 				else {
@@ -39,18 +140,18 @@ SignalPath.ParamRenderers = {
 		"Stream": {
 			create: function(module,data) {
 				var span = $("<span class='stream-parameter-wrapper'></span>");
-				
+
 				// Show search if no value is selected
 				var search = $("<input type='text' style='"+(data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(data.streamName || "")+"'>");
 				span.append(search);
-				
+
 				// Show symbol if it exists
 				var symbol = $("<span class='streamName' style='"+(data.value ? "" : "display:none")+"'><a href='#'>"+data.streamName+"</a></span>");
 				var id = $("<input type='hidden' class='streamId' value='"+data.value+"'>");
-					
+
 				span.append(symbol);
 				span.append(id);
-					
+
 				symbol.click((function(sym,sch) {
 					return function() {
 						$(sym).hide();
@@ -58,7 +159,7 @@ SignalPath.ParamRenderers = {
 						return false;
 					}
 				})(symbol,search));
-					
+
 				var onSel = (function(sym,sch,id,mod,d) {
 					return function(event,item) {
 						if (item) {
@@ -74,12 +175,12 @@ SignalPath.ParamRenderers = {
 							else {
 								$(id).val(item.id)
 								$(sym).find("a").html(item.name)
-								
+
 								d.streamName = item.name
-								
+
 								$(sch).hide()
 								$(sym).show()
-								
+
 								$(id).trigger('change')
 							}
 						}
@@ -89,41 +190,41 @@ SignalPath.ParamRenderers = {
 						}
 					}
 				})(symbol,search,id,module,data);
-				
+
 				var searchParams = {}
-				
+
 				if (data.feedFilter)
 					searchParams.feed = data.feedFilter
-				
+
 				$(search).typeahead({
-					highlight: true,
-					hint: false,
-					minLength: 1
-				}, {
-					name: 'streams',
-					displayKey: 'name',
-					source: function(q, callback) {
-						$.ajax({
-							url: Streamr.projectWebroot+"stream/search", 
-							data: $.extend({}, searchParams, { term: q }),
-							dataType: 'json',
-							success: callback,
-							error: function(jqXHR, textStatus, errorThrown) {
-								SignalPath.options.errorHandler({msg: errorThrown});
-								callback([]);
+						highlight: true,
+						hint: false,
+						minLength: 1
+					}, {
+						name: 'streams',
+						displayKey: 'name',
+						source: function(q, callback) {
+							$.ajax({
+								url: Streamr.projectWebroot+"stream/search",
+								data: $.extend({}, searchParams, { term: q }),
+								dataType: 'json',
+								success: callback,
+								error: function(jqXHR, textStatus, errorThrown) {
+									SignalPath.options.errorHandler({msg: errorThrown});
+									callback([]);
+								}
+							})
+						},
+						templates: {
+							suggestion: function(item) {
+								if (item.description)
+									return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>"
+								else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
 							}
-						})
-					},
-					templates: {
-						suggestion: function(item) {
-							if (item.description)
-								return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
-							else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
 						}
-					}
-				})
-				.on('typeahead:selected', onSel)
-					
+					})
+					.on('typeahead:selected', onSel)
+
 				return span;
 			},
 			getValue: function(module,data,input) {
@@ -168,99 +269,125 @@ SignalPath.ParamRenderers = {
 			enable: function(input) {
 				$(input).find(".colorInput").spectrum("enable")
 			}
+		},
+		"Map": {
+			create: function(module, data) {
+				var div = $("<div/>")
+				var collection = new KeyValuePairList()
+				collection.fromJSON(data.value || {})
+				var editor = new KeyValuePairEditor({
+					el: div,
+					collection: collection
+				})
+				div.data("editor", editor)
+				return div
+			},
+			getValue: function(module, data, input) {
+				return input.data("editor").collection.toJSON()
+			},
+			getValueName: function(module, data, input) {
+				return this.getValue(module, data, input)
+			},
+			disable: function(input) {
+				return input.data("editor").disable()
+			},
+			enable: function(input) {
+				return input.data("editor").enable()
+			}
 		}
-}
-
-SignalPath.getParamRenderer = function(data) {
-	var key = (data.type ? data.type : "default");
-	var renderer = (key in SignalPath.ParamRenderers ? SignalPath.ParamRenderers[key] : SignalPath.ParamRenderers["default"]);
-	return renderer;
-};
-
-
-SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
-	pub = pub || {};
-	pub = SignalPath.Input(json, parentDiv, module, type || "parameter input", pub);
-	
-	var super_createDiv = pub.createDiv;
-	pub.createDiv = function() {
-		var div = super_createDiv();
-
-		// Create the parameter input form
-		pub.input = createParamInput();
-		var inputTd = $("<td></td>");
-		inputTd.append(pub.input);
-		parentDiv.parent().append(inputTd);
-		
-		// Assign disabled class to input when the parameter is connected
-		div.bind("spConnect", (function(me) {
-			return function(output) {
-				if(getParamRenderer(me.json).disable)
-					getParamRenderer(me.json).disable(me.input)
-			}
-		})(pub));
-		
-		div.bind("spDisconnect", (function(me) {
-			return function(output) {
-				if(getParamRenderer(me.json).enable)
-					getParamRenderer(me.json).enable(me.input)
-			}
-		})(pub));
-		
-		// Changes to parameters can be made at runtime
-		pub.input.change(function() {
-			if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges && confirm("Make a runtime change to '"+pub.getDisplayName()+"'?")) {
-				var value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
-				SignalPath.sendRequest(module.getHash(), {type:"paramChange", param:pub.getName(), value:value}, function(resp) {});
-			}
-		});
-		
-		// Trigger the spIOReady event on the input as well
-		pub.input.trigger("spIOReady");
-		
-		return div;
 	}
 
-	// PRIVATE FUNCTIONS
-	function getParamRenderer() {
-		return SignalPath.getParamRenderer(pub.json);
-	}
-	
-	var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
-	pub.getJSPlumbEndpointOptions = function(json,connDiv) {
-		var opts = super_getJSPlumbEndpointOptions(json,connDiv);
-		opts.cssClass = (opts.cssClass || "") + " jsPlumb_parameter";
-		return opts;
-	}
-	
-	function createParamInput() {
-		var result = null;
+	SignalPath.getParamRenderer = function(data) {
+		var key = (data.type ? data.type : "default");
+		var renderer = (key in SignalPath.ParamRenderers ? SignalPath.ParamRenderers[key] : SignalPath.ParamRenderers["default"]);
+		return renderer;
+	};
 
-		var renderer = getParamRenderer(pub.json);
-		result = renderer.create(pub.module, pub.json);
-		
-		if (pub.json.updateOnChange) {
-			var oldVal = pub.json.value
-			$(result).change(function() {
-				var newVal = pub.toJSON().value
-				if (newVal != oldVal) { // on purpose instead of !==
-					SignalPath.updateModule(pub.module)
+
+	SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
+		pub = pub || {};
+		pub = SignalPath.Input(json, parentDiv, module, type || "parameter input", pub);
+
+		var super_createDiv = pub.createDiv;
+		pub.createDiv = function() {
+			var div = super_createDiv();
+
+			// Create the parameter input form
+			pub.input = createParamInput();
+			var inputTd = $("<td></td>");
+			inputTd.append(pub.input);
+			parentDiv.parent().append(inputTd);
+
+			// Assign disabled class to input when the parameter is connected
+			div.bind("spConnect", (function(me) {
+				return function(output) {
+					if(getParamRenderer(me.json).disable)
+						getParamRenderer(me.json).disable(me.input)
+				}
+			})(pub));
+
+			div.bind("spDisconnect", (function(me) {
+				return function(output) {
+					if(getParamRenderer(me.json).enable)
+						getParamRenderer(me.json).enable(me.input)
+				}
+			})(pub));
+
+			// Changes to parameters can be made at runtime
+			pub.input.change(function() {
+				if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges && confirm("Make a runtime change to '"+pub.getDisplayName()+"'?")) {
+					var value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+					SignalPath.sendRequest(module.getHash(), {type:"paramChange", param:pub.getName(), value:value}, function(resp) {});
 				}
 			});
-		}
-		
-		return result;
-	}
 
-	pub.getValue = function() {
-		return getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+			// Trigger the spIOReady event on the input as well
+			pub.input.trigger("spIOReady");
+
+			return div;
+		}
+
+		// PRIVATE FUNCTIONS
+		function getParamRenderer() {
+			return SignalPath.getParamRenderer(pub.json);
+		}
+
+		var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
+		pub.getJSPlumbEndpointOptions = function(json,connDiv) {
+			var opts = super_getJSPlumbEndpointOptions(json,connDiv);
+			opts.cssClass = (opts.cssClass || "") + " jsPlumb_parameter";
+			return opts;
+		}
+
+		function createParamInput() {
+			var result = null;
+
+			var renderer = getParamRenderer(pub.json);
+			result = renderer.create(pub.module, pub.json);
+
+			if (pub.json.updateOnChange) {
+				var oldVal = pub.json.value
+				$(result).change(function() {
+					var newVal = pub.toJSON().value
+					if (newVal != oldVal) { // on purpose instead of !==
+						SignalPath.updateModule(pub.module)
+					}
+				});
+			}
+
+			return result;
+		}
+
+		pub.getValue = function() {
+			return getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+		}
+
+		var super_toJSON = pub.toJSON;
+		pub.toJSON = function() {
+			pub.json.value = pub.getValue();
+			return super_toJSON();
+		}
+
+		return pub;
 	}
-	
-	var super_toJSON = pub.toJSON;
-	pub.toJSON = function() {
-		pub.json.value = pub.getValue();
-		return super_toJSON();
-	}
-	
-	return pub;
-}
+})();

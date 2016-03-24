@@ -18,7 +18,7 @@ public class MapAsTable extends ModuleWithUI {
 		super();
 		canClearState = false;
 		resendAll = false;
-		resendLast = 20;
+		resendLast = 1;
 	}
 
 	@Override
