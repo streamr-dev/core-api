@@ -676,11 +676,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			config.put("options", new HashMap<String, Object>());
 		}
 
-		Map<String, Object> options = (Map<String, Object>) config.get("options");
 		Map<String, Object> item = new HashMap<>();
-		options.put(name, item);
 		item.put("type", type);
 		item.put("value", value);
+
+		Map<String, Object> options = (Map<String, Object>)config.get("options");
+		options.put(name, item);
+
 		return item;
 	}
 
