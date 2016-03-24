@@ -27,7 +27,6 @@ public class SerializerImpl implements Serializer {
 	private final FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
 	public SerializerImpl() {
-		//((JsonFactory) conf.getCoderSpecific()).configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
 		conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
@@ -98,46 +97,6 @@ public class SerializerImpl implements Serializer {
 
 
 	// Custom serializers below
-
-	// TODO: hack for getting NaN Double values serialized, definitely not optimal
-	private static class SpecialValueDoubleSerializer extends FSTBasicObjectSerializer {
-
-		@Override
-		public void writeObject(FSTObjectOutput out,
-								Object toWrite,
-								FSTClazzInfo clzInfo,
-								FSTClazzInfo.FSTFieldInfo referencedBy,
-								int streamPosition) throws IOException {
-			out.writeStringUTF(((SpecialValueDouble)toWrite).d);
-		}
-
-		@Override
-		public Object instantiate(Class objectClass,
-								  FSTObjectInput in,
-								  FSTClazzInfo serializationInfo,
-								  FSTClazzInfo.FSTFieldInfo referencee,
-								  int streamPosition) throws Exception {
-			return Double.parseDouble(in.readStringUTF());
-		}
-	}
-
-	// TODO: hack for getting NaN Double values serialized, definitely not optimal
-	class DoubleSerializer extends FSTBigNumberSerializers.FSTDoubleSerializer {
-		@Override
-		public void writeObject(FSTObjectOutput out,
-								Object toWrite,
-								FSTClazzInfo clzInfo,
-								FSTClazzInfo.FSTFieldInfo referencedBy,
-								int streamPosition) throws IOException {
-			Double d = (Double) toWrite;
-			if (d.isNaN() || d.isInfinite()) {
-				out.writeObjectInternal(new SpecialValueDouble(d), conf.getClazzInfo(SpecialValueDouble.class));
-			} else {
-				super.writeObject(out, toWrite, clzInfo, referencedBy, streamPosition);
-			}
-		}
-	}
-
 	private static class DescriptiveStatisticsSerializer extends FSTBasicObjectSerializer {
 
 		@Override
