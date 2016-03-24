@@ -24,7 +24,7 @@ import org.codehaus.groovy.grails.web.json.JSONTokener;
 import java.io.IOException;
 
 
-public class Http extends AbstractSignalPathModule {
+public class SimpleHttp extends AbstractSignalPathModule {
 
 	private HttpVerbParameter verb = new HttpVerbParameter(this, "verb");
 	private StringParameter URL = new StringParameter(this, "URL", "http://localhost");
@@ -39,7 +39,7 @@ public class Http extends AbstractSignalPathModule {
 	private StringOutput errorOut = new StringOutput(this, "error");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");
 
-	private static final Logger log = Logger.getLogger(Http.class);
+	private static final Logger log = Logger.getLogger(SimpleHttp.class);
 
 	@Override
 	public void init() {

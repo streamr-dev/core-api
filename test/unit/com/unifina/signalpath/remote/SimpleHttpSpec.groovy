@@ -3,20 +3,17 @@ package com.unifina.signalpath.remote
 import com.unifina.utils.testutils.ModuleTestHelper
 import groovy.json.JsonBuilder
 import org.apache.http.Header
-import org.apache.http.HttpEntity
-import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.util.EntityUtils
 import org.json.JSONObject
 import spock.lang.Specification
 
-class HttpSpec extends Specification {
-	Http module
+class SimpleHttpSpec extends Specification {
+	SimpleHttp module
 
 	/**
 	 * Override "response" to provide the mock server implementation
@@ -30,10 +27,10 @@ class HttpSpec extends Specification {
 	def response = { request -> [] }
 
 	def setup() {
-		// TestableHttp is Http module wrapped so that we can inject our own mock HttpClient
-		// Separate class is needed in same path as Http.java; anonymous class won't work with de-serializer
-		TestableHttp.httpClient = mockClient
-		module = new TestableHttp()
+		// TestableSimpleHttp is SimpleHttp module wrapped so that we can inject our own mock HttpClient
+		// Separate class is needed in same path as SimpleHttp.java; anonymous class won't work with de-serializer
+		TestableSimpleHttp.httpClient = mockClient
+		module = new TestableSimpleHttp()
 		module.init()
 	}
 

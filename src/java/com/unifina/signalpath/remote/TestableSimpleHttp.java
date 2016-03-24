@@ -8,7 +8,7 @@ import org.apache.http.client.HttpClient;
  * 	so that the deserializer / class-loader finds it
  * @see HttpSpec where this class is used
  */
-class TestableHttp extends Http {
+class TestableSimpleHttp extends SimpleHttp {
 	public transient static HttpClient httpClient;
 	@Override
 	protected HttpClient getHttpClient() {
