@@ -5,41 +5,15 @@ import com.unifina.signalpath.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ConstantMap extends AbstractSignalPathModule implements Pullable<Map<String, Object>> {
+public class ConstantMap extends AbstractConstantModule<Map> {
 
-	MapParameter map = new MapParameter(this, "map", new LinkedHashMap<String, Object>());
-	MapOutput out = new MapOutput(this,"out");
-
-	public ConstantMap() {
-		super();
-		initPriority = 40;
-	}
-	
 	@Override
-	public void init() {
-		addInput(map);
-		addOutput(out);
-	}
-	
-	@Override
-	public void initialize() {
-		for (Input i : out.getTargets())
-			i.receive(map.getValue());
-	}
-	
-	@Override
-	public void sendOutput() {
-		out.send(map.getValue());
+	protected Parameter<Map> createConstantParameter() {
+		return new MapParameter(this, "map", new LinkedHashMap<String, Object>());
 	}
 
 	@Override
-	public void clearState() {
-
+	protected Output<Map> createOutput() {
+		return new MapOutput(this,"out");
 	}
-
-	@Override
-	public Map<String, Object> pullValue(Output output) {
-		return map.getValue();
-	}
-	
 }

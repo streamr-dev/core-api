@@ -43,15 +43,19 @@ public class Propagator implements Serializable {
 		if (newModule) { 
 			origins.add(module);
 			modArrDirty = true;
+
+			if (module.isSendPending())
+				sendPending = true;
 		}
 	}
 	
 	public void initialize() {
 		if (modArrDirty) {
 			ArrayList<Output> outputs = new ArrayList<>();
-			for (AbstractSignalPathModule m : origins)
+			for (AbstractSignalPathModule m : origins) {
 				for (Output o : m.getOutputs())
 					outputs.add(o);
+			}
 
 			connectOutputs(outputs);
 			reachable = makeReachableSet(outputs);
