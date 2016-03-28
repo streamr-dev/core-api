@@ -112,7 +112,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	            public Object run() {
 	            	
 	            	// Get declared fields for examination
-	    			Field[] fields = AbstractSignalPathModule.this.getClass().getDeclaredFields();
+					List<Field> fieldList = new ArrayList<>();
+					Class clazz = AbstractSignalPathModule.this.getClass();
+
+					do {
+						fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
+						clazz = clazz.getSuperclass();
+					} while (clazz != null);
+
+					Field[] fields = new Field[fieldList.size()];
+					fields = fieldList.toArray(fields);
 	    			
 	    			// Sort by field name
 	    			Arrays.sort(fields, new Comparator<Field>() {
