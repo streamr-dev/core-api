@@ -1,6 +1,7 @@
 package com.unifina.signalpath.remote;
 
 import com.unifina.signalpath.*;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -116,17 +117,23 @@ public class Http extends AbstractSignalPathModule {
 			}
 		}
 
-		long startTime = System.currentTimeMillis();
 		HttpResponse httpResponse;
 		try {
+			long startTime = System.currentTimeMillis();
 			httpResponse = getHttpClient().execute(request);
 			pingMillis.send(System.currentTimeMillis() - startTime);
-			statusCode.send(httpResponse.getStatusLine().getStatusCode());
 
 			String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 			JSONTokener parser = new JSONTokener(responseString);
 			Object responseData = parser.nextValue();	// parser returns Map, List, or String
 			response.send(responseData);
+
+			Map<String, String> headerMap = new HashMap<>();
+			for (Header h : httpResponse.getAllHeaders()) {
+				headerMap.put(h.getName(), h.getValue());
+			}
+			responseHeaders.send(headerMap);
+			statusCode.send(httpResponse.getStatusLine().getStatusCode());
 		} catch (IOException e) {
 			errors.add(e.getMessage());
 		}

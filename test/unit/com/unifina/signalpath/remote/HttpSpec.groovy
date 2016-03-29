@@ -3,6 +3,7 @@ package com.unifina.signalpath.remote
 import com.unifina.utils.testutils.ModuleTestHelper
 import groovy.json.JsonBuilder
 import org.apache.http.Header
+import org.apache.http.StatusLine
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpPost
@@ -32,6 +33,12 @@ class HttpSpec extends Specification {
 		TestableHttp.httpClient = mockClient
 		module = new TestableHttp()
 		module.init()
+		module.configure([
+			params : [
+				[name: "URL", value: "localhost"],
+				[name: "verb", value: "GET"],
+			]
+		])
 	}
 
 	/** HttpClient that generates mock responses to HttpUriRequests according to this.response */
@@ -56,7 +63,32 @@ class HttpSpec extends Specification {
 					// wrap in JSON and HttpEntity
 					return new StringEntity(new JsonBuilder(ret).toString())
 				}
+				getStatusLine() >> Stub(StatusLine) {
+					getStatusCode() >> 200
+				}
+				getAllHeaders() >> [Stub(Header) {
+					getName() >> "x-unit-test"
+					getValue() >> "testing123"
+				}]
 			}
 		}
+	}
+
+	void "no input, constant response"() {
+		def inputValues = [
+			params: [[:], [:], [:]],
+			headers: [[:], [:], [:]],
+			body: [[:], [:], [:]]
+		]
+		def outputValues = [
+			errors: [null, null, null],
+			data: [[test: 1], [test: 1], [test: 1]],
+			"status code": [200d, 200d, 200d],
+			//ping: [0, 0, 0],
+			headers: [["x-unit-test": "testing123"], ["x-unit-test": "testing123"], ["x-unit-test": "testing123"]]
+		]
+		response = [test: 1]
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }
