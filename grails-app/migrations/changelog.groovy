@@ -12,4 +12,8 @@ databaseChangeLog = {
 	include file: 'core/2016-02-25-feed-data-range-provider.groovy'
 
 	include file: 'core/2016-03-18-add-http-module.groovy'
+	include file: 'core/2016-03-02-map-modules.groovy'
+	include file: 'core/2016-03-22-fix-input-modules-json-help.groovy'
+	include file: 'core/2016-03-07-serialized-field-to-blob.groovy'
+	include file: 'core/2016-03-08-map-modules-2.groovy'
 }

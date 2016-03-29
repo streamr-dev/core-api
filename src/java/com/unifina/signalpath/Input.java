@@ -103,11 +103,14 @@ public class Input<T> extends Endpoint<T> {
 		proxying = true;
 		proxiedInputs.add(input);
 		
-		if (this.hasValue())
+		if (hasValue()) {
 			input.receive(getValue());
-		
-		input.owner.checkDirtyAndReadyCounters();
-		
+		}
+
+		if (input.getOwner() != null) {
+			input.getOwner().checkDirtyAndReadyCounters();
+		}
+
 		// TODO: might be necessary to mark owner as originatingmodule and mark it dirty, fix it when generalizing from subclasses
 	}
 
