@@ -20,7 +20,8 @@ public class Propagator implements Serializable {
 	
 	AbstractSignalPathModule[] modArr;
 	private boolean modArrDirty = true;
-	
+
+	// Outputs associated with this Propagator set sendPending to true when sending output
 	public boolean sendPending = false;
 	private boolean alwaysPropagate = false;
 	
@@ -44,6 +45,8 @@ public class Propagator implements Serializable {
 			origins.add(module);
 			modArrDirty = true;
 
+			// The Propagator might be created lazily, in which case a source module
+			// that already has a send pending might be added.
 			if (module.isSendPending())
 				sendPending = true;
 		}
@@ -90,7 +93,6 @@ public class Propagator implements Serializable {
 	/**
 	 * DFS search of inputs reachable from specified output
 	 * @param output
-	 * @param list
 	 * @param visited
 	 */
 	private void recurseOutputs(Output output, Set<Input> visited) {
@@ -218,7 +220,6 @@ public class Propagator implements Serializable {
 		// Convert to array for speed
 		modArr = modules.toArray(new AbstractSignalPathModule[modules.size()]);
 		modArrDirty = false;
-//		log.info("Propagator created for "+origin+": "+modules);
 	}
 	
 	public void propagate() {

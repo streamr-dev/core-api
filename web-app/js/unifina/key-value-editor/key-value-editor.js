@@ -31,7 +31,6 @@
         }
     });
 
-    // TODO: how to tab from key to value?
     var KeyValuePairView = Backbone.View.extend({
         tagName: 'tr',
         template: '<td><input type="text" class="form-control input-sm key" name="key" value="{{key}}" placeholder="Key"></td><td><input type="text" class="form-control input-sm value" name="value" value="{{value}}" placeholder="Value"></td><td><button class="btn btn-default btn-xs delete"><i class="fa fa-trash-o"></i></button></td>',
@@ -41,7 +40,6 @@
             'change input.value': 'update',
         },
         initialize: function() {
-            this.listenTo(this.model, 'change', this.render)
             this.listenTo(this.model, 'remove', this.unrender)
         },
         render: function() {
@@ -59,9 +57,11 @@
             this.model.collection.remove(this.model);
         }
     });
+    // Speeds up rendering
     Mustache.parse(KeyValuePairView.template)
 
     var KeyValuePairEditor = Backbone.View.extend({
+        // Wrap table in a form to get native tabbing
         template: "<table class='table table-striped table-condensed'><thead><tr><th>Key</th><th>Value</th><th><button class='btn btn-default btn-xs add'><i class='fa fa-plus'></i></button></th></tr></thead><tbody></tbody></table>",
         events: {
             'click .add': 'add'
@@ -106,6 +106,7 @@
             this.$el.show()
         }
     });
+    // Speeds up rendering
     Mustache.parse(KeyValuePairEditor.template)
 
     exports.KeyValuePairList = KeyValuePairList
