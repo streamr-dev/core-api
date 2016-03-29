@@ -37,7 +37,7 @@ class NewMapSpec extends Specification {
 		}
 
 		expect:
-		outputMaps.every { it.is(outputMaps.first()) }
+		outputMaps.every { it.equals(outputMaps.first()) }
 	}
 
 	def "newMapSpec can be configured to return different map reference"() {
