@@ -32,30 +32,41 @@
   }
 
   .access-row {
-    padding-bottom: 10pt;
-    display: flex;
+    height: 30pt;
+    position: relative;
   }
 
   /* bootstrap would add margin-bottom for narrow viewports */
   .form-group {
     margin-bottom: 0px;
+    display: inline-block;
   }
 
   .user-label {
     font-weight: bold;
-    flex-grow: 1;
+    position: absolute;
   }
 
   .user-delete-button {
     margin-left: 10pt;
+    position: absolute;
+    right: 5px;
+  }
+
+  .permission-dropdown {
+    position: absolute;
+    right: 55px;
   }
 
   .new-user-row {
-    display: flex;
+    position: relative;
+    height: 30pt;
   }
 
   .new-user-field {
-    flex-grow: 1;
+    width: 92%;
+    right: 55px;
+    position: absolute;
     &.has-error {
       color: #ff0000;
     }
@@ -63,5 +74,7 @@
 
   .new-user-button {
     margin-left: 10pt;
+    position: absolute;
+    right: 5px
   }
 }
