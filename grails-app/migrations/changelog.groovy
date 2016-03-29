@@ -11,6 +11,5 @@ databaseChangeLog = {
 	include file: 'core/2016-02-02-mongodb-feed.groovy'
 	include file: 'core/2016-02-25-feed-data-range-provider.groovy'
 
-	include file: 'core/2016-03-18-add-simple-http-module.groovy'
-	include file: 'core/2016-03-24-add-http-module.groovy'
+	include file: 'core/2016-03-18-add-http-module.groovy'
 }

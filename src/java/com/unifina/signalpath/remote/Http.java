@@ -34,7 +34,7 @@ public class Http extends AbstractSignalPathModule {
 
 	private Input<Object> body = new Input<>(this, "body", "Object");
 	private MapInput headers = new MapInput(this, "headers");
-	private MapInput queryParams = new MapInput(this, "query parameters");
+	private MapInput queryParams = new MapInput(this, "params");
 	private MapOutput responseHeaders = new MapOutput(this, "headers");
 	private ListOutput errorOut = new ListOutput(this, "errors");
 	private Output<Object> response = new Output<>(this, "data", "Object");
