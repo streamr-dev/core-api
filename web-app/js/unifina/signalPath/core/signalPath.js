@@ -446,6 +446,14 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
+				if (jqXHR.responseJSON) {
+					var apiError = jqXHR.responseJSON;
+					if (apiError && apiError.message) {
+						handleError(apiError.message)
+						return;
+					}
+
+				}
 				handleError(errorThrown)
 			}
 		})
