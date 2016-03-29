@@ -1,6 +1,8 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
@@ -89,9 +91,10 @@ class StreamApiController {
 	private def getAuthorizedStream(String uuid, Operation op, Closure successHandler) {
 		def stream = Stream.findByUuid(uuid)
 		if (stream == null) {
-			render(status: 404, text: [error: "Stream not found with uuid " + uuid, code: "NOT_FOUND"] as JSON)
+			throw new NotFoundException("Stream", uuid)
 		} else if (!permissionService.check(request.apiUser, stream, op)) {
 			render(status: 403, text: [error: "Not authorized to ${op.id} Stream " + uuid, code: "FORBIDDEN", fault: "op", op: op.id] as JSON)
+			throw new NotPermittedException(request.apiUser?.username, "Stream", uuid, op.id)
 		} else {
 			successHandler.call(stream)
 		}

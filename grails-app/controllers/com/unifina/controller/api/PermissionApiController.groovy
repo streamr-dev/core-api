@@ -77,8 +77,6 @@ class PermissionApiController {
 		Operation op = Operation.enumConstants.find { it.id == opId }
 		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'. Try e.g. 'read' instead.", "operation", opId) }
 
-		// TODO: check that username is a valid email address?
-
 		// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 		def user = SecUser.findByUsername(username)
 		if (!user) {
@@ -110,7 +108,7 @@ class PermissionApiController {
 			def newP = permissionService.grant(grantor, res, user, op)
 			header "Location", request.forwardURI + "/" + newP.id
 			response.status = 201
-			render(newP.toMap() + [text: "Successfully granted"] as JSON)
+			render(newP.toMap() as JSON)
 		}
 	}
 
