@@ -15,7 +15,7 @@ public class RemoveFromMap extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		Map map = new LinkedHashMap(in.getValue());
+		Map map = in.getModifiableValue();
 		Object r = map.remove(key.getValue());
 		if (r != null) { removedItem.send(r); }
 		out.send(map);
