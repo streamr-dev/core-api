@@ -150,7 +150,7 @@ public abstract class AbstractFeedFileDiscoveryUtil {
 	 * 
 	 * The default implementation returns null.
 	 */
-	protected Long getStreamId(String location) {
+	protected String getStreamId(String location) {
 		return null;
 	}
 	

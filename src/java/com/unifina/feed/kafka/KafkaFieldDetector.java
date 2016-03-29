@@ -27,14 +27,14 @@ public class KafkaFieldDetector extends FieldDetector {
 		KafkaOffsetUtil util = kafkaService.getOffsetUtil();
 
 		KafkaConsumer<byte[], byte[]> c = util.getNewConsumer();
-		List<PartitionInfo> partitions = c.partitionsFor(stream.getUuid());
+		List<PartitionInfo> partitions = c.partitionsFor(stream.getId());
 
 		// Find the latest message over all partitions
 		UnifinaKafkaMessage latestMessage = null;
 		for (PartitionInfo pi : partitions) {
-			long offset = util.getLastOffset(stream.getUuid(), pi.partition());
+			long offset = util.getLastOffset(stream.getId(), pi.partition());
 			if (offset > 0) {
-				UnifinaKafkaMessage msg = util.getMessage(stream.getUuid(), pi.partition(), offset - 1);
+				UnifinaKafkaMessage msg = util.getMessage(stream.getId(), pi.partition(), offset - 1);
 				if (msg != null && (latestMessage == null || msg.getTimestamp() > latestMessage.getTimestamp()))
 					latestMessage = msg;
 			}

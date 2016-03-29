@@ -86,12 +86,12 @@ class StreamApiController {
 		}
 	}
 
-	private def getAuthorizedStream(String uuid, Closure successHandler) {
-		def stream = Stream.findByUuid(uuid)
+	private def getAuthorizedStream(String id, Closure successHandler) {
+		def stream = Stream.findById(id)
 		if (stream == null) {
-			render(status: 404, text: [error: "Stream not found with uuid " + uuid, code: "NOT_FOUND"] as JSON)
+			render(status: 404, text: [error: "Stream not found with id " + id, code: "NOT_FOUND"] as JSON)
 		} else if (!unifinaSecurityService.canAccess(stream, request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Stream " + uuid, code: "FORBIDDEN"] as JSON)
+			render(status: 403, text: [error: "Not authorized to access Stream " + id, code: "FORBIDDEN"] as JSON)
 		} else {
 			successHandler.call(stream)
 		}

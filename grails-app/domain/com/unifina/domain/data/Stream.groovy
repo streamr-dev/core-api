@@ -1,13 +1,11 @@
 package com.unifina.domain.data
 
-import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.security.SecUser
+import com.unifina.utils.IdGenerator
 import grails.converters.JSON
-import groovy.json.JsonBuilder
 
 class Stream implements Comparable {
-	Long id
-	String uuid
+	String id
 	String apiKey
 	SecUser user
 
@@ -21,19 +19,17 @@ class Stream implements Comparable {
 
 	static constraints = {
 		name(blank:false)
-
 		config(nullable:true)
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
-		uuid(nullable:true)
 		apiKey(nullable:true)
 		user(nullable:true)
 	}
 	
 	static mapping = {
+		id generator: 'assigned' // Note: doesn't apply in unit tests
 		name index:"name_idx"
-		uuid index: "uuid_idx"
 		feed lazy:false
 		config type: 'text'
 	}
@@ -45,7 +41,7 @@ class Stream implements Comparable {
 
 	def toMap() {
 		[
-			uuid: uuid,
+			id: id,
 			apiKey: apiKey,
 			name: name,
 			feed: feedId,

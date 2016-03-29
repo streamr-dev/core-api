@@ -52,7 +52,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
 			InputStream inputStream, MapMessageEventRecipient recipient) {
 		try {
-			return new KafkaHistoricalIterator(inputStream,feedFile.getStream().getUuid());
+			return new KafkaHistoricalIterator(inputStream,feedFile.getStream().getId());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -76,7 +76,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 
 			kafkaIteratorReturnedForStream.put(stream, true);
 
-			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(recipient.getStream().getUuid(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
+			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(recipient.getStream().getId(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
 
 			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages,
 			// so need to wrap it with a parsing iterator
