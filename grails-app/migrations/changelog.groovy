@@ -1,6 +1,5 @@
 databaseChangeLog = {
 	include file: 'core/2016-01-12-initial-db-state.groovy'
-
 	include file: 'core/2016-01-28-streamr-map-module.groovy'
 	include file: 'core/2016-02-05-color-modules.groovy'
 	include file: 'core/2016-02-04-rate-limit-module.groovy'
@@ -15,4 +14,5 @@ databaseChangeLog = {
 	include file: 'core/2016-03-07-serialized-field-to-blob.groovy'
 	include file: 'core/2016-03-08-map-modules-2.groovy'
 	include file: 'core/2016-03-24-map-modules-3.groovy'
+	include file: 'core/2016-03-28-constant-map.groovy'
 }
