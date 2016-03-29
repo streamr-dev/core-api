@@ -11,8 +11,8 @@ package com.unifina.signalpath;
  */
 public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPathModule implements Pullable<ValueType> {
 
-	protected Parameter<ValueType> constant;
-	protected Output<ValueType> out;
+	private Parameter<ValueType> constant;
+	private Output<ValueType> out;
 
 	public AbstractConstantModule() {
 		super();
@@ -33,8 +33,9 @@ public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPa
 
 	@Override
 	public void initialize() {
-		for (Input i : out.getTargets())
-			i.receive(constant.getValue());
+		// Send out the value to any connected inputs to mark them ready.
+		// Otherwise the receiving module won't be able to activate.
+		out.send(constant.getValue());
 	}
 
 	@Override
