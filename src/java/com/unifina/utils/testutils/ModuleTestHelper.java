@@ -498,9 +498,13 @@ public class ModuleTestHelper {
 				throw new IllegalArgumentException(msg);
 			}
 		}
-		for (List<Object> outputValues : outputValuesByName.values()) {
-			if (outputValues.size() != outputValueCount) {
-				String msg = String.format("An output value list is not of expected size (%d).", outputValueCount);
+		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
+			int outputListSize = entry.getValue().size();
+			if (outputListSize != outputValueCount) {
+				String msg = String.format("List for output '%s' not of expected size (%d != %d).",
+					entry.getKey(),
+					outputListSize,
+					outputValueCount);
 				throw new IllegalArgumentException(msg);
 			}
 		}
