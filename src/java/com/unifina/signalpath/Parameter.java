@@ -127,9 +127,8 @@ public abstract class Parameter<T> extends Input<T> {
 				val = null;
 			else {
 				// Check config value type and directly assign if possible
-				ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
-				Class clazz = (Class) pt.getActualTypeArguments()[0];
-				if (clazz.isAssignableFrom(configValue.getClass())) {
+				Class typeClass = getTypeClass();
+				if (typeClass.isAssignableFrom(configValue.getClass())) {
 					val = (T) configValue;
 				}
 				// Fallback to parsing
