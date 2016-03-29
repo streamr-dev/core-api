@@ -30,7 +30,8 @@ class RemoveFromMapSpec extends Specification {
 				[b: 6d],
 				[a: "a", c: 32d],
 				[e: "e"]
-			]
+			],
+			item: [null, "a", 6d, "d"]
 		]
 
 		expect:

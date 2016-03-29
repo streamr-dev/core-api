@@ -8,13 +8,10 @@ public class MapInput extends Input<Map<String, Object>> {
 		super(owner, name, "Map");
 	}
 
+	/**
+	 * @return (shallow) copy of the input Map that can be freely modified
+	 */
 	public Map getModifiableValue() {
-		Map m = getValue();
-		return canBeModifiedAsSuch(m) ? m : new LinkedHashMap(m);
+		return new LinkedHashMap(getValue());
 	}
-
-	private boolean canBeModifiedAsSuch(Map m) {
-		return m instanceof HashMap || m instanceof TreeMap || m instanceof Hashtable;
-	}
-
 }

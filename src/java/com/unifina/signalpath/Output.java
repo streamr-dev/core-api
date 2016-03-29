@@ -1,7 +1,9 @@
 package com.unifina.signalpath;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 public class Output<T> extends Endpoint<T> {
@@ -35,6 +37,13 @@ public class Output<T> extends Endpoint<T> {
 			throw new NullPointerException("Sending a null value is not allowed!");
 		}
 
+		// prevent modification of sent Maps (no copying, just overriding modifying methods)
+		//   if a module wants to modify the value, it must make a personal copy
+		// see: MapInput.getModifiableValue
+		if (value instanceof Map) {
+			value = (T)Collections.unmodifiableMap((Map)value);
+		}
+
 		previousValue = value;
 		
 		if (connected) {
@@ -42,7 +51,7 @@ public class Output<T> extends Endpoint<T> {
 				cachedPropagators[i].sendPending = true;
 			}
 
-			for (i=0 ; i < cachedTargets.length; i++) {
+			for (i=0; i < cachedTargets.length; i++) {
 				cachedTargets[i].receive(value);
 			}
 		}

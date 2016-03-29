@@ -7,7 +7,8 @@ import spock.lang.Unroll
 class MapInputSpec extends Specification {
 	MapInput input = new MapInput(new Label(), "output")
 
-	def "result of getValue() is not necessarily modifiable"() {
+	def "result of getValue() is not modifiable"() {
+		// In practice, all maps are UnmodifiableMaps, see Output.send
 		input.receive(Collections.unmodifiableMap([a: "a"]))
 
 		when:
@@ -27,21 +28,5 @@ class MapInputSpec extends Specification {
 
 		then:
 		m == [a: "a", hello: "world"]
-	}
-
-	@Unroll
-	def "result of getModifiableValue() == getValue() if instance of #map.getClass()"(Map map) {
-		input.receive(map)
-
-		expect:
-		input.getValue().is(input.getModifiableValue())
-
-		where:
-		map << [
-		    new HashMap<>(),
-			new LinkedHashMap<>(),
-			new TreeMap<>(),
-			new Hashtable<>(),
-		]
 	}
 }
