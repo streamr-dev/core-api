@@ -63,7 +63,9 @@ class PermissionApiControllerSpec extends Specification {
 		params.id = canvasShared.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
-		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+		def opR = new Permission(id: null, user: me, operation: "OWNER")
+		def opW = opR
+		def opS = opR
 
 		when:
 		withFilters(action: "index") { controller.index() }
@@ -85,7 +87,9 @@ class PermissionApiControllerSpec extends Specification {
 		params.id = streamShared.uuid
 		params.resourceClass = Stream
 		params.resourceId = streamShared.uuid
-		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+		def opR = new Permission(id: null, user: me, operation: "OWNER")
+		def opW = opR
+		def opS = opR
 
 		when:
 		withFilters(action: "index") { controller.index() }
@@ -107,7 +111,9 @@ class PermissionApiControllerSpec extends Specification {
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
-		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+		def opR = new Permission(id: null, user: me, operation: "OWNER")
+		def opW = opR
+		def opS = opR
 
 		when:
 		withFilters(action: "show") { controller.show("${canvasPermission.id}") }
@@ -128,7 +134,9 @@ class PermissionApiControllerSpec extends Specification {
 		params.id = streamPermission.id
 		params.resourceClass = Stream
 		params.resourceId = streamShared.uuid
-		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+		def opR = new Permission(id: null, user: me, operation: "OWNER")
+		def opW = opR
+		def opS = opR
 
 		when:
 		withFilters(action: "show") { controller.show("${streamPermission.id}") }
@@ -193,7 +201,9 @@ class PermissionApiControllerSpec extends Specification {
 		params.id = canvasPermission.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
-		def opR, opW, opS = opR = opW = new Permission(id: null, user: me, operation: "OWNER")
+		def opR = new Permission(id: null, user: me, operation: "OWNER")
+		def opW = opR
+		def opS = opR
 
 		when:
 		withFilters(action: "delete") { controller.delete("${canvasPermission.id}") }
