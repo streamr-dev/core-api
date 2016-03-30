@@ -33,6 +33,10 @@
         {
             "name": "Canvas",
             "description": "Saved and running Canvases"
+        },
+        {
+            "name": "Permission",
+            "description": "Read, write and share rights"
         }
     ],
     "paths": {
@@ -197,6 +201,177 @@
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/streams/{uuid}/permissions": {
+            "get": {
+                "summary": "List permissions",
+                "description": "Lists the permissions to given stream.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of permission objects",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Permission"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Grant permission",
+                "description": "Grant a new permission to given stream.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Requested permission (id ignored)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New stream permission object that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/streams/{uuid}/permissions/{pid}": {
+            "get": {
+                "summary": "Get single permission object",
+                "description": "Returns one stream-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream or permission object wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a stream permission",
+                "description": "Deletes a stream permission by id.\n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be deleted",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream or permission wasn't found",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -467,6 +642,177 @@
                     }
                 }
             }
+        },
+        "/canvases/{id}/permissions": {
+            "get": {
+                "summary": "List permissions",
+                "description": "Lists the permissions to given canvas.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of permission objects",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Permission"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Grant permission",
+                "description": "Grant a new permission to given canvas.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Requested permission (id ignored)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New canvas permission object that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/canvases/{id}/permissions/{pid}": {
+            "get": {
+                "summary": "Get single permission object",
+                "description": "Returns one canvas-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas or permission object wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a canvas permission",
+                "description": "Deletes a canvas permission by id.\n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be deleted",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas or permission wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -679,6 +1025,30 @@
                 }
             }
         },
+        "Permission": {
+            "type": "object",
+            "required": [
+                "user",
+                "operation"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Unique identifier for this permission object",
+                    "example": "3"
+                },
+                "user": {
+                    "type": "string",
+                    "description": "User who was granted the permission",
+                    "example": "new.user@gmail.com"
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
+                    "example": "read"
+                }
+            }
+        },
         "Error": {
             "type": "object",
             "required": [
@@ -687,7 +1057,7 @@
             "properties": {
                 "code": {
                     "type": "string",
-                    "description": "Error code (e.g. \"NOT_FOUND\") for programmatic use."
+                    "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type automatically."
                 },
                 "message": {
                     "type": "string",
