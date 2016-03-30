@@ -46,6 +46,7 @@ public class Globals {
 	protected Date endDate = null;
 	
 	protected PushChannel uiChannel = null;
+	protected boolean realtime = false;
 
 	/**
 	 * Construct fake environment, e.g., for testing.
@@ -203,10 +204,13 @@ public class Globals {
 		if (uiChannel!=null)
 			uiChannel.destroy();
 	}
-	
+
+	public void setRealtime(boolean realtime) {
+		this.realtime = realtime;
+	}
+
 	public boolean isRealtime() {
-		return signalPathContext.containsKey("live") && (Boolean) signalPathContext.get("live");
-		//return dataSource instanceof RealtimeDataSource;
+		return realtime;
 	}
 	
 	public DataSource getDataSource() {
