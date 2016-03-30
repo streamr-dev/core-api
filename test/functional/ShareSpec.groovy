@@ -461,7 +461,10 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		$(".new-user-field") << "tester2@streamr.com"
+		// fix weird bug: on Jenkins, only "tester2" is typed before pressing enter
+		waitFor { $(".new-user-field").getAttribute("value").length() >= 19 }
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -535,7 +538,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "check dashboard"
 		to DashboardListPage
 		then:
-		getDashboardRow().click()
+		!getDashboardRow().find("button")
 
 		when:
 		getDashboardRow().click()
