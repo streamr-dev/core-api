@@ -461,9 +461,11 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com"
-		// fix weird bug: on Jenkins, only "tester2" is typed before pressing enter
-		waitFor { $(".new-user-field").getAttribute("value").length() >= 19 }
+		// fix weird bug: on Jenkins machine, only "tester2" is typed before pressing enter using normal <<
+		waitFor {
+			def len = $(".new-user-field").getAttribute("value").length()
+			len >= 19 ?: ($(".new-user-field") << "tester2@streamr.com".substring(len))
+		}
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
