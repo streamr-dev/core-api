@@ -14,9 +14,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Created by henripihkala on 02/02/16.
- */
 public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable {
 
 	private final Stream stream;
@@ -44,15 +41,11 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 		// Add static filters from mongoConfig
 		Document query = config.createQuery();
 
-		// Filter by startDate
-		Document startDateFilter = new Document();
-		startDateFilter.put("$gte", config.convertDateToMongoFormat(startDate));
-		query.append(config.getTimestampKey(), startDateFilter);
-
-		// Filter by endDate
-		Document endDateFilter = new Document();
-		endDateFilter.put("$lte", config.convertDateToMongoFormat(endDate));
-		query.append(config.getTimestampKey(), endDateFilter);
+		// Filter by time range
+		Document timeFilter = new Document();
+		timeFilter.put("$gte", config.convertDateToMongoFormat(startDate));
+		timeFilter.put("$lte", config.convertDateToMongoFormat(endDate));
+		query.append(config.getTimestampKey(), timeFilter);
 
 		FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(config.getTimestampKey()));
 		this.mongoCursor = iterable.iterator();

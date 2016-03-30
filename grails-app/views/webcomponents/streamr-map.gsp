@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-map" extends="streamr-widget" attributes="centerLat centerLng zoom minZoom maxZoom drawTrace traceRadius">
+<polymer-element name="streamr-map" extends="streamr-widget" attributes="autoZoom centerLat centerLng zoom minZoom maxZoom drawTrace traceRadius">
 	<!-- Using shadow element doesn't work with CSS -->
 	<template>
 		<link rel="stylesheet" href="${r.resource(dir:'/js/leaflet', file:'leaflet.css', plugin:'unifina-core')}">
@@ -32,12 +32,13 @@
 						})
 					}
 					_this.map = new StreamrMap(_this.$["streamr-widget-container"], {
+						autoZoom: this.autoZoom !== undefined ? (this.autoZoom==="true") : mapOptions.autoZoom,
 						centerLat: this.centerLat !== undefined ? this.centerLat : mapOptions.centerLat,
 						centerLng: this.centerLng !== undefined ? this.centerLng : mapOptions.centerLng,
 						zoom: this.zoom !== undefined ? this.zoom : mapOptions.zoom,
 						minZoom: this.minZoom !== undefined ? this.minZoom : mapOptions.minZoom,
 						maxZoom: this.maxZoom !== undefined ? this.maxZoom : mapOptions.maxZoom,
-						drawTrace: this.drawTrace !== undefined ? this.drawTrace : mapOptions.drawTrace,
+						drawTrace: this.drawTrace !== undefined ? (this.drawTrace==="true") : mapOptions.drawTrace,
 						traceRadius: this.traceRadius !== undefined ? this.traceRadius : mapOptions.traceRadius
 					})
 

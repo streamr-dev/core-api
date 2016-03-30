@@ -519,10 +519,38 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	}
 	pub.updateFrom = updateFrom;
 	
-	function clone() {
+	function clone(callback) {
 		var cloneData = jQuery.extend(true, {}, prot.toJSON());
 		prot.prepareCloneData(cloneData);
-		return SignalPath.createModuleFromJSON(cloneData);
+
+		// Null hash value causes NumberFormatException in backend.
+		delete cloneData["hash"]
+
+		// Need new uiChannel
+		delete cloneData["uiChannel"]
+
+
+		// Re-fetch module data from server to ensure that uiChannels are regenerated
+		var promise = $.ajax({
+			type: 'POST',
+			url: Streamr.createLink('module', 'jsonGetModule'),
+			data: {
+				id: cloneData.id,
+				configuration: JSON.stringify(cloneData)
+			},
+			dataType: 'json',
+		})
+
+		promise.done(function(data) {
+			var module = SignalPath.createModuleFromJSON(data)
+			if (module) {
+				callback(module)
+			}
+		})
+
+		promise.fail(function(jqXHR, textStatus, errorThrown) {
+			Streamr.showError("Error", errorThrown)
+		})
 	}
 	prot.clone = clone;
 	

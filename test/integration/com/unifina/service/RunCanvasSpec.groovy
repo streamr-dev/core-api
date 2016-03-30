@@ -87,7 +87,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		finalState[0] == "[(out) Stream.numero: 0.0, (out) Stream.areWeDoneYet: 1.0]"
 		finalState[1] == "[(out) Sum.out: $SUM_FROM_1_TO_100_TIMES_2]"
 		finalState[2] == "[(out) Multiply.A*B: 0.0]"
-		finalState[3] == "[(out) Constant.out: null]"
+		finalState[3] == "[(out) Constant.out: 2.0]"
 
 		cleanup:
 		canvasService.stop(canvas, user)

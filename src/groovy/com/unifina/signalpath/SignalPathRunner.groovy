@@ -40,6 +40,7 @@ public class SignalPathRunner extends Thread {
 		 * Instantiate the SignalPaths
 		 */
 		globals.dataSource = signalPathService.createDataSource(adhoc, globals)
+		globals.realtime = !adhoc
 		globals.init()
 
 		if (globals.signalPathContext.csv) {

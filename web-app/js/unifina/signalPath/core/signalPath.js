@@ -109,17 +109,6 @@ var SignalPath = (function () {
 	// hash argument can be undefined if the request is aimed at the canvas/runner
 	pub.sendRequest = function(hash, msg, callback) {
 		if (runningJson) {
-			
-			// Include UI channel if exists
-			var channel
-			for (var i=0;i<runningJson.modules.length;i++) {
-				// using == on purpose
-				if (runningJson.modules[i].hash==hash) {
-					channel = runningJson.modules[i].uiChannel.id
-					break
-				}
-			}
-
 			var url = options.apiUrl + '/canvases/'+runningJson.id+(hash==null ? '/request' : '/modules/'+hash+'/request')
 			$.ajax({
 				type: 'POST',
@@ -282,7 +271,7 @@ var SignalPath = (function () {
 	function createModuleFromJSON(data) {
 		if (data.error) {
 			handleError(data.message)
-			return;
+			return undefined;
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
@@ -457,6 +446,14 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
+				if (jqXHR.responseJSON) {
+					var apiError = jqXHR.responseJSON;
+					if (apiError && apiError.message) {
+						handleError(apiError.message)
+						return;
+					}
+
+				}
 				handleError(errorThrown)
 			}
 		})

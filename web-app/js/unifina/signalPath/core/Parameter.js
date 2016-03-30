@@ -1,266 +1,396 @@
-SignalPath.ParamRenderers = {
-		"default": {
-			create: function(module,data) {
-				if (data.possibleValues) {
-					var select = $("<select class='parameterInput form-control'></select>");
-					$(data.possibleValues).each(function(i,val) {
-						var option = $("<option></option>");
-						option.attr("value",val.value);
-						option.append(val.name);
-						
-						if (data.value==val.value)
-							option.attr("selected","selected");
-						
-						select.append(option);
+(function() {
+
+	/**
+	 * A parameter view that renders an input field for the parameter value.
+	 * Numeric types will be parsed, otherwise the value will be interpreted as a string.
+	 * If the model has possibleValues set, then a dropdown with the possible values
+	 * is shown.
+	 *
+	 * @param parent The parent dom element
+	 * @param module Reference to the module that has this parameter
+	 * @param data The model for this parameter
+	 * @constructor
+     */
+	var DefaultParameterValueEditor = function(parentElement, parameter) {
+		this.parameter = parameter
+		this.data = this.parameter.json
+
+		this.element = this.createElement()
+		parentElement.append(this.element)
+	}
+
+	/**
+	 * Creates and returns the element that shows the value of this parameter
+	 *
+	 * @returns {jQuery|HTMLElement}
+     */
+	DefaultParameterValueEditor.prototype.createElement = function() {
+		var _this = this
+		var result
+
+		if (this.data.possibleValues) {
+			var select = $("<select class='parameterInput form-control'></select>");
+
+			$(this.data.possibleValues).each(function(i,val) {
+				var option = $("<option></option>");
+				option.attr("value",val.value);
+				option.append(val.name);
+
+				if (_this.data.value==val.value)
+					option.attr("selected","selected");
+
+				select.append(option);
+			});
+
+			result = select
+		}
+		else {
+			result = $("<input class='parameterInput form-control' type='text' value='"+this.data.value+"'>");
+		}
+
+		result.change(function() {
+			$(_this).trigger('change')
+		})
+
+		return result
+	}
+
+	/**
+	 * Gets the current value of this parameter
+     */
+	DefaultParameterValueEditor.prototype.getValue = function() {
+		if (this.data.type === "Double" || this.data.type === "Integer" || this.data.type === "Number")
+			return parseFloat($(this.element).val())
+		else return $(this.element).val();
+	}
+
+	/**
+	 * Gets a label for the current value of this parameter (as string)
+	 */
+	DefaultParameterValueEditor.prototype.getValueName = function() {
+		return this.getValue().toString()
+	}
+
+	DefaultParameterValueEditor.prototype.disable = function() {
+		this.element.attr("disabled","disabled");
+	}
+
+	DefaultParameterValueEditor.prototype.enable = function() {
+		this.element.removeAttr("disabled");
+	}
+
+	/**
+	 * View for parameters of type Stream
+	 *
+	 * @param parent
+	 * @param module
+	 * @param data
+     * @constructor
+     */
+	var StreamParameterValueEditor = function(parentElement, parameter) {
+		DefaultParameterValueEditor.call(this, parentElement, parameter)
+	}
+	StreamParameterValueEditor.prototype = Object.create(DefaultParameterValueEditor.prototype)
+
+	StreamParameterValueEditor.prototype.createElement = function() {
+		var _this = this
+
+		var span = $("<span class='stream-parameter-wrapper'></span>");
+
+		// Show search if no value is selected
+		var search = $("<input type='text' style='"+(this.data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(this.data.streamName || "")+"'>");
+		this.search = search
+		span.append(search);
+
+		// Show name if a value is set
+		this.label = $("<span class='streamName' style='"+(this.data.value ? "" : "display:none")+"'><a href='#'>"+this.data.streamName+"</a></span>");
+		span.append(this.label);
+
+		this.label.click(function() {
+			$(_this.label).hide();
+			$(_this.search).show();
+			return false;
+		})
+
+		var onSel = function(event,item) {
+			if (item) {
+				// If the current module corresponds to the selected feed module and the new one
+				// does not, the module needs to be replaced
+				if (_this.parameter.module && _this.data.checkModuleId && _this.parameter.module.getModuleId() != item.module) {
+					bootbox.confirm("This stream is implemented by a different module. Replace current module? This will break current connections.", function(result) {
+						if (result)
+							SignalPath.replaceModule(_this.parameter.module, item.module,{params:[{name:"stream", value:item.id}]});
 					});
-					
-					return select;
 				}
+				// Handle same module implementation
 				else {
-					var input = $("<input class='parameterInput form-control' type='text' value='"+data.value+"'>");
-					return input;
+					_this.data.value = item.id
+					_this.label.find("a").html(item.name)
+					_this.data.streamName = item.name
+
+					$(_this.search).hide()
+					$(_this.label).show()
 				}
-			},
-			getValue: function(module,data,input) {
-				if (data.type === "Double" || data.type === "Integer" || data.type === "Number")
-					return parseFloat($(input).val())
-				else return $(input).val();
-			},
-			getValueName: function(module,data,input) {
-				return $(input).val();
-			},
-			disable: function(input) {
-				input.attr("disabled","disabled");
-			},
-			enable: function(input) {
-				input.removeAttr("disabled");
 			}
-		},
-		"Stream": {
-			create: function(module,data) {
-				var span = $("<span class='stream-parameter-wrapper'></span>");
-				
-				// Show search if no value is selected
-				var search = $("<input type='text' style='"+(data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(data.streamName || "")+"'>");
-				span.append(search);
-				
-				// Show symbol if it exists
-				var symbol = $("<span class='streamName' style='"+(data.value ? "" : "display:none")+"'><a href='#'>"+data.streamName+"</a></span>");
-				var id = $("<input type='hidden' class='streamId' value='"+data.value+"'>");
-					
-				span.append(symbol);
-				span.append(id);
-					
-				symbol.click((function(sym,sch) {
-					return function() {
-						$(sym).hide();
-						$(sch).show();
-						return false;
-					}
-				})(symbol,search));
-					
-				var onSel = (function(sym,sch,id,mod,d) {
-					return function(event,item) {
-						if (item) {
-							// If the current module corresponds to the selected feed module and the new one
-							// does not, the module needs to be replaced
-							if (mod && d.checkModuleId && mod.getModuleId() != item.module) {
-								bootbox.confirm("This stream is implemented by a different module. Replace current module? This will break current connections.", function(result) {
-									if (result)
-										SignalPath.replaceModule(mod, item.module,{params:[{name:"stream", value:item.id}]});
-								});
-							}
-							// Handle same module implementation
-							else {
-								$(id).val(item.id)
-								$(sym).find("a").html(item.name)
-								
-								d.streamName = item.name
-								
-								$(sch).hide()
-								$(sym).show()
-								
-								$(id).trigger('change')
-							}
-						}
-						else {
-							$(sch).hide();
-							$(sym).show();
-						}
-					}
-				})(symbol,search,id,module,data);
-				
-				var searchParams = {}
-				
-				if (data.feedFilter)
-					searchParams.feed = data.feedFilter
-				
-				$(search).typeahead({
-					highlight: true,
-					hint: false,
-					minLength: 1
-				}, {
-					name: 'streams',
-					displayKey: 'name',
-					source: function(q, callback) {
-						$.ajax({
-							url: Streamr.projectWebroot+"stream/search", 
-							data: $.extend({}, searchParams, { term: q }),
-							dataType: 'json',
-							success: callback,
-							error: function(jqXHR, textStatus, errorThrown) {
-								SignalPath.options.errorHandler({msg: errorThrown});
-								callback([]);
-							}
-						})
-					},
-					templates: {
-						suggestion: function(item) {
-							if (item.description)
-								return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>" 
-							else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
-						}
-					}
-				})
-				.on('typeahead:selected', onSel)
-					
-				return span;
-			},
-			getValue: function(module,data,input) {
-				var hidden = $(input).find("input.streamId");
-				if (hidden.val()==="")
-					return null
-				else return parseInt(hidden.val())
-			},
-			getValueName: function(module,data,input) {
-				var text = $(input).find("span.streamName a").text();
-				return text;
-			},
-			disable: function(input) {
-				input.attr("disabled","disabled");
-			},
-			enable: function(input) {
-				input.removeAttr("disabled");
-			}
-		},
-		"Color": {
-			create: function(module, data) {
-				var inputContainer = $("<div class='color-input-container'></div>")
-				var colorInput = $("<input type='text' class='parameterInput colorInput form-control'/>");
-				inputContainer.append(colorInput)
-				colorInput.spectrum({
-					preferredFormat: "rgb",
-					showInput: true,
-					showButtons: false
-				})
-				colorInput.spectrum("set", data.value)
-				return inputContainer
-			},
-			getValue: function(module, data, input) {
-				return $(input).find(".colorInput").spectrum("get").toRgbString()
-			},
-			getValueName: function(module, data, input) {
-				return this.getValue(module, data, input)
-			},
-			disable: function(input) {
-				$(input).find(".colorInput").spectrum("disable")
-			},
-			enable: function(input) {
-				$(input).find(".colorInput").spectrum("enable")
+			else {
+				$(_this.search).hide();
+				$(_this.label).show();
 			}
 		}
-}
 
-SignalPath.getParamRenderer = function(data) {
-	var key = (data.type ? data.type : "default");
-	var renderer = (key in SignalPath.ParamRenderers ? SignalPath.ParamRenderers[key] : SignalPath.ParamRenderers["default"]);
-	return renderer;
-};
+		var searchParams = {}
 
+		if (this.data.feedFilter)
+			searchParams.feed = this.data.feedFilter
 
-SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
-	pub = pub || {};
-	pub = SignalPath.Input(json, parentDiv, module, type || "parameter input", pub);
-	
-	var super_createDiv = pub.createDiv;
-	pub.createDiv = function() {
-		var div = super_createDiv();
+		$(search).typeahead({
+				highlight: true,
+				hint: false,
+				minLength: 1
+			}, {
+				name: 'streams',
+				displayKey: 'name',
+				source: function(q, callback) {
+					$.ajax({
+						url: Streamr.projectWebroot+"stream/search",
+						data: $.extend({}, searchParams, { term: q }),
+						dataType: 'json',
+						success: callback,
+						error: function(jqXHR, textStatus, errorThrown) {
+							SignalPath.options.errorHandler({msg: errorThrown});
+							callback([]);
+						}
+					})
+				},
+				templates: {
+					suggestion: function(item) {
+						if (item.description)
+							return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>"
+						else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
+					}
+				}
+			})
+			.on('typeahead:selected', onSel)
 
-		// Create the parameter input form
-		pub.input = createParamInput();
-		var inputTd = $("<td></td>");
-		inputTd.append(pub.input);
-		parentDiv.parent().append(inputTd);
-		
-		// Assign disabled class to input when the parameter is connected
-		div.bind("spConnect", (function(me) {
-			return function(output) {
-				if(getParamRenderer(me.json).disable)
-					getParamRenderer(me.json).disable(me.input)
-			}
-		})(pub));
-		
-		div.bind("spDisconnect", (function(me) {
-			return function(output) {
-				if(getParamRenderer(me.json).enable)
-					getParamRenderer(me.json).enable(me.input)
-			}
-		})(pub));
-		
-		// Changes to parameters can be made at runtime
-		pub.input.change(function() {
-			if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges && confirm("Make a runtime change to '"+pub.getDisplayName()+"'?")) {
-				var value = getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
-				SignalPath.sendRequest(module.getHash(), {type:"paramChange", param:pub.getName(), value:value}, function(resp) {});
-			}
-		});
-		
-		// Trigger the spIOReady event on the input as well
-		pub.input.trigger("spIOReady");
-		
-		return div;
+		return span;
 	}
 
-	// PRIVATE FUNCTIONS
-	function getParamRenderer() {
-		return SignalPath.getParamRenderer(pub.json);
+	StreamParameterValueEditor.prototype.getValue = function() {
+		return this.data.value
 	}
-	
-	var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
-	pub.getJSPlumbEndpointOptions = function(json,connDiv) {
-		var opts = super_getJSPlumbEndpointOptions(json,connDiv);
-		opts.cssClass = (opts.cssClass || "") + " jsPlumb_parameter";
-		return opts;
-	}
-	
-	function createParamInput() {
-		var result = null;
 
-		var renderer = getParamRenderer(pub.json);
-		result = renderer.create(pub.module, pub.json);
-		
-		if (pub.json.updateOnChange) {
-			var oldVal = pub.json.value
-			$(result).change(function() {
-				var newVal = pub.toJSON().value
-				if (newVal != oldVal) { // on purpose instead of !==
-					SignalPath.updateModule(pub.module)
+	StreamParameterValueEditor.prototype.getValueName = function() {
+		return this.data.streamName
+	}
+
+	StreamParameterValueEditor.prototype.disable = function() {
+		this.search.attr('disabled', 'disabled')
+	}
+
+	StreamParameterValueEditor.prototype.enable = function() {
+		this.search.removeAttr('disabled')
+	}
+
+	/**
+	 * Shows a colorpicker for params of type Color.
+	 *
+	 * @param parent
+	 * @param module
+	 * @param data
+	 * @constructor
+	 */
+	var ColorParameterValueEditor = function(parentElement, parameter) {
+		DefaultParameterValueEditor.call(this, parentElement, parameter)
+	}
+	ColorParameterValueEditor.prototype = Object.create(DefaultParameterValueEditor.prototype)
+
+	ColorParameterValueEditor.prototype.createElement = function() {
+		var _this = this
+
+		var inputContainer = $("<div class='color-input-container'></div>")
+		this.colorInput = $("<input type='text' class='parameterInput colorInput form-control'/>");
+		inputContainer.append(this.colorInput)
+
+		this.colorInput.spectrum({
+			preferredFormat: "rgb",
+			showInput: true,
+			showButtons: false,
+			hide: function() {
+				var oldValue = _this.data.value
+				_this.data.value = _this.getValue()
+				if (oldValue !== _this.data.value) {
+					$(_this).trigger('change')
+				}
+			}
+		})
+		this.colorInput.spectrum("set", this.data.value)
+
+		return inputContainer
+	}
+
+	ColorParameterValueEditor.prototype.getValue = function() {
+		return this.colorInput.spectrum("get").toRgbString()
+	}
+
+	ColorParameterValueEditor.prototype.disable = function() {
+		this.colorInput.spectrum("disable")
+	}
+
+	ColorParameterValueEditor.prototype.enable = function() {
+		this.colorInput.spectrum("enable")
+	}
+
+	/**
+	 * Shows a key-value-pair editor for parameters of type Map
+	 *
+	 * @param parent
+	 * @param module
+	 * @param data
+	 * @constructor
+	 */
+	var MapParameterValueEditor = function(parentElement, parameter) {
+		DefaultParameterValueEditor.call(this, parentElement, parameter)
+	}
+	MapParameterValueEditor.prototype = Object.create(DefaultParameterValueEditor.prototype)
+
+	MapParameterValueEditor.prototype.createElement = function() {
+		var _this = this
+		var div = $("<div/>")
+		var collection = new KeyValuePairList()
+		collection.fromJSON(this.data.value || {})
+
+		this.editor = new KeyValuePairEditor({
+			el: div,
+			collection: collection
+		})
+
+		// collection add and remove will resize the component, so module needs to be redrawn
+		collection.on('add', function() {
+			_this.parameter.module.redraw()
+			// don't trigger change on add, as the key and value will be empty
+		})
+		collection.on('remove', function() {
+			_this.parameter.module.redraw()
+			$(_this).trigger('change')
+		})
+
+		div.on('change', function() {
+			$(_this).trigger('change')
+		})
+
+		return div
+	}
+
+	MapParameterValueEditor.prototype.getValue = function() {
+		return this.editor.collection.toJSON()
+	}
+
+	MapParameterValueEditor.prototype.disable = function() {
+		this.editor.disable()
+	}
+
+	MapParameterValueEditor.prototype.enable = function() {
+		this.editor.enable()
+	}
+
+	// Map types to value editors. DefaultParameterValueEditor is the default.
+	var editorMappings = {
+		"Stream": StreamParameterValueEditor,
+		"Color": ColorParameterValueEditor,
+		"Map": MapParameterValueEditor
+	}
+
+	SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
+		pub = pub || {};
+		pub = SignalPath.Input(json, parentDiv, module, type || "parameter input", pub);
+
+		var super_createDiv = pub.createDiv;
+		pub.createDiv = function() {
+			var div = super_createDiv();
+
+			// Create the parameter input form
+			var inputTd = $("<td></td>");
+			parentDiv.parent().append(inputTd);
+			pub.editor = createParameterValueEditor(inputTd);
+
+			// Disable editor on connect, enable on disconnect
+			div.bind("spConnect", function() {
+				pub.editor.disable()
+			})
+			div.bind("spDisconnect", function() {
+				pub.editor.enable()
+			})
+
+			// Changes to parameters can be made at runtime
+			$(pub.editor).change(function(event) {
+				if (SignalPath.isRunning() && SignalPath.options.allowRuntimeChanges) {
+					var value = pub.editor.getValue()
+					bootbox.confirm({
+						message: "Make a runtime change to '"+pub.getDisplayName()+"'?",
+						className: "bootbox-sm",
+						callback: function(result) {
+							if (result) {
+								SignalPath.sendRequest(
+									module.getHash(),
+									{
+										type: "paramChange",
+										param: pub.getName(),
+										value: value
+									},
+									function (resp) {
+									}
+								);
+							}
+						}
+					})
 				}
 			});
-		}
-		
-		return result;
-	}
 
-	pub.getValue = function() {
-		return getParamRenderer(pub.json).getValue(pub.module, pub.json, pub.input);
+			if (pub.json.updateOnChange) {
+				var oldVal = pub.json.value
+
+				$(pub.editor).change(function() {
+					var newVal = pub.toJSON().value
+					if (newVal != oldVal && !SignalPath.isRunning()) { // != on purpose instead of !==
+						oldVal = newVal
+						SignalPath.updateModule(pub.module)
+					}
+				});
+			}
+
+			return div;
+		}
+
+		var super_getJSPlumbEndpointOptions = pub.getJSPlumbEndpointOptions;
+		pub.getJSPlumbEndpointOptions = function(json,connDiv) {
+			var opts = super_getJSPlumbEndpointOptions(json,connDiv);
+			opts.cssClass = (opts.cssClass || "") + " jsPlumb_parameter";
+			return opts;
+		}
+
+		function createParameterValueEditor(parentElement) {
+			var editorClass = editorMappings[pub.json.type] || DefaultParameterValueEditor
+			var Temp = function() {}
+			var editor
+
+			// see http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
+			Temp.prototype = editorClass.prototype;
+			editor = new Temp;
+			editorClass.apply(editor, [parentElement, pub]);
+
+			return editor;
+		}
+
+		pub.getValue = function() {
+			return pub.editor.getValue();
+		}
+
+		var super_toJSON = pub.toJSON;
+		pub.toJSON = function() {
+			pub.json.value = pub.getValue();
+			return super_toJSON();
+		}
+
+		return pub;
 	}
-	
-	var super_toJSON = pub.toJSON;
-	pub.toJSON = function() {
-		pub.json.value = pub.getValue();
-		return super_toJSON();
-	}
-	
-	return pub;
-}
+})();
