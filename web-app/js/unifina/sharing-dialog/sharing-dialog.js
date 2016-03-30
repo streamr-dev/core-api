@@ -247,7 +247,7 @@
                         label: "Save", //'<span class="spinner"><i class="icon-spin icon-refresh"></i></span>Save',
                         className: "btn-primary", // has-spinner",
                         callback: function() {
-                            return listView.finishUserInput() !== "error" && sharePopup.closeAndSaveChanges()
+                            return listView.finishUserInput() !== "error" && saveChanges()
                         }
                     }
                 }
