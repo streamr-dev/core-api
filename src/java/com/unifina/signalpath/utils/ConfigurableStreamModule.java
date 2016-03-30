@@ -37,6 +37,7 @@ public class ConfigurableStreamModule extends AbstractSignalPathModule implement
 	public void init() {
 		addInput(streamParameter);
 		streamParameter.setCheckModuleId(true);
+		streamParameter.setUpdateOnChange(true);
 	}
 
 	@Override
