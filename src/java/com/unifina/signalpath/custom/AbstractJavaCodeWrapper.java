@@ -26,6 +26,13 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	private static final Logger log = Logger.getLogger(AbstractJavaCodeWrapper.class);
 
 	@Override
+	public void init() {
+		super.init();
+		resendAll = false;
+		resendLast = 0;
+	}
+
+	@Override
 	public void initialize() {
 		if (instance != null) {
 			instance.initialize();
