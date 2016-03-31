@@ -63,7 +63,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".new-user-field").value() }
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com"
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -85,7 +85,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -216,7 +217,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".new-user-field").value() }
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com"
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -238,7 +239,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -354,7 +356,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".new-user-field").value() }
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com"
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -376,7 +378,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -622,7 +624,7 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
