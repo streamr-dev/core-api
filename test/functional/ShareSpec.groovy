@@ -23,6 +23,16 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 	}
 
+	// fix weird bug: on Jenkins machine and for particular test, only "tester2" is typed for
+	//   $(".new-user-field") << "tester2@streamr.com"
+	def forceFeedTextInput($input, String text) {
+		waitFor { $input.displayed }
+		waitFor {
+			def len = $input.getAttribute("value").length()
+			len >= text.length() ?: ($input << text.substring(len))
+		}
+	}
+
 	void "sharePopup can grant and revoke Stream permissions"() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
@@ -460,12 +470,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to stream"
 		to StreamListPage
 		getStreamRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		// fix weird bug: on Jenkins machine, only "tester2" is typed before pressing enter using normal <<
-		waitFor {
-			def len = $(".new-user-field").getAttribute("value").length()
-			len >= 19 ?: ($(".new-user-field") << "tester2@streamr.com".substring(len))
-		}
+		forceFeedTextInput($(".new-user-field"), "tester2@streamr.com")
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
@@ -480,8 +485,8 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
 		getCanvasRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput($(".new-user-field"), "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -495,8 +500,8 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
 		getDashboardRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput($(".new-user-field"), "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
