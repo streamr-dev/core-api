@@ -121,7 +121,7 @@ class PermissionApiController {
 				def newP = permissionService.grant(grantor, res, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
 				response.status = 201
-				render(newP.toMap() + [text: "Successfully granted"] as JSON)
+				render(newP.toMap() as JSON)
 			}
 		}
 	}
@@ -141,6 +141,4 @@ class PermissionApiController {
 			render status: 204
 		}
 	}
-
-
 }

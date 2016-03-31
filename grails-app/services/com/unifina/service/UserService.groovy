@@ -8,27 +8,27 @@ import com.unifina.user.UserCreationFailedException
 import org.springframework.validation.FieldError
 
 class UserService {
-    
+
 	def grailsApplication
-    def springSecurityService
+	def springSecurityService
 	def permissionService
-	
-    def createUser(Map properties, List<SecRole> roles=null, List<Feed> feeds=null, List<ModulePackage> packages=null) {
-        def secConf = grailsApplication.config.grails.plugin.springsecurity
-        ClassLoader cl = this.getClass().getClassLoader()
-        SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
+
+	def createUser(Map properties, List<SecRole> roles = null, List<Feed> feeds = null, List<ModulePackage> packages = null) {
+		def secConf = grailsApplication.config.grails.plugin.springsecurity
+		ClassLoader cl = this.getClass().getClassLoader()
+		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
         // Encode the password
         if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
         user.password = springSecurityService.encodePassword(user.password)
 
-        // When created, the account is always enabled
-        user.enabled = true
-        
-        if (!user.validate()) {
-            log.warn(checkErrors(user.errors.getAllErrors()))
-            throw new UserCreationFailedException("Registration user validation failed: "+checkErrors(user.errors.getAllErrors()))
-        }
+		// When created, the account is always enabled
+		user.enabled = true
+
+		if (!user.validate()) {
+			log.warn(checkErrors(user.errors.getAllErrors()))
+			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
+		}
 
         if (!user.save(flush:true)) {
             log.warn("Failed to save user data: "+checkErrors(user.errors.getAllErrors()))
@@ -41,29 +41,30 @@ class UserService {
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
-        }
-        log.info("Created user for "+user.username)
-        
-        return user
-    }
+		}
+		log.info("Created user for " + user.username)
 
-    def addRoles(user, List<SecRole> roles=null) {
-        def secConf = grailsApplication.config.grails.plugin.springsecurity
-        ClassLoader cl = this.getClass().getClassLoader()
+		return user
+	}
 
-        def userRoleClass = cl.loadClass(secConf.userLookup.authorityJoinClassName)
-        def roleClass = cl.loadClass(secConf.authority.className)
+	def addRoles(user, List<SecRole> roles = null) {
+		def secConf = grailsApplication.config.grails.plugin.springsecurity
+		ClassLoader cl = this.getClass().getClassLoader()
 
-        if(roles == null) {
-            roles = roleClass.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
-            if (roles.size() != secConf.ui.register.defaultRoleNames.size())
-                throw new RuntimeException("Roles not found: "+secConf.ui.register.defaultRoleNames)
-        }
+		def userRoleClass = cl.loadClass(secConf.userLookup.authorityJoinClassName)
+		def roleClass = cl.loadClass(secConf.authority.className)
 
-        roles.each { role ->
-            userRoleClass.create user, role
-        }
-    }
+		if (roles == null) {
+			roles = roleClass.findAllByAuthorityInList(secConf.ui.register.defaultRoleNames)
+			if (roles.size() != secConf.ui.register.defaultRoleNames.size()) {
+				throw new RuntimeException("Roles not found: " + secConf.ui.register.defaultRoleNames)
+			}
+		}
+
+		roles.each { role ->
+			userRoleClass.create user, role
+		}
+	}
 
 	/** Adds/removes Feed read permissions so that user's permissions match given ones */
     def setFeeds(user, List<Feed> feeds) {
@@ -71,7 +72,7 @@ class UserService {
         feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return feeds
-    }
+	}
 
 	/** Adds/removes ModulePackage read permissions so that user's permissions match given ones */
 	def setModulePackages(user, List<ModulePackage> packages) {
@@ -79,14 +80,16 @@ class UserService {
 		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return packages
-    }
+	}
 
 	/**
 	 * Looks up a user based on api key.
 	 * @returns SecUser user, or null if the keys do not match a user.
 	 */
 	SecUser getUserByApiKey(String apiKey) {
-		if (!apiKey) { return null }
+		if (!apiKey) {
+			return null
+		}
 		return SecUser.findByApiKey(apiKey)
 	}
 
@@ -120,17 +123,19 @@ class UserService {
 		List<FieldError> finalErrors = new ArrayList<>()
 		List<FieldError> toBeCensoredList = new ArrayList<>();
 		errorList.each {
-			if(blackList.contains(it.getField()))
+			if (blackList.contains(it.getField())) {
 				toBeCensoredList.add(it)
-			else
+			} else {
 				finalErrors.add(it)
+			}
 		}
 		toBeCensoredList.each {
 			List arguments = Arrays.asList(it.getArguments())
 			int index = arguments.indexOf(it.getRejectedValue())
 			arguments.set(index, "***")
 			FieldError fieldError = new FieldError(
-					it.getObjectName(), it.getField(), "***", it.isBindingFailure(), it.getCodes(), arguments.toArray(), it.getDefaultMessage()
+				it.getObjectName(), it.getField(), "***", it.isBindingFailure(),
+				it.getCodes(), arguments.toArray(), it.getDefaultMessage()
 			)
 			finalErrors.add(fieldError)
 		}

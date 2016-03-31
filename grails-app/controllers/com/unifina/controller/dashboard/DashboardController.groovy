@@ -3,6 +3,7 @@ package com.unifina.controller.dashboard
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import grails.converters.JSON
+import grails.gorm.DetachedCriteria
 import grails.plugin.springsecurity.annotation.Secured
 
 import com.unifina.domain.dashboard.Dashboard
@@ -16,9 +17,9 @@ class DashboardController {
 
 	static defaultAction = "list"
 
-	private def getAuthorizedDashboard(long id, Operation op=Operation.READ, Closure action) {
+	private def getAuthorizedDashboard(long id, Operation op=Operation.READ, boolean prefetchItems=false, Closure action) {
 		SecUser user = springSecurityService.currentUser
-		Dashboard dashboard = Dashboard.get(id)
+		Dashboard dashboard = prefetchItems ? Dashboard.findById(params.id, [fetch:[items:"join"]]) : Dashboard.get(id);
 		if (!dashboard) {
 			response.sendError(404)
 			// TODO: alternative (from delete())
@@ -50,9 +51,7 @@ class DashboardController {
 	}
 	
 	def getJson() {
-		// Here was: dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
-		// 			does this speed up things? Can there be a penalty for simply calling dashboard.items?
-		getAuthorizedDashboard(params.long("id")) { Dashboard dashboard, user ->
+		getAuthorizedDashboard(params.long("id"), Operation.READ, true) { Dashboard dashboard, user ->
 			render([
 				id   : dashboard.id,
 				name : dashboard.name,
@@ -79,15 +78,13 @@ class DashboardController {
 	
 	def delete() {
 		getAuthorizedDashboard(params.long("id"), Operation.WRITE) { Dashboard dashboard, SecUser user ->
-			try {
-				DashboardItem.executeUpdate("delete from DashboardItem di where di.dashboard = ?", [dashboard])
-				dashboard.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])}"
-				redirect(action: "list")
-			} catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])}"
-				redirect(action: "show", id: params.id)
-			}
+			// DashboardItems SHOULD be deleted because of belongsTo/hasMany, but it doesn't seem to work in 2.3.11
+			new DetachedCriteria(DashboardItem).build {
+				eq "dashboard", dashboard
+			}.deleteAll()
+			dashboard.delete(flush: true)
+			flash.message = message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])
+			redirect(action: "list")
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
 /**
@@ -119,7 +120,22 @@ public abstract class Parameter<T> extends Input<T> {
 		
  
 		if (config.containsKey("value")) {
-			T val = parseValue(config.get("value")==null ? null : config.get("value").toString());
+
+			T val;
+			Object configValue = config.get("value");
+			if (configValue == null)
+				val = null;
+			else {
+				// Check config value type and directly assign if possible
+				Class typeClass = getTypeClass();
+				if (typeClass.isAssignableFrom(configValue.getClass())) {
+					val = (T) configValue;
+				}
+				// Fallback to parsing
+				else {
+					val = parseValue(configValue.toString());
+				}
+			}
 			
 			// If unconnected, use the value contained in JSON
 			if (!conn) {
@@ -139,7 +155,7 @@ public abstract class Parameter<T> extends Input<T> {
 	}
 	
 	/**
-	 * Must return the value of type <T> represented by the String value s. 
+	 * Must return the value of type <T> represented by the String value s.
 	 * @param s
 	 * @return
 	 */

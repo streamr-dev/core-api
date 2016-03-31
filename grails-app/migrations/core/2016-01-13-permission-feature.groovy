@@ -16,7 +16,7 @@ databaseChangeLog = {
 			}
 
 			column(name: "long_id", type: "bigint") {
-				constraints(nullable: "false")
+				constraints(nullable: "true")
 			}
 
 			column(name: "operation", type: "varchar(255)") {
@@ -24,7 +24,7 @@ databaseChangeLog = {
 			}
 
 			column(name: "string_id", type: "varchar(255)") {
-				constraints(nullable: "false")
+				constraints(nullable: "true")
 			}
 
 			column(name: "user_id", type: "bigint") {
@@ -49,9 +49,5 @@ databaseChangeLog = {
 
 	changeSet(author: "jtakalai (generated)", id: "1452674923112-2") {
 		addForeignKeyConstraint(baseColumnNames: "user_id", baseTableName: "permission", constraintName: "FKE125C5CF60701D32", deferrable: "false", initiallyDeferred: "false", referencedColumnNames: "id", referencedTableName: "sec_user", referencesUniqueColumn: "false")
-	}
-
-	changeSet(author: "jtakalai (generated)", id: "1452674923112-5") {
-		dropNotNullConstraint(columnDataType: "varchar(255)", columnName: "string_id", tableName: "permission")
 	}
 }

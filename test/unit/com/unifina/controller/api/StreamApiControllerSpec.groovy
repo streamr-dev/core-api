@@ -1,5 +1,7 @@
 package com.unifina.controller.api
 
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -164,7 +166,7 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		thrown(ValidationException)
+		thrown ValidationException
 	}
 
 	void "show a Stream of logged in user"() {
@@ -193,7 +195,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 404
+		thrown NotFoundException
 	}
 
 	void "cannot show other user's Stream"() {
@@ -207,7 +209,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 
 	void "update a Stream of logged in user"() {
@@ -243,7 +245,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		thrown(ValidationException)
+		thrown ValidationException
 	}
 
 	void "cannot update non-existent Stream"() {
@@ -258,7 +260,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 404
+		thrown NotFoundException
 	}
 
 	void "cannot update other user's Stream"() {
@@ -273,7 +275,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 
 	void "delete a Stream of logged in user"() {
@@ -301,7 +303,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 404
+		thrown NotFoundException
 	}
 
 	void "cannot delete other user's Stream"() {
@@ -315,6 +317,6 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 }

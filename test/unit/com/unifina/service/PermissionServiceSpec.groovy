@@ -135,13 +135,13 @@ class PermissionServiceSpec extends Specification {
 		service.get(UiChannel, stranger) == []
 	}
 
-	void "public resources are listed if extra flag is specified"() {
+	void "getAll lists public resources"() {
 		expect:
-		service.get(Dashboard, me, Operation.READ, true) == [dashOwned, dashAllowed, dashPublic]
-		service.get(Dashboard, anotherUser, Operation.READ, true) == [dashAllowed, dashRestricted, dashPublic]
-		service.get(Dashboard, stranger, Operation.READ, true) == [dashPublic]
-		service.get(UiChannel, me, Operation.READ, true) == [uicAllowed, uicPublic]
-		service.get(UiChannel, stranger, Operation.READ, true) == [uicPublic]
+		service.getAll(Dashboard, me) == [dashOwned, dashAllowed, dashPublic]
+		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted, dashPublic]
+		service.getAll(Dashboard, stranger) == [dashPublic]
+		service.getAll(UiChannel, me) == [uicAllowed, uicPublic]
+		service.getAll(UiChannel, stranger) == [uicPublic]
 	}
 
 	void "grant and revoke work for UiChannels"() {
@@ -158,7 +158,7 @@ class PermissionServiceSpec extends Specification {
 		service.get(UiChannel, anotherUser) == []
 	}
 
-	void "getAll throws IllegalArgumentException on invalid resource"() {
+	void "get throws IllegalArgumentException on invalid resource"() {
 		when:
 		service.get(java.lang.Object, me)
 		then:
@@ -174,11 +174,11 @@ class PermissionServiceSpec extends Specification {
 		expect:
 		service.get(Dashboard, new SecUser()) == []
 		service.get(Dashboard, null) == []
-		service.get(Dashboard, new SecUser(), Operation.READ, true) == [dashPublic]
-		service.get(Dashboard, null, Operation.READ, true) == [dashPublic]
+		service.getAll(Dashboard, new SecUser()) == [dashPublic]
+		service.getAll(Dashboard, null) == [dashPublic]
 	}
 
-	void "getAll closure filtering works as expected"() {
+	void "get closure filtering works as expected"() {
 		expect:
 		service.get(Dashboard, me) { like("name", "%ll%") } == [dashAllowed]
 		service.get(Dashboard, me, Operation.SHARE) == [dashOwned]
@@ -195,19 +195,6 @@ class PermissionServiceSpec extends Specification {
 		service.revoke(me, dashOwned, stranger)
 		then:
 		service.get(Dashboard, stranger) == []
-
-		/* TBD
-		when: "granted a write, also reading is granted"
-		service.grant(me, dashOwned, stranger, Operation.WRITE)
-		then:
-		service.getAll(Dashboard, stranger) == [dashOwned]
-
-		when: "granted a share, also reading is granted"
-		service.revoke(me, dashOwned, stranger, Operation.WRITE)
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.getAll(Dashboard, stranger) == [dashOwned]
-		*/
 	}
 
 	void "granting and revoking write rights"() {

@@ -8,7 +8,7 @@ class SerializerImplSpec extends Specification {
 
 	def "it throws SerializationException when de-serializing empty string"() {
 		when:
-		serializer.deserializeFromString("")
+		serializer.deserializeFromByteArray(new byte[0])
 
 		then:
 		thrown(SerializationException)
@@ -16,7 +16,7 @@ class SerializerImplSpec extends Specification {
 
 	def "it throws SerializationException when de-serializing invalid string"() {
 		when:
-		serializer.deserializeFromString("{}")
+		serializer.deserializeFromByteArray("asdfasdfasfdasf".getBytes("UTF-8"))
 
 		then:
 		thrown(SerializationException)

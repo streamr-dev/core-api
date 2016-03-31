@@ -338,7 +338,7 @@ unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
-unifina.email.shareInvite.subject = "%USER% shared a document to you in Streamr"
+unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
 
 
 /**

@@ -17267,30 +17267,42 @@ body.dashboard-show .titlebar-clickable {
   font-weight: bold;
 }
 .modal-body .access-row {
-  padding-bottom: 10pt;
-  display: flex;
+  height: 30pt;
+  position: relative;
 }
 .modal-body .form-group {
   margin-bottom: 0px;
+  display: inline-block;
 }
 .modal-body .user-label {
   font-weight: bold;
-  flex-grow: 1;
+  position: absolute;
 }
 .modal-body .user-delete-button {
   margin-left: 10pt;
+  position: absolute;
+  right: 5px;
+}
+.modal-body .permission-dropdown {
+  position: absolute;
+  right: 47px;
 }
 .modal-body .new-user-row {
-  display: flex;
+  position: relative;
+  height: 30pt;
 }
 .modal-body .new-user-field {
-  flex-grow: 1;
+  width: 92%;
+  right: 47px;
+  position: absolute;
 }
 .modal-body .new-user-field.has-error {
   color: #ff0000;
 }
 .modal-body .new-user-button {
   margin-left: 10pt;
+  position: absolute;
+  right: 5px;
 }
 .widget-notifications .notification {
   position: relative;

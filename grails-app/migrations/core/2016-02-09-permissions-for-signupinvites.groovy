@@ -7,10 +7,6 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "jtakalai (generated)", id: "1455013969117-2") {
-		dropNotNullConstraint(columnDataType: "bigint", columnName: "long_id", tableName: "permission")
-	}
-
 	changeSet(author: "jtakalai (generated)", id: "1455013969117-3") {
 		dropNotNullConstraint(columnDataType: "bigint", columnName: "user_id", tableName: "permission")
 	}
