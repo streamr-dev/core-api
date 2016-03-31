@@ -25,8 +25,9 @@ class ShareSpec extends GebReportingSpec {
 
 	// fix weird bug: on Jenkins machine and for particular test, only "tester2" is typed for
 	//   $(".new-user-field") << "tester2@streamr.com"
-	def forceFeedTextInput($input, String text) {
-		waitFor { $input.displayed }
+	def forceFeedTextInput(inputSelector, String text) {
+		waitFor { $(inputSelector).displayed }
+		def $input = $(inputSelector);
 		waitFor {
 			def len = $input.getAttribute("value").length()
 			len >= text.length() ?: ($input << text.substring(len))
@@ -470,7 +471,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to stream"
 		to StreamListPage
 		getStreamRow().find("button").click()
-		forceFeedTextInput($(".new-user-field"), "tester2@streamr.com")
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
@@ -485,7 +486,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
 		getCanvasRow().find("button").click()
-		forceFeedTextInput($(".new-user-field"), "tester2@streamr.com")
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
@@ -500,7 +501,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
 		getDashboardRow().find("button").click()
-		forceFeedTextInput($(".new-user-field"), "tester2@streamr.com")
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
