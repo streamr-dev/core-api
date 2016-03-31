@@ -83,7 +83,7 @@ class SendToStreamSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals {
-				globals.signalPathContext["live"] = true
+				globals.realtime = true
 				globals.uiChannel = new FakePushChannel()
 				globals.dataSource = new RealtimeDataSource()
 				globals

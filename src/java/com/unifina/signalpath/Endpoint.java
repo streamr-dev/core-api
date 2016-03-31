@@ -1,6 +1,8 @@
 package com.unifina.signalpath;
 
 import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +52,16 @@ public abstract class Endpoint<T> implements Serializable {
 	
 	public String getTypeName() {
 		return typeName;
+	}
+
+	public Class<T> getTypeClass() {
+		Class clazz = this.getClass();
+		while (!(clazz.getGenericSuperclass() instanceof ParameterizedType)) {
+			clazz = this.getClass().getSuperclass();
+		}
+		ParameterizedType pt = (ParameterizedType) clazz.getGenericSuperclass();
+		Class firstTypeArgument = (Class) pt.getActualTypeArguments()[0];
+		return firstTypeArgument;
 	}
 	
 	public String getLongName() {

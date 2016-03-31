@@ -107,15 +107,22 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		 * Execute in a privileged block so that also user defined
 		 * untrusted modules can benefit from auto-initialization of IO. 
 		 */
-		AccessController.doPrivileged(
-			new PrivilegedAction<Object>() {
-				public Object run() {
+        AccessController.doPrivileged(
+	        new PrivilegedAction<Object>() {
+	            public Object run() {
+	            	
+					// Loop through class hierarchy and collect declared fields
+					List<Field> fieldList = new ArrayList<>();
+					Class clazz = AbstractSignalPathModule.this.getClass();
+					do {
+						fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
+						clazz = clazz.getSuperclass();
+					} while (clazz != null);
 
-					// Get declared fields for examination
-					Field[] fields = AbstractSignalPathModule.this.getClass().getDeclaredFields();
-
-					// Sort by field name
-					Arrays.sort(fields, new Comparator<Field>() {
+					Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
+	    			
+	    			// Sort by field name
+	    			Arrays.sort(fields, new Comparator<Field>() {
 						@Override
 						public int compare(Field o1, Field o2) {
 							return o1.getName().compareTo(o2.getName());

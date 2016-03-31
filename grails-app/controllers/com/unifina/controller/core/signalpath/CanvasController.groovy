@@ -45,8 +45,8 @@ class CanvasController {
 	}
 
 	def editor() {
-		def beginDate = new Date()-1
-		def endDate = new Date()-1
+		def beginDate = new Date()
+		def endDate = new Date()
 
 		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
 	}
