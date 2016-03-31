@@ -1,7 +1,5 @@
 package com.unifina.domain.dashboard
 
-import java.util.Date;
-
 import com.unifina.domain.security.SecUser
 
 class Dashboard {
@@ -23,6 +21,22 @@ class Dashboard {
 	
 	static mapping = {
 		items cascade: 'all-delete-orphan'
+	}
+
+	def toSummaryMap() {
+		[
+			id: id,
+		    name: name,
+			numOfItems: items == null ? 0 : items.size(),
+		]
+	}
+
+	def toMap() {
+		[
+			id: id,
+			name: name,
+			items: items == null ? [] : items*.toMap(),
+		]
 	}
 	
 }

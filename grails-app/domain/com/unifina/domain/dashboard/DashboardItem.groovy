@@ -24,4 +24,13 @@ class DashboardItem implements Comparable {
 			   id != null && obj.id != null ? id.compareTo(obj.id) :
 		       title.compareTo(obj.title)
 	}
+
+	def toMap() {
+		[
+		    title: title,
+			ord: ord,
+			size: size,
+			uiChannelId: uiChannelId
+		]
+	}
 }
