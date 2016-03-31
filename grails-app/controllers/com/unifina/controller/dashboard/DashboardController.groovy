@@ -77,6 +77,7 @@ class DashboardController {
 	
 	def delete() {
 		getAuthorizedDashboard(params.long("id"), Operation.WRITE) { Dashboard dashboard, SecUser user ->
+			// DashboardItems SHOULD be deleted because of belongsTo/hasMany, but it doesn't seem to work in 2.3.11
 			new DetachedCriteria(DashboardItem).build {
 				eq "dashboard", dashboard
 			}.deleteAll()
