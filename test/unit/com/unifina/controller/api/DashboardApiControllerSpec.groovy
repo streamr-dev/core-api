@@ -27,11 +27,11 @@ class DashboardApiControllerSpec extends Specification {
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
 		me = new SecUser(apiKey: "myApiKey").save(failOnError: true, validate: false)
-		initDashboards()
+		dashboards = initDashboards(me)
 	}
 
-	void initDashboards() {
-		dashboards = []
+	public static List<Dashboard> initDashboards(SecUser me) {
+		List<Dashboard> dashboards = []
 		dashboards.add(new Dashboard(name: "dashboard-1", user: me))
 		dashboards.add(new Dashboard(name: "dashboard-2", user: me))
 		dashboards.add(new Dashboard(name: "dashboard-3", user: me))
@@ -64,6 +64,7 @@ class DashboardApiControllerSpec extends Specification {
 		).save(failOnError: true))
 
 		dashboards*.save(failOnError: true)
+		return dashboards
 	}
 
 	def "index() lists (readable) dashboards"() {
@@ -121,16 +122,18 @@ class DashboardApiControllerSpec extends Specification {
 			name: "dashboard-3",
 			items: [
 			    [
+					id: 3,
+					ord: 0,
 			        title: "dashboard-3-item-2",
 					size: "x-large",
 					uiChannelId: "ui-channel-id",
-					ord: 0,
 			    ],
 				[
+					id: 2,
+					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
 					uiChannelId: "ui-channel-id",
-					ord: 1,
 				],
 			]
 		]
@@ -212,16 +215,18 @@ class DashboardApiControllerSpec extends Specification {
 			name: "dashboard-update-3",
 			items: [
 				[
+					id: 3,
+					ord: 0,
 					title: "dashboard-3-item-2",
 					size: "x-large",
 					uiChannelId: "ui-channel-id",
-					ord: 0,
 				],
 				[
+					id: 2,
+					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
 					uiChannelId: "ui-channel-id",
-					ord: 1,
 				],
 			]
 		]

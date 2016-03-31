@@ -27,8 +27,9 @@ class DashboardItem implements Comparable {
 
 	def toMap() {
 		[
-		    title: title,
+			id: id,
 			ord: ord,
+		    title: title,
 			size: size,
 			uiChannelId: uiChannelId
 		]

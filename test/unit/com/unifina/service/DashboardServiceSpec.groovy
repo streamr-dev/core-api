@@ -1,17 +1,17 @@
 package com.unifina.service
 
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveDashboardCommand
+import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.UiChannel
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(DashboardService)
-@Mock([Dashboard, Permission, SecUser])
+@Mock([Dashboard, DashboardItem, Permission, SecUser, UiChannel])
 class DashboardServiceSpec extends Specification {
 
 	SecUser user = new SecUser(username: "e@e.com", name: "user")
@@ -26,7 +26,12 @@ class DashboardServiceSpec extends Specification {
 		otherUser.save(failOnError: true, validate: false)
 
 		(1..3).each {
-			new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
+			def d = new Dashboard(name: "my-dashboard-$it", user: user).save(failOnError: true)
+			if (it == 3) {
+				d.addToItems(new DashboardItem(title: "item1", ord: 1, size: "large").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item2", ord: 0, size: "medium").save(validate: false, failOnError: true))
+				d.addToItems(new DashboardItem(title: "item3", ord: 2, size: "large").save(validate: false, failOnError: true))
+			}
 		}
 
 		(1..3).each {
@@ -112,5 +117,213 @@ class DashboardServiceSpec extends Specification {
 		dashboard != null
 		dashboard.name == "newName"
 		Dashboard.findById(2L).name == "newName"
+	}
+
+	def "findDashboardItem() cannot fetch non-existent dashboard"() {
+		when:
+		service.findDashboardItem(666L, 1L, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "findDashboardItem() cannot fetch non-existent dashboard item"() {
+		when:
+		service.findDashboardItem(3L, 4L, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "findDashboardItem() cannot fetch other user's non-readable dashboard"() {
+		when:
+		service.findDashboardItem(4L, 666L, user)
+		then:
+		thrown(NotPermittedException)
+	}
+
+	def "findDashboardItem() can fetch existing dashboard item from readable dashboard"() {
+		when:
+		def item = service.findDashboardItem(3L, 1L, user)
+		then:
+		item.id == 1L
+	}
+
+	def "addDashboardItem() cannot add item to non-existent dashboard"() {
+		def command = new SaveDashboardItemCommand(
+			title: "added-item",
+			uiChannelId: "ui-channel-id",
+			ord: 666,
+			size: "large"
+		)
+
+		when:
+		service.addDashboardItem(666L, command, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "addDashboardItem() cannot add item other user's non-writeable dashboard"() {
+		def command = new SaveDashboardItemCommand(
+			title: "added-item",
+			uiChannelId: "ui-channel-id",
+			ord: 666,
+			size: "large"
+		)
+
+		when:
+		service.addDashboardItem(5L, command, user)
+		then:
+		thrown(NotPermittedException)
+	}
+
+	def "addDashboardItem() cannot add with item non-valid command object"() {
+		when:
+		service.addDashboardItem(2L, new SaveDashboardItemCommand(), user)
+		then:
+		thrown(ValidationException)
+	}
+
+	def "addDashboardItem() adds item to existing dashboard"() {
+		setup:
+		def uiChannel = new UiChannel(name: "a-ui-channel")
+		uiChannel.id = "an-ui-channel-id"
+		uiChannel.save(failOnError: true, validate: false)
+
+		def command = new SaveDashboardItemCommand(
+			title: "added-item",
+			uiChannelId: "an-ui-channel-id",
+			ord: 666,
+			size: "large"
+		)
+
+		when:
+		def item = service.addDashboardItem(2L, command, user)
+
+		then:
+		item instanceof DashboardItem
+		item.id != null
+		item.title == "added-item"
+		item.uiChannelId == "an-ui-channel-id"
+		item.ord == 666
+		item.size == "large"
+
+		and:
+		Dashboard.get(2L).items*.id == [item.id]
+	}
+
+
+
+
+	def "updateDashboardItem() cannot update item from non-existent dashboard"() {
+		def command = new SaveDashboardItemCommand(
+			title: "updated-item",
+			uiChannelId: "new-new-ui-channel",
+			ord: 42,
+			size: "small"
+		)
+
+		when:
+		service.updateDashboardItem(666L, 0L, command, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "updateDashboardItem() cannot update item from other user's non-writeable dashboard"() {
+		def command = new SaveDashboardItemCommand(
+			title: "updated-item",
+			uiChannelId: "new-new-ui-channel",
+			ord: 42,
+			size: "small"
+		)
+
+		when:
+		service.updateDashboardItem(5L, 0L, command, user)
+		then:
+		thrown(NotPermittedException)
+	}
+
+	def "updateDashboardItem() cannot update non-existent dashboard - dashboard item -pair"() {
+		def command = new SaveDashboardItemCommand(
+			title: "updated-item",
+			uiChannelId: "new-new-ui-channel",
+			ord: 42,
+			size: "small"
+		)
+
+		when:
+		service.updateDashboardItem(2L, 1L, command, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "updateDashboardItem() throws ValidationException given non valid command object"() {
+		when:
+		service.updateDashboardItem(3L, 1L, new SaveDashboardItemCommand(), user)
+		then:
+		thrown(ValidationException)
+	}
+
+	def "updateDashboardItem() can update item on dashboard."() {
+		def uiChannel = new UiChannel()
+		uiChannel.id = "new-new-ui-channel"
+		uiChannel.save(validate: false, failOnError: true)
+
+		def command = new SaveDashboardItemCommand(
+			title: "updated-item",
+			uiChannelId: "new-new-ui-channel",
+			ord: 42,
+			size: "small"
+		)
+
+		def dashboardId = 3L
+		def itemToUpdateId = 1L
+
+		assert DashboardItem.findById(itemToUpdateId) != null
+
+		when:
+		def updatedItem = service.updateDashboardItem(dashboardId, itemToUpdateId, command, user)
+		then:
+		DashboardItem.findById(itemToUpdateId).properties == updatedItem.properties
+		updatedItem.toMap() == [
+			id: 1L,
+		    title: "updated-item",
+			uiChannelId: "new-new-ui-channel",
+			ord: 42,
+			size: "small",
+		]
+	}
+
+	def "deleteDashboardItem() cannot delete item from non-existent dashboard"() {
+		when:
+		service.deleteDashboardItem(666L, 0L, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "deleteDashboardItem() cannot delete item from other user's non-writeable dashboard"() {
+		when:
+		service.deleteDashboardItem(5L, 0L, user)
+		then:
+		thrown(NotPermittedException)
+	}
+
+	def "deleteDashboardItem() can delete non-existent dashboard item"() {
+		when:
+		service.deleteDashboardItem(2L, 1L, user)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "deleteDashboardItem() can remove item from dashboard and delete it"() {
+		def dashboardId = 3L
+		def itemToRemoveId = 2L
+
+		assert DashboardItem.findById(itemToRemoveId) != null
+		assert Dashboard.get(dashboardId).items*.id == [2L, 1L, 3L]
+
+		when:
+		service.deleteDashboardItem(dashboardId, itemToRemoveId, user)
+		then:
+		DashboardItem.findById(itemToRemoveId) == null
+		Dashboard.get(dashboardId).items*.id == [1L, 3L]
 	}
 }

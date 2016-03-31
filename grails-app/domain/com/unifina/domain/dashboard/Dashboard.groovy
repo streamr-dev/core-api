@@ -11,7 +11,7 @@ class Dashboard {
 	Date dateCreated
 	Date lastUpdated
 	
-	SortedSet items
+	SortedSet<DashboardItem> items
 	
 	static hasMany = [items: DashboardItem]
 	
