@@ -30,6 +30,10 @@ class Permission {
 		Operation(String id) {
 			this.id = id
 		}
+
+		public static fromString(String operationId) {
+			return Operation.enumConstants.find { it.id == operationId }
+		}
 	}
 	Operation operation = Operation.READ
 

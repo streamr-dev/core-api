@@ -71,9 +71,11 @@ class DashboardController {
 
 	def show() {
 		getAuthorizedDashboard(params.long("id")) { Dashboard dashboard, SecUser user ->
-			return [serverUrl: grailsApplication.config.streamr.ui.server,
-					dashboard: dashboard,
-					shareable: permissionService.canShare(user, dashboard)]
+			return [
+				serverUrl: grailsApplication.config.streamr.ui.server,
+				dashboard: dashboard,
+				shareable: permissionService.canShare(user, dashboard)
+			]
 		}
 	}
 	
