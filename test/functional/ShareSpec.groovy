@@ -379,6 +379,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -625,6 +626,7 @@ class ShareSpec extends GebReportingSpec {
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
