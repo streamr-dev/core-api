@@ -28,7 +28,7 @@ class Stream implements Comparable {
 	}
 	
 	static mapping = {
-		id generator: 'assigned' // Note: doesn't apply in unit tests
+		id generator: 'assigned'
 		name index:"name_idx"
 		feed lazy:false
 		config type: 'text'
