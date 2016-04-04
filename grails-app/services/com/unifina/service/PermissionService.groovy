@@ -37,49 +37,11 @@ class PermissionService {
 	final alsoRevoke = [read: [Operation.WRITE, Operation.SHARE]]
 	//final alsoGrant = [write: [Operation.READ], share: [Operation.READ]]
 
-	/**
-	 * Check that resourceClass is a proper resource
-	 * @return name of field in Permission object that refers to the resource's id by type ("stringId" or "longId")
-	 */
-	private String getIdPropertyName(Class resourceClass) throws IllegalArgumentException {
-		if (!resourceClass?.name) { throw new IllegalArgumentException("Missing resource class") }
-		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("$resourceClass is not a Grails domain class") }
 
-		def idProp = resourceClass.properties["declaredFields"].find { it.name == "id" }
-		if (idProp == null) { throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field!") }
-
-		if (idProp.type == String) {
-			return "stringId"
-		} else if (idProp.type == Long) {
-			return "longId"
-		} else {
-			throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field of type either Long or String!")
-		}
-	}
-
-	/**
-	 * Check that grant/revoke target is a proper permission-holder
-	 * @return name of field in Permission object that is the foreign-key to the user or sign-up invite
-	 */
-	private String getUserPropertyName(userish) {
-		if (!userish) {
-			throw new IllegalArgumentException("Missing user!")
-		} else if (userish instanceof SecUser) {
-			return "user"
-		} else if (userish instanceof SignupInvite) {
-			return "invite"
-		} else {
-			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
-		}
-	}
-
-	/** ownership (if applicable) is stored in each Resource as "user" attribute */
-	private boolean isOwner(SecUser user, resource) {
-		return resource?.hasProperty("user") &&
-				user?.id != null &&
-				resource.user?.id != null &&
-				resource.user.id == user.id
-	}
+	// TODO: does WRITE imply READ?
+	boolean canRead(SecUser user, resource)  { return check(user, resource, Operation.READ) }
+	boolean canWrite(SecUser user, resource) { return check(user, resource, Operation.WRITE) }
+	boolean canShare(SecUser user, resource) { return check(user, resource, Operation.SHARE) }
 
 	/**
 	 * @return true if user is allowed to perform given operation to resource
@@ -108,11 +70,6 @@ class PermissionService {
 			eq "operation", op
 		}.empty
 	}
-
-	// TODO: does WRITE imply READ?
-	boolean canRead(SecUser user, resource)  { return check(user, resource, Operation.READ) }
-	boolean canWrite(SecUser user, resource) { return check(user, resource, Operation.WRITE) }
-	boolean canShare(SecUser user, resource) { return check(user, resource, Operation.SHARE) }
 
 	/**
 	 * @return List of all Permissions granted to a specific resource
@@ -420,5 +377,49 @@ class PermissionService {
 			p.user = user
 			p.save(flush: true, failOnError: true)
 		}
+	}
+
+	/**
+	 * Check that resourceClass is a proper resource
+	 * @return name of field in Permission object that refers to the resource's id by type ("stringId" or "longId")
+	 */
+	private String getIdPropertyName(Class resourceClass) throws IllegalArgumentException {
+		if (!resourceClass?.name) { throw new IllegalArgumentException("Missing resource class") }
+		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("$resourceClass is not a Grails domain class") }
+
+		def idProp = resourceClass.properties["declaredFields"].find { it.name == "id" }
+		if (idProp == null) { throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field!") }
+
+		if (idProp.type == String) {
+			return "stringId"
+		} else if (idProp.type == Long) {
+			return "longId"
+		} else {
+			throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field of type either Long or String!")
+		}
+	}
+
+	/**
+	 * Check that grant/revoke target is a proper permission-holder
+	 * @return name of field in Permission object that is the foreign-key to the user or sign-up invite
+	 */
+	private String getUserPropertyName(userish) throws IllegalArgumentException {
+		if (!userish) {
+			throw new IllegalArgumentException("Missing user!")
+		} else if (userish instanceof SecUser) {
+			return "user"
+		} else if (userish instanceof SignupInvite) {
+			return "invite"
+		} else {
+			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
+		}
+	}
+
+	/** ownership (if applicable) is stored in each Resource as "user" attribute */
+	private boolean isOwner(SecUser user, resource) {
+		return resource?.hasProperty("user") &&
+			user?.id != null &&
+			resource.user?.id != null &&
+			resource.user.id == user.id
 	}
 }

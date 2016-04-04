@@ -89,7 +89,7 @@ class PermissionApiController {
 				render(newP.toMap() + [text: "Successfully granted"] as JSON)
 			}
 		} else {
-			// TODO: check that username is a valid email address?
+			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
 			if (!user) {
 				def invite = SignupInvite.findByUsername(username)
@@ -120,7 +120,7 @@ class PermissionApiController {
 				def newP = permissionService.grant(grantor, res, user, op)
 				header "Location", request.forwardURI + "/" + newP.id
 				response.status = 201
-				render(newP.toMap() + [text: "Successfully granted"] as JSON)
+				render(newP.toMap() as JSON)
 			}
 		}
 	}

@@ -16,7 +16,7 @@ import com.unifina.security.UserJavaClassLoader;
 public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	transient AbstractCustomModule instance = null;
-	String serializedInstance = null;
+	byte[] serializedInstance = null;
 	String code = null;
 	String className = null;
 	String fullCode = null;
