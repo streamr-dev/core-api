@@ -12,7 +12,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.grails.web.json.JSONTokener;
@@ -32,17 +31,15 @@ public class Http extends AbstractSignalPathModule {
 
 	private HttpVerbParameter verb = new HttpVerbParameter(this, "verb");
 	private StringParameter URL = new StringParameter(this, "URL", "localhost");
+	private MapParameter headers = new MapParameter(this, "headers");
+	private MapParameter queryParams = new MapParameter(this, "params");
 
 	private Input<Object> body = new Input<>(this, "body", "Object");
-	private MapInput headers = new MapInput(this, "headers");
-	private MapInput queryParams = new MapInput(this, "params");
 	private MapOutput responseHeaders = new MapOutput(this, "headers");
 	private ListOutput errorOut = new ListOutput(this, "errors");
 	private Output<Object> response = new Output<>(this, "data", "Object");
 	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "status code");
 	private TimeSeriesOutput pingMillis = new TimeSeriesOutput(this, "ping(ms)");
-
-	private static final Logger log = Logger.getLogger(Http.class);
 
 	@Override
 	public void init() {
@@ -75,16 +72,22 @@ public class Http extends AbstractSignalPathModule {
 	}
 	private transient CloseableHttpClient _httpClient;
 
+	/** For bodyless verbs, "body" is only a "trigger" */
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		if (verb.hasBody()) {
-			body.setDisplayName("body");
-			body.canToggleDrivingInput = true;
-		} else {
-			body.setDisplayName("trigger");
-			body.canToggleDrivingInput = false;
-			body.setDrivingInput(true);
+
+		if (config.containsKey("inputs")) {
+			// body.setDisplayName won't cut it; it will be re-read from config afterwards
+			for (Map i : (List<Map>) config.get("inputs")) {
+				if (i.get("name").equals("body")) {
+					i.put("displayName", verb.hasBody() ? "body" : "trigger");
+				}
+			}
+
+			// trigger should be driving and non-togglable
+			if (!verb.hasBody()) { body.setDrivingInput(true); }
+			body.canToggleDrivingInput = verb.hasBody();
 		}
 	}
 
@@ -93,16 +96,18 @@ public class Http extends AbstractSignalPathModule {
 		List<String> errors = new LinkedList<>();
 
 		List<NameValuePair> queryPairs = new LinkedList<>();
-		for (Map.Entry<String, Object> pair : queryParams.getValue().entrySet()) {
-			NameValuePair p = new BasicNameValuePair(pair.getKey(), pair.getValue().toString());
-			queryPairs.add(p);
+		for (Object pair : queryParams.getValue().entrySet()) {
+			Map.Entry p = (Map.Entry)pair;
+			NameValuePair nvp = new BasicNameValuePair(p.getKey().toString(), p.getValue().toString());
+			queryPairs.add(nvp);
 		}
 		boolean alreadyAdded = (URL.getValue().indexOf('?') > -1);
 		String url = URL.getValue() + (alreadyAdded ? "&" : "?") + URLEncodedUtils.format(queryPairs, "UTF-8");
 
 		HttpRequestBase request = verb.getRequest(url);
-		for (Map.Entry<String, Object> pair : headers.getValue().entrySet()) {
-			request.addHeader(pair.getKey(), pair.getValue().toString());
+		for (Object pair : headers.getValue().entrySet()) {
+			Map.Entry p = (Map.Entry)pair;
+			request.addHeader(p.getKey().toString(), p.getValue().toString());
 		}
 
 		if (verb.hasBody()) {
