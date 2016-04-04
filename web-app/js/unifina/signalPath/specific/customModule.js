@@ -13,14 +13,13 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.GenericModule(data,canvas,prot)
 
-	var module = pub.getDiv();
-	
 	var dialog = null;
 	var debug = null;
 	var debugTextArea = null;
 	var editor = null;
 	
-	addStuffToDiv();
+	createEditCodeButton();
+	$(prot).on('updated', createEditCodeButton)
 	
 	var codeWindow = ''
     +   '<div class="code-editor-dialog" style="width:600px; height:400px">'
@@ -68,18 +67,16 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			dialog.find(".apply-btn").click(function() {
 				editor.clearGutter("breakpoints");
 				updateJson();
-				SignalPath.updateModule(pub, function() {
-					module = pub.getDiv();
-					addStuffToDiv();
-				});
+				SignalPath.updateModule(pub);
 			})
 			dialog.find(".close-btn").click(function(){
 				dialog.hide()
 			})
-						
 			
 			$(SignalPath).on("new", pub.onDelete);
 			$(SignalPath).on("loaded", pub.onDelete);
+
+			$(SignalPath).on("started", clearDebug);
 			
 			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
 				value: prot.jsonData.code,
@@ -136,7 +133,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 				}
 			})
 			debug.find(".clear-btn").click(function() {
-				debugTextArea.html("");
+				clearDebug()
 			})
 			debug.find(".close-btn").click(function(){
 				debug.hide()
@@ -148,12 +145,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		} else debug.show()
 	}
 	
-	function addStuffToDiv() {
+	function createEditCodeButton() {
 		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
 		editButton.click(createCodeWindow);
-		
-		module.find(".modulefooter").prepend(editButton);
-		editButton.button();
+		pub.getDiv().find(".modulefooter").prepend(editButton);
 	}
 	
 	function updateJson() {
@@ -194,6 +189,10 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		if(super_onClose)
 			super_onClose()
 		clearModule()
+	}
+
+	function clearDebug() {
+		debugTextArea.html("");
 	}
 
 	var clearModule = function(){

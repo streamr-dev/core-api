@@ -31,6 +31,7 @@ import org.apache.commons.lang.time.DateUtils;
 public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String, MapMessageEventRecipient> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
+	Map<Stream, Boolean> feedfileIteratorReturnedForStream = new HashMap<>();
 	Properties kafkaProperties;
 
 	public KafkaHistoricalFeed(Globals globals, Feed domainObject) {
@@ -64,8 +65,15 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 
 		Stream stream = getStream(recipient);
 
-		// Only check Kafka for further messages if the latest message was not on the end date
-		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && !TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate()))) {
+		if (iterator != null)
+			feedfileIteratorReturnedForStream.put(stream, true);
+
+		// Only check Kafka for further messages if there was no feedfile iterator OR the last message was not on the end date (for efficiency)
+		// TODO: always check if this can be speeded up somehow
+		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) &&
+				(!feedfileIteratorReturnedForStream.containsKey(stream) ||
+						!TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate())))) {
+
 			kafkaIteratorReturnedForStream.put(stream, true);
 
 			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(recipient.getStream().getUuid(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
