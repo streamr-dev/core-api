@@ -77,8 +77,7 @@ class PermissionApiController {
 		if (anonymous && username) { throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String) }
 		if (!anonymous && !username) { throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!") }
 
-		String opId = request.JSON.operation
-		Operation op = Operation.enumConstants.find { it.id == opId }
+		Operation op = Operation.fromString request.JSON.operation
 		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'. Try e.g. 'read' instead.", "operation", opId) }
 
 		if (anonymous) {
@@ -90,7 +89,7 @@ class PermissionApiController {
 				render(newP.toMap() + [text: "Successfully granted"] as JSON)
 			}
 		} else {
-			// TODO: check that username is a valid email address?
+			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 			def user = SecUser.findByUsername(username)
 			if (!user) {
 				def invite = SignupInvite.findByUsername(username)
