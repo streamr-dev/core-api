@@ -51,7 +51,12 @@ public class MapTraversal {
 		Object raw = getProperty(map,name);
 		return (raw==null ? null : raw.toString());
 	}
-	
+
+	public static String getString(Map map, String name, String defaultValue) {
+		Object raw = getProperty(map,name);
+		return (raw==null ? defaultValue : raw.toString());
+	}
+
 	public static Integer getInteger(Map map, String name) {
 		Object raw = getProperty(map,name);
 		if (raw==null) return null;

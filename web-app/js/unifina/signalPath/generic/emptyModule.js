@@ -362,47 +362,51 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	/**
 	 * Functions for rendering and parsing options
+	 *
+	 * For {possibleValues:[ {text: "Description", value: "X"}, ... ]} create a drop-down box
+	 * For {type: "boolean"}, create drop-down with true/false
+	 * For the rest, a free-text field
 	 */
 	function createOption(key, option) {
-		var title
-		var value
 		var div = $("<div class='option'></div>");
-		if (option.type=="int" || option.type=="double" || option.type=="string") {
-			title = $("<span class='optionTitle'>"+key+"</span>");
-			value = $("<span class='optionValue'></span>");
+		var title = $("<span class='optionTitle'>" + key + "</span>").appendTo(div);
+		var value = $("<span class='optionValue'></span>").appendTo(div);
 
-			div.append(title);
-			div.append(value);
-
+		if (!!option.possibleValues) {
+			var $select = $("<select>");
+			_(option.possibleValues).each(function(opt) {
+				var $option = $("<option>");
+				$option.attr("value", opt.value);
+				$option.append(opt.text);
+				if (option.value == opt.value) {
+					$option.attr("selected", "selected");
+				}
+				$select.append($option);
+			});
+			value.append($select);
+		} else if (option.type == "int" || option.type == "double" || option.type == "string") {
 			var input = $("<input type='text'>");
-			input.attr("value",option.value);
+			input.attr("value", option.value);
 			value.append(input);
-		}
-		else if (option.type=="boolean") {
-			title = $("<span class='optionTitle'>"+key+"</span>");
-			value = $("<span class='optionValue'></span>");
-			
-			div.append(title);
-			div.append(value);
-			
-			value.append("<select><option value='true' "+(option.value ? "selected='selected'" : "")+">true</option><option value='false' "+(!option.value ? "selected='selected'" : "")+">false</option></select>");
+		} else if (option.type == "boolean") {
+			value.append("<select><option value='true' " + (option.value ? "selected='selected'" : "") + ">true</option><option value='false' " + (!option.value ? "selected='selected'" : "") + ">false</option></select>");
 		}
 		return div;
 	}
 	prot.createOption = createOption;
-	
+
 	function updateOption(option, div) {
-		if (option.type=="int") {
-			option.value = parseInt($(div).find("input").val());
-		}
-		else if (option.type=="double") {
-			option.value = parseFloat($(div).find("input").val());
-		}
-		else if (option.type=="string") {
-			option.value = $(div).find("input").val();
-		}
-		else if (option.type=="boolean") {
-			option.value = ($(div).find("select").val()=="true");
+		var isDropdown = (option.type == "boolean" || !!option.possibleValues)
+		var inputText = isDropdown ? $(div).find("select").val() : $(div).find("input").val()
+
+		if (option.type == "int") {
+			option.value = parseInt(inputText);
+		} else if (option.type == "double") {
+			option.value = parseFloat(inputText);
+		} else if (option.type == "string") {
+			option.value = inputText;
+		} else if (option.type == "boolean") {
+			option.value = (inputText == "true");
 		}
 	}
 	prot.updateOption = updateOption;

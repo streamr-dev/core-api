@@ -61,7 +61,7 @@ public class TextFieldModule extends InputModule {
 
 	@Override
 	protected void onInput(RuntimeRequest request, RuntimeResponse response) {
-		value = (String) request.get("value");
+		value = (String)request.get("value");
 	}
 
 	@Override
