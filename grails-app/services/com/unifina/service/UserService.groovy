@@ -78,8 +78,8 @@ class UserService {
 			}
 		}
 
-		List<Feed> existing = permissionService.getAll(Feed, user)
-		feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
+		List<Feed> existing = permissionService.get(Feed, user)
+        feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return feeds
 	}
@@ -95,7 +95,7 @@ class UserService {
 			}
 		}
 
-		List<ModulePackage> existing = permissionService.getAll(ModulePackage, user)
+		List<ModulePackage> existing = permissionService.get(ModulePackage, user)
 		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return packages

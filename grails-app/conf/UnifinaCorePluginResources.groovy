@@ -173,7 +173,7 @@ modules = {
 		resource url:[dir:'js/unifina/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
 	}
 	'sharing-dialog' {
-		dependsOn 'bootbox, backbone'
+		dependsOn 'bootbox, backbone, switcher'
 		resource url: [dir: 'js/unifina/sharing-dialog', file: 'sharing-dialog.js', plugin: 'unifina-core']
 	}
 	'signalpath-browser' {

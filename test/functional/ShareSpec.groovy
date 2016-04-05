@@ -53,7 +53,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "add invalid email"
 		$(".new-user-field") << "foobar" << Keys.ENTER
 		then: "enter adds a permission row"
-		waitFor { $(".ui-pnotify").find(".alert-danger") }
+		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
 		$(".new-user-field").value() == "foobar"
 
@@ -95,7 +95,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$(".new-user-field") << Keys.ENTER
 		then: "enter saves changes when user field is empty"
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "re-open once more"
@@ -163,7 +163,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "...this time for reals"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "open menu"
@@ -207,7 +207,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "add invalid email"
 		$(".new-user-field") << "foobar" << Keys.ENTER
 		then: "enter adds a permission row"
-		waitFor { $(".ui-pnotify").find(".alert-danger") }
+		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
 		$(".new-user-field").value() == "foobar"
 
@@ -249,7 +249,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$(".new-user-field") << Keys.ENTER
 		then: "enter saves changes when user field is empty"
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "re-open once more"
@@ -307,7 +307,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "...this time for reals"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "re-open"
@@ -346,7 +346,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "add invalid email"
 		$(".new-user-field") << "foobar" << Keys.ENTER
 		then: "enter adds a permission row"
-		waitFor { $(".ui-pnotify").find(".alert-danger") }
+		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
 		$(".new-user-field").value() == "foobar"
 
@@ -388,7 +388,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$(".new-user-field") << Keys.ENTER
 		then: "enter saves changes when user field is empty"
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "re-open once more"
@@ -446,7 +446,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "...this time for reals"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "re-open"
@@ -477,13 +477,13 @@ class ShareSpec extends GebReportingSpec {
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
-		waitFor { $(".access-row") }
+		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
 		when: "save stream read right"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "give tester2 read permission to canvas"
@@ -498,7 +498,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "save canvas read right"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "give tester2 read permission to dashboard"
@@ -507,13 +507,13 @@ class ShareSpec extends GebReportingSpec {
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
-		waitFor { $(".access-row") }
+		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
 		when: "save dashboard read right"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "challenger appears"
@@ -576,7 +576,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$("button", text: "Save").click()
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when:
@@ -594,7 +594,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$("button", text: "Save").click()
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when:
@@ -612,7 +612,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$("button", text: "Save").click()
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 	}
 
@@ -634,31 +634,88 @@ class ShareSpec extends GebReportingSpec {
 		when: "save canvas read right"
 		$(".new-user-field") << Keys.ENTER
 		then:
-		waitFor { $(".ui-pnotify").find(".alert-success") }
+		waitFor { $(".ui-pnotify .alert-success") }
 		waitFor { !$(".bootbox.modal") }
 
 		when: "try search"
 		closePnotify()
 		logout()
+
 		loginTester2()
+
 		search << "ShareSp"
 		then: "found!"
 		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
 
 		cleanup: "remove tester2 permission"
-		try {
-			logout()
-			loginTester1()
-			to StreamListPage
-			getStreamRow().find("button").click()
-			waitFor { $(".user-delete-button").displayed }
-			$(".user-delete-button").click()
-			waitFor { $(".access-row").size() == 0 }
-			$("button", text: "Save").click()
-			waitFor { $(".ui-pnotify").find(".alert-success") }
-		} catch (Exception e) {
-			// May fail if there is no permission to remove
-			// whatever, all of this has changed in the newer branch
+		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
+		logout()
+
+		loginTester1()
+
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".user-delete-button").displayed }
+		$(".user-delete-button").click()
+		waitFor { $(".access-row").size() == 0 }
+		$("button", text: "Save").click()
+		waitFor { $(".ui-pnotify .alert-success") }
+	}
+
+	void "public stream is visible in search and can be inspected, but won't be shown in list"() {
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+
+		loginTester1()
+
+		when: "publish it if not public (defensive, but we aren't testing that DB state is correct...)"
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".modal-body .owner-row .switcher").displayed }
+		if (!$(".anonymous-switcher").attr("checked")) {
+			$(".modal-body .owner-row .switcher").click()
 		}
+		then:
+		$(".anonymous-switcher").attr("checked")
+
+		when:
+		$("button", text: "Save").click()
+		then:
+		//waitFor { $(".ui-pnotify .alert-success") }	// robustness...
+		waitFor { !$(".bootbox.modal") }
+
+		when: "try search"
+		closePnotify()
+		def streamShowUrl = getStreamRow().attr("href")
+		logout()
+
+		loginTester2()
+
+		search << "ShareSp"
+		then: "found!"
+		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+
+		when: "check list"
+		to StreamListPage
+		then: "not found"
+		getStreamRow().size() == 0
+
+		when: "inspect"
+		go streamShowUrl
+		then:
+		waitFor { at StreamShowPage }
+
+		cleanup: "un-publish stream"
+		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
+		logout()
+
+		loginTester1()
+
+		to StreamListPage
+		getStreamRow().find("button").click()
+		waitFor { $(".modal-body .owner-row .switcher").displayed }
+		if ($(".anonymous-switcher").attr("checked")) {
+			$(".modal-body .owner-row .switcher").click()
+		}
+		$("button", text: "Save").click()
 	}
 }

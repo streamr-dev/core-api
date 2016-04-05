@@ -45,13 +45,14 @@ class StreamController {
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
-		List<Stream> streams = permissionService.getAll(Stream, user)
-		List<Stream> shareable = permissionService.getAll(Stream, user, Operation.SHARE)
+		List<Stream> streams = permissionService.get(Stream, user)
+		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
 		[streams:streams, shareable:shareable]
 	}
 
 	def search() {
-		render(permissionService.getAll(Stream, springSecurityService.currentUser) {
+		SecUser user = springSecurityService.currentUser
+		render(permissionService.getAll(Stream, user) {
 			or {
 				like "name", "%${params.term}%"
 				like "description", "%${params.term}%"
@@ -74,9 +75,11 @@ class StreamController {
 
 		if (!justStarted && stream.hasErrors()) { log.info(stream.errors) }
 		if (justStarted || stream.hasErrors()) {
-			return [stream: stream,
-					feeds: permissionService.getAll(Feed, user),
-					defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+			return [
+				stream: stream,
+				feeds: permissionService.get(Feed, user),
+				defaultFeed: Feed.findById(Feed.KAFKA_ID)
+			]
 		}
 
 		flash.message = "Your stream has been created! " +

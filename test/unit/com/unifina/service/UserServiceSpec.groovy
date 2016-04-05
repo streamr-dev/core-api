@@ -118,12 +118,12 @@ class UserServiceSpec extends Specification {
 		user.getAuthorities().size() == 1
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 
-		permissionService.getAll(Feed, user).size() == 0
+		permissionService.get(Feed, user).size() == 0
 
-		permissionService.getAll(ModulePackage, user).size() == 2
-		permissionService.getAll(ModulePackage, user)[0].id == 1
-		permissionService.getAll(ModulePackage, user)[1].id == 2
-	}
+		permissionService.get(ModulePackage, user).size() == 2
+		permissionService.get(ModulePackage, user)[0].id == 1
+		permissionService.get(ModulePackage, user)[1].id == 2
+    }
 
 	def "it should fail if the default roles, feeds of modulePackages are not found"() {
 		when:

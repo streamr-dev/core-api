@@ -37,7 +37,7 @@ class PermissionApiController {
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (!permissionService.canShare(request.apiUser, res)) {
-			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString())
+			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
 		}
@@ -71,44 +71,57 @@ class PermissionApiController {
 	def save() {
 		if (!request.hasProperty("JSON")) { throw new InvalidArgumentsException("JSON body expected") }
 
+		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+		boolean anonymous = request.JSON.anonymous as boolean
 		String username = request.JSON.user
-		String opId = request.JSON.operation
+		if (anonymous && username) { throw new InvalidArgumentsException("Can't specify user for anonymous permission! Leave out either 'user' or 'anonymous' parameter.", "anonymous", anonymous as String) }
+		if (!anonymous && !username) { throw new InvalidArgumentsException("Must specify either 'user' or 'anonymous'!") }
 
-		Operation op = Operation.enumConstants.find { it.id == opId }
+		Operation op = Operation.fromString request.JSON.operation
 		if (!op) { throw new InvalidArgumentsException("Invalid operation '$opId'. Try e.g. 'read' instead.", "operation", opId) }
 
-		// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
-		def user = SecUser.findByUsername(username)
-		if (!user) {
-			def invite = SignupInvite.findByUsername(username)
-			if (!invite) {
-				invite = signupCodeService.create(username)
-				def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
-				// TODO: react to MailSendException if invite.username is not valid a e-mail address
-				mailService.sendMail {
-					from grailsApplication.config.unifina.email.sender
-					to invite.username
-					subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
-					html g.render(
-							template: "/register/email_share_invite",
-							model: [invite: invite, sharer: sharer],
-							plugin: "unifina-core"
-					)
+		if (anonymous) {
+			useResource(params.resourceClass, params.resourceId) { res ->
+				def grantor = request.apiUser
+				def newP = permissionService.grantAnonymousAccess(grantor, res, op)
+				header "Location", request.forwardURI + "/" + newP.id
+				response.status = 201
+				render(newP.toMap() + [text: "Successfully granted"] as JSON)
+			}
+		} else {
+			// incoming "username" is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
+			def user = SecUser.findByUsername(username)
+			if (!user) {
+				def invite = SignupInvite.findByUsername(username)
+				if (!invite) {
+					invite = signupCodeService.create(username)
+					def sharer = request.apiUser?.username ?: "A friend"    // TODO: get default from config?
+					// TODO: react to MailSendException if invite.username is not valid a e-mail address
+					mailService.sendMail {
+						from grailsApplication.config.unifina.email.sender
+						to invite.username
+						subject grailsApplication.config.unifina.email.shareInvite.subject.replace("%USER%", sharer)
+						html g.render(
+								template: "/register/email_share_invite",
+								model: [invite: invite, sharer: sharer],
+								plugin: "unifina-core"
+						)
+					}
+					invite.sent = true
+					invite.save()
 				}
-				invite.sent = true
-				invite.save()
+
+				// permissionService handles SecUsers and SignupInvitations equally
+				user = invite
 			}
 
-			// permissionService handles SecUsers and SignupInvitations equally
-			user = invite
-		}
-
-		useResource(params.resourceClass, params.resourceId) { res ->
-			def grantor = request.apiUser
-			def newP = permissionService.grant(grantor, res, user, op)
-			header "Location", request.forwardURI + "/" + newP.id
-			response.status = 201
-			render(newP.toMap() as JSON)
+			useResource(params.resourceClass, params.resourceId) { res ->
+				def grantor = request.apiUser
+				def newP = permissionService.grant(grantor, res, user, op)
+				header "Location", request.forwardURI + "/" + newP.id
+				response.status = 201
+				render(newP.toMap() as JSON)
+			}
 		}
 	}
 
@@ -122,13 +135,9 @@ class PermissionApiController {
 	@StreamrApi(requiresAuthentication = false)
 	def delete(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
-			// share-permission has been tested in usePermission
+			// share-permission has been tested in usePermission (calls useResource)
 			permissionService.systemRevoke(p)
-			// https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.7 says DELETE may return "an entity describing the status", that is:
-			def newPerms = permissionService.getPermissionsTo(res)*.toMap()
-			render(p.toMap() + [text: "Successfully revoked", changedPermissions: newPerms] as JSON)
-			// it's also possible to send no body at all
-			//render status: 204
+			render status: 204
 		}
 	}
 

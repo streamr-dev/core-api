@@ -34,21 +34,20 @@ class DashboardController {
 	
 	def list() {
 		def user = springSecurityService.currentUser
-		def dashboards = permissionService.getAll(Dashboard, user) { order "dateCreated", "desc" }
-		def shareable = permissionService.getAll(Dashboard, user, Operation.SHARE)
+		def dashboards = permissionService.get(Dashboard, user) { order "dateCreated", "desc" }
+		def shareable = permissionService.get(Dashboard, user, Operation.SHARE)
 		return [dashboards:dashboards, shareable:shareable, user:user]
 	}
-	
+
 	def create() {
-		if (request.method=="GET") {
-			return [dashboard: new Dashboard()]
-		} else {
-			Dashboard dashboard = new Dashboard()
-			dashboard.name = params.name
-			dashboard.user = springSecurityService.currentUser
-			dashboard.save(flush:true, failOnError:true)
-			redirect(action:"show", id:dashboard.id)
-		}
+	}
+
+	def save() {
+		Dashboard dashboard = new Dashboard()
+		dashboard.name = params.name
+		dashboard.user = springSecurityService.currentUser
+		dashboard.save(flush:true, failOnError:true)
+		redirect(action:"show", id:dashboard.id)
 	}
 	
 	def getJson() {
@@ -71,7 +70,11 @@ class DashboardController {
 
 	def show() {
 		getAuthorizedDashboard(params.long("id")) { Dashboard dashboard, SecUser user ->
-			return [serverUrl: grailsApplication.config.streamr.ui.server, dashboard: dashboard, shareable: permissionService.canShare(user, dashboard)]
+			return [
+				serverUrl: grailsApplication.config.streamr.ui.server,
+				dashboard: dashboard,
+				shareable: permissionService.canShare(user, dashboard)
+			]
 		}
 	}
 	

@@ -17,6 +17,7 @@ databaseChangeLog = {
 	include file: 'core/2016-02-09-permissions-for-signupinvites.groovy'
 	include file: 'core/2016-02-10-remove-feeduser-modulepackageuser.groovy'
 	include file: 'core/2016-02-19-add-sharespec-test-data.groovy'
+	include file: 'core/2016-03-03-add-anonymous-access.groovy'
 
 	include file: 'core/2016-03-02-map-modules.groovy'
 	include file: 'core/2016-03-22-fix-input-modules-json-help.groovy'

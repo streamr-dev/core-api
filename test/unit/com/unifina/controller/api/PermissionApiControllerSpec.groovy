@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.NotPermittedException
+import com.unifina.api.InvalidArgumentsException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -59,7 +60,7 @@ class PermissionApiControllerSpec extends Specification {
 
     void "index returns list of permissions to shared resource (string id)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasShared.id}"
+		request.requestURI = "/api/v1/canvases/${canvasShared.id}/permissions"
 		params.id = canvasShared.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasShared.id
@@ -83,7 +84,7 @@ class PermissionApiControllerSpec extends Specification {
 
 	void "index returns list of permissions to shared resource (Stream using uuid)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamShared.uuid}"
+		request.requestURI = "/api/v1/streams/${streamShared.uuid}/permissions"
 		params.id = streamShared.uuid
 		params.resourceClass = Stream
 		params.resourceId = streamShared.uuid
@@ -153,7 +154,7 @@ class PermissionApiControllerSpec extends Specification {
 
 	void "index won't show list of permissions without 'share' permission (string id)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/allowed"
+		request.requestURI = "/api/v1/canvases/allowed/permissions"
 		params.id = canvasRestricted.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasRestricted.id
@@ -166,7 +167,7 @@ class PermissionApiControllerSpec extends Specification {
 
 	void "index won't show list of permissions without 'share' permission (Stream using uuid)"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/streams/${streamRestricted.uuid}"
+		request.requestURI = "/api/v1/streams/${streamRestricted.uuid}/permissions"
 		params.id = streamRestricted.uuid
 		params.resourceClass = Stream
 		params.resourceId = streamRestricted.uuid
@@ -179,7 +180,7 @@ class PermissionApiControllerSpec extends Specification {
 
 	void "save grants Permissions"() {
 		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/canvases/${canvasOwned.id}"
+		request.requestURI = "/api/v1/canvases/${canvasOwned.id}/permissions"
 		params.id = canvasOwned.id
 		params.resourceClass = Canvas
 		params.resourceId = canvasOwned.id
@@ -208,14 +209,23 @@ class PermissionApiControllerSpec extends Specification {
 		when:
 		withFilters(action: "delete") { controller.delete("${canvasPermission.id}") }
 		then:
-		response.status == 200
-		response.json.user == canvasPermission.user.username
-		response.json.operation == canvasPermission.operation.id
-		response.json.changedPermissions.size() == 3
+		response.status == 204
 		1 * permissionService.canShare(me, _) >> true
 		1 * permissionService.getPermissionsTo(_) >> [canvasPermission, opR, opW, opS]	// owner-permissions
 		1 * permissionService._
-		1 * permissionService.getPermissionsTo(_) >> [opR, opW, opS]
-		0 * permissionService._
+	}
+
+	void "can't give both 'user' and 'anonymous' arguments"() {
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases/${canvasOwned.id}/permissions"
+		params.id = canvasOwned.id
+		params.resourceClass = Canvas
+		params.resourceId = canvasOwned.id
+
+		when:
+		request.JSON = [anonymous: true, user: other.username, operation: "read"] as JSON
+		withFilters(action: "save") { controller.save() }
+		then:
+		thrown InvalidArgumentsException
 	}
 }

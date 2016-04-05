@@ -22,19 +22,15 @@ class StreamControllerSpec extends Specification {
 	Module module
 	
 	void setup() {
-		// Mock services or use real ones
-		controller.streamService = grailsApplication.mainContext.getBean("streamService")
-		controller.permissionService = [getAll: {clazz, user, closure -> stream}]
-
-		mockSpringSecurityService(null)
-
 		module = new Module(id: 1).save(validate: false)
 		feed = new Feed(streamListenerClass: NoOpStreamListener.name, module: module).save(validate: false)
 		stream = new Stream(id: "dummy", name: "dummy", description: "dummy", feed: feed).save(validate: false)
+		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey").save(validate:false)
 
-		// Users
-		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
-		user.save(validate:false)
+		mockSpringSecurityService(user)
+		controller.streamService = grailsApplication.mainContext.getBean("streamService")
+		controller.permissionService = Stub(PermissionService) { getAll(*_) >> [stream] }
+
 	}
 
 	private void mockSpringSecurityService(newUser) {
@@ -46,23 +42,22 @@ class StreamControllerSpec extends Specification {
 	}
 
 	void "stream create form"() {
-		mockSpringSecurityService(user)
-		
 		when:
-			params.name = "Test stream"
-			params.description = "Test stream"
-			params.feed = feed.id
-			params.format = "html"
-			request.method = 'POST'
-			controller.create()
+		params.name = "Test stream"
+		params.description = "Test stream"
+		params.feed = feed.id
+		params.format = "html"
+		request.method = 'POST'
+		controller.create()
 		then:
-			response.redirectedUrl == '/stream/show/2'
-			Stream.count() == 2
-			Stream.list()[1].user == user
+		response.redirectedUrl == '/stream/show/2'
+		Stream.count() == 2
+		Stream.list()[1].user == user
 	}
 
 	void "searching for a stream returns correct module"() {
 		when:
+		params.term = stream.name[1..2]
 		controller.search()
 		then:
 		response.json.size() == 1
@@ -70,7 +65,6 @@ class StreamControllerSpec extends Specification {
 		response.json[0].name == stream.name
 		response.json[0].description == stream.description
 		response.json[0].module == module.id
-
 	}
 
 }
