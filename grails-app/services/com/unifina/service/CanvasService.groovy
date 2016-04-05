@@ -133,11 +133,12 @@ class CanvasService {
 	private void updateUiChannels(Canvas canvas, Map oldSignalPathMap, Map newSignalPathMap) {
 
 		// Add new, previously unseen UiChannels
-		def foundIds = UiChannelIterator.over(newSignalPathMap).collect { UiChannelIterator.Element element ->
-			if (UiChannel.findById(element.id) == null) {
+		HashSet<String> foundIds = new HashSet<>()
+		UiChannelIterator.over(newSignalPathMap).each { UiChannelIterator.Element element ->
+			if (canvas.uiChannels.find {it.id == element.id} == null && !foundIds.contains(element.id)) {
 				canvas.addToUiChannels(element.toUiChannel())
 			}
-			element.id
+			foundIds.add(element.id)
 		}
 
 		// Remove no longer occurring UiChannels
@@ -155,8 +156,16 @@ class CanvasService {
 	}
 
 	private static void resetUiChannels(Map signalPathMap) {
+		HashMap<String,String> replacements = [:]
 		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
-			element.uiChannelData.id = IdGenerator.get()
+			if (replacements.containsKey(element.uiChannelData.id)) {
+				element.uiChannelData.id = replacements[element.uiChannelData.id]
+			}
+			else {
+				String newId = IdGenerator.get()
+				replacements[element.uiChannelData.id] = newId
+				element.uiChannelData.id = newId
+			}
 		}
 	}
 

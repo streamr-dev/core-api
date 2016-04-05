@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -43,7 +44,7 @@ public class KafkaFieldDetector extends FieldDetector {
 		util.close();
 
 		if (latestMessage==null)
-			return null;
+			return new MapMessage(null, null, new HashMap());
 		else {
 			KafkaMessage msg = new KafkaMessageParser().parse(latestMessage);
 			return new MapMessage(msg.getTimestamp(), msg.getTimestamp(), msg.payload);

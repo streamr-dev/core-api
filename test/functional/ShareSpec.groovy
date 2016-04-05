@@ -71,6 +71,17 @@ class ShareSpec extends GebReportingSpec {
 
 	// UNIT TESTS
 
+	// fix weird bug: on Jenkins machine and for particular test, only "tester2" is typed for
+	//   $(".new-user-field") << "tester2@streamr.com"
+	def forceFeedTextInput(inputSelector, String text) {
+		waitFor { $(inputSelector).displayed }
+		def $input = $(inputSelector);
+		waitFor {
+			def len = $input.getAttribute("value").length()
+			len >= text.length() ?: ($input << text.substring(len))
+		}
+	}
+
 	void "sharePopup can grant and revoke Stream permissions"() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
@@ -100,7 +111,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".new-user-field").value() }
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com"
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -122,7 +133,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -256,7 +268,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".new-user-field").value() }
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com"
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -278,7 +290,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -397,7 +410,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".new-user-field").value() }
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com"
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -419,7 +432,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then:
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -517,12 +531,8 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to stream"
 		to StreamListPage
 		getStreamRow().find("button").click()
-		then:
-		waitFor { $(".new-user-field").displayed }
-		$(".access-row").size() == 0
-
-		when:
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
@@ -536,8 +546,8 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
 		getCanvasRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
@@ -551,8 +561,8 @@ class ShareSpec extends GebReportingSpec {
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
 		getDashboardRow().find("button").click()
-		waitFor { $(".new-user-field").displayed }
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
@@ -596,7 +606,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "check dashboard"
 		to DashboardListPage
 		then:
-		getDashboardRow().click()
+		!getDashboardRow().find("button")
 
 		when:
 		getDashboardRow().click()
@@ -622,11 +632,8 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
-		then:
-		$(".access-row").size() == 0
-
-		when: "give tester2 read permission to stream"
-		$(".new-user-field") << "tester2@streamr.com" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1

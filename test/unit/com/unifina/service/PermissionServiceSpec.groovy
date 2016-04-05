@@ -195,19 +195,6 @@ class PermissionServiceSpec extends Specification {
 		service.revoke(me, dashOwned, stranger)
 		then:
 		service.get(Dashboard, stranger) == []
-
-		/* TBD
-		when: "granted a write, also reading is granted"
-		service.grant(me, dashOwned, stranger, Operation.WRITE)
-		then:
-		service.getAll(Dashboard, stranger) == [dashOwned]
-
-		when: "granted a share, also reading is granted"
-		service.revoke(me, dashOwned, stranger, Operation.WRITE)
-		service.grant(me, dashOwned, stranger, Operation.SHARE)
-		then:
-		service.getAll(Dashboard, stranger) == [dashOwned]
-		*/
 	}
 
 	void "granting and revoking write rights"() {

@@ -75,9 +75,11 @@ class StreamController {
 
 		if (!justStarted && stream.hasErrors()) { log.info(stream.errors) }
 		if (justStarted || stream.hasErrors()) {
-			return [stream: stream,
-					feeds: permissionService.get(Feed, user),
-					defaultFeed: Feed.findById(Feed.KAFKA_ID)]
+			return [
+				stream: stream,
+				feeds: permissionService.get(Feed, user),
+				defaultFeed: Feed.findById(Feed.KAFKA_ID)
+			]
 		}
 
 		flash.message = "Your stream has been created! " +

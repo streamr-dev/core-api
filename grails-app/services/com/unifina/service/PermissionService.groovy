@@ -37,52 +37,11 @@ class PermissionService {
 	final alsoRevoke = [read: [Operation.WRITE, Operation.SHARE]]
 	//final alsoGrant = [write: [Operation.READ], share: [Operation.READ]]
 
-	/**
-	 * Check that resourceClass is a proper resource
-	 * @return name of field in Permission object that refers to the resource's id by type ("stringId" or "longId")
-	 */
-	private String getIdPropertyName(Class resourceClass) throws IllegalArgumentException {
-		if (!resourceClass?.name) { throw new IllegalArgumentException("Missing resource class") }
-		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("$resourceClass is not a Grails domain class") }
 
-		def idProp = resourceClass.properties["declaredFields"].find { it.name == "id" }
-		if (idProp == null) { throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field!") }
-
-		if (idProp.type == String) {
-			return "stringId"
-		} else if (idProp.type == Long) {
-			return "longId"
-		} else {
-			throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field of type either Long or String!")
-		}
-	}
-
-	/**
-	 * Check that grant/revoke target is a proper permission-holder
-	 * @return name of field in Permission object that is the foreign-key to the user or sign-up invite
-	 */
-	private String getUserPropertyName(userish) {
-		if (!userish) {
-			throw new IllegalArgumentException("Missing user!")
-		} else if (userish instanceof SecUser) {
-			return "user"
-		} else if (userish instanceof SignupInvite) {
-			return "invite"
-		} else {
-			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
-		}
-	}
-	private boolean isValidUser(userish) {
-		return userish != null && (userish instanceof SecUser || userish instanceof SignupInvite)
-	}
-
-	/** ownership (if applicable) is stored in each Resource as "user" attribute */
-	private boolean isOwner(SecUser user, resource) {
-		return resource?.hasProperty("user") &&
-				user?.id != null &&
-				resource.user?.id != null &&
-				resource.user.id == user.id
-	}
+	// TODO: does WRITE imply READ?
+	boolean canRead(SecUser user, resource)  { return check(user, resource, Operation.READ) }
+	boolean canWrite(SecUser user, resource) { return check(user, resource, Operation.WRITE) }
+	boolean canShare(SecUser user, resource) { return check(user, resource, Operation.SHARE) }
 
 	/**
 	 * @return true if user is allowed to perform given operation to resource
@@ -109,11 +68,6 @@ class PermissionService {
 			eq "operation", op
 		}.empty
 	}
-
-	// TODO: does WRITE imply READ?
-	boolean canRead(SecUser user, resource)  { return check(user, resource, Operation.READ) }
-	boolean canWrite(SecUser user, resource) { return check(user, resource, Operation.WRITE) }
-	boolean canShare(SecUser user, resource) { return check(user, resource, Operation.SHARE) }
 
 	/**
 	 * @return List of all Permissions granted to a specific resource
@@ -150,7 +104,10 @@ class PermissionService {
 	 * Get all resources of given type that the user has specified type of access to
 	 * @throws IllegalArgumentException for bad resourceClass
 	 */
-	public <T> List<T> get(Class<T> resourceClass, SecUser user, Operation op, boolean includeAnonymous, Closure resourceFilter = {}) {
+	public <T> List<T> get(Class<T> resourceClass,
+						   SecUser user,
+						   Operation op,
+						   boolean includeAnonymous, Closure resourceFilter = {}) {
 		if (!includeAnonymous && !user?.id) { return [] }
 		String resourceIdProp = getIdPropertyName(resourceClass)	// throws if bad resource class
 
@@ -210,7 +167,11 @@ class PermissionService {
 	 * @throws AccessControlException if grantor doesn't have the 'share' permission
 	 * @throws IllegalArgumentException if trying to give resource owner "more" access permissions
      */
-	public Permission grant(SecUser grantor, resource, target, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+	public Permission grant(SecUser grantor,
+							resource,
+							target,
+							Operation operation=Operation.READ,
+							boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		if (target instanceof SecUser && isOwner(target, resource)) {
 			// owner already has all access, can't give "more" access
 			throw new IllegalArgumentException("Can't grant permissions for owner of $resource!")
@@ -230,7 +191,9 @@ class PermissionService {
 	 * @param resource to be shared
      * @return created Permission object
      */
-	public Permission systemGrant(target, resource, Operation operation=Operation.READ) {
+	public Permission systemGrant(target,
+								  resource,
+								  Operation operation=Operation.READ) {
 		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
 		String userProp = getUserPropertyName(target)
 
@@ -247,7 +210,10 @@ class PermissionService {
 		).save(flush: true, failOnError: true)
 	}
 
-	public Permission grantAnonymousAccess(SecUser grantor, resource, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
+	public Permission grantAnonymousAccess(SecUser grantor,
+										   resource,
+										   Operation operation=Operation.READ,
+										   boolean logIfDenied=true) throws AccessControlException, IllegalArgumentException {
 		if (!canShare(grantor, resource)) {
 			throwAccessControlException(grantor, resource, logIfDenied)
 		}
@@ -275,7 +241,11 @@ class PermissionService {
 	 * @param operation includes also all "higher" operations, e.g. READ also revokes SHARE
 	 * @returns Permission objects that were deleted
      */
-	public List<Permission> revoke(SecUser revoker, resource, target, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException {
+	public List<Permission> revoke(SecUser revoker,
+								   resource,
+								   target,
+								   Operation operation=Operation.READ,
+								   boolean logIfDenied=true) throws AccessControlException {
 		if (target instanceof SecUser && isOwner(target, resource)) {
 			throw new AccessControlException("Can't revoke owner's access to $resource!")
 		}
@@ -294,7 +264,9 @@ class PermissionService {
 	 * @param operation includes also all "higher" operations, e.g. READ also revokes SHARE
      * @return Permission objects that were deleted
      */
-	public List<Permission> systemRevoke(target, resource, Operation operation=Operation.READ) {
+	public List<Permission> systemRevoke(target,
+										 resource,
+										 Operation operation=Operation.READ) {
 		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
 		String userProp = getUserPropertyName(target)
 
@@ -306,7 +278,10 @@ class PermissionService {
 		return performRevoke(false, userProp, target, resourceClass.name, idProp, resource.id, operation)
 	}
 
-	public List<Permission> revokeAnonymousAccess(SecUser revoker, resource, Operation operation=Operation.READ, boolean logIfDenied=true) throws AccessControlException {
+	public List<Permission> revokeAnonymousAccess(SecUser revoker,
+												  resource,
+												  Operation operation=Operation.READ,
+												  boolean logIfDenied=true) throws AccessControlException {
 		if (!canShare(revoker, resource)) {
 			throwAccessControlException(revoker, resource, logIfDenied)
 		}
@@ -340,9 +315,7 @@ class PermissionService {
 		return systemRevoke(p)
 	}
 
-	/**
-	 * "Internal" version of revoke shortcut
-     */
+	/** "Internal" version of revoke shortcut */
 	public List<Permission> systemRevoke(Permission p) {
 		if (!p) { throw new IllegalArgumentException("Missing Permission object!") }
 		return performRevoke(
@@ -402,5 +375,52 @@ class PermissionService {
 			p.user = user
 			p.save(flush: true, failOnError: true)
 		}
+	}
+
+	/**
+	 * Check that resourceClass is a proper resource
+	 * @return name of field in Permission object that refers to the resource's id by type ("stringId" or "longId")
+	 */
+	private String getIdPropertyName(Class resourceClass) throws IllegalArgumentException {
+		if (!resourceClass?.name) { throw new IllegalArgumentException("Missing resource class") }
+		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("$resourceClass is not a Grails domain class") }
+
+		def idProp = resourceClass.properties["declaredFields"].find { it.name == "id" }
+		if (idProp == null) { throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field!") }
+
+		if (idProp.type == String) {
+			return "stringId"
+		} else if (idProp.type == Long) {
+			return "longId"
+		} else {
+			throw new IllegalArgumentException("$resourceClass doesn't have an 'id' field of type either Long or String!")
+		}
+	}
+
+	/**
+	 * Check that grant/revoke target is a proper permission-holder
+	 * @return name of field in Permission object that is the foreign-key to the user or sign-up invite
+	 */
+	private String getUserPropertyName(userish) throws IllegalArgumentException {
+		if (!userish) {
+			throw new IllegalArgumentException("Missing user!")
+		} else if (userish instanceof SecUser) {
+			return "user"
+		} else if (userish instanceof SignupInvite) {
+			return "invite"
+		} else {
+			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
+		}
+	}
+    private boolean isValidUser(userish) {
+        return userish != null && (userish instanceof SecUser || userish instanceof SignupInvite)
+    }
+
+	/** ownership (if applicable) is stored in each Resource as "user" attribute */
+	private boolean isOwner(SecUser user, resource) {
+		return resource?.hasProperty("user") &&
+			user?.id != null &&
+			resource.user?.id != null &&
+			resource.user.id == user.id
 	}
 }

@@ -120,7 +120,7 @@
         '</div>' +
         '<div class="access-list"></div>' +
         '<div class="form-inline new-user-row">' +
-            '<input type="text" class="new-user-field form-group" placeholder="Enter email address" autofocus>' +
+            '<input type="text" class="new-user-field form-control" placeholder="Enter email address" autofocus>' +
             '<button class="new-user-button btn btn-default" type="button"><span class="icon fa fa-plus"></span></button>' +
         '</div>'
     )
@@ -254,7 +254,7 @@
                         label: "Save", //'<span class="spinner"><i class="icon-spin icon-refresh"></i></span>Save',
                         className: "btn-primary", // has-spinner",
                         callback: function() {
-                            return listView.finishUserInput() !== "error" && sharePopup.closeAndSaveChanges()
+                            return listView.finishUserInput() !== "error" && saveChanges()
                         }
                     }
                 }

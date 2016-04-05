@@ -71,9 +71,17 @@
 
 				// Can be overridden by tag attributes
 				if (this.resendAll || this.resendLast!=null) {
-					resendOptions = {
-						resend_all: this.resendAll,
-						resend_last: this.resendLast
+					resendOptions = {}
+
+					if (this.resendAll !== undefined) {
+						resendOptions.resend_all = (this.resendAll.toLowerCase() === 'true')
+					}
+					else if (this.resendLast !== undefined) {
+						try {
+							resendOptions.resend_last = parseInt(this.resendLast)
+						} catch (err) {
+							console.error("resendLast could not be parsed to an integer! Value was: %s", this.resendLast)
+						}
 					}
 				}
 
