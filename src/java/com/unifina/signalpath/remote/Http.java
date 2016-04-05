@@ -1,10 +1,13 @@
 package com.unifina.signalpath.remote;
 
+import com.google.common.collect.ImmutableMap;
 import com.unifina.signalpath.*;
+import com.unifina.utils.MapTraversal;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
@@ -29,7 +32,29 @@ import java.util.*;
  */
 public class Http extends AbstractSignalPathModule {
 
-	private HttpVerbParameter verb = new HttpVerbParameter(this, "verb");
+	// TODO: this probably should be enum or class?
+	public static final String BODY_FORMAT_JSON = "text/json";
+	public static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
+	public static final String BODY_FORMAT_PLAIN = "text/plain";
+	public static final String BODY_FORMAT_XML = "application/xml";
+	public static final Map BODY_FORMAT_OPTIONS = ImmutableMap.of(
+			"value", BODY_FORMAT_JSON,
+			"type", "string",
+			"possibleValues", Arrays.asList(
+					ImmutableMap.of(
+							"text", "JSON",
+							"value", BODY_FORMAT_JSON
+					),
+					ImmutableMap.of(
+							"text", "Form-data",
+							"value", BODY_FORMAT_FORMDATA
+					)
+			)
+	);
+
+	private String bodyFormat = BODY_FORMAT_JSON;
+
+	private VerbParameter verb = new VerbParameter(this, "verb");
 	private StringParameter URL = new StringParameter(this, "URL", "localhost");
 	private MapParameter headers = new MapParameter(this, "headers");
 	private MapParameter queryParams = new MapParameter(this, "params");
@@ -72,10 +97,23 @@ public class Http extends AbstractSignalPathModule {
 	}
 	private transient CloseableHttpClient _httpClient;
 
+	@Override
+	public Map<String,Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		config.put(
+				"options", ImmutableMap.of(
+						"bodyFormat", BODY_FORMAT_OPTIONS
+				)
+		);
+		return config;
+	}
+
 	/** For bodyless verbs, "body" is only a "trigger" */
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+
+		bodyFormat = MapTraversal.getString(config, "options.bodyFormat.value", Http.BODY_FORMAT_JSON);
 
 		if (config.containsKey("inputs")) {
 			// body.setDisplayName won't cut it; it will be re-read from config afterwards
@@ -111,12 +149,27 @@ public class Http extends AbstractSignalPathModule {
 		}
 
 		if (verb.hasBody()) {
-			Object b = body.getValue();
-			String bodyString = b instanceof Map ? new JSONObject((Map)b).toString() :
-								b instanceof List ? new JSONArray((List)b).toString() :
-								b.toString();
 			try {
-				((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(bodyString));
+				switch (bodyFormat) {
+					case BODY_FORMAT_JSON:
+						Object b = body.getValue();
+						String bodyString = b instanceof Map ? new JSONObject((Map)b).toString() :
+											b instanceof List ? new JSONArray((List)b).toString() :
+											b.toString();
+						((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(bodyString));
+						break;
+					case BODY_FORMAT_FORMDATA:
+						Map bodyMap = (Map)body.getValue();
+						List<NameValuePair> inputNVPList = new LinkedList<>();
+						for (Object entry : bodyMap.entrySet()) {
+							Map.Entry e = (Map.Entry)entry;
+							inputNVPList.add(new BasicNameValuePair(e.getKey().toString(), e.getValue().toString()));
+						}
+						((HttpEntityEnclosingRequestBase)request).setEntity(new UrlEncodedFormEntity(inputNVPList));
+						break;
+					default:
+						throw new RuntimeException("Unexpected body format " + bodyFormat);
+				}
 			} catch (UnsupportedEncodingException e) {
 				errors.add(e.getMessage());
 			}
@@ -151,8 +204,8 @@ public class Http extends AbstractSignalPathModule {
 	@Override
 	public void clearState() {}
 
-	private static class HttpVerbParameter extends StringParameter {
-		public HttpVerbParameter(AbstractSignalPathModule owner, String name) {
+	public static class VerbParameter extends StringParameter {
+		public VerbParameter(AbstractSignalPathModule owner, String name) {
 			super(owner, name, "POST"); //this.getValueList()[0]);
 		}
 		private List<PossibleValue> getValueList() {
@@ -180,7 +233,6 @@ public class Http extends AbstractSignalPathModule {
 					v.equals("PUT") ? new HttpPut(url) :
 					v.equals("DELETE") ? new HttpDelete(url) :
 					v.equals("PATCH") ? new HttpPatch(url) : new HttpPost(url);
-
 		}
 	}
 }

@@ -4,9 +4,11 @@ import com.unifina.signalpath.*;
 import java.util.*;
 import com.google.common.collect.ImmutableMap;
 import com.unifina.utils.MapTraversal;
+import groovy.json.JsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.log4j.Logger;
 
 import org.apache.http.HttpResponse;
@@ -34,8 +36,9 @@ import java.io.IOException;
  */
 public class SimpleHttp extends AbstractSignalPathModule {
 
-	private HttpVerbParameter verb = new HttpVerbParameter(this, "verb");
+	private Http.VerbParameter verb = new Http.VerbParameter(this, "verb");
 	private StringParameter URL = new StringParameter(this, "URL", "http://localhost");
+	private String bodyFormat = Http.BODY_FORMAT_JSON;
 
 	// subset of inputs/outputs that correponds to HTTP parameters and response data
 	private List<Input<Object>> httpInputs = new ArrayList<>();
@@ -91,7 +94,8 @@ public class SimpleHttp extends AbstractSignalPathModule {
 				"headerCount", ImmutableMap.of(
 					"value", headers.size(),
 					"type", "int"
-				)
+				),
+				"bodyFormat", Http.BODY_FORMAT_OPTIONS
 			)
 		);
 		return config;
@@ -104,6 +108,7 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		int inputCount = MapTraversal.getInt(config, "options.inputCount.value", 0);
 		int outputCount = MapTraversal.getInt(config, "options.outputCount.value", 0);
 		int headerCount = MapTraversal.getInt(config, "options.headerCount.value", 0);
+		bodyFormat = MapTraversal.getString(config, "options.bodyFormat.value", Http.BODY_FORMAT_JSON);
 
 		httpInputs = new ArrayList<>(inputCount);
 		for (int i = 0; i < inputCount; i++) {
@@ -137,39 +142,32 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		List<Object> values = new LinkedList<>();
 		JSONObject result = null;
 		try {
+			List<NameValuePair> inputNVPList = new LinkedList<>();
+			Map<String, Object> inputMap = new HashMap<>();
+			for (Input in : httpInputs) {
+				String inputName = in.getDisplayName();
+				if (inputName == null) { inputName = in.getName(); }
+				inputNVPList.add(new BasicNameValuePair(inputName, in.getValue().toString()));
+				inputMap.put(inputName, in.getValue());
+			}
+
 			// build and prepare the HttpRequest: inputs are added to URL parameter string if body is not available
-			HttpRequestBase request;
-			switch (verb.getValue()) {
-				case "POST":
-				case "PUT":
-				case "PATCH":
-					Map<String, Object> bodyMap = new HashMap<>();
-					for (Input in : httpInputs) {
-						String inputName = in.getDisplayName();
-						if (inputName == null) { inputName = in.getName(); }
-						bodyMap.put(inputName, in.getValue());
-					}
-					String bodyString = new JSONObject(bodyMap).toString();
-					HttpEntityEnclosingRequestBase r =
-							verb.getValue().equalsIgnoreCase("POST") ? new HttpPost(URL.getValue()) :
-							verb.getValue().equalsIgnoreCase("PUT")  ? new HttpPut(URL.getValue()) :
-																	   new HttpPatch(URL.getValue());
-					r.setEntity(new StringEntity(bodyString));
-					request = r;
-					break;
-				case "GET":
-				case "DELETE":
-					List<NameValuePair> params = new LinkedList<>();
-					for (Input in : httpInputs) {
-						String inputName = in.getDisplayName();
-						if (inputName == null) { inputName = in.getName(); }
-						params.add(new BasicNameValuePair(inputName, in.getValue().toString()));
-					}
-					String url = URL.getValue() + "?" + URLEncodedUtils.format(params, "UTF-8");
-					request = verb.getValue().equalsIgnoreCase("GET") ? new HttpGet(url) : new HttpDelete(url);
-					break;
-				default:
-					throw new RuntimeException("Unexpected " + verb);
+			HttpRequestBase request = verb.getRequest(URL.getValue());
+			if (verb.hasBody()) {
+				switch (bodyFormat) {
+					case Http.BODY_FORMAT_JSON:
+						String bodyString = new JSONObject(inputMap).toString();
+						((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(bodyString));
+						break;
+					case Http.BODY_FORMAT_FORMDATA:
+						((HttpEntityEnclosingRequestBase)request).setEntity(new UrlEncodedFormEntity(inputNVPList));
+						break;
+					default:
+						throw new RuntimeException("Unexpected body format " + bodyFormat);
+				}
+			} else {
+				String url = URL.getValue() + "?" + URLEncodedUtils.format(inputNVPList, "UTF-8");
+				request = verb.getRequest(url);
 			}
 
 			for (StringParameter header : headers) {
@@ -253,24 +251,4 @@ public class SimpleHttp extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {}
-
-	private static class HttpVerbParameter extends StringParameter {
-		public HttpVerbParameter(AbstractSignalPathModule owner, String name) {
-			super(owner, name, "POST"); //this.getValueList()[0]);
-		}
-		private List<PossibleValue> getValueList() {
-			return Arrays.asList(
-				new PossibleValue("GET", "GET"),
-				new PossibleValue("POST", "POST"),
-				new PossibleValue("PUT", "PUT"),
-				new PossibleValue("DELETE", "DELETE"),
-				new PossibleValue("PATCH", "PATCH")
-			);
-		}
-		@Override public Map<String, Object> getConfiguration() {
-			Map<String, Object> config = super.getConfiguration();
-			config.put("possibleValues", getValueList());
-			return config;
-		}
-	}
 }
