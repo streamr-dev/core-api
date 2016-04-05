@@ -17285,7 +17285,7 @@ body.dashboard-show .titlebar-clickable {
 }
 .modal-body .permission-dropdown {
   position: absolute;
-  right: 47px;
+  right: 55px;
 }
 .modal-body .new-user-row {
   position: relative;
@@ -17293,7 +17293,7 @@ body.dashboard-show .titlebar-clickable {
 }
 .modal-body .new-user-field {
   width: 92%;
-  right: 47px;
+  right: 55px;
   position: absolute;
 }
 .modal-body .new-user-field.has-error {
