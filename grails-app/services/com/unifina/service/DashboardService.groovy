@@ -58,7 +58,7 @@ class DashboardService {
 	 */
 	@CompileStatic
 	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user)
-			throws NotFoundException, NotPermittedException {
+		throws NotFoundException, NotPermittedException {
 		def dashboard = authorizedGetById(id, user, Permission.Operation.WRITE)
 		dashboard.name = validCommand.name
 		dashboard.save(failOnError: true)
@@ -76,7 +76,7 @@ class DashboardService {
 	 */
 	@CompileStatic
 	DashboardItem findDashboardItem(Long dashboardId, Long itemId, SecUser user)
-			throws NotFoundException, NotPermittedException {
+		throws NotFoundException, NotPermittedException {
 		return authorizedGetDashboardItem(dashboardId, itemId, user, Permission.Operation.READ)
 	}
 
@@ -89,7 +89,7 @@ class DashboardService {
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 */
 	void deleteDashboardItem(Long dashboardId, Long itemId, SecUser user)
-			throws NotFoundException, NotPermittedException {
+		throws NotFoundException, NotPermittedException {
 		def dashboard = authorizedGetById(dashboardId, user, Permission.Operation.WRITE)
 		def dashboardItem = dashboard.items.find { DashboardItem item -> item.id == itemId }
 		if (dashboardItem == null) {
@@ -110,7 +110,7 @@ class DashboardService {
 	 * @throws ValidationException when command object is not valid
 	 */
 	DashboardItem addDashboardItem(Long dashboardId, SaveDashboardItemCommand command, SecUser user)
-			throws NotFoundException, NotPermittedException, ValidationException {
+		throws NotFoundException, NotPermittedException, ValidationException {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -134,7 +134,7 @@ class DashboardService {
 	 */
 	@CompileStatic
 	DashboardItem updateDashboardItem(Long dashboardId, Long itemId, SaveDashboardItemCommand command, SecUser user)
-			throws NotFoundException, NotPermittedException, ValidationException {
+		throws NotFoundException, NotPermittedException, ValidationException {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}

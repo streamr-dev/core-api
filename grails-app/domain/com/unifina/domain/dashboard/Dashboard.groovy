@@ -5,20 +5,20 @@ import com.unifina.domain.security.SecUser
 class Dashboard {
 
 	SecUser user
-	
+
 	String name
-	
+
 	Date dateCreated
 	Date lastUpdated
-	
+
 	SortedSet<DashboardItem> items
-	
+
 	static hasMany = [items: DashboardItem]
-	
+
 	static constraints = {
 		name(nullable:true)
 	}
-	
+
 	static mapping = {
 		items cascade: 'all-delete-orphan'
 	}
@@ -26,7 +26,7 @@ class Dashboard {
 	def toSummaryMap() {
 		[
 			id: id,
-		    name: name,
+			name: name,
 			numOfItems: items == null ? 0 : items.size(),
 		]
 	}
@@ -38,5 +38,5 @@ class Dashboard {
 			items: items == null ? [] : items*.toMap(),
 		]
 	}
-	
+
 }
