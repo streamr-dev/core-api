@@ -37,8 +37,10 @@ databaseChangeLog = {
 	// old system was ModulePackageUser and FeedUser connecting users (beyond modulePackage.user) that can access the resource
 	// new system is Permission table that combines all those
 	changeSet(author: "jtakalai (generated)", id: "1452674923112-4") {
-		sql("INSERT INTO permission SELECT NULL, 0, 'com.unifina.domain.signalpath.ModulePackage', module_package_id, 'read', '', user_id FROM module_package_user")
-		sql("INSERT INTO permission SELECT NULL, 0, 'com.unifina.domain.data.Feed', feed_id, 'read', '', user_id FROM feed_user")
+		sql("INSERT INTO permission (id, version, clazz, long_id, operation, string_id, user_id) " +
+			"SELECT NULL, 0, 'com.unifina.domain.signalpath.ModulePackage', module_package_id, 'read', NULL, user_id FROM module_package_user")
+		sql("INSERT INTO permission (id, version, clazz, long_id, operation, string_id, user_id) " +
+			"SELECT NULL, 0, 'com.unifina.domain.data.Feed', feed_id, 'read', NULL, user_id FROM feed_user")
 	}
 
 	changeSet(author: "jtakalai (generated)", id: "1452674923112-3") {
