@@ -17,11 +17,10 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	def closePnotify() {
-		Thread.sleep(10)	// more may pop up...
 		$(".ui-pnotify-closer").each {
 			try { it.click() } catch (StaleElementReferenceException e) {}
 		}
-		waitFor { $(".ui-pnotify").displayed }
+		waitFor { !$(".ui-pnotify").displayed }
 	}
 
 	// CLEANUP HELPERS: remove ALL (named) permissions in resource called "ShareSpec" of given type
@@ -679,7 +678,6 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		$("button", text: "Save").click()
 		then:
-		//waitFor { $(".ui-pnotify .alert-success") }	// commented out for robustness...
 		waitFor { !$(".bootbox.modal") }
 
 		when: "try search"
