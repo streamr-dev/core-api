@@ -157,7 +157,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		searchAndClick("MapModulesSpec")
 		moduleShouldAppearOnCanvas("Stream")
 		addAndWaitModule(moduleName)
-		moveModuleBy(moduleName, 200, 200, 0, true)
+		moveModuleBy(moduleName, 200, 200)
 		addAndWaitModule("MapAsTable")
 		moveModuleBy("MapAsTable", 650, 400)
 		addAndWaitModule("Label")
