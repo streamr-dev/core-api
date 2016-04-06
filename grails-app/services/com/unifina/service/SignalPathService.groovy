@@ -41,6 +41,7 @@ class SignalPathService {
 	def grailsLinkGenerator
 	def kafkaService
 	def serializationService
+	def permissionService
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
@@ -318,7 +319,7 @@ class SignalPathService {
 
 					return request
 				} else if (request.type=="ping") {
-					if (!canvas.shared && !request.isAuthenticated())
+					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
 					
 					return request
