@@ -25,14 +25,14 @@ public class KafkaStreamListener extends AbstractStreamListener {
 	@Override
 	@CompileStatic
 	public void addToConfiguration(Map configuration, Stream stream) {
-		configuration["topic"] = stream.uuid
+		configuration["topic"] = stream.id
 	}
 
 	@Override
 	@CompileStatic
 	public void afterStreamSaved(Stream stream) {
 		if (!stream.hasErrors()) {
-			kafkaService.createTopics([stream.uuid]);
+			kafkaService.createTopics([stream.id]);
 		}
 	}
 
@@ -43,6 +43,6 @@ public class KafkaStreamListener extends AbstractStreamListener {
 			feedFileService.deleteFile(it)
 		}
 		FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream", [stream: stream])
-		kafkaService.deleteTopics([stream.uuid])
+		kafkaService.deleteTopics([stream.id])
 	}
 }

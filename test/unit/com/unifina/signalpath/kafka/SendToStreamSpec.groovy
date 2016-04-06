@@ -52,7 +52,7 @@ class SendToStreamSpec extends Specification {
 
 		def s = new Stream()
 		s.feed = feed
-		s.name = "stream-0"
+		s.id = s.name = "stream-0"
 		s.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],

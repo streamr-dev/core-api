@@ -14,7 +14,7 @@
 
 				listView = new ListView({
 					el: $("#stream-fields"),
-					id: ${stream.id}
+					id: '${stream.id}'
 				});
         		listView.on('saved', function() {
             		window.location = '${createLink(action:"show", id:stream.id)}'
@@ -51,7 +51,7 @@
         				$(this).attr("disabled","disabled")
 						$(this).html("Waiting for data...")
 
-						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.uuid])}', function(stream) {
+						$.get('${createLink(controller: "streamApi", action: "detectFields", params: [id: stream.id])}', function(stream) {
 							updateWithNewStreamData(stream)
 						})
         			}

@@ -70,7 +70,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 					[name: "b", type: "number"],
 					[name: "c", type: "boolean"]
 				],
-				topic : stream.uuid
+				topic : stream.id
 			] as JSON
 		)
 		stream.save(failOnError: true)
@@ -85,7 +85,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		for (int i = 0; i < 100; ++i) {
 
 			// Produce message to kafka
-			kafkaService.sendMessage(stream, stream.uuid, [a: i, b: i * 2.5, c: i % 3 == 0])
+			kafkaService.sendMessage(stream, stream.id, [a: i, b: i * 2.5, c: i % 3 == 0])
 			sleep(25)
 
 			// Synchronize with thread
@@ -149,8 +149,8 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			FakeMessageSource source = (FakeMessageSource) feedProxy.hub.source
 
 			source.handleMessage(new UnifinaKafkaMessage(
-				stream.getUuid(),
-				stream.getUuid(),
+				stream.getId(),
+				stream.getId(),
 				System.currentTimeMillis(),
 				UnifinaKafkaMessage.CONTENT_TYPE_JSON,
 				new JsonBuilder(message).toString().getBytes("UTF-8")))

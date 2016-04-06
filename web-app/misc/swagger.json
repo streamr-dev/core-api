@@ -27,12 +27,10 @@
     ],
     "tags": [
         {
-            "name": "Stream",
-            "description": "Streams"
+            "name": "Stream"
         },
         {
-            "name": "Canvas",
-            "description": "Saved and running Canvases"
+            "name": "Canvas"
         }
     ],
     "paths": {
@@ -91,7 +89,7 @@
                 }
             }
         },
-        "/streams/{uuid}": {
+        "/streams/{id}": {
             "get": {
                 "summary": "Get stream by id",
                 "description": "Returns a stream by id",
@@ -101,7 +99,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "uuid",
+                        "name": "id",
                         "description": "ID of the stream to be fetched",
                         "required": true,
                         "type": "string"
@@ -137,7 +135,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "uuid",
+                        "name": "id",
                         "description": "ID of the stream to be updated",
                         "required": true,
                         "type": "string"
@@ -179,7 +177,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "uuid",
+                        "name": "id",
                         "description": "ID of the stream to be deleted",
                         "required": true,
                         "type": "string"
@@ -432,7 +430,7 @@
         },
         "/canvases/{id}/stop": {
             "post": {
-                "summary": "Stop a currently running canvas.",
+                "summary": "Stops a currently running canvas.",
                 "description": "Stops a canvas that is currently running.",
                 "tags": [
                     "Canvas"
@@ -479,7 +477,7 @@
                 {
                     "type": "object",
                     "properties": {
-                        "uuid": {
+                        "id": {
                             "type": "string",
                             "description": "Unique identifier for this stream."
                         },

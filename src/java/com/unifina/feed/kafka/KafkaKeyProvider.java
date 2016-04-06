@@ -13,7 +13,7 @@ public class KafkaKeyProvider extends AbstractKeyProvider<IStreamRequirement, Ka
 
 	@Override
 	public String getSubscriberKey(IStreamRequirement subscriber) {
-		return subscriber.getStream().getUuid();
+		return subscriber.getStream().getId();
 	}
 
 	@Override
