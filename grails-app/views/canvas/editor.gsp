@@ -24,6 +24,7 @@
 var loadBrowser
 
 $('#moduleTree').bind('loaded.jstree', function() {
+	Tour.startableTours([0])
 	Tour.autoStart()
 })
 

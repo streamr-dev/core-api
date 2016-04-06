@@ -1,6 +1,6 @@
 (function(exports) {
 
-var tourUrlRoot = Streamr.createLink({ uri: 'static/misc/' })
+var tourUrlRoot = Streamr.createLink({ uri: 'static/misc/tours/' })
 var tourIdPrefix = Streamr.user
 var startableTours = []
 var continuableTours = []
@@ -121,7 +121,7 @@ Tour.loadTour = function(tourNumber, cb) {
 }
 
 Tour.list = function(cb) {
-	$.getJSON(tourUrlRoot + 'tours.json', function(resp) {
+	$.getJSON(tourUrlRoot + 'index.json', function(resp) {
 		cb(resp)
 	})
 }

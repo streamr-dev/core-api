@@ -17,4 +17,5 @@ databaseChangeLog = {
 	include file: 'core/2016-03-28-constant-map.groovy'
 	include file: 'core/2016-03-29-change-canvas-stream-modules-id.groovy'
 	include file: 'core/2016-03-17-drop-ui-channel.groovy'
+	include file: 'core/2016-04-06-tours.groovy'
 }
