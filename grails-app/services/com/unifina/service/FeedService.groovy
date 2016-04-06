@@ -26,19 +26,14 @@ class FeedService {
 		feed.setTimeZone(TimeZone.getTimeZone(domain.timezone))
 		return feed
     }
-	
-	Stream getStream(Long id) {
+
+	@CompileStatic
+	Stream getStream(String id) {
 		Stream result = Stream.get(id)
-		if (!result)
+		if (!result) {
 			throw new StreamNotFoundException(id)
-		else return result
-	}
-	
-	Stream getStream(String name) {
-		Stream result = Stream.findByName(name)
-		if (!result)
-			throw new StreamNotFoundException(name)
-		else return result
+		}
+		return result
 	}
 	
 	Stream getStreamByFeedAndLocalId(Feed feed, String localId) {

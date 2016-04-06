@@ -72,10 +72,10 @@ class RunCanvasSpec extends IntegrationSpec {
 		canvasService.start(canvas, true)
 
 		// Produce data
-		(1..100).each { kafkaService.sendMessage(stream, stream.uuid, [numero: it, areWeDoneYet: false]) }
+		(1..100).each { kafkaService.sendMessage(stream, stream.id, [numero: it, areWeDoneYet: false]) }
 
 		// Terminator data package to know when we're done
-		kafkaService.sendMessage(stream, stream.uuid, [numero: 0, areWeDoneYet: true])
+		kafkaService.sendMessage(stream, stream.id, [numero: 0, areWeDoneYet: true])
 
 		// Synchronization: wait for terminator package
 		conditions.within(10) { assert modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0 }
@@ -87,7 +87,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		finalState[0] == "[(out) Stream.numero: 0.0, (out) Stream.areWeDoneYet: 1.0]"
 		finalState[1] == "[(out) Sum.out: $SUM_FROM_1_TO_100_TIMES_2]"
 		finalState[2] == "[(out) Multiply.A*B: 0.0]"
-		finalState[3] == "[(out) Constant.out: null]"
+		finalState[3] == "[(out) Constant.out: 2.0]"
 
 		cleanup:
 		canvasService.stop(canvas, user)

@@ -370,8 +370,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var super_clone = prot.clone;
 	prot.clone = function() {
-		var module = super_clone();
-		module.refreshConnections();
+		super_clone(function(module) {
+			module.refreshConnections();
+		});
 	}
 	
 	function refreshConnections() {

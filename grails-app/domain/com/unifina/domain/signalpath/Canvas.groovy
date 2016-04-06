@@ -42,7 +42,7 @@ class Canvas {
 	String runner
 	String server
 	String requestUrl
-	String serialized
+	byte[] serialized
 	Date serializationTime
 
 	static constraints = {
@@ -61,11 +61,11 @@ class Canvas {
 		shared defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
-		serialized type: 'text'
+		serialized sqlType: "mediumblob"
 	}
 
 	boolean isNotSerialized() {
-		serialized == null || serialized.empty
+		serialized == null
 	}
 
 	def toMap() {

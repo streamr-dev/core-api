@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.unifina.push.IHasPushChannel;
+import com.unifina.push.PushChannel;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 
@@ -15,6 +16,16 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	
 	public ModuleWithUI() {
 		super();
+	}
+
+	protected boolean pushToUiChannel(Object data) {
+		PushChannel rc = globals.getUiChannel();
+		if (rc == null) {
+			return false;
+		} else {
+			rc.push(data, uiChannelId);
+			return true;
+		}
 	}
 
 	@Override
@@ -39,7 +50,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	}
 
 	public Map getUiChannelMap() {
-		Map uiChannel = new HashMap<String,Object>();
+		Map<String, String> uiChannel = new HashMap<>();
 		uiChannel.put("id", getUiChannelId());
 		uiChannel.put("name", getUiChannelName());
 		uiChannel.put("webcomponent", getWebcomponentName());
@@ -93,5 +104,4 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		}
 		
 	}
-	
 }

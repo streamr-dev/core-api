@@ -84,7 +84,7 @@ class KafkaService {
 	@CompileStatic
 	void sendMessage(Stream stream, Object key, Map message) {
 		String str = (message as JSON).toString();
-		sendMessage(stream.getUuid(), key, str, true);
+		sendMessage(stream.getId(), key, str, true);
 	}
 	
 	@CompileStatic
@@ -168,7 +168,7 @@ class KafkaService {
 		// If never collected, query the first timestamp from Kafka
 		else {
 			// If getFirstTimestamp(topic) returns null, there is nothing to be collected
-			beginDate = getFirstTimestamp(stream.uuid)
+			beginDate = getFirstTimestamp(stream.id)
 			if (beginDate==null) {
 				log.warn("Could not determine first timestamp for stream $stream.name, not collecting")
 				return []

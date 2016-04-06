@@ -41,7 +41,8 @@ class MongoDataRangeProviderSpec extends IntegrationSpec {
 
 	def "it should fetch new Documents since starting" () {
 		Feed feed = Feed.load(8)
-		Stream stream = new Stream(name:this.class.name, uuid:"foo", apiKey:"foo", user:SecUser.load(1), feed:feed)
+		Stream stream = new Stream(name:this.class.name, apiKey:"foo", user:SecUser.load(1), feed:feed)
+		stream.id = "foo"
 
 		Map config = [mongodb:[
 			host: "dev.streamr",

@@ -4,9 +4,9 @@ import spock.lang.Specification
 
 class OutputSpec extends Specification {
 	def owner = Mock(AbstractSignalPathModule)
-	def output = new Output<Integer>(owner, "input", "Integer");
+	def output = new Output<Integer>(owner, "output", "Integer");
 	def in1 = new Input<Integer>(Mock(AbstractSignalPathModule), "in1", "Integer")
-	def in2 = new Input<Integer>(Mock(AbstractSignalPathModule), "in1", "Integer")
+	def in2 = new Input<Integer>(Mock(AbstractSignalPathModule), "in2", "Integer")
 
 	def setup() {
 		in1.owner.drivingInputs = new HashSet<>()
@@ -72,5 +72,20 @@ class OutputSpec extends Specification {
 
 		then:
 		p.sendPending
+	}
+
+	def "invoking send() delegates to any proxies"() {
+		setup:
+		def proxyOutput1 = new Output<Integer>(owner, "proxyOutput", "Integer");
+		def proxyOutput2 = new Output<Integer>(owner, "proxyOutput", "Integer");
+		output.addProxiedOutput(proxyOutput1)
+		output.addProxiedOutput(proxyOutput2)
+
+		when:
+		output.send(1024)
+
+		then:
+		proxyOutput1.getValue() == 1024
+		proxyOutput2.getValue() == 1024
 	}
 }

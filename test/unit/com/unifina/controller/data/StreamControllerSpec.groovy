@@ -53,8 +53,8 @@ class StreamControllerSpec extends Specification {
 			request.method = 'POST'
 			controller.create()
 		then:
-			response.redirectedUrl == '/stream/show/1'
 			Stream.count() == 1
+			response.redirectedUrl == '/stream/show/' + Stream.list()[0].id
 			Stream.list()[0].user == user
 	}
 

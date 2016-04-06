@@ -17,6 +17,8 @@
     "jquery-ui": "*",
     "jsdom": "8.1.0",
     "underscore": "*",
+    "backbone": "*",
+    "mustache": "*",
     "backbone-associations": "*"
   }
 }

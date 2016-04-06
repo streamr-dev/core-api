@@ -29,7 +29,7 @@ public class KafkaFeedFileDiscoveryUtil extends S3FeedFileDiscoveryUtil {
 	}
 
 	@Override
-	protected Long getStreamId(String location) {
+	protected String getStreamId(String location) {
 		return new KafkaFeedFileName(FilenameUtils.getName(location)).getStreamId();
 	}
 	

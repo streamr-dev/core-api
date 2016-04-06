@@ -52,7 +52,7 @@ class SendToStreamSpec extends Specification {
 
 		def s = new Stream()
 		s.feed = feed
-		s.name = "stream-0"
+		s.id = s.name = "stream-0"
 		s.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
@@ -83,7 +83,7 @@ class SendToStreamSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals {
-				globals.signalPathContext["live"] = true
+				globals.realtime = true
 				globals.uiChannel = new FakePushChannel()
 				globals.dataSource = new RealtimeDataSource()
 				globals

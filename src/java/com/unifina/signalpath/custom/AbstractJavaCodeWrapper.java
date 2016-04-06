@@ -16,7 +16,7 @@ import com.unifina.security.UserJavaClassLoader;
 public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	transient AbstractCustomModule instance = null;
-	String serializedInstance = null;
+	byte[] serializedInstance = null;
 	String code = null;
 	String className = null;
 	String fullCode = null;
@@ -24,6 +24,13 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	transient UserJavaClassLoader classLoader = null;
 
 	private static final Logger log = Logger.getLogger(AbstractJavaCodeWrapper.class);
+
+	@Override
+	public void init() {
+		super.init();
+		resendAll = false;
+		resendLast = 0;
+	}
 
 	@Override
 	public void initialize() {

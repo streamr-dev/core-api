@@ -1,22 +1,19 @@
 package com.unifina.controller.data
 
-import com.unifina.api.ApiException
-import com.unifina.feed.DataRange
-import com.unifina.feed.mongodb.MongoDbConfig
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-
-import java.text.SimpleDateFormat
-
-import org.springframework.web.multipart.MultipartFile
-
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.CSVImporter.Schema
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.web.multipart.MultipartFile
+
+import java.text.SimpleDateFormat
 
 @Secured(["ROLE_USER"])
 class StreamController {
@@ -31,7 +28,7 @@ class StreamController {
 	def streamService
 	
 	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(Stream.get(params.long("id")))) {
+			if (!unifinaSecurityService.canAccess(Stream.get(params.id))) {
 				if (request.xhr)
 					redirect(controller:'login', action:'ajaxDenied')
 				else
@@ -110,7 +107,6 @@ class StreamController {
 		// Access checked by beforeInterceptor
 		Stream streamInstance = Stream.get(params.id)
 		def name = streamInstance.name
-		def streamId = streamInstance.uuid
 		try {
 			streamService.deleteStream(streamInstance)
 			flash.message = "The stream $name has been deleted."

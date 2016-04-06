@@ -23,7 +23,7 @@ var CanvasStartButton = Backbone.View.extend({
         })
 
         $(this.signalPath).on('new error stopped stopping', function() {
-            _this.setRunning(false);
+            _this.setRunning(_this.signalPath.isRunning());
         })
 
         $(this.signalPath).on('starting started', function() {
