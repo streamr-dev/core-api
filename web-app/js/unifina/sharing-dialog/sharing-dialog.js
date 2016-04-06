@@ -244,15 +244,15 @@
                 title: "Share <span class='resource-name-label'></span>",
                 message: "Loading...",
                 closeButton: true,
-                //onEscape: true,
+                className: "sharing-dialog",
                 buttons: {
                     cancel: {
                         label: "Cancel",
-                        //callback: sharePopup.closeAndDiscardChanges
+                        className: "cancel-button",
                     },
                     save: {
-                        label: "Save", //'<span class="spinner"><i class="icon-spin icon-refresh"></i></span>Save',
-                        className: "btn-primary", // has-spinner",
+                        label: "Save",
+                        className: "btn-primary save-button",
                         callback: function() {
                             return listView.finishUserInput() !== "error" && saveChanges()
                         }

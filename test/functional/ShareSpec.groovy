@@ -23,6 +23,14 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".ui-pnotify").size() == 0 }
 	}
 
+	def acceptSharingModal() {
+		$(".sharing-dialog .save-button").click()
+	}
+
+	def cancelSharingModal() {
+		$(".sharing-dialog .cancel-button").click()
+	}
+
 	/** Cleanup helper */
 	def removeStreamPermissions() {
 		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
@@ -35,7 +43,7 @@ class ShareSpec extends GebReportingSpec {
 				$(".access-row").size() == 0
 			}
 		}
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
 	def removeCanvasPermissions() {
@@ -49,7 +57,7 @@ class ShareSpec extends GebReportingSpec {
 				$(".access-row").size() == 0
 			}
 		}
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
 	def removeDashboardPermissions() {
@@ -63,7 +71,7 @@ class ShareSpec extends GebReportingSpec {
 				$(".access-row").size() == 0
 			}
 		}
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
 
@@ -151,7 +159,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 
 		when:
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		then: "no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
@@ -182,7 +190,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".access-row").size() == 0 }
 
 		when: "discard changes"
-		$("button", text: "Cancel").click()
+		cancelSharingModal()
 		then: "...so no notification"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
@@ -308,7 +316,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 
 		when:
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		then: "no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
@@ -334,7 +342,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".access-row").size() == 0 }
 
 		when: "discard changes"
-		$("button", text: "Cancel").click()
+		cancelSharingModal()
 		then: "...so no notification"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
@@ -450,7 +458,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 
 		when:
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		then: "no changes, so no message displayed"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
@@ -476,7 +484,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".access-row").size() == 0 }
 
 		when: "discard changes"
-		$("button", text: "Cancel").click()
+		cancelSharingModal()
 		then: "...so no notification"
 		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
@@ -673,7 +681,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".anonymous-switcher").attr("checked")
 
 		when:
-		$("button", text: "Save").click()
+		acceptSharingModal()
 		then:
 		//waitFor { $(".ui-pnotify .alert-success") }	// robustness...
 		waitFor { !$(".bootbox.modal") }
@@ -711,6 +719,6 @@ class ShareSpec extends GebReportingSpec {
 		if ($(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
 		}
-		$("button", text: "Save").click()
+		acceptSharingModal()
 	}
 }
