@@ -30,14 +30,14 @@ class UserService {
 			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
 		}
 
-        if (!user.save(flush:true)) {
-            log.warn("Failed to save user data: "+checkErrors(user.errors.getAllErrors()))
-            throw new UserCreationFailedException()
-        } else {
-            // Save roles, feeds and module packages
-            addRoles(user, roles)
-            setFeeds(user, feeds ?: [])
-            setModulePackages(user, packages ?: [])
+		if (!user.save(flush: true)) {
+			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
+			throw new UserCreationFailedException()
+		} else {
+			// Save roles, feeds and module packages
+			addRoles(user, roles)
+			setFeeds(user, feeds ?: [])
+			setModulePackages(user, packages ?: [])
 
 			// Transfer permissions that were attached to sign-up invitation before user existed
 			permissionService.transferInvitePermissionsTo(user)
@@ -67,9 +67,9 @@ class UserService {
 	}
 
 	/** Adds/removes Feed read permissions so that user's permissions match given ones */
-    def setFeeds(user, List<Feed> feeds) {
+	def setFeeds(user, List<Feed> feeds) {
 		List<Feed> existing = permissionService.get(Feed, user)
-        feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
+		feeds.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !feeds.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return feeds
 	}

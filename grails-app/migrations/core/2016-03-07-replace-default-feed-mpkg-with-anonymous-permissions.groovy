@@ -1,6 +1,6 @@
 package core
 databaseChangeLog = {
-	changeSet(author: "jtakalai", context: "test", id: "2016030700000-1") {
+	changeSet(author: "jtakalai", id: "2016030700000-1") {
 		insert(tableName: "permission") {
 			//column(name: "id", valueNumeric: autoincremented?)
 			column(name: "version", valueNumeric: 0)
