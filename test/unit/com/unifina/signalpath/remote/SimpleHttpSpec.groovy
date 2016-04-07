@@ -61,6 +61,7 @@ class SimpleHttpSpec extends Specification {
 	}
 
 	void "no input, no response"() {
+		module.configure([options: [inputCount: [value: 0], outputCount: [value: 0]]])
 		def inputValues = [trigger: [1, true, "test"]]
 		def outputValues = [error: [null, null, null]]
 		expect:
@@ -68,6 +69,7 @@ class SimpleHttpSpec extends Specification {
 	}
 
 	void "no input, unexpected object response (ignored)"() {
+		module.configure([options: [inputCount: [value: 0], outputCount: [value: 0]]])
 		def inputValues = [trigger: [1, true, "test"]]
 		def outputValues = [error: [null, null, null]]
 		response = [foo: 3, bar: 2, shutdown: "now"]
@@ -89,7 +91,7 @@ class SimpleHttpSpec extends Specification {
 
 	void "empty response"() {
 		module.configure([options: [inputCount: [value: 1], outputCount: [value: 1]]])
-		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"]]
+		def inputValues = [in1: [4, 20, "everyday"]]
 		def outputValues = [error: [null, null, null]]
 		response = []
 		expect:
@@ -102,7 +104,7 @@ class SimpleHttpSpec extends Specification {
 			outputs: [[name: "out1", displayName: "foo"]]
 		])
 		def messages = ["4", "20", "everyday"]
-		def inputValues = [trigger: [1, true, "test"], in1: messages]
+		def inputValues = [in1: messages]
 		def outputValues = [error: [null, null, null], out1: messages]
 		response = { HttpPost r ->
 			def jsonString = EntityUtils.toString(r.entity)
@@ -118,7 +120,7 @@ class SimpleHttpSpec extends Specification {
 			options: [inputCount: [value: 2], outputCount: [value: 3]],
 			inputs : [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
 		])
-		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
+		def inputValues = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
 		def outputValues = [error: [null, null, null], out1: [true, true, true],
 							out2 : ["developers", "developers", "developers"], out3: [1, 1, 1]]
 		response = { request -> [true, "developers", 1, 2, 3, 4] }
@@ -131,7 +133,7 @@ class SimpleHttpSpec extends Specification {
 			options: [inputCount: [value: 2], outputCount: [value: 3]],
 			inputs : [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
 		])
-		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
+		def inputValues = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
 		def outputValues = [error: [null, null, null], out1: [":)", ":|", ":("]]
 		response = [[":)"], [":|"], [":("]]
 		expect:
@@ -143,7 +145,7 @@ class SimpleHttpSpec extends Specification {
 			options: [inputCount: [value: 2], outputCount: [value: 3]],
 			inputs : [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
 		])
-		def inputValues = [trigger: [1, true, "test"], in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
+		def inputValues = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
 		def outputValues = [error: [null, null, null], out1: [":)", ":|", ":("],
 							out2 : [null, 8, 7], out3: [null, null, 6]]
 		response = [[":)"], [":|", 8], [":(", 7, 6, 5, 4, 3]]
@@ -161,7 +163,7 @@ class SimpleHttpSpec extends Specification {
 				[name: "in2", displayName: "nother", value: false]
 			]
 		])
-		def inputValues = [trigger: [1, true, "test"], in1: [666, "666", 2 * 333], in2: [1 + 1 == 2, true, "true"]]
+		def inputValues = [in1: [666, "666", 2 * 333], in2: [1 + 1 == 2, true, "true"]]
 		def outputValues = [error: [null, null, null]]
 		response = { HttpUriRequest request ->
 			assert request.URI.toString().equals("localhost?inputput=666&nother=true")

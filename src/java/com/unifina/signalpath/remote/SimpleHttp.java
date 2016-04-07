@@ -50,14 +50,13 @@ public class SimpleHttp extends AbstractHttpModule {
 	public void init() {
 		addInput(verb);
 		addInput(URL);
-		addInput(trigger);
 		trigger.canToggleDrivingInput = false;
 		trigger.setDrivingInput(true);
 		addOutput(errorOut);
 	}
 
 	@Override
-	public Map<String,Object> getConfiguration() {
+	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("inputCount", httpInputs.size(), ModuleOption.OPTION_INTEGER));
@@ -77,14 +76,12 @@ public class SimpleHttp extends AbstractHttpModule {
 		httpInputs = new ArrayList<>(inputCount);
 		for (int i = 0; i < inputCount; i++) {
 			Input<Object> in = new Input<>(this, "in"+(i+1), "Object");
-			in.canToggleDrivingInput = false;
-			in.setDrivingInput(false);
 			addInput(in);
 			httpInputs.add(in);
 		}
-		//if (inputCount == 0) {
-		//	addInput(trigger);
-		//}
+		if (inputCount == 0) {
+			addInput(trigger);
+		}
 		httpOutputs = new ArrayList<>(outputCount);
 		for (int i = 0; i < outputCount; i++) {
 			Output<Object> out = new Output<>(this, "out"+(i+1), "Object");
