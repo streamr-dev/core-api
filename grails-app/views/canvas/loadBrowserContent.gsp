@@ -1,5 +1,5 @@
 <%@ page import="com.unifina.domain.signalpath.Canvas" %>
-<g:each in="${signalPaths}">
+<g:each in="${canvases}">
 	<tr class="selectable has-offset" data-id="${it.id}" data-offset="${it.offset}">
 		<td>
 			${it.name}

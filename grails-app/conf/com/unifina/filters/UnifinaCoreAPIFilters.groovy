@@ -14,15 +14,16 @@ import com.unifina.security.StreamrApi
 
 
 /**
- * API methods should be use the @ApiMethod annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
+ * API methods should use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
  * This will allow the UnifinaCoreApiFilters to check user credentials. The authenticated SecUser can be referenced
  * by request.apiUser.
  */
 
 class UnifinaCoreAPIFilters {
 
+	def userService
 	def springSecurityService
-	def unifinaSecurityService
+
 	GrailsApplication grailsApplication
 	
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
@@ -58,7 +59,7 @@ class UnifinaCoreAPIFilters {
 
 				request.isApiAction = true
 
-				TokenAuthenticator authenticator = new TokenAuthenticator(unifinaSecurityService)
+				TokenAuthenticator authenticator = new TokenAuthenticator(userService)
 				SecUser user = authenticator.authenticate(request)
 
 				if (authenticator.lastAuthenticationMalformed()) {

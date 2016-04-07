@@ -2,9 +2,9 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="stream.list.label" /></title>
-        
+		<r:require module="sharing-dialog"/>
     </head>
-    <body>
+    <body class="stream-list-page">
 		<ui:flashMessage/>
 		
 		<div class="btn-group toolbar">
@@ -28,7 +28,12 @@
 				        <ui:tr link="${ createLink(action:'show', id: stream.id) }" data-id="${stream.id }">					        
 				            <ui:td>${fieldValue(bean: stream, field: "name")}</ui:td>
 				            <ui:td>${fieldValue(bean: stream.feed, field: "name")}</ui:td>
-				            <ui:td>${fieldValue(bean: stream, field: "description")}</ui:td>
+				            <ui:td>
+								${fieldValue(bean: stream, field: "description")}
+								<g:if test="${shareable.contains(stream)}">
+									<ui:shareButton class="btn-end-of-row" url="${createLink(uri: "/api/v1/streams/" + stream.uuid)}" name="Stream ${stream.name}" />
+								</g:if>
+							</ui:td>
 						</ui:tr>
 					</g:each>
 				</ui:tbody>
