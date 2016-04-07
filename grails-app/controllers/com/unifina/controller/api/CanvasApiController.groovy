@@ -147,7 +147,7 @@ class CanvasApiController {
 		return command
 	}
 
-	private void getAuthorizedCanvas(String id, Operation op, Closure successHandler) {
+	private void getAuthorizedCanvas(String id, Operation op, Closure action) {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
 			throw new NotFoundException("Canvas", id)
@@ -155,7 +155,7 @@ class CanvasApiController {
 				   !permissionService.check(request.apiUser, canvas, op)) {
 			throw new NotPermittedException(request.apiUser?.username, "Canvas", id, op.id)
 		} else {
-			successHandler.call(canvas)
+			action.call(canvas)
 		}
 	}
 }

@@ -20,12 +20,15 @@ class StreamControllerSpec extends Specification {
 	SecUser user
 	Stream stream
 	Module module
-	
+
 	void setup() {
 		module = new Module(id: 1).save(validate: false)
 		feed = new Feed(streamListenerClass: NoOpStreamListener.name, module: module).save(validate: false)
-		stream = new Stream(id: "dummy", name: "dummy", description: "dummy", feed: feed).save(validate: false)
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey").save(validate:false)
+
+		stream = new Stream(name: "dummy", description: "dummy", feed: feed)
+		stream.id = "dummy"
+		stream.save(validate: false)
 
 		mockSpringSecurityService(user)
 		controller.streamService = grailsApplication.mainContext.getBean("streamService")
@@ -50,7 +53,7 @@ class StreamControllerSpec extends Specification {
 		request.method = 'POST'
 		controller.create()
 		then:
-		response.redirectedUrl == '/stream/show/2'
+        response.redirectedUrl == '/stream/show/' + Stream.list()[1].id
 		Stream.count() == 2
 		Stream.list()[1].user == user
 	}

@@ -9,7 +9,6 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.KafkaService
 import com.unifina.service.StreamService
 import com.unifina.service.PermissionService
 import com.unifina.service.UserService
@@ -30,10 +29,10 @@ class StreamApiControllerSpec extends Specification {
 	def streamService
 	def permissionService
 
-	def streamOneUuid
-	def streamTwoUuid
-	def streamThreeUuid
-	def streamFourUuid
+	def streamOneId
+	def streamTwoId
+	def streamThreeId
+	def streamFourId
 
 	def setup() {
 		streamService = mainContext.getBean(StreamService)
@@ -49,10 +48,10 @@ class StreamApiControllerSpec extends Specification {
 
 		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
 
-		streamOneUuid = streamService.createStream([name: "stream", description: "description", feed: feed], user).uuid
-		streamTwoUuid = streamService.createStream([name: "ztream", feed: feed], user).uuid
-		streamThreeUuid = streamService.createStream([name: "atream", feed: feed], user).uuid
-		streamFourUuid = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).uuid
+		streamOneId = streamService.createStream([name: "stream", description: "description", feed: feed], user).id
+		streamTwoId = streamService.createStream([name: "ztream", feed: feed], user).id
+		streamThreeId = streamService.createStream([name: "atream", feed: feed], user).id
+		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
 	}
 
 	void "find all streams of logged in user"() {
@@ -80,7 +79,7 @@ class StreamApiControllerSpec extends Specification {
 
 		then:
 		response.json.length() == 1
-		response.json[0].uuid.length() == 22
+		response.json[0].id.length() == 22
 		response.json[0].apiKey.length() == 22
 		response.json[0].name == "stream"
 		response.json[0].config == [
@@ -99,7 +98,7 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.uuid.length() == 22
+		response.json.id.length() == 22
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
 		response.json.config == [
@@ -107,7 +106,7 @@ class StreamApiControllerSpec extends Specification {
 		]
 		response.json.description == "Test stream"
 		Stream.count() == 5
-		Stream.findByUuid(response.json.uuid).user == user
+		Stream.findById(response.json.id).user == user
 	}
 
 	void "create a new stream (with fields) for currently logged in user"() {
@@ -130,7 +129,7 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		response.json.uuid.length() == 22
+		response.json.id.length() == 22
 		response.json.apiKey.length() == 22
 		response.json.name == "Test stream"
 		response.json.config == [
@@ -141,7 +140,7 @@ class StreamApiControllerSpec extends Specification {
 		]
 		response.json.description == "Test stream"
 		Stream.count() == 5
-		Stream.findByUuid(response.json.uuid).user == user
+		Stream.findById(response.json.id).user == user
 	}
 
 	void "creating stream fails given invalid token"() {
@@ -172,7 +171,7 @@ class StreamApiControllerSpec extends Specification {
 	void "show a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamOneUuid
+		params.id = streamOneId
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "show"]) {
@@ -201,7 +200,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot show other user's Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamFourUuid
+		params.id = streamFourId
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "show"]) {
@@ -215,7 +214,7 @@ class StreamApiControllerSpec extends Specification {
 	void "update a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamOneUuid
+		params.id = streamOneId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
 		request.requestURI = "/api/v1/stream"
@@ -227,7 +226,7 @@ class StreamApiControllerSpec extends Specification {
 		response.status == 204
 
 		then:
-		def stream = Stream.findById(1)
+		def stream = Stream.findById(streamOneId)
 		stream.name == "newName"
 		stream.description == "newDescription"
 		stream.config == null
@@ -236,7 +235,7 @@ class StreamApiControllerSpec extends Specification {
 	void "updating Stream with invalid mongodb settings raises validation error"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamOneUuid
+		params.id = streamOneId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription", config: {mongodb: {host: null}}}'
 		request.requestURI = "/api/v1/stream"
@@ -266,7 +265,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot update other user's Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamFourUuid
+		params.id = streamFourId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
 		request.requestURI = "/api/v1/stream"
@@ -281,7 +280,7 @@ class StreamApiControllerSpec extends Specification {
 	void "delete a Stream of logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamOneUuid
+		params.id = streamOneId
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "delete"]) {
@@ -309,7 +308,7 @@ class StreamApiControllerSpec extends Specification {
 	void "cannot delete other user's Stream"() {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		params.id = streamFourUuid
+		params.id = streamFourId
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "delete"]) {

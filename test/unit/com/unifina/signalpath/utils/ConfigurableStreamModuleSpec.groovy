@@ -23,7 +23,7 @@ class ConfigurableStreamModuleSpec extends Specification {
 
 		0.upto(4) {
 			def s = new Stream()
-			s.name = "stream-" + it
+			s.id = s.name = "stream-" + it
 			s.config = [fields: [[name: "out", type: "string"]]]
 			s.save(false)
 		}

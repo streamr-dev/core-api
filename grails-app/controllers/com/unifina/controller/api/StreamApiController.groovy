@@ -88,15 +88,14 @@ class StreamApiController {
 		}
 	}
 
-	private def getAuthorizedStream(String uuid, Operation op, Closure successHandler) {
-		def stream = Stream.findByUuid(uuid)
+	private def getAuthorizedStream(String id, Operation op, Closure action) {
+		def stream = Stream.get(id)
 		if (stream == null) {
-			throw new NotFoundException("Stream", uuid)
+			throw new NotFoundException("Stream", id)
 		} else if (!permissionService.check(request.apiUser, stream, op)) {
-			render(status: 403, text: [error: "Not authorized to ${op.id} Stream " + uuid, code: "FORBIDDEN", fault: "op", op: op.id] as JSON)
-			throw new NotPermittedException(request.apiUser?.username, "Stream", uuid, op.id)
+			throw new NotPermittedException(request.apiUser?.username, "Stream", id, op.id)
 		} else {
-			successHandler.call(stream)
+			action.call(stream)
 		}
 	}
 }

@@ -136,6 +136,7 @@
 				$(_this.search).hide();
 				$(_this.label).show();
 			}
+			$(_this).trigger('change')
 		}
 
 		var searchParams = {}

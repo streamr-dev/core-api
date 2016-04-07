@@ -16,8 +16,15 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.CSVImporter.Schema
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.web.multipart.MultipartFile
+
+import java.text.SimpleDateFormat
 
 @Secured(["ROLE_USER"])
 class StreamController {
@@ -30,18 +37,6 @@ class StreamController {
 	def feedFileService
 	def kafkaService
 	def streamService
-
-	private def getAuthorizedStream(long id, Operation op=Operation.READ, Closure action) {
-		SecUser user = springSecurityService.currentUser
-		Stream stream = Stream.get(id)
-		if (!stream) {
-			response.sendError(404)
-		} else if (!permissionService.check(user, stream, op)) {
-			redirect controller: 'login', action: (request.xhr ? 'ajaxDenied' : 'denied')
-		} else {
-			action.call(stream, user)
-		}
-	}
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
@@ -88,21 +83,21 @@ class StreamController {
 	}
 
 	def show() {
-		getAuthorizedStream(params.long("id")) { stream, user ->
+		getAuthorizedStream(params.id) { stream, user ->
 			[stream: stream, shareable: permissionService.canShare(user, stream)]
 		}
 	}
 
 	// Can be extended to handle more types
 	def details() {
-		getAuthorizedStream(params.long("id")) { stream, user ->
+		getAuthorizedStream(params.id) { stream, user ->
 			def model = [stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
 			render(template: stream.feed.streamPageTemplate, model: model)
 		}
 	}
 
 	def update() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			stream.name = params.name
 			stream.description = params.description
 			stream.save(flush: true, failOnError: true)
@@ -111,24 +106,25 @@ class StreamController {
 	}
 
 	def configure() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
 		}
 	}
 
 	def edit() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
 		}
 	}
 
 	def configureMongo() {
-		Stream stream = Stream.get(params.id)
-		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
+		}
 	}
 
 	def delete() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			try {
 				streamService.deleteStream(stream)
 				flash.message = "The stream $stream.name has been deleted."
@@ -142,11 +138,11 @@ class StreamController {
 	
 	def fields() {
 		if (request.method == "GET") {
-			getAuthorizedStream(params.long("id")) { stream, user ->
+			getAuthorizedStream(params.id) { stream, user ->
 				render((stream.config ? JSON.parse(stream.config).fields : []) as JSON)
 			}
 		} else if (request.method == "POST") {
-			getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+			getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 				def fields = request.JSON
 				Map config = stream.config ? JSON.parse(stream.config) : [:]
 				config.fields = fields
@@ -160,14 +156,14 @@ class StreamController {
 	}
 	
 	def files() {
-		getAuthorizedStream(params.long("id")) { stream, user ->
+		getAuthorizedStream(params.id) { stream, user ->
 			DataRange dataRange = streamService.getDataRange(stream)
 			return [dataRange: dataRange, stream:stream]
 		}
 	}
 	
 	def upload() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			File temp
 			boolean deleteFile = true
 			try {
@@ -201,7 +197,7 @@ class StreamController {
 	}
 
 	def confirm() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			File file = new File(params.file)
 
 			Map config = stream.config ? JSON.parse(stream.config) : [:]
@@ -215,7 +211,7 @@ class StreamController {
 	}
 	
 	def confirmUpload() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			File file = new File(params.file)
 			List fields = stream.config ? JSON.parse(stream.config).fields : []
 			def index = Integer.parseInt(params.timestampIndex)
@@ -252,7 +248,7 @@ class StreamController {
 	}
 	
 	def deleteFeedFilesUpTo() {
-		getAuthorizedStream(params.long("id"), Operation.WRITE) { stream, user ->
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			def date = new SimpleDateFormat(message(code: "default.dateOnly.format")).parse(params.date) + 1
 			FeedFile.findAllByStreamAndEndDateLessThan(stream, date).each {
 				feedFileService.deleteFile(it)
@@ -274,4 +270,15 @@ class StreamController {
 		render dataRangeMap as JSON
 	}
 
+	private def getAuthorizedStream(String id, Operation op=Operation.READ, Closure action) {
+		SecUser user = springSecurityService.currentUser
+		Stream stream = Stream.get(id)
+		if (!stream) {
+			response.sendError(404)
+		} else if (!permissionService.check(user, stream, op)) {
+			redirect controller: 'login', action: (request.xhr ? 'ajaxDenied' : 'denied')
+		} else {
+			action.call(stream, user)
+		}
+	}	
 }

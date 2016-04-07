@@ -32,8 +32,7 @@ class PermissionApiController {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
-		// TODO: remove kludge when Stream has String id instead of String uuid
-		def res = (resourceClass == Stream ? Stream.find { uuid == resourceId } : resourceClass.get(resourceId))
+		def res = resourceClass.get(resourceId)
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
 		} else if (!permissionService.canShare(request.apiUser, res)) {
