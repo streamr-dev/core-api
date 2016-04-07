@@ -175,7 +175,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "open menu"
 		streamMenuButton.click()
 		then: "shareButton in menu"
-		waitFor { shareButton.displayed }
+		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
 		shareButton.click()
@@ -198,7 +198,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "open menu"
 		streamMenuButton.click()
 		then: "shareButton in menu"
-		waitFor { shareButton.displayed }
+		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when: "re-open"
 		shareButton.click()
@@ -221,7 +221,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "open menu"
 		streamMenuButton.click()
 		then: "shareButton in menu"
-		waitFor { shareButton.displayed }
+		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when: "re-open"
 		shareButton.click()
@@ -327,7 +327,7 @@ class ShareSpec extends GebReportingSpec {
 		getCanvasRow().click()
 		then:
 		waitFor { at CanvasPage }
-		waitFor { shareButton.displayed }
+		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
 		shareButton.click()
@@ -469,7 +469,7 @@ class ShareSpec extends GebReportingSpec {
 		getDashboardRow().click()
 		then:
 		waitFor { at DashboardShowPage }
-		waitFor { shareButton.displayed }
+		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
 		shareButton.click()
