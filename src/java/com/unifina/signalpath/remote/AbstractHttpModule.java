@@ -31,7 +31,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule {
 	protected boolean trustSelfSigned = false;
 
 	/** This function is overridden so that the tests can inject a mock HttpClient */
-	protected HttpClient getHttpClient() {
+	protected CloseableHttpClient getHttpClient() {
 		if (_httpClient == null) {
 			if (trustSelfSigned) {
 				try {

@@ -9,6 +9,7 @@ import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import org.json.JSONObject
 import spock.lang.Specification
@@ -42,7 +43,7 @@ class HttpSpec extends Specification {
 	}
 
 	/** HttpClient that generates mock responses to HttpUriRequests according to this.response */
-	def mockClient = Stub(HttpClient) {
+	def mockClient = Stub(CloseableHttpClient) {
 		def responseI = [].iterator()
 		execute(_) >> { HttpUriRequest request ->
 			Stub(CloseableHttpResponse) {

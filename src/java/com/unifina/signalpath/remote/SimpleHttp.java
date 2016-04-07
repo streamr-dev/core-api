@@ -1,6 +1,7 @@
 package com.unifina.signalpath.remote;
 import com.unifina.signalpath.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.commons.lang.StringUtils;
@@ -15,6 +16,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.groovy.grails.web.json.JSONArray;
+import org.codehaus.groovy.grails.web.json.JSONException;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.grails.web.json.JSONTokener;
 
@@ -41,7 +43,7 @@ public class SimpleHttp extends AbstractHttpModule {
 	// subset of inputs that corresponds to HTTP headers
 	private List<StringParameter> headers = new ArrayList<>();
 
-	private StringOutput errorOut = new StringOutput(this, "error");
+	private ListOutput errorOut = new ListOutput(this, "errors");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");
 
 	private static final Logger log = Logger.getLogger(SimpleHttp.class);
@@ -105,67 +107,74 @@ public class SimpleHttp extends AbstractHttpModule {
 		// get from server either JSON object with values for named outputs, or list of output values
 		List<Object> values = new LinkedList<>();
 		JSONObject result = null;
-		try {
-			// read module inputs
-			List<NameValuePair> inputNVPList = new LinkedList<>();
-			JSONObject inputObject = new JSONObject();
-			for (Input in : httpInputs) {
-				String inputName = in.getDisplayName();
-				if (inputName == null) { inputName = in.getName(); }
-				inputNVPList.add(new BasicNameValuePair(inputName, in.getValue().toString()));
-				inputObject.put(inputName, in.getValue());
-			}
 
-			// build and prepare the HttpRequest: inputs are added to URL parameter string if body is not available
-			HttpRequestBase request = verb.getRequest(URL.getValue());
-			if (verb.hasBody()) {
+		// read module inputs
+		List<NameValuePair> inputNVPList = new LinkedList<>();
+		JSONObject inputObject = new JSONObject();
+		for (Input in : httpInputs) {
+			String inputName = in.getDisplayName();
+			if (inputName == null) { inputName = in.getName(); }
+			inputNVPList.add(new BasicNameValuePair(inputName, in.getValue().toString()));
+			inputObject.put(inputName, in.getValue());
+		}
+
+		// build and prepare the HttpRequest: inputs are added to URL parameter string if body is not available
+		HttpRequestBase request = verb.getRequest(URL.getValue());
+		if (verb.hasBody()) {
+			try {
 				switch (bodyFormat) {
 					case BODY_FORMAT_JSON:
 						String bodyString = inputObject.toString();
-						((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(bodyString));
+						((HttpEntityEnclosingRequestBase) request).setEntity(new StringEntity(bodyString));
 						break;
 					case BODY_FORMAT_FORMDATA:
-						((HttpEntityEnclosingRequestBase)request).setEntity(new UrlEncodedFormEntity(inputNVPList));
+						((HttpEntityEnclosingRequestBase) request).setEntity(new UrlEncodedFormEntity(inputNVPList));
 						break;
 					default:
 						throw new RuntimeException("Unexpected body format " + bodyFormat);
 				}
-			} else {
-				String url = URL.getValue() + "?" + URLEncodedUtils.format(inputNVPList, "UTF-8");
-				request = verb.getRequest(url);
+			} catch (UnsupportedEncodingException e) {
+				errors.add(e.getMessage());
 			}
+		} else {
+			String url = URL.getValue() + "?" + URLEncodedUtils.format(inputNVPList, "UTF-8");
+			request = verb.getRequest(url);
+		}
 
-			for (StringParameter header : headers) {
-				String headerName = header.getDisplayName();
-				if (headerName == null) { headerName = header.getName(); }
-				request.addHeader(headerName, header.getValue());
-			}
+		for (StringParameter header : headers) {
+			String headerName = header.getDisplayName();
+			if (headerName == null) { headerName = header.getName(); }
+			request.addHeader(headerName, header.getValue());
+		}
 
-			// send off the HttpRequest to server
+		// send off the HttpRequest to server
+		try {
 			long startTime = System.currentTimeMillis();
-			HttpResponse httpResponse = getHttpClient().execute(request);
-			log.info("HTTP request took " + (System.currentTimeMillis() - startTime) + " ms");
+			try (CloseableHttpResponse httpResponse = getHttpClient().execute(request)) {
+				log.info("HTTP request took " + (System.currentTimeMillis() - startTime) + " ms");
 
-			// parse response into a JSONObject (or simple list of values)
-			String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-			JSONTokener parser = new JSONTokener(responseString);
-			Object response = parser.nextValue();
-			if (response instanceof JSONObject) {
-				// TODO: http://jsonapi.org/format/ suggests we should read "data" member if available
-				result = (JSONObject)response;
-			} else if (response instanceof JSONArray) {
-				// array => send first-found object to outputs, or send one JSON value for each output if found first
-				result = findJSONObjectFromJSONArray((JSONArray)response, values, httpOutputs.size());
-			} else {
-				// first raw JSON value => send values to outputs as-is
-				values.add(response);
-				while (parser.more() && values.size() < httpOutputs.size()) {
-					values.add(parser.nextValue());
+				// parse response into a JSONObject (or simple list of values)
+				String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+				JSONTokener parser = new JSONTokener(responseString);
+				Object response = parser.nextValue();
+				if (response instanceof JSONObject) {
+					// TODO: http://jsonapi.org/format/ suggests we should read "data" member if available
+					result = (JSONObject) response;
+				} else if (response instanceof JSONArray) {
+					// array => send first-found object to outputs, or send one JSON value for each output if found first
+					result = findJSONObjectFromJSONArray((JSONArray) response, values, httpOutputs.size());
+				} else {
+					// first raw JSON value => send values to outputs as-is
+					values.add(response);
+					while (parser.more() && values.size() < httpOutputs.size()) {
+						values.add(parser.nextValue());
+					}
 				}
+			} catch (JSONException e) {
+				// send out what values were read so far
 			}
-		} catch (RuntimeException | IOException e) {
+		} catch (IOException e) {
 			errors.add(e.getMessage());
-			e.printStackTrace();
 		}
 
 		// send results to outputs, match output names to result object keys (ignore extra result object members)
@@ -188,9 +197,7 @@ public class SimpleHttp extends AbstractHttpModule {
 			}
 		}
 
-		if (!errors.isEmpty()) {
-			this.errorOut.send(StringUtils.join(errors, "\n"));
-		}
+		this.errorOut.send(errors);
 	}
 
 	/**

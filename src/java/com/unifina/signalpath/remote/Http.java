@@ -15,6 +15,8 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.groovy.grails.web.json.JSONArray;
@@ -130,23 +132,24 @@ public class Http extends AbstractHttpModule {
 			}
 		}
 
-		HttpResponse httpResponse;
 		try {
 			long startTime = System.currentTimeMillis();
-			httpResponse = getHttpClient().execute(request);
-			pingMillis.send(System.currentTimeMillis() - startTime);
+			try (CloseableHttpResponse httpResponse = getHttpClient().execute(request)) {
+				pingMillis.send(System.currentTimeMillis() - startTime);
 
-			String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-			JSONTokener parser = new JSONTokener(responseString);
-			Object responseData = parser.nextValue();	// parser returns Map, List, or String
-			response.send(responseData);
+				String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
 
-			Map<String, String> headerMap = new HashMap<>();
-			for (Header h : httpResponse.getAllHeaders()) {
-				headerMap.put(h.getName(), h.getValue());
+				JSONTokener parser = new JSONTokener(responseString);
+				Object responseData = parser.nextValue();    // parser returns Map, List, or String
+				response.send(responseData);
+
+				Map<String, String> headerMap = new HashMap<>();
+				for (Header h : httpResponse.getAllHeaders()) {
+					headerMap.put(h.getName(), h.getValue());
+				}
+				responseHeaders.send(headerMap);
+				statusCode.send(httpResponse.getStatusLine().getStatusCode());
 			}
-			responseHeaders.send(headerMap);
-			statusCode.send(httpResponse.getStatusLine().getStatusCode());
 		} catch (IOException e) {
 			errors.add(e.getMessage());
 		}

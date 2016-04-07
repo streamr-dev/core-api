@@ -3,11 +3,11 @@ package com.unifina.signalpath.remote
 import com.unifina.utils.testutils.ModuleTestHelper
 import groovy.json.JsonBuilder
 import org.apache.http.Header
-import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import org.json.JSONObject
 import spock.lang.Specification
@@ -35,7 +35,7 @@ class SimpleHttpSpec extends Specification {
 	}
 
 	/** HttpClient that generates mock responses to HttpUriRequests according to this.response */
-	def mockClient = Stub(HttpClient) {
+	def mockClient = Stub(CloseableHttpClient) {
 		def responseI = [].iterator()
 		execute(_) >> { HttpUriRequest request ->
 			Stub(CloseableHttpResponse) {
@@ -63,7 +63,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, no response"() {
 		module.configure([options: [inputCount: [value: 0], outputCount: [value: 0]]])
 		def inputValues = [trigger: [1, true, "test"]]
-		def outputValues = [error: [null, null, null]]
+		def outputValues = [errors: [[], [], []]]
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
@@ -71,7 +71,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, unexpected object response (ignored)"() {
 		module.configure([options: [inputCount: [value: 0], outputCount: [value: 0]]])
 		def inputValues = [trigger: [1, true, "test"]]
-		def outputValues = [error: [null, null, null]]
+		def outputValues = [errors: [[], [], []]]
 		response = [foo: 3, bar: 2, shutdown: "now"]
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
@@ -83,7 +83,7 @@ class SimpleHttpSpec extends Specification {
 			outputs: [[name: "out1", displayName: "foo"]]
 		])
 		def inputValues = [trigger: [1, true, "test"]]
-		def outputValues = [error: [null, null, null], out1: [3, 3, 3]]
+		def outputValues = [errors: [[], [], []], out1: [3, 3, 3]]
 		response = [foo: 3]
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
@@ -92,7 +92,7 @@ class SimpleHttpSpec extends Specification {
 	void "empty response"() {
 		module.configure([options: [inputCount: [value: 1], outputCount: [value: 1]]])
 		def inputValues = [in1: [4, 20, "everyday"]]
-		def outputValues = [error: [null, null, null]]
+		def outputValues = [errors: [[], [], []]]
 		response = []
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
@@ -105,7 +105,7 @@ class SimpleHttpSpec extends Specification {
 		])
 		def messages = ["4", "20", "everyday"]
 		def inputValues = [in1: messages]
-		def outputValues = [error: [null, null, null], out1: messages]
+		def outputValues = [errors: [[], [], []], out1: messages]
 		response = { HttpPost r ->
 			def jsonString = EntityUtils.toString(r.entity)
 			def ob = new JSONObject(jsonString)
@@ -121,7 +121,7 @@ class SimpleHttpSpec extends Specification {
 			inputs : [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
 		])
 		def inputValues = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
-		def outputValues = [error: [null, null, null], out1: [true, true, true],
+		def outputValues = [errors: [[], [], []], out1: [true, true, true],
 							out2 : ["developers", "developers", "developers"], out3: [1, 1, 1]]
 		response = { request -> [true, "developers", 1, 2, 3, 4] }
 		expect:
@@ -134,7 +134,7 @@ class SimpleHttpSpec extends Specification {
 			inputs : [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
 		])
 		def inputValues = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
-		def outputValues = [error: [null, null, null], out1: [":)", ":|", ":("]]
+		def outputValues = [errors: [[], [], []], out1: [":)", ":|", ":("]]
 		response = [[":)"], [":|"], [":("]]
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
@@ -146,7 +146,7 @@ class SimpleHttpSpec extends Specification {
 			inputs : [[name: "in1", displayName: "hark"], [name: "in2", displayName: "snark"]]
 		])
 		def inputValues = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
-		def outputValues = [error: [null, null, null], out1: [":)", ":|", ":("],
+		def outputValues = [errors: [[], [], []], out1: [":)", ":|", ":("],
 							out2 : [null, 8, 7], out3: [null, null, 6]]
 		response = [[":)"], [":|", 8], [":(", 7, 6, 5, 4, 3]]
 		expect:
@@ -164,7 +164,7 @@ class SimpleHttpSpec extends Specification {
 			]
 		])
 		def inputValues = [in1: [666, "666", 2 * 333], in2: [1 + 1 == 2, true, "true"]]
-		def outputValues = [error: [null, null, null]]
+		def outputValues = [errors: [[], [], []]]
 		response = { HttpUriRequest request ->
 			assert request.URI.toString().equals("localhost?inputput=666&nother=true")
 		}
@@ -208,7 +208,7 @@ class SimpleHttpSpec extends Specification {
 			]
 		])
 		def inputValues = [trigger: [1, true, "test"]]
-		def outputValues = [error: [null, null, null], out1: [4, 4, 4],
+		def outputValues = [errors: [[], [], []], out1: [4, 4, 4],
 							out2: ["Pink", "Pink", "Pink"], out3: ["Finn", "Finn", "Finn"]]
 		response = [best: [pony: "Pink", pals: [dog: "Jake", human: "Finn"]], seasons: 4]
 		expect:
@@ -225,7 +225,7 @@ class SimpleHttpSpec extends Specification {
 			]
 		])
 		def inputValues = [trigger: [1, true, "test"]]
-		def outputValues = [error: [null, null, null], out1: [3, 3, 3],
+		def outputValues = [errors: [[], [], []], out1: [3, 3, 3],
 							out2: [2, 2, 2], out3: ["Finn", "Finn", "Finn"]]
 		response = [best: [pals: [[name: "Jake", species: "Dog"], [name: "Finn", species: "Human"]]], seasons: [4,3,2,1]]
 		expect:
