@@ -20,7 +20,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".ui-pnotify-closer").each {
 			try { it.click() } catch (StaleElementReferenceException e) {}
 		}
-		waitFor { $(".ui-pnotify").size() == 0 }
+		waitFor { !$(".ui-pnotify").displayed }
 	}
 
 	def acceptSharingModal() {
@@ -46,6 +46,7 @@ class ShareSpec extends GebReportingSpec {
 		acceptSharingModal()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
+	/** Cleanup helper */
 	def removeCanvasPermissions() {
 		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 		to CanvasListPage
@@ -60,6 +61,7 @@ class ShareSpec extends GebReportingSpec {
 		acceptSharingModal()
 		waitFor { !$(".bootbox.modal").displayed }
 	}
+	/** Cleanup helper */
 	def removeDashboardPermissions() {
 		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		to DashboardListPage
@@ -683,7 +685,6 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		acceptSharingModal()
 		then:
-		//waitFor { $(".ui-pnotify .alert-success") }	// robustness...
 		waitFor { !$(".bootbox.modal") }
 
 		when: "try search"

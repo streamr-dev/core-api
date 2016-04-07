@@ -58,11 +58,9 @@ class PermissionService {
 		return !Permission.withCriteria {
 			or {
 				eq "anonymous", true
-				try {
+				if (isValidUser(user)) {
 					String userProp = getUserPropertyName(user)
 					eq userProp, user
-				} catch(e) {
-					// throws for e.g. null user; ignore, maybe anonymous check returns something
 				}
 			}
 			eq "clazz", resourceClass.name
@@ -414,6 +412,9 @@ class PermissionService {
 			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
 		}
 	}
+    private boolean isValidUser(userish) {
+        return userish != null && (userish instanceof SecUser || userish instanceof SignupInvite)
+    }
 
 	/** ownership (if applicable) is stored in each Resource as "user" attribute */
 	private boolean isOwner(SecUser user, resource) {
