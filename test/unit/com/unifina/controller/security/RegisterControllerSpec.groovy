@@ -286,7 +286,6 @@ class RegisterControllerSpec extends Specification {
 			SecUser.findByUsername(username)
 			SecUser.findByUsername(username).timezone == 'NoContinent/NoPlace'
 			SecUser.findByUsername(username).password == 'fooBar123!-encoded'
-			Permission.count() == grailsApplication.config.streamr.user.defaultModulePackages.size() + grailsApplication.config.streamr.user.defaultFeeds.size()
 			response.redirectedUrl != null
 		then: "welcome email should be sent"
 			controller.mailService.mailSent

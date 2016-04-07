@@ -140,6 +140,4 @@ class PermissionApiController {
 			render status: 204
 		}
 	}
-
-
 }
