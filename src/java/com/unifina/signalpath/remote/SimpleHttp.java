@@ -2,12 +2,9 @@ package com.unifina.signalpath.remote;
 import com.unifina.signalpath.*;
 
 import java.util.*;
-import com.google.common.collect.ImmutableMap;
 import com.unifina.utils.MapTraversal;
-import groovy.json.JsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.log4j.Logger;
 
@@ -15,8 +12,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.groovy.grails.web.json.JSONArray;
@@ -29,16 +24,15 @@ import java.io.IOException;
  * Module that makes HTTP requests and sends forward responses.
  * It constructs request input from variable number of Inputs, and
  *    de-constructs response output into specified Outputs using dot-notation names (e.g. values[3].car.id)
- * This module makes assumptions with input (GET uses URL params, POST uses body) and output (first found object is what we want)
- *    and is quite lenient with "bad" output (if no object is found, just send values that were found)
+ * This module makes assumptions from input (GET uses URL params, POST uses body) and response (first found object is what we want)
+ *    and makes a best-effort guess in case of "bad" response (if no object is found, just send values that were found)
  * @see MapTraversal that does output parsing according to Output displayName
  * @see Http for a minimally-magical module that gives full control to the user over forming the request and parsing the response
  */
-public class SimpleHttp extends AbstractSignalPathModule {
+public class SimpleHttp extends AbstractHttpModule {
 
-	private Http.VerbParameter verb = new Http.VerbParameter(this, "verb");
-	private StringParameter URL = new StringParameter(this, "URL", "http://localhost");
-	private String bodyFormat = Http.BODY_FORMAT_JSON;
+	private VerbParameter verb = new VerbParameter(this, "verb");
+	private StringParameter URL = new StringParameter(this, "URL", "");
 
 	// subset of inputs/outputs that correponds to HTTP parameters and response data
 	private List<Input<Object>> httpInputs = new ArrayList<>();
@@ -62,42 +56,13 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		addOutput(errorOut);
 	}
 
-	/** This function is overridden in SimpleHttpSpec to inject mock HttpClient */
-	protected HttpClient getHttpClient() {
-		if (_httpClient == null) {
-			// commented out: SSL client that supports self-signed certs
-			/*SSLContext sslcontext = SSLContexts.custom()
-				.loadTrustMaterial(null, new TrustSelfSignedStrategy())
-				.build();
-			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);*/
-			_httpClient = HttpClients.createMinimal(); /* .custom()
-				.setSSLSocketFactory(sslsf)
-				.build();*/
-		}
-		return _httpClient;
-	}
-	private transient CloseableHttpClient _httpClient;
-
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		config.put(
-			"options", ImmutableMap.of(
-				"inputCount", ImmutableMap.of(
-					"value", httpInputs.size(),
-					"type", "int"
-				),
-				"outputCount", ImmutableMap.of(
-					"value", httpOutputs.size(),
-					"type", "int"
-				),
-				"headerCount", ImmutableMap.of(
-					"value", headers.size(),
-					"type", "int"
-				),
-				"bodyFormat", Http.BODY_FORMAT_OPTIONS
-			)
-		);
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("inputCount", httpInputs.size(), ModuleOption.OPTION_INTEGER));
+		options.add(new ModuleOption("outputCount", httpOutputs.size(), ModuleOption.OPTION_INTEGER));
+		options.add(new ModuleOption("headerCount", headers.size(), ModuleOption.OPTION_INTEGER));
 		return config;
 	}
 
@@ -108,7 +73,6 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		int inputCount = MapTraversal.getInt(config, "options.inputCount.value", 0);
 		int outputCount = MapTraversal.getInt(config, "options.outputCount.value", 0);
 		int headerCount = MapTraversal.getInt(config, "options.headerCount.value", 0);
-		bodyFormat = MapTraversal.getString(config, "options.bodyFormat.value", Http.BODY_FORMAT_JSON);
 
 		httpInputs = new ArrayList<>(inputCount);
 		for (int i = 0; i < inputCount; i++) {
@@ -118,6 +82,9 @@ public class SimpleHttp extends AbstractSignalPathModule {
 			addInput(in);
 			httpInputs.add(in);
 		}
+		//if (inputCount == 0) {
+		//	addInput(trigger);
+		//}
 		httpOutputs = new ArrayList<>(outputCount);
 		for (int i = 0; i < outputCount; i++) {
 			Output<Object> out = new Output<>(this, "out"+(i+1), "Object");
@@ -142,24 +109,25 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		List<Object> values = new LinkedList<>();
 		JSONObject result = null;
 		try {
+			// read module inputs
 			List<NameValuePair> inputNVPList = new LinkedList<>();
-			Map<String, Object> inputMap = new HashMap<>();
+			JSONObject inputObject = new JSONObject();
 			for (Input in : httpInputs) {
 				String inputName = in.getDisplayName();
 				if (inputName == null) { inputName = in.getName(); }
 				inputNVPList.add(new BasicNameValuePair(inputName, in.getValue().toString()));
-				inputMap.put(inputName, in.getValue());
+				inputObject.put(inputName, in.getValue());
 			}
 
 			// build and prepare the HttpRequest: inputs are added to URL parameter string if body is not available
 			HttpRequestBase request = verb.getRequest(URL.getValue());
 			if (verb.hasBody()) {
 				switch (bodyFormat) {
-					case Http.BODY_FORMAT_JSON:
-						String bodyString = new JSONObject(inputMap).toString();
+					case BODY_FORMAT_JSON:
+						String bodyString = inputObject.toString();
 						((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(bodyString));
 						break;
-					case Http.BODY_FORMAT_FORMDATA:
+					case BODY_FORMAT_FORMDATA:
 						((HttpEntityEnclosingRequestBase)request).setEntity(new UrlEncodedFormEntity(inputNVPList));
 						break;
 					default:
@@ -189,10 +157,10 @@ public class SimpleHttp extends AbstractSignalPathModule {
 				// TODO: http://jsonapi.org/format/ suggests we should read "data" member if available
 				result = (JSONObject)response;
 			} else if (response instanceof JSONArray) {
-				// array => send first-found object to outputs, or send one primitive for each output if found first
+				// array => send first-found object to outputs, or send one JSON value for each output if found first
 				result = findJSONObjectFromJSONArray((JSONArray)response, values, httpOutputs.size());
 			} else {
-				// primitive => send values to outputs as-is
+				// first raw JSON value => send values to outputs as-is
 				values.add(response);
 				while (parser.more() && values.size() < httpOutputs.size()) {
 					values.add(parser.nextValue());
@@ -229,17 +197,17 @@ public class SimpleHttp extends AbstractSignalPathModule {
 	}
 
 	/**
-	 * Walk arrays, grab first found object; or collect given number of primitives
-	 * @param primitives that were found IF return value is null. If return value is not null, primitives is invalid.
-	 * @return JSONObject that was first found, or null if $maxCount primitives were found first
+	 * Walk arrays, grab first found object; or collect given number of raw JSON values
+	 * @param jsonValues that were found IF return value is null. If return value is not null, jsonValues is invalid.
+	 * @return JSONObject that was first found, or null if $maxCount jsonValues were found first
 	 */
-	private JSONObject findJSONObjectFromJSONArray(JSONArray arr, List<Object> primitives, int maxCount) {
-		for (int i = 0; i < arr.length() && primitives.size() < maxCount; i++) {
+	private JSONObject findJSONObjectFromJSONArray(JSONArray arr, List<Object> jsonValues, int maxCount) {
+		for (int i = 0; i < arr.length() && jsonValues.size() < maxCount; i++) {
 			Object ob = arr.opt(i);
 			if (ob instanceof JSONArray) {
-				ob = findJSONObjectFromJSONArray((JSONArray)ob, primitives, maxCount);
+				ob = findJSONObjectFromJSONArray((JSONArray)ob, jsonValues, maxCount);
 			} else {
-				primitives.add(ob);
+				jsonValues.add(ob);
 			}
 
 			if (ob instanceof JSONObject) {
@@ -248,7 +216,4 @@ public class SimpleHttp extends AbstractSignalPathModule {
 		}
 		return null;
 	}
-
-	@Override
-	public void clearState() {}
 }

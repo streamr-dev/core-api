@@ -1,6 +1,5 @@
 package com.unifina.signalpath.remote;
 
-import com.google.common.collect.ImmutableMap;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.Header;
@@ -10,6 +9,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -19,8 +21,12 @@ import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.grails.web.json.JSONTokener;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -30,32 +36,10 @@ import java.util.*;
  * Maps will be used as both Input and Output type, though JSON output can also be List
  * @see SimpleHttp for module that does input construction and output de-construction for you
  */
-public class Http extends AbstractSignalPathModule {
-
-	// TODO: this probably should be enum or class?
-	public static final String BODY_FORMAT_JSON = "text/json";
-	public static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
-	public static final String BODY_FORMAT_PLAIN = "text/plain";
-	public static final String BODY_FORMAT_XML = "application/xml";
-	public static final Map BODY_FORMAT_OPTIONS = ImmutableMap.of(
-			"value", BODY_FORMAT_JSON,
-			"type", "string",
-			"possibleValues", Arrays.asList(
-					ImmutableMap.of(
-							"text", "JSON",
-							"value", BODY_FORMAT_JSON
-					),
-					ImmutableMap.of(
-							"text", "Form-data",
-							"value", BODY_FORMAT_FORMDATA
-					)
-			)
-	);
-
-	private String bodyFormat = BODY_FORMAT_JSON;
+public class Http extends AbstractHttpModule {
 
 	private VerbParameter verb = new VerbParameter(this, "verb");
-	private StringParameter URL = new StringParameter(this, "URL", "localhost");
+	private StringParameter URL = new StringParameter(this, "URL", "");
 	private MapParameter headers = new MapParameter(this, "headers");
 	private MapParameter queryParams = new MapParameter(this, "params");
 
@@ -81,39 +65,10 @@ public class Http extends AbstractSignalPathModule {
 		addOutput(responseHeaders);
 	}
 
-	/** This function is overridden in HttpSpec to inject mock HttpClient */
-	protected HttpClient getHttpClient() {
-		if (_httpClient == null) {
-			// commented out: SSL client that supports self-signed certs
-			/*SSLContext sslcontext = SSLContexts.custom()
-				.loadTrustMaterial(null, new TrustSelfSignedStrategy())
-				.build();
-			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);*/
-			_httpClient = HttpClients.createMinimal(); /* .custom()
-				.setSSLSocketFactory(sslsf)
-				.build();*/
-		}
-		return _httpClient;
-	}
-	private transient CloseableHttpClient _httpClient;
-
-	@Override
-	public Map<String,Object> getConfiguration() {
-		Map<String, Object> config = super.getConfiguration();
-		config.put(
-				"options", ImmutableMap.of(
-						"bodyFormat", BODY_FORMAT_OPTIONS
-				)
-		);
-		return config;
-	}
-
 	/** For bodyless verbs, "body" is only a "trigger" */
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
-		bodyFormat = MapTraversal.getString(config, "options.bodyFormat.value", Http.BODY_FORMAT_JSON);
 
 		if (config.containsKey("inputs")) {
 			// body.setDisplayName won't cut it; it will be re-read from config afterwards
@@ -198,41 +153,6 @@ public class Http extends AbstractSignalPathModule {
 
 		if (!errors.isEmpty()) {
 			errorOut.send(errors);
-		}
-	}
-
-	@Override
-	public void clearState() {}
-
-	public static class VerbParameter extends StringParameter {
-		public VerbParameter(AbstractSignalPathModule owner, String name) {
-			super(owner, name, "POST"); //this.getValueList()[0]);
-		}
-		private List<PossibleValue> getValueList() {
-			return Arrays.asList(
-				new PossibleValue("GET", "GET"),
-				new PossibleValue("POST", "POST"),
-				new PossibleValue("PUT", "PUT"),
-				new PossibleValue("DELETE", "DELETE"),
-				new PossibleValue("PATCH", "PATCH")
-			);
-		}
-		@Override public Map<String, Object> getConfiguration() {
-			Map<String, Object> config = super.getConfiguration();
-			config.put("possibleValues", getValueList());
-			return config;
-		}
-		public boolean hasBody() {
-			String v = this.getValue();
-			return v.equals("POST") || v.equals("PUT") || v.equals("PATCH");
-		}
-		public HttpRequestBase getRequest(String url) {
-			String v = this.getValue();
-			return v.equals("GET") ? new HttpGet(url) :
-				   	v.equals("POST") ? new HttpPost(url) :
-					v.equals("PUT") ? new HttpPut(url) :
-					v.equals("DELETE") ? new HttpDelete(url) :
-					v.equals("PATCH") ? new HttpPatch(url) : new HttpPost(url);
 		}
 	}
 }
