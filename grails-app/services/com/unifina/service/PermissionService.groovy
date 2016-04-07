@@ -344,8 +344,8 @@ class PermissionService {
 			ret.add(it)
 			it.delete()
 		} }
-		revokeOp operation
-		alsoRevoke.get(operation.id).each revokeOp
+		revokeOp(operation)
+		alsoRevoke.get(operation.id).each(revokeOp)
 		return ret
 	}
 

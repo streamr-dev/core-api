@@ -56,9 +56,9 @@ class PermissionApiControllerSpec extends Specification {
 		canvasPermission = new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasShared.id, operation: Operation.SHARE).save(validate: false)
 		streamPermission = new Permission(id: 2, user: me, clazz: Stream.name, longId: streamShared.id, operation: Operation.SHARE).save(validate: false)
 
-		// read permission doesn't mean you're allowed to peek into sharing-dialog
-		new Permission(id: 1, user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: Operation.READ).save(validate: false)
-		new Permission(id: 2, user: me, clazz: Stream.name, longId: streamRestricted.id, operation: Operation.READ).save(validate: false)
+		// read permission allows opening stream/canvas but not opening sharing-dialog for that stream/canvas
+		new Permission(user: me, clazz: Canvas.name, stringId: canvasRestricted.id, operation: Operation.READ).save(validate: false)
+		new Permission(user: me, clazz: Stream.name, longId: streamRestricted.id, operation: Operation.READ).save(validate: false)
     }
 
 	// returned from API, for resource owner, together with granted permissions
