@@ -18,10 +18,10 @@ class UserService {
 		ClassLoader cl = this.getClass().getClassLoader()
 		SecUser user = cl.loadClass(secConf.userLookup.userDomainClassName).newInstance(properties)
 
-        // Encode the password
-        if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
-        user.password = springSecurityService.encodePassword(user.password)
-
+		// Encode the password
+		if (user.password == null) { throw new UserCreationFailedException("The password is empty!") }
+		user.password = springSecurityService.encodePassword(user.password)
+		
 		// When created, the account is always enabled
 		user.enabled = true
 
