@@ -1,13 +1,17 @@
 package com.unifina.controller.api
 
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.Permission
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.StreamService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
+import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -16,14 +20,14 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters, UnifinaSecurityService, SpringSecurityService, StreamService])
+@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
 	SecUser user
 
 	def streamService
-	def unifinaSecurityService
+	def permissionService
 
 	def streamOneId
 	def streamTwoId
@@ -32,10 +36,10 @@ class StreamApiControllerSpec extends Specification {
 
 	def setup() {
 		streamService = mainContext.getBean(StreamService)
-		unifinaSecurityService = mainContext.getBean(UnifinaSecurityService)
+		permissionService = mainContext.getBean(PermissionService)
 
 		controller.streamService = streamService
-		controller.unifinaSecurityService = unifinaSecurityService
+		controller.permissionService = permissionService
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
@@ -161,7 +165,7 @@ class StreamApiControllerSpec extends Specification {
 			controller.save()
 		}
 		then:
-		thrown(ValidationException)
+		thrown ValidationException
 	}
 
 	void "show a Stream of logged in user"() {
@@ -190,7 +194,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 404
+		thrown NotFoundException
 	}
 
 	void "cannot show other user's Stream"() {
@@ -204,7 +208,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 
 	void "update a Stream of logged in user"() {
@@ -240,7 +244,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		thrown(ValidationException)
+		thrown ValidationException
 	}
 
 	void "cannot update non-existent Stream"() {
@@ -255,7 +259,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 404
+		thrown NotFoundException
 	}
 
 	void "cannot update other user's Stream"() {
@@ -270,7 +274,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 
 	void "delete a Stream of logged in user"() {
@@ -298,7 +302,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 404
+		thrown NotFoundException
 	}
 
 	void "cannot delete other user's Stream"() {
@@ -312,6 +316,6 @@ class StreamApiControllerSpec extends Specification {
 		}
 
 		then:
-		response.status == 403
+		thrown NotPermittedException
 	}
 }

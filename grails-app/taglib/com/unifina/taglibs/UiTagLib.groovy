@@ -206,10 +206,8 @@ public class UiTagLib {
 	 * Renders a table with clickable rows
 	 */
 	def table = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'clickable-table table table-striped table-hover table-condensed table-bordered')
-		else attrs.put('class', attrs.get('class') + " clickable-table")
-			
+		attrs.class = (attrs['class'] ?: "table table-striped table-hover table-condensed table-bordered") + " clickable-table"
+
 		out << "<div "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -218,10 +216,8 @@ public class UiTagLib {
 	}
 
 	def thead = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'thead')
-		else attrs.put('class', attrs.get('class') + " thead")
-			
+		attrs.class = ((attrs.class ?: "") + ' thead').trim()
+
 		out << "<div "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -230,10 +226,8 @@ public class UiTagLib {
 	}
 	
 	def th = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'th')
-		else attrs.put('class', attrs.get('class') + " th")
-			
+		attrs.class = ((attrs.class ?: "") + ' th').trim()
+
 		out << "<span "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -242,10 +236,8 @@ public class UiTagLib {
 	}
 	
 	def tbody = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'tbody')
-		else attrs.put('class', attrs.get('class') + " tbody")
-			
+		attrs.class = ((attrs.class ?: "") + ' tbody').trim()
+
 		out << "<div "
 		outputAttributes(attrs, out)
 		out << ">"
@@ -254,9 +246,7 @@ public class UiTagLib {
 	}
 	
 	def td = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'td')
-		else attrs.put('class', attrs.get('class') + " td")
+		attrs.class = ((attrs.class ?: "") + ' td').trim()
 			
 		out << "<span "
 		outputAttributes(attrs, out)
@@ -272,10 +262,8 @@ public class UiTagLib {
 	 * @attr link Url that the row links to. If none is given, the row is not rendered as a link.
 	 */
 	def tr = {attrs, body->
-		if (!attrs.containsKey('class'))
-			attrs.put('class', 'tr')
-		else attrs.put('class', attrs.get('class') + " tr")
-	
+		attrs.class = ((attrs.class ?: "") + ' tr').trim()
+
 		def link = attrs.remove('link')
 		if (link) {
 			out << "<a href='${link}' "
@@ -291,6 +279,46 @@ public class UiTagLib {
 			out << body()
 			out << "</div>"
 		}
+	}
+
+	/**
+	 * Renders a button that opens a sharePopup (sharing-dialog.js)
+	 * Remember to add <r:require module="sharing-dialog"/> to <HEAD>!
+	 * @body is button label, just like HTML buttons
+	 * @attr url to the resource to be shared; read from data-url HTML attribute if url and getUrl omitted
+	 * @attr getUrl javascript command that returns the url to the resource
+	 * @attr name of the resource shown in the sharePopup dialog; generated if name and getName omitted
+	 * @attr getName javascript command that returns the name to the resource
+	 */
+	def shareButton = {attrs, body->
+		def type = attrs.remove("type") ?: "button"
+		def extraClass = attrs.remove("class") ?: ""
+		def extraOnClick = attrs.remove("onclick") ?: ""
+		def name = attrs.remove("name")
+		def nameGetter = attrs.remove("getName")
+		def resourceName = name ? '"'+name+'"' : nameGetter ?: "" // generated in sharePopup if omitted
+		def url = attrs.remove("url")
+		def urlGetter = attrs.remove("getUrl")
+		def resourceUrl = url ? '"'+url+'"' : (urlGetter ?: '$(this).data("url")')
+
+		def open, close
+		if (type == "button") {
+			open = "<button class='btn share-button $extraClass' "
+			close = " </button>"
+		} else if (type == "link") {
+			open = "<a href='#' class='share-button $extraClass' "
+			close = " </a>"
+		} else {
+			throw new IllegalArgumentException("Unknown 'type' for shareButton: $type")
+		}
+
+		out << open << "onclick='event.preventDefault();$extraOnClick;sharePopup($resourceUrl, $resourceName)' "
+		outputAttributes(attrs, out)
+		out << "><span class='superscript'>+</span><i class='fa fa-user'></i> " << body() << close
+
+		// http://stackoverflow.com/questions/33461034/call-grails-2-rrequire-module-from-a-taglib
+		// should be safe, ResourceTagLib.declareModuleRequiredByPage won't add it second time
+		out << r.require([modules: "sharing-dialog"])
 	}
 
 	/**
