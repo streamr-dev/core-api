@@ -17,7 +17,7 @@ class StreamService {
 	
 	Stream createStream(params, SecUser user) {
 		Stream stream = new Stream(params)
-		stream.uuid = IdGenerator.get()
+		stream.id = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
 		stream.config = params.config

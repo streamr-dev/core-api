@@ -38,9 +38,11 @@ class KafkaStreamListenerSpec extends Specification {
 
 	void "addToConfiguration() grabs topic form Stream and adds as entry"() {
 		def config = [a: "a"]
+		Stream stream = new Stream()
+		stream.id = "uuid"
 
 		when:
-		listener.addToConfiguration(config, new Stream(uuid: "uuid"))
+		listener.addToConfiguration(config, stream)
 
 		then:
 		config == [a: "a", topic: "uuid"]
@@ -49,8 +51,11 @@ class KafkaStreamListenerSpec extends Specification {
 	}
 
 	void "afterStreamSaved() invokes kafkaService for topic creation"() {
+		Stream stream = new Stream()
+		stream.id = "uuid"
+
 		when:
-		listener.afterStreamSaved(new Stream(uuid: "uuid"))
+		listener.afterStreamSaved(stream)
 
 		then:
 		1 * kafkaService.createTopics(["uuid"])
@@ -59,7 +64,8 @@ class KafkaStreamListenerSpec extends Specification {
 	}
 
 	void "afterStreamSaved() does nothing if Stream has errors"() {
-		Stream stream = new Stream(uuid: "uuid")
+		Stream stream = new Stream()
+		stream.id = "uuid"
 		stream.validate()
 
 		when:
@@ -71,8 +77,11 @@ class KafkaStreamListenerSpec extends Specification {
 	}
 
 	void "beforeDelete() invokes kafkaService for topic deletion"() {
+		Stream stream = new Stream()
+		stream.id = "uuid"
+
 		when:
-		listener.beforeDelete(new Stream(uuid: "uuid"))
+		listener.beforeDelete(stream)
 
 		then:
 		1 * kafkaService.deleteTopics(["uuid"])

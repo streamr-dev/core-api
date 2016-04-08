@@ -33,6 +33,7 @@ class KafkaServiceTests {
 		assert Feed.count()==1
 		
 		stream = new Stream(feed: feed, name: "testfeed", config: "{'topic':'test'}")
+		stream.id = "generated-id"
 		stream.save(validate:false)
 		assert Stream.count()==1
 		assert Stream.findByFeed(feed)==stream
