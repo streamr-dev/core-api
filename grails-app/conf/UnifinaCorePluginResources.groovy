@@ -185,7 +185,7 @@ modules = {
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	'key-value-editor' {
-		dependsOn 'bootstrap, mustache'
+		dependsOn 'bootstrap, backbone, mustache'
 		resource url:[dir:'js/unifina/key-value-editor', file:'key-value-editor.js', plugin:'unifina-core']
 	}
 	toolbar {
