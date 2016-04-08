@@ -22,7 +22,7 @@
 <r:script>
     $(function() {
         var showStreamUrl = "${createLink(controller: "stream", action: "show", params: [id: stream.id])}"
-        var streamApiUrl = "${createLink(uri: "/api/v1/streams/${stream.uuid}")}"
+        var streamApiUrl = "${createLink(uri: "/api/v1/streams/${stream.id}")}"
 
         var $form = $("#configure-mongo-form")
 

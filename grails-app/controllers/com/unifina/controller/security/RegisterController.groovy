@@ -17,10 +17,9 @@ class RegisterController {
     static defaultAction = 'index'
 
     def mailService
-    def unifinaSecurityService
+    def userService
     def springSecurityService
     def signupCodeService
-    def userService
 
     def saltSource
 
@@ -40,8 +39,9 @@ class RegisterController {
         def invite = SignupInvite.findByCode(cmd.invite)
         if (!invite || invite.used || !invite.sent) {
             flash.message = "Sorry, that is not a valid invitation code"
-            if(invite)
-                flash.message+=". Code: $invite.code"
+            if (invite) {
+				flash.message += ". Code: $invite.code"
+			}
             redirect action: 'signup'
             return
         }
@@ -58,7 +58,7 @@ class RegisterController {
         cmd.username = invite.username
 
         if (cmd.hasErrors()) {
-            log.warn("Registration command has errors: "+unifinaSecurityService.checkErrors(cmd.errors.getAllErrors()))
+            log.warn("Registration command has errors: "+userService.checkErrors(cmd.errors.getAllErrors()))
             return render(view: 'register', model: [user: cmd, invite: invite.code])
         }
 
@@ -94,13 +94,14 @@ class RegisterController {
         if (request.method != "POST") {
             return [ user: new EmailCommand() ]
         }
-
         if (cmd.hasErrors()) {
             render view: 'signup', model: [ user: cmd ]
             return
         }
+
         SignupInvite invite
-        if(Environment.current == Environment.TEST){
+        if (Environment.current == Environment.TEST) {
+			// kludge needed for RegisterSpec."registering can now be done correctly"()
             invite = new SignupInvite(
                 username: cmd.username,
                 code: cmd.username.replaceAll("@", "_"),
@@ -265,7 +266,7 @@ class RegisterCommand {
     String tosConfirmed
     Integer pwdStrength
 	
-    def unifinaSecurityService
+    def userService
 
     static constraints = {
         importFrom SecUser
@@ -281,10 +282,10 @@ class RegisterCommand {
         name blank: false
 				
         password validator: {String password, RegisterCommand command ->
-            return command.unifinaSecurityService.passwordValidator(password, command)
+            return command.userService.passwordValidator(password, command)
         }
         password2 validator: {value, RegisterCommand command ->
-            return command.unifinaSecurityService.password2Validator(value, command)
+            return command.userService.password2Validator(value, command)
         }
 
     }
@@ -296,14 +297,14 @@ class ResetPasswordCommand {
     String password2
     Integer pwdStrength
 
-    def unifinaSecurityService
+    def userService
 	
     static constraints = {
         password validator: {String password, ResetPasswordCommand command ->
-            return command.unifinaSecurityService.passwordValidator(password, command)
+            return command.userService.passwordValidator(password, command)
         }
         password2 validator: {value, ResetPasswordCommand command ->
-            return command.unifinaSecurityService.password2Validator(value, command)
+            return command.userService.password2Validator(value, command)
         }
     }
 }

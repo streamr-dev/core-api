@@ -31,6 +31,7 @@ import org.apache.commons.lang.time.DateUtils;
 public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String, MapMessageEventRecipient> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
+	Map<Stream, Boolean> feedfileIteratorReturnedForStream = new HashMap<>();
 	Properties kafkaProperties;
 
 	public KafkaHistoricalFeed(Globals globals, Feed domainObject) {
@@ -51,7 +52,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
 			InputStream inputStream, MapMessageEventRecipient recipient) {
 		try {
-			return new KafkaHistoricalIterator(inputStream,feedFile.getStream().getUuid());
+			return new KafkaHistoricalIterator(inputStream,feedFile.getStream().getId());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -64,11 +65,18 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 
 		Stream stream = getStream(recipient);
 
-		// Only check Kafka for further messages if the latest message was not on the end date
-		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) && !TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate()))) {
+		if (iterator != null)
+			feedfileIteratorReturnedForStream.put(stream, true);
+
+		// Only check Kafka for further messages if there was no feedfile iterator OR the last message was not on the end date (for efficiency)
+		// TODO: always check if this can be speeded up somehow
+		if (iterator==null && !kafkaIteratorReturnedForStream.containsKey(stream) &&
+				(!feedfileIteratorReturnedForStream.containsKey(stream) ||
+						!TimeOfDayUtil.getMidnight(globals.time).equals(TimeOfDayUtil.getMidnight(globals.getEndDate())))) {
+
 			kafkaIteratorReturnedForStream.put(stream, true);
 
-			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(recipient.getStream().getUuid(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
+			UnifinaKafkaIterator kafkaIterator = new UnifinaKafkaIterator(recipient.getStream().getId(), globals.time, globals.getEndDate(), 10*1000, kafkaProperties);
 
 			// UnifinaKafkaIterator iterates over raw UnifinaKafkaMessages,
 			// so need to wrap it with a parsing iterator

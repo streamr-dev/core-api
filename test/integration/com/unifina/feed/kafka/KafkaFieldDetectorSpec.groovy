@@ -18,15 +18,18 @@ class KafkaFieldDetectorSpec extends IntegrationSpec {
 
 	}
 
-	def "it should return null if the topic contains no messages" () {
+	def "it should return empty object if the topic contains no messages" () {
 		String topic = "KafkaFieldDetectorSpec-"+System.currentTimeMillis()
 		kafkaService.createTopics([topic])
 		Thread.sleep(2000)
 
 		when:
-		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
+		Stream stream = new Stream()
+		stream.id = topic
+		MapMessage msg = detector.fetchExampleMessage(stream)
 		then:
-		msg == null
+		msg != null
+		!msg.payload
 
 		cleanup:
 		kafkaService.deleteTopics([topic])
@@ -42,7 +45,9 @@ class KafkaFieldDetectorSpec extends IntegrationSpec {
 		Thread.sleep(2000)
 
 		when:
-		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
+		Stream stream = new Stream()
+		stream.id = topic
+		MapMessage msg = detector.fetchExampleMessage(stream)
 		then:
 		msg.payload.i == 9
 

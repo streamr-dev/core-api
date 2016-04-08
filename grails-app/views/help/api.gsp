@@ -7,7 +7,7 @@
     <r:script>
         $(function () {
 
-            $.getJSON('${resource(dir: 'misc', file: 'swagger.json')}', function(data) {
+            $.getJSON('${resource(dir: 'misc', file: 'swagger.json', plugin: 'unifina-core')}', function(data) {
 
                 // http://domain.com:8080/subpath/ => domain.com:8080/subpath
                 data.host = '${createLink(uri: "/", absolute: true).replaceAll("https?://", "")}'

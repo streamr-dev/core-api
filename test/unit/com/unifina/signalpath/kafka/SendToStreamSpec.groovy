@@ -3,9 +3,10 @@ package com.unifina.signalpath.kafka
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.SecUser
 import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
@@ -19,11 +20,10 @@ import spock.lang.Specification
 @Mock([Stream, Feed])
 class SendToStreamSpec extends Specification {
 
-	static class FakeUnifinaSecurityService extends UnifinaSecurityService {
-		@Override
-		boolean canAccess(Object instance) {
-			true
-		}
+	static class FakePermissionService extends PermissionService {
+		@Override boolean canRead(SecUser user, resource) { return true }
+		@Override boolean canWrite(SecUser user, resource) { return true }
+		@Override boolean canShare(SecUser user, resource) { return true }
 	}
 
 	static class FakeKafkaService extends KafkaService {
@@ -43,7 +43,7 @@ class SendToStreamSpec extends Specification {
 		defineBeans {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
-			unifinaSecurityService(FakeUnifinaSecurityService)
+			permissionService(FakePermissionService)
 		}
 
 		def feed = new Feed()
@@ -52,7 +52,7 @@ class SendToStreamSpec extends Specification {
 
 		def s = new Stream()
 		s.feed = feed
-		s.name = "stream-0"
+		s.id = s.name = "stream-0"
 		s.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
@@ -83,7 +83,7 @@ class SendToStreamSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals {
-				globals.signalPathContext["live"] = true
+				globals.realtime = true
 				globals.uiChannel = new FakePushChannel()
 				globals.dataSource = new RealtimeDataSource()
 				globals

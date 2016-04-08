@@ -19,6 +19,9 @@ class DashboardItem implements Comparable {
 	}
 	
 	int compareTo(obj) {
-		return ord.compareTo(obj.ord)
+		int cmp = ord.compareTo(obj.ord)
+		return cmp != 0 ? cmp :
+			   id != null && obj.id != null ? id.compareTo(obj.id) :
+		       title.compareTo(obj.title)
 	}
 }

@@ -111,18 +111,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	        new PrivilegedAction<Object>() {
 	            public Object run() {
 	            	
-	            	// Get declared fields for examination
-	    			List<Field> fieldList = new ArrayList<>();
+					// Loop through class hierarchy and collect declared fields
+					List<Field> fieldList = new ArrayList<>();
 					Class clazz = AbstractSignalPathModule.this.getClass();
-
 					do {
 						fieldList.addAll(Arrays.asList(clazz.getDeclaredFields()));
 						clazz = clazz.getSuperclass();
 					} while (clazz != null);
 
-					Field[] fields = new Field[fieldList.size()];
-					fields = fieldList.toArray(fields);
-
+					Field[] fields = fieldList.toArray(new Field[fieldList.size()]);
+	    			
 	    			// Sort by field name
 	    			Arrays.sort(fields, new Comparator<Field>() {
 						@Override

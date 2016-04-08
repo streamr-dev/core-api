@@ -20,7 +20,7 @@ class SignalPathServiceSpec extends Specification {
 			name: "canvas-1",
 			user: me,
 			json: "{}",
-			serialized: "here_be_content",
+			serialized: new byte[512],
 			serializationTime: new Date()
 		).save(failOnError: true)
 	}
