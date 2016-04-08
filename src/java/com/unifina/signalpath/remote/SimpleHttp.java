@@ -104,10 +104,6 @@ public class SimpleHttp extends AbstractHttpModule {
 	public void sendOutput() {
 		List<String> errors = new LinkedList<>();
 
-		// get from server either JSON object with values for named outputs, or list of output values
-		List<Object> values = new LinkedList<>();
-		JSONObject result = null;
-
 		// read module inputs
 		List<NameValuePair> inputNVPList = new LinkedList<>();
 		JSONObject inputObject = new JSONObject();
@@ -136,7 +132,7 @@ public class SimpleHttp extends AbstractHttpModule {
 			} catch (UnsupportedEncodingException e) {
 				errors.add(e.getMessage());
 			}
-		} else {
+		} else if (inputNVPList.size() > 0) {
 			String url = URL.getValue() + "?" + URLEncodedUtils.format(inputNVPList, "UTF-8");
 			request = verb.getRequest(url);
 		}
@@ -147,7 +143,9 @@ public class SimpleHttp extends AbstractHttpModule {
 			request.addHeader(headerName, header.getValue());
 		}
 
-		// send off the HttpRequest to server
+		// get from server either JSON object with values for named outputs, or list of output values
+		List<Object> values = new LinkedList<>();
+		JSONObject result = null;
 		try {
 			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse httpResponse = getHttpClient().execute(request)) {
@@ -155,6 +153,7 @@ public class SimpleHttp extends AbstractHttpModule {
 
 				// parse response into a JSONObject (or simple list of values)
 				String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+				if (responseString.isEmpty()) { errors.add("Empty response from server"); }
 				JSONTokener parser = new JSONTokener(responseString);
 				Object response = parser.nextValue();
 				if (response instanceof JSONObject) {
