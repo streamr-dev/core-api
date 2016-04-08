@@ -107,7 +107,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule {
 				   	v.equals("POST") ? new HttpPost(url) :
 					v.equals("PUT") ? new HttpPut(url) :
 					v.equals("DELETE") ? new HttpDelete(url) :
-					v.equals("PATCH") ? new HttpPatch(url) : new HttpPost(url);
+					v.equals("PATCH") ? new HttpPatch(url) : new HttpGet(url);
 		}
 	}
 }
