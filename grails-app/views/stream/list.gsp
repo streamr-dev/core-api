@@ -31,7 +31,7 @@
 				            <ui:td>
 								${fieldValue(bean: stream, field: "description")}
 								<g:if test="${shareable.contains(stream)}">
-									<ui:shareButton class="btn-end-of-row" url="${createLink(uri: "/api/v1/streams/" + stream.uuid)}" name="Stream ${stream.name}" />
+									<ui:shareButton class="btn-end-of-row" url="${createLink(uri: "/api/v1/streams/" + stream.id)}" name="Stream ${stream.name}" />
 								</g:if>
 							</ui:td>
 						</ui:tr>

@@ -2,7 +2,7 @@
  * Dialog that shows users and their permissions to given resource
  *
  * Can be spawned with something like
- *  <button onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.uuid)}', 'Stream ${stream.name}')"> Share </button>
+ *  <button onclick="sharePopup('${createLink(uri: "/api/v1/streams/" + stream.id)}', 'Stream ${stream.name}')"> Share </button>
  *
  * TODO: Split into parts: one file for each Backbone object, one file for the non-Backbone part (exports)
  *
