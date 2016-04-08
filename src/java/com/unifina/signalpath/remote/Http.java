@@ -90,14 +90,17 @@ public class Http extends AbstractHttpModule {
 	public void sendOutput() {
 		List<String> errors = new LinkedList<>();
 
-		List<NameValuePair> queryPairs = new LinkedList<>();
-		for (Object pair : queryParams.getValue().entrySet()) {
-			Map.Entry p = (Map.Entry)pair;
-			NameValuePair nvp = new BasicNameValuePair(p.getKey().toString(), p.getValue().toString());
-			queryPairs.add(nvp);
+		String url = URL.getValue();
+		if (queryParams.getValue().size() > 0) {
+			List<NameValuePair> queryPairs = new LinkedList<>();
+			for (Object pair : queryParams.getValue().entrySet()) {
+				Map.Entry p = (Map.Entry) pair;
+				NameValuePair nvp = new BasicNameValuePair(p.getKey().toString(), p.getValue().toString());
+				queryPairs.add(nvp);
+			}
+			boolean alreadyAdded = (URL.getValue().indexOf('?') > -1);
+			url += (alreadyAdded ? "&" : "?") + URLEncodedUtils.format(queryPairs, "UTF-8");
 		}
-		boolean alreadyAdded = (URL.getValue().indexOf('?') > -1);
-		String url = URL.getValue() + (alreadyAdded ? "&" : "?") + URLEncodedUtils.format(queryPairs, "UTF-8");
 
 		HttpRequestBase request = verb.getRequest(url);
 		for (Object pair : headers.getValue().entrySet()) {

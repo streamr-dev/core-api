@@ -133,7 +133,8 @@ public class SimpleHttp extends AbstractHttpModule {
 				errors.add(e.getMessage());
 			}
 		} else if (inputNVPList.size() > 0) {
-			String url = URL.getValue() + "?" + URLEncodedUtils.format(inputNVPList, "UTF-8");
+			boolean alreadyAdded = (URL.getValue().indexOf('?') > -1);
+			String url = URL.getValue() + (alreadyAdded ? "&" : "?") + URLEncodedUtils.format(inputNVPList, "UTF-8");
 			request = verb.getRequest(url);
 		}
 
