@@ -162,7 +162,6 @@ class CanvasServiceSpec extends Specification {
 		c.runner == null
 		c.server == null
 		c.requestUrl == null
-		!c.shared
 		!c.adhoc
 		c.serialized == null
 		c.serializationTime == null

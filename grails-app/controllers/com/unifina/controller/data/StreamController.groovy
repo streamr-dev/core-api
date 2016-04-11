@@ -1,5 +1,16 @@
 package com.unifina.controller.data
 
+import com.unifina.domain.security.Permission.Operation
+import com.unifina.api.ApiException
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+
+import java.text.SimpleDateFormat
+
+import org.springframework.web.multipart.MultipartFile
+
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
@@ -22,224 +33,197 @@ class StreamController {
 	
 	static defaultAction = "list"
 	
-	def unifinaSecurityService
+	def permissionService
 	def feedFileService
 	def kafkaService
 	def streamService
-	
-	def beforeInterceptor = [action:{
-			if (!unifinaSecurityService.canAccess(Stream.get(params.id))) {
-				if (request.xhr)
-					redirect(controller:'login', action:'ajaxDenied')
-				else
-					redirect(controller:'login', action:'denied')
-					
-				return false
-			}
-			else return true
-		},
-		except:['list','search','create','apiCreate','apiLookup']]
-	
+
 	def list() {
-		List<Stream> streams = Stream.findAllByUser(springSecurityService.currentUser)
-		[streams:streams]
+		SecUser user = springSecurityService.currentUser
+		List<Stream> streams = permissionService.get(Stream, user)
+		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
+		[streams:streams, shareable:shareable]
 	}
-	
+
+	def search() {
+		SecUser user = springSecurityService.currentUser
+		render(permissionService.getAll(Stream, user) {
+			or {
+				like "name", "%${params.term}%"
+				like "description", "%${params.term}%"
+			}
+			order "name", "asc"
+			maxResults 10
+		}.collect { stream -> [
+			id: stream.id,
+			name: stream.name,
+			description: stream.description,
+			module: stream.feed.moduleId
+		]} as JSON)
+	}
+
+	def create() {
+		SecUser user = springSecurityService.currentUser
+
+		boolean justStarted = request.method == "GET"
+		Stream stream = justStarted ? new Stream() : streamService.createStream(params, user);
+
+		if (!justStarted && stream.hasErrors()) { log.info(stream.errors) }
+		if (justStarted || stream.hasErrors()) {
+			return [
+				stream: stream,
+				feeds: permissionService.get(Feed, user),
+				defaultFeed: Feed.findById(Feed.KAFKA_ID)
+			]
+		}
+
+		flash.message = "Your stream has been created! " +
+				"You can start pushing realtime messages to the API or upload a message history from a csv file."
+		redirect(action: "show", id: stream.id)
+	}
+
 	def show() {
-		// Access checked by beforeInterceptor
-		Stream stream = Stream.get(params.id)
-		[stream:stream]
+		getAuthorizedStream(params.id) { stream, user ->
+			[stream: stream, shareable: permissionService.canShare(user, stream)]
+		}
 	}
-	
+
 	// Can be extended to handle more types
 	def details() {
-		// Access checked by beforeInterceptor
-		Stream stream = Stream.get(params.id)
-		def model = [stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
-		render(template: stream.feed.streamPageTemplate, model: model)
+		getAuthorizedStream(params.id) { stream, user ->
+			def model = [stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
+			render(template: stream.feed.streamPageTemplate, model: model)
+		}
 	}
 
 	def update() {
-		Stream stream = Stream.get(params.id)
-		stream.name = params.name
-		stream.description = params.description
-		stream.save(flush:true, failOnError:true)
-		redirect(action: "show", id: stream.id)
-	}
-	
-	def create() {
-		if (request.method=="GET") {
-			SecUser user = springSecurityService.currentUser
-			[stream: new Stream(), feeds: user.feeds.sort {it.id}, defaultFeed: Feed.findById(Feed.KAFKA_ID)]
-		} else {
-			SecUser user = springSecurityService.currentUser
-			Stream stream = streamService.createStream(params, user)
-			
-			if (stream.hasErrors()) {
-				log.info(stream.errors)
-				return [stream:stream]
-			}
-			else {
-				flash.message = "Your stream has been created! You can start pushing realtime messages to the API or upload a message history from a csv file."
-				redirect(action:"show", id:stream.id)
-			}
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			stream.name = params.name
+			stream.description = params.description
+			stream.save(flush: true, failOnError: true)
+			redirect(action: "show", id: stream.id)
 		}
 	}
-	
+
 	def configure() {
-		// Access checked by beforeInterceptor
-		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
+		}
 	}
 
 	def edit() {
-		// Access checked by beforeInterceptor
-		Stream stream = Stream.get(params.id)
-		[stream:stream, config:(stream.config ? JSON.parse(stream.config) : [:])]
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			[stream: stream, config: (stream.config ? JSON.parse(stream.config) : [:])]
+		}
 	}
 
 	def configureMongo() {
-		Stream stream = Stream.get(params.id)
-		[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
+		}
 	}
-	
+
 	def delete() {
-		// Access checked by beforeInterceptor
-		Stream streamInstance = Stream.get(params.id)
-		def name = streamInstance.name
-		try {
-			streamService.deleteStream(streamInstance)
-			flash.message = "The stream $name has been deleted."
-			redirect(action:"list")
-		} catch (Exception e) {
-			flash.error = "An error occurred while deleting the stream!"
-			redirect(action:"show", id:streamInstance.id)
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			try {
+				streamService.deleteStream(stream)
+				flash.message = "The stream $stream.name has been deleted."
+				redirect(action: "list")
+			} catch (Exception e) {
+				flash.error = "An error occurred while deleting the stream!"
+				redirect(action: "show", id: stream.id)
+			}
 		}
 	}
 	
 	def fields() {
-		// Access checked by beforeInterceptor
-		Stream stream = Stream.get(params.id)
-		Map config = (stream.config ? JSON.parse(stream.config) : [:])
-		if (request.method=="GET") {
-			render (config.fields ?: []) as JSON
-		}
-		else if (request.method=="POST") {
-			def fields = request.JSON
-			config.fields = fields
-			stream.config = (config as JSON)
-			flash.message = "Stream fields updated."
-			
-			Map result = [success:true, id:stream.id]
-			render result as JSON
+		if (request.method == "GET") {
+			getAuthorizedStream(params.id) { stream, user ->
+				render((stream.config ? JSON.parse(stream.config).fields : []) as JSON)
+			}
+		} else if (request.method == "POST") {
+			getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+				def fields = request.JSON
+				Map config = stream.config ? JSON.parse(stream.config) : [:]
+				config.fields = fields
+				stream.config = (config as JSON)
+				flash.message = "Stream fields updated."
+
+				Map result = [success: true, id: stream.id]
+				render result as JSON
+			}
 		}
 	}
-	
-	def search() {
-		List<Map> streams = []
-		SecUser user = springSecurityService.currentUser
-		Set<Feed> allowedFeeds = user.feeds ?: new HashSet<>()
-
-		if (!allowedFeeds.isEmpty()) {
-			String hql = "select new map(s.id as id, s.name as name, s.feed.module.id as module, s.description as description) from Stream s "+
-				"left outer join s.feed "+
-				"left outer join s.feed.module "+
-				"where (s.name like '"+params.term+"%' or s.description like '%"+params.term+"%') "+
-				"and s.feed.id in ("+allowedFeeds.collect{ feed -> feed.id }.join(',')+") "+
-				"and s.user.id = ${user.id} " // TODO: Throw away when landing permissions branch
-				
-				if (params.feed) {
-					hql += " and s.feed.id="+Feed.load(params.feed).id
-				}
-
-				if (params.module) {
-					hql += " and s.feed.module.id="+Module.load(params.module).id
-				}
-
-				hql += " order by length(s.name), s.id asc"
-		
-				streams = Stream.executeQuery(hql, [ max: 10 ])
-		}
-
-		render streams as JSON
-	}
-
 	
 	def files() {
-		// Access checked by beforeInspector
-		Stream stream = Stream.get(params.id)
-		DataRange dataRange = streamService.getDataRange(stream)
-		return [dataRange: dataRange, stream:stream]
+		getAuthorizedStream(params.id) { stream, user ->
+			DataRange dataRange = streamService.getDataRange(stream)
+			return [dataRange: dataRange, stream:stream]
+		}
 	}
 	
 	def upload() {
-		// Access checked by beforeInspector
-		
-		File temp
-		boolean deleteFile = true
-		try {
-			Stream stream = Stream.get(params.id)
-			MultipartFile file = request.getFile("file")
-			temp = File.createTempFile("csv_upload_", ".csv")
-			file.transferTo(temp)
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			File temp
+			boolean deleteFile = true
+			try {
+				MultipartFile file = request.getFile("file")
+				temp = File.createTempFile("csv_upload_", ".csv")
+				file.transferTo(temp)
 
-			Map config = (stream.config ? JSON.parse(stream.config) : [:])
-			List fields = config.fields ? config.fields : []
+				Map config = (stream.config ? JSON.parse(stream.config) : [:])
+				List fields = config.fields ? config.fields : []
 
-			CSVImporter csv = new CSVImporter(temp, fields)
-			if (csv.getSchema().timestampColumnIndex==null) {
-				flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
-				response.status = 500
-				render ([success:false, redirect:createLink(action:'confirm', params: [id:params.id, file:temp.getCanonicalPath()])] as JSON)
-				deleteFile = false
-			}
-			else {
-				importCsv(csv, stream)
-				render ([success:true] as JSON)
-			}
-		} catch (Exception e) {
+				CSVImporter csv = new CSVImporter(temp, fields)
+				if (csv.getSchema().timestampColumnIndex == null) {
+					deleteFile = false
+					flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
+					response.status = 500
+					render([success: false, redirect: createLink(action: 'confirm', params: [id: params.id, file: temp.getCanonicalPath()])] as JSON)
+				} else {
+					importCsv(csv, stream)
+					render([success: true] as JSON)
+				}
+			} catch (Exception e) {
 				log.error("Failed to import file", e)
 				response.status = 500
-				render ([success:false, error: e.message] as JSON)
-		} finally {
-			if (deleteFile && temp!=null && temp.exists())
-				temp.delete()
+				render([success: false, error: e.message] as JSON)
+			} finally {
+				if (deleteFile && temp != null && temp.exists()) {
+					temp.delete()
+				}
+			}
 		}
 	}
 
 	def confirm() {
-		Stream stream = Stream.get(params.id)
-		File file = new File(params.file)
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			File file = new File(params.file)
 
-		Map config = stream.config ? JSON.parse(stream.config) : [:]
-		List fields = config.fields ? config.fields : []
+			Map config = stream.config ? JSON.parse(stream.config) : [:]
+			List fields = config.fields ? config.fields : []
 
-		CSVImporter csv = new CSVImporter(file, fields)
-		Schema schema = csv.getSchema()
-		
-		[schema:schema, file:params.file, stream:stream]
+			CSVImporter csv = new CSVImporter(file, fields)
+			Schema schema = csv.getSchema()
+
+			[schema: schema, file: params.file, stream: stream]
+		}
 	}
 	
 	def confirmUpload() {
-		Stream stream = Stream.get(params.id)
-		File file = new File(params.file)
-
-		Map config = stream.config ? JSON.parse(stream.config) : [:]
-		List fields = config.fields ? config.fields : []
-
-		def format
-		def index
-		if(params.customFormat)
-			format = params.customFormat
-		else format = params.format
-		index = Integer.parseInt(params.timestampIndex)
-		try {
-			CSVImporter csv = new CSVImporter(file, fields, index, format)
-			importCsv(csv, stream)
-		} catch (Exception e) {
-			flash.message = "The format of the timestamp is not correct"
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			File file = new File(params.file)
+			List fields = stream.config ? JSON.parse(stream.config).fields : []
+			def index = Integer.parseInt(params.timestampIndex)
+			def format = params.customFormat ?: params.format
+			try {
+				CSVImporter csv = new CSVImporter(file, fields, index, format)
+				importCsv(csv, stream)
+			} catch (Exception e) {
+				flash.message = "The format of the timestamp is not correct"
+			}
+			redirect(action: "show", id: params.id)
 		}
-		redirect(action:"show", id:params.id)
 	}
 
 	private void importCsv(CSVImporter csv, Stream stream) {
@@ -264,22 +248,19 @@ class StreamController {
 	}
 	
 	def deleteFeedFilesUpTo() {
-		// Access checked by beforeInspector
-		def stream = Stream.get(params.id)
-		
-		def date = new SimpleDateFormat(message(code:"default.dateOnly.format")).parse(params.date) + 1
-		def feedFiles = FeedFile.findAllByStreamAndEndDateLessThan(stream, date)
-		feedFiles.each {
-			feedFileService.deleteFile(it)
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			def date = new SimpleDateFormat(message(code: "default.dateOnly.format")).parse(params.date) + 1
+			FeedFile.findAllByStreamAndEndDateLessThan(stream, date).each {
+				feedFileService.deleteFile(it)
+			}
+			def deletedCount = FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream and ff.endDate < :date", [stream: stream, date: date])
+			if (deletedCount > 0) {
+				flash.message = "All data up to " + params.date + " successfully deleted"
+			} else {
+				flash.error = "Something went wrong with deleting files"
+			}
+			redirect(action: "show", params: [id: params.id])
 		}
-		def deletedCount = FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream and ff.endDate < :date", [stream: stream, date: date])
-		if(deletedCount > 0){
-			flash.message = "All data up to "+params.date+" successfully deleted"
-		} else {
-			flash.error = "Something went wrong with deleting files"
-		}
-
-		redirect(action:"show", params:[id:params.id])
 	}
 
 	def getDataRange() {
@@ -288,5 +269,16 @@ class StreamController {
 		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
 		render dataRangeMap as JSON
 	}
-	
+
+	private def getAuthorizedStream(String id, Operation op=Operation.READ, Closure action) {
+		SecUser user = springSecurityService.currentUser
+		Stream stream = Stream.get(id)
+		if (!stream) {
+			response.sendError(404)
+		} else if (!permissionService.check(user, stream, op)) {
+			redirect controller: 'login', action: (request.xhr ? 'ajaxDenied' : 'denied')
+		} else {
+			action.call(stream, user)
+		}
+	}	
 }

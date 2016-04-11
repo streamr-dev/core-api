@@ -8,7 +8,7 @@
     <body>    
 		<ui:flashMessage/>
 		<ui:panel title="${message(code:"dashboard.create.label")}">
-			<g:form action="create">
+			<g:form action="save">
 				<ui:labeled label="${message(code: "dashboard.name.label")}">
 					<input name="name" type="text" class="form-control input-lg" required>
 					<g:hasErrors bean="${dashboard}" field="name">
