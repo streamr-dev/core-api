@@ -42,14 +42,14 @@
             '.tourStream1'
         )
 
-        .step("Let's add another module so that we can get connecting!<br/><br/>This is the module browser. Open the <b>Charts</b> section by clicking it to list the modules in that category.",
+        .step("Let's add another module so that we can get connecting!<br/><br/>This is the module browser. Open the <b>Visualizations</b> section by clicking it to list the modules in that category.",
             '#moduleTree',
             function() {
-                $('.jstree a:contains(Charts)').parent().one('click', tour.next)
+                $('.jstree a:contains(Visualizations)').parent().one('click', tour.next)
             }
         )
 
-        .step('Under <b>Charts</b>, find the <code>Map</code> module and drag and drop it to the canvas.',
+        .step('Under <b>Visualizations</b>, find the <code>Map</code> module and drag and drop it to the canvas.',
             '#moduleTree',
             tour.waitForModuleAdded('Map')
         )
