@@ -36,7 +36,38 @@ databaseChangeLog = {
 			column(name: "class", value: "com.unifina.domain.data.Stream")
 		}
 
-		// TODO: insert public read permission
+		// Grant public read permission to demo stream
+		insert(tableName: "permission") {
+			column(name: "version", valueNumeric: 0)
+			column(name: "clazz", value: "com.unifina.domain.data.Stream")
+			column(name: "operation", value: "read")
+			column(name: "string_id", value: "YpTAPDbvSAmj-iCUYz-dxA")
+			column(name: "anonymous", valueBoolean: false)
+		}
+	}
+
+	// Complete the tours for test users to avoid screwing up func tests etc.
+	changeSet(author: "henri", id: "tours-completed", context: "test") {
+		def date = "2016-04-11T15:00:00"
+
+		// tester1
+		insert(tableName: "tour_user") {
+			column(name: "user_id", valueNumeric: 1)
+			column(name: "tour_number", valueNumeric: 0)
+			column(name: "completed_at", valueDate: date)
+		}
+		// tester2
+		insert(tableName: "tour_user") {
+			column(name: "user_id", valueNumeric: 2)
+			column(name: "tour_number", valueNumeric: 0)
+			column(name: "completed_at", valueDate: date)
+		}
+		// tester-admin
+		insert(tableName: "tour_user") {
+			column(name: "user_id", valueNumeric: 3)
+			column(name: "tour_number", valueNumeric: 0)
+			column(name: "completed_at", valueDate: date)
+		}
 	}
 
 }
