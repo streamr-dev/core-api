@@ -51,7 +51,22 @@ databaseChangeLog = {
 						it.hash.toString() == row.module.toString()
 					}
 
-					sql.executeInsert(updateStatement, module.uiChannel.webcomponent, row.id)
+					String webcomponent = module.uiChannel.webcomponent
+					// Fallback handling for canvases that are so old that they don't have the webcomponent name in the json
+					if (!webcomponent) {
+						webcomponent = [
+						        Chart: "streamr-chart",
+								Heatmap: "streamr-heatmap",
+								Table: "streamr-table",
+								Label: "streamr-label"
+								// Other webcomponents are too new to have this issue
+						].get(module.uiChannel.name)
+
+						if (!webcomponent)
+							throw new RuntimeException("Oh no, couldn't find the webcomponent name for dashboard item $row.id! UiChannel name is $module.uiChannel.name")
+					}
+
+					sql.executeInsert(updateStatement, webcomponent, row.id)
 				}
 			}
 		}
