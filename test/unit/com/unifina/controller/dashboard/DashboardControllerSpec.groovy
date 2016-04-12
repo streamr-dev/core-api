@@ -26,9 +26,9 @@ class DashboardControllerSpec extends Specification {
 
 		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
 		dash = new Dashboard(name:"test", user:me)
-		dash.addToItems(new DashboardItem(title:"item1"))
-		dash.addToItems(new DashboardItem(title:"item2"))
-		dash.addToItems(new DashboardItem(title:"item3"))
+		dash.addToItems(new DashboardItem(title:"item1", ord: 0))
+		dash.addToItems(new DashboardItem(title:"item2", ord: 1))
+		dash.addToItems(new DashboardItem(title:"item3", ord: 2))
 		dash.save(validate:false)
     }
 
@@ -42,7 +42,7 @@ class DashboardControllerSpec extends Specification {
 		when:
 		params.id = dash.id
 		controller.delete()
-		//dash.delete(flush:true)
+
 		then:
 		Dashboard.count == 0
 		DashboardItem.count == 0
