@@ -37,7 +37,7 @@
 										<li><g:link action="edit" id="${stream.id}"><i class="fa fa-pencil"></i> Edit info</g:link></li>
 										<li><a href="#" id="delete-stream-button" data-action="${ createLink(action:'delete') }" class="confirm" data-confirm="Are you sure you want to delete the stream?"><i class="fa fa-trash-o"></i> Delete stream</a></li>
 										<g:if test="${shareable}">
-											<li><ui:shareButton url="${createLink(uri: "/api/v1/streams/" + stream.uuid)}" name="Stream ${stream.name}" type="link">Share</ui:shareButton></li>
+											<li><ui:shareButton url="${createLink(uri: "/api/v1/streams/" + stream.id)}" name="Stream ${stream.name}" type="link">Share</ui:shareButton></li>
 										</g:if>
 									</ul>
 								</li>

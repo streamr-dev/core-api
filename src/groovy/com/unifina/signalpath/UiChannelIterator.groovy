@@ -1,7 +1,6 @@
 package com.unifina.signalpath
 
 import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.UiChannel
 
 class UiChannelIterator implements Iterable<Element> {
 	private final Iterator moduleIter
@@ -55,15 +54,6 @@ class UiChannelIterator implements Iterable<Element> {
 			name = uiChannelData.name
 			hash = moduleData.hash?.toString()
 			module = Module.load(moduleData.id)
-		}
-
-		UiChannel toUiChannel() {
-			def ui = new UiChannel()
-			ui.id = id
-			ui.name = name
-			ui.hash = hash
-			ui.module = module
-			return ui
 		}
 	}
 }
