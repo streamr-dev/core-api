@@ -51,13 +51,13 @@ class DashboardController {
 	}
 	
 	def getJson() {
-		Dashboard dashboard = Dashboard.findById(params.id, [fetch:[items:"join"]])
-		Map dashboardMap = [
-			id: dashboard.id,
-			name: dashboard.name,
-			items: dashboard.items*.toMap()
-		]
-		render dashboardMap as JSON
+		getAuthorizedDashboard(params.long("id"), Operation.READ, true) { Dashboard dashboard, user ->
+			render([
+				id   : dashboard.id,
+				name : dashboard.name,
+				items: dashboard.items*.toMap()
+			] as JSON)
+		}
 	}
 
 	def show() {

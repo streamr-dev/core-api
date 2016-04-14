@@ -10,7 +10,6 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.UiChannel
 import com.unifina.domain.dashboard.Dashboard
 
 import com.unifina.utils.IdGenerator
@@ -24,7 +23,7 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas, UiChannel])
+@Mock([SecUser, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
 class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
@@ -32,9 +31,6 @@ class PermissionServiceSpec extends Specification {
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
 	Permission dashReadPermission, dashAnonymousReadPermission
-
-	UiChannel uicAllowed, uicRestricted, uicPublic // UiChannels don't have an owner
-	Permission uicReadPermission, uicAnonymousReadPermission
 
     def setup() {
 
@@ -52,30 +48,18 @@ class PermissionServiceSpec extends Specification {
 		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
 		dashPublic = new Dashboard(name:"public", user:anotherUser).save(validate:false)
 
-		// Ui channels (have stringId, have no "user")
 		def canvas = new Canvas(user: anotherUser).save(validate: false)
-		def createUiChannel = { name ->
-			def uic = new UiChannel(canvas: 1, name: name)
-			uic.id = IdGenerator.get()
-			uic.save(validate: false)
-		}
-		uicAllowed = createUiChannel "allowed"
-		uicRestricted = createUiChannel "restricted"
-		uicPublic = createUiChannel "public"
 
 		// Set up the Permissions to the allowed resources
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
-		uicReadPermission = service.systemGrant(me, uicAllowed)
-		uicAnonymousReadPermission = service.systemGrantAnonymousAccess(uicPublic)
     }
 
 	void "test setup"() {
 		expect:
 		SecUser.count() == 3
 		Dashboard.count() == 4
-		UiChannel.count() == 3
-		Permission.count() == 4
+		Permission.count() == 2
 
 		and: "anotherUser has an invitation"
 		invite.username == anotherUser.username
@@ -129,33 +113,11 @@ class PermissionServiceSpec extends Specification {
 		service.get(Dashboard, stranger) == []
 	}
 
-	void "retrieve all readable UiChannels correctly"() {
-		expect:
-		service.get(UiChannel, me) == [uicAllowed]
-		service.get(UiChannel, stranger) == []
-	}
-
 	void "getAll lists public resources"() {
 		expect:
 		service.getAll(Dashboard, me) == [dashOwned, dashAllowed, dashPublic]
 		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted, dashPublic]
 		service.getAll(Dashboard, stranger) == [dashPublic]
-		service.getAll(UiChannel, me) == [uicAllowed, uicPublic]
-		service.getAll(UiChannel, stranger) == [uicPublic]
-	}
-
-	void "grant and revoke work for UiChannels"() {
-		when:
-		service.systemGrant(anotherUser, uicRestricted)
-		then:
-		service.get(UiChannel, me) == [uicAllowed]
-		service.get(UiChannel, anotherUser) == [uicRestricted]
-
-		when:
-		service.systemRevoke(anotherUser, uicRestricted)
-		then:
-		service.get(UiChannel, me) == [uicAllowed]
-		service.get(UiChannel, anotherUser) == []
 	}
 
 	void "get throws IllegalArgumentException on invalid resource"() {
@@ -322,7 +284,6 @@ class PermissionServiceSpec extends Specification {
 	void "signup invitation can be granted and revoked of permissions just like normal users"() {
 		expect:
 		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
-		!service.getPermissionsTo(uicRestricted).find { it.invite == invite }
 
 		when:
 		service.grant(me, dashOwned, invite)
@@ -333,39 +294,23 @@ class PermissionServiceSpec extends Specification {
 		service.revoke(me, dashOwned, invite)
 		then:
 		!service.getPermissionsTo(dashOwned).find { it.invite == invite }
-
-		when:
-		service.systemGrant(invite, uicRestricted)
-		then:
-		service.getPermissionsTo(uicRestricted).find { it.invite == invite }
-
-		when:
-		service.systemRevoke(invite, uicRestricted)
-		then:
-		!service.getPermissionsTo(uicRestricted).find { it.invite == invite }
 	}
 
 	void "signup invitations are converted correctly"() {
 		expect:
 		!service.canRead(anotherUser, dashOwned)
-		!service.canRead(anotherUser, uicRestricted)
 
 		when: "pretend anotherUser was just created"
 		service.grant(me, dashOwned, invite)
-		service.systemGrant(invite, uicRestricted)
 		service.transferInvitePermissionsTo(anotherUser)
 		then:
 		service.canRead(anotherUser, dashOwned)
-		service.canRead(anotherUser, uicRestricted)
 	}
 
 	void "stranger can read public resources with anonymous read access"() {
 		expect: "... but not more than read"
 		service.canRead(stranger, dashPublic)
-		service.canRead(stranger, uicPublic)
 		!service.canWrite(stranger, dashPublic)
-		!service.canWrite(stranger, uicPublic)
 		!service.canShare(stranger, dashPublic)
-		!service.canShare(stranger, uicPublic)
 	}
 }

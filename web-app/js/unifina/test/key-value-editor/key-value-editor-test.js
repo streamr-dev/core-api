@@ -1,7 +1,7 @@
 var assert = require('assert')
 var jsdom = require("jsdom")
 
-var window = jsdom.jsdom().parentWindow
+var window = jsdom.jsdom().defaultView
 var $ = require('jquery')(window);
 var _ = require('underscore')
 var Backbone = require('backbone')
