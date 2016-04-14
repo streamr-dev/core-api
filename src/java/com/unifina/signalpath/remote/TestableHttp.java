@@ -1,6 +1,6 @@
 package com.unifina.signalpath.remote;
 
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.nio.client.HttpAsyncClient;
 
 /**
  * Simple holder for mock httpClient
@@ -9,9 +9,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * @see HttpSpec where this class is used
  */
 class TestableHttp extends Http {
-	public transient static CloseableHttpClient httpClient;
+	public transient static HttpAsyncClient httpClient;
+
 	@Override
-	protected CloseableHttpClient getHttpClient() {
+	protected HttpAsyncClient getHttpClient() {
 		return httpClient;
 	}
 }

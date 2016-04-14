@@ -148,6 +148,16 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * Serialization+deserialization changes module instance, and old references go stale.
+		 * Test Specification must listen to instance changes and update their references
+		 *   if they make direct calls to the module in the middle of the test (e.g. in Stub'd methods)
+         */
+		public Builder onModuleInstanceChange(Closure<?> moduleInstanceChanged) {
+			testHelper.moduleInstanceChanged = moduleInstanceChanged;
+			return this;
+		}
+
+		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
 		 */
@@ -198,6 +208,7 @@ public class ModuleTestHelper {
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
+	private Closure<?> moduleInstanceChanged = Closure.IDENTITY;
 
 	private int inputValueCount;
 	private int outputValueCount;
@@ -419,6 +430,7 @@ public class ModuleTestHelper {
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
 				module.globals = globalsTempHolder;
 				module.afterDeserialization();
+				moduleInstanceChanged.call(module);
 			}
 		}
 	}

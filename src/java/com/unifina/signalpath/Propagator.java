@@ -29,6 +29,10 @@ public class Propagator implements Serializable {
 	
 	public Propagator() {}
 
+	public Propagator(AbstractSignalPathModule origin) {
+		addModule(origin);
+	}
+
 	public Propagator(Input[] inputs, AbstractSignalPathModule origin) {
 		alwaysPropagate = true;
 		reachable = makeReachableSet(inputs);

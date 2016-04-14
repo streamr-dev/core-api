@@ -1,34 +1,22 @@
 package com.unifina.signalpath.remote;
-
 import com.unifina.signalpath.*;
-import com.unifina.utils.MapTraversal;
+
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
 import org.codehaus.groovy.grails.web.json.JSONArray;
+import org.codehaus.groovy.grails.web.json.JSONException;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.grails.web.json.JSONTokener;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -47,8 +35,8 @@ public class Http extends AbstractHttpModule {
 
 	private Input<Object> body = new Input<>(this, "body", "Object");
 	private MapOutput responseHeaders = new MapOutput(this, "headers");
-	private ListOutput errorOut = new ListOutput(this, "errors");
-	private Output<Object> response = new Output<>(this, "data", "Object");
+	private ListOutput errors = new ListOutput(this, "errors");
+	private Output<Object> responseData = new Output<>(this, "data", "Object");
 	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "status code");
 	private TimeSeriesOutput pingMillis = new TimeSeriesOutput(this, "ping(ms)");
 
@@ -60,8 +48,8 @@ public class Http extends AbstractHttpModule {
 		addInput(queryParams);
 		addInput(headers);
 		addInput(body);
-		addOutput(errorOut);
-		addOutput(response);
+		addOutput(errors);
+		addOutput(responseData);
 		addOutput(statusCode);
 		addOutput(pingMillis);
 		addOutput(responseHeaders);
@@ -86,10 +74,12 @@ public class Http extends AbstractHttpModule {
 		}
 	}
 
+	/**
+	 * Prepare HTTP request based on module inputs
+	 * @return HTTP request that will be sent to server
+	 */
 	@Override
-	public void sendOutput() {
-		List<String> errors = new LinkedList<>();
-
+	protected HttpRequestBase createRequest() {
 		String url = URL.getValue();
 		if (queryParams.getValue().size() > 0) {
 			List<NameValuePair> queryPairs = new LinkedList<>();
@@ -104,7 +94,7 @@ public class Http extends AbstractHttpModule {
 
 		HttpRequestBase request = verb.getRequest(url);
 		for (Object pair : headers.getValue().entrySet()) {
-			Map.Entry p = (Map.Entry)pair;
+			Map.Entry p = (Map.Entry) pair;
 			request.addHeader(p.getKey().toString(), p.getValue().toString());
 		}
 
@@ -113,52 +103,60 @@ public class Http extends AbstractHttpModule {
 				switch (bodyFormat) {
 					case BODY_FORMAT_JSON:
 						Object b = body.getValue();
-						String bodyString = b instanceof Map ? new JSONObject((Map)b).toString() :
-											b instanceof List ? new JSONArray((List)b).toString() :
+						String bodyString = b instanceof Map ? new JSONObject((Map) b).toString() :
+											b instanceof List ? new JSONArray((List) b).toString() :
 											b.toString();
-						((HttpEntityEnclosingRequestBase)request).setEntity(new StringEntity(bodyString));
+						((HttpEntityEnclosingRequestBase) request).setEntity(new StringEntity(bodyString));
 						break;
 					case BODY_FORMAT_FORMDATA:
-						Map bodyMap = (Map)body.getValue();
+						Map bodyMap = (Map) body.getValue();
 						List<NameValuePair> inputNVPList = new LinkedList<>();
 						for (Object entry : bodyMap.entrySet()) {
-							Map.Entry e = (Map.Entry)entry;
+							Map.Entry e = (Map.Entry) entry;
 							inputNVPList.add(new BasicNameValuePair(e.getKey().toString(), e.getValue().toString()));
 						}
-						((HttpEntityEnclosingRequestBase)request).setEntity(new UrlEncodedFormEntity(inputNVPList));
+						((HttpEntityEnclosingRequestBase) request).setEntity(new UrlEncodedFormEntity(inputNVPList));
 						break;
 					default:
 						throw new RuntimeException("Unexpected body format " + bodyFormat);
 				}
 			} catch (UnsupportedEncodingException e) {
-				errors.add(e.getMessage());
+				throw new RuntimeException(e);
 			}
 		}
 
-		try {
-			long startTime = System.currentTimeMillis();
-			try (CloseableHttpResponse httpResponse = getHttpClient().execute(request)) {
-				pingMillis.send(System.currentTimeMillis() - startTime);
+		return request;
+	}
 
-				String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-
-				JSONTokener parser = new JSONTokener(responseString);
-				Object responseData = parser.nextValue();    // parser returns Map, List, or String
-				response.send(responseData);
+	/**
+	 * Send module output based on server response
+	 * @param call and response from HTTP server plus metadata
+	 */
+	@Override
+	protected void sendOutput(HttpTransaction call) {
+		if (call.response != null) {
+			try {
+				String responseString = EntityUtils.toString(call.response.getEntity(), "UTF-8");
+				if (responseString.isEmpty()) {
+					call.errors.add("Empty response from server");
+				} else {
+					JSONTokener parser = new JSONTokener(responseString);
+					Object jsonObject = parser.nextValue();    // parser returns Map, List, or String
+					responseData.send(jsonObject);
+				}
 
 				Map<String, String> headerMap = new HashMap<>();
-				for (Header h : httpResponse.getAllHeaders()) {
+				for (Header h : call.response.getAllHeaders()) {
 					headerMap.put(h.getName(), h.getValue());
 				}
 				responseHeaders.send(headerMap);
-				statusCode.send(httpResponse.getStatusLine().getStatusCode());
+				statusCode.send(call.response.getStatusLine().getStatusCode());
+			} catch (IOException | JSONException e) {
+				call.errors.add(e.getMessage());
 			}
-		} catch (IOException e) {
-			errors.add(e.getMessage());
 		}
 
-		if (!errors.isEmpty()) {
-			errorOut.send(errors);
-		}
+		pingMillis.send(call.responseTime);
+		errors.send(call.errors);
 	}
 }

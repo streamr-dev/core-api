@@ -1,26 +1,25 @@
 package com.unifina.signalpath.remote;
 import com.unifina.signalpath.*;
 
-import java.io.UnsupportedEncodingException;
-import java.util.*;
 import com.unifina.utils.MapTraversal;
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.log4j.Logger;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONException;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.grails.web.json.JSONTokener;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * Module that makes HTTP requests and sends forward responses.
@@ -43,10 +42,8 @@ public class SimpleHttp extends AbstractHttpModule {
 	// subset of inputs that corresponds to HTTP headers
 	private List<StringParameter> headers = new ArrayList<>();
 
-	private ListOutput errorOut = new ListOutput(this, "errors");
+	private ListOutput errors = new ListOutput(this, "errors");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");
-
-	private static final Logger log = Logger.getLogger(SimpleHttp.class);
 
 	@Override
 	public void init() {
@@ -54,7 +51,7 @@ public class SimpleHttp extends AbstractHttpModule {
 		addInput(URL);
 		trigger.canToggleDrivingInput = false;
 		trigger.setDrivingInput(true);
-		addOutput(errorOut);
+		addOutput(errors);
 	}
 
 	@Override
@@ -100,16 +97,20 @@ public class SimpleHttp extends AbstractHttpModule {
 		}
 	}
 
+	/**
+	 * Prepare HTTP request based on module inputs
+	 * @return HTTP request that will be sent to server
+	 */
 	@Override
-	public void sendOutput() {
-		List<String> errors = new LinkedList<>();
-
+	protected HttpRequestBase createRequest() {
 		// read module inputs
 		List<NameValuePair> inputNVPList = new LinkedList<>();
 		JSONObject inputObject = new JSONObject();
 		for (Input in : httpInputs) {
 			String inputName = in.getDisplayName();
-			if (inputName == null) { inputName = in.getName(); }
+			if (inputName == null) {
+				inputName = in.getName();
+			}
 			inputNVPList.add(new BasicNameValuePair(inputName, in.getValue().toString()));
 			inputObject.put(inputName, in.getValue());
 		}
@@ -130,7 +131,7 @@ public class SimpleHttp extends AbstractHttpModule {
 						throw new RuntimeException("Unexpected body format " + bodyFormat);
 				}
 			} catch (UnsupportedEncodingException e) {
-				errors.add(e.getMessage());
+				throw new RuntimeException(e);
 			}
 		} else if (inputNVPList.size() > 0) {
 			boolean alreadyAdded = (URL.getValue().indexOf('?') > -1);
@@ -140,21 +141,35 @@ public class SimpleHttp extends AbstractHttpModule {
 
 		for (StringParameter header : headers) {
 			String headerName = header.getDisplayName();
-			if (headerName == null) { headerName = header.getName(); }
+			if (headerName == null) {
+				headerName = header.getName();
+			}
 			request.addHeader(headerName, header.getValue());
+		}
+
+		return request;
+	}
+
+	/**
+	 * Send module output based on server response
+	 * @param call and response from HTTP server plus metadata
+	 */
+	@Override
+	protected void sendOutput(HttpTransaction call) {
+		if (call.response == null) {
+			errors.send(call.errors);
+			return;
 		}
 
 		// get from server either JSON object with values for named outputs, or list of output values
 		List<Object> values = new LinkedList<>();
 		JSONObject result = null;
 		try {
-			long startTime = System.currentTimeMillis();
-			try (CloseableHttpResponse httpResponse = getHttpClient().execute(request)) {
-				log.info("HTTP request took " + (System.currentTimeMillis() - startTime) + " ms");
-
-				// parse response into a JSONObject (or simple list of values)
-				String responseString = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-				if (responseString.isEmpty()) { errors.add("Empty response from server"); }
+			// parse response into a JSONObject (or simple list of values)
+			String responseString = EntityUtils.toString(call.response.getEntity(), "UTF-8");
+			if (responseString.isEmpty()) {
+				call.errors.add("Empty response from server");
+			} else {
 				JSONTokener parser = new JSONTokener(responseString);
 				Object response = parser.nextValue();
 				if (response instanceof JSONObject) {
@@ -170,11 +185,10 @@ public class SimpleHttp extends AbstractHttpModule {
 						values.add(parser.nextValue());
 					}
 				}
-			} catch (JSONException e) {
-				// send out what values were read so far
 			}
-		} catch (IOException e) {
-			errors.add(e.getMessage());
+		} catch (IOException | JSONException e) {
+			call.errors.add(e.getMessage());
+			// send out what values were read so far
 		}
 
 		// send results to outputs, match output names to result object keys (ignore extra result object members)
@@ -185,7 +199,7 @@ public class SimpleHttp extends AbstractHttpModule {
 				if (value != null) {
 					out.send(value);
 				} else {
-					errors.add(key + " not found (or was null) in HTTP response!");
+					call.errors.add(key + " not found (or was null) in HTTP response!");
 				}
 			}
 		} else {
@@ -197,7 +211,7 @@ public class SimpleHttp extends AbstractHttpModule {
 			}
 		}
 
-		this.errorOut.send(errors);
+		errors.send(call.errors);
 	}
 
 	/**
