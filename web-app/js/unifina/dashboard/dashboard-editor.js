@@ -180,24 +180,24 @@ var DashboardItemView = Backbone.View.extend({
 		this.mediumClass = "medium-size col-xs-12 col-sm-12 col-md-8 col-lg-6 col-centered"
 		this.largeClass = "large-size col-xs-12 col-centered"
 
-		var webcomponent = this.model.get("uiChannel").webcomponent
+		var webcomponent = this.model.get("webcomponent")
 		this.$el.html(this.template(this.model.toJSON()))
-		if(webcomponent == "streamr-label" ||
+		if (webcomponent == "streamr-label" ||
 			webcomponent == "streamr-button" ||
 			webcomponent == "streamr-switcher") {
-			if(!this.model.get("size"))
+			if (!this.model.get("size"))
 				this.model.set("size", "small")
 		}
 		else {
-			if(!this.model.get("size"))
+			if (!this.model.get("size"))
 				this.model.set("size", "medium")
 		}
-		if (this.model.get("uiChannel").webcomponent !== undefined) {
-			var templateName = "#" + this.model.get("uiChannel").webcomponent + "-template"
+		if (webcomponent !== undefined) {
+			var templateName = "#" + webcomponent + "-template"
 			var template = _.template($(templateName).html())
 			this.$el.find(".widget-content").append(template(this.model.toJSON()))
 		} else {
-			throw new Error("No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!")
+			throw "No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!"
 		}
 
 		var titlebar = this.titlebarTemplate(this.model.toJSON())
@@ -356,12 +356,16 @@ var SidebarView = Backbone.View.extend({
 	// Synchronize the "checked" state of sidebar modules from the DashboardItemList
 	syncCheckedState: function() {
 		var checked = {}
+
 		_.each(this.dashboard.get('items').models, function(item) {
-			checked[item.get("uiChannel").id] = true
+			if (checked[item.get('canvas')] === undefined)
+				checked[item.get('canvas')] = {}
+
+			checked[item.get('canvas')][item.get('module')] = true
 		})
 		_.each(this.canvases.models, function(canvas) {
 			_.each(canvas.get('modules').models, function(module) {
-				module.set("checked", module.get('uiChannel') && checked[module.get('uiChannel').id])
+				module.set("checked", module.get('uiChannel') && checked[canvas.get('id')] && checked[canvas.get('id')][module.get('hash')])
 			})
 		})
 	},
@@ -397,12 +401,19 @@ var SidebarView = Backbone.View.extend({
 
 	// When modules become checked or unchecked, sync the dashboard items
 	syncDashboardItems: function(event, module) {
+		var canvas = module.collection.parents[0]
+
 		if (event.type == "checked") {
-			this.dashboard.get('items').add({title: module.get("uiChannel").name, canvas: module.collection.parents[0].id, module: module.get('hash'), uiChannel: module.get('uiChannel')})
+			this.dashboard.get('items').add({
+				title: module.get("uiChannel").name,
+				canvas: canvas.get('id'),
+				module: module.get('hash'),
+				webcomponent: module.get('uiChannel').webcomponent
+			})
 		}
 		if (event.type == "unchecked") {
 			var list = _.filter(this.dashboard.get('items').models, function(item) {
-				return item.get("uiChannel").id == module.get("uiChannel").id
+				return item.get("canvas") === canvas.get('id') && item.get('module') === module.get('hash')
 			}, this)
 			this.dashboard.get('items').remove(list)
 		}

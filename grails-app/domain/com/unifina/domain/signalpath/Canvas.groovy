@@ -59,11 +59,8 @@ class Canvas {
 		example defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
-		uiChannels cascade: 'all-delete-orphan'
 		serialized sqlType: "mediumblob"
 	}
-
-	static hasMany = [uiChannels: UiChannel]
 
 	boolean isNotSerialized() {
 		serialized == null

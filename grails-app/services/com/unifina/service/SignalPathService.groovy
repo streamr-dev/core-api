@@ -11,10 +11,12 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
+import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -131,7 +133,9 @@ class SignalPathService {
 
 		runner.signalPaths.each {
 			Canvas canvas = it.canvas.refresh()
-			canvas.uiChannels.each { uiChannelIds << it.id }
+			UiChannelIterator.over(canvas.toMap()).each {
+				uiChannelIds << it.id
+			}
 			canvas.delete()
 		}
 

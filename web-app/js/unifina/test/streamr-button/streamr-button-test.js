@@ -1,5 +1,5 @@
 var assert = require('assert')
-var $ = require('jquery')(require("jsdom").jsdom().parentWindow);
+var $ = require('jquery')(require("jsdom").jsdom().defaultView);
 var StreamrButton = require('../../streamr-button/streamr-button').StreamrButton
 
 

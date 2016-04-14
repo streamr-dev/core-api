@@ -22,11 +22,13 @@ databaseChangeLog = {
 	include file: 'core/2016-03-09-eliminate-canvas-shared.groovy'
 
 	include file: 'core/2016-03-02-map-modules.groovy'
-	include file: 'core/2016-03-22-fix-input-modules-json-help.groovy'
-	include file: 'core/2016-03-07-serialized-field-to-blob.groovy'
 	include file: 'core/2016-03-08-map-modules-2.groovy'
 	include file: 'core/2016-03-24-map-modules-3.groovy'
 	include file: 'core/2016-03-28-constant-map.groovy'
-	include file: 'core/2016-03-29-change-canvas-stream-modules-id.groovy'
 	include file: 'core/2016-03-18-add-http-module.groovy'
+
+	include file: 'core/2016-03-07-serialized-field-to-blob.groovy'
+	include file: 'core/2016-03-22-fix-input-modules-json-help.groovy'
+	include file: 'core/2016-03-29-change-canvas-stream-modules-id.groovy'
+	include file: 'core/2016-03-17-drop-ui-channel.groovy'
 }
