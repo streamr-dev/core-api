@@ -5,7 +5,8 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.UiChannel
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Module
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DashboardService
 import com.unifina.service.UserService
@@ -17,7 +18,7 @@ import spock.lang.Specification
 
 @TestFor(DashboardApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([Dashboard, DashboardItem, SecUser, UiChannel, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
+@Mock([Canvas, Dashboard, DashboardItem, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
 class DashboardApiControllerSpec extends Specification {
 
 	DashboardService dashboardService
@@ -36,15 +37,16 @@ class DashboardApiControllerSpec extends Specification {
 		dashboards.add(new Dashboard(name: "dashboard-2", user: me))
 		dashboards.add(new Dashboard(name: "dashboard-3", user: me))
 
-		def uiChannel = new UiChannel(name: "ui-channel")
-		uiChannel.id = "ui-channel-id"
-		uiChannel.save(failOnError: true, validate: false)
+		Canvas canvas = new Canvas()
+		canvas.save(failOnError: true, validate: false)
 
 		dashboards[1].addToItems(new DashboardItem(
 			title: "dashboard-2-item",
 			ord: 0,
 			size: "large",
-			uiChannel: uiChannel,
+			canvas: canvas,
+			module: 1,
+			webcomponent: "streamr-component",
 			dashboard: dashboards[1]
 		).save(failOnError: true))
 
@@ -52,14 +54,18 @@ class DashboardApiControllerSpec extends Specification {
 			title: "dashboard-3-item-1",
 			ord: 1,
 			size: "small",
-			uiChannel: uiChannel,
+			canvas: canvas,
+			module: 2,
+			webcomponent: "streamr-table",
 			dashboard: dashboards[2]
 		).save(failOnError: true))
 		dashboards[2].addToItems(new DashboardItem(
 			title: "dashboard-3-item-2",
 			ord: 0,
 			size: "x-large",
-			uiChannel: uiChannel,
+			canvas: canvas,
+			module: 3,
+			webcomponent: "streamr-chart",
 			dashboard: dashboards[2]
 		).save(failOnError: true))
 
@@ -126,14 +132,18 @@ class DashboardApiControllerSpec extends Specification {
 					ord: 0,
 			        title: "dashboard-3-item-2",
 					size: "x-large",
-					uiChannelId: "ui-channel-id",
+					canvas: "1",
+					module: 3,
+					webcomponent: "streamr-chart"
 			    ],
 				[
 					id: 2,
 					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
-					uiChannelId: "ui-channel-id",
+					canvas: "1",
+					module: 2,
+					webcomponent: "streamr-table"
 				],
 			]
 		]
@@ -219,14 +229,18 @@ class DashboardApiControllerSpec extends Specification {
 					ord: 0,
 					title: "dashboard-3-item-2",
 					size: "x-large",
-					uiChannelId: "ui-channel-id",
+					canvas: "1",
+					module: 3,
+					webcomponent: "streamr-chart"
 				],
 				[
 					id: 2,
 					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
-					uiChannelId: "ui-channel-id",
+					canvas: "1",
+					module: 2,
+					webcomponent: "streamr-table"
 				],
 			]
 		]

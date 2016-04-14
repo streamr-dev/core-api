@@ -1,36 +1,47 @@
 package com.unifina.api
 
 import com.unifina.domain.dashboard.DashboardItem
-import com.unifina.domain.signalpath.UiChannel
+import com.unifina.domain.signalpath.Canvas
 import grails.validation.Validateable
+import groovy.transform.CompileStatic
 
 @Validateable
 class SaveDashboardItemCommand {
 	String title
-	String uiChannelId
+	String canvasId
+	Integer module
+	//String webcomponent TODO: inferred
 	int ord
 	String size
 
 	static constraints = {
 		title(blank: false)
-		uiChannelId(blank: false)
+		canvasId(blank: false)
+		module(nullable: false)
 		ord(min: 0)
 		size(inList: ["small", "medium", "large"])
 	}
 
+	@CompileStatic
 	DashboardItem toDashboardItem() {
-		new DashboardItem(
+		def item = new DashboardItem(
 			title: title,
-			uiChannel: UiChannel.get(uiChannelId), // TODO: remove
+			canvas: Canvas.get(canvasId),
+			module: module,
 			ord: ord,
 			size: size
 		)
+		item.updateWebcomponent()
+		return item
 	}
 
+	@CompileStatic
 	void copyValuesTo(DashboardItem dashboardItem) {
 		dashboardItem.title = title
-		dashboardItem.uiChannel = UiChannel.get(uiChannelId) // TODO: remove
+		dashboardItem.canvas = Canvas.get(canvasId)
+		dashboardItem.module = module
 		dashboardItem.ord = ord
 		dashboardItem.size = size
+		dashboardItem.updateWebcomponent()
 	}
 }

@@ -5,13 +5,15 @@ import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.UiChannel
+import com.unifina.domain.signalpath.Canvas
+import grails.converters.JSON
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
+import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(DashboardService)
-@Mock([Dashboard, DashboardItem, Permission, SecUser, UiChannel])
+@Mock([Canvas, Dashboard, DashboardItem, Permission, SecUser])
 class DashboardServiceSpec extends Specification {
 
 	SecUser user = new SecUser(username: "e@e.com", name: "user")
@@ -148,9 +150,12 @@ class DashboardServiceSpec extends Specification {
 	}
 
 	def "addDashboardItem() cannot add item to non-existent dashboard"() {
+		def canvas = new Canvas().save(failOnError: true, validate: false)
+
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
-			uiChannelId: "ui-channel-id",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 666,
 			size: "large"
 		)
@@ -162,9 +167,12 @@ class DashboardServiceSpec extends Specification {
 	}
 
 	def "addDashboardItem() cannot add item other user's non-writeable dashboard"() {
+		def canvas = new Canvas().save(failOnError: true, validate: false)
+
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
-			uiChannelId: "ui-channel-id",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 666,
 			size: "large"
 		)
@@ -184,13 +192,18 @@ class DashboardServiceSpec extends Specification {
 
 	def "addDashboardItem() adds item to existing dashboard"() {
 		setup:
-		def uiChannel = new UiChannel(name: "a-ui-channel")
-		uiChannel.id = "an-ui-channel-id"
-		uiChannel.save(failOnError: true, validate: false)
+		def json = new JsonBuilder([
+		    modules: [
+		        [hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+		    ]
+		]).toString()
+
+		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
-			uiChannelId: "an-ui-channel-id",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 666,
 			size: "large"
 		)
@@ -202,7 +215,9 @@ class DashboardServiceSpec extends Specification {
 		item instanceof DashboardItem
 		item.id != null
 		item.title == "added-item"
-		item.uiChannelId == "an-ui-channel-id"
+		item.canvasId == "1"
+		item.module == 1
+		item.webcomponent == "streamr-chart"
 		item.ord == 666
 		item.size == "large"
 
@@ -214,9 +229,18 @@ class DashboardServiceSpec extends Specification {
 
 
 	def "updateDashboardItem() cannot update item from non-existent dashboard"() {
+		def json = new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+			]
+		]).toString()
+
+		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
+
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			uiChannelId: "new-new-ui-channel",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 42,
 			size: "small"
 		)
@@ -228,9 +252,18 @@ class DashboardServiceSpec extends Specification {
 	}
 
 	def "updateDashboardItem() cannot update item from other user's non-writeable dashboard"() {
+		def json = new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+			]
+		]).toString()
+
+		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
+
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			uiChannelId: "new-new-ui-channel",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 42,
 			size: "small"
 		)
@@ -242,9 +275,18 @@ class DashboardServiceSpec extends Specification {
 	}
 
 	def "updateDashboardItem() cannot update non-existent dashboard - dashboard item -pair"() {
+		def json = new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+			]
+		]).toString()
+
+		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
+
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			uiChannelId: "new-new-ui-channel",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 42,
 			size: "small"
 		)
@@ -263,13 +305,18 @@ class DashboardServiceSpec extends Specification {
 	}
 
 	def "updateDashboardItem() can update item on dashboard."() {
-		def uiChannel = new UiChannel()
-		uiChannel.id = "new-new-ui-channel"
-		uiChannel.save(validate: false, failOnError: true)
+		def json = new JsonBuilder([
+			modules: [
+				[hash: 1, uiChannel: [webcomponent: "streamr-chart"]]
+			]
+		]).toString()
+
+		def canvas = new Canvas(json: json).save(failOnError: true, validate: false)
 
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			uiChannelId: "new-new-ui-channel",
+			canvasId: canvas.id,
+			module: 1,
 			ord: 42,
 			size: "small"
 		)
@@ -286,7 +333,9 @@ class DashboardServiceSpec extends Specification {
 		updatedItem.toMap() == [
 			id: 1L,
 		    title: "updated-item",
-			uiChannelId: "new-new-ui-channel",
+			canvas: canvas.id,
+			module: 1,
+			webcomponent: "streamr-chart",
 			ord: 42,
 			size: "small",
 		]
