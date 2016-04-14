@@ -54,14 +54,6 @@
             tour.waitForModuleAdded('Map')
         )
 
-        .step("You can move modules around the canvas by dragging them. Try moving the <b>Map</b> around a bit.",
-            '.tourMap1',
-            { placement: 'bottom' },
-            function() {
-                $('.tourMap1').one('dragstop', tour.next)
-            }
-        )
-
         .step("Let's make a connection!<br/><br/>"+
             "Start dragging from the highlighted circle near the output <code>veh</code> on the Stream, and drop on the first input (called <code>id</code>) on the Map.",
             '.tourStream1',
@@ -112,7 +104,10 @@
             { nextOnTargetClick: true }
         )
 
-        .offerNextTour("Great job! In the next tour, we'll develop this a bit further. Click Begin when you are ready!")
+        // TODO: uncomment when the next tour is available
+        //.offerNextTour("Great job! In the next tour, we'll develop this a bit further. Click Begin when you are ready!")
+
+        .step("That's it for now! Stand by for more tours.")
 
         .ready()
 

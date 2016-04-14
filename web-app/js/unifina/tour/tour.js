@@ -20,7 +20,7 @@ function Tour() {
 	}
 
 	hopscotch.listen('error', function(e) {
-		console.log("Hopscotch error")
+		console.error("Hopscotch error", e)
 	})
 }
 
