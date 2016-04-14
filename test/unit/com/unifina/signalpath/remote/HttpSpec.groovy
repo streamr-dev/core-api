@@ -2,23 +2,17 @@ package com.unifina.signalpath.remote
 
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.DataSourceEventQueue
-import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import groovy.json.JsonBuilder
 import org.apache.http.Header
 import org.apache.http.HttpResponse
 import org.apache.http.StatusLine
-import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.concurrent.FutureCallback
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.nio.client.HttpAsyncClient
-import org.apache.http.util.EntityUtils
-import org.json.JSONObject
 import spock.lang.Specification
 
 class HttpSpec extends Specification {
@@ -123,15 +117,10 @@ class HttpSpec extends Specification {
 
 			// simulate AbstractHttpModule.receive, but without propagation
 			if (isAsync) {
-				beforeAsyncCall()
 				module.sendOutput(transaction)
-				afterAsyncCall()
 			}
 		}
 	}
-
-	Closure beforeAsyncCall = Closure.IDENTITY
-	Closure afterAsyncCall = Closure.IDENTITY
 
 	void "no input, varying response, async"() {
 		response = [[test: 1], [test: 2], [test: 3]]
