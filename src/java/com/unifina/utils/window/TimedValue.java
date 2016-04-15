@@ -1,11 +1,12 @@
 package com.unifina.utils.window;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by henripihkala on 03/03/16.
+ * A wrapper for a value of type T and its associated timestamp
  */
-public class TimedValue<T> {
+public class TimedValue<T> implements Serializable {
 	public final T value;
 	public final Date time;
 

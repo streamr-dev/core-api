@@ -14,21 +14,15 @@ public class Sum extends AbstractModuleWithWindow<Double> {
 
 	Double sum = 0D;
 	int count = 0;
-	
-/*	@Override
-	public void init() {
-		addInput(windowLength);
-		addInput(minSamples);
-		addInput(input);
-		addOutput(out);
-	}*/
-	
+
 	@Override
-	public void sendOutput() {
-		super.sendOutput();
+	protected void handleInputValues() {
 		addToWindow(input.getValue());
 		count++;
+	}
 
+	@Override
+	protected void doSendOutput() {
 		if (count>=minSamples.getValue())
 			out.send(sum);
 	}
@@ -41,7 +35,7 @@ public class Sum extends AbstractModuleWithWindow<Double> {
 
 
 	@Override
-	protected WindowListener<Double> createWindowListener() {
+	protected WindowListener<Double> createWindowListener(int dimension) {
 		return new SumWindowListener();
 	}
 

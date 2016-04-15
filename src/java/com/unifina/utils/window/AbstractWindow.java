@@ -30,10 +30,6 @@ public abstract class AbstractWindow<T> implements Serializable {
 		return length;
 	}
 
-	public int size() {
-		return values.size();
-	}
-
 	public void setLength(int length) {
 		if (this.length==0 && length!=0) {
 			throw new IllegalArgumentException("An infinite window may not change length!");
@@ -52,6 +48,10 @@ public abstract class AbstractWindow<T> implements Serializable {
 		}
 	}
 
+	public int getSize() {
+		return size;
+	}
+
 	public void add(T item) {
 		// Don't keep values in memory if length is 0 (infinite)
 		if (length > 0)
@@ -63,16 +63,15 @@ public abstract class AbstractWindow<T> implements Serializable {
 		purgeExtraValues();
 	}
 
+	/**
+	 * Removes extra values from the window.
+     */
 	protected void purgeExtraValues() {
 		while (length > 0 && hasExtraValues()) {
 			T removedItem = values.removeFirst();
 			size--;
 			listener.onRemove(removedItem);
 		}
-	}
-
-	public int getSize() {
-		return size;
 	}
 
 	/**

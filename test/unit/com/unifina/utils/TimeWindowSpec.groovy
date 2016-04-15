@@ -4,6 +4,8 @@ import com.unifina.utils.window.TimeWindow
 import com.unifina.utils.window.WindowListener
 import spock.lang.Specification
 
+import java.util.concurrent.TimeUnit
+
 class TimeWindowSpec extends Specification {
 
     def setup() {
@@ -17,7 +19,7 @@ class TimeWindowSpec extends Specification {
 	void "adding and removing values and setting length"() {
 		setup:
 		WindowListener<Double> listener = Mock(WindowListener)
-		TimeWindow window = new TimeWindow(2,listener) // window length is in seconds
+		TimeWindow window = new TimeWindow(2, TimeUnit.SECONDS, listener)
 		
 		when:
 		window.add(1, new Date(0))
@@ -73,7 +75,7 @@ class TimeWindowSpec extends Specification {
 	void "infinite window"() {
 		setup:
 		WindowListener<Double> listener = Mock(WindowListener)
-		TimeWindow window = new TimeWindow(0,listener)
+		TimeWindow window = new TimeWindow(0, TimeUnit.SECONDS, listener)
 
 		when:
 		window.add(1, new Date(0))
@@ -92,6 +94,19 @@ class TimeWindowSpec extends Specification {
 
 		then:
 		thrown(IllegalArgumentException)
+	}
+
+	void "setting time on empty TimeWindow does not throw"() {
+		WindowListener<Double> listener = Mock(WindowListener)
+		TimeWindow window = new TimeWindow(2, TimeUnit.SECONDS, listener)
+
+		when:
+		window.setTime(new Date(0))
+		window.setTime(new Date(1000))
+		window.setTime(new Date(2000))
+
+		then:
+		noExceptionThrown()
 	}
 
 }

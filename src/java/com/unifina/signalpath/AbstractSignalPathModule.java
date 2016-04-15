@@ -134,9 +134,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	    					// This is required to avoid java.lang.IllegalAccessException and requires privileges
 	    					f.setAccessible(true);
 	    					Object obj = f.get(AbstractSignalPathModule.this);
-	    					if (Input.class.isInstance(obj))
+	    					if (Input.class.isInstance(obj) && !inputs.contains(obj))
 	    						addInput((Input)obj);
-	    					else if (Output.class.isInstance(obj))
+	    					else if (Output.class.isInstance(obj) && !outputs.contains(obj))
 	    						addOutput((Output)obj);
 	    				} catch (Exception e) {
 	    					log.error("Could not get field: "+f+", class: "+AbstractSignalPathModule.this.getClass()+" due to exception: "+e);

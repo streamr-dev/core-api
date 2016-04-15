@@ -1,6 +1,7 @@
 package com.unifina.utils.window;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A Window whose length is defined by number of events in the window
@@ -8,9 +9,14 @@ import java.util.Date;
 public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 
 	private Date time;
+	private TimeUnit timeUnit;
+	private long lengthInMillis;
 
-	public TimeWindow(int length, final WindowListener<T> originalListener) {
+	public TimeWindow(int length, TimeUnit timeUnit, final WindowListener<T> originalListener) {
 		super(length, null);
+
+		this.timeUnit = timeUnit;
+		setLength(length);
 
 		// Wrap the item into a TimedValue
 		this.listener = new WindowListener<TimedValue<T>>() {
@@ -29,6 +35,12 @@ public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 				originalListener.onClear();
 			}
 		};
+	}
+
+	@Override
+	public void setLength(int length) {
+		lengthInMillis = timeUnit.toMillis(length);
+		super.setLength(length);
 	}
 
 	public void add(T item, Date time) {
@@ -51,6 +63,6 @@ public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 
 	@Override
 	protected boolean hasExtraValues() {
-		return this.time.getTime() - length*1000 >= values.peekFirst().time.getTime();
+		return values.size() > 0 && this.time.getTime() - lengthInMillis >= values.peekFirst().time.getTime();
 	}
 }
