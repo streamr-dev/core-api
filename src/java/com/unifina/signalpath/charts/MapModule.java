@@ -13,7 +13,7 @@ public class MapModule extends ModuleWithUI {
 	ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
 	boolean drawTrace = false;
-	boolean autoZoom = false;
+	boolean autoZoom = true;
 	int traceRadius = 2;
 
 	@Override
