@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.utils.HibernateHelper
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -267,7 +268,11 @@ class FeedFileService {
 			return null
 		}
 		else log.debug("getStream: starting FeedFile "+feedFile.id+" for stream "+stream.id)
-		
+
+		// Unproxy the feedFile.stream so it can be accessed from other threads with no bound session
+		if (feedFile.stream)
+			feedFile.stream = HibernateHelper.deproxy(feedFile.stream, Stream.class)
+
 		// Instantiate preprocessor and get the preprocessed file name
 		AbstractFeedPreprocessor preprocessor = getPreprocessor(feed)
 		
@@ -363,7 +368,7 @@ class FeedFileService {
 		feedFile = FeedFile.get(feedFile.id)
 		
 		// Update the existing streams
-		List<Stream> existing = Stream.findAllByFeedAndLocalIdInList(feedFile.feed, foundStreams.collect {it.localId})
+		List<Stream> existing = Stream.findAllByFeedAndIdInList(feedFile.feed, foundStreams.collect {it.id})
 		List existingIds = existing.collect {it.id}
 		Stream.executeUpdate("update Stream s set s.firstHistoricalDay = :day where s.id in (:existingIds) and (s.firstHistoricalDay is null OR s.firstHistoricalDay > :day)", [day:feedFile.day, existingIds:existingIds])
 		Stream.executeUpdate("update Stream s set s.lastHistoricalDay = :day where s.id in (:existingIds) and (s.lastHistoricalDay is null OR s.lastHistoricalDay < :day)", [day:feedFile.day, existingIds:existingIds])
@@ -372,9 +377,9 @@ class FeedFileService {
 		
 		// Save the non-existing streams
 		Set existingSet = new HashSet()
-		existing.each {existingSet.add(it.localId)}
+		existing.each {existingSet.add(it.id)}
 		foundStreams.each {Stream s->
-			if (!existingSet.contains(s.localId)) {
+			if (!existingSet.contains(s.id)) {
 				log.info("New Stream found from FeedFile $feedFile: $s")
 				s.firstHistoricalDay = feedFile.day
 				s.lastHistoricalDay = feedFile.day
@@ -382,6 +387,14 @@ class FeedFileService {
 			}
 		}
 		log.info("Total "+(System.currentTimeMillis()-time)+" ms")
+	}
+
+	public FeedFile getFirstFeedFile(Stream stream) {
+		return FeedFile.findByStream(stream, [sort:'beginDate', limit:1])
+	}
+
+	public FeedFile getLastFeedFile(Stream stream) {
+		return FeedFile.findByStream(stream, [sort:'endDate', order:"desc", limit:1])
 	}
 	
 	/**

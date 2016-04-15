@@ -15,7 +15,6 @@ function StreamrTable(parent, options) {
 		this.options = {}
 		this.options.maxRows = 0
 	}
-
 }
 
 StreamrTable.prototype.initTable = function (headers) {
@@ -58,6 +57,17 @@ StreamrTable.prototype.receiveResponse = function (d) {
 			newRow.append("<td>"+(d.nr[i]!=null ? d.nr[i] : "")+"</td>");
 		
 		this.tableBody.prepend(newRow);
+	}
+	// New map
+	else if (d.nm) {
+		$(this.tableBody).children().remove()
+
+		for (var key in d.nm) {
+			var newRow = $("<tr></tr>");
+			newRow.append("<td>"+(key!=null ? key : "")+"</td>");
+			newRow.append("<td>"+(d.nm[key]!=null ? JSON.stringify(d.nm[key]) : "")+"</td>");
+			$(this.tableBody).prepend(newRow)
+		}
 	}
 	// Edit cell message: d.id=row id, d.e=cell index, d.c=cell content 
 	else if (d.e!=null && d.id) {

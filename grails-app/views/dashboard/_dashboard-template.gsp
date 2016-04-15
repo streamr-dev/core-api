@@ -4,30 +4,33 @@
         <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="Dashboard Name" value="{{ name }}" />
     </div>
     <ul class="navigation" id="rsp-list">
-        <li class="rsp-title">
+        <li class="canvas-title">
             <label>Live Canvases</label>
         </li>
     </ul>
     <div class="menu-content">
         <button class='save-button btn btn-block btn-primary' title='Save dashboard'>Save</button>
+        <g:if test="${shareable}">
+            <ui:shareButton id="share-button" class="btn-block" name="Dashboard {{ name }}" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" > Share </ui:shareButton>
+        </g:if>
         <form method="post" role="form" id="deleteDashboardForm">
             <g:hiddenField name="id" value="${params.id}" />
             <button id='deleteButton' class='delete-button btn btn-block btn-default confirm' data-action="${createLink(action:'delete')}" data-confirm="Really delete dashboard {{ name }}?" title='Delete dashboard'>Delete</button>
         </form>
     </div>
 </script>
-<script id="rsp-template" type="text/template">
-    <a class="rsp-title" title="{{state != 'running' ? state : ''}}">
+<script id="canvas-template" type="text/template">
+    <a class="canvas-title" title="{{state != 'running' ? state : ''}}">
         <span class="mm-text mmc-dropdown-delay animated fadeIn">{{ name }}</span>
         <span class="howmanychecked badge badge-primary"></span>
     </a>
 </script>
 
-<script id="uichannel-template" type="text/template">
-        <a href="#" class="uichannel-title" id="uichannel_{{ id }}">
+<script id="module-template" type="text/template">
+        <a href="#" class="module-title">
             <i class="menu-icon fa fa-square"></i>
             <i class="menu-icon fa fa-check-square"></i>
-            {{ name ? name : id }}
+            {{ uiChannel && uiChannel.name ? uiChannel.name : (name ? name : id) }}
         </a>
 </script>
 
@@ -50,19 +53,35 @@
 </script>
 
 <script id="streamr-label-template" type="text/template">
-    <h1><streamr-label class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-label></h1>
+    <h1><streamr-label class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-label></h1>
 </script>
 
 <script id="streamr-heatmap-template" type="text/template">
-    <streamr-heatmap class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-heatmap>
+    <streamr-heatmap class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-heatmap>
 </script>
 
 <script id="streamr-chart-template" type="text/template">
-    <streamr-chart class="streamr-widget non-draggable" channel="{{ uiChannel.id }}"></streamr-chart>    
+    <streamr-chart class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-chart>
 </script>
 
 <script id="streamr-table-template" type="text/template">
-    <streamr-table class="streamr-widget non-draggable text-left" channel="{{ uiChannel.id }}"></streamr-table>    
+    <streamr-table class="streamr-widget non-draggable text-left" canvas="{{ canvas }}" module="{{ module }}"></streamr-table>
+</script>
+
+<script id="streamr-button-template" type="text/template">
+    <streamr-button class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-button>
+</script>
+
+<script id="streamr-switcher-template" type="text/template">
+    <streamr-switcher class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-switcher>
+</script>
+
+<script id="streamr-text-field-template" type="text/template">
+    <streamr-text-field class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-text-field>
+</script>
+
+<script id="streamr-map-template" type="text/template">
+    <streamr-map class="streamr-widget non-draggable" canvas="{{ canvas }}" module="{{ module }}"></streamr-map>
 </script>
 
 <script id="titlebar-template" type="text/template">

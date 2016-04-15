@@ -1,138 +1,73 @@
 package com.unifina.controller.data
 
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import grails.test.mixin.web.ControllerUnitTestMixin
-import grails.test.mixin.web.FiltersUnitTestMixin
-import spock.lang.Specification
-
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.KafkaService
+import com.unifina.domain.signalpath.Module
+import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.StreamService
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.PermissionService
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import spock.lang.Specification
 
 @TestFor(StreamController)
-@Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Feed, UnifinaCoreAPIFilters, UnifinaSecurityService, StreamService])
+@Mock([SecUser, Stream, Feed, Module, PermissionService, StreamService])
 class StreamControllerSpec extends Specification {
-	
+
+	Feed feed
 	SecUser user
-	
+	Stream stream
+	Module module
+
 	void setup() {
-		// Mock services or use real ones
+		module = new Module(id: 1).save(validate: false)
+		feed = new Feed(streamListenerClass: NoOpStreamListener.name, module: module).save(validate: false)
+		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey").save(validate:false)
+
+		stream = new Stream(name: "dummy", description: "dummy", feed: feed)
+		stream.id = "dummy"
+		stream.save(validate: false)
+
+		mockSpringSecurityService(user)
 		controller.streamService = grailsApplication.mainContext.getBean("streamService")
-		controller.streamService.kafkaService = Mock(KafkaService)
-		controller.unifinaSecurityService = grailsApplication.mainContext.getBean("unifinaSecurityService")
-		
-		SpringSecurityService springSecurityService = mockSpringSecurityService(null)
-		
-		// Users
-		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret")
-		user.save(validate:false)
-		
-	}
-	
-	private void mockSpringSecurityService(user) {
-		def springSecurityService = [
-			getCurrentUser: {-> user },
-			encodePassword: {String pw-> pw+"-encoded" }
-		] as SpringSecurityService
-		controller.springSecurityService = springSecurityService
-		controller.unifinaSecurityService.springSecurityService = springSecurityService
+		controller.permissionService = Stub(PermissionService) { getAll(*_) >> [stream] }
+
 	}
 
-	void "successful stream create json api call"() {
-		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret, name: "Test stream", description: "Test stream", localId: "my-stream-id"]
-			request.method = 'POST'
-			request.requestURI = '/api/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
-			withFilters([action:'apiCreate']) {
-				controller.apiCreate()
-			}
-		then:
-			response.json.success
-			response.json.stream instanceof String
-			response.json.auth instanceof String
-			response.json.name == "Test stream"
-			response.json.description == "Test stream"
-			response.json.localId == "my-stream-id"
-			Stream.count() == 1
-			Stream.list()[0].user == user
+	private void mockSpringSecurityService(newUser) {
+		def springSecurityService = [
+			getCurrentUser: {-> newUser },
+			encodePassword: {String pw -> pw+"-encoded" }
+		] as SpringSecurityService
+		controller.springSecurityService = springSecurityService
 	}
-	
-	void "invalid stream create json api call credentials"() {
-		when:
-			request.json = [key: user.apiKey, secret: "wrong secret", name: "Test stream", description: "Test stream", localId: "my-stream-id"]
-			request.method = 'POST'
-			request.requestURI = '/api/stream/create'
-			withFilters([action:'apiCreate']) {
-				controller.apiCreate()
-			}
-		then:
-			response.json.success == false
-			response.status == 401
-	}
-	
-	void "invalid stream create json api call values"() {
-		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret]
-			request.method = 'POST'
-			request.requestURI = '/api/stream/create'
-			withFilters([action:'apiCreate']) {
-				controller.apiCreate()
-			}
-		then:
-			response.json.success == false
-			response.status == 400
-	}
-	
+
 	void "stream create form"() {
-		mockSpringSecurityService(user)
-		
 		when:
-			params.name = "Test stream"
-			params.description = "Test stream"
-			params.format = "html"
-			request.method = 'POST'
-			controller.create()
+		params.name = "Test stream"
+		params.description = "Test stream"
+		params.feed = feed.id
+		params.format = "html"
+		request.method = 'POST'
+		controller.create()
 		then:
-			response.redirectedUrl == '/stream/show/1'
-			Stream.count() == 1
-			Stream.list()[0].user == user
+        response.redirectedUrl == '/stream/show/' + Stream.list()[1].id
+		Stream.count() == 2
+		Stream.list()[1].user == user
 	}
-	
-	void "successful stream lookup by localId"() {
-		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
-		
+
+	void "searching for a stream returns correct module"() {
 		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret, localId: stream.localId]
-			request.method = 'POST'
-			request.requestURI = '/api/stream/lookup'
-			withFilters([action:'apiLookup']) {
-				controller.apiLookup()
-			}
+		params.term = stream.name[1..2]
+		controller.search()
 		then:
-			response.status == 200
-			response.json.stream == stream.uuid
-	}
-	
-	void "unsuccessful stream lookup by localId"() {
-		Stream stream = controller.streamService.createUserStream([name:"Test",description:"Test desc",localId:"localId"], user)
-		
-		when:
-			request.json = [key: user.apiKey, secret: user.apiSecret, localId: "wrong local id"]
-			request.method = 'POST'
-			request.requestURI = '/api/stream/lookup'
-			withFilters([action:'apiLookup']) {
-				controller.apiLookup()
-			}
-		then:
-			response.status == 404
-			response.json.success == false
+		response.json.size() == 1
+		response.json[0].id == stream.id
+		response.json[0].name == stream.name
+		response.json[0].description == stream.description
+		response.json[0].module == module.id
 	}
 
 }

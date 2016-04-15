@@ -21,12 +21,12 @@
 			},
 			ready: function() {
 				var _this = this
-				this.bindEvents(_this.$.container)
+				this.bindEvents(_this.$["streamr-widget-container"])
 
 				this.getModuleJson(function(json) {
 					var resendOptions = _this.getResendOptions(json)
 
-					_this.chart = new StreamrChart(_this.$.container, {
+					_this.chart = new StreamrChart(_this.$["streamr-widget-container"], {
 						rangeDropdown: _this.rangeDropdown,	// default: true
 						showHideButtons: _this.showHideButtons	// default: true
 					})

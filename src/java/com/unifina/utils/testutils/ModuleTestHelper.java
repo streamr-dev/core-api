@@ -499,9 +499,13 @@ public class ModuleTestHelper {
 				throw new IllegalArgumentException(msg);
 			}
 		}
-		for (List<Object> outputValues : outputValuesByName.values()) {
-			if (outputValues.size() != outputValueCount) {
-				String msg = String.format("An output value list is not of expected size (%d).", outputValueCount);
+		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
+			int outputListSize = entry.getValue().size();
+			if (outputListSize != outputValueCount) {
+				String msg = String.format("List for output '%s' not of expected size (%d != %d).",
+					entry.getKey(),
+					outputListSize,
+					outputValueCount);
 				throw new IllegalArgumentException(msg);
 			}
 		}
@@ -518,6 +522,9 @@ public class ModuleTestHelper {
 	private void initAndAttachOutputsToModuleInputs() {
 		for (String inputName : inputValuesByName.keySet()) {
 			Input input = module.getInput(inputName);
+			if (input == null) {
+				throw new IllegalArgumentException("No input found with name " + inputName);
+			}
 			Output output = new Output(null, "outputFor" + inputName, input.getTypeName());
 			output.setDisplayName("outputFor" + inputName);
 			output.connect(input);

@@ -6,6 +6,7 @@ import com.unifina.feed.MessageRecipient;
 import com.unifina.feed.MessageSource;
 import com.unifina.kafkaclient.UnifinaKafkaMessage;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class FakeMessageSource implements MessageSource {
@@ -40,5 +41,10 @@ public class FakeMessageSource implements MessageSource {
 		Message msg = new Message(kafkaMessage.getChannel(), offset++, kafkaMessage);
 		msg.checkCounter = false;
 		recipient.receive(msg);
+	}
+
+	@Override
+	public void close() throws IOException {
+
 	}
 }

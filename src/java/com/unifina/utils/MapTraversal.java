@@ -8,29 +8,43 @@ import java.util.List;
 import java.util.Map;
 
 public class MapTraversal {
-	
-	
+
+	/**
+	 * Fetch given property in the nested map tree,
+	 * @param name e.g. "options.inputs[3].value"
+	 * @return given property, or null if not found
+	 */
 	@SuppressWarnings("rawtypes")
-	public static Object getProperty(Map map, String name) {		
-		if (name==null)
-			throw new IllegalArgumentException("Name can not be null!");
-		if (map==null)
-			return null;
-		
-		Object result = null;
-		
-		String[] names = name.split("\\.");
-		for (int i=0;i<names.length;i++) {
-			String s = names[i];
-			result = map.get(s);
-			if (result==null) 
+	public static Object getProperty(Map map, String name) {
+		if (name == null) { throw new IllegalArgumentException("Name can not be null!"); }
+
+		Object i = map;
+		for (String prop : name.split("\\.")) {
+			if (!(i instanceof Map)) {
+				if (i instanceof List && (prop.equalsIgnoreCase("count") || prop.equalsIgnoreCase("length"))) {
+					return new Integer(((List)i).size());
+				}
 				return null;
-			// Not the last entry: result should be a Map
-			if (i<names.length-1) {
-				map = (Map) result;
+			}
+			// iterate through (possibly nested) List property, e.g. "inputs[3]"
+			// Note: if prop isn't a List, then simply listParts[0] == prop, and loop is skipped
+			String[] listParts = prop.split("\\[");
+			i = ((Map)i).get(listParts[0]);
+			for (int j = 1; j < listParts.length; j++) {
+				if (!(i instanceof List)) { return null; }
+				int len = listParts[j].length();
+				if (len < 2 || listParts[j].charAt(len-1) != ']') {
+					return null;    // malformed, e.g. "inputs[13.value" or "inputs[[3]].value" or "inputs[hax[2]].value"
+				}
+				try {
+					int index = Integer.parseInt(listParts[j].substring(0, len - 1));
+					i = ((List)i).get(index);
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+					return null;
+				}
 			}
 		}
-		return result;
+		return i;
 	}
 	
 	public static String getString(Map map, String name) {
@@ -42,8 +56,29 @@ public class MapTraversal {
 		Object raw = getProperty(map,name);
 		if (raw==null) return null;
 		else if (raw instanceof Integer)
-			return (Integer) raw;
+			return (Integer)raw;
 		else return Integer.parseInt(raw.toString());
+	}
+
+	/**
+	 * @throws NumberFormatException if value wasn't parseable to integer (e.g. "foo", 3.5)
+	 * @throws NullPointerException if value wasn't found
+     */
+	public static int getInt(Map map, String name) throws NumberFormatException, NullPointerException {
+		Object raw = getProperty(map, name);
+		if (raw instanceof Integer) {
+			return ((Integer)raw).intValue();
+		} else {
+			return Integer.parseInt(raw.toString());
+		}
+	}
+
+	public static int getInt(Map map, String name, int defaultValue) {
+		try {
+			return getInt(map, name);
+		} catch (NumberFormatException | NullPointerException e) {
+			return defaultValue;
+		}
 	}
 
 	public static Long getLong(Map map, String name) {

@@ -214,7 +214,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	    		if (names && names.length>0) {
 	    			txt += "<h3>"+title+"</h3>";
 		    		var $t = $("<table></table>");
-		    		$(names).each(function(i,n) {
+				$(names).each(function(i,n) {
 		    			$t.append("<tr><td>"+n+"</td><td>"+valMap[n]+"</td></tr>");
 		    		});
 		    		txt += $t[0].outerHTML;
@@ -371,8 +371,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var super_clone = prot.clone;
 	prot.clone = function() {
-		var module = super_clone();
-		module.refreshConnections();
+		super_clone(function(module) {
+			module.refreshConnections();
+		});
 	}
 	
 	function refreshConnections() {

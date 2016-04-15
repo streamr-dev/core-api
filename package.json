@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha web-app/js/unifina/test"
+    "test": "mocha web-app/js/unifina/test --recursive"
   },
   "author": "",
   "license": "Unifina",
@@ -15,8 +15,10 @@
     "mocha": "^1.21.4",
     "jquery": "1.11.1",
     "jquery-ui": "*",
-    "jsdom": "3.1.2",
+    "jsdom": "8.1.0",
     "underscore": "*",
+    "backbone": "*",
+    "mustache": "*",
     "backbone-associations": "*"
   }
 }

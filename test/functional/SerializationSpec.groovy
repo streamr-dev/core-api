@@ -1,20 +1,17 @@
-import com.unifina.controller.core.signalpath.LiveController
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.service.BootService
 import com.unifina.service.SerializationService
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.pages.LiveShowPage
 import grails.test.mixin.TestFor
 import grails.util.Holders
 import spock.lang.Shared
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-@TestFor(LiveController)
+@TestFor(CanvasController) // makes grailsApplication available
 class SerializationSpec extends LoginTester1Spec {
 
 	static UnifinaKafkaProducer kafka
@@ -22,7 +19,6 @@ class SerializationSpec extends LoginTester1Spec {
 	@Shared long serializationIntervalInMillis
 
 	def setupSpec() {
-		BootService.mergeDefaultConfig(grailsApplication)
 		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
 
 		// For some reason the annotations don't work so need the below.
@@ -39,9 +35,9 @@ class SerializationSpec extends LoginTester1Spec {
 	}
 
 	def "resuming paused live canvas retains modules' states"() {
-		String liveName = "test" + new Date().getTime()
+		String canvasName = "SerializationSpec" + new Date().getTime()
 
-		when: "Modules are added and clicked 'Launch live'"
+		when: "Modules are added and canvas started"
 			// The stream
 			searchAndClick("SerializationSpec")
 			moduleShouldAppearOnCanvas("Stream")
@@ -60,20 +56,15 @@ class SerializationSpec extends LoginTester1Spec {
 			connectEndpoints(findOutput("Sum", "out"), findInput("Add", "in2"))
 			connectEndpoints(findOutput("Add", "sum"), findInput("Label", "label"))
 
-			$("#runDropdown").click()
-			waitFor { $("#runLiveModalButton").displayed }
-			$("#runLiveModalButton").click()
-		then: "launch live -modal opens"
-			waitFor { $("#runLiveModal").displayed }
+			ensureRealtimeTabDisplayed()
+			setCanvasName(canvasName)
+			startCanvas(true)
 
-		when: "Name for live canvas is given and it is launched"
-			$("#runLiveName") << liveName
-			$("#runLiveButton").click()
-		then: "LiveShowPage is opened and Label shows data"
-			waitFor(30) { at LiveShowPage }
-			stopButton.displayed
-			!$(".alert").displayed
+		then: "Button is in correct state"
+			runRealtimeButton.text().contains("Stop")
 
+		when: "Data is sent"
+			noNotificationsVisible()
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -82,31 +73,21 @@ class SerializationSpec extends LoginTester1Spec {
 					sleep(150)
 				}
 			}
-
+		then: "Label should show correct value"
 			// Wait for enough data, sometimes takes more than 30 sec to come
 			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
 			sleep(serializationIntervalInMillis + 200)
 			def oldVal = $(".modulelabel").text().toDouble()
 
 		when: "Live canvas is stopped"
-			stopButton.click()
-		then: "The confirmation dialog is shown"
-			waitForConfirmation()
+			noNotificationsVisible()
+			stopCanvas()
 
-		when: "Clicked OK"
-			acceptConfirmation()
-		then: "The LiveShowPage is opened again, now with the start and delete -buttons and info alert"
-			waitFor(30) {
-				startButton.displayed
-				deleteButton.displayed
-				$(".alert.alert-info").displayed
-			}
-
-		when: "Started again"
-			startButton.click()
-		then: "The LiveShowPage is opened and data must change"
-			waitFor { at LiveShowPage }
-
+		and: "Started again"
+			noNotificationsVisible()
+			startCanvas(false) // saving would reset serialized state
+			noNotificationsVisible()
+		and: "Data is sent"
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -115,40 +96,16 @@ class SerializationSpec extends LoginTester1Spec {
 					sleep(150)
 				}
 			}
-
+		then: "Label must change"
 			waitFor(30){ $(".modulelabel").text().toDouble() == (oldVal + 5 + 255).toDouble()}
 
 		when: "Live canvas is stopped"
-			stopButton.click()
-		then: "The confirmation dialog is shown"
-			waitForConfirmation()
-
-		when: "Clicked OK"
-			acceptConfirmation()
-		then: "The LiveShowPage is opened again, now with the start and delete -buttons and info alert"
-			waitFor(30) {
-				startButton.displayed
-				deleteButton.displayed
-				$(".alert.alert-info").displayed
-			}
-
-		when: "Dropdown button clicked"
-			dropDownButton.click()
-		then: "Dropdown menu visible"
-			dropDownMenu.displayed
-
-		when: "'Clear and start' clicked"
-			clearAndStartButton.click()
-		then: "The confirmation dialog is shown"
-			waitForConfirmation()
-
-		when: "Clicked OK"
-			acceptConfirmation()
-		then: "LiveShowPage is opened and Label shows data counted from empty state"
-			waitFor(30) { at LiveShowPage }
-			stopButton.displayed
-			//!$(".alert").displayed
-
+			stopCanvas()
+		and: "canvas started with 'reset' setting"
+			noNotificationsVisible()
+			resetAndStartCanvas(true)
+			noNotificationsVisible()
+		and: "Data is sent"
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
 					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
@@ -157,10 +114,13 @@ class SerializationSpec extends LoginTester1Spec {
 					sleep(150)
 				}
 			}
-
+		then: "Label must show correct value"
 			// Wait for enough data, sometimes takes more than 30 sec to come
 			waitFor(30) { $(".modulelabel").text().toDouble() == 115.0D }
-		}
+
+		cleanup:
+			stopCanvasIfRunning()
+	}
 
 	private def makeKafkaConfiguration() {
 		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));

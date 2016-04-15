@@ -9,7 +9,7 @@ import com.unifina.feed.MessageParser;
 import com.unifina.kafkaclient.UnifinaKafkaMessage;
 
 public class KafkaMessageParser implements MessageParser<UnifinaKafkaMessage, KafkaMessage> {
-	
+
 	@Override
 	public KafkaMessage parse(UnifinaKafkaMessage raw) {
 		if (raw.getContentType()==UnifinaKafkaMessage.CONTENT_TYPE_JSON) {

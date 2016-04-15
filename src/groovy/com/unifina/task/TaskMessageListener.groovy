@@ -1,15 +1,19 @@
 package com.unifina.task
 
+import com.unifina.service.KafkaService
 import grails.converters.JSON
+import groovy.transform.CompileStatic
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 import com.unifina.kafkaclient.UnifinaKafkaConsumer
 import com.unifina.kafkaclient.UnifinaKafkaMessage
 import com.unifina.kafkaclient.UnifinaKafkaMessageHandler
 import com.unifina.utils.MapTraversal
 
+@CompileStatic
 class TaskMessageListener implements UnifinaKafkaMessageHandler {
 	
 	GrailsApplication grailsApplication
@@ -28,9 +32,15 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 		Properties properties = new Properties();
 		for (String s : kafkaConfig.keySet())
 			properties.setProperty(s, kafkaConfig.get(s).toString());
-		
+
+		String taskTopic = MapTraversal.getString(grailsApplication.config, "unifina.task.messageQueue")
+
+		// Make sure the task topic exists
+		KafkaService kafkaService = (KafkaService) grailsApplication.mainContext.getBean("kafkaService")
+		kafkaService.createTopics([taskTopic])
+
 		consumer = new UnifinaKafkaConsumer(properties);
-		consumer.subscribe(MapTraversal.getString(grailsApplication.config, "unifina.task.messageQueue"),this,false)
+		consumer.subscribe(taskTopic,this)
 	}
 
 	public void quit() {
@@ -38,8 +48,8 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 	}
 
 	@Override
-	public void handleMessage(UnifinaKafkaMessage msg) {
-		Map json = JSON.parse(msg.toString())
+	public void handleMessage(UnifinaKafkaMessage msg, String topic, int partition, long offset) {
+		Map json = (JSONObject) JSON.parse(msg.toString())
 		if (json.type=="abort") {
 			def id = json.id
 			log.info("Abort message received for task $id")

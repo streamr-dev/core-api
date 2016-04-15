@@ -1,5 +1,8 @@
 package com.unifina.signalpath
 
+import com.unifina.datasource.IStartListener
+import com.unifina.datasource.IStopListener
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
@@ -13,7 +16,7 @@ import org.apache.log4j.Logger
  */
 public class SignalPathRunner extends Thread {
 	private final List<SignalPath> signalPaths = Collections.synchronizedList([])
-	private boolean deleteOnStop
+	private boolean adhoc
 	
 	String runnerId
 	
@@ -26,20 +29,18 @@ public class SignalPathRunner extends Thread {
 	
 	private static final Logger log = Logger.getLogger(SignalPathRunner.class)
 
-	private List<Runnable> startListeners = []
-	private List<Runnable> stopListeners = []
-
-	private SignalPathRunner(Globals globals, boolean deleteOnStop) {
+	private SignalPathRunner(Globals globals, boolean adhoc) {
 		this.globals = globals
 		this.signalPathService = globals.grailsApplication.mainContext.getBean("signalPathService")
-		this.deleteOnStop = deleteOnStop
+		this.adhoc = adhoc
 
 		runnerId = "s-"+new Date().getTime()
 
 		/**
 		 * Instantiate the SignalPaths
 		 */
-		globals.dataSource = signalPathService.createDataSource(globals.signalPathContext, globals)
+		globals.dataSource = signalPathService.createDataSource(adhoc, globals)
+		globals.realtime = !adhoc
 		globals.init()
 
 		if (globals.signalPathContext.csv) {
@@ -47,18 +48,18 @@ public class SignalPathRunner extends Thread {
 		}
 	}
 
-	public SignalPathRunner(List<Map> signalPathData, Globals globals, boolean deleteOnStop = true) {
-		this(globals, deleteOnStop)
+	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean adhoc = true) {
+		this(globals, adhoc)
 
 		// Instantiate SignalPaths from JSON
-		for (int i=0;i<signalPathData.size();i++) {
-			SignalPath signalPath = signalPathService.jsonToSignalPath(signalPathData[i],false,globals,true)
+		for (int i=0; i<signalPathMaps.size(); i++) {
+			SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMaps[i], false, globals, true)
 			signalPaths.add(signalPath)
 		}
 	}
 
-	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean deleteOnStop = true) {
-		this(globals, deleteOnStop)
+	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc = true) {
+		this(globals, adhoc)
 		signalPath.globals = globals
 		for (AbstractSignalPathModule module : signalPath.getModules()) {
 			module.globals = globals
@@ -89,12 +90,12 @@ public class SignalPathRunner extends Thread {
 		return running
 	}
 
-	public void addStartListener(Runnable r) {
-		startListeners << r
+	public void addStartListener(IStartListener listener) {
+		globals.dataSource.addStartListener(listener)
 	}
 
-	public void addStopListener(Runnable r) {
-		stopListeners << r
+	public void addStopListener(IStopListener listener) {
+		globals.dataSource.addStopListener(listener)
 	}
 
 	public synchronized void waitRunning(boolean target=true) {
@@ -105,9 +106,6 @@ public class SignalPathRunner extends Thread {
 	
 	@Override
 	public void run() {
-		startListeners.each {
-			it.run()
-		}
 		Throwable reportException = null
 		setName("SignalPathRunner");
 		
@@ -115,8 +113,13 @@ public class SignalPathRunner extends Thread {
 		try {
 			for (SignalPath it : signalPaths)
 				it.connectionsReady()
-				
-			setRunning(true)
+
+			globals.dataSource.addStartListener(new IStartListener() {
+				@Override
+				void onStart() {
+					setRunning(true)
+				}
+			})
 			
 			if (!signalPaths.isEmpty())
 				signalPathService.runSignalPaths(signalPaths)
@@ -160,15 +163,12 @@ public class SignalPathRunner extends Thread {
 	 * Aborts the data feed and releases all resources
 	 */
 	public void destroy() {
-		stopListeners.each {
-			it.run()
-		}
 		signalPaths.each {it.destroy()}
 		globals.destroy()
 		
-		if (deleteOnStop)
+		if (adhoc)
 			signalPathService.deleteRunningSignalPathReferences(this)
-		else signalPathService.updateState(getRunnerId(), "stopped")
+		else signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 	}
 	
 	public void abort() {

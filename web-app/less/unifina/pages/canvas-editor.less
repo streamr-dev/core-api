@@ -1,0 +1,84 @@
+// BUILD PAGE STYLES
+body.canvas-editor-page {
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+	.form-group-period .input-group-addon {
+		width: 60px;
+	}
+
+	&.selected-theme .breadcrumb-page {
+		margin-top: 0px;
+	}
+
+	.load-save-group {
+		width: 100%;
+		& > .btn, & > .btn-group {
+			width: 33.33%;
+		}
+		& > .btn-group > .btn {
+			width: 100%;
+		}
+	}
+
+	#save-dropdown-menu .disabled {
+		display: none;
+	}
+
+	.nav-tabs.run-mode-tabs {
+		& > li > a:hover,
+		& > li > a:active {
+			color: #999;
+		}
+	}
+
+	.run-button {
+		i.fa {
+			margin-right: 5px;
+		}
+	}
+
+	.run-group {
+		button.dropdown-toggle {
+			padding-left: 0px;
+			padding-right: 0px; 
+		}
+	}
+
+	#content-wrapper {
+		padding-top: @main-navbar-height;
+		padding-left: 0px;
+		padding-right: 0px;
+		padding-bottom: 0px;
+	}
+
+	#moduleTree {
+		max-height: 300px;
+		overflow:auto;	
+	}
+
+	#main-menu .twitter-typeahead {
+		width: 100%;
+	}
+	
+	#canvas-name-editor {
+		&.editing {
+			.canvas-name {
+				display:none;
+			}
+		}
+		&:not(.editing) {
+			input, button {
+				display: none;
+			}
+		}
+
+		.canvas-name {
+			cursor: pointer;
+		}
+	}
+
+	.breadcrumb {
+		margin-bottom: 0px;
+	}
+}

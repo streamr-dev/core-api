@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.unifina.push.IHasPushChannel;
+import com.unifina.push.PushChannel;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 
@@ -17,8 +18,21 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		super();
 	}
 
+	protected boolean pushToUiChannel(Object data) {
+		PushChannel rc = globals.getUiChannel();
+		if (rc == null) {
+			return false;
+		} else {
+			rc.push(data, uiChannelId);
+			return true;
+		}
+	}
+
 	@Override
 	public void connectionsReady() {
+		if (getUiChannelId() == null) {
+			throw new NullPointerException("uiChannelId of moduleWithUi " + name + " was unexpectedly null");
+		}
 		if (globals!=null && globals.getUiChannel()!=null) {
 			globals.getUiChannel().addChannel(uiChannelId);
 		}
@@ -34,24 +48,34 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	public String getUiChannelName() {
 		return getName();
 	}
-	
+
+	public Map getUiChannelMap() {
+		Map<String, String> uiChannel = new HashMap<>();
+		uiChannel.put("id", getUiChannelId());
+		uiChannel.put("name", getUiChannelName());
+		uiChannel.put("webcomponent", getWebcomponentName());
+		return uiChannel;
+	}
+
 	/**
 	 * Override this method if a webcomponent is available for this module. The
 	 * default implementation returns null, which means there is no webcomponent.
 	 * @return The name of the webcomponent.
 	 */
 	public String getWebcomponentName() {
-		return null;
+		if (domainObject == null) {
+			return null;
+		} else {
+			return domainObject.getWebcomponent();
+		}
 	}
 	
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		Map uiChannel = new HashMap<String,Object>();
-		uiChannel.put("id", getUiChannelId());
-		uiChannel.put("name", getUiChannelName());
+		Map uiChannel = getUiChannelMap();
 		
-		if (getWebcomponentName()!=null && globals.isRealtime())
+		if (getWebcomponentName() != null && globals.isRealtime())
 			uiChannel.put("webcomponent", getWebcomponentName());
 		
 		config.put("uiChannel", uiChannel);
@@ -80,5 +104,4 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		}
 		
 	}
-	
 }

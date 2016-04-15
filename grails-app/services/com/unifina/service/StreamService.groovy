@@ -1,47 +1,102 @@
 package com.unifina.service
 
-import grails.converters.JSON
-
-import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedFile
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.AbstractDataRangeProvider
+import com.unifina.feed.AbstractStreamListener
+import com.unifina.feed.DataRange
+import com.unifina.feed.FieldDetector
 import com.unifina.utils.IdGenerator
+import grails.converters.JSON
+import org.springframework.util.Assert
 
 class StreamService {
+
+	def grailsApplication
 	
-	def kafkaService
-	def feedFileService
-	
-	Stream createUserStream(params, SecUser user) {
+	Stream createStream(params, SecUser user) {
 		Stream stream = new Stream(params)
-		stream.uuid = IdGenerator.get()
+		stream.id = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
-		if (stream.localId==null)
-			stream.localId = stream.name
-		
-		stream.feed = Feed.load(7L) // API stream
-		stream.streamConfig = ([fields:[], topic: stream.uuid] as JSON)
-		
-		stream.save()
-		
-		if (!stream.hasErrors()) {
-			kafkaService.createTopics([stream.uuid])
+		stream.config = params.config
+
+		AbstractStreamListener streamListener
+		if (stream.feed != null) {
+			Map config = stream.getStreamConfigAsMap()
+			if (!config.fields) {
+				config.fields = []
+			}
+			streamListener = instantiateListener(stream)
+			streamListener.addToConfiguration(config, stream)
+			stream.config = config as JSON
+		}
+
+		if (!stream.validate()) {
+			throw new ValidationException(stream.errors)
+		}
+
+		stream.save(failOnError: true)
+		if (streamListener) {
+			streamListener.afterStreamSaved(stream)
 		}
 		return stream
 	}
 	
 	void deleteStream(Stream stream) {
-		if (stream.feed.id==7) {
-			def feedFiles = FeedFile.findAllByStream(stream, [sort:'beginDate'])
-			feedFiles.each {
-				feedFileService.deleteFile(it)
-			}
-			FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream", [stream: stream])
-			kafkaService.deleteTopics([stream.uuid])
-			stream.delete(flush:true)
+		AbstractStreamListener streamListener = instantiateListener(stream)
+		streamListener.beforeDelete(stream)
+		stream.delete(flush:true)
+	}
+
+	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
+		FieldDetector fieldDetector = instantiateDetector(stream)
+		fieldDetector.setFlattenMap(flattenHierarchies)
+		def fields = fieldDetector?.detectFields(stream)
+		if (fields) {
+			Map config = stream.getStreamConfigAsMap()
+			config.fields = fields
+			stream.config = config as JSON
+			stream.save(flush: true, failOnError: true)
+			return true
+		} else {
+			return false
 		}
-		else throw new RuntimeException("Unable to delete stream $stream.id, feed: $stream.feed.id")
+	}
+
+	// TODO: move to FeedService
+	private AbstractStreamListener instantiateListener(Stream stream) {
+		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
+		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
+		return clazz.newInstance(grailsApplication)
+	}
+
+	// TODO: move to FeedService
+	private FieldDetector instantiateDetector(Stream stream) {
+		if (stream.feed.fieldDetectorClass == null) {
+			return null
+		} else {
+			Class clazz = getClass().getClassLoader().loadClass(stream.feed.fieldDetectorClass)
+			return clazz.newInstance(grailsApplication)
+		}
+
+	}
+
+	// TODO: move to FeedService
+	private AbstractDataRangeProvider instantiateDataRangeProvider(Stream stream) {
+		if (stream.feed.dataRangeProviderClass == null) {
+			return null
+		} else {
+			Class clazz = getClass().getClassLoader().loadClass(stream.feed.dataRangeProviderClass)
+			return clazz.newInstance(grailsApplication)
+		}
+	}
+
+	DataRange getDataRange(Stream stream) {
+		AbstractDataRangeProvider provider = instantiateDataRangeProvider(stream)
+		if (provider)
+			return provider.getDataRange(stream)
+		else return null
 	}
 }

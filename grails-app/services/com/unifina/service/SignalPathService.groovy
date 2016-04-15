@@ -1,9 +1,30 @@
 package com.unifina.service
 
+import com.unifina.datasource.HistoricalDataSource
+import com.unifina.datasource.DataSource
+import com.unifina.datasource.HistoricalDataSource
+import com.unifina.datasource.IStartListener
+import com.unifina.datasource.IStopListener
+import com.unifina.datasource.RealtimeDataSource
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.exceptions.CanvasUnreachableException
+import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.ModuleWithUI
+import com.unifina.signalpath.RuntimeRequest
+import com.unifina.signalpath.RuntimeResponse
+import com.unifina.signalpath.SignalPath
+import com.unifina.signalpath.SignalPathRunner
+import com.unifina.signalpath.UiChannelIterator
+import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.NetworkInterfaceUtils
 import grails.converters.JSON
+import grails.transaction.NotTransactional
 import grails.transaction.Transactional
 import groovy.transform.CompileStatic
+import org.apache.log4j.Logger
 
 import java.nio.charset.StandardCharsets
 import java.security.AccessControlException
@@ -12,30 +33,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
-import org.codehaus.groovy.grails.web.json.JSONObject
-
-import com.mashape.unirest.http.HttpResponse
-import com.mashape.unirest.http.Unirest
-import com.unifina.datasource.BacktestDataSource
-import com.unifina.datasource.DataSource
-import com.unifina.datasource.RealtimeDataSource
-import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.Module
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.UiChannel
-import com.unifina.push.KafkaPushChannel
-import com.unifina.push.PushChannelEventListener
-import com.unifina.signalpath.RuntimeRequest
-import com.unifina.signalpath.RuntimeResponse
-import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.SignalPathRunner
-import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.IdGenerator
-import com.unifina.utils.NetworkInterfaceUtils
 
 class SignalPathService {
 
@@ -46,40 +43,43 @@ class SignalPathService {
 	def grailsLinkGenerator
 	def kafkaService
 	def serializationService
-	
+	def permissionService
+	ApiService apiService
+
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
 	
-	public SignalPath jsonToSignalPath(Map signalPathData, boolean connectionsReady, Globals globals, boolean isRoot) {
+	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
 		SignalPath sp = new SignalPath(isRoot)
+
 		sp.globals = globals
 		sp.init()		
-		sp.configure(signalPathData)
-		
-		if (connectionsReady)
+		sp.configure(signalPathMap)
+		if (connectionsReady) {
 			sp.connectionsReady()
+		}
+
 		return sp
 	}
 	
-	public Map signalPathToJson(SignalPath sp) {
-		return  [name: sp.name, modules:sp.modules.collect {it.getConfiguration()}]
+	public Map signalPathToMap(SignalPath sp) {
+		return  [
+			name: sp.name,
+			modules: sp.modules.collect { it.getConfiguration() },
+			settings: sp.globals.signalPathContext,
+			hasExports: sp.hasExports(),
+			uiChannel: sp.getUiChannelMap()
+		]
 	}
 	
 	/**
-	 * Rebuilds a saved representation of a SignalPath along with its context.
+	 * Rebuilds a saved representation of a SignalPath along with its context.a
 	 * Potentially modifies the map given as parameter.
 	 * @param json
 	 * @return
 	 */
-	public Map reconstruct(Map json, Globals globals) {
-		SignalPath sp = jsonToSignalPath(json.signalPathData, true, globals, true)
-		
-		// TODO: remove backwards compatibility
-		if (json.timeOfDayFilter)
-			json.signalPathContext.timeOfDayFilter = json.timeOfDayFilter
-		
-		json.signalPathData = signalPathToJson(sp)
-		
-		return json
+	public Map reconstruct(Map signalPathMap, Globals globals) {
+		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
+		return signalPathToMap(sp)
 	}
 	
 	public byte[] compress(String s) {
@@ -120,98 +120,27 @@ class SignalPathService {
 		return new String(unzipped,StandardCharsets.UTF_8)
 	}
 	
-	public DataSource createDataSource(Map signalPathContext, Globals globals) {
-		// Read the DataSource class from signalPathContext
-
-		// Return the historical DataSource by default
-		if (signalPathContext.live==null || !signalPathContext.live)
-			return new BacktestDataSource(globals)
+	public DataSource createDataSource(boolean adhoc, Globals globals) {
+		if (adhoc)
+			return new HistoricalDataSource(globals)
 		else return new RealtimeDataSource(globals)
-		
 	}
-	
-	public List<RunningSignalPath> launch(List<Map> signalPathData, Map signalPathContext, SecUser user, boolean adhoc) {
-		
-		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		globals.uiChannel = new KafkaPushChannel(kafkaService)
-		
-		// Create the runner thread
-		SignalPathRunner runner = new SignalPathRunner(signalPathData, globals, adhoc)
-		String runnerId = runner.runnerId
-		
-		// Abort on client disconnect
-		globals.uiChannel.addEventListener(new PushChannelEventListener() {
-			public void onClientDisconnected() {
-				runner.abort()
-			}
-		})
-		
-		// Start the runner thread
-		runner.start()
-		
-		// Save reference to running SignalPaths to the database
-		return createRunningSignalPathReferences(runner, user, adhoc)
-	}
-	
-	/**
-	 * Creates RunningSignalPath domain objects into the database with initial state "starting".
-	 * The RunningSignalPaths can be subsequently started by calling startLocal() or startRemote().
-	 * @param signalPathData
-	 * @param user
-	 * @param adhoc
-	 * @param resetUiChannelIds
-	 * @return
-	 */
-	@Transactional
-	public RunningSignalPath createRunningSignalPath(Map sp, SecUser user, boolean adhoc, boolean resetUiChannelIds) {
-		if (resetUiChannelIds) {
-			sp.uiChannel = [id:IdGenerator.get(), name: "Notifications"]
-			sp.modules.each {
-				if (it.uiChannel)
-					it.uiChannel.id = IdGenerator.get()
-			}
-		}
-		
-		RunningSignalPath rsp = new RunningSignalPath()
-		rsp.name = sp.name ?: "(unsaved canvas)"
-		rsp.user = user
-		rsp.json = (sp as JSON)
-		rsp.state = "starting"
-		rsp.adhoc = adhoc
-		
-		UiChannel rspUi = new UiChannel()
-		rspUi.id = sp.uiChannel.id
-		rsp.addToUiChannels(rspUi)
-		
-		for (Map it : sp.modules) { 
-			if (it.uiChannel) {
-				UiChannel ui = new UiChannel()
-				ui.id = it.uiChannel.id
-				ui.hash = it.hash.toString()
-				ui.module = Module.load(it.id)
-				ui.name = it.uiChannel.name
-				
-				rsp.addToUiChannels(ui)
-			}
-		}
-		
-		rsp.save(flush:true, failOnError:true)
-		
-		return rsp
-	}
-	
+
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
+
+		def uiChannelIds = []
+
+		runner.signalPaths.each {
+			Canvas canvas = it.canvas.refresh()
+			UiChannelIterator.over(canvas.toMap()).each {
+				uiChannelIds << it.id
+			}
+			canvas.delete()
+		}
+
 		// Delayed-delete the topics in one hour
-		List<UiChannel> channels = UiChannel.findAll { runningSignalPath.runner == runner.getRunnerId()}
-		kafkaService.createDeleteTopicTask(channels.collect{it.id}, 60*60*1000)
-		
-		List uiIds = UiChannel.executeQuery("select ui.id from UiChannel ui where ui.runningSignalPath.runner = ?", [runner.getRunnerId()])
-		if (!uiIds.isEmpty())
-			UiChannel.executeUpdate("delete from UiChannel ui where ui.id in (:list)", [list:uiIds])
-			
-		RunningSignalPath.executeUpdate("delete from RunningSignalPath r where r.runner = ?", [runner.getRunnerId()])
+		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -244,173 +173,160 @@ class SignalPathService {
 	/**
 	 * @throws SerializationException if de-serialization fails when resuming from existing state
      */
-	void startLocal(RunningSignalPath rsp, Map signalPathContext) throws SerializationException {
+	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
-		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication)
-		globals.uiChannel = new KafkaPushChannel(kafkaService, rsp.adhoc)
+		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
+		globals.uiChannel = new KafkaPushChannel(kafkaService, canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (rsp.isNotSerialized() || rsp.adhoc) {
-			runner = new SignalPathRunner([JSON.parse(rsp.json)], globals, rsp.adhoc)
-			log.info("Creating new signalPath connections " + rsp.id)
+		if (canvas.isNotSerialized() || canvas.adhoc) {
+			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
+			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
 		} else {
-			SignalPath sp = serializationService.deserialize(rsp.serialized)
-			runner = new SignalPathRunner(sp, globals, rsp.adhoc)
-			log.info("De-serializing existing signalPath " + rsp.id)
+			SignalPath sp = serializationService.deserialize(canvas.serialized)
+			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
+			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 		}
 
-		runner.addStartListener({
-
-			if (!servletContext["signalPathRunners"]) {
-				servletContext["signalPathRunners"] = [:]
+		runner.addStartListener(new IStartListener() {
+			@Override
+			void onStart() {
+				if (!servletContext["signalPathRunners"]) {
+					servletContext["signalPathRunners"] = [:]
+				}
+				servletContext["signalPathRunners"].put(runner.runnerId, runner)
 			}
-			servletContext["signalPathRunners"].put(runner.runnerId, runner)
 		})
 
-		runner.addStopListener({
-			servletContext["signalPathRunners"].remove(runner.runnerId)
+		runner.addStopListener(new IStopListener() {
+			@Override
+			void onStop() {
+				servletContext["signalPathRunners"].remove(runner.runnerId)
+			}
 		})
 
 		runner.signalPaths.each {
-			it.runningSignalPath = rsp
+			it.canvas = canvas
 		}
+
 		String runnerId = runner.runnerId
-		
-		// Start the runner thread
-		runner.start()
-		
-		// Wait for runner to be in running state
-		runner.waitRunning(true)
-		if (!runner.getRunning())
-			log.error("Timed out while waiting for runner $runnerId to start!")
-		
-		rsp.runner = runnerId
-		rsp.state = "running"
-		
+		canvas.runner = runnerId
+
 		// Use the link generator to get the protocol and port, but use network IP address
 		// as the host to get the address of this individual server
-		String link = grailsLinkGenerator.link(controller:'live', action:'request', absolute:true)
-		URL url = new URL(link)
-		
-		rsp.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
-		rsp.requestUrl = url.protocol+"://"+rsp.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/live/request")
-		
-		rsp.save()
+		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
+		URL url = new URL(root)
+
+		canvas.server = NetworkInterfaceUtils.getIPAddress(grailsApplication.config.streamr.ip.address.prefixes ?: []).getHostAddress()
+		canvas.requestUrl = url.protocol+"://"+canvas.server+":"+(url.port>0 ? url.port : url.defaultPort)+grailsLinkGenerator.link(uri:"/api/v1/canvases/$canvas.id", absolute: false)
+		canvas.state = Canvas.State.RUNNING
+
+		canvas.save()
+
+		// Start the runner thread
+		runner.start()
+
+		// Wait for runner to be in running state
+		runner.waitRunning(true)
+		if (!runner.getRunning()) {
+			log.error("Timed out while waiting for runner $runnerId to start!")
+		}
 	}
-	
-	boolean stopLocal(RunningSignalPath rsp) {
-		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(rsp.runner)
+
+	boolean stopLocal(Canvas canvas) {
+		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(canvas.runner)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
 			
 			// Wait for runner to be stopped state
 			runner.waitRunning(false)
 			if (runner.getRunning()) {
-				log.error("Timed out while waiting for runner $rsp.runner to stop!")
+				log.error("Timed out while waiting for runner $canvas.runner to stop!")
 				return false
+			} else {
+				return true
 			}
-			else return true
 		}
 		else {
-			log.error("stopLocal: could not find runner $rsp.runner!")
-			updateState(rsp.runner, "stopped")
+			log.error("stopLocal: could not find runner $canvas.runner!")
+			updateState(canvas.runner, Canvas.State.STOPPED)
 			return false
 		}
 	}
-	
-	@CompileStatic
-	RuntimeResponse stopRemote(RunningSignalPath rsp, SecUser user) {
-		return runtimeRequest([type:"stopRequest"], rsp, null, user)
-	}
-	
-	@CompileStatic
-	boolean ping(RunningSignalPath rsp, SecUser user) {
-		RuntimeResponse response = runtimeRequest([type:'ping'], rsp, null, user)
-		return response.isSuccess()
-	}
-	
-	@CompileStatic
-	RuntimeResponse sendRemoteRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user) {
-		def req = Unirest.post(rsp.requestUrl)
-		def json = [
-			local: true,
-			msg: msg,
-			id: rsp.id
-		]
-		
-		if (hash)
-			json.hash = hash
-			
-		if (user) {
-			json.key = user.apiKey
-			json.secret = user.apiSecret
-		}
 
-		req.header("Content-Type", "application/json")
-		
-		log.info("sendRemoteRequest: $json")
-		
-		HttpResponse<String> response = req.body((json as JSON).toString()).asString()
-
-		try {
-			Map map = (JSONObject) JSON.parse(response.getBody())
-			return new RuntimeResponse(map)
-		} catch (ConverterException e) {
-			log.error("sendRemoteRequest: Failed to parse JSON response: "+response.getBody())
-			throw new RuntimeException("Failed to parse JSON response", e)
-		}
+	@NotTransactional
+	@CompileStatic
+	Map stopRemote(Canvas canvas, SecUser user) {
+		return runtimeRequest([type:"stopRequest"], canvas, null, user)
 	}
 	
-	RuntimeResponse runtimeRequest(Map msg, RunningSignalPath rsp, Integer hash, SecUser user, boolean localOnly = false) {
-		SignalPathRunner spr = servletContext["signalPathRunners"]?.get(rsp.runner)
+	@CompileStatic
+	boolean ping(Canvas canvas, SecUser user) {
+		runtimeRequest([type:'ping'], canvas, null, user)
+		return true
+	}
+	
+	@CompileStatic
+	Map sendRemoteRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user) {
+		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
+		String url = canvas.requestUrl + (moduleId == null ? "/request" : "/modules/$moduleId/request") + "?local=true"
+		return apiService.post(url, msg, user)
+	}
+
+	private SignalPathRunner getLocalRunner(Canvas canvas) {
+		return servletContext["signalPathRunners"]?.get(canvas.runner)
+	}
+	
+	Map runtimeRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user, boolean localOnly = false) {
+		SignalPathRunner spr = getLocalRunner(canvas)
 		
-		log.info("runtimeRequest: $msg, RunningSignalPath: $rsp.id, module: $hash, localOnly: $localOnly")
+		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $moduleId, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
 			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
-			return new RuntimeResponse([success:false, error: "Canvas does not appear to be running!"])
+			throw new CanvasUnreachableException("Canvas does not appear to be running!")
 		}
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
-				return sendRemoteRequest(msg, rsp, hash, user)
+				return sendRemoteRequest(msg, canvas, moduleId, user)
 			} catch (Exception e) {
-				log.error("Unable to contact remote RunningSignalPath id $rsp.id at $rsp.requestUrl")
-				return new RuntimeResponse([success:false, error: "Unable to communicate with remote server!"])
+				log.error("Unable to contact remote Canvas id $canvas.id at $canvas.requestUrl")
+				throw new CanvasUnreachableException("Unable to communicate with remote server!")
 			}
 		}
 		// If runner found
 		else {
 			SignalPath sp = spr.signalPaths.find {
-				it.runningSignalPath.id == rsp.id
+				it.canvas.id == canvas.id
 			}
 			
 			if (!sp) {
-				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $rsp, module: $hash")
-				return new RuntimeResponse([success:false, error: "Canvas not found in runner. This should not happen."])
+				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $canvas, module: $moduleId")
+				throw new CanvasUnreachableException("Canvas not found in runner. This should not happen.")
 			}
 			else {				
-				RuntimeRequest request = new RuntimeRequest(msg)
+				RuntimeRequest request = new RuntimeRequest(msg, new Date())
 				request.setAuthenticated(user != null)
 				
 				/**
 				 * Requests for the runner thread
 				 */
 				if (request.type=="stopRequest") {
-					if (!request.isAuthenticated())
+					if (!request.isAuthenticated()) {
 						throw new AccessControlException("stopRequest requires authentication!");
-		
-					stopLocal(rsp);
-					
-					return new RuntimeResponse(true, [request:request])
-				}
-				else if (request.type=="ping") {
-					if (!rsp.shared && !request.isAuthenticated())
+					}
+
+					stopLocal(canvas);
+
+					return request
+				} else if (request.type=="ping") {
+					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
 					
-					return new RuntimeResponse(true, [request:request])
+					return request
 				}
 				/**
 				 * Requests for SignalPaths and modules
@@ -418,8 +334,8 @@ class SignalPathService {
 				else {
 					// Handle module-specific message
 					Future<RuntimeResponse> future
-					if (hash!=null) {
-						future = sp.getModule(hash).onRequest(request)
+					if (moduleId!=null) {
+						future = sp.getModule(moduleId).onRequest(request)
 					}
 					// Handle signalpath-specific message
 					else {
@@ -431,7 +347,7 @@ class SignalPathService {
 						log.info("runtimeRequest: responding with $resp")
 						return resp
 					} catch (TimeoutException e) {
-						return new RuntimeResponse([success:false, error: "Timed out while waiting for response."])
+						throw new CanvasUnreachableException("Timed out while waiting for response.")
 					}
 				}
 				
@@ -440,8 +356,8 @@ class SignalPathService {
 		
 	}
 	
-	void updateState(String runnerId, String state) {
-		RunningSignalPath.executeUpdate("update RunningSignalPath rsp set rsp.state = ? where rsp.runner = ?", [state, runnerId])
+	void updateState(String runnerId, Canvas.State state) {
+		Canvas.executeUpdate("update Canvas c set c.state = ? where c.runner = ?", [state, runnerId])
 	}
 	
 	@Deprecated
@@ -506,25 +422,25 @@ class SignalPathService {
 
 	@Transactional
 	def saveState(SignalPath sp) {
-		RunningSignalPath rsp = sp.runningSignalPath
-		rsp = rsp.attach()
+		Canvas canvas = sp.canvas
 
 		try {
-			rsp.serialized = serializationService.serialize(sp)
-			rsp.serializationTime = sp.globals.time
-			RunningSignalPath.executeUpdate("update RunningSignalPath rsp set rsp.serialized = ?, rsp.serializationTime = ? where rsp.id = ?",
-				[rsp.serialized, rsp.serializationTime, rsp.id])
-			log.info("RunningSignalPath " + rsp.id + " serialized")
+			canvas.serialized = serializationService.serialize(sp)
+			canvas.serializationTime = sp.globals.time
+			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
+				[canvas.serialized, canvas.serializationTime, canvas.id])
+			log.info("Canvas " + canvas.id + " serialized.")
 		} catch (SerializationException ex) {
-			log.error("Serialization of runningSignalPath " + rsp.id + " failed")
+			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
 		}
 	}
 
 	@Transactional
-	def clearState(RunningSignalPath rsp) {
-		rsp.serialized = null
-		rsp.save(failOnError: true)
-		log.info("RunningSignalPath " + rsp.id + " state cleared")
+	def clearState(Canvas canvas) {
+		canvas.serialized = null
+		canvas.serializationTime = null
+		canvas.save(failOnError: true)
+		log.info("Canvas " + canvas.id + " serialized state cleared.")
 	}
 }

@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import com.unifina.feed.util.RawMessageIterator;
 import com.unifina.kafkaclient.UnifinaKafkaMessageFactory;
 
-public class KafkaHistoricalIterator implements Iterator<Object> {
+public class KafkaHistoricalIterator implements Iterator<KafkaMessage> {
 
 	private RawMessageIterator rawIterator;
 	private KafkaMessageParser parser;
@@ -37,7 +37,7 @@ public class KafkaHistoricalIterator implements Iterator<Object> {
 	}
 
 	@Override
-	public Object next() {
+	public KafkaMessage next() {
 		msgLength = rawIterator.nextMessageLength();
 		raw = rawIterator.next();
 		if (raw==null)

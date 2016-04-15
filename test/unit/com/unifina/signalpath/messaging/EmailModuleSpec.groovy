@@ -38,7 +38,7 @@ public class EmailModuleSpec extends Specification {
 		module = new EmailModule()
 	}
 	
-	private void initContext(Map context, SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
+	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
 		globals = new Globals(context, grailsApplication, user)
 		globals.time = new Date()
 		
@@ -49,7 +49,8 @@ public class EmailModuleSpec extends Specification {
 	}
 
 	void "emailModule sends the correct email"() {
-		initContext([live:true])
+		initContext()
+		globals.realtime = true
 		globals.dataSource = new RealtimeDataSource()
 		when:
 		Map inputValues = [
@@ -78,7 +79,8 @@ public class EmailModuleSpec extends Specification {
 	}
 
 	void "module should send an email for a realtime datasource"(){
-		initContext([live:true])
+		initContext()
+		globals.realtime = true
 		
 		when: "feedback sent from the feedback page"
 			module.sub.receive("Test subject")
@@ -110,7 +112,8 @@ value2: test value
 	}
 	
 	void "module should send a notification for a non-realtime datasource"(){
-		initContext([:])
+		initContext()
+		globals.realtime = false
 		module.parentSignalPath = new SignalPath()
 		globals.uiChannel = Mock(PushChannel)
 		
@@ -138,7 +141,8 @@ value2: test value
 	}
 	
 	void "If trying to send emails too often send notification to warn about it"() {
-		initContext([live:true])
+		initContext()
+		globals.realtime = true
 		
 		module = new EmailModule(){
 			long myTime

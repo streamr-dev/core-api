@@ -1,21 +1,17 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-
-import java.security.AccessControlException
-
 import org.atmosphere.cpr.BroadcasterFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.util.FileCopyUtils
 
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.signalpath.RunningSignalPath
-import com.unifina.domain.signalpath.SavedSignalPath
 import com.unifina.service.SignalPathService
-import com.unifina.service.UnifinaSecurityService
-import com.unifina.signalpath.SignalPathRunner
+import com.unifina.service.PermissionService
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 
@@ -27,23 +23,40 @@ class CanvasController {
 	GrailsApplication grailsApplication
 	SpringSecurityService springSecurityService
 	SignalPathService signalPathService
-	UnifinaSecurityService unifinaSecurityService
+	PermissionService permissionService
 	
 	def index() {
-		redirect(action: "build", params:params)
+		redirect(action: "editor", params:params)
 	}
 
-	def build() {
-		def beginDate = new Date()-1
-		def endDate = new Date()-1
-		
-		def load = null
-		
-		if (params.load!=null) {
-			load = createLink(controller:"savedSignalPath",action:"load",params:[id:params.load])
+	def list() {
+		def user = springSecurityService.currentUser
+		Closure criteriaFilter = {
+			eq "adhoc", false
+			if (params.term) {
+				like "name", "%${params.term}%"
+			}
+			if (params.state) {
+				inList "state", params.list("state").collect { String param -> Canvas.State.fromValue(param) }
+			}
+			order "dateCreated", "desc"
 		}
-		
-		[beginDate:beginDate, endDate:endDate, load:load, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+		List<Canvas> readableCanvases = permissionService.get(Canvas, user, Operation.READ, criteriaFilter)
+		List<Canvas> shareableCanvases = permissionService.get(Canvas, user, Operation.SHARE, criteriaFilter)
+		[canvases: readableCanvases, shareable: shareableCanvases, user: user, stateFilter: params.state ? params.list("state") : []]
+	}
+
+	def editor() {
+		def beginDate = new Date()
+		def endDate = new Date()
+
+		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+	}
+
+	// Can be accessed anonymously for embedding canvases in iframes (eg. the landing page)
+	@Secured("IS_AUTHENTICATED_ANONYMOUSLY")
+	def embed() {
+		[id:params.id]
 	}
 	
 	def reconstruct() {
@@ -78,5 +91,58 @@ class CanvasController {
 	def debug() {
 		return [runners: servletContext["signalPathRunners"], returnChannels: servletContext["returnChannels"], broadcasters: BroadcasterFactory.getDefault().lookupAll()]
 	}
-	
+
+	def loadBrowser() {
+		def result = [
+				browserId: params.browserId,
+				headers: ["Name", "State"],
+				contentUrl: createLink(
+						controller: "canvas",
+						action: "loadBrowserContent",
+						params: [
+								browserId: params.browserId,
+								command: params.command
+						]
+				)
+		]
+
+		render(template: "loadBrowser", model: result)
+	}
+
+	def loadBrowserContent() {
+		def max = params.int("max") ?: 100
+		def offset = params.int("offset") ?: 0
+
+		def canvases = []
+		if (params.browserId == 'examplesLoadBrowser') {
+			// bypass Permission check; examples are public (make sure example-bit can't be set through API!)
+			canvases = Canvas.withCriteria {
+				eq "example", true
+				order "dateCreated", "asc"
+				maxResults max
+				firstResult offset
+			}
+		} else if (params.browserId == 'archiveLoadBrowser') {
+			def user = springSecurityService.currentUser
+			canvases = permissionService.get(Canvas, user, Operation.READ) {
+				eq "example", false
+				eq "adhoc", false
+				order "dateCreated", "desc"
+				maxResults max
+				firstResult offset
+			}
+		}
+
+		return [
+			canvases: canvases.collect {[
+				id: it.id,
+				name: it.name,
+				state: it.state,
+				command: params.command,
+				offset: offset++
+			]}
+		]
+	}
+
+
 }

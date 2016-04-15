@@ -18,11 +18,11 @@ import com.unifina.utils.Globals;
  * those modules reside.
  * @author Henri
  *
- * @param <T> The type of objects than can be registered
+ * @param <ModuleClass> The type of objects than can be registered
  */
-public abstract class AbstractEventRecipient<T> implements IEventRecipient, IStartListener {
+public abstract class AbstractEventRecipient<ModuleClass, MessageClass extends ITimestamped> implements IEventRecipient, IStartListener {
 
-	protected ArrayList<T> modules = new ArrayList<>();
+	protected ArrayList<ModuleClass> modules = new ArrayList<>();
 	protected int moduleSize = 0;
 	
 	protected Propagator propagator = new Propagator();
@@ -50,11 +50,11 @@ public abstract class AbstractEventRecipient<T> implements IEventRecipient, ISta
 		return clazz;
 	}
 	
-	public void register(Object module) {
+	public void register(ModuleClass module) {
 		if (!getParameterizedClass().isAssignableFrom(module.getClass()))
 			throw new IllegalArgumentException("Can not register module of type: "+module.getClass()+", required type: "+getParameterizedClass()+". Module: "+module);
 		else if (!modules.contains(module)) {
-			modules.add((T)module);
+			modules.add(module);
 			moduleSize = modules.size();
 			
 			if (module instanceof AbstractSignalPathModule) {
@@ -74,7 +74,7 @@ public abstract class AbstractEventRecipient<T> implements IEventRecipient, ISta
 		return propagator;
 	}
 	
-	public List<T> getModules() {
+	public List<ModuleClass> getModules() {
 		return modules;
 	}
 	
@@ -84,6 +84,6 @@ public abstract class AbstractEventRecipient<T> implements IEventRecipient, ISta
 	 * modules. Propagation will take place immediately after calling this method.
 	 * @param event
 	 */
-	protected abstract void sendOutputFromModules(FeedEvent event);
+	protected abstract void sendOutputFromModules(FeedEvent<MessageClass, ? extends IEventRecipient> event);
 	
 }

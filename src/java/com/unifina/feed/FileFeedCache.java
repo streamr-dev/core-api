@@ -97,7 +97,7 @@ public class FileFeedCache extends Thread implements IFeedCache<String> {
 	
 	@Override
 	public void receive(Message msg) {
-		queue.add(msg.getRawMessage().toString());
+		queue.add((msg instanceof ParsedMessage ? ((ParsedMessage)msg).getRawMessage() : msg).toString());
 		queuedSize++;
 	}
 

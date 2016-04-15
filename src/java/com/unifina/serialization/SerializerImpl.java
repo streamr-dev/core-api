@@ -3,17 +3,16 @@ package com.unifina.serialization;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.domain.security.SecUser;
+import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.domain.signalpath.RunningSignalPath;
-import com.unifina.domain.signalpath.SavedSignalPath;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
-import org.grails.datastore.gorm.GormStaticApi;
 import org.nustaq.serialization.*;
+import org.nustaq.serialization.coders.Unknown;
 import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
 
 import java.io.*;
@@ -25,24 +24,20 @@ public class SerializerImpl implements Serializer {
 
 	private static final Logger logger = Logger.getLogger(SerializerImpl.class);
 
-	private final FSTConfiguration conf = FSTConfiguration.createJsonConfiguration();
+	private final FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
 	public SerializerImpl() {
-		//((JsonFactory) conf.getCoderSpecific()).configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
 		conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
-		conf.registerSerializer(Double.class, new DoubleSerializer(), true);
-		conf.registerSerializer(SpecialValueDouble.class, new SpecialValueDoubleSerializer(), true);
 		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
 		conf.registerSerializer(JSONArray.class, new JSONArraySerializer(), true);
 
+		conf.registerSerializer(Canvas.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
-		conf.registerSerializer(RunningSignalPath.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(SecUser.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Stream.class, new DomainClassSerializer(), false);
-		conf.registerSerializer(SavedSignalPath.class, new DomainClassSerializer(), false);
 	}
 
 	public SerializerImpl(ClassLoader classLoader) {
@@ -51,14 +46,11 @@ public class SerializerImpl implements Serializer {
 	}
 
 	@Override
-	public String serializeToString(Object object) throws SerializationException {
+	public byte[] serializeToByteArray(Object object) throws SerializationException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		serialize(object, out);
-		try {
-			return out.toString("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new SerializationException("Unsupported encoding", e);
-		}
+		return out.toByteArray();
+
 	}
 
 	@Override
@@ -79,8 +71,8 @@ public class SerializerImpl implements Serializer {
 	}
 
 	@Override
-	public Object deserializeFromString(String string) throws SerializationException {
-		return deserialize(new ByteArrayInputStream(string.getBytes()));
+	public Object deserializeFromByteArray(byte[] bytes) throws SerializationException {
+		return deserialize(new ByteArrayInputStream(bytes));
 	}
 
 	@Override
@@ -94,6 +86,9 @@ public class SerializerImpl implements Serializer {
 			FSTObjectInput fstInput = conf.getObjectInput(in);
 			Object object = fstInput.readObject();
 			in.close();
+			if (object instanceof Unknown) {
+				throw new ClassNotFoundException("Deserialization failed");
+			}
 			return object;
 		} catch (ClassNotFoundException | IOException | NullPointerException e) {
 			throw new SerializationException("Failed to deserialize", e);
@@ -102,46 +97,6 @@ public class SerializerImpl implements Serializer {
 
 
 	// Custom serializers below
-
-	// TODO: hack for getting NaN Double values serialized, definitely not optimal
-	private static class SpecialValueDoubleSerializer extends FSTBasicObjectSerializer {
-
-		@Override
-		public void writeObject(FSTObjectOutput out,
-								Object toWrite,
-								FSTClazzInfo clzInfo,
-								FSTClazzInfo.FSTFieldInfo referencedBy,
-								int streamPosition) throws IOException {
-			out.writeStringUTF(((SpecialValueDouble)toWrite).d);
-		}
-
-		@Override
-		public Object instantiate(Class objectClass,
-								  FSTObjectInput in,
-								  FSTClazzInfo serializationInfo,
-								  FSTClazzInfo.FSTFieldInfo referencee,
-								  int streamPosition) throws Exception {
-			return Double.parseDouble(in.readStringUTF());
-		}
-	}
-
-	// TODO: hack for getting NaN Double values serialized, definitely not optimal
-	class DoubleSerializer extends FSTBigNumberSerializers.FSTDoubleSerializer {
-		@Override
-		public void writeObject(FSTObjectOutput out,
-								Object toWrite,
-								FSTClazzInfo clzInfo,
-								FSTClazzInfo.FSTFieldInfo referencedBy,
-								int streamPosition) throws IOException {
-			Double d = (Double) toWrite;
-			if (d.isNaN() || d.isInfinite()) {
-				out.writeObjectInternal(new SpecialValueDouble(d), conf.getClazzInfo(SpecialValueDouble.class));
-			} else {
-				super.writeObject(out, toWrite, clzInfo, referencedBy, streamPosition);
-			}
-		}
-	}
-
 	private static class DescriptiveStatisticsSerializer extends FSTBasicObjectSerializer {
 
 		@Override
@@ -274,8 +229,8 @@ public class SerializerImpl implements Serializer {
 								int streamPosition) throws IOException {
 			try {
 				Method method = toWrite.getClass().getMethod("getId");
-				Long id = (Long) method.invoke(toWrite);
-				out.writeLong(id);
+				Object id = method.invoke(toWrite);
+				out.writeObject(id);
 			} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
@@ -287,7 +242,7 @@ public class SerializerImpl implements Serializer {
 										   FSTClazzInfo serializationInfo,
 										   FSTClazzInfo.FSTFieldInfo referencee,
 										   int streamPosition) throws Exception {
-			return InvokerHelper.invokeMethod(objectClass, "get", in.readLong());
+			return InvokerHelper.invokeMethod(objectClass, "get", in.readObject());
 		}
 	}
 }

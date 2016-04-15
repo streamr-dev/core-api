@@ -14,6 +14,7 @@ class ModuleService {
 
 	@CompileStatic
     public AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
+		// TODO: Permission check
 		// TODO: check that the owning user has the privileges to access this module
 		
 		// Load the class using the classloader of the Globals class so that the classes loaded

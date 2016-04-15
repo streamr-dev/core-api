@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
 /**
@@ -95,12 +96,12 @@ public abstract class Parameter<T> extends Input<T> {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 		
-		config.put("defaultValue",defaultValue);
+		config.put("defaultValue",formatValue(defaultValue));
 		
 		if (value!=null)
-			config.put("value",value);
+			config.put("value",formatValue(value));
 		else 
-			config.put("value",defaultValue);
+			config.put("value",formatValue(defaultValue));
 		
 		if (updateOnChange) {
 			config.put("updateOnChange", true);
@@ -119,7 +120,22 @@ public abstract class Parameter<T> extends Input<T> {
 		
  
 		if (config.containsKey("value")) {
-			T val = parseValue(config.get("value")==null ? null : config.get("value").toString());
+
+			T val;
+			Object configValue = config.get("value");
+			if (configValue == null)
+				val = null;
+			else {
+				// Check config value type and directly assign if possible
+				Class typeClass = getTypeClass();
+				if (typeClass.isAssignableFrom(configValue.getClass())) {
+					val = (T) configValue;
+				}
+				// Fallback to parsing
+				else {
+					val = parseValue(configValue.toString());
+				}
+			}
 			
 			// If unconnected, use the value contained in JSON
 			if (!conn) {
@@ -139,12 +155,15 @@ public abstract class Parameter<T> extends Input<T> {
 	}
 	
 	/**
-	 * Must return the value of type <T> represented by the String value s. 
+	 * Must return the value of type <T> represented by the String value s.
 	 * @param s
 	 * @return
 	 */
 	public abstract T parseValue(String s);
-	
+	public Object formatValue(T value) {
+		return value;
+	}
+
 	@Override
 	public boolean hasValue() {
 		// Parameters should always (look like they) have a value
