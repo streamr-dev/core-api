@@ -16,7 +16,6 @@ class ModuleService {
 	public AbstractSignalPathModule getModuleInstance(Module mod, Map config, SignalPath parent, Globals globals) {
 		// TODO: check that the owning user has the privileges to access this module
 
-		// globals.classLoader  or  new GroovyClassLoader()  could also be used
 		ClassLoader cl = this.getClass().getClassLoader()
 		AbstractSignalPathModule m = (AbstractSignalPathModule) cl.loadClass(mod.implementingClass).newInstance()
 		m.globals = globals

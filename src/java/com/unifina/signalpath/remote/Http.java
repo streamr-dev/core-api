@@ -100,7 +100,7 @@ public class Http extends AbstractHttpModule {
 
 		if (verb.hasBody()) {
 			try {
-				switch (bodyFormat) {
+				switch (bodyContentType) {
 					case BODY_FORMAT_JSON:
 						Object b = body.getValue();
 						String bodyString = b instanceof Map ? new JSONObject((Map) b).toString() :
@@ -118,7 +118,7 @@ public class Http extends AbstractHttpModule {
 						((HttpEntityEnclosingRequestBase) request).setEntity(new UrlEncodedFormEntity(inputNVPList));
 						break;
 					default:
-						throw new RuntimeException("Unexpected body format " + bodyFormat);
+						throw new RuntimeException("Unexpected body format " + bodyContentType);
 				}
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);

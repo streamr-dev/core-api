@@ -24,37 +24,39 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Functionality that is common to HTTP modules:
- *  - blocking/async requests
+ *  - sync/async requests
  *  - body formatting
  *  - SSL
  */
 public abstract class AbstractHttpModule extends AbstractSignalPathModule implements IEventRecipient {
 
-	// TODO: this probably should be enum or class?
-	public static final String BODY_FORMAT_JSON = "text/json";
-	public static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
-	public static final String BODY_FORMAT_PLAIN = "text/plain";
-	public static final String BODY_FORMAT_XML = "application/xml";
+	protected static final String BODY_FORMAT_JSON = "application/json";
+	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
+	protected static final String BODY_FORMAT_PLAIN = "text/plain";
+	protected static final String BODY_FORMAT_XML = "application/xml";
 
-	public static int DEFAULT_TIMEOUT = 30;
+	public static int DEFAULT_TIMEOUT_SECONDS = 30;
+	public static int MAX_CONNECTIONS = 10;
 
-	protected String bodyFormat = BODY_FORMAT_JSON;
+	protected String bodyContentType = BODY_FORMAT_JSON;
 	protected boolean trustSelfSigned = false;
-	protected boolean isBlocking = false;
-	protected int timeoutSeconds = DEFAULT_TIMEOUT;
+	protected boolean isAsync = false;
+	protected int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
+
+	private transient CloseableHttpAsyncClient cachedHttpClient;
 
 	/** This function is overridden so that the tests can inject a mock HttpAsyncClient */
 	protected HttpAsyncClient getHttpClient() {
-		if (_httpClient == null) {
+		if (cachedHttpClient == null) {
 			if (trustSelfSigned) {
 				try {
 					SSLContext sslcontext = SSLContexts
 							.custom()
 							.loadTrustMaterial(null, new TrustSelfSignedStrategy())
 							.build();
-					_httpClient = HttpAsyncClients.custom()
-							.setMaxConnTotal(10)
-							.setMaxConnPerRoute(10)
+					cachedHttpClient = HttpAsyncClients.custom()
+							.setMaxConnTotal(MAX_CONNECTIONS)
+							.setMaxConnPerRoute(MAX_CONNECTIONS)
 							.setSSLContext(sslcontext)
 							.build();
 				} catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
@@ -63,28 +65,31 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 				}
 			}
 			if (!trustSelfSigned) {
-				_httpClient = HttpAsyncClients.custom()
-						.setMaxConnTotal(10)
-						.setMaxConnPerRoute(10)
+				cachedHttpClient = HttpAsyncClients.custom()
+						.setMaxConnTotal(MAX_CONNECTIONS)
+						.setMaxConnPerRoute(MAX_CONNECTIONS)
 						.build();
 			}
-			_httpClient.start();
+			cachedHttpClient.start();
 		}
-		return _httpClient;
+		return cachedHttpClient;
 	}
-	private transient CloseableHttpAsyncClient _httpClient;
 
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 		ModuleOptions options = ModuleOptions.get(config);
 
-		ModuleOption bodyFormatOption = new ModuleOption("bodyFormat", bodyFormat, ModuleOption.OPTION_STRING);
-		bodyFormatOption.addPossibleValue("JSON", AbstractHttpModule.BODY_FORMAT_JSON);
-		bodyFormatOption.addPossibleValue("Form-data", AbstractHttpModule.BODY_FORMAT_FORMDATA);
-		options.add(bodyFormatOption);
+		ModuleOption bodyContentTypeOption = new ModuleOption("bodyContentType", bodyContentType, ModuleOption.OPTION_STRING);
+		bodyContentTypeOption.addPossibleValue(AbstractHttpModule.BODY_FORMAT_JSON, AbstractHttpModule.BODY_FORMAT_JSON);
+		bodyContentTypeOption.addPossibleValue(AbstractHttpModule.BODY_FORMAT_FORMDATA, AbstractHttpModule.BODY_FORMAT_FORMDATA);
+		options.add(bodyContentTypeOption);
 
-		options.add(new ModuleOption("blockExecution", isBlocking, ModuleOption.OPTION_BOOLEAN));
+		ModuleOption asyncOption = new ModuleOption("syncMode", isAsync ? "async" : "sync", ModuleOption.OPTION_BOOLEAN);
+		asyncOption.addPossibleValue("asynchronous", "async");
+		asyncOption.addPossibleValue("synchronized", "sync");
+		options.add(asyncOption);
+
 		options.add(new ModuleOption("trustSelfSigned", trustSelfSigned, ModuleOption.OPTION_BOOLEAN));
 		options.add(new ModuleOption("timeoutSeconds", timeoutSeconds, ModuleOption.OPTION_INTEGER));
 
@@ -94,14 +99,14 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		bodyFormat = MapTraversal.getString(config, "options.bodyFormat.value", AbstractHttpModule.BODY_FORMAT_JSON);
+		bodyContentType = MapTraversal.getString(config, "options.bodyContentType.value", AbstractHttpModule.BODY_FORMAT_JSON);
 		trustSelfSigned = MapTraversal.getBoolean(config, "options.trustSelfSigned.value");
-		isBlocking = MapTraversal.getBoolean(config, "options.blockExecution.value");
-		timeoutSeconds = MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT);
+		isAsync = MapTraversal.getString(config, "options.syncMode.value", "async").equals("async");
+		timeoutSeconds = MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT_SECONDS);
 
 		// HTTP module in async mode won't send outputs on SendOutput(),
 		// 	but only in receive() where it creates its own Propagator
-		propagationSink = !isBlocking;
+		propagationSink = isAsync;
 
 		// try getting HTTP client, resets trustSelfSigned if such SSL client can't be created
 		getHttpClient();
@@ -131,7 +136,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		final AbstractHttpModule self = this;
 		final CountDownLatch latch = new CountDownLatch(1);
 		final long startTime = System.currentTimeMillis();
-		final boolean async = !isBlocking;
+		final boolean async = isAsync;
 		HttpAsyncClient client = getHttpClient();
 		Object ret = client.execute(request, new FutureCallback<HttpResponse>() {
 			@Override
@@ -164,7 +169,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 			}
 		});
 
-		if (isBlocking) {
+		if (!isAsync) {
 			try {
 				boolean done = latch.await(timeoutSeconds, TimeUnit.SECONDS);
 				if (!done) {

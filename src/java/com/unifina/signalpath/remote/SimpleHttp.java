@@ -119,7 +119,7 @@ public class SimpleHttp extends AbstractHttpModule {
 		HttpRequestBase request = verb.getRequest(URL.getValue());
 		if (verb.hasBody()) {
 			try {
-				switch (bodyFormat) {
+				switch (bodyContentType) {
 					case BODY_FORMAT_JSON:
 						String bodyString = inputObject.toString();
 						((HttpEntityEnclosingRequestBase) request).setEntity(new StringEntity(bodyString));
@@ -128,7 +128,7 @@ public class SimpleHttp extends AbstractHttpModule {
 						((HttpEntityEnclosingRequestBase) request).setEntity(new UrlEncodedFormEntity(inputNVPList));
 						break;
 					default:
-						throw new RuntimeException("Unexpected body format " + bodyFormat);
+						throw new RuntimeException("Unexpected body format " + bodyContentType);
 				}
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
