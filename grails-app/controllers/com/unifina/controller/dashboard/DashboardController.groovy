@@ -31,7 +31,7 @@ class DashboardController {
 			action.call(dashboard, user)
 		}
 	}
-	
+
 	def list() {
 		def user = springSecurityService.currentUser
 		def dashboards = permissionService.get(Dashboard, user) { order "dateCreated", "desc" }
@@ -55,15 +55,7 @@ class DashboardController {
 			render([
 				id   : dashboard.id,
 				name : dashboard.name,
-				items: dashboard.items.collect { DashboardItem item -> [
-					id       : item.id,
-					title    : item.title,
-					ord      : item.ord,
-					size     : item.size,
-					canvas   : item.uiChannel.canvas.id,
-					module   : item.uiChannel.hash,
-					uiChannel: item.uiChannel.toMap()
-				]}
+				items: dashboard.items*.toMap()
 			] as JSON)
 		}
 	}
@@ -111,8 +103,6 @@ class DashboardController {
 				}
 			}
 			dashboardMap.items?.findAll { it.id == null }.each {
-				DashboardItem item = new DashboardItem(it)
-				//item.uiChannel = UiChannel.load(it.uiChannel.id)
 				toBeAdded.add(it)
 			}
 			toBeRemoved.each { dashboard.removeFromItems(it) }

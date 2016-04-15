@@ -222,7 +222,13 @@ unifina.feed.fileStorageAdapter = "com.unifina.feed.file.S3FileStorageAdapter"
 // The following are used with S3FileStorageAdapter
 unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
 unifina.feed.s3FileStorageAdapter.secretKey = "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"
-unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
+unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-dev"
+environments {
+	production {
+		unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
+	}
+}
+
 
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)

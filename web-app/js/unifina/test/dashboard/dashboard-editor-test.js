@@ -1,8 +1,7 @@
 var assert = require('assert')
 var fs = require('fs')
 var jsdom = require("jsdom")
-
-var window = jsdom.jsdom().parentWindow
+var window = jsdom.jsdom().defaultView
 var $ = require('jquery')(window);
 var _ = require('underscore')
 var Backbone = require('backbone-associations')
@@ -31,7 +30,7 @@ describe('dashboard-editor', function() {
 		}
 		// jsdom wants to use the deprecated style of creating events, so let's mock a bridge between old and new
 		global.Event = function(type) {
-			var e = window.document.createEvent("MockEvent")
+			var e = window.document.createEvent("CustomEvent")
 			e.initEvent(type, true, true)
 			return e
 		}
@@ -55,8 +54,8 @@ describe('dashboard-editor', function() {
 			id: 1,
 			name: "Test",
 			items: [
-				{id: 1, title: "Item1", ord:0, canvas: "canvas-1", module: 1, uiChannel: {name: "uiChannel-1", id:'uiChannel-id-1', webcomponent: "streamr-chart"}, size:"medium"}, //chart
-				{id: 2, title: "Item2", ord:1, canvas: "canvas-3", module: 1, uiChannel: {name: "uiChannel-2", id:'uiChannel-id-2', webcomponent: "streamr-label"}, size:"small"}  //label
+				{id: 1, title: "Item1", ord:0, canvas: "canvas-1", module: 1, webcomponent: 'streamr-chart', size:"medium"}, //chart
+				{id: 2, title: "Item2", ord:1, canvas: "canvas-3", module: 1, webcomponent: 'streamr-label', size:"small"}  //label
 			]
 		}
 
@@ -104,14 +103,14 @@ describe('dashboard-editor', function() {
 		it('should throw error when trying to create module without webcomponent', function () {
 			assert.throws(
 				function() {
-					dashboard.get("items").push({title: "Item3", uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', webcomponent: null}, size:"medium"})
+					dashboard.get("items").push({title: "Item3", canvas: 'canvas-2', module:1, webcomponent: undefined, size:"medium"})
 				}, Error);
 		})
 
-		it('should render the amount of dashboardItems should be correct when added', function (){
+		it('should render the amount of dashboardItems correctly when items are added', function (){
 			assert.equal($(".streamr-widget").length, 2)
 			assert.equal(dashboardView.$el.children().length, 2)
-			dashboard.get("items").push({title: "Item3", canvas: "canvas-2", module: 1, uiChannel: {name: "uiChannel-3", id:'uiChannel-id-3', webcomponent:"streamr-chart"}, size:"medium"})
+			dashboard.get("items").push({title: "Item3", canvas: "canvas-2", module: 1, webcomponent:"streamr-chart", size:"medium"})
 			assert.equal($(".streamr-widget").length, 3)
 			assert.equal(dashboardView.$el.children().length, 3)
 		})
