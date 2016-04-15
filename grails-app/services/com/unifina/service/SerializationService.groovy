@@ -17,21 +17,21 @@ class SerializationService {
 	GrailsApplication grailsApplication
 	Serializer serializer = new SerializerImpl()
 
-	String serialize(AbstractSignalPathModule module) throws SerializationException {
+	byte[] serialize(AbstractSignalPathModule module) throws SerializationException {
 		module.beforeSerialization()
-		String result = serializer.serializeToString(module)
+		byte[] result = serializer.serializeToByteArray(module)
 		module.afterSerialization()
 		return result
 	}
 
-	AbstractSignalPathModule deserialize(String data) throws SerializationException {
-		AbstractSignalPathModule module = (AbstractSignalPathModule) serializer.deserializeFromString(data)
+	AbstractSignalPathModule deserialize(byte[] data) throws SerializationException {
+		AbstractSignalPathModule module = (AbstractSignalPathModule) serializer.deserializeFromByteArray(data)
 		module.afterDeserialization()
 		return module
 	}
 
-	AbstractSignalPathModule deserialize(String data, ClassLoader classLoader) throws SerializationException {
-		AbstractSignalPathModule module = (AbstractSignalPathModule) new SerializerImpl(classLoader).deserializeFromString(data)
+	AbstractSignalPathModule deserialize(byte[] data, ClassLoader classLoader) throws SerializationException {
+		AbstractSignalPathModule module = (AbstractSignalPathModule) new SerializerImpl(classLoader).deserializeFromByteArray(data)
 		module.afterDeserialization()
 		return module
 	}

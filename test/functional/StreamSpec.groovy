@@ -1,5 +1,3 @@
-import com.mongodb.MongoClient
-import com.mongodb.client.MongoCollection
 import com.unifina.feed.mongodb.MongoDbConfig
 import core.pages.ConfigureMongoPage
 import org.bson.Document
@@ -133,7 +131,12 @@ class StreamSpec extends LoginTester1Spec {
 			waitFor { at StreamShowPage }
 			$(".alert-info").displayed
 			$("#stream-fields tbody tr").size() == 2
-			
+
+		when: "open menu"
+			streamMenuButton.click()
+		then: "delete in menu"
+			waitFor { deleteStreamButton.displayed }
+
 		when: "delete stream button is clicked"
 			deleteStreamButton.click()
 		then: "must show confirmation"
@@ -218,6 +221,8 @@ class StreamSpec extends LoginTester1Spec {
 		cleanup: "delete stream"
 		to(StreamListPage)
 		openStream(streamName)
+		streamMenuButton.click()
+		waitFor { deleteStreamButton.displayed }
 		deleteStreamButton.click()
 		waitFor { $(".modal-dialog").displayed }
 		$(".modal-dialog .btn-primary").click()

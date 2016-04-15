@@ -24,7 +24,9 @@ class KafkaFieldDetectorSpec extends IntegrationSpec {
 		Thread.sleep(2000)
 
 		when:
-		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
+		Stream stream = new Stream()
+		stream.id = topic
+		MapMessage msg = detector.fetchExampleMessage(stream)
 		then:
 		msg != null
 		!msg.payload
@@ -43,7 +45,9 @@ class KafkaFieldDetectorSpec extends IntegrationSpec {
 		Thread.sleep(2000)
 
 		when:
-		MapMessage msg = detector.fetchExampleMessage(new Stream(uuid:topic))
+		Stream stream = new Stream()
+		stream.id = topic
+		MapMessage msg = detector.fetchExampleMessage(stream)
 		then:
 		msg.payload.i == 9
 

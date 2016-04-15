@@ -1,78 +1,80 @@
 package com.unifina.signalpath;
 
-import java.util.Map;
-
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedService;
 
-// This class can also receive Strings for backwards compatibility 
+import java.util.Map;
+
+// This class can also receive Strings for Stream UUID
 public class StreamParameter extends Parameter<Stream> {
-	
+
 	private boolean checkModuleId = false;
 	private Feed feedFilter = null;
 
 	public StreamParameter(AbstractSignalPathModule owner, String name) {
-		super(owner,name,null,"Stream");
+		super(owner, name, null, "Stream");
 		this.canToggleDrivingInput = false;
 	}
 
 	@Override
 	protected String[] getAcceptedTypes() {
-		return new String[] {"Stream","String"};
+		return new String[] {"Stream", "String"};
 	}
-	
+
 	@Override
 	public void receive(Object value) {
-		if (value instanceof String) {
-			FeedService fs = (FeedService) owner.globals.getGrailsApplication().getMainContext().getBean("feedService");
-			value = fs.getStream((String)value);
-		}
-		super.receive(value);
+		super.receive(getStreamById(value));
 	}
-	
+
 	@Override
 	protected Stream handlePulledObject(Object o) {
-		if (o instanceof String) {
-			FeedService fs = (FeedService) owner.globals.getGrailsApplication().getMainContext().getBean("feedService");
-			return fs.getStream((String)o);
+		if (o instanceof Stream) {
+			return super.handlePulledObject(o);
+		} else {
+			return getStreamById(o);
 		}
-		else return super.handlePulledObject(o);
 	}
-	
+
 	@Override
 	public Map<String,Object> getConfiguration() {
-		Map<String,Object> config = super.getConfiguration();
-		if (value!=null) {
-			config.put("value",value.getId());
+		Map<String, Object> config = super.getConfiguration();
+		if (value != null) {
+			config.put("value", value.getId());
 			config.put("streamName", value.getName());
-			config.put("feed",value.getFeed().getId());
+			config.put("feed", value.getFeed().getId());
 			if (checkModuleId) {
-				config.put("checkModuleId",true);
+				config.put("checkModuleId", true);
 			}
 		}
 
-		if (feedFilter!=null) {
+		if (feedFilter != null) {
 			config.put("feedFilter", feedFilter.getId());
 		}
-		
+
 		return config;
 	}
-	
+
 	@Override
 	public Stream parseValue(String s) {
-		if (s==null || s.equals("null"))
+		if (s == null || s.equals("null")) {
 			return null;
-		
-		FeedService fs = (FeedService) owner.globals.getGrailsApplication().getMainContext().getBean("feedService");
-		
-		Stream result; 
-		try {
-			result = fs.getStream(Long.parseLong(s));
-			return result;
-		} catch (NumberFormatException e) {}
-		
-		return fs.getStream(s);
+		}
+		return getStreamById(s);
+	}
+
+	private Stream getStreamById(Object id) {
+		if (id instanceof String) {
+			FeedService fs = getFeedService();
+			return fs.getStream((String) id);
+		} else if (id instanceof Number) {
+			throw new RuntimeException("Numeric stream ids no longer supported");
+		}
+		return (Stream) id;
+	}
+
+	private FeedService getFeedService() {
+		return getOwner().globals.getBean(FeedService.class);
 	}
 
 	public boolean getCheckModuleId() {
@@ -87,7 +89,7 @@ public class StreamParameter extends Parameter<Stream> {
 	public void setCheckModuleId(boolean checkModuleId) {
 		this.checkModuleId = checkModuleId;
 	}
-	
+
 	public Feed getFeedFilter() {
 		return feedFilter;
 	}
@@ -95,5 +97,5 @@ public class StreamParameter extends Parameter<Stream> {
 	public void setFeedFilter(Feed feedFilter) {
 		this.feedFilter = feedFilter;
 	}
-	
+
 }

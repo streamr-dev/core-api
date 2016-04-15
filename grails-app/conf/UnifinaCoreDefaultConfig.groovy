@@ -222,7 +222,13 @@ unifina.feed.fileStorageAdapter = "com.unifina.feed.file.S3FileStorageAdapter"
 // The following are used with S3FileStorageAdapter
 unifina.feed.s3FileStorageAdapter.accessKey = "AKIAJ5FFWRZLSQB6ASIQ"
 unifina.feed.s3FileStorageAdapter.secretKey = "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"
-unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
+unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-dev"
+environments {
+	production {
+		unifina.feed.s3FileStorageAdapter.bucket = "streamr-data-us"
+	}
+}
+
 
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
@@ -286,9 +292,6 @@ environments {
  * Spring security config
  */
 
-streamr.user.defaultFeeds = [7]
-streamr.user.defaultModulePackages = [1]
-
 grails.plugin.springsecurity.ui.register.defaultRoleNames = ["ROLE_USER", "ROLE_LIVE"]
 
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'com.unifina.domain.security.SecUser'
@@ -341,6 +344,7 @@ unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
+unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
 
 
 /**

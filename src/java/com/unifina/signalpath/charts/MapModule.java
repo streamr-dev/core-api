@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 
 public class MapModule extends ModuleWithUI {
 
-	Input<Object> id = new Input<>(this, "id", "Double String");
+	Input<Object> id = new Input<>(this, "id", "Object");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
 	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
 	ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));

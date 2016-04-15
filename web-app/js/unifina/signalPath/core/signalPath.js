@@ -46,7 +46,10 @@ var SignalPath = (function () {
 		apiUrl: Streamr.createLink({"uri": "api/v1"}),
 		getModuleUrl: Streamr.createLink("module", "jsonGetModule"),
 		getModuleHelpUrl: Streamr.createLink("module", "jsonGetModuleHelp"),
-		connectionOptions: {},
+		connectionOptions: {
+			autoConnect: true,
+			autoDisconnect: true
+		},
 		zoom: 1
     };
     
@@ -92,8 +95,11 @@ var SignalPath = (function () {
 		$(pub).on('new', disconnect)
 		$(pub).on('started', subscribe)
 		$(pub).on('stopped', function() {
+			// Simply disconnect when a canvas is stopped. It is important to let adhoc canvases auto-disconnect when done.
+			if (runningJson && !runningJson.adhoc) {
+				disconnect()
+			}
 			runningJson = null
-			disconnect()
 		})
 		$(pub).on('loaded', function() {
 			if (isRunning())
@@ -271,7 +277,7 @@ var SignalPath = (function () {
 	function createModuleFromJSON(data) {
 		if (data.error) {
 			handleError(data.message)
-			return;
+			return undefined;
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
@@ -446,6 +452,14 @@ var SignalPath = (function () {
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
+				if (jqXHR.responseJSON) {
+					var apiError = jqXHR.responseJSON;
+					if (apiError && apiError.message) {
+						handleError(apiError.message)
+						return;
+					}
+
+				}
 				handleError(errorThrown)
 			}
 		})

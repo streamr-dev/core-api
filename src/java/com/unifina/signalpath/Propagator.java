@@ -10,8 +10,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.unifina.signalpath.charts.TimeSeriesChart;
-
 @SuppressWarnings("rawtypes")
 public class Propagator implements Serializable {
 	Set<Input> reachable;
@@ -22,30 +20,45 @@ public class Propagator implements Serializable {
 	
 	AbstractSignalPathModule[] modArr;
 	private boolean modArrDirty = true;
-	
+
+	// Outputs associated with this Propagator set sendPending to true when sending output
 	public boolean sendPending = false;
 	private boolean alwaysPropagate = false;
 	
 	private static final Logger log = Logger.getLogger(Propagator.class);
 	
-	public Propagator() {
-		
+	public Propagator() {}
+
+	public Propagator(Input[] inputs, AbstractSignalPathModule origin) {
+		alwaysPropagate = true;
+		reachable = makeReachableSet(inputs);
+		calculateActivationOrder();
 	}
-	
+
+	public Propagator(List<Input> inputs, AbstractSignalPathModule origin) {
+		this(inputs.toArray(new Input[inputs.size()]), origin);
+	}
+
 	public void addModule(AbstractSignalPathModule module) {
 		boolean newModule = originSet.add(module);
 		if (newModule) { 
 			origins.add(module);
 			modArrDirty = true;
+
+			// The Propagator might be created lazily, in which case a source module
+			// that already has a send pending might be added.
+			if (module.isSendPending())
+				sendPending = true;
 		}
 	}
 	
 	public void initialize() {
 		if (modArrDirty) {
 			ArrayList<Output> outputs = new ArrayList<>();
-			for (AbstractSignalPathModule m : origins)
+			for (AbstractSignalPathModule m : origins) {
 				for (Output o : m.getOutputs())
 					outputs.add(o);
+			}
 
 			connectOutputs(outputs);
 			reachable = makeReachableSet(outputs);
@@ -53,21 +66,6 @@ public class Propagator implements Serializable {
 		}
 	}
 	
-	public Propagator(Input[] inputs, AbstractSignalPathModule origin) {
-		alwaysPropagate = true;
-		reachable = makeReachableSet(inputs);
-		calculateActivationOrder();
-	}
-	
-//	@Deprecated
-//	public Propagator(Output[] outputs) {
-//		if (outputs.length>0) {
-//			connectOutputs(Arrays.asList(outputs));
-//			reachable = makeReachableSet(Arrays.asList(outputs));
-//			calculateActivationOrder();
-//		}
-//	}
-//	
 	private void connectOutputs(List<Output> outputs) {
 		// Let the Output know that it belongs to this Propagator
 		for (Output o : outputs) {
@@ -95,7 +93,6 @@ public class Propagator implements Serializable {
 	/**
 	 * DFS search of inputs reachable from specified output
 	 * @param output
-	 * @param list
 	 * @param visited
 	 */
 	private void recurseOutputs(Output output, Set<Input> visited) {
@@ -223,7 +220,6 @@ public class Propagator implements Serializable {
 		// Convert to array for speed
 		modArr = modules.toArray(new AbstractSignalPathModule[modules.size()]);
 		modArrDirty = false;
-//		log.info("Propagator created for "+origin+": "+modules);
 	}
 	
 	public void propagate() {
@@ -248,33 +244,4 @@ public class Propagator implements Serializable {
 			modArr[i].clear();
 		}
 	}
-
-//	public void merge(Propagator propagator) {
-//		reachable.addAll(propagator.reachable);
-//		for (AbstractSignalPathModule m : propagator.origins)
-//			if (!originSet.contains(m))
-//				origins.add(m);
-//		originSet.addAll(propagator.originSet);
-//		
-//		
-//		
-//		/**
-//		 * Join the propagation arrays so that the arrays are concatenated and
-//		 * in case of multiple instances of the same module the latter one is
-//		 * preserved.
-//		 */
-//		HashSet<AbstractSignalPathModule> defer = new HashSet<>();
-//		defer.addAll(propagator.getModules());
-//		
-//		ArrayList<AbstractSignalPathModule> newModArr = new ArrayList<>();
-//		for (AbstractSignalPathModule m : modArr) {
-//			if (defer.contains(m))
-//				defer.remove(m);
-//			else newModArr.add(m);
-//		}
-//		
-//		newModArr.addAll(propagator.getModules());
-//		modArr = newModArr.toArray(new AbstractSignalPathModule[newModArr.size()]);
-//	}
-	
 }

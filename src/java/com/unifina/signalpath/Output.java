@@ -1,6 +1,9 @@
 package com.unifina.signalpath;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 public class Output<T> extends Endpoint<T> {
@@ -18,6 +21,8 @@ public class Output<T> extends Endpoint<T> {
 	
 	private boolean connected = false;
 	private int i;
+
+	private List<Output<T>> proxiedOutputs = new ArrayList<>();
 	
 	public Output(AbstractSignalPathModule owner,String name,String typeName) {
 		super(owner,name,typeName);
@@ -28,18 +33,31 @@ public class Output<T> extends Endpoint<T> {
 	}
 	
 	public void send(T value) {
-		// TODO: null check can be removed?
-		if (value==null)
+		if (value == null) {
 			throw new NullPointerException("Sending a null value is not allowed!");
+		}
+
+		// prevent modification of sent Maps (no copying, just overriding modifying methods)
+		//   if a module wants to modify the value, it must make a personal copy
+		// see: MapInput.getModifiableValue
+		if (value instanceof Map) {
+			value = (T)Collections.unmodifiableMap((Map)value);
+		}
 
 		previousValue = value;
 		
 		if (connected) {
-			for (i=0;i<cachedPropagators.length;i++)
+			for (i=0; i < cachedPropagators.length; i++) {
 				cachedPropagators[i].sendPending = true;
-			
-			for (i=0;i<cachedTargets.length;i++)
+			}
+
+			for (i=0; i < cachedTargets.length; i++) {
 				cachedTargets[i].receive(value);
+			}
+		}
+
+		for (Output<T> proxy : proxiedOutputs) {
+			proxy.send(value);
 		}
 	}
 	
@@ -66,6 +84,10 @@ public class Output<T> extends Endpoint<T> {
 		input.setSource(this);
 		connected = true;
 		cachedTargets = targets.toArray(new Input[targets.size()]);
+	}
+
+	public void addProxiedOutput(Output<T> output) {
+		proxiedOutputs.add(output);
 	}
 
 	@Override

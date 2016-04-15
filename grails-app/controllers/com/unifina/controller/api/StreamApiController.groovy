@@ -1,9 +1,12 @@
 package com.unifina.controller.api
 
 import com.unifina.api.ApiException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -12,15 +15,14 @@ import grails.plugin.springsecurity.annotation.Secured
 class StreamApiController {
 
 	def streamService
-	def unifinaSecurityService
+	def permissionService
 
 	@StreamrApi
 	def index() {
-		def streams
-		if (params.name) {
-			streams = Stream.findAllByUserAndName(request.apiUser, params.name)
-		} else {
-			streams = Stream.findAllByUser(request.apiUser)
+		def streams = permissionService.get(Stream, request.apiUser) {
+			if (params.name) {
+				eq "name", params.name
+			}
 		}
 		render(streams*.toMap() as JSON)
 	}
@@ -34,15 +36,15 @@ class StreamApiController {
 
 	@StreamrApi
 	def show(String id) {
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			render(stream.toMap() as JSON)
 		}
 	}
 
 	@StreamrApi
 	def update(String id) {
-		Stream newStream = new Stream(request.JSON)
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
+			Stream newStream = new Stream(request.JSON)
 			stream.name = newStream.name
 			stream.description = newStream.description
 			stream.config = readConfig()
@@ -57,7 +59,7 @@ class StreamApiController {
 
 	@StreamrApi
 	def detectFields(String id) {
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.READ) { Stream stream ->
 			if (streamService.autodetectFields(stream, params.boolean("flatten", false))) {
 				render(stream.toMap() as JSON)
 			} else {
@@ -80,20 +82,20 @@ class StreamApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedStream(id) { Stream stream ->
+		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			stream.delete()
 			render(status: 204)
 		}
 	}
 
-	private def getAuthorizedStream(String uuid, Closure successHandler) {
-		def stream = Stream.findByUuid(uuid)
+	private def getAuthorizedStream(String id, Operation op, Closure action) {
+		def stream = Stream.get(id)
 		if (stream == null) {
-			render(status: 404, text: [error: "Stream not found with uuid " + uuid, code: "NOT_FOUND"] as JSON)
-		} else if (!unifinaSecurityService.canAccess(stream, request.apiUser)) {
-			render(status: 403, text: [error: "Not authorized to access Stream " + uuid, code: "FORBIDDEN"] as JSON)
+			throw new NotFoundException("Stream", id)
+		} else if (!permissionService.check(request.apiUser, stream, op)) {
+			throw new NotPermittedException(request.apiUser?.username, "Stream", id, op.id)
 		} else {
-			successHandler.call(stream)
+			action.call(stream)
 		}
 	}
 }

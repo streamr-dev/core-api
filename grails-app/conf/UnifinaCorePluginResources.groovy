@@ -172,6 +172,10 @@ modules = {
 		dependsOn 'bootbox, mustache'
 		resource url:[dir:'js/unifina/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
 	}
+	'sharing-dialog' {
+		dependsOn 'bootbox, backbone, switcher'
+		resource url: [dir: 'js/unifina/sharing-dialog', file: 'sharing-dialog.js', plugin: 'unifina-core']
+	}
 	'signalpath-browser' {
 		dependsOn 'remote-tabs'
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
@@ -179,6 +183,10 @@ modules = {
 	'module-browser' {
 		dependsOn 'mathjax, bootstrap, underscore, streamr'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
+	}
+	'key-value-editor' {
+		dependsOn 'bootstrap, backbone, mustache'
+		resource url:[dir:'js/unifina/key-value-editor', file:'key-value-editor.js', plugin:'unifina-core']
 	}
 	toolbar {
 		dependsOn 'jquery'
@@ -257,6 +265,7 @@ modules = {
 		dependsOn 'mathjax'
 		dependsOn 'spectrum'
 		dependsOn 'underscore'
+		dependsOn 'key-value-editor'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

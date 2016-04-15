@@ -75,7 +75,8 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 				return 0
 			}
 		}
-		Stream stream = new Stream(name:"MongoMessageSourceSpec", uuid:"foo", apiKey:"foo", user:SecUser.load(1), feed:feed)
+		Stream stream = new Stream(name:"MongoMessageSourceSpec", apiKey:"foo", user:SecUser.load(1), feed:feed)
+		stream.id = "foo"
 
 		Map config = [mongodb:[
 			host: "dev.streamr",

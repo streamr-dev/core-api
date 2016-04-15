@@ -10,7 +10,7 @@ import com.unifina.domain.data.Stream;
 public class KafkaFeedFileName {
 	
 	private Date beginDate;
-	private Long streamId;
+	private String streamId;
 	
 	public KafkaFeedFileName(String string) {
 		if (!string.startsWith("kafka."))
@@ -24,7 +24,7 @@ public class KafkaFeedFileName {
 		}
 		
 		try {
-			streamId = Long.parseLong(string.substring("kafka.".length()+9, string.length()-".gz".length()));
+			streamId = string.substring("kafka.".length() + 9, string.length() - ".gz".length());
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("String "+string+" is not a kafka feedfile name (parsing the streamId failed)!");
 		}
@@ -40,7 +40,7 @@ public class KafkaFeedFileName {
 		return beginDate;
 	}
 	
-	public Long getStreamId() {
+	public String getStreamId() {
 		return streamId;
 	}
 	
