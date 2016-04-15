@@ -17,8 +17,8 @@
 			global: false
 		}).fail(function() {
 			callback(false)
-		}).done(function() {
-			callback(true)
+		}).done(function(data) {
+			callback(!!data)
 		})
 	}
 
