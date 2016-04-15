@@ -37,8 +37,8 @@ public class Http extends AbstractHttpModule {
 	private MapOutput responseHeaders = new MapOutput(this, "headers");
 	private ListOutput errors = new ListOutput(this, "errors");
 	private Output<Object> responseData = new Output<>(this, "data", "Object");
-	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "status code");
-	private TimeSeriesOutput pingMillis = new TimeSeriesOutput(this, "ping(ms)");
+	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "statusCode");
+	private TimeSeriesOutput roundtripMillis = new TimeSeriesOutput(this, "ping(ms)");
 
 	@Override
 	public void init() {
@@ -51,7 +51,7 @@ public class Http extends AbstractHttpModule {
 		addOutput(errors);
 		addOutput(responseData);
 		addOutput(statusCode);
-		addOutput(pingMillis);
+		addOutput(roundtripMillis);
 		addOutput(responseHeaders);
 	}
 
@@ -156,7 +156,7 @@ public class Http extends AbstractHttpModule {
 			}
 		}
 
-		pingMillis.send(call.responseTime);
+		roundtripMillis.send(call.responseTime);
 		errors.send(call.errors);
 	}
 }

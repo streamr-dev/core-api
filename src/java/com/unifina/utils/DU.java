@@ -7,7 +7,8 @@ package com.unifina.utils;
  */
 public class DU {
 	private static final double pow = 8;
-	private static final double epsilon = Math.pow(10,-pow);
+	private static final double epsilon = Math.pow(10, -pow);
+	private static final double epsilonInverse = 1.0 / epsilon;
 
 	/* Can't clean (or do precise math with) numbers that would exceed the Long.MAX_VALUE when divided by epsilon */
 	private static final double maxCleanable = Long.MAX_VALUE * epsilon;
@@ -25,7 +26,7 @@ public class DU {
 	/** Round to nearest multiple of epsilon to clean away precision variance */
 	public static double clean(double d) {
 		if (Math.abs(d) > maxCleanable) { return d; }
-		long fixedPoint = Math.round(d / epsilon);
+		long fixedPoint = Math.round(d * epsilonInverse);
 		return ((double)fixedPoint) * epsilon;
 	}
 
