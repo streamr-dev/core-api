@@ -112,7 +112,7 @@ class HttpSpec extends Specification {
 					getValue() >> "testing123"
 				}]
 			}
-			// blocking requests sendOutput here already
+			// synchronized requests sendOutput here already
 			future.completed(mockHttpResponse)
 
 			// simulate AbstractHttpModule.receive, but without propagation
@@ -132,7 +132,7 @@ class HttpSpec extends Specification {
 	void "no input, varying response, blocking"() {
 		isAsync = false
 		module.configure([
-			options: [blockExecution: [value: true]]
+			options: [syncMode: [value: "sync"]]
 		])
 		response = [[test: 1], [test: 2], [test: 3]]
 		outputs.data = response
