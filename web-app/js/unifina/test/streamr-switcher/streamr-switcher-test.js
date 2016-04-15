@@ -7,7 +7,7 @@ describe('streamr-switcher', function() {
 	before(function() {
 		assert = require('assert')
 
-		global.$ = require('jquery')(require("jsdom").jsdom().parentWindow);
+		global.$ = require('jquery')(require("jsdom").jsdom().defaultView);
 		StreamrSwitcher = require('../../streamr-switcher/streamr-switcher').StreamrSwitcher
 	})
 
