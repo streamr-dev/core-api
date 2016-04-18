@@ -16682,6 +16682,9 @@ body.user-guide hr {
   margin-top: 30px;
   margin-bottom: 30px;
 }
+body.user-guide pre {
+  background-color: white;
+}
 table {
   background-color: transparent;
 }
