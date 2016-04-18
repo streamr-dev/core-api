@@ -15,7 +15,7 @@ Modules are the workhorses which you'll use time and again as part of Streamr se
 - Extensions and abstraction.
 - Connectivity.
 
-In this chapter, we'll go through the module basics. For details on different modules, either see the individual module help in Streamr editor or have a look at the <g:link controller="help" action="module">module reference</g:link>.
+In this chapter, we'll go through the module basics. For details on different modules, either see the individual module help in the editor or have a look at the <g:link controller="module" action="list">module reference</g:link>.
 
 ##Inputs, outputs, parameters, and options
 
@@ -43,15 +43,11 @@ Inputs, outputs, and parameters can be renamed.  If you move the mouse on top of
 
 You’ll see a number of small icons next to the endpoints when you hover on top of a module.  These icons correspond to additional controls which are relevant to module activation.  We’ll have more to say on this below, but let’s first discuss the data flow between modules.
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Making connections
 
 A data flow between two modules — or a data flow between a stream and a module — is created by drawing a connection from an output endpoint to an input endpoint with the mouse or other pointing device.  You can create as many outgoing connections (i.e. connections that originate from an output connector) as you wish.  All connections are unidirectional, i.e. the data always flows from an output to one or more inputs in one direction only.  Only one connection per input is allowed, and the modules form a directed graph.
 
 On a canvas, the direction of the data flow is indicated by an arrow on top of the connection path.  You can alter the endpoint of an existing connection by dragging it to another input endpoint.  If you instead drop the endpoint in an empty space, the connection is cleared.  A mouse click on top of a module brings up an pop-up menu where you can choose to disconnect all incoming connections to the module.
-
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
 ##Module activation 
 
@@ -81,4 +77,4 @@ Module activation is an important concept.  The governing principles are few in 
 
 ##Reusing functionality
 
-Explain how to do abstraction, reuse services as modules, and code custom modules.
+**Explain how to do abstraction, reuse services as modules, and code custom modules.**
