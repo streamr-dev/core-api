@@ -43,7 +43,7 @@ Here's a few examples of specific things you can do.
 Although we sometimes find it hard to admit, there's life outside Streamr. We're not jealous, though, and indeed make it easy to emit data to the wider world. Here's what you can do:
 
 - Create [dashboards](#dashboards) which display live data from  a Streamr service.
-- Embed live visualisation elements in external web pages by inserting a single line of HTML code.
+- Embed live visualisation [elements](#embeddedwidgets) in external web pages by inserting a single line of HTML code.
 - Subscribe to a stream in external web pages and applications, and receive every event as soon as it’s available.
 
 ##Who is Streamr for?
