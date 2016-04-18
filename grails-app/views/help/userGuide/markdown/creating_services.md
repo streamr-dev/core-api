@@ -1,4 +1,3 @@
-<a name="creating-services"></a>
 #Creating services
 
 A Streamr service is a process which consumes and acts upon real-time data. In this section, we’ll show how to do the following: 

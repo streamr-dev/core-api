@@ -18,6 +18,23 @@
 			for (var i=0; i < textAreaElements.length; ++i) {
 				CodeMirror.fromTextArea(textAreaElements[i]);
 			}
+
+			var offset = 80
+
+			// Fix offset of anchor links.
+			$("#module-help-tree a").each(function() {
+				var href = $(this).attr("href")
+				if (href && href.startsWith("#")) {
+					console.log("href", href)
+					$(this).click(function(event) {
+						event.preventDefault()
+						if($($(this).attr('href'))[0]){
+							$($(this).attr('href'))[0].scrollIntoView()
+							scrollBy(0, -(offset-30))
+						}
+					})
+				}
+			})
 		});
 	</r:script>
 

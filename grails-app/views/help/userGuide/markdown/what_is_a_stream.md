@@ -1,11 +1,10 @@
-<a name="what-is-a-stream"></a>
 #What is a stream?
 
 All data in Streamr is stored in a stream. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams. 
 
 You can store different kinds of data in the same stream.  The data may be numeric, but it can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
 
-The Streamr platform includes a number of tools for [working with streams](#working-with-streams). You can manage streams, upload batches of historical data, add real-time data, and subscribe to a stream within the platform or from external applications.
+The Streamr platform includes a number of tools for [working with streams](#workingwithstreams). You can manage streams, upload batches of historical data, add real-time data, and subscribe to a stream within the platform or from external applications.
 
 <hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
