@@ -12,8 +12,6 @@ The development environment includes a playback mode where you can simulate the 
 
 The secret sauce of Streamr is the hidden technology which makes creating and managing real-time services easy. Apart from the browser-based user interface and visual programming tools, Streamr takes care of the data flow, event propagation, message queues, load balancing, and other technical issues under the hood. It also manages your live services and stores the full event history on your behalf.
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Data live in streams
 
 All real-time data in Streamr is stored in [streams](#streams). A stream is essentially a timestamped sequence of events. Each event may contain more than one field. You can create and work on dozens, hundreds, or thousands of streams. A stream is persistent, identified by a unique ID, and stored in the cloud.
@@ -42,13 +40,11 @@ Here's a few examples of specific things you can do.
 - Post events in HTTP format to external RESTful services. There's a wide range of popular and useful services out there, and you can use any one of them automatically from Streamr. 
 - Control external devices. As an example, you can override manual controls and make a remotely operated drone return to base when it's about to go out of range or running low on battery. Because the control interface is likely to be machine specific, this is one case where you'd be looking at coding a custom module in Java.
 
-Although we sometimes find it hard to admit, there's life outside Streamr. We're not jealous, though, and indeed make it easy to emit data to the wider world.
+Although we sometimes find it hard to admit, there's life outside Streamr. We're not jealous, though, and indeed make it easy to emit data to the wider world. Here's what you can do:
 
-As an example, you can create dashboards which display live data from within a Streamr service. Or you can embed visualisation modules in external web pages by inserting a single line of HTML code. Embedded visualisations will show live data as long as your service remains live.
-
-If you're a developer, you can just subscribe to a stream in external web pages and applications. You’ll then receive every event as soon as it’s available. It’s up to you what you do with the event; the possibilities are endless.
-
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+- Create [dashboards](#dashboards) which display live data from  a Streamr service.
+- Embed live visualisation elements in external web pages by inserting a single line of HTML code.
+- Subscribe to a stream in external web pages and applications, and receive every event as soon as it’s available.
 
 ##Who is Streamr for?
 
@@ -57,6 +53,4 @@ The short answer is that Streamr is for anyone who wants to create new, interest
 Streamr offers value to many different user groups. Domain experts and R&D teams can use Streamr for quick prototyping and exploration before building a production level offering. Streamr gives students, hobbyists, and enthusiasts a fully functional but affordable event processing platform in the cloud.
 
 For corporations and organisations, Streamr is also a tool for sharing and teamwork. The real-time data that you collect may be a treasure trove for innovation, but nothing will happen unless the data is available and usable. Streamr can be the spark which makes innovation happen: It brings the data into the open, and makes it easy to experiment with ideas for new products and services.
-
-------
 
