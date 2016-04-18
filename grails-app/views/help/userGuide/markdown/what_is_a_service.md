@@ -1,7 +1,6 @@
-<a name="what-is-a-service"></a>
 #What is a service?
 
-A Streamr service is a digital agent which processes streaming real-time data for you.  A service contains one or more modules (these do the processing) and one or more [streams](#what-is-a-stream) (these provide the data).  Streams and modules are connected in the configuration you'll design.  Those connections define how the data flows through the service.
+A Streamr service is a digital agent which processes streaming real-time data for you.  A service contains one or more modules (these do the processing) and one or more [streams](#whatisastream) (these provide the data).  Streams and modules are connected in the configuration you'll design.  Those connections define how the data flows through the service.
 
 There's a wide variety of built-in modules in Streamr.  Some of those perform basic arithmetic and logical operations, filtering, sampling, aggregation, and so on. Others transform the data in some fashion and feed it to the next stage.  Yet other modules interact with the outside world and with external systems.
 

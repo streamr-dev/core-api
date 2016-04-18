@@ -1,4 +1,3 @@
-<a name="services"></a>
 #Services
 
 A Streamr service is a process which consumes and acts upon real-time data.  A service contains one or more modules (these do the processing) and one or more [streams](#what-is-a-stream) (these provide the data).  Streams and modules are connected in the configuration you'll design.  Those connections define how the data flows through the service.

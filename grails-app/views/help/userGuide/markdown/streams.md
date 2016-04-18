@@ -1,4 +1,3 @@
-<a name="streams"></a>
 #Streams
 
 All data in Streamr is stored in a *stream*. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
@@ -82,7 +81,7 @@ There is no theoretical limitation as to the format or type of data in Streamr. 
 
 ##Creating or deleting streams
 
-You can create new streams either through the user interface or by using the [stream API](#stream-API-reference). Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
+You can create new streams either through the user interface or by using the [stream API](#streamapireference). Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
 
 If you want to create a stream manually, go to the Streams section.  There’s a button which looks like this:
 
@@ -112,7 +111,7 @@ If you want to configure the data fields manually, the Configure Fields button t
 
 <g:img dir="images/user-guide" file="configure-fields-dialog.png" class="img-responsive center-block" />
 
-You can also add data fields and specify the field types using the [stream API](#stream-API-reference).
+You can also add data fields and specify the field types using the [stream API](#streamAPIreference).
 
 <hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
@@ -222,7 +221,7 @@ If you want to subscribe to a stream in the user interface, you can either work 
 
 When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for `TweetText`, `TweetID`, `UserName`, `UserTimeZone`, etc.
 
-You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on [**Working with canvases**](#working-with-canvases) for examples of what you can do.
+You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on [**Working with canvases**](#workingwithcanvases) for examples of what you can do.
 
 <br style="clear:both;" />
 
