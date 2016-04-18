@@ -6,10 +6,11 @@ You can store different kinds of data in the same stream.  The data may be numer
 
 You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to a Streamr service, and act as a recipient of real-time output from such a service.
 
-In this section, we’ll show some examples of what a stream can look like, and describe the built-in data types. We'll then discuss how to do the following:
+In this chapter, we’ll show some examples and describe the built-in data types. We'll then discuss how to do the following:
 
-- Create or delete streams.
+- Create streams.
 - Edit stream details.
+- Delete streams.
 - Upload historical data.
 - Push events to a stream.
 - Subscribe to a stream.
@@ -18,9 +19,9 @@ In this section, we’ll show some examples of what a stream can look like, and 
 
 <hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
-##Examples
+##Stream examples
 
-Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields, a measurement of the operating temperature and the number of rotations per minute (RPM).
+Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields: a measurement of the operating temperature and the number of rotations per minute (RPM).
 
 Timestamp               | Temperature | RPM
 :---------------------- |:------------|:----
@@ -79,11 +80,11 @@ Data types can be freely mixed in one event. And you can freely add new fields t
 
 There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
 
-##Creating or deleting streams
+##Creating streams
 
-You can create new streams either through the user interface or by using the [stream API](#streamapireference). Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
+You can create new streams either through the user interface or by using the <g:link controller="help" action="api">stream API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
 
-If you want to create a stream manually, go to the Streams section.  There’s a button which looks like this:
+If you want to create a stream manually, go to the Streams tab.  There’s a button which looks like this:
 
 <g:img dir="images/user-guide" file="create-stream-button.png" class="img-responsive" />
 
@@ -95,13 +96,9 @@ A new stream is created when you press the **Next** button.  You’ll be shown a
 
 <g:img dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
 
-If you want to delete a stream, click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead.
-
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Editing stream details
 
-The stream details can be edited by clicking on the **Edit info** button. This is where you rename a stream or modify its description.
+If you want to edit stream details, you need to be in the Streams tab. Click on the stream name, and then click on the **Edit info** button. You'll see a dialog where you can rename a stream or modify its description.
 
 <g:img dir="images/user-guide" file="edit-stream-dialog.png" class="img-responsive center-block" />
 
@@ -111,7 +108,15 @@ If you want to configure the data fields manually, the Configure Fields button t
 
 <g:img dir="images/user-guide" file="configure-fields-dialog.png" class="img-responsive center-block" />
 
-You can also add data fields and specify the field types using the [stream API](#streamAPIreference).
+You can also rename a stream, edit the description, add data fields and specify the field types using the [stream API](#streamAPIreference).
+
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
+##Deleting streams
+
+You need to be in the Streams tab in order to delete a stream. Click on the stream name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead.
+
+Alternatively, you can delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
 
 <hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
@@ -217,7 +222,7 @@ Code | Description
 
 You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr user interface, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
 
-If you want to subscribe to a stream in the user interface, you can either work with a new canvas or load an existing one in the Canvas section.  Start typing in the name of a stream in a text box labeled **Add Stream / Module**.  We’ll find the stream for you as you type.
+If you want to subscribe to a stream in the user interface, you can either work with a new canvas or load an existing one in the Canvases tab.  Start typing in the name of a stream in a text box labeled **Add Stream / Module**.  We’ll find the stream for you as you type.
 
 When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for `TweetText`, `TweetID`, `UserName`, `UserTimeZone`, etc.
 

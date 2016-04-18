@@ -31,7 +31,7 @@ We'll also discuss the best practices that you should aim to follow when develop
 
 You can create a new service or modify an existing service by using the Streamr editor. When you log in to Streamr, the editor with a blank canvas is what you’ll first see. The editor is always accessible by clicking on the **Editor** tab.
 
-You'll find that using the editor is an easy way to create new services. However, you can also create a service programmatically by using the [service API](#service-API-reference). 
+You'll find that using the editor is an easy way to create new services. However, you can also create a service programmatically by using the <g:link controller="help" action="api">canvas API</g:link>. 
 
 <g:img dir="images/user-guide" file="blank-canvas-with-arrow.png" class="img-responsive center-block" />
 

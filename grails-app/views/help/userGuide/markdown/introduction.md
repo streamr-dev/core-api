@@ -16,7 +16,7 @@ The secret sauce of Streamr is the hidden technology which makes creating and ma
 
 ##Data live in streams
 
-All real-time data in Streamr is stored in a [stream](#whatisastream). A stream is essentially a timestamped sequence of events. Each event may contain more than one field. You can create and work on dozens, hundreds, or thousands of streams. A stream is persistent, identified by a unique ID, and stored in the cloud.
+All real-time data in Streamr is stored in [streams](#streams). A stream is essentially a timestamped sequence of events. Each event may contain more than one field. You can create and work on dozens, hundreds, or thousands of streams. A stream is persistent, identified by a unique ID, and stored in the cloud.
 
 Any kind of real-time data can be stored in a stream. The incoming data may consist of sensory readings of speed, geolocation, orientation, ambient temperature, humidity, and so forth. Or the data may contain social media messages, stock market events, mobile ad impressions, and so on.
 
@@ -30,9 +30,9 @@ Streams implement a publish-subscribe paradigm, or pub/sub for short. A stream c
 
 ##Turn the data into action
 
-You can build any kind of automatic real-time functionality with Streamr [services](#creatingservices). We make it easy to create and manage your digital workforce. There is an extensive built-in module library as a source of building blocks. You can abstract modules and re-use them later, and you can code custom modules in Java.
+You can build any kind of automatic real-time functionality with Streamr [services](#services). We make it easy to create and manage your digital workforce. There is an extensive built-in module library as a source of building blocks. You can abstract modules and re-use them later, and you can code custom modules in Java.
 
-Here's a few examples of specific things you can do with services.
+Here's a few examples of specific things you can do.
 
 - Refine real-time data by passing it through different modules. The built-in module library includes arithmetic and logical operations. There are also functions for smoothing, sampling, and aggregating streaming data.
 - Chain modules together so that the output from one operation flows as an input to another. This is one way to build arbitrarily complex streaming analytics. If you want to keep things tidy, you can encapsulate the complexity and reuse the abstracted result.
