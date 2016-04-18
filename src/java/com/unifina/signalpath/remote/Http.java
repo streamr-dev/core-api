@@ -1,6 +1,8 @@
 package com.unifina.signalpath.remote;
 import com.unifina.signalpath.*;
 
+import org.apache.commons.collections.list.UnmodifiableList;
+import org.apache.commons.collections.map.UnmodifiableMap;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -142,6 +144,11 @@ public class Http extends AbstractHttpModule {
 				} else {
 					JSONTokener parser = new JSONTokener(responseString);
 					Object jsonObject = parser.nextValue();    // parser returns Map, List, or String
+					if (jsonObject instanceof Map) {
+						jsonObject = UnmodifiableMap.decorate((Map)jsonObject);
+					} else if (jsonObject instanceof List) {
+						jsonObject = UnmodifiableList.decorate((List)jsonObject);
+					}
 					responseData.send(jsonObject);
 				}
 
