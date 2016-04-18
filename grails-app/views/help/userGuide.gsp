@@ -14,9 +14,12 @@
 
 	<r:script>
 		$(document).ready(function() {
-			var textAreaElements = document.querySelectorAll("textarea");
-			for (var i=0; i < textAreaElements.length; ++i) {
-				CodeMirror.fromTextArea(textAreaElements[i]);
+			var codeBlocks = document.querySelectorAll("pre code");
+			for (var i=0; i < codeBlocks.length; ++i) {
+				var codeBlock = codeBlocks[i]
+				var myCodeMirror = CodeMirror(function(elt) {
+					codeBlock.parentNode.replaceChild(elt, codeBlock);
+				}, {value: codeBlocks[i].innerHTML.trim()});
 			}
 
 			var offset = 80
