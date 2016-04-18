@@ -1,46 +1,63 @@
+<a name="working-with-streams"></a>
 #Working with streams
 
-All data in Streamr is stored in [streams](“What is a stream?”).  A stream is a timestamped sequence of events.  A stream is capable of receiving and saving new data points, and it will return data in the correct sequence when needed.  In this section, we’ll show how to do the following:
+All data in Streamr is stored in [streams](#what-is-a-stream). A stream is a timestamped sequence of events.  A stream is capable of receiving and saving new data points, and it will return data in the correct sequence when needed.
 
-- Creating and deleting streams.
-- Editing stream details.
-- Uploading historical data.
-- Pushing events to a stream.
-- Subscribing to a stream.
+You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to a streaming service, and act as a recipient of real-time output from a service.
 
-##Creating and deleting streams
+In this section, we’ll show how to do the following:
 
-You can create new streams either through the user interface or by using the [stream API](“Stream API reference”).  If you want to create a stream manually, go to the Streams section.  There’s a button which looks like this:
+- Create or delete streams.
+- Edit stream details.
+- Upload historical data.
+- Push events to a stream.
+- Subscribe to a stream.
 
-![Create Stream](userGuide/images/create-stream.png "Create Stream")
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
-![Create Stream](/Users/risto/github/documentation/images/create-stream.png "Create Stream")
+<center>Discuss database (MongoDb) poller streams</center>
+
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
+##Creating or deleting streams
+
+You can create new streams either through the user interface or by using the [stream API](#stream-API-reference).  If you want to create a stream manually, go to the Streams section.  There’s a button which looks like this:
+
+<g:img dir="images/user-guide" file="create-stream-button.png" hspace="25" vspace="20" />
 
 A click on the button takes you to a dialog where you’ll fill in the stream name and an optional description.
 
-![Create stream dialog](/Users/risto/github/documentation/images/create-stream-dialog.png "Create stream dialog")
+<g:img dir="images/user-guide" file="create-stream-dialog.png" width="550" hspace="25" vspace="20" />
 
-A new stream is created when you press the **Next** button.  You’ll be shown a stream view that includes the stream details (the name and description), API credentials, configured fields (there’s won’t be any yet), and an overview of stream history (there will be none yet). 
+A new stream is created when you press the **Next** button.  You’ll be shown a stream view that includes the stream details (the name and description), API credentials, configured fields (there won’t be any yet), and a summary of stream history (there will be none yet). 
 
+<g:img dir="images/user-guide" file="my-first-stream-view.png" width="675" hspace="25" vspace="20" />
 
 If you want to delete a stream, click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead.
+
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
 ##Editing stream details
 
 The stream details can be edited by clicking on the **Edit info** button. This is where you rename a stream or modify its description.
 
+<g:img dir="images/user-guide" file="edit-stream-dialog.png" width="550" hspace="25" />
+
 The stream view also includes the option of configuring the data fields.  If you’ll load real-time data through the API, you’ll need to configure the data fields now.  If you’ll first load historical data from a text file, you can skip this step.  We’ll be in many cases able to to autodetect the field types from the input.
 
 If you want to configure the data fields manually, the Configure Fields button takes you to a setup dialog.  To add a new data field, click on the **+ Add Field** button, give the field a name and change the field type as appropriate.  Remember to save the changes when done.
 
+<g:img dir="images/user-guide" file="configure-fields-dialog.png" width="550" hspace="25" vspace="20" />
 
-You can also add data fields and specify the field types using the [stream API](“Stream API reference”).  
+You can also add data fields and specify the field types using the [stream API](#stream-API-reference).
 
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
 ##Uploading historical data
 
 Batches of historical events can be loaded into a stream by importing a CSV file.  If you click on an existing stream, you’ll see a History panel and a data drop.  This is where you can drop a text file with a batch of event history.
 
+<g:img dir="images/user-guide" file="csv-data-drop.png" width="510" hspace="25" vspace="20" />
 
 You can also pick a local file for import by manually by clicking on the data drop.  Either way, Streamr will parse the given CSV file and load the events into the stream.
 
@@ -48,17 +65,21 @@ As to the format, the CSV file should have the column names on the first row, an
 
 If Streamr cannot find the event timestamps or doesn’t understand the timestamp format, you will see a dialog box like the one below.  This is where you can manually select the timestamp column and specify the format.
 
+<g:img dir="images/user-guide" file="csv-field-dialog.png" width="675" hspace="25" vspace="20" />
 
 We’ll do our best to make sense of the data columns in the CSV file, but the autodetection of field types will not always work.  For instance, a column of telephone numbers may be interpreted as numbers even if you’d probably want to import them as strings.  In such cases, you’ll need to configure the fields manually as shown above.  Mind you, making changes that don’t make sense will cause runtime exceptions due to incompatible data types.
 
-Let’s now go ahead and upload some sample data.  We’ll import a text file which contains a collection of recent tweets found with the keywords `“augmented intelligence”`.  This is what the sample tweet data looks like, as at the time of writing, and only four columns and twenty rows shown:
+Let’s now go ahead and upload some sample data.  We’ll import a text file which contains a collection of recent tweets found with the keywords `“augmented intelligence”`.  This is what the sample tweet data looks like, as at the time of writing, with only four columns and a subset of rows shown:
 
-ADD TABLE HERE
+<g:img dir="images/user-guide" file="sample-twitter-data.png" width="675" hspace="25" vspace="20" />
 
 The data file is called `“SampleTweets.csv”`, and you can download the latest version to your desktop from this [link](“SampleTweets.csv”). 
 
 If you drag the the sample file to the data drop, the events are uploaded to the stream.  Once the process is complete, the stream view is updated to show the extent of the archived history. 
 
+<g:img dir="images/user-guide" file="twitter-stream-view.png" width="675" hspace="25" vspace="20" />
+
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
 ##Pushing events to a stream
 
@@ -126,17 +147,23 @@ Code | Description
 404  | Unknown endpoint
 500  | Unexpected error
 
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
 ##Subscribing to a stream
 
-You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr user interface, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the Streamr [API](“Javascript API reference”).
+<g:img dir="images/user-guide" file="add-twitter-stream.png" align="left"  hspace="10" vspace="5" />
+
+You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr user interface, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
 
 If you want to subscribe to a stream in the user interface, you can either work with a new canvas or load an existing one in the Canvas section.  Start typing in the name of a stream in a text box labeled **Add Stream / Module**.  We’ll find the stream for you as you type.
 
+When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for `TweetText`, `TweetID`, `UserName`, `UserTimeZone`, etc.
 
-When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for TweetText, TweetID, UserName, UserTimeZone, etc.
+You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on [**Working with canvases**](#working-with-canvases) for examples of what you can do.
 
-You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on ["Working with canvases"](“Working with canvases”) for examples of what you can do.  For now, we’ll just add a chart module to visualise the data.
+<br style="clear:both;" />
 
+For now, we’ll just add a Table module to visualise the data.  This is what we get:
 
-------
+<g:img dir="images/user-guide" file="twitter-stream-on-canvas.png" width="675" hspace="25" vspace="20" />
 

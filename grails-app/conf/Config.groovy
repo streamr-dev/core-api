@@ -8,4 +8,3 @@ markdown.definitionLists = true
 markdown.smartPunctuation = true
 markdown.fencedCodeBlocks = true
 markdown.tables = true
-markdown.baseUri = "http://streamr.com"

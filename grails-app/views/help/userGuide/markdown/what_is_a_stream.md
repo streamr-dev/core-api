@@ -1,12 +1,15 @@
+<a name="what-is-a-stream"></a>
 #What is a stream?
 
-All data in Streamr is stored in a stream. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and you can get data out from a stream in the correct order. Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams. 
+All data in Streamr is stored in a stream. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams. 
 
-You can store different kinds of data in the same stream.  The data may be numeric, but they can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
+You can store different kinds of data in the same stream.  The data may be numeric, but it can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
 
-The platform includes a number of tools for [working with streams](“Working with streams”). You can manage streams, upload batches of historical data, add real-time data, and subscribe to a stream within the platform or from external applications.
+The Streamr platform includes a number of tools for [working with streams](#working-with-streams). You can manage streams, upload batches of historical data, add real-time data, and subscribe to a stream within the platform or from external applications.
 
-##Stream examples
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
+##Examples
 
 Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields, a measurement of the operating temperature and the number of rotations per minute (RPM).
 
@@ -42,9 +45,11 @@ As an example of a more complicated event, here’s a data point in a stock mark
               {"Price": 118, "Size": 50000}
     ]}
 
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
 ##Built-in data types
 
-There’s a number of specific built-in data types which can be used in a standard stream. These are the following:
+There’s a number of built-in data types that can be used in a stream. These are the following:
 
 Number
 :   A numeric data type internally stored as a double precision (64-bit) float.
@@ -56,14 +61,11 @@ String
 :   A sequence of zero or more alphabetical characters.
 
 Map
-:   A collection of key-value pairs. Each key is a string, and the value can be of any built-in data type (even a Map). Map is the same as a dictionary or an associative array found in a number of programming languages.
+:   A collection of key-value pairs. Each key is a string, and the value can be of any built-in data type (even a Map again). Map is the same as a dictionary or an associative array found in a number of programming languages.
 
 List
 :   An ordered collection of zero or more elements.
 
 Data types can be freely mixed in one event. And you can freely add new fields to an existing stream; you don’t have to know what fields you might eventually need. A single event can be of any size within reason, and a stream can grow indefinitely when extended by new events. 
 
-Whilst the standard streams only support specific data types, there is no theoretical limitation as to the format or type of data in a stream. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us on what you have in mind.
-
-------
-
+There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
