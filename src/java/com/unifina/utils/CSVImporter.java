@@ -115,15 +115,6 @@ public class CSVImporter implements Iterable<LineValues> {
 				new CSVParser(';')
 		};
 
-		// A formatter with regular ISO8601 format and a custom one where 'T' is replaced by whitespace
-		private DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
-				.append(new DateTimeFormatterBuilder()
-						.append(ISODateTimeFormat.dateParser())
-						.appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toParser())
-						.appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toParser())
-						.append(ISODateTimeFormat.timeParser())
-						.toFormatter()).toFormatter().withZoneUTC();
-
 		public CSVParser parser = null;
 		public SchemaEntry[] entries;
 		
@@ -172,13 +163,13 @@ public class CSVImporter implements Iterable<LineValues> {
 			    			// Is the type of this field still undetected?
 			    			if (entries[i]==null) {
 			    				if(timestampColumnIndex != null && i == timestampColumnIndex){
-			    					entries[i] = new SchemaEntry(headers[i], DateTimeFormat.forPattern(format));
+			    					entries[i] = new SchemaEntry(headers[i], new CustomDateTimeParser(format));
 			    				} else {
 			    					entries[i] = detectEntry(columns[i], headers[i]);
 			    				}
 			    				if (entries[i] != null) {
 			    					undetectedSchemaEntries--;
-			    					if (entries[i].dateTimeFormatter !=null && timestampColumnIndex==null)
+			    					if (entries[i].dateTimeParser !=null && timestampColumnIndex==null)
 			    						timestampColumnIndex = i;
 			    				}
 			    				
@@ -232,16 +223,16 @@ public class CSVImporter implements Iterable<LineValues> {
 			} else {
 				// Try to parse as ISO dateTime
 				try {
-					dateTimeFormatter.parseDateTime(value);
-					return new SchemaEntry(name, dateTimeFormatter);
+					CustomDateTimeParser parser = new CustomDateTimeParser();
+					parser.parse(value);
+					return new SchemaEntry(name, parser);
 				} catch (Exception e) {}
 
 				// Try to parse as double
 				try {
 					Double.parseDouble(value);
 					return new SchemaEntry(name, "number");
-				} catch (Exception e) {
-				}
+				} catch (Exception e) {}
 
 				// Try to parse as boolean
 				if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
@@ -263,7 +254,7 @@ public class CSVImporter implements Iterable<LineValues> {
 				for (i=0; i < values.length && i < entries.length; i++) {
 					// The timestamp column cannot be empty
 					if (i == timestampColumnIndex) {
-						Date d = entries[i].dateTimeFormatter.parseDateTime(values[i]).toDate();
+						Date d = entries[i].dateTimeParser.parse(values[i]);
 						if (lastDate != null && d.before(lastDate)) {
 							throw new RuntimeException("The lines must be in a chronological order!");
 						}
@@ -274,8 +265,8 @@ public class CSVImporter implements Iterable<LineValues> {
 					else if (values[i] == null || values[i].length() == 0)
 						parsed[i] = null;
 						// Parse date field
-					else if (entries[i].dateTimeFormatter != null) {
-						parsed[i] = entries[i].dateTimeFormatter.parseDateTime(values[i]).toDate();
+					else if (entries[i].dateTimeParser != null) {
+						parsed[i] = entries[i].dateTimeParser.parse(values[i]);
 					}
 					// Parse number
 					else if (entries[i].type.equals("number"))
@@ -309,17 +300,17 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		public String name;
 		public String type;
-		public DateTimeFormatter dateTimeFormatter;
+		public CustomDateTimeParser dateTimeParser;
 		
 		public SchemaEntry(String name, String type) {
 			this.name = name;
 			this.type = type;
 		}
 		
-		public SchemaEntry(String name, DateTimeFormatter dateTimeFormatter) {
+		public SchemaEntry(String name, CustomDateTimeParser dateTimeParser) {
 			this.name = name;
 			this.type = "timestamp";
-			this.dateTimeFormatter = dateTimeFormatter;
+			this.dateTimeParser = dateTimeParser;
 		}
 		
 	}
@@ -335,6 +326,54 @@ public class CSVImporter implements Iterable<LineValues> {
 		
 		public Date getTimestamp() {
 			return (Date) values[schema.timestampColumnIndex];
+		}
+	}
+
+	public class CustomDateTimeParser {
+
+		private DateTimeFormatter fmt;
+		private String format;
+
+		public CustomDateTimeParser() {
+			this("");
+		}
+
+		public CustomDateTimeParser(String format) {
+			this.format = format;
+			if (!(format.equals("unix") || format.equals("unix-s"))) {
+				if (!format.equals("")) {
+					fmt = DateTimeFormat.forPattern(format);
+				} else {
+					// A formatter with regular ISO8601 format and a custom one where 'T' is replaced by whitespace
+					fmt = new DateTimeFormatterBuilder()
+						.append(ISODateTimeFormat.dateParser())
+						.appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toParser())
+						.appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toParser())
+						.append(ISODateTimeFormat.timeParser())
+						.toFormatter().withZoneUTC();
+				}
+			}
+		}
+
+		public Date parse(String date) {
+			try {
+				if (format.equals("unix") || format.equals("unix-s")) {
+					long l;
+					l = Long.parseLong(date);
+					if (format.equals("unix-s")) {
+						l *= 1000;
+					}
+					return new Date(l);
+				} else {
+					return fmt.parseDateTime(date).toDate();
+				}
+			} catch (Exception e) {
+				throw new RuntimeException("Invalid date!");
+			}
+		}
+
+		public Date parse(long date) {
+			return parse("" + date);
 		}
 	}
 
