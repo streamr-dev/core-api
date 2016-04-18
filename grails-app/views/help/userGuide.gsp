@@ -71,14 +71,14 @@
 			<markdown:renderHtml template="userGuide/services" />
 			<hr>
 
-
+			<markdown:renderHtml template="userGuide/extensions" />
+			<hr>
+			
 			<markdown:renderHtml template="userGuide/dashboards" />
 			<hr>
 
 			<!-- <markdown:renderHtml template="userGuide/embedded_widgets" /> -->
 
-			<markdown:renderHtml template="userGuide/extensions" />
-			<hr>
 
 			<markdown:renderHtml template="userGuide/life_outside_streamr" />
 			<hr>

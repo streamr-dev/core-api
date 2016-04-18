@@ -160,7 +160,7 @@ The event timestamp is optional.  If omitted, the current timestamp on the recei
 
 Here’s an example of request headers:
 
-    Stream: -2IwFcsJSzO__9nt0nhc7g
+    Stream: z2IwFcsJSzOxx9nt0nhc7g
     Auth: cZhdnH7OQpK9ip07rttKSQ
     Timestamp: 1441227869000
 
@@ -182,7 +182,7 @@ A fully-formed request example using `jquery` looks like the following:
         type: "POST",
         url: "http://data.streamr.com/json",
         headers: {
-            Stream: "-2IwFcsJSzO__9nt0nhc7g",
+            Stream: "z2IwFcsJSzOxx9nt0nhc7g",
             Auth: "cZhdnH7OQpK9ip07rttKSQ",
             Timestamp: Date.now()
         },
@@ -192,7 +192,7 @@ A fully-formed request example using `jquery` looks like the following:
 
 The same example using `curl` looks like this.
 
-    curl -i -X POST -H "Stream: -2IwFcsJSzO__9nt0nhc7g" -H "Auth: cZhdnH7OQpK9ip07rttKSQ" \
+    curl -i -X POST -H "Stream: z2IwFcsJSzOxx9nt0nhc7g" -H "Auth: cZhdnH7OQpK9ip07rttKSQ" \
     -d "{\"foo\":\"hello\",\"bar\":24.5}" http://data.streamr.com/json
 
 If the call is successful, the data API returns the code 204 (i.e. “no content”).  These are the possible return codes:
