@@ -1,17 +1,13 @@
 package com.unifina.signalpath.statistics;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
+import com.unifina.signalpath.*;
+import com.unifina.utils.window.WindowListener;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.IntegerParameter;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesOutput;
-
-public class LinearRegressionXY extends AbstractSignalPathModule {
-
-	IntegerParameter windowLength = new IntegerParameter(this,"windowLength",60);
+public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressionXY.XYPair> {
 	
 	TimeSeriesInput x = new TimeSeriesInput(this,"inX");
 	TimeSeriesInput y = new TimeSeriesInput(this,"inY");
@@ -20,53 +16,72 @@ public class LinearRegressionXY extends AbstractSignalPathModule {
 	TimeSeriesOutput intercept = new TimeSeriesOutput(this,"intercept");
 	TimeSeriesOutput error = new TimeSeriesOutput(this,"error");
 	TimeSeriesOutput rsq = new TimeSeriesOutput(this,"R^2");
-	
-	ArrayList<double[]> values;
+
 	SimpleRegression regression = new SimpleRegression();
 	
 	@Override
 	public void init() {
-		addInput(windowLength);
-		addInput(x);
-		addInput(y);
+		super.init();
+
+		// Control the order of outputs
 		addOutput(slope);
 		addOutput(intercept);
 		addOutput(error);
 		addOutput(rsq);
 	}
-	
+
 	@Override
-	public void sendOutput() {
-		if (values==null)
-			values = new ArrayList<double[]>(windowLength.getValue());
-		
-		while (values.size()>=windowLength.getValue()) {
-			double[] removed = values.remove(0);
-			regression.removeData(removed[0],removed[1]);
-		}
-		
-		double[] newVal = new double[2];
-		newVal[0] = x.value;
-		newVal[1] = y.value;
-		
-		values.add(newVal);
-		regression.addData(newVal[0],newVal[1]);
-		
-		if (values.size()==windowLength.getValue()) {
-			double s = regression.getSlope();
-			if (s != Double.NaN) {
-				slope.send(regression.getSlope());
-				intercept.send(regression.getIntercept());
-				error.send(regression.getMeanSquareError());
-				rsq.send(regression.getRSquare());
-			}
+	protected Integer getDimensions() {
+		return 2;
+	}
+
+	@Override
+	protected void handleInputValues() {
+		addToWindow(new XYPair(x.getValue(), y.getValue()));
+	}
+
+	@Override
+	protected void doSendOutput() {
+		double s = regression.getSlope();
+		if (s != Double.NaN) {
+			slope.send(regression.getSlope());
+			intercept.send(regression.getIntercept());
+			error.send(regression.getMeanSquareError());
+			rsq.send(regression.getRSquare());
 		}
 	}
-	
+
 	@Override
-	public void clearState() {
-		values = new ArrayList<double[]>(windowLength.getValue());
-		regression = new SimpleRegression();
+	protected WindowListener<XYPair> createWindowListener(int dimension) {
+		return new LinearRegressionWindowListener();
+	}
+
+	class LinearRegressionWindowListener implements WindowListener<XYPair> {
+
+		@Override
+		public void onAdd(XYPair item) {
+			regression.addData(item.x, item.y);
+		}
+
+		@Override
+		public void onRemove(XYPair item) {
+			regression.removeData(item.x, item.y);
+		}
+
+		@Override
+		public void onClear() {
+			regression.clear();
+		}
+	}
+
+	class XYPair implements Serializable {
+		public double x;
+		public double y;
+
+		public XYPair(double x, double y) {
+			this.x = x;
+			this.y = y;
+		}
 	}
 	
 }

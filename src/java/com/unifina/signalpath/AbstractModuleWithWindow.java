@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModule implements ITimeListener {
 
-	enum WindowType {
+	// The time-based enums should have the same name as the corresponding TimeUnit.XXXX
+	protected enum WindowType {
 		EVENTS,
 		SECONDS,
 		MINUTES,
@@ -24,19 +25,28 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		DAYS
 	}
 
-	IntegerParameter windowLength = new IntegerParameter(this, "windowLength", 0); // needs to be protected to work with auto-init
-	WindowTypeParameter windowType = new WindowTypeParameter(this, "windowType", WindowType.EVENTS.toString().toLowerCase()); // needs to be protected to work with auto-init
+	protected IntegerParameter windowLength = new IntegerParameter(this, "windowLength", 100);
+	protected WindowTypeParameter windowType = new WindowTypeParameter(this, "windowType", WindowType.EVENTS.toString().toLowerCase());
 
-	private AbstractWindow[] windows;
-	private WindowType selectedWindowType = WindowType.EVENTS;
+	@ExcludeInAutodetection
+	protected IntegerParameter minSamples = new IntegerParameter(this, "minSamples", 1);
 
-	private int dimensions = 1;
-	private Integer cachedLength = null;
+	protected AbstractWindow<T>[] windows;
+	protected WindowType selectedWindowType = WindowType.EVENTS;
+
+	private transient Integer cachedLength = null;
+
+	// Subclass can set this to false in constructor to disable minSamples functionality
+	protected boolean supportsMinSamples = true;
 
 	@Override
 	public void init() {
 		addInput(windowLength);
 		addInput(windowType);
+
+		if (supportsMinSamples)
+			addInput(minSamples);
+
 		super.init();
 	}
 
@@ -59,8 +69,8 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		selectedWindowType = WindowType.valueOf(windowType.getValue().toUpperCase());
-		this.windows = new AbstractWindow[dimensions];
-		for (int d = 0; d< dimensions; d++) {
+		this.windows = new AbstractWindow[getDimensions()];
+		for (int d = 0; d < getDimensions(); d++) {
 			windows[d] = createWindow(this.selectedWindowType, d);
 		}
 	}
@@ -81,12 +91,15 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	}
 
 	/**
-	 * Should add input values to the windows by calling addToWindow()
+	 * Should add input values to the windows by calling addToWindow().
+	 * All windows must have the same number of values!
 	 */
 	protected abstract void handleInputValues();
 
 	/**
-	 * Should send out the current value
+	 * Should send out the current value. Only gets called if the
+	 * window is ready, eg. does not require a minimum number of samples
+	 * or the minimum has been reached.
 	 */
 	protected abstract void doSendOutput();
 
@@ -101,37 +114,43 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	public void setTime(Date time) {
 		if (selectedWindowType != WindowType.EVENTS) {
 			boolean windowChanged = false;
-			for (int d = 0; d< dimensions; d++) {
+			for (int d = 0; d < getDimensions(); d++) {
 				int initialSize = windows[d].getSize();
 				((TimeWindow) windows[d]).setTime(time);
 				if (windows[d].getSize() != initialSize)
 					windowChanged = true;
 			}
 
-			if (windowChanged) {
+			if (windowChanged && isWindowReady()) {
 				doSendOutput();
 			}
 		}
+	}
+
+	protected boolean isWindowReady() {
+		return !supportsMinSamples || windows[0].getSize() >= minSamples.getValue();
 	}
 
 	@Override
 	public void sendOutput() {
 		if (cachedLength==null || !windowLength.getValue().equals(cachedLength)) {
 			cachedLength = windowLength.getValue();
-			for (int d = 0; d< dimensions; d++) {
+			for (int d = 0; d < getDimensions(); d++) {
 				windows[d].setLength(cachedLength);
 			}
 		}
 
 		handleInputValues();
-		doSendOutput();
+		if (isWindowReady())
+			doSendOutput();
 	}
 
 	@Override
 	public void clearState() {
-		for (int d = 0; d< dimensions; d++) {
+		for (int d = 0; d < getDimensions(); d++) {
 			windows[d].clear();
 		}
+		cachedLength = null;
 	}
 
 	class WindowTypeParameter extends StringParameter {
@@ -157,17 +176,8 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		}
 	}
 
-	public int getDimensions() {
-		return dimensions;
-	}
-
-	public void setDimensions(int dimensions) {
-		if (windows==null) {
-			this.dimensions = dimensions;
-		}
-		else {
-			throw new RuntimeException("Module has already been configured, must set dimension earlier!");
-		}
+	protected Integer getDimensions() {
+		return 1;
 	}
 
 }

@@ -1,7 +1,10 @@
 package com.unifina.utils.window;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * An abstraction of a sliding window that supports adding new objects of type T and removing old ones.
@@ -11,13 +14,13 @@ import java.util.ArrayDeque;
  *
  * Methods on the WindowListener are called when items are added or removed or when the window is cleared.
  */
-public abstract class AbstractWindow<T> implements Serializable {
+public abstract class AbstractWindow<T> implements Serializable, Iterable<T> {
 	protected WindowListener listener;
 	protected int length;
 	protected int size = 0;
 	protected ArrayDeque<T> values;
 
-	public AbstractWindow(int length, WindowListener listener) {
+	public AbstractWindow(int length, @Nullable WindowListener listener) {
 		if (length < 0)
 			throw new IllegalArgumentException("Invalid window length: "+length);
 
@@ -58,7 +61,10 @@ public abstract class AbstractWindow<T> implements Serializable {
 			values.add(item);
 
 		size++;
-		listener.onAdd(item);
+
+		if (listener != null) {
+			listener.onAdd(item);
+		}
 
 		purgeExtraValues();
 	}
@@ -70,7 +76,10 @@ public abstract class AbstractWindow<T> implements Serializable {
 		while (length > 0 && hasExtraValues()) {
 			T removedItem = values.removeFirst();
 			size--;
-			listener.onRemove(removedItem);
+
+			if (listener != null) {
+				listener.onRemove(removedItem);
+			}
 		}
 	}
 
@@ -84,6 +93,15 @@ public abstract class AbstractWindow<T> implements Serializable {
 	public void clear() {
 		values.clear();
 		size = 0;
-		listener.onClear();
+
+		if (listener != null) {
+			listener.onClear();
+		}
 	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return values.iterator();
+	}
+
 }

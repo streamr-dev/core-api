@@ -124,4 +124,20 @@ class AbstractWindowSpec extends Specification {
 		thrown(IllegalArgumentException)
 	}
 
+	void "listener can be null"() {
+		setup:
+		AbstractWindow window = new AbstractWindow(5, null) {
+			@Override
+			protected boolean hasExtraValues() {
+				return false
+			}
+		}
+
+		when:
+		(1..10).each { window.add(it) }
+
+		then:
+		notThrown(Exception)
+	}
+
 }
