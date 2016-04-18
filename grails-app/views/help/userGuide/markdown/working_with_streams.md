@@ -151,7 +151,7 @@ Code | Description
 
 ##Subscribing to a stream
 
-<g:img dir="images/user-guide" file="add-twitter-stream.png" align="left"  hspace="10" vspace="5" />
+<g:img dir="images/user-guide" file="add-twitter-stream.png" class="side-image" />
 
 You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr user interface, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
 

@@ -16670,6 +16670,12 @@ body.canvas-list-page .panel-heading-controls .input-group {
   width: 300px;
   margin-left: 15px;
 }
+@media (min-width: 700px) {
+  body.user-guide .side-image {
+    float: right;
+    margin-left: 1em;
+  }
+}
 table {
   background-color: transparent;
 }
