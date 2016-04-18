@@ -16676,6 +16676,12 @@ body.canvas-list-page .panel-heading-controls .input-group {
     margin-left: 1em;
   }
 }
+body.user-guide hr {
+  width: 70%;
+  border-top: #E9570F solid 2px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
 table {
   background-color: transparent;
 }
