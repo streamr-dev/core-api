@@ -6,6 +6,7 @@ import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.conn.ssl.SSLContexts;
@@ -35,13 +36,13 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	protected static final String BODY_FORMAT_PLAIN = "text/plain";
 	protected static final String BODY_FORMAT_XML = "application/xml";
 
-	public static int DEFAULT_TIMEOUT_SECONDS = 30;
+	public static int DEFAULT_TIMEOUT_SECONDS = 5;
 	public static int MAX_CONNECTIONS = 10;
 
 	protected String bodyContentType = BODY_FORMAT_JSON;
 	protected boolean trustSelfSigned = false;
 	protected boolean isAsync = false;
-	protected int timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
+	protected int timeoutMillis = 1000 * DEFAULT_TIMEOUT_SECONDS;
 
 	private transient Propagator asyncPropagator = new Propagator(this);
 	private transient CloseableHttpAsyncClient cachedHttpClient;
@@ -92,7 +93,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		options.add(asyncOption);
 
 		options.add(new ModuleOption("trustSelfSigned", trustSelfSigned, ModuleOption.OPTION_BOOLEAN));
-		options.add(new ModuleOption("timeoutSeconds", timeoutSeconds, ModuleOption.OPTION_INTEGER));
+		options.add(new ModuleOption("timeoutSeconds", timeoutMillis/1000, ModuleOption.OPTION_INTEGER));
 
 		return config;
 	}
@@ -103,7 +104,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		bodyContentType = MapTraversal.getString(config, "options.bodyContentType.value", AbstractHttpModule.BODY_FORMAT_JSON);
 		trustSelfSigned = MapTraversal.getBoolean(config, "options.trustSelfSigned.value");
 		isAsync = MapTraversal.getString(config, "options.syncMode.value", "async").equals("async");
-		timeoutSeconds = MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT_SECONDS);
+		timeoutMillis = 1000 * MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT_SECONDS);
 
 		// HTTP module in async mode won't send outputs on SendOutput(),
 		// 	but only in receive() where it creates its own Propagator
@@ -123,6 +124,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	public void sendOutput() {
 		final HttpTransaction response = new HttpTransaction(globals.isRealtime() ? new Date() : globals.time);
 
+		// get HTTP request from subclass
 		HttpRequestBase request = null;
 		try {
 			request = createRequest();
@@ -132,6 +134,11 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 			sendOutput(response);
 			return;
 		}
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectTimeout(timeoutMillis)
+				.setConnectionRequestTimeout(timeoutMillis)
+				.setSocketTimeout(timeoutMillis).build();
+		request.setConfig(requestConfig);
 
 		// if async: push server response into FeedEvent queue; it will later call this.receive
 		final AbstractHttpModule self = this;
@@ -172,9 +179,9 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 
 		if (!isAsync) {
 			try {
-				boolean done = latch.await(timeoutSeconds, TimeUnit.SECONDS);
+				boolean done = latch.await(timeoutMillis, TimeUnit.MILLISECONDS);
 				if (!done) {
-					response.errors.add("HTTP Request timed out after " + timeoutSeconds + " seconds");
+					response.errors.add("HTTP Request timed out after " + timeoutMillis + " ms");
 				}
 			} catch (InterruptedException e) {
 				response.errors.add(e.getMessage());
