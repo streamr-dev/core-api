@@ -17,21 +17,21 @@ You can create a new service or modify an existing service by using the Streamr 
 
 You'll find that using the editor is an easy way to create new services. However, you can also create a service programmatically by using the [service API](#service-API-reference). 
 
-<g:img dir="images/user-guide" file="blank-canvas-with-arrow.png" width="675" hspace="25" vspace="20" />
+<g:img dir="images/user-guide" file="blank-canvas-with-arrow.png" class="img-responsive center-block" />
 
 You choose what to do using the control sidebar. There are three things you can do:
 
 - If you want to create a new service, click on the left-most icon in the top row of the sidebar. This is where you'll be taken by default.
 
-   <g:img dir="images/user-guide" file="new-service-with-arrow.png" width="200" hspace="25" vspace="0" />
+   <g:img dir="images/user-guide" file="new-service-with-arrow.png" class="img-responsive center-block"/>
 
 - If you want to view or modify an existing service, click on the icon in the middle.
 
-    <g:img dir="images/user-guide" file="open-service-with-arrow.png" width="175" hspace="12" vspace="0" />
+    <g:img dir="images/user-guide" file="open-service-with-arrow.png" class="img-responsive center-block" />
 
 - If you want to save the service, click on the icon on the right.
 
-    <g:img dir="images/user-guide" file="save-service-with-arrow.png" width="175" hspace="12" vspace="0" />
+    <g:img dir="images/user-guide" file="save-service-with-arrow.png" class="img-responsive center-block" />
 
 The editor's canvas is your workspace for building a service and the event processing logic. You can test the service with a playback of historical data and launch it live when you're ready to go.
 
@@ -77,7 +77,7 @@ Whenever you edit the workflow on a canvas, the historical mode is in force.  Yo
 
 ##Launching a live service
 
-<g:img dir="images/user-guide" file="launch-realtime-run.png" align="right"  hspace="10" vspace="5" />
+<g:img dir="images/user-guide" file="launch-realtime-run.png" class="side-image" />
 
 If you want to run the canvas in the realtime mode, simply switch to the realtime tab.  Press the Run button to activate the canvas.
 

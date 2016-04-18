@@ -26,7 +26,7 @@ When placed on a canvas, the inputs are shown as circular connectors along the l
 
 Many modules have parameters which control their operation.  Module parameters can be hardcoded, but their values are usually not immutable.  If a parameter can be modified at run-time, there is an associated parameter input at the left-hand edge of the module.
 
-<g:img dir="images/user-guide" file="round-to-step-module.png" align="left"  hspace="10" vspace="5" />
+<g:img dir="images/user-guide" file="round-to-step-module.png" class="side-image" />
 
 As an example, the **RoundToStep** module has three inputs, two parameters, and one output.  The first two inputs correspond to the module’s parameters, i.e. precision and mode.  The last input is a numeric value which will be rounded with the specified precision in the direction specified by the mode.  The module output is equal to the rounded input.
 
@@ -36,11 +36,11 @@ Options control its behaviour or appearance of a module.  Options apply to a spe
 
 As an example, **Table** only shows one data column by default.  If you hover on top of the module and click on the wrench icon, you’ll see the available options in a pop-up window.  Change the number of inputs to 3, press **OK**, and you’ll get a **Table** with three columns.
 
-<g:img dir="images/user-guide" file="table-module-options.png" width="550" hspace="25" vspace="20" />
+<g:img dir="images/user-guide" file="table-module-options.png" class="img-responsive center-block" />
 
 Inputs, outputs, and parameters can be renamed.  If you move the mouse on top of a name, a click brings up a pop-up menu which allows you to give the endpoint or parameter a new display name.  Renaming has no bearing on functionality.
 
-<g:img dir="images/user-guide" file="module-popup-menu.png" width="550" hspace="25" vspace="20" />
+<g:img dir="images/user-guide" file="module-popup-menu.png" class="img-responsive center-block" />
 
 You’ll see a number of small icons next to the endpoints when you hover on top of a module.  These icons correspond to additional controls which are relevant to module activation.  We’ll have more to say on this below, but let’s first discuss the data flow between modules.
 
@@ -64,13 +64,13 @@ That’s all there is to it.  As soon as the two conditions are met, a module pr
 
 As part of the processing, the module may send one or more events downstream from the output endpoints.  It is important to note that a module does not need to submit any output.  It may take care of some side effect instead, or the inputs may be such that there’s no point in sending data onwards.
 
-<g:img dir="images/user-guide" file="and-module.png" align="left"  hspace="10" vspace="5" />
+<g:img dir="images/user-guide" file="and-module.png" class="side-image" />
 
 At least one endpoint is designated as a driving input by default.  To change the default settings, hover on top of a module and you’ll see a number of additional controls.  You can make any input a driver by clicking on the associated **DR** icon (a toggle button) next to an input connector.  
 
 As mentioned, every input must a have a value before anything happens.  The input values typically arrive either as events from a stream, or from the output endpoints in some other module(s).  If the input corresponds to a numeric value or a string, you can also specify an explicit initial value.  If you click on a **IV** icon next to an input, you’ll see an initial value dialog.
 
-<g:img dir="images/user-guide" file="initial-value-dialog.png" width="550" hspace="25" vspace="20" />
+<g:img dir="images/user-guide" file="initial-value-dialog.png" class="img-responsive center-block" />
 
 By default, feedback loops are not allowed.  This is because feedback and event processing do not always mix well (just think back to the last time you placed a live microphone too close to a loudspeaker).
 

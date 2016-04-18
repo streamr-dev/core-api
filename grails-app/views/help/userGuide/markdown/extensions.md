@@ -16,15 +16,15 @@ Whatever the reason, Streamr platform can be extended by writing your own specia
 // Define inputs and outputs here
  
 public void initialize() {
-// Initialize local variables
+    // Initialize local variables
 }
  
 public void sendOutput() {
-//Write your module code here
+    //Write your module code here
 }
  
 public void clearState() {
-// Clear internal state
+    // Clear internal state
 }
 ```
 
@@ -57,15 +57,15 @@ TimeSeriesInput in = new TimeSeriesInput(this, "in");
 TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
  
 public void initialize() {
-// Initialize local variables
+    // Initialize local variables
 }
  
 public void sendOutput() {
-//Write your module code here
+    //Write your module code here
 }
  
 public void clearState() {
-// Clear internal state
+    // Clear internal state
 }
 ```
 
@@ -126,11 +126,7 @@ public void clearState() {
 
 After inserting the code above into **JavaModule** editor and clicking **Apply**, you should see the module appear with input `in` and output `out` as illustrated in the figure below.
 
-Figure: JavaModule on Canvas with input named in and output named out.
-
-Figure: JavaModule for running multiplication. Input and output visible.
-
-<g:img dir="images/user-guide" file="custom-module.png" width="550" hspace="25" vspace="20" />
+<g:img dir="images/user-guide" file="custom-module.png" class="img-responsive center-block" />
 
 The module is now done and can be used like any other on the canvas. If you want some extra challenge, you can try making the initial value into a parameter yourself. Another useful feature is the ability to keep a running product over a moving window (as module **Sum** can be configured to do).
 
@@ -138,9 +134,7 @@ The module is now done and can be used like any other on the canvas. If you want
 
 Inputs, visually speaking, are the colored circles and labels found on the left-side of a module on a Canvas. For example, the module Multiply requires inputs A and B to calculate the result of multiplication. The inputs of a module must be connected to compatible outputs for data to arrive and for it to be processed.
 
-Figure: Multiply module
-
-<g:img dir="images/user-guide" file="multiply.png" hspace="25" vspace="20" />
+<g:img dir="images/user-guide" file="multiply.png" class="img-responsive center-block" />
 
 Inputs can be *optional* or *required*. Optional inputs may or may not be connected to an output depending on desired outcome. Required inputs must be connected to outputs in order for the module to activate, i.e., for the module to read received values on inputs, perform some computation, and spit out results to outputs. Required inputs are colored red when not connected. Optional inputs are gray even when not connected.
 
