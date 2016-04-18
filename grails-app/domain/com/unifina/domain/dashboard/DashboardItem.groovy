@@ -35,4 +35,9 @@ class DashboardItem implements Comparable {
 				webcomponent: webcomponent
 		]
 	}
+
+	void updateWebcomponent() {
+		def module = canvas.toMap().modules.find { it.hash ==  module }
+		webcomponent = module?.uiChannel?.webcomponent
+	}
 }
