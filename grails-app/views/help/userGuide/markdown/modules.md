@@ -1,4 +1,3 @@
-<a name="modules"></a>
 #Modules
 
 Modules are the workhorses which you'll use time and again as part of Streamr services. These are the module categories:
@@ -16,7 +15,7 @@ Modules are the workhorses which you'll use time and again as part of Streamr se
 - Extensions and abstraction.
 - Connectivity.
 
-In this chapter, we'll go through the module basics. For details on different modules, either see the individual module help in Streamr editor or have a look at the module [reference](#modulereference).
+In this chapter, we'll go through the module basics. For details on different modules, either see the individual module help in Streamr editor or have a look at the <g:link controller="help" action="module">module reference</g:link>.
 
 ##Inputs, outputs, parameters, and options
 

@@ -17,7 +17,7 @@ You can run a service with either historical or real-time data.
 - In the *historical mode*, running a service is a playback of what would have happened in the past. The playback mode can be extremely useful when you’re testing, refining, or demonstrating the functionality of a service.
 - The *real-time mode* is used in production where you want to react to events as they arrive. There's no need to modify the service if you decide to use it in the real-time mode after testing with historical data.  One click is all it takes to activate a service and take it live.
 
-In this section, we’ll show how to do the following: 
+In this chapter, we’ll show how to do the following: 
 
 - Create and edit services.
 - Run a historical playback.

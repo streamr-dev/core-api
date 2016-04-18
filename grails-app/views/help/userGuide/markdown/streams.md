@@ -1,6 +1,6 @@
 #Streams
 
-All data in Streamr is stored in a *stream*. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
+All data in Streamr is stored in a **stream**. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
 
 You can store different kinds of data in the same stream.  The data may be numeric, but it can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
 
@@ -8,20 +8,18 @@ You can use a stream as a pub/sub-device, push data into it, and subscribe to th
 
 In this chapter, we’ll show some examples and describe the built-in data types. We'll then discuss how to do the following:
 
-- Create streams.
-- Edit stream details.
-- Delete streams.
+- Create a stream.
+- Edit a stream.
+- Delete a stream.
 - Upload historical data.
 - Push events to a stream.
 - Subscribe to a stream.
 
 **Discuss database (MongoDb) poller streams somewhere**
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Stream examples
 
-Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields: a measurement of the operating temperature and the number of rotations per minute (RPM).
+Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields: A measurement of the operating temperature and the number of rotations per minute (RPM).
 
 Timestamp               | Temperature | RPM
 :---------------------- |:------------|:----
@@ -55,8 +53,6 @@ As an example of a more complicated event, here’s a data point in a stock mark
               {"Price": 118, "Size": 50000}
     ]}
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Built-in data types
 
 There’s a number of built-in data types that can be used in a stream. These are the following:
@@ -80,25 +76,25 @@ Data types can be freely mixed in one event. And you can freely add new fields t
 
 There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
 
-##Creating streams
+##Creating a stream
 
 You can create new streams either through the user interface or by using the <g:link controller="help" action="api">stream API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
 
-If you want to create a stream manually, go to the Streams tab.  There’s a button which looks like this:
+If you want to create a stream manually, go to the <kbd>Streams</kbd> tab.  There’s a button which looks like this:
 
 <g:img dir="images/user-guide" file="create-stream-button.png" class="img-responsive" />
 
-A click on the button takes you to a dialog where you’ll fill in the stream name and an optional description.
+A click takes you to a dialog where you’ll fill in the stream name and an optional description.
 
 <g:img dir="images/user-guide" file="create-stream-dialog.png" class="img-responsive center-block" />
 
-A new stream is created when you press the **Next** button.  You’ll be shown a stream view that includes the stream details (the name and description), API credentials, configured fields (there won’t be any yet), and a summary of stream history (there will be none yet). 
+A new stream is created when you click the **Next** button.  You’ll be shown a stream view that includes the stream details (the name and description), API credentials, configured fields (there won’t be any yet), and a summary of stream history (there will be none yet). 
 
 <g:img dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
 
-##Editing stream details
+##Editing a stream
 
-If you want to edit stream details, you need to be in the Streams tab. Click on the stream name, and then click on the **Edit info** button. You'll see a dialog where you can rename a stream or modify its description.
+If you want to edit stream details, you need to be in the <kbd>Streams</kbd> tab. Click on the stream name, and then click on the **Edit info** button. You'll see a dialog where you can rename a stream or modify its description.
 
 <g:img dir="images/user-guide" file="edit-stream-dialog.png" class="img-responsive center-block" />
 
@@ -110,19 +106,15 @@ If you want to configure the data fields manually, the Configure Fields button t
 
 You can also rename a stream, edit the description, add data fields and specify the field types using the [stream API](#streamAPIreference).
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+##Deleting a stream
 
-##Deleting streams
-
-You need to be in the Streams tab in order to delete a stream. Click on the stream name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead.
+You need to be in the <kbd>Streams</kbd> tab in order to delete a stream. Click on the stream name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead.
 
 Alternatively, you can delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Uploading historical data
 
-Batches of historical events can be loaded into a stream by importing a CSV file.  If you click on an existing stream, you’ll see a History panel and a data drop.  This is where you can drop a text file with a batch of event history.
+Batches of historical events can be loaded into a stream by importing a CSV file. You need to be in the <kbd>Streams</kbd> tab to do this. When you click on an existing stream, you’ll see a History panel and a data drop.  This is where you can drop a text file with a batch of event history.
 
 <g:img dir="images/user-guide" file="csv-data-drop.png" class="img-responsive center-block" />
 
@@ -136,7 +128,7 @@ If Streamr cannot find the event timestamps or doesn’t understand the timestam
 
 We’ll do our best to make sense of the data columns in the CSV file, but the autodetection of field types will not always work.  For instance, a column of telephone numbers may be interpreted as numbers even if you’d probably want to import them as strings.  In such cases, you’ll need to configure the fields manually as shown above.  Mind you, making changes that don’t make sense will cause runtime exceptions due to incompatible data types.
 
-Let’s now go ahead and upload some sample data.  We’ll import a text file which contains a collection of recent tweets found with the keywords `“augmented intelligence”`.  This is what the sample tweet data looks like, as at the time of writing, with only four columns and a subset of rows shown:
+Let’s go ahead and upload some sample data.  We’ll import a text file which contains a collection of recent tweets found with the keywords `“augmented intelligence”`.  This is what the sample tweet data looks like, as at the time of writing, with only four columns and a subset of rows shown:
 
 <g:img dir="images/user-guide" file="sample-twitter-data.png" class="img-responsive center-block" />
 
@@ -145,8 +137,6 @@ The data file is called `“SampleTweets.csv”`, and you can download the lates
 If you drag the the sample file to the data drop, the events are uploaded to the stream.  Once the process is complete, the stream view is updated to show the extent of the archived history. 
 
 <g:img dir="images/user-guide" file="twitter-stream-view.png" class="img-responsive center-block" />
-
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
 ##Pushing events to a stream
 
@@ -202,7 +192,8 @@ A fully-formed request example using `jquery` looks like the following:
 
 The same example using `curl` looks like this.
 
-    curl -i -X POST -H "Stream: -2IwFcsJSzO__9nt0nhc7g" -H "Auth: cZhdnH7OQpK9ip07rttKSQ" -d "{\"foo\":\"hello\",\"bar\":24.5}" http://data.streamr.com/json
+    curl -i -X POST -H "Stream: -2IwFcsJSzO__9nt0nhc7g" -H "Auth: cZhdnH7OQpK9ip07rttKSQ" \
+    -d "{\"foo\":\"hello\",\"bar\":24.5}" http://data.streamr.com/json
 
 If the call is successful, the data API returns the code 204 (i.e. “no content”).  These are the possible return codes:
 
@@ -214,8 +205,6 @@ Code | Description
 404  | Unknown endpoint
 500  | Unexpected error
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Subscribing to a stream
 
 <g:img dir="images/user-guide" file="add-twitter-stream.png" class="side-image" />
@@ -226,11 +215,11 @@ If you want to subscribe to a stream in the user interface, you can either work 
 
 When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for `TweetText`, `TweetID`, `UserName`, `UserTimeZone`, etc.
 
-You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on [**Working with canvases**](#workingwithcanvases) for examples of what you can do.
+You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on [services](#services) for examples of what you can do.
 
 <br style="clear:both;" />
 
-For now, we’ll just add a Table module to visualise the data.  This is what we get:
+For now, we’ll just add a **Table** module to visualise the data.  This is what we get:
 
 <g:img dir="images/user-guide" file="twitter-stream-on-canvas.png" class="img-responsive center-block" />
 
