@@ -1,11 +1,13 @@
-<a name="working-with-streams"></a>
-#Working with streams
+<a name="streams"></a>
+#Streams
 
-All data in Streamr is stored in [streams](#what-is-a-stream). A stream is a timestamped sequence of events.  A stream is capable of receiving and saving new data points, and it will return data in the correct sequence when needed.
+All data in Streamr is stored in a *stream*. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
 
-You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to a streaming service, and act as a recipient of real-time output from a service.
+You can store different kinds of data in the same stream.  The data may be numeric, but it can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
 
-In this section, we’ll show how to do the following:
+You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to a Streamr service, and act as a recipient of real-time output from such a service.
+
+In this section, we’ll show some examples of what a stream can look like, and describe the built-in data types. We'll then discuss how to do the following:
 
 - Create or delete streams.
 - Edit stream details.
@@ -13,17 +15,78 @@ In this section, we’ll show how to do the following:
 - Push events to a stream.
 - Subscribe to a stream.
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
-<center>Discuss database (MongoDb) poller streams</center>
+**Discuss database (MongoDb) poller streams somewhere**
 
 <hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
+##Examples
+
+Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields, a measurement of the operating temperature and the number of rotations per minute (RPM).
+
+Timestamp               | Temperature | RPM
+:---------------------- |:------------|:----
+2016-02-01 11:30:01.012 | 312.56      | 3550
+2016-02-01 11:30:02.239 | 312.49      | 3549
+2016-02-01 11:30:04.105 | 312.42      | 3543
+2016-02-01 11:30:08.122 | 313.21      | 3565
+2016-02-01 11:30:11.882 | 317.45      | 3602
+...                     |             |
+
+As an example of a more complicated event, here’s a data point in a stock market stream.
+
+    {
+      "Symbol": "PFFT",
+      "EventType": 1,
+      "OrderId": 6454321,
+      "Direction": "Up",
+      "Trade": {"Price": 118.55, "Size": 100},
+      "Ask": [
+              {"Price": 118.6, "Size": 22500},
+              {"Price": 118.65, "Size": 18000},
+              {"Price": 118.7, "Size": 13000},
+              {"Price": 118.8, "Size": 8000},
+              {"Price": 119, "Size": 45000}
+              ],
+      "Bid": [
+              {"Price": 118.5, "Size": 16500},
+              {"Price": 118.45, "Size": 11000},
+              {"Price": 118.4, "Size": 14200},
+              {"Price": 118.2, "Size": 19000},
+              {"Price": 118, "Size": 50000}
+    ]}
+
+<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
+
+##Built-in data types
+
+There’s a number of built-in data types that can be used in a stream. These are the following:
+
+Number
+:   A numeric data type internally stored as a double precision (64-bit) float.
+
+Boolean
+:   A logical data type with two possible values, True and False. In Streamr, a numeric value exactly equal to one represents logical truth. Anything else is interpreted as a logical falsehood.
+
+String
+:   A sequence of zero or more alphabetical characters.
+
+Map
+:   A collection of key-value pairs. Each key is a string, and the value can be of any built-in data type (even a Map again). Map is the same as a dictionary or an associative array found in a number of programming languages.
+
+List
+:   An ordered collection of zero or more elements.
+
+Data types can be freely mixed in one event. And you can freely add new fields to an existing stream; you don’t have to know what fields you might eventually need. A single event can be of any size within reason, and a stream can grow indefinitely when extended by new events. 
+
+There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
 
 ##Creating or deleting streams
 
-You can create new streams either through the user interface or by using the [stream API](#stream-API-reference).  If you want to create a stream manually, go to the Streams section.  There’s a button which looks like this:
+You can create new streams either through the user interface or by using the [stream API](#stream-API-reference). Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
 
-<g:img dir="images/user-guide" file="create-stream-button.png" class="img-responsive center-block" />
+If you want to create a stream manually, go to the Streams section.  There’s a button which looks like this:
+
+<g:img dir="images/user-guide" file="create-stream-button.png" class="img-responsive" />
 
 A click on the button takes you to a dialog where you’ll fill in the stream name and an optional description.
 

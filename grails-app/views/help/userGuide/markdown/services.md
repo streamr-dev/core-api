@@ -1,7 +1,24 @@
-<a name="creating-services"></a>
-#Creating services
+<a name="services"></a>
+#Services
 
-A Streamr service is a process which consumes and acts upon real-time data. In this section, we’ll show how to do the following: 
+A Streamr service is a process which consumes and acts upon real-time data.  A service contains one or more modules (these do the processing) and one or more [streams](#what-is-a-stream) (these provide the data).  Streams and modules are connected in the configuration you'll design.  Those connections define how the data flows through the service.
+
+There's a wide variety of built-in modules in Streamr.  Some of those perform basic arithmetic and logical operations, filtering, sampling, aggregation, and so on. Others transform the data in some fashion and feed it to the next stage.  Yet other modules interact with the outside world and with external systems.
+
+Computation in a Streamr service is entirely event-based. Any module will execute immediately when activated by incoming events. When new events arrive in the input stream, the data automatically flows through the service. This inherently asynchronous process allows for fast and continuous in-memory processing of large volumes of data.
+
+**Add a paragraph to make the case that the service topology is more than a sequential workflow?**
+
+As a simple example, here's a service consisting of one stream and a chart module connected together.  When you run the service, the events flow from the stream to the chart, and the chart draws the data points as they arrive.
+
+<g:img dir="images/user-guide" file="my-first-stream-on-canvas.png" class="img-responsive center-block" />
+
+You can run a service with either historical or real-time data.
+
+- In the *historical mode*, running a service is a playback of what would have happened in the past. The playback mode can be extremely useful when you’re testing, refining, or demonstrating the functionality of a service.
+- The *real-time mode* is used in production where you want to react to events as they arrive. There's no need to modify the service if you decide to use it in the real-time mode after testing with historical data.  One click is all it takes to activate a service and take it live.
+
+In this section, we’ll show how to do the following: 
 
 - Create and edit services.
 - Run a historical playback.
@@ -11,7 +28,7 @@ We'll also discuss the best practices that you should aim to follow when develop
 
 <hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
 
-##Streamr editor
+##Creating and editing services
 
 You can create a new service or modify an existing service by using the Streamr editor. When you log in to Streamr, the editor with a blank canvas is what you’ll first see. The editor is always accessible by clicking on the **Editor** tab.
 
@@ -23,7 +40,7 @@ You choose what to do using the control sidebar. There are three things you can 
 
 - If you want to create a new service, click on the left-most icon in the top row of the sidebar. This is where you'll be taken by default.
 
-   <g:img dir="images/user-guide" file="new-service-with-arrow.png" class="img-responsive center-block"/>
+   <g:img dir="images/user-guide" file="new-service-with-arrow.png" class="img-responsive"/>
 
 - If you want to view or modify an existing service, click on the icon in the middle.
 
@@ -77,9 +94,22 @@ Whenever you edit the workflow on a canvas, the historical mode is in force.  Yo
 
 ##Launching a live service
 
+What are live services?
+How to launch them
+They keep running until you stop them
+Saved state
+
 <g:img dir="images/user-guide" file="launch-realtime-run.png" class="side-image" />
 
 If you want to run the canvas in the realtime mode, simply switch to the realtime tab.  Press the Run button to activate the canvas.
+
+##Error handling
+
+- What are the possible error situations?
+- What runtime errors may happen? Numerical overflow, wrong type of events?
+- What happens when the cloud instance dies?
+- What happens if the Internet connection is interrupted?
+- What other errors are possible?
 
 ##Best practises
 
