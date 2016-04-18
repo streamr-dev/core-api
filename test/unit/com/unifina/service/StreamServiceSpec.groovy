@@ -6,6 +6,7 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
+import com.unifina.feed.NoOpStreamListener
 import com.unifina.feed.kafka.KafkaDataRangeProvider
 import com.unifina.feed.kafka.KafkaStreamListener
 import grails.test.mixin.Mock
@@ -25,7 +26,10 @@ class StreamServiceSpec extends Specification {
 	Feed feed
 
 	def setup() {
-		feed = new Feed(streamListenerClass: KafkaStreamListener.name, dataRangeProviderClass: KafkaDataRangeProvider.name).save(validate: false)
+		feed = new Feed(
+			streamListenerClass: NoOpStreamListener.name,
+			dataRangeProviderClass: KafkaDataRangeProvider.name
+		).save(validate: false)
 	}
 
 	void "createStream throws ValidationException input incomplete"() {
