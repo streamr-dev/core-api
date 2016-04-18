@@ -51,59 +51,38 @@
 	<div class="col-sm-12">
 		<div class="scrollspy-wrapper col-md-9" id="module-help-tree">
 
-			<markdown:renderHtml template="userGuide/what_is_streamr" />
-			<hr>
+			<markdown:renderHtml template="userGuide/introduction" />
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/real_life_use_cases" />
-			<hr>
+			<!-- <markdown:renderHtml template="userGuide/real_life_use_cases" /> -->
 
 			<markdown:renderHtml template="userGuide/getting_started" />
-			<hr>
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/what_is_a_stream" />
-			<hr>
+			<markdown:renderHtml template="userGuide/streams" />
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/what_is_a_service" />
-			<hr>
+			<markdown:renderHtml template="userGuide/modules" />
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/working_with_streams" />
-			<hr>
+			<markdown:renderHtml template="userGuide/services" />
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/creating_services" />
-			<hr>
-
-			<markdown:renderHtml template="userGuide/using_modules" />
-			<hr>
-
-			<markdown:renderHtml template="userGuide/live_services" />
-			<hr>
 
 			<markdown:renderHtml template="userGuide/dashboards" />
-			<hr>
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/embedded_widgets" />
-			<hr>
+			<!-- <markdown:renderHtml template="userGuide/embedded_widgets" /> -->
 
 			<markdown:renderHtml template="userGuide/extensions" />
-			<hr>
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
 			<markdown:renderHtml template="userGuide/life_outside_streamr" />
-			<hr>
+			<hr style="width: 70%; border-top: #E9570F solid 2px;  margin-top: 30px; margin-bottom: 30px">
 
-			<markdown:renderHtml template="userGuide/sharing_and_collaboration" />
-			<hr>
-
-			<markdown:renderHtml template="userGuide/streaming_data_cookbook" />
-			<hr>
-
-			<markdown:renderHtml template="userGuide/module_reference" />
-			<hr>
-
-			<markdown:renderHtml template="userGuide/api_reference" />
-			<hr>
-
-			<markdown:renderHtml template="userGuide/glossary" />
-			<hr>
+			<!-- <markdown:renderHtml template="userGuide/sharing_and_collaboration" /> -->
+			<!-- <markdown:renderHtml template="userGuide/streaming_data_cookbook" /> -->
+			<!-- <markdown:renderHtml template="userGuide/glossary" /> -->
 
 		</div>
 

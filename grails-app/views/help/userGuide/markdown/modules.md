@@ -1,5 +1,5 @@
-<a name="using-modules"></a>
-#Using modules
+<a name="modules"></a>
+#Modules
 
 Modules are the workhorses which you'll use time and again as part of Streamr services. These are the module categories:
 

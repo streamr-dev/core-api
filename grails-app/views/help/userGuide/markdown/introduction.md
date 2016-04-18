@@ -42,8 +42,6 @@ Here's a few examples of specific things you can do with services.
 - Post events in HTTP format to external RESTful services. There's a wide range of popular and useful services out there, and you can use any one of them automatically from Streamr. 
 - Control external devices. As an example, you can override manual controls and make a remotely operated drone return to base when it's about to go out of range or running low on battery. Because the control interface is likely to be machine specific, this is one case where you'd be looking at coding a custom module in Java.
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 Although we sometimes find it hard to admit, there's life outside Streamr. We're not jealous, though, and indeed make it easy to emit data to the wider world.
 
 As an example, you can create dashboards which display live data from within a Streamr service. Or you can embed visualisation modules in external web pages by inserting a single line of HTML code. Embedded visualisations will show live data as long as your service remains live.
