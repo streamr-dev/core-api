@@ -89,9 +89,8 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 		int initialQueueSize = queue.size();
 
 		if (nextDay == null) {
-			nextDay = new DateTime(lastReportedSec);
-			nextDay.minusMillis(nextDay.getMillisOfDay());
-			nextDay.plusDays(1);
+			DateTime now = new DateTime(lastReportedSec);
+			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
 		}
 
 		while (lastReportedSec + 1000 <= time && queue.size() == initialQueueSize) {
@@ -114,7 +113,7 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 					dayListeners.get(i).onDay(d);
 				}
 
-				nextDay.plusDays(1);
+				nextDay = nextDay.plusDays(1);
 			}
 
 			FeedEvent timeEvent = new FeedEvent();
