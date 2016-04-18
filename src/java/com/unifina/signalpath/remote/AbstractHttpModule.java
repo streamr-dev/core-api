@@ -122,7 +122,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 
 	@Override
 	public void sendOutput() {
-		final HttpTransaction response = new HttpTransaction(globals.isRealtime() ? new Date() : globals.time);
+		final HttpTransaction response = new HttpTransaction(globals.time);
 
 		// get HTTP request from subclass
 		HttpRequestBase request = null;
