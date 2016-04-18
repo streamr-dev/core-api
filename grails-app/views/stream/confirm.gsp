@@ -2,7 +2,6 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="stream.confirm.label" /></title>
-        
     </head>
     <body>    
 		<ui:flashMessage/>
