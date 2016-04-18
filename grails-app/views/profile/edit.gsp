@@ -29,7 +29,7 @@
 	<form method="post" action="update">
 		
 		<div class="row">
-			<div class="${coreProfilePanelClasses}">
+			<div class="col-sm-6 col-md-offset-2 col-md-4">
 				<ui:panel title="Profile Settings">
 					<div class="form-group ${hasErrors(bean: user, field: 'username', 'has-error')}">
 					
@@ -88,6 +88,19 @@
 					</div>
 					
 				</ui:panel>
+
+			</div>
+
+			<div class="col-sm-6 col-md-4">
+				<ui:panel title="Credentials">
+					<label class="control-label">
+						<g:message code="secuser.credentials.apiKey" default="Api Key" />
+					</label>
+
+					<div>
+						${user.apiKey}
+					</div>
+				</ui:panel>
 			</div>
 			
 			<g:render template="extensions" />
@@ -95,7 +108,7 @@
 		</div>
 
 		<div class="row">
-			<div class="${coreProfilePanelClasses}">
+			<div class="col-sm-12 col-md-8 col-md-offset-2">
 				<g:submitButton name="submit" class="save btn btn-lg btn-primary" value="${message(code: 'default.button.update.label', default: 'Update')}" />
 			</div>
 		</div>
