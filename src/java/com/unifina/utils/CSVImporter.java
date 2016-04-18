@@ -91,6 +91,10 @@ public class CSVImporter implements Iterable<LineValues> {
 				line = it.next();
 			}
 
+			// Empty line or a line with only spaces/tabs
+			while (line.equals("") || line.matches("^([ \\t]?)+$"))
+				line = it.next();
+
 			try {
 				return schema.parseLine(line);
 			} catch (IOException | ParseException | RuntimeException e) {
