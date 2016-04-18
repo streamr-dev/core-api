@@ -7,6 +7,7 @@ import com.unifina.data.IEventQueue;
 import com.unifina.feed.MasterClock;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.utils.Globals;
+import org.joda.time.DateTime;
 
 public abstract class DataSourceEventQueue implements IEventQueue {
 
@@ -19,7 +20,7 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 	private ArrayList<IDayListener> dayListeners = new ArrayList<>();
 
 	private long lastReportedSec = 0;
-	private long lastReportedDayNumber = 0;
+	private DateTime nextDay;
 
 	protected long timeSpentProcessing = 0;
 	protected long eventCounter = 0;
@@ -87,16 +88,18 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 		 */
 		int initialQueueSize = queue.size();
 
+		if (nextDay == null) {
+			nextDay = new DateTime(lastReportedSec);
+			nextDay.minusMillis(nextDay.getMillisOfDay());
+			nextDay.plusDays(1);
+		}
+
 		while (lastReportedSec + 1000 <= time && queue.size() == initialQueueSize) {
 			lastReportedSec += 1000;
 			Date d = new Date(lastReportedSec);
 			globals.time = d;
 
-			// Is this a new day?
-			Calendar c = new GregorianCalendar();
-			c.setTime(d);
-			int dayNumber = c.get(GregorianCalendar.DAY_OF_WEEK);
-			if (lastReportedDayNumber != dayNumber) {
+			if (lastReportedSec > nextDay.getMillis()) {
 				dlCount = dayListeners.size();
 
 				// TODO: remove this hack. The point is that all modules must be cleared before calling onDay(d)
@@ -111,7 +114,7 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 					dayListeners.get(i).onDay(d);
 				}
 
-				lastReportedDayNumber = dayNumber;
+				nextDay.plusDays(1);
 			}
 
 			FeedEvent timeEvent = new FeedEvent();
