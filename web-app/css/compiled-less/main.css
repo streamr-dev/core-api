@@ -16685,6 +16685,10 @@ body.user-guide hr {
 body.user-guide pre {
   background-color: white;
 }
+body.user-guide #module-help-tree img {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
 table {
   background-color: transparent;
 }
