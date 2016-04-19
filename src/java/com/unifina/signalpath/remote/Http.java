@@ -40,7 +40,7 @@ public class Http extends AbstractHttpModule {
 	private ListOutput errors = new ListOutput(this, "errors");
 	private Output<Object> responseData = new Output<>(this, "data", "Object");
 	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "statusCode");
-	private TimeSeriesOutput roundtripMillis = new TimeSeriesOutput(this, "ping(ms)");
+	private TimeSeriesOutput roundtripMillis = new TimeSeriesOutput(this, "roundtripMillis");
 
 	@Override
 	public void init() {
