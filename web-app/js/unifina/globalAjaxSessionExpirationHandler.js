@@ -3,8 +3,8 @@
 	// If it is expired, show a modal login screen.
 	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
 		if (jqXHR.status === 401 || jqXHR.status === 403) {
-			isSessionActive(function(active) {
-				if (!active) {
+			isSessionActive(function(isActive) {
+				if (!isActive) {
 					showLogin()
 				}
 			})
@@ -18,7 +18,7 @@
 		}).fail(function() {
 			callback(false)
 		}).done(function(data) {
-			callback(!!data)
+			callback(true)
 		})
 	}
 
