@@ -146,7 +146,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		final long startTime = System.currentTimeMillis();
 		final boolean async = isAsync;
 		HttpAsyncClient client = getHttpClient();
-		Object ret = client.execute(request, new FutureCallback<HttpResponse>() {
+		Object httpResponseFuture = client.execute(request, new FutureCallback<HttpResponse>() {
 			@Override
 			public void completed(HttpResponse httpResponse) {
 				response.response = httpResponse;
@@ -156,7 +156,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 			@Override
 			public void failed(Exception e) {
 				response.errors.add("Sending HTTP Request failed");
-				response.errors.add(e.getMessage());
+				response.errors.add(e.toString());
 				returnResponse();
 			}
 

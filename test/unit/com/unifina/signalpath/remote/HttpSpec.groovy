@@ -170,4 +170,14 @@ class HttpSpec extends Specification {
 		expect:
 		test()
 	}
+
+	void "timeout is sent to errors"() {
+		mockClient = Stub(HttpAsyncClient) {
+			execute(_, _) >> { HttpUriRequest request, FutureCallback<HttpResponse> future ->
+				future.failed(new java.net.SocketTimeoutException())
+				module.sendOutput(transaction)
+			}
+		}
+		outputs.errors = [["Sending HTTP Request failed", "java.net.SocketTimeoutException"]] * 3
+	}
 }
