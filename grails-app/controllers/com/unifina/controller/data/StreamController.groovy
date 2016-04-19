@@ -84,7 +84,7 @@ class StreamController {
 
 	def show() {
 		getAuthorizedStream(params.id) { stream, user ->
-			[stream: stream, shareable: permissionService.canShare(user, stream)]
+			[stream: stream, writable: permissionService.canWrite(user, stream), shareable: permissionService.canShare(user, stream)]
 		}
 	}
 

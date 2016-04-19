@@ -23,12 +23,14 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".ui-pnotify").displayed }
 	}
 
-	def acceptSharingModal() {
+	def save() {
 		$(".sharing-dialog .save-button").click()
+		waitFor { !$(".sharing-dialog").displayed }
 	}
 
-	def cancelSharingModal() {
+	def cancel() {
 		$(".sharing-dialog .cancel-button").click()
+		waitFor { !$(".sharing-dialog").displayed }
 	}
 
 	/** Cleanup helper */
@@ -43,8 +45,7 @@ class ShareSpec extends GebReportingSpec {
 				$(".access-row").size() == 0
 			}
 		}
-		acceptSharingModal()
-		waitFor { !$(".bootbox.modal").displayed }
+		save()
 	}
 	/** Cleanup helper */
 	def removeCanvasPermissions() {
@@ -58,8 +59,7 @@ class ShareSpec extends GebReportingSpec {
 				$(".access-row").size() == 0
 			}
 		}
-		acceptSharingModal()
-		waitFor { !$(".bootbox.modal").displayed }
+		save()
 	}
 	/** Cleanup helper */
 	def removeDashboardPermissions() {
@@ -73,8 +73,7 @@ class ShareSpec extends GebReportingSpec {
 				$(".access-row").size() == 0
 			}
 		}
-		acceptSharingModal()
-		waitFor { !$(".bootbox.modal").displayed }
+		save()
 	}
 
 	// fix weird bug: on Jenkins machine and for particular test, only "tester2" is typed for
@@ -161,9 +160,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 
 		when:
-		acceptSharingModal()
+		save()
 		then: "no changes, so no message displayed"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		// REMOVE PERMISSION
@@ -192,9 +190,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".access-row").size() == 0 }
 
 		when: "discard changes"
-		cancelSharingModal()
+		cancel()
 		then: "...so no notification"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		when: "open menu"
@@ -318,9 +315,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 
 		when:
-		acceptSharingModal()
+		save()
 		then: "no changes, so no message displayed"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		// REMOVE PERMISSION
@@ -344,9 +340,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".access-row").size() == 0 }
 
 		when: "discard changes"
-		cancelSharingModal()
+		cancel()
 		then: "...so no notification"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		when: "re-open"
@@ -460,9 +455,8 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 
 		when:
-		acceptSharingModal()
+		save()
 		then: "no changes, so no message displayed"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		// REMOVE PERMISSION
@@ -486,9 +480,8 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { $(".access-row").size() == 0 }
 
 		when: "discard changes"
-		cancelSharingModal()
+		cancel()
 		then: "...so no notification"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		when: "re-open"
@@ -587,16 +580,11 @@ class ShareSpec extends GebReportingSpec {
 		then: "no share button in list"
 		!getStreamRow().find("button")
 
-		when: "open edit view"
+		when: "open stream edit view"
 		getStreamRow().click()
-		then:
+		then: "there should be no menu for read rights only"
 		waitFor { at StreamShowPage }
-
-		when: "open menu"
-		streamMenuButton.click()
-		then: "no shareButton in menu!"
-		waitFor { deleteStreamButton.displayed }
-		!$("#share-button")
+		!streamMenuButton.displayed
 
 		when: "check canvas"
 		to CanvasListPage
@@ -627,6 +615,58 @@ class ShareSpec extends GebReportingSpec {
 		removeStreamPermissions()
 		removeCanvasPermissions()
 		removeDashboardPermissions()
+	}
+
+	void "write rights show stream menu but no share button"() {
+		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
+
+		loginTester1()
+
+		when: "give tester2 write permission to stream"
+		to StreamListPage
+		getStreamRow().find("button").click()
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-field") << Keys.ENTER
+		then: "got the access-row"
+		waitFor { $(".access-row").displayed }
+		$(".access-row").size() == 1
+
+		when: "toggle write rights"
+		$(".permission-dropdown").click()
+		$(".permission-dropdown").find("li", "data-opt": "write").click()
+		then:
+		$(".permission-dropdown .access-description").text() == "can edit"
+
+		when: "save stream rights"
+		$(".new-user-field") << Keys.ENTER
+		then:
+		waitFor { $(".ui-pnotify .alert-success") }
+		waitFor { !$(".bootbox.modal") }
+
+		when: "challenger appears"
+		closePnotify()
+		logout()
+		loginTester2()
+		to StreamListPage
+		then: "no share button in list"
+		!getStreamRow().find("button")
+
+		when: "open stream edit view"
+		getStreamRow().click()
+		then:
+		waitFor { at StreamShowPage }
+
+		when: "open menu"
+		streamMenuButton.click()
+		then: "no shareButton in menu!"
+		waitFor { deleteStreamButton.displayed }
+		!$("#share-button")
+
+		cleanup:
+		to StreamListPage	// closes dialog if open...
+		logout()
+		loginTester1()
+		removeStreamPermissions()
 	}
 
 	void "shared stream is shown in search box"() {
@@ -682,12 +722,8 @@ class ShareSpec extends GebReportingSpec {
 		then:
 		$(".anonymous-switcher").attr("checked")
 
-		when:
-		acceptSharingModal()
-		then:
-		waitFor { !$(".bootbox.modal") }
-
 		when: "try search"
+		save()
 		closePnotify()
 		def streamShowUrl = getStreamRow().attr("href")
 		logout()
@@ -720,6 +756,6 @@ class ShareSpec extends GebReportingSpec {
 		if ($(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
 		}
-		acceptSharingModal()
+		save()
 	}
 }
