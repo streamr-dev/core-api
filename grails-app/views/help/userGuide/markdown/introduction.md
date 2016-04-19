@@ -28,7 +28,7 @@ Streams implement a publish-subscribe paradigm, or pub/sub for short. A stream c
 
 ##Turn the data into action
 
-You can build any kind of automatic real-time functionality with Streamr [services](#services). We make it easy to create and manage your digital workforce. There is an extensive built-in module library as a source of building blocks. You can abstract modules and re-use them later, and you can code custom modules in Java.
+You can build any kind of automatic real-time functionality with Streamr [services](#services). We make it easy to create and manage your digital workforce. There is an extensive collection of built-in [modules](#modules) as a source of building blocks. You can abstract modules and re-use them later, and you can code custom modules in Java.
 
 Here's a few examples of specific things you can do.
 
@@ -40,11 +40,11 @@ Here's a few examples of specific things you can do.
 - Post events in HTTP format to external RESTful services. There's a wide range of popular and useful services out there, and you can use any one of them automatically from Streamr. 
 - Control external devices. As an example, you can override manual controls and make a remotely operated drone return to base when it's about to go out of range or running low on battery. Because the control interface is likely to be machine specific, this is one case where you'd be looking at coding a custom module in Java.
 
-Although we sometimes find it hard to admit, there's life outside Streamr. We're not jealous, though, and indeed make it easy to emit data to the wider world. Here's what you can do:
+Although we sometimes find it hard to admit, there's life outside Streamr. We're not jealous, though, and indeed make it easy to spread the word. Here's what you can do:
 
-- Create [dashboards](#dashboards) which display live data from  a Streamr service.
+- Create [dashboards](#dashboards) which display live data sourced from Streamr.
 - Embed live visualisation [elements](#embeddedwidgets) in external web pages by inserting a single line of HTML code.
-- Subscribe to a stream in external web pages and applications, and receive every event as soon as it’s available.
+- [Subscribe](#lifeoutsidestreamr) to a stream in external web pages and applications, and receive every event as soon as it’s available.
 
 ##Who is Streamr for?
 

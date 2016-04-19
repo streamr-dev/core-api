@@ -1,6 +1,14 @@
 #Modules
 
-Modules are the workhorses which you'll use time and again as part of Streamr services. These are the module categories:
+A module performs a specific task using the incoming real-time events as inputs. A module may have one or more outputs, or it may take care of some side effect instead. Modules are a integral part of Streamr: They process the data emanating from event streams. Modules are the workhorses which you'll use time and again as part of Streamr [services](#services).
+
+A module is close akin to what you'd call a function, subroutine, procedure, or a method in many programming languages. In Streamr, modules are specialised computation units that handle streaming real-time data. A module processes its inputs as soon as it is activated, and there are specific rules as to when this happens (more on this below).
+
+There’s no limitations on the number of module instances, i.e. on the numberf of times the same module is used in a service or in different services.  Different instances of the same module are independent of each other (unless one feeds data to the other).
+
+A module has an internal state, and it can and typically will update that state when it is executed. The manner in which this is done depends, of course, on the particular module. The important point is that the state does exist, and it is indeed the statefulness that makes modules convenient for real-time event stream processing.
+
+There's a number of built-in modules on the Streamr platform. These are the module categories:
 
 - Visualisation.
 - Filtering, sampling and aggregation.
@@ -15,13 +23,13 @@ Modules are the workhorses which you'll use time and again as part of Streamr se
 - Extensions and abstraction.
 - Connectivity.
 
-In this chapter, we'll go through the module basics. For details on different modules, either see the individual module help in the editor or have a look at the <g:link controller="module" action="list">module reference</g:link>.
+In this chapter, we'll go through the module basics. For details on different modules, either see the individual module help in the Streamr editor or have a look at the <g:link controller="module" action="list">module reference</g:link>.
 
 ##Inputs, outputs, parameters, and options
 
 A module can have inputs, outputs, parameters, and options.  Whilst a module does not need to have any inputs or outputs, useful modules will typically allow for either incoming or outgoing data (and usually both).
 
-When placed on a canvas, the inputs are shown as circular connectors along the left-hand side of the module.  The outputs are shown as connectors along the right-hand side.
+When placed on the editor canvas as part of a service, the inputs are shown as circular connectors along the left-hand side of the module.  The outputs are shown as connectors along the right-hand side.
 
 Many modules have parameters which control their operation.  Module parameters can be hardcoded, but their values are usually not immutable.  If a parameter can be modified at run-time, there is an associated parameter input at the left-hand edge of the module.
 
@@ -31,13 +39,13 @@ As an example, the **RoundToStep** module has three inputs, two parameters, and 
 
 <br style="clear:both;" />
 
-Options control its behaviour or appearance of a module.  Options apply to a specific instance of the module, and they can only be changed through the canvas.
+Options control the behaviour or the appearance of a module.  Options apply to a specific instance of the module, and they can only be changed through the editor.
 
 As an example, **Table** only shows one data column by default.  If you hover on top of the module and click on the wrench icon, you’ll see the available options in a pop-up window.  Change the number of inputs to 3, press **OK**, and you’ll get a **Table** with three columns.
 
 <g:img dir="images/user-guide" file="table-module-options.png" class="img-responsive center-block" />
 
-Inputs, outputs, and parameters can be renamed.  If you move the mouse on top of a name, a click brings up a pop-up menu which allows you to give the endpoint or parameter a new display name.  Renaming has no bearing on functionality.
+Inputs, outputs, and parameters can be renamed.  If you move the mouse on top of a name, a click brings up a pop-up menu which allows you to give the endpoint or parameter a new display name.  Renaming has no bearing on module functionality.
 
 <g:img dir="images/user-guide" file="module-popup-menu.png" class="img-responsive center-block" />
 
@@ -45,7 +53,9 @@ You’ll see a number of small icons next to the endpoints when you hover on top
 
 ##Making connections
 
-A data flow between two modules — or a data flow between a stream and a module — is created by drawing a connection from an output endpoint to an input endpoint with the mouse or other pointing device.  You can create as many outgoing connections (i.e. connections that originate from an output connector) as you wish.  All connections are unidirectional, i.e. the data always flows from an output to one or more inputs in one direction only.  Only one connection per input is allowed, and the modules form a directed graph.
+A data flow between two modules — or a data flow between a stream and a module — is created by drawing a connection from an output endpoint to an input endpoint with the mouse or other pointing device.  You can create as many outgoing connections (i.e. connections that originate from an output connector) as you wish. 
+
+All connections are unidirectional, i.e. the data always flows from an output to one or more inputs in one direction only.  Only one connection per input is allowed, and the modules form a directed graph.
 
 On a canvas, the direction of the data flow is indicated by an arrow on top of the connection path.  You can alter the endpoint of an existing connection by dragging it to another input endpoint.  If you instead drop the endpoint in an empty space, the connection is cleared.  A mouse click on top of a module brings up an pop-up menu where you can choose to disconnect all incoming connections to the module.
 
@@ -55,15 +65,13 @@ A module processes its inputs as soon as it is activated.  The activation happen
 1. Every input has a value.
 2. An event arrives at one of the driving inputs.
 
-That’s all there is to it.  As soon as the two conditions are met, a module processes its inputs.  A module with no driving inputs will never activate.
-
-As part of the processing, the module may send one or more events downstream from the output endpoints.  It is important to note that a module does not need to submit any output.  It may take care of some side effect instead, or the inputs may be such that there’s no point in sending data onwards.
+As soon as the two conditions are met, a module processes its inputs.  A module with no driving inputs will never activate.
 
 <g:img dir="images/user-guide" file="and-module.png" class="side-image" />
 
-At least one endpoint is designated as a driving input by default.  To change the default settings, hover on top of a module and you’ll see a number of additional controls.  You can make any input a driver by clicking on the associated **DR** icon (a toggle button) next to an input connector.  
+At least one endpoint in any module is designated as a driving input by default.  To change the default settings, hover on top of a module and you’ll see a number of additional controls.  You can make any input a driver by clicking on the associated **DR** icon (a toggle button) next to an input connector.  
 
-As mentioned, every input must a have a value before anything happens.  The input values typically arrive either as events from a stream, or from the output endpoints in some other module(s).  If the input corresponds to a numeric value or a string, you can also specify an explicit initial value.  If you click on a **IV** icon next to an input, you’ll see an initial value dialog.
+As mentioned, every input must a have a value before anything happens.  The input values typically arrive either as events from a stream, or from the output endpoints in some other module(s).  If the input corresponds to a numeric value or a string, you can specify an explicit initial value.  If you click on a **IV** icon next to an input, you’ll see an initial value dialog.
 
 <g:img dir="images/user-guide" file="initial-value-dialog.png" class="img-responsive center-block" />
 
@@ -73,8 +81,3 @@ But if you really want to create a feedback loop, we won’t stop you.  If you c
 
 Lastly, note the **NR** icon next to each output connector.  This is a non-repeat button, and if it’s on, the module suppresses any output that would be an exact replica of the last outgoing event.  This covers the use case where you’re only interested in events that represent something new.
 
-Module activation is an important concept.  The governing principles are few in number, and once you master those principles, you’re well on your way to understanding how event processing works. 
-
-##Reusing functionality
-
-**Explain how to do abstraction, reuse services as modules, and code custom modules.**

@@ -1,8 +1,7 @@
 <a name="extensions"></a>
 #Extensions
 
-Abstracting and reusing services
-Creating Java modules
+**Explain how to do abstraction, reuse services as modules, and code custom Java modules.**
 
 Once in a while, you may find yourself in need of a custom module. Perhaps you need some functionality that cannot be implemented with existing modules. Or perhaps implementing some functionality with existing modules is possible, but cumbersome. Maybe your bottleneck is performance -- you want to do some hefty calculations as fast as possible or you want to minimize memory use.
 

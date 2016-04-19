@@ -1,10 +1,10 @@
 #Streams
 
-All data in Streamr is stored in a **stream**. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
+All data in Streamr is stored in a stream. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
 
 You can store different kinds of data in the same stream.  The data may be numeric, but it can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
 
-You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to a Streamr service, and act as a recipient of real-time output from such a service.
+You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to Streamr [services](#services), and act as a recipient of real-time output from such services.
 
 In this chapter, we’ll show some examples and describe the built-in data types. We'll then discuss how to do the following:
 
@@ -207,19 +207,11 @@ Code | Description
 
 ##Subscribing to a stream
 
-<g:img dir="images/user-guide" file="add-twitter-stream.png" class="side-image" />
+You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr editor, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
 
-You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr user interface, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
+**FIX THE JAVASCRIPT API LINK ABOVE**
 
-If you want to subscribe to a stream in the user interface, you can either work with a new canvas or load an existing one in the Canvases tab.  Start typing in the name of a stream in a text box labeled **Add Stream / Module**.  We’ll find the stream for you as you type.
-
-When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for `TweetText`, `TweetID`, `UserName`, `UserTimeZone`, etc.
-
-You can next add processing modules and start creating intelligence on top of the real-time data that flows from the stream.  Or you can first place other streams in the canvas and combine different data sources.  See the chapter on [services](#services) for examples of what you can do.
-
-<br style="clear:both;" />
-
-For now, we’ll just add a **Table** module to visualise the data.  This is what we get:
+In the next chapter, we'll show how to add streams as data sources in [services](#services). As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
 
 <g:img dir="images/user-guide" file="twitter-stream-on-canvas.png" class="img-responsive center-block" />
 
