@@ -1,5 +1,6 @@
 package com.unifina.signalpath.map
 
+import com.unifina.signalpath.AbstractModuleWithWindow
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
@@ -18,6 +19,15 @@ class SumByKeySpec extends Specification {
 	}
 
 	void "sumByKey gives the right answer"() {
+		module.configure([
+				options: [sorted: [value: false]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 0]
+				]
+		])
+
 		when:
 		Map outputValues = [
 			"map": [
@@ -41,7 +51,14 @@ class SumByKeySpec extends Specification {
 	}
 
 	void "sumByKey gives the right answer (with sliding window)"() {
-		module.getInput("windowLength").receive(2)
+		module.configure([
+				options: [sorted: [value: false]],
+				inputs: [
+						[name: "windowLength", value: 2],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 0]
+				]
+		])
 
 		when:
 		Map outputValues = [
@@ -66,11 +83,14 @@ class SumByKeySpec extends Specification {
 	}
 
 	void "sumByKey gives the right answer (with sliding window, sorting and maxKeyCount)"() {
-		module.configure([options: [
-			sorted: [value: true]
-		]])
-		module.getInput("windowLength").receive(2)
-		module.getInput("maxKeyCount").receive(3)
+		module.configure([
+				options: [sorted: [value: true]],
+				inputs: [
+						[name: "windowLength", value: 2],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 3]
+				]
+		])
 
 		when:
 		Map outputValues = [

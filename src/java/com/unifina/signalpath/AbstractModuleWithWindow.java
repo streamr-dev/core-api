@@ -10,9 +10,17 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Abstraction of a module that collects values into a sliding window.
- * The sliding window can have its length defined in either time or the
- * number of values.
+ * Abstraction of a module that collects values into a sliding windows.
+ * The sliding windows can have their length defined in either time or the
+ * number of values. Windows can be created per key to support multidimensional (eg. x, y)
+ * and dynamic (eg. window per key) windowing.
+ *
+ * The module can have a minSamples parameter that controls how many samples
+ * the window must contain. Before this number is reached, doSendOutput() will
+ * not be called. The variable minSamplesWindowKey contols which window will
+ * be used to determine if the minSamples condition has been reached or not.
+ * Set supportsMinSamples = false to disable the minSamples feature altogether.
+ *
  */
 public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModule implements ITimeListener {
 
@@ -31,13 +39,14 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	@ExcludeInAutodetection
 	protected IntegerParameter minSamples = new IntegerParameter(this, "minSamples", 1);
 
-	protected AbstractWindow<T>[] windows;
+	protected LinkedHashMap<Object, AbstractWindow> windowByKey = new LinkedHashMap<>();
 	protected WindowType selectedWindowType = WindowType.EVENTS;
 
 	private transient Integer cachedLength = null;
 
 	// Subclass can set this to false in constructor to disable minSamples functionality
 	protected boolean supportsMinSamples = true;
+	protected Object minSamplesWindowKey = 0;
 
 	@Override
 	public void init() {
@@ -51,48 +60,62 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	}
 
 	/**
-	 * Adds an item to the window (in multidimensional case, use addToWindow(item, dimension)).
+	 * Adds an item to the window (in multidimensional case, use addToWindow(item, key)).
 	 * @param item
      */
 	protected void addToWindow(T item) {
 		addToWindow(item, 0);
 	}
 
-	protected void addToWindow(T item, int dimension) {
+	/**
+	 * Adds an item to the window specified by key. A window will be created for
+	 * this key if it does not exist.
+	 * @param item
+	 * @param key
+     */
+	protected void addToWindow(T item, Object key) {
 		if (selectedWindowType == WindowType.EVENTS)
-			windows[dimension].add(item);
+			getWindowForKey(key).add(item);
 		else {
-			((TimeWindow) windows[dimension]).add(item, globals.time);
+			((TimeWindow) getWindowForKey(key)).add(item, globals.time);
 		}
+	}
+
+	protected AbstractWindow<T> getWindowForKey(Object key) {
+		AbstractWindow window = windowByKey.get(key);
+		if (window==null) {
+			window = createWindow(this.selectedWindowType, key);
+			windowByKey.put(key, window);
+		}
+		return window;
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		selectedWindowType = WindowType.valueOf(windowType.getValue().toUpperCase());
-		this.windows = new AbstractWindow[getDimensions()];
-		for (int d = 0; d < getDimensions(); d++) {
-			windows[d] = createWindow(this.selectedWindowType, d);
-		}
 	}
 
-	protected AbstractWindow createWindow(WindowType type, int dimension) {
+	protected AbstractWindow createWindow(WindowType type, Object key) {
 		AbstractWindow w;
 
 		if (type == WindowType.EVENTS) {
-			w = new EventWindow(windowLength.getValue(), createWindowListener(dimension));
+			w = new EventWindow(windowLength.getValue(), createWindowListener(key));
 		}
 		else {
 			// Expects the enum names between TimeUnit and WindowType to be equal
 			TimeUnit timeUnit = TimeUnit.valueOf(windowType.getValue());
-			w = new TimeWindow(windowLength.getValue(), timeUnit, createWindowListener(dimension));
+			w = new TimeWindow(windowLength.getValue(), timeUnit, createWindowListener(key));
 		}
 
 		return w;
 	}
 
+	protected void deleteWindow(Object key) {
+		windowByKey.remove(key);
+	}
+
 	/**
 	 * Should add input values to the windows by calling addToWindow().
-	 * All windows must have the same number of values!
 	 */
 	protected abstract void handleInputValues();
 
@@ -104,20 +127,22 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	protected abstract void doSendOutput();
 
 	/**
-	 * Should create a WindowListener for the given dimension index
-	 * @param dimension
+	 * Should create a WindowListener for the given key
+	 * @param key
 	 * @return
      */
-	protected abstract WindowListener<T> createWindowListener(int dimension);
+	protected abstract WindowListener<T> createWindowListener(Object key);
 
 	@Override
 	public void setTime(Date time) {
+		// If we have time-based windows, they all need to be updated on time events
 		if (selectedWindowType != WindowType.EVENTS) {
 			boolean windowChanged = false;
-			for (int d = 0; d < getDimensions(); d++) {
-				int initialSize = windows[d].getSize();
-				((TimeWindow) windows[d]).setTime(time);
-				if (windows[d].getSize() != initialSize)
+
+			for (AbstractWindow<T> window : windowByKey.values()) {
+				int initialSize = window.getSize();
+				((TimeWindow) window).setTime(time);
+				if (window.getSize() != initialSize)
 					windowChanged = true;
 			}
 
@@ -127,16 +152,29 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		}
 	}
 
+	/**
+	 * Determines if a window has enough values, controlled by minSamples, for the module
+	 * to activate. If supportsMinSamples is false, this method always returns true.
+	 * Otherwise the window indicated by minSamplesWindowKey is inspected for enough values.
+     */
 	protected boolean isWindowReady() {
-		return !supportsMinSamples || windows[0].getSize() >= minSamples.getValue();
+		if (!supportsMinSamples) {
+			return true;
+		}
+		else {
+			AbstractWindow<T> minSamplesWindow = windowByKey.get(minSamplesWindowKey);
+			if (minSamplesWindow==null)
+				throw new NullPointerException("No window was found with key: "+minSamplesWindowKey+", you need to set minSamplesWindowKey! Keys: "+windowByKey.keySet());
+			else return minSamplesWindow.getSize() >= minSamples.getValue();
+		}
 	}
 
 	@Override
 	public void sendOutput() {
 		if (cachedLength==null || !windowLength.getValue().equals(cachedLength)) {
 			cachedLength = windowLength.getValue();
-			for (int d = 0; d < getDimensions(); d++) {
-				windows[d].setLength(cachedLength);
+			for (AbstractWindow<T> window : windowByKey.values()) {
+				window.setLength(cachedLength);
 			}
 		}
 
@@ -147,9 +185,10 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 
 	@Override
 	public void clearState() {
-		for (int d = 0; d < getDimensions(); d++) {
-			windows[d].clear();
+		for (AbstractWindow<T> window : windowByKey.values()) {
+			window.clear();
 		}
+		windowByKey.clear();
 		cachedLength = null;
 	}
 
@@ -174,10 +213,6 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 
 			return config;
 		}
-	}
-
-	protected Integer getDimensions() {
-		return 1;
 	}
 
 }

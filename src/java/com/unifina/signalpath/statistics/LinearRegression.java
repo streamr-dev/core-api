@@ -29,11 +29,6 @@ public class LinearRegression extends AbstractModuleWithWindow<com.unifina.signa
 	}
 
 	@Override
-	protected Integer getDimensions() {
-		return 2;
-	}
-
-	@Override
 	protected void handleInputValues() {
 		addToWindow(new XYPair((double) counter++, input.getValue()));
 	}
@@ -46,7 +41,7 @@ public class LinearRegression extends AbstractModuleWithWindow<com.unifina.signa
 	}
 
 	@Override
-	protected WindowListener<XYPair> createWindowListener(int dimension) {
+	protected WindowListener<XYPair> createWindowListener(Object key) {
 		return new LinearRegressionWindowListener();
 	}
 

@@ -51,7 +51,7 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractModuleWithWin
 	}
 
 	@Override
-	protected WindowListener<Double> createWindowListener(int dimension) {
+	protected WindowListener<Double> createWindowListener(Object key) {
 		return new DescriptiveStatisticsAdapterWindowListener();
 	}
 
@@ -107,8 +107,8 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractModuleWithWin
 		}
 
 		private void resizeStats() {
-			if (windows[0].getLength() != stats.getWindowSize())
-				stats.setWindowSize(windows[0].getLength());
+			if (windowByKey.get(0).getLength() != stats.getWindowSize())
+				stats.setWindowSize(windowByKey.get(0).getLength());
 		}
 	}
 }

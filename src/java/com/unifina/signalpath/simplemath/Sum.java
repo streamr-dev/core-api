@@ -29,7 +29,7 @@ public class Sum extends AbstractModuleWithWindow<Double> {
 	}
 
 	@Override
-	protected WindowListener<Double> createWindowListener(int dimension) {
+	protected WindowListener<Double> createWindowListener(Object key) {
 		return new SumWindowListener();
 	}
 

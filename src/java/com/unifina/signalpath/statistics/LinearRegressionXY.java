@@ -1,11 +1,12 @@
 package com.unifina.signalpath.statistics;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import com.unifina.signalpath.*;
+import com.unifina.signalpath.AbstractModuleWithWindow;
+import com.unifina.signalpath.TimeSeriesInput;
+import com.unifina.signalpath.TimeSeriesOutput;
 import com.unifina.utils.window.WindowListener;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+
+import java.io.Serializable;
 
 public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressionXY.XYPair> {
 	
@@ -31,11 +32,6 @@ public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressio
 	}
 
 	@Override
-	protected Integer getDimensions() {
-		return 2;
-	}
-
-	@Override
 	protected void handleInputValues() {
 		addToWindow(new XYPair(x.getValue(), y.getValue()));
 	}
@@ -52,7 +48,7 @@ public class LinearRegressionXY extends AbstractModuleWithWindow<LinearRegressio
 	}
 
 	@Override
-	protected WindowListener<XYPair> createWindowListener(int dimension) {
+	protected WindowListener<XYPair> createWindowListener(Object key) {
 		return new LinearRegressionWindowListener();
 	}
 

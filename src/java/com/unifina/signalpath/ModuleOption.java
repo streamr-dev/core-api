@@ -1,7 +1,6 @@
 package com.unifina.signalpath;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ModuleOption extends LinkedHashMap<String, Object> {
 
@@ -36,7 +35,24 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		this.put("value", value);
 		this.put("type", type);
 	}
-	
+
+	/**
+	 * List of possible values will be rendered as dropdown box
+	 * @param description shown to user
+	 * @param value written into canvas JSON and sent back from UI
+	 */
+	public void addPossibleValue(String description, String value) {
+		List<Map<String, String>> choices = (List<Map<String, String>>)this.get("possibleValues");
+		if (choices == null) {
+			choices = new LinkedList<>();
+			this.put("possibleValues", choices);
+		}
+		Map<String, String> choice = new HashMap<>();
+		choice.put("text", description);
+		choice.put("value", value);
+		choices.add(choice);
+	}
+
 	public void addTo(Map<String,Object> options) {
 		options.put(key, this);
 	}
@@ -83,5 +99,9 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 
 	public static ModuleOption createInt(String key, Integer value) {
 		return new ModuleOption(key, value, OPTION_INTEGER);
+	}
+
+	public static ModuleOption createString(String key, String value) {
+		return new ModuleOption(key, value, OPTION_STRING);
 	}
 }

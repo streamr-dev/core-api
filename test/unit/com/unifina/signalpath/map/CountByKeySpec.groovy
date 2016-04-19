@@ -1,5 +1,6 @@
 package com.unifina.signalpath.map
 
+import com.unifina.signalpath.AbstractModuleWithWindow
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
@@ -16,7 +17,14 @@ class CountByKeySpec extends Specification {
 	}
 
 	void "countByKey gives the right answer"() {
-		module.configure(module.getConfiguration())
+		module.configure([
+				options: [sorted: [value: false]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 0]
+				]
+		])
 
 		when:
 		Map outputValues = [
@@ -40,10 +48,14 @@ class CountByKeySpec extends Specification {
 	}
 
 	void "countByKey gives the right answer (sorting and maxKeyCount enabled)"() {
-		module.configure([options: [
-		    sorted: [value: true],
-		]])
-		module.getInput("maxKeyCount").receive(3)
+		module.configure([
+				options: [sorted: [value: true]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 3]
+				]
+		])
 
 		when:
 		Map outputValues = [
@@ -67,9 +79,14 @@ class CountByKeySpec extends Specification {
 	}
 
 	void "countByKey gives the right answer (sorting, ascending, and maxKeyCount enabled)"() {
-		module.configure([options: [
-			sorted: [value: true], ascending: [value: true]
-		]])
+		module.configure([
+				options: [sorted: [value: true], ascending: [value: true]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 3]
+				]
+		])
 		module.getInput("maxKeyCount").receive(3)
 
 		when:

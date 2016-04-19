@@ -10,7 +10,11 @@ import spock.lang.Specification
 class AbstractModuleWithWindowSpec extends Specification {
 
 	private WindowingModule makeModule(boolean minSamples = true, Map config = [:], int dimensions = 1) {
-		List<WindowListener<Double>> windowListeners = [Mock(WindowListener), Mock(WindowListener)]
+		Map<Object, WindowListener<Double>> windowListeners = [:]
+		for (int i=0; i<dimensions; i++) {
+			windowListeners.put(i, Mock(WindowListener))
+		}
+
 		WindowingModule m = new WindowingModule(minSamples, dimensions, windowListeners, Mock(AbstractModuleWithWindow))
 		m.globals = GlobalsFactory.createInstance([:], grailsApplication)
 		m.globals.time = new Date(0)
@@ -185,11 +189,11 @@ class AbstractModuleWithWindowSpec extends Specification {
 	class WindowingModule extends AbstractModuleWithWindow<Double> {
 
 		StringParameter test = new StringParameter(this, "test", "value")
-		List<WindowListener<Double>> windowListeners
+		Map<Object, WindowListener<Double>> windowListeners
 		AbstractModuleWithWindow<Double> mock
 		Integer dimensions
 
-		public WindowingModule(boolean supportsMinSamples, int dimensions, List<WindowListener<Double>> windowListeners, AbstractModuleWithWindow<Double> mock) {
+		public WindowingModule(boolean supportsMinSamples, int dimensions, Map<Object, WindowListener<Double>> windowListeners, AbstractModuleWithWindow<Double> mock) {
 			this.windowListeners = windowListeners
 			this.mock = mock
 			this.supportsMinSamples = supportsMinSamples
@@ -197,13 +201,8 @@ class AbstractModuleWithWindowSpec extends Specification {
 		}
 
 		@Override
-		protected Integer getDimensions() {
-			return dimensions;
-		}
-
-		@Override
-		protected WindowListener<Double> createWindowListener(int dimension) {
-			return windowListeners[dimension]
+		protected WindowListener<Double> createWindowListener(Object key) {
+			return windowListeners[key]
 		}
 
 		public void addTestValue(Double d) {

@@ -3,6 +3,7 @@ package com.unifina.signalpath.statistics;
 import com.unifina.signalpath.AbstractModuleWithWindow;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.utils.window.AbstractWindow;
 import com.unifina.utils.window.WindowListener;
 
 /**
@@ -27,11 +28,6 @@ public abstract class BivariateStatisticAdapter<Statistic> extends AbstractModul
 	}
 
 	@Override
-	protected Integer getDimensions() {
-		return 2;
-	}
-
-	@Override
 	protected void handleInputValues() {
 		addToWindow(x.getValue(), 0);
 		addToWindow(y.getValue(), 1);
@@ -39,21 +35,24 @@ public abstract class BivariateStatisticAdapter<Statistic> extends AbstractModul
 
 	@Override
 	protected void doSendOutput() {
+		AbstractWindow<Double> xWindow = windowByKey.get(0);
+		AbstractWindow<Double> yWindow = windowByKey.get(1);
+
 		if (stat == null) {
 			stat = createStatistic();
 		}
-		if (xValues == null || xValues.length != windows[0].getSize()) {
-			xValues = new double[windows[0].getSize()];
-			yValues = new double[windows[0].getSize()];
+		if (xValues == null || xValues.length != xWindow.getSize()) {
+			xValues = new double[xWindow.getSize()];
+			yValues = new double[yWindow.getSize()];
 		}
 
 		// Goddamn slow. Is there a better way to unbox a bunch of Doubles more effectively?
 		int i=0;
-		for (Double d : windows[0]) {
+		for (Double d : xWindow) {
 			xValues[i++] = d;
 		}
 		i=0;
-		for (Double d : windows[1]) {
+		for (Double d : yWindow) {
 			yValues[i++] = d;
 		}
 
@@ -64,7 +63,7 @@ public abstract class BivariateStatisticAdapter<Statistic> extends AbstractModul
 	}
 
 	@Override
-	protected WindowListener<Double> createWindowListener(int dimension) {
+	protected WindowListener<Double> createWindowListener(Object key) {
 		// Not interested in window events, because we always need the whole contents of the window to compute Covariance
 		return null;
 	}
