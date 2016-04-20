@@ -38,7 +38,7 @@ public class Barify extends AbstractSignalPathModule implements ITimeListener {
 			currentBar.sum += value;
 			currentBar.count++;
 		} else {
-			currentBar = new Bar(globals.time, input.value, input.value, input.value, input.value, 0, 0);
+			currentBar = new Bar(globals.time, input.value, input.value, input.value, input.value, value, 1);
 		}
 	}
 	

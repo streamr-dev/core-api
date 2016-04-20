@@ -183,6 +183,24 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		checkDirtyAndReadyCounters();
 	}
 
+	public void removeInput(Input input) {
+		if (!inputs.contains(input)) {
+			throw new IllegalArgumentException("Unable to remove input: input not found: "+input);
+		}
+
+		inputs.remove(input);
+
+		inputsByName.remove(input.getName());
+		for (Object alias : input.getAliases()) {
+			inputsByName.remove(alias.toString());
+		}
+
+		inputCount = inputs.size();
+
+		// re-count because inputs already contained in the counters might be removed
+		checkDirtyAndReadyCounters();
+	}
+
 	public void addOutput(Output output) {
 		addOutput(output, output.getName());
 	}
@@ -197,6 +215,19 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		for (Object alias : output.getAliases()) {
 			outputsByName.put(alias.toString(), output);
+		}
+	}
+
+	public void removeOutput(Output output) {
+		if (!outputs.contains(output)) {
+			throw new IllegalArgumentException("Unable to remove output: output not foudn: "+output);
+		}
+
+		outputs.remove(output);
+		outputsByName.remove(output.getName());
+
+		for (Object alias : output.getAliases()) {
+			outputsByName.remove(alias.toString());
 		}
 	}
 

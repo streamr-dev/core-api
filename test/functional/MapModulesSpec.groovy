@@ -84,6 +84,8 @@ class MapModulesSpec extends LoginTester1Spec {
 		moveModuleBy("Multiply", 150, 150)
 		addAndWaitModule("Sum")
 		moveModuleBy("Sum", 500, 150)
+		setParameterValueForModule("Sum", "windowLength", "5")
+		chooseDropdownParameterForModule("Sum", "windowType", "seconds")
 		addAndWaitModule("Max (window)")
 		moveModuleBy("Max (window)", 150, 350)
 		addAndWaitModule("LogNatural")
@@ -97,7 +99,6 @@ class MapModulesSpec extends LoginTester1Spec {
 		toggleExport("Multiply", "A")
 		toggleExport("Max (window)", "in")
 		toggleExport("LogNatural", "out")
-
 
 		then: "save sub canvas"
 		setCanvasName(subCanvasName)
@@ -149,6 +150,18 @@ class MapModulesSpec extends LoginTester1Spec {
 			'key-4 ."out2":3.496507\\d*,"out":1090.',
 			'key-5 ."out":0.'
 		])
+
+		and: "After sum values have fallen from the window, sum outputs must show zero"
+		waitFor(20) {
+			$(".modulelabel")[0].text() == "0.0"
+			tableContains([
+					'key-1 ."out2":3.688879\\d*,"out":0.',
+					'key-2 ."out":0.',
+					'key-3 ."out2":4.744932\\d*,"out":0.',
+					'key-4 ."out2":3.496507\\d*,"out":0.',
+					'key-5 ."out":0.'
+			])
+		}
 
 		cleanup:
 		stopCanvasIfRunning()

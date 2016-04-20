@@ -18,7 +18,7 @@ class CountByKeySpec extends Specification {
 
 	void "countByKey gives the right answer"() {
 		module.configure([
-				options: [sorted: [value: false]],
+				options: [sort: [value: false]],
 				inputs: [
 						[name: "windowLength", value: 0],
 						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
@@ -49,7 +49,7 @@ class CountByKeySpec extends Specification {
 
 	void "countByKey gives the right answer (sorting and maxKeyCount enabled)"() {
 		module.configure([
-				options: [sorted: [value: true]],
+				options: [sort: [value: true], sortOrder: [value: "descending"]],
 				inputs: [
 						[name: "windowLength", value: 0],
 						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
@@ -80,7 +80,7 @@ class CountByKeySpec extends Specification {
 
 	void "countByKey gives the right answer (sorting, ascending, and maxKeyCount enabled)"() {
 		module.configure([
-				options: [sorted: [value: true], ascending: [value: true]],
+				options: [sort: [value: true], sortOrder: [value: "ascending"]],
 				inputs: [
 						[name: "windowLength", value: 0],
 						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],

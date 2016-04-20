@@ -41,12 +41,13 @@ public abstract class AggregateByKey extends AbstractModuleWithWindow<Double> {
 	}
 
 	protected void doSendOutput() {
-		// Get the value before pruning, because this key might be pruned
+		// Might activate on time or driving input. There is no "current key" when activated by time.
 		Double currentValue = aggregateByKey.get(key.getValue());
 		pruneTreeIfNeeded();
-
+		if (currentValue != null) {
+			valueOfCurrentKey.send(currentValue);
+		}
 		map.send(Collections.unmodifiableMap(aggregateByKey));
-		valueOfCurrentKey.send(currentValue);
 	}
 
 	private void pruneTreeIfNeeded() {

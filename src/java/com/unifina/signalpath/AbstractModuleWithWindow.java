@@ -33,13 +33,15 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		DAYS
 	}
 
-	protected IntegerParameter windowLength = new IntegerParameter(this, "windowLength", 100);
+	protected IntegerParameter windowLength = new IntegerParameter(this, "windowLength", 0);
 	protected WindowTypeParameter windowType = new WindowTypeParameter(this, "windowType", WindowType.EVENTS.toString().toLowerCase());
 
 	@ExcludeInAutodetection
-	protected IntegerParameter minSamples = new IntegerParameter(this, "minSamples", 1);
+	protected IntegerParameter minSamples = new IntegerParameter(this, "minSamples", 0);
 
 	protected LinkedHashMap<Object, AbstractWindow> windowByKey = new LinkedHashMap<>();
+	private boolean iteratingWindowByKey = false;
+	private Set<Object> keysPendingRemoval = new HashSet<>();
 	protected WindowType selectedWindowType = WindowType.EVENTS;
 
 	private transient Integer cachedLength = null;
@@ -111,7 +113,14 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 	}
 
 	protected void deleteWindow(Object key) {
-		windowByKey.remove(key);
+		// Mark window for removal instead of instantly removing it from windowByKey,
+		// as this would cause a ConcurrentModificationException if currently iterating over it
+		if (iteratingWindowByKey) {
+			keysPendingRemoval.add(key);
+		}
+		else {
+			windowByKey.remove(key);
+		}
 	}
 
 	/**
@@ -135,16 +144,24 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 
 	@Override
 	public void setTime(Date time) {
-		// If we have time-based windows, they all need to be updated on time events
+		// If we have time-based windows, all of them need to be updated on time events
 		if (selectedWindowType != WindowType.EVENTS) {
 			boolean windowChanged = false;
 
+			iteratingWindowByKey = true;
 			for (AbstractWindow<T> window : windowByKey.values()) {
 				int initialSize = window.getSize();
 				((TimeWindow) window).setTime(time);
 				if (window.getSize() != initialSize)
 					windowChanged = true;
 			}
+			iteratingWindowByKey = false;
+
+			// Clean up the windows that were deleted while iterating
+			for (Object key : keysPendingRemoval) {
+				deleteWindow(key);
+			}
+			keysPendingRemoval.clear();
 
 			if (windowChanged && isWindowReady()) {
 				doSendOutput();
