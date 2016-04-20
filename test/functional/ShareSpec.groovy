@@ -25,12 +25,12 @@ class ShareSpec extends GebReportingSpec {
 
 	def save() {
 		$(".sharing-dialog .save-button").click()
-		waitFor { !$(".sharing-dialog").displayed }
+		waitFor { !$(".sharing-dialog") }
 	}
 
 	def cancel() {
 		$(".sharing-dialog .cancel-button").click()
-		waitFor { !$(".sharing-dialog").displayed }
+		waitFor { !$(".sharing-dialog") }
 	}
 
 	/** Cleanup helper */
