@@ -29,18 +29,21 @@ public class Propagator implements Serializable {
 	
 	public Propagator() {}
 
-	public Propagator(AbstractSignalPathModule origin) {
+	public Propagator(AbstractSignalPathModule origin, boolean autoPropagation) {
+		alwaysPropagate = autoPropagation;
 		addModule(origin);
 	}
+	public Propagator(AbstractSignalPathModule origin) {
+		this(origin, true);
+	}
 
-	public Propagator(Input[] inputs, AbstractSignalPathModule origin) {
+	public Propagator(Input[] inputs) {
 		alwaysPropagate = true;
 		reachable = makeReachableSet(inputs);
 		calculateActivationOrder();
 	}
-
-	public Propagator(List<Input> inputs, AbstractSignalPathModule origin) {
-		this(inputs.toArray(new Input[inputs.size()]), origin);
+	public Propagator(List<Input> inputs) {
+		this(inputs.toArray(new Input[inputs.size()]));
 	}
 
 	public void addModule(AbstractSignalPathModule module) {
