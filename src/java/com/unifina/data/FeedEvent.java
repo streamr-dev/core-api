@@ -15,28 +15,27 @@ public class FeedEvent<MessageClass extends ITimestamped, EventRecipientClass ex
 	public EventRecipientClass recipient;
 	public AbstractFeed feed;
 	public FeedEventIterator<MessageClass, EventRecipientClass> iterator;
-	
+
 	public long queueTicket = 0;
-	
+
 	public FeedEvent() {
-		
+
 	}
-	
+
 	public FeedEvent(MessageClass content, Date timestamp, EventRecipientClass recipient) {
 		this.content = content;
 		this.timestamp = timestamp;
 		this.recipient = recipient;
 	}
-	
+
 	@Override
 	public int compareTo(FeedEvent<MessageClass, EventRecipientClass> e) {
 		int t = timestamp.compareTo(e.timestamp);
-		if (t!=0) return t;
-		else return Long.compare(queueTicket, e.queueTicket);
+		return (t != 0) ? t : Long.compare(queueTicket, e.queueTicket);
 	}
-	
+
 	@Override
 	public String toString() {
-		return timestamp + " - "+"iterator: "+iterator+", content: "+content;
+		return timestamp + " - " + "iterator: " + iterator + ", content: " + content;
 	}
 }
