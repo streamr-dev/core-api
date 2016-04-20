@@ -339,6 +339,7 @@ class PermissionService {
 			}
 			eq("clazz", clazz)
 			eq(idProp, resourceId)
+			lock(true)
 		}
 		def revokeOp = { Operation op -> perms.findAll { it.operation == op }.each {
 			ret.add(it)
