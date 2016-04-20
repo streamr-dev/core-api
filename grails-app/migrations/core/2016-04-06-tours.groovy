@@ -44,6 +44,30 @@ databaseChangeLog = {
 			column(name: "string_id", value: "YpTAPDbvSAmj-iCUYz-dxA")
 			column(name: "anonymous", valueBoolean: false)
 		}
+
+		// Insert feed files
+		insert(tableName: "feed_file") {
+			column(name: "begin_date", value: "2016-04-11 00:00:00")
+			column(name: "day", value: "2016-04-11 00:00:00")
+			column(name: "end_date", value: "2016-04-11 23:59:59")
+			column(name: "feed_id", valueNumeric: 7)
+			column(name: "name", value: "kafka.20160411.YpTAPDbvSAmj-iCUYz-dxA.gz")
+			column(name: "process_task_created", valueNumeric: 0)
+			column(name: "processed", valueNumeric: 1)
+			column(name: "processing", valueNumeric: 0)
+			column(name: "stream_id", value: "YpTAPDbvSAmj-iCUYz-dxA")
+		}
+		insert(tableName: "feed_file") {
+			column(name: "begin_date", value: "2016-04-12 00:00:00")
+			column(name: "day", value: "2016-04-12 00:00:00")
+			column(name: "end_date", value: "2016-04-12 23:59:59")
+			column(name: "feed_id", valueNumeric: 7)
+			column(name: "name", value: "kafka.20160412.YpTAPDbvSAmj-iCUYz-dxA.gz")
+			column(name: "process_task_created", valueNumeric: 0)
+			column(name: "processed", valueNumeric: 1)
+			column(name: "processing", valueNumeric: 0)
+			column(name: "stream_id", value: "YpTAPDbvSAmj-iCUYz-dxA")
+		}
 	}
 
 	// Complete the tours for test users to avoid screwing up func tests etc.
