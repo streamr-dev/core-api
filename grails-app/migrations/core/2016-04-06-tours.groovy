@@ -1,16 +1,22 @@
 package core
 
+import org.apache.log4j.Logger
 import org.json.JSONObject
+
+Logger log = Logger.getLogger("tours")
 
 databaseChangeLog = {
 
-	changeSet(author: "henri", id: "tour-resources") {
+	changeSet(author: "henri", id: "tour-resources-1") {
 		// Rename Charts module category to Visualizations
 		grailsChange {
 			change {
 				sql.execute("UPDATE module_category SET name = 'Visualizations' WHERE name = 'Charts'")
 			}
 		}
+	}
+
+	changeSet(author: "henri", id: "tour-resources-2", failOnError: false) {
 
 		// Insert demo stream
 		insert(tableName: "stream") {
@@ -22,19 +28,22 @@ databaseChangeLog = {
 			column(name: "feed_id", valueNumeric: 7) // API stream
 
 			def config = [fields: [
-			        [name: "veh", type: "string"],
-					[name: "lat", type: "number"],
-					[name: "long", type: "number"],
-					[name: "spd", type: "number"],
-					[name: "hdg", type: "number"],
-					[name: "odo", type: "number"],
-					[name: "dl", type: "number"],
-					[name: "desi", type: "string"]
+				[name: "veh", type: "string"],
+				[name: "lat", type: "number"],
+				[name: "long", type: "number"],
+				[name: "spd", type: "number"],
+				[name: "hdg", type: "number"],
+				[name: "odo", type: "number"],
+				[name: "dl", type: "number"],
+				[name: "desi", type: "string"]
 			]]
 			column(name: "config", value: new JSONObject(config).toString())
 			column(name: "user_id", valueNumeric: 1)
 			column(name: "class", value: "com.unifina.domain.data.Stream")
 		}
+	}
+
+	changeSet(author: "henri", id: "tour-resources-3") {
 
 		// Grant public read permission to demo stream
 		insert(tableName: "permission") {
