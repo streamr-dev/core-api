@@ -3,6 +3,7 @@ package com.unifina.data;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import com.codahale.metrics.*;
 import org.apache.log4j.Logger;
 
 import com.unifina.datasource.DataSource;
@@ -13,6 +14,8 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 
 	private long elapsedTime;
 	private int eventCounter;
+
+	private final Meter eventsProcessed;
 
 	boolean firstEvent = true;
 
