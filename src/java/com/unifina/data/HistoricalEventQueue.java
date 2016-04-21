@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.codahale.metrics.Meter;
+import com.unifina.service.MetricsService;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import com.unifina.datasource.DataSource;
@@ -19,6 +22,9 @@ import com.unifina.utils.TimeOfDayUtil;
 public class HistoricalEventQueue extends DataSourceEventQueue {
 	
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
+
+	private final MetricsService metricsService = (MetricsService)Holders.getGrailsApplication().getMainContext().getBean("metricsService");
+	private final Meter eventsProcessed = metricsService.getMeter("eventsProcessed.historical");
 	
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
 		super(globals, dataSource);
@@ -155,6 +161,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			log.debug("PERFORMANCE: Processing took "+((timeSpentProcessing/eventCounter)/1000.0)+" microseconds per event.");
 			log.debug("PERFORMANCE: Entire processing took "+feedElapsedTime+" milliseconds or "+((feedElapsedTime*1000)/eventCounter)+" microseconds per event.");
 		}
+		eventsProcessed.mark(eventCounter);
 
 	}
 
