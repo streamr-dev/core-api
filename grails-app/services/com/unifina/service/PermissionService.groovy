@@ -3,6 +3,7 @@ package com.unifina.service
 import org.apache.log4j.Logger
 
 import com.unifina.domain.security.SecUser
+import org.hibernate.StaleObjectStateException
 import org.hibernate.proxy.HibernateProxyHelper
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
@@ -339,11 +340,16 @@ class PermissionService {
 			}
 			eq("clazz", clazz)
 			eq(idProp, resourceId)
-			lock(true)
 		}
 		def revokeOp = { Operation op -> perms.findAll { it.operation == op }.each {
 			ret.add(it)
-			it.delete()
+			try {
+				it.delete(flush: true)
+			} catch (StaleObjectStateException) {
+				// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
+				// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
+				// ignoring the exception is fine; after all, the permission has been deleted
+			}
 		} }
 		revokeOp(operation)
 		alsoRevoke.get(operation.id).each(revokeOp)
