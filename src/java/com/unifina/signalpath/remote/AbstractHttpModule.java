@@ -44,7 +44,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	protected boolean isAsync = false;
 	protected int timeoutMillis = 1000 * DEFAULT_TIMEOUT_SECONDS;
 
-	private transient Propagator asyncPropagator = new Propagator(this);
+	private transient Propagator asyncPropagator;
 	private transient CloseableHttpAsyncClient cachedHttpClient;
 
 	/** This function is overridden so that the tests can inject a mock HttpAsyncClient */
@@ -199,10 +199,17 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		if (event.content instanceof HttpTransaction) {
 			sendOutput((HttpTransaction) event.content);
 			setSendPending(true);
-			asyncPropagator.propagate();
+			getPropagator().propagate();
 		} else {
 			super.receive(event);
 		}
+	}
+
+	private Propagator getPropagator() {
+		if (asyncPropagator == null) {
+			asyncPropagator = new Propagator(this);
+		}
+		return asyncPropagator;
 	}
 
 	/**
