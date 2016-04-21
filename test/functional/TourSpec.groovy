@@ -114,7 +114,13 @@ class TourSpec extends LoginTester1Spec {
 			runHistoricalButton.click()
 		}
 
-		// TODO: check that map gets data
+		waitFor {
+			$(".leaflet-marker-icon").size() > 45
+		}
+
+		advance {
+			runHistoricalButton.click()
+		}
 
 		waitFor {
 			!getTourBubble().displayed
