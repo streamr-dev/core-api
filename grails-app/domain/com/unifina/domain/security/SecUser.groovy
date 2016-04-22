@@ -34,4 +34,13 @@ class SecUser {
 	Set<SecRole> getAuthorities() {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
+
+	public Map toMap() {
+		return [
+			name           : name,
+			username       : username,
+			apiKey         : apiKey,
+			timezone       : timezone,
+		]
+	}
 }
