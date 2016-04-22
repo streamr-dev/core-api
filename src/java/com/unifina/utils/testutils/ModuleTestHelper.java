@@ -148,6 +148,16 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * Serialization+deserialization changes module instance, and old references go stale.
+		 * Test Specification must listen to instance changes and update their references
+		 *   if they make direct calls to the module in the middle of the test (e.g. in Stub'd methods)
+         */
+		public Builder onModuleInstanceChange(Closure<?> moduleInstanceChanged) {
+			testHelper.moduleInstanceChanged = moduleInstanceChanged;
+			return this;
+		}
+
+		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
 		 */
@@ -198,6 +208,7 @@ public class ModuleTestHelper {
 	private Closure<Globals> overrideGlobalsClosure = Closure.IDENTITY;
 	private Closure<?> beforeEachTestCase = Closure.IDENTITY;
 	private Closure<?> afterEachTestCase = Closure.IDENTITY;
+	private Closure<?> moduleInstanceChanged = Closure.IDENTITY;
 
 	private int inputValueCount;
 	private int outputValueCount;
@@ -302,7 +313,7 @@ public class ModuleTestHelper {
 	private void activateModule(int i) {
 		module.trySendOutput();
 		if (isTimedMode() && ticks.containsKey(i)) {
-			((ITimeListener) module).setTime(ticks.get(i));
+			((ITimeListener)module).setTime(ticks.get(i));
 		}
 	}
 
@@ -317,7 +328,7 @@ public class ModuleTestHelper {
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
-				expected = DU.clean((Double) expected);
+				expected = DU.clean((Double)expected);
 			}
 
 			// Possible failures:
@@ -327,7 +338,6 @@ public class ModuleTestHelper {
 			if ((expected == null && actual != null) ||
 					(expected != null && actual == null) ||
 					expected != null && !expected.equals(actual)) {
-
 				throwException(entry.getKey(), i, outputIndex, actual, expected);
 			}
 		}
@@ -420,6 +430,7 @@ public class ModuleTestHelper {
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
 				module.globals = globalsTempHolder;
 				module.afterDeserialization();
+				moduleInstanceChanged.call(module);
 			}
 		}
 	}
@@ -468,7 +479,7 @@ public class ModuleTestHelper {
 			throw new TestHelperException(hiddenFieldDetector);
 		}
 
-		// Anonymous inner classes not alowed
+		// Anonymous inner classes not allowed
 		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
 		if (anonymousInnerClassDetector.detect(module)) {
 			throw new TestHelperException("Anonymous inner class detected. Not allowed when serializing.", this);
@@ -519,6 +530,14 @@ public class ModuleTestHelper {
 		}
 	}
 
+	private void setUpGlobals(AbstractSignalPathModule module) {
+		module.globals = new Globals();
+		module.globals.time = new Date(0);
+		module.globals.setUiChannel(new FakePushChannel());
+		module.globals = overrideGlobalsClosure.call(module.globals);
+	}
+
+	/** create dummy outputs for each tested input */
 	private void initAndAttachOutputsToModuleInputs() {
 		for (String inputName : inputValuesByName.keySet()) {
 			Input input = module.getInput(inputName);
@@ -531,6 +550,7 @@ public class ModuleTestHelper {
 		}
 	}
 
+	/** create (one-input dummy) Collector modules for each tested output */
 	private void connectCollectorsToModule(AbstractSignalPathModule module) {
 		for (String outputName : outputValuesByName.keySet()) {
 			Output output = module.getOutput(outputName);
@@ -542,16 +562,7 @@ public class ModuleTestHelper {
 			collector.attachToModule(output);
 		}
 	}
-
-	private void setUpGlobals(AbstractSignalPathModule module) {
-		module.globals = new Globals();
-		module.globals.time = new Date(0);
-		module.globals.setUiChannel(new FakePushChannel());
-		module.globals = overrideGlobalsClosure.call(module.globals);
-	}
-
 	private static class Collector extends AbstractSignalPathModule {
-
 		Input<Object> input = new Input<>(this, "input", "Object");
 
 		@Override
@@ -559,16 +570,14 @@ public class ModuleTestHelper {
 			addInput(input);
 		}
 
-		@Override
-		public void sendOutput() {
-		}
-
-		@Override
-		public void clearState() {
-		}
-
 		public void attachToModule(Output<Object> externalOutput) {
 			externalOutput.connect(input);
 		}
+
+		@Override
+		public void sendOutput() { }
+
+		@Override
+		public void clearState() { }
 	}
 }
