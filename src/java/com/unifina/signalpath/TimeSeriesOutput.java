@@ -21,7 +21,11 @@ public class TimeSeriesOutput extends Output<Double> {
 	public void send(int value) {
 		send(new Double(value));
 	}
-	
+
+	public void send(long value) {
+		send(new Double(value));
+	}
+
 	public void send(Double value) {
 		if (!noRepeat || previousValue==null || !value.equals(previousValue)) {
 			value = DU.clean(value);

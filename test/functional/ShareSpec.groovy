@@ -86,6 +86,7 @@ class ShareSpec extends GebReportingSpec {
 			def len = $input.getAttribute("value").length()
 			len >= text.length() ?: ($input << text.substring(len))
 		}
+		return $input
 	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
@@ -105,7 +106,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		$(".new-user-field") << "foobar" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "foobar") << Keys.ENTER
 		then: "enter adds a permission row"
 		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
@@ -262,7 +263,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		$(".new-user-field") << "foobar" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "foobar") << Keys.ENTER
 		then: "enter adds a permission row"
 		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
@@ -404,7 +405,7 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		$(".new-user-field") << "foobar" << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "foobar") << Keys.ENTER
 		then: "enter adds a permission row"
 		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
@@ -605,9 +606,10 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		getCanvasRow().click()
-		then: "only read rights given"
+		then: "wait until permission check is done, should not view login form (because not logging in isn't why sharing isn't allowed)"
 		waitFor { at CanvasPage }
-		shareButton.disabled
+		waitFor { shareButton.hasClass("forbidden") }
+		!$(".page-signin-alt #loginForm")
 
 		when: "check dashboard"
 		to DashboardListPage
