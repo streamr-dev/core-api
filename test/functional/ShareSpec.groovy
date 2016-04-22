@@ -605,9 +605,10 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		getCanvasRow().click()
-		then: "only read rights given"
+		then: "wait until permission check is done, should not view login form (because not logging in isn't why sharing isn't allowed)"
 		waitFor { at CanvasPage }
-		shareButton.disabled
+		waitFor { shareButton.hasClass("forbidden") }
+		!$(".page-signin-alt #loginForm")
 
 		when: "check dashboard"
 		to DashboardListPage
