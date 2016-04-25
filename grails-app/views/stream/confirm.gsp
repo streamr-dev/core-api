@@ -2,6 +2,11 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="stream.confirm.label" /></title>
+        <r:script>
+        	$("#customFormatInput").keydown(function() {
+				$("#customFormatRadio").click()
+			})
+		</r:script>
     </head>
     <body>    
 		<ui:flashMessage/>
@@ -34,9 +39,9 @@
 					</g:each>
 					<div class="radio">
 					  	<label>
-					    	<input type="radio" name="format" value="custom" class="px">
+					    	<input id="customFormatRadio" type="radio" name="format" value="custom" class="px">
 					    	<span class="lbl">Custom date format (in <a href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" target="_blank">SimpleDateFormat</a> notation)</span>
-					    	<input type="text" name="customFormat" class="form-control"></input>
+					    	<input id="customFormatInput" type="text" name="customFormat" class="form-control"></input>
 					  	</label>
 					</div>
 				</div>
