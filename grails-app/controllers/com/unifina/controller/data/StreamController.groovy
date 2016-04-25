@@ -6,6 +6,7 @@ import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import org.apache.commons.lang.exception.ExceptionUtils
 
 import java.text.SimpleDateFormat
 
@@ -185,6 +186,7 @@ class StreamController {
 					render([success: true] as JSON)
 				}
 			} catch (Exception e) {
+				e = ExceptionUtils.getRootCause(e)
 				log.error("Failed to import file", e)
 				response.status = 500
 				render([success: false, error: e.message] as JSON)
@@ -220,7 +222,8 @@ class StreamController {
 				CSVImporter csv = new CSVImporter(file, fields, index, format)
 				importCsv(csv, stream)
 			} catch (Exception e) {
-				flash.message = "The format of the timestamp is not correct"
+				e = ExceptionUtils.getRootCause(e)
+				flash.error = e.message
 			}
 			redirect(action: "show", id: params.id)
 		}

@@ -1,4 +1,5 @@
 package core
+
 databaseChangeLog = {
 
 	// migrate data
