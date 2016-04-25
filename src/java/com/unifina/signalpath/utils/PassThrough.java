@@ -1,23 +1,35 @@
 package com.unifina.signalpath.utils;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.Output;
+import com.unifina.signalpath.variadic.InputInstantiator;
+import com.unifina.signalpath.variadic.OutputInstantiator;
+import com.unifina.signalpath.variadic.VariadicInputOutputPair;
+
+import java.util.List;
+import java.util.Map;
 
 public class PassThrough extends AbstractSignalPathModule {
 
-	Input<Object> input = new Input<>(this,"in","Object");
-	Output<Object> output = new Output<>(this,"out","Object");
-	
+	private VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(this, 1,
+			new InputInstantiator.SimpleObject(),
+			new OutputInstantiator.SimpleObject());
+
 	@Override
-	public void init() {
-		addInput(input);
-		addOutput(output);
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		inputOutputPairs.getConfiguration(config);
+		return config;
 	}
-	
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+		inputOutputPairs.onConfiguration(config);
+	}
+
 	@Override
 	public void initialize() {
-		// Input source and Output targets must be of same type
+		/*// Input source and Output targets must be of same type
 		if (input.isConnected() && output.getTargets().length>0) {
 			String type = input.getSource().getTypeName();
 			
@@ -28,12 +40,13 @@ public class PassThrough extends AbstractSignalPathModule {
 					if (!i.getTypeName().equals("Object") && !type.equals(i.getTypeName()))
 						throw new RuntimeException("PassThrough: input is connected to type "+type+", connection to "+(i.getDisplayName()!=null ? i.getDisplayName() : i.getName())+" is of wrong type ("+i.getTypeName()+")!");
 			}
-		}
+		}*/
 	}
 	
 	@Override
 	public void sendOutput() {
-		output.send(input.value);
+		List<Object> values = inputOutputPairs.getInputValues();
+		inputOutputPairs.sendValuesToOutputs(values);
 	}
 
 	@Override
