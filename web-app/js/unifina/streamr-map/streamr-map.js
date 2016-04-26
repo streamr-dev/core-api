@@ -137,7 +137,7 @@
         if(marker === undefined) {
             this.markers[id] = this.createMarker(id, latlng)
         } else {
-            this.moveMarker(id, lat, lng, color)
+            this.moveMarker(id, lat, lng)
         }
         if(this.options.drawTrace)
             this.addLinePoint(id, lat, lng, color)
@@ -265,6 +265,7 @@
         }
 
         this.autoZoomBounds = this.defaultAutoZoomBounds
+
         this.markers = {}
         this.pendingMarkerUpdates = {}
         this.pendingLineUpdates = []
