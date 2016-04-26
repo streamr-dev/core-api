@@ -26,6 +26,17 @@
             drawTrace: false
         }, options || {})
 
+        this.bounds = {
+            lat: {
+                min: 200,
+                max: -200
+            },
+            lng: {
+                min: 200,
+                max: -200
+            }
+        }
+
         if (!this.parent.attr("id"))
             this.parent.attr("id", "map-"+Date.now())
 
@@ -45,9 +56,12 @@
             layers: [this.baseLayer]
         })
 
-        this.map.one("zoomstart dragstart", function() {
+        var mouseEventHandler = function() {
             _this.untouched = false
-        })
+        }
+
+        this.map.once("dragstart click", mouseEventHandler)
+        this.map._container.addEventListener("wheel", mouseEventHandler)
 
         this.map.on("moveend", function() {
             $(_this).trigger("move", _this.getCenterAndZoom())
@@ -115,9 +129,7 @@
         var latlng = new L.LatLng(lat, lng)
 
         if(this.options.autoZoom && this.untouched) {
-            this.setCenter(lat,lng)
-            this.map.setZoom(10)
-            this.untouched = false
+            this.setAutoZoom(lat, lng)
         }
 
         var marker = this.markers[id]
@@ -130,6 +142,29 @@
             this.addLinePoint(id, lat, lng, color)
 
         return marker
+    }
+
+    StreamrMap.prototype.setAutoZoom = function(lat, lng) {
+        var _this = this
+
+        this.bounds.lat.min = Math.min(lat, _this.bounds.lat.min)
+        this.bounds.lat.max = Math.max(lat, _this.bounds.lat.max)
+        this.bounds.lng.min = Math.min(lng, _this.bounds.lng.min)
+        this.bounds.lng.max = Math.max(lng, _this.bounds.lng.max)
+
+        this.lastEvent = [
+            [_this.bounds.lat.max, _this.bounds.lng.min],
+            [_this.bounds.lat.min, _this.bounds.lng.max]
+        ]
+
+        console.log("Checking autozoom: %d", this.autoZoomTimeout)
+        if (this.autoZoomTimeout === undefined) {
+            this.autoZoomTimeout = setTimeout(function() {
+                console.log("Fitting %o", _this.lastEvent)
+                _this.map.fitBounds(_this.lastEvent)
+                _this.autoZoomTimeout = undefined
+            }, 1000)
+        }
     }
 
     StreamrMap.prototype.createMarker = function(id, latlng) {
@@ -164,8 +199,6 @@
 
     StreamrMap.prototype.requestUpdate = function() {
         if (!this.animationFrameRequested) {
-            this.requestUpdateStart = Date.now()
-            console.log("RequestUpdate called")
             L.Util.requestAnimFrame(this.animate, this, true);
             this.animationFrameRequested = true;
         }
@@ -185,7 +218,6 @@
 
         this.pendingMarkerUpdates = {}
         this.animationFrameRequested = false
-        console.log("Animate, took "+(Date.now() - this.requestUpdateStart))
     }
 
     StreamrMap.prototype.addLinePoint = function(id, lat, lng, color) {
@@ -231,6 +263,17 @@
             var ctx = this.circles[0]
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             this.circles = []
+        }
+
+        this.bounds = {
+            lat: {
+                min: 200,
+                max: -200
+            },
+            lng: {
+                min: 200,
+                max: -200
+            }
         }
 
         this.markers = {}
