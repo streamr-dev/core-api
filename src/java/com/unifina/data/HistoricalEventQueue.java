@@ -24,7 +24,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 	private static final Logger log = Logger.getLogger(HistoricalEventQueue.class);
 
 	private final MetricsService metricsService = (MetricsService)Holders.getGrailsApplication().getMainContext().getBean("metricsService");
-	private final Meter eventsProcessed = metricsService.getMeter("eventsProcessed.historical");
+	private final Meter eventsProcessed = metricsService.getMeterFor("eventsProcessed.historical");
 	
 	public HistoricalEventQueue(Globals globals, DataSource dataSource) {
 		super(globals, dataSource);

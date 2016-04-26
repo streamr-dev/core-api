@@ -18,7 +18,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	private int eventCounter;
 
 	private final MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
-	private final Meter eventsProcessed = metricsService.getMeter("eventsProcessed.realtime");
+	private final Meter eventsProcessed = metricsService.getMeterFor("eventsProcessed.realtime");
 
 	boolean firstEvent = true;
 

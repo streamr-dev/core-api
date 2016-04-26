@@ -65,6 +65,7 @@ grails.project.dependency.resolution = {
 		compile 'org.mongodb:mongodb-driver:3.2.1'
         compile('log4j:log4j:1.2.16')
 		compile('io.dropwizard.metrics:metrics-core:3.1.0')
+		compile('io.dropwizard.metrics:metrics-json:3.1.0')
 		
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
