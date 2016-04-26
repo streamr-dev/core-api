@@ -218,7 +218,6 @@ describe('dashboard-editor', function() {
 	describe("Sidebar", function() {
 
 		it('must render runningsignalpath-elements', function() {
-			console.log($("#sidebar-view").html())
 			assert.equal($("#sidebar-view").find(".canvas").length, 4)
 		})
 

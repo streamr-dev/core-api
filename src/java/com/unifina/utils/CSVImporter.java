@@ -224,7 +224,7 @@ public class CSVImporter implements Iterable<LineValues> {
 			}
 			
 			if (headers.length<2) {
-				throw new RuntimeException("Sorry, couldn't determine format of csv file!");
+				throw new CSVImporterException("Sorry, couldn't determine format of csv file!");
 			}
 			else {
 				return headers;
@@ -276,7 +276,7 @@ public class CSVImporter implements Iterable<LineValues> {
 					if (i == timestampColumnIndex) {
 						Date d = entries[i].dateFormat.parse(values[i]);
 						if (lastDate != null && d.before(lastDate)) {
-							throw new RuntimeException("The lines must be in a chronological order!");
+							throw new CSVImporterException("The lines must be in a chronological order!");
 						}
 						parsed[i] = d;
 						lastDate = d;
@@ -299,7 +299,7 @@ public class CSVImporter implements Iterable<LineValues> {
 						parsed[i] = values[i];
 				}
 			} catch (NumberFormatException e) {
-				throw new RuntimeException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type);
+				throw new CSVImporterException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type);
 			}
 			
 			return new LineValues(schema, parsed);
@@ -372,4 +372,9 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 	}
 
+	public class CSVImporterException extends RuntimeException {
+		public CSVImporterException(String message) {
+			super(message);
+		}
+	}
 }
