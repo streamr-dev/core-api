@@ -1,6 +1,8 @@
 package com.unifina.signalpath.map;
 
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.variadic.OutputInstantiator;
+import com.unifina.signalpath.variadic.VariadicOutput;
 import com.unifina.utils.MapTraversal;
 
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 
 	private MapInput in = new MapInput(this, "in");
 
-	private List<Output<Object>> outs;
+	private VariadicOutput<Object> outs = new VariadicOutput<>(this, 1, new OutputInstantiator.SimpleObject());
 	private MapOutput founds = new MapOutput(this, "founds");
 
 
@@ -26,20 +28,20 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 	public void sendOutput() {
 		Map map = in.getValue();
 
-		Map<String, Double> foundList = new HashMap<>();
+		Map<String, Double> foundMap = new HashMap<>();
 
-		for (Output<Object> out : outs) {
+		for (Output<Object> out : outs.getEndpoints()) {
 			String key = out.getEffectiveName();
 			Object value = MapTraversal.getProperty(map, key);
 			if (value == null) {
-				foundList.put(key, 0.0);
+				foundMap.put(key, 0.0);
 			} else {
-				foundList.put(key, 1.0);
+				foundMap.put(key, 1.0);
 				out.send(value);
 			}
 		}
 
-		founds.send(foundList);
+		founds.send(foundMap);
 	}
 
 	@Override
@@ -48,31 +50,13 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-
-		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(ModuleOption.createInt("numOfKeys", outs.size()));
-
+		outs.getConfiguration(config);
 		return config;
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
-		int numOfKeys = 1;
-
-		ModuleOptions options = ModuleOptions.get(config);
-		ModuleOption numOfKeysOption = options.getOption("numOfKeys");
-		if (numOfKeysOption != null) {
-			numOfKeys = numOfKeysOption.getInt();
-		}
-
-		outs = new ArrayList<>();
-
-		for (int i=1; i <= numOfKeys; ++i) {
-			Output<Object> out = new Output<>(this, "out-" + i, "Object");
-			addOutput(out);
-			outs.add(out);
-		}
+		outs.onConfiguration(config);
 	}
 }
