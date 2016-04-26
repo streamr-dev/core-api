@@ -44,8 +44,8 @@
         this.baseLayer = L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
                 attribution: '© OpenStreetMap contributors, Streamr',
-                minZoom: this.options.minZoom,
-                maxZoom: this.options.maxZoom
+                minZoom: _this.options.minZoom,
+                maxZoom: _this.options.maxZoom
             }
         )
 
@@ -61,7 +61,7 @@
             _this.untouched = false
         }
 
-        this.map.once("dragstart click", mouseEventHandler)
+        this.map.one("dragstart click", mouseEventHandler)
         this.map._container.addEventListener("wheel", mouseEventHandler)
 
         this.map.on("moveend", function() {
@@ -160,8 +160,8 @@
 
         if (this.autoZoomTimeout === undefined) {
             this.autoZoomTimeout = setTimeout(function() {
-                _this.map.fitBounds(_this.lastEvent)
                 _this.autoZoomTimeout = undefined
+                _this.map.fitBounds(_this.lastEvent)
             }, 1000)
         }
     }
