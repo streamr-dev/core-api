@@ -21,12 +21,7 @@ package com.unifina.metrics;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.json.MetricsModule;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.unifina.domain.security.SecUser;
 import com.unifina.service.KafkaService;
 import grails.util.Holders;
@@ -34,15 +29,17 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 public class KafkaReporter extends ScheduledReporter {
     private static final Logger log = Logger.getLogger(KafkaReporter.class);
+
 	transient protected KafkaService kafkaService = null;
 
+	private final MetricFilter filter;
     private final String kafkaTopic;
     private final ObjectMapper mapper;
     private final MetricRegistry registry;
@@ -51,9 +48,10 @@ public class KafkaReporter extends ScheduledReporter {
     public KafkaReporter(MetricRegistry registry, String kafkaTopic, SecUser user) {
         super(registry, kafkaTopic, MetricFilter.ALL, TimeUnit.SECONDS, TimeUnit.SECONDS);
         this.registry = registry;
-        this.mapper = new ObjectMapper().registerModule(new StreamrMetricsModule(user));
+		this.mapper = new ObjectMapper().registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.SECONDS, false));
         this.kafkaTopic = kafkaTopic;
 		this.user = user;
+		this.filter = MetricFilter.ALL;
     }
 
     @Override
@@ -65,57 +63,26 @@ public class KafkaReporter extends ScheduledReporter {
 		if (kafkaService == null) {
 			kafkaService = (KafkaService) Holders.getGrailsApplication().getMainContext().getBean("kafkaService");
 		}
-		try {
-			StringWriter report = new StringWriter();
-			mapper.writeValue(report, registry);
-			kafkaService.sendMessage(kafkaTopic, "", report.toString());
-			log.info("Metrics reported: " + report.toString());
-		} catch (IOException e) {
-
-		}
+		sendMetrics(registry.getGauges(filter));
+		sendMetrics(registry.getCounters(filter));
+		sendMetrics(registry.getHistograms(filter));
+		sendMetrics(registry.getMeters(filter));
+		sendMetrics(registry.getTimers(filter));
     }
 
-	/** Jackson JSON serializer module */
-	private static class StreamrMetricsModule extends MetricsModule {
-		private final SecUser user;
+	private synchronized void sendMetrics(SortedMap<String, ?> metrics) {
+		for (Map.Entry<String, ?> metric : metrics.entrySet()) {
+			try {
+				Map<String, Object> message = new LinkedHashMap<>();
+				message.put("user", user.getName());
+				message.put("metric", metric.getKey());
+				message.put("value", metric.getValue());
 
-		public StreamrMetricsModule(SecUser user) {
-			super(TimeUnit.SECONDS, TimeUnit.SECONDS, false);
-			this.user = user;
-		}
-
-		@Override
-		public void setupModule(SetupContext context) {
-			super.setupModule(context);
-			context.addSerializers(new SimpleSerializers(Arrays.asList(new JsonSerializer<?>[] { new RegistrySerializer(user) })));
-		}
-	}
-
-	/** Replaces MetricsModule serializer for MetricRegistry */
-	private static class RegistrySerializer extends StdSerializer<MetricRegistry> {
-		private final MetricFilter filter = MetricFilter.ALL;
-		private final SecUser user;
-
-		private RegistrySerializer(SecUser user) {
-			super(MetricRegistry.class);
-			this.user = user;
-		}
-
-		public void serialize(MetricRegistry registry, JsonGenerator json, SerializerProvider provider) throws IOException {
-			json.writeStartObject();
-			json.writeObjectField("user", user.getName());
-			writeMeters(json, registry.getGauges(filter));
-			writeMeters(json, registry.getCounters(filter));
-			writeMeters(json, registry.getHistograms(filter));
-			writeMeters(json, registry.getMeters(filter));
-			writeMeters(json, registry.getTimers(filter));
-			json.writeEndObject();
-		}
-
-		// flatten different meters into response object
-		private void writeMeters(JsonGenerator json, SortedMap<String, ?> meters) throws IOException {
-			for (Map.Entry<String, ?> entry : meters.entrySet()) {
-				json.writeObjectField(entry.getKey(), entry.getValue());
+				StringWriter json = new StringWriter();
+				mapper.writeValue(json, message);
+				kafkaService.sendMessage(kafkaTopic, "", json.toString());
+			} catch (IOException e) {
+				log.info("Write failed for metric " + metric.getKey());
 			}
 		}
 	}
