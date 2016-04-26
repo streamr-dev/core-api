@@ -40,7 +40,7 @@
 					<div class="radio">
 					  	<label>
 					    	<input id="customFormatRadio" type="radio" name="format" value="custom" class="px">
-					    	<span class="lbl">Custom date format (in <a href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html" target="_blank">SimpleDateFormat</a> notation)</span>
+					    	<span class="lbl">Custom date format (in <a href="http://www.joda.org/joda-time/apidocs/org/joda/time/format/DateTimeFormat.html" target="_blank">JodaTime pattern syntax</a>)</span>
 					    	<input id="customFormatInput" type="text" name="customFormat" class="form-control"></input>
 					  	</label>
 					</div>
