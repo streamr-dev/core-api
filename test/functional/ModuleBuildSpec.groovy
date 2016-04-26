@@ -17,7 +17,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 		when: "clone option is selected from module context menu"
 			selectFromContextMenu(findModuleOnCanvas("Barify"), "Clone module")
 		then: "there should be another module on canvas"
-			canvas.find(".component").size()==2
+			waitFor { canvas.find(".component").size()==2 }
 	}
 	
 	def "module help button functionality"() {
