@@ -46,7 +46,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		waitFor(10) { $(".modulelabel")[0].text() == "3.0" }
 
 		and: "TableAsMap for map shows correct key-count pairs"
-		tableContents() == ["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1",] as Set
+		tableContains(["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1"])
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -70,7 +70,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		waitFor(10) { $(".modulelabel")[0].text() == "34.0" }
 
 		and: "TableAsMap for map shows correct key-count pairs"
-		tableContents() == ["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0",] as Set
+		tableContains(["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0"])
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -140,14 +140,15 @@ class MapModulesSpec extends LoginTester1Spec {
 		// key-3 13225, log(115) = 4.744932
 		// key-4 1090, log(33) = 3.496508
 		// key-5 0, log(0)  = - inf
+		// \\d* eliminates float inaccuracy by matching "some number of digits", e.g. 0000005
 		and: "TableAsMap for map shows correct key-count pairs"
-		tableContents() == [
-			'key-1 {"out2":3.68887945,"out":2500}',
-			'key-2 {"out":2725}',
-			'key-3 {"out2":4.74493213,"out":13225}',
-			'key-4 {"out2":3.49650756,"out":1090}',
-			'key-5 {"out":0}'
-		] as Set
+		tableContains([
+			'key-1 ."out2":3.688879\\d*,"out":2500.',
+			'key-2 ."out":2725.',
+			'key-3 ."out2":4.744932\\d*,"out":13225.',
+			'key-4 ."out2":3.496507\\d*,"out":1090.',
+			'key-5 ."out":0.'
+		])
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -183,9 +184,11 @@ class MapModulesSpec extends LoginTester1Spec {
 		produceToKafka("key-4", 33)
 	}
 
-	private Set<String> tableContents() {
+	private boolean tableContains(Collection<String> patterns) {
 		def mapAsTable = findModuleOnCanvas("MapAsTable")
-		return mapAsTable.find(".event-table-module-content tr").collect { it.text() }.toSet()
+		mapAsTable.find(".event-table-module-content tr").find { $row ->
+			patterns.find { $row.text() =~ it } == null
+		} == null
 	}
 
 	private void produceToKafka(String key, Double value) {

@@ -1,4 +1,5 @@
 package core
+
 databaseChangeLog = {
 	changeSet(author: "jtakalai", id: "2016030700000-1") {
 		insert(tableName: "permission") {
