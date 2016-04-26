@@ -585,7 +585,7 @@ class ShareSpec extends GebReportingSpec {
 		getStreamRow().click()
 		then: "there should be no menu for read rights only"
 		waitFor { at StreamShowPage }
-		!streamMenuButton.displayed
+		!$("#stream-menu-toggle")
 
 		when: "check canvas"
 		to CanvasListPage
