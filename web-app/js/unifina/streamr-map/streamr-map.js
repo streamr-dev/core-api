@@ -22,7 +22,8 @@
             zoom: 2,
             minZoom: 2,
             maxZoom: 18,
-            traceRadius: 2
+            traceRadius: 2,
+            drawTrace: false
         }, options || {})
 
         if (!this.parent.attr("id"))
@@ -44,7 +45,7 @@
             layers: [this.baseLayer]
         })
 
-        this.map.once("zoomstart dragstart", function() {
+        this.map.one("zoomstart dragstart", function() {
             _this.untouched = false
         })
 
@@ -73,9 +74,6 @@
             },
 
             render: function(changesOnly) {
-                // TODO: remove this
-                console.log("Render called")
-                var start = Date.now()
                 var bigPointLayer = this
                 var canvas = this.getCanvas();
                 var ctx = canvas.getContext('2d');
@@ -96,7 +94,6 @@
                     bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, update.color)
                 })
 
-                console.log("Render took "+ (Date.now()-start)+"ms, pendingLineUpdates.length: "+_this.pendingLineUpdates.length)
                 _this.pendingLineUpdates = []
             }
         })
@@ -110,8 +107,6 @@
     }
 
     StreamrMap.prototype.addMarker = function(attr) {
-        var _this = this
-
         var id = attr.id
         var lat = attr.lat
         var lng = attr.lng
@@ -128,11 +123,11 @@
         var marker = this.markers[id]
         if(marker === undefined) {
             this.markers[id] = this.createMarker(id, latlng)
-            if(this.options.drawTrace)
-                this.addLinePoint(id, lat, lng, color)
         } else {
             this.moveMarker(id, lat, lng, color)
         }
+        if(this.options.drawTrace)
+            this.addLinePoint(id, lat, lng, color)
 
         return marker
     }
@@ -164,8 +159,6 @@
     StreamrMap.prototype.moveMarker = function(id, lat, lng, color) {
         var latlng = L.latLng(lat,lng)
         this.pendingMarkerUpdates[id] = latlng
-        if(this.options.drawTrace)
-            this.addLinePoint(id, lat, lng, color)
         this.requestUpdate()
     }
 
