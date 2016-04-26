@@ -67,8 +67,7 @@ class CSVImporterFuncSpec extends LoginTester1Spec {
 		when: "A another testing file is configured to be uploaded"
 		fileInput = getFile("test-upload-file.csv")
 		then: "the correct data is uploaded"
-		waitFor(){ at StreamShowPage }
-		waitFor { $(".history .control-label", text:"Range").displayed }
+		waitFor(30) { $(".history .control-label", text:"Range").displayed }
 		waitFor { $(".history div", text:contains("2015-02-23")).displayed }
 		waitFor { $(".history div", text:contains("2015-02-25")).displayed }
 	}
