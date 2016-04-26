@@ -25,6 +25,18 @@
             traceRadius: 2
         }, options || {})
 
+        this.defaultAutoZoomBounds = {
+            lat: {
+                min: Infinity,
+                max: -Infinity
+            },
+            lng: {
+                min: Infinity,
+                max: -Infinity
+            }
+        }
+        this.autoZoomBounds = this.defaultAutoZoomBounds
+
         if (!this.parent.attr("id"))
             this.parent.attr("id", "map-"+Date.now())
 
@@ -44,9 +56,12 @@
             layers: [this.baseLayer]
         })
 
-        this.map.once("zoomstart dragstart", function() {
+        var mouseEventHandler = function() {
             _this.untouched = false
-        })
+        }
+
+        this.map.once("dragstart click", mouseEventHandler)
+        this.map._container.addEventListener("wheel", mouseEventHandler)
 
         this.map.on("moveend", function() {
             $(_this).trigger("move", _this.getCenterAndZoom())
@@ -73,8 +88,6 @@
             },
 
             render: function(changesOnly) {
-                // TODO: remove this
-                console.log("Render called")
                 var start = Date.now()
                 var bigPointLayer = this
                 var canvas = this.getCanvas();
@@ -96,7 +109,6 @@
                     bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, update.color)
                 })
 
-                console.log("Render took "+ (Date.now()-start)+"ms, pendingLineUpdates.length: "+_this.pendingLineUpdates.length)
                 _this.pendingLineUpdates = []
             }
         })
@@ -120,21 +132,40 @@
         var latlng = new L.LatLng(lat, lng)
 
         if(this.options.autoZoom && this.untouched) {
-            this.setCenter(lat,lng)
-            this.map.setZoom(10)
-            this.untouched = false
+            this.setAutoZoom(lat, lng)
         }
 
         var marker = this.markers[id]
         if(marker === undefined) {
             this.markers[id] = this.createMarker(id, latlng)
-            if(this.options.drawTrace)
-                this.addLinePoint(id, lat, lng, color)
         } else {
-            this.moveMarker(id, lat, lng, color)
+            this.moveMarker(id, lat, lng)
         }
+        if(this.options.drawTrace)
+            this.addLinePoint(id, lat, lng, color)
 
         return marker
+    }
+
+    StreamrMap.prototype.setAutoZoom = function(lat, lng) {
+        var _this = this
+
+        this.autoZoomBounds.lat.min = Math.min(lat, _this.autoZoomBounds.lat.min)
+        this.autoZoomBounds.lat.max = Math.max(lat, _this.autoZoomBounds.lat.max)
+        this.autoZoomBounds.lng.min = Math.min(lng, _this.autoZoomBounds.lng.min)
+        this.autoZoomBounds.lng.max = Math.max(lng, _this.autoZoomBounds.lng.max)
+
+        this.lastEvent = [
+            [_this.autoZoomBounds.lat.max, _this.autoZoomBounds.lng.min],
+            [_this.autoZoomBounds.lat.min, _this.autoZoomBounds.lng.max]
+        ]
+
+        if (this.autoZoomTimeout === undefined) {
+            this.autoZoomTimeout = setTimeout(function() {
+                _this.map.fitBounds(_this.lastEvent)
+                _this.autoZoomTimeout = undefined
+            }, 1000)
+        }
     }
 
     StreamrMap.prototype.createMarker = function(id, latlng) {
@@ -161,18 +192,15 @@
         return marker
     }
 
-    StreamrMap.prototype.moveMarker = function(id, lat, lng, color) {
+    StreamrMap.prototype.moveMarker = function(id, lat, lng) {
         var latlng = L.latLng(lat,lng)
         this.pendingMarkerUpdates[id] = latlng
-        if(this.options.drawTrace)
-            this.addLinePoint(id, lat, lng, color)
+
         this.requestUpdate()
     }
 
     StreamrMap.prototype.requestUpdate = function() {
         if (!this.animationFrameRequested) {
-            this.requestUpdateStart = Date.now()
-            console.log("RequestUpdate called")
             L.Util.requestAnimFrame(this.animate, this, true);
             this.animationFrameRequested = true;
         }
@@ -192,7 +220,6 @@
 
         this.pendingMarkerUpdates = {}
         this.animationFrameRequested = false
-        console.log("Animate, took "+(Date.now() - this.requestUpdateStart))
     }
 
     StreamrMap.prototype.addLinePoint = function(id, lat, lng, color) {
@@ -239,6 +266,8 @@
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             this.circles = []
         }
+
+        this.autoZoomBounds = this.defaultAutoZoomBounds
 
         this.markers = {}
         this.pendingMarkerUpdates = {}
