@@ -55,10 +55,10 @@ databaseChangeLog = {
 					// Fallback handling for canvases that are so old that they don't have the webcomponent name in the json
 					if (!webcomponent) {
 						webcomponent = [
-						        Chart: "streamr-chart",
+								Chart  : "streamr-chart",
 								Heatmap: "streamr-heatmap",
-								Table: "streamr-table",
-								Label: "streamr-label"
+								Table  : "streamr-table",
+								Label  : "streamr-label"
 								// Other webcomponents are too new to have this issue
 						].get(module.uiChannel.name)
 

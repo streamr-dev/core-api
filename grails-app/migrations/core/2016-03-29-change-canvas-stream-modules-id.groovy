@@ -80,24 +80,24 @@ databaseChangeLog = {
 
 	changeSet(author: "eric", id: "change-canvas-stream-modules-id-6") {
 		renameColumn(
-			tableName: "stream",
-			oldColumnName: "uuid",
-			newColumnName: "id",
-			columnDataType: "varchar(255)"
+				tableName: "stream",
+				oldColumnName: "uuid",
+				newColumnName: "id",
+				columnDataType: "varchar(255)"
 		)
 		addPrimaryKey(
-			tableName: "stream",
-			constraintName: "pk_stream_id",
-			columnNames: "id",
+				tableName: "stream",
+				constraintName: "pk_stream_id",
+				columnNames: "id",
 		)
 	}
 
 	changeSet(author: "eric", id: "change-canvas-stream-modules-id-7") {
 		renameColumn(
-			tableName: "feed_file",
-			oldColumnName: "stream_uuid",
-			newColumnName: "stream_id",
-			columnDataType: "varchar(255)",
+				tableName: "feed_file",
+				oldColumnName: "stream_uuid",
+				newColumnName: "stream_id",
+				columnDataType: "varchar(255)",
 		)
 	}
 
@@ -113,14 +113,14 @@ databaseChangeLog = {
 
 	changeSet(author: "eric", id: "change-canvas-stream-modules-id-10") {
 		addForeignKeyConstraint(
-			baseColumnNames: "stream_id",
-			baseTableName: "feed_file",
-			constraintName: "FK9DFF7A2F49034A50",
-			deferrable: "false",
-			initiallyDeferred: "false",
-			referencedColumnNames: "id",
-			referencedTableName: "stream",
-			referencesUniqueColumn: "false",
+				baseColumnNames: "stream_id",
+				baseTableName: "feed_file",
+				constraintName: "FK9DFF7A2F49034A50",
+				deferrable: "false",
+				initiallyDeferred: "false",
+				referencedColumnNames: "id",
+				referencedTableName: "stream",
+				referencesUniqueColumn: "false",
 		)
 	}
 }

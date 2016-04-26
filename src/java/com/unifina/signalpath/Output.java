@@ -1,9 +1,6 @@
 package com.unifina.signalpath;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class Output<T> extends Endpoint<T> {
@@ -35,13 +32,6 @@ public class Output<T> extends Endpoint<T> {
 	public void send(T value) {
 		if (value == null) {
 			throw new NullPointerException("Sending a null value is not allowed!");
-		}
-
-		// prevent modification of sent Maps (no copying, just overriding modifying methods)
-		//   if a module wants to modify the value, it must make a personal copy
-		// see: MapInput.getModifiableValue
-		if (value instanceof Map) {
-			value = (T)Collections.unmodifiableMap((Map)value);
 		}
 
 		previousValue = value;
