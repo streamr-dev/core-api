@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit
 @Transactional
 class MetricsService implements InitializingBean {
 
+	def springSecurityService
+
 	final DEFAULT_REPORT_INTERVAL_SECONDS = 5
 	public MetricRegistry metrics = new MetricRegistry();
 	private KafkaReporter kafkaReporter;
@@ -36,7 +38,7 @@ class MetricsService implements InitializingBean {
 		if (kafkaReporter) {
 			kafkaReporter.stop()
 		} else {
-			kafkaReporter = new KafkaReporter(metrics, "streamr-metrics")
+			kafkaReporter = new KafkaReporter(metrics, "streamr-metrics", springSecurityService.getCurrentUser())
 		}
 		kafkaReporter.start(interval, TimeUnit.SECONDS)
 	}
