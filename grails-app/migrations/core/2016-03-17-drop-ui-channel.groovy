@@ -51,22 +51,28 @@ databaseChangeLog = {
 						it.hash.toString() == row.module.toString()
 					}
 
-					String webcomponent = module.uiChannel.webcomponent
-					// Fallback handling for canvases that are so old that they don't have the webcomponent name in the json
-					if (!webcomponent) {
-						webcomponent = [
-								Chart  : "streamr-chart",
-								Heatmap: "streamr-heatmap",
-								Table  : "streamr-table",
-								Label  : "streamr-label"
-								// Other webcomponents are too new to have this issue
-						].get(module.uiChannel.name)
+					if (module) {
+						String webcomponent = module.uiChannel.webcomponent
+						// Fallback handling for canvases that are so old that they don't have the webcomponent name in the json
+						if (!webcomponent) {
+							webcomponent = [
+									Chart  : "streamr-chart",
+									Heatmap: "streamr-heatmap",
+									Table  : "streamr-table",
+									Label  : "streamr-label"
+									// Other webcomponents are too new to have this issue
+							].get(module.uiChannel.name)
 
-						if (!webcomponent)
-							throw new RuntimeException("Oh no, couldn't find the webcomponent name for dashboard item $row.id! UiChannel name is $module.uiChannel.name")
+							if (!webcomponent)
+								throw new RuntimeException("Oh no, couldn't find the webcomponent name for dashboard item $row.id! UiChannel name is $module.uiChannel.name")
+						}
+
+						sql.executeInsert(updateStatement, webcomponent, row.id)
 					}
-
-					sql.executeInsert(updateStatement, webcomponent, row.id)
+					else {
+						// The dashboard item may point to a non-existing module on the canvas. In that case, print a warning and ignore the row.
+						println "Dashboard item $row.id points to a module hash $row.module, but it does not seem to exist!"
+					}
 				}
 			}
 		}
