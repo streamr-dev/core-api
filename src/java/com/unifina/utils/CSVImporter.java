@@ -340,18 +340,16 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		public CustomDateTimeParser(String format) {
 			this.format = format;
-			if (!(format.equals("unix") || format.equals("unix-s"))) {
-				if (!format.equals("")) {
-					fmt = DateTimeFormat.forPattern(format);
-				} else {
-					// A formatter with regular ISO8601 format and a custom one where 'T' is replaced by whitespace
-					fmt = new DateTimeFormatterBuilder()
+			if (format.equals("")) {
+				// A formatter with regular ISO8601 format and a custom one where 'T' is replaced by whitespace
+				fmt = new DateTimeFormatterBuilder()
 						.append(ISODateTimeFormat.dateParser())
 						.appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toParser())
 						.appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toParser())
 						.append(ISODateTimeFormat.timeParser())
 						.toFormatter().withZoneUTC();
-				}
+			} else if (!(format.equals("unix") || format.equals("unix-s"))) {
+				fmt = DateTimeFormat.forPattern(format);
 			}
 		}
 
