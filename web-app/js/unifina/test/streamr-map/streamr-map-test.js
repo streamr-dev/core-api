@@ -41,7 +41,7 @@ describe('streamr-map', function() {
 	})
 
 	describe('constructor', function() {
-		it('should set the default values correctly', function() {
+		it('must set the default values correctly', function() {
 			map = new StreamrMap($parent)
 			function compare(el1, el2) {
 				assert.equal(JSON.stringify(el1), JSON.stringify(el2))
@@ -53,12 +53,12 @@ describe('streamr-map', function() {
 			compare(map.animationFrameRequested, false)
 		})
 
-		it('should give the parent correct id', function() {
+		it('must give the parent correct id', function() {
 			map = new StreamrMap($parent)
 			assert($parent.is("[id*='map-']"))
 		})
 
-		it('should set the default options correctly', function() {
+		it('must set the default options correctly', function() {
 			map = new StreamrMap($parent)
 			assert.equal(map.options.centerLat, 35)
 			assert.equal(map.options.centerLng, 15)
@@ -69,7 +69,7 @@ describe('streamr-map', function() {
 			assert.equal(map.options.drawTrace, false)
 		})
 
-		it('should set the given options correctly', function() {
+		it('must set the given options correctly', function() {
 			map = new StreamrMap($parent, {
 				centerLat: -45,
 				zoom: -45,
@@ -85,7 +85,7 @@ describe('streamr-map', function() {
 			assert.equal(map.options.drawTrace, true)
 		})
 
-		it('should create the baselayer correctly', function(done) {
+		it('must create the baselayer correctly', function(done) {
 			global.L.tileLayer = function(url, opt) {
 				assert.equal(url, 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 				assert.equal(opt.attribution, '© OpenStreetMap contributors, Streamr')
@@ -99,7 +99,15 @@ describe('streamr-map', function() {
 			})
 		})
 
-		it('should create the map correctly', function(done) {
+		it('must set the bounds correctly', function() {
+			map = new StreamrMap($parent)
+			assert.equal(map.bounds.lat.min, 200)
+			assert.equal(map.bounds.lat.max, -200)
+			assert.equal(map.bounds.lng.min, 200)
+			assert.equal(map.bounds.lng.max, -200)
+		})
+
+		it('must create the map correctly', function(done) {
 			global.L.tileLayer = function() {
 				return "test"
 			}
@@ -122,26 +130,26 @@ describe('streamr-map', function() {
 			})
 		})
 
-		it('should set the event handlers to map correctly', function(done) {
-			var superGetCenterAndZoom = StreamrMap.prototype.getCenterAndZoom
-			StreamrMap.prototype.getCenterAndZoom = function(){
+		it('must set the event handlers to map correctly', function(done) {
+			map = new StreamrMap($parent)
+			map.getCenterAndZoom = function(){
 				return "test"
 			}
 			global.L.Map = function(parent, opt) {
 				return $('<div></div>')
 			}
-			map = new StreamrMap($parent)
 			$(map).on("move", function(e, data) {
 				assert.equal(map.untouched, false)
 				assert.equal(data, "test")
-				StreamrMap.prototype.getCenterAndZoom = superGetCenterAndZoom
 				done()
 			})
 			map.map.trigger('zoomstart')
 			map.map.trigger('moveend')
+
+			assert(false) // more tests
 		})
 
-		it('should not call createLinePointLayer if !options.drawTrace', function(done) {
+		it('must not call createLinePointLayer if !options.drawTrace', function(done) {
 			var superCreateLinePointLayer = StreamrMap.prototype.createLinePointLayer
 			StreamrMap.prototype.createLinePointLayer = function() {
 				assert(false)
@@ -235,11 +243,11 @@ describe('streamr-map', function() {
 	})
 
 	describe('addMarker', function() {
-		describe('if options.autoZoom === true && untouched === true', function() {
+		describe('if options.autoZoom == true && untouched == true', function() {
 			it('must call setCenter', function() {
 				assert(false)
 			})
-			it('must call map.setZoom', function() {
+			it('must call setAutoZoom', function() {
 				assert(false)
 			})
 			it('must set untouched to false', function() {
@@ -252,7 +260,22 @@ describe('streamr-map', function() {
 		it('must create a new marker if the id does not exist', function() {
 			assert(false)
 		})
-		it('must call addLinePoint if options.drawTrace === true', function() {
+		it('must call addLinePoint if options.drawTrace == true', function() {
+			assert(false)
+		})
+	})
+
+	describe('setAutoZoom', function() {
+		it('must set the bounds correctly', function() {
+			assert(false)
+		})
+		it('must set the lastEvent correctly', function() {
+			assert(false)
+		})
+		it('must call map.fitBounds and set autoZoomTimeout to undefined after timeout', function() {
+			assert(false)
+		})
+		it('must not set timeout if the last one is still on', function() {
 			assert(false)
 		})
 	})
@@ -278,20 +301,126 @@ describe('streamr-map', function() {
 			}
 		})
 		it('must create marker with the right data', function() {
-
+			assert(false)
 		})
 		it('must bind popup to marker', function() {
-
+			assert(false)
 		})
 		it('must call openPopup on "mouseover"', function() {
-
+			assert(false)
 		})
 		it('must call closePopup on "mouseout"', function() {
-
+			assert(false)
 		})
 		it('must call add marker to map', function() {
-
+			assert(false)
 		})
 	})
 
+	describe('moveMarker', function() {
+		it('must create new latLng', function() {
+			assert(false)
+		})
+		it('must add the latLng to pendingMarkerUpdates', function() {
+			assert(false)
+		})
+		it('must requestUpdate', function() {
+			assert(false)
+		})
+	})
+
+	describe('requestUpdate', function() {
+		it('must do nothing if animationFrameRequested == false', function() {
+			assert(false)
+		})
+		describe('if animationFrameRequested == true', function() {
+			it('muit call L.util.requestAnimFrame', function() {
+				assert(false)
+			})
+			it('must set animationFrameRequested to true', function() {
+				assert(false)
+			})
+		})
+	})
+
+	describe('animate', function() {
+		it('must call marker.setLatLng for all the pendingMarkerUpdates', function() {
+			assert(false)
+		})
+		it('must call lineLayer.render if lineLayer != undefined', function() {
+			assert(false)
+		})
+		it('must set pendingMarkerUpdates to {}', function() {
+			assert(false)
+		})
+		it('must set animationFrameRequested to false', function() {
+			assert(false)
+		})
+	})
+
+	describe('addLinePoint', function() {
+		it('must create new latLng', function() {
+			assert(false)
+		})
+		it('must push correct update object to pendingLineUpdates', function() {
+			assert(false)
+		})
+		it('must push correct update object to allLineUpdates', function() {
+			assert(false)
+		})
+	})
+
+	describe('handleMessage', function() {
+		it('must call addMarker(d) if d.t == "p"', function() {
+			assert(false)
+		})
+		it('must do nothing if d.t != "p"', function() {
+			assert(false)
+		})
+	})
+
+	describe('resize', function() {
+		it('must set parent width and height correctly', function() {
+			assert(false)
+		})
+		it('must call map.invalidateSize', function() {
+			assert(false)
+		})
+	})
+
+	describe('toJSON', function() {
+		it('must return getCenterAndZoom', function() {
+			assert(false)
+		})
+	})
+
+	describe('getCenterAndZoom', function() {
+		it('must call map.getCenter', function() {
+			assert(false)
+		})
+		it('must return right kind of object', function() {
+			assert(false)
+		})
+	})
+
+	describe('clear', function() {
+		it('must call removeLayer for all the markers', function() {
+			assert(false)
+		})
+		it('must empty circles (if exists)', function() {
+			assert(false)
+		})
+		it('must call clearRect for circles[0]', function() {
+			assert(false)
+		})
+		it('must do nothing if !circles', function() {
+			assert(false)
+		})
+		it('must set bounds back to original', function() {
+			assert(false)
+		})
+		it('must set all the other stuff back to empty', function() {
+			assert(false)
+		})
+	})
 })
