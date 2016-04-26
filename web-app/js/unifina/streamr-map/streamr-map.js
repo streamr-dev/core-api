@@ -25,16 +25,17 @@
             traceRadius: 2
         }, options || {})
 
-        this.bounds = {
+        this.defaultAutoZoomBounds = {
             lat: {
-                min: 200,
-                max: -200
+                min: Infinity,
+                max: -Infinity
             },
             lng: {
-                min: 200,
-                max: -200
+                min: Infinity,
+                max: -Infinity
             }
         }
+        this.autoZoomBounds = this.defaultAutoZoomBounds
 
         if (!this.parent.attr("id"))
             this.parent.attr("id", "map-"+Date.now())
@@ -137,11 +138,11 @@
         var marker = this.markers[id]
         if(marker === undefined) {
             this.markers[id] = this.createMarker(id, latlng)
-            if(this.options.drawTrace)
-                this.addLinePoint(id, lat, lng, color)
         } else {
-            this.moveMarker(id, lat, lng, color)
+            this.moveMarker(id, lat, lng)
         }
+        if(this.options.drawTrace)
+            this.addLinePoint(id, lat, lng, color)
 
         return marker
     }
@@ -149,20 +150,18 @@
     StreamrMap.prototype.setAutoZoom = function(lat, lng) {
         var _this = this
 
-        this.bounds.lat.min = Math.min(lat, _this.bounds.lat.min)
-        this.bounds.lat.max = Math.max(lat, _this.bounds.lat.max)
-        this.bounds.lng.min = Math.min(lng, _this.bounds.lng.min)
-        this.bounds.lng.max = Math.max(lng, _this.bounds.lng.max)
+        this.autoZoomBounds.lat.min = Math.min(lat, _this.autoZoomBounds.lat.min)
+        this.autoZoomBounds.lat.max = Math.max(lat, _this.autoZoomBounds.lat.max)
+        this.autoZoomBounds.lng.min = Math.min(lng, _this.autoZoomBounds.lng.min)
+        this.autoZoomBounds.lng.max = Math.max(lng, _this.autoZoomBounds.lng.max)
 
         this.lastEvent = [
-            [_this.bounds.lat.max, _this.bounds.lng.min],
-            [_this.bounds.lat.min, _this.bounds.lng.max]
+            [_this.autoZoomBounds.lat.max, _this.autoZoomBounds.lng.min],
+            [_this.autoZoomBounds.lat.min, _this.autoZoomBounds.lng.max]
         ]
 
-        console.log("Checking autozoom: %d", this.autoZoomTimeout)
         if (this.autoZoomTimeout === undefined) {
             this.autoZoomTimeout = setTimeout(function() {
-                console.log("Fitting %o", _this.lastEvent)
                 _this.map.fitBounds(_this.lastEvent)
                 _this.autoZoomTimeout = undefined
             }, 1000)
@@ -193,11 +192,10 @@
         return marker
     }
 
-    StreamrMap.prototype.moveMarker = function(id, lat, lng, color) {
+    StreamrMap.prototype.moveMarker = function(id, lat, lng) {
         var latlng = L.latLng(lat,lng)
         this.pendingMarkerUpdates[id] = latlng
-        if(this.options.drawTrace)
-            this.addLinePoint(id, lat, lng, color)
+
         this.requestUpdate()
     }
 
@@ -269,16 +267,7 @@
             this.circles = []
         }
 
-        this.bounds = {
-            lat: {
-                min: 200,
-                max: -200
-            },
-            lng: {
-                min: 200,
-                max: -200
-            }
-        }
+        this.autoZoomBounds = this.defaultAutoZoomBounds
 
         this.markers = {}
         this.pendingMarkerUpdates = {}
