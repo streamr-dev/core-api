@@ -18,8 +18,6 @@
 </head>
 <body>
 
-	<g:render template="variables"/>
-	
 	<div class="row">
 		<div class="col-sm-12 col-md-offset-2 col-md-8">
 			<ui:flashMessage/>
@@ -94,7 +92,7 @@
 			<div class="col-sm-6 col-md-4">
 				<ui:panel title="Credentials">
 					<label class="control-label">
-						<g:message code="secuser.credentials.apiKey" default="Api Key" />
+						<g:message code="secuser.apiKey.label" default="Api Key" />
 					</label>
 
 					<div>
