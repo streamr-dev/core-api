@@ -1,5 +1,8 @@
 package com.unifina.service
 
+import com.unifina.domain.security.SecUser
+import com.unifina.task.TaskWorker
+import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 
 import org.apache.log4j.Logger
@@ -14,9 +17,24 @@ class TaskService {
 	
 	GrailsApplication grailsApplication
 	def kafkaService
+	def servletContext
 
 	String createTaskGroupId() {
 		return UUID.randomUUID().toString()
+	}
+
+	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, String groupId = IdGenerator.get()) {
+		Task task = new Task()
+		task.available = true
+		task.complete = false
+		task.complexity = 0
+		task.category = category
+		task.config = (config as JSON).toString()
+		task.implementingClass = taskClass.name
+		task.taskGroupId = groupId
+		task.save(failOnError:true)
+
+		return task
 	}
 	
     AbstractTask getTaskInstance(Task task) {
@@ -162,5 +180,28 @@ class TaskService {
 		List<Task> tasks = Task.findAllByTaskGroupIdAndComplete(taskGroupId,false)
 		tasks.each { abortTask(it) }
 		return tasks
+	}
+
+	List<TaskWorker> getWorkers() {
+		return servletContext["taskWorkers"]
+	}
+
+	TaskWorker stopWorker(id) {
+		getWorkers().each {
+			if (it.workerId==id) {
+				it.quit()
+				return it
+			}
+		}
+		return null
+	}
+
+	TaskWorker startWorker(SecUser priorityUser = null) {
+		List workers = getWorkers()
+
+		TaskWorker worker = new TaskWorker(grailsApplication, workers.size() + 1 , priorityUser)
+		worker.start()
+		workers.add(worker)
+		return worker
 	}
 }
