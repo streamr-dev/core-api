@@ -238,12 +238,15 @@ $(document).ready(function() {
 	$(SignalPath).on('loaded saved', function(e, json) {
 		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
 		// Check share permission by knocking on the /permissions/ API endpoint
+		// Disabled without .forbidden means not checked yet
+		$("#share-button").attr("disabled", "disabled")
+		$("#share-button").removeClass("forbidden")
 		$.getJSON(canvasUrl + "/permissions").success(function () {
 			$("#share-button").data("url", canvasUrl)
 			$("#share-button").removeAttr("disabled")
 		}).fail(function () {
 			// Forbidden means no permission
-			$("#share-button").attr("disabled", "disabled")
+			$("#share-button").addClass("forbidden")
 		})
 	})
 

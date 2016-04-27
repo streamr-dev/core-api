@@ -156,7 +156,7 @@
 
         events: {
             "click .new-user-button": "finishUserInput",
-            "keyup .new-user-field": "keyHandler"
+            "keypress .new-user-field": "keyHandler"
         },
         keyHandler: function(e) {
             this.$newUserField.removeClass("has-error")

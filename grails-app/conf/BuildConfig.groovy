@@ -90,6 +90,7 @@ grails.project.dependency.resolution = {
         runtime('com.twitter:hbc-core:2.2.0')
 		
         runtime('com.github.nkzawa:socket.io-client:0.3.0')
+		runtime('joda-time:joda-time:2.9.3')
     }
 
     plugins {

@@ -214,7 +214,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-button', file:'streamr-button.js', plugin: 'unifina-core']
 	}
 	'streamr-switcher' {
-		dependsOn 'jquery, switcher'
+		dependsOn 'jquery'
 		resource url:[dir:'js/unifina/streamr-switcher', file:'streamr-switcher.js', plugin: 'unifina-core']
 	}
 	'streamr-text-field' {
