@@ -45,7 +45,7 @@ public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 
 	public void add(T item, Date time) {
 		this.time = time;
-		add(new TimedValue<>(item, time));
+		super.add(new TimedValue<>(item, time));
 	}
 
 	/**
