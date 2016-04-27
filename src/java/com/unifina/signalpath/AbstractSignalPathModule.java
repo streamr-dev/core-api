@@ -16,7 +16,10 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.codahale.metrics.Meter;
+import com.unifina.service.MetricsService;
 import com.unifina.utils.HibernateHelper;
+import grails.util.Holders;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -80,6 +83,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	private boolean initialized;
 
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
+
+	private final MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
+	private final Meter activations = metricsService.getMeterFor("activations", this);
 
 	/**
 	 * This propagator is created and used if an UI event triggers
@@ -380,6 +386,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			wasReady = true;
 			setSendPending(false);
 			sendOutput();
+			activations.mark();
 			drivingInputs.clear();
 		}
 	}
@@ -574,8 +581,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * as a FeedEvent. It returns a Future that will hold the RuntimeResponse that
 	 * results when the event is processed from the queue.
 	 * <p/>
-	 * This method is not intended to be subclassed. To implement handling of requests,
-	 * subclass the handleRequest() method.
+	 * This method is not intended to be overridden. To implement handling of requests,
+	 * override the handleRequest() method.
 	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */

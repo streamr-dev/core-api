@@ -18,7 +18,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	private int eventCounter;
 
 	private final MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
-	private final Meter eventsProcessed = metricsService.getMeterFor("eventsProcessed.realtime");
+	private final Meter eventsProcessed = metricsService.getMeterFor("eventsProcessed", this);
 
 	boolean firstEvent = true;
 
@@ -65,10 +65,10 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			long startTime = System.nanoTime();
 			process(event);
 
+			eventsProcessed.mark();
 			if (loggingInterval > 0) {
 				elapsedTime += System.nanoTime() - startTime;
 				eventCounter++;
-				eventsProcessed.mark();
 				if (eventCounter >= loggingInterval) {
 					double perEvent = (elapsedTime / eventCounter) / 1000.0;
 					log.info("Processed " + eventCounter + " events in " + elapsedTime + " nanoseconds. " +

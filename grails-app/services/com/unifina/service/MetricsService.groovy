@@ -5,6 +5,7 @@ import com.codahale.metrics.Histogram
 import com.codahale.metrics.Meter
 import com.codahale.metrics.Timer
 import com.codahale.metrics.MetricRegistry
+import static com.codahale.metrics.MetricRegistry.name;
 import com.unifina.metrics.KafkaReporter
 import grails.transaction.Transactional
 import org.springframework.beans.factory.InitializingBean
@@ -43,7 +44,7 @@ class MetricsService implements InitializingBean {
 		kafkaReporter.start(interval, TimeUnit.SECONDS)
 	}
 
-	Meter getMeterFor(String metricName) { return metrics.meter(metricName) }
-	Histogram getHistogramFor(String metricName) { return metrics.histogram(metricName) }
-	Timer getTimerFor(String metricName) { return metrics.timer(metricName) }
+	Meter getMeterFor(String metricName, Object host=null) { return metrics.meter(name(host?.class, metricName)) }
+	Histogram getHistogramFor(String metricName, Object host=null) { return metrics.histogram(name(host?.class, metricName)) }
+	Timer getTimerFor(String metricName, Object host=null) { return metrics.timer(name(host?.class, metricName)) }
 }
