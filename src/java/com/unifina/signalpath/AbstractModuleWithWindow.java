@@ -153,6 +153,12 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		if (selectedWindowType != WindowType.EVENTS) {
 			boolean windowChanged = false;
 
+			/**
+			 * Calling TimeWindow#setTime() below might call deleteWindow() further down the stack.
+			 * Directly modifying windowByKey would result in an ConcurrentModificationException,
+			 * so let's set a flag to be checked in deleteWindow() to prevent that.
+			 * The keys will be removed after the iteration is complete.
+			 */
 			iteratingWindowByKey = true;
 			for (AbstractWindow<T> window : windowByKey.values()) {
 				int initialSize = window.getSize();

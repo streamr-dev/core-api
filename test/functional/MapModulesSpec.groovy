@@ -42,9 +42,6 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[0].text() == "3.0" }
-
 		and: "TableAsMap for map shows correct key-count pairs"
 		tableContains(["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1"])
 
@@ -65,9 +62,6 @@ class MapModulesSpec extends LoginTester1Spec {
 
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
-
-		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[0].text() == "34.0" }
 
 		and: "TableAsMap for map shows correct key-count pairs"
 		tableContains(["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0"])
@@ -112,6 +106,8 @@ class MapModulesSpec extends LoginTester1Spec {
 		addAndConnectModules("ForEach")
 
 		addAndWaitModule("Label")
+		moveModuleBy("Label", 650, 200)
+		addAndWaitModule("Label")
 		moveModuleBy("Label", 650, 75, 1)
 
 		chooseDropdownParameterForModule("ForEach", "canvas", subCanvasName)
@@ -129,9 +125,6 @@ class MapModulesSpec extends LoginTester1Spec {
 
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
-
-		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[0].text() == (0 * 0 + 1 * 1 + 33 * 33).toString() + ".0" }
 
 		$(".modulelabel")[1].text() == new DecimalFormat("#.########",
 			DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(Math.log(33))
@@ -174,15 +167,9 @@ class MapModulesSpec extends LoginTester1Spec {
 		moveModuleBy(moduleName, 200, 200, 0, true)
 		addAndWaitModule("MapAsTable")
 		moveModuleBy("MapAsTable", 650, 400)
-		addAndWaitModule("Label")
-		moduleShouldAppearOnCanvas("Label")
-		moveModuleBy("Label", 650, 200)
 
 		connectEndpoints(findOutput("Stream", "key"), findInput(moduleName, "key"))
 		connectEndpoints(findOutput(moduleName, "map"), findInput("MapAsTable", "map"))
-		if (moduleName != "ForEach") {
-			connectEndpoints(findOutput(moduleName, "valueOfCurrentKey"), findInput("Label", "label", 0))
-		}
 	}
 
 	private void produceAllDataToKafka() {

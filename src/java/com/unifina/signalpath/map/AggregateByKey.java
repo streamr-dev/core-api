@@ -18,7 +18,6 @@ public abstract class AggregateByKey extends AbstractModuleWithWindow<Double> {
 	private StringInput key = new StringInput(this, "key");
 
 	private MapOutput map = new MapOutput(this, "map");
-	private TimeSeriesOutput valueOfCurrentKey = new TimeSeriesOutput(this, "valueOfCurrentKey");
 
 	protected Map<String, Double> aggregateByKey;
 
@@ -33,6 +32,7 @@ public abstract class AggregateByKey extends AbstractModuleWithWindow<Double> {
 		super.init();
 	}
 
+	@Override
 	protected void handleInputValues() {
 		if (aggregateByKey == null) {
 			aggregateByKey = initializeAggregateMap();
@@ -40,13 +40,9 @@ public abstract class AggregateByKey extends AbstractModuleWithWindow<Double> {
 		addToWindow(getNewWindowValue(), key.getValue());
 	}
 
+	@Override
 	protected void doSendOutput() {
-		// Might activate on time or driving input. There is no "current key" when activated by time.
-		Double currentValue = aggregateByKey.get(key.getValue());
 		pruneTreeIfNeeded();
-		if (currentValue != null) {
-			valueOfCurrentKey.send(currentValue);
-		}
 		map.send(Collections.unmodifiableMap(aggregateByKey));
 	}
 

@@ -39,8 +39,7 @@ class CountByKeySpec extends Specification {
 				[k1: 3, k2: 1, k3: 2, k4: 1, k5: 1],
 				[k1: 3, k2: 1, k3: 2, k4: 1, k5: 1, k6: 1],
 				[k1: 3, k2: 1, k3: 2, k4: 1, k5: 1, k6: 1, k0: 1],
-			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } },
-			"valueOfCurrentKey": [1, 2, 1, 1, 2, 1, 3, 1, 1, 1].collect { it.doubleValue() }
+			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } }
 		]
 
 		then:
@@ -70,8 +69,7 @@ class CountByKeySpec extends Specification {
 				[k1: 3, k3: 2, k2: 1],
 				[k1: 3, k3: 2, k2: 1],
 				[k1: 3, k3: 2, k0: 1],
-			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } },
-			"valueOfCurrentKey": [1, 2, 1, 1, 2, 1, 3, 1, 1, 1].collect { it.doubleValue() }
+			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } }
 		]
 
 		then:
@@ -102,8 +100,7 @@ class CountByKeySpec extends Specification {
 				[k2: 1, k4: 1, k5: 1],
 				[k2: 1, k4: 1, k5: 1],
 				[k2: 1, k4: 1, k0: 1],
-			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } },
-			"valueOfCurrentKey": [1, 2, 1, 1, 2, 1, 3, 1, 1, 1].collect { it.doubleValue() }
+			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } }
 		]
 
 		then:
