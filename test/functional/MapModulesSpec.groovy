@@ -42,7 +42,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		and: "TableAsMap for map shows correct key-count pairs"
+		then: "TableAsMap for map shows correct key-count pairs"
 		tableContains(["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1"])
 
 		cleanup:
@@ -63,7 +63,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		and: "TableAsMap for map shows correct key-count pairs"
+		then: "TableAsMap for map shows correct key-count pairs"
 		tableContains(["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0"])
 
 		cleanup:
@@ -135,7 +135,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		// key-4 1090, log(33) = 3.496508
 		// key-5 0, log(0)  = - inf
 		// \\d* eliminates float inaccuracy by matching "some number of digits", e.g. 0000005
-		and: "TableAsMap for map shows correct key-count pairs"
+		then: "TableAsMap for map shows correct key-count pairs"
 		tableContains([
 			'key-1 ."out2":3.688879\\d*,"out":2500.',
 			'key-2 ."out":2725.',
