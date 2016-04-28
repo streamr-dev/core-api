@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A Window whose length is defined by number of events in the window
+ * A Window whose length is defined as a duration in time.
  */
 public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 
@@ -13,28 +13,10 @@ public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 	private long lengthInMillis;
 
 	public TimeWindow(int length, TimeUnit timeUnit, final WindowListener<T> originalListener) {
-		super(length, null);
+		super(length, wrapWindowListener(originalListener));
 
 		this.timeUnit = timeUnit;
 		setLength(length);
-
-		// Wrap the item into a TimedValue
-		this.listener = new WindowListener<TimedValue<T>>() {
-			@Override
-			public void onAdd(TimedValue<T> item) {
-				originalListener.onAdd(item.value);
-			}
-
-			@Override
-			public void onRemove(TimedValue<T> item) {
-				originalListener.onRemove(item.value);
-			}
-
-			@Override
-			public void onClear() {
-				originalListener.onClear();
-			}
-		};
 	}
 
 	@Override
@@ -64,5 +46,24 @@ public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 	@Override
 	protected boolean hasExtraValues() {
 		return values.size() > 0 && this.time.getTime() - lengthInMillis >= values.peekFirst().time.getTime();
+	}
+
+	private static <T> WindowListener<TimedValue<T>> wrapWindowListener(final WindowListener<T> originalListener) {
+		return new WindowListener<TimedValue<T>>() {
+			@Override
+			public void onAdd(TimedValue<T> item) {
+				originalListener.onAdd(item.value);
+			}
+
+			@Override
+			public void onRemove(TimedValue<T> item) {
+				originalListener.onRemove(item.value);
+			}
+
+			@Override
+			public void onClear() {
+				originalListener.onClear();
+			}
+		};
 	}
 }

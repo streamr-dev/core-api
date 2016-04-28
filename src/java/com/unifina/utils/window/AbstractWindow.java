@@ -60,6 +60,7 @@ public abstract class AbstractWindow<T> implements Serializable, Iterable<T> {
 		if (length > 0)
 			values.add(item);
 
+		// Keep track of size. Equals values.size() for finite windows, but for values is empty for infinite windows.
 		size++;
 
 		if (listener != null) {
@@ -73,12 +74,14 @@ public abstract class AbstractWindow<T> implements Serializable, Iterable<T> {
 	 * Removes extra values from the window.
      */
 	protected void purgeExtraValues() {
-		while (length > 0 && hasExtraValues()) {
-			T removedItem = values.removeFirst();
-			size--;
+		if (length > 0) {
+			while (hasExtraValues()) {
+				T removedItem = values.removeFirst();
+				size--;
 
-			if (listener != null) {
-				listener.onRemove(removedItem);
+				if (listener != null) {
+					listener.onRemove(removedItem);
+				}
 			}
 		}
 	}

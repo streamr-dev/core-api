@@ -95,7 +95,12 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractModuleWithWin
 
 		@Override
 		public void onRemove(Double item) {
-			resizeStats();
+			if (storeless) {
+				throw new IllegalStateException("Window is infinite and values should never be removed! There must be a bug!");
+			}
+			else {
+				resizeStats();
+			}
 		}
 
 		@Override
