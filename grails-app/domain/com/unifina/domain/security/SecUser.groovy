@@ -11,7 +11,7 @@ class SecUser {
 	boolean accountLocked
 	boolean passwordExpired
 	
-	String apiKey = IdGenerator.get() + IdGenerator.get()
+	String apiKey = generateApiKey()
 	
 	String name
 	String timezone
@@ -42,5 +42,9 @@ class SecUser {
 			apiKey         : apiKey,
 			timezone       : timezone,
 		]
+	}
+
+	public String generateApiKey() {
+		return IdGenerator.get() + IdGenerator.get()
 	}
 }

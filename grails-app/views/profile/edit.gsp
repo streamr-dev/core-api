@@ -4,6 +4,7 @@
     <title><g:message code="profile.edit.label"/></title>
 
 	<r:require module="detect-timezone"/>
+	<r:require module="confirm-button"/>
 
 	<r:script>
 		$(document).ready(function() {
@@ -25,80 +26,76 @@
 	</div>
 
 	<form method="post" action="update">
-		
 		<div class="row">
 			<div class="col-sm-6 col-md-offset-2 col-md-4">
 				<ui:panel title="Profile Settings">
 					<div class="form-group ${hasErrors(bean: user, field: 'username', 'has-error')}">
-					
 						<label for="username" class="control-label">
 							<g:message code="secuser.username.label" default="Username" />
 						</label>
-					    
 					    <div>
 					    	${user.username}
 					    </div>
-					    
 					</div>
-					
+
 					<div class="form-group">
-					
 						<label for="changePassword" class="control-label">
 							<g:message code="secuser.password.label" />
 						</label>
-					    
 					    <div>
 							<g:link action="changePwd">
 								<g:message code="profile.changePassword.label"/>
 							</g:link>
 						</div>
-
 					</div>
-					
+
 					<div class="form-group ${hasErrors(bean: user, field: 'name', 'has-error')}">
-					
 						<label for="name" class="control-label">
 							<g:message code="secuser.name.label" />
 						</label>
-					    
 						<input name="name" type="text" class="form-control input-lg" value="${user.name}" required>
-		
 						<g:hasErrors bean="${user}" field="name">
 							<span class="text-danger">
 								<g:renderErrors bean="${user}" field="name" as="list" />
 							</span>
 						</g:hasErrors>
-					</div>	
-					
+					</div>
+
 					<div class="form-group ${hasErrors(bean: user, field: 'timezone', 'has-error')}">
-					
 						<label for="timezone" class="control-label">
 							<g:message code="secuser.timezone.label"/>
 						</label>
-					    
 						<select name="timezone" id="timezone" class="form-control input-lg"></select>
-		
 						<g:hasErrors bean="${user}" field="timezone">
 							<span class="text-danger">
 								<g:renderErrors bean="${user}" field="timezone" as="list" />
 							</span>
 						</g:hasErrors>
 					</div>
-					
+
 				</ui:panel>
 
 			</div>
 
 			<div class="col-sm-6 col-md-4">
-				<ui:panel title="Credentials">
-					<label class="control-label">
-						<g:message code="secuser.apiKey.label" default="Api Key" />
-					</label>
-
-					<div>
-						${user.apiKey}
+				<div class="panel">
+					<div class="panel-heading">
+						<span class="panel-title">${message(code:"secuser.credentials.label", default:"Credentials")}</span>
+						<div class="panel-heading-controls">
+							<button id="regenerateApiKeyButton" type="button" class="btn btn-danger pull-right btn-sm">Regenerate api key</button>
+						</div>
 					</div>
-				</ui:panel>
+					<div class="panel-body">
+						<div class="form-group">
+							<label class="control-label">
+								<g:message code="secuser.credentials.apiKey.label" default="Api Key" />
+							</label>
+							<div>
+								${user.apiKey}
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 			
 			<g:render template="extensions" />
@@ -112,5 +109,20 @@
 		</div>
 		
 	</form>
+
+	<r:script>
+		new ConfirmButton("#regenerateApiKeyButton", {
+			title: "Really regenerate the api key?",
+			message: "You'll need to re-authenticate to the api."
+		}, function(result) {
+			if(result) {
+				$.post("${ createLink(action: 'regenerateApiKey') }", {}, function(response) {
+					if(response.success) {
+						location.reload()
+					}
+				})
+			}
+		})
+	</r:script>
 </body>
 </html>

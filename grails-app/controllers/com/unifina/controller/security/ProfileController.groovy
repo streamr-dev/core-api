@@ -1,5 +1,6 @@
 package com.unifina.controller.security
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 import com.unifina.domain.security.SecUser
@@ -9,11 +10,10 @@ class ProfileController {
 	
 	def springSecurityService
 	def userService
+	def kafkaService
 	
 	static defaultAction = "edit"
-	
 
-	
 	def edit() {
 		[user:SecUser.get(springSecurityService.currentUser.id)]
 	}
@@ -32,6 +32,19 @@ class ProfileController {
 			flash.message = "Profile updated."
 			redirect(action:"edit")
 		}
+	}
+
+	def regenerateApiKey() {
+		SecUser user = SecUser.get(springSecurityService.currentUser.id)
+		String oldApiKey = user.apiKey
+		user.apiKey = user.generateApiKey()
+		kafkaService.sendMessage("revoked-api-keys", "", [
+		        action: "revoked",
+				user: user.id,
+				key: oldApiKey
+		])
+		log.info("User $user.username regenerated api key!")
+		render ([success: true] as JSON)
 	}
 	
 	def changePwd(ChangePasswordCommand cmd) {

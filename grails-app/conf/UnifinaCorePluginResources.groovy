@@ -241,6 +241,9 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
 	}
+	'confirm-button' {
+		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
 		dependsOn 'streamr'
@@ -315,4 +318,5 @@ modules = {
 		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
 	}
+
 }
