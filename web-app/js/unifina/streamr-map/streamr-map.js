@@ -243,6 +243,8 @@
         this.parent.css("width", width+"px")
         this.parent.css("height", height+"px")
         this.map.invalidateSize()
+        if(this.options.drawTrace)
+            this.lineLayer.redraw()
     }
 
     StreamrMap.prototype.toJSON = function() {
