@@ -25,12 +25,12 @@ class ShareSpec extends GebReportingSpec {
 
 	def save() {
 		$(".sharing-dialog .save-button").click()
-		waitFor { !$(".sharing-dialog") }
+		waitFor { !$(".sharing-dialog") && !$(".modal-backdrop") }
 	}
 
 	def cancel() {
 		$(".sharing-dialog .cancel-button").click()
-		waitFor { !$(".sharing-dialog") }
+		waitFor { !$(".sharing-dialog") && !$(".modal-backdrop") }
 	}
 
 	/** Cleanup helper */
@@ -81,11 +81,19 @@ class ShareSpec extends GebReportingSpec {
 	def forceFeedTextInput(inputSelector, String text) {
 		waitFor { $(inputSelector).displayed }
 		def $input = $(inputSelector);
-		waitFor {
+		waitFor(20, 1) {
 			def len = $input.getAttribute("value").length()
 			len >= text.length() ?: ($input << text.substring(len))
 		}
 		return $input
+	}
+
+	def pressKeyUntil(inputSelector, Keys key, Closure successCondition) {
+		waitFor { $(inputSelector).displayed }
+		def $input = $(inputSelector);
+		waitFor(20, 2) {
+			successCondition() ?: $input << key
+		}
 	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
@@ -95,28 +103,31 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		to StreamListPage
 		then:
-		!$(".bootbox.modal")
+		!$(".sharing-dialog")
 
 		when: "open 'ShareSpec' Stream"
 		getStreamRow().find("button").click()
 		then:
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		forceFeedTextInput(".new-user-field", "foobar") << Keys.ENTER
-		then: "enter adds a permission row"
-		waitFor { $(".ui-pnotify .alert-danger") }
+		forceFeedTextInput(".new-user-field", "foobar")
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-danger")
+		}
+		then: "enter would add a permission row, but doesn't since there was error"
 		$(".access-row").size() == 0
 		$(".new-user-field").value() == "foobar"
 
-		when:
-		$(".new-user-field") << Keys.ESCAPE
-		then: "esc clears the email"
-		waitFor { !$(".new-user-field").value() }
+		expect: "esc clears the email"
+		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
+			!$(".new-user-field").value()
+		}
 
 		when:
+		closePnotify()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
@@ -124,39 +135,42 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 		!$(".new-user-field").value()
 
-		when:
-		$(".new-user-field") << Keys.ESCAPE
-		then: "esc closes the popup discarding changes"
-		waitFor { !$(".bootbox.modal") }
+		expect: "esc closes the popup discarding changes"
+		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
+			!$(".sharing-dialog")
+		}
+		!$(".ui-pnotify")
 
 		// ADD PERMISSION
 
 		when: "re-open"
+		waitFor { !$(".modal-backdrop") }
 		getStreamRow().find("button").click()
 		then: "access row from last time was discarded"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when:
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".access-row")
+		}
 		then:
-		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
 		!$(".new-user-field").value()
 
-		when:
-		$(".new-user-field") << Keys.ENTER
-		then: "enter saves changes when user field is empty"
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "re-open once more"
 		closePnotify()	// the second pnotify would cover the share button
 		getStreamRow().find("button").click()
 		then: "check that the saved row is still there"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -181,7 +195,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		shareButton.click()
 		then: "check that the saved row is still there"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -203,7 +217,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "re-open"
 		shareButton.click()
 		then: "check that row hasn't been deleted"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -212,11 +226,11 @@ class ShareSpec extends GebReportingSpec {
 		then:
 		waitFor { $(".access-row").size() == 0 }
 
-		when: "...this time for reals"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "...this time for reals"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "open menu"
 		streamMenuButton.click()
@@ -226,15 +240,16 @@ class ShareSpec extends GebReportingSpec {
 		when: "re-open"
 		shareButton.click()
 		then: "...to double-check it's gone"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
-		when: "save"
+		when: "save and close"
 		closePnotify()
-		$(".new-user-field") << Keys.ENTER
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			!$(".sharing-dialog")
+		}
 		then: "...but no changes, so no message displayed"
-		waitFor { !$(".bootbox.modal") }
 		!$(".ui-pnotify")
 
 		cleanup: "just in case..."
@@ -248,28 +263,53 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		to CanvasListPage
 		then:
-		!$(".bootbox.modal")
+		!$(".sharing-dialog")
 		waitFor { at CanvasListPage }
 		waitFor { getCanvasRow().displayed }
 
 		when: "open 'ShareSpec' Canvas"
 		getCanvasRow().find("button").click()
 		then:
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		forceFeedTextInput(".new-user-field", "foobar") << Keys.ENTER
+		forceFeedTextInput(".new-user-field", "foobar")
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-danger")
+		}
 		then: "enter adds a permission row"
-		waitFor { $(".ui-pnotify .alert-danger") }
 		$(".access-row").size() == 0
 		$(".new-user-field").value() == "foobar"
 
+		expect: "esc clears the email"
+		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
+			!$(".new-user-field").value()
+		}
+
 		when:
-		$(".new-user-field") << Keys.ESCAPE
-		then: "esc clears the email"
-		waitFor { !$(".new-user-field").value() }
+		closePnotify()
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-button").click()
+		then:
+		waitFor { $(".access-row") }
+		$(".access-row").size() == 1
+		!$(".new-user-field").value()
+
+		when: "discard changes"
+		cancel()
+		then: "...so no notification"
+		!$(".ui-pnotify")
+
+		// ADD PERMISSION
+
+		when: "re-open"
+		getCanvasRow().find("button").click()
+		then: "access row from last time was discarded"
+		waitFor { $(".sharing-dialog") }
+		waitFor { $(".new-user-field").displayed }
+		$(".access-row").size() == 0
 
 		when:
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
@@ -279,39 +319,17 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 		!$(".new-user-field").value()
 
-		when:
-		$(".new-user-field") << Keys.ESCAPE
-		then: "esc closes the popup discarding changes"
-		waitFor { !$(".bootbox.modal") }
-
-		// ADD PERMISSION
-
-		when: "re-open"
-		getCanvasRow().find("button").click()
-		then: "access row from last time was discarded"
-		waitFor { $(".bootbox.modal") }
-		waitFor { $(".new-user-field").displayed }
-		$(".access-row").size() == 0
-
-		when:
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".access-row") }
-		$(".access-row").size() == 1
-		!$(".new-user-field").value()
-
-		when:
-		$(".new-user-field") << Keys.ENTER
-		then: "enter saves changes when user field is empty"
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "re-open once more"
 		closePnotify()	// the second pnotify would cover the share button
 		getCanvasRow().find("button").click()
 		then: "check that the saved row is still there"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -331,7 +349,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		shareButton.click()
 		then: "check that the saved row is still there"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -348,7 +366,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "re-open"
 		shareButton.click()
 		then: "check that row hasn't been deleted"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -357,24 +375,24 @@ class ShareSpec extends GebReportingSpec {
 		then: "it's gone!"
 		waitFor { $(".access-row").size() == 0 }
 
-		when: "...this time for reals"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "...this time for reals"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "re-open"
 		closePnotify()
 		shareButton.click()
 		then: "...to double-check it's gone"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "save"
-		$(".new-user-field") << Keys.ENTER
+		save()
 		then: "...but no changes, so no message displayed"
-		waitFor { !$(".bootbox.modal") }
+		waitFor { !$(".sharing-dialog") }
 		!$(".ui-pnotify")
 
 		cleanup: "just in case..."
@@ -388,28 +406,53 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		to DashboardListPage
 		then:
-		!$(".bootbox.modal")
+		!$(".sharing-dialog")
 		waitFor { at DashboardListPage }
 		waitFor { getDashboardRow().displayed }
 
 		when: "open 'ShareSpec' Dashboard"
 		getDashboardRow().find("button").click()
 		then:
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		forceFeedTextInput(".new-user-field", "foobar") << Keys.ENTER
-		then: "enter adds a permission row"
-		waitFor { $(".ui-pnotify .alert-danger") }
+		forceFeedTextInput(".new-user-field", "foobar")
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-danger")
+		}
+		then: "no new permission row"
 		$(".access-row").size() == 0
 		$(".new-user-field").value() == "foobar"
 
+		expect: "esc clears the email"
+		pressKeyUntil(".new-user-field", Keys.ESCAPE) {
+			!$(".new-user-field").value()
+		}
+
 		when:
-		$(".new-user-field") << Keys.ESCAPE
-		then: "esc clears the email"
-		waitFor { !$(".new-user-field").value() }
+		closePnotify()
+		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		$(".new-user-button").click()
+		then:
+		waitFor { $(".access-row") }
+		$(".access-row").size() == 1
+		!$(".new-user-field").value()
+
+		when: "discard changes"
+		cancel()
+		then: "...so no notification"
+		!$(".ui-pnotify")
+
+		// ADD PERMISSION
+
+		when: "re-open"
+		getDashboardRow().find("button").click()
+		then: "access row from last time was discarded"
+		waitFor { $(".sharing-dialog") }
+		waitFor { $(".new-user-field").displayed }
+		$(".access-row").size() == 0
 
 		when:
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
@@ -419,39 +462,17 @@ class ShareSpec extends GebReportingSpec {
 		$(".access-row").size() == 1
 		!$(".new-user-field").value()
 
-		when:
-		$(".new-user-field") << Keys.ESCAPE
-		then: "esc closes the popup discarding changes"
-		waitFor { !$(".bootbox.modal") }
-
-		// ADD PERMISSION
-
-		when: "re-open"
-		getDashboardRow().find("button").click()
-		then: "access row from last time was discarded"
-		waitFor { $(".bootbox.modal") }
-		waitFor { $(".new-user-field").displayed }
-		$(".access-row").size() == 0
-
-		when:
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".access-row") }
-		$(".access-row").size() == 1
-		!$(".new-user-field").value()
-
-		when:
-		$(".new-user-field") << Keys.ENTER
-		then: "enter saves changes when user field is empty"
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "re-open once more"
 		closePnotify()	// the second pnotify would cover the share button
 		getDashboardRow().find("button").click()
 		then: "check that the saved row is still there"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -471,7 +492,7 @@ class ShareSpec extends GebReportingSpec {
 		when:
 		shareButton.click()
 		then: "check that the saved row is still there"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -488,7 +509,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "re-open"
 		shareButton.click()
 		then: "check that row hasn't been deleted"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 1
 
@@ -497,24 +518,24 @@ class ShareSpec extends GebReportingSpec {
 		then: "it's gone!"
 		waitFor { $(".access-row").size() == 0 }
 
-		when: "...this time for reals"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "...this time for reals"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "re-open"
 		closePnotify()
 		shareButton.click()
 		then: "...to double-check it's gone"
-		waitFor { $(".bootbox.modal") }
+		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "save"
-		$(".new-user-field") << Keys.ENTER
+		save()
 		then: "...but no changes, so no message displayed"
-		waitFor { !$(".bootbox.modal") }
+		waitFor { !$(".sharing-dialog") }
 		!$(".ui-pnotify")
 
 		cleanup: "just in case..."
@@ -532,46 +553,46 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
+		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
-		when: "save stream read right"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
 		getCanvasRow().find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
+		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
 
-		when: "save canvas read right"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
 		getDashboardRow().find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
+		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
-		when: "save dashboard read right"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "challenger appears"
 		closePnotify()
@@ -628,7 +649,7 @@ class ShareSpec extends GebReportingSpec {
 		to StreamListPage
 		getStreamRow().find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
+		$(".new-user-button").click()
 		then: "got the access-row"
 		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
@@ -639,11 +660,11 @@ class ShareSpec extends GebReportingSpec {
 		then:
 		$(".permission-dropdown .access-description").text() == "can edit"
 
-		when: "save stream rights"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "challenger appears"
 		closePnotify()
@@ -681,16 +702,16 @@ class ShareSpec extends GebReportingSpec {
 		getStreamRow().find("button").click()
 		waitFor { $(".new-user-field").displayed }
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
-		$(".new-user-field") << Keys.ENTER
+		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
 		$(".access-row").size() == 1
 
-		when: "save canvas read right"
-		$(".new-user-field") << Keys.ENTER
-		then:
-		waitFor { $(".ui-pnotify .alert-success") }
-		waitFor { !$(".bootbox.modal") }
+		expect: "enter saves changes when user field is empty"
+		pressKeyUntil(".new-user-field", Keys.ENTER) {
+			$(".ui-pnotify .alert-success")
+		}
+		waitFor { !$(".sharing-dialog") }
 
 		when: "try search"
 		closePnotify()
