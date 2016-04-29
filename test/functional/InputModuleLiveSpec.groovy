@@ -96,7 +96,7 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		def textFieldTable = { findModuleByHash(4).find("table.event-table-module-content tbody") }
 
 		then: "the modules load their states and the tables have rows"
-		waitFor {
+		waitFor(20) {
 			$(".switcher.checked").size() == 1
 			textField().getAttribute("value") == "test"
 			button().text() == "test"

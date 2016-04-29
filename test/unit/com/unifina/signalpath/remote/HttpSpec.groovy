@@ -18,6 +18,9 @@ import spock.lang.Specification
 class HttpSpec extends Specification {
 	Http module
 	boolean isAsync = true
+	String dummyHeaderName = "x-unit-test"
+	String dummyHeaderValue = "testing123"
+	def dummyHeader = [(dummyHeaderName): dummyHeaderValue]
 
 	/**
 	 * Module input name -> List of values for each iteration
@@ -42,9 +45,9 @@ class HttpSpec extends Specification {
 	Map<String, List> outputs = [
 		data: [[], [], []],
 		errors: [[], [], []],
-		"status code": [200d, 200d, 200d],
+		statusCode: [200d, 200d, 200d],
 		//ping: [0, 0, 0],
-		headers: [["x-unit-test": "testing123"], ["x-unit-test": "testing123"], ["x-unit-test": "testing123"]]
+		headers: [dummyHeader, dummyHeader, dummyHeader]
 	]
 
 	def setup() {
@@ -108,11 +111,11 @@ class HttpSpec extends Specification {
 					getStatusCode() >> 200
 				}
 				getAllHeaders() >> [Stub(Header) {
-					getName() >> "x-unit-test"
-					getValue() >> "testing123"
+					getName() >> dummyHeaderName
+					getValue() >> dummyHeaderValue
 				}]
 			}
-			// blocking requests sendOutput here already
+			// synchronized requests sendOutput here already
 			future.completed(mockHttpResponse)
 
 			// simulate AbstractHttpModule.receive, but without propagation
@@ -132,11 +135,49 @@ class HttpSpec extends Specification {
 	void "no input, varying response, blocking"() {
 		isAsync = false
 		module.configure([
-			options: [blockExecution: [value: true]]
+			options: [syncMode: [value: "sync"]]
 		])
 		response = [[test: 1], [test: 2], [test: 3]]
 		outputs.data = response
 		expect:
 		test()
+	}
+
+	void "query parameters appear correctly in URL"() {
+		inputs.params = [[cake: 1, is: true, or: "lie"]] * 3
+		response = { HttpUriRequest request ->
+			return request.URI.toString().equals("localhost?cake=1&is=true&or=lie")
+		}
+		outputs.data = [true, true, true]
+		expect:
+		test()
+	}
+
+	void "headers are added correctly to request"() {
+		Map headers = [header1: "head", header2: true, header3: 3]
+		inputs.headers = [headers] * 3
+		response = { HttpUriRequest request ->
+			int found = 0
+			request.allHeaders.each { Header h ->
+				if (headers.containsKey(h.name)) {
+					assert headers[h.name].toString() == h.value
+					found++
+				}
+			}
+			return found
+		}
+		outputs.data = [3, 3, 3]
+		expect:
+		test()
+	}
+
+	void "timeout is sent to errors"() {
+		mockClient = Stub(HttpAsyncClient) {
+			execute(_, _) >> { HttpUriRequest request, FutureCallback<HttpResponse> future ->
+				future.failed(new java.net.SocketTimeoutException())
+				module.sendOutput(transaction)
+			}
+		}
+		outputs.errors = [["Sending HTTP Request failed", "java.net.SocketTimeoutException"]] * 3
 	}
 }

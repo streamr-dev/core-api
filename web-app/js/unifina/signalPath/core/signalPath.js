@@ -637,7 +637,7 @@ var SignalPath = (function () {
 		else if (message.type=="D") {
 			$(pub).trigger("done")
 
-			if (runningJson.adhoc)
+			if (runningJson && runningJson.adhoc)
 				$(pub).trigger("stopped")
 		}
 		else if (message.type=="E") {

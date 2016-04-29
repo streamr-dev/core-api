@@ -1,6 +1,8 @@
 package com.unifina.signalpath.remote;
 import com.unifina.signalpath.*;
 
+import org.apache.commons.collections.list.UnmodifiableList;
+import org.apache.commons.collections.map.UnmodifiableMap;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -37,8 +39,8 @@ public class Http extends AbstractHttpModule {
 	private MapOutput responseHeaders = new MapOutput(this, "headers");
 	private ListOutput errors = new ListOutput(this, "errors");
 	private Output<Object> responseData = new Output<>(this, "data", "Object");
-	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "status code");
-	private TimeSeriesOutput pingMillis = new TimeSeriesOutput(this, "ping(ms)");
+	private TimeSeriesOutput statusCode = new TimeSeriesOutput(this, "statusCode");
+	private TimeSeriesOutput roundtripMillis = new TimeSeriesOutput(this, "roundtripMillis");
 
 	@Override
 	public void init() {
@@ -51,7 +53,7 @@ public class Http extends AbstractHttpModule {
 		addOutput(errors);
 		addOutput(responseData);
 		addOutput(statusCode);
-		addOutput(pingMillis);
+		addOutput(roundtripMillis);
 		addOutput(responseHeaders);
 	}
 
@@ -100,7 +102,7 @@ public class Http extends AbstractHttpModule {
 
 		if (verb.hasBody()) {
 			try {
-				switch (bodyFormat) {
+				switch (bodyContentType) {
 					case BODY_FORMAT_JSON:
 						Object b = body.getValue();
 						String bodyString = b instanceof Map ? new JSONObject((Map) b).toString() :
@@ -118,7 +120,7 @@ public class Http extends AbstractHttpModule {
 						((HttpEntityEnclosingRequestBase) request).setEntity(new UrlEncodedFormEntity(inputNVPList));
 						break;
 					default:
-						throw new RuntimeException("Unexpected body format " + bodyFormat);
+						throw new RuntimeException("Unexpected body format " + bodyContentType);
 				}
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
@@ -142,6 +144,11 @@ public class Http extends AbstractHttpModule {
 				} else {
 					JSONTokener parser = new JSONTokener(responseString);
 					Object jsonObject = parser.nextValue();    // parser returns Map, List, or String
+					if (jsonObject instanceof Map) {
+						jsonObject = UnmodifiableMap.decorate((Map)jsonObject);
+					} else if (jsonObject instanceof List) {
+						jsonObject = UnmodifiableList.decorate((List)jsonObject);
+					}
 					responseData.send(jsonObject);
 				}
 
@@ -156,7 +163,7 @@ public class Http extends AbstractHttpModule {
 			}
 		}
 
-		pingMillis.send(call.responseTime);
+		roundtripMillis.send(call.responseTime);
 		errors.send(call.errors);
 	}
 }

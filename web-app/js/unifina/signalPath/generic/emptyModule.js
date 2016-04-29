@@ -372,7 +372,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var title = $("<span class='optionTitle'>" + key + "</span>").appendTo(div);
 		var value = $("<span class='optionValue'></span>").appendTo(div);
 
-		if (!!option.possibleValues) {
+		if (option.possibleValues) {
 			var $select = $("<select>");
 			_(option.possibleValues).each(function(opt) {
 				var $option = $("<option>");
@@ -396,7 +396,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.createOption = createOption;
 
 	function updateOption(option, div) {
-		var isDropdown = (option.type == "boolean" || !!option.possibleValues)
+		var isDropdown = (option.type == "boolean" || option.possibleValues != undefined)
 		var inputText = isDropdown ? $(div).find("select").val() : $(div).find("input").val()
 
 		if (option.type == "int") {
