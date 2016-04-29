@@ -341,18 +341,18 @@ class PermissionService {
 		}
 		log.info("performRevoke: Found permissions for $clazz $resourceId: $perms")
 		def revokeOp = { Operation op ->
-			perms.findAll { it.operation == op }.each {
-				ret.add(it)
+			perms.findAll { it.operation == op }.each { Permission perm ->
+				ret.add(perm)
 				try {
-					log.info("performRevoke: Trying to delete permission $it.id")
+					log.info("performRevoke: Trying to delete permission $perm.id")
 					Permission.withNewTransaction {
-						it.delete(flush: true)
+						perm.delete(flush: true)
 					}
 				} catch (Throwable e) {
 					// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
 					// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
 					// ignoring the exception is fine; after all, the permission has been deleted
-					log.warn("Caught throwable while deleting permission $it.id: $e")
+					log.warn("Caught throwable while deleting permission $perm.id: $e")
 				}
 			}
 		}
