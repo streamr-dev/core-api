@@ -345,7 +345,9 @@ class PermissionService {
 				ret.add(it)
 				try {
 					log.info("performRevoke: Trying to delete permission $it.id")
-					it.delete(flush: true)
+					Permission.withNewTransaction {
+						it.delete(flush: true)
+					}
 				} catch (Throwable e) {
 					// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
 					// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
