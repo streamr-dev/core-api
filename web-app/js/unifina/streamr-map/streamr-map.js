@@ -123,6 +123,7 @@
 
     StreamrMap.prototype.addMarker = function(attr) {
         var id = attr.id
+        var label = attr.label
         var lat = attr.lat
         var lng = attr.lng
         // Needed for linePoints
@@ -135,7 +136,7 @@
 
         var marker = this.markers[id]
         if(marker === undefined) {
-            this.markers[id] = this.createMarker(id, latlng)
+            this.markers[id] = this.createMarker(id, label, latlng)
         } else {
             this.moveMarker(id, lat, lng)
         }
@@ -144,7 +145,7 @@
 
         return marker
     }
-
+    
     StreamrMap.prototype.setAutoZoom = function(lat, lng) {
         var _this = this
 
@@ -166,7 +167,7 @@
         }
     }
 
-    StreamrMap.prototype.createMarker = function(id, latlng) {
+    StreamrMap.prototype.createMarker = function(id, label, latlng) {
         var marker = L.marker(latlng, {
             icon: L.divIcon({
                 iconSize:     [19, 48], // size of the icon
@@ -175,7 +176,7 @@
                 className: 'streamr-map-icon fa fa-map-marker fa-4x'
             })
         })
-        var popupContent = "<span style='text-align:center;width:100%'><span>"+id+"</span></span>"
+        var popupContent = "<span style='text-align:center;width:100%'><span>"+label+"</span></span>"
         var popupOptions = {
             closeButton: false,
         }
