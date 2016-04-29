@@ -20,11 +20,11 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 	private final AbstractSignalPathModule module;
 	private final String configOption;
 	private final List<E> endpoints = new ArrayList<>();
-	private int numOfModules;
+	private int numOfEndpoints;
 
 	public void getConfiguration(Map<String,Object> config) {
 		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(ModuleOption.createInt(configOption, numOfModules));
+		options.addIfMissing(ModuleOption.createInt(configOption, numOfEndpoints));
 	}
 
 	public void onConfiguration(Map<String,Object> config) {
@@ -32,10 +32,10 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 
 		ModuleOption option = options.getOption(configOption);
 		if (option != null) {
-			numOfModules = option.getInt();
+			numOfEndpoints = option.getInt();
 		}
 
-		for (int i=0; i < numOfModules; ++i) {
+		for (int i = 0; i < numOfEndpoints; ++i) {
 			addEndpoint(i);
 		}
 	}
@@ -47,17 +47,17 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 	VariadicEndpoint(AbstractSignalPathModule module, String configOption, int defaultCount) {
 		this.module = module;
 		this.configOption = configOption;
-		this.numOfModules = defaultCount;
+		this.numOfEndpoints = defaultCount;
 	}
 
-	abstract E makeAndAttachNewEndpoint(AbstractSignalPathModule owner, int index);
+	abstract E makeAndAttachNewEndpoint(AbstractSignalPathModule owner);
+
+	abstract String getDisplayName();
 
 	private void addEndpoint(int index) {
-		E endpoint = makeAndAttachNewEndpoint(module, index + 1);
-		if (endpoint.getDisplayName() == null) {
-			endpoint.setDisplayName(endpoint.getName());
-		}
+		E endpoint = makeAndAttachNewEndpoint(module);
 		endpoint.setName("endpoint-" + IdGenerator.get());
+		endpoint.setDisplayName(numOfEndpoints == 1 ? getDisplayName() : getDisplayName() + (index + 1));
 		endpoints.add(endpoint);
 	}
 }

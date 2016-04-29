@@ -41,9 +41,14 @@ public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 	}
 
 	@Override
-	Input<T> makeAndAttachNewEndpoint(AbstractSignalPathModule owner, int index) {
-		Input<T> input = inputInstantiator.instantiate(owner, index);
+	Input<T> makeAndAttachNewEndpoint(AbstractSignalPathModule owner) {
+		Input<T> input = inputInstantiator.instantiate(owner);
 		owner.addInput(input);
 		return input;
+	}
+
+	@Override
+	String getDisplayName() {
+		return "in";
 	}
 }

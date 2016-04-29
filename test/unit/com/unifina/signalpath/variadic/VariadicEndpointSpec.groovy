@@ -9,8 +9,13 @@ class VariadicEndpointSpec extends Specification {
 
 	def variadicEndpoint = new VariadicEndpoint(null, "numOfEndpoints", 5) {
 		@Override
-		def Endpoint makeAndAttachNewEndpoint(AbstractSignalPathModule owner, int index) {
-			return new TimeSeriesInput(owner, "nameprefix" + index)
+		def Endpoint makeAndAttachNewEndpoint(AbstractSignalPathModule owner) {
+			return new TimeSeriesInput(owner, null)
+		}
+
+		@Override
+		def String getDisplayName() {
+			return "nameprefix"
 		}
 	}
 
@@ -37,6 +42,17 @@ class VariadicEndpointSpec extends Specification {
 		variadicEndpoint.onConfiguration([:])
 		then:
 		variadicEndpoint.endpoints*.displayName == (1..5).collect { "nameprefix$it" }
+	}
+
+	def "single endpoint's display name contains only prefix without index"() {
+		when:
+		variadicEndpoint.onConfiguration([
+			options: [
+				numOfEndpoints: [value: 1, type: "int"]
+			]
+		])
+		then:
+		variadicEndpoint.endpoints*.displayName == ["nameprefix"]
 	}
 
 	def "getConfiguration() provides current number of endpoints"() {

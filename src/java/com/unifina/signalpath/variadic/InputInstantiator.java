@@ -11,19 +11,19 @@ import java.io.Serializable;
  */
 public interface InputInstantiator<T> {
 
-	Input<T> instantiate(AbstractSignalPathModule owner, int index);
+	Input<T> instantiate(AbstractSignalPathModule owner);
 
 	class TimeSeries implements InputInstantiator<Double>, Serializable {
 		@Override
-		public Input<Double> instantiate(AbstractSignalPathModule owner, int index) {
-			return new TimeSeriesInput(owner, "in" + index);
+		public Input<Double> instantiate(AbstractSignalPathModule owner) {
+			return new TimeSeriesInput(owner, null);
 		}
 	}
 
 	class SimpleObject implements InputInstantiator<Object>, Serializable {
 		@Override
-		public Input<Object> instantiate(AbstractSignalPathModule owner, int index) {
-			return new Input<>(owner, "in" + index, "Object");
+		public Input<Object> instantiate(AbstractSignalPathModule owner) {
+			return new Input<>(owner, null, "Object");
 		}
 	}
 }

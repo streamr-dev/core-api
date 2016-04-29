@@ -44,9 +44,14 @@ public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 	}
 
 	@Override
-	Output<T> makeAndAttachNewEndpoint(AbstractSignalPathModule owner, int index) {
-		Output<T> output = outputInstantiator.instantiate(owner, index);
+	Output<T> makeAndAttachNewEndpoint(AbstractSignalPathModule owner) {
+		Output<T> output = outputInstantiator.instantiate(owner);
 		owner.addOutput(output);
 		return output;
+	}
+
+	@Override
+	String getDisplayName() {
+		return "out";
 	}
 }

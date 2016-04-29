@@ -1,6 +1,10 @@
 package com.unifina.signalpath.variadic
 
+import com.unifina.signalpath.AbstractSignalPathModule
+import com.unifina.signalpath.Input
+import com.unifina.signalpath.Output
 import com.unifina.signalpath.simplemath.Multiply
+import groovy.transform.CompileStatic
 import spock.lang.Specification
 
 class VariadicInputOutputPairSpec extends Specification {
@@ -32,16 +36,26 @@ class VariadicInputOutputPairSpec extends Specification {
 		when:
 		inputOutputPairs.sendValuesToOutputs([666, "hello", "world"])
 		then:
-		module.getOutput("out1").value == 666
-		module.getOutput("out2").value == "hello"
-		module.getOutput("out3").value == "world"
+		getOutputByDisplayName(module, "out1").value == 666
+		getOutputByDisplayName(module, "out2").value == "hello"
+		getOutputByDisplayName(module, "out3").value == "world"
 	}
 
 	def "getInputValues() returns values of inputs"() {
-		module.getInput("in1").receive("hello")
-		module.getInput("in2").receive("world")
-		module.getInput("in3").receive("!")
+		getInputByDisplayName(module, "in1").receive("hello")
+		getInputByDisplayName(module, "in2").receive("world")
+		getInputByDisplayName(module, "in3").receive("!")
 		expect:
 		inputOutputPairs.inputValues == ["hello", "world", "!"]
+	}
+
+	@CompileStatic
+	Output getOutputByDisplayName(AbstractSignalPathModule module, String displayName) {
+		module.outputs.find { Output output -> output.displayName == displayName }
+	}
+
+	@CompileStatic
+	Input getInputByDisplayName(AbstractSignalPathModule module, String displayName) {
+		module.inputs.find { Input input -> input.displayName == displayName }
 	}
 }
