@@ -331,8 +331,8 @@ class PermissionService {
 
 	/** find Permissions that will be revoked, and cascade according to alsoRevoke map */
 	private List<Permission> performRevoke(boolean anonymous, String userProp, target, String clazz, String idProp, resourceId, Operation operation) {
-		def ret = []
-		def perms = Permission.withCriteria {
+		List<Permission> ret = []
+		List<Permission> perms = Permission.withCriteria {
 			if (anonymous) {
 				eq("anonymous", true)
 			} else {
@@ -341,16 +341,19 @@ class PermissionService {
 			eq("clazz", clazz)
 			eq(idProp, resourceId)
 		}
-		def revokeOp = { Operation op -> perms.findAll { it.operation == op }.each {
-			ret.add(it)
-			try {
-				it.delete(flush: true)
-			} catch (StaleObjectStateException e) {
-				// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
-				// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
-				// ignoring the exception is fine; after all, the permission has been deleted
+		def revokeOp = { Operation op ->
+			perms.findAll { it.operation == op }.each {
+				ret.add(it)
+				try {
+					it.delete(flush: true)
+				} catch (StaleObjectStateException e) {
+					// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
+					// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
+					// ignoring the exception is fine; after all, the permission has been deleted
+					log.warn("Caught StateObjectStateException while deleting permission $it.id")
+				}
 			}
-		} }
+		}
 		revokeOp(operation)
 		alsoRevoke.get(operation.id).each(revokeOp)
 		return ret
