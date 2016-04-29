@@ -27,6 +27,22 @@
 				});
 			})
 		</r:script>
+		<r:script>
+			$(document).ready(function() {
+				$(".delete-canvas-link").click(function(event) {
+					event.preventDefault()
+					var url = $(this).attr("data-action")
+					$.ajax({url: url, method: "DELETE"})
+						.done(function(data) {
+							console.log(data)
+							//location.reload()
+						}).fail(function(data) {
+							console.log(data)
+						})
+
+				})
+			})
+		</r:script>
     </head>
     <body class="canvas-list-page">
 		
@@ -78,9 +94,21 @@
 							</ui:td>
 							<ui:td>
 								<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
-								<g:if test="${shareable.contains(canvas)}">
-									<ui:shareButton class="btn-end-of-row" url="${createLink(uri: "/api/v1/canvases/" + canvas.id)}" name="Canvas ${canvas.name}" />
-								</g:if>
+								<div class="dropdown">
+									<a id="stream-menu-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown">
+										<i class="navbar-icon fa fa-bars"></i>
+									</a>
+									<ul class="dropdown-menu pull-right">
+										<li>
+											<a href="#" class="delete-canvas-link confirm" data-action="${ createLink(url: "/api/v1/canvases/", absolute: true) + "/" + canvas.id }" data-confirm="Are you sure you want to delete the canvas?">
+												<i class="fa fa-trash-o"></i> Delete canvas
+											</a>
+										</li>
+										<g:if test="${shareable.contains(canvas)}">
+											<li><ui:shareButton url="${createLink(uri: '/api/v1/canvases') + canvas.id}" name="Canvas ${canvas.name}" type="link">Share</ui:shareButton></li>
+										</g:if>
+									</ul>
+								</div>
 							</ui:td>
 						</ui:tr>
 					</g:each>
