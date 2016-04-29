@@ -9,15 +9,14 @@ class GetMultiFromMapSpec extends Specification {
 	def setup() {
 		module = new GetMultiFromMap()
 		module.init()
-		module.configure([
-			options: [outputs: [value: 4]],
-			outputs: [
-				[name: "out1", displayName: "a"],
-				[name: "out2", displayName: "b"],
-				[name: "out3", displayName: "c"],
-				[name: "out4", displayName: "deep.deep.inside"]
-			]
-		])
+		module.configure([options: [outputs: [value: 4]]])
+		def displayNameToOutput = module.outputs.collectEntries {
+			[(it.displayName): it]
+		}
+		displayNameToOutput["out1"].displayName = "a"
+		displayNameToOutput["out2"].displayName = "b"
+		displayNameToOutput["out3"].displayName = "c"
+		displayNameToOutput["out4"].displayName = "deep.deep.inside"
 	}
 
 	def "GetMultiFromMap works as expected"() {
@@ -32,10 +31,10 @@ class GetMultiFromMapSpec extends Specification {
 		]
 
 		Map outputValues = [
-			"out1": [null,              666,       666,     1, 1],
-			"out2": [null,             null, "two-two",     2, 2],
-			"out3": [null, [hello: "world"],        42,     3, 3],
-			"out4": [null,             null,       null, null, "oh, yeah"],
+			"a": [null,              666,       666,     1, 1],
+			"b": [null,             null, "two-two",     2, 2],
+			"c": [null, [hello: "world"],        42,     3, 3],
+			"deep.deep.inside": [null,             null,       null, null, "oh, yeah"],
 			founds: [
 				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 0d],
 				[a: 1d, b: 0d, c: 1d, "deep.deep.inside": 0d],

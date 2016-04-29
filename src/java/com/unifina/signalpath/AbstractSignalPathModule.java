@@ -243,8 +243,28 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		return inputsByName.get(name);
 	}
 
+	/** Linear-time search! */
+	public Input findInputByDisplayName(String displayName) {
+		for (Input input : inputs) {
+			if (displayName.equals(input.getDisplayName())) {
+				return input;
+			}
+		}
+		return null;
+	}
+
 	public Output getOutput(String name) {
 		return outputsByName.get(name);
+	}
+
+	/** Linear-time search! */
+	public Output findOutputByDisplayName(String displayName) {
+		for (Output output : outputs) {
+			if (displayName.equals(output.getDisplayName())) {
+				return output;
+			}
+		}
+		return null;
 	}
 
 	public void markReady(Input input) {

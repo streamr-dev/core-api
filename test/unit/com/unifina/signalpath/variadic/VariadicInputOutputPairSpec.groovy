@@ -36,26 +36,16 @@ class VariadicInputOutputPairSpec extends Specification {
 		when:
 		inputOutputPairs.sendValuesToOutputs([666, "hello", "world"])
 		then:
-		getOutputByDisplayName(module, "out1").value == 666
-		getOutputByDisplayName(module, "out2").value == "hello"
-		getOutputByDisplayName(module, "out3").value == "world"
+		module.findOutputByDisplayName("out1").value == 666
+		module.findOutputByDisplayName("out2").value == "hello"
+		module.findOutputByDisplayName("out3").value == "world"
 	}
 
 	def "getInputValues() returns values of inputs"() {
-		getInputByDisplayName(module, "in1").receive("hello")
-		getInputByDisplayName(module, "in2").receive("world")
-		getInputByDisplayName(module, "in3").receive("!")
+		module.findInputByDisplayName("in1").receive("hello")
+		module.findInputByDisplayName("in2").receive("world")
+		module.findInputByDisplayName("in3").receive("!")
 		expect:
 		inputOutputPairs.inputValues == ["hello", "world", "!"]
-	}
-
-	@CompileStatic
-	Output getOutputByDisplayName(AbstractSignalPathModule module, String displayName) {
-		module.outputs.find { Output output -> output.displayName == displayName }
-	}
-
-	@CompileStatic
-	Input getInputByDisplayName(AbstractSignalPathModule module, String displayName) {
-		module.inputs.find { Input input -> input.displayName == displayName }
 	}
 }

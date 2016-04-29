@@ -303,7 +303,7 @@ public class ModuleTestHelper {
 
 	private void feedInputs(int i) {
 		for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
-			Input input = module.getInput(entry.getKey());
+			Input input = getInputByNameOrDisplayName(entry.getKey());
 			if (input == null) {
 				throw new IllegalArgumentException("No input found with name " + entry.getKey());
 			}
@@ -327,7 +327,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
+			Object actual = getOutputByNameOrDisplayName(entry.getKey()).getTargets()[0].getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -543,7 +543,7 @@ public class ModuleTestHelper {
 	/** create dummy outputs for each tested input */
 	private void initAndAttachOutputsToModuleInputs() {
 		for (String inputName : inputValuesByName.keySet()) {
-			Input input = module.getInput(inputName);
+			Input input = getInputByNameOrDisplayName(inputName);
 			if (input == null) {
 				throw new IllegalArgumentException("No input found with name " + inputName);
 			}
@@ -553,10 +553,26 @@ public class ModuleTestHelper {
 		}
 	}
 
+	private Input getInputByNameOrDisplayName(String name) {
+		Input input = module.getInput(name);
+		if (input == null) {
+			input = module.findInputByDisplayName(name);
+		}
+		return input;
+	}
+
+	private Output getOutputByNameOrDisplayName(String name) {
+		Output output = module.getOutput(name);
+		if (output == null) {
+			output = module.findOutputByDisplayName(name);
+		}
+		return output;
+	}
+
 	/** create (one-input dummy) Collector modules for each tested output */
 	private void connectCollectorsToModule(AbstractSignalPathModule module) {
 		for (String outputName : outputValuesByName.keySet()) {
-			Output output = module.getOutput(outputName);
+			Output output = getOutputByNameOrDisplayName(outputName);
 			if (output == null) {
 				throw new IllegalArgumentException("No output found with name " + outputName);
 			}
