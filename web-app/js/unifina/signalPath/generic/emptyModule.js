@@ -197,6 +197,23 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			buttons.push(refresh);
 		}
 
+		if (prot.jsonData.variadicInput || prot.jsonData.variadicOutput) {
+			var addEndpointLink = createModuleButton("delete fa-plus")
+			addEndpointLink.click(function() {
+				if (prot.jsonData.options.inputs) {
+					prot.jsonData.options.inputs.value += 1
+				} else if (prot.jsonData.options.outputs) {
+					prot.jsonData.options.outputs.value += 1
+				} else if (prot.jsonData.options.inputOutputPairs) {
+					prot.jsonData.options.inputOutputPairs.value += 1
+				} else {
+					throw "Missing module option for variadic endpoint"
+				}
+				prot.onOptionsUpdated()
+			});
+			buttons.push(addEndpointLink)
+		}
+
 		prot.header.append(buttons.reverse())
 		
 		// Must add to canvas before setting draggable
