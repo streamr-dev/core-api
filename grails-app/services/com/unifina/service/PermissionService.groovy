@@ -345,7 +345,7 @@ class PermissionService {
 			ret.add(it)
 			try {
 				it.delete(flush: true)
-			} catch (StaleObjectStateException) {
+			} catch (StaleObjectStateException e) {
 				// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
 				// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
 				// ignoring the exception is fine; after all, the permission has been deleted
