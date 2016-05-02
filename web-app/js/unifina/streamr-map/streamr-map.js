@@ -1,9 +1,12 @@
 
 (function(exports) {
 
+    var TRACE_REDRAW_BATCH_SIZE = 10000
+
     function StreamrMap(parent, options) {
 
         var _this = this
+
         this.parent = $(parent)
 
         this.untouched = true
@@ -103,13 +106,11 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
-                var max = updates.length
-                var traceRedrawCount = 10000
                 var i = 0
                 function redrawTrace() {
                     setTimeout(function() {
-                        var count = i + traceRedrawCount
-                        while(i < count && i < max) {
+                        var count = i + TRACE_REDRAW_BATCH_SIZE
+                        while(i < count && i < updates.length) {
                             var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
                             bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
                             i++
