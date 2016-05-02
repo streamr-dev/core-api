@@ -255,6 +255,12 @@ public class ModuleTestHelper {
 		int outputIndex = 0;
 		for (int i = 0; i < inputValueCount + extraIterationsAfterInput; ++i) {
 
+			// Time is set at start of event
+			if (isTimedMode() && ticks.containsKey(i)) {
+				((ITimeListener)module).setTime(ticks.get(i));
+				module.globals.time = ticks.get(i);
+			}
+
 			// Set input values
 			if (i < inputValueCount) {
 				serializeAndDeserializeModule();
@@ -312,9 +318,6 @@ public class ModuleTestHelper {
 
 	private void activateModule(int i) {
 		module.trySendOutput();
-		if (isTimedMode() && ticks.containsKey(i)) {
-			((ITimeListener)module).setTime(ticks.get(i));
-		}
 	}
 
 	private boolean shouldValidateOutput(int i, int skip) {

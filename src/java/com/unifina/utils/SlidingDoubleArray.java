@@ -2,6 +2,7 @@ package com.unifina.utils;
 
 import java.io.Serializable;
 
+@Deprecated
 public class SlidingDoubleArray implements Serializable {
 	
 	int maxSize;
