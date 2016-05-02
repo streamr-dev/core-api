@@ -32,6 +32,17 @@ class DashboardSpec extends LoginTester1Spec {
 		$("#navLogoutLink").click()
 		waitFor { at LoginPage }
 	}
+
+	def cleanupSpec() {
+		super.login()
+
+		to CanvasListPage
+		waitFor { at CanvasListPage }
+		$(".table .td", text:"DashboardSpec").click()
+
+		waitFor { at CanvasPage }
+		stopCanvasIfRunning()
+	}
 	
 	void "the flow of creating, modifying and deleting a dashboard works correctly"() {
 //		Creating a new dashboard

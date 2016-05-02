@@ -111,11 +111,11 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			h
 		}
 
-		// Stop canvas
-		canvasService.stop(canvas, user)
-
 		then: "output values are as expected if no restarts had happened"
 		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], [Add: [300.0]]]
+
+		cleanup:
+		canvasService.stop(canvas, user)
 	}
 
 	private Canvas createAndRun(savedStructure) {
