@@ -1,12 +1,11 @@
 package com.unifina.service
 
-import org.apache.log4j.Logger
-
-import com.unifina.domain.security.SecUser
-import org.hibernate.proxy.HibernateProxyHelper
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
+import org.apache.log4j.Logger
+import org.hibernate.proxy.HibernateProxyHelper
 
 import java.security.AccessControlException
 
@@ -330,8 +329,8 @@ class PermissionService {
 
 	/** find Permissions that will be revoked, and cascade according to alsoRevoke map */
 	private List<Permission> performRevoke(boolean anonymous, String userProp, target, String clazz, String idProp, resourceId, Operation operation) {
-		def ret = []
-		def perms = Permission.withCriteria {
+		List<Permission> ret = []
+		List<Permission> perms = Permission.withCriteria {
 			if (anonymous) {
 				eq("anonymous", true)
 			} else {
@@ -340,10 +339,23 @@ class PermissionService {
 			eq("clazz", clazz)
 			eq(idProp, resourceId)
 		}
-		def revokeOp = { Operation op -> perms.findAll { it.operation == op }.each {
-			ret.add(it)
-			it.delete()
-		} }
+		log.info("performRevoke: Found permissions for $clazz $resourceId: $perms")
+		def revokeOp = { Operation op ->
+			perms.findAll { it.operation == op }.each { Permission perm ->
+				ret.add(perm)
+				try {
+					log.info("performRevoke: Trying to delete permission $perm.id")
+					Permission.withNewTransaction {
+						perm.delete(flush: true)
+					}
+				} catch (Throwable e) {
+					// several threads could be deleting the same permission, all after first resulting in StaleObjectStateException
+					// e.g. API calls "revoke write" + "revoke read" arrive so that "revoke read" comes first
+					// ignoring the exception is fine; after all, the permission has been deleted
+					log.warn("Caught throwable while deleting permission $perm.id: $e")
+				}
+			}
+		}
 		revokeOp(operation)
 		alsoRevoke.get(operation.id).each(revokeOp)
 		return ret
