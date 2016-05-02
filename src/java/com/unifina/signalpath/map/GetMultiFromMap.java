@@ -14,7 +14,7 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 
 	private MapInput in = new MapInput(this, "in");
 
-	private VariadicOutput<Object> outs = new VariadicOutput<>(this, 1, new OutputInstantiator.SimpleObject());
+	private VariadicOutput<Object> outs = new VariadicOutput<>(this, new OutputInstantiator.SimpleObject(), 1);
 	private MapOutput founds = new MapOutput(this, "founds");
 
 

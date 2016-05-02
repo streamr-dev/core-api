@@ -1,16 +1,12 @@
 package com.unifina.signalpath.variadic
 
-import com.unifina.signalpath.AbstractSignalPathModule
-import com.unifina.signalpath.Input
-import com.unifina.signalpath.Output
 import com.unifina.signalpath.simplemath.Multiply
-import groovy.transform.CompileStatic
 import spock.lang.Specification
 
 class VariadicInputOutputPairSpec extends Specification {
 	def module = new Multiply()
-	def inputOutputPairs = new VariadicInputOutputPair<Object>(module, 3,
-		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject())
+	def inputOutputPairs = new VariadicInputOutputPair<Object>(module,
+		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject(), 3)
 
 	def setup() {
 		inputOutputPairs.onConfiguration([:])
@@ -23,13 +19,20 @@ class VariadicInputOutputPairSpec extends Specification {
 		inputOutputPairs.getConfiguration(config)
 
 		then:
-		config == [
-			variadicInput: true,
-			variadicOutput: true,
-			options: [
-				inputOutputPairs: [value: 3, type: "int"]
-			]
+		config.keySet() == ["options", "inputNames", "outputNames", "variadicInput", "variadicOutput"] as Set
+
+		and:
+		config.options == [
+			inputOutputPairs: [value: 3, type: "int"],
 		]
+
+		and:
+		config.inputNames.size() == 3
+		config.outputNames.size() == 3
+
+		and:
+		config.variadicInput == true
+		config.variadicOutput == true
 	}
 
 	def "sendValuesToOutputs() sends values to outputs"() {

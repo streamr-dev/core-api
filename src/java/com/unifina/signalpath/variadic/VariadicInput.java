@@ -12,18 +12,17 @@ import java.util.Map;
  * @param <T>
  */
 public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
-	private final InputInstantiator<T> inputInstantiator;
 
-	public VariadicInput(AbstractSignalPathModule module, int defaultCount, InputInstantiator<T> inputInstantiator) {
-		this(module, "inputs", defaultCount, inputInstantiator);
+	public VariadicInput(AbstractSignalPathModule module, InputInstantiator<T> inputInstantiator, int defaultCount) {
+		this(module, inputInstantiator, "inputs", "inputNames", defaultCount);
 	}
 
 	public VariadicInput(AbstractSignalPathModule module,
-						 String configOption,
-						 int defaultCount,
-						 InputInstantiator<T> inputInstantiator) {
-		super(module, configOption, defaultCount);
-		this.inputInstantiator = inputInstantiator;
+						 InputInstantiator<T> inputInstantiator,
+						 String countConfig,
+						 String namesConfig,
+						 int defaultCount) {
+		super(module, inputInstantiator, countConfig, namesConfig, defaultCount);
 	}
 
 	public List<T> getValues() {
@@ -41,10 +40,8 @@ public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 	}
 
 	@Override
-	Input<T> makeAndAttachNewEndpoint(AbstractSignalPathModule owner) {
-		Input<T> input = inputInstantiator.instantiate(owner);
+	void attachToModule(AbstractSignalPathModule owner, Input<T> input) {
 		owner.addInput(input);
-		return input;
 	}
 
 	@Override

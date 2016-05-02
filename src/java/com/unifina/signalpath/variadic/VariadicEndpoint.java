@@ -18,25 +18,35 @@ import java.util.Map;
  */
 abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializable {
 	private final AbstractSignalPathModule module;
-	private final String configOption;
+	private final EndpointInstantiator<E> endpointInstantiator;
+	private final String countConfig;
+	private final String namesConfig;
 	private final List<E> endpoints = new ArrayList<>();
 	private int numOfEndpoints;
 
 	public void getConfiguration(Map<String,Object> config) {
 		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(ModuleOption.createInt(configOption, numOfEndpoints));
+		options.addIfMissing(ModuleOption.createInt(countConfig, numOfEndpoints));
+		config.put(namesConfig, collectEndpointNames());
 	}
 
 	public void onConfiguration(Map<String,Object> config) {
 		ModuleOptions options = ModuleOptions.get(config);
 
-		ModuleOption option = options.getOption(configOption);
-		if (option != null) {
-			numOfEndpoints = option.getInt();
+		ModuleOption count = options.getOption(countConfig);
+		if (count != null) {
+			numOfEndpoints = count.getInt();
 		}
 
+		List<String> existingEndpointNames = (List<String>) config.get(namesConfig);
 		for (int i = 0; i < numOfEndpoints; ++i) {
-			addEndpoint(i);
+			String name;
+			if (existingEndpointNames != null && i < existingEndpointNames.size()) {
+				name = existingEndpointNames.get(i);
+			} else {
+				name = "endpoint-" + IdGenerator.get();
+			}
+			addEndpoint(i, name);
 		}
 	}
 
@@ -44,20 +54,34 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		return Collections.unmodifiableList(endpoints);
 	}
 
-	VariadicEndpoint(AbstractSignalPathModule module, String configOption, int defaultCount) {
+	VariadicEndpoint(AbstractSignalPathModule module,
+					 EndpointInstantiator<E> endpointInstantiator,
+					 String countConfig,
+					 String namesConfig,
+					 int defaultCount) {
 		this.module = module;
-		this.configOption = configOption;
+		this.endpointInstantiator = endpointInstantiator;
+		this.countConfig = countConfig;
+		this.namesConfig = namesConfig;
 		this.numOfEndpoints = defaultCount;
 	}
 
-	abstract E makeAndAttachNewEndpoint(AbstractSignalPathModule owner);
+	abstract void attachToModule(AbstractSignalPathModule owner, E endpoint);
 
 	abstract String getDisplayName();
 
-	private void addEndpoint(int index) {
-		E endpoint = makeAndAttachNewEndpoint(module);
-		endpoint.setName("endpoint-" + IdGenerator.get());
+	private void addEndpoint(int index, String name) {
+		E endpoint = endpointInstantiator.instantiate(module, name);
 		endpoint.setDisplayName(numOfEndpoints == 1 ? getDisplayName() : getDisplayName() + (index + 1));
 		endpoints.add(endpoint);
+		attachToModule(module, endpoint);
+	}
+
+	private List<String> collectEndpointNames() {
+		List<String> names = new ArrayList<>();
+		for (E e : endpoints) {
+			names.add(e.getName());
+		}
+		return names;
 	}
 }

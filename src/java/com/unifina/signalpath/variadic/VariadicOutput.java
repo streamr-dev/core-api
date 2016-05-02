@@ -11,18 +11,17 @@ import java.util.Map;
  * @param <T>
  */
 public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
-	private final OutputInstantiator<T> outputInstantiator;
 
-	public VariadicOutput(AbstractSignalPathModule module, int defaultCount, OutputInstantiator<T> outputInstantiator) {
-		this(module, "outputs", defaultCount, outputInstantiator);
+	public VariadicOutput(AbstractSignalPathModule module, OutputInstantiator<T> outputInstantiator, int defaultCount) {
+		this(module, outputInstantiator, "outputs", "outputNames", defaultCount);
 	}
 
 	public VariadicOutput(AbstractSignalPathModule module,
-						  String configOption,
-						  int defaultCount,
-						  OutputInstantiator<T> outputInstantiator) {
-		super(module, configOption, defaultCount);
-		this.outputInstantiator = outputInstantiator;
+						  OutputInstantiator<T> outputInstantiator,
+						  String countConfig,
+						  String namesConfig,
+						  int defaultCount) {
+		super(module, outputInstantiator, countConfig, namesConfig, defaultCount);
 	}
 
 	public void send(List<T> values) {
@@ -44,10 +43,8 @@ public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 	}
 
 	@Override
-	Output<T> makeAndAttachNewEndpoint(AbstractSignalPathModule owner) {
-		Output<T> output = outputInstantiator.instantiate(owner);
+	void attachToModule(AbstractSignalPathModule owner, Output<T> output) {
 		owner.addOutput(output);
-		return output;
 	}
 
 	@Override

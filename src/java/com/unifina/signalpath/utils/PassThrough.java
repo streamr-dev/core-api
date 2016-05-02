@@ -10,9 +10,11 @@ import java.util.Map;
 
 public class PassThrough extends AbstractSignalPathModule {
 
-	private VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(this, 1,
-			new InputInstantiator.SimpleObject(),
-			new OutputInstantiator.SimpleObject());
+	private VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(
+		this,
+		new InputInstantiator.SimpleObject(),
+		new OutputInstantiator.SimpleObject(),
+		1);
 
 	@Override
 	public Map<String, Object> getConfiguration() {

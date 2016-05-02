@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 class VariadicOutputSpec extends Specification {
 	def module = Mock(AbstractSignalPathModule)
-	def variadicOutput = new VariadicOutput<Object>(module, 3, new OutputInstantiator.SimpleObject())
+	def variadicOutput = new VariadicOutput<Object>(module, new OutputInstantiator.SimpleObject(), 3)
 
 	def "outputs are created"() {
 		when:
@@ -61,7 +61,7 @@ class VariadicOutputSpec extends Specification {
 		thrown(IllegalArgumentException)
 	}
 
-	def "getConfiguration() provides output count and module configuration"() {
+	def "getConfiguration() provides output count and names, and module configuration"() {
 		variadicOutput.onConfiguration([:])
 
 		when:
@@ -69,11 +69,17 @@ class VariadicOutputSpec extends Specification {
 		variadicOutput.getConfiguration(config)
 
 		then:
-		config == [
-			variadicOutput: true,
-			options: [
-				outputs: [value: 3, type: "int"]
-			]
+		config.keySet() == ["options", "outputNames", "variadicOutput"] as Set
+
+		and:
+		config.options == [
+			outputs: [value: 3, type: "int"]
 		]
+
+		and:
+		config.outputNames.size() == 3
+
+		and:
+		config.variadicOutput == true
 	}
 }

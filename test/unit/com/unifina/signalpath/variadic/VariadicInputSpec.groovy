@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 class VariadicInputSpec extends Specification {
 	def module = Mock(AbstractSignalPathModule)
-	def variadicInput = new VariadicInput<Object>(module, 3, new InputInstantiator.SimpleObject())
+	def variadicInput = new VariadicInput<Object>(module, new InputInstantiator.SimpleObject(), 3)
 
 	def "inputs are created"() {
 		when:
@@ -41,7 +41,7 @@ class VariadicInputSpec extends Specification {
 		variadicInput.values == [666D, "hello world", null]
 	}
 
-	def "getConfiguration() provides input count and module configuration"() {
+	def "getConfiguration() provides input count and names, and module configuration"() {
 		variadicInput.onConfiguration([:])
 
 		when:
@@ -49,11 +49,17 @@ class VariadicInputSpec extends Specification {
 		variadicInput.getConfiguration(config)
 
 		then:
-		config == [
-			variadicInput: true,
-			options: [
-				inputs: [value: 3, type: "int"]
-			]
+		config.keySet() == ["options", "inputNames", "variadicInput"] as Set
+
+		and:
+		config.options == [
+			inputs: [value: 3, type: "int"]
 		]
+
+		and:
+		config.inputNames.size() == 3
+
+		and:
+		config.variadicInput == true
 	}
 }
