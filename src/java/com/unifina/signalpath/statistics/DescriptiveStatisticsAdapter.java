@@ -1,25 +1,23 @@
 package com.unifina.signalpath.statistics;
 
+import com.unifina.signalpath.AbstractModuleWithWindow;
+import com.unifina.signalpath.TimeSeriesInput;
+import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.utils.window.WindowListener;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.IntegerParameter;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesOutput;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Helper class for implementing the stuff provided by Apache Commons Math
- * DescriptiveStatistics as separate modules. Supports infinite windows by
- * setting windowLength to 0 - in this case stateless implementations are used.
+ * DescriptiveStatistics as separate modules. Uses stateless implementations
+ * in case windowLength is 0.
  * @author Henri
- *
  */
-public abstract class DescriptiveStatisticsAdapter extends AbstractSignalPathModule {
+public abstract class DescriptiveStatisticsAdapter extends AbstractModuleWithWindow<Double> {
 
-	protected IntegerParameter windowLength = new IntegerParameter(this, "windowLength", 50);
-	protected IntegerParameter minSamples = new IntegerParameter(this, "minSamples", 1);
-	
 	protected TimeSeriesInput input = new TimeSeriesInput(this, "in");
 	protected TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
 	
@@ -30,14 +28,37 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractSignalPathMod
 	
 	@Override
 	public void init() {
-		addInput(windowLength);
-		addInput(minSamples);
+		super.init();
 		addInput(input);
 		addOutput(out);
 	}
-	
+
 	@Override
-	public void sendOutput() {
+	protected void handleInputValues() {
+		addToWindow(input.getValue());
+	}
+
+	@Override
+	protected void doSendOutput() {
+		if (storeless) {
+			out.send(storelessStats.getResult());
+		}
+		else {
+			Double d = getValue(stats);
+			if (!d.equals(Double.NaN))
+				out.send(d);
+		}
+	}
+
+	@Override
+	protected WindowListener<Double> createWindowListener(Object key) {
+		return new DescriptiveStatisticsAdapterWindowListener();
+	}
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+
 		// Initialize the storeless/stateful statistic.
 		if (storeless==null) {
 			// Use the storeless one only if windowLength is zero and unconnected
@@ -46,26 +67,6 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractSignalPathMod
 				storelessStats = getStorelessStatistic();
 			else {
 				stats = new DescriptiveStatistics(windowLength.getValue());
-			}
-		}
-		
-		// If we use the windowed stats, check that the window size is correct
-		if (!storeless && stats.getWindowSize()!=windowLength.getValue()) {
-			stats.setWindowSize(windowLength.getValue());
-		}
-		
-		// Increment stats and produce output if more than minSamples values received
-		if (storeless) {
-			storelessStats.increment(input.value);
-			if (storelessStats.getN()>=minSamples.getValue())
-				out.send(storelessStats.getResult());
-		}
-		else {
-			stats.addValue(input.value);
-			if (stats.getN()>=minSamples.getValue()) {
-				Double d = getValue(stats);
-				if (!d.equals(Double.NaN))
-					out.send(d);
 			}
 		}
 	}
@@ -79,12 +80,40 @@ public abstract class DescriptiveStatisticsAdapter extends AbstractSignalPathMod
 	 */
 	protected abstract Double getValue(DescriptiveStatistics stats);
 
-	@Override
-	public void clearState() {
-		if (stats!=null)
-			stats.clear();
-		if (storelessStats!=null)
-			storelessStats.clear();
-	}
+	class DescriptiveStatisticsAdapterWindowListener implements WindowListener<Double>, Serializable {
 
+		@Override
+		public void onAdd(Double item) {
+			if (storeless) {
+				storelessStats.increment(item);
+			}
+			else {
+				resizeStats();
+				stats.addValue(item);
+			}
+		}
+
+		@Override
+		public void onRemove(Double item) {
+			if (storeless) {
+				throw new IllegalStateException("Window is infinite and values should never be removed! There must be a bug!");
+			}
+			else {
+				resizeStats();
+			}
+		}
+
+		@Override
+		public void onClear() {
+			if (stats!=null)
+				stats.clear();
+			if (storelessStats!=null)
+				storelessStats.clear();
+		}
+
+		private void resizeStats() {
+			if (windowByKey.get(0).getLength() != stats.getWindowSize())
+				stats.setWindowSize(windowByKey.get(0).getLength());
+		}
+	}
 }

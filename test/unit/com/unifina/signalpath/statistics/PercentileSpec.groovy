@@ -10,14 +10,16 @@ class PercentileSpec extends Specification {
 	def setup() {
 		module = new Percentile()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "5"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "2"],
+				[name: "percentage", value: 75D]
+		]])
 	}
 
 	void "percentile gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(5)
-		module.getInput("minSamples").receive(2)
-		module.getInput("percentage").receive(75D)
-
 		Map inputValues = [
 			in: [1, 3, 1.5, 6, 7, 31, 8].collect {it?.doubleValue()},
 		]
