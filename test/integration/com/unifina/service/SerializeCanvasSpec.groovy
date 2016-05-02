@@ -101,6 +101,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 				canvas.state = Canvas.State.STOPPED
 				canvasService.start(canvas, false)
 				globals = kafkaService.globals = globals(canvasService, canvas)
+				sleep(1000) // msgs might be sent before the canvas is really running
 			}
 		}
 
