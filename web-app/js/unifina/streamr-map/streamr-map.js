@@ -103,11 +103,22 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
-                updates.forEach(function(update) {
-                    // get center from the map (projected)
-                    var point = bigPointLayer._map.latLngToContainerPoint(update.latlng);
-                    bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, update.color)
-                })
+                var max = updates.length
+                var traceRedrawCount = 10000
+                var i = 0
+                function redrawTrace() {
+                    setTimeout(function() {
+                        var count = i + traceRedrawCount
+                        while(i < count && i < max) {
+                            var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
+                            bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
+                            i++
+                        }
+                        if(i < max)
+                            redrawTrace()
+                    })
+                }
+                redrawTrace()
 
                 _this.pendingLineUpdates = []
             }
