@@ -127,25 +127,26 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 						public int compare(Field o1, Field o2) {
 							return o1.getName().compareTo(o2.getName());
 						}
-					});
+	    			});
 
-					for (Field f : fields) {
-						try {
-							// This is required to avoid java.lang.IllegalAccessException and requires privileges
-							f.setAccessible(true);
-							Object obj = f.get(AbstractSignalPathModule.this);
-							if (Input.class.isInstance(obj)) {
+	    			for (Field f : fields) {
+	    				try {
+	    					// This is required to avoid java.lang.IllegalAccessException and requires privileges
+	    					f.setAccessible(true);
+	    					Object obj = f.get(AbstractSignalPathModule.this);
+	    					if (Input.class.isInstance(obj) && !inputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
 								addInput((Input) obj);
-							} else if (Output.class.isInstance(obj)) {
+							}
+	    					else if (Output.class.isInstance(obj) && !outputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
 								addOutput((Output) obj);
 							}
-						} catch (Exception e) {
-							log.error("Could not get field: " + f + ", class: " + AbstractSignalPathModule.this.getClass() + " due to exception: " + e);
-						} finally {
-							// Set the field back to non-accessible
-							f.setAccessible(false);
-						}
-					}
+	    				} catch (Exception e) {
+	    					log.error("Could not get field: "+f+", class: "+AbstractSignalPathModule.this.getClass()+" due to exception: "+e);
+	    				} finally {
+	    					// Set the field back to non-accessible
+	    					f.setAccessible(false);
+	    				}
+	    			}
 					return null;
 				}
 			});
@@ -182,6 +183,24 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		checkDirtyAndReadyCounters();
 	}
 
+	public void removeInput(Input input) {
+		if (!inputs.contains(input)) {
+			throw new IllegalArgumentException("Unable to remove input: input not found: "+input);
+		}
+
+		inputs.remove(input);
+
+		inputsByName.remove(input.getName());
+		for (Object alias : input.getAliases()) {
+			inputsByName.remove(alias.toString());
+		}
+
+		inputCount = inputs.size();
+
+		// re-count because inputs already contained in the counters might be removed
+		checkDirtyAndReadyCounters();
+	}
+
 	public void addOutput(Output output) {
 		addOutput(output, output.getName());
 	}
@@ -196,6 +215,19 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		for (Object alias : output.getAliases()) {
 			outputsByName.put(alias.toString(), output);
+		}
+	}
+
+	public void removeOutput(Output output) {
+		if (!outputs.contains(output)) {
+			throw new IllegalArgumentException("Unable to remove output: output not foudn: "+output);
+		}
+
+		outputs.remove(output);
+		outputsByName.remove(output.getName());
+
+		for (Object alias : output.getAliases()) {
+			outputsByName.remove(alias.toString());
 		}
 	}
 
