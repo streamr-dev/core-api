@@ -472,7 +472,7 @@ describe('streamr-map', function() {
 				_this.addTo = function(){}
 				return _this
 			}
-			map.createMarker("test")
+			map.createMarker(0, "test")
 		})
 		it('must call openPopup on "mouseover"', function(done) {
 			global.L.marker = function(latlng, attr) {
