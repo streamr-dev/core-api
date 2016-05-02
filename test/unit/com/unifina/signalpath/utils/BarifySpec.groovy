@@ -16,18 +16,19 @@ class BarifySpec extends Specification {
 		when:
 		module.getInput("barLength").receive(60)
 		Map inputValues = [
-			in: [3, 3.5, 3.2,
-				 2.8, 2.1, 2.0, 3.05, 3.11, 2.99,
-				 2.59, 3, 3.1, 3.2, 0.995, 4.1, 3.2, 3.3
+			in: [3, 3.5,
+				 3.2, 2.8, 2.1, 2.0, 3.05, 3.11,
+				 2.99, 2.59, 3, 3.1, 3.2, 0.995, 4.1, 3.2,
+				 3.3
 			].collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			open : [3, 3.2, 2.99].collect { it?.doubleValue() },
-			high : [3.5, 3.2, 4.1].collect { it?.doubleValue() },
+			open : [3, 3.5, 3.11].collect { it?.doubleValue() },
+			high : [3.5, 3.5, 4.1].collect { it?.doubleValue() },
 			low  : [3, 2.0, 0.995].collect { it?.doubleValue() },
-			close: [3.2, 2.99, 3.3].collect { it?.doubleValue() },
-			sum  : [6.7, 16.05, 23.485].collect { it?.doubleValue() },
-			avg  : [3.35, 2.675, 2.935625].collect { it?.doubleValue() },
+			close: [3.5, 3.11, 3.2].collect { it?.doubleValue() },
+			sum  : [6.5, 16.26, 23.175].collect { it?.doubleValue() },
+			avg  : [3.25, 2.71, 2.896875].collect { it?.doubleValue() },
 
 		]
 		Map ticks = [

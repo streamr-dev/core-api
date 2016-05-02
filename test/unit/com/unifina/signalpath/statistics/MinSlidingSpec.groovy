@@ -10,12 +10,15 @@ class MinSlidingSpec extends Specification {
 	def setup() {
 		module = new MinSliding()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "3"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "2"]
+		]])
 	}
 
 	void "minSliding gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(3)
-		module.getInput("minSamples").receive(2)
 		Map inputValues = [
 			in: [1, 3, 1.5, 6, 7, 31, 8, 2, 5].collect {it?.doubleValue()},
 		]

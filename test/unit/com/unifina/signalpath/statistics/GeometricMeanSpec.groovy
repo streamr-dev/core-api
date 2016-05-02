@@ -15,9 +15,13 @@ class GeometricMeanSpec extends Specification {
     }
 	
 	void "geometricMean gives the right answer"() {
+		module.configure([inputs: [
+				[name: "windowLength", value: "3"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "2"]
+		]])
+
 		when:
-		module.getInput("windowLength").receive(3)
-		module.getInput("minSamples").receive(2)
 		Map inputValues = [
 			in: [1, 3, 1.5, 6, 7, 31, 8].collect {it?.doubleValue()},
 		]

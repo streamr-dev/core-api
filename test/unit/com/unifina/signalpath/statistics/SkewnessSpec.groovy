@@ -10,13 +10,15 @@ class SkewnessSpec extends Specification {
 	def setup() {
 		module = new Skewness()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "4"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "3"]
+		]])
 	}
 
 	void "skewness gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(4)
-		module.getInput("minSamples").receive(3)
-
 		Map inputValues = [
 			in: [1, 3, 1.5, 6, 7, 31, 8].collect {it?.doubleValue()},
 		]

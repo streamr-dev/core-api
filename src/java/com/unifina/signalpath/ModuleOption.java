@@ -52,7 +52,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		choice.put("value", value);
 		choices.add(choice);
 	}
-	
+
 	public void addTo(Map<String,Object> options) {
 		options.put(key, this);
 	}
@@ -91,5 +91,9 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 
 	public static ModuleOption createInt(String key, Integer value) {
 		return new ModuleOption(key, value, OPTION_INTEGER);
+	}
+
+	public static ModuleOption createString(String key, String value) {
+		return new ModuleOption(key, value, OPTION_STRING);
 	}
 }
