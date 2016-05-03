@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class PutToMapSpec extends Specification {
+class PutToMapSpec extends ModuleSpecification {
 	PutToMap module
 
 	def setup() {

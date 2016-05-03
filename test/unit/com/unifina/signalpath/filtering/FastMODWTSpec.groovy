@@ -1,9 +1,9 @@
 package com.unifina.signalpath.filtering
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class FastMODWTSpec extends Specification {
+class FastMODWTSpec extends ModuleSpecification {
 
 	FastMODWT module
 

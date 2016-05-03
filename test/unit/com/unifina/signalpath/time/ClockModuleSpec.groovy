@@ -6,14 +6,14 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
-class ClockModuleSpec extends Specification {
+class ClockModuleSpec extends ModuleSpecification {
 
 	Globals globals
 	ClockModule module

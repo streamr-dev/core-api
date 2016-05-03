@@ -2,9 +2,9 @@ package com.unifina.signalpath.simplemath
 
 import com.unifina.utils.DU
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class ChangeRelativeSpec extends Specification {
+class ChangeRelativeSpec extends ModuleSpecification {
 	
 	ChangeRelative module
 	

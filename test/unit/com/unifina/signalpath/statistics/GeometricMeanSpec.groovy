@@ -3,9 +3,9 @@ package com.unifina.signalpath.statistics
 import com.unifina.utils.testutils.ModuleTestHelper
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class GeometricMeanSpec extends Specification {
+class GeometricMeanSpec extends ModuleSpecification {
 
 	GeometricMean module
 	

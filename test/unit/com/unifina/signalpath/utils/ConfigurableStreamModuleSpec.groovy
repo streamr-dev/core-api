@@ -7,11 +7,11 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 @TestMixin(GrailsUnitTestMixin)
 @Mock(Stream)
-class ConfigurableStreamModuleSpec extends Specification {
+class ConfigurableStreamModuleSpec extends ModuleSpecification {
 
 	Globals globals
 	ConfigurableStreamModule module

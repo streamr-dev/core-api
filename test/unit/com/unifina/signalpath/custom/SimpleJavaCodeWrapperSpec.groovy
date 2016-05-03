@@ -8,10 +8,10 @@ import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 @TestMixin(GrailsUnitTestMixin)
-class SimpleJavaCodeWrapperSpec extends Specification {
+class SimpleJavaCodeWrapperSpec extends ModuleSpecification {
 
 	SimpleJavaCodeWrapper module
 	Globals globals

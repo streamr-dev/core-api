@@ -1,9 +1,9 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class MapAsTableSpec extends Specification {
+class MapAsTableSpec extends ModuleSpecification {
 	MapAsTable module
 
 	def setup() {

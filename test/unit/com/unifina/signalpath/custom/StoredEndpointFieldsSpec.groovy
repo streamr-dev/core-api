@@ -2,9 +2,9 @@ package com.unifina.signalpath.custom
 
 import com.unifina.signalpath.Input
 import com.unifina.signalpath.Output
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class StoredEndpointFieldsSpec extends Specification {
+class StoredEndpointFieldsSpec extends ModuleSpecification {
 
 	private static class A {
 		private int a;

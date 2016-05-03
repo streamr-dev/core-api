@@ -1,9 +1,9 @@
 package com.unifina.signalpath.charts
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class HeatmapSpec extends Specification {
+class HeatmapSpec extends ModuleSpecification {
 
 	Heatmap module
 

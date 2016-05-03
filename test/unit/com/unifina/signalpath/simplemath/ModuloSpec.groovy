@@ -1,10 +1,10 @@
 package com.unifina.signalpath.simplemath
 
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.utils.testutils.ModuleTestHelper
 
-class ModuloSpec extends Specification {
+class ModuloSpec extends ModuleSpecification {
 	
 	Modulo module
 	

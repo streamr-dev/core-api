@@ -15,11 +15,11 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 @TestMixin(GrailsUnitTestMixin)
 @Mock([Stream, Feed])
-class SendToStreamSpec extends Specification {
+class SendToStreamSpec extends ModuleSpecification {
 
 	static class FakePermissionService extends PermissionService {
 		@Override boolean canRead(SecUser user, resource) { return true }
@@ -45,7 +45,6 @@ class SendToStreamSpec extends Specification {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
 			permissionService(FakePermissionService)
-			metricsService(MockMetricsService)
 		}
 
 		def feed = new Feed()

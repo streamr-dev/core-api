@@ -2,9 +2,9 @@ package com.unifina.signalpath.map
 
 import groovy.transform.CompileStatic
 import org.apache.commons.lang3.RandomStringUtils
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class ValueSortedMapSpec extends Specification {
+class ValueSortedMapSpec extends ModuleSpecification {
 	def seededRandom = new Random(1234)
 	Map valueSortedMap = new ValueSortedMap<String, Double>(true)
 

@@ -1,9 +1,9 @@
 package com.unifina.signalpath.filtering
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class ExponentialMovingAverageSpec extends Specification {
+class ExponentialMovingAverageSpec extends ModuleSpecification {
 
 	ExponentialMovingAverage module
 

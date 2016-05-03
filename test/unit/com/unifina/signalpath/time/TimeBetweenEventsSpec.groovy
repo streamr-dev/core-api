@@ -3,13 +3,13 @@ package com.unifina.signalpath.time
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
-class TimeBetweenEventsSpec extends Specification {
+class TimeBetweenEventsSpec extends ModuleSpecification {
 	
 	Globals globals
 	TimeBetweenEvents module

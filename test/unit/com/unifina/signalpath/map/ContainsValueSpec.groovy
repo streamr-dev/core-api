@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class ContainsValueSpec extends Specification {
+class ContainsValueSpec extends ModuleSpecification {
 	ContainsValue module
 
 	def setup() {

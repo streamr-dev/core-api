@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class RemoveFromMapSpec extends Specification {
+class RemoveFromMapSpec extends ModuleSpecification {
 	RemoveFromMap module
 
 	def setup() {

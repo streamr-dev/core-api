@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class SortMapSpec extends Specification {
+class SortMapSpec extends ModuleSpecification {
 	SortMap module
 
 	Map inputValues = [

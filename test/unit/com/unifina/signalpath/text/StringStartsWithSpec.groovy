@@ -1,10 +1,10 @@
 package com.unifina.signalpath.text
 
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.utils.testutils.ModuleTestHelper
 
-class StringStartsWithSpec extends Specification {
+class StringStartsWithSpec extends ModuleSpecification {
 	
 	def module
 

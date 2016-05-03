@@ -388,16 +388,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			sendOutput();
 			drivingInputs.clear();
 
-			if (activations != null) {
+			if (activations == null) {
+				MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
+				activations = metricsService.getMeterFor("activations", this);
 				activations.mark();
-			} else {
-				// don't use metrics in tests that don't defineBeans { metricsService(MockMetricsService) }
-				if (Holders.getGrailsApplication() != null && Holders.getGrailsApplication().getMainContext().containsBean("metricsService")) {
-					MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
-					activations = metricsService.getMeterFor("activations", this);
-					activations.mark();
-				}
 			}
+			activations.mark();
 		}
 	}
 
