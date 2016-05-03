@@ -187,7 +187,9 @@ class MapModulesSpec extends LoginTester1Spec {
 	private boolean tableContains(Collection<String> patterns) {
 		def mapAsTable = findModuleOnCanvas("MapAsTable")
 		mapAsTable.find(".event-table-module-content tr").find { $row ->
-			patterns.find { $row.text() =~ it } == null
+			def found = patterns.find { $row.text() =~ it }
+			assert found != null
+			found == null
 		} == null
 	}
 
