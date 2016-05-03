@@ -22,7 +22,6 @@ import com.unifina.utils.NetworkInterfaceUtils
 class TaskWorker extends Thread {
 	
 	GrailsApplication grailsApplication
-//	BacktestService backtestService
 	TaskService taskService
 	SessionFactory sessionFactory
 

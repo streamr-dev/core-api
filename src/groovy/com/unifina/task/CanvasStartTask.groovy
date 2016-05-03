@@ -3,7 +3,6 @@ package com.unifina.task
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
-import com.unifina.service.KafkaService
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
@@ -20,7 +19,14 @@ public class CanvasStartTask extends AbstractTask {
 	public CanvasStartTask(Task task, Map<String, Object> config,
 						   GrailsApplication grailsApplication) {
 		super(task, config, grailsApplication);
-		canvasService = (KafkaService) grailsApplication.getMainContext().getBean("canvasService");
+		canvasService = (CanvasService) grailsApplication.getMainContext().getBean("canvasService");
+	}
+
+	// TODO: used by unit test to set mock CanvasService. Can be removed when upgrading to Grails 2.4+
+	public CanvasStartTask(Task task, Map<String, Object> config,
+						   GrailsApplication grailsApplication, CanvasService canvasService) {
+		super(task, config, grailsApplication);
+		this.canvasService = canvasService
 	}
 
 	@Override
@@ -28,11 +34,11 @@ public class CanvasStartTask extends AbstractTask {
 		Canvas canvas = Canvas.get(config.id)
 
 		try {
-			canvasService.start(config.forceReset)
+			canvasService.start(canvas, config.forceReset)
 		} catch (Exception e) {
-			if (!config.forceReset && config.tryResetting) {
+			if (!config.forceReset && config.resetOnFail) {
 				log.error("Failed to start canvas $canvas.id, trying again by clearing serialization...", e)
-				canvasService.start(true)
+				canvasService.start(canvas, true)
 			} else {
 				log.error("Failed to start canvas $canvas.id", e)
 			}

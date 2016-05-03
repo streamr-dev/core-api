@@ -19,6 +19,7 @@ import com.unifina.utils.NetworkInterfaceUtils
 class BootService {
 	
 	def grailsApplication
+	def taskService
 	def servletContext
 	
 	private static final Logger log = Logger.getLogger(BootService.class)
@@ -67,11 +68,7 @@ class BootService {
 		if (isFullEnvironment()) {
 			def ip = NetworkInterfaceUtils.getIPAddress()
 			log.info("My network interface is: $ip")
-			
-			// 
-			def taskWorkers = []
-			servletContext["taskWorkers"] = taskWorkers
-			
+
 			HostConfig taskWorkerConfig = HostConfig.findByHostAndParameter(ip.toString(),"task.workers")
 			
 			int workerCount
@@ -81,10 +78,8 @@ class BootService {
 				workerCount = Integer.parseInt(taskWorkerConfig.value)
 			else workerCount = config.unifina.task.workers ?: 0
 			
-			for (int i=1;i<=workerCount;i++) {
-				TaskWorker worker = new TaskWorker(grailsApplication,i)
-				worker.start()
-				taskWorkers.add(worker)
+			for (int i=0; i<workerCount; i++) {
+				taskService.startTaskWorker()
 			}
 			log.info("onInit: started $workerCount task workers")
 			
@@ -98,9 +93,10 @@ class BootService {
 	}
 	
 	def onDestroy() {
+		taskService?.stopAllTaskWorkers()
+
 		if (servletContext) {
 			servletContext["signalPathRunners"]?.values().each {it.abort()}
-			servletContext["taskWorkers"]?.each {it.quit()}
 			servletContext["taskMessageListener"]?.quit()
 			servletContext["realtimeDataSource"]?.stopFeed()
 		}

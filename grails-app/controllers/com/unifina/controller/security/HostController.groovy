@@ -18,9 +18,7 @@ class HostController {
 	def shutdown() {
 		if (request.method.equals("POST")) {
 			// Shut down task workers, avoid ConcurrentModificationException by making a copy of the list
-			taskService.getWorkers().collect { it }.each {
-				taskService.stopWorker(it.getWorkerId())
-			}
+			taskService.stopAllTaskWorkers()
 
 			// Stop all canvases
 			List<Canvas> stoppedCanvases = signalPathService.stopAllLocalCanvases()
@@ -31,8 +29,9 @@ class HostController {
 			}
 
 			render(stoppedCanvases*.toMap() as JSON)
+		} else {
+			throw new ApiException(405, "METHOD_NOT_ALLOWED", "Dude you need to do a POST")
 		}
-		throw new ApiException(405, "METHOD_NOT_ALLOWED", "Dude you need to do a POST")
 	}
 
 }

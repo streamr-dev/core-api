@@ -17,7 +17,8 @@ class TaskService {
 	
 	GrailsApplication grailsApplication
 	def kafkaService
-	def servletContext
+
+	private List<TaskWorker> taskWorkers = []
 
 	String createTaskGroupId() {
 		return UUID.randomUUID().toString()
@@ -182,26 +183,36 @@ class TaskService {
 		return tasks
 	}
 
-	List<TaskWorker> getWorkers() {
-		return servletContext["taskWorkers"]
+	List<TaskWorker> getTaskWorkers() {
+		return taskWorkers
 	}
 
-	TaskWorker stopWorker(id) {
-		getWorkers().each {
-			if (it.workerId==id) {
-				it.quit()
-				return it
-			}
+	TaskWorker stopTaskWorker(id) {
+		TaskWorker tw = getTaskWorkers().find {it.workerId == id}
+		if (tw) {
+			tw.quit()
 		}
-		return null
+		return tw
 	}
 
-	TaskWorker startWorker(SecUser priorityUser = null) {
-		List workers = getWorkers()
+	void stopAllTaskWorkers() {
+		List<TaskWorker> copy = []
+		copy.addAll(getTaskWorkers())
+		copy.each {
+			stopTaskWorker(it.workerId)
+		}
+	}
 
-		TaskWorker worker = new TaskWorker(grailsApplication, workers.size() + 1 , priorityUser)
+	TaskWorker startTaskWorker(SecUser priorityUser = null) {
+		List workers = getTaskWorkers()
+
+		TaskWorker worker = createTaskWorker(grailsApplication, workers.size() + 1, priorityUser)
 		worker.start()
 		workers.add(worker)
 		return worker
+	}
+
+	TaskWorker createTaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser) {
+		return new TaskWorker(grailsApplication, id, priorityUser)
 	}
 }

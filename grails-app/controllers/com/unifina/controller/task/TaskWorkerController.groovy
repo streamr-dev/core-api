@@ -3,7 +3,6 @@ package com.unifina.controller.task
 import grails.plugin.springsecurity.annotation.Secured
 
 import com.unifina.domain.security.SecUser
-import com.unifina.task.TaskWorker
 
 @Secured(["ROLE_ADMIN"])
 class TaskWorkerController {
@@ -13,19 +12,19 @@ class TaskWorkerController {
 	def taskService
 
 	def status() {
-		def workers = taskService.getWorkers()
+		def workers = taskService.getTaskWorkers()
 		def users = SecUser.list()
 		[workers:workers,users:users]
 	}
 	
 	def quitWorker() {
-		taskService.stopWorker(params.int("id"))
+		taskService.stopTaskWorker(params.int("id"))
 		redirect(action: "status")
 	}
 	
 	def startWorker() {
 		SecUser user = params.user ? SecUser.get(params.user) : null
-		taskService.startWorker(user)
+		taskService.startTaskWorker(user)
 		redirect(action: "status")
 	}
 	
