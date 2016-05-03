@@ -19,6 +19,7 @@ import java.util.concurrent.FutureTask;
 import com.codahale.metrics.Meter;
 import com.unifina.service.MetricsService;
 import com.unifina.utils.HibernateHelper;
+import grails.util.Environment;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
 
@@ -84,8 +85,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 
-	private final MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
-	private final Meter activations = metricsService.getMeterFor("activations", this);
+	transient private Meter activations;
 
 	/**
 	 * This propagator is created and used if an UI event triggers
@@ -386,8 +386,18 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			wasReady = true;
 			setSendPending(false);
 			sendOutput();
-			activations.mark();
 			drivingInputs.clear();
+
+			if (activations != null) {
+				activations.mark();
+			} else {
+				// don't use metrics in tests that don't defineBeans { metricsService(MockMetricsService) }
+				if (Holders.getGrailsApplication() != null && Holders.getGrailsApplication().getMainContext().containsBean("metricsService")) {
+					MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
+					activations = metricsService.getMeterFor("activations", this);
+					activations.mark();
+				}
+			}
 		}
 	}
 

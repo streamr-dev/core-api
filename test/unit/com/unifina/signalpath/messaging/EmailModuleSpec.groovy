@@ -1,5 +1,6 @@
 package com.unifina.signalpath.messaging
 
+import com.unifina.utils.MockMetricsService
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
@@ -26,10 +27,11 @@ public class EmailModuleSpec extends Specification {
 	boolean notificationSent = false
 
 	void setup() {
-		
 		defineBeans {
 			mailService(MockMailService)
+			metricsService(MockMetricsService)
 		}
+
 		ms = grailsApplication.mainContext.getBean("mailService")
 		assert ms != null
 		
