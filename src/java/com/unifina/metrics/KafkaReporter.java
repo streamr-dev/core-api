@@ -55,7 +55,7 @@ public class KafkaReporter extends ScheduledReporter {
 		for (Map.Entry<String, ?> metric : metrics.entrySet()) {
 			try {
 				Map<String, Object> message = new LinkedHashMap<>();
-				message.put("user", user.getName());
+				message.put("user", user.getId());
 				message.put("metric", metric.getKey());
 				message.put("value", metric.getValue());
 
