@@ -4,6 +4,7 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import grails.util.Holders
+import org.apache.log4j.Logger
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -11,6 +12,8 @@ import java.text.DecimalFormatSymbols
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
 class MapModulesSpec extends LoginTester1Spec {
+
+	Logger log = Logger.getLogger(MapModulesSpec)
 
 	UnifinaKafkaProducer kafka
 
@@ -187,7 +190,12 @@ class MapModulesSpec extends LoginTester1Spec {
 	private boolean tableContains(Collection<String> patterns) {
 		def mapAsTable = findModuleOnCanvas("MapAsTable")
 		mapAsTable.find(".event-table-module-content tr").find { $row ->
-			patterns.find { $row.text() =~ it } == null
+			def found = patterns.find { $row.text() =~ it }
+			if (found == null) {
+				log.info("Could not find " + $row.text())
+				assert false
+			}
+			found == null
 		} == null
 	}
 
