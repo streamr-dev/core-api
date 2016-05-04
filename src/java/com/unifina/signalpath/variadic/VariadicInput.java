@@ -30,12 +30,6 @@ public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 	}
 
 	@Override
-	public void getConfiguration(Map<String, Object> config) {
-		config.put("variadicInput", true);
-		super.getConfiguration(config);
-	}
-
-	@Override
 	void attachToModule(AbstractSignalPathModule owner, Input<T> input) {
 		owner.addInput(input);
 	}
@@ -48,5 +42,10 @@ public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 	@Override
 	String getDisplayName() {
 		return "in";
+	}
+
+	@Override
+	String getModuleConfigField() {
+		return "inputs";
 	}
 }

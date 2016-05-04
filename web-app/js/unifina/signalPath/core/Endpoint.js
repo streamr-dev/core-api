@@ -66,6 +66,12 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 				me.json.connected = me.isConnected()
 				if (me.json.connected) {
 					me.div.addClass("connected");
+					if (me.module.jsonData.updateModuleOnConnection) {
+						if (me.module.modulesUpdating === 0) {
+							console.log("Invoking onOptionsUpdate() of input's module", me.module)
+							me.module.onOptionsUpdated()
+						}
+					}
 				}
 				
 				if (me.hasWarning())
@@ -79,6 +85,12 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 				me.json.connected = me.isConnected()
 				if (!me.json.connected) {
 					me.div.removeClass("connected");
+					if (me.module.jsonData.updateModuleOnConnection) {
+						if (me.module.modulesUpdating === 0) {
+							console.log("Invoking onOptionsUpdate() of input's module", me.module)
+							me.module.onOptionsUpdated()
+						}
+					}
 				}
 				
 				if (me.hasWarning())

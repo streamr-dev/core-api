@@ -33,12 +33,6 @@ public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 	}
 
 	@Override
-	public void getConfiguration(Map<String, Object> config) {
-		config.put("variadicOutput", true);
-		super.getConfiguration(config);
-	}
-
-	@Override
 	void attachToModule(AbstractSignalPathModule owner, Output<T> output) {
 		owner.addOutput(output);
 	}
@@ -49,5 +43,10 @@ public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 	@Override
 	String getDisplayName() {
 		return "out";
+	}
+
+	@Override
+	String getModuleConfigField() {
+		return "outputs";
 	}
 }

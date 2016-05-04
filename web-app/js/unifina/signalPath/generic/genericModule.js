@@ -13,6 +13,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.inputs = [];
 	prot.outputsByName = {};
 	prot.outputs = [];
+	prot.modulesUpdating = 0;
 	
 	// Updated on dragstart, used on drag event to repaint jsPlumb connectors
 	var _cachedEndpoints = []
@@ -64,6 +65,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superUpdateFrom = pub.updateFrom;
 	function updateFrom(data) {
+		prot.modulesUpdating += 1
 		var oldInputConnections = [];
 		var oldOutputConnections = [];
 		
@@ -98,6 +100,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		});
 		
 		pub.redraw()
+		prot.modulesUpdating -= 1
 	}
 	pub.updateFrom = updateFrom;
 	

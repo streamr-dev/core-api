@@ -25,14 +25,25 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 	private int currentIndex = 1;
 
 	public void getConfiguration(Map<String,Object> config) {
-		config.put(namesConfig, collectEndpointNames());
+		List<String> names = new ArrayList<>();
+		for (E e : endpoints) {
+			names.add(e.getName());
+		}
+		if (placeholderEndpoint != null) {
+			names.add(placeholderEndpoint.getName());
+		}
+
+		config.put(namesConfig, names);
+		config.put("updateModuleOnConnection", true);
 	}
 
 	public void onConfiguration(Map<String,Object> config) {
 		List<String> existingEndpointNames = (List<String>) config.get(namesConfig);
 		if (existingEndpointNames != null) {
 			for (String endpointName : existingEndpointNames) {
-				addEndpoint(endpointName);
+				if (determineFromConfigIfConnected(config, endpointName)) {
+					addEndpoint(endpointName);
+				}
 			}
 		}
 		addPlaceholderEndpoint();
@@ -68,10 +79,31 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 
 	abstract String getDisplayName();
 
+	abstract String getModuleConfigField();
+
 	private void addEndpoint(String name) {
 		E endpoint = initializeEndpoint(name);
 		endpoints.add(endpoint);
 		attachToModule(module, endpoint);
+	}
+
+	/**
+	 * Determine whether an endpoint is connected through config rather than asking directly from endpoint object
+	 * instance. The reason being that during <code>onConfiguration()</code>, no endpoint connections have yet been
+	 * made.
+	 */
+	private boolean determineFromConfigIfConnected(Map<String, Object> config, String endpointName) {
+		List<Map<String, Object>> inputs = (List<Map<String, Object>>) config.get(getModuleConfigField());
+		if (inputs != null) {
+			for (Map<String, Object> input : inputs) {
+				String name = (String) input.get("name");
+				if (endpointName.equals(name)) {
+					Boolean isConnected = (Boolean) input.get("connected");
+					return isConnected != null && isConnected;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void addPlaceholderEndpoint() {
@@ -84,13 +116,5 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		E endpoint = endpointInstantiator.instantiate(module, name);
 		endpoint.setDisplayName(getDisplayName() + (currentIndex++));
 		return endpoint;
-	}
-
-	private List<String> collectEndpointNames() {
-		List<String> names = new ArrayList<>();
-		for (E e : endpoints) {
-			names.add(e.getName());
-		}
-		return names;
 	}
 }
