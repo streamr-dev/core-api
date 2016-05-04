@@ -17,13 +17,16 @@ class HostController {
 
 	def shutdown() {
 		if (request.method.equals("POST")) {
-			// Shut down task workers, avoid ConcurrentModificationException by making a copy of the list
+			// Shut down task workers
 			taskService.stopAllTaskWorkers()
 
 			// Stop all canvases
 			List<Canvas> stoppedCanvases = signalPathService.stopAllLocalCanvases()
 
-			// Create start task for those canvases
+			// Discard adhoc canvases
+			stoppedCanvases = stoppedCanvases.findAll { !it.adhoc }
+
+			// Create start tasks
 			stoppedCanvases.each {
 				canvasService.startRemote(it, false, true)
 			}

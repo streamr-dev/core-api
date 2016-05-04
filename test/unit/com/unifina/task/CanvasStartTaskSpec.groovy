@@ -42,7 +42,7 @@ class CanvasStartTaskSpec extends Specification {
 	void "task must retry starting with reset-and-start if resetOnFail==true"() {
 		CanvasStartTask task = new CanvasStartTask(
 				new Task(),
-				CanvasStartTask.getConfig(canvas, true, false),
+				CanvasStartTask.getConfig(canvas, false, true),
 				grailsApplication,
 				canvasService)
 
@@ -58,7 +58,7 @@ class CanvasStartTaskSpec extends Specification {
 	void "task must reset-and-start canvas if forceReset==true"() {
 		CanvasStartTask task = new CanvasStartTask(
 				new Task(),
-				CanvasStartTask.getConfig(canvas, false, true),
+				CanvasStartTask.getConfig(canvas, true, false),
 				grailsApplication,
 				canvasService)
 

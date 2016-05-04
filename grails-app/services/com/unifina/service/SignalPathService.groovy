@@ -236,7 +236,7 @@ class SignalPathService {
 
 	List<Canvas> stopAllLocalCanvases() {
 		List canvases = []
-		List runnerKeys = servletContext["signalPathRunners"].each { String key, SignalPathRunner runner ->
+		servletContext["signalPathRunners"].each { String key, SignalPathRunner runner ->
 			if (stopLocalRunner(key)) {
 				canvases.addAll(runner.getSignalPaths().collect {it.getCanvas()})
 			}
@@ -260,7 +260,7 @@ class SignalPathService {
 		}
 		else {
 			log.error("stopLocal: could not find runner $canvas.runner!")
-			updateState(canvas.runner, Canvas.State.STOPPED)
+			updateState(runnerId, Canvas.State.STOPPED)
 			return false
 		}
 	}

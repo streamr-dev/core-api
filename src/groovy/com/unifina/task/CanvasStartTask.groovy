@@ -31,14 +31,20 @@ public class CanvasStartTask extends AbstractTask {
 
 	@Override
 	public boolean run() {
-		Canvas canvas = Canvas.get(config.id)
+		Canvas canvas
 
 		try {
-			canvasService.start(canvas, config.forceReset)
+			Canvas.withTransaction {
+				canvas = Canvas.get(config.id)
+				canvasService.start(canvas, config.forceReset)
+			}
 		} catch (Exception e) {
 			if (!config.forceReset && config.resetOnFail) {
 				log.error("Failed to start canvas $canvas.id, trying again by clearing serialization...", e)
-				canvasService.start(canvas, true)
+				Canvas.withTransaction {
+					canvas = Canvas.get(config.id)
+					canvasService.start(canvas, true)
+				}
 			} else {
 				log.error("Failed to start canvas $canvas.id", e)
 			}
@@ -52,7 +58,7 @@ public class CanvasStartTask extends AbstractTask {
 		
 	}
 	
-	public static Map<String,Object> getConfig(Canvas canvas, boolean resetOnFail, boolean forceReset) {
+	public static Map<String,Object> getConfig(Canvas canvas, boolean forceReset, boolean resetOnFail) {
 		return [id:canvas.id, resetOnFail: resetOnFail, forceReset: forceReset]
 	}
 }
