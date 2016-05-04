@@ -1,5 +1,6 @@
 package com.unifina.signalpath.map
 
+import com.unifina.signalpath.Output
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
@@ -9,8 +10,12 @@ class GetMultiFromMapSpec extends Specification {
 	def setup() {
 		module = new GetMultiFromMap()
 		module.init()
-		module.configure([options: [outputs: [value: 4]]])
-		def displayNameToOutput = module.outputs.collectEntries {
+		module.configure([
+		    outputNames: ["endpoint-a", "endpoint-b", "endpoint-c", "endpoint-d"]
+		])
+
+		// Rename outputs
+		Map<String, Output> displayNameToOutput = module.outputs.collectEntries {
 			[(it.displayName): it]
 		}
 		displayNameToOutput["out1"].displayName = "a"

@@ -41,7 +41,9 @@ public class Input<T> extends Endpoint<T> {
 		if (!ready) {
 			ready = true;
 			wasReady = true;
-			owner.markReady(this);
+			if (requiresConnection) { // Has already been marked if connection not required
+				owner.markReady(this);
+			}
 		}
 		
 		if (drivingInput) {
@@ -149,7 +151,7 @@ public class Input<T> extends Endpoint<T> {
 	}
 
 	public boolean isReady() {
-		return ready;
+		return ready || !requiresConnection;
 	}
 
 	public boolean wasReady() {

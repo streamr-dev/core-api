@@ -1,6 +1,8 @@
 package com.unifina.signalpath.utils;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.Input;
+import com.unifina.signalpath.Output;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.OutputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInputOutputPair;
@@ -10,11 +12,16 @@ import java.util.Map;
 
 public class PassThrough extends AbstractSignalPathModule {
 
-	private VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(
-		this,
-		new InputInstantiator.SimpleObject(),
-		new OutputInstantiator.SimpleObject(),
-		1);
+	private Input<Object> in = new Input<>(this, "in", "Object");
+	private Output<Object> out = new Output<>(this, "out", "Object");
+	private VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(this,
+		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject(), 2);
+
+	@Override
+	public void init() {
+		addInput(in);
+		addOutput(out);
+	}
 
 	@Override
 	public Map<String, Object> getConfiguration() {
@@ -47,6 +54,7 @@ public class PassThrough extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
+		out.send(in.getValue());
 		List<Object> values = inputOutputPairs.getInputValues();
 		inputOutputPairs.sendValuesToOutputs(values);
 	}

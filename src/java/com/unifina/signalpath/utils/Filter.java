@@ -11,6 +11,7 @@ public class Filter extends PassThrough {
 		addInput(pass);
 		pass.setDrivingInput(false);
 		pass.canToggleDrivingInput = false;
+		super.init();
 	}
 
 	@Override

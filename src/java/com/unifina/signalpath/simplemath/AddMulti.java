@@ -8,11 +8,15 @@ import java.util.Map;
 
 public class AddMulti extends AbstractSignalPathModule {
 
-	private VariadicInput<Double> variadicInput = new VariadicInput<>(this, new InputInstantiator.TimeSeries(), 2);
+	private TimeSeriesInput in1 = new TimeSeriesInput(this, "in1");
+	private TimeSeriesInput in2 = new TimeSeriesInput(this, "in2");
+	private VariadicInput<Double> variadicInput = new VariadicInput<>(this, new InputInstantiator.TimeSeries(), 3);
 	private TimeSeriesOutput out = new TimeSeriesOutput(this, "sum");
 
 	@Override
 	public void init() {
+		addInput(in1);
+		addInput(in2);
 		addOutput(out);
 	}
 
@@ -20,6 +24,8 @@ public class AddMulti extends AbstractSignalPathModule {
 
 	public void sendOutput() {
 		double sum = 0;
+		sum += in1.getValue();
+		sum += in2.getValue();
 		for (Double val : variadicInput.getValues()) {
 			sum += val;
 		}

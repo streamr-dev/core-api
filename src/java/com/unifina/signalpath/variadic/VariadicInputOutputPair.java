@@ -18,10 +18,16 @@ public class VariadicInputOutputPair<T> implements Serializable {
 
 	public VariadicInputOutputPair(AbstractSignalPathModule module,
 								   InputInstantiator<T> inputInstantiator,
+								   OutputInstantiator<T> outputInstantiator) {
+		this(module, inputInstantiator, outputInstantiator, 1);
+	}
+
+	public VariadicInputOutputPair(AbstractSignalPathModule module,
+								   InputInstantiator<T> inputInstantiator,
 								   OutputInstantiator<T> outputInstantiator,
-								   int defaultCount) {
-		this.variadicInput = new VariadicInput<>(module, inputInstantiator, "inputOutputPairs", "inputNames", defaultCount);
-		this.variadicOutput = new VariadicOutput<>(module, outputInstantiator, "inputOutputPairs", "outputNames",  defaultCount);
+								   int startIndex) {
+		this.variadicInput = new VariadicInput<>(module, inputInstantiator, startIndex);
+		this.variadicOutput = new VariadicOutput<>(module, outputInstantiator, startIndex);
 	}
 
 	public void getConfiguration(Map<String,Object> config) {

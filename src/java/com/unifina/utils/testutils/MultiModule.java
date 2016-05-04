@@ -78,8 +78,8 @@ public class MultiModule extends AbstractSignalPathModule {
 		Double v1 = in1.getValue();
 		Double v2 = in2.getValue();
 
-		addMulti.findInputByDisplayName("in1").receive(v1);
-		addMulti.findInputByDisplayName("in2").receive(v2);
+		addMulti.getInput("in1").receive(v1);
+		addMulti.getInput("in2").receive(v2);
 
 		count.getInput("in").receive(v1);
 

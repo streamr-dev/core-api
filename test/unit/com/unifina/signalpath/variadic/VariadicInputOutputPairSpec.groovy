@@ -6,10 +6,13 @@ import spock.lang.Specification
 class VariadicInputOutputPairSpec extends Specification {
 	def module = new Multiply()
 	def inputOutputPairs = new VariadicInputOutputPair<Object>(module,
-		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject(), 3)
+		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject())
 
 	def setup() {
-		inputOutputPairs.onConfiguration([:])
+		inputOutputPairs.onConfiguration([
+			inputNames: ["endpoint-a", "endpoint-b"],
+			outputNames: ["endpoint-c", "endpoint-d"]
+		])
 	}
 
 	def "getConfiguration() provides expected module options and configurations"() {
@@ -19,16 +22,11 @@ class VariadicInputOutputPairSpec extends Specification {
 		inputOutputPairs.getConfiguration(config)
 
 		then:
-		config.keySet() == ["options", "inputNames", "outputNames", "variadicInput", "variadicOutput"] as Set
+		config.keySet() == ["inputNames", "outputNames", "variadicInput", "variadicOutput"] as Set
 
 		and:
-		config.options == [
-			inputOutputPairs: [value: 3, type: "int"],
-		]
-
-		and:
-		config.inputNames.size() == 3
-		config.outputNames.size() == 3
+		config.inputNames.size() == 2
+		config.outputNames.size() == 2
 
 		and:
 		config.variadicInput == true
@@ -37,18 +35,16 @@ class VariadicInputOutputPairSpec extends Specification {
 
 	def "sendValuesToOutputs() sends values to outputs"() {
 		when:
-		inputOutputPairs.sendValuesToOutputs([666, "hello", "world"])
+		inputOutputPairs.sendValuesToOutputs([666, "hello world"])
 		then:
 		module.findOutputByDisplayName("out1").value == 666
-		module.findOutputByDisplayName("out2").value == "hello"
-		module.findOutputByDisplayName("out3").value == "world"
+		module.findOutputByDisplayName("out2").value == "hello world"
 	}
 
 	def "getInputValues() returns values of inputs"() {
 		module.findInputByDisplayName("in1").receive("hello")
 		module.findInputByDisplayName("in2").receive("world")
-		module.findInputByDisplayName("in3").receive("!")
 		expect:
-		inputOutputPairs.inputValues == ["hello", "world", "!"]
+		inputOutputPairs.inputValues == ["hello", "world"]
 	}
 }

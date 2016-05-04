@@ -7,10 +7,13 @@ import spock.lang.Specification
 
 class VariadicEndpointSpec extends Specification {
 
-	def variadicEndpoint = new VariadicEndpoint(null, new InputInstantiator.SimpleObject(), "num", "names", 5) {
+	def variadicEndpoint = new VariadicEndpoint(null, new InputInstantiator.SimpleObject(), "names") {
 
 		@Override
 		def void attachToModule(AbstractSignalPathModule owner, Endpoint endpoint) {}
+
+		@Override
+		def void handlePlaceholder(Endpoint placeholderEndoint) {}
 
 		@Override
 		def String getDisplayName() {
@@ -18,73 +21,56 @@ class VariadicEndpointSpec extends Specification {
 		}
 	}
 
-	def "onConfiguration() with empty config initializes default number of endpoints"() {
+	def "onConfiguration() with empty config initializes no endpoint and single placeholder"() {
 		when:
 		variadicEndpoint.onConfiguration([:])
 		then:
-		variadicEndpoint.endpoints.size() == 5
+		variadicEndpoint.endpoints.size() == 0
+		variadicEndpoint.placeholder != null
 	}
 
-	def "onConfiguration() with existing config initializes expected number of endpoints"() {
+	def "onConfiguration() with config initializes existing endpoints and single placeholder"() {
 		when:
 		variadicEndpoint.onConfiguration([
-			options: [
-			    num: [value: 13, type: "int"]
-			]
+			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
 		])
 		then:
-		variadicEndpoint.endpoints.size() == 13
+		variadicEndpoint.endpoints.size() == 2
+		variadicEndpoint.endpoints[0].name == "endpoint-29fka8d"
+		variadicEndpoint.endpoints[1].name == "endpoint-lmg92jk"
+		variadicEndpoint.placeholder.name.startsWith("endpoint-")
 	}
 
 	def "endpoints' display names contain prefix followed by index"() {
 		when:
-		variadicEndpoint.onConfiguration([:])
-		then:
-		variadicEndpoint.endpoints*.displayName == (1..5).collect { "nameprefix$it" }
-	}
-
-	def "single endpoint's display name contains only prefix without index"() {
-		when:
 		variadicEndpoint.onConfiguration([
-			options: [
-				num: [value: 1, type: "int"]
-			]
+			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
 		])
 		then:
-		variadicEndpoint.endpoints*.displayName == ["nameprefix"]
+		variadicEndpoint.endpoints*.displayName == (1..2).collect { "nameprefix$it" }
 	}
 
-	def "onConfiguration() with existing config re-uses endpoint names for previously seen endpoints"() {
+	def "placeholder's display name contains prefix followed by index"() {
 		when:
 		variadicEndpoint.onConfiguration([
-			options: [
-				num: [value: 6, type: "int"],
-			],
-			names: ["aa", "bb", "cc", "dd"]
+			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
 		])
 		then:
-		variadicEndpoint.endpoints.size() == 6
-		variadicEndpoint.endpoints.subList(0, 4)*.name == ["aa", "bb", "cc", "dd"]
-		variadicEndpoint.endpoints.subList(4, 6).name.every { it.startsWith("endpoint-") }
+		variadicEndpoint.placeholder.displayName == "nameprefix3"
 	}
 
 	def "getConfiguration() provides current number of endpoints along with their names"() {
-		variadicEndpoint.onConfiguration([:])
+		variadicEndpoint.onConfiguration([
+			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
+		])
 		def config = [:]
 
 		when:
 		variadicEndpoint.getConfiguration(config)
 
 		then:
-		config.keySet() == ["options", "names"] as Set
-
-		and:
-		config.options == [
-		    num: [value: 5, type: "int"]
-		]
-
-		and:
-		config.names.size() == 5
+		config.keySet() == ["names"] as Set
+		config.names.size() == 2
 		config.names.every { it.startsWith("endpoint-") }
 	}
 }

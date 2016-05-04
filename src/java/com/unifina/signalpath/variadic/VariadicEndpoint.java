@@ -19,62 +19,71 @@ import java.util.Map;
 abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializable {
 	private final AbstractSignalPathModule module;
 	private final EndpointInstantiator<E> endpointInstantiator;
-	private final String countConfig;
 	private final String namesConfig;
 	private final List<E> endpoints = new ArrayList<>();
-	private int numOfEndpoints;
+	private E placeholderEndpoint;
+	private int currentIndex = 1;
 
 	public void getConfiguration(Map<String,Object> config) {
-		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(ModuleOption.createInt(countConfig, numOfEndpoints));
 		config.put(namesConfig, collectEndpointNames());
 	}
 
 	public void onConfiguration(Map<String,Object> config) {
-		ModuleOptions options = ModuleOptions.get(config);
-
-		ModuleOption count = options.getOption(countConfig);
-		if (count != null) {
-			numOfEndpoints = count.getInt();
-		}
-
 		List<String> existingEndpointNames = (List<String>) config.get(namesConfig);
-		for (int i = 0; i < numOfEndpoints; ++i) {
-			String name;
-			if (existingEndpointNames != null && i < existingEndpointNames.size()) {
-				name = existingEndpointNames.get(i);
-			} else {
-				name = "endpoint-" + IdGenerator.get();
+		if (existingEndpointNames != null) {
+			for (String endpointName : existingEndpointNames) {
+				addEndpoint(endpointName);
 			}
-			addEndpoint(i, name);
 		}
+		addPlaceholderEndpoint();
 	}
 
 	public List<E> getEndpoints() {
 		return Collections.unmodifiableList(endpoints);
 	}
 
+	public E getPlaceholder() {
+		return placeholderEndpoint;
+	}
+
 	VariadicEndpoint(AbstractSignalPathModule module,
 					 EndpointInstantiator<E> endpointInstantiator,
-					 String countConfig,
-					 String namesConfig,
-					 int defaultCount) {
+					 String namesConfig) {
 		this.module = module;
 		this.endpointInstantiator = endpointInstantiator;
-		this.countConfig = countConfig;
 		this.namesConfig = namesConfig;
-		this.numOfEndpoints = defaultCount;
+	}
+
+	VariadicEndpoint(AbstractSignalPathModule module,
+					 EndpointInstantiator<E> endpointInstantiator,
+					 String namesConfig,
+					 int startIndex) {
+		this(module, endpointInstantiator, namesConfig);
+		this.currentIndex = startIndex;
 	}
 
 	abstract void attachToModule(AbstractSignalPathModule owner, E endpoint);
 
+	abstract void handlePlaceholder(E placeholderEndoint);
+
 	abstract String getDisplayName();
 
-	private void addEndpoint(int index, String name) {
-		E endpoint = endpointInstantiator.instantiate(module, name);
-		endpoint.setDisplayName(numOfEndpoints == 1 ? getDisplayName() : getDisplayName() + (index + 1));
+	private void addEndpoint(String name) {
+		E endpoint = initializeEndpoint(name);
 		endpoints.add(endpoint);
 		attachToModule(module, endpoint);
+	}
+
+	private void addPlaceholderEndpoint() {
+		placeholderEndpoint = initializeEndpoint("endpoint-" + IdGenerator.get());
+		handlePlaceholder(placeholderEndpoint);
+		attachToModule(module, placeholderEndpoint);
+	}
+
+	private E initializeEndpoint(String name) {
+		E endpoint = endpointInstantiator.instantiate(module, name);
+		endpoint.setDisplayName(getDisplayName() + (currentIndex++));
+		return endpoint;
 	}
 
 	private List<String> collectEndpointNames() {
