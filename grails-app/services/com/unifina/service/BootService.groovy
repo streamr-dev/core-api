@@ -84,7 +84,7 @@ class BootService {
 			log.info("onInit: started $workerCount task workers")
 			
 			// Start a listener for Task-related events
-			servletContext["taskMessageListener"] = new TaskMessageListener(grailsApplication, taskWorkers)
+			servletContext["taskMessageListener"] = new TaskMessageListener(grailsApplication, taskService.getTaskWorkers())
 			log.info("onInit: started TaskMessageListener")
 		}
 		else {
