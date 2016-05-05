@@ -2,6 +2,7 @@ package com.unifina.signalpath.variadic;
 
 import com.unifina.signalpath.*;
 import com.unifina.utils.IdGenerator;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.Map;
  * @param <T> data type
  */
 abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializable {
+	private static final Logger log = Logger.getLogger(VariadicEndpoint.class);
+
 	private final AbstractSignalPathModule module;
 	private final EndpointInstantiator<E> endpointInstantiator;
 	private final String namesConfig;
@@ -31,6 +34,9 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		}
 		if (placeholderEndpoint != null) {
 			names.add(placeholderEndpoint.getName());
+			config.put("placeholder", placeholderEndpoint.getName());
+		} else {
+			log.warn("Unexpected placeholderEndpoint is null");
 		}
 
 		config.put(namesConfig, names);
@@ -46,7 +52,12 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 				}
 			}
 		}
-		addPlaceholderEndpoint();
+		String oldPlaceholderName = (String) config.get("placeholder");
+		if (oldPlaceholderName == null || determineFromConfigIfConnected(config, oldPlaceholderName)) {
+			addPlaceholderEndpoint(null);
+		} else {
+			addPlaceholderEndpoint(oldPlaceholderName);
+		}
 	}
 
 	public List<E> getEndpoints() {
@@ -106,8 +117,8 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		return false;
 	}
 
-	private void addPlaceholderEndpoint() {
-		placeholderEndpoint = initializeEndpoint("endpoint-" + IdGenerator.get());
+	private void addPlaceholderEndpoint(String existingName) {
+		placeholderEndpoint = initializeEndpoint(existingName != null ? existingName : "endpoint-" + IdGenerator.get());
 		handlePlaceholder(placeholderEndpoint);
 		attachToModule(module, placeholderEndpoint);
 	}
