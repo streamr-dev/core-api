@@ -235,8 +235,11 @@ class SignalPathService {
 	}
 
 	List<Canvas> stopAllLocalCanvases() {
+		// Copy list to prevent ConcurrentModificationException
+		Map runners = [:]
+		runners.putAll(servletContext["signalPathRunners"])
 		List canvases = []
-		servletContext["signalPathRunners"].each { String key, SignalPathRunner runner ->
+		runners.each { String key, SignalPathRunner runner ->
 			if (stopLocalRunner(key)) {
 				canvases.addAll(runner.getSignalPaths().collect {it.getCanvas()})
 			}
