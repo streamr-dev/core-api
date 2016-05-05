@@ -83,6 +83,3 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 	}
 
 }
-
-
-

@@ -188,16 +188,27 @@ class TaskService {
 	}
 
 	TaskWorker stopTaskWorker(id) {
-		TaskWorker tw = getTaskWorkers().find {it.workerId == id}
+		return stopTaskWorker(getTaskWorkers().find {it.workerId == id})
+	}
+
+	TaskWorker stopTaskWorker(TaskWorker tw) {
 		if (tw) {
 			tw.quit()
+
+			int i=0
+			while (tw.isAlive() && i < 50) {
+				i++
+				Thread.sleep(200)
+				log.info("Waiting for task worker $tw.workerId to quit...")
+			}
 		}
+
 		return tw
 	}
 
 	void stopAllTaskWorkers() {
 		List<TaskWorker> copy = []
-		copy.addAll(getTaskWorkers())
+		copy.addAll(getTaskWorkers().findAll { it.isAlive() })
 		copy.each {
 			stopTaskWorker(it.workerId)
 		}
