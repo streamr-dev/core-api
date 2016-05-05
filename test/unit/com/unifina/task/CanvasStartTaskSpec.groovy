@@ -16,7 +16,7 @@ class CanvasStartTaskSpec extends Specification {
 
     def setup() {
 		canvasService = Mock(CanvasService)
-		canvas = new Canvas(id: "id", state: "stopped")
+		canvas = new Canvas(state: "stopped")
 		canvas.save(validate:false)
     }
 
@@ -70,7 +70,7 @@ class CanvasStartTaskSpec extends Specification {
 		0 * canvasService.start(canvas, false)
 	}
 
-	void "must not retry reset-and-starting if forceReset==true and forceReset==true"() {
+	void "must not retry reset-and-starting if forceReset==true and resetOnFail==true"() {
 		CanvasStartTask task = new CanvasStartTask(
 				new Task(),
 				CanvasStartTask.getConfig(canvas, true, true),
