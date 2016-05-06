@@ -44,7 +44,7 @@ class SecUser {
 		]
 	}
 
-	public String generateApiKey() {
+	public static String generateApiKey() {
 		return IdGenerator.get() + IdGenerator.get()
 	}
 }

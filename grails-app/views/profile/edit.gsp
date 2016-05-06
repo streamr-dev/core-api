@@ -80,15 +80,17 @@
 			<div class="col-sm-6 col-md-4">
 				<div class="panel">
 					<div class="panel-heading">
-						<span class="panel-title">${message(code:"secuser.credentials.label", default:"Credentials")}</span>
+						<span class="panel-title">${message(code:"profile.credentials.label", default:"Credentials")}</span>
 						<div class="panel-heading-controls">
-							<button id="regenerateApiKeyButton" type="button" class="btn btn-danger pull-right btn-sm">Regenerate api key</button>
+							<button id="regenerateApiKeyButton" type="button" class="btn btn-danger pull-right btn-sm">
+								<g:message code="profile.regenerateAPIKeyButton.label" />
+							</button>
 						</div>
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
 							<label class="control-label">
-								<g:message code="secuser.credentials.apiKey.label" default="Api Key" />
+								<g:message code="secuser.APIKey.label" />
 							</label>
 							<div>
 								${user.apiKey}
@@ -112,8 +114,8 @@
 
 	<r:script>
 		new ConfirmButton("#regenerateApiKeyButton", {
-			title: "Really regenerate the api key?",
-			message: "You'll need to re-authenticate to the api."
+			title: "${message(code: "profile.regenerateAPIKeyConfirm.title")}",
+			message: "${message(code: "profile.regenerateAPIKeyConfirm.message")}"
 		}, function(result) {
 			if(result) {
 				$.post("${ createLink(action: 'regenerateApiKey') }", {}, function(response) {

@@ -6,7 +6,8 @@ function ConfirmButton(button, options, callback) {
         title: "&nbsp;",
         message: "Are you sure?"
     }, options)
-    this.button.click(function() {
+    this.button.click(function(event) {
+        event.preventDefault()
         bootbox.confirm({
             title: _this.options.title,
             message: _this.options.message,
