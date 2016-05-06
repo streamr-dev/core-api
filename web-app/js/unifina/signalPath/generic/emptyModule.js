@@ -40,7 +40,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function createDiv() {
 		var buttons = []
 
-		prot.div = $("<div id='"+prot.id+"' class='component context-menu "+prot.type+"'></div>");
+		prot.div = $("<div id='"+prot.id+"' class='component module context-menu "+prot.type+"'></div>");
 		prot.div.data("spObject",prot);
 		
 		// Set absolute position
@@ -88,7 +88,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
 		
-		var delay=500, tooltipDelayTimer		
+		var delay=500, tooltipDelayTimer
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
 	 			prot.getHelp(false, function(htext) {
@@ -197,7 +197,11 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			buttons.push(refresh);
 		}
 
-		prot.header.append(buttons.reverse())
+		prot.moduleButtonContainer = $("<div/>", {
+			class: "modulebutton-container pull-right"
+		})
+		prot.header.append(prot.moduleButtonContainer)
+		prot.moduleButtonContainer.append(buttons.reverse())
 		
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);

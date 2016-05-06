@@ -43,7 +43,7 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 	function updateSize() {
 		if (heatmap) {
 			var width = container.parent().width()
-			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight() - 20
+			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight()
 			heatmap.resize(width, height)
 		}
 	}

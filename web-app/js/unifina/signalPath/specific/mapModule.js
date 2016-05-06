@@ -52,7 +52,7 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	function updateSize() {
 		if (map) {
 			var width = container.parent().width()
-			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight() - 20
+			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight()
 			map.resize(width, height)
 		}
 	}

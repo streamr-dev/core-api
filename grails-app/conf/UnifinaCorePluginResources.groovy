@@ -1,4 +1,13 @@
 modules = {
+	"jquery" {
+		resource url:[dir:'js/jquery', file:'jquery-1.11.1.min.js'], disposition: 'head'
+	}
+	"jquery-ui" {
+		dependsOn "jquery"
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.css']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.theme.css']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.js']
+	}
 	// jquery-migrate can be removed when there are no longer dependencies on pre-1.9 jquery
 	"jquery-migrate" {
 		dependsOn 'jquery'

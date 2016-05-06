@@ -395,7 +395,7 @@ $(document).unload(function () {
 				<span id="canvas-name-editor"></span>
 			</li>
 		</ui:breadcrumb>
-		<div id="canvas" class="scrollable embeddable"></div>
+		<div id="canvas" class="streamr-canvas scrollable embeddable"></div>
 	</div>
 
 	<div id="main-menu-bg"></div>

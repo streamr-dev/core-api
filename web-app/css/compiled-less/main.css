@@ -16152,7 +16152,7 @@ fieldset[disabled] .btn {
 .paramTable select.form-control {
   padding-top: 1px;
 }
-#canvas {
+.streamr-canvas {
   position: relative;
   font-size: 12px;
   overflow: auto;
@@ -16165,112 +16165,152 @@ fieldset[disabled] .btn {
   -ms-user-select: none;
   user-select: none;
 }
-.component {
+.streamr-canvas .component {
   position: absolute;
   padding: 7px;
   z-index: 5;
-}
-.component.holdFocus {
-  z-index: 15;
-}
-.component:hover {
   cursor: move;
 }
-.component input {
+.streamr-canvas .component.holdFocus {
+  z-index: 15;
+}
+.streamr-canvas .component input {
   width: 50px;
 }
-.component a:link,
-a:visited,
-a:hover {
+.streamr-canvas .component a:link,
+.streamr-canvas .component a:visited,
+.streamr-canvas .component a:hover {
   text-decoration: none;
+}
+.streamr-canvas ._jsPlumb_endpoint {
+  z-index: 10;
+}
+.streamr-canvas ._jsPlumb_endpoint.holdFocus {
+  z-index: 20;
+}
+.streamr-canvas ._jsPlumb_endpoint.connectionHolder {
+  cursor: move;
+}
+.streamr-canvas ._jsPlumb_connector {
+  z-index: 1;
+}
+.streamr-canvas div.tooltip .tooltip-inner {
+  max-width: 350px;
+  white-space: nowrap;
+}
+.streamr-canvas div.tooltip .tooltip-inner .message {
+  background-color: #101020;
+}
+.streamr-canvas div.tooltip .modulehelp-tooltip {
+  width: 350px !important;
+  text-align: left;
+  white-space: normal;
+}
+.bootbox-body .option .optionTitle {
+  width: 100px;
+  display: inline-block;
+}
+.bootbox-body .modulehelp {
+  overflow: auto;
+}
+.bootbox-body .modulehelp h3 {
+  margin-top: 7px;
+}
+.bootbox-body .modulehelp table {
+  border: 0;
+}
+.bootbox-body .modulehelp table tbody tr td:first-child {
+  font-weight: bolder;
+  width: 100px;
+}
+.bootbox-body .modulehelp p {
+  margin-bottom: 1em;
+}
+.bootbox-body .modulehelp .highlight {
+  font-weight: bolder;
+}
+.bootbox-body .modulehelp .formula {
+  display: inline-block;
+  font-weight: bolder;
 }
 .module {
   min-width: 150px;
+  min-height: 76px;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
 }
-.moduleheader {
+.module .moduleheader {
   width: 100%;
   height: 18px;
-  display: inline-table;
   margin-bottom: 5px;
+  -ms-flex: 0;
+  -webkit-flex: 0;
+  flex: 0;
 }
-.modulebody {
-  padding: 5px;
-}
-.modulefooter {
-  overflow: hidden;
-  width: 100%;
-  margin-top: 3px;
-}
-.modulename {
-  display: table-cell;
+.module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
 }
-.modulebutton {
+.module .moduleheader .modulebutton {
   width: 16px;
   text-align: right;
-  display: table-cell;
+  display: inline;
   vertical-align: top;
   cursor: pointer;
 }
-table.paramTable {
-  width: 100%;
-  padding: 0px;
-  border: none;
+.module .modulebody {
+  padding: 5px;
+  -ms-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
 }
-table.paramTable td {
-  padding-right: 5px;
-}
-table.paramTable td input {
-  width: 50px;
-}
-table.ioTable td {
-  padding-right: 5px;
-}
-table.ioTable {
-  border: none;
-  width: 100%;
-  padding: 0px;
-}
-td.input {
-  text-align: right;
-}
-td.output {
-  text-align: left;
-  padding-left: 10px;
-}
-.modulebody .table th {
+.module .modulebody .table th {
   padding-left: 3px;
   padding-right: 3px;
 }
-.moduleSwitchContainer {
-  float: right;
+.module .modulebody table.paramTable {
+  width: 100%;
+  padding: 0px;
+  border: none;
 }
-.moduleSwitch {
-  font-size: 7px;
-  text-align: center;
+.module .modulebody table.paramTable td {
+  padding-right: 5px;
+}
+.module .modulebody table.paramTable td input {
+  width: 50px;
+}
+.module .modulebody table.ioTable {
+  border: none;
+  width: 100%;
+  padding: 0px;
+}
+.module .modulebody table.ioTable td {
+  padding-right: 5px;
+}
+.module .modulebody table.ioTable td.input {
+  text-align: right;
+}
+.module .modulebody table.ioTable td.output {
+  text-align: left;
+  padding-left: 10px;
+}
+.module .modulebody div.endpoint.input {
   cursor: pointer;
-  padding: 2px;
 }
-div.input:hover,
-div.output:hover {
-  cursor: pointer;
-}
-.ioname {
-  display: inline-block;
-  max-width: 100px;
-  white-space: pre-wrap;
-}
-.switchContainer {
-  display: inline-block;
-}
-div.input .switchContainer {
+.module .modulebody div.endpoint.input .switchContainer {
   float: left;
 }
-div.output .switchContainer {
+.module .modulebody div.endpoint.output {
+  cursor: pointer;
+}
+.module .modulebody div.endpoint .switchContainer {
   float: right;
 }
-.ioSwitch {
+.module .modulebody div.endpoint .switchContainer .ioSwitch {
   display: inline-block;
   font-size: 7px;
   vertical-align: text-bottom;
@@ -16279,140 +16319,42 @@ div.output .switchContainer {
   height: 13px;
   cursor: pointer;
 }
-.option .optionTitle {
-  width: 100px;
+.module .modulebody div.ioname {
   display: inline-block;
+  max-width: 100px;
+  white-space: pre-wrap;
 }
-._jsPlumb_endpoint {
-  z-index: 10;
+.module .modulefooter {
+  width: 100%;
+  margin-top: 3px;
+  -ms-flex: 0;
+  -webkit-flex: 0;
+  flex: 0;
 }
-._jsPlumb_endpoint.holdFocus {
-  z-index: 20;
+.module .modulefooter .moduleSwitchContainer {
+  float: right;
+  margin-bottom: -3px;
 }
-.connectionHolder._jsPlumb_endpoint {
-  cursor: move;
+.module .modulefooter .moduleSwitchContainer .moduleSwitch {
+  font-size: 7px;
+  text-align: center;
+  cursor: pointer;
+  padding: 2px;
 }
-._jsPlumb_connector {
-  z-index: 1;
+.module.ui-resizable .modulefooter .moduleSwitchContainer {
+  padding-right: 20px;
 }
-.csvDownload {
+.module .csvDownload {
   display: block;
 }
-.csvDownload img {
+.module .csvDownload img {
   vertical-align: middle;
 }
-.ui-menu {
-  z-index: 200;
-}
-/**
- * jQuery UI stuff
- **/
-.ui-autocomplete-loading {
-  background: white url('../../images/spinner_16x16.gif') right center no-repeat;
-}
-.ui-button-text-only .ui-button-text {
-  padding: 0.2em 0.7em;
-}
-/**
-  * PanicButtons
-  */
-table.panic tbody tr.blocked {
-  background-color: red;
-}
-table.panic tbody tr.blocked td {
-  background-color: red;
-}
-.panicButtons {
-  width: 200px;
-}
-button.arrow {
-  padding-right: 1.5em;
-}
-button.arrow:after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 1em;
-  margin-top: -3px;
-  height: 0;
-  width: 0;
-  /* order of following 3 rules important for fallbacks to work */
-  border: 5px solid transparent;
-  border-top-color: #1c94c4;
-}
-/**
- * Dashboard mode
- **/
-.dashboard.dashboardEnabled .ioTable,
-.dashboard.dashboardEnabled .paramTable {
-  display: none;
-}
-.component.dashboard.dashboardEnabled {
-  background-color: transparent;
-  box-shadow: none;
-}
-.component.dashboard.dashboardEnabled .modulebody {
-  box-shadow: none;
-}
-.component.dashboard.dashboardEnabled .moduleheader,
-.component.dashboard.dashboardEnabled .modulefooter,
-.component.dashboard.dashboardEnabled .ui-resizable-handle {
+.module .showOnHover {
   opacity: 0.0;
 }
-.component.dashboard.dashboardEnabled:hover .moduleheader,
-.component.dashboard.dashboardEnabled:hover .modulefooter,
-.component.dashboard.dashboardEnabled:hover .ui-resizable-handle {
+.module .showOnHover:hover {
   opacity: 1.0;
-}
-.showOnHover {
-  opacity: 0.0;
-}
-.showOnHover:hover {
-  opacity: 1.0;
-}
-.ui-pnotify-title {
-  font-weight: bold;
-}
-.joyride-fixed {
-  position: fixed !important;
-}
-.tooltip-inner {
-  max-width: 350px;
-  white-space: nowrap;
-}
-.modulehelp-tooltip {
-  width: 350px !important;
-  text-align: left;
-  white-space: normal;
-}
-.tooltip-inner .message {
-  background-color: #101020;
-}
-/**
- * Module help styles
- **/
-.modulehelp h3 {
-  margin-top: 7px;
-}
-.modulehelp table {
-  border: 0;
-}
-.modulehelp table tbody tr td:first-child {
-  font-weight: bolder;
-  width: 100px;
-}
-.modulehelp p {
-  margin-bottom: 1em;
-}
-.modulehelp .highlight {
-  font-weight: bolder;
-}
-.modulehelp .formula {
-  display: inline-block;
-  font-weight: bolder;
-}
-.bootbox-body .modulehelp {
-  overflow: auto;
 }
 .dashboard streamr-label {
   font-size: 70px;
