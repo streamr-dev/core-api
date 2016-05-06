@@ -42,6 +42,10 @@
 						traceRadius: this.traceRadius !== undefined ? this.traceRadius : mapOptions.traceRadius
 					})
 
+					_this.$["streamr-widget-container"].addEventListener("resize", function() {
+						_this.map.resize()
+					})
+
 					_this.subscribe(
 						function(message) {
 					    	_this.map.handleMessage(message)

@@ -8,12 +8,20 @@ class SumSpec extends Specification {
 	Sum module
 
 	def setup() {
+
+	}
+
+	private void setupModule(int windowLength) {
 		module = new Sum()
 		module.init()
-		module.configure([:])
+		module.configure([inputs:[
+				[name: "windowLength", value: windowLength]
+		]])
 	}
 
 	void "sum without window gives the right answer"() {
+		setupModule(0)
+
 		when:
 		Map inputValues = [
 				in: [3, 15, 10, -5, -20, 0, 5].collect { it?.doubleValue() }
@@ -27,8 +35,9 @@ class SumSpec extends Specification {
 	}
 
 	void "sum with window gives the right answer"() {
+		setupModule(3)
+
 		when:
-		module.getInput("windowLength").receive(3);
 		module.getInput("minSamples").receive(2);
 		Map inputValues = [
 				in: [3, 15, 10, -5, -20, 0, 5].collect { it?.doubleValue() }
@@ -42,6 +51,8 @@ class SumSpec extends Specification {
 	}
 
 	void "sum with infinite window"() {
+		setupModule(0)
+
 		when:
 		module.getInput("windowLength").receive(0);
 		module.getInput("minSamples").receive(1);

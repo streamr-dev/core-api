@@ -1,5 +1,8 @@
 package com.unifina.service
 
+import com.unifina.domain.security.SecUser
+import com.unifina.task.TaskWorker
+import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 
 import org.apache.log4j.Logger
@@ -15,8 +18,24 @@ class TaskService {
 	GrailsApplication grailsApplication
 	def kafkaService
 
+	private List<TaskWorker> taskWorkers = []
+
 	String createTaskGroupId() {
 		return UUID.randomUUID().toString()
+	}
+
+	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, String groupId = IdGenerator.get()) {
+		Task task = new Task()
+		task.available = true
+		task.complete = false
+		task.complexity = 0
+		task.category = category
+		task.config = (config as JSON).toString()
+		task.implementingClass = taskClass.name
+		task.taskGroupId = groupId
+		task.save(failOnError:true)
+
+		return task
 	}
 	
     AbstractTask getTaskInstance(Task task) {
@@ -162,5 +181,49 @@ class TaskService {
 		List<Task> tasks = Task.findAllByTaskGroupIdAndComplete(taskGroupId,false)
 		tasks.each { abortTask(it) }
 		return tasks
+	}
+
+	List<TaskWorker> getTaskWorkers() {
+		return taskWorkers
+	}
+
+	TaskWorker stopTaskWorker(id) {
+		return stopTaskWorker(getTaskWorkers().find {it.workerId == id})
+	}
+
+	TaskWorker stopTaskWorker(TaskWorker tw) {
+		if (tw) {
+			tw.quit()
+
+			int i=0
+			while (tw.isAlive() && i < 50) {
+				i++
+				Thread.sleep(200)
+				log.info("Waiting for task worker $tw.workerId to quit...")
+			}
+		}
+
+		return tw
+	}
+
+	void stopAllTaskWorkers() {
+		List<TaskWorker> copy = []
+		copy.addAll(getTaskWorkers().findAll { it.isAlive() })
+		copy.each {
+			stopTaskWorker(it.workerId)
+		}
+	}
+
+	TaskWorker startTaskWorker(SecUser priorityUser = null) {
+		List workers = getTaskWorkers()
+
+		TaskWorker worker = createTaskWorker(grailsApplication, workers.size() + 1, priorityUser)
+		worker.start()
+		workers.add(worker)
+		return worker
+	}
+
+	TaskWorker createTaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser) {
+		return new TaskWorker(grailsApplication, id, priorityUser)
 	}
 }
