@@ -11,6 +11,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 	private SignalPathParameter signalPathParameter = new SignalPathParameter(this, "canvas");
 	private StringInput key = new StringInput(this, "key");
+	private StringOutput keyOut = new StringOutput(this, "key");
 	private MapOutput map = new MapOutput(this, "map");
 
 	private Map signalPathMap;
@@ -49,23 +50,27 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Steal endpoints
 		for (Input input : exportedInputs) {
+			input.getOwner().removeInput(input);
 			input.setOwner(this);
 			addInput(input);
-			input.addProxiedInput(new InputTriggerTracker(triggeredInputs, input));
+			input.addProxiedInput(new InputTriggerTracker(this, triggeredInputs, input));
 		}
 		for (Output output : exportedOutputs) {
+			output.getOwner().removeOutput(output);
 			output.setOwner(this);
 			addOutput(output);
 			outputsToPropagate.add(output);
 		}
 	}
 
+	// This module will activate on events arriving at its driving inputs,
+	// like normal modules, but also on events originating from subcanvases!
 	@Override
 	public void sendOutput() {
 		// Instantiate a new sub-canvas if not yet instantiated for received key
 		String currentKey = key.getValue();
 		if (!keyToSignalPath.containsKey(currentKey)) {
-			SubSignalPath subSignalPath = makeSubSignalPath(this);
+			SubSignalPath subSignalPath = makeSubSignalPath(this, currentKey);
 			subSignalPath.proxyToOutputs(outputsToPropagate);
 			cachedOutputValuesByKey.put(currentKey, instantiateCacheUpdateListeners(subSignalPath));
 			keyToSignalPath.put(currentKey, subSignalPath);
@@ -78,13 +83,16 @@ public class ForEach extends AbstractSignalPathModule {
 			subSignalPath.feedInput(input.getName(), input.getValue());
 		}
 
-		// Clear inputs for next module activation
-		triggeredInputs.clear();
-
-		subSignalPath.propagate();
+		if (triggeredInputs.size() > 0) {
+			subSignalPath.propagate();
+		}
 
 		// Other outputs sent indirectly via proxying
 		map.send(cachedOutputValuesByKey);
+		keyOut.send(currentKey);
+
+		// Clear inputs for next module activation
+		triggeredInputs.clear();
 	}
 
 	@Override
@@ -93,7 +101,7 @@ public class ForEach extends AbstractSignalPathModule {
 		cachedOutputValuesByKey = new HashMap<>();
 	}
 
-	private static SubSignalPath makeSubSignalPath(ForEach parent) {
+	private static SubSignalPath makeSubSignalPath(ForEach parent, String key) {
 		SignalPathService signalPathService = parent.globals.getBean(SignalPathService.class);
 		SignalPath signalPath = signalPathService.mapToSignalPath(parent.signalPathMap, false, parent.globals, false);
 		signalPath.setParentSignalPath(parent.getParentSignalPath());
@@ -101,14 +109,17 @@ public class ForEach extends AbstractSignalPathModule {
 		Propagator propagator = new Propagator(signalPath.getExportedInputs(), parent);
 
 		signalPath.connectionsReady();
-		return new SubSignalPath(signalPath, propagator);
+		return new SubSignalPath(signalPath, propagator, key);
 	}
 
 	private Map<String, Object> instantiateCacheUpdateListeners(SubSignalPath subSignalPath) {
 		Map<String, Object> outputCache = new HashMap<>();
 		for (Output output : outputsToPropagate) {
 			String outputName = output.getName();
-			subSignalPath.connectTo(outputName, new CacheUpdaterInput(outputName, outputCache));
+			Input cacheUpdaterInput = new CacheUpdaterInput(this, subSignalPath.getKey(), outputName, outputCache);
+			// Needs to be added to this module, otherwise propagator dependency resolution won't be correct
+			addInput(cacheUpdaterInput);
+			subSignalPath.connectTo(outputName, cacheUpdaterInput);
 		}
 		return outputCache;
 	}
@@ -121,8 +132,8 @@ public class ForEach extends AbstractSignalPathModule {
 		private final Set<Input> triggeredInputs;
 		private final Input originalInput;
 
-		public InputTriggerTracker(Set<Input> triggeredInputs, Input originalInput) {
-			super(null, "ValueReceivedTracker-For-" + originalInput.getName(), "Object");
+		public InputTriggerTracker(AbstractSignalPathModule owner, Set<Input> triggeredInputs, Input originalInput) {
+			super(owner, "ValueReceivedTracker-For-" + originalInput.getName(), "Object");
 			this.triggeredInputs = triggeredInputs;
 			this.originalInput = originalInput;
 		}
@@ -140,16 +151,26 @@ public class ForEach extends AbstractSignalPathModule {
 	private static class CacheUpdaterInput<T> extends Input<T> {
 		private final String outputName;
 		private final Map<String, Object> cachedOutputValues;
+		private final String key;
 
-		public CacheUpdaterInput(String outputName, Map<String, Object> cachedOutputValues) {
-			super(null, "CacheUpdaterInput-For-" + outputName, "Object");
+		public CacheUpdaterInput(AbstractSignalPathModule owner, String key, String outputName, Map<String, Object> cachedOutputValues) {
+			super(owner, "CacheUpdaterInput-For-" + key + "-" + outputName, "Object");
+			this.key = key;
 			this.outputName = outputName;
 			this.cachedOutputValues = cachedOutputValues;
 		}
 
 		@Override
 		public void receive(Object value) {
+			owner.setSendPending(true);
+			owner.getInput("key").receive(key);
 			cachedOutputValues.put(outputName, value);
+		}
+
+		// Always return true so that this input will never prevent ForEach from activating
+		@Override
+		public boolean isReady() {
+			return true;
 		}
 	}
 }
