@@ -91,7 +91,6 @@
             },
 
             render: function(changesOnly) {
-                var start = Date.now()
                 var bigPointLayer = this
                 var canvas = this.getCanvas();
                 var ctx = canvas.getContext('2d');
@@ -106,17 +105,21 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
+                if(!changesOnly && _this.traceRedrawTimeout)
+                    clearTimeout(_this.traceRedrawTimeout)
+
                 var i = 0
                 function redrawTrace() {
-                    setTimeout(function() {
+                    _this.traceRedrawTimeout = setTimeout(function() {
                         var count = i + TRACE_REDRAW_BATCH_SIZE
                         while(i < count && i < updates.length) {
                             var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
                             bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
                             i++
                         }
-                        if(i < max)
+                        if(i < updates.length)
                             redrawTrace()
+                        _this.traceRedrawTimeout = undefined
                     })
                 }
                 redrawTrace()
