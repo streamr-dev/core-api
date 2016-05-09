@@ -31,7 +31,7 @@
 				<ui:panel title="Profile Settings">
 					<div class="form-group ${hasErrors(bean: user, field: 'username', 'has-error')}">
 						<label for="username" class="control-label">
-							<g:message code="secuser.username.label" default="Username" />
+							<g:message code="secuser.username.label" />
 						</label>
 					    <div>
 					    	${user.username}
@@ -80,20 +80,25 @@
 			<div class="col-sm-6 col-md-4">
 				<div class="panel">
 					<div class="panel-heading">
-						<span class="panel-title">${message(code:"profile.credentials.label", default:"Credentials")}</span>
+						<span class="panel-title">${message(code:"profile.credentials.label")}</span>
 						<div class="panel-heading-controls">
-							<button id="regenerateApiKeyButton" type="button" class="btn btn-danger pull-right btn-sm">
-								<g:message code="profile.regenerateAPIKeyButton.label" />
-							</button>
+
 						</div>
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
-							<label class="control-label">
-								<g:message code="secuser.APIKey.label" />
-							</label>
 							<div>
-								${user.apiKey}
+								<label class="control-label">
+									<g:message code="secuser.apiKey.label" />
+								</label>
+								<g:link class="pull-right" controller="help" action="api">API docs</g:link>
+							</div>
+							<pre>${user.apiKey}</pre>
+							<div>
+								<button id="regenerateApiKeyButton" type="button" class="btn btn-danger btn-xs">
+									<i class="fa fa-refresh"></i>
+									<g:message code="profile.regenerateAPIKeyButton.label" />
+								</button>
 							</div>
 						</div>
 					</div>
@@ -106,7 +111,7 @@
 
 		<div class="row">
 			<div class="col-sm-12 col-md-8 col-md-offset-2">
-				<g:submitButton name="submit" class="save btn btn-lg btn-primary" value="${message(code: 'default.button.update.label', default: 'Update')}" />
+				<g:submitButton name="submit" class="save btn btn-lg btn-primary" value="${message(code: 'default.button.update.label')}" />
 			</div>
 		</div>
 		
