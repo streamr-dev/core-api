@@ -68,7 +68,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 					me.div.addClass("connected");
 					if (me.module.jsonData.updateModuleOnConnection && me.module.jsonData.placeholder === me.getName()) {
 						console.log("May update module state for ", me.module.jsonData.name)
-						if (me.module.modulesUpdating === 0) {
+						if (!me.module.modulesUpdating) {
 							console.log("Invoking onOptionsUpdate() of input's module", me.module)
 							me.module.onOptionsUpdated()
 						}
@@ -88,7 +88,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 					me.div.removeClass("connected");
 					if (me.module.jsonData.updateModuleOnConnection) {
 						if ((me.module.jsonData.inputNames && me.module.jsonData.inputNames.includes(me.getName())) || (me.module.jsonData.outputNames && me.module.jsonData.outputNames.includes(me.getName())) ) {
-							if (me.module.modulesUpdating === 0) {
+							if (!me.module.modulesUpdating) {
 								console.log("Invoking onOptionsUpdate() of input's module", me.module)
 								me.module.onOptionsUpdated()
 							}
