@@ -8,7 +8,6 @@ public class IntegerParameter extends Parameter<Integer> {
 		super(owner, name, defaultValue, "Double");
 	}
 	
-	@Override
 	public void receive(Object value) {
 		if (value instanceof Double)
 			super.receive(((Double)value).intValue());

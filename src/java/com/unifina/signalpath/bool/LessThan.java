@@ -1,9 +1,6 @@
 package com.unifina.signalpath.bool;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.BooleanParameter;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.signalpath.*;
 
 public class LessThan extends AbstractSignalPathModule {
 
@@ -12,7 +9,7 @@ public class LessThan extends AbstractSignalPathModule {
 	TimeSeriesInput a = new TimeSeriesInput(this,"A");
 	TimeSeriesInput b = new TimeSeriesInput(this,"B");
 	
-	TimeSeriesOutput out = new TimeSeriesOutput(this,"A&lt;B");
+	BooleanOutput out = new BooleanOutput(this,"A&lt;B");
 	
 	@Override
 	public void init() {
@@ -28,8 +25,8 @@ public class LessThan extends AbstractSignalPathModule {
 	
 	public void sendOutput() {
 		if (a.value < b.value || equality.getValue() && a.value.equals(b.value))
-			out.send(1D);
-		else out.send(0D);
+			out.send(true);
+		else out.send(false);
 	}
 	
 }
