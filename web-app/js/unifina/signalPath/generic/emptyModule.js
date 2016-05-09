@@ -52,8 +52,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		} 
 		// Else add to default position in viewport
 		else {
-			prot.div.css('top',canvas.scrollTop() + 10);
-			prot.div.css('left',canvas.scrollLeft() + 10);
+			prot.div.css('top',canvas.scrollTop() + 20);
+			prot.div.css('left',canvas.scrollLeft() + 70);
 		}
 		
 		// Module header
@@ -323,10 +323,14 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.initResizable = initResizable;
 	
 	function removeFocus() {
-		prot.div.removeClass("focus");
-		prot.div.removeClass("hoverFocus");
-		prot.div.removeClass("holdFocus");
-		prot.div.find(".showOnFocus").fadeTo(100,0);
+		if(this.focusRemoveTimeout)
+			clearTimeout(this.focusRemoveTimeout)
+		this.focusRemoveTimeout = setTimeout(function() {
+			prot.div.removeClass("focus");
+			prot.div.removeClass("hoverFocus");
+			prot.div.removeClass("holdFocus");
+			prot.div.find(".showOnFocus").fadeTo(100,0);
+		}, 500)
 	}
 	prot.removeFocus = removeFocus;
 	

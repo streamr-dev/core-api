@@ -16194,7 +16194,7 @@ a:hover {
   margin-bottom: 5px;
 }
 .modulebody {
-  padding: 5px;
+  padding: 5px 10px;
 }
 .modulefooter {
   overflow: hidden;
@@ -16252,10 +16252,6 @@ td.output {
   cursor: pointer;
   padding: 2px;
 }
-div.input:hover,
-div.output:hover {
-  cursor: pointer;
-}
 .ioname {
   display: inline-block;
   max-width: 100px;
@@ -16263,12 +16259,31 @@ div.output:hover {
 }
 .switchContainer {
   display: inline-block;
+  position: absolute;
+  width: 60px;
+  margin-top: 2px;
+}
+div.input,
+div.output {
+  cursor: pointer;
+}
+div.input {
+  text-align: left;
 }
 div.input .switchContainer {
-  float: left;
+  left: -75px;
+}
+div.input .switchContainer .ioSwitch {
+  float: right;
+}
+div.output {
+  text-align: right;
 }
 div.output .switchContainer {
-  float: right;
+  right: -70px;
+}
+div.output .switchContainer .ioSwitch {
+  float: left;
 }
 .ioSwitch {
   display: inline-block;

@@ -35,20 +35,23 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		
 		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
-		
-		if (data.canToggleDrivingInput==null || data.canToggleDrivingInput) {
-			var driving = new SignalPath.IOSwitch(switchDiv, "ioSwitch drivingInput", {
+
+		// The flags must be appended in reverse order
+
+		// Feedback connection. Default false. Switchable for TimeSeries types.
+		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
+			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
 				getValue: (function(d){
-					return function() { return d.drivingInput; };
+					return function() { return d.feedback; };
 				})(data),
 				setValue: (function(d){
-					return function(value) { return d.drivingInput = value; };
+					return function(value) { return d.feedback = value; };
 				})(data),
-				buttonText: function() { return "DR"; },
-				tooltip: 'Driving input'
+				buttonText: function() { return "FB"; },
+				tooltip: 'Feedback connection'
 			});
 		}
-		
+
 		// Initial value. Default null/off. Only valid for TimeSeries type
 		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
 			var iv = new SignalPath.IOSwitch(switchDiv, "ioSwitch initialValue", {
@@ -64,14 +67,14 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return currentValue != null;
 				}
 			});
-			
+
 			// Override click handler
 			iv.click = function() {
 				if (iv.getValue()==null) {
 					bootbox.prompt({
-						title: "Initial Value:", 
-						callback: function(result) {                
-							if (result != null) {                                             
+						title: "Initial Value:",
+						callback: function(result) {
+							if (result != null) {
 								iv.setValue(parseFloat(result))
 								iv.update();
 								iv.div.html(iv.buttonText());
@@ -86,7 +89,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					iv.div.html(iv.buttonText());
 				}
 			}
-			
+
 			// Remove requiresConnection class on update if input has initial value
 			if (pub.json.requiresConnection) {
 				$(iv).on("updated", function(e) {
@@ -97,20 +100,18 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				})
 				iv.update()
 			}
-		} 
-		
-		// Feedback connection. Default false. Switchable for TimeSeries types.
-		
-		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
-			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
+		}
+
+		if (data.canToggleDrivingInput==null || data.canToggleDrivingInput) {
+			var driving = new SignalPath.IOSwitch(switchDiv, "ioSwitch drivingInput", {
 				getValue: (function(d){
-					return function() { return d.feedback; };
+					return function() { return d.drivingInput; };
 				})(data),
 				setValue: (function(d){
-					return function(value) { return d.feedback = value; };
+					return function(value) { return d.drivingInput = value; };
 				})(data),
-				buttonText: function() { return "FB"; },
-				tooltip: 'Feedback connection'
+				buttonText: function() { return "DR"; },
+				tooltip: 'Driving input'
 			});
 		}
 	}
