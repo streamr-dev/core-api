@@ -38,25 +38,32 @@ Streamr.createLink = function(optsOrController, action, id) {
 }
 
 Streamr.showError = function(msg, title, delay) {
-	this.showNotify('error', msg, title, delay)
+	title = title || "Error"
+	delay = delay || 4000
+	$.pnotify({
+		type: 'error',
+		title: title,
+		text: msg,
+		delay: delay
+	})
 }
 
 Streamr.showInfo = function(msg, title, delay) {
-	this.showNotify('info', msg, title, delay)
+	delay = delay || 4000
+	$.pnotify({
+		type: 'info',
+		title: title,
+		text: msg,
+		delay: delay
+	})
 }
 
 Streamr.showSuccess = function(msg, title, delay) {
-	this.showNotify('success', msg, title, delay)
-}
-
-Streamr.showNotify = function(type, msg, title, delay) {
+	delay = delay || 4000
 	$.pnotify({
-		type: type,
+		type: 'success',
 		title: title,
 		text: msg,
-		delay: delay || 4000,
-		nonblock: {
-			nonblock: true
-		}
+		delay: delay
 	})
 }
