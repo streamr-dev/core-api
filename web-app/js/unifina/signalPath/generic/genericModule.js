@@ -96,7 +96,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				output.connect(item.endpoint);
 			}
 		});
-		
+
 		pub.redraw()
 	}
 	pub.updateFrom = updateFrom;
@@ -162,7 +162,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	var superClose = pub.close;
 	function close() {
 		disconnect();
-		
+
 		$(prot.div).find("div.input").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
 			// This call should not be necessary but there may be a bug in jsPlumb
@@ -357,7 +357,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 					_this.redraw()
 				}
 			}
-		}, 100)
+		}, 0)
 	}
 
 	prot.removeOutput = function(name) {
@@ -380,7 +380,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 					_this.redraw()
 				}
 			}
-		}, 100)
+		}, 0)
 	}
 
 	var superGetContextMenu = prot.getContextMenu;

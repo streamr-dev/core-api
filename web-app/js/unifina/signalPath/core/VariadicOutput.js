@@ -12,27 +12,31 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
         var div = super_createDiv()
 
         div.bind("spConnect", function(event, output) {
-            console.log("connected")
+            if (!SignalPath.isBeingReloaded) {
+                console.log("connected")
 
-            if (json.variadic.isLast) {
-                var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
+                if (json.variadic.isLast) {
+                    var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
 
-                json.variadic.isLast = false
+                    json.variadic.isLast = false
 
-                jsonCopy.connected = false
-                delete jsonCopy.id
-                delete jsonCopy.longName
-                delete jsonCopy.sourceId
-                jsonCopy.name = "endpoint" + Date.now()
-                jsonCopy.variadic.isLast = true
-                jsonCopy.variadic.index += 1
-                module.addOutput(jsonCopy)
+                    jsonCopy.connected = false
+                    delete jsonCopy.id
+                    delete jsonCopy.longName
+                    delete jsonCopy.sourceId
+                    jsonCopy.name = "endpoint" + Date.now()
+                    jsonCopy.variadic.isLast = true
+                    jsonCopy.variadic.index += 1
+                    module.addOutput(jsonCopy)
+                }
             }
         })
 
         div.bind("spDisconnect", function(event, output) {
-            console.log("disconnected")
-            module.removeOutput(json.name)
+            if (!SignalPath.isBeingReloaded) {
+                console.log("disconnected")
+                module.removeOutput(json.name)
+            }
         })
 
         return div

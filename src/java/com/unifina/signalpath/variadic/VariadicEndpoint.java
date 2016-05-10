@@ -26,8 +26,19 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		return endpoint;
 	}
 
+	public E addPlaceholder() {
+		E endpoint = initializeEndpoint("endpoint-" + System.currentTimeMillis());
+		if (endpoint instanceof Input) {
+			((Input) endpoint).requiresConnection = false;
+		}
+		endpoints.add(endpoint);
+		attachToModule(module, endpoint);
+		updateEndpointConfigurations();
+		return endpoint;
+	}
+
 	public List<E> getEndpoints() {
-		return Collections.unmodifiableList(endpoints);
+		return endpoints.subList(0, endpoints.size() - 1);
 	}
 
 	VariadicEndpoint(AbstractSignalPathModule module,
@@ -45,7 +56,7 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 
 	public void onConfiguration(Map<String, Object> config) {
 		if (endpoints.isEmpty()) {
-			addEndpoint("endpoint-" + System.currentTimeMillis());
+			addPlaceholder();
 		}
 	}
 
@@ -59,10 +70,6 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		E endpoint = endpointInstantiator.instantiate(module, name);
 		endpoint.setDisplayName(getDisplayName() + (offsetIndex + endpoints.size() - 1));
 		endpoint.setJsClass(getJsClass());
-		// TODO: move to VariadicInput
-		if (endpoint instanceof Input) {
-			((Input) endpoint).requiresConnection = false;
-		}
 		return endpoint;
 	}
 
