@@ -322,7 +322,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 
 	prot.addOutput = function(data, clazz) {
-		clazz = clazz || SignalPath.Output
+		clazz = clazz || data.jsClass || SignalPath.Output
+		if (typeof clazz === "string") {
+			clazz = eval("SignalPath." + clazz);
+		}
 		
 		var td = createRoomForIO("output");
 
@@ -346,6 +349,29 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				}
 				prot.inputs.splice(index, 1)
 				delete prot.inputsByName[name]
+
+				try {
+					jsPlumb.remove(el.div)
+				} finally {
+					el.parentDiv.remove()
+					_this.redraw()
+				}
+			}
+		}, 100)
+	}
+
+	prot.removeOutput = function(name) {
+		var _this = this
+		// TODO: timeout BAD BAD BAD
+		setTimeout(function() {
+			var el = prot.outputsByName[name]
+			if (el) {
+				var index = prot.outputs.indexOf(el)
+				if (index <= -1) {
+					throw "Shouldn't be here!"
+				}
+				prot.outputs.splice(index, 1)
+				delete prot.outputsByName[name]
 
 				try {
 					jsPlumb.remove(el.div)
