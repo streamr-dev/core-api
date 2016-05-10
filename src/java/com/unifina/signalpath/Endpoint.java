@@ -13,6 +13,7 @@ public abstract class Endpoint<T> implements Serializable {
 	protected String name;
 	protected String displayName;
 	protected String typeName;
+	private String jsClass;
 	
 	private Map<String,Object> json;
 	private boolean configured = false;
@@ -87,10 +88,14 @@ public abstract class Endpoint<T> implements Serializable {
 		map.put("type",getTypeName());
 		map.put("connected", isConnected());
 		map.put("canConnect", canConnect);
-		
-		if (displayName!=null)
-			map.put("displayName",displayName);
-		
+
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (jsClass != null) {
+			map.put("jsClass", jsClass);
+		}
+
 		return map;
 	}
 	
@@ -129,5 +134,8 @@ public abstract class Endpoint<T> implements Serializable {
 			return new ArrayList<String>(0);
 		else return aliases;
 	}
-	
+
+	public void setJsClass(String jsClass) {
+		this.jsClass = jsClass;
+	}
 }

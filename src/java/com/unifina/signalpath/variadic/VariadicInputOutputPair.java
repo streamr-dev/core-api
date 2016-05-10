@@ -30,16 +30,6 @@ public class VariadicInputOutputPair<T> implements Serializable {
 		this.variadicOutput = new VariadicOutput<>(module, outputInstantiator, startIndex);
 	}
 
-	public void getConfiguration(Map<String,Object> config) {
-		variadicInput.getConfiguration(config);
-		variadicOutput.getConfiguration(config);
-	}
-
-	public void onConfiguration(Map<String,Object> config) {
-		variadicInput.onConfiguration(config);
-		variadicOutput.onConfiguration(config);
-	}
-
 	public void sendValuesToOutputs(List<T> values) {
 		variadicOutput.send(values);
 	}

@@ -53,17 +53,4 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {}
-
-	@Override
-	public Map<String, Object> getConfiguration() {
-		Map<String, Object> config = super.getConfiguration();
-		outs.getConfiguration(config);
-		return config;
-	}
-
-	@Override
-	protected void onConfiguration(Map<String, Object> config) {
-		super.onConfiguration(config);
-		outs.onConfiguration(config);
-	}
 }

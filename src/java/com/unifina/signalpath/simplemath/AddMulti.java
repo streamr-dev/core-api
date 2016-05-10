@@ -33,14 +33,16 @@ public class AddMulti extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public Map<String, Object> getConfiguration() {
-		Map<String, Object> config = super.getConfiguration();
-		variadicInput.getConfiguration(config);
-		return config;
+	public Input getInput(String name) {
+		Input input = super.getInput(name);
+		if (input == null) {
+			input = variadicInput.addEndpoint(name);
+		}
+		return input;
 	}
 
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		variadicInput.onConfiguration(config);
 	}

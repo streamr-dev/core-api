@@ -306,9 +306,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	
 	prot.addInput = function(data, clazz) {
-		clazz = clazz || SignalPath.Input
+		clazz = clazz || data.jsClass || SignalPath.Input
+		if (typeof clazz === "string") {
+			clazz = eval("SignalPath." + clazz);
+		}
 		
-		var td = createRoomForIO("input");
+ 		var td = createRoomForIO("input");
 
 		var endpoint = clazz(data, td, prot);
 		endpoint.createDiv();
@@ -329,6 +332,29 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		prot.outputsByName[endpoint.getName()] = endpoint;
 		
 		return endpoint;
+	}
+	
+	prot.removeInput = function(name) {
+		var _this = this
+		// TODO: timeout BAD BAD BAD
+		setTimeout(function() {
+			var el = prot.inputsByName[name]
+			if (el) {
+				var index = prot.inputs.indexOf(el)
+				if (index <= -1) {
+					throw "Shouldn't be here!"
+				}
+				prot.inputs.splice(index, 1)
+				delete prot.inputsByName[name]
+
+				try {
+					jsPlumb.remove(el.div)
+				} finally {
+					el.parentDiv.remove()
+					_this.redraw()
+				}
+			}
+		}, 100)
 	}
 
 	var superGetContextMenu = prot.getContextMenu;

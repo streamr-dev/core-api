@@ -24,19 +24,6 @@ public class PassThrough extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public Map<String, Object> getConfiguration() {
-		Map<String, Object> config = super.getConfiguration();
-		inputOutputPairs.getConfiguration(config);
-		return config;
-	}
-
-	@Override
-	protected void onConfiguration(Map<String, Object> config) {
-		super.onConfiguration(config);
-		inputOutputPairs.onConfiguration(config);
-	}
-
-	@Override
 	public void initialize() {
 		/*// Input source and Output targets must be of same type
 		if (input.isConnected() && output.getTargets().length>0) {
