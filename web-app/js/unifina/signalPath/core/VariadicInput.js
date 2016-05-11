@@ -29,6 +29,12 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
                     jsonCopy.requiresConnection = false
                     jsonCopy.variadic.isLast = true
                     jsonCopy.variadic.index += 1
+
+                    if (json.variadic.linkedOutput) {
+                        var newOutput = module.getOutput(json.variadic.linkedOutput).makeNewOutput()
+                        jsonCopy.variadic.linkedOutput = newOutput.getName()
+                    }
+
                     module.addInput(jsonCopy)
                 }
             }
@@ -37,6 +43,9 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
         div.bind("spDisconnect", function(event, output) {
             if (!SignalPath.isBeingReloaded) {
                 console.log("disconnected")
+                if (json.variadic.linkedOutput) {
+                    module.removeOutput(json.variadic.linkedOutput)
+                }
                 module.removeInput(json.name)
             }
         })

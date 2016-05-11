@@ -1,6 +1,8 @@
 package com.unifina.signalpath.variadic;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.Input;
+import com.unifina.signalpath.Output;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,8 +28,15 @@ public class VariadicInputOutputPair<T> implements Serializable {
 								   InputInstantiator<T> inputInstantiator,
 								   OutputInstantiator<T> outputInstantiator,
 								   int startIndex) {
-		this.variadicInput = new VariadicInput<>(module, inputInstantiator, startIndex);
-		this.variadicOutput = new VariadicOutput<>(module, outputInstantiator, startIndex);
+		variadicInput = new VariadicInput<>(module, inputInstantiator, startIndex);
+		variadicOutput = new VariadicOutput<>(module, outputInstantiator, startIndex);
+	}
+
+	public void onConfiguration(Map<String, Object> config) {
+		variadicInput.onConfiguration(config);
+		variadicOutput.onConfiguration(config);
+		linkInputsToOutputs(variadicInput.getEndpointsIncludingPlaceholder(),
+			variadicOutput.getEndpointsIncludingPlaceholder());
 	}
 
 	public void sendValuesToOutputs(List<T> values) {
@@ -36,5 +45,22 @@ public class VariadicInputOutputPair<T> implements Serializable {
 
 	public List<T> getInputValues() {
 		return variadicInput.getValues();
+	}
+
+	public Input addInput(String name) {
+		return variadicInput.addEndpoint(name);
+	}
+
+	public Output addOutput(String name) {
+		return variadicOutput.addEndpoint(name);
+	}
+
+	private void linkInputsToOutputs(List<Input<T>> inputs, List<Output<T>> outputs) {
+		for (int i=0; i < inputs.size(); ++i) {
+			Input<T> input = inputs.get(i);
+			Map<String, Object> config = input.getConfiguration();
+			Map<String, Object> variadicConfig = (Map<String, Object>) config.get("variadic");
+			variadicConfig.put("linkedOutput", outputs.get(i).getName());
+		}
 	}
 }

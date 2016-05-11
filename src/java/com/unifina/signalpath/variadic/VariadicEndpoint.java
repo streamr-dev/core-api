@@ -41,6 +41,10 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		return endpoints.subList(0, endpoints.size() - 1);
 	}
 
+	List<E> getEndpointsIncludingPlaceholder() {
+		return Collections.unmodifiableList(endpoints);
+	}
+
 	VariadicEndpoint(AbstractSignalPathModule module,
 					 EndpointInstantiator<E> endpointInstantiator) {
 		this(module, endpointInstantiator, 1);

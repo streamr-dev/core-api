@@ -30,7 +30,7 @@ public class PassThrough extends AbstractSignalPathModule {
 			}
 		}*/
 	}
-	
+
 	@Override
 	public void sendOutput() {
 		List<Object> values = inputOutputPairs.getInputValues();
@@ -40,4 +40,27 @@ public class PassThrough extends AbstractSignalPathModule {
 	@Override
 	public void clearState() {}
 
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+		inputOutputPairs.onConfiguration(config);
+	}
+
+	@Override
+	public Input getInput(String name) {
+		Input input = super.getInput(name);
+		if (input == null) {
+			input = inputOutputPairs.addInput(name);
+		}
+		return input;
+	}
+
+	@Override
+	public Output getOutput(String name) {
+		Output output = super.getOutput(name);
+		if (output == null) {
+			output = inputOutputPairs.addOutput(name);
+		}
+		return output;
+	}
 }
