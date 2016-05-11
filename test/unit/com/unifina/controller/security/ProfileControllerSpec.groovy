@@ -1,12 +1,12 @@
 package com.unifina.controller.security
 
+import com.unifina.service.KafkaService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
 import com.unifina.domain.security.SecUser
-import com.unifina.service.UnifinaSecurityService
+import com.unifina.service.UserService
 
 @TestFor(ProfileController)
 @Mock([SecUser])
@@ -31,6 +31,7 @@ class ProfileControllerSpec extends Specification {
 
 	void setup() {
 		controller.springSecurityService = springSecurityService
+		controller.kafkaService = Mock(KafkaService)
 		user = new SecUser(id:1, 
 			username:"test@test.test", 
 			name: "Test User",
@@ -46,7 +47,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar123!", password: 'barbar123!', password2: 'barbar123!', pwdStrength: 3)
 			cmd.springSecurityService = springSecurityService
-			cmd.unifinaSecurityService = new UnifinaSecurityService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "password must be changed"
@@ -63,7 +64,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted with invalid password"
 			def cmd = new ChangePasswordCommand(currentpassword: "invalid", password: 'barbar123!', password2: 'barbar123!')
 			cmd.springSecurityService = springSecurityService
-			cmd.unifinaSecurityService = new UnifinaSecurityService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
@@ -79,7 +80,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted with invalid new password"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar", password: 'asd', password2: 'asd', pwdStrength: 0)
 			cmd.springSecurityService = springSecurityService
-			cmd.unifinaSecurityService = new UnifinaSecurityService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
@@ -95,7 +96,7 @@ class ProfileControllerSpec extends Specification {
 		when: "password change form is submitted with invalid new password"
 			def cmd = new ChangePasswordCommand(currentpassword: "foobar123", password: 'asd', password2: 'asd', pwdStrength: 0)
 			cmd.springSecurityService = springSecurityService
-			cmd.unifinaSecurityService = new UnifinaSecurityService()
+			cmd.userService = new UserService()
 			request.method = 'POST'
 			controller.changePwd(cmd)
 		then: "the old password must remain valid"
@@ -116,6 +117,30 @@ class ProfileControllerSpec extends Specification {
 			SecUser.get(1).name == "Changed Name"
 			SecUser.get(1).timezone == "Europe/Helsinki"
 			flash.message != null
+	}
+
+	void "regenerating api key changes the key"() {
+		setup: "change the api key manually"
+			user.apiKey = "test"
+		when: "regenerated the api key"
+			request.method = "POST"
+			controller.regenerateApiKey()
+		then: "the key has changed"
+			user.apiKey != "test"
+	}
+
+	void "regenerating the api key send message to kafka"() {
+		setup: "change the api key manually"
+			user.apiKey = "test"
+		when: "regenerated the api key"
+			request.method = "POST"
+			controller.regenerateApiKey()
+		then: "the key has changed"
+			1 * controller.kafkaService.sendMessage("revoked-api-keys", "", [
+			        action: "revoked",
+					user: 1,
+					key: "test"
+			])
 	}
 	
 }

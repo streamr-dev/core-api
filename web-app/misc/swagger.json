@@ -33,6 +33,14 @@
         {
             "name": "Canvas",
             "description": "Saved and running Canvases"
+        },
+        {
+            "name": "Permission",
+            "description": "Read, write and share rights"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboards and their items"
         }
     ],
     "paths": {
@@ -91,7 +99,7 @@
                 }
             }
         },
-        "/streams/{uuid}": {
+        "/streams/{id}": {
             "get": {
                 "summary": "Get stream by id",
                 "description": "Returns a stream by id",
@@ -101,7 +109,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "uuid",
+                        "name": "id",
                         "description": "ID of the stream to be fetched",
                         "required": true,
                         "type": "string"
@@ -137,7 +145,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "uuid",
+                        "name": "id",
                         "description": "ID of the stream to be updated",
                         "required": true,
                         "type": "string"
@@ -179,7 +187,7 @@
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "uuid",
+                        "name": "id",
                         "description": "ID of the stream to be deleted",
                         "required": true,
                         "type": "string"
@@ -197,6 +205,177 @@
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/streams/{uuid}/permissions": {
+            "get": {
+                "summary": "List permissions",
+                "description": "Lists the permissions to given stream.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of permission objects",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Permission"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Grant permission",
+                "description": "Grant a new permission to given stream.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Requested permission (id ignored)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New stream permission object that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/streams/{uuid}/permissions/{pid}": {
+            "get": {
+                "summary": "Get single permission object",
+                "description": "Returns one stream-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream or permission object wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a stream permission",
+                "description": "Deletes a stream permission by id.\n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Stream", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "uuid",
+                        "description": "ID of the stream",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be deleted",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "No sharing rights to the stream",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Stream or permission wasn't found",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -467,6 +646,580 @@
                     }
                 }
             }
+        },
+        "/canvases/{id}/permissions": {
+            "get": {
+                "summary": "List permissions",
+                "description": "Lists the permissions to given canvas.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of permission objects",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Permission"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Grant permission",
+                "description": "Grant a new permission to given canvas.\n Requires 'share' permission or ownership.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Requested permission (id ignored)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New canvas permission object that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/canvases/{id}/permissions/{pid}": {
+            "get": {
+                "summary": "Get single permission object",
+                "description": "Returns one canvas-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas or permission object wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a canvas permission",
+                "description": "Deletes a canvas permission by id.\n Requires 'share' permission or ownership.",
+                "tags": [
+                    "Canvas", "Permission"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the canvas",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "pid",
+                        "description": "ID of the permission to be deleted",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "No sharing rights to the canvas",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Canvas or permission wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboards": {
+            "get": {
+                "summary": "List dashboards",
+                "description": "Lists your dashboards",
+                "tags": [
+                    "Dashboard"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "an array of dashboards",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DashboardSummary"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Dashboard",
+                "description": "Creates a new empty Dashboard.",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Dashboard object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DashboardSaveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The Dashboard that was created",
+                        "schema": {
+                            "$ref": "#/definitions/Dashboard"
+                        }
+                    },
+                    "422": {
+                        "description": "Request body did not pass validation",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboards/{id}": {
+            "get": {
+                "summary": "Get Dashboard",
+                "description": "Get Dashboard by id",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "succesful operation",
+                        "schema": {
+                            "$ref": "#/definitions/Dashboard"
+                        }
+                    },
+                    "403": {
+                        "description": "Not allowed to access Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a Dashboard",
+                "description": "Updates an existing Dashboard.",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard to be updated",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "New Dashboard details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DashboardSaveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Dashboard"
+                        }
+                    },
+                    "403": {
+                        "description": "Not allowed to update Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Dashboard",
+                "description": "Deletes a Dashboard by id",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard to be deleted",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "Not allowed to delete Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboards/{id}/items": {
+            "get": {
+                "summary": "List Items of Dashboard",
+                "description": "Get Items of Dashboard by id",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard whose Items are to be fetched",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "succesful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/DashboardItem"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not allowed to access Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a new Dashboard Item",
+                "description": "Creates a new Dashboard Item associated with a Dashboard.",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the associated Dashboard",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Dashboard Item",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SaveDashboardItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success ",
+                        "schema": {
+                            "$ref": "#/definitions/DashboardItem"
+                        }
+                    },
+                    "403": {
+                        "description": "Not allowed to add Item to Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Request body did not pass validation",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboards/{dashboardId}/items/{id}": {
+            "get": {
+                "summary": "Get Dashboard Item",
+                "description": "Get Dashboard Item from associated Dashboard",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dashboardId",
+                        "description": "ID of the Dashboard",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard Item",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "succesful operation",
+                        "schema": {
+                            "$ref": "#/definitions/DashboardItem"
+                        }
+                    },
+                    "403": {
+                        "description": "Not allowed to access Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard or Dashboard Item not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a Dashboard Item",
+                "description": "Updates an existing Dashboard Item associated with a Dashboard",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dashboardId",
+                        "description": "ID of the Dashboard",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard Item",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "New Dashboard Item details",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SaveDashboardItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/DashboardItem"
+                        }
+                    },
+                    "403": {
+                        "description": "Not allowed to update Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard or Dashboard Item not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Request body did not pass validation",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Dashboard Item",
+                "description": "Deletes a Dashboard Item and disassociates it from its parent Dashboard",
+                "tags": [
+                    "Dashboard"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "dashboardId",
+                        "description": "ID of the Dashboard",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the Dashboard Item",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success (no content)"
+                    },
+                    "403": {
+                        "description": "Not allowed to delete item from Dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Dashboard or Dashboard Item not found",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -479,7 +1232,7 @@
                 {
                     "type": "object",
                     "properties": {
-                        "uuid": {
+                        "id": {
                             "type": "string",
                             "description": "Unique identifier for this stream."
                         },
@@ -648,6 +1401,100 @@
                 }
             }
         },
+        "DashboardSaveRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "name"
+                }
+            }
+        },
+        "DashboardSummary": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique identifier"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name"
+                },
+                "numOfItems": {
+                    "type": "integer",
+                    "description": "number of items contained in Dashboard"
+                }
+            }
+        },
+        "Dashboard": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique identifier"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "name"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DashboardItem"
+                    },
+                    "description": "items contained in Dashboard"
+                }
+            }
+        },
+        "SaveDashboardItemRequest": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "title of item"
+                },
+                "ord": {
+                    "type": "integer",
+                    "description": "positive integer indicating order within Dashboard"
+                },
+                "size": {
+                    "type": "string",
+                    "description": "size of item on Dashboard",
+                    "enum": ["small", "medium", "large"]
+                },
+                "uiChannelId": {
+                    "type": "string",
+                    "description": "id of the ui channel of this item"
+                }
+            }
+        },
+        "DashboardItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "unique identifier of item"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "title of item"
+                },
+                "ord": {
+                    "type": "integer",
+                    "description": "positive integer indicating order within Dashboard"
+                },
+                "size": {
+                    "type": "string",
+                    "description": "size of item on Dashboard",
+                    "enum": ["small", "medium", "large"]
+                },
+                "uiChannelId": {
+                    "type": "string",
+                    "description": "id of the ui channel of this item"
+                }
+            }
+        },
         "Module": {
             "type": "object"
         },
@@ -679,6 +1526,30 @@
                 }
             }
         },
+        "Permission": {
+            "type": "object",
+            "required": [
+                "user",
+                "operation"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "description": "Unique identifier for this permission object",
+                    "example": "3"
+                },
+                "user": {
+                    "type": "string",
+                    "description": "User who was granted the permission",
+                    "example": "new.user@gmail.com"
+                },
+                "operation": {
+                    "type": "string",
+                    "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
+                    "example": "read"
+                }
+            }
+        },
         "Error": {
             "type": "object",
             "required": [
@@ -687,7 +1558,7 @@
             "properties": {
                 "code": {
                     "type": "string",
-                    "description": "Error code (e.g. \"NOT_FOUND\") for programmatic use."
+                    "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type automatically."
                 },
                 "message": {
                     "type": "string",

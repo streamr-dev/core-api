@@ -230,6 +230,24 @@ $(document).ready(function() {
 		signalPath: SignalPath
 	})
 
+	$(SignalPath).on('new', function(e, json) {
+		$("#share-button").attr("disabled", "disabled")
+	})
+
+	$(SignalPath).on('loaded saved', function(e, json) {
+		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
+		// Check share permission by knocking on the /permissions/ API endpoint
+		// Disabled without .forbidden means not checked yet
+		$("#share-button").attr("disabled", "disabled")
+		$("#share-button").removeClass("forbidden")
+		$.getJSON(canvasUrl + "/permissions").success(function () {
+			$("#share-button").data("url", canvasUrl)
+			$("#share-button").removeAttr("disabled")
+		}).fail(function () {
+			// Forbidden means no permission
+			$("#share-button").addClass("forbidden")
+		})
+	})
 
 	<g:if test="${id}">
 		SignalPath.load('${id}');
@@ -362,9 +380,12 @@ $(document).unload(function () {
 					<i class="fa fa-plus"></i>
 					<g:message code="signalPath.addModule.label" default="Add Module" />
 				</sp:moduleAddButton>
-				
-
 			</div>
+
+			<div class="menu-content">
+				<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
+			</div>
+
 		</div> <!-- / #main-menu-inner -->
 	</div> <!-- / #main-menu -->
 
@@ -484,8 +505,6 @@ $(document).unload(function () {
 		<li><a href="#" id="saveAsButton">Save as..</a></li>
 	</ul>
 	
-	<g:render template="/feedback/fixedFeedback" plugin="unifina-core"/>
-
 	<!-- extension point for apps using the core plugin -->
 	<g:render template="/canvas/buildBodyExtensions"/>
 

@@ -4,6 +4,7 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import grails.util.Holders
+import org.apache.log4j.Logger
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -11,6 +12,8 @@ import java.text.DecimalFormatSymbols
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
 class MapModulesSpec extends LoginTester1Spec {
+
+	Logger log = Logger.getLogger(MapModulesSpec)
 
 	UnifinaKafkaProducer kafka
 
@@ -42,11 +45,8 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[0].text() == "3.0" }
-
-		and: "TableAsMap for map shows correct key-count pairs"
-		tableContents() == ["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1",] as Set
+		then: "TableAsMap for map shows correct key-count pairs"
+		tableContains(["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1"])
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -66,11 +66,8 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[0].text() == "34.0" }
-
-		and: "TableAsMap for map shows correct key-count pairs"
-		tableContents() == ["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0",] as Set
+		then: "TableAsMap for map shows correct key-count pairs"
+		tableContains(["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0"])
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -84,6 +81,8 @@ class MapModulesSpec extends LoginTester1Spec {
 		moveModuleBy("Multiply", 150, 150)
 		addAndWaitModule("Sum")
 		moveModuleBy("Sum", 500, 150)
+		setParameterValueForModule("Sum", "windowLength", "5")
+		chooseDropdownParameterForModule("Sum", "windowType", "seconds")
 		addAndWaitModule("Max (window)")
 		moveModuleBy("Max (window)", 150, 350)
 		addAndWaitModule("LogNatural")
@@ -98,7 +97,6 @@ class MapModulesSpec extends LoginTester1Spec {
 		toggleExport("Max (window)", "in")
 		toggleExport("LogNatural", "out")
 
-
 		then: "save sub canvas"
 		setCanvasName(subCanvasName)
 		saveCanvasAs(subCanvasName)
@@ -110,6 +108,8 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "build new canvas with ForEach module"
 		addAndConnectModules("ForEach")
 
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 650, 200)
 		addAndWaitModule("Label")
 		moveModuleBy("Label", 650, 75, 1)
 
@@ -129,25 +129,40 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		then: "Label for valueOfCurrentKey shows correct number"
-		waitFor(10) { $(".modulelabel")[0].text() == (0 * 0 + 1 * 1 + 33 * 33).toString() + ".0" }
-
-		$(".modulelabel")[1].text() == new DecimalFormat("#.########",
-			DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(Math.log(33))
+		then:
+		waitFor {
+			$(".modulelabel")[1].text() == new DecimalFormat("#.########",
+					DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(Math.log(33))
+		}
 
 		// key-1 2500, log(40) = 3.688879
 		// key-2 2725, log(-15)
 		// key-3 13225, log(115) = 4.744932
 		// key-4 1090, log(33) = 3.496508
 		// key-5 0, log(0)  = - inf
+		// \\d* eliminates float inaccuracy by matching "some number of digits", e.g. 0000005
 		and: "TableAsMap for map shows correct key-count pairs"
-		tableContents() == [
-			'key-1 {"out2":3.68887945,"out":2500}',
-			'key-2 {"out":2725}',
-			'key-3 {"out2":4.74493213,"out":13225}',
-			'key-4 {"out2":3.49650756,"out":1090}',
-			'key-5 {"out":0}'
-		] as Set
+		waitFor {
+			tableContains([
+					'key-1 ."out2":3.688879\\d*,"out":2500.',
+					'key-2 ."out":2725.',
+					'key-3 ."out2":4.744932\\d*,"out":13225.',
+					'key-4 ."out2":3.496507\\d*,"out":1090.',
+					'key-5 ."out":0.'
+			])
+		}
+
+		and: "After sum values have fallen from the window, sum outputs must show zero"
+		waitFor(20) {
+			$(".modulelabel")[0].text() == "0.0"
+			tableContains([
+					'key-1 ."out2":3.688879\\d*,"out":0.',
+					'key-2 ."out":0.',
+					'key-3 ."out2":4.744932\\d*,"out":0.',
+					'key-4 ."out2":3.496507\\d*,"out":0.',
+					'key-5 ."out":0.'
+			])
+		}
 
 		cleanup:
 		stopCanvasIfRunning()
@@ -160,15 +175,9 @@ class MapModulesSpec extends LoginTester1Spec {
 		moveModuleBy(moduleName, 200, 200, 0, true)
 		addAndWaitModule("MapAsTable")
 		moveModuleBy("MapAsTable", 650, 400)
-		addAndWaitModule("Label")
-		moduleShouldAppearOnCanvas("Label")
-		moveModuleBy("Label", 650, 200)
 
 		connectEndpoints(findOutput("Stream", "key"), findInput(moduleName, "key"))
 		connectEndpoints(findOutput(moduleName, "map"), findInput("MapAsTable", "map"))
-		if (moduleName != "ForEach") {
-			connectEndpoints(findOutput(moduleName, "valueOfCurrentKey"), findInput("Label", "label", 0))
-		}
 	}
 
 	private void produceAllDataToKafka() {
@@ -183,9 +192,16 @@ class MapModulesSpec extends LoginTester1Spec {
 		produceToKafka("key-4", 33)
 	}
 
-	private Set<String> tableContents() {
+	private boolean tableContains(Collection<String> patterns) {
 		def mapAsTable = findModuleOnCanvas("MapAsTable")
-		return mapAsTable.find(".event-table-module-content tr").collect { it.text() }.toSet()
+		mapAsTable.find(".event-table-module-content tbody tr").find { $row ->
+			def found = patterns.find { $row.text() =~ it }
+			if (found == null) {
+				log.info("Could not find " + $row.text())
+				assert false
+			}
+			found == null
+		} == null
 	}
 
 	private void produceToKafka(String key, Double value) {

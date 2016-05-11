@@ -36,73 +36,73 @@ import com.unifina.utils.MapTraversal;
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
-	private Map<String,Object> json;
+	private Map<String, Object> json;
 
 	protected SignalPath parentSignalPath;
 	transient private SignalPath cachedTopParentSignalPath;
 	protected Integer initPriority = 50;
-	
+
 	protected ArrayList<Input> inputs = new ArrayList<Input>();
-	protected Map<String,Input> inputsByName = new HashMap<String,Input>();
-	
+	protected Map<String, Input> inputsByName = new HashMap<String, Input>();
+
 	protected ArrayList<Output> outputs = new ArrayList<Output>();
-	protected Map<String,Output> outputsByName = new HashMap<String,Output>();
-	
+	protected Map<String, Output> outputsByName = new HashMap<String, Output>();
+
 	private boolean wasReady = false;
-	
+
 	private int readyInputs = 0;
 	private int inputCount = 0;
-	
+
 	boolean sendPending = false;
-	
+
 	// If this is set to true, this module will be a leaf in all Propagator trees
 	protected boolean propagationSink = false;
-	
+
 	Module domainObject;
-	
+
 	protected HashSet<Input> drivingInputs = new HashSet<Input>();
-	
+
 	Date lastCleared = null;
-	
+
 	/**
 	 * Module params
 	 */
 	protected boolean canClearState = true;
 	boolean clearState = false;
-	
+
 	protected boolean canRefresh = false;
-	
+
 	protected String name;
 	protected Integer hash;
-	
+
 	transient public Globals globals;
 
 	private boolean initialized;
-	
+
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
-	
+
 	/**
-	 * This propagator is created and used if an UI event triggers 
+	 * This propagator is created and used if an UI event triggers
 	 * this module to send output. This can happen, for example, if
 	 * a Parameter is marked as driving and then the Parameter is changed
 	 * at runtime.
 	 */
 	transient protected Propagator uiEventPropagator = null;
-	
+
 	public AbstractSignalPathModule() {
 
 	}
-	
+
 	/**
 	 * This is called immediately after instantiation, and it should
 	 * call addInput or addOutput for all inputs and outputs in the module.
-	 * The default implementation obtains the declared inputs and outputs via 
+	 * The default implementation obtains the declared inputs and outputs via
 	 * reflection. They are sorted in alphabetic order.  If you want to control
 	 * the order in which IO is shown on the module, then override this method
 	 * and call addInput() or addOutput() in the order you want.
 	 */
 	public void init() {
-		
+
 		/**
 		 * Execute in a privileged block so that also user defined
 		 * untrusted modules can benefit from auto-initialization of IO. 
@@ -128,16 +128,18 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 							return o1.getName().compareTo(o2.getName());
 						}
 	    			});
-	    			
+
 	    			for (Field f : fields) {
 	    				try {
 	    					// This is required to avoid java.lang.IllegalAccessException and requires privileges
 	    					f.setAccessible(true);
 	    					Object obj = f.get(AbstractSignalPathModule.this);
-	    					if (Input.class.isInstance(obj))
-	    						addInput((Input)obj);
-	    					else if (Output.class.isInstance(obj))
-	    						addOutput((Output)obj);
+	    					if (Input.class.isInstance(obj) && !inputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+								addInput((Input) obj);
+							}
+	    					else if (Output.class.isInstance(obj) && !outputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+								addOutput((Output) obj);
+							}
 	    				} catch (Exception e) {
 	    					log.error("Could not get field: "+f+", class: "+AbstractSignalPathModule.this.getClass()+" due to exception: "+e);
 	    				} finally {
@@ -146,54 +148,89 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	    				}
 	    			}
 					return null;
-	            }
-	        });
+				}
+			});
 	}
-	
+
 	/**
 	 * This method is for local initialization of the module. It
 	 * gets called after the module is set up, ie. after the connections
 	 * have been made. The default implementation does nothing.
 	 */
 	public void initialize() {
-		
+
 	}
-	
+
 	public void addInput(Input input) {
-		addInput(input,input.getName());
+		addInput(input, input.getName());
 	}
-	
+
 	protected void addInput(Input input, String name) {
-		if (inputs.contains(input))
+		if (inputs.contains(input)) {
 			inputs.remove(input);
-		
+		}
+
 		inputs.add(input);
-		
-		inputsByName.put(name,input);
-		for (Object alias : input.getAliases())
+
+		inputsByName.put(name, input);
+		for (Object alias : input.getAliases()) {
 			inputsByName.put(alias.toString(), input);
-		
+		}
+
 		inputCount = inputs.size();
-		
+
 		// re-count because inputs already contained in the counters might be added
 		checkDirtyAndReadyCounters();
 	}
-	
+
+	public void removeInput(Input input) {
+		if (!inputs.contains(input)) {
+			throw new IllegalArgumentException("Unable to remove input: input not found: "+input);
+		}
+
+		inputs.remove(input);
+
+		inputsByName.remove(input.getName());
+		for (Object alias : input.getAliases()) {
+			inputsByName.remove(alias.toString());
+		}
+
+		inputCount = inputs.size();
+
+		// re-count because inputs already contained in the counters might be removed
+		checkDirtyAndReadyCounters();
+	}
+
 	public void addOutput(Output output) {
-		addOutput(output,output.getName());
+		addOutput(output, output.getName());
 	}
-	
+
 	protected void addOutput(Output output, String name) {
-		if (outputs.contains(output))
+		if (outputs.contains(output)) {
 			outputs.remove(output);
-		
+		}
+
 		outputs.add(output);
-		outputsByName.put(name,output);
-		
-		for (Object alias : output.getAliases())
+		outputsByName.put(name, output);
+
+		for (Object alias : output.getAliases()) {
 			outputsByName.put(alias.toString(), output);
+		}
 	}
-	
+
+	public void removeOutput(Output output) {
+		if (!outputs.contains(output)) {
+			throw new IllegalArgumentException("Unable to remove output: output not foudn: "+output);
+		}
+
+		outputs.remove(output);
+		outputsByName.remove(output.getName());
+
+		for (Object alias : output.getAliases()) {
+			outputsByName.remove(alias.toString());
+		}
+	}
+
 	public Input[] getInputs() {
 		return inputs.toArray(new Input[inputs.size()]);
 	}
@@ -201,7 +238,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Output[] getOutputs() {
 		return outputs.toArray(new Output[outputs.size()]);
 	}
-	
+
 	public Input getInput(String name) {
 		return inputsByName.get(name);
 	}
@@ -209,34 +246,37 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Output getOutput(String name) {
 		return outputsByName.get(name);
 	}
-	
+
 	public void markReady(Input input) {
 		readyInputs++;
 	}
-	
+
 	public void cancelReady(Input input) {
 		readyInputs--;
 	}
-	
+
 	public boolean allInputsReady() {
-		return readyInputs==inputCount;
+		return readyInputs == inputCount;
 	}
-	
+
 	public abstract void sendOutput();
 
 	public void clear() {
-		if (clearState && (lastCleared==null || lastCleared.before(globals.time))) {
+		if (clearState && (lastCleared == null || lastCleared.before(globals.time))) {
 			lastCleared = globals.time;
 			clearState();
-			
-			for (Output o : getOutputs())
+
+			for (Output o : getOutputs()) {
 				o.doClear();
-			for (Input i : getInputs())
+			}
+			for (Input i : getInputs()) {
 				i.doClear();
-			
+			}
+
 			checkDirtyAndReadyCounters();
 		}
 	}
+
 	public abstract void clearState();
 
 	public boolean isClearState() {
@@ -262,15 +302,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public void setSendPending(boolean sendPending) {
 		this.sendPending = sendPending;
 	}
-	
+
 	public boolean wasReady() {
 		return wasReady;
 	}
-	
+
 	/**
-	 * Used to signal that all the connections to this output 
-	 * have been made. 
-	 * 
+	 * Used to signal that all the connections to outputs
+	 * have been made.
+	 * <p/>
 	 * Can be called multiple times for modules implementing
 	 * the ISharedInstance interface, once for each SignalPath
 	 * the module exists in!
@@ -278,7 +318,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public void connectionsReady() {
 
 		initialize();
-		
+
 		// Only report the initialization of this module once
 		if (!initialized) {
 			globals.onModuleInitialized(this);
@@ -290,41 +330,43 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * By default creates one Propagator containing all outputs of the module.
 	 */
 	protected Output[][] getSpecialPropagatorDefinitions() {
-		return new Output[][] {};
+		return new Output[][]{};
 	}
-	
+
 	private void findFeedbackConnections() {
 		ArrayList<AbstractSignalPathModule> traversedModules = new ArrayList<AbstractSignalPathModule>();
 		ArrayList<Input> traversedInputs = new ArrayList<Input>();
 		traversedModules.add(this);
-		for (Output o : getOutputs())
-			recurseFeedbackConnections(o,traversedModules,traversedInputs);
+		for (Output o : getOutputs()) {
+			recurseFeedbackConnections(o, traversedModules, traversedInputs);
+		}
 	}
 
 	private void recurseFeedbackConnections(Output output,
-			ArrayList<AbstractSignalPathModule> traversedModules,ArrayList<Input> traversedInputs) {
-		
+											ArrayList<AbstractSignalPathModule> traversedModules, ArrayList<Input> traversedInputs) {
+
 		Input[] inputs = output.getTargets();
 		HashSet<AbstractSignalPathModule> newModules = new HashSet<AbstractSignalPathModule>();
 		for (Input i : inputs) {
 			// Never traverse feedback connections any further
-			if (i.isFeedbackConnection())
+			if (i.isFeedbackConnection()) {
 				continue;
-			
+			}
+
 			AbstractSignalPathModule module = i.getOwner();
 			// Mark as feedback if traversed contains the input owner
 			if (traversedModules.contains(module)) {
 				i.setFeedbackConnection(true);
-				System.out.println("Found feedback connection: "+traversedModules+" -> "+output+" -> "+i);
-				
+				System.out.println("Found feedback connection: " + traversedModules + " -> " + output + " -> " + i);
+
 				// TODO: remove this exception if an automatic algorithm can be made to work
-				throw new IllegalStateException("Infinite cycle found! You must mark some input(s) as feedback! "+traversedModules+" -> "+output+" -> "+i);
-				
+				throw new IllegalStateException("Infinite cycle found! You must mark some input(s) as feedback! " + traversedModules + " -> " + output + " -> " + i);
+
 				// TODO: The previous one was not a sufficient algorithm. One possibility is to keep track of
 				// the whole traversal tree and mark as feedback connections all connections that connect
 				// to any ancestor element. Another possibility is that no unambiguous solution exists
 				// and the fb connections must be marked by hand.
-				
+
 //				int pos = traversedInputs.size()-1;
 //				
 //				while (pos>=0) {
@@ -342,8 +384,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 //					}
 //					else break;
 //				}
-			}
-			else {
+			} else {
 				// Collect modules traversed in this step. Several of these inputs could be in the same module.
 				boolean notYetTraversed = newModules.add(module);
 				if (notYetTraversed) {
@@ -353,16 +394,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 						newTraversedModules.addAll(traversedModules);
 						// Add this module to the set
 						newTraversedModules.add(module);
-						
+
 						ArrayList<Input> newTraversedInputs = new ArrayList<Input>();
 						newTraversedInputs.addAll(traversedInputs);
 						newTraversedInputs.add(i);
-						
-						recurseFeedbackConnections(o,newTraversedModules,newTraversedInputs);
+
+						recurseFeedbackConnections(o, newTraversedModules, newTraversedInputs);
 					}
 				}
 			}
-			
+
 		}
 	}
 
@@ -374,77 +415,85 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			drivingInputs.clear();
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return name;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	public Map<String,Object> getConfiguration() {
-		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
-		
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> map = (json != null ? json : new HashMap<String, Object>());
+
 		List<Map> params = new ArrayList<Map>();
 		List<Map> ins = new ArrayList<Map>();
 		List<Map> outs = new ArrayList<Map>();
-		for (Input i : getInputs())
-			if (i instanceof Parameter)
+		for (Input i : getInputs()) {
+			if (i instanceof Parameter) {
 				params.add(i.getConfiguration());
-			else ins.add(i.getConfiguration());
-		
-		for (Output o : getOutputs())
+			} else {
+				ins.add(i.getConfiguration());
+			}
+		}
+
+		for (Output o : getOutputs()) {
 			outs.add(o.getConfiguration());
-		
-		map.put("params",params);
-		map.put("inputs",ins);
-		map.put("outputs",outs);
-		
-		map.put("name",name);
-		
+		}
+
+		map.put("params", params);
+		map.put("inputs", ins);
+		map.put("outputs", outs);
+
+		map.put("name", name);
+
 		map.put("canClearState", canClearState);
 		map.put("clearState", clearState);
-		
-		if (canRefresh)
+
+		if (canRefresh) {
 			map.put("canRefresh", canRefresh);
-		
+		}
+
 		return map;
 	}
-	
+
 	/**
 	 * Configures the module and its IO.
+	 *
 	 * @param config
 	 */
-	public void configure(Map<String,Object> config) {
+	public void configure(Map<String, Object> config) {
 		setConfiguration(config);
-		setIOConfiguration(config,true);
+		setIOConfiguration(config, true);
 		onConfiguration(config);
 		// Ignore not found inputs here too. For example, if the
 		// number of inputs in TimeSeriesChart is made smaller, some
 		// inputs in the config are not found anymore.
-		setIOConfiguration(config,true);
+		setIOConfiguration(config, true);
 	}
-	
+
 	/**
 	 * Gets called when the module and (static) io have been
 	 * configured. After calling this the io will be configured
 	 * again in case new io has been created. The default
 	 * implementation does nothing.
+	 *
 	 * @param config
 	 */
-	protected void onConfiguration(Map<String,Object> config) {
-		
+	protected void onConfiguration(Map<String, Object> config) {
+
 	}
-	
-	
-	private void setIOConfiguration(Map<String,Object> config, boolean ignoreNotFound) {
+
+
+	private void setIOConfiguration(Map<String, Object> config, boolean ignoreNotFound) {
 		// Set IO config automatically
-		if (config.get("params")!=null) {
-			for (Map modConf : (List<Map>)config.get("params")) {
-				Input i = getInput((String)modConf.get("name"));
-				if (i==null && !ignoreNotFound)
-					throw new RuntimeException("Parameter not found: "+modConf.get("name"));
-				else if (i!=null)
+		if (config.get("params") != null) {
+			for (Map modConf : (List<Map>) config.get("params")) {
+				Input i = getInput((String) modConf.get("name"));
+				if (i == null && !ignoreNotFound) {
+					throw new RuntimeException("Parameter not found: " + modConf.get("name"));
+				} else if (i != null) {
 					i.setConfiguration(modConf);
+				}
 			}
 		}
 		// There may be new Parameters added since the creation of the config map.
@@ -457,39 +506,44 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				}
 			}
 		}
-		
-		if (config.get("inputs")!=null) {
-			for (Map modConf : (List<Map>)config.get("inputs")) {
-				Input i = getInput((String)modConf.get("name"));
-				if (i==null && !ignoreNotFound)
-					throw new RuntimeException("Input not found: "+modConf.get("name"));
-				else if (i!=null)
+
+		if (config.get("inputs") != null) {
+			for (Map modConf : (List<Map>) config.get("inputs")) {
+				Input i = getInput((String) modConf.get("name"));
+				if (i == null && !ignoreNotFound) {
+					throw new RuntimeException("Input not found: " + modConf.get("name"));
+				} else if (i != null) {
 					i.setConfiguration(modConf);
+				}
 			}
 		}
-		if (config.get("outputs")!=null) {
-			for (Map modConf : (List<Map>)config.get("outputs")) {
-				Output o = getOutput((String)modConf.get("name"));
-				if (o==null && !ignoreNotFound)
-					throw new RuntimeException("Output not found: "+modConf.get("name"));
-				else if (o!=null)
+		if (config.get("outputs") != null) {
+			for (Map modConf : (List<Map>) config.get("outputs")) {
+				Output o = getOutput((String) modConf.get("name"));
+				if (o == null && !ignoreNotFound) {
+					throw new RuntimeException("Output not found: " + modConf.get("name"));
+				} else if (o != null) {
 					o.setConfiguration(modConf);
+				}
 			}
 		}
 	}
-	
-	private void setConfiguration(Map<String,Object> config) {
+
+	private void setConfiguration(Map<String, Object> config) {
 		json = config;
-		
-		if (config.containsKey("clearState"))
+
+		if (config.containsKey("clearState")) {
 			clearState = Boolean.parseBoolean(config.get("clearState").toString());
-		
-		if (config.containsKey("hash"))
+		}
+
+		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
-		
+		}
+
 		// Embedded modules inherit the hash-id of their parents
-		if (parentSignalPath!=null && parentSignalPath.getHash()!=null)
+		if (parentSignalPath != null && parentSignalPath.getHash() != null) {
 			hash = parentSignalPath.getHash();
+		}
 	}
 
 	public Module getDomainObject() {
@@ -507,29 +561,33 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public void setHash(Integer hash) {
 		this.hash = hash;
 	}
-	
+
 	/**
 	 * This method will be called when execution of the SignalPath ends.
 	 */
 	public void destroy() {
-		
+
 	}
 
 	public SignalPath getTopParentSignalPath() {
-		if (parentSignalPath==null) return null;
+		if (parentSignalPath == null) {
+			return null;
+		}
 		// Return cached value
-		else if (cachedTopParentSignalPath !=null)
+		else if (cachedTopParentSignalPath != null) {
 			return cachedTopParentSignalPath;
+		}
 		// Establish cached value
 		else {
 			cachedTopParentSignalPath = parentSignalPath;
-			while (cachedTopParentSignalPath.getParentSignalPath()!=null)
+			while (cachedTopParentSignalPath.getParentSignalPath() != null) {
 				cachedTopParentSignalPath = cachedTopParentSignalPath.getParentSignalPath();
+			}
 
 			return cachedTopParentSignalPath;
 		}
 	}
-	
+
 	public SignalPath getParentSignalPath() {
 		return parentSignalPath;
 	}
@@ -541,16 +599,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Integer getInitPriority() {
 		return initPriority;
 	}
-	
+
 	/**
-	 * This method is used to serve requests from the UI to individual modules. 
+	 * This method is used to serve requests from the UI to individual modules.
 	 * The default implementation inserts the requests into the global event queue
 	 * as a FeedEvent. It returns a Future that will hold the RuntimeResponse that
 	 * results when the event is processed from the queue.
-	 * 
+	 * <p/>
 	 * This method is not intended to be subclassed. To implement handling of requests,
 	 * subclass the handleRequest() method.
-	 * 
+	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
 	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
@@ -559,14 +617,14 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
-		
+
 		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					handleRequest(request, response);
 				} catch (AccessControlException e) {
-					String error = "Unauthenticated request! Type: "+request.getType()+", Msg: "+e.getMessage();
+					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
 					log.error(error);
 					response.setSuccess(false);
 					response.put("error", error);
@@ -574,49 +632,50 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			}
 		}, response);
 		request.setFuture(future);
-		
+
 		globals.getDataSource().getEventQueue().enqueue(fe);
 		return future;
 	}
-	
+
 	@Override
 	public void receive(FeedEvent event) {
 		if (event.content instanceof RuntimeRequest) {
 			RuntimeRequest request = (RuntimeRequest) event.content;
-			((FutureTask)request.getFuture()).run();
+			((FutureTask) request.getFuture()).run();
+		} else {
+			log.warn("receive: Unidentified FeedEvent content: " + event.content);
 		}
-		else log.warn("receive: Unidentified FeedEvent content: "+event.content);
 	}
-	
+
 	/**
 	 * This method handles RuntimeRequests. Handlers can check if the request is made by an
 	 * authenticated user by checking request.isAuthenticated(). An AccessControlException
 	 * should be thrown for secure but unauthenticated requests.
-	 * 
+	 * <p/>
 	 * If you override this method, be sure to call super.handleRequest(request,response) if the
 	 * request type is not processed in the subclass.
-	 * 
+	 * <p/>
 	 * Key-value pairs can be added to the response via response.put(key, value). Also
 	 * you should call response.setSuccess(true) to indicate successful processing of the message.
-	 * 
+	 *
 	 * @param request
 	 */
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		// By default all modules support runtime parameter changes
 		if (request.getType().equals("paramChange")) {
-			
+
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
-				
+
 				if (!request.isAuthenticated()) {
 					throw new AccessControlException("Unauthenticated parameter change request!");
 				}
-				
+
 				Object value = param.parseValue(request.get("value").toString());
 				param.receive(value);
-				
+
 				if (isSendPending()) {
-					if (uiEventPropagator==null) {
+					if (uiEventPropagator == null) {
 						uiEventPropagator = new Propagator();
 						uiEventPropagator.addModule(this);
 					}
@@ -625,10 +684,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 						uiEventPropagator.propagate();
 					}
 				}
-				
+
 				response.setSuccess(true);
 			} catch (Exception e) {
-				log.error("Error making runtime parameter change!",e);
+				log.error("Error making runtime parameter change!", e);
 				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
@@ -638,32 +697,36 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		// Set the quick dirty/ready counters
 		int readyCount = 0;
 		for (Input i : getInputs()) {
-			if (i.isReady())
+			if (i.isReady()) {
 				readyCount++;
+			}
 		}
 
 		readyInputs = readyCount;
 	}
-	
+
 	@Override
 	public void onDay(Date day) {
 
 	}
-	
-	public Map<String,Object> addOption(Map<String,Object> config, String name, String type, Object value) {
-		if (config.get("options")==null)
-			config.put("options", new HashMap<String,Object>());
-		
-		Map<String, Object> options = (Map<String, Object>) config.get("options");
+
+	public Map<String, Object> addOption(Map<String, Object> config, String name, String type, Object value) {
+		if (config.get("options") == null) {
+			config.put("options", new HashMap<String, Object>());
+		}
+
 		Map<String, Object> item = new HashMap<>();
+		item.put("type", type);
+		item.put("value", value);
+
+		Map<String, Object> options = (Map<String, Object>)config.get("options");
 		options.put(name, item);
-		item.put("type",type);
-		item.put("value",value);
+
 		return item;
 	}
-	
-	public Object getOption(Map<String,Object> config, String name) {
-		return MapTraversal.getProperty(config, "options."+name+".value");
+
+	public Object getOption(Map<String, Object> config, String name) {
+		return MapTraversal.getProperty(config, "options." + name + ".value");
 	}
 
 	/**
@@ -677,7 +740,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * Override to handle steps after serialization
 	 */
-	public void afterSerialization() {}
+	public void afterSerialization() {
+	}
 
 	/**
 	 * Override to handle steps after deserialization

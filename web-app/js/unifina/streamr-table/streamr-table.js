@@ -1,14 +1,9 @@
 (function(exports) {
 
 function StreamrTable(parent, options) {
-	var _this = this
 	this.$parent = $(parent)
 
-	this.tableContainer;
-	this.table;
-	this.tableHeader;
-	this.tableBody;
-	if(options){
+	if (options) {
 		this.options = options
 		this.rowCount = options.maxRows ? options.maxRows : 0;
 	} else {
@@ -28,14 +23,13 @@ StreamrTable.prototype.initTable = function (headers) {
 		this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
 		this.tableContainer.append(this.table);
 		
-		this.tableHeader = $("<thead></thead>");
+		this.tableHeader = $("<thead><tr></tr></thead>");
 		this.table.append(this.tableHeader);
 		
-		if(headers) {
-			for (var i=0;i<headers.length;i++)
-				this.tableHeader.append("<th>"+headers[i]+"</th>");
+		if (headers) {
+			for (var i=0; i<headers.length; i++)
+				this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
 		}
-		
 		
 		this.tableBody = $("<tbody></tbody>");
 		this.table.append(this.tableBody);

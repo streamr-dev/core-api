@@ -6,10 +6,10 @@ import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.UiChannel
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.UiChannelIterator
+import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
@@ -22,6 +22,7 @@ class CanvasService {
 
 	def grailsApplication
 	def signalPathService
+	def taskService
 
 	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
 		def query = Canvas.where { user == currentUser }
@@ -66,17 +67,13 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
-		Map oldSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : null
 		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, resetUi)
-
-		updateUiChannels(canvas, oldSignalPathMap, newSignalPathMap)
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
 		canvas.json = new JsonBuilder(newSignalPathMap).toString()
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
-		canvas.shared = command.isShared()
 
 		// clear serialization
 		canvas.serialized = null
@@ -100,6 +97,10 @@ class CanvasService {
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
 		}
+	}
+
+	public void startRemote(Canvas canvas, boolean forceReset=false, boolean resetOnError=true) {
+		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start")
 	}
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
@@ -129,31 +130,6 @@ class CanvasService {
 		}
 
 		return reconstructFrom(inputSignalPathMap)
-	}
-
-	private void updateUiChannels(Canvas canvas, Map oldSignalPathMap, Map newSignalPathMap) {
-
-		// Add new, previously unseen UiChannels
-		HashSet<String> foundIds = new HashSet<>()
-		UiChannelIterator.over(newSignalPathMap).each { UiChannelIterator.Element element ->
-			if (canvas.uiChannels.find {it.id == element.id} == null && !foundIds.contains(element.id)) {
-				canvas.addToUiChannels(element.toUiChannel())
-			}
-			foundIds.add(element.id)
-		}
-
-		// Remove no longer occurring UiChannels
-		if (oldSignalPathMap != null) {
-			UiChannelIterator.over(oldSignalPathMap).collect { UiChannelIterator.Element element ->
-				if (!foundIds.contains(element.id)) {
-					UiChannel uiChannel = canvas.uiChannels.find { it.id == element.id }
-					if (uiChannel) {
-						canvas.removeFromUiChannels(uiChannel)
-						uiChannel.delete()
-					}
-				}
-			}
-		}
 	}
 
 	private static void resetUiChannels(Map signalPathMap) {

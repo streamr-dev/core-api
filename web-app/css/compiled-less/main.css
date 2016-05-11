@@ -16414,6 +16414,153 @@ button.arrow:after {
 .bootbox-body .modulehelp {
   overflow: auto;
 }
+div.module div.modulebody div.scheduler {
+  font-size: 14px;
+  padding: 10px;
+  max-height: 265px;
+  overflow: auto;
+  white-space: nowrap;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table {
+  margin-bottom: 0px;
+  display: table;
+  list-style-type: none;
+  border-collapse: collapse;
+  counter-reset: sectioncounter;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li {
+  display: table-row;
+  height: 80px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:before {
+  content: counter(sectioncounter) ".";
+  counter-increment: sectioncounter;
+  display: inline-block;
+  text-align: center;
+  position: relative;
+  margin-right: -2em;
+  margin-left: 28px;
+  height: 80px;
+  width: 2em;
+  top: 0px;
+  left: -28px;
+  padding-top: 30px;
+  padding-right: 30px;
+  padding-left: 20px;
+  padding-bottom: 30px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highlight:before,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highlight div.td {
+  background-color: #dff0d8;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highlight.first:before,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.active-highlight.first div.td {
+  background-color: #92BF80;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight div.td {
+  background-color: #ffdede;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:first-of-type div.move-up-btn {
+  visibility: hidden;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:last-of-type div.move-down-btn {
+  visibility: hidden;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li.error-highlight:before {
+  background-color: #ffdede;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li:not(:first-of-type) {
+  border-top: 1px solid #ccc;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td {
+  display: table-cell;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: middle;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:first-of-type {
+  padding-left: 15px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td:last-of-type {
+  padding-right: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn {
+  cursor: pointer;
+  float: right;
+  font-size: 15px;
+  margin-left: 10px;
+  padding: 10px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.delete .delete-btn:hover {
+  color: #999;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .startDate span,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td .endDate span {
+  margin-top: 5px;
+  margin-left: 10px;
+  float: left;
+  width: 42px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td select.form-control.input-sm,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
+  display: inline;
+  width: auto;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td input.form-control.input-sm {
+  width: 100px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value {
+  padding-left: 20px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.value input {
+  width: 70px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move {
+  width: 20px;
+  padding-left: 15px;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-up-btn,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-down-btn {
+  cursor: pointer;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-up-btn:hover,
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move .move-down-btn:hover {
+  color: #999;
+}
+div.module div.modulebody div.scheduler ol.table.scheduler-table li div.td.move div.move-down {
+  margin-top: 25px;
+}
+div.module div.modulefooter div.setup {
+  margin-top: 7px;
+  margin-bottom: -8px;
+}
+div.module div.modulefooter div.setup .add-range-btn {
+  height: 30px;
+}
+div.module div.modulefooter div.setup div {
+  display: inline-block;
+}
+div.module div.modulefooter div.setup div.default-value {
+  float: right;
+  margin-right: 30px;
+  font-size: 14px;
+}
+div.module div.modulefooter div.setup div.default-value input.form-control.input-sm {
+  margin-left: 10px;
+  width: 100px;
+  display: inline;
+}
+div.module div.modulefooter div.setup div.default-value input.form-control.input-sm.error-highlight {
+  background-color: #ffdede;
+}
 .dashboard streamr-label {
   font-size: 70px;
 }
@@ -17233,6 +17380,98 @@ body.dashboard-show #sidebar-view .canvas-title {
 }
 body.dashboard-show .titlebar-clickable {
   cursor: pointer;
+}
+.share-button {
+  /** plus sign of the plus-guy icon */
+  /** Compact and discrete form, can be used in lists etc. */
+}
+.share-button .superscript {
+  vertical-align: super;
+  font-size: x-small;
+  line-height: 0;
+}
+.share-button.btn-end-of-row {
+  float: right;
+  padding-top: 0;
+  height: 20px;
+  padding-left: 4px;
+  padding-right: 7px;
+}
+/** @see sharing-dialog.js */
+.sharing-dialog .modal-body {
+  /* bootstrap would add margin-bottom for narrow viewports */
+}
+.sharing-dialog .modal-body .resource-name-label {
+  font-weight: bold;
+}
+.sharing-dialog .modal-body .publish-label {
+  float: right;
+  padding: 2px 10px 0 0;
+}
+.sharing-dialog .modal-body .switcher {
+  float: right;
+}
+.sharing-dialog .modal-body .switcher-toggler {
+  font-size: 16pt;
+  color: white;
+  background: unset;
+  box-shadow: unset;
+  -webkit-box-shadow: unset;
+  margin-left: 3px;
+  margin-top: -3px;
+}
+.sharing-dialog .modal-body .switcher-state-on {
+  font-size: 13pt;
+}
+.sharing-dialog .modal-body .switcher-state-off {
+  font-size: 13pt;
+}
+.sharing-dialog .modal-body .switcher.checked .switcher-toggler {
+  margin-left: -22px;
+}
+.sharing-dialog .modal-body .access-list {
+  padding-top: 20pt;
+}
+.sharing-dialog .modal-body .owner-label {
+  font-weight: bold;
+}
+.sharing-dialog .modal-body .access-row {
+  height: 30pt;
+  position: relative;
+}
+.sharing-dialog .modal-body .form-group {
+  margin-bottom: 0px;
+  display: inline-block;
+}
+.sharing-dialog .modal-body .user-label {
+  font-weight: bold;
+  position: absolute;
+}
+.sharing-dialog .modal-body .user-delete-button {
+  margin-left: 10pt;
+  position: absolute;
+  right: 5px;
+}
+.sharing-dialog .modal-body .permission-dropdown {
+  position: absolute;
+  right: 55px;
+}
+.sharing-dialog .modal-body .new-user-row {
+  position: relative;
+  height: 30pt;
+}
+.sharing-dialog .modal-body .new-user-field {
+  width: 91%;
+  right: 55px;
+  position: absolute;
+}
+.sharing-dialog .modal-body .new-user-field.has-error {
+  color: #ff0000;
+}
+.sharing-dialog .modal-body .new-user-button {
+  margin-left: 10pt;
+  position: absolute;
+  right: 5px;
 }
 .widget-notifications .notification {
   position: relative;

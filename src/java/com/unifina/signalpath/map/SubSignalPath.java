@@ -11,10 +11,12 @@ import java.util.List;
 public class SubSignalPath implements Serializable {
 	private final SignalPath signalPath;
 	private final Propagator propagator;
+	private final String key;
 
-	public SubSignalPath(SignalPath signalPath, Propagator propagator) {
+	public SubSignalPath(SignalPath signalPath, Propagator propagator, String key) {
 		this.signalPath = signalPath;
 		this.propagator = propagator;
+		this.key = key;
 	}
 
 	public void feedInput(String inputName, Object value) {
@@ -34,5 +36,9 @@ public class SubSignalPath implements Serializable {
 			Output output = signalPath.getOutput(proxyOutput.getName());
 			output.addProxiedOutput(proxyOutput);
 		}
+	}
+
+	public String getKey() {
+		return key;
 	}
 }

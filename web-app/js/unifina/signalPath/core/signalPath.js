@@ -607,7 +607,10 @@ var SignalPath = (function () {
 			if (moduleJson.uiChannel) {
 				// Module channels reference the module by hash
 				var module = getModuleById(moduleJson.hash)
-				connection.subscribe(moduleJson.uiChannel.id, module.receiveResponse, module.getUIChannelOptions())
+				// The user may have modified the ui canvas vs. the running one, so check
+				if (module) {
+					connection.subscribe(moduleJson.uiChannel.id, module.receiveResponse, module.getUIChannelOptions())
+				}
 			}
 		})
 	}
@@ -634,7 +637,7 @@ var SignalPath = (function () {
 		else if (message.type=="D") {
 			$(pub).trigger("done")
 
-			if (runningJson.adhoc)
+			if (runningJson && runningJson.adhoc)
 				$(pub).trigger("stopped")
 		}
 		else if (message.type=="E") {

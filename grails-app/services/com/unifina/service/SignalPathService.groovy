@@ -11,10 +11,12 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
+import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -41,6 +43,7 @@ class SignalPathService {
 	def grailsLinkGenerator
 	def kafkaService
 	def serializationService
+	def permissionService
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
@@ -130,7 +133,9 @@ class SignalPathService {
 
 		runner.signalPaths.each {
 			Canvas canvas = it.canvas.refresh()
-			canvas.uiChannels.each { uiChannelIds << it.id }
+			UiChannelIterator.over(canvas.toMap()).each {
+				uiChannelIds << it.id
+			}
 			canvas.delete()
 		}
 
@@ -221,7 +226,7 @@ class SignalPathService {
 
 		// Start the runner thread
 		runner.start()
-		
+
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
@@ -229,11 +234,24 @@ class SignalPathService {
 		}
 	}
 
-	boolean stopLocal(Canvas canvas) {
-		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(canvas.runner)
+	List<Canvas> stopAllLocalCanvases() {
+		// Copy list to prevent ConcurrentModificationException
+		Map runners = [:]
+		runners.putAll(servletContext["signalPathRunners"])
+		List canvases = []
+		runners.each { String key, SignalPathRunner runner ->
+			if (stopLocalRunner(key)) {
+				canvases.addAll(runner.getSignalPaths().collect {it.getCanvas()})
+			}
+		}
+		return canvases
+	}
+
+	boolean stopLocalRunner(String runnerId) {
+		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(runnerId)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
-			
+
 			// Wait for runner to be stopped state
 			runner.waitRunning(false)
 			if (runner.getRunning()) {
@@ -245,9 +263,13 @@ class SignalPathService {
 		}
 		else {
 			log.error("stopLocal: could not find runner $canvas.runner!")
-			updateState(canvas.runner, Canvas.State.STOPPED)
+			updateState(runnerId, Canvas.State.STOPPED)
 			return false
 		}
+	}
+
+	boolean stopLocal(Canvas canvas) {
+		return stopLocalRunner(canvas.runner)
 	}
 
 	@NotTransactional
@@ -318,7 +340,7 @@ class SignalPathService {
 
 					return request
 				} else if (request.type=="ping") {
-					if (!canvas.shared && !request.isAuthenticated())
+					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
 					
 					return request

@@ -36,7 +36,6 @@ class Canvas {
 
 	Boolean hasExports = false
 	Boolean example = false
-	Boolean shared = false
 	Boolean adhoc = false
 
 	String runner
@@ -58,14 +57,10 @@ class Canvas {
 		json type: 'text'
 		hasExports defaultValue: false
 		example defaultValue: false
-		shared defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
-		uiChannels cascade: 'all-delete-orphan'
 		serialized sqlType: "mediumblob"
 	}
-
-	static hasMany = [uiChannels: UiChannel]
 
 	boolean isNotSerialized() {
 		serialized == null
@@ -79,7 +74,6 @@ class Canvas {
 			created: dateCreated,
 			updated: lastUpdated,
 			adhoc: adhoc,
-			shared: shared,
 			state: state.toString(),
 			hasExports: hasExports,
 			serialized: !isNotSerialized(),

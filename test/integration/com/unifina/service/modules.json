@@ -58,7 +58,7 @@
           "requiresConnection": false,
           "streamName": "run-canvas-spec-stream",
           "type": "Stream",
-          "value": STREAM_ID
+          "value": "STREAM_ID"
         }
       ],
       "type": "module"

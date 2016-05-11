@@ -1,12 +1,14 @@
-var assert = require('assert')
-var $ = require('jquery')(require("jsdom").jsdom().parentWindow);
-var StreamrSwitcher = require('../../streamr-switcher/streamr-switcher').StreamrSwitcher
 
 describe('streamr-switcher', function() {
+	var assert
+	var StreamrSwitcher
 	var switcher
 
 	before(function() {
-		global.$ = $
+		assert = require('assert')
+
+		global.$ = require('jquery')(require("jsdom").jsdom().defaultView);
+		StreamrSwitcher = require('../../streamr-switcher/streamr-switcher').StreamrSwitcher
 	})
 
 	after(function() {
@@ -14,7 +16,6 @@ describe('streamr-switcher', function() {
 	})
 
 	beforeEach(function() {
-		$.fn.switcher = function() {}
 		$("body").html("<div id='parent'></div>")
 	})
 
@@ -51,15 +52,6 @@ describe('streamr-switcher', function() {
 			switcher = new StreamrSwitcher("#parent", {switcherValue: true})
 			switcher.render()
 			assert.equal($("#parent input").attr("checked"), "checked")
-		})
-		it('must call $.fn.switcher when created', function(done) {
-			$.fn.switcher = function(data) {
-				assert.equal(data.theme, "square")
-				assert.equal(data.on_state_content, "1")
-				assert.equal(data.off_state_content, "0")
-				done()
-			}
-			switcher.render()
 		})
 	})
 

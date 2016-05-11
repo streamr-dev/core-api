@@ -172,6 +172,10 @@ modules = {
 		dependsOn 'bootbox, mustache'
 		resource url:[dir:'js/unifina/remote-tabs', file:'remote-tabs.js', plugin: 'unifina-core']
 	}
+	'sharing-dialog' {
+		dependsOn 'bootbox, backbone, switcher'
+		resource url: [dir: 'js/unifina/sharing-dialog', file: 'sharing-dialog.js', plugin: 'unifina-core']
+	}
 	'signalpath-browser' {
 		dependsOn 'remote-tabs'
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
@@ -181,7 +185,7 @@ modules = {
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	'key-value-editor' {
-		dependsOn 'bootstrap, mustache'
+		dependsOn 'bootstrap, backbone, mustache'
 		resource url:[dir:'js/unifina/key-value-editor', file:'key-value-editor.js', plugin:'unifina-core']
 	}
 	toolbar {
@@ -210,7 +214,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-button', file:'streamr-button.js', plugin: 'unifina-core']
 	}
 	'streamr-switcher' {
-		dependsOn 'jquery, switcher'
+		dependsOn 'jquery'
 		resource url:[dir:'js/unifina/streamr-switcher', file:'streamr-switcher.js', plugin: 'unifina-core']
 	}
 	'streamr-text-field' {
@@ -239,6 +243,9 @@ modules = {
 		dependsOn 'signalpath-core, backbone'
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
+	}
+	'confirm-button' {
+		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
@@ -287,6 +294,8 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
@@ -314,4 +323,5 @@ modules = {
 		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
 	}
+
 }
