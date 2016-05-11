@@ -10,14 +10,14 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
         var div = super_createDiv()
 
         div.bind("spConnect", function(event, output) {
-            if (!SignalPath.isBeingReloaded) {
+            if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
                 console.log("connected")
                 pub.makeNewOutput()
             }
         })
 
         div.bind("spDisconnect", function(event, output) {
-            if (!SignalPath.isBeingReloaded) {
+            if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
                 console.log("disconnected")
                 module.removeOutput(json.name)
             }

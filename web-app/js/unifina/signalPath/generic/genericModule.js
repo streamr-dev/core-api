@@ -13,6 +13,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.inputs = [];
 	prot.outputsByName = {};
 	prot.outputs = [];
+	prot.moduleClosed = false
 	
 	// Updated on dragstart, used on drag event to repaint jsPlumb connectors
 	var _cachedEndpoints = []
@@ -161,6 +162,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superClose = pub.close;
 	function close() {
+		prot.moduleClosed = true
 		disconnect();
 
 		$(prot.div).find("div.input").each(function(i,div) {
