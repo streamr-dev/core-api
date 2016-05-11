@@ -10,6 +10,11 @@
 		// Draws sidebar with scrollspy. If h1 -> first level title. If h2 -> second level title.
 		// Scrollspy uses only titles to track scrolling. div.help-text elements are not significant for the scrollspy.
 		new ScrollSpyHelper("#user-guide-wrapper", "#sidebar")
+
+		$(function() {
+			// style vanilla elements from markdown with bootstrap styles
+			$("table").addClass("table table-striped table-hover")
+		})
 	</r:script>
 
 	<r:script>
@@ -52,7 +57,7 @@
 
 <div class="row">
 	<div class="col-sm-12">
-		<div class="scrollspy-wrapper col-md-9" id="user-guide-wrapper">
+		<div class="scrollspy-wrapper col-md-9 col-lg-offset-2 col-lg-6" id="user-guide-wrapper">
 
 			<markdown:renderHtml template="userGuide/introduction" />
 			<hr>
@@ -90,8 +95,9 @@
 		</div>
 
 
-		<!-- Don't remove this div -->
-		<div class="col-xs-0 col-sm-0 col-md-3" id="sidebar"></div>
+		<!-- Don't remove these divs -->
+		<div class="col-xs-0 col-lg-1"></div>
+		<div class="col-xs-0 col-sm-0 col-md-3 col-lg-3" id="sidebar"></div>
 	</div>
 </div>
 </body>
