@@ -1,12 +1,9 @@
 package com.unifina.signalpath.messaging
 
-import com.unifina.utils.MockMetricsService
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.datasource.RealtimeDataSource

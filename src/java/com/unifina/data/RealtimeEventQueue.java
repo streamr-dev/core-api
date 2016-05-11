@@ -3,7 +3,6 @@ package com.unifina.data;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import com.codahale.metrics.*;
 import com.unifina.service.MetricsService;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
@@ -18,7 +17,6 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 	private int eventCounter;
 
 	private final MetricsService metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
-	private final Meter eventsProcessed = metricsService.getMeterFor("eventsProcessed", this);
 
 	boolean firstEvent = true;
 
@@ -65,7 +63,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			long startTime = System.nanoTime();
 			process(event);
 
-			eventsProcessed.mark();
+			metricsService.increment("eventsProcessed.realtime");
 			if (loggingInterval > 0) {
 				elapsedTime += System.nanoTime() - startTime;
 				eventCounter++;
