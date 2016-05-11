@@ -5,8 +5,6 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
     pub = pub || {};
     pub = SignalPath.Output(json, parentDiv, module, type, pub);
 
-    json.displayName = "out" + json.variadic.index
-
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
         var div = super_createDiv()
@@ -19,12 +17,14 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
                     var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
 
                     json.variadic.isLast = false
+                    json.connected = true
 
                     jsonCopy.connected = false
                     delete jsonCopy.id
                     delete jsonCopy.longName
                     delete jsonCopy.sourceId
                     jsonCopy.name = "endpoint" + Date.now()
+                    jsonCopy.displayName = json.displayName.replace(/[0-9]/g, '') + (json.variadic.index + 1)
                     jsonCopy.variadic.isLast = true
                     jsonCopy.variadic.index += 1
                     module.addOutput(jsonCopy)

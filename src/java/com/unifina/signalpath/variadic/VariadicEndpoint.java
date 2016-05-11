@@ -57,6 +57,12 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 	public void onConfiguration(Map<String, Object> config) {
 		if (endpoints.isEmpty()) {
 			addPlaceholder();
+		} else {
+			E placeholder = endpoints.get(endpoints.size() - 1);
+			if (placeholder instanceof Input) {
+				((Input) placeholder).requiresConnection = false;
+			}
+			attachToModule(module, placeholder);
 		}
 	}
 
@@ -68,7 +74,7 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 
 	private E initializeEndpoint(String name) {
 		E endpoint = endpointInstantiator.instantiate(module, name);
-		endpoint.setDisplayName(getDisplayName() + (offsetIndex + endpoints.size() - 1));
+		endpoint.setDisplayName(getDisplayName() + (offsetIndex + endpoints.size()));
 		endpoint.setJsClass(getJsClass());
 		return endpoint;
 	}

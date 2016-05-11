@@ -5,8 +5,6 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
     pub = pub || {};
     pub = SignalPath.Input(json, parentDiv, module, type, pub);
 
-    json.displayName = "in" + json.variadic.index
-
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
         var div = super_createDiv()
@@ -20,12 +18,14 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
 
                     json.variadic.isLast = false
                     json.requiresConnection = true // does not work
+                    json.connected = true
 
                     jsonCopy.connected = false
                     delete jsonCopy.id
                     delete jsonCopy.longName
                     delete jsonCopy.sourceId
                     jsonCopy.name = "endpoint" + Date.now()
+                    jsonCopy.displayName = json.displayName.replace(/[0-9]/g, '') + (json.variadic.index + 1)
                     jsonCopy.requiresConnection = false
                     jsonCopy.variadic.isLast = true
                     jsonCopy.variadic.index += 1

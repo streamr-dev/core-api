@@ -3,10 +3,7 @@ package com.unifina.signalpath;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Endpoint<T> implements Serializable {
 	public AbstractSignalPathModule owner;
@@ -100,7 +97,7 @@ public abstract class Endpoint<T> implements Serializable {
 	}
 	
 	public void setConfiguration(Map<String,Object> config) {
-		json = config;
+		json = new LinkedHashMap<>(config);
 		configured = true;
 		
 		if (config.containsKey("displayName"))

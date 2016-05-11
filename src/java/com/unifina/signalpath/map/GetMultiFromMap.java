@@ -13,16 +13,13 @@ import java.util.Map;
 public class GetMultiFromMap extends AbstractSignalPathModule {
 
 	private MapInput in = new MapInput(this, "in");
-
-	private Output<Object> out1 = new Output<>(this, "out1", "Object");
-	private VariadicOutput<Object> outs = new VariadicOutput<>(this, new OutputInstantiator.SimpleObject(), 2);
+	private VariadicOutput<Object> outs = new VariadicOutput<>(this, new OutputInstantiator.SimpleObject(), 1);
 	private MapOutput founds = new MapOutput(this, "founds");
 
 
 	@Override
 	public void init() {
 		addInput(in);
-		addOutput(out1);
 		addOutput(founds);
 	}
 
@@ -31,10 +28,6 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 		Map map = in.getValue();
 
 		Map<String, Double> foundMap = new HashMap<>();
-
-		List<Output<Object>> outputs = new ArrayList<>();
-		outputs.add(out1);
-		outputs.addAll(outs.getEndpoints());
 
 
 		for (Output<Object> out : outs.getEndpoints()) {

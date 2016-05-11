@@ -12,16 +12,8 @@ import java.util.Map;
 
 public class PassThrough extends AbstractSignalPathModule {
 
-	private Input<Object> in = new Input<>(this, "in", "Object");
-	private Output<Object> out = new Output<>(this, "out", "Object");
 	private VariadicInputOutputPair<Object> inputOutputPairs = new VariadicInputOutputPair<>(this,
-		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject(), 2);
-
-	@Override
-	public void init() {
-		addInput(in);
-		addOutput(out);
-	}
+		new InputInstantiator.SimpleObject(), new OutputInstantiator.SimpleObject(), 1);
 
 	@Override
 	public void initialize() {
@@ -41,14 +33,11 @@ public class PassThrough extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		out.send(in.getValue());
 		List<Object> values = inputOutputPairs.getInputValues();
 		inputOutputPairs.sendValuesToOutputs(values);
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 }
