@@ -9,19 +9,21 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
     pub.createDiv = function() {
         var div = super_createDiv()
 
-        div.bind("spConnect", function(event, output) {
-            if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
-                console.log("connected")
-                pub.makeNewOutput()
-            }
-        })
+        if (json.variadic.disableGrow) {
+            div.bind("spConnect", function(event, output) {
+                if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
+                    console.log("connected")
+                    pub.makeNewOutput()
+                }
+            })
 
-        div.bind("spDisconnect", function(event, output) {
-            if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
-                console.log("disconnected")
-                module.removeOutput(json.name)
-            }
-        })
+            div.bind("spDisconnect", function(event, output) {
+                if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
+                    console.log("disconnected")
+                    module.removeOutput(json.name)
+                }
+            })
+        }
 
         return div
     }
