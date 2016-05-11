@@ -1,8 +1,6 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Streamr API",
-        "description": "Create streams and canvases, and let the real-time data flow right through it all.",
         "version": "1.0.0"
     },
     "host": "www.streamr.com",
@@ -27,19 +25,19 @@
     ],
     "tags": [
         {
-            "name": "Stream",
-            "description": "Streams"
+            "name": "streams",
+            "description": "Manage your Streams"
         },
         {
-            "name": "Canvas",
-            "description": "Saved and running Canvases"
+            "name": "canvases",
+            "description": "Start, stop, and manage Canvases"
         },
         {
-            "name": "Permission",
+            "name": "permissions",
             "description": "Read, write and share rights"
         },
         {
-            "name": "Dashboard",
+            "name": "dashboards",
             "description": "Dashboards and their items"
         }
     ],
@@ -58,7 +56,7 @@
                     }
                 ],
                 "tags": [
-                    "Stream"
+                    "streams"
                 ],
                 "responses": {
                     "200": {
@@ -87,7 +85,7 @@
                     }
                 ],
                 "tags": [
-                    "Stream"
+                    "streams"
                 ],
                 "responses": {
                     "200": {
@@ -104,7 +102,7 @@
                 "summary": "Get stream by id",
                 "description": "Returns a stream by id",
                 "tags": [
-                    "Stream"
+                    "streams"
                 ],
                 "parameters": [
                     {
@@ -140,7 +138,7 @@
                 "summary": "Update a stream",
                 "description": "Updates a stream.",
                 "tags": [
-                    "Stream"
+                    "streams"
                 ],
                 "parameters": [
                     {
@@ -182,7 +180,7 @@
                 "summary": "Delete a stream",
                 "description": "Deletes a stream by id. This will also delete all data for this stream. Use with caution!",
                 "tags": [
-                    "Stream"
+                    "streams"
                 ],
                 "parameters": [
                     {
@@ -226,7 +224,7 @@
                     }
                 ],
                 "tags": [
-                    "Stream", "Permission"
+                    "streams", "permissions"
                 ],
                 "responses": {
                     "200": {
@@ -274,7 +272,7 @@
                     }
                 ],
                 "tags": [
-                    "Stream", "Permission"
+                    "streams", "permissions"
                 ],
                 "responses": {
                     "200": {
@@ -303,7 +301,7 @@
                 "summary": "Get single permission object",
                 "description": "Returns one stream-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
                 "tags": [
-                    "Stream", "Permission"
+                    "streams", "permissions"
                 ],
                 "parameters": [
                     {
@@ -346,7 +344,7 @@
                 "summary": "Delete a stream permission",
                 "description": "Deletes a stream permission by id.\n Requires 'share' permission or ownership.",
                 "tags": [
-                    "Stream", "Permission"
+                    "streams", "permissions"
                 ],
                 "parameters": [
                     {
@@ -388,7 +386,7 @@
                 "summary": "List canvases",
                 "description": "Lists (and possibly filters) canvases in your archive.",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -429,7 +427,7 @@
                 "summary": "Create a canvas",
                 "description": "Creates a new canvas into your archive.",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -463,7 +461,7 @@
                 "summary": "Get canvas by id",
                 "description": "Returns a canvas by id",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -505,7 +503,7 @@
                 "summary": "Update a canvas.",
                 "description": "Updates a canvas. The *id* field can not be updated.",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -541,7 +539,7 @@
                 "summary": "Delete a canvas",
                 "description": "Deletes a canvas by id",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -570,7 +568,7 @@
                 "summary": "Starts a canvas",
                 "description": "Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -614,7 +612,7 @@
                 "summary": "Stop a currently running canvas.",
                 "description": "Stops a canvas that is currently running.",
                 "tags": [
-                    "Canvas"
+                    "canvases"
                 ],
                 "parameters": [
                     {
@@ -661,7 +659,7 @@
                     }
                 ],
                 "tags": [
-                    "Canvas", "Permission"
+                    "canvases", "permissions"
                 ],
                 "responses": {
                     "200": {
@@ -709,7 +707,7 @@
                     }
                 ],
                 "tags": [
-                    "Canvas", "Permission"
+                    "canvases", "permissions"
                 ],
                 "responses": {
                     "200": {
@@ -738,7 +736,7 @@
                 "summary": "Get single permission object",
                 "description": "Returns one canvas-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
                 "tags": [
-                    "Canvas", "Permission"
+                    "canvases", "permissions"
                 ],
                 "parameters": [
                     {
@@ -781,7 +779,7 @@
                 "summary": "Delete a canvas permission",
                 "description": "Deletes a canvas permission by id.\n Requires 'share' permission or ownership.",
                 "tags": [
-                    "Canvas", "Permission"
+                    "canvases", "permissions"
                 ],
                 "parameters": [
                     {
@@ -823,7 +821,7 @@
                 "summary": "List dashboards",
                 "description": "Lists your dashboards",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "responses": {
                     "200": {
@@ -841,7 +839,7 @@
                 "summary": "Create a Dashboard",
                 "description": "Creates a new empty Dashboard.",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -875,7 +873,7 @@
                 "summary": "Get Dashboard",
                 "description": "Get Dashboard by id",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -911,7 +909,7 @@
                 "summary": "Update a Dashboard",
                 "description": "Updates an existing Dashboard.",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -956,7 +954,7 @@
                 "summary": "Delete a Dashboard",
                 "description": "Deletes a Dashboard by id",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -991,7 +989,7 @@
                 "summary": "List Items of Dashboard",
                 "description": "Get Items of Dashboard by id",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -1030,7 +1028,7 @@
                 "summary": "Create a new Dashboard Item",
                 "description": "Creates a new Dashboard Item associated with a Dashboard.",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -1083,7 +1081,7 @@
                 "summary": "Get Dashboard Item",
                 "description": "Get Dashboard Item from associated Dashboard",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -1126,7 +1124,7 @@
                 "summary": "Update a Dashboard Item",
                 "description": "Updates an existing Dashboard Item associated with a Dashboard",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {
@@ -1184,7 +1182,7 @@
                 "summary": "Delete a Dashboard Item",
                 "description": "Deletes a Dashboard Item and disassociates it from its parent Dashboard",
                 "tags": [
-                    "Dashboard"
+                    "dashboards"
                 ],
                 "parameters": [
                     {

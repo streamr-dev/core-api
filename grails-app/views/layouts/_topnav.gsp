@@ -56,8 +56,8 @@ Tour.list(function(tourList) {
 						<ul class="dropdown-menu" id="help-tour-list">
 							<%-- Tours are dynamically inserted here --%>
 <%--							<li class="divider"></li>--%>
-							<li><g:link elementId="navUserGuideLink" controller="help" action="userGuide">User Guide</g:link></li>
-							<li><g:link controller="help" action="api">API Documentation</g:link></li>
+							<li><g:link elementId="navUserGuideLink" controller="help" action="userGuide"><g:message code="help.userGuide.title" /></g:link></li>
+							<li><g:link controller="help" action="api"><g:message code="help.api.title" /></g:link></li>
 							<li><g:link controller="module" action="list">Module Reference</g:link></li>
 							<li><g:link elementId="navExamplesLink" controller="canvas" params="[examples:1]">Example Canvases</g:link></li>
 						</ul>

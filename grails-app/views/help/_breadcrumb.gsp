@@ -1,5 +1,5 @@
 <li class="${active ? "active" : "" }">
 	<g:link controller="help" action="userGuide">
-		User Guide
+		<g:message code="help.userGuide.title" />
 	</g:link>
 </li>

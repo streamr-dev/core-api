@@ -2,7 +2,16 @@
 <head>
     <meta name="layout" content="main" />
     <title><g:message code="help.api.title" /></title>
+
     <r:require module="swagger"/>
+	<r:require module="scrollspy-helper"/>
+	<r:require module="codemirror"/>
+
+	<r:script>
+		// Draws sidebar with scrollspy. If h1 -> first level title. If h2 -> second level title.
+		// Scrollspy uses only titles to track scrolling. div.help-text elements are not significant for the scrollspy.
+		new ScrollSpyHelper("#api-docs-wrapper", "#sidebar")
+	</r:script>
 
     <r:script>
         $(function () {
@@ -65,7 +74,13 @@
 
                 window.swaggerUi.load();
 
-
+				setTimeout(function() {
+					// Add bootstrap styling to controls created by swagger
+					$("#swagger-ui-container input[type=submit]").addClass("btn btn-default")
+					$("#swagger-ui-container button").addClass("btn btn-default")
+					$("#swagger-ui-container select").addClass("form-control")
+					$("#swagger-ui-container textarea").addClass("form-control")
+				}, 1000)
 
                 function log() {
                     if ('console' in window) {
@@ -76,21 +91,48 @@
         });
     </r:script>
 </head>
-<body class="swagger-section">
+
+<body class="help-page">
+
 <ui:flashMessage/>
 
-<div>
-    <div class="swagger-ui-wrap">
-        <!--<a id="logo" href="http://swagger.io">swagger</a>-->
-        <form id='api_selector'>
-            <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="hidden"/></div>
-            <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text"/></div>
-            <div class='input'><a id="explore" href="#" data-sw-translate>Explore</a></div>
-        </form>
-    </div>
+<ui:breadcrumb>
+	<g:render template="/help/apiBreadcrumb"/>
+</ui:breadcrumb>
+
+<div class="row">
+	<div class="col-sm-12">
+		<div class="scrollspy-wrapper col-md-9" id="api-docs-wrapper">
+
+			<markdown:renderHtml template="api/introduction" />
+			<hr>
+			<markdown:renderHtml template="api/data-input" />
+
+			<hr>
+			<markdown:renderHtml template="api/data-output" />
+			<hr>
+			<markdown:renderHtml template="api/resources" />
+
+			<div class="swagger-section">
+				<div class="swagger-ui-wrap">
+					<!--<a id="logo" href="http://swagger.io">swagger</a>-->
+					<form id='api_selector'>
+						<div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="hidden"/></div>
+						<div class='input'><input placeholder="API Key" id="input_apiKey" name="apiKey" type="text"/></div>
+						<div class='input'><a id="explore" href="#" data-sw-translate>Explore</a></div>
+					</form>
+				</div>
+
+				<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
+				<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+			</div>
+
+		</div>
+
+		<!-- Don't remove this div -->
+		<div class="col-xs-0 col-sm-0 col-md-3" id="sidebar"></div>
+	</div>
 </div>
 
-<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
-<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
 </body>
 </html>

@@ -1,15 +1,15 @@
 <html>
 <head>
 	<meta name="layout" content="main" />
-	<title>User guide</title>
+	<title><g:message code="help.userGuide.title" /></title>
 
-	<r:require module="user-guide"/>
+	<r:require module="scrollspy-helper"/>
 	<r:require module="codemirror"/>
 
 	<r:script>
 		// Draws sidebar with scrollspy. If h1 -> first level title. If h2 -> second level title.
 		// Scrollspy uses only titles to track scrolling. div.help-text elements are not significant for the scrollspy.
-		new UserGuide("#module-help-tree", "#sidebar")
+		new ScrollSpyHelper("#user-guide-wrapper", "#sidebar")
 	</r:script>
 
 	<r:script>
@@ -42,7 +42,7 @@
 	</r:script>
 
 </head>
-<body class="user-guide">
+<body class="help-page">
 
 <ui:flashMessage/>
 
@@ -52,7 +52,7 @@
 
 <div class="row">
 	<div class="col-sm-12">
-		<div class="scrollspy-wrapper col-md-9" id="module-help-tree">
+		<div class="scrollspy-wrapper col-md-9" id="user-guide-wrapper">
 
 			<markdown:renderHtml template="userGuide/introduction" />
 			<hr>

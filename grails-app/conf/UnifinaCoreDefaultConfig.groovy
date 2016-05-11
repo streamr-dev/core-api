@@ -1,3 +1,5 @@
+import org.pegdown.Extensions
+
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
@@ -351,6 +353,15 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
  * Miscellaneous
  */
 tomcat.nio = true // in run-app or test-app
+
+// markdown configuration options
+markdown.hardwraps = true
+markdown.autoLinks = true
+markdown.definitionLists = true
+markdown.smartPunctuation = true
+markdown.smartQuotes = true
+markdown.fencedCodeBlocks = true
+markdown.tables = true
 
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
