@@ -269,7 +269,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.inputsByName[name];
 	}
 	pub.getInput = getInput;
-	
+
 	/**
 	 * Returns an Output object
 	 */
@@ -277,6 +277,30 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.outputsByName[name];
 	}
 	pub.getOutput = getOutput;
+
+	function findInputByDisplayName(name) {
+		var found = null
+		$(prot.inputs).each(function(i, endpoint) {
+			if (endpoint.json.displayName === name || endpoint.json.name === name) {
+				found = endpoint
+				return
+			}
+		});
+		return found
+	}
+	pub.findInputByDisplayName = findInputByDisplayName
+
+	function findOutputByDisplayName(name) {
+		var found = null
+		$(prot.outputs).each(function(i, endpoint) {
+			if (endpoint.json.displayName === name || endpoint.json.name === name) {
+				found = endpoint
+				return
+			}
+		});
+		return found
+	}
+	pub.findOutputByDisplayName = findOutputByDisplayName
 	
 	function addParameter(data) {
 		// Create room for the parameter in paramTable
