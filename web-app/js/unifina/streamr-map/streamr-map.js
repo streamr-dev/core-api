@@ -113,12 +113,12 @@
                 function redrawTrace() {
                     _this.traceRedrawTimeout = setTimeout(function() {
                         var count = i + TRACE_REDRAW_BATCH_SIZE
-                        while(i < count && i < updates.length) {
+                        while (i < count && i < updates.length) {
                             var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
                             bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
                             i++
                         }
-                        if(i < updates.length - 1)
+                        if (i < updates.length)
                             redrawTrace()
                     })
                 }
