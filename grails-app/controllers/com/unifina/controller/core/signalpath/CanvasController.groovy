@@ -127,7 +127,7 @@ class CanvasController {
 			canvases = permissionService.get(Canvas, user, Operation.READ) {
 				eq "example", false
 				eq "adhoc", false
-				order "dateCreated", "desc"
+				order "lastUpdated", "desc"
 				maxResults max
 				firstResult offset
 			}
