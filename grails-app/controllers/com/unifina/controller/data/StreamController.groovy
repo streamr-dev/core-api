@@ -41,7 +41,9 @@ class StreamController {
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
-		List<Stream> streams = permissionService.get(Stream, user)
+		List<Stream> streams = permissionService.get(Stream, user, {
+			order("lastUpdated", "desc")
+		})
 		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
 		[streams:streams, shareable:shareable]
 	}
