@@ -129,8 +129,11 @@ class MapModulesSpec extends LoginTester1Spec {
 		and: "data produced to Kafka topic"
 		produceAllDataToKafka()
 
-		$(".modulelabel")[1].text() == new DecimalFormat("#.########",
-			DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(Math.log(33))
+		then:
+		waitFor {
+			$(".modulelabel")[1].text() == new DecimalFormat("#.########",
+					DecimalFormatSymbols.getInstance(Locale.ENGLISH)).format(Math.log(33))
+		}
 
 		// key-1 2500, log(40) = 3.688879
 		// key-2 2725, log(-15)
@@ -138,14 +141,16 @@ class MapModulesSpec extends LoginTester1Spec {
 		// key-4 1090, log(33) = 3.496508
 		// key-5 0, log(0)  = - inf
 		// \\d* eliminates float inaccuracy by matching "some number of digits", e.g. 0000005
-		then: "TableAsMap for map shows correct key-count pairs"
-		tableContains([
-			'key-1 ."out2":3.688879\\d*,"out":2500.',
-			'key-2 ."out":2725.',
-			'key-3 ."out2":4.744932\\d*,"out":13225.',
-			'key-4 ."out2":3.496507\\d*,"out":1090.',
-			'key-5 ."out":0.'
-		])
+		and: "TableAsMap for map shows correct key-count pairs"
+		waitFor {
+			tableContains([
+					'key-1 ."out2":3.688879\\d*,"out":2500.',
+					'key-2 ."out":2725.',
+					'key-3 ."out2":4.744932\\d*,"out":13225.',
+					'key-4 ."out2":3.496507\\d*,"out":1090.',
+					'key-5 ."out":0.'
+			])
+		}
 
 		and: "After sum values have fallen from the window, sum outputs must show zero"
 		waitFor(20) {
@@ -189,7 +194,7 @@ class MapModulesSpec extends LoginTester1Spec {
 
 	private boolean tableContains(Collection<String> patterns) {
 		def mapAsTable = findModuleOnCanvas("MapAsTable")
-		mapAsTable.find(".event-table-module-content tr").find { $row ->
+		mapAsTable.find(".event-table-module-content tbody tr").find { $row ->
 			def found = patterns.find { $row.text() =~ it }
 			if (found == null) {
 				log.info("Could not find " + $row.text())
