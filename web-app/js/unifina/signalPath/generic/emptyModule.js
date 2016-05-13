@@ -276,14 +276,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			    type: 'GET',
 			    url: prot.signalPath.options.getModuleHelpUrl,
 			    dataType: 'json',
+				data: {
+					id:prot.jsonData.id,
+					canvas_id:SignalPath.getId()
+				},
 			    success: function(data) {
 			    	prot.cachedHelpResponse = data;
 			    	cb(prot.renderHelp(prot.cachedHelpResponse, extended))
 				},
 			    error: function() {
 			    	result = "An error occurred while loading module help.";
-			    },
-			    data: {id:prot.jsonData.id}
+			    }
 			});
 		}
 	}

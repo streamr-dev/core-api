@@ -266,13 +266,6 @@ class StreamController {
 		}
 	}
 
-	def getDataRange() {
-		Stream stream = Stream.get(params.id)
-		DataRange dataRange = streamService.getDataRange(stream)
-		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
-		render dataRangeMap as JSON
-	}
-
 	private def getAuthorizedStream(String id, Operation op=Operation.READ, Closure action) {
 		SecUser user = springSecurityService.currentUser
 		Stream stream = Stream.get(id)

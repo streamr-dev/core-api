@@ -1,5 +1,6 @@
 package com.unifina.controller.signalpath
 
+import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
@@ -179,15 +180,23 @@ class ModuleController {
 			globals.destroy()
 		}
 	}
-	
+
+	// Anonymous access to help of public modules/canvases
+	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 	def jsonGetModuleHelp() {
 		Module module = Module.get(params.long("id"))
-		if (!permissionService.canRead(springSecurityService.currentUser, module.modulePackage)) {
-			throw new Exception("User $springSecurityService.currentUser does not have access to module $module.name")
+
+		// Access to canvas or module package grants access to module help
+		if (params.canvas_id && permissionService.canRead(springSecurityService.currentUser, Canvas.get(params.canvas_id))
+			|| !permissionService.canRead(springSecurityService.currentUser, module.modulePackage)) {
+			response.setContentType("application/json")
+			render module.jsonHelp ?: "{}"
+		}
+		else {
+			response.status = 403
+			render ([success:false, error: "Access denied"] as JSON)
 		}
 
-		response.setContentType("application/json")
-		render module.jsonHelp ?: "{}"
 	}
 	
 	def jsonSetModuleHelp() {
