@@ -34,7 +34,7 @@ class DashboardController {
 
 	def list() {
 		def user = springSecurityService.currentUser
-		def dashboards = permissionService.get(Dashboard, user) { order "lastEdited", "desc" }
+		def dashboards = permissionService.get(Dashboard, user) { order "lastUpdated", "desc" }
 		def shareable = permissionService.get(Dashboard, user, Operation.SHARE)
 		return [dashboards:dashboards, shareable:shareable, user:user]
 	}
