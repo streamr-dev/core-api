@@ -56,13 +56,12 @@ class MetricsServiceTest extends Specification {
 		(1..sendCount).each {
 			service.increment("test.metric", me, singleIncrement)
 		}
-		service.flush()
 		then:
-		messageCount == 2
+		messageCount == 1
 		valueSum == sendCount * singleIncrement
 		lastSentChannelId == "streamr-metrics"
 		lastSentMessage.metric == "test.metric"
 		lastSentMessage.user == me.id
-		lastSentMessage.value == valueSum - service.reportingPeriodEvents
+		lastSentMessage.value == valueSum
 	}
 }
