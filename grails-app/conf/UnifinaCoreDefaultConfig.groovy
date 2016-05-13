@@ -346,6 +346,10 @@ unifina.email.feedback.recipient = "contact@streamr.com"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
 
+/**
+ * Signup Configs
+ */
+streamr.signup.requireAccepting = false
 
 /**
  * Miscellaneous

@@ -11,20 +11,25 @@
 </head>
 
 <body class="login-page show-sign-in">
-	<g:if test='${signupOk}'>
+	<g:if test='${inviteSent}'>
 	
 		<h1 id="signup-ok" class="form-header">Thanks for signing up!</h1>
 	
 		<div class="panel">
-			<p>
-				As we are still in private beta, we are letting people in little by little.
-
-				As soon as we are ready for you, we'll send you an invite.
-
-				We'll be in touch!
-			</p>
+			<p>As we are still in private beta, we are letting people in little by little. As soon as we are ready for you, we'll send you an invite.</p>
+			<p>We'll be in touch!</p>
 		</div>
 	</g:if>
+
+	<g:elseif test='${registerConfirmSent}'>
+
+		<h1 id="signup-ok" class="form-header">Thanks for signing up!</h1>
+
+		<div class="panel">
+			<p>Please confirm your registering by clicking the link we've just sent you with email.</p>
+			<p>See you soon!</p>
+		</div>
+	</g:elseif>
 
 	<g:else>
 		<h1 class="form-header">Sign Up</h1>
