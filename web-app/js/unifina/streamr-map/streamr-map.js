@@ -1,9 +1,12 @@
 
 (function(exports) {
 
+    var TRACE_REDRAW_BATCH_SIZE = 10000
+
     function StreamrMap(parent, options) {
 
         var _this = this
+
         this.parent = $(parent)
 
         this.untouched = true
@@ -103,11 +106,23 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
-                updates.forEach(function(update) {
-                    // get center from the map (projected)
-                    var point = bigPointLayer._map.latLngToContainerPoint(update.latlng);
-                    bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, update.color)
-                })
+                if(!changesOnly)
+                    clearTimeout(_this.traceRedrawTimeout)
+
+                var i = 0
+                function redrawTrace() {
+                    _this.traceRedrawTimeout = setTimeout(function() {
+                        var count = i + TRACE_REDRAW_BATCH_SIZE
+                        while (i < count && i < updates.length) {
+                            var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
+                            bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
+                            i++
+                        }
+                        if (i < updates.length)
+                            redrawTrace()
+                    })
+                }
+                redrawTrace()
 
                 _this.pendingLineUpdates = []
             }
