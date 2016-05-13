@@ -274,6 +274,25 @@ div.output .switchContainer .ioSwitch {
 	opacity: 1.0;
 }
 
+.component .showOnFocus {
+	transition: opacity 0.1s linear;
+	opacity: 0;
+}
+
+.component.holdFocus .showOnFocus {
+	opacity: 1;
+}
+
+// This is to use the delay only when hiding the buttons, not when showing them
+.component:not(:hover) .showOnFocus {
+	transition-delay: 0.5s;
+}
+
+.component:hover .showOnFocus,
+.component .showOnFocus:hover {
+	opacity: 1;
+}
+
 .showOnHover {
 	opacity: 0.0;
 }

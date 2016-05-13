@@ -88,7 +88,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
 		
-		var delay=500, tooltipDelayTimer		
+		var delay=500, tooltipDelayTimer
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
 	 			prot.getHelp(false, function(htext) {
@@ -213,7 +213,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			prot.addFocus(true);
 			event.stopPropagation();
 		});
-		
+
 		prot.div.hover(function() {
 			if (!prot.div.hasClass("focus")) {
 				prot.addFocus(false);
@@ -323,27 +323,22 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.initResizable = initResizable;
 	
 	function removeFocus() {
-		if(this.focusRemoveTimeout)
-			clearTimeout(this.focusRemoveTimeout)
-		this.focusRemoveTimeout = setTimeout(function() {
-			prot.div.removeClass("focus");
-			prot.div.removeClass("hoverFocus");
-			prot.div.removeClass("holdFocus");
-			prot.div.find(".showOnFocus").fadeTo(100,0);
-		}, 500)
+		prot.div.removeClass("focus");
+		prot.div.removeClass("hoverFocus");
+		prot.div.removeClass("holdFocus");
 	}
 	prot.removeFocus = removeFocus;
 	
 	function addFocus(hold) {
 		prot.div.addClass("focus");
-		
-		if (hold) prot.div.addClass("holdFocus");
-		else prot.div.addClass("hoverFocus");
-		
-		prot.div.find(".showOnFocus").fadeTo(100,1);
+		if (hold)
+			prot.div.addClass("holdFocus");
+		else
+			prot.div.addClass("hoverFocus");
 	}
 	prot.addFocus = addFocus;
 	
+
 	function createModuleButton(additionalClasses) {
 		var button = $("<div class='modulebutton'><a class='btn btn-default btn-xs showOnFocus' href='#' style='padding: 0px'><i class='fa fa-fw "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
 		return button;
