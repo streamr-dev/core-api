@@ -105,7 +105,7 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
-                if(!changesOnly && _this.traceRedrawTimeout)
+                if(!changesOnly)
                     clearTimeout(_this.traceRedrawTimeout)
 
                 var i = 0
@@ -117,9 +117,8 @@
                             bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
                             i++
                         }
-                        if(i < updates.length)
+                        if(i < updates.length - 1)
                             redrawTrace()
-                        _this.traceRedrawTimeout = undefined
                     })
                 }
                 redrawTrace()
