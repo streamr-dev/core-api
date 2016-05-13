@@ -64,7 +64,7 @@
             _this.untouched = false
         }
 
-        this.map.one("dragstart click", mouseEventHandler)
+        this.map.once("dragstart click", mouseEventHandler)
         this.map._container.addEventListener("wheel", mouseEventHandler)
 
         this.map.on("moveend", function() {
