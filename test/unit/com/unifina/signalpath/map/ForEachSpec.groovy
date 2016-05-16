@@ -1,10 +1,12 @@
 package com.unifina.signalpath.map
 
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.service.CanvasService
+import com.unifina.service.MetricsService
 import com.unifina.service.ModuleService
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.simplemath.Divide
@@ -16,11 +18,11 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import com.unifina.signalpath.ModuleSpecification
+import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService])
-class ForEachSpec extends ModuleSpecification {
+@Mock([CanvasService, SignalPathService, Canvas, Module, SecUser, ModuleService, SpringSecurityService])
+class ForEachSpec extends Specification {
 
 	CanvasService canvasService
 
@@ -29,12 +31,25 @@ class ForEachSpec extends ModuleSpecification {
 	SecUser user
 
 	def setup() {
+		defineBeans {
+			metricsService(MockMetricsService)
+		}
 		canvasService = mainContext.getBean(CanvasService)
 		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEach()
 		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.init()
 		user = new SecUser().save(failOnError: true, validate: false)
+	}
+
+	public static class MockMetricsService extends MetricsService {
+		@Override public def increment(String metric, SecUser user, long count=0) { }
+		@Override public def increment(String metric, long count=0) { }
+		@Override public def increment(String metric, Stream stream, long count=0) { }
+		@Override public def flush() { }
+
+		@Override void afterPropertiesSet() throws Exception { }
+		@Override void destroy() throws Exception { }
 	}
 
 	def "throws RuntimeException if canvas has no exported inputs"() {

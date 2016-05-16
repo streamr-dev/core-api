@@ -6,6 +6,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
+import com.unifina.service.MetricsService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
@@ -15,11 +16,11 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import com.unifina.signalpath.ModuleSpecification
+import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
 @Mock([Stream, Feed])
-class SendToStreamSpec extends ModuleSpecification {
+class SendToStreamSpec extends Specification {
 
 	static class FakePermissionService extends PermissionService {
 		@Override boolean canRead(SecUser user, resource) { return true }
@@ -36,6 +37,16 @@ class SendToStreamSpec extends ModuleSpecification {
 		}
 	}
 
+	public static class MockMetricsService extends MetricsService {
+		@Override public def increment(String metric, SecUser user, long count=0) { }
+		@Override public def increment(String metric, long count=0) { }
+		@Override public def increment(String metric, Stream stream, long count=0) { }
+		@Override public def flush() { }
+
+		@Override void afterPropertiesSet() throws Exception { }
+		@Override void destroy() throws Exception { }
+	}
+
 	FakeKafkaService fakeKafkaService
 	Globals globals
 	SendToStream module
@@ -45,6 +56,7 @@ class SendToStreamSpec extends ModuleSpecification {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
 			permissionService(FakePermissionService)
+			metricsService(MockMetricsService)
 		}
 
 		def feed = new Feed()

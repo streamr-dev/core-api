@@ -15,6 +15,9 @@ class ModuleSpecification extends Specification {
 		@Override public def increment(String metric, long count=0) { }
 		@Override public def increment(String metric, Stream stream, long count=0) { }
 		@Override public def flush() { }
+
+		@Override void afterPropertiesSet() throws Exception { }
+		@Override void destroy() throws Exception { }
 	}
 
 	def setupSpec() {
