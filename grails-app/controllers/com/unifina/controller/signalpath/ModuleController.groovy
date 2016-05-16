@@ -188,7 +188,7 @@ class ModuleController {
 
 		// Access to canvas or module package grants access to module help
 		if (params.canvas_id && permissionService.canRead(springSecurityService.currentUser, Canvas.get(params.canvas_id))
-			|| !permissionService.canRead(springSecurityService.currentUser, module.modulePackage)) {
+			|| permissionService.canRead(springSecurityService.currentUser, module.modulePackage)) {
 			response.setContentType("application/json")
 			render module.jsonHelp ?: "{}"
 		}
