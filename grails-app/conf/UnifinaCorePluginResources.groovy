@@ -103,7 +103,10 @@ modules = {
 	}
 	'detect-timezone' {
 		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
-		resource url:[dir:'js/timezones', file:'list_timezones.js', plugin: 'unifina-core']
+		resource url:[dir:'js/timezones', file:'time-zone-list.js', plugin: 'unifina-core']
+	}
+	'timezone-list' {
+		resource url:[dir:'js/timezones', file:'time-zone-list.js', plugin: 'unifina-core']
 	}
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
@@ -140,6 +143,13 @@ modules = {
 	spectrum {
 		resource url:[dir:'js/spectrum', file:'spectrum.js', plugin:'unifina-core']
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
+	}
+	moment {
+		resource url:[dir:'js/moment', file:'moment.js']
+	}
+	'moment-timezone' {
+		dependsOn 'moment'
+		resource url:[dir:'js/moment', file:'moment-timezone.js']
 	}
 
 	/**

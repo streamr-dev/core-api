@@ -3,7 +3,8 @@
     <meta name="layout" content="login" />
     <title>Register</title>
     
-	<r:require module="detect-timezone"/>
+	<r:require module="moment-timezone"/>
+	<r:require module="timezone-list"/>
 	<r:require module="bootbox"/>
 	<r:require module="password-meter"/>
 
@@ -18,7 +19,7 @@
 			var currentTz = "${user.timezone}"
 		</g:if>
 		<g:else>
-			var currentTz = jstz().timezone_name
+			var currentTz = moment.tz.guess()
 		</g:else>
 		
 		$('span.timezone').text(currentTz)
@@ -28,7 +29,7 @@
 		})
 
     	var $tzSelect = $('#timezone')
-		var tzOpts = timezoneList.map(function(tz) {
+		var tzOpts = timeZoneList.map(function(tz) {
 			return $('<option '+(tz === currentTz ? 'selected': '')+' value="'+tz+'">'+tz+'</option>')
 		})
 
@@ -40,7 +41,7 @@
 				message: $("#tc-content").html()
 			})
 		})
-		
+
 		$("#privacy-link").click(function() {
 			bootbox.dialog({
 				title: "Privacy Policy",
@@ -53,8 +54,6 @@
 		})
 
 	});
-
-	var timezoneList = jstz.getTimezoneList()
 
 	</r:script>
 </head>

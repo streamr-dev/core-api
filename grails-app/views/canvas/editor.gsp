@@ -15,7 +15,7 @@
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
-		<r:require module="detect-timezone"/>
+		<r:require module="moment-timezone"/>
 		<r:require module="canvas-controls"/>
 
 		<r:script>
@@ -30,7 +30,7 @@ $('#moduleTree').bind('loaded.jstree', function() {
 $(document).ready(function() {
 
 	function settings() {
-		var tz = jstz();
+		var tz = moment.tz.guess();
 
 		return {
 			beginDate: $("#beginDate").val(),
@@ -39,8 +39,8 @@ $(document).ready(function() {
 			timeOfDayFilter: {
 				timeOfDayStart: $("#timeOfDayStart").val(),
 				timeOfDayEnd: $("#timeOfDayEnd").val(),
-				timeZone: tz.timezone_name,
-				timeZoneOffset: tz.utc_offset,
+				timeZone: tz.name,
+				timeZoneOffset: new Date().getTimezoneOffset(),
 				timeZoneDst: tz.uses_dst
 			},
 			editorState: {
