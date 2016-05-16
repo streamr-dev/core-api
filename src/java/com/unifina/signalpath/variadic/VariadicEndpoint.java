@@ -26,19 +26,24 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		return endpoint;
 	}
 
-	public E addPlaceholder() {
-		E endpoint = initializeEndpoint("endpoint-" + System.currentTimeMillis());
-		if (endpoint instanceof Input) {
-			((Input) endpoint).requiresConnection = false;
+	public List<E> getEndpoints() {
+		if (endpoints.isEmpty()) {
+			return Collections.emptyList();
 		}
-		endpoints.add(endpoint);
-		attachToModule(module, endpoint);
-		updateEndpointConfigurations();
-		return endpoint;
+		return endpoints.subList(0, endpoints.size() - 1);
 	}
 
-	public List<E> getEndpoints() {
-		return endpoints.subList(0, endpoints.size() - 1);
+
+	public void onConfiguration(Map<String, Object> config) {
+		if (endpoints.isEmpty()) {
+			addPlaceholder();
+		} else {
+			E placeholder = endpoints.get(endpoints.size() - 1);
+			if (placeholder instanceof Input) {
+				((Input) placeholder).requiresConnection = false;
+			}
+			attachToModule(module, placeholder);
+		}
 	}
 
 	List<E> getEndpointsIncludingPlaceholder() {
@@ -58,23 +63,22 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		this.offsetIndex = startIndex;
 	}
 
-	public void onConfiguration(Map<String, Object> config) {
-		if (endpoints.isEmpty()) {
-			addPlaceholder();
-		} else {
-			E placeholder = endpoints.get(endpoints.size() - 1);
-			if (placeholder instanceof Input) {
-				((Input) placeholder).requiresConnection = false;
-			}
-			attachToModule(module, placeholder);
-		}
-	}
-
 	abstract void attachToModule(AbstractSignalPathModule owner, E endpoint);
 
 	abstract String getDisplayName();
 
 	abstract String getJsClass();
+
+	private E addPlaceholder() {
+		E endpoint = initializeEndpoint("endpoint-" + System.currentTimeMillis());
+		if (endpoint instanceof Input) {
+			((Input) endpoint).requiresConnection = false;
+		}
+		endpoints.add(endpoint);
+		attachToModule(module, endpoint);
+		updateEndpointConfigurations();
+		return endpoint;
+	}
 
 	private E initializeEndpoint(String name) {
 		E endpoint = endpointInstantiator.instantiate(module, name);

@@ -7,70 +7,78 @@ import spock.lang.Specification
 
 class VariadicEndpointSpec extends Specification {
 
-	def variadicEndpoint = new VariadicEndpoint(null, new InputInstantiator.SimpleObject(), "names") {
+	def module = Stub(AbstractSignalPathModule)
+	def attachToModuleEndpoints = []
+	def variadicEndpoint = new VariadicEndpoint(module, new InputInstantiator.SimpleObject(), 5) {
 
 		@Override
-		def void attachToModule(AbstractSignalPathModule owner, Endpoint endpoint) {}
-
-		@Override
-		def void handlePlaceholder(Endpoint placeholderEndoint) {}
+		def void attachToModule(AbstractSignalPathModule owner, Endpoint endpoint) {
+			assert owner == module
+			attachToModuleEndpoints << endpoint
+		}
 
 		@Override
 		def String getDisplayName() {
 			return "nameprefix"
 		}
+
+		@Override
+		def String getJsClass() {
+			return "jsClass"
+		}
 	}
 
-	def "onConfiguration() with empty config initializes no endpoint and single placeholder"() {
-		when:
-		variadicEndpoint.onConfiguration([:])
-		then:
-		variadicEndpoint.endpoints.size() == 0
-		variadicEndpoint.placeholder != null
+	def "state right after instantiation"() {
+		expect: "no endpoints"
+		variadicEndpoint.getEndpoints().empty
+		variadicEndpoint.getEndpointsIncludingPlaceholder().empty
+
 	}
 
-	def "onConfiguration() with config initializes existing endpoints and single placeholder"() {
+	def "state after onConfiguration() on fresh instance"() {
 		when:
-		variadicEndpoint.onConfiguration([
-			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
-		])
-		then:
-		variadicEndpoint.endpoints.size() == 2
-		variadicEndpoint.endpoints[0].name == "endpoint-29fka8d"
-		variadicEndpoint.endpoints[1].name == "endpoint-lmg92jk"
-		variadicEndpoint.placeholder.name.startsWith("endpoint-")
+		variadicEndpoint.onConfiguration(null)
+
+		then: "no 'non-placeholder' endpoints"
+		variadicEndpoint.endpoints.empty
+
+		and: "one appropriately named placeholder endpoint"
+		variadicEndpoint.endpointsIncludingPlaceholder.size() == 1
+		variadicEndpoint.endpointsIncludingPlaceholder.first().displayName == "nameprefix5"
+
+		and: "one invocation of attachToModule"
+		attachToModuleEndpoints == [variadicEndpoint.endpointsIncludingPlaceholder.first()]
 	}
 
-	def "endpoints' display names contain prefix followed by index"() {
+	def "state after 4 addEndpoint() calls followed by an onConfiguration() invocation"() {
 		when:
-		variadicEndpoint.onConfiguration([
-			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
-		])
-		then:
-		variadicEndpoint.endpoints*.displayName == (1..2).collect { "nameprefix$it" }
-	}
+		variadicEndpoint.addEndpoint("first-endpoint")
+		variadicEndpoint.addEndpoint("second-endpoint")
+		variadicEndpoint.addEndpoint("third-endpoint")
+		variadicEndpoint.addEndpoint("placeholder-endpoint")
+		variadicEndpoint.onConfiguration(null)
 
-	def "placeholder's display name contains prefix followed by index"() {
-		when:
-		variadicEndpoint.onConfiguration([
-			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
-		])
-		then:
-		variadicEndpoint.placeholder.displayName == "nameprefix3"
-	}
+		List<Endpoint> allEps = variadicEndpoint.endpointsIncludingPlaceholder
 
-	def "getConfiguration() provides current number of endpoints along with their names"() {
-		variadicEndpoint.onConfiguration([
-			names: ["endpoint-29fka8d", "endpoint-lmg92jk"]
-		])
-		def config = [:]
+		then: "3 'non-placeholder' endpoints"
+		variadicEndpoint.endpoints.size() == 3
 
-		when:
-		variadicEndpoint.getConfiguration(config)
+		and: "4 endpoints when including placeholder"
+		allEps.size() == 4
 
-		then:
-		config.keySet() == ["names"] as Set
-		config.names.size() == 2
-		config.names.every { it.startsWith("endpoint-") }
+		and: "4 + 1 (additional for placeholder) invocations of attachToModule"
+		attachToModuleEndpoints == allEps + [allEps.last()]
+
+		and: "endpoints appropriately named"
+		allEps*.displayName == ["nameprefix5", "nameprefix6", "nameprefix7", "nameprefix8"]
+
+		and: "endpoints appropriately configured"
+		allEps*.getConfiguration()*.jsClass == ["jsClass", "jsClass", "jsClass", "jsClass"]
+		allEps*.getConfiguration()*.variadic == [
+			[isLast: false, index: 5],
+			[isLast: false, index: 6],
+			[isLast: false, index: 7],
+			[isLast: true, index: 8]
+		]
 	}
 }
