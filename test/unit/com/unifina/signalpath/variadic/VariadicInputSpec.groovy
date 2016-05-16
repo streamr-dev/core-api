@@ -7,71 +7,40 @@ class VariadicInputSpec extends Specification {
 	def module = Mock(AbstractSignalPathModule)
 	def variadicInput = new VariadicInput<Object>(module, new InputInstantiator.SimpleObject())
 
-	def "inputs are created"() {
+	def "attachToModule() attaches endpoint (Input) to module"() {
 		when:
-		variadicInput.onConfiguration([
-			inputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-		then:
-		variadicInput.endpoints.size() == 3
-	}
-
-	def "created inputs' display names are as expected"() {
-		when:
-		variadicInput.onConfiguration([
-			inputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-		then:
-		variadicInput.endpoints*.displayName == ["in1", "in2", "in3"]
-	}
-
-	def "created inputs + placeholder are registered with module"() {
-		when:
-		variadicInput.onConfiguration([
-			inputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-		then:
-		4 * module.addInput(_)
-		0 * module._
-	}
-
-	def "getValues() collects input values"() {
-		module.drivingInputs = [] // prevent null pointer exception
-
-		variadicInput.onConfiguration([
-			inputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-		variadicInput.endpoints.get(0).receive(Double.valueOf(666))
-		variadicInput.endpoints.get(1).receive("hello world")
-
-		expect:
-		variadicInput.values == [666D, "hello world", null]
-	}
-
-	def "getConfiguration() provides input count and names, and module configuration"() {
-		variadicInput.onConfiguration([
-			inputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-
-		when:
-		def config = [:]
-		variadicInput.getConfiguration(config)
+		variadicInput.addEndpoint("new-input-1")
+		variadicInput.addEndpoint("new-input-2")
 
 		then:
-		config.keySet() == ["inputNames", "variadicInput"] as Set
-		config.inputNames.size() == 3
-		config.variadicInput == true
+		2 * module.addInput(_)
 	}
 
-	def "placeholder input"() {
+	def "created inputs have expected displayName and jsClass"() {
 		when:
-		variadicInput.onConfiguration([
-			inputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
+		variadicInput.addEndpoint("new-input-1")
+		variadicInput.addEndpoint("new-input-2")
 
-		then: "requiresConnection=false"
-		!variadicInput.placeholder.requiresConnection
-		and: "display name is as expected"
-		variadicInput.placeholder.displayName == "in4"
+		then:
+		variadicInput.endpointsIncludingPlaceholder*.displayName == ["in1", "in2"]
+		variadicInput.endpointsIncludingPlaceholder*.getConfiguration()*.jsClass == ["VariadicInput", "VariadicInput"]
+	}
+
+	def "can getValues() of non-placeholder input"() {
+		module.drivingInputs = [] // Prevent NullPointerException during receive()
+
+		variadicInput.addEndpoint("new-input-1")
+		variadicInput.addEndpoint("new-input-2")
+		variadicInput.addEndpoint("new-input-3")
+		variadicInput.onConfiguration([:])
+
+		variadicInput.endpoints[0].receive(666)
+		variadicInput.endpoints[1].receive("hello world")
+
+		when:
+		List values = variadicInput.getValues()
+
+		then:
+		values == [666, "hello world"]
 	}
 }
