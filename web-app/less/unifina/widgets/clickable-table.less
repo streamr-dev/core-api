@@ -1,5 +1,7 @@
 @import "bootstrap-3.2.0/tables.less";
+@import "bootstrap-3.2.0/dropdowns.less";
 @import "pixel-admin/pixel-admin-less/tables.less";
+@import "pixel-admin/pixel-admin-less/dropdowns.less";
 
 div.table.clickable-table {
 	&:extend(.table);
@@ -92,6 +94,27 @@ div.table.clickable-table {
 	&.table-hover {
 		.tbody > .tr:hover > .td {
 			&:extend(.table-hover > tbody > tr:hover > td);
+		}
+	}
+
+	div.dropdown {
+		text-align: center;
+
+		span.dropdown-toggle {
+			cursor: pointer;
+		}
+
+		ul.dropdown-menu > li > span {
+			font-size: 14px;
+			cursor: pointer;
+			margin: 0 -2px;
+			padding: 5px 18px;
+			display: block;
+		}
+
+		ul.dropdown-menu > li > span:hover {
+			background-color: @primary-color;
+			color: #FFFFFF;
 		}
 	}
 }

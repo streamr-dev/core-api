@@ -2,6 +2,9 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="canvas.list.label" /></title>
+
+		<r:require module="confirm-button"/>
+
         <r:script>
         	$(function() {
 				function applyFilter() {
@@ -29,20 +32,28 @@
 		</r:script>
 		<r:script>
 			$(document).ready(function() {
-				$(".delete-canvas-link").click(function(event) {
-					event.preventDefault()
-					var url = $(this).attr("data-action")
-					$.ajax({url: url, method: "DELETE"})
-						.done(function(data) {
-							console.log(data)
-							//location.reload()
-						}).fail(function(data) {
-							console.log(data)
-						})
-
+				$(".delete-canvas-link").each(function(i, el) {
+					new ConfirmButton(el, {
+						title: "Are you sure you want to delete canvas?",
+						message: "This also deletes all of this canvases dashboard items from the dashboards."
+					}, function(result) {
+						if (result) {
+							$.ajax("${ createLink(uri:"/api/v1/canvases", absolute: true)}" + '/' + $(el).data('id'), {
+								method: 'DELETE',
+								success: function() {
+									location.reload()
+								},
+								error: function(e, t, msg) {
+									Streamr.showError(msg)
+								}
+							})
+						}
+					})
 				})
 			})
 		</r:script>
+
+		<r:layoutResources disposition="head"/>
     </head>
     <body class="canvas-list-page">
 		
@@ -81,6 +92,7 @@
 						<ui:th><g:message code="canvas.name.label" /></ui:th>
 						<ui:th><g:message code="canvas.state.label" /></ui:th>
 						<ui:th><g:message code="canvas.created.label" /></ui:th>
+						<ui:th></ui:th>
 					</ui:tr>
 				</ui:thead>
 				<ui:tbody>
@@ -94,18 +106,22 @@
 							</ui:td>
 							<ui:td>
 								<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
+							</ui:td>
+							<ui:td>
 								<div class="dropdown">
-									<a id="stream-menu-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown">
+									<span id="canvas-menu-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown">
 										<i class="navbar-icon fa fa-bars"></i>
-									</a>
+									</span>
 									<ul class="dropdown-menu pull-right">
 										<li>
-											<a href="#" class="delete-canvas-link confirm" data-action="${ createLink(url: "/api/v1/canvases/", absolute: true) + "/" + canvas.id }" data-confirm="Are you sure you want to delete the canvas?">
+											<span data-id="${canvas.id}" class="delete-canvas-link confirm">
 												<i class="fa fa-trash-o"></i> Delete canvas
-											</a>
+											</span>
 										</li>
 										<g:if test="${shareable.contains(canvas)}">
-											<li><ui:shareButton url="${createLink(uri: '/api/v1/canvases') + canvas.id}" name="Canvas ${canvas.name}" type="link">Share</ui:shareButton></li>
+											<li>
+												<ui:shareButton url="${createLink(uri: '/api/v1/canvases') + canvas.id}" name="Canvas ${canvas.name}" type="span">Share</ui:shareButton>
+											</li>
 										</g:if>
 									</ul>
 								</div>

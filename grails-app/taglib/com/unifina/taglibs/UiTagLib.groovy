@@ -308,6 +308,9 @@ public class UiTagLib {
 		} else if (type == "link") {
 			open = "<a href='#' class='share-button $extraClass' "
 			close = " </a>"
+		} else if (type == "span") {
+			open = "<span class='share-button $extraClass' "
+			close = " </span>"
 		} else {
 			throw new IllegalArgumentException("Unknown 'type' for shareButton: $type")
 		}
