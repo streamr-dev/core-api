@@ -78,6 +78,76 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		stopCanvasIfRunning()
 	}
 
+	def "variadic outputs works as expected"() {
+		when: "build canvas"
+		searchAndClick("MapModulesSpec")
+		moduleShouldAppearOnCanvas("Stream")
+
+		addAndWaitModule("NewMap")
+		moveModuleBy("NewMap", 0, 200, 0, true)
+		chooseDropdownParameterForModule("NewMap", "alwaysNew", "false")
+
+		addAndWaitModule("PutToMap")
+		moveModuleBy("PutToMap", 300, 150, 0, true)
+
+		addAndWaitModule("GetMultiFromMap")
+		moveModuleBy("GetMultiFromMap", 550, 175, 0, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 750, 50, 0, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 750, 150, 1, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 750, 250, 2, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 750, 350, 3, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 750, 450, 4, true)
+
+		connectEndpoints(findOutput("NewMap", "out"), findInputByDisplayName("PutToMap", "map"))
+		connectEndpoints(findOutput("Stream", "key"), findInputByDisplayName("PutToMap", "key"))
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("PutToMap", "value"))
+		connectEndpoints(findOutput("PutToMap", "map"), findInputByDisplayName("GetMultiFromMap", "in"))
+
+		connectEndpoints(findOutputByDisplayName("GetMultiFromMap", "out1"), findInput("Label", "label", 0))
+		connectEndpoints(findOutputByDisplayName("GetMultiFromMap", "out2"), findInput("Label", "label", 1))
+		renameEndpoint("GetMultiFromMap", "out3", "key-2")
+		connectEndpoints(findOutputByDisplayName("GetMultiFromMap", "key-2"), findInput("Label", "label", 2))
+		connectEndpoints(findOutputByDisplayName("GetMultiFromMap", "out4"), findInput("Label", "label", 3))
+		connectEndpoints(findOutputByDisplayName("GetMultiFromMap", "out5"), findInput("Label", "label", 4))
+		disconnectEndpoint(findOutputByDisplayName("GetMultiFromMap", "out1"))
+		connectEndpoints(findOutputByDisplayName("GetMultiFromMap", "out6"), findInput("Label", "label", 0))
+		connectEndpoints(findOutputByDisplayName("Stream", "key"), findInput("NewMap", "trigger"))
+
+		renameEndpoint("GetMultiFromMap", "out2", "key-1")
+		renameEndpoint("GetMultiFromMap", "out4", "key-5")
+		renameEndpoint("GetMultiFromMap", "out5", "nonexistent")
+		renameEndpoint("GetMultiFromMap", "out6", "key-3")
+
+		and: "save and start real-time canvas"
+		ensureRealtimeTabDisplayed()
+		setCanvasName(getClass().simpleName + new Date().getTime())
+		startCanvas(true)
+
+
+		and: "data produced to Kafka"
+		produceAllDataToKafka()
+
+ 		then:
+		waitFor(30) { $(".modulelabel")[3].text().toDouble() == 0d }
+		$(".modulelabel")[0].text().toDouble() == 115d
+		$(".modulelabel")[1].text().toDouble() == 40d
+		$(".modulelabel")[2].text().toDouble() == -15d
+		$(".modulelabel")[4].text() == ""
+
+		cleanup:
+		stopCanvasIfRunning()
+	}
+
 	private void produceAllDataToKafka() {
 		produceToKafka("key-1", 30)
 		produceToKafka("key-1", 40)

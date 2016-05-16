@@ -64,7 +64,7 @@ public class VariadicInputOutputPair<T> implements Serializable {
 			Map<String, Object> variadicInputConfig = (Map<String, Object>) inputConfig.get("variadic");
 			variadicInputConfig.put("linkedOutput", output.getName());
 
-			Map<String, Object> outputConfig = input.getConfiguration();
+			Map<String, Object> outputConfig = output.getConfiguration();
 			Map<String, Object> variadicOutputConfig = (Map<String, Object>) outputConfig.get("variadic");
 			variadicOutputConfig.put("disableGrow", true);
 		}

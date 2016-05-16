@@ -9,7 +9,7 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
     pub.createDiv = function() {
         var div = super_createDiv()
 
-        if (json.variadic.disableGrow) {
+        if (!json.variadic.disableGrow) {
             div.bind("spConnect", function(event, output) {
                 if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
                     console.log("connected")
@@ -39,8 +39,9 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
             delete jsonCopy.id
             delete jsonCopy.longName
             delete jsonCopy.sourceId
+            jsonCopy.targets = []
             jsonCopy.name = "endpoint" + Date.now()
-            jsonCopy.displayName = json.displayName.replace(/[0-9]/g, '') + (json.variadic.index + 1)
+            jsonCopy.displayName = "out" + (json.variadic.index + 1)
             jsonCopy.variadic.isLast = true
             jsonCopy.variadic.index += 1
             return module.addOutput(jsonCopy)

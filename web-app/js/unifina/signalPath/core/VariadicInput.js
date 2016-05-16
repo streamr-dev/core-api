@@ -25,7 +25,7 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
                     delete jsonCopy.longName
                     delete jsonCopy.sourceId
                     jsonCopy.name = "endpoint" + Date.now()
-                    jsonCopy.displayName = json.displayName.replace(/[0-9]/g, '') + (json.variadic.index + 1)
+                    jsonCopy.displayName = "in" + (json.variadic.index + 1)
                     jsonCopy.requiresConnection = false
                     jsonCopy.variadic.isLast = true
                     jsonCopy.variadic.index += 1

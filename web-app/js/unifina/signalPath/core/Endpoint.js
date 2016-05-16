@@ -177,20 +177,24 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	pub.createJSPlumbEndpoint = createJSPlumbEndpoint;
 	
 	function rename(iodiv,data) {
-		var n = $(iodiv).find(".ioname").text();
+		var defaultValue = $(iodiv).find(".ioname").text();
 
-		var displayName = prompt("Display name for "+data.name+":",n);
-		if (displayName != null) {
-			if (displayName != "" && displayName != data.name) {
-				data.displayName = displayName;
+		bootbox.prompt({
+			title: "Display name for "+data.name,
+			value: defaultValue,
+			className: 'rename-endpoint-dialog',
+			callback: function(displayName) {
+				if (displayName != null) {
+					if (displayName != "" && displayName != data.name) {
+						data.displayName = displayName;
+					} else {
+						delete data.displayName;
+						displayName = data.name;
+					}
+					$(iodiv).find(".ioname").html(displayName);
+				}
 			}
-			else {
-				delete data.displayName;
-				displayName = data.name;
-			}
-
-			$(iodiv).find(".ioname").html(displayName);
-		}
+		});
 		module.redraw()
 	}
 	
