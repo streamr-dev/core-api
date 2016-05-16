@@ -379,8 +379,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				try {
 					jsPlumb.remove(el.div)
 				} finally {
-					el.parentDiv.remove()
+					el.parentDiv.empty()
 					_this.redraw()
+					if (el.parentDiv.parent().find("td.output:empty").length !== 0) {
+						el.parentDiv.parent().remove()
+					}
 				}
 			}
 		}, 0)
@@ -402,8 +405,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				try {
 					jsPlumb.remove(el.div)
 				} finally {
-					el.parentDiv.remove()
+					el.parentDiv.empty()
 					_this.redraw()
+					if (el.parentDiv.parent().find("td.input:empty").length !== 0) {
+						el.parentDiv.parent().remove()
+					}
 				}
 			}
 		}, 0)

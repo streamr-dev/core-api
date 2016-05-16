@@ -148,6 +148,83 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		stopCanvasIfRunning()
 	}
 
+	def "variadic input-output pair works as expected"() {
+		when: "build canvas"
+		searchAndClick("MapModulesSpec")
+		moduleShouldAppearOnCanvas("Stream")
+
+		addAndWaitModule("Constant")
+		moveModuleBy("Constant", 0, 150, 0, true)
+
+		addAndWaitModule("GreaterThan")
+		moveModuleBy("GreaterThan", 300, 150, 0, true)
+
+		addAndWaitModule("TextLength")
+		moveModuleBy("TextLength", 300, 0, 0, true)
+
+		addAndWaitModule("Filter")
+		moveModuleBy("Filter", 550, 175, 0, true)
+
+		connectEndpoints(findOutput("Stream", "value"), findInput("GreaterThan", "A"))
+		connectEndpoints(findOutput("Constant", "out"), findInput("GreaterThan", "B"))
+		connectEndpoints(findOutput("GreaterThan", "A&gt;B"), findInput("Filter", "pass"))
+
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Filter", "in1"))
+
+		connectEndpoints(findOutput("Stream", "key"), findInput("TextLength", "text"))
+		connectEndpoints(findOutput("TextLength", "length"), findInputByDisplayName("Filter", "in2"))
+
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Filter", "in3"))
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 0, 500, 0, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 200, 500, 1, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 400, 500, 2, true)
+
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 600, 500, 3, true)
+
+		connectEndpoints(findOutputByDisplayName("Filter", "out4"), findInput("Label", "label", 3))
+		connectEndpoints(findOutputByDisplayName("Filter", "out2"), findInput("Label", "label", 2))
+		connectEndpoints(findOutputByDisplayName("Filter", "out1"), findInput("Label", "label", 1))
+		connectEndpoints(findOutputByDisplayName("Filter", "out3"), findInput("Label", "label", 0))
+
+		disconnectEndpoint(findInput("Label", "label", 2))
+
+		disconnectEndpoint(findInputByDisplayName("Filter", "in1"))
+		disconnectEndpoint(findInputByDisplayName("Filter", "in3"))
+		disconnectEndpoint(findInputByDisplayName("Filter", "in2"))
+
+		connectEndpoints(findOutputByDisplayName("TextLength", "length"), findInputByDisplayName("Filter", "in4"))
+		connectEndpoints(findOutputByDisplayName("Stream", "value"), findInputByDisplayName("Filter", "in5"))
+		connectEndpoints(findOutputByDisplayName("Stream", "value"), findInputByDisplayName("Filter", "in6"))
+
+		connectEndpoints(findOutputByDisplayName("Filter", "out5"), findInput("Label", "label", 0))
+		connectEndpoints(findOutputByDisplayName("Filter", "out6"), findInput("Label", "label", 1))
+
+		and: "save and start real-time canvas"
+		ensureRealtimeTabDisplayed()
+		setCanvasName(getClass().simpleName + new Date().getTime())
+		startCanvas(true)
+
+
+		and: "data produced to Kafka"
+		produceAllDataToKafka()
+
+		then:
+		waitFor(30) { $(".modulelabel")[0].text().toDouble() == 33d }
+		$(".modulelabel")[1].text().toDouble() == 33d
+		$(".modulelabel")[2].text() == ""
+		$(".modulelabel")[3].text().toDouble() == 5d
+
+		cleanup:
+		stopCanvasIfRunning()
+	}
+
 	private void produceAllDataToKafka() {
 		produceToKafka("key-1", 30)
 		produceToKafka("key-1", 40)
