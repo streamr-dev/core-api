@@ -5,27 +5,6 @@
 
 	<g:render template="help-page-styling" model="[wrapper: 'user-guide-wrapper']"/>
 
-	<r:script>
-		$(document).ready(function() {
-			var offset = 80
-
-			// Fix offset of anchor links.
-			$("#module-help-tree a").each(function() {
-				var href = $(this).attr("href")
-				if (href && href.startsWith("#")) {
-					console.log("href", href)
-					$(this).click(function(event) {
-						event.preventDefault()
-						if($($(this).attr('href'))[0]){
-							$($(this).attr('href'))[0].scrollIntoView()
-							scrollBy(0, -(offset-30))
-						}
-					})
-				}
-			})
-		});
-	</r:script>
-
 </head>
 
 <body class="help-page">
@@ -36,7 +15,7 @@
 		<g:render template="/help/breadcrumb"/>
 	</ui:breadcrumb>
 
-	<div id="user-guide-wrapper">
+	<div id="user-guide-wrapper" class="docs-wrapper">
 
 		<markdown:renderHtml template="userGuide/introduction" />
 		<hr>

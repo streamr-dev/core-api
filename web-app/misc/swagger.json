@@ -384,7 +384,7 @@
         "/canvases": {
             "get": {
                 "summary": "List canvases",
-                "description": "Lists (and possibly filters) canvases in your archive.",
+                "description": "Lists (and optionally filters) canvases in your archive.",
                 "tags": [
                     "canvases"
                 ],

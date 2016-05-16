@@ -16,7 +16,7 @@ function ScrollSpyHelper(helpTreeEl, sidebarEl, offset) {
 	this.sidebarEl.append(this.sidebar)
 
 	var lastLi
-	$.each(this.helpTreeEl.children(), function(i, el){
+	$.each(this.helpTreeEl.find("h1,h2"), function(i, el){
 		var text = $(el).text()
 		var id = text.toLowerCase().replace(/\W/g, '')
 		var href = "#" + id

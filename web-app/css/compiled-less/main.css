@@ -16817,6 +16817,9 @@ body.canvas-list-page .panel-heading-controls .input-group {
   width: 300px;
   margin-left: 15px;
 }
+body.help-page {
+  /* Prevent FOUC by hiding the content initially, then shown using js */
+}
 @media (min-width: 700px) {
   body.help-page .side-image {
     float: right;
@@ -16831,6 +16834,9 @@ body.help-page hr {
 }
 body.help-page pre {
   background-color: white;
+}
+body.help-page .docs-wrapper {
+  display: none;
 }
 table {
   background-color: transparent;

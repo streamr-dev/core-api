@@ -4,12 +4,14 @@
 <r:script>
 	$(function() {
 		var wrapper = $("#${wrapper}")
-		var padding = $("<div class='col-xs-0 col-lg-1'/>")
-		var sidebar = $("<div class='col-xs-0 col-sm-0 col-md-3 col-lg-3' />")
-		wrapper.addClass("scrollspy-wrapper col-md-9 col-lg-offset-2 col-lg-6")
+		var sidebar = $("<div class='col-xs-0 col-sm-0 col-md-3 col-lg-4' />")
+
+		wrapper.addClass("scrollspy-wrapper col-md-9 col-lg-offset-1 col-lg-7")
 		wrapper.wrap($("<div class='row' />"))
-		wrapper.parent(".row").append(padding)
 		wrapper.parent(".row").append(sidebar)
+
+		wrapper.wrapInner("<div class='panel-body'/>")
+		wrapper.wrapInner("<div class='panel panel-default'/>")
 
 		// Draws sidebar with scrollspy. If h1 -> first level title. If h2 -> second level title.
 		// Scrollspy uses only titles to track scrolling. div.help-text elements are not significant for the scrollspy.
@@ -26,5 +28,28 @@
 				codeBlock.parentNode.replaceChild(elt, codeBlock);
 			}, {value: codeBlocks[i].innerHTML.trim()});
 		}
+		// FOUC is prevented by having the content hidden on load. Now show it!
+		wrapper.show()
+
+		// Fix offset of anchor links.
+		var offset = 80
+		wrapper.find("a").each(function() {
+			var href = $(this).attr("href")
+			if (href && href.startsWith("#")) {
+				var el = $("a[name="+href.substring(1))
+				if (el.length == 0) {
+					console.log("Anchor "+href+" is a link target, but does not exist on page (yet)")
+				}
+				else {
+					$(this).click(function(event) {
+						if (el[0].scrollIntoView !== undefined) {
+							event.preventDefault()
+							el[0].scrollIntoView()
+							scrollBy(0, -(offset-30))
+						}
+					})
+				}
+			}
+		})
 	})
 </r:script>

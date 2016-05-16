@@ -358,8 +358,9 @@ tomcat.nio = true // in run-app or test-app
 markdown.hardwraps = true
 markdown.autoLinks = true
 markdown.definitionLists = true
-markdown.smartPunctuation = true
-markdown.smartQuotes = true
+markdown.smartPunctuation = false
+markdown.smartQuotes = false
+markdown.smart = false
 markdown.fencedCodeBlocks = true
 markdown.tables = true
 
