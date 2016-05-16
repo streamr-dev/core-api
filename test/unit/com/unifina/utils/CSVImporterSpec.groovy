@@ -214,5 +214,47 @@ class CSVImporterSpec extends Specification {
 		schema.entries.length == 21
 		schema.entries.findAll {it==null}.size() == 2
 	}
+
+	void "should ignore empty string fields by default"() {
+		def value
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/empty-strings.csv").toURI()).toFile()
+
+		when: "lines are read in"
+			CSVImporter csv = new CSVImporter(file)
+			CSVImporter.Schema schema = csv.getSchema()
+			int i = 0
+			for (CSVImporter.LineValues line : csv) {
+				if(i == 5) {
+					value = line.values[4]
+					break
+				}
+				i++
+			}
+
+		then: "value is null"
+			value == null
+	}
+
+	void "should read empty strings if ignoreEmptyFields == false"() {
+		def value
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/empty-strings.csv").toURI()).toFile()
+
+		when: "lines are read in"
+			CSVImporter csv = new CSVImporter(file, null, null, null, false)
+			CSVImporter.Schema schema = csv.getSchema()
+			int i = 0
+			for (CSVImporter.LineValues line : csv) {
+				if(i == 5) {
+					value = line.values[4]
+					break
+				}
+				i++
+			}
+
+		then: "value is an empty string"
+			value == ""
+	}
 	
 }

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
@@ -22,10 +21,11 @@ public class CSVImporter implements Iterable<LineValues> {
 
 	private Schema schema;
 	private File file;
+	private boolean ignoreEmptyFields;
 
 	private static final Logger log = Logger.getLogger(CSVImporter.class);
 
-	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format) throws IOException {
+	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format, boolean ignoreEmptyFields) throws IOException {
 		this.file = file;
 
 		// Detect the schema
@@ -40,18 +40,22 @@ public class CSVImporter implements Iterable<LineValues> {
 			}
 		
 		try {
-			schema = new Schema(is, fieldMap, timestampIndex, format);
+			schema = new Schema(is, fieldMap, timestampIndex, format, ignoreEmptyFields);
 		} finally {
 			is.close();
 		}
 	}
 
+	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format) throws IOException {
+		this(file, fields, timestampIndex, format, true);
+	}
+
 	public CSVImporter(File file) throws IOException {
-		this(file, null, null, null);
+		this(file, null, null, null, true);
 	}
 
 	public CSVImporter(File file, List fields) throws IOException {
-		this(file, fields, null, null);
+		this(file, fields, null, null, true);
 	}
 
 	@Override
@@ -117,7 +121,9 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		public CSVParser parser = null;
 		public SchemaEntry[] entries;
-		
+
+		private boolean ignoreEmptyFields = false;
+
 		public Integer timestampColumnIndex = null;
 		private String format;
 		public String[] headers;
@@ -127,7 +133,8 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		private Map<String, String> fields = null;
 		
-		public Schema(InputStream is, Map<String, String> fields, Integer timestampIndex, String format) throws IOException {
+		public Schema(InputStream is, Map<String, String> fields, Integer timestampIndex, String format, boolean ignoreEmptyFields) throws IOException {
+			this.ignoreEmptyFields = ignoreEmptyFields;
 			if(timestampIndex != null)
 				setTimeStampColumnIndex(timestampIndex);
 			if(format != null)
@@ -261,20 +268,20 @@ public class CSVImporter implements Iterable<LineValues> {
 						parsed[i] = d;
 						lastDate = d;
 					}
-					// Check for empty fields
-					else if (values[i] == null || values[i].length() == 0)
+					// Check for missing or empty (if ignoreEmptyFields == true) fields
+					else if (values[i] == null || (ignoreEmptyFields && values[i].length() == 0))
 						parsed[i] = null;
-						// Parse date field
+					// Parse date field
 					else if (entries[i].dateTimeParser != null) {
 						parsed[i] = entries[i].dateTimeParser.parse(values[i]);
 					}
 					// Parse number
 					else if (entries[i].type.equals("number"))
 						parsed[i] = Double.parseDouble(values[i]);
-						// Parse boolean
+					// Parse boolean
 					else if (entries[i].type.equals("boolean"))
 						parsed[i] = Boolean.parseBoolean(values[i]);
-						// String
+					// String
 					else if (entries[i].type.equals("string"))
 						parsed[i] = values[i];
 				}
