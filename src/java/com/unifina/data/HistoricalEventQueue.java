@@ -159,7 +159,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			log.debug("PERFORMANCE: Processing took "+((timeSpentProcessing/eventCounter)/1000.0)+" microseconds per event.");
 			log.debug("PERFORMANCE: Entire processing took "+feedElapsedTime+" milliseconds or "+((feedElapsedTime*1000)/eventCounter)+" microseconds per event.");
 		}
-		metricsService.increment("eventsProcessed.historical", eventCounter);
+		metricsService.increment("eventsProcessed.historical", globals.getUser(), eventCounter);
 
 	}
 

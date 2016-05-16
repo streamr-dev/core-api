@@ -63,7 +63,7 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 			long startTime = System.nanoTime();
 			process(event);
 
-			metricsService.increment("eventsProcessed.realtime");
+			metricsService.increment("eventsProcessed.realtime", globals.getUser());
 			if (loggingInterval > 0) {
 				elapsedTime += System.nanoTime() - startTime;
 				eventCounter++;

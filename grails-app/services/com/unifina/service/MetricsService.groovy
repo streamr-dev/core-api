@@ -38,9 +38,6 @@ class MetricsService implements InitializingBean, DisposableBean {
 			report(metric, user)
 		}
 	}
-	def increment(String metric, long count=1) {
-		increment(metric, (SecUser)springSecurityService.getCurrentUser(), count)
-	}
 	def increment(String metric, Stream stream, long count=1) {
 		increment(metric, stream?.user, count)
 	}
