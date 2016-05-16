@@ -101,13 +101,6 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/slimScroll-1.3.0/', file:'jquery.slimscroll.min.js', plugin: 'unifina-core']
 	}
-	'detect-timezone' {
-		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
-		resource url:[dir:'js/timezones', file:'time-zone-list.js', plugin: 'unifina-core']
-	}
-	'timezone-list' {
-		resource url:[dir:'js/timezones', file:'time-zone-list.js', plugin: 'unifina-core']
-	}
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
@@ -149,7 +142,7 @@ modules = {
 	}
 	'moment-timezone' {
 		dependsOn 'moment'
-		resource url:[dir:'js/moment', file:'moment-timezone.js']
+		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js']
 	}
 
 	/**
@@ -272,7 +265,6 @@ modules = {
 		dependsOn 'tablesorter'
 		dependsOn 'bootstrap-contextmenu'
 		dependsOn 'typeahead'
-		dependsOn 'detect-timezone'
 		dependsOn 'raf-polyfill'
 		dependsOn 'signalpath-widgets'
 		dependsOn 'mathjax'

@@ -4,7 +4,6 @@
     <title>Register</title>
     
 	<r:require module="moment-timezone"/>
-	<r:require module="timezone-list"/>
 	<r:require module="bootbox"/>
 	<r:require module="password-meter"/>
 
@@ -29,7 +28,7 @@
 		})
 
     	var $tzSelect = $('#timezone')
-		var tzOpts = timeZoneList.map(function(tz) {
+		var tzOpts = moment.tz.names().map(function(tz) {
 			return $('<option '+(tz === currentTz ? 'selected': '')+' value="'+tz+'">'+tz+'</option>')
 		})
 
