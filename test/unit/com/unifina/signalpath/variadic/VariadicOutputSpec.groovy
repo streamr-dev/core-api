@@ -7,87 +7,58 @@ class VariadicOutputSpec extends Specification {
 	def module = Mock(AbstractSignalPathModule)
 	def variadicOutput = new VariadicOutput<Object>(module, new OutputInstantiator.SimpleObject())
 
-	def "outputs are created"() {
+	def "attachToModule() attaches endpoint (Output) to module"() {
 		when:
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
+		variadicOutput.addEndpoint("new-output-1")
+		variadicOutput.addEndpoint("new-output-2")
+
 		then:
-		variadicOutput.endpoints.size() == 3
+		2 * module.addOutput(_)
 	}
 
-	def "created outputs' display names are as expected"() {
+	def "created outputs have expected displayName and jsClass"() {
 		when:
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
+		variadicOutput.addEndpoint("new-output-1")
+		variadicOutput.addEndpoint("new-output-2")
+
 		then:
-		variadicOutput.endpoints*.displayName == ["out1", "out2", "out3"]
+		variadicOutput.endpointsIncludingPlaceholder*.displayName == ["out1", "out2"]
+		variadicOutput.endpointsIncludingPlaceholder*.getConfiguration()*.jsClass == ["VariadicOutput", "VariadicOutput"]
 	}
 
-	def "created outputs + placeholder are registered with module"() {
+	def "can send data to (non-placeholder) outputs"() {
+		variadicOutput.addEndpoint("new-output-1")
+		variadicOutput.addEndpoint("new-output-2")
+		variadicOutput.addEndpoint("new-output-3")
+
 		when:
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
+		variadicOutput.send([666, "hello"])
+
 		then:
-		4 * module.addOutput(_)
-		0 * module._
+		variadicOutput.endpoints*.value == [666, "hello"]
 	}
 
-	def "created outputs can be sent to"() {
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
+	def "any nulls in list to be sent to (non-placeholder) outputs are ignored"() {
+		variadicOutput.addEndpoint("new-output-1")
+		variadicOutput.addEndpoint("new-output-2")
+		variadicOutput.addEndpoint("new-output-3")
 
 		when:
-		variadicOutput.send(["hello", "world", 512])
+		variadicOutput.send([null, "hello"])
+
 		then:
-		variadicOutput.endpoints*.getValue() == ["hello", "world", 512]
+		variadicOutput.endpoints*.value == [null, "hello"]
 	}
 
-	def "nulls are ignored when sending to outputs"() {
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
+	def "cannot send data of unmatching size"() {
+		variadicOutput.addEndpoint("new-output-1")
+		variadicOutput.addEndpoint("new-output-2")
+		variadicOutput.addEndpoint("new-output-3")
 
 		when:
-		variadicOutput.send(["hello", null, 512])
-		then:
-		notThrown(NullPointerException)
-		variadicOutput.endpoints*.getValue() == ["hello", null, 512]
-	}
+		variadicOutput.send([666, "hello", "world"])
 
-	def "attempting to send mismatching list size to outputs causes IllegalArgumentException"() {
-		variadicOutput.onConfiguration([:])
-
-		when:
-		variadicOutput.send(["hello", 512])
 		then:
 		thrown(IllegalArgumentException)
-	}
-
-	def "getConfiguration() provides output count and names, and module configuration"() {
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-
-		when:
-		def config = [:]
-		variadicOutput.getConfiguration(config)
-		then:
-		config.keySet() == ["outputNames", "variadicOutput"] as Set
-		config.outputNames.size() == 3
-		config.variadicOutput == true
-	}
-
-	def "placeholder output"() {
-		when:
-		variadicOutput.onConfiguration([
-			outputNames: ["endpoint-a", "endpoint-b", "endpoint-c"]
-		])
-
-		then: "display name is as expected"
-		variadicOutput.placeholder.displayName == "out4"
 	}
 }
