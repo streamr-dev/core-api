@@ -7,7 +7,8 @@ import core.pages.StreamListPage
 import core.pages.StreamShowPage
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Keys
-import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.StaleElementReferenceException
+import org.openqa.selenium.WebDriverException;
 
 class ShareSpec extends GebReportingSpec {
 
@@ -18,7 +19,7 @@ class ShareSpec extends GebReportingSpec {
 
 	def closePnotify() {
 		$(".ui-pnotify-closer").each {
-			try { it.click() } catch (StaleElementReferenceException e) {}
+			try { it.click() } catch (StaleElementReferenceException | WebDriverException e) {}
 		}
 		waitFor { !$(".ui-pnotify").displayed }
 	}

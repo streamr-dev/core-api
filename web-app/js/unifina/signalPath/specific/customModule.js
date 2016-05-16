@@ -192,7 +192,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	}
 
 	function clearDebug() {
-		debugTextArea.html("");
+		if(debugTextArea)
+			debugTextArea.html("");
 	}
 
 	var clearModule = function(){
