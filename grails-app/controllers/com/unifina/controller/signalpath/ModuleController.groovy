@@ -181,24 +181,6 @@ class ModuleController {
 		}
 	}
 
-	// Anonymous access to help of public modules/canvases
-	@Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
-	def jsonGetModuleHelp() {
-		Module module = Module.get(params.long("id"))
-
-		// Access to canvas or module package grants access to module help
-		if (params.canvas_id && permissionService.canRead(springSecurityService.currentUser, Canvas.get(params.canvas_id))
-			|| !permissionService.canRead(springSecurityService.currentUser, module.modulePackage)) {
-			response.setContentType("application/json")
-			render module.jsonHelp ?: "{}"
-		}
-		else {
-			response.status = 403
-			render ([success:false, error: "Access denied"] as JSON)
-		}
-
-	}
-	
 	def jsonSetModuleHelp() {
 		Module module = Module.get(params.long("id"))
 		if (!permissionService.canWrite(springSecurityService.currentUser, module.modulePackage)) {
