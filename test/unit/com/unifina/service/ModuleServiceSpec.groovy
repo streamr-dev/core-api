@@ -38,7 +38,7 @@ class ModuleServiceSpec extends Specification {
 	}
 
 	def "it instantiates AbstractSignalPathModule according to Module, config and parentSignalPath"() {
-		def config = [inputNames: ["endpoint-a", "endpoint-b"]]
+		def config = [:]
 		def signalPath = new SignalPath()
 
 		when:
@@ -50,7 +50,7 @@ class ModuleServiceSpec extends Specification {
 		spm.globals == globals
 		spm.domainObject == module
 		spm.parentSignalPath == signalPath
-		spm.getConfiguration().inputs.size() == 5 // Check that configure() called
+		spm.getConfiguration().inputs.size() == 3 // Check that configure() called
 	}
 
 	def "it can get Module domain objects for given config"() {

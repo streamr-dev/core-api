@@ -10,9 +10,10 @@ class AddMultiSpec extends Specification {
     def setup() {
 		module = new AddMulti()
 		module.init()
-		module.configure([
-			inputNames: ["endpoint-a", "endpoint-b"]
-		])
+		module.getInput("in3")
+		module.getInput("in4")
+		module.getInput("in5")
+		module.configure([:])
     }
 
 	void "addMulti gives the right answer"() {

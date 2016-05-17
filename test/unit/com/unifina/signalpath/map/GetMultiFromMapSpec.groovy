@@ -10,18 +10,17 @@ class GetMultiFromMapSpec extends Specification {
 	def setup() {
 		module = new GetMultiFromMap()
 		module.init()
-		module.configure([
-		    outputNames: ["endpoint-a", "endpoint-b", "endpoint-c", "endpoint-d"]
-		])
+		module.getOutput("endpoint-12312321")
+		module.getOutput("endpoint-23213242")
+		module.getOutput("endpoint-32423232")
+		module.getOutput("endpoint-45545454")
+		module.configure([:])
 
 		// Rename outputs
-		Map<String, Output> displayNameToOutput = module.outputs.collectEntries {
-			[(it.displayName): it]
-		}
-		displayNameToOutput["out1"].displayName = "a"
-		displayNameToOutput["out2"].displayName = "b"
-		displayNameToOutput["out3"].displayName = "c"
-		displayNameToOutput["out4"].displayName = "deep.deep.inside"
+		module.getOutput("endpoint-12312321").displayName = "a"
+		module.getOutput("endpoint-23213242").displayName = "b"
+		module.getOutput("endpoint-32423232").displayName = "c"
+		module.getOutput("endpoint-45545454").displayName = "deep.deep.inside"
 	}
 
 	def "GetMultiFromMap works as expected"() {
