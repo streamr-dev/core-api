@@ -10,13 +10,15 @@ class VarianceSpec extends ModuleSpecification {
 	def setup() {
 		module = new Variance()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "3"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "2"]
+		]])
 	}
 
 	void "variance gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(3)
-		module.getInput("minSamples").receive(2)
-
 		Map inputValues = [
 			in: [1, 1, 0, -1, 13.329316686].collect {it?.doubleValue()},
 		]

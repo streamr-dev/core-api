@@ -21,7 +21,7 @@
             </g:if>
             
             <div class="list">
-                <table>
+                <table id="task-worker-table">
                     <thead>
                         <tr>
                         

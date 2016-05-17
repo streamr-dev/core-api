@@ -9,6 +9,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.UiChannelIterator
+import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.IdGenerator
@@ -21,6 +22,7 @@ class CanvasService {
 
 	def grailsApplication
 	def signalPathService
+	def taskService
 
 	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
 		def query = Canvas.where { user == currentUser }
@@ -95,6 +97,10 @@ class CanvasService {
 			String msg = "Could not load (deserialize) previous state of canvas $canvas.id."
 			throw new ApiException(500, "LOADING_PREVIOUS_STATE_FAILED", msg)
 		}
+	}
+
+	public void startRemote(Canvas canvas, boolean forceReset=false, boolean resetOnError=true) {
+		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start")
 	}
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])

@@ -1,5 +1,6 @@
 package com.unifina.signalpath.map
 
+import com.unifina.signalpath.AbstractModuleWithWindow
 import com.unifina.utils.testutils.ModuleTestHelper
 import com.unifina.signalpath.ModuleSpecification
 
@@ -16,7 +17,14 @@ class CountByKeySpec extends ModuleSpecification {
 	}
 
 	void "countByKey gives the right answer"() {
-		module.configure(module.getConfiguration())
+		module.configure([
+				options: [sort: [value: false]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 0]
+				]
+		])
 
 		when:
 		Map outputValues = [
@@ -31,8 +39,7 @@ class CountByKeySpec extends ModuleSpecification {
 				[k1: 3, k2: 1, k3: 2, k4: 1, k5: 1],
 				[k1: 3, k2: 1, k3: 2, k4: 1, k5: 1, k6: 1],
 				[k1: 3, k2: 1, k3: 2, k4: 1, k5: 1, k6: 1, k0: 1],
-			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } },
-			"valueOfCurrentKey": [1, 2, 1, 1, 2, 1, 3, 1, 1, 1].collect { it.doubleValue() }
+			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } }
 		]
 
 		then:
@@ -40,10 +47,14 @@ class CountByKeySpec extends ModuleSpecification {
 	}
 
 	void "countByKey gives the right answer (sorting and maxKeyCount enabled)"() {
-		module.configure([options: [
-		    sorted: [value: true],
-		]])
-		module.getInput("maxKeyCount").receive(3)
+		module.configure([
+				options: [sort: [value: true], sortOrder: [value: "descending"]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 3]
+				]
+		])
 
 		when:
 		Map outputValues = [
@@ -58,8 +69,7 @@ class CountByKeySpec extends ModuleSpecification {
 				[k1: 3, k3: 2, k2: 1],
 				[k1: 3, k3: 2, k2: 1],
 				[k1: 3, k3: 2, k0: 1],
-			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } },
-			"valueOfCurrentKey": [1, 2, 1, 1, 2, 1, 3, 1, 1, 1].collect { it.doubleValue() }
+			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } }
 		]
 
 		then:
@@ -67,9 +77,14 @@ class CountByKeySpec extends ModuleSpecification {
 	}
 
 	void "countByKey gives the right answer (sorting, ascending, and maxKeyCount enabled)"() {
-		module.configure([options: [
-			sorted: [value: true], ascending: [value: true]
-		]])
+		module.configure([
+				options: [sort: [value: true], sortOrder: [value: "ascending"]],
+				inputs: [
+						[name: "windowLength", value: 0],
+						[name: "windowType", value: AbstractModuleWithWindow.WindowType.EVENTS],
+						[name: "maxKeyCount", value: 3]
+				]
+		])
 		module.getInput("maxKeyCount").receive(3)
 
 		when:
@@ -85,8 +100,7 @@ class CountByKeySpec extends ModuleSpecification {
 				[k2: 1, k4: 1, k5: 1],
 				[k2: 1, k4: 1, k5: 1],
 				[k2: 1, k4: 1, k0: 1],
-			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } },
-			"valueOfCurrentKey": [1, 2, 1, 1, 2, 1, 3, 1, 1, 1].collect { it.doubleValue() }
+			].collect { it.collectEntries { [it.key, it.value.doubleValue()] } }
 		]
 
 		then:

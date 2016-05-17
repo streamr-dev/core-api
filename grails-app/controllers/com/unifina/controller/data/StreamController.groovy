@@ -41,7 +41,9 @@ class StreamController {
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
-		List<Stream> streams = permissionService.get(Stream, user)
+		List<Stream> streams = permissionService.get(Stream, user, {
+			order("lastUpdated", "desc")
+		})
 		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
 		[streams:streams, shareable:shareable]
 	}
@@ -264,13 +266,6 @@ class StreamController {
 			}
 			redirect(action: "show", params: [id: params.id])
 		}
-	}
-
-	def getDataRange() {
-		Stream stream = Stream.get(params.id)
-		DataRange dataRange = streamService.getDataRange(stream)
-		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
-		render dataRangeMap as JSON
 	}
 
 	private def getAuthorizedStream(String id, Operation op=Operation.READ, Closure action) {

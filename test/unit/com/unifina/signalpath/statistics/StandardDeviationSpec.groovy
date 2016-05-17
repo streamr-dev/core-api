@@ -10,13 +10,15 @@ class StandardDeviationSpec extends ModuleSpecification {
 	def setup() {
 		module = new StandardDeviation()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "3"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "2"]
+		]])
 	}
 
 	void "standardDeviation gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(3)
-		module.getInput("minSamples").receive(2)
-
 		Map inputValues = [
 			in: [1, 1, 0, -1, 13.32931668].collect {it?.doubleValue()},
 		]

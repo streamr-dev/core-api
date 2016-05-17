@@ -10,7 +10,11 @@ class KurtosisSpec extends ModuleSpecification {
     def setup() {
 		module = new Kurtosis()
 		module.init()
-		module.configure([:])
+		module.configure([inputs: [
+				[name: "windowLength", value: "100"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "4"]
+		]])
     }
 	
 	void "kurtosis gives the right answer"() {

@@ -10,11 +10,15 @@ class CovarianceSpec extends ModuleSpecification {
     def setup() {
 		module = new Covariance()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "4"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "4"]
+		]])
     }
 
 	void "covariance gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(4)
 		Map inputValues = [
 			inX: [1, 4, 0.5, 6, 3, 7, 10, 5].collect {it?.doubleValue()},
 			inY: [2, 8, 1, 12, 6.15, 14.5, 21.5, 10].collect {it?.doubleValue()},

@@ -10,11 +10,15 @@ class LinearRegressionSpec extends ModuleSpecification {
 	def setup() {
 		module = new LinearRegression()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "3"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "3"]
+		]])
 	}
 
 	void "linearRegression gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(3)
 		Map inputValues = [
 			in: [1, 2, 3, 4, 5.1, 5.9, 13].collect {it?.doubleValue()},
 		]
