@@ -317,7 +317,7 @@ public class UiTagLib {
 
 		out << open << "onclick='event.preventDefault();$extraOnClick;sharePopup($resourceUrl, $resourceName)' "
 		outputAttributes(attrs, out)
-		out << "><span class='superscript'>+</span><i class='fa fa-user'></i> " << body() << close
+		out << "><i class='fa fa-user'></i> " << body() << close
 
 		// http://stackoverflow.com/questions/33461034/call-grails-2-rrequire-module-from-a-taglib
 		// should be safe, ResourceTagLib.declareModuleRequiredByPage won't add it second time

@@ -19,14 +19,27 @@
 
 					window.location = '${createLink(controller:"canvas", action:"list")}?' + $.param(params, true)
 				}
-				$(".filter-toggle-button").click(function() {
-					$(this).toggleClass('active')
+				// The buttons are in two places at the page so we have to add/remove the class to/from both of them
+				$(".filter-toggle-button.running-filter").click(function() {
+					if(!$(this).hasClass("active"))
+						$(".filter-toggle-button.running-filter").addClass('active')
+					else
+						$(".filter-toggle-button.running-filter").removeClass('active')
+					applyFilter()
+				})
+				$(".filter-toggle-button.stopped-filter").click(function() {
+					if(!$(this).hasClass("active"))
+						$(".filter-toggle-button.stopped-filter").addClass('active')
+					else
+						$(".filter-toggle-button.stopped-filter").removeClass('active')
 					applyFilter()
 				})
 				$("#search-button").click(applyFilter)
 				$("#search-term").change(applyFilter)
 				$('#search-term').focus(function(event) {
-					setTimeout(function() {$('#search-term').select();}, 0);
+					setTimeout(function() {
+						$('#search-term').select();
+					});
 				});
 			})
 		</r:script>
@@ -44,7 +57,7 @@
 									location.reload()
 								},
 								error: function(e, t, msg) {
-									Streamr.showError(msg)
+									Streamr.showError("Cannot delete canvas", "Something went wrong!")
 								}
 							})
 						}
@@ -59,40 +72,29 @@
 		
 	<ui:flashMessage/>
 
-	<div class="panel">
+	<div class="panel list-panel">
 		<div class="panel-heading">
 			<span class="panel-title"> <g:message
 					code="canvas.list.label" />
 			</span>
 			<div class="panel-heading-controls">
-				<div class="form-inline">
-					<button type="button" class="filter-toggle-button btn btn-xs btn-default btn-outline ${stateFilter.contains('running') ? 'active' : ''}" data-state="running" data-toggle="button" aria-pressed="false" autocomplete="off">
-						running
-					</button>
-					<button type="button" class="filter-toggle-button btn btn-xs btn-default btn-outline ${stateFilter.contains('stopped') ? 'active' : ''}" data-state="stopped" data-toggle="button" aria-pressed="false" autocomplete="off">
-						stopped
-					</button>
-					<div class="input-group input-group-sm">
-						<input id="search-term" name="term" value="${params.term}" placeholder="Search by name"
-							class="form-control" /> <span class="input-group-btn">
-							<button id="search-button" class="btn" type="submit">
-								<span class="fa fa-search"></span>
-							</button>
-						</span>
-					</div>
-					<!-- / .input-group -->
+				<div class="hidden-xs">
+					<g:render template="canvasListSearch"/>
 				</div>
 			</div>
 		</div>
 
 		<div class="panel-body">
+			<div class="hidden-sm hidden-md hidden-lg">
+				<g:render template="canvasListSearch"/>
+			</div>
 			<ui:table>
 				<ui:thead>
 					<ui:tr>
 						<ui:th><g:message code="canvas.name.label" /></ui:th>
 						<ui:th><g:message code="canvas.state.label" /></ui:th>
-						<ui:th><g:message code="canvas.created.label" /></ui:th>
-						<ui:th></ui:th>
+						<ui:th class="hidden-sm hidden-xs"><g:message code="canvas.updated.label" /></ui:th>
+						<ui:th class="button-column"></ui:th>
 					</ui:tr>
 				</ui:thead>
 				<ui:tbody>
@@ -104,27 +106,31 @@
 							<ui:td>
 								<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
 							</ui:td>
-							<ui:td>
+							<ui:td class="hidden-sm hidden-xs">
 								<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
 							</ui:td>
-							<ui:td>
-								<div class="dropdown">
-									<span id="canvas-menu-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown">
-										<i class="navbar-icon fa fa-bars"></i>
-									</span>
-									<ul class="dropdown-menu pull-right">
-										<li>
-											<span data-id="${canvas.id}" class="delete-canvas-link confirm">
-												<i class="fa fa-trash-o"></i> Delete canvas
-											</span>
-										</li>
-										<g:if test="${shareable.contains(canvas)}">
-											<li>
-												<ui:shareButton url="${createLink(uri: '/api/v1/canvases') + canvas.id}" name="Canvas ${canvas.name}" type="span">Share</ui:shareButton>
-											</li>
-										</g:if>
-									</ul>
-								</div>
+							<ui:td class="button-column">
+								<g:if test="${writableCanvases.contains(canvas) || shareableCanvases.contains(canvas)}">
+									<div class="dropdown">
+										<button class="canvas-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
+											<i class="navbar-icon fa fa-caret-down"></i>
+										</button>
+										<ul class="dropdown-menu pull-right">
+											<g:if test="${shareableCanvases.contains(canvas)}">
+												<li>
+													<ui:shareButton url="${createLink(uri: "/api/v1/canvases/$canvas.id")}" name="Canvas ${canvas.name}" type="span">Share</ui:shareButton>
+												</li>
+											</g:if>
+											<g:if test="${writableCanvases.contains(canvas)}">
+												<li>
+													<span data-id="${canvas.id}" class="delete-canvas-link confirm">
+														<i class="fa fa-trash-o"></i> Delete canvas
+													</span>
+												</li>
+											</g:if>
+										</ul>
+									</div>
+								</g:if>
 							</ui:td>
 						</ui:tr>
 					</g:each>

@@ -69,6 +69,7 @@ class CanvasApiController {
 				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
 			} else {
 				canvas.delete(flush: true)
+				render(status: 204)
 			}
 		}
 	}

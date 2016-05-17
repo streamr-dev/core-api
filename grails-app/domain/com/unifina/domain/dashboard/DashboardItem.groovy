@@ -11,8 +11,8 @@ class DashboardItem implements Comparable {
 	Integer ord
 	String size
 	
-	static belongsTo = [dashboard: Dashboard]
-	
+	static belongsTo = [dashboard: Dashboard, canvas: Canvas]
+
 	static constraints = {
 		title(nullable:true)
 	}

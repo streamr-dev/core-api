@@ -31,9 +31,9 @@
 							<g:if test="${writable}">
 								<div class="panel-heading-controls">
 									<li class="dropdown">
-										<a id="stream-menu-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown">
+										<button id="stream-menu-toggle" href="#" class="dropdown-toggle btn btn-sm" data-toggle="dropdown">
 											<i class="navbar-icon fa fa-bars"></i>
-										</a>
+										</button>
 										<ul class="dropdown-menu pull-right">
 											<li><g:link action="edit" id="${stream.id}"><i class="fa fa-pencil"></i> Edit info</g:link></li>
 											<li><a href="#" id="delete-stream-button" data-action="${ createLink(action:'delete') }" class="confirm" data-confirm="Are you sure you want to delete the stream?"><i class="fa fa-trash-o"></i> Delete stream</a></li>
