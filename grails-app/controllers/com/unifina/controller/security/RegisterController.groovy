@@ -113,14 +113,14 @@ class RegisterController {
 			invite = signupCodeService.create(cmd.username)
 		}
 
-		if(grailsApplication.config.streamr.signup.requireAccepting) {
+		if (grailsApplication.config.streamr.signup.requireInvite) {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
 				to invite.username
-				subject grailsApplication.config.unifina.email.signup.subject
-				html g.render(template:"email_signup", model:[user: invite], plugin:'unifina-core')
+				subject grailsApplication.config.unifina.email.waitForInvite.subject
+				html g.render(template: "email_wait_for_invite", model: [user: invite], plugin: 'unifina-core')
 			}
-			render view: 'signup', model: [ inviteSent: true ]
+			render view: 'waitForInvitation'
 
 		} else {
 			invite.sent = true
@@ -128,10 +128,10 @@ class RegisterController {
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
 				to invite.username
-				subject grailsApplication.config.unifina.email.invite.subject
-				html g.render(template:"email_confirm_registering", model:[user: invite], plugin:'unifina-core')
+				subject grailsApplication.config.unifina.email.registerLink.subject
+				html g.render(template:"email_register_link", model:[user: invite], plugin:'unifina-core')
 			}
-			render view: 'signup', model: [ registerConfirmSent: true ]
+			render view: 'registerLinkSent'
 
 		}
 		log.info("Signed up $invite.username")

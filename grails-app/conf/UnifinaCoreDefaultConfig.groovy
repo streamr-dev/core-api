@@ -339,7 +339,8 @@ grails {
 }
 
 unifina.email.sender = "contact@streamr.com"
-unifina.email.signup.subject = "Thanks for signing up for Streamr"
+unifina.email.waitForInvite.subject = "Thanks for signing up for Streamr"
+unifina.email.registerLink.subject = "Streamr signup link"
 unifina.email.invite.subject = "Invitation to Streamr"
 unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
@@ -349,7 +350,7 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 /**
  * Signup Configs
  */
-streamr.signup.requireAccepting = false
+streamr.signup.requireInvite = true
 
 /**
  * Miscellaneous
