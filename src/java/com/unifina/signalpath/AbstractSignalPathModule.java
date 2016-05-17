@@ -390,7 +390,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			if (metricsService == null) {
 				metricsService = (MetricsService) Holders.getGrailsApplication().getMainContext().getBean("metricsService");
 			}
-			metricsService.increment("activations", globals.getUser());
+			if (globals != null) {
+				metricsService.increment("activations", globals.getUser());
+			}
 		}
 	}
 
