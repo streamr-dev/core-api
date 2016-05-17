@@ -34,12 +34,12 @@ class ForEachSpec extends Specification {
 		defineBeans {
 			metricsService(MockMetricsService)
 		}
+		user = new SecUser().save(failOnError: true, validate: false)
 		canvasService = mainContext.getBean(CanvasService)
 		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEach()
 		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.init()
-		user = new SecUser().save(failOnError: true, validate: false)
 	}
 
 	public static class MockMetricsService extends MetricsService {
