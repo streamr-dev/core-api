@@ -3,5 +3,10 @@
     "title": "Introduction to Streamr",
     "controller": "canvas",
     "action": "editor"
+  },
+  {
+    "title": "Building logic in Streamr",
+    "controller": "canvas",
+    "action": "editor"
   }
 ]
