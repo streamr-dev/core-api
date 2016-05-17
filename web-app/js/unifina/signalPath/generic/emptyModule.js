@@ -274,12 +274,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		else {
 	    	$.ajax({
 			    type: 'GET',
-			    url: prot.signalPath.options.getModuleHelpUrl,
+			    url: Streamr.createLink({uri: 'api/v1/modules/'+prot.jsonData.id+'/help'}),
 			    dataType: 'json',
-				data: {
-					id:prot.jsonData.id,
-					canvas_id:SignalPath.getId()
-				},
 			    success: function(data) {
 			    	prot.cachedHelpResponse = data;
 			    	cb(prot.renderHelp(prot.cachedHelpResponse, extended))
