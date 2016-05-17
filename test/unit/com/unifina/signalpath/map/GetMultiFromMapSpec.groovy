@@ -14,6 +14,7 @@ class GetMultiFromMapSpec extends Specification {
 		module.getOutput("endpoint-23213242")
 		module.getOutput("endpoint-32423232")
 		module.getOutput("endpoint-45545454")
+		module.getOutput("endpoint-not-used-placeholder")
 		module.configure([:])
 
 		// Rename outputs

@@ -20,11 +20,11 @@ class FilterSpec extends Specification {
 	void "filter gives the right answer"() {
 		when:
 		Map inputValues = [
-			"endpoint-352323": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() },
+			in1: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() },
 			pass: [0, 0, 1, 0, 1, 0, 0, 1, 1, 0].collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			"endpoint-532135" : [null, null, 3, 3, 5, 5, 5, 8, 9, 9].collect { it?.doubleValue() },
+			out1: [null, null, 3, 3, 5, 5, 5, 8, 9, 9].collect { it?.doubleValue() },
 		]
 
 		then:

@@ -24,14 +24,14 @@ class PassThroughSpec extends Specification {
 	void "passThrough gives the right answer"() {
 		when:
 		Map inputValues = [
-			"input-a": (1..10).collect { it?.doubleValue() },
-			"input-b": (10..19).collect { it?.doubleValue() },
-			"input-c": (20..29).collect { it?.doubleValue() },
+			in1: (1..10).collect { it?.doubleValue() },
+			in2: (10..19).collect { it?.doubleValue() },
+			in3: (20..29).collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			"output-a": (1..10).collect { it?.doubleValue() },
-			"output-b": (10..19).collect { it?.doubleValue() },
-			"output-c": (20..29).collect { it?.doubleValue() },
+			out1: (1..10).collect { it?.doubleValue() },
+			out2: (10..19).collect { it?.doubleValue() },
+			out3: (20..29).collect { it?.doubleValue() },
 		]
 
 		then:
