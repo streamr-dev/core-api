@@ -1,14 +1,13 @@
 package com.unifina.signalpath.map
 
 import com.unifina.api.SaveCanvasCommand
-import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.service.CanvasService
-import com.unifina.service.MetricsService
 import com.unifina.service.ModuleService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.ModuleSpecification
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
@@ -32,7 +31,7 @@ class ForEachSpec extends Specification {
 
 	def setup() {
 		defineBeans {
-			metricsService(MockMetricsService)
+			metricsService(ModuleSpecification.MockMetricsService)
 		}
 		user = new SecUser().save(failOnError: true, validate: false)
 		canvasService = mainContext.getBean(CanvasService)
@@ -40,16 +39,6 @@ class ForEachSpec extends Specification {
 		module = new ForEach()
 		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.init()
-	}
-
-	public static class MockMetricsService extends MetricsService {
-		@Override public def increment(String metric, SecUser user, long count=0) { }
-		@Override public def increment(String metric, long count=0) { }
-		@Override public def increment(String metric, Stream stream, long count=0) { }
-		@Override public def flush() { }
-
-		@Override void afterPropertiesSet() throws Exception { }
-		@Override void destroy() throws Exception { }
 	}
 
 	def "throws RuntimeException if canvas has no exported inputs"() {

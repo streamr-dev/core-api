@@ -8,6 +8,7 @@ import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
 import com.unifina.service.MetricsService
 import com.unifina.service.PermissionService
+import com.unifina.signalpath.ModuleSpecification
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 
@@ -37,16 +38,6 @@ class SendToStreamSpec extends Specification {
 		}
 	}
 
-	public static class MockMetricsService extends MetricsService {
-		@Override public def increment(String metric, SecUser user, long count=0) { }
-		@Override public def increment(String metric, long count=0) { }
-		@Override public def increment(String metric, Stream stream, long count=0) { }
-		@Override public def flush() { }
-
-		@Override void afterPropertiesSet() throws Exception { }
-		@Override void destroy() throws Exception { }
-	}
-
 	FakeKafkaService fakeKafkaService
 	Globals globals
 	SendToStream module
@@ -56,7 +47,7 @@ class SendToStreamSpec extends Specification {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
 			permissionService(FakePermissionService)
-			metricsService(MockMetricsService)
+			metricsService(ModuleSpecification.MockMetricsService)
 		}
 
 		def feed = new Feed()
