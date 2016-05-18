@@ -95,6 +95,11 @@
             }
         )
 
+        .step("Now let's define the vehicle we are filtering.<br><br>Type <code>VEH00X2</code> into parameter <b>search</b> of module <b>Filter</b>.",
+            '.tourTextEquals1 .endpoint.parameter:first',
+            tour.waitForInput(".tourTextEquals1 .parameterInput", "VEH00X2")
+        )
+
         .step("Pretty easy, right?")
 
         .offerNextTour("Great job! In the next tour, we'll develop this a bit further. Click Begin when you are ready!")
