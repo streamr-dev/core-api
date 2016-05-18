@@ -24,6 +24,12 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { !$(".ui-pnotify").displayed }
 	}
 
+	def clickShareButton(name = "ShareSpec") {
+		def row = $("a.tr").findAll { it.text().trim().startsWith(name) }.first()
+		row.find(".dropdown-toggle").click()
+		row.find(".share-button").click()
+	}
+
 	def save() {
 		$(".sharing-dialog .save-button").click()
 		waitFor { !$(".sharing-dialog") && !$(".modal-backdrop") }
@@ -36,9 +42,8 @@ class ShareSpec extends GebReportingSpec {
 
 	/** Cleanup helper */
 	def removeStreamPermissions() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		to StreamListPage
-		getStreamRow().find("button").click()
+		clickShareButton()
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -50,9 +55,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 	/** Cleanup helper */
 	def removeCanvasPermissions() {
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 		to CanvasListPage
-		getCanvasRow().find("button").click()
+		clickShareButton()
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -64,9 +68,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 	/** Cleanup helper */
 	def removeDashboardPermissions() {
-		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		to DashboardListPage
-		getDashboardRow().find("button").click()
+		clickShareButton()
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -77,16 +80,22 @@ class ShareSpec extends GebReportingSpec {
 		save()
 	}
 
-	// fix weird bug: on Jenkins machine and for particular test, only "tester2" is typed for
-	//   $(".new-user-field") << "tester2@streamr.com"
-	def forceFeedTextInput(inputSelector, String text) {
-		waitFor { $(inputSelector).displayed }
-		def $input = $(inputSelector);
-		waitFor(20, 1) {
-			def len = $input.getAttribute("value").length()
-			len >= text.length() ?: ($input << text.substring(len))
+	// We still don't know why it's so damn hard to type text into the input,
+	// just "$('.new-user-field') << text" won't work.
+	// That's why this huge hack.
+	def feedTextInput(String text) {
+		def tryType = {
+			waitFor {
+				$('.new-user-field').displayed
+				$('.new-user-field').firstElement().clear()
+				$('.new-user-field') << text
+				return $('.new-user-field').value().equals(text)
+			}
 		}
-		return $input
+		for(int i = 0; i < 10; i++) {
+			if(tryType())
+				break;
+		}
 	}
 
 	def pressKeyUntil(inputSelector, Keys key, Closure successCondition) {
@@ -106,15 +115,15 @@ class ShareSpec extends GebReportingSpec {
 		then:
 		!$(".sharing-dialog")
 
-		when: "open 'ShareSpec' Stream"
-		getStreamRow().find("button").click()
+		when: "open sharing dialog"
+		clickShareButton()
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		forceFeedTextInput(".new-user-field", "foobar")
+		feedTextInput("foobar")
 		pressKeyUntil(".new-user-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-danger")
 		}
@@ -129,7 +138,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		closePnotify()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -146,14 +155,15 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open"
 		waitFor { !$(".modal-backdrop") }
-		getStreamRow().find("button").click()
+
+		clickShareButton()
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when:
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		pressKeyUntil(".new-user-field", Keys.ENTER) {
 			$(".access-row")
 		}
@@ -169,7 +179,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open once more"
 		closePnotify()	// the second pnotify would cover the share button
-		getStreamRow().find("button").click()
+		clickShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -269,14 +279,14 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { getCanvasRow().displayed }
 
 		when: "open 'ShareSpec' Canvas"
-		getCanvasRow().find("button").click()
+		clickShareButton()
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		forceFeedTextInput(".new-user-field", "foobar")
+		feedTextInput( "foobar")
 		pressKeyUntil(".new-user-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-danger")
 		}
@@ -291,7 +301,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		closePnotify()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -306,14 +316,15 @@ class ShareSpec extends GebReportingSpec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		getCanvasRow().find("button").click()
+		clickShareButton()
+
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when:
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -328,7 +339,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open once more"
 		closePnotify()	// the second pnotify would cover the share button
-		getCanvasRow().find("button").click()
+		clickShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -412,14 +423,14 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { getDashboardRow().displayed }
 
 		when: "open 'ShareSpec' Dashboard"
-		getDashboardRow().find("button").click()
+		clickShareButton()
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when: "add invalid email"
-		forceFeedTextInput(".new-user-field", "foobar")
+		feedTextInput( "foobar")
 		pressKeyUntil(".new-user-field", Keys.ENTER) {
 			$(".ui-pnotify .alert-danger")
 		}
@@ -434,7 +445,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		closePnotify()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -449,14 +460,14 @@ class ShareSpec extends GebReportingSpec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		getDashboardRow().find("button").click()
+		clickShareButton()
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
 		$(".access-row").size() == 0
 
 		when:
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then:
 		waitFor { $(".access-row") }
@@ -471,7 +482,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open once more"
 		closePnotify()	// the second pnotify would cover the share button
-		getDashboardRow().find("button").click()
+		clickShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -552,8 +563,8 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "give tester2 read permission to stream"
 		to StreamListPage
-		getStreamRow().find("button").click()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		clickShareButton()
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row").displayed }
@@ -567,8 +578,8 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
-		getCanvasRow().find("button").click()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		clickShareButton()
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
@@ -582,8 +593,8 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
-		getDashboardRow().find("button").click()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		clickShareButton()
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row").displayed }
@@ -601,7 +612,7 @@ class ShareSpec extends GebReportingSpec {
 		loginTester2()
 		to StreamListPage
 		then: "no share button in list"
-		!getStreamRow().find("button")
+		!getStreamRow().find(".dropdown-toggle")
 
 		when: "open stream edit view"
 		getStreamRow().click()
@@ -612,7 +623,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "check canvas"
 		to CanvasListPage
 		then: "no share button in list"
-		!getCanvasRow().find("button")
+		!getCanvasRow().find(".dropdown-toggle")
 
 		when:
 		getCanvasRow().click()
@@ -624,7 +635,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "check dashboard"
 		to DashboardListPage
 		then:
-		!getDashboardRow().find("button")
+		!getDashboardRow().find(".dropdown-toggle")
 
 		when:
 		getDashboardRow().click()
@@ -648,18 +659,18 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "give tester2 write permission to stream"
 		to StreamListPage
-		getStreamRow().find("button").click()
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		clickShareButton()
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row"
 		waitFor { $(".access-row").displayed }
 		$(".access-row").size() == 1
 
 		when: "toggle write rights"
-		$(".permission-dropdown").click()
-		$(".permission-dropdown").find("li", "data-opt": "write").click()
+		$(".permission-dropdown-toggle").click()
+		$(".permission-dropdown-menu").find("li", "data-opt": "write").click()
 		then:
-		$(".permission-dropdown .access-description").text() == "can edit"
+		$(".permission-dropdown-toggle .state").text() == "can edit"
 
 		expect: "enter saves changes when user field is empty"
 		pressKeyUntil(".new-user-field", Keys.ENTER) {
@@ -673,7 +684,8 @@ class ShareSpec extends GebReportingSpec {
 		loginTester2()
 		to StreamListPage
 		then: "no share button in list"
-		!getStreamRow().find("button")
+		getStreamRow().find(".dropdown-toggle").click()
+		!getStreamRow().find(".share-button")
 
 		when: "open stream edit view"
 		getStreamRow().click()
@@ -700,9 +712,9 @@ class ShareSpec extends GebReportingSpec {
 
 		when:
 		to StreamListPage
-		getStreamRow().find("button").click()
+		clickShareButton()
 		waitFor { $(".new-user-field").displayed }
-		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
+		feedTextInput("tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
 		waitFor { $(".access-row") }
@@ -738,7 +750,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "publish it if not public (defensive, but we aren't testing that DB state is correct...)"
 		to StreamListPage
-		getStreamRow().find("button").click()
+		clickShareButton()
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
 		if (!$(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
@@ -775,7 +787,7 @@ class ShareSpec extends GebReportingSpec {
 		loginTester1()
 
 		to StreamListPage
-		getStreamRow().find("button").click()
+		clickShareButton()
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
 		if ($(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()

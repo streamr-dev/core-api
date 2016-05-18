@@ -57,10 +57,10 @@
                 '<button class="form-group user-delete-button btn btn-danger pull-right">' +
                     '<span class="icon fa fa-trash-o"></span>' +
                 '</button>' +
-                '<button type="button" class="btn btn-default dropdown-toggle pull-right" data-toggle="dropdown">' +
-                    '<%= state %> <span class="caret"></span>' +
+                '<button type="button" class="btn btn-default dropdown-toggle permission-dropdown-toggle pull-right" data-toggle="dropdown">' +
+                    '<span class="state"><%= state %></span> <span class="caret"></span>' +
                 '</button>' +
-                '<ul class="dropdown-menu">' +
+                '<ul class="permission-dropdown-menu dropdown-menu">' +
                     '<li data-opt="read"><a href="#">make read-only</a></li>' +
                     '<li data-opt="write"><a href="#">make editable</a></li>' +
                     '<li data-opt="share"><a href="#">make shareable</a></li>' +
@@ -85,6 +85,7 @@
             this.el = this.$el[0]
             this.$userLabel = this.$(".user-label")
             this.$accessDescription = this.$(".access-description")
+            this.$stateLabel = this.$el.find(".state")
 
             this.$(".user-delete-button").on("click", function() {
                 self.model.destroy()
@@ -93,6 +94,7 @@
             this.$("li[data-opt]").on("click", function(e) {
                 var selection = e.currentTarget.dataset.opt
                 self.model.setAccess(selection)
+                self.$stateLabel.text(self.model.getAccessDescription())
             });
 
             this.listenTo(self.model, 'change', self.render)
@@ -455,7 +457,10 @@
     }
 
     exports.sharePopup.closeAndDiscardChanges = function() {
-        if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
+        if (!dialogIsOpen()) {
+            console.error("Cannot close sharePopup, try opening it first!");
+            return
+        }
         sharingDialog.modal("hide")
     }
 

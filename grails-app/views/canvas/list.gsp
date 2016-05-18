@@ -93,7 +93,7 @@
 					<ui:tr>
 						<ui:th><g:message code="canvas.name.label" /></ui:th>
 						<ui:th><g:message code="canvas.state.label" /></ui:th>
-						<ui:th class="hidden-sm hidden-xs"><g:message code="canvas.updated.label" /></ui:th>
+						<ui:th class="hidden-xs"><g:message code="canvas.updated.label" /></ui:th>
 						<ui:th class="button-column"></ui:th>
 					</ui:tr>
 				</ui:thead>
@@ -106,7 +106,7 @@
 							<ui:td>
 								<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
 							</ui:td>
-							<ui:td class="hidden-sm hidden-xs">
+							<ui:td class="hidden-xs">
 								<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
 							</ui:td>
 							<ui:td class="button-column">

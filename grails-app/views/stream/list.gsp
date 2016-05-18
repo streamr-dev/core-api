@@ -56,25 +56,27 @@
 				            <ui:td class="hidden-xs">${fieldValue(bean: stream, field: "description")}</ui:td>
 							<ui:td class="hidden-xs"><g:formatDate date="${stream.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
 							<ui:td class="button-column">
-								<div class="dropdown">
-									<button class="dashboard-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
-										<i class="navbar-icon fa fa-caret-down"></i>
-									</button>
-									<ul class="dropdown-menu pull-right">
-										<g:if test="${shareable.contains(stream)}">
-											<li>
-												<ui:shareButton type="span" url="${createLink(uri: "/api/v1/streams/" + stream.id)}" name="Stream ${stream.name}">Share</ui:shareButton>
-											</li>
-										</g:if>
-										<g:if test="${writable.contains(stream)}">
-											<li>
-												<span data-id="${stream.id}" class="delete-stream-link confirm">
-													<i class="fa fa-trash-o"></i> Delete
-												</span>
-											</li>
-										</g:if>
-									</ul>
-								</div>
+								<g:if test="${writable.contains(stream) || shareable.contains(stream)}">
+									<div class="dropdown">
+										<button class="stream-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
+											<i class="navbar-icon fa fa-caret-down"></i>
+										</button>
+										<ul class="dropdown-menu pull-right">
+											<g:if test="${shareable.contains(stream)}">
+												<li>
+													<ui:shareButton type="span" url="${createLink(uri: "/api/v1/streams/" + stream.id)}" name="Stream ${stream.name}">Share</ui:shareButton>
+												</li>
+											</g:if>
+											<g:if test="${writable.contains(stream)}">
+												<li>
+													<span data-id="${stream.id}" class="delete-stream-link confirm">
+														<i class="fa fa-trash-o"></i> Delete
+													</span>
+												</li>
+											</g:if>
+										</ul>
+									</div>
+								</g:if>
 							</ui:td>
 						</ui:tr>
 					</g:each>

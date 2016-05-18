@@ -60,25 +60,27 @@
 					            <ui:td>${dashboard.name}</ui:td>					        
 					            <ui:td class="hidden-xs"><g:formatDate date="${dashboard.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
 								<ui:td class="button-column">
-									<div class="dropdown">
-										<button class="dashboard-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
-											<i class="navbar-icon fa fa-caret-down"></i>
-										</button>
-										<ul class="dropdown-menu pull-right">
-											<g:if test="${shareable.contains(dashboard)}">
-												<li>
-													<ui:shareButton type="span" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" name="Dashboard ${dashboard.name}">Share</ui:shareButton>
-												</li>
-											</g:if>
-											<g:if test="${writable.contains(dashboard)}">
-												<li>
-													<span data-id="${dashboard.id}" class="delete-dashboard-link confirm">
-														<i class="fa fa-trash-o"></i> Delete
-													</span>
-												</li>
-											</g:if>
-										</ul>
-									</div>
+									<g:if test="${writable.contains(dashboard) || shareable.contains(dashboard)}">
+										<div class="dropdown">
+											<button class="dashboard-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
+												<i class="navbar-icon fa fa-caret-down"></i>
+											</button>
+											<ul class="dropdown-menu pull-right">
+												<g:if test="${shareable.contains(dashboard)}">
+													<li>
+														<ui:shareButton type="span" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" name="Dashboard ${dashboard.name}">Share</ui:shareButton>
+													</li>
+												</g:if>
+												<g:if test="${writable.contains(dashboard)}">
+													<li>
+														<span data-id="${dashboard.id}" class="delete-dashboard-link confirm">
+															<i class="fa fa-trash-o"></i> Delete
+														</span>
+													</li>
+												</g:if>
+											</ul>
+										</div>
+									</g:if>
 								</ui:td>
 				            </ui:tr>
 						</g:each>
