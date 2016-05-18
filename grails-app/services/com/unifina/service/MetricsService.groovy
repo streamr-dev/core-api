@@ -2,7 +2,9 @@ package com.unifina.service
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.utils.MapTraversal
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.util.Holders
 import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import org.springframework.beans.factory.DisposableBean
@@ -19,11 +21,11 @@ class MetricsService implements InitializingBean, DisposableBean {
 	SpringSecurityService springSecurityService
 	KafkaService kafkaService
 
-	final int DEFAULT_REPORTING_PERIOD_SECONDS = System.getProperty("metrics.reportingPeriodSeconds")?.toInteger() ?: 60
-	final int DEFAULT_REPORTING_PERIOD_EVENTS = System.getProperty("metrics.reportingPeriodEvents")?.toInteger() ?: 10000
-	final boolean isActive = System.getProperty("metrics.isActive")?.toBoolean() ?: true
+	final int DEFAULT_REPORTING_PERIOD_SECONDS = MapTraversal.getInt(Holders.config, "unifina.metrics.reportingPeriodSeconds", 60)
+	final int DEFAULT_REPORTING_PERIOD_EVENTS = MapTraversal.getInt(Holders.config, "unifina.metrics.reportingPeriodEvents", 10000)
+	private boolean disabled = MapTraversal.getBoolean(Holders.config, "unifina.metrics.disabled")
 
-	String kafkaTopic = "streamr-metrics"
+	String kafkaTopic = MapTraversal.getString(Holders.config, "unifina.metrics.kafkaTopic", "streamr-metrics")
 
 	int reportingPeriodEvents = DEFAULT_REPORTING_PERIOD_EVENTS
 	int reportingPeriodSeconds = DEFAULT_REPORTING_PERIOD_SECONDS
@@ -34,7 +36,7 @@ class MetricsService implements InitializingBean, DisposableBean {
 
 	private final incrementInitLock = new Object[0]
 	def increment(String metric, SecUser user, long count=1) {
-		if (!isActive || !metric || !user?.id || count < 1) { return }
+		if (disabled || !metric || !user?.id || count < 1) { return }
 		long userId = user.id
 
 		AtomicLong counter
@@ -86,9 +88,7 @@ class MetricsService implements InitializingBean, DisposableBean {
 
 	@Synchronized
 	void setReportingPeriodSeconds(int t) {
-		if (flushTimer) {
-			flushTimer.cancel()
-		}
+		if (flushTimer) { flushTimer.cancel() }
 		flushTimer = new Timer("MetricsService");
 		flushTimer.schedule(new TimerTask() {
 			@Override
@@ -98,16 +98,30 @@ class MetricsService implements InitializingBean, DisposableBean {
 		}, 0, reportingPeriodSeconds*1000);
 	}
 
-	@Override
-	void afterPropertiesSet() throws Exception {
-		// start thread
+	boolean isDisabled() { disabled }
+	void disable() {
+		if (disabled) { return }
+		disabled = true
+		if (flushTimer) { flushTimer.cancel() }
+		flush()
+	}
+	void enable() {
+		if (!disabled) { return }
+		disabled = false
 		setReportingPeriodSeconds(reportingPeriodSeconds)
 	}
 
 	@Override
+	void afterPropertiesSet() throws Exception {
+		// start thread
+		if (!disabled) {
+			setReportingPeriodSeconds(reportingPeriodSeconds)
+		}
+	}
+
+	@Override
 	void destroy() throws Exception {
-		// stop thread
-		flushTimer.cancel()
-		flush()
+		// stop thread and flush
+		disable()
 	}
 }

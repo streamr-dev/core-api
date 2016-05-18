@@ -70,4 +70,38 @@ class MetricsServiceTest extends Specification {
 		lastSentMessage.user == me.id
 		lastSentMessage.value == valueSum
 	}
+
+	def "disabled MetricsService won't report anything"() {
+		when:
+		service.increment("test.metric", me)
+		service.flush()
+		then:
+		messageCount == 1
+
+		when:
+		service.disable()
+		service.increment("test.metric", me)
+		service.flush()
+		then: "still one"
+		messageCount == 1
+
+		when:
+		service.enable()
+		service.increment("test.metric", me)
+		service.flush()
+		then:
+		messageCount == 2
+	}
+
+	def "results are flushed before disabling"() {
+		when:
+		service.increment("test.metric", me)
+		then:
+		messageCount == 0
+
+		when:
+		service.disable()
+		then:
+		messageCount == 1
+	}
 }
