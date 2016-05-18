@@ -61,8 +61,6 @@
                     '<li data-opt="read"><a href="#">make read-only</a></li>' +
                     '<li data-opt="write"><a href="#">make editable</a></li>' +
                     '<li data-opt="share"><a href="#">make shareable</a></li>' +
-                    '<li role="separator" class="divider"></li>' +
-                    '<li><a href="#">give ownership</a></li>' +
                 '</ul>' +
             '</div>' +
             '<button class="form-group user-delete-button btn btn-danger"><span class="icon fa fa-trash-o"></span></button>' +
@@ -156,7 +154,7 @@
 
         events: {
             "click .new-user-button": "finishUserInput",
-            "keypress .new-user-field": "keyHandler"
+            "keyup .new-user-field": "keyHandler"
         },
         keyHandler: function(e) {
             this.$newUserField.removeClass("has-error")

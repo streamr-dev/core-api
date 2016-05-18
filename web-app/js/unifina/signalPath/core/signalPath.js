@@ -45,7 +45,6 @@ var SignalPath = (function () {
 		allowRuntimeChanges: true,
 		apiUrl: Streamr.createLink({"uri": "api/v1"}),
 		getModuleUrl: Streamr.createLink("module", "jsonGetModule"),
-		getModuleHelpUrl: Streamr.createLink("module", "jsonGetModuleHelp"),
 		connectionOptions: {
 			autoConnect: true,
 			autoDisconnect: true
@@ -607,7 +606,10 @@ var SignalPath = (function () {
 			if (moduleJson.uiChannel) {
 				// Module channels reference the module by hash
 				var module = getModuleById(moduleJson.hash)
-				connection.subscribe(moduleJson.uiChannel.id, module.receiveResponse, module.getUIChannelOptions())
+				// The user may have modified the ui canvas vs. the running one, so check
+				if (module) {
+					connection.subscribe(moduleJson.uiChannel.id, module.receiveResponse, module.getUIChannelOptions())
+				}
 			}
 		})
 	}

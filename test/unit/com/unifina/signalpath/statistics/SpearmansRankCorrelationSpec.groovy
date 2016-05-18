@@ -10,12 +10,15 @@ class SpearmansRankCorrelationSpec extends Specification {
 	def setup() {
 		module = new SpearmansRankCorrelation()
 		module.init()
+		module.configure([inputs: [
+				[name: "windowLength", value: "3"],
+				[name: "windowType", value: "EVENTS"],
+				[name: "minSamples", value: "3"]
+		]])
 	}
 
 	void "spearmansRankCorrelation gives the right answer"() {
 		when:
-		module.getInput("windowLength").receive(3)
-
 		Map inputValues = [
 			inX: [9, 15, 4, -666, -12, 0.25, 1].collect {it?.doubleValue()},
 			inY: [-3, 2, 33, 0, 12, 100, -3].collect {it?.doubleValue()},

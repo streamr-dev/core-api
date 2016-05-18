@@ -1,12 +1,14 @@
 package com.unifina.service
 
-
-
+import com.unifina.domain.security.SecUser
+import com.unifina.task.TaskWorker
 import grails.test.mixin.*
-
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.junit.*
 
 import com.unifina.domain.task.Task
+import spock.lang.Specification
+
 import static plastic.criteria.PlasticCriteria.* ; // mockCriteria() method
 
 /**
@@ -14,10 +16,9 @@ import static plastic.criteria.PlasticCriteria.* ; // mockCriteria() method
  */
 @TestFor(TaskService)
 @Mock([Task])
-class TaskServiceTests {
-	
+class TaskServiceSpec extends Specification {
+
 	void testDeleteGroupIfComplete() {
-		
 		// Must mock executeUpdate(String,List) because HQL is not supported in unit test GORM
 		def unitMock = mockFor(Task)
 		unitMock.demand.static.executeUpdate(1) {String s, List p->
@@ -31,31 +32,36 @@ class TaskServiceTests {
 		
 		Task unit2 = new Task("DummyClass", configString, "test", taskGroupId)
 		unit2.save(flush:true, failOnError:true)
-		
-		assert Task.count() == 2
-		assert Task.countByTaskGroupId(taskGroupId) == 2
-		assert Task.countByTaskGroupIdAndComplete(taskGroupId,true) == 0
+
+		expect:
+		Task.count() == 2
+		Task.countByTaskGroupId(taskGroupId) == 2
+		Task.countByTaskGroupIdAndComplete(taskGroupId,true) == 0
 		
 		// Not ready yet
-		assert !service.deleteGroupIfComplete(unit1.taskGroupId)
+		!service.deleteGroupIfComplete(unit1.taskGroupId)
 
+		when:
 		service.setComplete(unit1)
-		assert Task.count() == 2
-		assert Task.countByTaskGroupId(taskGroupId) == 2
-		assert Task.countByTaskGroupIdAndComplete(taskGroupId,true) == 1
-		
-		// Not ready yet
-		assert !service.deleteGroupIfComplete(unit1.taskGroupId)
-		
-		service.setComplete(unit2)
-		assert Task.count() == 2
-		assert Task.countByTaskGroupId(taskGroupId) == 2
-		assert Task.countByTaskGroupIdAndComplete(taskGroupId,true) == 2
 
+		then:
+		Task.count() == 2
+		Task.countByTaskGroupId(taskGroupId) == 2
+		Task.countByTaskGroupIdAndComplete(taskGroupId,true) == 1
+		// Not ready yet
+		!service.deleteGroupIfComplete(unit1.taskGroupId)
+
+		when:
+		service.setComplete(unit2)
+
+		then:
+		Task.count() == 2
+		Task.countByTaskGroupId(taskGroupId) == 2
+		Task.countByTaskGroupIdAndComplete(taskGroupId,true) == 2
 		// Now it's complete
-		assert service.deleteGroupIfComplete(unit1.taskGroupId)
+		service.deleteGroupIfComplete(unit1.taskGroupId)
 		// Check that the Tasks were deleted
-		assert Task.count() == 0
+		Task.count() == 0
 		
 	}
 	
@@ -72,21 +78,30 @@ class TaskServiceTests {
 		Task unit1 = new Task("DummyClass", configString, "test", taskGroupId)
 		unit1.save(flush:true, failOnError:true)
 
-		assert Task.countByAvailable(true) == 1
-		
+		expect:
+		Task.countByAvailable(true) == 1
+
+		when:
 		unit1.available = false
 		unit1.save(flush:true, failOnError:true)
-		
-		assert Task.countByAvailable(true) == 0
-		
+
+		then:
+		Task.countByAvailable(true) == 0
+
+		when:
 		service.skipTask(unit1)
-		assert Task.countByAvailable(true) == 1
-		
+
+		then:
+		Task.countByAvailable(true) == 1
+
+		when:
 		unit1.available = false
 		unit1.save(flush:true, failOnError:true)
 		service.setComplete(unit1)
-		assert service.deleteGroupIfComplete(unit1.taskGroupId)
-		assert Task.count() == 0
+
+		then:
+		service.deleteGroupIfComplete(unit1.taskGroupId)
+		Task.count() == 0
 	}
 	
 	void testGetTaskGroupProgress() { 
@@ -101,13 +116,21 @@ class TaskServiceTests {
 		
 		Task unit2 = new Task("DummyClass", configString, "test", taskGroupId)
 		unit2.save(flush:true, failOnError:true)
-		
-		assert service.getTaskGroupProgress([taskGroupId]) == 25
-		
+
+		expect:
+		service.getTaskGroupProgress([taskGroupId]) == 25
+
+		when:
 		service.setComplete(unit1)
-		assert service.getTaskGroupProgress([taskGroupId]) == 50
+
+		then:
+		service.getTaskGroupProgress([taskGroupId]) == 50
+
+		when:
 		service.setComplete(unit2)
-		assert service.getTaskGroupProgress([taskGroupId]) == 100
+
+		then:
+		service.getTaskGroupProgress([taskGroupId]) == 100
 	}
 	
 	void testGetTaskGroupProgress2() {
@@ -127,13 +150,52 @@ class TaskServiceTests {
 		Task g2u1 = new Task("DummyClass", configString, "test", taskGroupId2)
 		g2u1.progress = 50
 		g2u1.save(flush:true, failOnError:true)
-		
-		assert service.getTaskGroupProgress([taskGroupId, taskGroupId2]) == 50
-		
-		// Progress must be reported correctly after the task group is deleted
+
+		expect:
+		service.getTaskGroupProgress([taskGroupId, taskGroupId2]) == 50
+
+		when: "Task group is deleted"
 		g1u1.delete()
 		g1u2.delete()
-		assert service.getTaskGroupProgress([taskGroupId, taskGroupId2]) == 75
+
+		then: "Progress must be reported correctly"
+		service.getTaskGroupProgress([taskGroupId, taskGroupId2]) == 75
 	}
-	
+
+	void "startTaskWorker() must create a TaskWorker, start it, and add it to the list"() {
+		def taskWorkerMock = Mock(TaskWorker)
+		TaskService service = new TaskService() {
+			@Override
+			TaskWorker createTaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser) {
+				return taskWorkerMock
+			}
+		}
+
+		when:
+		TaskWorker tw = service.startTaskWorker()
+
+		then:
+		tw != null
+		service.getTaskWorkers().size() == 1
+		1 * taskWorkerMock.start()
+	}
+
+	void "stopTaskWorker(id) must stop the TaskWorker with the given id"() {
+		def taskWorkerMock = Mock(TaskWorker)
+		TaskService service = new TaskService() {
+			@Override
+			TaskWorker createTaskWorker(GrailsApplication grailsApplication, int id, SecUser priorityUser) {
+				return taskWorkerMock
+			}
+		}
+		TaskWorker tw = service.startTaskWorker()
+
+		when:
+		service.stopTaskWorker(tw.getWorkerId())
+
+		then:
+		service.getTaskWorkers().size() == 1
+		1 * taskWorkerMock.quit()
+	}
+
 }
