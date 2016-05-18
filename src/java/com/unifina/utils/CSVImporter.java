@@ -93,7 +93,7 @@ public class CSVImporter implements Iterable<LineValues> {
 			}
 
 			// Empty line or a line with only spaces/tabs
-			while (line.equals("") || line.matches("^([ \\t]?)+$"))
+			while (line.matches("^\\s*$"))
 				line = it.next();
 
 			try {
