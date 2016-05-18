@@ -13,6 +13,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.inputs = [];
 	prot.outputsByName = {};
 	prot.outputs = [];
+	prot.moduleClosed = false
 	
 	// Updated on dragstart, used on drag event to repaint jsPlumb connectors
 	var _cachedEndpoints = []
@@ -96,7 +97,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				output.connect(item.endpoint);
 			}
 		});
-		
+
 		pub.redraw()
 	}
 	pub.updateFrom = updateFrom;
@@ -161,8 +162,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superClose = pub.close;
 	function close() {
+		prot.moduleClosed = true
 		disconnect();
-		
+
 		$(prot.div).find("div.input").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
 			// This call should not be necessary but there may be a bug in jsPlumb
@@ -267,7 +269,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.inputsByName[name];
 	}
 	pub.getInput = getInput;
-	
+
 	/**
 	 * Returns an Output object
 	 */
@@ -275,6 +277,30 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.outputsByName[name];
 	}
 	pub.getOutput = getOutput;
+
+	function findInputByDisplayName(name) {
+		var found = null
+		$(prot.inputs).each(function(i, endpoint) {
+			if (endpoint.json.displayName === name || endpoint.json.name === name) {
+				found = endpoint
+				return
+			}
+		});
+		return found
+	}
+	pub.findInputByDisplayName = findInputByDisplayName
+
+	function findOutputByDisplayName(name) {
+		var found = null
+		$(prot.outputs).each(function(i, endpoint) {
+			if (endpoint.json.displayName === name || endpoint.json.name === name) {
+				found = endpoint
+				return
+			}
+		});
+		return found
+	}
+	pub.findOutputByDisplayName = findOutputByDisplayName
 	
 	function addParameter(data) {
 		// Create room for the parameter in paramTable
@@ -306,9 +332,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	
 	prot.addInput = function(data, clazz) {
-		clazz = clazz || SignalPath.Input
+		clazz = clazz || data.jsClass || SignalPath.Input
+		if (typeof clazz === "string") {
+			clazz = eval("SignalPath." + clazz);
+		}
 		
-		var td = createRoomForIO("input");
+ 		var td = createRoomForIO("input");
 
 		var endpoint = clazz(data, td, prot);
 		endpoint.createDiv();
@@ -319,7 +348,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 
 	prot.addOutput = function(data, clazz) {
-		clazz = clazz || SignalPath.Output
+		clazz = clazz || data.jsClass || SignalPath.Output
+		if (typeof clazz === "string") {
+			clazz = eval("SignalPath." + clazz);
+		}
 		
 		var td = createRoomForIO("output");
 
@@ -329,6 +361,58 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		prot.outputsByName[endpoint.getName()] = endpoint;
 		
 		return endpoint;
+	}
+	
+	prot.removeInput = function(name) {
+		var _this = this
+		// TODO: timeout BAD BAD BAD
+		setTimeout(function() {
+			var el = prot.inputsByName[name]
+			if (el) {
+				var index = prot.inputs.indexOf(el)
+				if (index <= -1) {
+					throw "Shouldn't be here!"
+				}
+				prot.inputs.splice(index, 1)
+				delete prot.inputsByName[name]
+
+				try {
+					jsPlumb.remove(el.div)
+				} finally {
+					el.parentDiv.empty()
+					_this.redraw()
+					if (el.parentDiv.parent().find("td.output:empty").length !== 0) {
+						el.parentDiv.parent().remove()
+					}
+				}
+			}
+		}, 0)
+	}
+
+	prot.removeOutput = function(name) {
+		var _this = this
+		// TODO: timeout BAD BAD BAD
+		setTimeout(function() {
+			var el = prot.outputsByName[name]
+			if (el) {
+				var index = prot.outputs.indexOf(el)
+				if (index <= -1) {
+					throw "Shouldn't be here!"
+				}
+				prot.outputs.splice(index, 1)
+				delete prot.outputsByName[name]
+
+				try {
+					jsPlumb.remove(el.div)
+				} finally {
+					el.parentDiv.empty()
+					_this.redraw()
+					if (el.parentDiv.parent().find("td.input:empty").length !== 0) {
+						el.parentDiv.parent().remove()
+					}
+				}
+			}
+		}, 0)
 	}
 
 	var superGetContextMenu = prot.getContextMenu;

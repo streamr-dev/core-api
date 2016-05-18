@@ -116,7 +116,9 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], [Add: [300.0]]]
 
 		cleanup:
-		canvasService.stop(canvas, user)
+		if (canvas.state == Canvas.State.RUNNING) {
+			canvasService.stop(canvas, user)
+		}
 	}
 
 	private Canvas createAndRun(savedStructure) {

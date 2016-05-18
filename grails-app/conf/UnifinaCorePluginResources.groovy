@@ -101,10 +101,6 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/slimScroll-1.3.0/', file:'jquery.slimscroll.min.js', plugin: 'unifina-core']
 	}
-	'detect-timezone' {
-		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
-		resource url:[dir:'js/timezones', file:'list_timezones.js', plugin: 'unifina-core']
-	}
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
@@ -140,6 +136,13 @@ modules = {
 	spectrum {
 		resource url:[dir:'js/spectrum', file:'spectrum.js', plugin:'unifina-core']
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
+	}
+	moment {
+		resource url:[dir:'js/moment', file:'moment.js']
+	}
+	'moment-timezone' {
+		dependsOn 'moment'
+		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js']
 	}
 
 	/**
@@ -262,7 +265,6 @@ modules = {
 		dependsOn 'tablesorter'
 		dependsOn 'bootstrap-contextmenu'
 		dependsOn 'typeahead'
-		dependsOn 'detect-timezone'
 		dependsOn 'raf-polyfill'
 		dependsOn 'signalpath-widgets'
 		dependsOn 'mathjax'
@@ -275,6 +277,8 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicInput.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']

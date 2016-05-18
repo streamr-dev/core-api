@@ -53,12 +53,12 @@ class ModuleBuildSpec extends LoginTester1Spec {
 	
 	def "module options button functionality"() {
 		when: "the Add module is added via module browser"
-			addModule 'Add'
+			addModule 'Simple HTTP'
 		then: "module should appear on canvas"
-			moduleShouldAppearOnCanvas 'Add'
+			moduleShouldAppearOnCanvas 'Simple HTTP'
 			
 		when: "options button is clicked"
-			findModuleOnCanvas("Add").find(".modulebutton .options").click()
+			findModuleOnCanvas("Simple HTTP").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
@@ -69,18 +69,19 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			waitFor { !$(".modal-dialog .optionEditor") }
 		
 		when: "options button is clicked"
-			findModuleOnCanvas("Add").find(".modulebutton .options").click()
+			findModuleOnCanvas("Simple HTTP").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
 		when: "number of inputs is changed to 3 and options are OK'ed"
+			def el = $(".modal-dialog .optionEditor input").firstElement()
 			$(".modal-dialog .optionEditor input").firstElement().clear()
-			$(".modal-dialog .optionEditor input") << "3"
+			$(".modal-dialog .optionEditor input", 0) << "3"
 			$(".modal-dialog .optionEditor").parents(".modal-dialog").find(".btn.btn-primary").click()
 		then: "dialog is OK'ed"
 			waitFor { !$(".modal-dialog .optionEditor") }
 		then: "module must be reloaded with 3 inputs"
-			waitFor { findModuleOnCanvas("Add").find(".endpoint.input").size()==3 }
+			waitFor { findModuleOnCanvas("Simple HTTP").find(".endpoint.parameter").size()==5 }
 			
 	}
 	
@@ -212,7 +213,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 		then: "a connector must appear"
 			$("._jsPlumb_connector").size()>0
 		then: "inputs must highlight"
-			$(".jsPlumb_input.highlight").size()==2
+			$(".jsPlumb_input.highlight").size()==3
 			
 		when: "connection is dropped"
 			interact {

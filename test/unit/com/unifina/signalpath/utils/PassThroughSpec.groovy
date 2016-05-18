@@ -9,16 +9,29 @@ class PassThroughSpec extends Specification {
 
 	def setup() {
 		module = new PassThrough()
+		module.getInput("input-a")
+		module.getInput("input-b")
+		module.getInput("input-c")
+		module.getInput("input-d")
+		module.getOutput("output-a")
+		module.getOutput("output-b")
+		module.getOutput("output-c")
+		module.getOutput("output-d")
 		module.init()
+		module.configure([:])
 	}
 
 	void "passThrough gives the right answer"() {
 		when:
 		Map inputValues = [
-			in: (1..100).collect { it?.doubleValue() },
+			in1: (1..10).collect { it?.doubleValue() },
+			in2: (10..19).collect { it?.doubleValue() },
+			in3: (20..29).collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			out : (1..100).collect { it?.doubleValue() },
+			out1: (1..10).collect { it?.doubleValue() },
+			out2: (10..19).collect { it?.doubleValue() },
+			out3: (20..29).collect { it?.doubleValue() },
 		]
 
 		then:
