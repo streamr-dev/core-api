@@ -206,7 +206,7 @@ public class SerializerImpl implements Serializer {
 								FSTClazzInfo clzInfo,
 								FSTClazzInfo.FSTFieldInfo referencedBy,
 								int streamPosition) throws IOException {
-			out.writeUTF(toWrite.toString());
+			out.writeUTF("null");
 		}
 
 		@Override
@@ -215,6 +215,7 @@ public class SerializerImpl implements Serializer {
 								  FSTClazzInfo serializationInfo,
 								  FSTClazzInfo.FSTFieldInfo referencee,
 								  int streamPosition) throws Exception {
+			in.readStringUTF();
 			return JSONObject.NULL;
 		}
 	}
