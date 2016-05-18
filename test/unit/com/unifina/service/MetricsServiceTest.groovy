@@ -1,31 +1,37 @@
 package com.unifina.service
 
 import com.unifina.domain.security.SecUser
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(MetricsService)
 class MetricsServiceTest extends Specification {
 
-	SecUser me = new SecUser(username: "e@e.com", name: "user")
+	static SecUser me
 
 	String lastSentChannelId
 	def lastSentMessage
 	int valueSum
 	int messageCount
 
+	def setupSpec() {
+		me = new SecUser(username: "e@e.com", name: "user")
+		me.id = 1
+	}
+
 	def setup() {
-		service.springSecurityService = [
-		    getCurrentUser: { -> me }
-		]
-		service.kafkaService = [
-			sendMessage: { String channelId, key, message ->
+		service.springSecurityService = new SpringSecurityService() {
+			@Override Object getCurrentUser() { me }
+		}
+		service.kafkaService = new KafkaService() {
+			@Override void sendMessage(String channelId, Object key, Map message) {
 				lastSentChannelId = channelId
 				lastSentMessage = message
 				valueSum += message.value
 				messageCount++
 			}
-		]
+		}
 
 		lastSentChannelId = null
 		lastSentMessage = null
