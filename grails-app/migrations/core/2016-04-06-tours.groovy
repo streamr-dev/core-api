@@ -18,6 +18,8 @@ databaseChangeLog = {
 
 	changeSet(author: "henri", id: "tour-resources-2", failOnError: false) {
 
+		String now = "2016-05-18T18:06:00"
+
 		// Insert demo stream
 		insert(tableName: "stream") {
 			column(name: "version", valueNumeric: 0)
@@ -25,6 +27,8 @@ databaseChangeLog = {
 			column(name: "api_key", value: "RYZ2idC0RZ2mGyRJARiBaQ")
 			column(name: "name", value: "Public transport demo")
 			column(name: "description", value: "Helsinki tram locations etc.")
+			column(name: "date_created", valueDate: now)
+			column(name: "last_updated", valueDate: now)
 			column(name: "feed_id", valueNumeric: 7) // API stream
 
 			def config = [fields: [
