@@ -112,14 +112,8 @@ public class Globals {
 		
 		if (user!=null)
 			tzString = user.getTimezone();
-		// Else try to read the auto-detected value from the signalPathContext
-		else if (MapTraversal.getString(signalPathContext, "timeOfDayFilter.timeZoneOffset")!=null) {
-			String tzOffset = MapTraversal.getString(signalPathContext, "timeOfDayFilter.timeZoneOffset");
-			String tzDst = MapTraversal.getString(signalPathContext, "timeOfDayFilter.timeZoneDst");
-			tzString = "GMT"+tzOffset;
-		}
 		else {
-			log.info("User time zone info not found, setting it to UTC");
+			log.info("User not found, setting time zone to UTC");
 			tzString = "UTC";
 		}
 
