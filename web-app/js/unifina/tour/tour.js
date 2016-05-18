@@ -464,7 +464,7 @@ Tour.prototype.waitForConnections = function(conns) {
 			var targetEndpoints = targetModule.getInputs()
 
 			if (c.toEndpoint)
-				targetEndpoints = [ targetModule.getInput(c.toEndpoint) ]
+				targetEndpoints = [ targetModule.findInputByDisplayName(c.toEndpoint) ]
 
 			targetEndpoints.forEach(function(targetEp) {
 				targetEp.getConnectedEndpoints().forEach(function(xEndpoint) {
@@ -512,7 +512,7 @@ Tour.prototype.highlightOutputUntilDraggingStarts = function(qualifiedName) {
 			_cb = cb
 
 		// Flash-highlight the endpoint
-		var $ep = that._getSpObject(module).getOutput(output)
+		var $ep = that._getSpObject(module).findOutputByDisplayName(output)
 		var i = 0;
 		var interval = setInterval(function () {
 			if (i++ % 2 === 0)

@@ -90,6 +90,7 @@
 
         .step("Drop the connection on the first input of the Filter, called <code>pass</code>.",
             '.tourFilter1 .endpoint.input:first',
+            { placement: 'top' },
             function(cb) {
                 tour.waitForConnections([['tourTextEquals1.equals?', 'tourFilter1.pass']])(cb)
             }
@@ -98,6 +99,17 @@
         .step("Now let's define the vehicle we are filtering.<br><br>Type <code>VEH00X2</code> into parameter <b>search</b> of module <b>Filter</b>.",
             '.tourTextEquals1 .endpoint.parameter:first',
             tour.waitForInput(".tourTextEquals1 .parameterInput", "VEH00X2")
+        )
+
+        .step("Then connect <code>lat</code>, <code>long</code>, and <code>spd</code> of Stream to <code>in1</code>, <code>in2</code>, and <code>in3</code> of module Filter",
+            '.tourStream1',
+            function(cb) {
+                tour.waitForConnections([
+                    ['tourStream1.lat', 'tourFilter1.in1'],
+                    ['tourStream1.long', 'tourFilter1.in2'],
+                    ['tourStream1.spd', 'tourFilter1.in3']
+                ])(cb)
+            }
         )
 
         .step("Pretty easy, right?")
