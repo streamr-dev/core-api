@@ -57,22 +57,7 @@
             "Start dragging from the highlighted circle near the output <code>veh</code> on the Stream, and drop on the first input (called <code>id</code>) on the Map.",
             '.tourStream1',
             { placement: 'bottom' },
-            function(cb) {
-                // Flash-highlight the endpoint
-                var $ep = $(".tourStream1").data("spObject").getOutput("veh")
-                var i = 0;
-                var interval = setInterval(function() {
-                    if (i++ % 2 === 0)
-                        $ep.addClass("highlight")
-                    else
-                        $ep.removeClass("highlight")
-                }, 500)
-                // Clear interval on dragstart
-                $($ep.jsPlumbEndpoint.canvas).one('dragstart', function() {
-                    clearInterval(interval)
-                    tour.next()
-                })
-            }
+            tour.highlightOutputUntilDraggingStarts("tourStream1.veh")
         )
 
         .step("Drop the connection on the first input of the Map, called <code>id</code>.",

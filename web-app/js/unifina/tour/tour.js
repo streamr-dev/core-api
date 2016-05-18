@@ -499,6 +499,35 @@ Tour.prototype.waitForConnections = function(conns) {
 	}
 }
 
+Tour.prototype.highlightOutputUntilDraggingStarts = function(qualifiedName) {
+
+	var module = qualifiedName.split('.')[0]
+	var output = qualifiedName.split('.')[1]
+
+	var _cb = this.next.bind(this)
+	var that = this
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		// Flash-highlight the endpoint
+		var $ep = that._getSpObject(module).getOutput(output)
+		var i = 0;
+		var interval = setInterval(function () {
+			if (i++ % 2 === 0)
+				$ep.addClass("highlight")
+			else
+				$ep.removeClass("highlight")
+		}, 500)
+		// Clear interval on dragstart
+		$($ep.jsPlumbEndpoint.canvas).one('dragstart', function () {
+			clearInterval(interval)
+			_cb()
+		})
+	}
+}
+
 exports.Tour = Tour
 
 })(typeof(exports) !== 'undefined' ? exports : window)

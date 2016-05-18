@@ -72,22 +72,7 @@
             "Start dragging from the highlighted circle near the output <code>veh</code> on the Stream, and drop on the second input (called <code>text</code>) on the TextEquals module.",
             '.tourStream1',
             { placement: 'bottom' },
-            function(cb) {
-                // Flash-highlight the endpoint
-                var $ep = $(".tourStream1").data("spObject").getOutput("veh")
-                var i = 0;
-                var interval = setInterval(function() {
-                    if (i++ % 2 === 0)
-                        $ep.addClass("highlight")
-                    else
-                        $ep.removeClass("highlight")
-                }, 500)
-                // Clear interval on dragstart
-                $($ep.jsPlumbEndpoint.canvas).one('dragstart', function() {
-                    clearInterval(interval)
-                    tour.next()
-                })
-            }
+            tour.highlightOutputUntilDraggingStarts("tourStream1.veh")
         )
 
         .step("Drop the connection on the second input of the TextEquals, called <code>text</code>.",
@@ -100,22 +85,7 @@
         .step("Next connect <code>equals?</code> of TextEquals to <code>pass</code> of Filter.",
             '.tourTextEquals1 .endpoint.output:first',
             { placement: 'bottom' },
-            function(cb) {
-                // Flash-highlight the endpoint
-                var $ep = $(".tourTextEquals1").data("spObject").getOutput("equals?")
-                var i = 0;
-                var interval = setInterval(function() {
-                    if (i++ % 2 === 0)
-                        $ep.addClass("highlight")
-                    else
-                        $ep.removeClass("highlight")
-                }, 500)
-                // Clear interval on dragstart
-                $($ep.jsPlumbEndpoint.canvas).one('dragstart', function() {
-                    clearInterval(interval)
-                    tour.next()
-                })
-            }
+            tour.highlightOutputUntilDraggingStarts("tourTextEquals1.equals?")
         )
 
         .step("Drop the connection on the first input of the Filter, called <code>pass</code>.",
