@@ -39,18 +39,21 @@
 					container.dispatchEvent(new Event('resize'))
 				})
 			},
-			subscribe: function(messageHandler, resendOptions) {
+			subscribe: function(messageHandler, options) {
 				var _this = this
 
 				this.getModuleJson(function(moduleJson) {
 					if (!moduleJson.uiChannel)
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
+					options = options || _this.getResendOptions(moduleJson)
+					options.canvas = _this.canvas
+
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
 								moduleJson.uiChannel.id,
 								messageHandler,
-								resendOptions
+								options
 						)
 					})
 				})
