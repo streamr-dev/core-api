@@ -39,7 +39,7 @@ class CanvasController {
 			if (params.state) {
 				inList "state", params.list("state").collect { String param -> Canvas.State.fromValue(param) }
 			}
-			order "dateCreated", "desc"
+			order "lastUpdated", "desc"
 		}
 		List<Canvas> readableCanvases = permissionService.get(Canvas, user, Operation.READ, criteriaFilter)
 		List<Canvas> shareableCanvases = permissionService.get(Canvas, user, Operation.SHARE, criteriaFilter)
@@ -127,7 +127,7 @@ class CanvasController {
 			canvases = permissionService.get(Canvas, user, Operation.READ) {
 				eq "example", false
 				eq "adhoc", false
-				order "dateCreated", "desc"
+				order "lastUpdated", "desc"
 				maxResults max
 				firstResult offset
 			}
