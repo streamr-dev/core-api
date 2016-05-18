@@ -1,5 +1,6 @@
 package com.unifina.controller.security
 
+import com.unifina.service.KafkaService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -30,6 +31,7 @@ class ProfileControllerSpec extends Specification {
 
 	void setup() {
 		controller.springSecurityService = springSecurityService
+		controller.kafkaService = Mock(KafkaService)
 		user = new SecUser(id:1, 
 			username:"test@test.test", 
 			name: "Test User",
@@ -115,6 +117,30 @@ class ProfileControllerSpec extends Specification {
 			SecUser.get(1).name == "Changed Name"
 			SecUser.get(1).timezone == "Europe/Helsinki"
 			flash.message != null
+	}
+
+	void "regenerating api key changes the key"() {
+		setup: "change the api key manually"
+			user.apiKey = "test"
+		when: "regenerated the api key"
+			request.method = "POST"
+			controller.regenerateApiKey()
+		then: "the key has changed"
+			user.apiKey != "test"
+	}
+
+	void "regenerating the api key send message to kafka"() {
+		setup: "change the api key manually"
+			user.apiKey = "test"
+		when: "regenerated the api key"
+			request.method = "POST"
+			controller.regenerateApiKey()
+		then: "the key has changed"
+			1 * controller.kafkaService.sendMessage("revoked-api-keys", "", [
+			        action: "revoked",
+					user: 1,
+					key: "test"
+			])
 	}
 	
 }

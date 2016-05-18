@@ -234,11 +234,24 @@ class SignalPathService {
 		}
 	}
 
-	boolean stopLocal(Canvas canvas) {
-		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(canvas.runner)
+	List<Canvas> stopAllLocalCanvases() {
+		// Copy list to prevent ConcurrentModificationException
+		Map runners = [:]
+		runners.putAll(servletContext["signalPathRunners"])
+		List canvases = []
+		runners.each { String key, SignalPathRunner runner ->
+			if (stopLocalRunner(key)) {
+				canvases.addAll(runner.getSignalPaths().collect {it.getCanvas()})
+			}
+		}
+		return canvases
+	}
+
+	boolean stopLocalRunner(String runnerId) {
+		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(runnerId)
 		if (runner!=null && runner.isAlive()) {
 			runner.abort()
-			
+
 			// Wait for runner to be stopped state
 			runner.waitRunning(false)
 			if (runner.getRunning()) {
@@ -250,9 +263,13 @@ class SignalPathService {
 		}
 		else {
 			log.error("stopLocal: could not find runner $canvas.runner!")
-			updateState(canvas.runner, Canvas.State.STOPPED)
+			updateState(runnerId, Canvas.State.STOPPED)
 			return false
 		}
+	}
+
+	boolean stopLocal(Canvas canvas) {
+		return stopLocalRunner(canvas.runner)
 	}
 
 	@NotTransactional

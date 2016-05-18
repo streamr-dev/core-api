@@ -505,8 +505,6 @@ $(document).unload(function () {
 		<li><a href="#" id="saveAsButton">Save as..</a></li>
 	</ul>
 	
-	<g:render template="/feedback/fixedFeedback" plugin="unifina-core"/>
-
 	<!-- extension point for apps using the core plugin -->
 	<g:render template="/canvas/buildBodyExtensions"/>
 
