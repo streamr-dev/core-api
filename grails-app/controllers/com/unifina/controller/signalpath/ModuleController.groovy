@@ -1,5 +1,6 @@
 package com.unifina.controller.signalpath
 
+import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.util.GrailsUtil
@@ -179,17 +180,7 @@ class ModuleController {
 			globals.destroy()
 		}
 	}
-	
-	def jsonGetModuleHelp() {
-		Module module = Module.get(params.long("id"))
-		if (!permissionService.canRead(springSecurityService.currentUser, module.modulePackage)) {
-			throw new Exception("User $springSecurityService.currentUser does not have access to module $module.name")
-		}
 
-		response.setContentType("application/json")
-		render module.jsonHelp ?: "{}"
-	}
-	
 	def jsonSetModuleHelp() {
 		Module module = Module.get(params.long("id"))
 		if (!permissionService.canWrite(springSecurityService.currentUser, module.modulePackage)) {

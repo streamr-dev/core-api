@@ -101,10 +101,6 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/slimScroll-1.3.0/', file:'jquery.slimscroll.min.js', plugin: 'unifina-core']
 	}
-	'detect-timezone' {
-		resource url:[dir:'js/timezones', file:'detect_timezone.js', plugin: 'unifina-core']
-		resource url:[dir:'js/timezones', file:'list_timezones.js', plugin: 'unifina-core']
-	}
 	'raf-polyfill' {
 		resource url:[dir:'js/raf-polyfill', file:'raf-polyfill.js', plugin: 'unifina-core']
 	}
@@ -140,6 +136,13 @@ modules = {
 	spectrum {
 		resource url:[dir:'js/spectrum', file:'spectrum.js', plugin:'unifina-core']
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
+	}
+	moment {
+		resource url:[dir:'js/moment', file:'moment.js']
+	}
+	'moment-timezone' {
+		dependsOn 'moment'
+		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js']
 	}
 
 	/**
@@ -241,6 +244,9 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
 	}
+	'confirm-button' {
+		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
+	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
 		dependsOn 'streamr'
@@ -259,7 +265,6 @@ modules = {
 		dependsOn 'tablesorter'
 		dependsOn 'bootstrap-contextmenu'
 		dependsOn 'typeahead'
-		dependsOn 'detect-timezone'
 		dependsOn 'raf-polyfill'
 		dependsOn 'signalpath-widgets'
 		dependsOn 'mathjax'
@@ -317,4 +322,5 @@ modules = {
 		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
 		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
 	}
+
 }
