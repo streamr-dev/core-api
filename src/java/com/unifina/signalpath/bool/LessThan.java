@@ -24,9 +24,7 @@ public class LessThan extends AbstractSignalPathModule {
 	}
 	
 	public void sendOutput() {
-		if (a.value < b.value || equality.getValue() && a.value.equals(b.value))
-			out.send(true);
-		else out.send(false);
+		out.send(a.value < b.value || equality.getValue() && a.value.equals(b.value));
 	}
 	
 }

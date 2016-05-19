@@ -26,12 +26,11 @@ public class SameSign extends AbstractSignalPathModule {
 	}
 	
 	public void sendOutput() {
-		if (Math.signum(a.value)==Math.signum(b.value)) {
+		if (Math.signum(a.value) == Math.signum(b.value)) {
 			out.send(true);
 			sign.send(Math.signum(a.value));
 		} else {
 			out.send(false);
-			sign.send(0);
 		}
 	}
 	

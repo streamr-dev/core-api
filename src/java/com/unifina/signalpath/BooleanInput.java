@@ -3,7 +3,7 @@ package com.unifina.signalpath;
 import java.util.List;
 import java.util.Map;
 
-public class BooleanInput extends Input<Boolean> {
+public class BooleanInput extends PrimitiveInput<Boolean> {
 
 	public BooleanInput(AbstractSignalPathModule owner, String name) {
 		super(owner, name, "Object");
@@ -13,8 +13,8 @@ public class BooleanInput extends Input<Boolean> {
 	public void receive(Object value) {
 		if(value instanceof Boolean) {
 			super.receive(value);
-		} else if(value instanceof Double) {
-			super.receive(!value.equals(0d) && !((Double) value).isNaN());
+		} else if(value instanceof Number) {
+			super.receive(!value.equals(0d));
 		} else if(value instanceof Integer) {
 			super.receive(value != 0);
 		} else if(value instanceof String) {
@@ -25,5 +25,10 @@ public class BooleanInput extends Input<Boolean> {
 			super.receive(!((Map) value).isEmpty());
 		} else
 			super.receive(value != null);
+	}
+
+	@Override
+	protected Boolean parseInitialValue(String initialValue) {
+		return Boolean.parseBoolean(initialValue);
 	}
 }

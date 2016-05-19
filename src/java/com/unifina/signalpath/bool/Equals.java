@@ -23,9 +23,7 @@ public class Equals extends AbstractSignalPathModule {
 	}
 	
 	public void sendOutput() {
-		if (Math.abs(a.value-b.value)<=tolerance.getValue())
-			out.send(true);
-		else out.send(false);
+		out.send(Math.abs(a.value - b.value) <= tolerance.getValue());
 	}
 	
 }
