@@ -64,7 +64,7 @@
             tour.waitForModuleAdded('TextEquals')
         )
 
-        .step("Our goal is to filter data related to a single tram (specifically, vehicle RHKL00122) from all tram data being pushed out by <b>Stream</b>. To do so, we will need to pass forward only those events whose <b>veh</b> equals <b>RHKL00122</b>.",
+        .step("Our goal is to filter data related to a single tram (specifically, vehicle RHKL00112) from all tram data being pushed out by <b>Stream</b>. To do so, we will need to pass forward only those events whose <b>veh</b> equals <b>RHKL00112</b>.",
             '.tourStream1'
         )
 
@@ -96,9 +96,9 @@
             }
         )
 
-        .step("Now let's define the vehicle we are filtering.<br><br>Type <code>RHKL00122</code> into parameter <b>search</b> of module <b>Filter</b>.",
+        .step("Now let's define the vehicle we are filtering.<br><br>Type <code>RHKL00112</code> into parameter <b>search</b> of module <b>Filter</b>.",
             '.tourTextEquals1 .endpoint.parameter:first',
-            tour.waitForInput(".tourTextEquals1 .parameterInput", "RHKL00122")
+            tour.waitForInput(".tourTextEquals1 .parameterInput", "RHKL00112")
         )
 
         .step("Then connect <code>lat</code>, <code>long</code>, and <code>spd</code> of Stream to <code>in1</code>, <code>in2</code>, and <code>in3</code> of module Filter",
