@@ -4,6 +4,7 @@ import core.pages.*
 import spock.lang.*
 import geb.spock.GebReportingSpec
 
+@Stepwise
 class RegisterSpec extends GebReportingSpec {
         
         // Not a real email
