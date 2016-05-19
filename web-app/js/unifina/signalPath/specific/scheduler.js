@@ -1,12 +1,5 @@
 (function(exports) {
-
-//Change the variable signs from <%= var %> to {{ var }}
-_.templateSettings = {
-	evaluate : /\{\[([\s\S]+?)\]\}/g,
-	escape : /\[\[([\s\S]+?)\]\]/g,
-	interpolate : /\{\{([\s\S]+?)\}\}/g
-};
-
+	
 var Rule = Backbone.Model.extend({
 	initialize: function(attributes, options){
 		if($.isEmptyObject(attributes)){
@@ -430,19 +423,19 @@ Templates["rule-view-template"] = ''+
 Templates["rule-view-year-template"] = ''+
 		'the'+
 		'<select name="day" class="form-control input-sm">'+
-			'{[ _.each(_.range(31), function(i){ ]}'+
-				'<option value="{{i+1}}">'+
-					'{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} '+
-						'{{ i+1 + "st" }}'+
-					'{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}'+
-						'{{ i+1 + "nd" }}'+
-					'{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}'+
-						'{{ i+1 + "rd" }}'+
-					'{[ } else { ]}'+
-						'{{ i+1 + "th" }}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(31), function(i){ %>'+
+				'<option value="<%=i+1%>">'+
+					'<% if(i+1 == 1 || (i+1) % 10 == 1){ %> '+
+						'<%= i+1 + "st" %>'+
+					'<% } else if(i+1 == 2 || (i+1) % 10 == 2) { %>'+
+						'<%= i+1 + "nd" %>'+
+					'<% } else if(i+1 == 3 || (i+1) % 10 == 3) { %>'+
+						'<%= i+1 + "rd" %>'+
+					'<% } else { %>'+
+						'<%= i+1 + "th" %>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		'of'+
 		'<select name="month" class="form-control input-sm">'+
@@ -461,69 +454,69 @@ Templates["rule-view-year-template"] = ''+
 		'</select>'+
 		'at'+
 		'<select name="hour" class="form-control input-sm">'+
-			'{[ _.each(_.range(24), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(24), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		':'+
 		'<select name="minute" class="form-control input-sm">'+
-			'{[ _.each(_.range(60), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(60), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>';
 
 Templates["rule-view-month-template"] = ''+
 		'the'+
 		'<select name="day" class="form-control input-sm">'+
-			'{[ _.each(_.range(31), function(i){ ]}'+
-				'<option value="{{i+1}}">'+
-					'{[ if(i+1 == 1 || (i+1) % 10 == 1){ ]} '+
-						'{{ i+1 + "st" }}'+
-					'{[ } else if(i+1 == 2 || (i+1) % 10 == 2) { ]}'+
-						'{{ i+1 + "nd" }}'+
-					'{[ } else if(i+1 == 3 || (i+1) % 10 == 3) { ]}'+
-						'{{ i+1 + "rd" }}'+
-					'{[ } else { ]}'+
-						'{{ i+1 + "th" }}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(31), function(i){ %>'+
+				'<option value="<%=i+1%>">'+
+					'<% if(i+1 == 1 || (i+1) % 10 == 1){ %> '+
+						'<%= i+1 + "st" %>'+
+					'<% } else if(i+1 == 2 || (i+1) % 10 == 2) { %>'+
+						'<%= i+1 + "nd" %>'+
+					'<% } else if(i+1 == 3 || (i+1) % 10 == 3) { %>'+
+						'<%= i+1 + "rd" %>'+
+					'<% } else { %>'+
+						'<%= i+1 + "th" %>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		'at'+
 		'<select name="hour" class="form-control input-sm">'+
-			'{[ _.each(_.range(24), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(24), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		':'+
 		'<select name="minute" class="form-control input-sm">'+
-			'{[ _.each(_.range(60), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(60), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>';
 
 Templates["rule-view-week-template"] = ''+
@@ -538,65 +531,65 @@ Templates["rule-view-week-template"] = ''+
 		'</select>'+
 		'at'+
 		'<select name="hour" class="form-control input-sm">'+
-			'{[ _.each(_.range(24), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(24), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		':'+
 		'<select name="minute" class="form-control input-sm">'+
-			'{[ _.each(_.range(60), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(60), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>';
 
 Templates["rule-view-day-template"] = ''+ 
 		'<select name="hour" class="form-control input-sm">'+
-			'{[ _.each(_.range(24), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(24), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		':'+
 		'<select name="minute" class="form-control input-sm">'+
-			'{[ _.each(_.range(60), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(60), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>';
 
 Templates["rule-view-hour-template"] = ''+
 		'<select name="minute" class="form-control input-sm">'+
-			'{[ _.each(_.range(60), function(i){ ]}'+
-				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
+			'<% _.each(_.range(60), function(i){ %>'+
+				'<option value="<%=i%>">'+
+					'<% if(i<10){ %> '+
+						'0<%=i%>'+
+					'<% } else { %>'+
+						'<%=i%>'+
+					'<% } %>'+
 				'</option>'+
-			'{[ }); ]}'+
+			'<% }); %>'+
 		'</select>'+
 		'minutes from the beginning of the hour';
 
