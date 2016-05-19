@@ -30,7 +30,9 @@ class MetricsService implements InitializingBean, DisposableBean {
 	int reportingPeriodEvents = DEFAULT_REPORTING_PERIOD_EVENTS
 	int reportingPeriodSeconds = DEFAULT_REPORTING_PERIOD_SECONDS
 
-	private Map<String, Map<Long, AtomicLong>> stats
+	private Map<String, Map<Long, AtomicLong>> stats = [:]
+	// See Java 8 solution for increment
+	//private ConcurrentMap<String, ConcurrentMap<Long, AtomicLong>> stats = new ConcurrentHashMap<>()
 
 	private Timer flushTimer
 
@@ -41,12 +43,15 @@ class MetricsService implements InitializingBean, DisposableBean {
 
 		AtomicLong counter
 		synchronized (incrementInitLock) {
-			if (!stats) { stats = [:] }
 			def m = stats[metric]
 			if (!m) { m = stats[metric] = [:] }
 			counter = m[userId]
 			if (!counter) { counter = m[userId] = new AtomicLong() }
 		}
+
+		// Java 8 solution for the above, no need for manual locking
+		//def m = stats.computeIfAbsent(metric, k -> new ConcurrentHashMap<Long, AtomicLong>()) ?: stats.get(metric)
+		//AtomicLong counter = m.computeIfAbsent(userId, k -> new AtomicLong()) ?: m.get(userId)
 
 		long newCount = counter.addAndGet(count)
 		if (newCount > reportingPeriodEvents) {
@@ -59,8 +64,8 @@ class MetricsService implements InitializingBean, DisposableBean {
 
 	private Lock flushLock = new ReentrantLock()
 	def flush() {
-		// if locked, bail; it's ok, someone else is reporting this metric already
-		if (stats && flushLock.tryLock()) {
+		// if locked, bail; it's ok, someone else is flushing all metrics already
+		if (flushLock.tryLock()) {
 			try {
 				stats.each { String metric, Map<Long, AtomicLong> mStats ->
 					mStats.each { Long userId, AtomicLong counter ->
@@ -82,8 +87,8 @@ class MetricsService implements InitializingBean, DisposableBean {
 			value: stats[metric][userId].get()
 		]);
 
-		// zero it for now, clean up all after flush
-		stats[metric][userId] = new AtomicLong()
+		// zero it for now, clean up all metrics after flush
+		stats[metric][userId].set(0L)
 	}
 
 	@Synchronized
