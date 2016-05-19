@@ -295,7 +295,7 @@ class SignalPathService {
 		return servletContext["signalPathRunners"]?.get(canvas.runner)
 	}
 	
-	Map runtimeRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user, boolean localOnly = false) {
+	Map runtimeRequest(Map msg, Canvas canvas, Integer moduleId = null, SecUser user, boolean localOnly = false) {
 		SignalPathRunner spr = getLocalRunner(canvas)
 		
 		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $moduleId, localOnly: $localOnly")

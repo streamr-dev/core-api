@@ -35,7 +35,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 		addDashboardItem(liveCanvasName, "Table")
 
-		save()
+		saveDashboard()
 
 		waitFor {
 			!$(".ui-pnotify").displayed
@@ -77,7 +77,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 	}
 
 	def cleanup() {
-		save()
+		saveDashboard()
 	}
 
 	void "the button works"() {
@@ -130,7 +130,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		}
 
 		when: "Logged out and reloaded"
-		save()
+		saveDashboard()
 		waitFor {
 			!$(".ui-pnotify").displayed
 		}

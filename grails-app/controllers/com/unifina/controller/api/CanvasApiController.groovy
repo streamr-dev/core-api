@@ -4,6 +4,8 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
@@ -21,6 +23,7 @@ class CanvasApiController {
 	def grailsApplication
 	def permissionService
 	def signalPathService
+	def dashboardService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
@@ -104,30 +107,33 @@ class CanvasApiController {
 		}
 	}
 
+	@StreamrApi(requiresAuthentication = false)
+	def request(String id) {
+		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
+			def msg = request.JSON
+			Map response = signalPathService.runtimeRequest(msg, canvas, request.apiUser, params.local ? true : false)
+
+			log.info("request: responding with $response")
+			render response as JSON
+		}
+	}
+
 	/**
 	 * Gets the json of a single module on a canvas
 	 * @param id
 	 * @param moduleId
-     * @return
-     */
+	 * @return
+	 */
 	@StreamrApi(requiresAuthentication = false)
-	def module(String id, Integer moduleId) {
-		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
-			Map canvasMap = canvas.toMap()
-			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId.toString() }
-
-			if (!moduleMap) {
-				throw new ApiException(404, "MODULE_NOT_FOUND", "Module $moduleId not found on canvas $id")
-			} else {
-				render moduleMap as JSON
-			}
-
+	def module(String canvasId, Integer moduleId, Long dashboard) {
+		getAuthorizedModuleOnCanvas(canvasId, moduleId, dashboard, Operation.READ) { Canvas canvas, Map moduleMap ->
+			render moduleMap as JSON
 		}
 	}
 
 	@StreamrApi(requiresAuthentication = false)
-	def request(String id, Integer moduleId) {
-		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
+	def moduleRequest(String canvasId, Integer moduleId, Long dashboard) {
+		getAuthorizedModuleOnCanvas(canvasId, moduleId, dashboard, Operation.READ) { Canvas canvas, Map moduleMap ->
 			def msg = request.JSON
 			Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, params.local ? true : false)
 
@@ -147,15 +153,45 @@ class CanvasApiController {
 		return command
 	}
 
+	private hasCanvasPermission(Canvas canvas, SecUser user, Operation op) {
+		return op == Operation.READ && canvas.example || permissionService.check(user, canvas, op)
+	}
+
 	private void getAuthorizedCanvas(String id, Operation op, Closure action) {
 		def canvas = Canvas.get(id)
 		if (!canvas) {
 			throw new NotFoundException("Canvas", id)
-		} else if (!(op == Operation.READ && canvas.example) &&
-				   !permissionService.check(request.apiUser, canvas, op)) {
+		} else if (!hasCanvasPermission(canvas, request.apiUser, op)) {
 			throw new NotPermittedException(request.apiUser?.username, "Canvas", id, op.id)
 		} else {
 			action.call(canvas)
+		}
+	}
+
+	/**
+	 * Checks if the user has permission to access a module on a canvas.
+	 * Permission can be granted via:
+	 * - Permission to the canvas that contains the module
+	 * - Permission to a dashboard that contains the module from that canvas
+     */
+	private void getAuthorizedModuleOnCanvas(String canvasId, Integer moduleId, Long dashboardId, Operation op, Closure action) {
+		Canvas canvas = Canvas.get(canvasId)
+		Dashboard dashboard
+
+		if (!canvas) {
+			throw new NotFoundException("Canvas", canvasId)
+		} else if (!(hasCanvasPermission(canvas, request.apiUser, op) ||
+				dashboardId && (dashboard = dashboardService.authorizedGetById(dashboardId, request.apiUser, op)) &&
+				dashboard.items?.find { it.canvas.id == canvasId && it.module == moduleId })) {
+			throw new NotPermittedException(request.apiUser?.username, "Canvas", canvasId, op.id)
+		} else {
+			Map canvasMap = canvas.toMap()
+			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId.toString() }
+
+			if (!moduleMap) {
+				throw new ApiException(404, "MODULE_NOT_FOUND", "Module $moduleId not found on canvas $canvasId")
+			}
+			action.call(canvas, moduleMap)
 		}
 	}
 }

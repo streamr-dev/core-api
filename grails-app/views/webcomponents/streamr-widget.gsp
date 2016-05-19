@@ -15,12 +15,6 @@
 	
 	<script>
 		Polymer('streamr-widget',{
-			publish: {
-				canvas: undefined,
-				module: undefined,
-				resendLast: undefined,
-				resendAll: undefined
-			},
 			detached: function() {
 				var _this = this
 
@@ -48,9 +42,8 @@
 
 					options = options || _this.getResendOptions(moduleJson)
 
-					// Set the request context
-					options.canvas = _this.canvas
-					options.dashboard = _this.dashboard
+					// Pass on the access context to the subscribe request
+					options = $.extend(options, _this.getAccessContext())
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
@@ -101,8 +94,8 @@
 				else {
 					// Get JSON from the server to initialize options
 					$.ajax({
-						type: 'POST',
-						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module + (_this.dashboard ? "?dashboard="+_this.dashboard : ""),
+						type: 'GET',
+						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module + "?" + $.param(_this.getAccessContext()),
 						dataType: 'json',
 						success: function(response) {
 							_this.cachedModuleJson = response
@@ -125,7 +118,7 @@
 				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request' + (_this.dashboard ? "?dashboard="+_this.dashboard : ""),
+					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request' + "?" + $.param(_this.getAccessContext()),
 					data: JSON.stringify(msg),
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
@@ -140,6 +133,14 @@
 
 				});
 			},
+			getAccessContext: function() {
+				// extend cleans off keys with undefined values
+				return $.extend({}, {
+					canvas: this.canvas,
+					dashboard: this.dashboard ? this.dashboard : undefined
+				})
+			},
+
 			<g:if test="${params.lightDOM}">
 				parseDeclaration: function(elementElement) {
 					return this.lightFromTemplate(this.fetchTemplate(elementElement))
