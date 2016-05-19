@@ -3,13 +3,12 @@
     <meta name="layout" content="main" />
     <title><g:message code="profile.edit.label"/></title>
 
-	<r:require module="detect-timezone"/>
 	<r:require module="confirm-button"/>
+	<r:require module="moment-timezone"/>
 
 	<r:script>
 		$(document).ready(function() {
-			var timezoneList = jstz.getTimezoneList()
-			var tzOpts = timezoneList.map(function(tz) {
+			var tzOpts = moment.tz.names().map(function(tz) {
 				return $('<option '+(tz === "${user.timezone}" ? 'selected': '')+' value="'+tz+'">'+tz+'</option>')
 			})
 			$("#timezone").append(tzOpts)

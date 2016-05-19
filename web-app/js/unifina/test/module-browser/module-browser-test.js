@@ -33,8 +33,10 @@ describe('module-browser-page', function(){
 		}
 
 		global.Streamr = {
-			createLink: function(controller, action, id){
-				if(id === undefined)
+			createLink: function(controller, action, id) {
+				if (controller.uri)
+					return controller.uri
+				else if (id === undefined)
 					return controller+"/"+action
 				else
 					return controller+"/"+action+"/"+id
@@ -122,7 +124,9 @@ describe('module-browser-page', function(){
 			})
 		})
 		
-		describe('rendering the helps', function(){
+		describe('rendering the helps', function() {
+			var helpRegex = /api\/v1\/modules\/(.*)\/help/
+
 			beforeEach(function(){
 				moduleTree = [
 					{
@@ -136,14 +140,18 @@ describe('module-browser-page', function(){
 			})
 
 			describe('without rights to edit', function(){
-				beforeEach(function(){
+				beforeEach(function() {
+
 					$.getJSON = function(url, data, cb){
-						if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
+						if (url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
 							cb(moduleTree)
-						} else if(url.split("/")[1] == "jsonGetModule"){
+						} else if (url.split("/")[1] == "jsonGetModule"){
 							cb({})
-						} else if(url.split("/")[1] == "jsonGetModuleHelp"){
-							cb(getHelp(url.split("/")[2]))
+						} else if (url.match(helpRegex)) {
+							var id = url.match(helpRegex)[1]
+							cb(getHelp(id))
+						} else {
+							console.log("getJSON mock: I don't know how to respond to url "+url)
 						}
 					}
 					var moduleBrowser = new mb.ModuleBrowser({
@@ -177,8 +185,9 @@ describe('module-browser-page', function(){
 					$.getJSON = function(url, data, cb){
 						if(url.split("/")[1] == "jsonGetModuleTree?modulesFirst=true"){
 							cb(moduleTree)
-						} else if(url.split("/")[1] == "jsonGetModuleHelp"){
-							cb(getHelp(url.split("/")[2]))
+						} else if (url.match(helpRegex)) {
+							var id = url.match(helpRegex)[1]
+							cb(getHelp(id))
 						} else if(url.split("/")[1] == "jsonGetModule"){
 							cb({})
 						} else if(url.split("/")[1] == "canEdit"){
@@ -293,8 +302,9 @@ describe('module-browser-page', function(){
 							cb(moduleTree)
 						} else if(url.split("/")[1] == "jsonGetModule"){
 							cb({inputs:[{name:"moduleExtraInput"}]})
-						} else if(url.split("/")[1] == "jsonGetModuleHelp"){
-							var help = getHelp(url.split("/")[2])
+						} else if (url.match(helpRegex)) {
+							var id = url.match(helpRegex)[1]
+							var help = getHelp(id)
 							help.inputNames.push("helpExtraInput")
 							cb(help)
 						}

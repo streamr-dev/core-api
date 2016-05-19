@@ -17,6 +17,9 @@ class Stream implements Comparable {
 	Date firstHistoricalDay
 	Date lastHistoricalDay
 
+	Date dateCreated
+	Date lastUpdated
+
 	static constraints = {
 		name(blank:false)
 		config(nullable:true)

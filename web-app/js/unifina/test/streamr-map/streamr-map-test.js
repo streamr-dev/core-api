@@ -18,6 +18,7 @@ describe('streamr-map', function() {
 			Map: function() {
 				var _this = $('<div></div>')
 				_this._container = _this[0]
+				_this.once = _this.one
 				return _this
 			},
 			LatLng: function(){},
@@ -130,7 +131,7 @@ describe('streamr-map', function() {
 				assert.equal(opt.layers, "test")
 				done()
 				return {
-					one: function(){},
+					once: function(){},
 					on: function(){},
 					_container: {
 						addEventListener: function(){}

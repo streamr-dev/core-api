@@ -4,6 +4,7 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
+import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
@@ -85,6 +86,15 @@ class StreamApiController {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
 			stream.delete()
 			render(status: 204)
+		}
+	}
+
+	@StreamrApi
+	def range(String id) {
+		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+			DataRange dataRange = streamService.getDataRange(stream)
+			Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
+			render dataRangeMap as JSON
 		}
 	}
 
