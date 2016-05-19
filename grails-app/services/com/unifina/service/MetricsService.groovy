@@ -41,12 +41,24 @@ class MetricsService implements InitializingBean, DisposableBean {
 		if (disabled || !metric || !user?.id || count < 1) { return }
 		long userId = user.id
 
-		AtomicLong counter
-		synchronized (incrementInitLock) {
-			def m = stats[metric]
-			if (!m) { m = stats[metric] = [:] }
+		def m = stats[metric]
+		if (!m) {
+			synchronized (incrementInitLock) {
+				if (!stats[metric]) {
+					stats[metric] = [:]
+				}
+			}
+			m = stats[metric]
+		}
+
+		AtomicLong counter = m[userId]
+		if (!counter) {
+			synchronized (incrementInitLock) {
+				if (!m[userId]) {
+					m[userId] = new AtomicLong()
+				}
+			}
 			counter = m[userId]
-			if (!counter) { counter = m[userId] = new AtomicLong() }
 		}
 
 		// Java 8 solution for the above, no need for manual locking
