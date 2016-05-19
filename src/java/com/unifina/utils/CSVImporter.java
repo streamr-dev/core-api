@@ -21,10 +21,17 @@ public class CSVImporter implements Iterable<LineValues> {
 
 	private Schema schema;
 	private File file;
-	private boolean ignoreEmptyFields;
 
 	private static final Logger log = Logger.getLogger(CSVImporter.class);
 
+	/**
+	 * @param file The File to read
+	 * @param fields Existing field config, if available
+	 * @param timestampIndex Index of the timestamp column, if available
+	 * @param format Timestamp format (in JodaTime syntax), if available
+	 * @param ignoreEmptyFields If true, ignores empty fields. If false, returns empty strings, and throws exception for empty numbers and booleans. True by default.
+     * @throws IOException
+     */
 	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format, boolean ignoreEmptyFields) throws IOException {
 		this.file = file;
 
@@ -126,7 +133,7 @@ public class CSVImporter implements Iterable<LineValues> {
 		public CSVParser parser = null;
 		public SchemaEntry[] entries;
 
-		private boolean ignoreEmptyFields = false;
+		private boolean ignoreEmptyFields;
 
 		public Integer timestampColumnIndex = null;
 		private String format;
