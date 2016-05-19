@@ -155,10 +155,6 @@ var DashboardItemView = Backbone.View.extend({
 	tagName: "li",
 	className: "dashboarditem",	
 	template: _.template($("#streamr-widget-template").html()),
-	labelTemplate: _.template($("#streamr-label-template").html()),
-	chartTemplate: _.template($("#streamr-chart-template").html()),
-	heatmapTemplate: _.template($("#streamr-heatmap-template").html()),
-	tableTemplate: _.template($("#streamr-table-template").html()),
 	titlebarTemplate: _.template($("#titlebar-template").html()),
 
 	events: {

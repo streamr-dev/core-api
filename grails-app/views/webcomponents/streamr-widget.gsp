@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="canvas module resendAll resendLast">
+<polymer-element name="streamr-widget" attributes="canvas module dashboard resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
@@ -47,7 +47,10 @@
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
 					options = options || _this.getResendOptions(moduleJson)
+
+					// Set the request context
 					options.canvas = _this.canvas
+					options.dashboard = _this.dashboard
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
@@ -99,7 +102,7 @@
 					// Get JSON from the server to initialize options
 					$.ajax({
 						type: 'POST',
-						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module,
+						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module + (_this.dashboard ? "?dashboard="+_this.dashboard : ""),
 						dataType: 'json',
 						success: function(response) {
 							_this.cachedModuleJson = response
@@ -122,7 +125,7 @@
 				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request',
+					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request' + (_this.dashboard ? "?dashboard="+_this.dashboard : ""),
 					data: JSON.stringify(msg),
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
