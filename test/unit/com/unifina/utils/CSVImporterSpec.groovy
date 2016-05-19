@@ -255,6 +255,18 @@ class CSVImporterSpec extends Specification {
 
 		then: "value is an empty string"
 			value == ""
+
+	void "should not fail if the file has empty rows"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/with-empty-rows.csv").toURI()).toFile()
+
+		when:
+		CSVImporter csv = new CSVImporter(file)
+		CSVImporter.Schema schema = csv.getSchema()
+		for (CSVImporter.LineValues line : csv) {}
+
+		then: "the rows have been read"
+		schema.entries.length == 5
 	}
 	
 }
