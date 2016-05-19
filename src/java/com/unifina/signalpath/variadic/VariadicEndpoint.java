@@ -50,6 +50,10 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		return endpoints;
 	}
 
+	AbstractSignalPathModule getModule() {
+		return module;
+	}
+
 	VariadicEndpoint(AbstractSignalPathModule module,
 					 EndpointInstantiator<E> endpointInstantiator) {
 		this(module, endpointInstantiator, 1);

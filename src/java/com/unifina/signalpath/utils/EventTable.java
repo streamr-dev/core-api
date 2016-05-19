@@ -2,6 +2,8 @@ package com.unifina.signalpath.utils;
 
 import com.unifina.push.PushChannel;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.variadic.InputInstantiator;
+import com.unifina.signalpath.variadic.VariadicInput;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +12,23 @@ import java.util.Map;
 
 public class EventTable extends ModuleWithUI {
 
-	int eventTableInputCount = 1;
+	private VariadicInput<Object> inputs = new VariadicInput<>(this, new InputInstantiator<Object>() {
+
+		@Override
+		public Input<Object> instantiate(AbstractSignalPathModule module, String endpointName) {
+			Input<Object> input = new Input<>(module, endpointName, "Object");
+			input.setDrivingInput(true);
+			input.canToggleDrivingInput = false;
+			input.canBeFeedback = false;
+			input.requiresConnection = false;
+			return input;
+		}
+	});
+
 	int maxRows = 20;
+
+	@Override
+	public void init() {}
 	
 	public EventTable() {
 		super();
@@ -48,10 +65,12 @@ public class EventTable extends ModuleWithUI {
 			msg.put("nr", nr);
 			nr.add(globals.dateTimeFormat.format(globals.time));
 
-			for (Input i : getInputs()) {
-				if (i.hasValue())
+			for (Input<Object> i : inputs.getEndpoints()) {
+				if (i.hasValue()) {
 					nr.add(i.getValue().toString());
-				else nr.add(null);
+				} else {
+					nr.add(null);
+				}
 			}
 
 			rc.push(msg, uiChannelId);
@@ -59,45 +78,39 @@ public class EventTable extends ModuleWithUI {
 	}
 
 	@Override
-	public void clearState() {
-	}
-
-	public Input<Object> createAndAddInput(String name) {
-
-		Input<Object> conn = new Input<Object>(this,name,"Object");
-
-		conn.setDrivingInput(true);
-		conn.canToggleDrivingInput = false;
-		conn.canBeFeedback = false;
-		conn.requiresConnection = false;
-		
-		// Add the input
-		if (getInput(name)==null)
-			addInput(conn);
-			
-		return conn;
-	}
+	public void clearState() {}
 	
 	@Override
 	public boolean allInputsReady() {
 		return true;
 	}
-	
-	protected Map<String,Object> getHeaderDefinition() {
+
+	@Override
+	public Input getInput(String name) {
+		Input input = super.getInput(name);
+		if (input == null) {
+			input = inputs.addEndpoint(name);
+		}
+		return input;
+	}
+
+	private Map<String,Object> getHeaderDefinition() {
 		// Table config
 		Map<String,Object> headerDef = new HashMap<>();
 		
 		ArrayList headers = new ArrayList<>();
 		headers.add("timestamp");
-		for (Input<Object> i : getInputs()) {
+		for (Input<Object> i : inputs.getEndpoints()) {
 			String name;
-			if (i.isConnected())
-				name = (i.getSource().getDisplayName()!=null ? i.getSource().getDisplayName() : i.getSource().getName());
-			else name = i.getName();
+			if (i.isConnected()) {
+				name = (i.getSource().getDisplayName() != null ? i.getSource().getDisplayName() : i.getSource().getName());
+			} else {
+				name = i.getName();
+			}
 			
 			headers.add(name);
 		}
-		headerDef.put("headers",headers);
+		headerDef.put("headers", headers);
 		return headerDef;
 	}
 	
@@ -105,30 +118,21 @@ public class EventTable extends ModuleWithUI {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 
-		// Module options
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("inputs", eventTableInputCount, "int"));
 		options.add(new ModuleOption("maxRows", maxRows, "int"));
-		
 		config.put("tableConfig", getHeaderDefinition());
-		
+
 		return config;
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+		inputs.onConfiguration(config);
 		
 		ModuleOptions options = ModuleOptions.get(config);
-		
-		if (options.getOption("inputs")!=null)
-			eventTableInputCount = options.getOption("inputs").getInt();
-		
-		if (options.getOption("maxRows")!=null)
+		if (options.getOption("maxRows") != null) {
 			maxRows = options.getOption("maxRows").getInt();
-		
-		for (int i = 1; i<= eventTableInputCount; i++) {
-			createAndAddInput("input"+i);
 		}
 	}
 	
@@ -141,13 +145,9 @@ public class EventTable extends ModuleWithUI {
 			hdrMsg.put("hdr", getHeaderDefinition());
 			response.put("initRequest", hdrMsg);
 			response.setSuccess(true);
+		} else {
+			super.handleRequest(request, response);
 		}
-		else super.handleRequest(request, response);
-	}
-	
-	@Override
-	public void init() {
-
 	}
 	
 	@Override

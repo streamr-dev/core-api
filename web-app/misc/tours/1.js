@@ -64,7 +64,7 @@
             tour.waitForModuleAdded('TextEquals')
         )
 
-        .step("Our goal is to filter data related to a single tram (specifically, vehicle VEH00X2) from all tram data being pushed out by <b>Stream</b>. To do so, we will need to pass forward only those events whose <b>veh</b> equals <b>VEH00X2</b>.",
+        .step("Our goal is to filter data related to a single tram (specifically, vehicle RHKL00122) from all tram data being pushed out by <b>Stream</b>. To do so, we will need to pass forward only those events whose <b>veh</b> equals <b>RHKL00122</b>.",
             '.tourStream1'
         )
 
@@ -96,9 +96,9 @@
             }
         )
 
-        .step("Now let's define the vehicle we are filtering.<br><br>Type <code>VEH00X2</code> into parameter <b>search</b> of module <b>Filter</b>.",
+        .step("Now let's define the vehicle we are filtering.<br><br>Type <code>RHKL00122</code> into parameter <b>search</b> of module <b>Filter</b>.",
             '.tourTextEquals1 .endpoint.parameter:first',
-            tour.waitForInput(".tourTextEquals1 .parameterInput", "VEH00X2")
+            tour.waitForInput(".tourTextEquals1 .parameterInput", "RHKL00122")
         )
 
         .step("Then connect <code>lat</code>, <code>long</code>, and <code>spd</code> of Stream to <code>in1</code>, <code>in2</code>, and <code>in3</code> of module Filter",
@@ -108,6 +108,22 @@
                     ['tourStream1.lat', 'tourFilter1.in1'],
                     ['tourStream1.long', 'tourFilter1.in2'],
                     ['tourStream1.spd', 'tourFilter1.in3']
+                ])(cb)
+            }
+        )
+
+        .step("Let's add a <code>Table</code> to see affirm that data is flowing in and to see how it looks like",
+            '#search',
+            tour.waitForModuleAdded('Table')
+        )
+
+        .step("Connect <code>out1</code>, <code>out2</code>, and <code>out3</code> of Filter to Table (in that order)",
+            '.tourStream1',
+            function(cb) {
+                tour.waitForConnections([
+                    ['tourFilter1.out1', 'tourTable1.in1'],
+                    ['tourFilter1.out2', 'tourTable1.in2'],
+                    ['tourFilter1.out3', 'tourTable1.in3']
                 ])(cb)
             }
         )
