@@ -28,6 +28,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		waitFor { at CanvasPage }
 
 		ensureRealtimeTabDisplayed()
+		stopCanvasIfRunning()
 		resetAndStartCanvas(true)
 
 		createDashboard(dashboardName)

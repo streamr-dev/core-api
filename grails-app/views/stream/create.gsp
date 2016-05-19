@@ -2,12 +2,12 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="stream.create.label" /></title>
-        
-        <r:script>
-        	$(document).ready(function() {
-        		$("input[name='name']").focus()
-        	})
-        </r:script>
+
+		<r:script>
+			$(function() {
+				$("input:first").focus()
+			})
+		</r:script>
     </head>
     <body>
     	<ui:breadcrumb>

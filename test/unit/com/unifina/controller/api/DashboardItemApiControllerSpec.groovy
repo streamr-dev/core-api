@@ -48,6 +48,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		response.json == [
 			[
 				id: 3,
+				dashboard: dashboards[2].id,
 				title: "dashboard-3-item-2",
 				size: "x-large",
 				canvas: "1",
@@ -57,6 +58,7 @@ class DashboardItemApiControllerSpec extends Specification {
 			],
 			[
 				id: 2,
+				dashboard: dashboards[2].id,
 				title: "dashboard-3-item-1",
 				size: "small",
 				canvas: "1",
@@ -83,6 +85,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			id: 2,
+			dashboard: dashboards[2].id,
 			title: "dashboard-3-item-1",
 			size: "small",
 			canvas: "1",
@@ -114,6 +117,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			id: 32,
+			dashboard: 3,
 			title: "new-dashboard-item",
 			ord: 3,
 			canvas: "canvasId",
@@ -125,6 +129,7 @@ class DashboardItemApiControllerSpec extends Specification {
 															 SaveDashboardItemCommand command,
 															 SecUser user ->
 			def item = command.toDashboardItem()
+			item.dashboard = dashboards[2]
 			item.id = 32
 			return item
 		}
@@ -152,6 +157,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [
 			id           : 1,
+			dashboard	 : 2,
 			title        : "updated-dashboard-item",
 			ord          : 9,
 			canvas       : "canvasId",

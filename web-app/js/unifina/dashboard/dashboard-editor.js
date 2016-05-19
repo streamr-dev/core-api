@@ -401,6 +401,7 @@ var SidebarView = Backbone.View.extend({
 
 		if (event.type == "checked") {
 			this.dashboard.get('items').add({
+				dashboard: this.dashboard.get('id'),
 				title: module.get("uiChannel").name,
 				canvas: canvas.get('id'),
 				module: module.get('hash'),
