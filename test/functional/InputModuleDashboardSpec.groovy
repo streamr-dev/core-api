@@ -1,5 +1,5 @@
 import core.LoginTester1Spec
-import core.mixins.CanvasListMixin
+import core.mixins.ListPageMixin
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.mixins.DashboardMixin
@@ -13,7 +13,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	def setupSpec() {
 		// @Mixin is buggy, use runtime mixins instead
-		this.class.metaClass.mixin(CanvasListMixin)
+		this.class.metaClass.mixin(ListPageMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
 		this.class.metaClass.mixin(DashboardMixin)
 		this.class.metaClass.mixin(CanvasMixin)
@@ -24,7 +24,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		// Go start the RunningSignalPath related to this spec
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickCanvasRow(liveCanvasName)
+		clickRow(liveCanvasName)
 		waitFor { at CanvasPage }
 
 		ensureRealtimeTabDisplayed()
@@ -71,7 +71,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickCanvasRow(liveCanvasName)
+		clickRow(liveCanvasName)
 		waitFor { at CanvasPage }
 		stopCanvasIfRunning()
 	}

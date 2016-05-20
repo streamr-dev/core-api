@@ -1,13 +1,7 @@
-import core.mixins.CanvasMixin
-import core.mixins.DashboardMixin
-import core.mixins.LoginMixin
-import core.mixins.NotificationMixin
-import core.mixins.ShareMixin
+import core.mixins.*
 import core.pages.*
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Keys
-import org.openqa.selenium.StaleElementReferenceException
-import org.openqa.selenium.WebDriverException
 
 class ShareSpec extends GebReportingSpec {
 
@@ -18,6 +12,7 @@ class ShareSpec extends GebReportingSpec {
 		this.class.metaClass.mixin(NotificationMixin)
 		this.class.metaClass.mixin(CanvasMixin)
 		this.class.metaClass.mixin(DashboardMixin)
+		this.class.metaClass.mixin(ListPageMixin)
 	}
 
 	def save() {
@@ -32,9 +27,8 @@ class ShareSpec extends GebReportingSpec {
 
 	/** Cleanup helper */
 	def removeStreamPermissions() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		to StreamListPage
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -46,9 +40,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 	/** Cleanup helper */
 	def removeCanvasPermissions() {
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 		to CanvasListPage
-		getCanvasRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -60,9 +53,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 	/** Cleanup helper */
 	def removeDashboardPermissions() {
-		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		to DashboardListPage
-		getDashboardRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		waitFor { $(".new-user-field").displayed }
 		if ($(".user-delete-button").displayed) {
 			waitFor {
@@ -82,7 +74,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
 		loginTester1()
 
 		when:
@@ -91,7 +82,7 @@ class ShareSpec extends GebReportingSpec {
 		!$(".sharing-dialog")
 
 		when: "open 'ShareSpec' Stream"
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -130,7 +121,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open"
 		waitFor { !$(".modal-backdrop") }
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -153,7 +144,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open once more"
 		closeNotifications()	// the second pnotify would cover the share button
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -167,7 +158,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Stream page, revoke permission"
-		getStreamRow().click()
+		findRow("ShareSpec").click()
 		then:
 		waitFor { at StreamShowPage }
 		waitFor { streamMenuButton.displayed }
@@ -242,7 +233,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 		loginTester1()
 
 		when:
@@ -250,10 +240,10 @@ class ShareSpec extends GebReportingSpec {
 		then:
 		!$(".sharing-dialog")
 		waitFor { at CanvasListPage }
-		waitFor { getCanvasRow().displayed }
+		waitFor { findRow("ShareSpec").displayed }
 
 		when: "open 'ShareSpec' Canvas"
-		getCanvasRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -290,7 +280,7 @@ class ShareSpec extends GebReportingSpec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		getCanvasRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -312,7 +302,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open once more"
 		closeNotifications()	// the second pnotify would cover the share button
-		getCanvasRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -326,7 +316,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Canvas info page, revoke permission"
-		getCanvasRow().click()
+		findRow("ShareSpec").click()
 		then:
 		waitFor { at CanvasPage }
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
@@ -385,7 +375,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Dashboard permissions"() {
-		def getDashboardRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
 		loginTester1()
 
 		when:
@@ -393,10 +382,10 @@ class ShareSpec extends GebReportingSpec {
 		then:
 		!$(".sharing-dialog")
 		waitFor { at DashboardListPage }
-		waitFor { getDashboardRow().displayed }
+		waitFor { findRow("ShareSpec").displayed }
 
 		when: "open 'ShareSpec' Dashboard"
-		getDashboardRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then:
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -433,7 +422,7 @@ class ShareSpec extends GebReportingSpec {
 		// ADD PERMISSION
 
 		when: "re-open"
-		getDashboardRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then: "access row from last time was discarded"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -455,7 +444,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open once more"
 		closeNotifications()	// the second pnotify would cover the share button
-		getDashboardRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -469,7 +458,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Dashboard editor page, revoke permission"
-		getDashboardRow().click()
+		findRow("ShareSpec").click()
 		then:
 		waitFor { at DashboardShowPage }
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
@@ -528,15 +517,11 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "read permission allows opening but doesn't show share buttons"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
-		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
 		loginTester1()
 
 		when: "give tester2 read permission to stream"
 		to StreamListPage
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
@@ -551,7 +536,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "give tester2 read permission to canvas"
 		to CanvasListPage
-		getCanvasRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
@@ -566,7 +551,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "give tester2 read permission to dashboard"
 		to DashboardListPage
-		getDashboardRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row; also it's the only one so we're not mixing things up"
@@ -585,10 +570,10 @@ class ShareSpec extends GebReportingSpec {
 		loginTester2()
 		to StreamListPage
 		then: "no share button in list"
-		!getStreamRow().find("button")
+		!findRow("ShareSpec").find("button")
 
 		when: "open stream edit view"
-		getStreamRow().click()
+		findRow("ShareSpec").click()
 		then: "there should be no menu for read rights only"
 		waitFor { at StreamShowPage }
 		!$("#stream-menu-toggle")
@@ -596,10 +581,10 @@ class ShareSpec extends GebReportingSpec {
 		when: "check canvas"
 		to CanvasListPage
 		then: "no share button in list"
-		!getCanvasRow().find("button")
+		!findRow("ShareSpec").find("button")
 
 		when:
-		getCanvasRow().click()
+		findRow("ShareSpec").click()
 		then: "wait until permission check is done, should not view login form (because not logging in isn't why sharing isn't allowed)"
 		waitFor { at CanvasPage }
 		waitFor { shareButton.hasClass("forbidden") }
@@ -608,10 +593,10 @@ class ShareSpec extends GebReportingSpec {
 		when: "check dashboard"
 		to DashboardListPage
 		then:
-		!getDashboardRow().find("button")
+		!findRow("ShareSpec").find("button")
 
 		when:
-		getDashboardRow().click()
+		findRow("ShareSpec").click()
 		then: "only read rights given"
 		waitFor { at DashboardShowPage }
 		!$("#share-button")
@@ -626,13 +611,11 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "write rights show stream menu but no share button"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
 		loginTester1()
 
 		when: "give tester2 write permission to stream"
 		to StreamListPage
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
 		then: "got the access-row"
@@ -657,10 +640,10 @@ class ShareSpec extends GebReportingSpec {
 		loginTester2()
 		to StreamListPage
 		then: "no share button in list"
-		!getStreamRow().find("button")
+		!findRow("ShareSpec").find("button")
 
 		when: "open stream edit view"
-		getStreamRow().click()
+		findRow("ShareSpec").click()
 		then:
 		waitFor { at StreamShowPage }
 
@@ -678,13 +661,11 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "shared stream is shown in search box"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
 		loginTester1()
 
 		when:
 		to StreamListPage
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		waitFor { $(".new-user-field").displayed }
 		forceFeedTextInput(".new-user-field", "tester2@streamr.com")
 		$(".new-user-button").click()
@@ -716,13 +697,11 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "public stream is visible in search and can be inspected, but won't be shown in list"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
 		loginTester1()
 
 		when: "publish it if not public (defensive, but we aren't testing that DB state is correct...)"
 		to StreamListPage
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
 		if (!$(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
@@ -733,7 +712,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "try search"
 		save()
 		closeNotifications()
-		def streamShowUrl = getStreamRow().attr("href")
+		def streamShowUrl = findRow("ShareSpec").attr("href")
 		logout()
 
 		loginTester2()
@@ -745,7 +724,7 @@ class ShareSpec extends GebReportingSpec {
 		when: "check list"
 		to StreamListPage
 		then: "not found"
-		getStreamRow().size() == 0
+		findRow("ShareSpec").size() == 0
 
 		when: "inspect"
 		go streamShowUrl
@@ -759,7 +738,7 @@ class ShareSpec extends GebReportingSpec {
 		loginTester1()
 
 		to StreamListPage
-		getStreamRow().find("button").click()
+		findRow("ShareSpec").find("button").click()
 		waitFor { $(".modal-body .owner-row .switcher").displayed }
 		if ($(".anonymous-switcher").attr("checked")) {
 			$(".modal-body .owner-row .switcher").click()
@@ -792,6 +771,7 @@ class ShareSpec extends GebReportingSpec {
 		shareButton.click()
 		waitForShareDialog()
 		shareTo("tester2@streamr.com")
+		closeNotifications()
 
 		when:
 		findDashboardItem("Button").find(".button-module-button").click()

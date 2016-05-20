@@ -2,8 +2,12 @@ package com.unifina.service
 
 import com.unifina.api.ApiException
 import com.unifina.api.InvalidStateException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
@@ -23,6 +27,8 @@ class CanvasService {
 	def grailsApplication
 	def signalPathService
 	def taskService
+	def permissionService
+	def dashboardService
 
 	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
 		def query = Canvas.where { user == currentUser }
@@ -118,6 +124,56 @@ class CanvasService {
 		}
 	}
 
+	/**
+	 * Gets a canvas by id, authorizing the given user for the given Operation.
+	 * Throws an exception if authorization fails.
+     */
+	Canvas authorizedGetById(String id, SecUser user, Permission.Operation op) {
+		def canvas = Canvas.get(id)
+		if (!canvas) {
+			throw new NotFoundException("Canvas", id)
+		} else if (!hasCanvasPermission(canvas, user, op)) {
+			throw new NotPermittedException(user?.username, "Canvas", id, op.id)
+		} else {
+			return canvas
+		}
+	}
+
+	/**
+	 * Checks if the user has permission to access a module on a canvas.
+	 * Throws an exception if authorization fails.
+	 *
+	 * Permission can be granted via:
+	 *
+	 * - Permission to the canvas that contains the module
+	 * - Permission to a dashboard that contains the module from that canvas
+	 */
+	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
+		Canvas canvas = Canvas.get(canvasId)
+		Dashboard dashboard
+
+		if (!canvas) {
+			throw new NotFoundException("Canvas", canvasId)
+		} else if (!(hasCanvasPermission(canvas, user, op) ||
+				dashboardId && (dashboard = dashboardService.authorizedGetById(dashboardId, user, op)) &&
+				dashboard?.items?.find { it.canvas.id == canvasId && it.module == moduleId })) {
+			throw new NotPermittedException(user?.username, "Canvas", canvasId, op.id)
+		} else {
+			Map canvasMap = canvas.toMap()
+			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId?.toString() }
+
+			if (!moduleMap) {
+				throw new NotFoundException("Module $moduleId not found on canvas $canvasId", "Module", moduleId?.toString())
+			}
+
+			return moduleMap
+		}
+	}
+
+	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
+		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
+	}
+
 	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, boolean resetUi) {
 		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]
 
@@ -159,4 +215,5 @@ class CanvasService {
 			globals.destroy()
 		}
 	}
+
 }
