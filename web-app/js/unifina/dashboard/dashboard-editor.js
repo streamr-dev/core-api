@@ -311,7 +311,7 @@ var SidebarView = Backbone.View.extend({
 
 		this.el = options.el
 
-		var requiredOptions = ['dashboard', 'menuToggle', 'canvases']
+		var requiredOptions = ['dashboard', 'menuToggle', 'canvases', 'baseUrl']
 
 		requiredOptions.forEach(function(requiredOption) {
 			if (options[requiredOption] === undefined)
@@ -320,6 +320,7 @@ var SidebarView = Backbone.View.extend({
 
 		this.dashboard = options.dashboard
 		this.menuToggle = options.menuToggle
+		this.baseUrl = options.baseUrl
 		this.canvases = new CanvasList(options.canvases)
 		this.syncCheckedState()
 
@@ -346,7 +347,6 @@ var SidebarView = Backbone.View.extend({
 		})
 
 		this.dashboard.on('invalid', function(error) {
-			console.log(error)
 			Streamr.showError(_this.dashboard.validationError, 'Invalid value')
 		})
 
@@ -371,6 +371,7 @@ var SidebarView = Backbone.View.extend({
 	},
 
 	render: function () {
+		var _this = this
 		this.$el.append(this.template(this.dashboard.toJSON()))
 		this.titleInput = this.$el.find("input.dashboard-name.title-input")
 		this.list = this.$el.find("#rsp-list")
@@ -378,7 +379,26 @@ var SidebarView = Backbone.View.extend({
 			var canvasView = new CanvasView({ model: canvas })
 			this.list.append(canvasView.el)
 		}, this)
-		new Toolbar(this.$el.find("#deleteDashboardForm"))
+		new ConfirmButton(this.$el.find("#deleteDashboardButton"), {
+			title: "Are you sure?",
+			message: "Really delete dashboard " + _this.dashboard.get("name") + "?"
+		}, function(response) {
+			if(response) {
+				Backbone.sync("delete", _this.dashboard, {
+					success: function() {
+						// we dont want to accept exiting the page when we have just removed the whole dashboard
+						$(window).off("beforeunload")
+						Streamr.showSuccess("Dashboard deleted succesfully!", "", 2000)
+						setTimeout(function() {
+							window.location = _this.baseUrl + "dashboard/list"
+						}, 2000)
+					},
+					error: function(a, b, c) {
+						Streamr.showError()
+					}
+				})
+			}
+		})
 	},
 
 	setEditMode: function (active) {		
@@ -436,7 +456,10 @@ var SidebarView = Backbone.View.extend({
 	    	},
 	    	error: function(model, response) {
 				Streamr.showError(response.responseText, "Error while saving")
-	    	}
+	    	},
+			// save() returns the complete model with id, and
+			// Backbone wants to re-render the view. Since we don't need that, we don't want any events to be triggered.
+			silent: true
 	    })
     }
 })

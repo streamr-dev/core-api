@@ -13,10 +13,7 @@
         <g:if test="${shareable}">
             <ui:shareButton id="share-button" class="btn-block" name="Dashboard {{ name }}" url="${createLink(uri: "/api/v1/dashboards/" + dashboard.id)}" > Share </ui:shareButton>
         </g:if>
-        <form method="post" role="form" id="deleteDashboardForm">
-            <g:hiddenField name="id" value="${params.id}" />
-            <button id='deleteButton' class='delete-button btn btn-block btn-default confirm' data-action="${createLink(action:'delete')}" data-confirm="Really delete dashboard {{ name }}?" title='Delete dashboard'>Delete</button>
-        </form>
+		<button id='deleteDashboardButton' class='delete-button btn btn-block btn-default confirm' title='Delete dashboard'>Delete</button>
     </div>
 </script>
 <script id="canvas-template" type="text/template">

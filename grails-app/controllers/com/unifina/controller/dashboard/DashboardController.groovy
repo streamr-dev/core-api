@@ -1,5 +1,6 @@
 package com.unifina.controller.dashboard
 
+import com.unifina.api.NotPermittedException
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import grails.converters.JSON
@@ -26,7 +27,12 @@ class DashboardController {
 			//flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), params.id])}"
 			//redirect(action: "list")
 		} else if (!permissionService.check(user, dashboard, op)) {
-			redirect controller: 'login', action: (request.xhr ? 'ajaxDenied' : 'denied')
+			if (request.xhr) {
+				response.status = 403
+				render (new NotPermittedException(user.name, "Dashboard", id.toString()).asApiError().toMap() as JSON)
+			} else {
+				redirect controller: 'login', action: 'denied'
+			}
 		} else {
 			action.call(dashboard, user)
 		}
@@ -49,16 +55,16 @@ class DashboardController {
 		dashboard.save(flush:true, failOnError:true)
 		redirect(action:"show", id:dashboard.id)
 	}
-	
-	def getJson() {
-		getAuthorizedDashboard(params.long("id"), Operation.READ, true) { Dashboard dashboard, user ->
-			render([
-				id   : dashboard.id,
-				name : dashboard.name,
-				items: dashboard.items*.toMap()
-			] as JSON)
-		}
-	}
+
+//	def getJson() {
+//		getAuthorizedDashboard(params.long("id"), Operation.READ, true) { Dashboard dashboard, user ->
+//			render([
+//				id   : dashboard.id,
+//				name : dashboard.name,
+//				items: dashboard.items*.toMap()
+//			] as JSON)
+//		}
+//	}
 
 	def show() {
 		getAuthorizedDashboard(params.long("id")) { Dashboard dashboard, SecUser user ->
@@ -69,47 +75,47 @@ class DashboardController {
 			]
 		}
 	}
-	
-	def delete() {
-		getAuthorizedDashboard(params.long("id"), Operation.WRITE) { Dashboard dashboard, SecUser user ->
-			// DashboardItems SHOULD be deleted because of belongsTo/hasMany, but it doesn't seem to work in 2.3.11
-			new DetachedCriteria(DashboardItem).build {
-				eq "dashboard", dashboard
-			}.deleteAll()
-			dashboard.delete(flush: true)
-			flash.message = message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])
-			redirect(action: "list")
-		}
-	}
-	
-	def update() {
-		Map dashboardMap = request.JSON
-		getAuthorizedDashboard(dashboardMap.id, Operation.WRITE) { Dashboard dashboard, SecUser user ->
-			dashboard.properties = dashboardMap
 
-			// collect dashboard items into a map by id
-			Map itemsById = [:]
-			dashboard.items?.findAll { it.id != null }.each {
-				itemsById[it.id] = it
-			}
-
-			Collection toBeRemoved = []
-			Collection toBeAdded = []
-			dashboard.items?.each {
-				if (itemsById[it.id] == null) {
-					toBeRemoved.add(it)
-				} else {
-					it.properties = itemsById[it.id]
-				}
-			}
-			dashboardMap.items?.findAll { it.id == null }.each {
-				toBeAdded.add(it)
-			}
-			toBeRemoved.each { dashboard.removeFromItems(it) }
-			toBeAdded.each { dashboard.addToItems(it) }
-
-			dashboard.save(flush: true, failOnError: true)
-			render([success: true] as JSON)
-		}
-	}
+//	def delete() {
+//		getAuthorizedDashboard(params.long("id"), Operation.WRITE) { Dashboard dashboard, SecUser user ->
+//			// DashboardItems SHOULD be deleted because of belongsTo/hasMany, but it doesn't seem to work in 2.3.11
+//			new DetachedCriteria(DashboardItem).build {
+//				eq "dashboard", dashboard
+//			}.deleteAll()
+//			dashboard.delete(flush: true)
+//			flash.message = message(code: 'default.deleted.message', args: [message(code: 'dashboard.label', default: 'Dashboard'), dashboard.name])
+//			redirect(action: "list")
+//		}
+//	}
+//
+//	def update() {
+//		Map dashboardMap = request.JSON
+//		getAuthorizedDashboard(dashboardMap.id, Operation.WRITE) { Dashboard dashboard, SecUser user ->
+//			dashboard.properties = dashboardMap
+//
+//			// collect dashboard items into a map by id
+//			Map itemsById = [:]
+//			dashboard.items?.findAll { it.id != null }.each {
+//				itemsById[it.id] = it
+//			}
+//
+//			Collection toBeRemoved = []
+//			Collection toBeAdded = []
+//			dashboard.items?.each {
+//				if (itemsById[it.id] == null) {
+//					toBeRemoved.add(it)
+//				} else {
+//					it.properties = itemsById[it.id]
+//				}
+//			}
+//			dashboardMap.items?.findAll { it.id == null }.each {
+//				toBeAdded.add(it)
+//			}
+//			toBeRemoved.each { dashboard.removeFromItems(it) }
+//			toBeAdded.each { dashboard.addToItems(it) }
+//
+//			dashboard.save(flush: true, failOnError: true)
+//			render([success: true] as JSON)
+//		}
+//	}
 }

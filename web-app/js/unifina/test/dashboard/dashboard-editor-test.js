@@ -40,7 +40,7 @@ describe('dashboard-editor', function() {
 		$("body").append(templates)
 		db = require('../../dashboard/dashboard-editor')
 
-		global.Toolbar = function(options) {
+		global.ConfirmButton = function(options) {
 			return options
 		}
 	})
@@ -86,7 +86,8 @@ describe('dashboard-editor', function() {
 			el: $("#sidebar-view"),
 			dashboard: dashboard, 
 			canvases: canvases,
-			menuToggle: $("#main-menu-toggle")
+			menuToggle: $("#main-menu-toggle"),
+			baseUrl: "/"
 		})
 	})
 
@@ -305,7 +306,7 @@ describe('dashboard-editor', function() {
 			assert(unchecked)
 		})
 
-		it('must change the name of the dashboard by name-input with clicking save', function () {
+		it('must change the name of the dashboard in name-input with clicking save', function () {
 			assert.equal(dashboard.get("name"), "Test")
 			$("input.dashboard-name").val("changed-name")
 

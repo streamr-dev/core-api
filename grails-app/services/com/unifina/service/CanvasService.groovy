@@ -23,27 +23,22 @@ class CanvasService {
 	def grailsApplication
 	def signalPathService
 	def taskService
+	def permissionService
 
-	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
-		def query = Canvas.where { user == currentUser }
-
-		if (nameFilter) {
-			query = query.where {
-				name == nameFilter
+	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String ord = "asc") {
+		return permissionService.get(Canvas, currentUser) {
+			if (nameFilter) {
+				eq "name", nameFilter
 			}
-		}
-		if (adhocFilter != null) {
-			query = query.where {
-				adhoc == adhocFilter
+			if (adhocFilter) {
+				eq "adhoc", adhocFilter
 			}
-		}
-		if (stateFilter) {
-			query = query.where {
-				state == stateFilter
+			if (stateFilter) {
+				eq "state", stateFilter
 			}
+			if(sort)
+				order sort, ord
 		}
-
-		return query.order(sort, order).findAll()
 	}
 
 

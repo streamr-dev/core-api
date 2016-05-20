@@ -17,7 +17,7 @@
 			$(document).ready(function() {
 				var dashboard
 
-				$.getJSON("${createLink(controller:'dashboard', action:'getJson', id:dashboard.id)}", {}, function(dbJson) {
+				$.getJSON("${createLink(uri:"/api/v1/dashboards/$dashboard.id")}", {}, function(dbJson) {
 					dashboard = new Dashboard(dbJson)
 					var dashboardView = new DashboardView({
 						model: dashboard,
@@ -27,7 +27,7 @@
 						Streamr.showError(itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error)
 					})
 
-					dashboard.urlRoot = "${createLink(controller:'dashboard', action:'update')}"
+					dashboard.urlRoot = "${createLink(uri:'/api/v1/dashboards/', absolute:true)}"
 					
 					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false, sort:'dateCreated', order:'desc'}, function(canvases) {
 						var sidebar = new SidebarView({
@@ -35,11 +35,8 @@
 							dashboard: dashboard, 
 							canvases: canvases,
 							el: $("#sidebar-view"),
-							menuToggle: $("#main-menu-toggle")
-						})
-						// we dont want to accept exiting the page when we have just removed the whole dashboard
-						$("#deleteDashboardForm").on("submit", function(){
-							$(window).off("beforeunload")
+							menuToggle: $("#main-menu-toggle"),
+							baseUrl: '${ createLink(uri: "/", absolute:true) }'
 						})
 					})
 					$(window).on('beforeunload', function(){
