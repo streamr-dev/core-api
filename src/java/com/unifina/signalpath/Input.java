@@ -133,6 +133,9 @@ public class Input<T> extends Endpoint<T> {
 
 	public void setSource(Output<T> source) {
 		this.source = source;
+		if (!isReady()) {
+			owner.cancelReady(this);
+		}
 	}
 	
 	protected void doClear() {

@@ -158,5 +158,8 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		waitFor {
 			table().find("tr").size() == 2
 		}
+
+		cleanup:
+		stopCanvasIfRunning()
 	}
 }
