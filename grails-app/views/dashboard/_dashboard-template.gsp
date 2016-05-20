@@ -1,11 +1,11 @@
 <script id="sidebar-template" type="text/template">
     <div class="menu-content">
-        <label>Dashboard Name</label>
-        <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="Dashboard Name" value="{{ name }}" />
+        <label><g:message code="dashboard.name.label"/></label>
+        <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="<g:message code="dashboard.name.label"/>" value="{{ name }}" />
     </div>
     <ul class="navigation" id="rsp-list">
         <li class="canvas-title">
-            <label>Live Canvases</label>
+            <label><g:message code="dashboard.canvases.label"/></label>
         </li>
     </ul>
     <div class="menu-content">

@@ -69,9 +69,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
