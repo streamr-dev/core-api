@@ -14,9 +14,7 @@ public class BooleanInput extends PrimitiveInput<Boolean> {
 		if(value instanceof Boolean) {
 			super.receive(value);
 		} else if(value instanceof Number) {
-			super.receive(!((Number)value).doubleValue().equals(0D));
-		} else if(value instanceof Integer) {
-			super.receive(value != 0);
+			super.receive(((Number)value).doubleValue() != 0d);
 		} else if(value instanceof String) {
 			super.receive(!value.equals("") && !value.equals("false"));
 		} else if(value instanceof List) {

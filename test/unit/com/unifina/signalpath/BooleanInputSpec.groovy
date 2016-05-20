@@ -35,10 +35,6 @@ class BooleanInputSpec extends Specification {
 			input.receive(-1d)
 		then: "value is true"
 			input.getValue()
-		when: "inputted NaN"
-			input.receive(Double.NaN)
-		then: "value is false"
-			!input.getValue()
 	}
 
 	def "booleanInput works with Integers"() {
