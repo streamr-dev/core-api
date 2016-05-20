@@ -41,9 +41,7 @@ public class Input<T> extends Endpoint<T> {
 		if (!ready) {
 			ready = true;
 			wasReady = true;
-			if (requiresConnection) { // Has already been marked if connection not required
-				owner.markReady(this);
-			}
+			owner.markReady(this);
 		}
 		
 		if (drivingInput) {
@@ -109,8 +107,13 @@ public class Input<T> extends Endpoint<T> {
 			input.receive(getValue());
 		}
 
-		if (input.getOwner() != null) {
-			input.getOwner().checkDirtyAndReadyCounters();
+		AbstractSignalPathModule owner = input.getOwner();
+		if (owner != null) {
+			if (input.isReady()) {
+				owner.markReady(input);
+			} else {
+				owner.cancelReady(input);
+			}
 		}
 
 		// TODO: might be necessary to mark owner as originatingmodule and mark it dirty, fix it when generalizing from subclasses
@@ -151,7 +154,7 @@ public class Input<T> extends Endpoint<T> {
 	}
 
 	public boolean isReady() {
-		return ready || !requiresConnection;
+		return ready || (!isConnected() && !requiresConnection);
 	}
 
 	public boolean wasReady() {

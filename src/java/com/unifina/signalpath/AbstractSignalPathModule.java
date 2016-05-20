@@ -5,14 +5,7 @@ import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -50,8 +43,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private boolean wasReady = false;
 
-	private int readyInputs = 0;
-	private int inputCount = 0;
+	private Set<Input> readyInputs = new HashSet<>();
 
 	boolean sendPending = false;
 
@@ -177,10 +169,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.put(alias.toString(), input);
 		}
 
-		inputCount = inputs.size();
-
-		// re-count because inputs already contained in the counters might be added
-		checkDirtyAndReadyCounters();
+		if (input.isReady()) {
+			readyInputs.add(input);
+		}
 	}
 
 	public void removeInput(Input input) {
@@ -195,10 +186,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.remove(alias.toString());
 		}
 
-		inputCount = inputs.size();
-
-		// re-count because inputs already contained in the counters might be removed
-		checkDirtyAndReadyCounters();
+		if (input.isReady()) {
+			readyInputs.add(input);
+		}
 	}
 
 	public void addOutput(Output output) {
@@ -220,7 +210,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	public void removeOutput(Output output) {
 		if (!outputs.contains(output)) {
-			throw new IllegalArgumentException("Unable to remove output: output not foudn: "+output);
+			throw new IllegalArgumentException("Unable to remove output: output not found: "+output);
 		}
 
 		outputs.remove(output);
@@ -248,15 +238,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public void markReady(Input input) {
-		readyInputs++;
+		readyInputs.add(input);
 	}
 
 	public void cancelReady(Input input) {
-		readyInputs--;
+		readyInputs.remove(input);
 	}
 
 	public boolean allInputsReady() {
-		return readyInputs == inputCount;
+		return readyInputs.size() == inputs.size();
 	}
 
 	public abstract void sendOutput();
@@ -273,7 +263,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				i.doClear();
 			}
 
-			checkDirtyAndReadyCounters();
+			// Rebuild
+			readyInputs.clear();
+			for (Input i : getInputs()) {
+				if (i.isReady()) {
+					readyInputs.add(i);
+				}
+			}
 		}
 	}
 
@@ -691,18 +687,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
-	}
-
-	public void checkDirtyAndReadyCounters() {
-		// Set the quick dirty/ready counters
-		int readyCount = 0;
-		for (Input i : getInputs()) {
-			if (i.isReady()) {
-				readyCount++;
-			}
-		}
-
-		readyInputs = readyCount;
 	}
 
 	@Override
