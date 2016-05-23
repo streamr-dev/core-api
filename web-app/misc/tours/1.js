@@ -98,6 +98,7 @@
 
         .step("Now let's define the vehicle we are filtering.<br><br>Type <code>RHKL00112</code> into parameter <b>search</b> of module <b>Filter</b>.",
             '.tourTextEquals1 .endpoint.parameter:first',
+            { placement: 'left' },
             tour.waitForInput(".tourTextEquals1 .parameterInput", "RHKL00112")
         )
 

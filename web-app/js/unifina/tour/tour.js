@@ -463,8 +463,13 @@ Tour.prototype.waitForConnections = function(conns) {
 			var targetModule = that._getSpObject(c.toModule)
 			var targetEndpoints = targetModule.getInputs()
 
-			if (c.toEndpoint)
-				targetEndpoints = [ targetModule.findInputByDisplayName(c.toEndpoint) ]
+			if (c.toEndpoint) {
+				var singleInput = targetModule.findInputByDisplayName(c.toEndpoint)
+				if (!singleInput) {
+					return
+				}
+				targetEndpoints = [singleInput]
+			}
 
 			targetEndpoints.forEach(function(targetEp) {
 				targetEp.getConnectedEndpoints().forEach(function(xEndpoint) {
