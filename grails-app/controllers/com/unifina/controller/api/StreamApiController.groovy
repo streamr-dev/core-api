@@ -21,10 +21,24 @@ class StreamApiController {
 	@StreamrApi
 	def index() {
 		def streams = permissionService.get(Stream, request.apiUser) {
+
+		}
+		render(permissionService.getAll(Stream, user) {
 			if (params.name) {
 				eq "name", params.name
 			}
-		}
+			if (params.search) {
+				or {
+					like "name", "%${params.search}%"
+					like "description", "%${params.search}%"
+				}
+			}
+			order params.sort ?: "name", params.order ?: "asc"
+			if (params.max) {
+				maxResults params.max
+			}
+			firstResult params.offset ?: 0
+		})
 		render(streams*.toMap() as JSON)
 	}
 

@@ -52,7 +52,7 @@ modules = {
 	}
 	typeahead {
 		dependsOn 'jquery'
-		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/typeahead', file:'typeahead.bundle.js', plugin: 'unifina-core']
 	}
 	mustache {
 		resource url:[dir:'js/mustache-0.8.2', file:'mustache.js', plugin: 'unifina-core']
@@ -167,9 +167,9 @@ modules = {
 		dependsOn 'jquery, backbone'
 		resource url:[dir:'js/unifina/stream-fields', file:'stream-fields.js', plugin: 'unifina-core']
 	}
-	'search-control' {
+	'streamr-search' {
 		dependsOn 'typeahead'
-		resource url:[dir:'js/unifina/search-control', file:'search-control.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-search', file:'streamr-search.js', plugin: 'unifina-core']
 	}
 	'remote-tabs' {
 		dependsOn 'bootbox, mustache'
@@ -202,7 +202,7 @@ modules = {
 	}
 	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
+//		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
