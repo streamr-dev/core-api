@@ -17,6 +17,7 @@ class CanvasApiController {
 	def springSecurityService
 	def grailsApplication
 	def signalPathService
+	def permissionService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 

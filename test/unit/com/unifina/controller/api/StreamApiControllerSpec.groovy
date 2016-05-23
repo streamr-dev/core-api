@@ -5,13 +5,14 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.StreamService
 import com.unifina.service.PermissionService
+import com.unifina.service.StreamService
 import com.unifina.service.UserService
+import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -86,6 +87,20 @@ class StreamApiControllerSpec extends Specification {
 			fields: []
 		]
 		response.json[0].description == "description"
+	}
+
+	void "index() adds name param to filter criteria"() {
+		when:
+		def name = Stream.get(streamTwoId).name
+		params.name = name
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		response.json[0].name == name
 	}
 
 	void "create a new stream for currently logged in user"() {
