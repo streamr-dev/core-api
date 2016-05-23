@@ -2,8 +2,12 @@
     <head>
         <meta name="layout" content="main" />
         <title><g:message code="dashboard.create.label" /></title>
-        <!-- <title>Create a New Dashboard</title> -->
-        
+
+        <r:script>
+			$(function() {
+				$("input:first").focus()
+			})
+		</r:script>
     </head>
     <body>    
 		<ui:flashMessage/>
