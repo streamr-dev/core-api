@@ -7,4 +7,4 @@
 <p>As soon as we're ready for you, we'll send you an invite by email. We'll be in touch soon!</p>
 
 <p>Best regards,</p>
-<p>Streamr Team</p>
+<p>Streamr team</p>
