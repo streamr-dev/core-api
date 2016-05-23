@@ -246,8 +246,7 @@ class CSVImporterSpec extends Specification {
 			CSVImporter.Schema schema = csv.getSchema()
 			int i = 0
 			for (CSVImporter.LineValues line : csv) {
-				if (
-				i == 5) {
+				if (i == 5) {
 					value = line.values[4]
 					break
 				}
