@@ -40,9 +40,9 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 		String canvasName = "ShutdownSpec"+System.currentTimeMillis()
 		addModule("Button")
 		addModule("Count")
-		moveModuleBy("Count", 200, 0)
+		moveModuleBy("Count", 250, 0)
 		addModule("Label")
-		moveModuleBy("Label", 400, 0)
+		moveModuleBy("Label", 500, 0)
 		connectEndpoints(findOutput("Button", "out"), findInput("Count", "in"))
 		connectEndpoints(findOutput("Count", "count"), findInput("Label", "label"))
 

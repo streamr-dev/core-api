@@ -150,7 +150,7 @@ public class CSVImporter implements Iterable<LineValues> {
 				int undetectedSchemaEntries = Integer.MAX_VALUE;
 			    String line;
 			    
-			    while (undetectedSchemaEntries>0 && (line = reader.readLine()) != null) {
+			    while (undetectedSchemaEntries > 0 && (line = reader.readLine()) != null) {
 			    	
 			    	// Try to detect separator format and parse headers from first line
 			    	if (lineCount==0) {
