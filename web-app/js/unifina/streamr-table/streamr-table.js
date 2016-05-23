@@ -14,27 +14,35 @@ function StreamrTable(parent, options) {
 
 StreamrTable.prototype.initTable = function (headers) {
 		
-		if (this.tableContainer)
-			this.tableContainer.remove()
-			
-		this.tableContainer = $("<div class='table-module-container'></div>");
-		this.$parent.append(this.tableContainer);
-		
-		this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
-		this.tableContainer.append(this.table);
-		
-		this.tableHeader = $("<thead><tr></tr></thead>");
-		this.table.append(this.tableHeader);
-		
-		if (headers) {
-			for (var i=0; i<headers.length; i++)
-				this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
-		}
-		
-		this.tableBody = $("<tbody></tbody>");
-		this.table.append(this.tableBody);
+	if (this.tableContainer)
+		this.tableContainer.remove()
+
+	this.tableContainer = $("<div class='table-module-container'></div>");
+	this.$parent.append(this.tableContainer);
+
+	this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
+	this.tableContainer.append(this.table);
+
+	this.tableHeader = $("<thead><tr></tr></thead>");
+	this.table.append(this.tableHeader);
+
+	if (headers) {
+		for (var i=0; i<headers.length; i++)
+			this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
 	}
 
+	this.tableBody = $("<tbody></tbody>");
+	this.table.append(this.tableBody);
+}
+
+StreamrTable.prototype.addRow = function (row, rowId) {
+	var rowIdString = (rowId != null) ? " id='" + rowId + "'" : "";
+	var newRow = $("<tr"+ rowIdString +"></tr>");
+	for (var i = 0; i < row.length; i++) {
+		newRow.append("<td>" + (row[i] != null ? row[i] : "") + "</td>");
+	}
+	this.tableBody.prepend(newRow);
+}
 
 StreamrTable.prototype.receiveResponse = function (d) {
 	// New row message
@@ -46,11 +54,15 @@ StreamrTable.prototype.receiveResponse = function (d) {
 				$(rows[rows.length-1]).remove();
 		}
 		
-		var newRow = $("<tr"+(d.id!=null ? " id='"+d.id+"'" : "")+"></tr>");
-		for (var i=0;i<d.nr.length;i++)
-			newRow.append("<td>"+(d.nr[i]!=null ? d.nr[i] : "")+"</td>");
-		
-		this.tableBody.prepend(newRow);
+		this.addRow(d.nr, d.id);
+	}
+	// New contents: 2d array that replaces existing contents
+	else if (d.nc) {
+		this.tableBody.children().remove()
+		// reverse order since the rows are prepended...
+		for (var i = d.nc.length; i--;) {
+			this.addRow(d.nc[i], "row-" + i)
+		}
 	}
 	// New map
 	else if (d.nm) {
