@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.api.StreamrApiHelper
 import com.unifina.api.ValidationException
 import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
@@ -20,11 +21,13 @@ class StreamApiController {
 
 	@StreamrApi
 	def index() {
-		def streams = permissionService.get(Stream, request.apiUser) {
+		def criteria = StreamrApiHelper.createListCriteria(params, ["name", "description"], {
+			// Add possibility lookup stream by exact name
 			if (params.name) {
 				eq "name", params.name
 			}
-		}
+		})
+		def streams = permissionService.get(Stream, request.apiUser, Operation.READ, StreamrApiHelper.isPublicFlagOn(params), criteria)
 		render(streams*.toMap() as JSON)
 	}
 

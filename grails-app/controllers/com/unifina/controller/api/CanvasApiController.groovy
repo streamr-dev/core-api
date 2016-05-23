@@ -1,10 +1,6 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.domain.security.SecUser
+import com.unifina.api.*
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
@@ -26,12 +22,21 @@ class CanvasApiController {
 
 	@StreamrApi
 	def index() {
-		SecUser user = request.apiUser
-		String name = params.name
-		Boolean adhoc = params.boolean("adhoc")
-		Canvas.State state = Canvas.State.fromValue(params.state)
-
-		def canvases = canvasService.findAllBy(user, name, adhoc, state, params.sort ?: "dateCreated", params.order ?: "asc")
+		def criteria = StreamrApiHelper.createListCriteria(params, ["name"], {
+			// Lookup by exact name
+			if (params.name) {
+				eq "name", params.name
+			}
+			// Lookup by adhoc
+			if (params.adhoc) {
+				eq "adhoc", params.boolean("adhoc")
+			}
+			// Lookup by state
+			if (params.state) {
+				eq "state", Canvas.State.fromValue(params.state)
+			}
+		})
+		def canvases = permissionService.get(Canvas, request.apiUser, Operation.READ, StreamrApiHelper.isPublicFlagOn(params), criteria)
 		render(canvases*.toMap() as JSON)
 	}
 
