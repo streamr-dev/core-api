@@ -73,7 +73,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "index() renders authorized canvases as a list"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		request.requestURI = "/api/v1/canvases"
 		withFilters(action: "index") {
 			controller.index()
@@ -151,7 +151,7 @@ class CanvasApiControllerSpec extends Specification {
 	void "show() authorizes, reconstructs and renders the canvas as json"() {
 		when:
 		params.id = "1"
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		request.requestURI = "/api/v1/canvases/$params.id"
 		withFilters(action: "show") {
 			controller.show()
@@ -169,7 +169,7 @@ class CanvasApiControllerSpec extends Specification {
 		def newCanvasId
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		request.JSON = [
 			name: "brand new Canvas",
 			modules: [],
@@ -194,7 +194,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "update() authorizes, updates and renders the canvas as json"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.JSON = [
 			name: "updated, new name",
@@ -216,10 +216,12 @@ class CanvasApiControllerSpec extends Specification {
 		}
 	}
 
-	void "update() must not update canvas is authorization fails"() {
+	void "update() must not update canvas if authorization fails"() {
+		Map originalProperties = canvas2.properties
+
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		params.id = "2"
+		request.addHeader("Authorization", "Token $me.apiKey")
+		params.id = canvas2.id
 		request.JSON = [
 			name: "me me me",
 			modules: []
@@ -230,14 +232,17 @@ class CanvasApiControllerSpec extends Specification {
 			controller.update()
 		}
 
-		then:
+		then: "canvas must be unchanged"
+		originalProperties == canvas2.properties
+
+		and: "exception must not be swallowed"
 		thrown NotPermittedException
-		1 * canvasService.authorizedGetById("2", me, Permission.Operation.WRITE) >> { throw new NotPermittedException("mock") }
+		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> { throw new NotPermittedException("mock") }
 	}
 
 	void "delete() must authorize and delete the canvas"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/canvases/$params.id"
@@ -253,7 +258,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "delete() must not delete the canvas if authorization fails"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "2"
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/canvases/$params.id"
@@ -269,7 +274,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "start() must authorize and start a canvas"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/start"
@@ -286,7 +291,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.JSON = [clearState: true]
 		request.method = "POST"
@@ -303,22 +308,28 @@ class CanvasApiControllerSpec extends Specification {
 	}
 
 	void "start() must not start a canvas if authorization fails"() {
+		Map originalProperties = canvas2.properties
+
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		params.id = "2"
+		request.addHeader("Authorization", "Token $me.apiKey")
+		params.id = canvas2.id
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/start"
 		withFilters(action: "start") {
 			controller.start()
 		}
-		then:
+
+		then: "canvas must be unchanged"
+		originalProperties == canvas2.properties
+
+		and: "exception must not be swallowed"
 		thrown NotPermittedException
-		1 * canvasService.authorizedGetById("2", me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
+		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
 	}
 
 	void "stop() must authorize and stop a canvas"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -337,7 +348,7 @@ class CanvasApiControllerSpec extends Specification {
 		canvas1.adhoc = true
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -352,22 +363,28 @@ class CanvasApiControllerSpec extends Specification {
 	}
 
 	void "stop() must not stop the canvas if authorization fails"() {
+		Map originalProperties = canvas2.properties
+
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		params.id = "2"
+		request.addHeader("Authorization", "Token $me.apiKey")
+		params.id = canvas2.id
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
 		withFilters(action: "stop") {
 			controller.stop()
 		}
-		then:
+
+		then: "canvas must be unchanged"
+		originalProperties == canvas2.properties
+
+		and: "exception must not be swallowed"
 		thrown NotPermittedException
-		1 * canvasService.authorizedGetById("2", me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
+		1 * canvasService.authorizedGetById(canvas2.id, me, Permission.Operation.WRITE) >> {throw new NotPermittedException("mock")}
 	}
 
 	void "stop() must throw an exception if the canvas can't be reached"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/stop"
@@ -386,7 +403,7 @@ class CanvasApiControllerSpec extends Specification {
 		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboard = 2
@@ -406,7 +423,7 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
@@ -420,11 +437,12 @@ class CanvasApiControllerSpec extends Specification {
 		response.json == runtimeResponse
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
 		1 * controller.signalPathService.runtimeRequest([bar: 'foo'], canvas1, null, me, false) >> runtimeResponse
+		0 * controller.signalPathService.runtimeRequest(_, _, _, _, _)
 	}
 
 	void "request() must not send a runtime request to the canvas if authorization fails"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
@@ -442,7 +460,7 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.id = "1"
 		params.local = "true"
 		request.JSON = [bar: 'foo']
@@ -464,7 +482,7 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboard = 2
@@ -484,7 +502,7 @@ class CanvasApiControllerSpec extends Specification {
 
 	void "moduleRequest() must not send a runtime request to the canvas if authorization fails"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboard = 2
@@ -506,7 +524,7 @@ class CanvasApiControllerSpec extends Specification {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
+		request.addHeader("Authorization", "Token $me.apiKey")
 		params.canvasId = "1"
 		params.moduleId = 1
 		params.dashboard = 2
