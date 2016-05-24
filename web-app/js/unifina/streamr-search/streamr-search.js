@@ -101,19 +101,23 @@ StreamrSearch.prototype.hide = function() {
     this.el.hide()
 }
 
+var _getSortScore = function(string, query){
+    string = string.toLowerCase()
+    query = query.toLowerCase()
+    // If the real name of the module contains the term, the earlier the better. Else sorted last.
+    if(string === query)
+        return -1
+    if(string.indexOf(query) >= 0)
+        return string.indexOf(query)
+    else return Infinity
+}
+
 var _ModuleSearchModule = function(limit){
     var modules
     $.get(Streamr.createLink({ uri: "api/v1/modules" }), function(ds) {
         modules = ds
     })
-    var getSortScore = function(module, term){
-        var name = module.name.toLowerCase()
-        term = term.toLowerCase()
-        // If the real name of the module contains the term, the earlier the better. Else sorted last.
-        if(name.indexOf(term) >= 0)
-            return name.indexOf(term)
-        else return Infinity
-    }
+
     return {
         name: 'Modules',
         displayKey: 'name',
@@ -129,20 +133,18 @@ var _ModuleSearchModule = function(limit){
                     return false
                 })
                 matches.sort(function (a, b) {
-                    return (getSortScore(a, q) - getSortScore(b, q))
+                    return (_getSortScore(a.name, q) - _getSortScore(b.name, q))
                 })
                 sync(matches.slice(0, limit ? limit : 5))
             }
-        },
-        local: {
-            url: "moifd"
         },
         templates: {
             header: '<p class="streamr-search-dataset-header">Modules</p>',
             suggestion: function(module) {
                 return "<div data-type='module'><p class='streamr-search-suggestion-name'>" + module.name + "</p></div>"
             }
-        }
+        },
+        limit: Infinity
     }
 }
 
@@ -152,6 +154,9 @@ var _StreamModuleSearch = function (limit) {
         displayKey: 'name',
         source: function (q, sync, async) {
             $.get(Streamr.createLink({uri: "api/v1/streams"}) + '?search='+q, function(result) {
+                result.sort(function (a, b) {
+                    return (_getSortScore(a.name, q) - _getSortScore(b.name, q))
+                })
                 result = result.slice(0, limit ? limit : 5)
                 result.forEach(function(r) {
                     // This is set only so the result type can be checked later (e.g. "module" or "stream")

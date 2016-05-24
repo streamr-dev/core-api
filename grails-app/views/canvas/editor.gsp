@@ -122,7 +122,7 @@ $(document).ready(function() {
 		limit: 5
 	}, {
 		name: "stream",
-		limit: 5
+		limit: 3
 	}], {
 		inBody: true
 	}, function(item) {
