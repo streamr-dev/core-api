@@ -1,19 +1,16 @@
-<a name="extensions"></a>
 #Extensions
 
-**Explain how to do abstraction, reuse services as modules, and code custom Java modules.**
-
-Once in a while, you may find yourself in need of a custom module. Perhaps you need some functionality that cannot be implemented with existing modules. Or perhaps implementing some functionality with existing modules is possible, but cumbersome. Maybe your bottleneck is performance -- you want to do some hefty calculations as fast as possible or you want to minimize memory use.
-
-Whatever the reason, Streamr platform can be extended by writing your own specialized custom modules. In this chapter, we will go through the different ways of doing so.
+You can easily extend Streamr by writing custom modules in Java programming language. When a custom module is activated in a Streamr service, your code is executed as if the module were a part of the built-in machinery. As an alternative to custom code, you can also do [abstraction](#reusingservicesasmodules), i.e. reuse existing services as modules. 
 
 ##JavaModule
 
-**JavaModule** supports writing custom behavior in the Java programming language. Simply add the module to a canvas, and press the "Edit code"-button to open a code editor. The default template code will look as follows.
+JavaModule is the tool to use for custom code. Start by creating a new service or by opening an existing service in the editor. Then insert a JavaModule on the canvas, click on the “Edit code” button, and a code editor will open in a resizable pop-up window. This is what you'll see:
 
 ```
 // Define inputs and outputs here
- 
+// TimeSeriesInput input = new TimeSeriesInput(this,"in");
+// TimeSeriesOutput output = new TimeSeriesOutput(this,"out");
+
 public void initialize() {
     // Initialize local variables
 }
@@ -27,34 +24,19 @@ public void clearState() {
 }
 ```
 
+The Java editor contains a code template that you need to fill in with the appropriate components. A custom module consists of inputs, parameters, outputs, an optional state, and a few specific methods. For the magic to happen, you'll need to specify the inputs and outputs and override the relevant methods. We'll go through the components below.
 
-You will need to fill in this template with appropriate components for the module to work.
+##Inputs and outputs
 
-A module in Streamr consists of inputs, parameters, outputs, possibly state, and methods that need to be overriden for the magic to happen.
+Module inputs correspond to the endpoints that receive incoming events. On the canvas, they are shown as small circles on the left-hand side of a module. The outputs correspond to the endpoints which send out computed values after module activation. The output endpoints are shown as small circles on the right-hand side of a module.
 
-##Writing Your First Custom Module
-
-Let's write a module similar to **Sum**, but instead of keeping a running sum, we will keep a running product of given multiplicands.
-
-How would you write this? First of all, let's visualize how running the module would look like with some example input and expected output.
-
-Example input and output for a single run.
-
-Input   Output
-5   5
-2   10
-3   30
-10  300
-1/3 100
-1   100
-0   0
-
-Essentially we have a single input and a single output. Let's start off by declaring our endpoints in the code template.
+Inputs and outputs are defined in the beginning of the code template. To help you get started, there's two lines of commented code near the top.
 
 ```
-TimeSeriesInput in = new TimeSeriesInput(this, "in");
-TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
- 
+// Define inputs and outputs here
+TimeSeriesInput input = new TimeSeriesInput(this,"in");
+TimeSeriesOutput output = new TimeSeriesOutput(this,"out");
+
 public void initialize() {
     // Initialize local variables
 }
@@ -68,34 +50,126 @@ public void clearState() {
 }
 ```
 
-Above we declare and instantiate an input field `in` as a `TimeSeriesInput`. This type of input receives floating-point numbers. We also declare and instantiate an output field `out` as `TimeSeriesOutput`. This type of output is used to pass out floating-point numbers to other connected modules.
+If you uncomment those lines (as we've done above), you will get a module with one numerical input and one numerical output. If you want to see the result on the canvas, first click the “Apply” button and then the “Close” button. 
 
-The constructors for input and output are similar. The first argument is always `this`, a reference to the current module. The second argument defines the name of the endpoint as seen by the rest of the system. By convention, field variable name and input name are the same.
+<g:img dir="images/user-guide" file="java-module-on-canvas.png" class="img-responsive center-block" />
 
-Next, let us add in state by keeping track of the current product.
+In this example, the inputs belong to the `TimeSeriesInput` class and the outputs to the `TimeSeriesOutput` class. The first argument of an input or output constructor is always `this`, a reference to the current module. The second argument is there for the display name, i.e. a visual label for the endpoint. The variable name on the left-hand side of the assignment can be any valid variable name in Java.
+
+The input and output variables must be unique within a module, but the display names are only labels with no deeper meaning. They don’t have to be unique, and an empty string is a valid name. A common convention is to make the display name equal to the variable name, but this is not a requirement.
+
+You're not limited to numerical endpoints. These are the possible choices for an input event:
+
+TimeSeriesInput
+:   Used for numeric floating point data.
+
+BooleanInput
+:   Used for boolean data.
+
+StringInput
+:   Used for string data.
+
+ListInput
+:   Used for lists (or arrays) of data.
+
+MapInput
+:   Used for key-value pairs.
+
+These are the possible choices for an output event:
+
+TimeSeriesOutput
+:   Used for numeric floating point data.
+
+BooleanOutput
+:   Used for boolean data.
+
+StringOutput
+:   Used for string data.
+
+ListOutput
+:   Used for lists (or arrays) of data.
+
+MapOutput
+:   Used for key-value pairs.
+
+Parameters are just inputs with default values. Such inputs have a distict visual look in the Streamr editor. Because a parameter has a default value, there is no need for an incoming connection in the corresponding endpoint. If there is a connection, however, the custom module should take any parameter changes into account at run-time. Possible parameter types are listed below.
+
+BooleanParameter
+:   Used for boolean values (displayed as a drop-down selection).
+
+DoubleParameter
+:   Used for numeric floating point data (displayed as an input).
+
+IntegerParameter
+:   Used for integers (displayed as an input).
+
+StringParameter
+:   Used for strings (displayed as an input).
+
+ColorParameter
+:   Used for RGB colors (displayed as a color selector).
+
+There’s no limitations on the number of incoming and outgoing connections. An an example, the following code would give you three inputs (one of which is a parameter) and two outputs:
 
 ```
-    TimeSeriesInput in = new TimeSeriesInput(this, "in");
-    TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
+// Define inputs and outputs here
+TimeSeriesInput value = new TimeSeriesInput(this,"Value");
+StringInput source = new StringInput(this,"Source");
+BooleanParameter mode = new BooleanParameter(this,"Mode");
+TimeSeriesOutput score = new TimeSeriesOutput(this,"Score");
+BooleanOutput match = new BooleanOutput(this,"Match?");
+```
+
+##State and methods
+
+Every Streamr module can have a state. If present, the state persists between module activations and even when a live service is stopped and later restarted. Whilst a module does not need to have a state, there are many streaming data operations which simply cannot be implemented without one.
+
+The state of a module is kept in its *instance variables* (aka *member variables* or *member fields*). Each instance of JavaModule has its own variables, and these are visible and acccessible in that one instance only. You can use any of the valid Java data types for the instance variables. Here's some examples of valid declarations:
+
+```
+private int counter;
+private boolean active;
+private double temperature;
+private String greeting = "Hello world!";
+private double[] assignments = new long[10];
+```
+
+Any manipulation of the module state and the generation of module output is handled by JavaModule's methods. There are three methods that you need to override and implement. They are the following:
+
+`initialize()`
+:   This method is called once when a specific JavaModule is activated. This is where you define and initialise the instance variables (i.e. the module state).
+
+`sendOutput()`
+:   This is where you read the incoming events, perform arbitrary calculations, and send events downstream. You can see and alter the module state here.
+
+`clearState()`
+:   This is where you reset the module state. Any module **must** be able to reset itself to its initial state on request. This is typically done by reinitialising the instance variables.
+
+##Custom module example
+
+For the sake of illustration, let's create a new JavaModule. It will be similar to the built-in **Sum**, but instead of keeping a running sum, we'll calculate a running product of successive numerical events.
+
+We'll start with the module inputs and outputs. We only need one numerical input and one output here, so we'll just uncomment the relevant lines:
+
+```
+// Define inputs and outputs here
+TimeSeriesInput input = new TimeSeriesInput(this,"in");
+TimeSeriesOutput output = new TimeSeriesOutput(this,"out");
+
+public void initialize() {
+    // Initialize local variables
+}
  
-    private double product;
- 
-    public void initialize() {
-        product = 1;
-    }
- 
-    public void sendOutput() {
+public void sendOutput() {
     //Write your module code here
-    }
+}
  
-    public void clearState() {
-        product = 1;
-    }
+public void clearState() {
+    // Clear internal state
+}
 ```
 
-We initialize `product = 1` (instead of zero, or else `a * 0 = 0` for all `a`). Because we have state in our module, we must also implement method `clearState()` so that it resets our module to the initial state. Luckily, our example module consists of such a simple state that this can be achieved through one assignment statement.
-
-Finally, we are only left with the main concern of our module: multiplying numbers. This is achieved by implementing `public void sendOutput()` as shown below:
+In this example the module state is equal to the current value of the cumulative product. We'll call the state `product` and initialise it by the assignment `product = 1` in the `initialize` method. As discussed, we also need to reset the module to its initial state on request. Let's just redo the initial assignment when the `clearState` method is called.
 
 ```
 TimeSeriesInput in = new TimeSeriesInput(this, "in");
@@ -108,13 +182,34 @@ public void initialize() {
 }
  
 public void sendOutput() {
-    // Read input
+//Write your module code here
+}
+ 
+public void clearState() {
+    product = 1;
+}
+```
+
+All that's left to do is to write the code to multiply the product by the new incoming event, save the state, and submit the output.
+
+```
+TimeSeriesInput in = new TimeSeriesInput(this, "in");
+TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
+ 
+private double product;
+ 
+public void initialize() {
+    product = 1;
+}
+ 
+public void sendOutput() {
+    // Read input.
     double newValue = in.getValue();
  
-    // Update state by multiplying
+    // Update the state.
     product = product * newValue;
  
-    // Send new state via output
+    // Send output.
     out.send(product);
 }
  
@@ -123,85 +218,11 @@ public void clearState() {
 }
 ```
 
-After inserting the code above into **JavaModule** editor and clicking **Apply**, you should see the module appear with input `in` and output `out` as illustrated in the figure below.
+The code in a JavaModule is compiled and validated when you click the “Apply” button. Unless there's syntax errors in the code, the module is now ready to use. This is what the output looks like with sample input data:
 
-<g:img dir="images/user-guide" file="custom-module.png" class="img-responsive center-block" />
+<g:img dir="images/user-guide" file="java-module-example-on-canvas.png" class="img-responsive center-block" />
 
-The module is now done and can be used like any other on the canvas. If you want some extra challenge, you can try making the initial value into a parameter yourself. Another useful feature is the ability to keep a running product over a moving window (as module **Sum** can be configured to do).
+**TODO: DISCUSS SELECTED USEFUL METHODS AND PROPERTIES AVAILABLE WITHIN THE MODULE.**
 
-##Inputs
 
-Inputs, visually speaking, are the colored circles and labels found on the left-side of a module on a Canvas. For example, the module Multiply requires inputs A and B to calculate the result of multiplication. The inputs of a module must be connected to compatible outputs for data to arrive and for it to be processed.
 
-<g:img dir="images/user-guide" file="multiply.png" class="img-responsive center-block" />
-
-Inputs can be *optional* or *required*. Optional inputs may or may not be connected to an output depending on desired outcome. Required inputs must be connected to outputs in order for the module to activate, i.e., for the module to read received values on inputs, perform some computation, and spit out results to outputs. Required inputs are colored red when not connected. Optional inputs are gray even when not connected.
-
-Inputs are typed according to the type of data they can receive. The types of inputs are listed below.
-
-TimeSeriesInput for receiving floating-point numeric data. Booleans can be represented as 0.0 (false) and 1.0 (true).
-
-StringInput for receiving string data.
-
-ListInput for receiving multiple values as lists (or arrays) of data.
-MapInput for receiving map data (think `java.util.Map ` in Java, object or JSON in Javascript, (associative) array in PHP.)
-
-`Input<Object>` for any data. Often used when not interested in content itself, but rather arrival of content.
-
-Input types must match output types. In other words, you cannot connect a output that produces strings to an input that expects floating-point numbers.
-
-##Parameters
-
-Parameters are basically just inputs that have default values and that have a distinct visual look on the canvas. A parameter is optional in the sense that no connection to an output is necessary. However, if connected, the module should be written in such a way as to be able to handle parameter value changes while being run.
-
-Possible parameter types are listed below.
-
-BooleanParameter
-:   This is used for boolean (true or false) values. These are displayed as drop-down selection.
-
-DoubleParameter
-:   This is used for floating-point numbers (displayed as input).
-
-IntegerParameter
-:   This is used for integers (displayed as input).
-
-StringParameter
-:   This is used for strings (displayed as input)
-
-ColorParameter
-:   This is used for RGB colors (displayed as a color selector).
-
-##Outputs
-
-Outputs, the counterpart of inputs, reside at the right-hand side of a module and are responsible for sending out computed values after a module has been activated. E.g., the **Multiply** module, on activation, multiplies the values of its two inputs and then sends the product to an output named `A*B`. The product will then be passed to 0..n inputs connected to the output.
-
-Outputs are typed according to the type of data they send out. The types of outputs are listed below.
-
-TimeSeriesOutput
-:   This is used for floating-point numeric data. Booleans can be represented as 0.0 (false) and 1.0 (true).
-
-StringOutput
-:   This is used for string data.
-
-ListOutput
-:   This is used for a list (or array).
-
-MapOutput
-:   This is used for map data (think `java.util.Map` in Java, object or JSON in Javascript, or associative array in PHP and in many other languages).
-
-`Output<Object>` 
-:   This can be used for any data. `Output<Object>` is often used when you are not interested in the content itself, but rather in whether there is content or not.
-
-##State
-
-The state of a module can be kept in its fields (aka instance variables or member variables). For example, the **Count** module keeps track of the number of received values by having an integer counter as a field (`private int counter = 0;`) Everytime a new value is received, it increments the counter by one and spits the new counter value through its output.
-
-There is a caveat concerning fields. You should make sure that they are serializable, i.e., their type implements `java.io.Serializable`. If this is not the case, you can declare the field transient by adding keyword `transient` to its declaration. However, you need take special precautions when working with transient fields in modules. Specifically, the value of a transient field may be `null` at the beginning of `sendOutput() due to Java's object de-serialization.
-
-##Methods
-
-There are three methods that you need to override and implement.
-
-Reading input values, performing calculations, and sending results to outputs are all done in the method `public void sendOutput()`.
-
-The remaining two methods are related to state. Method `public void initialize()` is used to initialize the fields of a module. Method `public void clearState()` clears the fields of a module. The desired semantic is that invoking `clearState() reset the module to its initial state.

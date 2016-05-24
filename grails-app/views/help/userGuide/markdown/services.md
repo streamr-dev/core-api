@@ -6,13 +6,11 @@ There's a wide variety of built-in modules in Streamr.  Some of those perform ba
 
 Computation in a Streamr service is entirely event-based. Any module will execute immediately when activated by incoming events. When new events arrive in the input stream, the data automatically flows through the service. This inherently asynchronous process allows for fast and continuous in-memory processing of large volumes of real-time data.
 
-**Add a paragraph to make the case that the topology can be mch more than a sequential workflow?**
-
 As a simple example, here's a service consisting of one stream and a chart module connected together.  When you run the service, the events flow from the stream to the chart, and the chart draws the data points as they arrive.
 
 <g:img dir="images/user-guide" file="my-first-stream-on-canvas.png" class="img-responsive center-block" />
 
-You can run a service with either historical or real-time data.
+You can run a service in either historical or real-time mode.
 
 - In the *historical mode*, running a service is a playback of what would have happened in the past. A playback can be extremely useful when you’re testing, refining, or demonstrating the functionality of a service.
 - The *real-time mode* is used in production where you want to react to events as they arrive. There's no need to modify the service in order to run it live.  One click is all it takes to activate a service and start consuming real-time data.
@@ -20,21 +18,21 @@ You can run a service with either historical or real-time data.
 In this chapter, we’ll show how to do the following: 
 
 - Create and edit services.
-- Subscribing to streams.
-- Adding modules to a service.
-- Configuring a service.
+- Subscribe to streams.
+- Build services.
 - Run a historical playback.
-- Launch a live service.
+- Start or stop a live service.
+- Reuse services as modules.
 
-We'll also discuss error handling and demonstrate the best practices that will make your life easier.
+##Using the editor
 
-##Creating and editing services
-
-You can create a new service or modify an existing service by using the Streamr editor. When you log in to Streamr, the editor with a blank canvas is what you’ll first see. The editor is always accessible by clicking on the **Editor** tab.
-
-You'll find that using the editor is an easy way to create new services. However, you can also create a service programmatically by using the <g:link controller="help" action="api">canvas API</g:link>. 
+You create a new service or modify an existing service by using the Streamr editor. When you log in to Streamr, the editor with a blank canvas is what you’ll first see. The editor is always accessible by clicking on the **Editor** tab.
 
 <g:img dir="images/user-guide" file="blank-canvas-with-arrow.png" class="img-responsive center-block" />
+
+<g:img dir="images/user-guide" file="hide-control-bar-button.png" align="right"  hspace="0" vspace="0" />
+
+As a space-saving hint, note the small icon in the top left corner, just left of the Streamr log.  Click on the icon to hide the editor sidebar.  Click again, and the sidebar reappears. 
 
 There are three things you can do in the editor:
 
@@ -50,74 +48,77 @@ There are three things you can do in the editor:
 
     <g:img dir="images/user-guide" file="save-service-with-arrow.png" class="img-responsive" />
 
-The editor's canvas is your workspace for building a service and the event processing logic. You can test the service with a playback of historical data and launch it live when you're ready to go.
+The editor's canvas is your workspace for building a service and the event processing logic. You can test the service with a playback of historical data and launch it live when you're ready to go. There's a natural iterative workflow, where you build a perhaps rudimentary version of a service, test it with historical data where possible, refine the design based on the test findings, and repeat until you're happy.
 
-When you build a service, you’ll typically start by adding data streams on the canvas.  You’ll then add modules for analytics, visualisation or communication, and define how the data flows streams to modules and from one module to another.  You can do all this interactively by dragging and dropping streams and modules from the sidebar to the canvas and by drawing connections between them.
+You'll find that the editor works well with a build-test-refine cycle. However, you can also create a service programmatically by using the <g:link controller="help" action="api">canvas API</g:link>. 
 
-You can move modules around on the canvas as you wish, but the location of a module has no impact on functionality.  For clarity, though, you may want to design the canvas so that module placement reflects the data flow from the input streams through the modules.
+##Building a service
 
-<g:img dir="images/user-guide" file="hide-control-bar-button.png" align="left"  hspace="10" vspace="5" />
+<g:img dir="images/user-guide" file="add-twitter-stream.png" class="side-image"/>
 
-As a space-saving hint, note the small icon in the top left corner, just left of the Streamr log.  Click on the icon to hide the editor sidebar.  Click again, and the sidebar reappears. 
+When you want to build a service, you’ll typically start by adding one or more data streams on the canvas.  You’ll then create the processing logic by adding modules to a service and connecting the streams and modules together. You can do all this interactively by dragging and dropping streams and modules from the sidebar to the canvas and by drawing connections between them.
 
-##Subscribing to streams
+When you place a stream on the canvas, you effectively subscribe to a real-time data source. To find a stream, just start typing its name in a text box labeled **Add Stream / Module** (see the editor sidebar).  We’ll autocomplete the stream name as you type. Either click on the highlighted name or press <kbd>Enter</kbd> to select the  stream. Real-time events are now available at the output endpoints.
 
-**REWRITE**
+<g:img dir="images/user-guide" file="module-browser.png" class="side-image"/>
 
-<g:img dir="images/user-guide" file="add-twitter-stream.png" class="side-image" />
+There are [modules](#streams) for streaming analytics, visualisation, communication, and many other purposes. You'll find all the built-in components in the **Module Browser** which is organised by category.
 
-If you want to add a stream to the service as an input source, type its name in the search box (**Add Stream / Module**) in the sidebar. The stream name will be autocompleted as soon as it can be identified. Either click on the stream name or press <kbd>Enter</kbd> to select the highlighted stream.
+If you already know the name of the module you need, type its name (with autocomplete) in the search box (**Add Stream / Module**).  If there’s several partial matches, you can select the one you want from the popup window. As a shortcut, you can press <kbd>Enter</kbd> to select the first match. You can also drill down in the module browser to the module you want. Then either highlight the module with a mouse click and then click on the **Add Module** button. Or just drag a module from the browser to the canvas.
 
-You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr editor, and the events start flowing downstream for further processing. 
+You can move modules around on the canvas as you wish, but the placement of a module has no impact on functionality.  For clarity, you may want to design the canvas so that module placement reflects the data flow from the input streams through the modules.
 
-If you want to subscribe to a stream in the user interface, you can either work with a new canvas or load an existing one in the Canvases tab.  Start typing in the name of a stream in a text box labeled **Add Stream / Module**.  We’ll find the stream for you as you type.
+A data flow between two modules — or a data flow between a stream and a module — is created by drawing a connection from an outgoing endpoint to an incoming endpoint with the mouse (or other pointing device).  You can create as many outgoing connections as you wish. You can only have one incoming connection per an endpoint.
 
-When you click on the match, the stream module will be placed on the canvas.  The events in the stream are now available at the output endpoints.  In this case, we’ve got data fields for `TweetText`, `TweetID`, `UserName`, `UserTimeZone`, etc.
+<g:img dir="images/user-guide" file="connecting-stream-to-module.png" class="img-responsive" />
 
-##Adding modules to a service
+All connections are unidirectional, i.e. the data always flows from an output to one or more inputs in one direction only.  The modules form a directed graph. [Feedback loops](#loops) are discouraged, but you can create them if you really want.
 
-The **Module Browser** lists all the available built-in modules.  You can drill down in different categories when looking for a specific module. If you already know the name of the module you need on the canvas, you can type that name (again with autocomplete) in the sidebar search box.  If there’s several partial matches, you can select the one you want from the popup window or just press <kbd>Enter</kbd> to select the first match.
+**TODO: FIX THE LINK TO FEEDBACK LOOPS IN MODULES SECTION.**
 
-You can add any module to the service in three different ways:
+When you view a service on a canvas, the direction of a data connection is indicated by an arrow.  You can alter the endpoint of an existing connection by dragging it to another input endpoint.  If you instead drop the endpoint in an empty space, the connection is cleared.  A mouse click on top of a module brings up an pop-up menu where you can choose to disconnect all incoming connections to the module.
 
-1. By clicking on the **Add Module** button
-2. By clicking on the module name.
-3. By dragging the module to the canvas.
-
-##Configuring a service
-
-**EXTEND**
+The topology of a service can be arbitrarily complex. You can of course design a simple sequential work flow, and in many cases it will be perfectly adequate. In other cases the flow of data may involve merging data pathways, branches and even loops. Go ahead, be adventurous, but also bear in mind Streamr's abstraction capabilities. Reusing existing canvases will help you manage the development process and keep things tidy and neat.
 
 ##Running a playback
 
-By default, the service is in a historical mode.  You can specify the time period (the start date and the end date) for a historical playback period in the sidebar.  The playback starts when you press the **Run** button.
+<g:img dir="images/user-guide" file="start-historical-run.png" class="side-image"/>
 
-In the historical mode, you can use the dropdown menu to save all Chart inputs in a CSV file during a run.  If there’s more than one Chart in the service, each such module will produce a separate output file.
+The historical playback facility is a great way to test a service.  In a playback, a service is applied to historical events stored in the subscribed streams. A playback is a simulation of what would have happened in the past.
 
-A service can be run in either historical mode or real-time mode.  The historical mode is a playback of what would have happened in the past.  The playback mode is useful when you’re testing, refining, or demonstrating functionality.  The real-time mode is used in production where you want to react to events as they arrive.  The same exact exact service is used in either case.
+By default, a service is in a historical mode. Provided that the streams used by the service contain some historical data, you can run a playback at any time that the service is open in the editor.
 
-Whenever you edit a service on a canvas, the historical mode is in force.  You’ll switch to the realtime mode when you’re ready for production.
+You specify the time period (the start date and the end date) for a historical playback period in the editor sidebar.  The playback starts when you press the **Run** button.
 
-##Launching a live service
+By default, playback events are processed sequentially but at a much faster pace compared to the actual history. You can easily change the playback speed for the historical run. Click on the Options icon, and a pop-up menu shows the available choices.
 
-- What are live services?
-- How to launch them
-- They keep running until you stop them
-- Saved state
+<g:img dir="images/user-guide" file="playback-options.png" class="img-responsive" />
 
-<g:img dir="images/user-guide" file="launch-realtime-run.png" class="side-image" />
+You can use the dropdown menu to save all Chart inputs in a CSV file during a historical run.  If there’s more than one Chart in the service, each one will produce a separate output file.
 
-If you want to run a service in the realtime mode, simply switch to the realtime tab.  Press the **Run** button to activate the canvas.
+##Running live services
 
-##Error handling
+<g:img dir="images/user-guide" file="start-realtime-run.png" class="side-image"/>
 
-- What are the possible error situations?
-- What runtime errors may happen? Numerical overflow, wrong type of events?
-- What happens when the cloud instance dies?
-- What happens if the Internet connection is interrupted?
-- What other errors are possible?
+When a service is live, it will listen to real-time events arriving in the subscribed streams, and process them as soon as they're available. You can think of live services as digital agents who'll react to new events in real-time on your behalf.
 
-##Best practises
+A service does not need to be modified in any way when you want to take it live. It will work as is, in the same exact form as used in historical testing. Simply switch to the realtime tab, press the **Start** button, and voilà!
 
-- Go through the best practices.
+**TODO: ADD AN IMAGE OF THE SAMPLE SERVICE GOING LIVE.**
+
+**TODO: NEED A NICE SIMPLE EXAMPLE TO USE THROUGHOUT THIS CHAPTER.**
+
+<g:img dir="images/user-guide" file="stop-realtime-run.png" class="side-image"/>
+
+A live service keeps running until you explictly tell it to stop. When you stop a service, its internal state is saved on the disk. If you later restart the service, it will gracefully resume from the point where it stopped. It will not, however, process any events that occurred when it was not running.
+
+You'll see all of your services (and their state) in the Canvases tab. Click on a service to open it in the editor. You can then stop it (if it is live) or launch it live (if it is stopped).
+
+##Reusing services as modules
+
+You can easily reuse a service as a component of another service. This is done via *abstraction*, where you encapsulate a service as a module. You can then use the new module when you build additional services.
+
+To create an abstraction, you'll need to expose -- or export -- inputs and outputs. The exported endpoints will show up as endpoints of the abstracted service.
+
+**TODO: EXTEND AND SHOW AN EXAMPLE.**
 

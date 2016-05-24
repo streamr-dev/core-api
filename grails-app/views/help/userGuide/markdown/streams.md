@@ -8,14 +8,11 @@ You can use a stream as a pub/sub-device, push data into it, and subscribe to th
 
 In this chapter, we’ll show some examples and describe the built-in data types. We'll then discuss how to do the following:
 
-- Create a stream.
-- Edit a stream.
-- Delete a stream.
+- Create or delete a stream.
+- Edit stream details.
 - Upload historical data.
 - Push events to a stream.
 - Subscribe to a stream.
-
-**Discuss database (MongoDb) poller streams somewhere**
 
 ##Stream examples
 
@@ -53,32 +50,9 @@ As an example of a more complicated event, here’s a data point in a stock mark
               {"Price": 118, "Size": 50000}
     ]}
 
-##Built-in data types
+##Working with streams
 
-There’s a number of built-in data types that can be used in a stream. These are the following:
-
-Number
-:   A numeric data type internally stored as a double precision (64-bit) float.
-
-Boolean
-:   A logical data type with two possible values, True and False. In Streamr, a numeric value exactly equal to one represents logical truth. Anything else is interpreted as a logical falsehood.
-
-String
-:   A sequence of zero or more alphabetical characters.
-
-Map
-:   A collection of key-value pairs. Each key is a string, and the value can be of any built-in data type (even a Map again). Map is the same as a dictionary or an associative array found in a number of programming languages.
-
-List
-:   An ordered collection of zero or more elements.
-
-Data types can be freely mixed in one event. And you can freely add new fields to an existing stream; you don’t have to know what fields you might eventually need. A single event can be of any size within reason, and a stream can grow indefinitely when extended by new events. 
-
-There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
-
-##Creating a stream
-
-You can create new streams either through the user interface or by using the <g:link controller="help" action="api">stream API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the overall number of streams.
+You can create new streams either manually in the user interface or by using the <g:link controller="help" action="api">stream API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the total number of streams.
 
 If you want to create a stream manually, go to the <kbd>Streams</kbd> tab.  There’s a button which looks like this:
 
@@ -92,7 +66,9 @@ A new stream is created when you click the **Next** button.  You’ll be shown a
 
 <g:img dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
 
-##Editing a stream
+If you want to delete a stream, first click on its name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead. You can also delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
+
+##Editing stream details
 
 If you want to edit stream details, you need to be in the <kbd>Streams</kbd> tab. Click on the stream name, and then click on the **Edit info** button. You'll see a dialog where you can rename a stream or modify its description.
 
@@ -105,12 +81,6 @@ If you want to configure the data fields manually, the Configure Fields button t
 <g:img dir="images/user-guide" file="configure-fields-dialog.png" class="img-responsive center-block" />
 
 You can also rename a stream, edit the description, add data fields and specify the field types using the [stream API](#streamAPIreference).
-
-##Deleting a stream
-
-You need to be in the <kbd>Streams</kbd> tab in order to delete a stream. Click on the stream name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead.
-
-Alternatively, you can delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
 
 ##Uploading historical data
 
@@ -137,6 +107,29 @@ The data file is called `“SampleTweets.csv”`, and you can download the lates
 If you drag the the sample file to the data drop, the events are uploaded to the stream.  Once the process is complete, the stream view is updated to show the extent of the archived history. 
 
 <g:img dir="images/user-guide" file="twitter-stream-view.png" class="img-responsive center-block" />
+
+##Built-in data types
+
+There’s a number of built-in data types that can be used in a stream. These are the following:
+
+Number
+:   A numeric data type internally stored as a double precision (64-bit) float.
+
+Boolean
+:   A logical data type with two possible values, True and False. In Streamr, a numeric value exactly equal to one represents logical truth. Anything else is interpreted as a logical falsehood.
+
+String
+:   A sequence of zero or more alphabetical characters.
+
+Map
+:   A collection of key-value pairs. Each key is a string, and the value can be of any built-in data type (even a Map again). Map is the same as a dictionary or an associative array found in a number of programming languages.
+
+List
+:   An ordered collection of zero or more elements.
+
+Data types can be freely mixed in one event. And you can freely add new fields to an existing stream; you don’t have to know what fields you might eventually need. A single event can be of any size within reason, and a stream can grow indefinitely when extended by new events. 
+
+There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
 
 ##Pushing events to a stream
 
@@ -207,11 +200,12 @@ Code | Description
 
 ##Subscribing to a stream
 
-You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You place a stream module on a digital canvas in Streamr editor, and the events start flowing downstream for further processing.  You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
+You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You just add a stream module to a Streamr service.  As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
 
-**FIX THE JAVASCRIPT API LINK ABOVE**
+<g:img dir="images/user-guide" file="twitter-stream-with-table.png" class="img-responsive center-block" />
 
-In the next chapter, we'll show how to add streams as data sources in [services](#services). As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
+You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
 
-<g:img dir="images/user-guide" file="twitter-stream-on-canvas.png" class="img-responsive center-block" />
+**TODO: FIX THE JAVASCRIPT API LINK ABOVE**
+
 

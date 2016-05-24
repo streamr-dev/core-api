@@ -24,8 +24,6 @@ There are a few different ways to get data into a stream. Streamr has a simple H
 
 Streams implement a publish-subscribe paradigm, or pub/sub for short. A stream can receive data from many sources (or publishers), and there can be several listeners who subscribe to a stream. There are several variations on the possible pub/sub topologies, such as many-to-one, one-to-many, or many-to-many.  Streamr supports all of these.
 
-<hr style="width: 50%; border-top: #E9570F solid 1px;  margin-top: 20px; margin-bottom: 20px">
-
 ##Turn the data into action
 
 You can build any kind of automatic real-time functionality with Streamr [services](#services). We make it easy to create and manage your digital workforce. There is an extensive collection of built-in [modules](#modules) as a source of building blocks. You can abstract modules and re-use them later, and you can code custom modules in Java.
@@ -44,7 +42,7 @@ Although we sometimes find it hard to admit, there's life outside Streamr. We're
 
 - Create [dashboards](#dashboards) which display live data sourced from Streamr.
 - Embed live visualisation [elements](#embeddedwidgets) in external web pages by inserting a single line of HTML code.
-- [Subscribe](#lifeoutsidestreamr) to a stream in external web pages and applications, and receive every event as soon as it’s available.
+- [Subscribe](#lifeoutsidestreamr) to a stream in external web pages and applications. You'll receive every event as soon as it’s available.
 
 ##Who is Streamr for?
 
