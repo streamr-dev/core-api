@@ -11,6 +11,7 @@
  * stopping
  * stopped
  * moduleAdded (jsonData, div)
+ * moduleBeforeClose (jsonData, div)
  * done
  * error (message)
  * 

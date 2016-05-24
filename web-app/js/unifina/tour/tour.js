@@ -348,6 +348,29 @@ Tour.prototype.waitForModuleAdded = function(moduleName) {
 	}
 }
 
+Tour.prototype.waitForModuleRemoved = function(moduleName) {
+	var that = this
+	var _cb = this.next.bind(this)
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		function listener(e, jsonData, div) {
+			if (jsonData.name !== moduleName)
+				return;
+
+			that.bindModule(moduleName, div)
+
+			$(SignalPath).off('moduleBeforeClose.tour', listener)
+
+			_cb()
+		}
+
+		$(SignalPath).on('moduleBeforeClose.tour', listener)
+	}
+}
+
 Tour.prototype.waitForInput = function(selector, content) {
 	var _cb = this.next.bind(this)
 
@@ -435,6 +458,10 @@ Tour.prototype.waitForStream = function(selector, streamName) {
 	}
 }
 
+Tour.prototype.waitForConnection = function(conn) {
+	return this.waitForConnections([conn])
+}
+
 Tour.prototype.waitForConnections = function(conns) {
 	var that = this
 	var _triggered = false
@@ -476,7 +503,7 @@ Tour.prototype.waitForConnections = function(conns) {
 					if (!xEndpoint.module.div.hasClass(c.fromModule))
 						return;
 
-					if (c.fromEndpoint && xEndpoint.json.name !== c.fromEndpoint)
+					if (c.fromEndpoint && xEndpoint.json.name !== c.fromEndpoint && (xEndpoint.json.displayName && xEndpoint.json.displayName !== c.fromEndpoint))
 						return;
 
 					connsMade++

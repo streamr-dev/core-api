@@ -49,7 +49,9 @@
 
         .step('Under <b>Utils</b>, find the <code>Filter</code> module and drag and drop it to the canvas.',
             '#moduleTree',
-            tour.waitForModuleAdded('Filter')
+            function(cb) {
+                tour.waitForModuleAdded('Filter')(cb)
+            }
         )
 
         .step("Next, open the <b>Text</b> section by clicking it to list text processing-related modules.",
@@ -61,7 +63,9 @@
 
         .step('Under <b>Text</b>, find the <code>TextEquals</code> module and drag and drop it to the canvas.',
             '#moduleTree',
-            tour.waitForModuleAdded('TextEquals')
+            function(cb) {
+                tour.waitForModuleAdded('TextEquals')(cb)
+            }
         )
 
         .step("Our goal is to filter data related to a single tram (specifically, vehicle RHKL00112) from all tram data being pushed out by <b>Stream</b>. To do so, we will need to pass forward only those events whose <b>veh</b> equals <b>RHKL00112</b>.",
@@ -115,11 +119,13 @@
 
         .step("Let's add a <code>Table</code> to see affirm that data is flowing in and to see how it looks like",
             '#search',
-            tour.waitForModuleAdded('Table')
+            function(cb) {
+                tour.waitForModuleAdded('Table')(cb)
+            }
         )
 
         .step("Connect <code>out1</code>, <code>out2</code>, and <code>out3</code> of Filter to Table (in that order)",
-            '.tourStream1',
+            '.tourFilter1',
             function(cb) {
                 tour.waitForConnections([
                     ['tourFilter1.out1', 'tourTable1.in1'],
@@ -129,9 +135,70 @@
             }
         )
 
-        .step("Pretty easy, right?")
+        .step("Everything should be properly connected for the filtering to work now.<br><br>" +
+            "Let's <b>run</b> this canvas (in historical mode) to verify that it is indeed working.",
+            '#run-historical-button',
+            { nextOnTargetClick: true }
+        )
 
-        .offerNextTour("Great job! In the next tour, we'll develop this a bit further. Click Begin when you are ready!")
+        .step("If you see data appearing on the table, our filtering is working! Well done!",
+            '.tourTable1',
+            { placement: 'left' }
+        )
+
+        .step("<b>Abort</b> the running canvas to proceed.",
+            '#run-historical-button',
+            { nextOnTargetClick: true }
+        )
+
+        .step("Let's proceed to build something a bit more visual and interesting.<br><br>First off, remove the <b>Table</b> module " +
+            "from the canvas by hovering on top of the module and pressing the close button (visual x) in the top-right corner.",
+            '.tourTable1',
+            { placement: 'left' },
+            function(cb) {
+                tour.waitForModuleRemoved('Table')(cb)
+            }
+        )
+
+        .step("Placeholder", ".tourStream1")
+
+        .step("Open the <b>Visualizations</b> section by clicking it.",
+            '#moduleTree',
+            function() {
+                $('.jstree a:contains(Visualizations)').parent().one('click', tour.next)
+            }
+        )
+
+        .step('Under <b>Visualizations</b>, find the <code>Chart</code> module and drag and drop it to the canvas.',
+            '#moduleTree',
+            function(cb) {
+                tour.waitForModuleAdded('Chart')(cb)
+            }
+        )
+
+        .step("Connect <code>out3</code> of <b>Filter</b> to the first input of <b>Chart</b>.",
+            '.tourFilter1 .endpoint.output:eq(3)',
+            function(cb) {
+                tour.waitForConnection(['tourFilter1.out3', 'tourChart1.in1'])(cb)
+            }
+        )
+
+        .step("<b>Run</b> the canvas.",
+            '#run-historical-button',
+            { nextOnTargetClick: true }
+        )
+
+        .step("The speed of tram RHKL00112 is visualized on the chart by time.",
+            '.tourChart1',
+            { placement: 'left' }
+        )
+
+        .step("When you are ready to continue, press <b>Abort</b>.",
+            '#run-historical-button',
+            { nextOnTargetClick: true }
+        )
+
+        .offerNextTour("Extraordinary! In the next tour, we'll go even deeper. Click Begin when you are ready!")
 
         .ready()
 
