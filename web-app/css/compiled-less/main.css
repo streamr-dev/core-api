@@ -16128,6 +16128,15 @@ fieldset[disabled] .btn {
 .paramTable select.form-control {
   padding-top: 1px;
 }
+.stream-parameter-wrapper .twitter-typeahead input {
+  width: 100%;
+}
+.stream-parameter-wrapper:not(.toggled) .twitter-typeahead * {
+  display: none;
+}
+.stream-parameter-wrapper.toggled .streamName {
+  display: none;
+}
 #canvas {
   position: relative;
   font-size: 12px;
@@ -17463,10 +17472,9 @@ body.dashboard-show .titlebar-clickable {
   z-index: 1000;
   border-radius: 3px;
   border: 1px solid #ccc;
-  margin-top: 3px;
-  -webkit-box-shadow: inset 0 0 6px 1px #ccc;
-  -moz-box-shadow: inset 0 0 6px 1px #ccc;
-  box-shadow: inset 0 0 6px 1px #ccc;
+  -webkit-box-shadow: 0 0 3px 1px #ccc;
+  -moz-box-shadow: 0 0 3px 1px #ccc;
+  box-shadow: 0 0 3px 1px #ccc;
 }
 .streamr-search-menu .streamr-search-dataset:not(:empty),
 .streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty) {
@@ -17502,8 +17510,8 @@ body.dashboard-show .titlebar-clickable {
 .streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description {
   font-size: 12px;
 }
-.typeahead-menu,
-.typeahead-menu.streamr-search-empty {
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-empty {
   position: absolute;
   display: none;
 }

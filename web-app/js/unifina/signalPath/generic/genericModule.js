@@ -1,8 +1,9 @@
+var a
 SignalPath.GenericModule = function(data, canvas, prot) {
 	prot = prot || {};
 	
 	var pub = SignalPath.EmptyModule(data, canvas, prot);
-
+	a = pub
 	prot.paramTable = null;
 	prot.ioTable = null;
 
@@ -20,9 +21,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
 		
-		var div = $("<div class='modulefooter'></div>");
-		prot.div.append(div);
-		prot.footer = div;
+		var div = $("<div class='modulefooter'></div>")
+		prot.div.append(div)
+		prot.footer = div
 		
 		var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
 		div.append(container)
@@ -183,15 +184,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		super_addFocus(hold);
 		
 		if (hold) {
-			$.each(getParameters(), function(i, endpoint) {
+			$.each(getEndpoints(), function(i, endpoint) {
 				endpoint.jsPlumbEndpoint.addClass("holdFocus");
-			});
-			$.each(getInputs(), function(i, endpoint) {
-				endpoint.jsPlumbEndpoint.addClass("holdFocus");
-			});
-			$.each(getOutputs(), function(i, endpoint) {
-				endpoint.jsPlumbEndpoint.addClass("holdFocus");
-			});
+			})
 		}
 	}
 	
@@ -233,16 +228,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	var super_removeFocus = prot.removeFocus;
 	prot.removeFocus = function() {
 		super_removeFocus();
-		
-		$.each(getParameters(), function(i, endpoint) {
+
+		$.each(getEndpoints(), function(i, endpoint) {
 			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
-		});
-		$.each(getInputs(), function(i, endpoint) {
-			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
-		});
-		$.each(getOutputs(), function(i, endpoint) {
-			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
-		});
+		})
 	}
 	
 	function getParameters() {
@@ -259,7 +248,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.outputs;
 	}
 	pub.getOutputs = getOutputs;
-	
+
+	function getEndpoints() {
+		return getParameters().concat(getInputs()).concat(getOutputs())
+	}
+	pub.getEndpoints = getEndpoints
+
 	/**
 	 * Returns an Input object
 	 */
@@ -377,15 +371,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	
 	function refreshConnections() {
-		$(getParameters()).each(function(i,endpoint) {
+		$(getEndpoints()).each(function(i,endpoint) {
 			endpoint.refreshConnections();
-		});
-		$(getInputs()).each(function(i,endpoint) {
-			endpoint.refreshConnections();
-		});
-		$(getOutputs()).each(function(i,endpoint) {
-			endpoint.refreshConnections();
-		});
+		})
 	}
 	pub.refreshConnections = refreshConnections;
 	

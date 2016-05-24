@@ -120,15 +120,20 @@ $(document).ready(function() {
 	var streamrSearch = new StreamrSearch('#search', [{
 		name: "module",
 		limit: 5
-	// }, {
-		// name: "stream",
-		// limit: 5
+	}, {
+		name: "stream",
+		limit: 5
 	}], {
 		inBody: true
 	}, function(item) {
-		streamrSearch.setValue('')
-		if (item.module) { // is stream, specifies module
-			SignalPath.addModule(item.module, { params: [{ name: 'stream', value: item.id }] })
+
+		if (item.resultType == "stream") { // is stream, specifies module
+			SignalPath.addModule(item.feed.module, {
+				params: [{
+					name: 'stream',
+					value: item.id
+				}]
+			})
 		} else { // is module
 			SignalPath.addModule(item.id, {})
 		}

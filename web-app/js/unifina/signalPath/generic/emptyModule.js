@@ -27,9 +27,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			var x = ui.offset.left + canvas.scrollLeft()
 			var y = ui.offset.top + canvas.scrollTop()
 			
-			if (x < cpos.left-100 || y < cpos.top-50) {
+			if (x < cpos.left - 100 || y < cpos.top - 50) {
 				return false
 			}
+			$(prot).add(pub).trigger("drag")
 		}
 	}
 	
@@ -330,10 +331,11 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function addFocus(hold) {
 		prot.div.addClass("focus");
-		if (hold)
-			prot.div.addClass("holdFocus");
-		else
-			prot.div.addClass("hoverFocus");
+		if (hold) {
+			prot.div.addClass("holdFocus")
+		} else {
+			prot.div.addClass("hoverFocus")
+		}
 	}
 	prot.addFocus = addFocus;
 	
@@ -448,7 +450,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		pub.clearWarnings()
 	}
 	
-	pub.onClose = function() {};
+	pub.onClose = function() {
+		$(prot).add(pub).trigger("closed")
+	}
 	
 	function toJSON() {
 		writePosition();
@@ -563,8 +567,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
 	}
 	prot.prepareCloneData = prepareCloneData;
-	
-	prot.onDrag = function() {}
 	
 	// Everything added to the public interface can be accessed from the
 	// protected interface too

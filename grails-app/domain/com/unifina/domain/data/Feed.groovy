@@ -64,4 +64,12 @@ class Feed implements Serializable {
 	public boolean equals(Object obj) {
 		return obj instanceof Feed && obj.id == this.id
 	}
+
+	public Map toMap() {
+		return [
+		   	id: id,
+		   	name: name,
+			module: module.id
+		]
+	}
 }
