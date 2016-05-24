@@ -1,6 +1,7 @@
 package com.unifina.domain.dashboard
 
 import com.unifina.domain.security.SecUser
+import groovy.transform.CompileStatic
 
 class Dashboard {
 
@@ -23,7 +24,8 @@ class Dashboard {
 		items cascade: 'all-delete-orphan'
 	}
 
-	def toSummaryMap() {
+	@CompileStatic
+	Map toSummaryMap() {
 		[
 			id: id,
 			name: name,
@@ -31,7 +33,8 @@ class Dashboard {
 		]
 	}
 
-	def toMap() {
+	@CompileStatic
+	Map toMap() {
 		[
 			id: id,
 			name: name,
