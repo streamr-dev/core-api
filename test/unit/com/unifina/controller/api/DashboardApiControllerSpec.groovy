@@ -4,12 +4,14 @@ import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.signalpath.Module
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.DashboardService
+import com.unifina.service.PermissionService
 import com.unifina.service.UserService
+import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -27,6 +29,7 @@ class DashboardApiControllerSpec extends Specification {
 
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
+		controller.permissionService = Mock(PermissionService)
 		me = new SecUser(apiKey: "myApiKey").save(failOnError: true, validate: false)
 		dashboards = initDashboards(me)
 	}
@@ -73,23 +76,39 @@ class DashboardApiControllerSpec extends Specification {
 		return dashboards
 	}
 
-	def "index() lists (readable) dashboards"() {
+	void "index() renders authorized dashboards as a list"() {
 		when:
-		request.addHeader("Authorization", "Token myApiKey")
-		request.requestURI = "/api/v1/dashboards/"
+		request.addHeader("Authorization", "Token $me.apiKey")
+		request.requestURI = "/api/v1/canvases"
 		withFilters(action: "index") {
 			controller.index()
 		}
 
 		then:
 		response.status == 200
-		response.json == [
-		    [id: 1, name: "dashboard-1", numOfItems: 0],
-			[id: 2, name: "dashboard-2", numOfItems: 1],
-			[id: 3, name: "dashboard-3", numOfItems: 2],
-		]
-		1 * dashboardService.findAllDashboards(me) >> dashboards
-		0 * dashboardService._
+		response.json.size() == dashboards.size()
+		1 * controller.permissionService.get(Dashboard, me, Permission.Operation.READ, false, _) >> dashboards
+	}
+
+	void "index() adds name param to filter criteria"() {
+		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
+
+		when:
+		params.name = "Foo"
+		request.addHeader("Authorization", "Token $me.apiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		1 * controller.permissionService.get(Dashboard, me, Permission.Operation.READ, false, _) >> { Class resource, SecUser u, Permission.Operation op, boolean pub, Closure criteria ->
+			criteria.delegate = criteriaBuilderMock
+			criteria()
+			return []
+		}
+		and:
+		1 * criteriaBuilderMock.eq("name", "Foo")
 	}
 
 	def "show() shows dashboard with 0 items"() {
@@ -129,6 +148,7 @@ class DashboardApiControllerSpec extends Specification {
 			items: [
 			    [
 					id: 3,
+					dashboard: dashboards[2].id,
 					ord: 0,
 			        title: "dashboard-3-item-2",
 					size: "x-large",
@@ -138,6 +158,7 @@ class DashboardApiControllerSpec extends Specification {
 			    ],
 				[
 					id: 2,
+					dashboard: dashboards[2].id,
 					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
@@ -226,6 +247,7 @@ class DashboardApiControllerSpec extends Specification {
 			items: [
 				[
 					id: 3,
+					dashboard: dashboards[2].id,
 					ord: 0,
 					title: "dashboard-3-item-2",
 					size: "x-large",
@@ -235,6 +257,7 @@ class DashboardApiControllerSpec extends Specification {
 				],
 				[
 					id: 2,
+					dashboard: dashboards[2].id,
 					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",

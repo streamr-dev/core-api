@@ -1,10 +1,7 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
+import com.unifina.api.*
 import com.unifina.api.SaveCanvasCommand
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
@@ -19,29 +16,37 @@ class CanvasApiController {
 	def canvasService
 	def springSecurityService
 	def grailsApplication
-	def permissionService
 	def signalPathService
+	def permissionService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
 	@StreamrApi
 	def index() {
-		SecUser user = request.apiUser
-		String name = params.name
-		Boolean adhoc = params.boolean("adhoc")
-		Canvas.State state = Canvas.State.fromValue(params.state)
-
-		def canvases = canvasService.findAllBy(user, name, adhoc, state, params.sort ?: "dateCreated", params.order ?: "asc")
+		def criteria = StreamrApiHelper.createListCriteria(params, ["name"], {
+			// Lookup by exact name
+			if (params.name) {
+				eq "name", params.name
+			}
+			// Lookup by adhoc
+			if (params.adhoc) {
+				eq "adhoc", params.boolean("adhoc")
+			}
+			// Lookup by state
+			if (params.state) {
+				eq "state", Canvas.State.fromValue(params.state)
+			}
+		})
+		def canvases = permissionService.get(Canvas, request.apiUser, Operation.READ, StreamrApiHelper.isPublicFlagOn(params), criteria)
 		render(canvases*.toMap() as JSON)
 	}
 
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
-		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
-			Map result = canvasService.reconstruct(canvas)
-			canvas.json = result as JSON
-			render canvas.toMap() as JSON
-		}
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
+		Map result = canvasService.reconstruct(canvas)
+		canvas.json = result as JSON
+		render canvas.toMap() as JSON
 	}
 
 	@StreamrApi
@@ -52,88 +57,76 @@ class CanvasApiController {
 
 	@StreamrApi
 	def update(String id) {
-		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
-			if (canvas.example) {
-				render(status: 403, text: [error: "cannot update common example", code: "FORBIDDEN"] as JSON)
-			} else {
-				canvasService.updateExisting(canvas, readSaveCommand())
-				render canvas.toMap() as JSON
-			}
-		}
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		canvasService.updateExisting(canvas, readSaveCommand())
+		render canvas.toMap() as JSON
 	}
 
 	@StreamrApi
 	def delete(String id) {
-		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
-			if (canvas.example) {
-				render(status: 403, text:[error: "cannot delete common example", code: "FORBIDDEN"] as JSON)
-			} else {
-				canvas.delete(flush: true)
-			}
-		}
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		canvas.delete(flush: true)
+		response.status = 204
+		render ""
 	}
 
 	@StreamrApi
 	def start(String id) {
-		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
-			if (canvas.example) {
-				render(status: 403, text:[error: "cannot start common example", code: "FORBIDDEN"] as JSON)
-			} else {
-				canvasService.start(canvas, request.JSON?.clearState ?: false)
-				render canvas.toMap() as JSON
-			}
-		}
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		canvasService.start(canvas, request.JSON?.clearState ?: false)
+		render canvas.toMap() as JSON
 	}
 
 	@StreamrApi
 	@NotTransactional
 	def stop(String id) {
-		getAuthorizedCanvas(id, Operation.WRITE) { Canvas canvas ->
-			if (canvas.example) {
-				render(status: 403, text:[error: "cannot stop common example", code: "FORBIDDEN"] as JSON)
-			} else {
-				// Updates canvas in another thread, so canvas needs to be refreshed
-				canvasService.stop(canvas, request.apiUser)
-				if (canvas.adhoc) {
-					render(status: 204) // Adhoc canvases are deleted on stop.
-				} else {
-					canvas.refresh()
-					render canvas.toMap() as JSON
-				}
-			}
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
+		// Updates canvas in another thread, so canvas needs to be refreshed
+		canvasService.stop(canvas, request.apiUser)
+		if (canvas.adhoc) {
+			response.status = 204 // Adhoc canvases are deleted on stop.
+			render ""
+		} else {
+			canvas.refresh()
+			render canvas.toMap() as JSON
 		}
 	}
 
 	/**
-	 * Gets the json of a single module on a canvas
-	 * @param id
-	 * @param moduleId
-     * @return
-     */
+	 * Sends a runtime request to a running canvas
+	 */
 	@StreamrApi(requiresAuthentication = false)
-	def module(String id, Integer moduleId) {
-		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
-			Map canvasMap = canvas.toMap()
-			Map moduleMap = canvasMap.modules.find { it.hash.toString() == moduleId.toString() }
+	def request(String id, Boolean local) {
+		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
+		def msg = request.JSON
+		Map response = signalPathService.runtimeRequest(msg, canvas, null, request.apiUser, local ? true : false)
 
-			if (!moduleMap) {
-				throw new ApiException(404, "MODULE_NOT_FOUND", "Module $moduleId not found on canvas $id")
-			} else {
-				render moduleMap as JSON
-			}
-
-		}
+		log.info("request: responding with $response")
+		render response as JSON
 	}
 
+	/**
+	 * Gets the json of a single module on a canvas
+	 */
 	@StreamrApi(requiresAuthentication = false)
-	def request(String id, Integer moduleId) {
-		getAuthorizedCanvas(id, Operation.READ) { Canvas canvas ->
-			def msg = request.JSON
-			Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, params.local ? true : false)
+	def module(String canvasId, Integer moduleId, Long dashboard) {
+		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
+		render moduleMap as JSON
+	}
 
-			log.info("request: responding with $response")
-			render response as JSON
-		}
+	/**
+	 * Sends a runtime request to a module on a canvas
+     */
+	@StreamrApi(requiresAuthentication = false)
+	def moduleRequest(String canvasId, Integer moduleId, Long dashboard, Boolean local) {
+		// Always asks for read permission only. Problem?
+		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
+		Canvas canvas = Canvas.get(canvasId)
+		def msg = request.JSON
+
+		Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, local ? true : false)
+		log.info("request: responding with $response")
+		render response as JSON
 	}
 
 	private SaveCanvasCommand readSaveCommand() {
@@ -147,15 +140,4 @@ class CanvasApiController {
 		return command
 	}
 
-	private void getAuthorizedCanvas(String id, Operation op, Closure action) {
-		def canvas = Canvas.get(id)
-		if (!canvas) {
-			throw new NotFoundException("Canvas", id)
-		} else if (!(op == Operation.READ && canvas.example) &&
-				   !permissionService.check(request.apiUser, canvas, op)) {
-			throw new NotPermittedException(request.apiUser?.username, "Canvas", id, op.id)
-		} else {
-			action.call(canvas)
-		}
-	}
 }
