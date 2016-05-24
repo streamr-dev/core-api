@@ -38,7 +38,7 @@ class Dashboard {
 		[
 			id: id,
 			name: name,
-			items: items == null ? [] : items*.toMap(),
+			items: items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
 		]
 	}
 
