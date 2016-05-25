@@ -8,8 +8,7 @@
 		$(document).ready(function() {
 			$(".delete-dashboard-link").each(function(i, el) {
 				new ConfirmButton(el, {
-					title: "Are you sure you want to delete dashboard?",
-					message: "This also deletes all the dashboard items."
+					message: "${ message(code:"dashboard.delete.confirm") }"
 				}, function(result) {
 					if (result) {
 						$.ajax("${ createLink(uri:"/api/v1/dashboards", absolute: true)}" + '/' + $(el).data('id'), {
@@ -18,7 +17,7 @@
 								location.reload()
 							},
 							error: function(e, t, msg) {
-								Streamr.showError("Cannot delete dashboard", "Something went wrong!")
+								Streamr.showError("${ message(code:"dashboard.delete.error") }", "${ message(code:"dashboard.delete.error.title") }")
 							}
 						})
 					}
