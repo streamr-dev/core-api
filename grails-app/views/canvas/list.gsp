@@ -47,8 +47,8 @@
 			$(document).ready(function() {
 				$(".delete-canvas-link").each(function(i, el) {
 					new ConfirmButton(el, {
-						title: "Are you sure you want to delete canvas?",
-						message: "This also deletes all of this canvases dashboard items from the dashboards."
+						title: "${ message(code: 'canvas.delete.title') }",
+						message: "${ message(code: 'canvas.delete.confirm') }"
 					}, function(result) {
 						if (result) {
 							$.ajax("${ createLink(uri:"/api/v1/canvases", absolute: true)}" + '/' + $(el).data('id'), {
@@ -57,7 +57,7 @@
 									location.reload()
 								},
 								error: function(e, t, msg) {
-									Streamr.showError("Cannot delete canvas", "Something went wrong!")
+									Streamr.showError("${ message(code: 'canvas.delete.error') }", "${ message(code: 'canvas.delete.error.title') }")
 								}
 							})
 						}

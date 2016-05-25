@@ -80,21 +80,15 @@ class ShareSpec extends GebReportingSpec {
 		save()
 	}
 
-	// We still don't know why it's so damn hard to type text into the input,
+	// We still don't know why it's so hard to type text into the input,
 	// just "$('.new-user-field') << text" won't work.
-	// That's why this huge hack.
+	// That's why this hack.
 	def feedTextInput(String text) {
-		def tryType = {
-			waitFor {
-				$('.new-user-field').displayed
-				$('.new-user-field').firstElement().clear()
-				$('.new-user-field') << text
-				return $('.new-user-field').value().equals(text)
-			}
-		}
-		for(int i = 0; i < 10; i++) {
-			if(tryType())
-				break;
+		waitFor {
+			$('.new-user-field').displayed
+			$('.new-user-field').firstElement().clear()
+			$('.new-user-field') << text
+			$('.new-user-field').value().equals(text)
 		}
 	}
 

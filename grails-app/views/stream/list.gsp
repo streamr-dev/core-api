@@ -8,8 +8,7 @@
 			$(document).ready(function() {
 				$(".delete-stream-link").each(function(i, el) {
 					new ConfirmButton(el, {
-						title: "Are you sure you want to delete stream?",
-						message: ""
+						message: "${ message(code:'stream.delete.confirm' )}"
 					}, function(result) {
 						if (result) {
 							$.ajax("${ createLink(uri:"/api/v1/streams", absolute: true)}" + '/' + $(el).data('id'), {
@@ -18,7 +17,7 @@
 									location.reload()
 								},
 								error: function(e, t, msg) {
-									Streamr.showError("Cannot delete stream", "Something went wrong!")
+									Streamr.showError("${ message(code:'stream.delete.error' )}", "${ message(code:'stream.delete.error.title' )}")
 								}
 							})
 						}
