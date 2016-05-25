@@ -54,19 +54,18 @@
             }
         )
 
-        .step("Next, open the <b>Text</b> section by clicking it to list text processing-related modules.",
-            '#moduleTree',
-            function() {
-                $('.jstree a:contains(Text)').parent().one('click', tour.next)
-            }
-        )
-
-        .step('Under <b>Text</b>, find the <code>TextEquals</code> module and drag and drop it to the canvas.',
-            '#moduleTree',
+        .step("Next, let's add the <code>TextEquals</code> module. This time we will use the search box for this.<br><br>" +
+            "Go ahead and type <b>Text</b> into the search and choose the <code>TextEquals</code> module from the " +
+            "results.",
+            '#search',
             function(cb) {
                 tour.waitForModuleAdded('TextEquals')(cb)
             }
         )
+
+        .step("Feel free to move the module into a more spacious area.", ".tourTextEquals1")
+
+        .step("Search is a faster and more convenient way of adding modules that are already familiar to you by name.", "#search")
 
         .step("Our goal is to filter data related to a single tram (specifically, vehicle RHKL00112) from all tram " +
             "data being pushed out by <b>Stream</b>. To do so, we will need to pass forward only those events whose " +
@@ -83,55 +82,64 @@
         )
 
         .step("Drop the connection on the second input of the TextEquals, called <code>text</code>.",
-            '.tourTextEquals1 .endpoint.input:nth(1)',
+            '.tourTextEquals1',
             function(cb) {
-                tour.waitForConnections([['tourStream1.veh', 'tourTextEquals1.text']])(cb)
+                tour.highlightInputUntilConnected("tourTextEquals1.text")(function() {
+                    tour.waitForConnection(['tourStream1.veh', 'tourTextEquals1.text'])(cb)
+                })
             }
         )
 
         .step("Next connect <code>equals?</code> of TextEquals to <code>pass</code> of Filter.",
-            '.tourTextEquals1 .endpoint.output:first',
+            '.tourTextEquals1',
             { placement: 'bottom' },
             tour.highlightOutputUntilDraggingStarts("tourTextEquals1.equals?")
         )
 
         .step("Drop the connection on the first input of the Filter, called <code>pass</code>.",
-            '.tourFilter1 .endpoint.input:first',
+            '.tourFilter1',
             { placement: 'top' },
             function(cb) {
-                tour.waitForConnections([['tourTextEquals1.equals?', 'tourFilter1.pass']])(cb)
+                tour.highlightInputUntilConnected("tourFilter1.pass")(function() {
+                    tour.waitForConnection(['tourTextEquals1.equals?', 'tourFilter1.pass'])(cb)
+                })
             }
         )
 
-        .step("Now let's define the vehicle we are filtering.<br><br>Type <code>RHKL00112</code> into parameter <b>search</b> of module <b>Filter</b>.",
-            '.tourTextEquals1 .endpoint.parameter:first',
+        .step("Now let's define the vehicle we are filtering.<br><br>Type <b>RHKL00112</b> into parameter <code>search</code> of module Filter.",
+            '.tourTextEquals1',
             { placement: 'left' },
             tour.waitForInput(".tourTextEquals1 .parameterInput", "RHKL00112")
         )
 
         .step("Then connect <code>lat</code> of Stream to <code>in1</code> of Filter.",
-            '.tourStream1 .endpoint.output:eq(2)',
+            '.tourStream1',
             tour.waitForConnection(['tourStream1.lat', 'tourFilter1.in1'])
         )
 
-        .step("Then connect <code>long</code> of Stream to <code>in2</code> of Filter.",
-            '.tourStream1 .endpoint.output:eq(3)',
+        .step("Notice how a new input (<code>in2</code>) appeared on Filter.", '.tourFilter1')
+
+        .step("Connect <code>long</code> of Stream to <code>in2</code> of Filter.",
+            '.tourStream1',
             tour.waitForConnection(['tourStream1.long', 'tourFilter1.in2'])
         )
 
         .step("Then connect <code>spd</code> of Stream to <code>in3</code> of Filter.",
-            '.tourStream1 .endpoint.output:eq(4)',
+            '.tourStream1',
             tour.waitForConnection(['tourStream1.spd', 'tourFilter1.in3'])
         )
 
-        .step("Let's add a <code>Table</code> to see affirm that data is flowing in and to see how it looks like",
+        .step("Let's add a <code>Table</code> to confirm that data is indeed flowing in and to see how the data looks " +
+            "like.<br><br>Search for <b>Table</b> and add it to the canvas.",
             '#search',
             function(cb) {
                 tour.waitForModuleAdded('Table')(cb)
             }
         )
 
-        .step("Connect <code>out1</code>, <code>out2</code>, and <code>out3</code> of Filter to Table (in that order)",
+        .step("Feel free to move the Table into a more spacious area.", ".tourTable1")
+
+        .step("Connect <code>out1</code>, <code>out2</code>, and <code>out3</code> of Filter to Table (in that order.)",
             '.tourFilter1',
             function(cb) {
                 tour.waitForConnections([
@@ -142,18 +150,18 @@
             }
         )
 
-        .step("Everything should be properly connected for the filtering to work now.<br><br>" +
-            "Let's <b>run</b> this canvas (in historical mode) to verify that it is indeed working.",
+        .step("Everything should now be properly connected for the filtering to work.<br><br>" +
+            "<b>Run</b> this canvas (in historical mode) to verify that this is the case.",
             '#run-historical-button',
             { nextOnTargetClick: true }
         )
 
-        .step("If you see data appearing on the table, our filtering is working! Well done!",
+        .step("If you see data appearing on the table, our filtering is working as intended! Well done!",
             '.tourTable1',
             { placement: 'left' }
         )
 
-        .step("<b>Abort</b> the running canvas to proceed.",
+        .step("<b>Abort</b> the running canvas to continue.",
             '#run-historical-button',
             { nextOnTargetClick: true }
         )
@@ -169,26 +177,26 @@
 
         .step("Placeholder", ".tourStream1")
 
-        .step("Open the <b>Visualizations</b> section by clicking it.",
-            '#moduleTree',
-            function() {
-                $('.jstree a:contains(Visualizations)').parent().one('click', tour.next)
-            }
-        )
-
-        .step('Under <b>Visualizations</b>, find the <code>Chart</code> module and drag and drop it to the canvas.',
-            '#moduleTree',
+        .step("Add the <code>Chart</code> module and feel free to position it as you please.",
+            '#search',
             function(cb) {
                 tour.waitForModuleAdded('Chart')(cb)
             }
         )
 
         .step("Connect <code>out3</code> of <b>Filter</b> to the first input of <b>Chart</b>.",
-            '.tourFilter1 .endpoint.output:eq(3)',
+            '.tourFilter1',
             function(cb) {
                 tour.waitForConnection(['tourFilter1.out3', 'tourChart1.in1'])(cb)
             }
         )
+
+        .step('The Chart module is used to plot quantitative values by time.',
+            '.tourChart1',
+            { placement: 'left' })
+
+        .step("Currently we have routed <code>spd</code> of Stream to <code>in3</code> of Filter, which is passed along " +
+            "to the Chart via <code>out3</code> of Filter.", '.tourFilter1')
 
         .step("<b>Run</b> the canvas.",
             '#run-historical-button',
@@ -205,7 +213,7 @@
             { nextOnTargetClick: true }
         )
 
-        .offerNextTour("Extraordinary! In the next tour, we'll go even deeper. Click Begin when you are ready!")
+        .offerNextTour("Extraordinary! In the next tour, we'll go even deeper.<br><br> Click Begin when you are ready!")
 
         .ready()
 
