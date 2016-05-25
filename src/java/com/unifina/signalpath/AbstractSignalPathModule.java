@@ -186,9 +186,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.remove(alias.toString());
 		}
 
-		if (input.isReady()) {
-			readyInputs.add(input);
-		}
+		readyInputs.remove(input);
 	}
 
 	public void addOutput(Output output) {
