@@ -27,7 +27,7 @@ import java.util.*;
  *    de-constructs response output into specified Outputs using dot-notation names (e.g. values[3].car.id)
  * This module makes assumptions from input (GET uses URL params, POST uses body) and response (first found object is what we want)
  *    and makes a best-effort guess in case of "bad" response (if no object is found, just send values that were found)
- * @see MapTraversal that does output parsing according to Output displayName
+ * @see MapTraversal that does output parsing according to Output name
  * @see Http for a minimally-magical module that gives full control to the user over forming the request and parsing the response
  */
 public class SimpleHttp extends AbstractHttpModule {
@@ -107,10 +107,7 @@ public class SimpleHttp extends AbstractHttpModule {
 		List<NameValuePair> inputNVPList = new LinkedList<>();
 		JSONObject inputObject = new JSONObject();
 		for (Input in : httpInputs) {
-			String inputName = in.getDisplayName();
-			if (inputName == null) {
-				inputName = in.getName();
-			}
+			String inputName = in.getEffectiveName();
 			inputNVPList.add(new BasicNameValuePair(inputName, in.getValue().toString()));
 			inputObject.put(inputName, in.getValue());
 		}
@@ -140,10 +137,7 @@ public class SimpleHttp extends AbstractHttpModule {
 		}
 
 		for (StringParameter header : headers) {
-			String headerName = header.getDisplayName();
-			if (headerName == null) {
-				headerName = header.getName();
-			}
+			String headerName = header.getEffectiveName();
 			request.addHeader(headerName, header.getValue());
 		}
 
@@ -194,7 +188,7 @@ public class SimpleHttp extends AbstractHttpModule {
 		// send results to outputs, match output names to result object keys (ignore extra result object members)
 		if (result != null) {
 			for (Output out : httpOutputs) {
-				String key = out.getDisplayName();
+				String key = out.getEffectiveName();
 				Object value = MapTraversal.getProperty(result, key);
 				if (value != null) {
 					out.send(value);

@@ -15,7 +15,6 @@
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
-		<r:require module="detect-timezone"/>
 		<r:require module="canvas-controls"/>
 
 		<r:script>
@@ -30,8 +29,6 @@ $('#moduleTree').bind('loaded.jstree', function() {
 $(document).ready(function() {
 
 	function settings() {
-		var tz = jstz();
-
 		return {
 			beginDate: $("#beginDate").val(),
 			endDate: $("#endDate").val(),
@@ -39,9 +36,6 @@ $(document).ready(function() {
 			timeOfDayFilter: {
 				timeOfDayStart: $("#timeOfDayStart").val(),
 				timeOfDayEnd: $("#timeOfDayEnd").val(),
-				timeZone: tz.timezone_name,
-				timeZoneOffset: tz.utc_offset,
-				timeZoneDst: tz.uses_dst
 			},
 			editorState: {
 				runTab: $("#tab-historical").is(":visible") ? "#tab-historical" : "#tab-realtime"
@@ -505,8 +499,6 @@ $(document).unload(function () {
 		<li><a href="#" id="saveAsButton">Save as..</a></li>
 	</ul>
 	
-	<g:render template="/feedback/fixedFeedback" plugin="unifina-core"/>
-
 	<!-- extension point for apps using the core plugin -->
 	<g:render template="/canvas/buildBodyExtensions"/>
 

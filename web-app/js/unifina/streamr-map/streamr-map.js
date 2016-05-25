@@ -1,9 +1,12 @@
 
 (function(exports) {
 
+    var TRACE_REDRAW_BATCH_SIZE = 10000
+
     function StreamrMap(parent, options) {
 
         var _this = this
+
         this.parent = $(parent)
 
         this.untouched = true
@@ -22,7 +25,8 @@
             zoom: 2,
             minZoom: 2,
             maxZoom: 18,
-            traceRadius: 2
+            traceRadius: 2,
+            drawTrace: false
         }, options || {})
 
         this.defaultAutoZoomBounds = {
@@ -43,8 +47,8 @@
         this.baseLayer = L.tileLayer(
             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
                 attribution: '© OpenStreetMap contributors, Streamr',
-                minZoom: this.options.minZoom,
-                maxZoom: this.options.maxZoom
+                minZoom: _this.options.minZoom,
+                maxZoom: _this.options.maxZoom
             }
         )
 
@@ -88,7 +92,6 @@
             },
 
             render: function(changesOnly) {
-                var start = Date.now()
                 var bigPointLayer = this
                 var canvas = this.getCanvas();
                 var ctx = canvas.getContext('2d');
@@ -103,11 +106,23 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
 
-                updates.forEach(function(update) {
-                    // get center from the map (projected)
-                    var point = bigPointLayer._map.latLngToContainerPoint(update.latlng);
-                    bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, update.color)
-                })
+                if(!changesOnly)
+                    clearTimeout(_this.traceRedrawTimeout)
+
+                var i = 0
+                function redrawTrace() {
+                    _this.traceRedrawTimeout = setTimeout(function() {
+                        var count = i + TRACE_REDRAW_BATCH_SIZE
+                        while (i < count && i < updates.length) {
+                            var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
+                            bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
+                            i++
+                        }
+                        if (i < updates.length)
+                            redrawTrace()
+                    })
+                }
+                redrawTrace()
 
                 _this.pendingLineUpdates = []
             }
@@ -122,8 +137,6 @@
     }
 
     StreamrMap.prototype.addMarker = function(attr) {
-        var _this = this
-
         var id = attr.id
         var label = attr.label
         var lat = attr.lat
@@ -163,8 +176,8 @@
 
         if (this.autoZoomTimeout === undefined) {
             this.autoZoomTimeout = setTimeout(function() {
-                _this.map.fitBounds(_this.lastEvent)
                 _this.autoZoomTimeout = undefined
+                _this.map.fitBounds(_this.lastEvent)
             }, 1000)
         }
     }
@@ -196,7 +209,6 @@
     StreamrMap.prototype.moveMarker = function(id, lat, lng) {
         var latlng = L.latLng(lat,lng)
         this.pendingMarkerUpdates[id] = latlng
-
         this.requestUpdate()
     }
 
