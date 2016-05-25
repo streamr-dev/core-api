@@ -16131,6 +16131,9 @@ fieldset[disabled] .btn {
 .stream-parameter-wrapper .twitter-typeahead input {
   width: 100%;
 }
+.stream-parameter-wrapper .twitter-typeahead input:not(:disabled) {
+  background-color: white;
+}
 .stream-parameter-wrapper:not(.toggled) .twitter-typeahead * {
   display: none;
 }
@@ -17470,7 +17473,7 @@ body.dashboard-show .titlebar-clickable {
   display: block;
   background-color: #FFFFFF;
   z-index: 1000;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1px solid #ccc;
   -webkit-box-shadow: 0 0 3px 1px #ccc;
   -moz-box-shadow: 0 0 3px 1px #ccc;

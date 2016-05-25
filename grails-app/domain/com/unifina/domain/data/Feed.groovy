@@ -69,7 +69,7 @@ class Feed implements Serializable {
 		return [
 		   	id: id,
 		   	name: name,
-			module: module.id
+			module: module?.id
 		]
 	}
 }

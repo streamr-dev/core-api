@@ -687,7 +687,7 @@ class ShareSpec extends GebReportingSpec {
 
 		search << "ShareSp"
 		then: "found!"
-		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+		waitFor { $('.streamr-search-suggestion .streamr-search-suggestion-name', text: "ShareSpec") }
 
 		cleanup: "remove tester2 permission"
 		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
@@ -719,7 +719,7 @@ class ShareSpec extends GebReportingSpec {
 
 		search << "ShareSp"
 		then: "found!"
-		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+		waitFor { $('.streamr-search-suggestion .streamr-search-suggestion-name', text: "ShareSpec") }
 
 		when: "check list"
 		to StreamListPage

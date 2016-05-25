@@ -298,15 +298,15 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			ob.find(".streamSearch").displayed
 			
 		when: "search term is changed to 'xyzzy'"
-			ob.find(".streamSearch").firstElement().clear()
-			ob.find(".streamSearch") << "xyzzy"
+			ob.find(".streamSearch.streamr-search-input").firstElement().clear()
+			ob.find(".streamSearch.streamr-search-input") << "xyzzy"
 		then: "ModuleBuildSpec stream must be shown in suggestions"
 			waitFor {
-				ob.find('.tt-suggestion span', text: contains("ModuleBuildSpec"))
+				ob.find('.streamr-search-suggestion span', text: contains("ModuleBuildSpec"))
 			}
 			
 		when: "suggestion is clicked"
-			ob.find('.tt-suggestion span', text: contains("ModuleBuildSpec")).click()
+			ob.find('.streamr-search-suggestion span', text: contains("ModuleBuildSpec")).click()
 		then: "stream is changed"
 			waitFor {
 				$(".streamName", text: "ModuleBuildSpec")

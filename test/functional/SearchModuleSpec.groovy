@@ -24,7 +24,7 @@ class SearchModuleSpec extends LoginTester1Spec {
 			$("#search") << "if"
 		then: "the first result begins with the search term"
 			waitFor {
-				$(".tt-suggestion-name", 0).text() == "IfThenElse"
+				$(".streamr-search-suggestion-name", 0).text() == "IfThenElse"
 			}
 			
 	}

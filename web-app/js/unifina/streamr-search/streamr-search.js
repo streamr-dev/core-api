@@ -153,7 +153,7 @@ var _StreamModuleSearch = function (limit) {
         name: 'Streams',
         displayKey: 'name',
         source: function (q, sync, async) {
-            $.get(Streamr.createLink({uri: "api/v1/streams"}) + '?search='+q, function(result) {
+            $.get(Streamr.createLink({uri: "api/v1/streams"}) + '?' + $.param({public: true, search: q}), function(result) {
                 result.sort(function (a, b) {
                     return (_getSortScore(a.name, q) - _getSortScore(b.name, q))
                 })
