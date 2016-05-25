@@ -348,6 +348,22 @@ Tour.prototype.waitForModuleAdded = function(moduleName) {
 	}
 }
 
+Tour.prototype.waitForCanvasStopped = function() {
+	var that = this
+	var _cb = this.next.bind(this)
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		function listener() {
+			_cb()
+		}
+
+		$(SignalPath).one('stopped', listener)
+	}
+}
+
 Tour.prototype.waitForModuleRemoved = function(moduleName) {
 	var that = this
 	var _cb = this.next.bind(this)

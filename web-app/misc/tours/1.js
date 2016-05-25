@@ -163,7 +163,7 @@
 
         .step("<b>Abort</b> the running canvas to continue.",
             '#run-historical-button',
-            { nextOnTargetClick: true }
+            tour.waitForCanvasStopped()
         )
 
         .step("Let's proceed to build something a bit more visual and interesting.<br><br>First off, remove the <b>Table</b> module " +
@@ -210,7 +210,7 @@
 
         .step("When you are ready to continue, press <b>Abort</b>.",
             '#run-historical-button',
-            { nextOnTargetClick: true }
+            tour.waitForCanvasStopped()
         )
 
         .offerNextTour("Extraordinary! In the next tour, we'll go even deeper.<br><br> Click Begin when you are ready!")

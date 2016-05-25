@@ -95,7 +95,7 @@
 
         .step("Doesn't it look beautiful? <br/><br/>When you are ready to move to the next tour, press Abort",
             '#run-historical-button',
-            { nextOnTargetClick: true }
+            tour.waitForCanvasStopped()
         )
         
         .offerNextTour("Great job! In the next tour, we'll develop this a bit further.<br><br> Click Begin when you are ready!")
