@@ -365,7 +365,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	prot.removeInput = function(name) {
 		var _this = this
-		// TODO: timeout BAD BAD BAD
 		setTimeout(function() {
 			var el = prot.inputsByName[name]
 			if (el) {
@@ -391,7 +390,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 
 	prot.removeOutput = function(name) {
 		var _this = this
-		// TODO: timeout BAD BAD BAD
 		setTimeout(function() {
 			var el = prot.outputsByName[name]
 			if (el) {
