@@ -560,6 +560,35 @@ Tour.prototype.highlightOutputUntilDraggingStarts = function(qualifiedName) {
 	}
 }
 
+Tour.prototype.highlightInputUntilConnected = function(qualifiedName) {
+
+	var module = qualifiedName.split('.')[0]
+	var input = qualifiedName.split('.')[1]
+
+	var _cb = this.next.bind(this)
+	var that = this
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		// Flash-highlight the endpoint
+		var $ep = that._getSpObject(module).findInputByDisplayName(input)
+		var i = 0;
+		var interval = setInterval(function () {
+			if (i++ % 2 === 0)
+				$ep.addClass("highlight")
+			else
+				$ep.removeClass("highlight")
+		}, 500)
+		// Clear interval on dragstart
+		$($ep.div).one('spConnect', function () {
+			clearInterval(interval)
+			_cb()
+		})
+	}
+}
+
 exports.Tour = Tour
 
 })(typeof(exports) !== 'undefined' ? exports : window)

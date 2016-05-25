@@ -41,7 +41,7 @@
             '.tourStream1'
         )
 
-        .step("Let's add another module so that we can get connecting!<br/><br/>This is the module browser. Open the <b>Visualizations</b> section by clicking it to list the modules in that category.",
+        .step("Let's add another module so that we can get connecting!<br/><br/>This is the module browser.<br/><br/> Open the <b>Visualizations</b> section by clicking it to list the modules in that category.",
             '#moduleTree',
             function() {
                 $('.jstree a:contains(Visualizations)').parent().one('click', tour.next)
@@ -61,14 +61,18 @@
         )
 
         .step("Drop the connection on the first input of the Map, called <code>id</code>.",
-            '.tourMap1 .endpoint.input:first',
+            '.tourMap1',
+            { placement: 'top' },
             function(cb) {
-                tour.waitForConnections([['tourStream1.veh', 'tourMap1.id']])(cb)
+                tour.highlightInputUntilConnected("tourMap1.id")(function() {
+                    tour.waitForConnection(['tourStream1.veh', 'tourMap1.id'])(cb)
+                })
             }
         )
 
         .step("Nice! Your first connection!<br/><br/>"+
-            "Let's do two more. Connect <code>lat</code> to <code>latitude</code> and <code>long</code> to <code>longitude</code>.<br/><br/>This tour will advance when you're done.",
+            "Let's do two more. This tour will advance when you're done. <br/><br/>" +
+            "Connect <ul><li><code>lat</code> to <code>latitude</code></li><li><code>long</code> to <code>longitude</code>.</li></ul>",
             '.tourStream1',
             { placement: 'bottom' },
             function(cb) {
@@ -82,8 +86,9 @@
             '.run-mode-tabs'
         )
 
-        .step("Let's run this canvas in historical mode. Do it now by pressing <b>Run</b>. The events from a day I selected will be replayed, "+
-            "and our Stream will power the Map with tram locations on that day.",
+        .step("Let's run this canvas in historical mode. The events from a day I selected will be replayed, "+
+            "and our Stream will power the Map with tram locations on that day.<br><br>" +
+            "Do it now by pressing <b>Run</b>.",
             '#run-historical-button',
             { nextOnTargetClick: true }
         )
@@ -93,7 +98,7 @@
             { nextOnTargetClick: true }
         )
         
-        .offerNextTour("Great job! In the next tour, we'll develop this a bit further. Click Begin when you are ready!")
+        .offerNextTour("Great job! In the next tour, we'll develop this a bit further.<br><br> Click Begin when you are ready!")
 
         .ready()
 
