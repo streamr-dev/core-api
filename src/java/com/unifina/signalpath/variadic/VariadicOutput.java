@@ -38,6 +38,9 @@ public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 	}
 
 	@Override
+	void furtherConfigurePlaceholder(Output<T> placeholder) {}
+
+	@Override
 	String getDisplayName() {
 		return "out";
 	}

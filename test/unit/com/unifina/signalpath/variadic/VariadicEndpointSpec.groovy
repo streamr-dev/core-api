@@ -18,6 +18,9 @@ class VariadicEndpointSpec extends Specification {
 		}
 
 		@Override
+		def void furtherConfigurePlaceholder(Endpoint placeholder) {}
+
+		@Override
 		def String getDisplayName() {
 			return "nameprefix"
 		}
