@@ -1,18 +1,16 @@
 package com.unifina.signalpath.bool;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.signalpath.*;
 
 public class Not extends AbstractSignalPathModule {
 
-	TimeSeriesInput input = new TimeSeriesInput(this,"in");
+	BooleanInput in = new BooleanInput(this,"in");
 	
-	TimeSeriesOutput out = new TimeSeriesOutput(this,"out");
+	BooleanOutput out = new BooleanOutput(this,"out");
 	
 	@Override
 	public void init() {
-		addInput(input);
+		addInput(in);
 		addOutput(out);
 	}
 	
@@ -21,9 +19,7 @@ public class Not extends AbstractSignalPathModule {
 	}
 	
 	public void sendOutput() {
-		if (input.value==1D)
-			out.send(0D);
-		else out.send(1D);
+		out.send(!in.getValue());
 	}
 	
 }
