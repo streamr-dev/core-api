@@ -1,8 +1,7 @@
 package com.unifina.signalpath.remote;
 import com.unifina.signalpath.*;
 
-import org.apache.commons.collections.list.UnmodifiableList;
-import org.apache.commons.collections.map.UnmodifiableMap;
+import com.unifina.signalpath.text.JsonParser;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -15,7 +14,6 @@ import org.apache.http.util.EntityUtils;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONException;
 import org.codehaus.groovy.grails.web.json.JSONObject;
-import org.codehaus.groovy.grails.web.json.JSONTokener;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -142,14 +140,7 @@ public class Http extends AbstractHttpModule {
 				if (responseString.isEmpty()) {
 					call.errors.add("Empty response from server");
 				} else {
-					JSONTokener parser = new JSONTokener(responseString);
-					Object jsonObject = parser.nextValue();    // parser returns Map, List, or String
-					if (jsonObject instanceof Map) {
-						jsonObject = UnmodifiableMap.decorate((Map)jsonObject);
-					} else if (jsonObject instanceof List) {
-						jsonObject = UnmodifiableList.decorate((List)jsonObject);
-					}
-					responseData.send(jsonObject);
+					responseData.send(JsonParser.jsonStringToOutputObject(responseString));
 				}
 
 				Map<String, String> headerMap = new HashMap<>();
