@@ -99,30 +99,42 @@ class RegisterController {
             return
         }
 
-        SignupInvite invite
-        if (Environment.current == Environment.TEST) {
+		SignupInvite invite
+		if (Environment.current == Environment.TEST) {
 			// kludge needed for RegisterSpec."registering can now be done correctly"()
-            invite = new SignupInvite(
-                username: cmd.username,
-                code: cmd.username.replaceAll("@", "_"),
-                sent: true,
-                used: false
-            )
-            invite.save()
-        } else {
-            invite = signupCodeService.create(cmd.username)
-        }
-		
-        mailService.sendMail {
-            from grailsApplication.config.unifina.email.sender
-            to invite.username
-            subject grailsApplication.config.unifina.email.signup.subject
-            html g.render(template:"email_signup", model:[user: invite], plugin:'unifina-core')
-        }
-		
-        log.info("Signed up $invite.username")
+			invite = new SignupInvite(
+					username: cmd.username,
+					code: cmd.username.replaceAll("@", "_"),
+					sent: true,
+					used: false
+			)
+			invite.save()
+		} else {
+			invite = signupCodeService.create(cmd.username)
+		}
 
-        render view: 'signup', model: [ signupOk: true ]
+		if (grailsApplication.config.streamr.signup.requireInvite) {
+			mailService.sendMail {
+				from grailsApplication.config.unifina.email.sender
+				to invite.username
+				subject grailsApplication.config.unifina.email.waitForInvite.subject
+				html g.render(template: "email_wait_for_invite", model: [user: invite], plugin: 'unifina-core')
+			}
+			render view: 'waitForInvitation'
+
+		} else {
+			invite.sent = true
+			invite.save()
+			mailService.sendMail {
+				from grailsApplication.config.unifina.email.sender
+				to invite.username
+				subject grailsApplication.config.unifina.email.registerLink.subject
+				html g.render(template:"email_register_link", model:[user: invite], plugin:'unifina-core')
+			}
+			render view: 'registerLinkSent'
+
+		}
+		log.info("Signed up $invite.username")
     }
 
     @Secured(["ROLE_ADMIN"])
