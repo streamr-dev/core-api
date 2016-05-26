@@ -1,12 +1,13 @@
 package com.unifina.signalpath.bool;
 
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.BooleanInput;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
 public class IfThenElse extends AbstractSignalPathModule {
 
-	TimeSeriesInput condition = new TimeSeriesInput(this,"if");
+	BooleanInput condition = new BooleanInput(this,"if");
 	TimeSeriesInput th = new TimeSeriesInput(this,"then");
 	TimeSeriesInput el = new TimeSeriesInput(this,"else");
 	
@@ -22,7 +23,7 @@ public class IfThenElse extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		if (condition.value==1)
+		if (condition.getValue())
 			out.send(th.value);
 		else
 			out.send(el.value);

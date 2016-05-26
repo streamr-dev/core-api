@@ -24,7 +24,7 @@ class EqualsSpec extends Specification {
 			B: [5, 8, -4, -5].collect {it?.doubleValue()},
 		]
 		Map outputValues = [
-			out: [1, 0, 0, 1].collect {it?.doubleValue()}
+			out: [true, false, false, true]
 		]
 		
 		then:
