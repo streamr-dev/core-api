@@ -35,13 +35,14 @@ StreamrTable.prototype.initTable = function (headers) {
 	this.table.append(this.tableBody);
 }
 
-StreamrTable.prototype.addRow = function (row, rowId) {
+StreamrTable.prototype.addRow = function (row, rowId, op) {
+	if (op != "append") { op = "prepend" }
 	var rowIdString = (rowId != null) ? " id='" + rowId + "'" : "";
 	var newRow = $("<tr"+ rowIdString +"></tr>");
 	for (var i = 0; i < row.length; i++) {
 		newRow.append("<td>" + (row[i] != null ? row[i] : "") + "</td>");
 	}
-	this.tableBody.prepend(newRow);
+	this.tableBody[op](newRow);
 }
 
 StreamrTable.prototype.receiveResponse = function (d) {
@@ -58,21 +59,17 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	}
 	// New contents: 2d array that replaces existing contents
 	else if (d.nc) {
-		this.tableBody.children().remove()
-		// reverse order since the rows are prepended...
-		for (var i = d.nc.length; i--;) {
-			this.addRow(d.nc[i], "row-" + i)
+		this.tableBody.empty();
+		for (var i in d.nc) {
+			this.addRow(d.nc[i], "row-" + i, "append");
 		}
 	}
 	// New map
 	else if (d.nm) {
-		$(this.tableBody).children().remove()
+		$(this.tableBody).empty();
 
 		for (var key in d.nm) {
-			var newRow = $("<tr></tr>");
-			newRow.append("<td>"+(key!=null ? key : "")+"</td>");
-			newRow.append("<td>"+(d.nm[key]!=null ? JSON.stringify(d.nm[key]) : "")+"</td>");
-			$(this.tableBody).prepend(newRow)
+			this.addRow([key, d.nm[key]], "row-" + key);
 		}
 	}
 	// Edit cell message: d.id=row id, d.e=cell index, d.c=cell content 
