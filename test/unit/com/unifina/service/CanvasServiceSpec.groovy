@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.api.InvalidStateException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.api.ValidationException
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
@@ -16,7 +17,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService])
+@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me

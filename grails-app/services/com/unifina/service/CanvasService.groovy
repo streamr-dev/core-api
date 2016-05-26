@@ -30,7 +30,7 @@ class CanvasService {
 			if (nameFilter) {
 				eq "name", nameFilter
 			}
-			if (adhocFilter) {
+			if (adhocFilter != null) {
 				eq "adhoc", adhocFilter
 			}
 			if (stateFilter) {
