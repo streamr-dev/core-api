@@ -1,7 +1,6 @@
 package com.unifina.controller.api
 
 import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.StreamrApiHelper
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
