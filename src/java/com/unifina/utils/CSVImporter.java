@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
@@ -26,7 +25,15 @@ public class CSVImporter implements Iterable<LineValues> {
 
 	private static final Logger log = Logger.getLogger(CSVImporter.class);
 
-	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format, String timeZone) throws IOException {
+	/**
+	 * @param file The File to read
+	 * @param fields Existing field config, if available
+	 * @param timestampIndex Index of the timestamp column, if available
+	 * @param format Timestamp format (in JodaTime syntax), if available
+	 * @param ignoreEmptyFields If true, ignores empty fields. If false, returns empty strings, and throws exception for empty numbers and booleans. True by default.
+     * @throws IOException
+     */
+	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format, String timeZone, boolean ignoreEmptyFields) throws IOException {
 		this.file = file;
 
 		// Detect the schema
@@ -41,22 +48,22 @@ public class CSVImporter implements Iterable<LineValues> {
 			}
 		
 		try {
-			schema = new Schema(is, fieldMap, timestampIndex, format, timeZone);
+			schema = new Schema(is, fieldMap, timestampIndex, format, timeZone, ignoreEmptyFields);
 		} finally {
 			is.close();
 		}
 	}
 
+	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format) throws IOException {
+		this(file, fields, timestampIndex, format, null, true);
+	}
+
 	public CSVImporter(File file) throws IOException {
-		this(file, null, null, null, null);
+		this(file, null, null, null, null, true);
 	}
 
 	public CSVImporter(File file, List fields) throws IOException {
-		this(file, fields, null, null, null);
-	}
-
-	public CSVImporter(File file, List fields, Integer timestampIndex, String format) throws IOException {
-		this(file, fields, timestampIndex, format, null);
+		this(file, fields, null, null, null, true);
 	}
 
 	@Override
@@ -97,6 +104,10 @@ public class CSVImporter implements Iterable<LineValues> {
 				line = it.next();
 			}
 
+			// Empty line or a line with only spaces/tabs
+			while (line.matches("^\\s*$"))
+				line = it.next();
+
 			try {
 				return schema.parseLine(line);
 			} catch (IOException | ParseException | RuntimeException e) {
@@ -122,7 +133,9 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		public CSVParser parser = null;
 		public SchemaEntry[] entries;
-		
+
+		private boolean ignoreEmptyFields;
+
 		public Integer timestampColumnIndex = null;
 		private String format;
 		private String timeZone;
@@ -132,8 +145,9 @@ public class CSVImporter implements Iterable<LineValues> {
 		private Date lastDate = null;
 
 		private Map<String, String> fields = null;
-		
-		public Schema(InputStream is, Map<String, String> fields, Integer timestampIndex, String format, String timeZone) throws IOException {
+
+		public Schema(InputStream is, Map<String, String> fields, Integer timestampIndex, String format, String timeZone, boolean ignoreEmptyFields) throws IOException {
+			this.ignoreEmptyFields = ignoreEmptyFields;
 			if(timestampIndex != null)
 				setTimeStampColumnIndex(timestampIndex);
 			if(format != null)
@@ -268,20 +282,20 @@ public class CSVImporter implements Iterable<LineValues> {
 						parsed[i] = d;
 						lastDate = d;
 					}
-					// Check for empty fields
-					else if (values[i] == null || values[i].length() == 0)
+					// Check for missing or empty (if ignoreEmptyFields == true) fields
+					else if (values[i] == null || (ignoreEmptyFields && values[i].length() == 0))
 						parsed[i] = null;
-						// Parse date field
+					// Parse date field
 					else if (entries[i].dateTimeParser != null) {
 						parsed[i] = entries[i].dateTimeParser.parse(values[i]);
 					}
 					// Parse number
 					else if (entries[i].type.equals("number"))
 						parsed[i] = Double.parseDouble(values[i]);
-						// Parse boolean
+					// Parse boolean
 					else if (entries[i].type.equals("boolean"))
 						parsed[i] = Boolean.parseBoolean(values[i]);
-						// String
+					// String
 					else if (entries[i].type.equals("string"))
 						parsed[i] = values[i];
 				}
