@@ -14,6 +14,9 @@ import java.util.*;
 public class ListAsTable extends ModuleWithUI {
 	private ListInput in = new ListInput(this, "list");
 
+	private List<String> currentHeaders;
+	private boolean listIsEmpty = false;
+
 	public ListAsTable() {
 		super();
 		canClearState = false;
@@ -25,16 +28,20 @@ public class ListAsTable extends ModuleWithUI {
 	public void sendOutput() {
 		List input = in.getValue();
 		if (input == null || input.size() < 1) {
-			Map headerDef = new HashMap<>();
-			headerDef.put("headers", Arrays.asList("List is empty"));
-			Map headerMessage = new HashMap<>();
-			headerMessage.put("hdr", headerDef);
-			pushToUiChannel(headerMessage);
-			Map dataMessage = new HashMap<>();
-			dataMessage.put("nc", Arrays.asList(new ArrayList<>()));
-			pushToUiChannel(dataMessage);
+			if (!listIsEmpty) {
+				listIsEmpty = true;
+				Map headerDef = new HashMap<>();
+				headerDef.put("headers", Arrays.asList("List is empty"));
+				Map headerMessage = new HashMap<>();
+				headerMessage.put("hdr", headerDef);
+				pushToUiChannel(headerMessage);
+				Map dataMessage = new HashMap<>();
+				dataMessage.put("nc", Arrays.asList(new ArrayList<>()));
+				pushToUiChannel(dataMessage);
+			}
 			return;
 		}
+		listIsEmpty = false;
 
 		// headers: index i plus all distinct keys in all maps, additionally value column for non-maps
 		Set headerSet = new LinkedHashSet<>();
@@ -51,11 +58,14 @@ public class ListAsTable extends ModuleWithUI {
 		headers.add("i");
 		if (hasValueColumn) { headers.add("value"); }
 		headers.addAll(headerSet);
-		Map headerDef = new HashMap<>();
-		headerDef.put("headers", headers);
-		Map headerMessage = new HashMap<>();
-		headerMessage.put("hdr", headerDef);
-		pushToUiChannel(headerMessage);
+		if (!headers.equals(currentHeaders)) {
+			Map headerDef = new HashMap<>();
+			headerDef.put("headers", headers);
+			Map headerMessage = new HashMap<>();
+			headerMessage.put("hdr", headerDef);
+			pushToUiChannel(headerMessage);
+			currentHeaders = headers;
+		}
 
 		List<List<Object>> contents = new ArrayList<>();
 		for (int i = 0; i < input.size(); i++) {
@@ -85,7 +95,10 @@ public class ListAsTable extends ModuleWithUI {
 	}
 
 	@Override
-	public void clearState() { }
+	public void clearState() {
+		currentHeaders = null;
+		listIsEmpty = false;
+	}
 
 	@Override
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {

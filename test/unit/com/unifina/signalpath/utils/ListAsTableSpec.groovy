@@ -19,10 +19,14 @@ class ListAsTableSpec extends Specification {
 		Map inputValues = [
 		    list: [
 		        [],
+				[],			// Repetition won't produce a message
+				[],
 				[5, 4, 3, 21],
 				["asdf", "qwer", "rty", "ert"],
-				[1, true, "test", ["list", false]]
-		    ]
+				[1, true, "test", ["list", false]],
+				[],
+				[],
+			]
 		]
 		Map outputValues = [:]
 		Map channelMessages = [
@@ -31,10 +35,10 @@ class ListAsTableSpec extends Specification {
 				[nc: [[]]],
 				[hdr: [headers: ["i", "value"]]],
 				[nc: [[0, 5], [1, 4], [2, 3], [3, 21]]],
-				[hdr: [headers: ["i", "value"]]],
 				[nc: [[0, "asdf"], [1, "qwer"], [2, "rty"], [3, "ert"]]],
-				[hdr: [headers: ["i", "value"]]],
 				[nc: [[0, 1], [1, true], [2, "test"], [3, ["list", false]]]],
+				[hdr: [headers: ["List is empty"]]],
+				[nc: [[]]],
 			]
 		]
 
@@ -50,6 +54,7 @@ class ListAsTableSpec extends Specification {
 			list: [
 				[[:]],
 				[[q: "A", w: "B"], [q: "C", w: "D"]],
+				[[q: "A"], [q: "C", w: "D"], [w: "E"]],
 				[[q: "A", w: "B"], [q: "C", r: "D"]],
 				[[a: 1, b: true], [a: "test", b: ["list", false]]]
 			]
@@ -60,7 +65,8 @@ class ListAsTableSpec extends Specification {
 				[hdr: [headers: ["i"]]],
 				[nc: [[0]]],
 				[hdr: [headers: ["i", "q", "w"]]],
-				[nc: [[0, "A", "B"], [1, "C", "D"]]],
+				[nc: [[0, "A", "B"], [1, "C", "D"]]],	// same headers, won't be re-sent
+				[nc: [[0, "A", ""], [1, "C", "D"], [2, "", "E"]]],
 				[hdr: [headers: ["i", "q", "w", "r"]]],
 				[nc: [[0, "A", "B", ""], [1, "C", "", "D"]]],
 				[hdr: [headers: ["i", "a", "b"]]],
@@ -79,6 +85,7 @@ class ListAsTableSpec extends Specification {
 		Map inputValues = [
 			list: [
 				[[], [:]],
+				[[:], 2, ""],
 				[[q: "A", w: "B"], 1, 2, [1, 2]],
 				[[1: true, "e": "V"], ["list"], "test"]
 			]
@@ -88,6 +95,7 @@ class ListAsTableSpec extends Specification {
 			table: [
 				[hdr: [headers: ["i", "value"]]],
 				[nc: [[0, []], [1, ""]]],
+				[nc: [[0, ""], [1, 2], [2, ""]]],
 				[hdr: [headers: ["i", "value", "q", "w"]]],
 				[nc: [[0, "", "A", "B"], [1, 1], [2, 2], [3, [1, 2]]]],
 				[hdr: [headers: ["i", "value", 1, "e"]]],
