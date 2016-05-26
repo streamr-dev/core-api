@@ -330,6 +330,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		}
 		return td;
 	}
+
+	prot.addPlaceholderOutput = function() {
+		var td = createRoomForIO("output");
+		td.append("<div class='endpoint placeholder'></div>")
+	}
 	
 	prot.addInput = function(data, clazz) {
 		clazz = clazz || data.jsClass || SignalPath.Input

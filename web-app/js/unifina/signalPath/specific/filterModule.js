@@ -9,10 +9,7 @@ SignalPath.FilterModule = function(data,canvas,prot) {
     function addInput(data, clazz) {
         var endpoint = superAddInput(data, clazz);
         if (endpoint.getName() === 'pass') {
-            var output = prot.addOutput({
-                name: "notused"
-            })
-            output.div.css("display", "none")
+            prot.addPlaceholderOutput()
         }
         return endpoint
     }
