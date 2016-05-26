@@ -25,6 +25,11 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
             })
         }
 
+        if (json.variadic.isLast && json.variadic.disableGrow) {
+            console.log("Hiding last output")
+            div.css('display', 'none')
+        }
+
         return div
     }
 
