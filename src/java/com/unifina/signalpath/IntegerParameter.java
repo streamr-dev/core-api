@@ -7,7 +7,7 @@ public class IntegerParameter extends Parameter<Integer> {
 			Integer defaultValue) {
 		super(owner, name, defaultValue, "Double");
 	}
-	
+
 	@Override
 	public void receive(Object value) {
 		if (value instanceof Double)
