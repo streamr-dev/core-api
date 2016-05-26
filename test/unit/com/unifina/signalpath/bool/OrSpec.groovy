@@ -19,11 +19,11 @@ class OrSpec extends Specification {
 	void "or gives the right answer"() {
 		when:
 		Map inputValues = [
-			A: [0, 0, 1, 1].collect {it?.doubleValue()},
-			B: [0, 1, 0, 1].collect {it?.doubleValue()},
+			A: [false, false, true, true],
+			B: [false, true, false, true]
 		]
 		Map outputValues = [
-			out: [0, 1, 1, 1].collect {it?.doubleValue()}
+			out: [false, true, true, true]
 		]
 		
 		then:

@@ -176,8 +176,8 @@ class StreamController {
 
 				Map config = (stream.config ? JSON.parse(stream.config) : [:])
 				List fields = config.fields ? config.fields : []
-
-				CSVImporter csv = new CSVImporter(temp, fields)
+				def a = springSecurityService.currentUser
+				CSVImporter csv = new CSVImporter(temp, fields, null, null, springSecurityService.currentUser.timezone)
 				if (csv.getSchema().timestampColumnIndex == null) {
 					deleteFile = false
 					flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
@@ -188,7 +188,9 @@ class StreamController {
 					render([success: true] as JSON)
 				}
 			} catch (Exception e) {
-				e = ExceptionUtils.getRootCause(e)
+				Exception rootCause = ExceptionUtils.getRootCause(e)
+				if(rootCause != null)
+					e = rootCause
 				log.error("Failed to import file", e)
 				response.status = 500
 				render([success: false, error: e.message] as JSON)

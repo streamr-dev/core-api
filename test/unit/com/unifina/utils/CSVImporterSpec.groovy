@@ -139,6 +139,7 @@ class CSVImporterSpec extends Specification {
 		
 		when:
 		CSVImporter csv = new CSVImporter(file)
+		for (CSVImporter.LineValues line : csv) {}
 		CSVImporter.Schema schema = csv.getSchema()
 		
 		then:
@@ -242,7 +243,7 @@ class CSVImporterSpec extends Specification {
 			File file = Paths.get(getClass().getResource("test-files/empty-strings.csv").toURI()).toFile()
 
 		when: "lines are read in"
-			CSVImporter csv = new CSVImporter(file, null, null, null, false)
+			CSVImporter csv = new CSVImporter(file, null, null, null, null, false)
 			CSVImporter.Schema schema = csv.getSchema()
 			int i = 0
 			for (CSVImporter.LineValues line : csv) {
@@ -269,5 +270,47 @@ class CSVImporterSpec extends Specification {
 		then: "the rows have been read"
 		schema.entries.length == 5
 	}
-	
+
+	void "should import the csv in the given timezone"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
+
+		when:
+		// GMT+8
+		CSVImporter csv = new CSVImporter(file, null, null, null, "Asia/Hong_Kong")
+
+		then: "dates are correct"
+		String date
+		for (CSVImporter.LineValues line : csv) {
+			line.values[0] instanceof Date
+			date = ((Date)line.values[0]).toGMTString()
+			break;
+		}
+		date == "23 Feb 2015 08:30:00 GMT"
+	}
+
+	void "if csv date has timezone itself, importer should use that"() {
+		setup:
+		File file = Paths.get(getClass().getResource("test-files/timezone-in-date.csv").toURI()).toFile()
+
+		when:
+		// GMT+8
+		CSVImporter csv = new CSVImporter(file, null, null, null, "Asia/Hong_Kong")
+
+		then: "dates are correct"
+		String date
+		String date2
+		for (CSVImporter.LineValues line : csv) {
+			line.values[0] instanceof Date
+			if (date == null) {
+				date = ((Date)line.values[0]).toGMTString()
+			} else if (date2 == null) {
+				date2 = ((Date)line.values[0]).toGMTString()
+			} else {
+				break;
+			}
+		}
+		date == "23 Feb 2015 16:30:00 GMT"
+		date2 == "24 Feb 2015 02:30:00 GMT"
+	}
 }
