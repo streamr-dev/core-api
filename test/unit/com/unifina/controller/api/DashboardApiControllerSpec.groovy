@@ -8,6 +8,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.ApiService
 import com.unifina.service.DashboardService
 import com.unifina.service.PermissionService
 import com.unifina.service.UserService
@@ -20,7 +21,7 @@ import spock.lang.Specification
 
 @TestFor(DashboardApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([Canvas, Dashboard, DashboardItem, SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
+@Mock([Canvas, Dashboard, DashboardItem, SecUser, UnifinaCoreAPIFilters, SpringSecurityService, UserService, ApiService])
 class DashboardApiControllerSpec extends Specification {
 
 	DashboardService dashboardService
@@ -30,6 +31,8 @@ class DashboardApiControllerSpec extends Specification {
 	def setup() {
 		dashboardService = controller.dashboardService = Mock(DashboardService)
 		controller.permissionService = Mock(PermissionService)
+		controller.apiService = mainContext.getBean(ApiService)
+
 		me = new SecUser(apiKey: "myApiKey").save(failOnError: true, validate: false)
 		dashboards = initDashboards(me)
 	}

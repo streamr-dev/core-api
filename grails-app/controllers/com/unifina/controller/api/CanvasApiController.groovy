@@ -18,26 +18,27 @@ class CanvasApiController {
 	def grailsApplication
 	def signalPathService
 	def permissionService
+	def apiService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
 	@StreamrApi
 	def index() {
-		def criteria = StreamrApiHelper.createListCriteria(params, ["name"], {
-			// Lookup by exact name
+		def criteria = apiService.createListCriteria(params, ["name"], {
+			// Filter by exact name
 			if (params.name) {
 				eq "name", params.name
 			}
-			// Lookup by adhoc
+			// Filter by adhoc
 			if (params.adhoc) {
 				eq "adhoc", params.boolean("adhoc")
 			}
-			// Lookup by state
+			// Filter by state
 			if (params.state) {
 				eq "state", Canvas.State.fromValue(params.state)
 			}
 		})
-		def canvases = permissionService.get(Canvas, request.apiUser, Operation.READ, StreamrApiHelper.isPublicFlagOn(params), criteria)
+		def canvases = permissionService.get(Canvas, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)
 		render(canvases*.toMap() as JSON)
 	}
 

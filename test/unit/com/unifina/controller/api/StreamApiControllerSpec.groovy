@@ -9,10 +9,10 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.ApiService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.UserService
-import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -21,7 +21,7 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService])
+@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -41,6 +41,7 @@ class StreamApiControllerSpec extends Specification {
 
 		controller.streamService = streamService
 		controller.permissionService = permissionService
+		controller.apiService = mainContext.getBean(ApiService)
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)

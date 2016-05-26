@@ -1,9 +1,11 @@
-package com.unifina.api
+package com.unifina.service
 
 import grails.orm.HibernateCriteriaBuilder
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-class StreamrApiHelperSpec extends Specification {
+@TestFor(ApiService)
+class ApiServiceSpec extends Specification {
 	
 	HibernateCriteriaBuilder builder
 	Map params
@@ -15,7 +17,7 @@ class StreamrApiHelperSpec extends Specification {
 
 	void "createListCriteria() with empty params"() {
 		when:
-		def c = StreamrApiHelper.createListCriteria(params, [], {})
+		def c = service.createListCriteria(params, [], {})
 		c.delegate = builder
 		c()
 
@@ -26,7 +28,7 @@ class StreamrApiHelperSpec extends Specification {
 	void "createListCriteria() with search"() {
 		when:
 		params.search = "foo"
-		def c = StreamrApiHelper.createListCriteria(params, ["name", "description"], {})
+		def c = service.createListCriteria(params, ["name", "description"], {})
 		c.delegate = builder
 		c()
 
@@ -45,7 +47,7 @@ class StreamrApiHelperSpec extends Specification {
 	void "createListCriteria() with sort"() {
 		when:
 		params.sort = "name"
-		def c = StreamrApiHelper.createListCriteria(params, [], {})
+		def c = service.createListCriteria(params, [], {})
 		c.delegate = builder
 		c()
 
@@ -58,7 +60,7 @@ class StreamrApiHelperSpec extends Specification {
 		when:
 		params.sort = "name"
 		params.order = "desc"
-		def c = StreamrApiHelper.createListCriteria(params, [], {})
+		def c = service.createListCriteria(params, [], {})
 		c.delegate = builder
 		c()
 
@@ -70,7 +72,7 @@ class StreamrApiHelperSpec extends Specification {
 	void "createListCriteria() with max"() {
 		when:
 		params.max = "5"
-		def c = StreamrApiHelper.createListCriteria(params, [], {})
+		def c = service.createListCriteria(params, [], {})
 		c.delegate = builder
 		c()
 
@@ -82,7 +84,7 @@ class StreamrApiHelperSpec extends Specification {
 	void "createListCriteria() with offset"() {
 		when:
 		params.offset = "10"
-		def c = StreamrApiHelper.createListCriteria(params, [], {})
+		def c = service.createListCriteria(params, [], {})
 		c.delegate = builder
 		c()
 
@@ -94,7 +96,7 @@ class StreamrApiHelperSpec extends Specification {
 	void "createListCriteria() with additional custom criteria"() {
 		when:
 		params.max = "10"
-		def c = StreamrApiHelper.createListCriteria(params, [], {
+		def c = service.createListCriteria(params, [], {
 			eq("foo", "bar")
 		})
 		c.delegate = builder
@@ -113,7 +115,7 @@ class StreamrApiHelperSpec extends Specification {
 		params.order = "desc"
 		params.max = "5"
 		params.offset = "10"
-		def c = StreamrApiHelper.createListCriteria(params, ["name", "desc"], {})
+		def c = service.createListCriteria(params, ["name", "desc"], {})
 		c.delegate = builder
 		c()
 
@@ -135,10 +137,10 @@ class StreamrApiHelperSpec extends Specification {
 
 	void "isPublicFlagOn()"() {
 		expect:
-		!StreamrApiHelper.isPublicFlagOn([:])
-		StreamrApiHelper.isPublicFlagOn([public: "true"])
-		StreamrApiHelper.isPublicFlagOn([public: "TRUE"])
-		!StreamrApiHelper.isPublicFlagOn([public: "false"])
+		!service.isPublicFlagOn([:])
+		service.isPublicFlagOn([public: "true"])
+		service.isPublicFlagOn([public: "TRUE"])
+		!service.isPublicFlagOn([public: "false"])
 	}
 
 }

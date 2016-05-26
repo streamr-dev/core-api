@@ -18,16 +18,17 @@ class StreamApiController {
 
 	def streamService
 	def permissionService
+	def apiService
 
 	@StreamrApi
 	def index() {
-		def criteria = StreamrApiHelper.createListCriteria(params, ["name", "description"], {
-			// Add possibility lookup stream by exact name
+		def criteria = apiService.createListCriteria(params, ["name", "description"], {
+			// Filter by exact name
 			if (params.name) {
 				eq "name", params.name
 			}
 		})
-		def streams = permissionService.get(Stream, request.apiUser, Operation.READ, StreamrApiHelper.isPublicFlagOn(params), criteria)
+		def streams = permissionService.get(Stream, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)
 		render(streams*.toMap() as JSON)
 	}
 

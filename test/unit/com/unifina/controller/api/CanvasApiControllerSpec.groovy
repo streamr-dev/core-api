@@ -8,6 +8,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
@@ -23,7 +24,7 @@ import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
+@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, SpringSecurityService, ApiService])
 class CanvasApiControllerSpec extends Specification {
 
 	CanvasService canvasService
@@ -36,6 +37,7 @@ class CanvasApiControllerSpec extends Specification {
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
 		controller.permissionService = Mock(PermissionService)
+		controller.apiService = mainContext.getBean(ApiService)
 
 		me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
