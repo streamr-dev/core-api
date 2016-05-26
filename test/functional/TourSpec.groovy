@@ -85,7 +85,7 @@ class TourSpec extends LoginTester1Spec {
 
 		advance { selectCategoryInModuleBrowser("Visualizations") }
 
-		advance { dragAndDropModule("Map", 200, -100) }
+		advance { dragAndDropModule("Map", 500, -400) }
 
 		advance {
 			// Start dragging
@@ -123,7 +123,7 @@ class TourSpec extends LoginTester1Spec {
 		}
 
 		waitFor {
-			!getTourBubble().displayed
+			atEndOfTour()
 		}
 	}
 
