@@ -1,3 +1,5 @@
+(function(exports) {
+
 /*
     Params:
         el - html element, jquery element or jquery selector of the input
@@ -48,8 +50,8 @@ function StreamrSearch(el, modules, options, onSelected) {
     // Typeahead needs the options first
     args.push(this.options)
     var moduleNameToFunction = {
-        "module": _ModuleSearchModule,
-        "stream": _StreamModuleSearch
+        "module": ModuleSearchModule,
+        "stream": StreamSearchModule
     }
     modules.forEach(function(mod) {
         var moduleFunction = moduleNameToFunction[mod.name]
@@ -97,11 +99,7 @@ StreamrSearch.prototype.redrawMenu = function() {
     }
 }
 
-StreamrSearch.prototype.hide = function() {
-    this.el.hide()
-}
-
-var _getSortScore = function(string, query){
+var getSortScore = function(string, query){
     string = string.toLowerCase()
     query = query.toLowerCase()
     // If the real name of the module contains the term, the earlier the better. Else sorted last.
@@ -112,7 +110,7 @@ var _getSortScore = function(string, query){
     else return Infinity
 }
 
-var _ModuleSearchModule = function(limit){
+var ModuleSearchModule = function(limit){
     var modules
     $.get(Streamr.createLink({ uri: "api/v1/modules" }), function(ds) {
         modules = ds
@@ -133,7 +131,7 @@ var _ModuleSearchModule = function(limit){
                     return false
                 })
                 matches.sort(function (a, b) {
-                    return (_getSortScore(a.name, q) - _getSortScore(b.name, q))
+                    return (getSortScore(a.name, q) - getSortScore(b.name, q))
                 })
                 sync(matches.slice(0, limit ? limit : 5))
             }
@@ -148,14 +146,14 @@ var _ModuleSearchModule = function(limit){
     }
 }
 
-var _StreamModuleSearch = function (limit) {
+var StreamSearchModule = function (limit) {
     return {
         name: 'Streams',
         displayKey: 'name',
         source: function (q, sync, async) {
             $.get(Streamr.createLink({uri: "api/v1/streams"}) + '?' + $.param({public: true, search: q}), function(result) {
                 result.sort(function (a, b) {
-                    return (_getSortScore(a.name, q) - _getSortScore(b.name, q))
+                    return (getSortScore(a.name, q) - getSortScore(b.name, q))
                 })
                 result = result.slice(0, limit ? limit : 5)
                 result.forEach(function(r) {
@@ -179,3 +177,7 @@ var _StreamModuleSearch = function (limit) {
         limit: Infinity
     }
 }
+
+exports.StreamrSearch = StreamrSearch
+
+})(typeof(exports) !== 'undefined' ? exports : window)
