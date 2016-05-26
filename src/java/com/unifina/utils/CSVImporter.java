@@ -31,7 +31,8 @@ public class CSVImporter implements Iterable<LineValues> {
 	 * @param timestampIndex Index of the timestamp column, if available
 	 * @param format Timestamp format (in JodaTime syntax), if available
 	 * @param ignoreEmptyFields If true, ignores empty fields. If false, returns empty strings, and throws exception for empty numbers and booleans. True by default.
-     * @throws IOException
+     * @param timeZone The users time zone. If null, UTC is used.
+	 * @throws IOException
      */
 	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format, String timeZone, boolean ignoreEmptyFields) throws IOException {
 		this.file = file;
@@ -54,16 +55,20 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 	}
 
+	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format, String timeZone) throws IOException {
+		this(file, fields, timestampIndex, format, timeZone, true);
+	}
+
 	public CSVImporter(File file, List<Map> fields, Integer timestampIndex, String format) throws IOException {
 		this(file, fields, timestampIndex, format, null, true);
 	}
 
-	public CSVImporter(File file) throws IOException {
-		this(file, null, null, null, null, true);
-	}
-
 	public CSVImporter(File file, List fields) throws IOException {
 		this(file, fields, null, null, null, true);
+	}
+
+	public CSVImporter(File file) throws IOException {
+		this(file, null, null, null, null, true);
 	}
 
 	@Override

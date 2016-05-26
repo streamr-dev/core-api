@@ -243,7 +243,7 @@ class CSVImporterSpec extends Specification {
 			File file = Paths.get(getClass().getResource("test-files/empty-strings.csv").toURI()).toFile()
 
 		when: "lines are read in"
-			CSVImporter csv = new CSVImporter(file, null, null, null, false)
+			CSVImporter csv = new CSVImporter(file, null, null, null, null, false)
 			CSVImporter.Schema schema = csv.getSchema()
 			int i = 0
 			for (CSVImporter.LineValues line : csv) {
