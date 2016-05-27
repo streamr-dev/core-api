@@ -6,7 +6,7 @@ import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @TestFor(MetricsService)
-class MetricsServiceTest extends Specification {
+class MetricsServiceSpec extends Specification {
 
 	static SecUser me
 
