@@ -127,7 +127,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, no response, async"() {
 		init()
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [[], [], []]]
+		outputs = [errors: [null, null, null]]
 		expect:
 		test()
 	}
@@ -135,7 +135,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, no response, synchronized"() {
 		init([], [], [], false)
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [[], [], []]]
+		outputs = [errors: [null, null, null]]
 		expect:
 		test()
 	}
@@ -143,7 +143,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, unexpected object response (ignored)"() {
 		init()
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [[], [], []]]
+		outputs = [errors: [null, null, null]]
 		response = [foo: 3, bar: 2, shutdown: "now"]
 		expect:
 		test()
@@ -152,7 +152,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, object response"() {
 		init(0, ["foo"])
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [[], [], []], out1: [3, 3, 3]]
+		outputs = [errors: [null, null, null], out1: [3, 3, 3]]
 		response = [foo: 3]
 		expect:
 		test()
@@ -161,7 +161,7 @@ class SimpleHttpSpec extends Specification {
 	void "empty response"() {
 		init(1, 1)
 		inputs = [in1: [4, 20, "everyday"]]
-		outputs = [errors: [[], [], []]]
+		outputs = [errors: [null, null, null]]
 		response = []
 		expect:
 		test()
@@ -171,7 +171,7 @@ class SimpleHttpSpec extends Specification {
 		init(1, ["foo"])
 		def messages = ["4", "20", "everyday"]
 		inputs = [in1: messages]
-		outputs = [errors: [[], [], []], out1: messages]
+		outputs = [errors: [null, null, null], out1: messages]
 		response = { HttpPost r ->
 			def jsonString = EntityUtils.toString(r.entity)
 			def ob = new JSONObject(jsonString)
@@ -184,7 +184,7 @@ class SimpleHttpSpec extends Specification {
 	void "two inputs, three outputs, array constant response with too many elements (ignored)"() {
 		init(2, 3)
 		inputs = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
-		outputs = [errors: [[], [], []], out1: [true, true, true],
+		outputs = [errors: [null, null, null], out1: [true, true, true],
 							out2 : ["developers", "developers", "developers"], out3: [1, 1, 1]]
 		response = { request -> [true, "developers", 1, 2, 3, 4] }
 		expect:
@@ -194,7 +194,7 @@ class SimpleHttpSpec extends Specification {
 	void "two inputs, three outputs, array varying response with too few elements"() {
 		init(2, 3)
 		inputs = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
-		outputs = [errors: [[], [], []], out1: [":)", ":|", ":("]]
+		outputs = [errors: [null, null, null], out1: [":)", ":|", ":("]]
 		response = [[":)"], [":|"], [":("]]
 		expect:
 		test()
@@ -203,7 +203,7 @@ class SimpleHttpSpec extends Specification {
 	void "two inputs, three outputs, array varying length response"() {
 		init(2, 3)
 		inputs = [in1: [4, 20, "everyday"], in2: [1, 2, "ree"]]
-		outputs = [errors: [[], [], []], out1: [":)", ":|", ":("],
+		outputs = [errors: [null, null, null], out1: [":)", ":|", ":("],
 							out2 : [null, 8, 7], out3: [null, null, 6]]
 		response = [[":)"], [":|", 8], [":(", 7, 6, 5, 4, 3]]
 		expect:
@@ -216,7 +216,7 @@ class SimpleHttpSpec extends Specification {
 			[name: "verb", value: "GET"]
 		])
 		inputs = [in1: [666, "666", 2 * 333], in2: [1 + 1 == 2, true, "true"]]
-		outputs = [errors: [[], [], []]]
+		outputs = [errors: [null, null, null]]
 		response = { HttpUriRequest request ->
 			assert request.URI.toString().equals("localhost?inputput=666&nother=true")
 		}
@@ -250,7 +250,7 @@ class SimpleHttpSpec extends Specification {
 	void "JSON object dot notation works for output parsing"() {
 		init(0, ["seasons", "best.pony", "best.pals.human"])
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [[], [], []], out1: [4, 4, 4],
+		outputs = [errors: [null, null, null], out1: [4, 4, 4],
 							out2: ["Pink", "Pink", "Pink"], out3: ["Finn", "Finn", "Finn"]]
 		response = [best: [pony: "Pink", pals: [dog: "Jake", human: "Finn"]], seasons: 4]
 		expect:
@@ -260,7 +260,7 @@ class SimpleHttpSpec extends Specification {
 	void "JSON object dot notation supports array indexing too"() {
 		init(0, ["seasons[1]", "best.pals.count", "best.pals[1].name"])
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [[], [], []], out1: [3, 3, 3],
+		outputs = [errors: [null, null, null], out1: [3, 3, 3],
 							out2: [2, 2, 2], out3: ["Finn", "Finn", "Finn"]]
 		response = [best: [pals: [[name: "Jake", species: "Dog"], [name: "Finn", species: "Human"]]], seasons: [4,3,2,1]]
 		expect:
