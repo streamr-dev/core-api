@@ -95,7 +95,7 @@ class StreamApiControllerSpec extends Specification {
 		def name = Stream.get(streamTwoId).name
 		params.name = name
 		request.addHeader("Authorization", "Token ${user.apiKey}")
-		request.requestURI = "/api/v1/canvases"
+		request.requestURI = "/api/v1/streams"
 		withFilters(action: "index") {
 			controller.index()
 		}
