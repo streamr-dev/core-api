@@ -2,7 +2,6 @@ package com.unifina.controller.api
 
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
@@ -17,17 +16,28 @@ class CanvasApiController {
 	def springSecurityService
 	def grailsApplication
 	def signalPathService
+	def permissionService
+	def apiService
 
 	private static final Logger log = Logger.getLogger(CanvasApiController)
 
 	@StreamrApi
 	def index() {
-		SecUser user = request.apiUser
-		String name = params.name
-		Boolean adhoc = params.boolean("adhoc")
-		Canvas.State state = Canvas.State.fromValue(params.state)
-
-		def canvases = canvasService.findAllBy(user, name, adhoc, state, params.sort ?: "dateCreated", params.order ?: "asc")
+		def criteria = apiService.createListCriteria(params, ["name"], {
+			// Filter by exact name
+			if (params.name) {
+				eq "name", params.name
+			}
+			// Filter by adhoc
+			if (params.adhoc) {
+				eq "adhoc", params.boolean("adhoc")
+			}
+			// Filter by state
+			if (params.state) {
+				eq "state", Canvas.State.fromValue(params.state)
+			}
+		})
+		def canvases = permissionService.get(Canvas, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)
 		render(canvases*.toMap() as JSON)
 	}
 

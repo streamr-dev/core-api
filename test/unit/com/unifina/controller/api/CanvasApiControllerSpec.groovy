@@ -3,26 +3,28 @@ package com.unifina.controller.api
 import com.unifina.api.NotPermittedException
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.filters.UnifinaCoreAPIFilters
+import com.unifina.service.ApiService
 import com.unifina.service.CanvasService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
 import com.unifina.service.UserService
 import grails.converters.JSON
+import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.web.FiltersUnitTestMixin
 import groovy.json.JsonBuilder
-import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
 @TestFor(CanvasApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
+@Mock([SecUser, Permission, Canvas, UnifinaCoreAPIFilters, UserService, SpringSecurityService, ApiService])
 class CanvasApiControllerSpec extends Specification {
 
 	CanvasService canvasService
@@ -34,6 +36,8 @@ class CanvasApiControllerSpec extends Specification {
 	void setup() {
 		controller.canvasService = canvasService = Mock(CanvasService)
 		controller.signalPathService = Mock(SignalPathService)
+		controller.permissionService = Mock(PermissionService)
+		controller.apiService = mainContext.getBean(ApiService)
 
 		me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
 		SecUser other = new SecUser(id: 2, apiKey: "otherApiKey").save(validate: false)
@@ -68,12 +72,10 @@ class CanvasApiControllerSpec extends Specification {
 		assert Canvas.count() == 3
 	}
 
-	void "index() renders my canvases as a list"() {
+	void "index() renders authorized canvases as a list"() {
 		when:
 		request.addHeader("Authorization", "Token $me.apiKey")
 		request.requestURI = "/api/v1/canvases"
-		params.sort = "sortField"
-		params.order = "desc"
 		withFilters(action: "index") {
 			controller.index()
 		}
@@ -81,7 +83,70 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 200
 		response.json.size() == 3
-		1 * canvasService.findAllBy(me, null, null, null, "sortField", "desc") >> [canvas1, canvas2, canvas3]
+		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> [canvas1, canvas2, canvas3]
+	}
+
+	void "index() adds name param to filter criteria"() {
+		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
+
+		when:
+		params.name = "Foo"
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> {Class resource, SecUser u, Operation op, boolean pub, Closure criteria ->
+			criteria.delegate = criteriaBuilderMock
+			criteria()
+			return []
+		}
+		and:
+		1 * criteriaBuilderMock.eq("name", "Foo")
+	}
+
+	void "index() adds adhoc param to filter criteria"() {
+		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
+
+		when:
+		params.adhoc = "true"
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> {Class resource, SecUser u, Operation op, boolean pub, Closure criteria ->
+			criteria.delegate = criteriaBuilderMock
+			criteria()
+			return []
+		}
+		and:
+		1 * criteriaBuilderMock.eq("adhoc", true)
+	}
+
+	void "index() adds state param to filter criteria"() {
+		def criteriaBuilderMock = Mock(HibernateCriteriaBuilder)
+
+		when:
+		params.state = "running"
+		request.addHeader("Authorization", "Token myApiKey")
+		request.requestURI = "/api/v1/canvases"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		1 * controller.permissionService.get(Canvas, me, Permission.Operation.READ, false, _) >> {Class resource, SecUser u, Operation op, boolean pub, Closure criteria ->
+			criteria.delegate = criteriaBuilderMock
+			criteria()
+			return []
+		}
+		and:
+		1 * criteriaBuilderMock.eq("state", Canvas.State.RUNNING)
 	}
 
 	void "show() authorizes, reconstructs and renders the canvas as json"() {
