@@ -336,9 +336,11 @@ class SignalPathService {
 						throw new AccessControlException("stopRequest requires authentication!");
 					}
 
-					stopLocal(canvas);
-
-					return request
+					if (stopLocal(canvas)) {
+						return request
+					} else {
+						throw new CanvasUnreachableException("Canvas could not be stopped.")
+					}
 				} else if (request.type=="ping") {
 					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
