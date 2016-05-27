@@ -8,6 +8,7 @@ import org.apache.log4j.Logger
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.util.regex.Pattern
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
@@ -194,14 +195,15 @@ class MapModulesSpec extends LoginTester1Spec {
 
 	private boolean tableContains(Collection<String> patterns) {
 		def mapAsTable = findModuleOnCanvas("MapAsTable")
-		mapAsTable.find(".event-table-module-content tbody tr").find { $row ->
-			def found = patterns.find { $row.text() =~ it }
-			if (found == null) {
-				log.info("Could not find " + $row.text())
-				assert false
+		waitFor {
+			patterns.every {
+				def results = mapAsTable.find(".event-table-module-content tbody tr", text: Pattern.compile(".*${it}.*"))
+				if (results.isEmpty()) {
+					log.info("Could not find $it")
+				}
+				return !results.isEmpty()
 			}
-			found == null
-		} == null
+		}
 	}
 
 	private void produceToKafka(String key, Double value) {

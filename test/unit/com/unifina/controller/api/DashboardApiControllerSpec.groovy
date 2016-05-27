@@ -129,6 +129,7 @@ class DashboardApiControllerSpec extends Specification {
 			items: [
 			    [
 					id: 3,
+					dashboard: dashboards[2].id,
 					ord: 0,
 			        title: "dashboard-3-item-2",
 					size: "x-large",
@@ -138,6 +139,7 @@ class DashboardApiControllerSpec extends Specification {
 			    ],
 				[
 					id: 2,
+					dashboard: dashboards[2].id,
 					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
@@ -226,6 +228,7 @@ class DashboardApiControllerSpec extends Specification {
 			items: [
 				[
 					id: 3,
+					dashboard: dashboards[2].id,
 					ord: 0,
 					title: "dashboard-3-item-2",
 					size: "x-large",
@@ -235,6 +238,7 @@ class DashboardApiControllerSpec extends Specification {
 				],
 				[
 					id: 2,
+					dashboard: dashboards[2].id,
 					ord: 1,
 					title: "dashboard-3-item-1",
 					size: "small",
