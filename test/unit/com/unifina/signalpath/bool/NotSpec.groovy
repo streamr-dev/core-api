@@ -19,10 +19,10 @@ class NotSpec extends ModuleSpecification {
 	void "not gives the right answer"() {
 		when:
 		Map inputValues = [
-			in: [0, 1].collect {it?.doubleValue()},
+			in: [false, true],
 		]
 		Map outputValues = [
-			out: [1, 0].collect {it?.doubleValue()}
+			out: [true, false]
 		]
 		
 		then:

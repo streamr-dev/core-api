@@ -24,7 +24,7 @@ class LessThanSpec extends ModuleSpecification {
 			B: [5, 8, -4].collect {it?.doubleValue()},
 		]
 		Map outputValues = [
-			"A&lt;B": [0, 1, 0].collect {it?.doubleValue()}
+			"A&lt;B": [false, true, false]
 		]
 		
 		then:
@@ -39,7 +39,7 @@ class LessThanSpec extends ModuleSpecification {
 			B: [5, 8, -4].collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			"A&lt;B": [1, 1, 0].collect { it?.doubleValue() }
+			"A&lt;B": [true, true, false]
 		]
 
 		then:

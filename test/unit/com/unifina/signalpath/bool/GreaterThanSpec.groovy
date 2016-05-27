@@ -24,7 +24,7 @@ class GreaterThanSpec extends ModuleSpecification {
 			B: [5, 8, -4].collect {it?.doubleValue()},
 		]
 		Map outputValues = [
-			"A&gt;B": [0, 0, 1].collect {it?.doubleValue()}
+			"A&gt;B": [false, false, true]
 		]
 		
 		then:
@@ -39,7 +39,7 @@ class GreaterThanSpec extends ModuleSpecification {
 			B: [5, 8, -4].collect { it?.doubleValue() },
 		]
 		Map outputValues = [
-			"A&gt;B": [1, 0, 1].collect { it?.doubleValue() }
+			"A&gt;B": [true, false, true]
 		]
 
 		then:

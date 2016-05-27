@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="canvas module resendAll resendLast">
+<polymer-element name="streamr-widget" attributes="canvas module dashboard resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
@@ -15,12 +15,6 @@
 	
 	<script>
 		Polymer('streamr-widget',{
-			publish: {
-				canvas: undefined,
-				module: undefined,
-				resendLast: undefined,
-				resendAll: undefined
-			},
 			detached: function() {
 				var _this = this
 
@@ -47,7 +41,9 @@
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
 					options = options || _this.getResendOptions(moduleJson)
-					options.canvas = _this.canvas
+
+					// Pass on the access context to the subscribe request
+					options = $.extend(options, _this.getAccessContext())
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
@@ -98,8 +94,8 @@
 				else {
 					// Get JSON from the server to initialize options
 					$.ajax({
-						type: 'POST',
-						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module,
+						type: 'GET',
+						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module + "?" + $.param(_this.getAccessContext()),
 						dataType: 'json',
 						success: function(response) {
 							_this.cachedModuleJson = response
@@ -122,7 +118,7 @@
 				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request',
+					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request' + "?" + $.param(_this.getAccessContext()),
 					data: JSON.stringify(msg),
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
@@ -137,6 +133,14 @@
 
 				});
 			},
+			getAccessContext: function() {
+				// extend cleans off keys with undefined values
+				return $.extend({}, {
+					canvas: this.canvas,
+					dashboard: this.dashboard ? this.dashboard : undefined
+				})
+			},
+
 			<g:if test="${params.lightDOM}">
 				parseDeclaration: function(elementElement) {
 					return this.lightFromTemplate(this.fetchTemplate(elementElement))

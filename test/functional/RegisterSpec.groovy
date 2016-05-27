@@ -1,9 +1,10 @@
-
+import core.mixins.LoginMixin
 import grails.util.Environment
 import core.pages.*
 import spock.lang.*
 import geb.spock.GebReportingSpec
 
+@Stepwise
 class RegisterSpec extends GebReportingSpec {
         
         // Not a real email
@@ -24,7 +25,10 @@ class RegisterSpec extends GebReportingSpec {
         // Delete the user
         def cleanupSpec() {
             when: "login"
-                to LoginPage
+				go "logout"
+				waitFor {
+					at LoginPage
+				}
                 username = "tester-admin@streamr.com"
                 password = "tester-adminTESTER-ADMIN"
                 loginButton.click()

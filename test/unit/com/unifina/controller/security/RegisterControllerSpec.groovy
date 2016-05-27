@@ -26,7 +26,6 @@ import com.unifina.service.UserService
 		Feed, ModulePackage, PermissionService, Permission, UserService])
 class RegisterControllerSpec extends Specification {
 
-	def mailSent = false
 	def username = "user@invite.to"
 	String reauthenticated = null
 
@@ -72,18 +71,35 @@ class RegisterControllerSpec extends Specification {
 			model.user.errors.allErrors.size() > 0
 	}
 
-	void "signup with email should create invite code"() {
+	void "signup with email should create but not send invite code if requireInvite = true"() {
+		setup:
+			controller.grailsApplication.config.streamr.signup.requireInvite = true
 		when: "signing up with email"
 			params.username = username
 			request.method = 'POST'
 			controller.signup()
 		then: "should create invite code"
 			SignupInvite.count() == 1
-			model.signupOk
-			view == '/register/signup'
+			view == '/register/waitForInvitation'
 		then: "signup email should be sent"
 			controller.mailService.mailSent
-			
+			controller.mailService.html.contains("invite")
+	}
+
+	void "signup with email should create and send invite code if requireInvite = false"() {
+		setup:
+			controller.grailsApplication.config.streamr.signup.requireInvite = false
+		when: "signing up with email"
+			params.username = username
+			request.method = 'POST'
+			controller.signup()
+		then: "should create invite code"
+			SignupInvite.count() == 1
+			SignupInvite.getAll().get(0).sent
+			view == '/register/registerLinkSent'
+		then: "signup email should be sent"
+			controller.mailService.mailSent
+			controller.mailService.html.contains("complete")
 	}
 
 	void "sending an invite with nonexistent code should fail"() {
