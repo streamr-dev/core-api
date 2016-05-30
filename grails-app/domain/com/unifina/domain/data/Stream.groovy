@@ -3,6 +3,7 @@ package com.unifina.domain.data
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import groovy.transform.CompileStatic
 
 class Stream implements Comparable {
 	String id
@@ -42,7 +43,8 @@ class Stream implements Comparable {
 		return name
 	}
 
-	def toMap() {
+	@CompileStatic
+	Map toMap() {
 		[
 			id: id,
 			apiKey: apiKey,

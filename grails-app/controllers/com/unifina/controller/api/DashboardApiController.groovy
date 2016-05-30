@@ -16,16 +16,17 @@ class DashboardApiController {
 
 	DashboardService dashboardService
 	def permissionService
+	def apiService
 
 	@StreamrApi
 	def index() {
-		def criteria = StreamrApiHelper.createListCriteria(params, ["name"], {
-			// Add possibility lookup stream by exact name
+		def criteria = apiService.createListCriteria(params, ["name"], {
+			// Filter by exact name
 			if (params.name) {
 				eq "name", params.name
 			}
 		})
-		def dashboards = permissionService.get(Dashboard, request.apiUser, Permission.Operation.READ, StreamrApiHelper.isPublicFlagOn(params), criteria)
+		def dashboards = permissionService.get(Dashboard, request.apiUser, Permission.Operation.READ, apiService.isPublicFlagOn(params), criteria)
 		render(dashboards*.toSummaryMap() as JSON)
 	}
 

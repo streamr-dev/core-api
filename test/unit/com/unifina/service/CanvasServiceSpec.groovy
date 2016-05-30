@@ -405,27 +405,21 @@ class CanvasServiceSpec extends Specification {
 	}
 
 	def "authorizedGetById() checks access to canvases from PermissionService and returns the canvas if allowed"() {
-		List<Permission.Operation> ops = Permission.Operation.values()
-		ops.each { op ->
-			when:
-			def canvas = service.authorizedGetById(myFirstCanvas.id, me, op)
+		when:
+		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.READ)
 
-			then:
-			canvas == myFirstCanvas
-			1 * service.permissionService.check(me, myFirstCanvas, op) >> true
-		}
+		then:
+		canvas == myFirstCanvas
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
 	}
 
 	def "authorizedGetById() checks access to canvases from PermissionService and throws exception if not allowed"() {
-		List<Permission.Operation> ops = Permission.Operation.values()
-		ops.each { op ->
-			when:
-			def canvas = service.authorizedGetById(myFirstCanvas.id, me, op)
+		when:
+		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.READ)
 
-			then:
-			canvas == myFirstCanvas
-			1 * service.permissionService.check(me, myFirstCanvas, op) >> false
-		}
+		then:
+		thrown NotPermittedException
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
 	}
 
 	def "authorizedGetById() grants read access to examples to anyone without checking permissions"() {
@@ -467,36 +461,32 @@ class CanvasServiceSpec extends Specification {
 	def "authorizedGetById() throws NotFoundException if no canvas exists"() {
 		when:
 		service.authorizedGetById("foo", me, Permission.Operation.READ)
+
 		then:
 		thrown(NotFoundException)
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to canvas from PermissionService and returns the module if allowed"() {
-		List<Permission.Operation> ops = Permission.Operation.values()
-		ops.each { op ->
-			when:
-			def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, op)
+		when:
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.READ)
 
-			then:
-			module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
-			1 * service.permissionService.check(me, myFirstCanvas, op) >> true
-		}
+		then:
+		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and returns the module if allowed"() {
 		Dashboard db = new Dashboard()
 		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, ord: 0, title: "foo"))
+		db.save(validate: false)
 
-		List<Permission.Operation> ops = Permission.Operation.values()
-		ops.each { op ->
-			when:
-			def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, op)
+		when:
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
 
-			then:
-			module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
-			1 * service.permissionService.check(me, myFirstCanvas, op) >> false
-			1 * service.permissionService.check(me, db, op) >> true
-		}
+		then:
+		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
 	}
 
 	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the canvas doesn't match the dashboard item"() {
@@ -559,6 +549,7 @@ class CanvasServiceSpec extends Specification {
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no module exists"() {
 		when:
 		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 999, null, me, Permission.Operation.READ)
+
 		then:
 		thrown(NotFoundException)
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
@@ -567,6 +558,7 @@ class CanvasServiceSpec extends Specification {
 	def "authorizedGetModuleOnCanvas() throws NotFoundException if no dashboard exists"() {
 		when:
 		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, 1, me, Permission.Operation.READ)
+
 		then:
 		thrown(NotFoundException)
 		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
