@@ -40,7 +40,9 @@ StreamrTable.prototype.addRow = function (row, rowId, op) {
 	var rowIdString = (rowId != null) ? " id='" + rowId + "'" : "";
 	var newRow = $("<tr"+ rowIdString +"></tr>");
 	for (var i = 0; i < row.length; i++) {
-		newRow.append("<td>" + (row[i] != null ? row[i] : "") + "</td>");
+		var content = row[i] == null ? "" :
+					  row[i] instanceof Object ? JSON.stringify(row[i]) : row[i];
+		newRow.append("<td>" + content + "</td>");
 	}
 	this.tableBody[op](newRow);
 }
