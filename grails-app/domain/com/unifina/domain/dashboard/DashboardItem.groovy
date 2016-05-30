@@ -27,6 +27,7 @@ class DashboardItem implements Comparable {
 	Map toMap() {
 		return [
 				id: id,
+				dashboard: dashboard.id,
 				title: title,
 				ord: ord,
 				size: size,
