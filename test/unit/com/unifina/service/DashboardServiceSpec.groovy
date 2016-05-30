@@ -332,6 +332,7 @@ class DashboardServiceSpec extends Specification {
 		DashboardItem.findById(itemToUpdateId).properties == updatedItem.properties
 		updatedItem.toMap() == [
 			id: 1L,
+			dashboard: dashboardId,
 		    title: "updated-item",
 			canvas: canvas.id,
 			module: 1,

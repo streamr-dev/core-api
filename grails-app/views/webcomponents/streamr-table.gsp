@@ -22,7 +22,6 @@
 				this.bindEvents(_this.$["streamr-widget-container"])
 
 				this.getModuleJson(function(json) {
-					var resendOptions = _this.getResendOptions(json)
 					var options = {}
 					options.maxRows = _this.maxRows
 
@@ -33,12 +32,9 @@
 						_this.table.receiveResponse(response.initRequest)
 					})
 
-					_this.subscribe(
-						function(message) {
-					    	_this.table.receiveResponse(message)
-					    },
-					    resendOptions
-					)
+					_this.subscribe(function(message) {
+						_this.table.receiveResponse(message)
+					})
 				})
 
 			},
