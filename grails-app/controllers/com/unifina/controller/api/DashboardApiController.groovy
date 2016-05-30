@@ -3,6 +3,7 @@ package com.unifina.controller.api
 import com.unifina.api.SaveDashboardCommand
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.DashboardService
@@ -11,11 +12,20 @@ import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class DashboardApiController {
+
 	DashboardService dashboardService
+	def permissionService
+	def apiService
 
 	@StreamrApi
 	def index() {
-		def dashboards = dashboardService.findAllDashboards((SecUser) request.apiUser)
+		def criteria = apiService.createListCriteria(params, ["name"], {
+			// Filter by exact name
+			if (params.name) {
+				eq "name", params.name
+			}
+		})
+		def dashboards = permissionService.get(Dashboard, request.apiUser, Permission.Operation.READ, apiService.isPublicFlagOn(params), criteria)
 		render(dashboards*.toSummaryMap() as JSON)
 	}
 

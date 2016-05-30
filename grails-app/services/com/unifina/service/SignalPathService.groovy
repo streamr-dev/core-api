@@ -249,20 +249,20 @@ class SignalPathService {
 
 	boolean stopLocalRunner(String runnerId) {
 		SignalPathRunner runner = servletContext["signalPathRunners"]?.get(runnerId)
-		if (runner!=null && runner.isAlive()) {
+		if (runner!=null) {
 			runner.abort()
 
-			// Wait for runner to be stopped state
+			// Wait for runner to be in stopped state
 			runner.waitRunning(false)
 			if (runner.getRunning()) {
-				log.error("Timed out while waiting for runner $canvas.runner to stop!")
+				log.error("Timed out while waiting for runner $runnerId to stop!")
 				return false
 			} else {
 				return true
 			}
 		}
 		else {
-			log.error("stopLocal: could not find runner $canvas.runner!")
+			log.error("stopLocal: could not find runner $runnerId!")
 			updateState(runnerId, Canvas.State.STOPPED)
 			return false
 		}
@@ -336,9 +336,11 @@ class SignalPathService {
 						throw new AccessControlException("stopRequest requires authentication!");
 					}
 
-					stopLocal(canvas);
-
-					return request
+					if (stopLocal(canvas)) {
+						return request
+					} else {
+						throw new CanvasUnreachableException("Canvas could not be stopped.")
+					}
 				} else if (request.type=="ping") {
 					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
 						throw new AccessControlException("ping requires authentication!");
