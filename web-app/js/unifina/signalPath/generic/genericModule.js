@@ -330,6 +330,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		}
 		return td;
 	}
+
+	prot.addPlaceholderOutput = function() {
+		var td = createRoomForIO("output");
+		td.append("<div class='endpoint placeholder'></div>")
+	}
 	
 	prot.addInput = function(data, clazz) {
 		clazz = clazz || data.jsClass || SignalPath.Input
@@ -365,7 +370,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	prot.removeInput = function(name) {
 		var _this = this
-		// TODO: timeout BAD BAD BAD
 		setTimeout(function() {
 			var el = prot.inputsByName[name]
 			if (el) {
@@ -391,7 +395,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 
 	prot.removeOutput = function(name) {
 		var _this = this
-		// TODO: timeout BAD BAD BAD
 		setTimeout(function() {
 			var el = prot.outputsByName[name]
 			if (el) {

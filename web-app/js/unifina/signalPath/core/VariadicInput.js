@@ -31,8 +31,11 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
                     jsonCopy.variadic.index += 1
 
                     if (json.variadic.linkedOutput) {
-                        var newOutput = module.getOutput(json.variadic.linkedOutput).makeNewOutput()
+                        var linkedOutput = module.getOutput(json.variadic.linkedOutput)
+                        linkedOutput.div.css("display", "")
+                        var newOutput = linkedOutput.makeNewOutput()
                         jsonCopy.variadic.linkedOutput = newOutput.getName()
+                        module.redraw()
                     }
 
                     module.addInput(jsonCopy)

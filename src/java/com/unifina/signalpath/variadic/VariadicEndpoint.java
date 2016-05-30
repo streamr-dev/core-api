@@ -39,9 +39,7 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 			addPlaceholder();
 		} else {
 			E placeholder = endpoints.get(endpoints.size() - 1);
-			if (placeholder instanceof Input) {
-				((Input) placeholder).requiresConnection = false;
-			}
+			furtherConfigurePlaceholder(placeholder);
 			attachToModule(module, placeholder);
 		}
 	}
@@ -67,17 +65,29 @@ abstract class VariadicEndpoint<E extends Endpoint<T>, T> implements Serializabl
 		this.offsetIndex = startIndex;
 	}
 
+	/**
+	 * Sub class is responsible for attaching <code>endpoint</code> to <code>owner</code> in a correct way.
+	 */
 	abstract void attachToModule(AbstractSignalPathModule owner, E endpoint);
 
+	/**
+	 * Sub class can further configure placeholder if deemed necessary.
+	 */
+	abstract void furtherConfigurePlaceholder(E placeholder);
+
+	/**
+	 * Sub class defines (prefix) display name of endpoints
+	 */
 	abstract String getDisplayName();
 
+	/**
+	 * Sub class defines js class that will be used in front-end.
+	 */
 	abstract String getJsClass();
 
 	private E addPlaceholder() {
 		E endpoint = initializeEndpoint("endpoint-" + System.currentTimeMillis());
-		if (endpoint instanceof Input) {
-			((Input) endpoint).requiresConnection = false;
-		}
+		furtherConfigurePlaceholder(endpoint);
 		endpoints.add(endpoint);
 		attachToModule(module, endpoint);
 		updateEndpointConfigurations();

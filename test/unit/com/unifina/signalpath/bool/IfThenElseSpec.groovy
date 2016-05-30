@@ -19,7 +19,7 @@ class IfThenElseSpec extends Specification {
 	void "ifThenElse gives the right answer"() {
 		when:
 		Map inputValues = [
-			if: [1, 1, 0, 0].collect {it?.doubleValue()},
+			if: [true, true, false, false],
 			then: [1, 2, 5, 6].collect {it?.doubleValue()},
 			else: [7, 8, 3, 4].collect {it?.doubleValue()},
 		]

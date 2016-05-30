@@ -603,7 +603,14 @@ var SignalPath = (function () {
 
 		// SignalPath uiChannel
 		if (runningJson.uiChannel) {
-			connection.subscribe(runningJson.uiChannel.id, processMessage, runningJson.adhoc ? {resend_all:true} : {})
+			connection.subscribe(
+				runningJson.uiChannel.id,
+				processMessage,
+				{
+					resend_all: (runningJson.adhoc ? true : undefined),
+					canvas: runningJson.id
+				}
+			)
 		}
 
 		// Module uiChannels
@@ -613,7 +620,11 @@ var SignalPath = (function () {
 				var module = getModuleById(moduleJson.hash)
 				// The user may have modified the ui canvas vs. the running one, so check
 				if (module) {
-					connection.subscribe(moduleJson.uiChannel.id, module.receiveResponse, module.getUIChannelOptions())
+					connection.subscribe(
+						moduleJson.uiChannel.id,
+						module.receiveResponse,
+						$.extend({}, module.getUIChannelOptions(), {canvas: runningJson.id})
+					)
 				}
 			}
 		})

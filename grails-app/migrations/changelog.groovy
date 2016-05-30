@@ -26,6 +26,8 @@ databaseChangeLog = {
 	include file: 'core/2016-03-17-drop-ui-channel.groovy'
 	include file: 'core/2016-02-04-scheduler-module-added.groovy'
 	include file: 'core/2016-03-18-add-http-module.groovy'
+	include file: 'core/2016-05-09-boolean-modules.groovy'
 	include file: 'core/2016-05-09-stream-date-created-and-last-updated.groovy'
+	include file: 'core/2016-05-26-add-filter-specific-js-module.groovy'
 	include file: 'core/2016-04-06-tours.groovy'
 }
