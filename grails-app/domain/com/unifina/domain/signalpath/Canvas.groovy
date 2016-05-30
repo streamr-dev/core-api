@@ -4,6 +4,8 @@ import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 class Canvas {
 
@@ -69,8 +71,9 @@ class Canvas {
 		serialized == null
 	}
 
-	def toMap() {
-		Map map = JSON.parse(json)
+	@CompileStatic
+	Map toMap() {
+		Map map = (JSONObject) JSON.parse(json)
 		return [
 			id: id,
 			name: name,

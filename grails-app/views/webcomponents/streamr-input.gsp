@@ -13,7 +13,6 @@
                 this.bindEvents(_this.$["streamr-widget-container"])
 
                 this.getModuleJson(function(json) {
-                    var resendOptions = _this.getResendOptions(json)
                     _this.widget = _this.createWidget(json)
                     _this.widget.render()
                     $(_this.widget).on("input", function(e, value) {
@@ -29,13 +28,10 @@
                         _this.widget.updateState(response.state)
                     })
 
-                    _this.subscribe(
-                        function(message) {
-                            if(_this.widget && _this.widget.receiveResponse)
-                                _this.widget.receiveResponse(message)
-                        },
-                        resendOptions
-                    )
+                    _this.subscribe(function(message) {
+						if(_this.widget && _this.widget.receiveResponse)
+							_this.widget.receiveResponse(message)
+					})
                 })
                 if(this.onReady)
                     this.onReady()
