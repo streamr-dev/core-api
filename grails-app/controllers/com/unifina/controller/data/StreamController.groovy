@@ -41,9 +41,12 @@ class StreamController {
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
-		List<Stream> streams = permissionService.get(Stream, user)
-		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
-		[streams:streams, shareable:shareable]
+		List<Stream> streams = permissionService.get(Stream, user, {
+			order("lastUpdated", "desc")
+		})
+		Set<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE).toSet()
+		Set<Stream> writable = permissionService.get(Stream, user, Operation.WRITE).toSet()
+		[streams:streams, shareable:shareable, writable:writable, user:user]
 	}
 
 	def search() {
@@ -174,8 +177,8 @@ class StreamController {
 
 				Map config = (stream.config ? JSON.parse(stream.config) : [:])
 				List fields = config.fields ? config.fields : []
-
-				CSVImporter csv = new CSVImporter(temp, fields)
+				def a = springSecurityService.currentUser
+				CSVImporter csv = new CSVImporter(temp, fields, null, null, springSecurityService.currentUser.timezone)
 				if (csv.getSchema().timestampColumnIndex == null) {
 					deleteFile = false
 					flash.message = "Unfortunately we couldn't recognize some of the fields in the CSV-file. But no worries! With a couple of confirmations we still can import your data."
@@ -186,7 +189,9 @@ class StreamController {
 					render([success: true] as JSON)
 				}
 			} catch (Exception e) {
-				e = ExceptionUtils.getRootCause(e)
+				Exception rootCause = ExceptionUtils.getRootCause(e)
+				if(rootCause != null)
+					e = rootCause
 				log.error("Failed to import file", e)
 				response.status = 500
 				render([success: false, error: e.message] as JSON)
@@ -264,13 +269,6 @@ class StreamController {
 			}
 			redirect(action: "show", params: [id: params.id])
 		}
-	}
-
-	def getDataRange() {
-		Stream stream = Stream.get(params.id)
-		DataRange dataRange = streamService.getDataRange(stream)
-		Map dataRangeMap = [beginDate: dataRange?.beginDate, endDate: dataRange?.endDate]
-		render dataRangeMap as JSON
 	}
 
 	private def getAuthorizedStream(String id, Operation op=Operation.READ, Closure action) {

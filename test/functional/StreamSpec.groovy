@@ -146,7 +146,6 @@ class StreamSpec extends LoginTester1Spec {
 			acceptConfirmation()
 		then: "must navigate to list page and show message"
 			waitFor { at StreamListPage }
-			$(".alert-info").displayed
 	}
 
 	void "creating a mongo stream and autodetecting its fields work"() {
@@ -227,7 +226,6 @@ class StreamSpec extends LoginTester1Spec {
 		waitFor { $(".modal-dialog").displayed }
 		$(".modal-dialog .btn-primary").click()
 		waitFor { at StreamListPage }
-		$(".alert-info").text().contains("deleted")
 	}
 	
 }

@@ -6,9 +6,8 @@
 	 * If the model has possibleValues set, then a dropdown with the possible values
 	 * is shown.
 	 *
-	 * @param parent The parent dom element
-	 * @param module Reference to the module that has this parameter
-	 * @param data The model for this parameter
+	 * @param parentElement The parent dom element
+	 * @param parameter The parameter this editor is attached to
 	 * @constructor
      */
 	var DefaultParameterValueEditor = function(parentElement, parameter) {
@@ -36,7 +35,7 @@
 				option.attr("value",val.value);
 				option.append(val.name);
 
-				if (_this.data.value==val.value)
+				if (_this.data.value && _this.data.value.toString() == val.value)
 					option.attr("selected","selected");
 
 				select.append(option);
@@ -82,9 +81,8 @@
 	/**
 	 * View for parameters of type Stream
 	 *
-	 * @param parent
-	 * @param module
-	 * @param data
+	 * @param parentElement The parent dom element
+	 * @param parameter The parameter this editor is attached to
      * @constructor
      */
 	var StreamParameterValueEditor = function(parentElement, parameter) {
@@ -195,9 +193,8 @@
 	/**
 	 * Shows a colorpicker for params of type Color.
 	 *
-	 * @param parent
-	 * @param module
-	 * @param data
+	 * @param parentElement The parent dom element
+	 * @param parameter The parameter this editor is attached to
 	 * @constructor
 	 */
 	var ColorParameterValueEditor = function(parentElement, parameter) {
@@ -244,9 +241,8 @@
 	/**
 	 * Shows a key-value-pair editor for parameters of type Map
 	 *
-	 * @param parent
-	 * @param module
-	 * @param data
+	 * @param parentElement The parent dom element
+	 * @param parameter The parameter this editor is attached to
 	 * @constructor
 	 */
 	var MapParameterValueEditor = function(parentElement, parameter) {
@@ -293,6 +289,8 @@
 	MapParameterValueEditor.prototype.enable = function() {
 		this.editor.enable()
 	}
+
+
 
 	// Map types to value editors. DefaultParameterValueEditor is the default.
 	var editorMappings = {

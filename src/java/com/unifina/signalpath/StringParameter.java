@@ -16,5 +16,4 @@ public class StringParameter extends Parameter<String> {
 	protected boolean isEmpty(String value) {
 		return super.isEmpty(value) || value.equals("");
 	}
-
 }

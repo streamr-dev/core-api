@@ -22,7 +22,6 @@ import com.unifina.utils.NetworkInterfaceUtils
 class TaskWorker extends Thread {
 	
 	GrailsApplication grailsApplication
-//	BacktestService backtestService
 	TaskService taskService
 	SessionFactory sessionFactory
 
@@ -178,21 +177,27 @@ class TaskWorker extends Thread {
 			} catch (Exception e) {
 				log.error("Failed to write error to Task!", e)
 			}
-			
-			if (!currentTask) {
-				stateCode = 0
-				if (i%60==0)
-					log.info("No tasks available.")
 
-				Thread.sleep(10*1000)
+			synchronized(this) {
+				if (!currentTask && !quit) {
+					stateCode = 0
+					if (i % 60 == 0) {
+						log.info("No tasks available.")
+					}
+					wait(10000)
+				}
 			}
 		}
 		
 		stateCode = -1
+		log.info("Task worker thread $workerId stopped.")
 	}
 
 	public void quit() {
-		quit = true
+		synchronized(this) {
+			quit = true
+			this.notify()
+		}
 	}
 
 }

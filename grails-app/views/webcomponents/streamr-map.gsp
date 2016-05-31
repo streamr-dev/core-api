@@ -24,7 +24,6 @@
 				this.$["streamr-widget-container"].classList.add("map-container")
 
 				this.getModuleJson(function(json) {
-					var resendOptions = _this.getResendOptions(json)
 					var mapOptions = {}
 					if (json.options) {
 						Object.keys(json.options).forEach(function(key) {
@@ -42,12 +41,13 @@
 						traceRadius: this.traceRadius !== undefined ? this.traceRadius : mapOptions.traceRadius
 					})
 
-					_this.subscribe(
-						function(message) {
-					    	_this.map.handleMessage(message)
-					    },
-					    resendOptions
-					)
+					_this.$["streamr-widget-container"].addEventListener("resize", function() {
+						_this.map.resize()
+					})
+
+					_this.subscribe(function(message) {
+						_this.map.handleMessage(message)
+					})
 
 				})
 

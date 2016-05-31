@@ -199,4 +199,126 @@ class CanvasSpec extends LoginTester1Spec {
 
 	}
 
+	void "module help shows and hides tooltip"() {
+		setup:
+			addAndWaitModule 'Add'
+		when: "module help button is hovered"
+			def helpButton = $(".moduleheader .modulebutton", 1)
+			interact {
+				moveToElement(helpButton)
+			}
+		then: "the tooltip should show up"
+			waitFor {
+				$(".tooltip .modulehelp-tooltip").displayed
+				$(".tooltip .modulehelp-tooltip p", 1).text().contains("Adds together")
+			}
+		when: "mouse moved away"
+			def menu = $(".menu-content")
+			interact {
+				moveToElement(menu)
+			}
+		then: "tooltip should be hidden"
+			waitFor {
+				!$(".tooltip .modulehelp-tooltip").displayed
+			}
+	}
+
+	void "IOSwitches show tooltips"() {
+		setup:
+			addAndWaitModule 'Add'
+		when: "input ioSwitch is hovered"
+			def el = $("td.input .ioSwitch.drivingInput")
+			interact {
+				moveToElement(el)
+			}
+		then: "input ioSwitch tooltip is displayed"
+			waitFor {
+				$(".tooltip").displayed
+				$(".tooltip .tooltip-inner").text().contains("Driving input")
+			}
+		when: "mouse moved away"
+			def menu = $(".menu-content")
+			interact {
+				moveToElement(menu)
+			}
+		then: "input ioSwitch is no longer displayed"
+			waitFor {
+				!$(".tooltip .modulehelp-tooltip").displayed
+			}
+
+		when: "output ioSwitch is hovered"
+			el = $("td.output .ioSwitch.noRepeat")
+			interact {
+				moveToElement(el)
+			}
+		then: "output ioSwitch tooltip is displayed"
+			waitFor {
+				$(".tooltip").displayed
+				$(".tooltip .tooltip-inner").text().contains("No repeat")
+			}
+		when: "mouse moved away"
+			menu = $(".menu-content")
+			interact {
+				moveToElement(menu)
+			}
+		then: "output ioSwitch tooltip is no longer displayed"
+			waitFor {
+				!$(".tooltip .modulehelp-tooltip").displayed
+			}
+	}
+
+	void "moduleSwitch shows tooltip"() {
+		setup:
+			addAndWaitModule 'Add'
+		when: "footer moduleSwitch is hovered"
+			def el = $(".modulefooter .moduleSwitch.clearState")
+			interact {
+				moveToElement(el)
+			}
+		then: "footer ioSwitch tooltip is displayed"
+			waitFor {
+				$(".tooltip").displayed
+				$(".tooltip .tooltip-inner").text().contains("Clear module state")
+			}
+		when: "mouse moved away"
+			def menu = $(".menu-content")
+			interact {
+				moveToElement(menu)
+			}
+		then: "footer moduleSwitch tooltip is no longer displayed"
+			waitFor {
+				!$(".tooltip").displayed
+			}
+	}
+
+	void "IOSwitch tooltip shows the value of the switch"() {
+		def ioSwitch
+		setup:
+			addAndWaitModule 'Add'
+		when: "input ioSwitch is hovered"
+		ioSwitch = $("td.input .ioSwitch.drivingInput")
+			interact {
+				moveToElement(ioSwitch)
+			}
+		then: "input ioSwitch tooltip show value 'on'"
+			waitFor {
+				$(".tooltip").displayed
+				$(".tooltip .tooltip-inner strong").text() == "on"
+			}
+		when: "tooltip is hidden, switch is clicked and tooltip is shown again"
+			def menu = $(".menu-content")
+			interact {
+				moveToElement(menu)
+			}
+			ioSwitch.click()
+			interact {
+				moveToElement(ioSwitch)
+			}
+		then: "input ioSwitch tooltip show value 'on'"
+			waitFor {
+				$(".tooltip").displayed
+				$(".tooltip .tooltip-inner strong").text() == "off"
+			}
+	}
+
 }

@@ -278,7 +278,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		else {
 	    	$.ajax({
 			    type: 'GET',
-			    url: prot.signalPath.options.getModuleHelpUrl,
+			    url: Streamr.createLink({uri: 'api/v1/modules/'+prot.jsonData.id+'/help'}),
 			    dataType: 'json',
 			    success: function(data) {
 			    	prot.cachedHelpResponse = data;
@@ -286,8 +286,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				},
 			    error: function() {
 			    	result = "An error occurred while loading module help.";
-			    },
-			    data: {id:prot.jsonData.id}
+			    }
 			});
 		}
 	}
@@ -528,7 +527,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.updateFrom = updateFrom;
 	
 	function clone(callback) {
-		var cloneData = jQuery.extend(true, {}, prot.toJSON());
+		var cloneData = jQuery.extend(true, {}, pub.toJSON());
 		prot.prepareCloneData(cloneData);
 
 		// Null hash value causes NumberFormatException in backend.

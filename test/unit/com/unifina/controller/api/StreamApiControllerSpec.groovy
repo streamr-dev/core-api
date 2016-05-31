@@ -5,12 +5,13 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission
+import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
-import com.unifina.service.StreamService
+import com.unifina.service.ApiService
 import com.unifina.service.PermissionService
+import com.unifina.service.StreamService
 import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
@@ -20,7 +21,7 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService])
+@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -40,6 +41,7 @@ class StreamApiControllerSpec extends Specification {
 
 		controller.streamService = streamService
 		controller.permissionService = permissionService
+		controller.apiService = mainContext.getBean(ApiService)
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
@@ -86,6 +88,20 @@ class StreamApiControllerSpec extends Specification {
 			fields: []
 		]
 		response.json[0].description == "description"
+	}
+
+	void "index() adds name param to filter criteria"() {
+		when:
+		def name = Stream.get(streamTwoId).name
+		params.name = name
+		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.requestURI = "/api/v1/streams"
+		withFilters(action: "index") {
+			controller.index()
+		}
+
+		then:
+		response.json[0].name == name
 	}
 
 	void "create a new stream for currently logged in user"() {
