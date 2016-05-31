@@ -33,18 +33,15 @@ public class UiTagLib {
 			<script type="text/javascript">
 				\$(document).ready(function() {
 					\$("#${id}").datepicker({
-						firstDay: 1,
-						dateFormat: '${message(code:"default.datePicker.format")}',
+						weekStart: 1,
+						format: '${message(code: "default.datePicker.format")}',
 						autoclose: true,
-						minDate: ${attrs.startDate ? 'new Date('+attrs.startDate.getTime()+')' : 'undefined'},
-						maxDate: ${attrs.endDate ? 'new Date('+attrs.endDate.getTime()+')' : 'undefined'},
-						showButtonPanel: ${attrs.todayBtn && attrs.todayBtn == 'true' ? 'true' : 'false'},
-						selectOtherMonths: true,
-						changeMonth: true,
-						changeYear: true
+						startDate: ${attrs.startDate ? 'new Date(' + attrs.startDate.getTime() + ')' : 'undefined'},
+						endDate: ${attrs.endDate ? 'new Date(' + attrs.endDate.getTime() + ')' : 'undefined'},
+						todayBtn: ${attrs.todayBtn && attrs.todayBtn == 'true' ? 'true' : 'false'}
 					});
 					\$("#${id}").on('change', function() {
-						\$(this).datepicker('refresh')
+						\$(this).datepicker('update')
 					});
 				});
 			</script>

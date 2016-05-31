@@ -5,8 +5,6 @@
 		<title>Canvas</title>
 
 		<r:require module='jstree'/>
-		%{--<r:require module="bootstrap-datepicker"/>--}%
-		<r:require module='jquery-ui'/>
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>
 		<r:require module="slimscroll"/>
@@ -16,6 +14,7 @@
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
 		<r:require module="canvas-controls"/>
+		<r:require module="bootstrap-datepicker"/>
 
 		<r:script>
 
