@@ -261,4 +261,40 @@ class TourSpec extends LoginTester1Spec {
 		}
 	}
 
+	def "tour 2"() {
+		startTourFromHelpMenu(2)
+
+		expect:
+		waitFor {
+			getTourBubble().displayed
+			getTourBubble().find('.hopscotch-next').displayed
+		}
+		repeatNextStep()
+
+		advance { searchAndClickContains("Twitter-Bitcoin") }
+
+		advance { searchAndClickContains("Table") }
+
+		moveModuleBy("Table", 200, 200)
+
+		advance {
+			connectEndpoints(findOutputByDisplayName("Stream", "text"), findInputByDisplayName("Table", "in1"))
+			connectEndpoints(findOutputByDisplayName("Stream", "retweet_count"), findInputByDisplayName("Table", "in2"))
+			connectEndpoints(findOutputByDisplayName("Stream", "favorite_count"), findInputByDisplayName("Table", "in3"))
+			connectEndpoints(findOutputByDisplayName("Stream", "lang"), findInputByDisplayName("Table", "in4"))
+		}
+
+		advance {
+			ensureRealtimeTabDisplayed()
+		}
+
+		advance {
+			ensureRealtimeTabDisplayed()
+		}
+
+		advance {
+			startCanvas(true)
+		}
+	}
+
 }

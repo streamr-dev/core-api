@@ -47,14 +47,49 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "henri", id: "tour-resources-3") {
+	changeSet(author: "henri", id: "tour-resources-3", failOnError: false) {
 
-		// Grant public read permission to demo stream
+		String now = "2016-05-31T18:16:00"
+
+		// Insert demo stream
+		insert(tableName: "stream") {
+			column(name: "version", valueNumeric: 0)
+			column(name: "id", value: "ln2g8OKHSdi7BcL-bcnh2g")
+			column(name: "api_key", value: "TaPRLN84RXqh8HXuFjQDLg")
+			column(name: "name", value: "Twitter-Bitcoin")
+			column(name: "description", value: "Bitcoin mentions on Twitter")
+			column(name: "date_created", valueDate: now)
+			column(name: "last_updated", valueDate: now)
+			column(name: "feed_id", valueNumeric: 7) // API stream
+
+			def config = [fields: [
+				[name: "text", type: "string"],
+				[name: "user", type: "object"],
+				[name: "retweet_count", type: "number"],
+				[name: "favorite_count", type: "number"],
+				[name: "lang", type: "string"]
+			]]
+			column(name: "config", value: new JSONObject(config).toString())
+			column(name: "user_id", valueNumeric: 1)
+			column(name: "class", value: "com.unifina.domain.data.Stream")
+		}
+	}
+
+	changeSet(author: "henri", id: "tour-resources-4") {
+
+		// Grant public read permission to demo streams
 		insert(tableName: "permission") {
 			column(name: "version", valueNumeric: 0)
 			column(name: "clazz", value: "com.unifina.domain.data.Stream")
 			column(name: "operation", value: "read")
 			column(name: "string_id", value: "YpTAPDbvSAmj-iCUYz-dxA")
+			column(name: "anonymous", valueBoolean: false)
+		}
+		insert(tableName: "permission") {
+			column(name: "version", valueNumeric: 0)
+			column(name: "clazz", value: "com.unifina.domain.data.Stream")
+			column(name: "operation", value: "read")
+			column(name: "string_id", value: "ln2g8OKHSdi7BcL-bcnh2g")
 			column(name: "anonymous", valueBoolean: false)
 		}
 
@@ -88,22 +123,24 @@ databaseChangeLog = {
 		def date = "2016-04-11T15:00:00"
 
 		// tester1
-		insert(tableName: "tour_user") {
-			column(name: "user_id", valueNumeric: 1)
-			column(name: "tour_number", valueNumeric: 0)
-			column(name: "completed_at", valueDate: date)
-		}
-		// tester2
-		insert(tableName: "tour_user") {
-			column(name: "user_id", valueNumeric: 2)
-			column(name: "tour_number", valueNumeric: 0)
-			column(name: "completed_at", valueDate: date)
-		}
-		// tester-admin
-		insert(tableName: "tour_user") {
-			column(name: "user_id", valueNumeric: 3)
-			column(name: "tour_number", valueNumeric: 0)
-			column(name: "completed_at", valueDate: date)
+		(0..2).each { num ->
+			insert(tableName: "tour_user") {
+				column(name: "user_id", valueNumeric: 1)
+				column(name: "tour_number", valueNumeric: num)
+				column(name: "completed_at", valueDate: date)
+			}
+			// tester2
+			insert(tableName: "tour_user") {
+				column(name: "user_id", valueNumeric: 2)
+				column(name: "tour_number", valueNumeric: num)
+				column(name: "completed_at", valueDate: date)
+			}
+			// tester-admin
+			insert(tableName: "tour_user") {
+				column(name: "user_id", valueNumeric: 3)
+				column(name: "tour_number", valueNumeric: num)
+				column(name: "completed_at", valueDate: date)
+			}
 		}
 	}
 
