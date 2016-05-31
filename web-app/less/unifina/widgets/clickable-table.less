@@ -48,6 +48,15 @@ div.table.clickable-table {
 		.td, .th {
 			display: table-cell;
 		}
+
+		.button-column {
+			width: 70px;
+			border-left: none !important;
+			> * {
+				float: right;
+			}
+		}
+
 		.td {
 			&:extend(td);
 			&:extend(.table tr > td);
@@ -71,7 +80,7 @@ div.table.clickable-table {
 	&.table-bordered {
 		&:extend(.table-bordered);
 		.thead > .tr > .th {
-			&:not(:first-child),{
+			&:not(:first-child){
 				border-left: 1px solid #dddddd;
 			}
 		}
@@ -92,6 +101,32 @@ div.table.clickable-table {
 	&.table-hover {
 		.tbody > .tr:hover > .td {
 			&:extend(.table-hover > tbody > tr:hover > td);
+		}
+	}
+
+	div.dropdown {
+		text-align: center;
+
+		span.dropdown-toggle {
+			cursor: pointer;
+			font-size: 20px;
+		}
+
+		span.dropdown-toggle:hover {
+			color: #000000;
+		}
+
+		ul.dropdown-menu > li > span {
+			font-size: 14px;
+			cursor: pointer;
+			margin: 0 -2px;
+			padding: 5px 18px;
+			display: block;
+		}
+
+		ul.dropdown-menu > li > span:hover {
+			background-color: @primary-color;
+			color: #FFFFFF;
 		}
 	}
 }

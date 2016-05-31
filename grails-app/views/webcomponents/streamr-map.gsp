@@ -24,7 +24,6 @@
 				this.$["streamr-widget-container"].classList.add("map-container")
 
 				this.getModuleJson(function(json) {
-					var resendOptions = _this.getResendOptions(json)
 					var mapOptions = {}
 					if (json.options) {
 						Object.keys(json.options).forEach(function(key) {
@@ -46,12 +45,9 @@
 						_this.map.resize()
 					})
 
-					_this.subscribe(
-						function(message) {
-					    	_this.map.handleMessage(message)
-					    },
-					    resendOptions
-					)
+					_this.subscribe(function(message) {
+						_this.map.handleMessage(message)
+					})
 
 				})
 
