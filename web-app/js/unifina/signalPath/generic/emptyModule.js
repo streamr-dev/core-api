@@ -77,47 +77,20 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 
 		var tooltipOptions = {
 			animation: false,
-			trigger: 'manual',
-			container: SignalPath.getParentElement(),
-			viewport: {
-				selector: SignalPath.getParentElement(),
-				padding: 0
-			},
+			show: {delay: 500},
+			hide: {delay: 500},
+			items: helpLink,
 			html: true,
-			placement: 'auto top',
-			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
+			tooltipClass: "module-help-tooltip",
+			position: { my: "right bottom-20", of: helpLink, collision: "flipfit" },
+			template: '' +
+				'<div class="tooltip" role="tooltip">' +
+					'<div class="tooltip-arrow"></div>' +
+					'<div class="tooltip-inner modulehelp-tooltip"></div>' +
+				'</div>'
 		}
-		
-		var delay=500, tooltipDelayTimer
-		helpLink.mouseenter(function() {
-			tooltipDelayTimer = setTimeout(function() {
-	 			prot.getHelp(false, function(htext) {
-	 				tooltipOptions.title = htext
-					// show tooltip after help text is loaded
-					helpLink.tooltip(tooltipOptions)
-
-					helpLink.on('shown.bs.tooltip', function(event, param) {
-						$tt = $(".tooltip")
-						if ($tt.length) {
-							var top = $tt.offset().top
-							// Workaround for CORE-216: tooltip is shown under main navbar
-							if (top < 75 && $tt.hasClass("top")) {
-								helpLink.tooltip("destroy")
-								helpLink.tooltip($.extend({}, tooltipOptions, {placement: 'bottom'}))
-								helpLink.tooltip("show")
-							}
-							MathJax.Hub.Queue(["Typeset",MathJax.Hub,$tt[0]]);
-							MathJax.Hub.Queue(function(){
-								$tt.find(".math-tex").addClass("math-jax-ready")
-							})
-						}
-					})
-					helpLink.tooltip('show')
-	 			})
-			}, delay)
-		}).mouseleave(function() {
-			clearTimeout(tooltipDelayTimer)
-			helpLink.tooltip('destroy')
+		prot.getHelp(false, function(content) {
+			helpLink.tooltip($.extend(tooltipOptions, {content: content}))
 		})
 
 		helpLink.click(function() {

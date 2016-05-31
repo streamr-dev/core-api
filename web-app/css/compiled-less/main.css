@@ -16233,9 +16233,8 @@ fieldset[disabled] .btn {
   display: inline-block;
   font-weight: bolder;
 }
-.module {
+#canvas .module {
   min-width: 150px;
-  min-height: 76px;
   display: -ms-flexbox;
   display: -webkit-flex;
   display: flex;
@@ -16243,7 +16242,7 @@ fieldset[disabled] .btn {
   -webkit-flex-direction: column;
   flex-direction: column;
 }
-.module .moduleheader {
+#canvas .module .moduleheader {
   width: 100%;
   height: 18px;
   margin-bottom: 5px;
@@ -16251,66 +16250,75 @@ fieldset[disabled] .btn {
   -webkit-flex: 0;
   flex: 0;
 }
-.module .moduleheader .modulename {
+#canvas .module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
 }
-.module .moduleheader .modulebutton {
+#canvas .module .moduleheader .modulebutton {
   width: 16px;
   text-align: right;
   display: inline;
   vertical-align: top;
   cursor: pointer;
 }
-.module .modulebody {
+#canvas .module .modulebody {
   padding: 5px;
   -ms-flex: 1;
   -webkit-flex: 1;
   flex: 1;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
 }
-.module .modulebody .table th {
+#canvas .module .modulebody .table th {
   padding-left: 3px;
   padding-right: 3px;
 }
-.module .modulebody table.paramTable {
+#canvas .module .modulebody table.paramTable {
   width: 100%;
   padding: 0px;
   border: none;
 }
-.module .modulebody table.paramTable td {
+#canvas .module .modulebody table.paramTable td {
   padding-right: 5px;
 }
-.module .modulebody table.paramTable td input {
+#canvas .module .modulebody table.paramTable td input {
   width: 50px;
 }
-.module .modulebody table.ioTable {
+#canvas .module .modulebody table.ioTable {
   border: none;
   width: 100%;
-  padding: 0px;
+  padding: 0;
+  -ms-flex: 0;
+  flex: 0;
+  -webkit-flex: 0;
 }
-.module .modulebody table.ioTable td {
+#canvas .module .modulebody table.ioTable td {
   padding-right: 5px;
 }
-.module .modulebody table.ioTable td.input {
+#canvas .module .modulebody table.ioTable td.input {
   text-align: right;
 }
-.module .modulebody table.ioTable td.output {
+#canvas .module .modulebody table.ioTable td.output {
   text-align: left;
   padding-left: 10px;
 }
-.module .modulebody div.endpoint.input {
+#canvas .module .modulebody div.endpoint.input {
   cursor: pointer;
 }
-.module .modulebody div.endpoint.input .switchContainer {
+#canvas .module .modulebody div.endpoint.input .switchContainer {
   float: left;
 }
-.module .modulebody div.endpoint.output {
+#canvas .module .modulebody div.endpoint.output {
   cursor: pointer;
 }
-.module .modulebody div.endpoint .switchContainer {
+#canvas .module .modulebody div.endpoint .switchContainer {
   float: right;
 }
-.module .modulebody div.endpoint .switchContainer .ioSwitch {
+#canvas .module .modulebody div.endpoint .switchContainer .ioSwitch {
   display: inline-block;
   font-size: 7px;
   vertical-align: text-bottom;
@@ -16319,42 +16327,49 @@ fieldset[disabled] .btn {
   height: 13px;
   cursor: pointer;
 }
-.module .modulebody div.ioname {
+#canvas .module .modulebody div.ioname {
   display: inline-block;
   max-width: 100px;
   white-space: pre-wrap;
 }
-.module .modulefooter {
+#canvas .module .modulebody .leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+#canvas .module .modulefooter {
   width: 100%;
   margin-top: 3px;
   -ms-flex: 0;
   -webkit-flex: 0;
   flex: 0;
 }
-.module .modulefooter .moduleSwitchContainer {
+#canvas .module .modulefooter .moduleSwitchContainer {
   float: right;
   margin-bottom: -3px;
 }
-.module .modulefooter .moduleSwitchContainer .moduleSwitch {
+#canvas .module .modulefooter .moduleSwitchContainer .moduleSwitch {
   font-size: 7px;
   text-align: center;
   cursor: pointer;
   padding: 2px;
 }
-.module.ui-resizable .modulefooter .moduleSwitchContainer {
+#canvas .module.ui-resizable .modulefooter .moduleSwitchContainer {
   padding-right: 20px;
 }
-.module .csvDownload {
+#canvas .module .csvDownload {
   display: block;
 }
-.module .csvDownload img {
+#canvas .module .csvDownload img {
   vertical-align: middle;
 }
-.module .showOnHover {
+#canvas .module .showOnHover {
   opacity: 0.0;
 }
-.module .showOnHover:hover {
+#canvas .module .showOnHover:hover {
   opacity: 1.0;
+}
+.ui-widget-content.module-help-tooltip {
+  background: #333;
 }
 div.module div.modulebody div.scheduler {
   font-size: 14px;

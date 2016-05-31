@@ -5,10 +5,10 @@
 		<title>Canvas</title>
 
 		<r:require module='jstree'/>
+		%{--<r:require module="bootstrap-datepicker"/>--}%
 		<r:require module='jquery-ui'/>
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>
-		<r:require module="bootstrap-datepicker"/>
 		<r:require module="slimscroll"/>
 		<r:require module="search-control"/>
 		<r:require module="signalpath-browser"/>

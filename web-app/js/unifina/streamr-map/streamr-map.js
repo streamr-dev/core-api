@@ -251,11 +251,9 @@
         }
     }
 
-    StreamrMap.prototype.resize = function(width, height) {
-        this.parent.css("width", width+"px")
-        this.parent.css("height", height+"px")
+    StreamrMap.prototype.redraw = function() {
         this.map.invalidateSize()
-        if(this.options.drawTrace)
+        if(this.lineLayer)
             this.lineLayer.redraw()
     }
 

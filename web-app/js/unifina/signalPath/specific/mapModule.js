@@ -16,7 +16,9 @@ SignalPath.MapModule = function(data,canvas,prot) {
 
 		prot.body.css("height", "100%")
 
-		container = $("<div class='map-container' style='width: 500px; height: 400px;'></div>")
+		container = $("<div class='map-container'></div>")
+		prot.div.width(500)
+		prot.div.height(400)
 		prot.body.append(container)
 
 		var mapOptions = {
@@ -40,20 +42,16 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		})
 
 		prot.initResizable({
-			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
-			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
+			minWidth: 350,
+			minHeight: 250,
 			stop: updateSize
 		});
-
-		$(SignalPath).on("loaded", updateSize)
 	}
 	prot.createDiv = createDiv;	
 	
 	function updateSize() {
 		if (map) {
-			var width = container.parent().width()
-			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight()
-			map.resize(width, height)
+			map.redraw()
 		}
 	}
 

@@ -1,155 +1,173 @@
-.module {
-  min-width: 150px;
-  min-height: 76px;
+#canvas {
 
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  -ms-flex-direction: column;
-  -webkit-flex-direction: column;
-  flex-direction: column;
+  .module {
+    min-width: 150px;
 
-  .moduleheader {
-    width: 100%;
-    height: 18px;
-    margin-bottom: 5px;
-    -ms-flex: 0;
-    -webkit-flex: 0;
-    flex: 0;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -ms-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
 
-    .modulename {
-      font-weight: bold;
-      font-size: 12px;
-    }
-
-    .modulebutton {
-      width: 16px;
-      text-align: right;
-      display: inline;
-      vertical-align: top;
-      cursor: pointer;
-    }
-  }
-
-  .modulebody {
-    padding: 5px;
-
-    -ms-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
-
-    .table th {
-      padding-left: 3px;
-      padding-right: 3px;
-    }
-
-    table.paramTable {
+    .moduleheader {
       width: 100%;
-      padding: 0px;
-      border: none;
+      height: 18px;
+      margin-bottom: 5px;
+      -ms-flex: 0;
+      -webkit-flex: 0;
+      flex: 0;
 
-      td {
-        padding-right: 5px;
+      .modulename {
+        font-weight: bold;
+        font-size: 12px;
+      }
 
-        input {
-          width: 50px;
-        }
+      .modulebutton {
+        width: 16px;
+        text-align: right;
+        display: inline;
+        vertical-align: top;
+        cursor: pointer;
       }
     }
 
-    table.ioTable {
-      border: none;
-      width: 100%;
-      padding: 0px;
+    .modulebody {
+      padding: 5px;
+      -ms-flex: 1;
+      -webkit-flex: 1;
+      flex: 1;
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      -ms-flex-direction: column;
+      -webkit-flex-direction: column;
+      flex-direction: column;
 
-      td {
-        padding-right: 5px;
+      .table th {
+        padding-left: 3px;
+        padding-right: 3px;
+      }
 
+      table.paramTable {
+        width: 100%;
+        padding: 0px;
+        border: none;
+
+        td {
+          padding-right: 5px;
+
+          input {
+            width: 50px;
+          }
+        }
+      }
+
+      table.ioTable {
+        border: none;
+        width: 100%;
+        padding: 0;
+        -ms-flex: 0;
+        flex: 0;
+        -webkit-flex: 0;
+
+        td {
+          padding-right: 5px;
+
+          &.input {
+            text-align: right;
+          }
+
+          &.output {
+            text-align: left;
+            padding-left: 10px;
+          }
+        }
+      }
+
+      div.endpoint {
         &.input {
-          text-align: right;
+          cursor: pointer;
+
+          .switchContainer {
+            float: left;
+          }
         }
 
         &.output {
-          text-align: left;
-          padding-left: 10px;
-        }
-      }
-    }
+          cursor: pointer;
 
-    div.endpoint {
-      &.input {
-        cursor: pointer;
+        }
 
         .switchContainer {
-          float: left;
+          float: right;
+
+          .ioSwitch {
+            display: inline-block;
+            font-size: 7px;
+            vertical-align: text-bottom;
+            text-align: center;
+            width: 13px;
+            height: 13px;
+            cursor: pointer;
+          }
         }
       }
 
-      &.output {
-        cursor: pointer;
-
+      div.ioname {
+        display: inline-block;
+        max-width: 100px;
+        white-space: pre-wrap;
       }
 
-      .switchContainer {
+      .leaflet-container {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .modulefooter {
+      width: 100%;
+      margin-top: 3px;
+
+      -ms-flex: 0;
+      -webkit-flex: 0;
+      flex: 0;
+
+      .moduleSwitchContainer {
         float: right;
+        margin-bottom: -3px;
 
-        .ioSwitch {
-          display: inline-block;
+        .moduleSwitch {
           font-size: 7px;
-          vertical-align: text-bottom;
           text-align: center;
-          width: 13px;
-          height: 13px;
           cursor: pointer;
+          padding: 2px;
         }
       }
     }
 
-    div.ioname {
-      display: inline-block;
-      max-width: 100px;
-      white-space: pre-wrap;
+    &.ui-resizable .modulefooter .moduleSwitchContainer {
+        padding-right: 20px;
     }
-  }
 
-  .modulefooter {
-    width: 100%;
-    margin-top: 3px;
+    .csvDownload {
+      display: block;
 
-    -ms-flex: 0;
-    -webkit-flex: 0;
-    flex: 0;
+      img {
+        vertical-align: middle;
+      }
+    }
 
-    .moduleSwitchContainer {
-      float: right;
-      margin-bottom: -3px;
+    .showOnHover {
+      opacity: 0.0;
 
-      .moduleSwitch {
-        font-size: 7px;
-        text-align: center;
-        cursor: pointer;
-        padding: 2px;
+      &:hover {
+        opacity: 1.0;
       }
     }
   }
-
-  &.ui-resizable .modulefooter .moduleSwitchContainer {
-      padding-right: 20px;
-  }
-
-  .csvDownload {
-    display: block;
-
-    img {
-      vertical-align:middle;
-    }
-  }
-
-  .showOnHover {
-    opacity: 0.0;
-
-    &:hover {
-      opacity: 1.0;
-    }
-  }
+}
+.ui-widget-content.module-help-tooltip {
+  background: #333;
 }

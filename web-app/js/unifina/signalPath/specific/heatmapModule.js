@@ -16,7 +16,9 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 
 		prot.body.css("height", "100%")
 		
-		container = $("<div class='heatmap-container' style='width: 500px; height: 400px;'></div>")
+		container = $("<div class='heatmap-container'></div>")
+		prot.div.width(500)
+		prot.div.height(400)
 		prot.body.append(container)
 
 		var heatMapOptions = {}
@@ -31,20 +33,17 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 		heatmap = new StreamrHeatMap(container, heatMapOptions)
 
 		prot.initResizable({
-			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
-			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
+			minWidth: 350,
+			minHeight: 250,
 			stop: updateSize
 		});
 
-		$(SignalPath).on("loaded", updateSize)
 	}
 	prot.createDiv = createDiv;	
 	
 	function updateSize() {
 		if (heatmap) {
-			var width = container.parent().width()
-			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight()
-			heatmap.resize(width, height)
+			heatmap.redraw()
 		}
 	}
 
