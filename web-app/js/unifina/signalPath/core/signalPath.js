@@ -398,7 +398,6 @@ var SignalPath = (function () {
 				callback(json);
 
 			$(pub).trigger('saved', [json]);
-			window.history.replaceState({}, 'Canvas ' + name, Streamr.createLink({controller: "canvas", action: "editor", id: json.id}));
 		}
 
 		var json = toJSON()

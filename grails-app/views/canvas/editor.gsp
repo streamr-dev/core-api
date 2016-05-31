@@ -83,23 +83,17 @@ $(document).ready(function() {
 		if (settings.editorState && settings.editorState.runTab)
 			$("a[href="+settings.editorState.runTab+"]").tab('show')
 
-	});
-
-	// Show realtime tab when a running SignalPath is loaded
-	$(SignalPath).on('loaded', function(event, json) {
 		if (SignalPath.isRunning()) {
+			// Show realtime tab when a running SignalPath is loaded
 			$("a[href=#tab-realtime]").tab('show')
-		}
-	});
 
-	// Try to ping a running SignalPath on load, and show error if it can't be reached
-	$(SignalPath).on('loaded', function(event, json) {
-		if (SignalPath.isRunning()) {
+			// Try to ping a running SignalPath on load, and show error if it can't be reached
 			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
 				if (err)
 					Streamr.showError('${message(code:'canvas.ping.error')}')
 			})
 		}
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: json.id}))
 	});
 
 	$(SignalPath).on('error', function(error) {
@@ -114,7 +108,17 @@ $(document).ready(function() {
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
+
+	$(SignalPath).on("new", function(event) {
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor"}))
+	})
+
+	function setAddressbarUrl(url) {
+		if(window.history && window.history.pushState)
+	  		window.history.replaceState({}, undefined, url)
+	}
 
 	// show search control
 	new SearchControl(
