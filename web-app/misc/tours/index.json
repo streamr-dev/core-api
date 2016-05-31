@@ -8,5 +8,10 @@
     "title": "Building logic in Streamr",
     "controller": "canvas",
     "action": "editor"
+  },
+  {
+    "title": "Real-time data and reacting to events",
+    "controller": "canvas",
+    "action": "editor"
   }
 ]

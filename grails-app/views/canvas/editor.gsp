@@ -288,7 +288,7 @@ $(document).unload(function () {
 						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
 					</li>
 					<li class="">
-						<a href="#tab-realtime" role="tab" data-toggle="tab">Realtime</a>
+						<a href="#tab-realtime" id="open-realtime-tab-link" role="tab" data-toggle="tab">Realtime</a>
 					</li>
 				</ul>
 
