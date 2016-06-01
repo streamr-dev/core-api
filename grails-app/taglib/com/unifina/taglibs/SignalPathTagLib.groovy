@@ -108,6 +108,11 @@ class SignalPathTagLib {
 				data.inst.open_node(data.rslt.obj)
 			}
 	    })
+	    .slimscroll({
+	    	wheelStep: 10
+	    })
+	    // This is a hack for the slimscroll, the scroll bar doesn't fade out on creation without the mouseover event
+	    .mouseover()
 		"""
 		out << str
 		writeScriptFooter(out)
