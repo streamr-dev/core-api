@@ -116,8 +116,27 @@ $(document).ready(function() {
 	})
 
 	function setAddressbarUrl(url) {
-		if(window.history && window.history.pushState)
-	  		window.history.replaceState({}, undefined, url)
+		if (window.history && window.history.pushState && window.history.replaceState) {
+			// Replace the current state so we know to reload the page on back
+	  		window.history.replaceState({
+	  			streamr: {
+	  				urlPath: window.location.href
+				}
+			}, undefined, window.location.href)
+			// Push the new state to the history
+			window.history.pushState({
+				streamr: {
+	  				urlPath: url
+				}
+			}, undefined, url)
+		}
+	}
+
+	window.onpopstate = function(e) {
+		if (e.state && e.state.streamr && e.state.streamr.urlPath) {
+			// location.reload() doesn't work because the event is fired before the location change
+			window.location = e.state.streamr.urlPath
+		}
 	}
 
 	// show search control

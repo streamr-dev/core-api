@@ -1,3 +1,4 @@
+import core.pages.CanvasPage
 import org.openqa.selenium.Keys
 
 import java.text.SimpleDateFormat
@@ -62,7 +63,7 @@ class CanvasSpec extends LoginTester1Spec {
 				searchControl.find('.tt-suggestion p', text: contains("Add"))
 			}
 	}
-	
+
 	def "searching for stream with its description should show the stream in results"() {
 		when: "a search is entered"
 			search << 'to test running canvases'
@@ -72,7 +73,7 @@ class CanvasSpec extends LoginTester1Spec {
 				searchControl.find('.tt-suggestion p', text: contains("to test running canvases"))
 			}
 	}
-	
+
 	def "clicking a canvas in the load browser should load the signalpath"() {
 		when: "load button is clicked"
 			loadSignalPath 'CanvasSpec test loading a SignalPath'
@@ -80,6 +81,61 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor {
 				$("#module_2")
 			}
+	}
+
+	def "canvas can be saved"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		setup:
+			addAndWaitModule("Label")
+		when: "saved with name"
+			saveCanvasAs(name)
+			login()
+		then: "canvas can be loaded"
+			loadSignalPath(name)
+			findModuleOnCanvas("Label")
+	}
+
+	def "saving changes the url in address bar"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		expect: "the url is clear"
+			driver.currentUrl.endsWith("/canvas/editor")
+		when: "saved with name"
+			saveCanvasAs(name)
+		then: "url changes"
+			!driver.currentUrl.endsWith("/canvas/editor")
+			at CanvasPage
+		when: "login"
+			login()
+		then: "the url is clean again"
+			driver.currentUrl.endsWith("/canvas/editor")
+	}
+
+	def "loading changes the url in address bar"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		when: "saved with name"
+			saveCanvasAs(name)
+			login()
+		then: "url is clear"
+			driver.currentUrl.endsWith("/canvas/editor")
+		when: "canvas is loaded"
+			loadSignalPath(name)
+		then: "the url has changed"
+			!driver.currentUrl.endsWith("/canvas/editor")
+			at CanvasPage
+	}
+
+	def "creating new canvas clears the url"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		when: "saved with name"
+			saveCanvasAs(name)
+			login()
+		then: "url is clear"
+			driver.currentUrl.endsWith("/canvas/editor")
+		when: "canvas is loaded but then created new"
+			loadSignalPath(name)
+			$("#newSignalPath").click()
+		then: "the url is clean"
+			driver.currentUrl.endsWith("/canvas/editor")
 	}
 	
 	def "unsaved canvases should show the save as option"() {
@@ -90,7 +146,7 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "save in place button should not be shown"
 			!saveButton.displayed
 	}
-	
+
 	def "saved canvases should show the save in place option"() {
 		when: "load button is clicked"
 			loadSignalPath 'CanvasSpec test loading a SignalPath'
@@ -105,7 +161,11 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "save in place button should be shown"
 			saveButton.displayed
 	}
-	
+
+	def "the url in address bar should be changed on save"() {
+
+	}
+
 	def "begin- and end date datepickers"() {
 		when: "a signalpath is loaded"
 			loadSignalPath("CanvasSpec test loading a SignalPath")
@@ -114,13 +174,13 @@ class CanvasSpec extends LoginTester1Spec {
 				beginDate.value() == "2015-07-02"
 				endDate.value() == "2015-07-03"
 			}
-		
+
 		when: "the begin date field is clicked"
 			beginDate.click()
 		then: "a datepicker is displayed that shows the current date"
 			$(".datepicker").displayed
 			$(".datepicker .active.day").text() == "2"
-		
+
 		when: "a date is selected in the datepicker"
 			$(".datepicker .active.day").parent().find(".day", text:"3").click()
 		then: "the datepicker is closed"
@@ -128,7 +188,7 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "the input field shows the selected value"
 			beginDate.value() == "2015-07-03"
 	}
-	
+
 	private void sleepForNSeconds(int n) {
 		def originalMilliseconds = System.currentTimeMillis()
 		waitFor(n + 1, 0.5) {
@@ -141,7 +201,7 @@ class CanvasSpec extends LoginTester1Spec {
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
 			moduleShouldAppearOnCanvas('Table')
-			
+
 		when: "run button is clicked"
 			runHistoricalButton.click()
 		then: "output should be produced"
@@ -149,7 +209,7 @@ class CanvasSpec extends LoginTester1Spec {
 				runHistoricalButton.text().contains("Abort")
 				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
 			}
-			
+
 		when: "abort button is clicked"
 			runHistoricalButton.click()
 			sleepForNSeconds(2) // Allow some time for server-side stuff to clean up
@@ -158,12 +218,12 @@ class CanvasSpec extends LoginTester1Spec {
 				runHistoricalButton.text().contains("Run")
 			}
 	}
-	
+
 	def "running a SignalPath on current day should read from Kafka"() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		Date now = new Date()
 		String sNow = df.format(now)
-		
+
 		when: "SignalPath is loaded"
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
