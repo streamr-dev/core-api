@@ -155,10 +155,6 @@ var DashboardItemView = Backbone.View.extend({
 	tagName: "li",
 	className: "dashboarditem",	
 	template: _.template($("#streamr-widget-template").html()),
-	labelTemplate: _.template($("#streamr-label-template").html()),
-	chartTemplate: _.template($("#streamr-chart-template").html()),
-	heatmapTemplate: _.template($("#streamr-heatmap-template").html()),
-	tableTemplate: _.template($("#streamr-table-template").html()),
 	titlebarTemplate: _.template($("#titlebar-template").html()),
 
 	events: {
@@ -194,7 +190,7 @@ var DashboardItemView = Backbone.View.extend({
 		}
 		if (webcomponent !== undefined) {
 			var templateName = "#" + webcomponent + "-template"
-			var template = _.template($(templateName).html())
+			var template = _.template($(templateName).html(), {variable: 'item'})
 			this.$el.find(".widget-content").append(template(this.model.toJSON()))
 		} else {
 			throw "No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!"
@@ -378,6 +374,8 @@ var SidebarView = Backbone.View.extend({
 			var canvasView = new CanvasView({ model: canvas })
 			this.list.append(canvasView.el)
 		}, this)
+
+	// This is changed to ConfirmButton in branch CORE-647-shared-canvases-on-dashboard
 		new Toolbar(this.$el.find("#deleteDashboardForm"))
 	},
 
@@ -405,6 +403,7 @@ var SidebarView = Backbone.View.extend({
 
 		if (event.type == "checked") {
 			this.dashboard.get('items').add({
+				dashboard: this.dashboard.get('id'),
 				title: module.get("uiChannel").name,
 				canvas: canvas.get('id'),
 				module: module.get('hash'),

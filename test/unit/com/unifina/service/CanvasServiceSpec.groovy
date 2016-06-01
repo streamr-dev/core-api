@@ -1,14 +1,16 @@
 package com.unifina.service
 
-import com.unifina.api.InvalidStateException
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.ValidationException
+import com.unifina.api.*
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
+import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -16,16 +18,20 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService])
+@Mock([SecUser, Canvas, Dashboard, DashboardItem, Module, ModuleService, SpringSecurityService, SignalPathService])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
 	SecUser someoneElse
 	Canvas myFirstCanvas
+	List<Canvas> canvases = []
 
 	Module moduleWithUi
 
 	def setup() {
+		service.permissionService = Mock(PermissionService)
+		service.dashboardService = Mock(DashboardService)
+
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
 		me = new SecUser(username: "me@me.com", apiKey: "myKey").save(validate: false)
@@ -36,7 +42,9 @@ class CanvasServiceSpec extends Specification {
 			json: new JsonBuilder([
 			    name: "my_canvas_1",
 				hasExports: false,
-				modules: [],
+				modules: [
+						[hash: 1]
+				],
 				settings: [
 					speed: 0,
 					beginDate: "2016-01-25",
@@ -50,14 +58,15 @@ class CanvasServiceSpec extends Specification {
 		)
 
 		myFirstCanvas.save(failOnError: true)
+		canvases << myFirstCanvas
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "my_canvas_2",
 			user: me,
 			json: "{}",
 		).save(failOnError: true)
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "my_canvas_3",
 			user: me,
 			json: "{}",
@@ -65,7 +74,7 @@ class CanvasServiceSpec extends Specification {
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "my_canvas_4",
 			user: me,
 			json: "{}",
@@ -73,7 +82,7 @@ class CanvasServiceSpec extends Specification {
 			state: Canvas.State.RUNNING
 		).save(failOnError: true)
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "my_canvas_5",
 			user: me,
 			json: "{}",
@@ -81,7 +90,7 @@ class CanvasServiceSpec extends Specification {
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "my_canvas_6",
 			user: me,
 			json: "{}",
@@ -91,7 +100,7 @@ class CanvasServiceSpec extends Specification {
 
 		someoneElse = new SecUser(username: "someone@someone.com", apiKey: "otherKey").save(validate: false)
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "someoneElses_canvas_1",
 			user: someoneElse,
 			json: "{}",
@@ -99,7 +108,7 @@ class CanvasServiceSpec extends Specification {
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
-		new Canvas(
+		canvases << new Canvas(
 			name: "someoneElses_canvas_2",
 			user: someoneElse,
 			json: "{}",
@@ -395,7 +404,168 @@ class CanvasServiceSpec extends Specification {
 		thrown(InvalidStateException)
 	}
 
-	def uiChannelIdsFromMap(Map signalPathMap) {
+	def "authorizedGetById() checks access to canvases from PermissionService and returns the canvas if allowed"() {
+		when:
+		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.READ)
+
+		then:
+		canvas == myFirstCanvas
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
+	}
+
+	def "authorizedGetById() checks access to canvases from PermissionService and throws exception if not allowed"() {
+		when:
+		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.READ)
+
+		then:
+		thrown NotPermittedException
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+	}
+
+	def "authorizedGetById() grants read access to examples to anyone without checking permissions"() {
+		myFirstCanvas.example = true
+
+		when:
+		def canvas = service.authorizedGetById(myFirstCanvas.id, null, Permission.Operation.READ)
+
+		then:
+		canvas == myFirstCanvas
+		0 * service.permissionService._
+	}
+
+	def "authorizedGetById() does not grant write or share permission to examples unless permitted by PermissionService"() {
+		myFirstCanvas.example = true
+
+		when:
+		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.WRITE)
+
+		then:
+		thrown(NotPermittedException)
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.WRITE) >> false
+
+		when:
+		service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.SHARE)
+
+		then:
+		thrown(NotPermittedException)
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.SHARE) >> false
+
+		when:
+		def canvas = service.authorizedGetById(myFirstCanvas.id, me, Permission.Operation.SHARE)
+
+		then:
+		canvas == myFirstCanvas
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.SHARE) >> true
+	}
+
+	def "authorizedGetById() throws NotFoundException if no canvas exists"() {
+		when:
+		service.authorizedGetById("foo", me, Permission.Operation.READ)
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "authorizedGetModuleOnCanvas() checks access to canvas from PermissionService and returns the module if allowed"() {
+		when:
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.READ)
+
+		then:
+		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
+	}
+
+	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and returns the module if allowed"() {
+		Dashboard db = new Dashboard()
+		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 1, ord: 0, title: "foo"))
+		db.save(validate: false)
+
+		when:
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
+
+		then:
+		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
+	}
+
+	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the canvas doesn't match the dashboard item"() {
+		Dashboard db = new Dashboard()
+		db.addToItems(new DashboardItem(canvas: canvases.find {it != myFirstCanvas}, module: 1, ord: 0, title: "foo"))
+		db.save(validate: false)
+
+		when:
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
+
+		then:
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
+		thrown(NotPermittedException)
+	}
+
+	def "authorizedGetModuleOnCanvas() checks access to dashboard from PermissionService and throws exception if the module doesn't match the dashboard item"() {
+		Dashboard db = new Dashboard()
+		db.addToItems(new DashboardItem(canvas: myFirstCanvas, module: 999, ord: 0, title: "foo"))
+		db.save(validate: false)
+		service.permissionService = Mock(PermissionService)
+		service.dashboardService = Mock(DashboardService)
+
+		when:
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, db.id, me, Permission.Operation.READ)
+
+		then:
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.dashboardService.authorizedGetById(db.id, me, Permission.Operation.READ) >> db
+		thrown(NotPermittedException)
+	}
+
+	def "authorizedGetModuleOnCanvas() checks access to canvases from PermissionService and throws exception if not allowed and no dashboard given"() {
+		when:
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, me, Permission.Operation.READ)
+
+		then:
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		thrown(NotPermittedException)
+	}
+
+	def "authorizedGetModuleOnCanvas() grants read access to examples to anyone without checking permissions"() {
+		myFirstCanvas.example = true
+
+		when:
+		def module = service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, null, null, Permission.Operation.READ)
+
+		then:
+		module == JSON.parse(myFirstCanvas.json).modules.find {it.hash == 1}
+		0 * service.permissionService._
+	}
+
+	def "authorizedGetModuleOnCanvas() throws NotFoundException if no canvas exists"() {
+		when:
+		service.authorizedGetModuleOnCanvas("foo", 1, null, me, Permission.Operation.READ)
+		then:
+		thrown(NotFoundException)
+	}
+
+	def "authorizedGetModuleOnCanvas() throws NotFoundException if no module exists"() {
+		when:
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 999, null, me, Permission.Operation.READ)
+
+		then:
+		thrown(NotFoundException)
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> true
+	}
+
+	def "authorizedGetModuleOnCanvas() throws NotFoundException if no dashboard exists"() {
+		when:
+		service.authorizedGetModuleOnCanvas(myFirstCanvas.id, 1, 1, me, Permission.Operation.READ)
+
+		then:
+		thrown(NotFoundException)
+		1 * service.permissionService.check(me, myFirstCanvas, Permission.Operation.READ) >> false
+		1 * service.dashboardService.authorizedGetById(1, me, Permission.Operation.READ) >> { throw new NotFoundException("thrown by mock") }
+	}
+
+	private uiChannelIdsFromMap(Map signalPathMap) {
 		UiChannelIterator.over(signalPathMap).collect { it.id }
 	}
 }

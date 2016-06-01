@@ -28,16 +28,19 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
 		"/api/v1/canvases/$id/request"(controller: "canvasApi", action: "request")
-		"/api/v1/canvases/$id/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
-		"/api/v1/canvases/$id/modules/$moduleId/request"(controller: "canvasApi", action: "request") // for internal use
+		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
+		"/api/v1/canvases/$canvasId/modules/$moduleId/request"(controller: "canvasApi", action: "moduleRequest") // for internal use
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$id/detectFields"(controller: "streamApi", action: "detectFields")
+		"/api/v1/streams/$id/range"(controller: "streamApi", action: "range")
 
 		"/api/v1/dashboards"(resources: "dashboardApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$dashboardId/items"(resources: "dashboardItemApi", excludes: ["create", "edit"])
 		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
+
+		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
 	}

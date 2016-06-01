@@ -50,9 +50,56 @@
                     {
                         "name": "name",
                         "in": "query",
-                        "description": "Filter results by stream name.",
+                        "description": "Only return streams that exactly match the given name.",
                         "required": false,
                         "type": "string"
+                    },
+                    {
+                        "name": "max",
+                        "in": "query",
+                        "description": "Maximum number of returned results.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Skip the first (offset) results. Used together with max for paging.",
+                        "required": false,
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort the returned results by the given field.",
+                        "required": false,
+                        "type": "string",
+                        "default": "id"
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Control whether the results are sorted in ascending or descending order.",
+                        "required": false,
+                        "type": "string",
+                        "default": "asc",
+                        "enum": ["asc", "desc"]
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Returns streams that contain the given search term in their name or description.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "public",
+                        "in": "query",
+                        "description": "If true, includes publicly available resources in the results.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
                     }
                 ],
                 "tags": [
@@ -409,6 +456,53 @@
                         "description": "Filter canvases by their adhoc-ness.",
                         "required": false,
                         "type": "boolean"
+                    },
+                    {
+                        "name": "max",
+                        "in": "query",
+                        "description": "Maximum number of returned results.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Skip the first (offset) results. Used together with max for paging.",
+                        "required": false,
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort the returned results by the given field.",
+                        "required": false,
+                        "type": "string",
+                        "default": "id"
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Control whether the results are sorted in ascending or descending order.",
+                        "required": false,
+                        "type": "string",
+                        "default": "asc",
+                        "enum": ["asc", "desc"]
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Returns canvases that contain the given search term in their name.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "public",
+                        "in": "query",
+                        "description": "If true, includes publicly available resources in the results.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
                     }
                 ],
                 "responses": {
@@ -820,6 +914,62 @@
             "get": {
                 "summary": "List dashboards",
                 "description": "Lists your dashboards",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Only return dashboards that exactly match the given name.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "max",
+                        "in": "query",
+                        "description": "Maximum number of returned results.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Skip the first (offset) results. Used together with max for paging.",
+                        "required": false,
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort the returned results by the given field.",
+                        "required": false,
+                        "type": "string",
+                        "default": "id"
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Control whether the results are sorted in ascending or descending order.",
+                        "required": false,
+                        "type": "string",
+                        "default": "asc",
+                        "enum": ["asc", "desc"]
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Returns dashboards that contain the given search term in their name.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "public",
+                        "in": "query",
+                        "description": "If true, includes publicly available resources in the results.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
+                    }
+                ],
                 "tags": [
                     "dashboards"
                 ],
