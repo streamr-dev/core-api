@@ -26,7 +26,7 @@
 			})
 		</r:script>
     </head>
-    <body class="stream-show">
+    <body class="stream-show main-menu-fixed">
     	<ui:breadcrumb>
 			<g:render template="/stream/breadcrumbList" model="[stream:stream]"/>
 			<g:render template="/stream/breadcrumbShow" model="[stream:stream, active:true]"/>

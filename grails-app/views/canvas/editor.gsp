@@ -25,8 +25,59 @@ var loadBrowser
 $('#moduleTree').bind('loaded.jstree', function() {
 	Tour.autoStart()
 })
+var saveAndAskName
+$(function() {
+	saveAsAndAskName = function() {
+		bootbox.prompt({
+			title: 'Save As..',
+			callback: function(saveAsName) {
+				if (!saveAsName)
+					return;
 
-$(document).ready(function() {
+				SignalPath.saveAs(saveAsName)
+			},
+			value: SignalPath.getName(),
+			className: 'save-as-name-dialog'
+		})
+	}
+	$("body").keydown(function(e) {
+		// ctrl + shift + s || cmd + shift + s
+		if (e.shiftKey && (e.ctrlKey || e.metaKey)) {
+			if (String.fromCharCode(e.which).toLowerCase() == 's') {
+				saveAsAndAskName()
+			}
+		}
+		// ctrl || cmd
+		else if (e.ctrlKey || e.metaKey) {
+			switch (String.fromCharCode(e.which).toLowerCase()) {
+				case 's':
+					e.preventDefault()
+					if (!SignalPath.isSaved())
+						saveAsAndAskName()
+					else
+						SignalPath.save()
+					break;
+				case 'o':
+					e.preventDefault();
+					loadBrowser.modal()
+					break;
+				case 'n':
+					e.preventDefault();
+					SignalPath.clear()
+					break;
+			}
+		}
+		// alt + r
+		else if (e.altKey) {
+			if (String.fromCharCode(e.which).toLowerCase() == 'r') {
+				if (!SignalPath.isRunning()) {
+					SignalPath.start();
+				} else {
+					SignalPath.stop()
+				}
+			}
+		}
+	})
 
 	function settings() {
 		return {
@@ -155,10 +206,6 @@ $(document).ready(function() {
 		loadBrowser.modal()
 	})
 
-	$(document).bind('keyup', 'alt+r', function() {
-		SignalPath.run();
-	});
-
 	$('#csv').click(function() {
 		var ctx = {
 			csv: true,
@@ -170,7 +217,7 @@ $(document).ready(function() {
 			}
 		}
 
-		SignalPath.run(ctx);
+		SignalPath.start(ctx);
 	});
 
 	// Historical run button
@@ -246,11 +293,13 @@ $(document).ready(function() {
 	<g:if test="${id}">
 		SignalPath.load('${id}');
 	</g:if>
+	$(document).unload(function () {
+		SignalPath.unload()
+	})
+
+
 })
 
-$(document).unload(function () {
-	SignalPath.unload()
-})
 
 </r:script>
 
@@ -275,7 +324,7 @@ $(document).unload(function () {
 					<button id="loadSignalPath" title="Load Canvas" class="btn btn-default">
 						<i class="fa fa-folder-open"></i>
 					</button>
-		
+
 					<sp:saveButtonDropdown/>
 				</div>
 			</div>
@@ -284,9 +333,13 @@ $(document).unload(function () {
 
 				<ul class="nav nav-tabs nav-justified nav-tabs-xs run-mode-tabs">
 					<li class="active">
+						<div class="nav-tab-white-background nav-tab-background"></div>
+						<div class="nav-tab-orange-background nav-tab-background"></div>
 						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
 					</li>
 					<li class="">
+						<div class="nav-tab-white-background nav-tab-background"></div>
+						<div class="nav-tab-orange-background nav-tab-background"></div>
 						<a href="#tab-realtime" role="tab" data-toggle="tab">Realtime</a>
 					</li>
 				</ul>
@@ -385,6 +438,11 @@ $(document).unload(function () {
 
 	<div id="content-wrapper">
 		<ui:breadcrumb>
+			<li>
+				<a href="/streamr/canvas/list">
+					Canvases
+				</a>
+			</li>
 			<li class="active">
 				<span id="canvas-name-editor"></span>
 			</li>
