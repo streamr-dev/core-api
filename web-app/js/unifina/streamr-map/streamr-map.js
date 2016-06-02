@@ -65,7 +65,10 @@
         }
 
         this.map.once("dragstart click", mouseEventHandler)
-        this.map._container.addEventListener("wheel", mouseEventHandler)
+        // For some reason, listening to 'wheel' event didn't work
+        this.map._container.addEventListener("mousewheel", mouseEventHandler)
+        // 'mousewheel' doesn't work in Firefox but 'DOMMouseScroll' does
+        this.map._container.addEventListener("DOMMouseScroll", mouseEventHandler)
 
         this.map.on("moveend", function() {
             $(_this).trigger("move", _this.getCenterAndZoom())
