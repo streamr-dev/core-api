@@ -156,7 +156,7 @@ $(document).ready(function() {
 	})
 
 	$(document).bind('keyup', 'alt+r', function() {
-		SignalPath.run();
+		SignalPath.start();
 	});
 
 	$('#csv').click(function() {
@@ -170,7 +170,7 @@ $(document).ready(function() {
 			}
 		}
 
-		SignalPath.run(ctx);
+		SignalPath.start(ctx);
 	});
 
 	// Historical run button
