@@ -15,20 +15,18 @@
 	
 	<script>
 		Polymer('streamr-widget',{
+			attached: function() {
+				this.isAttached = true
+			},
 			detached: function() {
 				var _this = this
-
-				_this.$.client.getClient(function(client) {
-					client.unsubscribe(_this.sub)
-				})
+				this.isAttached = false
+				setTimeout(function() {
+					if (!_this.isAttached)
+						_this.unsubscribe()
+				}, 10) // This also worked with delay 0, but I used 10 just to be sure
 			},
 			bindEvents: function(container) {
-				container.parentNode.addEventListener("remove", function() {
-					var _this = this
-					this.$.client.getClient(function(client) {
-						client.unsubscribe(_this.sub)
-					})
-				})
 				container.parentNode.addEventListener("resize", function() {
 					container.dispatchEvent(new Event('resize'))
 				})
@@ -36,22 +34,33 @@
 			subscribe: function(messageHandler, options) {
 				var _this = this
 
+				if (messageHandler !== undefined)
+					this.messageHandler = messageHandler
+				if (options !== undefined)
+					this.options = options
+
 				this.getModuleJson(function(moduleJson) {
 					if (!moduleJson.uiChannel)
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
-					options = options || _this.getResendOptions(moduleJson)
+					_this.options = _this.options || _this.getResendOptions(moduleJson)
 
 					// Pass on the access context to the subscribe request
-					options = $.extend(options, _this.getAccessContext())
+					_this.options = $.extend(_this.options, _this.getAccessContext())
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
 								moduleJson.uiChannel.id,
-								messageHandler,
-								options
+								_this.messageHandler,
+								_this.options
 						)
 					})
+				})
+			},
+			unsubscribe: function() {
+				var _this = this
+				this.$.client.getClient(function(client) {
+					client.unsubscribe(_this.sub)
 				})
 			},
 			getResendOptions: function(json) {

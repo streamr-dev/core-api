@@ -15,10 +15,7 @@
 		var streamrClient
 
 		function createClient(cb, element) {
-			if (streamrClient) {
-				cb(streamrClient)
-			}
-			else if (typeof StreamrClient !== 'undefined' && element.server) {
+			if (typeof StreamrClient !== 'undefined' && element.server) {
 				var myOptions = {
 					server: element.server,
 					autoConnect: (element.autoconnect != null ? element.autoconnect : true),
@@ -48,7 +45,10 @@
 				createClient(function(client) {}, this)
 			},
 			getClient: function(cb) {
-				createClient(cb, this)
+				if (streamrClient)
+					cb(streamrClient)
+				else
+					createClient(cb, this)
 			},
 			<g:if test="${params.lightDOM}">
 				parseDeclaration: function(elementElement) {
