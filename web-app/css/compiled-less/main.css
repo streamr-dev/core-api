@@ -16663,6 +16663,10 @@ body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:hover,
 body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:active {
   color: #999;
 }
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li {
+  float: left;
+  width: 50%;
+}
 body.canvas-editor-page .nav-tabs.run-mode-tabs > li:first-child > .nav-tab-orange-background {
   right: 0;
 }
