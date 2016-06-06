@@ -157,7 +157,9 @@ class CSVImporterSpec extends Specification {
 		for (CSVImporter.LineValues line : csv) {}
 
 		then:
-		thrown RuntimeException
+		Exception e = thrown()
+		e.message.contains("chronological")
+		e.message.contains("Line: 19")
 	}
 
 	void "test giving the field type in a map"() {

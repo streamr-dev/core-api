@@ -243,8 +243,8 @@ class StreamController {
 		List fields = []
 
 		// The primary timestamp column is implicit, so don't include it in streamConfig
-		for (int i=0;i<csv.schema.entries.length;i++) {
-			if (i!=csv.getSchema().timestampColumnIndex) {
+		for (int i=0; i < csv.schema.entries.length; i++) {
+			if (i != csv.getSchema().timestampColumnIndex) {
 				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
 				if (e!=null)
 					fields << [name:e.name, type:e.type]

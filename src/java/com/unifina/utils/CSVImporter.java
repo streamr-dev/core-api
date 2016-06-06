@@ -87,9 +87,9 @@ public class CSVImporter implements Iterable<LineValues> {
 	public class LineValuesIterator implements Iterator<LineValues> {
 		private LineIterator it;
 		private Schema schema;
-		
-		boolean headerRead = false;
-		
+
+		private int lineNumber = 0;
+
 		public LineValuesIterator(File file, Schema schema) throws IOException {
 			 this.it = FileUtils.lineIterator(file, "UTF-8");
 			 this.schema = schema;
@@ -102,19 +102,15 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		@Override
 		public LineValues next() {
-			String line = it.next();
-			
-			if (!headerRead) {
-				headerRead = true;
+			String line;
+			do {
 				line = it.next();
-			}
-
-			// Empty line or a line with only spaces/tabs
-			while (line.matches("^\\s*$"))
-				line = it.next();
+				lineNumber++;
+			// Is a header line or is an empty line or a line with only spaces/tabs
+			} while (lineNumber < 2 || line.matches("^\\s*$"));
 
 			try {
-				return schema.parseLine(line);
+				return schema.parseLine(line, lineNumber);
 			} catch (IOException | ParseException | RuntimeException e) {
 				throw new RuntimeException(e);
 			}
@@ -270,19 +266,19 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		}
 		
-		LineValues parseLine(String line) throws IOException, ParseException {
+		LineValues parseLine(String line, int lineNumber) throws IOException, ParseException {
 			String[] values = parser.parseLine(line);
 			Object[] parsed = new Object[values.length];
 
-			int i=0;
+			int i = 0;
 			// Ignore missing or extra columns
 			try {
-				for (i=0; i < values.length && i < entries.length; i++) {
+				for (i = 0; i < values.length && i < entries.length; i++) {
 					// The timestamp column cannot be empty
 					if (i == timestampColumnIndex) {
 						Date d = entries[i].dateTimeParser.parse(values[i]);
 						if (lastDate != null && d.before(lastDate)) {
-							throw new CSVImporterException("The lines must be in a chronological order!");
+							throw new CSVImporterException("The lines must be in a chronological order!", lineNumber);
 						}
 						parsed[i] = d;
 						lastDate = d;
@@ -305,7 +301,7 @@ public class CSVImporter implements Iterable<LineValues> {
 						parsed[i] = values[i];
 				}
 			} catch (NumberFormatException e) {
-				throw new CSVImporterException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type);
+				throw new CSVImporterException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type + ".", lineNumber);
 			}
 			
 			return new LineValues(schema, parsed);
@@ -407,6 +403,10 @@ public class CSVImporter implements Iterable<LineValues> {
 	public class CSVImporterException extends RuntimeException {
 		public CSVImporterException(String message) {
 			super(message);
+		}
+
+		public CSVImporterException(String message, int lineNumber) {
+			super(message + " Line: " + lineNumber + ".");
 		}
 	}
 }
