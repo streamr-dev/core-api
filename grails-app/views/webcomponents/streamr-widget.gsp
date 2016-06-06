@@ -25,7 +25,7 @@
 					// If the element is attached again i.e. dashboard item is moved to another place
 					if (!_this.isAttached)
 						_this.unsubscribe()
-				}, 10) // This also worked with delay 0, but I used 10 just to be sure
+				})
 			},
 			bindEvents: function(container) {
 				container.parentNode.addEventListener("resize", function() {

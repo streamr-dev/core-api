@@ -115,7 +115,7 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "pnotify with title 'Saved!' appears"
 			waitFor { $(".ui-pnotify .ui-pnotify-title", text:"Saved!").displayed }
 		
-		//Checking the modifications have been saved	
+		// Checking the modifications have been saved
 		when: "went to the dashboard list page"
 			to DashboardListPage
 		then: "the new dashboard is visible"
@@ -136,7 +136,15 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "the dashboard should be in edit-mode"
 			waitFor { js.exec("return \$('#main-menu').width()") > 0 }
 			js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
-		
+
+		// Testing of dragging the items
+		when: "dragged the item everywhere"
+			dragDashboardItem("Table", 0, -300)
+			dragDashboardItem("Table", -300, -300)
+			dragDashboardItem("Table", -300, 0)
+		then: "hasn't failed"
+			at DashboardShowPage
+
 		// Click to delete the dashboard without accepting it
 		when: "clicked the delete-button"
 			deleteButton.click()
