@@ -86,6 +86,11 @@
             '#run-realtime-button',
             function() {
                 console.log("Binding")
+
+                // We must rebind modules because their .tourXXX classes were removed during saving...
+                tour.bindModule('Stream', $("#module_0"))
+                tour.bindModule('Table', $("#module_1"))
+
                 $(document).one("shown.bs.modal", function() {
                     console.log("shown")
                     tour.next()
@@ -99,13 +104,17 @@
             tour.waitForCanvasStopped()
         )
 
+        .step("Remove the <b>Table</b> module from the canvas.",
+            '.tourTable2',
+            { placement: 'left' },
+            function(cb) {
+                tour.waitForModuleRemoved('Table')(cb)
+            }
+        )
+
         .step("Next, let's build some more advanced logic.<br><br>Start by adding module <strong>Count</strong> to the canvas.",
             '#search',
             function(cb) {
-                // We must rebind modules because their .tourXXX classes were removed during saving...
-                tour.bindModule('Stream', $("#module_0"))
-                tour.bindModule('Table', $("#module_1"))
-
                 tour.waitForModuleAdded('Count')(cb)
             }
         )
@@ -178,7 +187,65 @@
             tour.waitForConnection(['tourFilter1.out1', 'tourEmail1.value1'])
         )
 
-        .offerNextTour("Absolutely fantastic! In the next tour, we'll go even deeper.<br><br> Click Begin when you are ready!")
+        .step("We have now set-up a system that sends us an email every time the number of Bitcoin related tweets within a minute exceeds a threshold.")
+
+        .step("Just to make sure that everything is working correctly let's add a Table.<br><br>Add a <strong>Table</strong> to the canvas.",
+            "#search",
+            function(cb) {
+                tour.waitForModuleAdded('Table')(cb)
+            }
+        )
+
+        .step("Connect <code>count</code> of Count to <code>in1</code> of Table.",
+            '.tourCount1',
+            tour.waitForConnection(['tourCount1.count', 'tourTable4.in1'])
+        )
+
+        .step("Connect <code>A>B</code> of GreaterThan to <code>in2</code> of Table.",
+            '.tourGreaterThan1',
+            tour.waitForConnection(['tourGreaterThan1.A>B', 'tourTable4.in2'])
+        )
+
+        .step("Start the canvas.",
+            '#run-realtime-button',
+            { placement: 'right' },
+            function() {
+                console.log("Binding")
+                $(document).one("shown.bs.modal", function() {
+                    console.log("shown")
+                    tour.next()
+                })
+            }
+        )
+
+        .step("You must save a real-time canvas before running it.<br><br><strong>Save</strong> the canvas.",
+            '.save-on-start-confirmation-dialog .modal-content',
+            { nextOnTargetClick: true, placement: 'bottom' }
+        )
+
+        .step("You will now see some debug data on the Table. The current tweet count is shown along with whether the " +
+            "threshold to send an email has been reached. If the threshold is reached you will receive an email indicating " +
+            "this.<br><br>Press Next to continue.",
+            '.tourTable4'
+        )
+
+        .step("<b>Stop</b> the running canvas when you feel you ready to continue.",
+            '#run-realtime-button',
+            function() {
+                $(document).one("shown.bs.modal", function() {
+                    console.log("shown")
+                    tour.next()
+                })
+            }
+        )
+
+        .step("Confirm that you want to stop the canvas.",
+            '.stop-confirmation-dialog .modal-content',
+            { placement: 'bottom' },
+            tour.waitForCanvasStopped()
+        )
+
+        .offerNextTour("Nice! In the next tour, we'll go even deeper.<br><br> Click Begin when you are ready!")
 
         .ready()
 

@@ -308,6 +308,10 @@ class TourSpec extends LoginTester1Spec {
 			acceptStopConfirmationAndWaitForStopped()
 		}
 
+		advance {
+			closeModule("Table")
+		}
+
 		advance { searchAndClickContains("Count") }
 
 		moveModuleBy("Count", 200, 25)
@@ -360,7 +364,40 @@ class TourSpec extends LoginTester1Spec {
 			connectEndpoints(findOutputByDisplayName("Filter", "out1"), findInputByDisplayName("Email", "value1"))
 		}
 
-		true
+		advance { searchAndClickContains("Table") }
+
+		moveModuleBy("Table", 500, 500)
+
+		advance {
+			connectEndpoints(findOutput("Count", "count"), findInputByDisplayName("Table", "in1"))
+		}
+
+		advance {
+			connectEndpoints(findOutput("GreaterThan", "A&gt;B"), findInputByDisplayName("Table", "in2"))
+		}
+
+		advance {
+			startCanvas(true)
+		}
+
+		waitFor(30) {
+			$(".event-table-module-content tbody tr").size() >= 10
+		}
+
+		advance {
+			openUpStopConfirmation()
+		}
+
+		waitFor {
+			getTourBubble().displayed
+		}
+
+		advance {
+			acceptStopConfirmationAndWaitForStopped()
+		}
+
+		cleanup:
+		stopCanvasIfRunning()
 	}
 
 }
