@@ -289,12 +289,78 @@ class TourSpec extends LoginTester1Spec {
 		}
 
 		advance {
-			ensureRealtimeTabDisplayed()
+			startCanvas(true)
+		}
+
+		waitFor(30) {
+			$(".event-table-module-content tbody tr").size() >= 2
 		}
 
 		advance {
-			startCanvas(true)
+			openUpStopConfirmation()
 		}
+
+		waitFor {
+			getTourBubble().displayed
+		}
+
+		advance {
+			acceptStopConfirmationAndWaitForStopped()
+		}
+
+		advance { searchAndClickContains("Count") }
+
+		moveModuleBy("Count", 200, 25)
+
+		advance {
+			connectEndpoints(findOutput("Stream", "text"), findInput("Count", "in"))
+		}
+
+		advance { searchAndClickContains("GreaterThan") }
+
+		moveModuleBy("GreaterThan", 400, 25)
+
+		advance {
+			connectEndpoints(findOutput("Count", "count"), findInput("GreaterThan", "A"))
+		}
+
+		advance { searchAndClickContains("Constant") }
+
+		moveModuleBy("Constant", 600, 25)
+
+		advance {
+			setParameterValueForModule("Constant", "constant", "4")
+		}
+
+		advance {
+			connectEndpoints(findOutput("Constant", "out"), findInput("GreaterThan", "B"))
+		}
+
+		advance { searchAndClickContains("Filter") }
+
+		moveModuleBy("Filter", 800, 25)
+
+		advance {
+			connectEndpoints(findOutput("GreaterThan", "A&gt;B"), findInput("Filter", "pass"))
+		}
+
+		advance {
+			connectEndpoints(findOutput("Count", "count"), findInputByDisplayName("Filter", "in1"))
+		}
+
+		advance { searchAndClickContains("Email") }
+
+		moveModuleBy("Email", 1000, 25)
+
+		advance {
+			setParameterValueForModule("Email", "subject", "bitcoin mentions are exploding!")
+		}
+
+		advance {
+			connectEndpoints(findOutputByDisplayName("Filter", "out1"), findInputByDisplayName("Email", "value1"))
+		}
+
+		true
 	}
 
 }
