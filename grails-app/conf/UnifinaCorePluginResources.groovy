@@ -108,7 +108,7 @@ modules = {
 		resource url:[dir:'js/webcomponentsjs', file:'webcomponents.min.js', plugin: 'unifina-core'], disposition:'head'
 	}
 	lodash {
-		resource url:[dir:'js/lodash/dist', file:'lodash.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/lodash-3.10.1', file:'lodash.min.js', plugin: 'unifina-core']
 	}
 	backbone {
 		dependsOn 'lodash,jquery'
