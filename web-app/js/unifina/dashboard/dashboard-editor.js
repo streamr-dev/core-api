@@ -78,7 +78,7 @@ var CanvasView = Backbone.View.extend({
 	initialize: function (){
 		this.model.get('modules').on("change:checked", function() {
 			this.render()
-		},this)
+		}, this)
 		this.render()
 	},
 
