@@ -3,6 +3,8 @@
  See: http://www.gebish.org/manual/current/configuration.html
 */
 
+
+import org.openqa.selenium.Dimension
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.DesiredCapabilities
@@ -18,10 +20,14 @@ baseUrl = 'http://' + sutHost + ':' + sutPort + '/unifina-core/'
 println('Geb baseUrl '+baseUrl)
 
 driver = {
+	def dr
 	if (inJenkins)
-		new RemoteWebDriver(new URL("http://dev.unifina:4444/wd/hub"), DesiredCapabilities.chrome())
+		dr = new RemoteWebDriver(new URL("http://dev.unifina:4444/wd/hub"), DesiredCapabilities.chrome())
 	else
-		new ChromeDriver()
+		dr = new ChromeDriver()
+	// Resolution where everything should be visible
+	dr.manage().window().setSize(new Dimension(1280,1024));
+	return dr
 }
 
 waiting {

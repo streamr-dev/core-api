@@ -52,7 +52,6 @@
 			    $('#main-menu-inner').slimScroll({
 			      height: '100%'
 			    })
-
 			})
 		</r:script>
 </head>

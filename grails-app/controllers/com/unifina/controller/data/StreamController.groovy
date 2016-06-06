@@ -44,8 +44,9 @@ class StreamController {
 		List<Stream> streams = permissionService.get(Stream, user, {
 			order("lastUpdated", "desc")
 		})
-		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
-		[streams:streams, shareable:shareable]
+		Set<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE).toSet()
+		Set<Stream> writable = permissionService.get(Stream, user, Operation.WRITE).toSet()
+		[streams:streams, shareable:shareable, writable:writable, user:user]
 	}
 
 	def search() {
