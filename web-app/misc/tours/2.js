@@ -119,6 +119,16 @@
             }
         )
 
+        .step("Set parameter <code>windowLength</code> of Count to <strong>1</strong>",
+            '.tourCount1',
+            tour.waitForInput(".tourCount1 .parameterInput:eq(0)", "1")
+        )
+
+        .step("Set parameter <code>windowType</code> to <strong>minutes</strong>",
+            '.tourCount1',
+            tour.waitForInput(".tourCount1 .parameterInput:eq(1)", "MINUTES")
+        )
+
         .step("Connect <code>text</code> of Stream to <code>in</code> of Count.",
             '.tourStream2', // same as tourStream1
             tour.waitForConnection(['tourStream2.text', 'tourCount1.in'])
@@ -143,9 +153,9 @@
             }
         )
 
-        .step("Set parameter <code>constant</code> of Constant to <strong>4</strong>",
+        .step("Set parameter <code>constant</code> of Constant to <strong>10</strong>",
             '.tourConstant1',
-            tour.waitForInput(".tourConstant1 .parameterInput", "4")
+            tour.waitForInput(".tourConstant1 .parameterInput", "10")
         )
 
         .step("Connect <code>out</code> of Constant to <code>B</code> of GreaterThan.",

@@ -317,6 +317,14 @@ class TourSpec extends LoginTester1Spec {
 		moveModuleBy("Count", 200, 25)
 
 		advance {
+			setParameterValueForModule("Count", "windowLength", "1")
+		}
+
+		advance {
+			chooseDropdownParameterForModule("Count", "windowType", "minutes")
+		}
+
+		advance {
 			connectEndpoints(findOutput("Stream", "text"), findInput("Count", "in"))
 		}
 
@@ -333,7 +341,7 @@ class TourSpec extends LoginTester1Spec {
 		moveModuleBy("Constant", 600, 25)
 
 		advance {
-			setParameterValueForModule("Constant", "constant", "4")
+			setParameterValueForModule("Constant", "constant", "10")
 		}
 
 		advance {
@@ -381,7 +389,7 @@ class TourSpec extends LoginTester1Spec {
 		}
 
 		waitFor(30) {
-			$(".event-table-module-content tbody tr").size() >= 10
+			$(".event-table-module-content tbody tr").size() >= 5
 		}
 
 		advance {
