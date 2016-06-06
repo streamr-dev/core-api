@@ -12,9 +12,11 @@ import java.util.*;
 public class Sql extends AbstractSignalPathModule {
 	private transient Logger log = Logger.getLogger(Sql.class);
 
-	private StringParameter loginUrl = new StringParameter(this, "database", "");
+	private EngineParameter engine = new EngineParameter(this, "engine");
+	private StringParameter loginUrl = new StringParameter(this, "host", "");
 	private StringParameter loginUser = new StringParameter(this, "username", "");
 	private StringParameter loginPassword = new StringParameter(this, "password", "");
+	private StringParameter database = new StringParameter(this, "database", "");
 
 	private StringInput sqlString = new StringInput(this, "sql");
 
@@ -25,7 +27,9 @@ public class Sql extends AbstractSignalPathModule {
 
 	@Override
 	public void init() {
+		addInput(engine);
 		addInput(loginUrl);
+		addInput(database);
 		addInput(loginUser);
 		addInput(loginPassword);
 		addInput(sqlString);
@@ -68,10 +72,18 @@ public class Sql extends AbstractSignalPathModule {
 
 	// separated method so it can be mocked in a test
 	protected Statement createStatement() throws SQLException {
-		if (db == null) {
-			db = DriverManager.getConnection(loginUrl.getValue(), loginUser.getValue(), loginPassword.getValue());
+		if (db == null || !db.isValid(1)) {
+			db = DriverManager.getConnection(getConnectionURL(), loginUser.getValue(), loginPassword.getValue());
 		}
 		return db.createStatement();
+	}
+
+	public String getConnectionURL() {
+		String url = engine.getUrlProtocol() + "://" + loginUrl.getValue();
+		if (!database.getValue().isEmpty()) {
+			url += "/" + database.getValue();
+		}
+		return url;
 	}
 
 	@Override
@@ -80,5 +92,38 @@ public class Sql extends AbstractSignalPathModule {
 	@Override
 	public void destroy() {
 		if (db != null) { try { db.close(); } catch (SQLException e) { } }
+	}
+
+	public static class EngineParameter extends StringParameter {
+		public EngineParameter(AbstractSignalPathModule owner, String name) {
+			super(owner, name, "MySQL"); //this.getValueList()[0]);
+		}
+
+		private List<PossibleValue> getValueList() {
+			return Arrays.asList(
+				new PossibleValue("MySQL", "MySQL"),
+				new PossibleValue("PostgreSQL", "PostgreSQL")
+				//new PossibleValue("Oracle", "Oracle"),			// TODO: fix, now got error downloading ojdbc14
+				//new PossibleValue("SQL Server", "SQLServer")	// TODO: install; it's probably not in Maven
+			);
+		}
+
+		@Override public Map<String, Object> getConfiguration() {
+			Map<String, Object> config = super.getConfiguration();
+			config.put("possibleValues", getValueList());
+			return config;
+		}
+
+		public String getUrlProtocol() {
+			switch (getValue()) {
+				case "MySQL": return "jdbc:mysql";
+				case "PostgreSQL": return "jdbc:postgresql";
+				//case "Oracle": return "jdbc:oracle:thin";
+				//case "SQLServer": return "jdbc:sqlserver";
+				default:
+					// TODO: log error
+					return "jdbc:mysql";
+			}
+		}
 	}
 }

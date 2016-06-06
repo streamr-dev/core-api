@@ -11,14 +11,13 @@ databaseChangeLog = {
 			column(name: "type", value: "module")
 			column(name: "module_package_id", valueNumeric: 1)
 			column(name: "json_help", value: '{' +
-				'"params":{"DB engine":"e.g. MySQL","Database":"Database URL to connect","Username":"Login username","Password":"Login password"},' +
-				'"paramNames":["DB engine","Host","Username","Password"],' +
-				'"inputs":{"SQL Command":"SQL command to be executed"},' +
-				'"inputNames":["SQL Command"],' +
+				'"params":{"engine":"Database engine, e.g. MySQL","host":"Database server to connect","database":"Name of the database","username":"Login username","password":"Login password"},' +
+				'"paramNames":["engine","host","database","username","password"],' +
+				'"inputs":{"sql":"SQL command to be executed"},' +
+				'"inputNames":["sql"],' +
 				'"outputs":{"errors":"List of error strings","result":"List of rows returned by the database"},' +
-				'"outputNames":["errors", "result"],' +
+				'"outputNames":["errors","result"],' +
 				'"helpText":"' +
-					'<p>Database URL contains server and database name, e.g. <b>jdbc:mysql://localhost/myDB</b>.</p>' +
 					'<p>The result is a list of map objects, e.g. <i>[{&quot;id&quot;:0, &quot;name&quot;:&quot;Me&quot;}, {&quot;id&quot;:1, &quot;name&quot;:&quot;You&quot;}]</i></p>' +
 				'"}')
 		}

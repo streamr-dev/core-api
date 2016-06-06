@@ -19,8 +19,10 @@ class SqlSpec extends Specification {
 		module = new TestableSql();
 		module.init()
 		module.configure([
-			params : [
-				[name: "database", value: "jdbc:mysql://test.com/database"],
+			params: [
+				[name: "engine", value: "PostgreSQL"],
+				[name: "host", value: "test.com"],
+				[name: "database", value: "mydatabase"],
 				[name: "username", value: "user"],
 				[name: "password", value: "pass"],
 			]
@@ -58,5 +60,10 @@ class SqlSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	void "SQL module builds the connection URL correctly"() {
+		expect:
+		module.getConnectionURL() == "jdbc:postgresql://test.com/mydatabase"
 	}
 }
