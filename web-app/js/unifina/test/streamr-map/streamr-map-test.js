@@ -352,6 +352,19 @@ describe('streamr-map', function() {
 				lng: 2
 			})
 		})
+		it('must use default id if it is not given', function(done) {
+			map.createMarker = function(id) {
+				setTimeout(function() {
+					assert.equal(map.markers["UndefinedId"], "moi")
+					done()
+				})
+				return "moi"
+			}
+			map.addMarker({
+				lat: 1,
+				lng: 2
+			})
+		})
 		it('must call addLinePoint if options.drawTrace == true', function() {
 			map.addLinePoint = function() {
 				done()

@@ -1,15 +1,13 @@
 package com.unifina.signalpath.charts;
 
-import com.unifina.api.InvalidArgumentsException;
 import com.unifina.signalpath.*;
 import com.unifina.utils.StreamrColor;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class MapModule extends ModuleWithUI {
 
-	MapIdInput id = new MapIdInput(this, "id");
+	Input<Object> id = new Input<>(this, "id", "Object");
 	Input<Object> label = new Input<>(this, "label", "Object");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
 	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
@@ -35,8 +33,16 @@ public class MapModule extends ModuleWithUI {
 		longitude.canBeFeedback = false;
 		id.setDrivingInput(true);
 		id.canBeFeedback = false;
+		id.requiresConnection = false;
 		label.setDrivingInput(false);
 		label.canBeFeedback = false;
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		if (!id.isConnected())
+			id.receive("DefaultId");
 	}
 
 	@Override
@@ -119,55 +125,6 @@ public class MapModule extends ModuleWithUI {
 			put("lng", longitude);
 			put("id", id);
 			put("color", color.toString());
-		}
-	}
-
-	public class MapIdInput extends Input<Object> {
-
-		public boolean canHaveInitialValue = true;
-		public Object initialValue = null;
-
-		public MapIdInput(AbstractSignalPathModule owner, String name) {
-			super(owner, name, "Object");
-		}
-
-		public Object getInitialValue() {
-			return initialValue;
-		}
-
-		public void setInitialValue(Object initialValue) {
-			if (initialValue!=null) {
-				if (initialValue instanceof Number) {
-					this.initialValue = ((Number)initialValue).doubleValue();
-				} else if (initialValue instanceof String) {
-					this.initialValue = initialValue;
-				} else {
-					throw new InvalidArgumentsException("Initial value can only be Number or String. Type was: " + initialValue.getClass());
-				}
-
-				boolean wasPending = owner.isSendPending();
-				this.receive(initialValue);
-				// Initial value must not change send pending state
-				owner.setSendPending(wasPending);
-			}
-		}
-
-		@Override
-		public Map<String,Object> getConfiguration() {
-			Map<String,Object> config = super.getConfiguration();
-			config.put("canHaveInitialValue", canHaveInitialValue);
-			if (canHaveInitialValue && initialValue != null)
-				config.put("initialValue", initialValue);
-
-			return config;
-		}
-
-		@Override
-		public void setConfiguration(Map<String,Object> config) {
-			super.setConfiguration(config);
-
-			if (config.containsKey("initialValue") && config.get("initialValue") != null && !config.get("initialValue").toString().equals("null"))
-				setInitialValue(config.get("initialValue"));
 		}
 	}
 }
