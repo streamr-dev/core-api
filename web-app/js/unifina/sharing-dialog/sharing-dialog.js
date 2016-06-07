@@ -277,7 +277,7 @@
             originalPermissions = {}
             var initialAccessMap = {}
             originalAnonPermission = undefined;
-            _(originalPermissionList).each(function(p) {
+            originalPermissionList.forEach(function(p) {
                 if (!p || !p.operation) { return }      // continue
                 if (p.anonymous) {
                     originalAnonPermission = p;
@@ -339,7 +339,7 @@
             testedUsers[user] = true;
         })
         // completely removed users don't show up in accessList, need to be tested separately
-        _(originalPermissions).each(function (before, user) {
+        originalPermissions.forEach(function (before, user) {
             if (user in testedUsers) { return }    // continue
             if (before.read)  { removedPermissions.push(before.read) }
             if (before.write) { removedPermissions.push(before.write) }
@@ -356,7 +356,7 @@
         var revokedFrom = {}
         var errorMessages = []
         if (addedPermissions.length > 0 || removedPermissions.length > 0) {
-            _(addedPermissions).each(function(permission) {
+            addedPermissions.forEach(function(permission) {
                 started += 1
                 pendingRequests.push($.ajax({
                     url: resourceUrl + "/permissions",
@@ -373,7 +373,7 @@
                     }
                 }))
             })
-            _(removedPermissions).each(function(p) {
+            removedPermissions.forEach(function(p) {
                 started += 1
                 pendingRequests.push($.ajax({
                     url: resourceUrl + "/permissions/" + p.id,
