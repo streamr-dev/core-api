@@ -1,5 +1,6 @@
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
+import org.openqa.selenium.Keys
 
 class ModuleBuildSpec extends LoginTester1Spec {
 
@@ -52,13 +53,15 @@ class ModuleBuildSpec extends LoginTester1Spec {
 	}	
 	
 	def "module options button functionality"() {
-		when: "the Add module is added via module browser"
-			addModule 'Simple HTTP'
+		when: "the Map module is added via module browser"
+			addModule 'Map'
 		then: "module should appear on canvas"
-			moduleShouldAppearOnCanvas 'Simple HTTP'
+			moduleShouldAppearOnCanvas 'Map'
+		then: "module zoom level != 12"
+			mapZoomLevel() != 12
 			
 		when: "options button is clicked"
-			findModuleOnCanvas("Simple HTTP").find(".modulebutton .options").click()
+			findModuleOnCanvas("Map").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
@@ -69,20 +72,23 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			waitFor { !$(".modal-dialog .optionEditor") }
 		
 		when: "options button is clicked"
-			findModuleOnCanvas("Simple HTTP").find(".modulebutton .options").click()
+			findModuleOnCanvas("Map").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
-		when: "number of inputs is changed to 3 and options are OK'ed"
-			def el = $(".modal-dialog .optionEditor input").firstElement()
-			$(".modal-dialog .optionEditor input").firstElement().clear()
-			$(".modal-dialog .optionEditor input", 0) << "3"
+		when: "zoom level is changed to 12 and options are OK'ed"
+			def zoomElementIndex = $(".modal-dialog .optionEditor input").findIndexOf { it.text() == "zoom" }
+			$(".modal-dialog .optionEditor input", zoomElementIndex).value("12")
 			$(".modal-dialog .optionEditor").parents(".modal-dialog").find(".btn.btn-primary").click()
 		then: "dialog is OK'ed"
 			waitFor { !$(".modal-dialog .optionEditor") }
-		then: "module must be reloaded with 3 inputs"
-			waitFor { findModuleOnCanvas("Simple HTTP").find(".endpoint.parameter").size()==5 }
-			
+		then: "module must be reloaded with zoom level 12"
+			mapZoomLevel() == 12
+	}
+
+
+	def mapZoomLevel() {
+		js.exec('return $("#module_0").data("spObject").getMap().map.getZoom();')
 	}
 	
 	def "module context menu"() {
