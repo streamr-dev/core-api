@@ -4,10 +4,10 @@ import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
-import com.unifina.feed.DataRange
-import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
+import com.unifina.feed.DataRange
+import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -17,14 +17,17 @@ class StreamApiController {
 
 	def streamService
 	def permissionService
+	def apiService
 
 	@StreamrApi
 	def index() {
-		def streams = permissionService.get(Stream, request.apiUser) {
+		def criteria = apiService.createListCriteria(params, ["name", "description"], {
+			// Filter by exact name
 			if (params.name) {
 				eq "name", params.name
 			}
-		}
+		})
+		def streams = permissionService.get(Stream, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)
 		render(streams*.toMap() as JSON)
 	}
 
@@ -84,7 +87,7 @@ class StreamApiController {
 	@StreamrApi
 	def delete(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			stream.delete()
+			streamService.deleteStream(stream)
 			render(status: 204)
 		}
 	}

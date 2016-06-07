@@ -23,7 +23,8 @@ class SameSignSpec extends Specification {
 			B: [0, +0, -3, 3, -2, 5, -7].collect {it?.doubleValue()},
 		]
 		Map outputValues = [
-			sign: [0, 0, 0, 0, 0, 1, -1].collect {it?.doubleValue()}
+			sameSign: [true, true, false, false, false, true, true],
+			sign: [0, 0, 0, 0, 0, 1, -1].collect { return it.doubleValue() }
 		]
 		
 		then:

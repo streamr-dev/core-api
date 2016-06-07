@@ -153,7 +153,7 @@ class DashboardService {
 
 
 	@CompileStatic
-	private DashboardItem authorizedGetDashboardItem(Long dashboardId, Long itemId, SecUser user, Operation operation) {
+	DashboardItem authorizedGetDashboardItem(Long dashboardId, Long itemId, SecUser user, Operation operation) {
 		def dashboard = authorizedGetById(dashboardId, user, operation)
 		def dashboardItem = dashboard.items?.find { DashboardItem item -> item.id == itemId }
 		if (dashboardItem == null) {
@@ -163,7 +163,7 @@ class DashboardService {
 	}
 
 	@CompileStatic
-	private Dashboard authorizedGetById(Long id, SecUser user, Operation operation) {
+	Dashboard authorizedGetById(Long id, SecUser user, Operation operation) {
 		def dashboard = Dashboard.get(id)
 		if (dashboard == null) {
 			throw new NotFoundException(Dashboard.simpleName, id.toString())
