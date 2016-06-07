@@ -129,8 +129,6 @@ List
 
 Map is the same as a dictionary or an associative array found in a number of programming languages. Each key is a string, and the value can be of any built-in data type (even a Map again).
 
-If a boolean input is required, any non-boolean events are automatically converted to logical truth values. Numbers exactly equal to zero are deemed to be False, and any non-zero values True. An empty string ("") is False, a non-empty string is True. An empty list is False, a non-empty list is True. An empty Map is False, and anything else is True.
-
 Data types can be freely mixed in one event. And you can freely add new fields to an existing stream; you don’t have to know what fields you might eventually need. A single event can be of any size within reason, and a stream can grow indefinitely when extended by new events. 
 
 There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.

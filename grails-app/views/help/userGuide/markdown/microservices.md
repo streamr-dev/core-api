@@ -74,6 +74,10 @@ A data flow between two modules — or a data flow between a stream and a module
 
 <g:img dir="images/user-guide" file="connecting-stream-to-module.png" class="img-responsive" />
 
+You can only connect endpoints with compatible data types. For instance, you cannot create a connection which feeds string events to an endpoint where numerical events are expected.
+
+However, any non-boolean events are automatically converted to logical truth values if a boolean input is required. Numbers exactly equal to zero are deemed to be False, and any non-zero values True. An empty string ("") is False, a non-empty string is True. An empty list is False, a non-empty list is True. An empty Map is False, and anything else is True.
+
 All connections are unidirectional, i.e. the data always flows from an output to one or more inputs in one direction only.  The modules form a directed graph. [Feedback loops](#feedbackloops) are discouraged, but you can create them if you really want.
 
 When you view a canvas, the direction of a data connection is indicated by an arrow.  You can alter the endpoint of an existing connection by dragging it to another input endpoint.  If you instead drop the endpoint in an empty area in the workspace, the connection is cleared.  A mouse click on top of a module brings up an pop-up menu where you can choose to disconnect all incoming connections to the module.
