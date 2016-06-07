@@ -1,10 +1,10 @@
 #Extensions
 
-You can easily extend Streamr by writing custom modules in Java programming language. When a custom module is activated in a Streamr service, your code is executed as if the module were a part of the built-in machinery. As an alternative to custom code, you can also do [abstraction](#reusingservicesasmodules), i.e. reuse existing services as modules. 
+You can easily extend Streamr by writing custom modules in Java programming language. When a custom module is activated in a Streamr canvas, your code is executed as if the module were a part of the built-in machinery. As an alternative to custom code, you can also do abstraction, i.e. reuse existing canvases as modules. 
 
 ##JavaModule
 
-JavaModule is the tool to use for custom code. Start by creating a new service or by opening an existing service in the editor. Then insert a JavaModule on the canvas, click on the “Edit code” button, and a code editor will open in a resizable pop-up window. This is what you'll see:
+JavaModule is the tool to use for custom code. Start by creating a new canvas or by opening an existing canvas in the editor. Then insert a JavaModule on the workspace, click on the “Edit code” button, and a code editor will open in a resizable pop-up window. This is what you'll see:
 
 ```
 // Define inputs and outputs here
@@ -222,7 +222,6 @@ The code in a JavaModule is compiled and validated when you click the “Apply�
 
 <g:img dir="images/user-guide" file="java-module-example-on-canvas.png" class="img-responsive center-block" />
 
-**TODO: DISCUSS SELECTED USEFUL METHODS AND PROPERTIES AVAILABLE WITHIN THE MODULE.**
 
 
 

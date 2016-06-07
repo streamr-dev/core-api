@@ -1,12 +1,12 @@
 #Modules
 
-Modules are a integral part of Streamr: They process the data emanating from event streams. All Streamr [services](#services) consist of streams (they provide the data) and modules (they process the data).
+Modules process the data emanating from event streams. All Streamr [canvases](#canvases) consist of streams (they provide the data) and modules (they process the data).
 
-A module is close akin to what you'd call a function, subroutine, procedure, or a method in many programming languages. In Streamr, modules are specialised computation units for handling streaming real-time data. A module may have one or more outputs, or it may take care of some side effect instead. A module processes its inputs as soon as it is activated.
+A module is close akin to what you'd call a function, subroutine, procedure, or a method in various programming languages. In Streamr, modules are specialised computation units for handling streaming real-time data. A module processes its inputs as soon as it is activated by the arrival of a new event. The module may have one or more outputs, or it may take care of some side effect instead. 
 
-There’s no limitations on the number of module instances, i.e. on the number of of times the same module is used in a service or in different services.  Different instances of the same module are independent of each other (unless one feeds data to the other).
+There’s no limitations on the number of module instances, i.e. on the number of of times the same module is used in a canvas or in different canvases.  Different instances of the same module are independent of each other (unless one feeds data to the other).
 
-A module has an internal state, and it can and typically will update that state when it is executed. How this is done depends on the particular module. The statefulness is an important feature and one the key ingredients in real-time event stream processing.
+A module has an internal state, and it can and typically will update that state when it is executed. How this is done depends on the particular module. The statefulness is an important feature and one the key ingredients in real-time stream processing.
 
 ##Built-in modules
 
@@ -31,11 +31,11 @@ For details on different modules, either see the individual module help in the S
 
 A module can have inputs, outputs, and parameters.  Whilst a module does not need to have any inputs or outputs, useful modules will typically allow for either incoming or outgoing data (and usually both).
 
-When placed on the editor canvas, the inputs are shown as circular connectors along the left-hand side of the module.  The outputs are shown as connectors along the right-hand side.
+When placed on a canvas, the inputs are shown as circular connectors along the left-hand side of the module.  The outputs are shown as connectors along the right-hand side.
 
 <g:img dir="images/user-guide" file="round-to-step-module.png" class="side-image" />
 
-Many modules have parameters which control their operation.  Module parameters can be hardcoded, but their values are usually not immutable.  If a parameter can be modified at run-time, there is an associated parameter input at the left-hand edge of the module.
+Many modules have parameters which control their operation.  Module parameters can be hardcoded, but their values are typically not immutable.  If a parameter can be modified at run-time, there is an associated parameter input at the left-hand edge of the module.
 
 As an example, the **RoundToStep** module has three inputs, two parameters, and one output.  The first two inputs correspond to the module’s parameters, i.e. precision and mode.  The last input is a numeric value which will be rounded with the specified precision in the direction specified by the mode.  The module output is equal to the rounded input.
 
@@ -67,11 +67,11 @@ As mentioned, every input must a have a value before anything happens.  The inpu
 
 <g:img dir="images/user-guide" file="initial-value-dialog.png" class="img-responsive center-block" />
 
-<a name="loops"></a>
+<a name="feedbackloops"></a>
 
 By default, feedback loops are not allowed.  This is because feedback and event processing do not always mix well (just think back to the last time you placed a live microphone too close to a loudspeaker).
 
-But if you really want to create a feedback loop, we won’t stop you.  If you click on the **FB** icon next to an input connector, the endpoint will now accept events that originate from the same module.  If feedback is disabled, the endpoint won’t accept feedback events either directly or indirectly (i.e. not even when recycled through other modules).
+If you really want to create a feedback loop, we won’t stop you.  If you click on the **FB** icon next to an input connector, the endpoint will now accept events that originate from the same module.  If feedback is disabled, the endpoint won’t accept feedback events either directly or indirectly (i.e. not even when recycled through other modules).
 
 Lastly, note the **NR** icon next to each output connector.  This is a non-repeat button, and if it’s on, the module suppresses any output that would be an exact replica of the last outgoing event.  This covers the use case where you’re only interested in events that represent something new.
 

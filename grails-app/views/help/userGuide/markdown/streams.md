@@ -4,9 +4,9 @@ All data in Streamr is stored in a stream. A stream is simply a sequence of even
 
 You can store different kinds of data in the same stream.  The data may be numeric, but it can equally well consist of strings, collections of elementary data types, or associative arrays. Each event contains at least one data field, but you can have as many fields per event as required. The data are persistent and stored in the cloud.
 
-You can use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. However, the raison d'être for a stream is its capability to provide real-time inputs to Streamr [services](#services), and act as a recipient of real-time output from such services.
+The raison d'être for a stream is its capability to provide real-time inputs to Streamr [canvases](#canvases), and act as a recipient of real-time output from such canvases. You can also use a stream as a pub/sub-device, push data into it, and subscribe to the data elsewhere. 
 
-In this chapter, we’ll show some examples and describe the built-in data types. We'll then discuss how to do the following:
+In this chapter, we’ll show stream examples and describe the built-in data types. We'll then discuss how to do the following:
 
 - Create or delete a stream.
 - Edit stream details.
@@ -116,16 +116,20 @@ Number
 :   A numeric data type internally stored as a double precision (64-bit) float.
 
 Boolean
-:   A logical data type with two possible values, True and False. In Streamr, a numeric value exactly equal to one represents logical truth. Anything else is interpreted as a logical falsehood.
+:   A logical data type with two possible values, True and False.
 
 String
 :   A sequence of zero or more alphabetical characters.
 
 Map
-:   A collection of key-value pairs. Each key is a string, and the value can be of any built-in data type (even a Map again). Map is the same as a dictionary or an associative array found in a number of programming languages.
+:   A collection of key-value pairs.
 
 List
 :   An ordered collection of zero or more elements.
+
+Map is the same as a dictionary or an associative array found in a number of programming languages. Each key is a string, and the value can be of any built-in data type (even a Map again).
+
+If a boolean input is required, any non-boolean events are automatically converted to logical truth values. Numbers exactly equal to zero are deemed to be False, and any non-zero values True. An empty string ("") is False, a non-empty string is True. An empty list is False, a non-empty list is True. An empty Map is False, and anything else is True.
 
 Data types can be freely mixed in one event. And you can freely add new fields to an existing stream; you don’t have to know what fields you might eventually need. A single event can be of any size within reason, and a stream can grow indefinitely when extended by new events. 
 
@@ -200,12 +204,10 @@ Code | Description
 
 ##Subscribing to a stream
 
-You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You just add a stream module to a Streamr service.  As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
+You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You just add a stream module to a Streamr canvas.  As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
 
 <g:img dir="images/user-guide" file="twitter-stream-with-table.png" class="img-responsive center-block" />
 
 You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
-
-**TODO: FIX THE JAVASCRIPT API LINK ABOVE**
 
 

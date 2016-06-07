@@ -2,7 +2,7 @@
 
 You can easily get your own data out of Streamr. There are several ways of doing so:
 
-- You can create [dashboards](#dashboards) which display live data from  a Streamr service.
+- You can create [dashboards](#dashboards) which display live data from  a Streamr canvas.
 - You can use [embedded widgets](#embeddedwidgets) in external web pages.
 - You can subscribe to a stream in external web pages and applications.
 - You can drive external services with HTTP requests.
