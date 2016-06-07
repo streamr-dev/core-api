@@ -678,20 +678,22 @@ describe('streamr-map', function() {
 		})
 	})
 
-	describe('resize', function() {
-		it('must set parent width and height correctly', function() {
-			map = new StreamrMap($parent)
-			map.map.invalidateSize = function(){}
-			map.resize(200, 200)
-			assert.equal(map.parent.css("width"), "200px")
-			assert.equal(map.parent.css("height"), "200px")
-		})
+	describe('redraw', function() {
 		it('must call map.invalidateSize', function(done) {
 			map = new StreamrMap($parent)
 			map.map.invalidateSize = function() {
 				done()
 			}
-			map.resize(200, 200)
+			map.redraw()
+		})
+		it('must call lineLayer.redraw()', function (done) {
+			map = new StreamrMap($parent)
+			map.map.invalidateSize = function(){}
+			map.lineLayer = {}
+			map.lineLayer.redraw = function() {
+				done()
+			}
+			map.redraw()
 		})
 	})
 

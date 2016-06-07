@@ -71,8 +71,9 @@
             $(_this).trigger("move", _this.getCenterAndZoom())
         })
 
-        if(this.options.drawTrace)
+        if(this.options.drawTrace) {
             this.lineLayer = this.createLinePointLayer()
+        }
     }
 
     StreamrMap.prototype.createLinePointLayer = function() {
