@@ -373,7 +373,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 
 		if (option.possibleValues) {
 			var $select = $("<select>");
-			_(option.possibleValues).each(function(opt) {
+			_.each(option.possibleValues, function(opt) {
 				var $option = $("<option>");
 				$option.attr("value", opt.value);
 				$option.append(opt.text);
