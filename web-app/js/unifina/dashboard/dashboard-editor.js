@@ -371,6 +371,9 @@ var SidebarView = Backbone.View.extend({
 		this.$el.append(this.template(this.dashboard.toJSON()))
 		this.titleInput = this.$el.find("input.dashboard-name.title-input")
 		this.list = this.$el.find("#rsp-list")
+		this.saveButton = this.$el.find("#saveButton")
+		this.shareButton = this.$el.find("#share-button")
+		this.deleteButton = this.$el.find("#deleteDashboardButton")
 		_.each(this.canvases.models, function(canvas) {
 			var canvasView = new CanvasView({ model: canvas })
 			this.list.append(canvasView.el)
@@ -393,6 +396,31 @@ var SidebarView = Backbone.View.extend({
 						Streamr.showError()
 					}
 				})
+			}
+		})
+		this.checkPermissions()
+	},
+
+	checkPermissions: function() {
+		var _this = this
+		$.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(perm) {
+			var permissions = []
+			_.each(perm, function(permission) {
+				if (permission.id = "${id}") {
+					permissions.push(permission.operation)
+				}
+			})
+			if (_.contains(permissions, "share")) {
+				_this.shareButton.removeAttr("disabled")
+			} else {
+				_this.shareButton.addClass("forbidden")
+			}
+			if (_.contains(permissions, "write")) {
+				_this.saveButton.removeAttr("disabled")
+				_this.deleteButton.removeAttr("disabled")
+			} else {
+				_this.saveButton.addClass("forbidden")
+				_this.deleteButton.addClass("forbidden")
 			}
 		})
 	},
