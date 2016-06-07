@@ -222,4 +222,20 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "the old dashboard is not in the list anymore"
 			!($(".table .td", text:dashboardName + "2").displayed)		
 	}
+
+	def "not shared dashboard cannot be opened"() {
+		when: "try to upload an existing dashboard without permission"
+		go "dashboard/show/1000000"
+		then: "no sidebar, alert visible"
+		!$("#sidebar-view *").size()
+		$(".alert-danger", text: contains("not found"))
+	}
+
+	def "non-existing dashboard cannot be opened"() {
+		when: "try to upload a non-existing dashboard"
+		go "dashboard/show/asdfasfasdfsadfasfar"
+		then: "no sidebar, alert visible"
+		!$("#sidebar-view *").size()
+		$(".alert-danger", text: contains("not found"))
+	}
 }
