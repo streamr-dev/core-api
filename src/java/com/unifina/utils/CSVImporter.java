@@ -406,7 +406,7 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 
 		public CSVImporterException(String message, int lineNumber) {
-			super(message + " Line: " + lineNumber + ".");
+			super(message + " (Line: " + lineNumber + ")");
 		}
 	}
 }
