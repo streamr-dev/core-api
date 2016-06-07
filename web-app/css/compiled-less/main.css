@@ -16604,9 +16604,6 @@ table.sortable th {
   border-radius: 4px;
   border: 1px solid #ccc;
 }
-#addModule {
-  margin-top: 4px;
-}
 .jstree a {
   color: #555 !important;
 }
@@ -16697,6 +16694,9 @@ body.canvas-editor-page #canvas-name-editor .canvas-name {
 }
 body.canvas-editor-page .breadcrumb {
   margin-bottom: 0px;
+}
+body.canvas-editor-page #addModule {
+  margin-top: 4px;
 }
 .login-page .btn-sign-up {
   display: none;

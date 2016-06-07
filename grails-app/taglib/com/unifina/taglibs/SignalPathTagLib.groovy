@@ -31,6 +31,7 @@ class SignalPathTagLib {
 		
 		writeScriptHeader(out)
 		def str = """
+		var jsTreeContainerOriginalHeight
 		jQuery("#$id").jstree({
 			"core": {
 				"animation": 100
@@ -108,9 +109,35 @@ class SignalPathTagLib {
 				data.inst.open_node(data.rslt.obj)
 			}
 	    })
-	    .slimscroll({
-	    	wheelStep: 10
-	    })
+	    // SlimScroll is added because of the SlimScroll in the container. Otherwise the scrolling wouldn't work at all.
+	    .bind('loaded.jstree', function() {
+	    	jsTreeContainerOriginalHeight = jQuery(this).height()
+			jQuery(this).slimscroll({
+				wheelStep: 15,
+				height: jsTreeContainerOriginalHeight
+			})
+		})
+		.bind('close_node.jstree', function() {
+			if (!jQuery("#$id").find('> ul > li.jstree-open').length) {
+				jQuery("#$id").slimscroll({destroy: true})
+				jQuery("#$id").slimscroll({
+					wheelStep: 15,
+					height: jsTreeContainerOriginalHeight
+				})
+			} else {
+				jQuery(this).slimscroll()
+			}
+		})
+	    .bind('open_node.jstree', function() {
+			if (jQuery("#$id").find('> ul > li.jstree-open').length == 1) {
+				jQuery("#$id").slimscroll({
+					wheelStep: 15,
+					height: 'auto'
+				})
+			} else {
+				jQuery(this).slimscroll()
+			}
+		})
 	    // This is a hack for the slimscroll, the scroll bar doesn't fade out on creation without the mouseover event
 	    .mouseover()
 		"""
