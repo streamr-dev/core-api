@@ -106,6 +106,26 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
 	}
 
+	void "getSingleUserPermissionsTo returns permissions for single user"() {
+		expect:
+		service.getSingleUserPermissionsTo(dashOwned, me).size() == 3
+		service.getSingleUserPermissionsTo(dashOwned, anotherUser) == []
+		service.getSingleUserPermissionsTo(dashOwned, stranger) == []
+		service.getSingleUserPermissionsTo(dashOwned, null) == []
+		service.getSingleUserPermissionsTo(dashAllowed, me)[0].operation == Operation.READ
+		service.getSingleUserPermissionsTo(dashAllowed, anotherUser).size() == 3
+		service.getSingleUserPermissionsTo(dashAllowed, stranger) == []
+		service.getSingleUserPermissionsTo(dashAllowed, null) == []
+		service.getSingleUserPermissionsTo(dashRestricted, me) == []
+		service.getSingleUserPermissionsTo(dashRestricted, anotherUser).size() == 3
+		service.getSingleUserPermissionsTo(dashRestricted, stranger) == []
+		service.getSingleUserPermissionsTo(dashRestricted, null) == []
+		service.getSingleUserPermissionsTo(dashPublic, me)[0].operation == Operation.READ
+		service.getSingleUserPermissionsTo(dashPublic, anotherUser).size() == 4
+		service.getSingleUserPermissionsTo(dashPublic, stranger)[0].operation == Operation.READ
+		service.getSingleUserPermissionsTo(dashPublic, null)[0].operation == Operation.READ
+	}
+
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
 		service.get(Dashboard, me) == [dashOwned, dashAllowed]
