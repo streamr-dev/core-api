@@ -22,7 +22,7 @@
 				var _this = this
 				this.isAttached = false
 				setTimeout(function() {
-					// If the element is attached again i.e. dashboard item is moved to another place
+					// If the element is not attached again immediately, unsubscribe
 					if (!_this.isAttached)
 						_this.unsubscribe()
 				})
@@ -35,25 +35,20 @@
 			subscribe: function(messageHandler, options) {
 				var _this = this
 
-				if (messageHandler !== undefined)
-					this.messageHandler = messageHandler
-				if (options !== undefined)
-					this.options = options
-
 				this.getModuleJson(function(moduleJson) {
 					if (!moduleJson.uiChannel)
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
-					_this.options = _this.options || _this.getResendOptions(moduleJson)
+					options = options || _this.getResendOptions(moduleJson)
 
 					// Pass on the access context to the subscribe request
-					_this.options = $.extend(_this.options, _this.getAccessContext())
+					options = $.extend(options, _this.getAccessContext())
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
 								moduleJson.uiChannel.id,
-								_this.messageHandler,
-								_this.options
+								messageHandler,
+								options
 						)
 					})
 				})

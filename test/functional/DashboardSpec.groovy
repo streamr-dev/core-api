@@ -144,6 +144,22 @@ class DashboardSpec extends LoginTester1Spec {
 			dragDashboardItem("Table", -300, 0)
 		then: "hasn't failed"
 			at DashboardShowPage
+			waitFor {
+				// Testing that all the subscriptions are still subscribed
+				browser.driver.executeAsyncScript("""
+					var allSubscribed = true
+					var ready = false
+					var originalArguments = arguments
+					\$("#client")[0].getClient(function(client) {
+						\$.each(client.subById, function(k ,v) {
+							if (!v.isSubscribed()) {
+								allSubscribed = false
+							}
+						})
+						originalArguments[originalArguments.length - 1](allSubscribed)
+					})
+				""")
+			}
 
 		// Click to delete the dashboard without accepting it
 		when: "clicked the delete-button"

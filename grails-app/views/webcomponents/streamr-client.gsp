@@ -15,20 +15,24 @@
 		var streamrClient
 
 		function createClient(cb, element) {
-			if (typeof StreamrClient !== 'undefined' && element.server) {
-				var myOptions = {
-					server: element.server,
-					autoConnect: (element.autoconnect != null ? element.autoconnect : true),
-					autoDisconnect: (element.autodisconnect != null ? element.autodisconnect : true)
-				}
-
-				streamrClient = new StreamrClient(myOptions)
+			if (streamrClient)
 				cb(streamrClient)
-			}
 			else {
-				setTimeout(function() {
-					createClient(cb, element)
-				}, 100)
+				if (typeof StreamrClient !== 'undefined' && element.server) {
+					var myOptions = {
+						server: element.server,
+						autoConnect: (element.autoconnect != null ? element.autoconnect : true),
+						autoDisconnect: (element.autodisconnect != null ? element.autodisconnect : true)
+					}
+
+					streamrClient = new StreamrClient(myOptions)
+					cb(streamrClient)
+				}
+				else {
+					setTimeout(function() {
+						createClient(cb, element)
+					}, 100)
+				}
 			}
 		}
 
