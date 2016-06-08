@@ -225,7 +225,7 @@ class DashboardSpec extends LoginTester1Spec {
 
 	def "not shared dashboard cannot be opened"() {
 		when: "try to upload an existing dashboard without permission"
-		go "dashboard/show/1000000"
+		go "dashboard/show/456456"
 		then: "no sidebar, alert visible"
 		!$("#sidebar-view *").size()
 		$(".alert-danger", text: contains("not found"))
@@ -237,5 +237,32 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "no sidebar, alert visible"
 		!$("#sidebar-view *").size()
 		$(".alert-danger", text: contains("not found"))
+	}
+
+	def "a dashboard with no share-permission doesn't show share button enabled"() {
+		when: "try to upload a non-existing dashboard"
+		go "dashboard/show/567567"
+		then: "share button is disabled"
+		waitFor {
+			at DashboardShowPage
+		}
+		shareButton.displayed
+		shareButton.getAttribute("disabled")
+	}
+
+	def "a dashboard with no write-permission doesn't show save and delete buttons enabled"() {
+		when: "try to upload a non-existing dashboard"
+		go "dashboard/show/678678"
+		then: "no save and delete buttons are disabled"
+		waitFor {
+			at DashboardShowPage
+		}
+		saveButton.displayed
+		saveButton.getAttribute("disabled")
+		deleteButton.displayed
+		deleteButton.getAttribute("disabled")
+		// And shareButton is not
+		shareButton.displayed
+		!shareButton.getAttribute("disabled")
 	}
 }
