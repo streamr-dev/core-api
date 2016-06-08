@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ValidationException
+import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.AbstractDataRangeProvider
@@ -23,15 +24,17 @@ class StreamService {
 		stream.config = params.config
 
 		AbstractStreamListener streamListener
-		if (stream.feed != null) {
-			Map config = stream.getStreamConfigAsMap()
-			if (!config.fields) {
-				config.fields = []
-			}
-			streamListener = instantiateListener(stream)
-			streamListener.addToConfiguration(config, stream)
-			stream.config = config as JSON
+		// If no feed given, API feed is used
+		if (stream.feed == null) {
+			stream.feed = Feed.load(Feed.KAFKA_ID)
 		}
+		Map config = stream.getStreamConfigAsMap()
+		if (!config.fields) {
+			config.fields = []
+		}
+		streamListener = instantiateListener(stream)
+		streamListener.addToConfiguration(config, stream)
+		stream.config = config as JSON
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
