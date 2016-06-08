@@ -1,8 +1,6 @@
 package com.unifina.signalpath.map;
 
 import com.unifina.signalpath.*;
-import com.unifina.signalpath.variadic.OutputInstantiator;
-import com.unifina.signalpath.variadic.VariadicOutput;
 import com.unifina.utils.MapTraversal;
 
 import java.util.ArrayList;
@@ -13,7 +11,8 @@ import java.util.Map;
 public class GetMultiFromMap extends AbstractSignalPathModule {
 
 	private MapInput in = new MapInput(this, "in");
-	private VariadicOutput<Object> outs = new VariadicOutput<>(this, new OutputInstantiator.SimpleObject(), 1);
+
+	private List<Output<Object>> outs;
 	private MapOutput founds = new MapOutput(this, "founds");
 
 
@@ -27,38 +26,53 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 	public void sendOutput() {
 		Map map = in.getValue();
 
-		Map<String, Boolean> foundMap = new HashMap<>();
+		Map<String, Double> foundList = new HashMap<>();
 
-
-		for (Output<Object> out : outs.getEndpoints()) {
+		for (Output<Object> out : outs) {
 			String key = out.getEffectiveName();
 			Object value = MapTraversal.getProperty(map, key);
 			if (value == null) {
-				foundMap.put(key, false);
+				foundList.put(key, 0.0);
 			} else {
-				foundMap.put(key, true);
+				foundList.put(key, 1.0);
 				out.send(value);
 			}
 		}
 
-		founds.send(foundMap);
+		founds.send(foundList);
 	}
 
 	@Override
 	public void clearState() {}
 
 	@Override
-	public Output getOutput(String name) {
-		Output output = super.getOutput(name);
-		if (output == null) {
-			output = outs.addEndpoint(name);
-		}
-		return output;
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		ModuleOptions options = ModuleOptions.get(config);
+		options.addIfMissing(ModuleOption.createInt("numOfKeys", outs.size()));
+
+		return config;
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		outs.onConfiguration(config);
+
+		int numOfKeys = 1;
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ModuleOption numOfKeysOption = options.getOption("numOfKeys");
+		if (numOfKeysOption != null) {
+			numOfKeys = numOfKeysOption.getInt();
+		}
+
+		outs = new ArrayList<>();
+
+		for (int i=1; i <= numOfKeys; ++i) {
+			Output<Object> out = new Output<>(this, "out-" + i, "Object");
+			addOutput(out);
+			outs.add(out);
+		}
 	}
 }
