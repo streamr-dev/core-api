@@ -159,8 +159,8 @@ $(document).ready(function() {
 		SignalPath.start();
 	});
 
-	$('#csv').click(function() {
-		var ctx = {
+	$('#run-csv-button').click(function() {
+		var startRequest = {
 			csv: true,
 			csvOptions: {
 				timeFormat: $("#csvTimeFormat").val(),
@@ -170,7 +170,7 @@ $(document).ready(function() {
 			}
 		}
 
-		SignalPath.start(ctx);
+		SignalPath.startAdhoc(startRequest);
 	});
 
 	// Historical run button
@@ -438,7 +438,7 @@ $(document).unload(function () {
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="csv" class="btn btn-primary" data-dismiss="modal">Run</button>
+	        <button id="run-csv-button" class="btn btn-primary" data-dismiss="modal">Run</button>
 	      </div>
 	    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->
