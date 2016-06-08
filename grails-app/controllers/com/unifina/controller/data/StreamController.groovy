@@ -44,8 +44,9 @@ class StreamController {
 		List<Stream> streams = permissionService.get(Stream, user, {
 			order("lastUpdated", "desc")
 		})
-		List<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE)
-		[streams:streams, shareable:shareable]
+		Set<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE).toSet()
+		Set<Stream> writable = permissionService.get(Stream, user, Operation.WRITE).toSet()
+		[streams:streams, shareable:shareable, writable:writable, user:user]
 	}
 
 	def search() {
@@ -242,8 +243,8 @@ class StreamController {
 		List fields = []
 
 		// The primary timestamp column is implicit, so don't include it in streamConfig
-		for (int i=0;i<csv.schema.entries.length;i++) {
-			if (i!=csv.getSchema().timestampColumnIndex) {
+		for (int i=0; i < csv.schema.entries.length; i++) {
+			if (i != csv.getSchema().timestampColumnIndex) {
 				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
 				if (e!=null)
 					fields << [name:e.name, type:e.type]

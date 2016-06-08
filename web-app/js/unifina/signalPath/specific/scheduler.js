@@ -56,7 +56,7 @@ var Rule = Backbone.Model.extend({
 			})
 			this.view.errorHighlight()
 			return false
-		} else 
+		} else
 			return true
 	},
 
@@ -384,7 +384,7 @@ var Templates = {}
 
 Templates["scheduler-template"] = ''+
 	'<ol class="table scheduler-table">'+
-		
+
 	'</ol>';
 
 
@@ -561,7 +561,7 @@ Templates["rule-view-week-template"] = ''+
 			'{[ }); ]}'+
 		'</select>';
 
-Templates["rule-view-day-template"] = ''+ 
+Templates["rule-view-day-template"] = ''+
 		'<select name="hour" class="form-control input-sm">'+
 			'{[ _.each(_.range(24), function(i){ ]}'+
 				'<option value="{{i}}">'+
