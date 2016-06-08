@@ -246,11 +246,7 @@
 
         var originalPermissionList = []
         $.getJSON(resourceUrl + "/permissions").success(function(data) {
-            originalOwner = _(data)
-                .filter(function(p) {
-                    return p.operation === "share" && !p.id
-                })
-                .pluck("user").first().value()
+            originalOwner = _(data).filter(function(p) { return p.operation === "share" && !p.id }).first().user
             originalPermissionList = _.filter(data, "id")
         }).always(function() {
             sharingDialog = bootbox.dialog({
@@ -340,7 +336,7 @@
             testedUsers[user] = true;
         })
         // completely removed users don't show up in accessList, need to be tested separately
-        originalPermissions.forEach(function (before, user) {
+        _.each(originalPermissions, function (before, user) {
             if (user in testedUsers) { return }    // continue
             if (before.read)  { removedPermissions.push(before.read) }
             if (before.write) { removedPermissions.push(before.write) }
