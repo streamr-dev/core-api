@@ -10,7 +10,7 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
         var div = super_createDiv()
 
         div.bind("spConnect", function(event, output) {
-            if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
+            if (!SignalPath.isLoading() && !module.moduleClosed) {
 
                 if (json.variadic.isLast) {
                     var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
@@ -43,7 +43,7 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
         })
 
         div.bind("spDisconnect", function(event, output) {
-            if (!SignalPath.isBeingReloaded && !module.moduleClosed) {
+            if (!SignalPath.isLoading() && !module.moduleClosed) {
                 if (json.variadic.linkedOutput) {
                     module.removeOutput(json.variadic.linkedOutput)
                 }

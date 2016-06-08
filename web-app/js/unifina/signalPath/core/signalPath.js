@@ -509,6 +509,8 @@ var SignalPath = (function () {
 			if (callback)
 				callback(json);
 
+			SignalPath.isBeingReloaded = false
+			
 			// Trigger loaded on pub and parentElement
 			$(pub).add(parentElement).trigger('loaded', [savedJson]);
 
@@ -529,7 +531,6 @@ var SignalPath = (function () {
 		else {
 			doLoad(idOrObject)
 		}
-		SignalPath.isBeingReloaded = false
 	}
 	pub.load = load;
 	
@@ -736,6 +737,10 @@ var SignalPath = (function () {
 		else (parentElement.css("zoom", zoom))
 	}
 	pub.setZoom = setZoom
+
+	pub.isLoading = function() {
+		return SignalPath.isBeingReloaded;
+	}
 
 	return pub; 
 }());
