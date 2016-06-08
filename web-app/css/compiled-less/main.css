@@ -16602,7 +16602,6 @@ table.sortable th {
 }
 .jstree {
   border-radius: 4px;
-  margin-bottom: 4px;
   border: 1px solid #ccc;
 }
 .jstree a {
@@ -16695,6 +16694,9 @@ body.canvas-editor-page #canvas-name-editor .canvas-name {
 }
 body.canvas-editor-page .breadcrumb {
   margin-bottom: 0px;
+}
+body.canvas-editor-page #addModule {
+  margin-top: 4px;
 }
 .login-page .btn-sign-up {
   display: none;
