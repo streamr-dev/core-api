@@ -439,18 +439,18 @@ var Scheduler = Backbone.View.extend({
 		'</select>'+
 		'of'+
 		'<select name="month" class="form-control input-sm">'+
-		'<option value="1">January</option>'+
-		'<option value="2">February</option>'+
-		'<option value="3">March</option>'+
-		'<option value="4">April</option>'+
-		'<option value="5">May</option>'+
-		'<option value="6">June</option>'+
-		'<option value="7">July</option>'+
-		'<option value="8">August</option>'+
-		'<option value="9">September</option>'+
-		'<option value="10">October</option>'+
-		'<option value="11">November</option>'+
-		'<option value="12">December</option>'+
+			'<option value="1">January</option>'+
+			'<option value="2">February</option>'+
+			'<option value="3">March</option>'+
+			'<option value="4">April</option>'+
+			'<option value="5">May</option>'+
+			'<option value="6">June</option>'+
+			'<option value="7">July</option>'+
+			'<option value="8">August</option>'+
+			'<option value="9">September</option>'+
+			'<option value="10">October</option>'+
+			'<option value="11">November</option>'+
+			'<option value="12">December</option>'+
 		'</select>'+
 		'at'+
 		'<select name="hour" class="form-control input-sm">'+
@@ -521,13 +521,13 @@ var Scheduler = Backbone.View.extend({
 
 	Templates["rule-view-week-template"] = ''+
 		'<select name="weekday" class="form-control input-sm">'+
-		'<option value="2">Monday</option>'+
-		'<option value="3">Tuesday</option>'+
-		'<option value="4">Wednesday</option>'+
-		'<option value="5">Thursday</option>'+
-		'<option value="6">Friday</option>'+
-		'<option value="7">Saturday</option>'+
-		'<option value="1">Sunday</option>'+
+			'<option value="2">Monday</option>'+
+			'<option value="3">Tuesday</option>'+
+			'<option value="4">Wednesday</option>'+
+			'<option value="5">Thursday</option>'+
+			'<option value="6">Friday</option>'+
+			'<option value="7">Saturday</option>'+
+			'<option value="1">Sunday</option>'+
 		'</select>'+
 		'at'+
 		'<select name="hour" class="form-control input-sm">'+
