@@ -137,6 +137,68 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "the url is clean"
 			driver.currentUrl.endsWith("/canvas/editor")
 	}
+
+	def "going back after creating a new canvas reloads the last one"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		when: "saved with name"
+			addAndWaitModule("Table")
+			saveCanvasAs(name)
+			login()
+		then: "no module"
+			waitFor {
+				at CanvasPage
+			}
+			!findModuleOnCanvas("Table")
+		when: "canvas is loaded"
+			loadSignalPath(name)
+		then: "module can be found"
+			findModuleOnCanvas("Table")
+		when: "new canvas is created"
+			$("#newSignalPath").click()
+		then: "no module"
+			!findModuleOnCanvas("Table")
+		when: "clicked back button"
+			driver.navigate().back()
+		then: "module can be found"
+			waitFor {
+				findModuleOnCanvas("Table")
+			}
+	}
+
+	def "going back after loading a canvas reloads the last one"() {
+		setup:
+			def name = "CanvasSpec-" + System.currentTimeMillis()
+			addAndWaitModule("Table")
+			saveCanvasAs(name)
+			login()
+			waitFor {
+				at CanvasPage
+			}
+			def name2 = "CanvasSpec-" + System.currentTimeMillis()
+			addAndWaitModule("Label")
+			saveCanvasAs(name2)
+			login()
+			waitFor {
+				at CanvasPage
+			}
+		when: "canvas 1 is loaded"
+			loadSignalPath(name)
+		then: "Table can be found, no Label"
+			findModuleOnCanvas("Table")
+			!findModuleOnCanvas("Label")
+		when: "canvas 2 is loaded"
+			loadSignalPath(name2)
+		then: "Label can be found"
+			!findModuleOnCanvas("Table")
+			findModuleOnCanvas("Label")
+		when: "clicked back button"
+			driver.navigate().back()
+		then: "Table can be found, no Label"
+			waitFor {
+				findModuleOnCanvas("Table")
+				!findModuleOnCanvas("Label")
+			}
+	}
 	
 	def "unsaved canvases should show the save as option"() {
 		when: "save dropdown button is clicked"
@@ -160,10 +222,6 @@ class CanvasSpec extends LoginTester1Spec {
 			saveAsButton.displayed
 		then: "save in place button should be shown"
 			saveButton.displayed
-	}
-
-	def "the url in address bar should be changed on save"() {
-
 	}
 
 	def "begin- and end date datepickers"() {

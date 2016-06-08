@@ -117,12 +117,14 @@ $(document).ready(function() {
 
 	function setAddressbarUrl(url) {
 		if (window.history && window.history.pushState && window.history.replaceState) {
-			// Replace the current state so we know to reload the page on back
-	  		window.history.replaceState({
-	  			streamr: {
-	  				urlPath: window.location.href
-				}
-			}, undefined, window.location.href)
+			// If we haven't set the current url into history, replace the current state so we know to reload the page on back
+			if (!window.history.state || !window.history.state.streamr) {
+				window.history.replaceState({
+					streamr: {
+						urlPath: window.location.href
+					}
+				}, undefined, window.location.href)
+			}
 			// Push the new state to the history
 			window.history.pushState({
 				streamr: {
