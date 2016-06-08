@@ -1,6 +1,6 @@
 <html>
     <head>
-        <meta name="layout" content="main" />
+        <meta name="layout" content="sidemenu" />
         <title><g:message code="stream.show.label" args="[stream.name]"/></title>
         <r:require module="dropzone"/>
 		<r:require module="confirm-button"/>
@@ -27,69 +27,79 @@
 		</r:script>
     </head>
     <body class="stream-show main-menu-fixed">
-    	<ui:breadcrumb>
-			<g:render template="/stream/breadcrumbList" model="[stream:stream]"/>
-			<g:render template="/stream/breadcrumbShow" model="[stream:stream, active:true]"/>
-		</ui:breadcrumb>
-	
-		<ui:flashMessage/>
+		<div id="main-menu" role="navigation">
+			<div id="main-menu-inner">
+				<div class="menu-content">
+					<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
+				</div>
+			</div> <!-- / #main-menu-inner -->
+		</div> <!-- / #main-menu -->
+		<div id="content-wrapper">
 
-		<div class="row">
-			<div class="col-sm-6 col-md-4">
-				<div class="panel ">
-					<div class="panel-heading">
-						<g:hiddenField name="id" value="${ stream.id }" />
+			<ui:breadcrumb>
+				<g:render template="/stream/breadcrumbList" model="[stream:stream]"/>
+				<g:render template="/stream/breadcrumbShow" model="[stream:stream, active:true]"/>
+			</ui:breadcrumb>
 
-						<span class="panel-title">${message(code:"stream.show.label", args:[stream.name])}</span>
-						<g:if test="${writable}">
-							<div class="panel-heading-controls">
-								<li class="dropdown">
-									<button id="stream-menu-toggle" href="#" class="dropdown-toggle btn btn-sm" data-toggle="dropdown">
-										<i class="navbar-icon fa fa-bars"></i>
-									</button>
-									<ul class="dropdown-menu pull-right">
-										<li>
-											<g:link action="edit" id="${stream.id}">
-												<i class="fa fa-pencil"></i> <g:message code="stream.editInfo.label"/>
-											</g:link>
-										</li>
-										<g:if test="${shareable}">
+			<ui:flashMessage/>
+
+			<div class="row">
+				<div class="col-sm-6 col-md-4">
+					<div class="panel ">
+						<div class="panel-heading">
+							<g:hiddenField name="id" value="${ stream.id }" />
+
+							<span class="panel-title">${message(code:"stream.show.label", args:[stream.name])}</span>
+							<g:if test="${writable}">
+								<div class="panel-heading-controls">
+									<li class="dropdown">
+										<button id="stream-menu-toggle" href="#" class="dropdown-toggle btn btn-sm" data-toggle="dropdown">
+											<i class="navbar-icon fa fa-bars"></i>
+										</button>
+										<ul class="dropdown-menu pull-right">
 											<li>
-												<ui:shareButton url="${createLink(uri: "/api/v1/streams/" + stream.id)}" name="Stream ${stream.name}" type="link">
-													<g:message code="stream.share.label"/>
-												</ui:shareButton>
+												<g:link action="edit" id="${stream.id}">
+													<i class="fa fa-pencil"></i> <g:message code="stream.editInfo.label"/>
+												</g:link>
 											</li>
-										</g:if>
-										<li>
-											<a href="#" id="delete-stream-button">
-												<i class="fa fa-trash-o"></i> <g:message code="stream.delete.label"/>
-											</a>
-										</li>
-									</ul>
-								</li>
-							</div>
-						</g:if>
-					</div>
-					<div class="panel-body">
+											<g:if test="${shareable}">
+												<li>
+													<ui:shareButton url="${createLink(uri: "/api/v1/streams/" + stream.id)}" name="Stream ${stream.name}" type="link">
+														<g:message code="stream.share.label"/>
+													</ui:shareButton>
+												</li>
+											</g:if>
+											<li>
+												<a href="#" id="delete-stream-button">
+													<i class="fa fa-trash-o"></i> <g:message code="stream.delete.label"/>
+												</a>
+											</li>
+										</ul>
+									</li>
+								</div>
+							</g:if>
+						</div>
+						<div class="panel-body">
 
-						<ui:labeled label="${message(code:"stream.name.label")}">
-					    	${stream.name}
-						</ui:labeled>
-						
-						<ui:labeled label="${message(code:"stream.description.label")}">
-						    	${stream.description}
-						</ui:labeled>
-						
-						<ui:labeled label="${message(code:"stream.type.label")}">
-						    	${stream.feed.name}
-						</ui:labeled>
+							<ui:labeled label="${message(code:"stream.name.label")}">
+								${stream.name}
+							</ui:labeled>
+
+							<ui:labeled label="${message(code:"stream.description.label")}">
+									${stream.description}
+							</ui:labeled>
+
+							<ui:labeled label="${message(code:"stream.type.label")}">
+									${stream.feed.name}
+							</ui:labeled>
+						</div>
 					</div>
 				</div>
-			</div>
-			
-			<g:include action="details" id="${stream.id}"/>
 
+				<g:include action="details" id="${stream.id}"/>
+
+			</div>
 		</div>
-		
+		<div id="main-menu-bg"></div>
     </body>
 </html>
