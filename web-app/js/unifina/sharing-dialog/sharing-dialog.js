@@ -246,11 +246,12 @@
 
         var originalPermissionList = []
         $.getJSON(resourceUrl + "/permissions").success(function(data) {
-            originalOwner = _.chain(data)
-                .filter(function(p) { return p.operation === "share" && !p.id })
-                .pluck("user")
-                .first().value()
-            originalPermissionList = _(data).filter(function(p) { return !!p.id })
+            originalOwner = _(data)
+                .filter(function(p) {
+                    return p.operation === "share" && !p.id
+                })
+                .pluck("user").first().value()
+            originalPermissionList = _.filter(data, "id")
         }).always(function() {
             sharingDialog = bootbox.dialog({
                 title: "Share <span class='resource-name-label'></span>",
@@ -312,7 +313,7 @@
 
     var pendingRequests = []
     function savingChanges() {
-        pendingRequests = _(pendingRequests).filter(function(deferred) { return deferred.state() === "pending" })
+        pendingRequests = _.filter(pendingRequests, function(deferred) { return deferred.state() === "pending" })
         return pendingRequests.length > 0
     }
 
