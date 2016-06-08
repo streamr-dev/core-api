@@ -16,25 +16,11 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		)
 		widget.render()
 
-		$(SignalPath).on("started loaded", function() {
-			if (SignalPath.isRunning()) {
-				if (widget.enable)
-					widget.enable()
-				$(widget).trigger("started")
-			}
-		})
+		$(SignalPath).on("started loaded", prot.start)
 
-		$(SignalPath).on("loaded", function(e, json) {
-			if (SignalPath.isRunning())
-				requestState(json)
-		})
+		$(SignalPath).on("loaded", prot.requestState)
 
-		$(SignalPath).on("stopped", function() {
-			if(widget.disable)
-				widget.disable()
-			$(widget).trigger("stopped")
-			$(pub).trigger("stopped")
-		})
+		$(SignalPath).on("stopped", prot.stop)
 
 		$(widget).on("update", function() {
 			prot.redraw()
@@ -52,6 +38,27 @@ SignalPath.InputModule = function(data,canvas,prot) {
 			prot.div.draggable("option", "cancel", list)
 		}
 	}
+
+	prot.start = function() {
+		if (SignalPath.isRunning()) {
+			if (widget.enable)
+				widget.enable()
+			$(widget).trigger("started")
+		}
+	}
+
+	prot.stop = function() {
+		if(widget.disable)
+			widget.disable()
+		$(widget).trigger("stopped")
+		$(pub).trigger("stopped")
+	}
+
+	prot.requestState = function(e, json) {
+		if (SignalPath.isRunning())
+			requestState(json)
+	}
+
 
 	function requestState(json) {
 		if (json && !json.adhoc) {
@@ -79,6 +86,12 @@ SignalPath.InputModule = function(data,canvas,prot) {
 			type: "uiEvent",
 			value: value
 		}, function(resp) {});
+	}
+
+	pub.onClose = function() {
+		$(widget).off()
+		$(SignalPath).off("started loaded", prot.start)
+		$(SignalPath).off("loaded", prot.requestState)
 	}
 	
 	return pub;
