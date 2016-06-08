@@ -80,7 +80,7 @@ If you want to configure the data fields manually, the Configure Fields button t
 
 <g:img dir="images/user-guide" file="configure-fields-dialog.png" class="img-responsive center-block" />
 
-You can also rename a stream, edit the description, add data fields and specify the field types using the [stream API](#streamAPIreference).
+You can also rename a stream, edit the description, add data fields and specify the field types using the [API](${createLink(controller:"help", action:"api")}).
 
 ##Uploading historical data
 
@@ -206,6 +206,6 @@ You’ll need to be a stream subscriber in order to receive events. Streamr make
 
 <g:img dir="images/user-guide" file="twitter-stream-with-table.png" class="img-responsive center-block" />
 
-You can also subscribe to a stream in external applications with the [Javascript API](#javascript-API-reference).
+You can also subscribe to a stream in external applications via our [API](${createLink(controller:'help', action:'api')}).
 
 

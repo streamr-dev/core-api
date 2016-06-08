@@ -36,9 +36,9 @@
 		wrapper.find("a").each(function() {
 			var href = $(this).attr("href")
 			if (href && href.startsWith("#")) {
-				var el = $("a[name="+href.substring(1))
+				var el = $("a[name="+href.substring(1)).add(href)
 				if (el.length == 0) {
-					console.log("Anchor "+href+" is a link target, but does not exist on page (yet)")
+					console.log("Anchor "+href+" is a link target, but does not exist on page!")
 				}
 				else {
 					$(this).click(function(event) {
