@@ -1,9 +1,8 @@
-var a
 SignalPath.GenericModule = function(data, canvas, prot) {
 	prot = prot || {};
 	
 	var pub = SignalPath.EmptyModule(data, canvas, prot);
-	a = pub
+
 	prot.paramTable = null;
 	prot.ioTable = null;
 
