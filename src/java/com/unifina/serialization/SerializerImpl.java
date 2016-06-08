@@ -72,6 +72,9 @@ public class SerializerImpl implements Serializer {
 
 	@Override
 	public Object deserializeFromByteArray(byte[] bytes) throws SerializationException {
+		if (bytes.length == 0) {
+			throw new SerializationException("Zero bytes given as input");
+		}
 		return deserialize(new ByteArrayInputStream(bytes));
 	}
 
