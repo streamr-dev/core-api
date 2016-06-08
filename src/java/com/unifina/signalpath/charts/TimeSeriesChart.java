@@ -19,7 +19,7 @@ import com.unifina.utils.MapTraversal;
 public class TimeSeriesChart extends Chart {
 	
 	int tsInputCount = 10;
-	boolean barify = true;
+	boolean barify = false;
 	
 	TimeSeriesInput[] myInputs;
 	
