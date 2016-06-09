@@ -1,6 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
+        "title": "Streamr resource management API",
         "version": "1.0.0"
     },
     "host": "www.streamr.com",
