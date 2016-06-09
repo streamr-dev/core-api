@@ -403,12 +403,9 @@ var SidebarView = Backbone.View.extend({
 
 	checkPermissions: function() {
 		var _this = this
-		$.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(perm) {
-			var permissions = []
-			_.each(perm, function(permission) {
-				if (permission.id = "${id}") {
-					permissions.push(permission.operation)
-				}
+		$.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(permissions) {
+			permissions = _.map(permissions, function(p) {
+				return p.operation
 			})
 			if (_.contains(permissions, "share")) {
 				_this.shareButton.removeAttr("disabled")
