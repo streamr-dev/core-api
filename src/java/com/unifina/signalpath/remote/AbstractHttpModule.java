@@ -198,7 +198,6 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	public void receive(FeedEvent event) {
 		if (event.content instanceof HttpTransaction) {
 			sendOutput((HttpTransaction) event.content);
-			setSendPending(true);
 			getPropagator().propagate();
 		} else {
 			super.receive(event);
