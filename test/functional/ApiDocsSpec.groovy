@@ -21,4 +21,12 @@ class ApiDocsSpec extends LoginTester1Spec {
 		$("h1", text:link.text()).displayed
 	}
 
+	void "CORE-693 code blocks are not collapsed initially"() {
+		to ApiDocsPage
+		waitFor { $(".CodeMirror-lines").size() > 0 }
+
+		expect: "all codemirror lines to have a height greater than zero"
+		waitFor { js.exec('return Math.min.apply(null, $(".CodeMirror-lines").map(function(i,o) { return $(o).height(); }))') > 0 }
+	}
+
 }

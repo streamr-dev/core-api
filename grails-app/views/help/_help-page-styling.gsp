@@ -30,6 +30,10 @@
 		}
 		// FOUC is prevented by having the content hidden on load. Now show it!
 		wrapper.show()
+		// Need to refresh codemirrors after showing
+		$('.CodeMirror').each(function(i, el) {
+			el.CodeMirror.refresh();
+		});
 
 		// Fix offset of anchor links.
 		var offset = 80
