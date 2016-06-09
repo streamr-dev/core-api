@@ -1,6 +1,7 @@
 package com.unifina.signalpath.map;
 
 import com.unifina.signalpath.*;
+import com.unifina.utils.MapTraversal;
 
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class GetFromMap extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		Map source = in.getValue();
-		Object target = source.get(key.getValue());
+		Object target = MapTraversal.getProperty(source, key.getValue());
 		if (target == null) {
 			found.send(0.0);
 		} else {
