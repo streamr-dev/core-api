@@ -7,8 +7,22 @@ import spock.lang.Specification
 
 class CSVImporterSpec extends Specification {
 
-	def setup() {
+	CSVImporter.Schema schema
+	List<CSVImporter.LineValues> lines = []
 
+
+	void readFile(String fileName, List<Map> fields = null, Integer timestampIndex = null, String format = null, String timeZone = null, boolean ignoreEmptyFields = true) {
+		File file = Paths.get(getClass().getResource(fileName).toURI()).toFile()
+		CSVImporter csv = new CSVImporter(file, fields, timestampIndex, format, timeZone, ignoreEmptyFields)
+		schema = csv.getSchema()
+		for (CSVImporter.LineValues lv : csv) {
+			lines.add(lv);
+		}
+	}
+
+	def setup() {
+		schema = null
+		lines.clear()
 	}
 
 	def cleanup() {
@@ -16,12 +30,8 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "test detecting a schema from a csv file"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
-
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		CSVImporter.Schema schema = csv.getSchema()
+		readFile("test-files/test-upload-file.csv")
 
 		then:
 		schema.entries.length == 5
@@ -38,44 +48,26 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "test reading values from a csv file"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
-		int rowsRead = 0
-		List<CSVImporter.LineValues> firstRows = []
-
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		for (CSVImporter.LineValues line : csv) {
-			if (line == null)
-				continue
-
-			if (rowsRead < 25)
-				firstRows << line
-
-			rowsRead++
-		}
+		readFile("test-files/test-upload-file.csv")
 
 		then:
-		rowsRead == 735
-		firstRows[0].values[0] instanceof Date
-		firstRows[0].values[1] instanceof Double
-		firstRows[0].values[1] == 477.74
-		firstRows[0].values[2] instanceof Double
-		firstRows[0].values[2] == 100.0
-		firstRows[0].values[3] instanceof Boolean
-		firstRows[0].values[3] == true
-		firstRows[0].values[4] == null
-		firstRows[23].values[1] == 477.16
-		firstRows[23].values[4] == "No way!"
+		lines.size() == 735
+		lines.get(0).values[0] instanceof Date
+		lines.get(0).values[1] instanceof Double
+		lines.get(0).values[1] == 477.74
+		lines.get(0).values[2] instanceof Double
+		lines.get(0).values[2] == 100.0
+		lines.get(0).values[3] instanceof Boolean
+		lines.get(0).values[3] == true
+		lines.get(0).values[4] == null
+		lines.get(23).values[1] == 477.16
+		lines.get(23).values[4] == "No way!"
 	}
 
 	void "test detecting the schema from another csv file"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/crime-records.csv").toURI()).toFile()
-
 		when:
-		CSVImporter csv = new CSVImporter(file, null, 0, "MM/dd/yy HH:mm")
-		CSVImporter.Schema schema = csv.getSchema()
+		readFile("test-files/crime-records.csv", null, 0, "MM/dd/yy HH:mm")
 
 		then:
 		schema.entries.length == 9
@@ -100,47 +92,24 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "test detecting the timestamp from epoch"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/epoch-test.csv").toURI()).toFile()
-		CSVImporter csv = new CSVImporter(file, null, 0, "unix")
-		CSVImporter.Schema schema = csv.getSchema()
-
-		int rowsRead = 0
-		List<CSVImporter.LineValues> firstRows = []
-
-		expect:
-		schema.entries.length == 6
-		schema.timestampColumnIndex == 0
-
 		when:
-		for (CSVImporter.LineValues line : csv) {
-			if (line == null)
-				continue
-
-			if (rowsRead < 25)
-				firstRows << line
-
-			rowsRead++
-		}
+		readFile("test-files/epoch-test.csv", null, 0, "unix")
 
 		then:
-		rowsRead == 8
-		firstRows[0].values[0] instanceof Date
-		Date d = firstRows[5].values[0]
+		schema.entries.length == 6
+		schema.timestampColumnIndex == 0
+		lines.size() == 8
+		lines.get(0).values[0] instanceof Date
+		Date d = lines.get(5).values[0]
 		d instanceof Date
-		firstRows[5].values[2] == 53
+		lines.get(5).values[2] == 53
 	}
 	
 	
 	
 	void "test detecting timestamp from another time format"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/real_time_sales.csv").toURI()).toFile()
-		
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		for (CSVImporter.LineValues line : csv) {}
-		CSVImporter.Schema schema = csv.getSchema()
+		readFile("test-files/real_time_sales.csv")
 		
 		then:
 		schema.entries.length == 12
@@ -148,29 +117,24 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "should fail when the order of the lines is not chronological"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/invalid-chronological-order.csv").toURI()).toFile()
-
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		// Tries to parse each line
-		for (CSVImporter.LineValues line : csv) {}
+		readFile("test-files/invalid-chronological-order.csv")
 
 		then:
-		thrown RuntimeException
+		Exception e = thrown()
+		e.message.contains("chronological")
+		e.message.contains("Line: 19")
 	}
 
 	void "test giving the field type in a map"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
+		String file = "test-files/test-upload-file.csv"
 		List fields = [
 		        [name: "really", type: "string"],
 				[name: "price", type: "string"]
 		]
 
 		when: "the fields are not given"
-		CSVImporter csv = new CSVImporter(file)
-		CSVImporter.Schema schema = csv.getSchema()
+		readFile(file)
 
 		then: "the field types are autodetected"
 		schema.entries[1].type == "number"
@@ -178,8 +142,7 @@ class CSVImporterSpec extends Specification {
 		schema.entries[3].type == "boolean"
 
 		when: "the fields are given"
-		csv = new CSVImporter(file, fields)
-		schema = csv.getSchema()
+		readFile(file, fields)
 
 		then: "the field types are all strings as given"
 		schema.entries[1].type == "string"
@@ -188,12 +151,8 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "can detect multiple date fields"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/two-date-fields.csv").toURI()).toFile()
-
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		CSVImporter.Schema schema = csv.getSchema()
+		readFile("test-files/two-date-fields.csv")
 
 		then:
 		schema.entries.length == 3
@@ -204,12 +163,8 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "should not fail with invalid number of columns on row"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/invalid-number-of-columns.csv").toURI()).toFile()
-
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		CSVImporter.Schema schema = csv.getSchema()
+		readFile("test-files/invalid-number-of-columns.csv")
 
 		then: "schema contains all entries, but two of them are null (undetected)"
 		schema.entries.length == 21
@@ -217,100 +172,53 @@ class CSVImporterSpec extends Specification {
 	}
 
 	void "should ignore empty string fields by default"() {
-		def value
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/empty-strings.csv").toURI()).toFile()
-
 		when: "lines are read in"
-			CSVImporter csv = new CSVImporter(file)
-			CSVImporter.Schema schema = csv.getSchema()
-			int i = 0
-			for (CSVImporter.LineValues line : csv) {
-				if(i == 5) {
-					value = line.values[4]
-					break
-				}
-				i++
-			}
+		readFile("test-files/empty-strings.csv")
 
 		then: "value is null"
-		value == null
+		lines.get(5).values[4] == null
 	}
 
 	void "should read empty strings if ignoreEmptyFields == false"() {
-		def value
-		setup:
-			File file = Paths.get(getClass().getResource("test-files/empty-strings.csv").toURI()).toFile()
-
 		when: "lines are read in"
-			CSVImporter csv = new CSVImporter(file, null, null, null, null, false)
-			CSVImporter.Schema schema = csv.getSchema()
-			int i = 0
-			for (CSVImporter.LineValues line : csv) {
-				if (i == 5) {
-					value = line.values[4]
-					break
-				}
-				i++
-			}
+		readFile("test-files/empty-strings.csv", null, null, null, null, false)
 
 		then: "value is an empty string"
-			value == ""
+		lines.get(5).values[4] == ""
 	}
 
 	void "should not fail if the file has empty rows"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/with-empty-rows.csv").toURI()).toFile()
-
 		when:
-		CSVImporter csv = new CSVImporter(file)
-		CSVImporter.Schema schema = csv.getSchema()
-		for (CSVImporter.LineValues line : csv) {}
+		readFile("test-files/with-empty-rows.csv")
 
 		then: "the rows have been read"
 		schema.entries.length == 5
 	}
 
 	void "should import the csv in the given timezone"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/test-upload-file.csv").toURI()).toFile()
-
 		when:
 		// GMT+8
-		CSVImporter csv = new CSVImporter(file, null, null, null, "Asia/Hong_Kong")
+		readFile("test-files/test-upload-file.csv", null, null, null, "Asia/Hong_Kong")
 
-		then: "dates are correct"
-		String date
-		for (CSVImporter.LineValues line : csv) {
-			line.values[0] instanceof Date
-			date = ((Date)line.values[0]).toGMTString()
-			break;
-		}
-		date == "23 Feb 2015 08:30:00 GMT"
+		then: "date is correct"
+		lines.get(0).values[0].toGMTString() == "23 Feb 2015 08:30:00 GMT"
 	}
 
 	void "if csv date has timezone itself, importer should use that"() {
-		setup:
-		File file = Paths.get(getClass().getResource("test-files/timezone-in-date.csv").toURI()).toFile()
-
 		when:
 		// GMT+8
-		CSVImporter csv = new CSVImporter(file, null, null, null, "Asia/Hong_Kong")
+		readFile("test-files/timezone-in-date.csv", null, null, null, "Asia/Hong_Kong")
 
 		then: "dates are correct"
-		String date
-		String date2
-		for (CSVImporter.LineValues line : csv) {
-			line.values[0] instanceof Date
-			if (date == null) {
-				date = ((Date)line.values[0]).toGMTString()
-			} else if (date2 == null) {
-				date2 = ((Date)line.values[0]).toGMTString()
-			} else {
-				break;
-			}
-		}
-		date == "23 Feb 2015 16:30:00 GMT"
-		date2 == "24 Feb 2015 02:30:00 GMT"
+		lines.get(0).values[0].toGMTString() == "23 Feb 2015 16:30:00 GMT"
+		lines.get(1).values[0].toGMTString() == "24 Feb 2015 02:30:00 GMT"
+	}
+
+	void "should accept timezone ids with custom format"() {
+		when:
+		readFile("test-files/timezone-id.csv", null, null, "E MMM dd HH:mm:ss zzz yyyy")
+
+		then: "Doesn't have any problem"
+		schema.timestampColumnIndex == 1
 	}
 }
