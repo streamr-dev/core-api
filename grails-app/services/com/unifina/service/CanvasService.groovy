@@ -22,31 +22,15 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class CanvasService {
 
-	def grailsApplication
-	def signalPathService
-	def taskService
+	GrailsApplication grailsApplication
+	SignalPathService signalPathService
+	TaskService taskService
 	PermissionService permissionService
 	DashboardService dashboardService
-
-	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String ord = "asc") {
-		return permissionService.get(Canvas, currentUser) {
-			if (nameFilter) {
-				eq "name", nameFilter
-			}
-			if (adhocFilter != null) {
-				eq "adhoc", adhocFilter
-			}
-			if (stateFilter) {
-				eq "state", stateFilter
-			}
-			if(sort)
-				order sort, ord
-		}
-	}
-
 
 	public Map reconstruct(Canvas canvas) {
 		Map signalPathMap = JSON.parse(canvas.json)
