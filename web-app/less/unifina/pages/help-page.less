@@ -1,4 +1,7 @@
 body.help-page {
+
+  line-height: 1.6;
+
   @media (min-width: 700px) {
     .side-image {
       float: right;
@@ -20,6 +23,11 @@ body.help-page {
   /* Prevent FOUC by hiding the content initially, then shown using js */
   .docs-wrapper {
     display: none;
+  }
+
+  h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 40px;
+    margin-bottom: 20px;
   }
 
 }

@@ -16823,6 +16823,7 @@ body.canvas-list-page .panel-heading-controls .input-group {
   width: 300px;
 }
 body.help-page {
+  line-height: 1.6;
   /* Prevent FOUC by hiding the content initially, then shown using js */
 }
 @media (min-width: 700px) {
@@ -16842,6 +16843,15 @@ body.help-page pre {
 }
 body.help-page .docs-wrapper {
   display: none;
+}
+body.help-page h1,
+body.help-page .h1,
+body.help-page h2,
+body.help-page .h2,
+body.help-page h3,
+body.help-page .h3 {
+  margin-top: 40px;
+  margin-bottom: 20px;
 }
 table {
   background-color: transparent;
