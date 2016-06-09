@@ -33,8 +33,16 @@ public class MapModule extends ModuleWithUI {
 		longitude.canBeFeedback = false;
 		id.setDrivingInput(true);
 		id.canBeFeedback = false;
+		id.requiresConnection = false;
 		label.setDrivingInput(false);
 		label.canBeFeedback = false;
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		if (!id.isConnected())
+			id.receive("DefaultId");
 	}
 
 	@Override
