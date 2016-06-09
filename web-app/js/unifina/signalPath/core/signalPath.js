@@ -573,8 +573,12 @@ var SignalPath = (function () {
 
 				$(pub).trigger('started', [response])
 			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(textStatus+"\n"+errorThrown)
+			error: function(jqXHR, textStatus, errorThrown) {
+				if (callback) {
+					callback(undefined, jqXHR.responseJSON)
+				} else {
+					handleError(textStatus + "\n" + errorThrown)
+				}
 			}
 		});
 	}
@@ -706,8 +710,7 @@ var SignalPath = (function () {
 
 					if (callback) {
 						callback(undefined, jqXHR.responseJSON)
-					}
-					else {
+					} else {
 						handleError(textStatus + "\n" + errorThrown)
 					}
 				}
