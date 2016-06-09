@@ -82,7 +82,7 @@ public class SendToStream extends AbstractSignalPathModule {
 		if (stream==null)
 			return;
 		
-		// Check access to this Stream if the datasource is set (we're about to run the canvas, and aren't doing reconstructing or similar)
+		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas 
 		if (globals.isRunContext()) {
 			if (permissionService.canWrite(globals.getUser(), stream)) {
 				authenticatedStream = stream;
