@@ -412,7 +412,7 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 
 		private boolean usesSimpleDateFormat() {
-			return format != null && !format.isEmpty() && !format.equals("unix") && !format.equals("unix-s");
+			return !usesJodaTime() && !format.equals("unix") && !format.equals("unix-s");
 		}
 
 		private boolean usesSeconds() {
