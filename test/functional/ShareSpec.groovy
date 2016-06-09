@@ -1,9 +1,10 @@
+import core.LoginTester1Spec
 import core.mixins.*
 import core.pages.*
 import geb.spock.GebReportingSpec
 import org.openqa.selenium.Keys
 
-class ShareSpec extends GebReportingSpec {
+class ShareSpec extends LoginTester1Spec {
 
 	def setupSpec() {
 		// @Mixin is buggy, use runtime mixins instead
@@ -16,9 +17,8 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	def clickShareButton(name = "ShareSpec") {
-		def row = $("a.tr").findAll { it.text().trim().startsWith(name) }.first()
-		row.find(".dropdown-toggle").click()
-		row.find(".share-button").click()
+		scrollToRow(name)
+		clickShareButton(name)
 	}
 
 	def save() {
@@ -92,8 +92,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Stream permissions"() {
-		loginTester1()
-
 		when:
 		to StreamListPage
 		then:
@@ -176,7 +174,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Stream page, revoke permission"
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then:
 		waitFor { at StreamShowPage }
 		waitFor { streamMenuButton.displayed }
@@ -251,13 +249,11 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Canvas permissions"() {
-		loginTester1()
-
 		when:
 		to CanvasListPage
 		then:
-		!$(".sharing-dialog")
 		waitFor { at CanvasListPage }
+		!$(".sharing-dialog")
 		waitFor { findRow("ShareSpec").displayed }
 
 		when: "open 'ShareSpec' Canvas"
@@ -334,7 +330,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Canvas info page, revoke permission"
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then:
 		waitFor { at CanvasPage }
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
@@ -393,8 +389,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "sharePopup can grant and revoke Dashboard permissions"() {
-		loginTester1()
-
 		when:
 		to DashboardListPage
 		then:
@@ -476,7 +470,7 @@ class ShareSpec extends GebReportingSpec {
 		// REMOVE PERMISSION
 
 		when: "Move to Dashboard editor page, revoke permission"
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then:
 		waitFor { at DashboardShowPage }
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
@@ -535,12 +529,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "read permission allows opening but doesn't show share buttons"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-		def getCanvasRow = { $("a.tr").findAll { it.text().startsWith("ShareSpec") }.first() }
-		def getDashboardRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
-		loginTester1()
-
 		when: "give tester2 read permission to stream"
 		to StreamListPage
 		clickShareButton()
@@ -592,10 +580,10 @@ class ShareSpec extends GebReportingSpec {
 		loginTester2()
 		to StreamListPage
 		then: "no share button in list"
-		!getStreamRow().find(".dropdown-toggle")
+		!findDropdownButton("ShareSpec")
 
 		when: "open stream edit view"
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then: "there should be no menu for read rights only"
 		waitFor { at StreamShowPage }
 		!$("#stream-menu-toggle")
@@ -603,10 +591,10 @@ class ShareSpec extends GebReportingSpec {
 		when: "check canvas"
 		to CanvasListPage
 		then: "no share button in list"
-		!getCanvasRow().find(".dropdown-toggle")
+		!findDropdownButton("ShareSpec")
 
 		when:
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then: "wait until permission check is done, should not view login form (because not logging in isn't why sharing isn't allowed)"
 		waitFor { at CanvasPage }
 		waitFor { shareButton.hasClass("forbidden") }
@@ -615,10 +603,10 @@ class ShareSpec extends GebReportingSpec {
 		when: "check dashboard"
 		to DashboardListPage
 		then:
-		!getDashboardRow().find(".dropdown-toggle")
+		!findDropdownButton("ShareSpec")
 
 		when:
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then: "only read rights given"
 		waitFor { at DashboardShowPage }
 		!$("#share-button")
@@ -633,10 +621,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "write rights show stream menu but no share button"() {
-		def getStreamRow = { $("a.tr").findAll { it.text().trim().startsWith("ShareSpec") }.first() }
-
-		loginTester1()
-
 		when: "give tester2 write permission to stream"
 		to StreamListPage
 		clickShareButton()
@@ -664,11 +648,12 @@ class ShareSpec extends GebReportingSpec {
 		loginTester2()
 		to StreamListPage
 		then: "no share button in list"
-		getStreamRow().find(".dropdown-toggle").click()
-		!getStreamRow().find(".share-button")
+
+		clickDropdownButton("ShareSpec")
+		!findShareButton("ShareSpec")
 
 		when: "open stream edit view"
-		findRow("ShareSpec").click()
+		clickRow("ShareSpec")
 		then:
 		waitFor { at StreamShowPage }
 
@@ -686,8 +671,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "shared stream is shown in search box"() {
-		loginTester1()
-
 		when:
 		to StreamListPage
 		clickShareButton()
@@ -722,8 +705,6 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	void "public stream is visible in search and can be inspected, but won't be shown in list"() {
-		loginTester1()
-
 		when: "publish it if not public (defensive, but we aren't testing that DB state is correct...)"
 		to StreamListPage
 		clickShareButton()
@@ -773,8 +754,6 @@ class ShareSpec extends GebReportingSpec {
 
 	void "access to dashboard is enough for viewing it"() {
 		def name = "ShareSpec_"+System.currentTimeMillis()
-
-		loginTester1()
 
 		// Create test canvas
 		to CanvasPage
