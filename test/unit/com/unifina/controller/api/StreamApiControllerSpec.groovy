@@ -36,24 +36,28 @@ class StreamApiControllerSpec extends Specification {
 	def streamFourId
 
 	def setup() {
-		streamService = mainContext.getBean(StreamService)
 		permissionService = mainContext.getBean(PermissionService)
 
-		controller.streamService = streamService
 		controller.permissionService = permissionService
 		controller.apiService = mainContext.getBean(ApiService)
 
 		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
 		user.save(validate: false)
 
-		feed = new Feed(streamListenerClass: NoOpStreamListener.name).save(validate: false)
+		feed = new Feed(streamListenerClass: NoOpStreamListener.name, id: 7).save(validate: false)
 
 		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
 
+		// First use real streamService to create the streams
+		streamService = mainContext.getBean(StreamService)
 		streamOneId = streamService.createStream([name: "stream", description: "description", feed: feed], user).id
 		streamTwoId = streamService.createStream([name: "ztream", feed: feed], user).id
 		streamThreeId = streamService.createStream([name: "atream", feed: feed], user).id
 		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
+
+		// Then moch StreamService
+		streamService = Mock(StreamService)
+		controller.streamService = streamService
 	}
 
 	void "find all streams of logged in user"() {
@@ -104,61 +108,6 @@ class StreamApiControllerSpec extends Specification {
 		response.json[0].name == name
 	}
 
-	void "create a new stream for currently logged in user"() {
-		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
-		request.json = [name: "Test stream", description: "Test stream", feed: feed]
-		request.method = 'POST'
-		request.requestURI = '/api/v1/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
-		withFilters([action:'save']) {
-			controller.save()
-		}
-		then:
-		response.json.id.length() == 22
-		response.json.apiKey.length() == 22
-		response.json.name == "Test stream"
-		response.json.config == [
-			fields: []
-		]
-		response.json.description == "Test stream"
-		Stream.count() == 5
-		Stream.findById(response.json.id).user == user
-	}
-
-	void "create a new stream (with fields) for currently logged in user"() {
-		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
-		request.json = [
-			name: "Test stream",
-			description: "Test stream",
-			feed: feed,
-			config: [
-				fields: [
-					[name: "profit", type: "number"],
-					[name: "keyword", type: "string"]
-				]
-			]
-		]
-		request.method = 'POST'
-		request.requestURI = '/api/v1/stream/create' // UnifinaCoreAPIFilters has URI-based matcher
-		withFilters([action:'save']) {
-			controller.save()
-		}
-		then:
-		response.json.id.length() == 22
-		response.json.apiKey.length() == 22
-		response.json.name == "Test stream"
-		response.json.config == [
-			fields: [
-				[name: "profit", type: "number"],
-				[name: "keyword", type: "string"]
-			]
-		]
-		response.json.description == "Test stream"
-		Stream.count() == 5
-		Stream.findById(response.json.id).user == user
-	}
-
 	void "creating stream fails given invalid token"() {
 		when:
 		request.addHeader("Authorization", "Token wrongKey")
@@ -172,16 +121,20 @@ class StreamApiControllerSpec extends Specification {
 		response.status == 401
 	}
 
-	void "creating stream fails when required parameters are missing"() {
+	void "save() calls StreamService.createStream() and returns it.toMap()"() {
+		setup:
+		def stream = new Stream(id: "test-stream", feed: new Feed())
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.json = [test: "test"]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create'
 		withFilters([action:'save']) {
 			controller.save()
 		}
 		then:
-		thrown ValidationException
+		1 * streamService.createStream([test: "test"], user) >> { stream }
+		response.json == stream.toMap()
 	}
 
 	void "show a Stream of logged in user"() {
