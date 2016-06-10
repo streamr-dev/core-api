@@ -400,6 +400,7 @@ var SignalPath = (function () {
 				callback(json);
 
 			$(pub).trigger('saved', [json]);
+			window.history.replaceState({}, 'Canvas ' + name, Streamr.createLink({controller: "canvas", action: "editor", id: json.id}));
 		}
 
 		var json = toJSON()
@@ -578,7 +579,11 @@ var SignalPath = (function () {
 				$(pub).trigger('started', [response])
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(textStatus+"\n"+errorThrown)
+				if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+					handleError(jqXHR.responseJSON.message)
+				} else {
+					handleError(textStatus + "\n" + errorThrown)
+				}
 			}
 		});
 	}

@@ -87,7 +87,7 @@ class StreamApiController {
 	@StreamrApi
 	def delete(String id) {
 		getAuthorizedStream(id, Operation.WRITE) { Stream stream ->
-			stream.delete()
+			streamService.deleteStream(stream)
 			render(status: 204)
 		}
 	}
