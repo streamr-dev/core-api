@@ -115,11 +115,10 @@ public class ForEach extends AbstractSignalPathModule {
 	private Map<String, Object> instantiateCacheUpdateListeners(SubSignalPath subSignalPath) {
 		Map<String, Object> outputCache = new HashMap<>();
 		for (Output output : outputsToPropagate) {
-			String outputName = output.getName();
-			Input cacheUpdaterInput = new CacheUpdaterInput(this, subSignalPath.getKey(), outputName, outputCache);
+			Input cacheUpdaterInput = new CacheUpdaterInput(this, subSignalPath.getKey(), output.getEffectiveName(), outputCache);
 			// Needs to be added to this module, otherwise propagator dependency resolution won't be correct
 			addInput(cacheUpdaterInput);
-			subSignalPath.connectTo(outputName, cacheUpdaterInput);
+			subSignalPath.connectTo(output.getName(), cacheUpdaterInput);
 		}
 		return outputCache;
 	}
