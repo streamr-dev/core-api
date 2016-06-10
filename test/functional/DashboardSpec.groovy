@@ -159,7 +159,31 @@ class DashboardSpec extends LoginTester1Spec {
 		then: "the dashboard should be in edit-mode"
 			waitFor { js.exec("return \$('#main-menu').width()") > 0 }
 			js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
-		
+
+		// Testing of dragging the items
+		when: "dragged the item everywhere"
+			dragDashboardItem("Table", 0, -300)
+			dragDashboardItem("Table", -300, -300)
+			dragDashboardItem("Table", -300, 0)
+		then: "hasn't failed"
+			at DashboardShowPage
+			waitFor {
+				// Testing that all the subscriptions are still subscribed
+				browser.driver.executeAsyncScript("""
+					var allSubscribed = true
+					var ready = false
+					var originalArguments = arguments
+					\$("#client")[0].getClient(function(client) {
+						\$.each(client.subById, function(k ,v) {
+							if (!v.isSubscribed()) {
+								allSubscribed = false
+							}
+						})
+						originalArguments[originalArguments.length - 1](allSubscribed)
+					})
+				""")
+			}
+
 		// Click to delete the dashboard without accepting it
 		when: "clicked the delete-button"
 			deleteButton.click()

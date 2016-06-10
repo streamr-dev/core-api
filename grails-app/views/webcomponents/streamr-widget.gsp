@@ -15,20 +15,19 @@
 	
 	<script>
 		Polymer('streamr-widget',{
+			attached: function() {
+				this.isAttached = true
+			},
 			detached: function() {
 				var _this = this
-
-				_this.$.client.getClient(function(client) {
-					client.unsubscribe(_this.sub)
+				this.isAttached = false
+				setTimeout(function() {
+					// If the element is not attached again immediately, unsubscribe
+					if (!_this.isAttached)
+						_this.unsubscribe()
 				})
 			},
 			bindEvents: function(container) {
-				container.parentNode.addEventListener("remove", function() {
-					var _this = this
-					this.$.client.getClient(function(client) {
-						client.unsubscribe(_this.sub)
-					})
-				})
 				container.parentNode.addEventListener("resize", function() {
 					container.dispatchEvent(new Event('resize'))
 				})
@@ -52,6 +51,12 @@
 								options
 						)
 					})
+				})
+			},
+			unsubscribe: function() {
+				var _this = this
+				this.$.client.getClient(function(client) {
+					client.unsubscribe(_this.sub)
 				})
 			},
 			getResendOptions: function(json) {
