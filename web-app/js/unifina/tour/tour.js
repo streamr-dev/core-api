@@ -1,6 +1,5 @@
 (function(exports) {
 
-var tourUrlRoot = Streamr.createLink({ uri: 'static/misc/tours/' })
 var tourIdPrefix = Streamr.user
 var startableTours = []
 var continuableTours = []
@@ -98,7 +97,6 @@ Tour.playTour = function(tourNumber, currentStep) {
 }
 
 Tour.loadTour = function(tourNumber, cb) {
-	var url = tourUrlRoot + tourNumber + '.js'
 
 	Tour.create = function() {
 		console.log('Tour.create', tourNumber)
@@ -117,13 +115,14 @@ Tour.loadTour = function(tourNumber, cb) {
 	}
 
 	//Use jQuery instead of appending script tag to head due to caching issues
-	$.getScript(url)
+	Tour.list(function(tours) {
+		$.getScript(tours[tourNumber].url)
+	})
+
 }
 
 Tour.list = function(cb) {
-	$.getJSON(tourUrlRoot + 'index.json', function(resp) {
-		cb(resp)
-	})
+	cb(Streamr.Tours)
 }
 
 // ---
