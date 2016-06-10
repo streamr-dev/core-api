@@ -576,6 +576,8 @@ var SignalPath = (function () {
 			error: function(jqXHR, textStatus, errorThrown) {
 				if (callback) {
 					callback(undefined, jqXHR.responseJSON)
+				} if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+					handleError(jqXHR.responseJSON.message)
 				} else {
 					handleError(textStatus + "\n" + errorThrown)
 				}
