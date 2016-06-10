@@ -1,10 +1,14 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.signalpath.RuntimeRequest
+import com.unifina.signalpath.RuntimeResponse
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
 class ListAsTableSpec extends Specification {
 	ListAsTable module
+
+	RuntimeResponse initResponse = new RuntimeResponse()
 
 	def setup() {
 		module = new ListAsTable()
@@ -12,6 +16,13 @@ class ListAsTableSpec extends Specification {
 		module.configure([
 			uiChannel: [id: "table"],
 		])
+	}
+
+	def "initial headers are set correctly"() {
+		when:
+		module.handleRequest(new RuntimeRequest([type: "initRequest"], new Date()), initResponse);
+		then:
+		initResponse.initRequest.hdr.headers == ["List is empty"]
 	}
 
 	def "ListAsTable works for value lists"() {
@@ -62,7 +73,7 @@ class ListAsTableSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			table: [
-				[hdr: [headers: ["i"]]],
+				[hdr: [headers: ["i"]]],				// looks kind of stupid, but empty objects ARE kind of stupid
 				[nc: [[0]]],
 				[hdr: [headers: ["i", "q", "w"]]],
 				[nc: [[0, "A", "B"], [1, "C", "D"]]],	// same headers, won't be re-sent

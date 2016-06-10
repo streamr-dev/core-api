@@ -14,8 +14,8 @@ import java.util.*;
 public class ListAsTable extends ModuleWithUI {
 	private ListInput in = new ListInput(this, "list");
 
+	private static final List<String> emptyHeaders = Arrays.asList("List is empty");
 	private List<String> currentHeaders;
-	private boolean listIsEmpty = false;
 
 	public ListAsTable() {
 		super();
@@ -24,24 +24,38 @@ public class ListAsTable extends ModuleWithUI {
 		resendLast = 1;
 	}
 
+	/** @returns true if headers were actually sent (changed from what is shown in client) */
+	private boolean sendHeaders(List<String> headers) {
+		if (headers.equals(currentHeaders)) { return false; }
+		pushToUiChannel(buildHeaderMessage(headers));
+		currentHeaders = headers;
+		return true;
+	}
+
+	private void sendBody(List<List<Object>> contents) {
+		Map dataMessage = new HashMap<>();
+		dataMessage.put("nc", contents);
+		pushToUiChannel(dataMessage);
+	}
+
+	private Map buildHeaderMessage(List<String> headers) {
+		Map headerDef = new HashMap<>();
+		headerDef.put("headers", headers);
+		Map headerMessage = new HashMap<>();
+		headerMessage.put("hdr", headerDef);
+		return headerMessage;
+	}
+
 	@Override
 	public void sendOutput() {
 		List input = in.getValue();
 		if (input == null || input.size() < 1) {
-			if (!listIsEmpty) {
-				listIsEmpty = true;
-				Map headerDef = new HashMap<>();
-				headerDef.put("headers", Arrays.asList("List is empty"));
-				Map headerMessage = new HashMap<>();
-				headerMessage.put("hdr", headerDef);
-				pushToUiChannel(headerMessage);
-				Map dataMessage = new HashMap<>();
-				dataMessage.put("nc", Arrays.asList(new ArrayList<>()));
-				pushToUiChannel(dataMessage);
+			if (sendHeaders(emptyHeaders)) {
+				// headers were non-emptyHeaders, so content should be reset too
+				sendBody(Arrays.asList((List<Object>) new ArrayList<>()));
 			}
 			return;
 		}
-		listIsEmpty = false;
 
 		// headers: index i plus all distinct keys in all maps, additionally value column for non-maps
 		Set headerSet = new LinkedHashSet<>();
@@ -59,12 +73,7 @@ public class ListAsTable extends ModuleWithUI {
 		if (hasValueColumn) { headers.add("value"); }
 		headers.addAll(headerSet);
 		if (!headers.equals(currentHeaders)) {
-			Map headerDef = new HashMap<>();
-			headerDef.put("headers", headers);
-			Map headerMessage = new HashMap<>();
-			headerMessage.put("hdr", headerDef);
-			pushToUiChannel(headerMessage);
-			currentHeaders = headers;
+			sendHeaders(headers);
 		}
 
 		List<List<Object>> contents = new ArrayList<>();
@@ -84,9 +93,7 @@ public class ListAsTable extends ModuleWithUI {
 			}
 			contents.add(row);
 		}
-		Map dataMessage = new HashMap<>();
-		dataMessage.put("nc", contents);
-		pushToUiChannel(dataMessage);
+		sendBody(contents);
 	}
 
 	@Override
@@ -97,18 +104,14 @@ public class ListAsTable extends ModuleWithUI {
 	@Override
 	public void clearState() {
 		currentHeaders = null;
-		listIsEmpty = false;
 	}
 
 	@Override
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		// We need to support unauthenticated initRequests for public views, so no authentication check
 		if (request.getType().equals("initRequest")) {
-			Map headerDef = new HashMap<>();
-			headerDef.put("headers", Arrays.asList("index", "value"));
-			Map headerMessage = new HashMap<>();
-			headerMessage.put("hdr", headerDef);
-			response.put("initRequest", headerMessage);
+			response.put("initRequest", buildHeaderMessage(emptyHeaders));
+			currentHeaders = emptyHeaders;
 			response.setSuccess(true);
 		} else {
 			super.handleRequest(request, response);
