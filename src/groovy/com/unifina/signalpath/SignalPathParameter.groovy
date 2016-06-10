@@ -8,44 +8,30 @@ class SignalPathParameter extends Parameter<Canvas> {
 		super(owner, name, null, "Canvas");
 	}
 	
-	def getCriteria() {
-		def springSecurityService = owner.globals?.grailsApplication?.mainContext?.getBean("springSecurityService")
-		def user = springSecurityService?.currentUser
-		
-		if (user) {
-			return {
-				eq("hasExports",true)
-				eq("user",user)
-			}
-		}
-		else return null
-	}
-	
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration()
 		
-		if (value!=null) {
+		if (getValue() != null) {
 			config.put("value", getValue().getId());
 			config.put("defaultValue", getValue().getId());
 		}
 
-		Collection signalPaths
-		def crit = getCriteria()
-		if (crit!=null) {
-			def proj = {
-				projections {
-					property 'id', 'id'
-					property 'name', 'name'
-				}
+		def proj = {
+			projections {
+				property 'id', 'id'
+				property 'name', 'name'
 			}
-			// TODO: Use permissionService to query Canvases accessible to this user once that branch is landed
-			signalPaths = Canvas.createCriteria().list(proj << crit)
 		}
-		else signalPaths = []
+		def crit = {
+			eq("hasExports", true)
+		}
+		def permissionService = owner.globals?.grailsApplication?.mainContext?.getBean("permissionService")
+		def user = owner.globals?.getUser()
+		Collection signalPaths = permissionService.get(Canvas, user, proj << crit)
 
 		List possibleValues = signalPaths.collect {[value:it[0], name:it[1]]}
 		
-		if (value==null)
+		if (getValue() == null)
 			possibleValues.add(0, [value:null, name: "Select >>"])
 			
 		config.put("possibleValues", possibleValues)
