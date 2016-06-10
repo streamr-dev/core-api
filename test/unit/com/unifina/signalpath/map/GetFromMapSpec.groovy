@@ -26,7 +26,7 @@ class GetFromMapSpec extends Specification {
 		    ]
 		]
 		Map outputValues = [
-			found: [ 0, 1, 1, 1, 1, 1, 0 ]*.doubleValue(),
+			found: [ false, true, true, true, true, true, false ],
 			out: [ null, 1d, 6.66d, "ddd", "Finn", 2, 2 ],
 		]
 		expect:
