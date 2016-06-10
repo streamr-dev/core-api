@@ -126,11 +126,13 @@ $(document).ready(function() {
 				}, undefined, window.location.href)
 			}
 			// Push the new state to the history
-			window.history.pushState({
-				streamr: {
-	  				urlPath: url
-				}
-			}, undefined, url)
+			if (url !== window.location.href) {
+				window.history.pushState({
+					streamr: {
+						urlPath: url
+					}
+				}, undefined, url)
+			}
 		}
 	}
 

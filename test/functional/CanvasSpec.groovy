@@ -1,3 +1,5 @@
+import core.mixins.ListPageMixin
+import core.pages.CanvasListPage
 import core.pages.CanvasPage
 import org.openqa.selenium.Keys
 
@@ -12,6 +14,7 @@ class CanvasSpec extends LoginTester1Spec {
 	
 	def setupSpec(){
 		CanvasSpec.metaClass.mixin(CanvasMixin)
+		CanvasSpec.metaClass.mixin(ListPageMixin)
 	}
 
 	def "clicking module close button in canvas should remove it"() {
@@ -197,6 +200,56 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor {
 				findModuleOnCanvas("Table")
 				!findModuleOnCanvas("Label")
+			}
+	}
+
+	def "going back after opening a canvas from list goes back to the list"() {
+		setup:
+			to CanvasListPage
+		when: "canvas 1 is loaded"
+			clickRow("CanvasSpec test loading a SignalPath")
+		then: "Add can be found"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "clicked back button"
+			driver.navigate().back()
+		then:
+			waitFor {
+				at CanvasListPage
+			}
+	}
+
+	def "going back after opening a canvas from list goes back to the list, even after reloading the canvas"() {
+		setup:
+			to CanvasListPage
+		when: "canvas 1 is loaded"
+			clickRow("CanvasSpec test loading a SignalPath")
+		then: "Add can be found"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "reloaded"
+			driver.navigate().refresh()
+		then: "Add can be found"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "reloaded again"
+			driver.navigate().refresh()
+		then: "Add can be found once again"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "clicked back button"
+			driver.navigate().back()
+		then:
+			waitFor {
+				at CanvasListPage
 			}
 	}
 	
