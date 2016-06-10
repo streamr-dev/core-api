@@ -28,14 +28,14 @@ class PermissionApiController {
 	 * Checks Permissions for current user first, and blocks the action if access hasn't been granted
 	 * @param action Closure that takes up to one argument: the specified resource
      */
-	private useResource(Class resourceClass, resourceId, Closure action) {
+	private useResource(Class resourceClass, resourceId, boolean requireSharePermission=true, Closure action) {
 		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
 		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
 
 		def res = resourceClass.get(resourceId)
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
-		} else if (!permissionService.canShare(request.apiUser, res)) {
+		} else if (requireSharePermission && !permissionService.canShare(request.apiUser, res)) {
 			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
@@ -62,6 +62,14 @@ class PermissionApiController {
 	def index() {
 		useResource(params.resourceClass, params.resourceId) { res ->
 			def perms = permissionService.getPermissionsTo(res)*.toMap()
+			render(perms as JSON)
+		}
+	}
+
+	@StreamrApi(requiresAuthentication = false)
+	def getOwnPermissions() {
+		useResource(params.resourceClass, params.resourceId, false) { res ->
+			def perms = permissionService.getSingleUserPermissionsTo(res, request.apiUser)*.toMap()
 			render(perms as JSON)
 		}
 	}

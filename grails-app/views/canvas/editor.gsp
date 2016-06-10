@@ -368,9 +368,9 @@ $(document).unload(function () {
 				<div class="menu-content-header">
 					<label for="moduleTree">Module Browser</label>
 				</div>
-				
+
 				<sp:moduleBrowser id="moduleTree" buttonId="addModule" />
-				
+
 				<sp:moduleAddButton buttonId="addModule" browserId="moduleTree" class="btn-block">
 					<i class="fa fa-plus"></i>
 					<g:message code="signalPath.addModule.label" default="Add Module" />

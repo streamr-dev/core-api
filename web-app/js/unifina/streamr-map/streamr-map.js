@@ -65,7 +65,10 @@
         }
 
         this.map.once("dragstart click", mouseEventHandler)
-        this.map._container.addEventListener("wheel", mouseEventHandler)
+        // For some reason, listening to 'wheel' event didn't work
+        this.map._container.addEventListener("mousewheel", mouseEventHandler)
+        // 'mousewheel' doesn't work in Firefox but 'DOMMouseScroll' does
+        this.map._container.addEventListener("DOMMouseScroll", mouseEventHandler)
 
         this.map.on("moveend", function() {
             $(_this).trigger("move", _this.getCenterAndZoom())
@@ -186,7 +189,7 @@
         var marker = L.marker(latlng, {
             icon: L.divIcon({
                 iconSize:     [19, 48], // size of the icon
-                iconAnchor:   [14, 53], // point of the icon which will correspond to marker's location
+                iconAnchor:   [13.5, 43], // point of the icon which will correspond to marker's location
                 popupAnchor:  [0, -41], // point from which the popup should open relative to the iconAnchor,
                 className: 'streamr-map-icon fa fa-map-marker fa-4x'
             })

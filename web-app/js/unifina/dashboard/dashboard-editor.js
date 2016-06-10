@@ -374,6 +374,8 @@ var SidebarView = Backbone.View.extend({
 			var canvasView = new CanvasView({ model: canvas })
 			this.list.append(canvasView.el)
 		}, this)
+
+	// This is changed to ConfirmButton in branch CORE-647-shared-canvases-on-dashboard
 		new Toolbar(this.$el.find("#deleteDashboardForm"))
 	},
 

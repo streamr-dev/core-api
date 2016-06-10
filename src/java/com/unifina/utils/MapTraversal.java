@@ -18,17 +18,18 @@ public class MapTraversal {
 	public static Object getProperty(Map map, String name) {
 		if (name == null) { throw new IllegalArgumentException("Name can not be null!"); }
 
+		// split with -1 limit also returns trailing empty strings (so that malformed names won't accidentally work)
 		Object i = map;
-		for (String prop : name.split("\\.")) {
+		for (String prop : name.split("\\.", -1)) {
 			if (!(i instanceof Map)) {
-				if (i instanceof List && (prop.equalsIgnoreCase("count") || prop.equalsIgnoreCase("length"))) {
+				if (i instanceof List && (prop.equalsIgnoreCase("count") || prop.equalsIgnoreCase("length") || prop.equalsIgnoreCase("size"))) {
 					return new Integer(((List)i).size());
 				}
 				return null;
 			}
 			// iterate through (possibly nested) List property, e.g. "inputs[3]"
 			// Note: if prop isn't a List, then simply listParts[0] == prop, and loop is skipped
-			String[] listParts = prop.split("\\[");
+			String[] listParts = prop.split("\\[", -1);
 			i = ((Map)i).get(listParts[0]);
 			for (int j = 1; j < listParts.length; j++) {
 				if (!(i instanceof List)) { return null; }
@@ -39,7 +40,7 @@ public class MapTraversal {
 				try {
 					int index = Integer.parseInt(listParts[j].substring(0, len - 1));
 					i = ((List)i).get(index);
-				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+				} catch (NumberFormatException | IndexOutOfBoundsException e) {
 					return null;
 				}
 			}

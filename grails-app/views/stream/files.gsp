@@ -7,10 +7,10 @@
   			<span class="history-end-date"><g:formatDate date="${dataRange.endDate}" timeZone="UTC" format="${message(code:'default.dateOnly.format')}"/></span>.
 		</ui:labeled>
 		<ui:labeled label="Delete data up to and including">
-			<form id="history-delete-form" class="form-inline">
+			<form action="${ createLink(action:'deleteFeedFilesUpTo') }" id="history-delete-form" class="form-inline">
 				<g:hiddenField name="id" value="${ stream.id }" />
 				<ui:datePicker id="history-delete-date" name="date" value="${dataRange.beginDate}" startDate="${dataRange.beginDate}" endDate="${dataRange.endDate}" class="form-control input-sm"/>
-				<button id="history-delete-button" data-action="${ createLink(action:'deleteFeedFilesUpTo') }" class="btn btn-danger confirm" data-confirm="Are you sure?">Delete</button>
+				<button type="button" id="history-delete-button" class="btn btn-danger"><g:message code="default.button.delete.label"/></button>
 			</form>
 		</ui:labeled>
   	</div>
@@ -19,7 +19,13 @@
 	<p id="no-history-message">This stream has no history.</p>
 </g:else>
 <script>
-	$(document).ready(function() {
-	 	new Toolbar($("#history-delete-form"))
-	 })
+	$(function() {
+		new ConfirmButton($("#history-delete-button"), {
+			message: "${ message(code:'stream.feedfile.delete.label' )}",
+		}, function(result) {
+			if (result) {
+				$("#history-delete-form").submit()
+			}
+		})
+ 	})
 </script>

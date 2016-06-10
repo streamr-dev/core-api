@@ -547,7 +547,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 
 		promise.done(function(data) {
 			var module = SignalPath.createModuleFromJSON(data)
-			if (module) {
+			if (module && callback) {
 				callback(module)
 			}
 		})
