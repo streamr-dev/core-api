@@ -2,9 +2,9 @@ package com.unifina.signalpath.color
 
 import com.unifina.utils.StreamrColor
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class GradientSpec extends Specification {
+class GradientSpec extends ModuleSpecification {
 	
 	Gradient module
 	

@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class MergeMapSpec extends Specification {
+class MergeMapSpec extends ModuleSpecification {
 	MergeMap module
 
 	def setup() {

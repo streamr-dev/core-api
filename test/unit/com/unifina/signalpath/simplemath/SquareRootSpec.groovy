@@ -1,9 +1,9 @@
 package com.unifina.signalpath.simplemath
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class SquareRootSpec extends Specification {
+class SquareRootSpec extends ModuleSpecification {
 	
 	SquareRoot module
 	

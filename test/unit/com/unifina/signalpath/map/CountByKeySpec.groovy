@@ -2,9 +2,9 @@ package com.unifina.signalpath.map
 
 import com.unifina.signalpath.AbstractModuleWithWindow
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class CountByKeySpec extends Specification {
+class CountByKeySpec extends ModuleSpecification {
 	CountByKey module
 
 	Map inputValues = [

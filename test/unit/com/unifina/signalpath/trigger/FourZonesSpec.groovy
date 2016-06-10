@@ -1,9 +1,9 @@
 package com.unifina.signalpath.trigger
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class FourZonesSpec extends Specification {
+class FourZonesSpec extends ModuleSpecification {
 
 	FourZones module
 

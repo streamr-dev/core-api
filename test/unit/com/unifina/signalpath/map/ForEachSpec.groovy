@@ -7,6 +7,7 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.ModuleSpecification
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
@@ -19,7 +20,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService])
+@Mock([CanvasService, SignalPathService, Canvas, Module, SecUser, ModuleService, SpringSecurityService])
 class ForEachSpec extends Specification {
 
 	CanvasService canvasService
@@ -29,12 +30,15 @@ class ForEachSpec extends Specification {
 	SecUser user
 
 	def setup() {
+		defineBeans {
+			metricsService(ModuleSpecification.MockMetricsService)
+		}
+		user = new SecUser().save(failOnError: true, validate: false)
 		canvasService = mainContext.getBean(CanvasService)
 		canvasService.signalPathService = mainContext.getBean(SignalPathService)
 		module = new ForEach()
 		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.init()
-		user = new SecUser().save(failOnError: true, validate: false)
 	}
 
 	def "throws RuntimeException if canvas has no exported inputs"() {

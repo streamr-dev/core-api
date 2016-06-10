@@ -1,9 +1,9 @@
 package com.unifina.signalpath.map
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class TailMapSpec extends Specification {
+class TailMapSpec extends ModuleSpecification {
 	TailMap module
 
 	def setup() {

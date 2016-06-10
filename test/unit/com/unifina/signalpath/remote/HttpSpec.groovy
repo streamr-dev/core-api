@@ -13,9 +13,9 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.concurrent.FutureCallback
 import org.apache.http.entity.StringEntity
 import org.apache.http.nio.client.HttpAsyncClient
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class HttpSpec extends Specification {
+class HttpSpec extends ModuleSpecification {
 	Http module
 	boolean isAsync = true
 	String dummyHeaderName = "x-unit-test"

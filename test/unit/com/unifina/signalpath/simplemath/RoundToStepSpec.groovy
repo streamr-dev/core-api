@@ -1,9 +1,9 @@
 package com.unifina.signalpath.simplemath
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class RoundToStepSpec extends Specification {
+class RoundToStepSpec extends ModuleSpecification {
 
 	RoundToStep module
 

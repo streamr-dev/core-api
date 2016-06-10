@@ -1,9 +1,9 @@
 package com.unifina.signalpath.bool
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class OrSpec extends Specification {
+class OrSpec extends ModuleSpecification {
 	
 	Or module
 	

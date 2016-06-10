@@ -1,9 +1,9 @@
 package com.unifina.signalpath.charts
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class GaugeSpec extends Specification {
+class GaugeSpec extends ModuleSpecification {
 	
 	Gauge module
 	

@@ -6,9 +6,12 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
+import com.unifina.service.MetricsService
 import com.unifina.service.PermissionService
+import com.unifina.signalpath.ModuleSpecification
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
+
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
@@ -44,6 +47,7 @@ class SendToStreamSpec extends Specification {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
 			permissionService(FakePermissionService)
+			metricsService(ModuleSpecification.MockMetricsService)
 		}
 
 		def feed = new Feed()

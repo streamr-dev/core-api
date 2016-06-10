@@ -289,6 +289,14 @@ environments {
 }
 
 /**
+ * Metrics config
+ */
+unifina.metrics.disabled = System.getProperty("metrics.disabled")?.toBoolean() ?: false
+unifina.metrics.reportingPeriodSeconds = System.getProperty("metrics.reportingPeriodSeconds")?.toInteger() ?: 60
+unifina.metrics.reportingPeriodEvents = System.getProperty("metrics.reportingPeriodEvents")?.toInteger() ?: 10000
+unifina.metrics.kafkaTopic = "streamr-metrics"
+
+/**
  * Spring security config
  */
 

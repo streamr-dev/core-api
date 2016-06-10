@@ -1,9 +1,9 @@
 package com.unifina.signalpath.statistics
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class StandardDeviationSpec extends Specification {
+class StandardDeviationSpec extends ModuleSpecification {
 
 	StandardDeviation module
 

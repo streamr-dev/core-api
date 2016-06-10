@@ -1,9 +1,9 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class FilterSpec extends Specification {
+class FilterSpec extends ModuleSpecification {
 
 	Filter module
 

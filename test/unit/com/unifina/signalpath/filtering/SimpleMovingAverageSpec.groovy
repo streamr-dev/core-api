@@ -1,10 +1,10 @@
 package com.unifina.signalpath.filtering
 
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.utils.testutils.ModuleTestHelper
 
-class SimpleMovingAverageSpec extends Specification {
+class SimpleMovingAverageSpec extends ModuleSpecification {
 	
 	SimpleMovingAverageEvents sma
 	

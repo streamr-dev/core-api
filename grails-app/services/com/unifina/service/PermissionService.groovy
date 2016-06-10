@@ -361,7 +361,7 @@ class PermissionService {
 			eq("clazz", clazz)
 			eq(idProp, resourceId)
 		}
-		log.info("performRevoke: Found permissions for $clazz $resourceId: $perms")
+		log.info("performRevoke: Found permissions for $clazz $resourceId: " + perms.collect { it.operation.toString() + ": " + it.id.toString() })
 		def revokeOp = { Operation op ->
 			perms.findAll { it.operation == op }.each { Permission perm ->
 				ret.add(perm)

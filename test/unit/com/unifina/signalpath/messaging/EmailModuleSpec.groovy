@@ -1,12 +1,10 @@
 package com.unifina.signalpath.messaging
 
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
@@ -16,7 +14,7 @@ import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
-public class EmailModuleSpec extends Specification {
+public class EmailModuleSpec extends ModuleSpecification {
 	
 	String timeStamp
 	EmailModule module
@@ -26,10 +24,10 @@ public class EmailModuleSpec extends Specification {
 	boolean notificationSent = false
 
 	void setup() {
-		
 		defineBeans {
 			mailService(MockMailService)
 		}
+
 		ms = grailsApplication.mainContext.getBean("mailService")
 		assert ms != null
 		

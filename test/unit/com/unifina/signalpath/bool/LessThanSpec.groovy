@@ -1,9 +1,9 @@
 package com.unifina.signalpath.bool
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class LessThanSpec extends Specification {
+class LessThanSpec extends ModuleSpecification {
 	
 	LessThan module
 	

@@ -6,14 +6,14 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
 
 @TestMixin(GrailsUnitTestMixin)
-class DateConversionSpec extends Specification {
+class DateConversionSpec extends ModuleSpecification {
 
 	def final static format = "yyyy-MM-dd HH:mm:ss";
 

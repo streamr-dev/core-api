@@ -2,9 +2,9 @@ package com.unifina.signalpath.charts
 
 import com.unifina.utils.StreamrColor
 import com.unifina.utils.testutils.ModuleTestHelper;
-import spock.lang.Specification;
+import com.unifina.signalpath.ModuleSpecification;
 
-public class MapModuleSpec extends Specification {
+public class MapModuleSpec extends ModuleSpecification {
 	MapModule module
 
 	def setup() {

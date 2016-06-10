@@ -1,9 +1,9 @@
 package com.unifina.signalpath.simplemath
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class ChangeLogarithmicSpec extends Specification {
+class ChangeLogarithmicSpec extends ModuleSpecification {
 	
 	ChangeLogarithmic module
 	

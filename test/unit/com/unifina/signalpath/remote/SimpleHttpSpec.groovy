@@ -15,9 +15,9 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.nio.client.HttpAsyncClient
 import org.apache.http.util.EntityUtils
 import org.json.JSONObject
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class SimpleHttpSpec extends Specification {
+class SimpleHttpSpec extends ModuleSpecification {
 	SimpleHttp module
 
 	/**

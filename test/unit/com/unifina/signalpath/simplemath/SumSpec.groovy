@@ -1,9 +1,9 @@
 package com.unifina.signalpath.simplemath
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class SumSpec extends Specification {
+class SumSpec extends ModuleSpecification {
 
 	Sum module
 

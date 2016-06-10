@@ -2,9 +2,9 @@ package com.unifina.signalpath.utils.testutils
 
 import com.unifina.utils.testutils.ModuleTestHelper
 import com.unifina.utils.testutils.MultiModule
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class MultiModuleSpec extends Specification {
+class MultiModuleSpec extends ModuleSpecification {
 
 	MultiModule module
 

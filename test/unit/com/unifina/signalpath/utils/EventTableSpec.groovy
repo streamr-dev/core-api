@@ -1,11 +1,11 @@
 package com.unifina.signalpath.utils
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
 import java.text.SimpleDateFormat
 
-class EventTableSpec extends Specification {
+class EventTableSpec extends ModuleSpecification {
 
 	def final static format = "yyyy-MM-dd HH:mm:ss.SSS";
 

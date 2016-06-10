@@ -3,7 +3,8 @@ package com.unifina.domain.security
 import com.unifina.utils.IdGenerator;
 
 class SecUser {
-	
+	Long id
+
 	String username
 	String password
 	boolean enabled

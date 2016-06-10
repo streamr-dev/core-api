@@ -2,9 +2,9 @@ package com.unifina.signalpath.remote
 
 import com.unifina.utils.testutils.FakeConnexorTweetSentiment
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class ConnexorTweetSentimentModuleSpec extends Specification {
+class ConnexorTweetSentimentModuleSpec extends ModuleSpecification {
 
 	FakeConnexorTweetSentiment module
 

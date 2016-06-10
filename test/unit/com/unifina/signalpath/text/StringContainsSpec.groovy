@@ -1,9 +1,9 @@
 package com.unifina.signalpath.text
 
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import com.unifina.signalpath.ModuleSpecification
 
-class StringContainsSpec extends Specification {
+class StringContainsSpec extends ModuleSpecification {
 
 	StringContains module
 
