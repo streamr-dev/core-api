@@ -7,9 +7,9 @@ var _ = require('underscore')
 var Backbone = require('backbone')
 var Mustache = require('mustache')
 
-describe('key-value-editor', function() {
+describe('list-editor', function() {
 
-    var KeyValuePairEditor
+    var ListEditor
     var fixture
 
     before(function(){
@@ -22,7 +22,7 @@ describe('key-value-editor', function() {
         global.jQuery = $
         global.Mustache = Mustache
 
-        KeyValuePairEditor = require('../../key-value-editor/key-value-editor')
+        ListEditor = require('../../list-editor/list-editor')
     })
 
     beforeEach(function() {
@@ -45,56 +45,70 @@ describe('key-value-editor', function() {
         global.Mustache = undefined
     })
 
-    describe("KeyValuePairEditor", function() {
+    describe("ValueInList", function() {
+        it('should take a primitive value as constructor argument', function() {
+            var val = new ListEditor.ValueInList("foo")
+            assert.equal(val.get('value'), "foo")
+        })
+        it('should convert back to the primitive value with toJSON', function() {
+            var val = new ListEditor.ValueInList("foo")
+            assert.equal(val.toJSON(), "foo")
+        })
+        it('should be able to parse a json object', function() {
+            var val = new ListEditor.ValueInList("{\"foo\":5}")
+            assert.equal(val.toJSON(), {foo:5})
+        })
+        it('should be able to parse a json array', function() {
+            var val = new ListEditor.ValueInList("[5,6]")
+            assert.equal(val.toJSON(), [5,6])
+        })
+        it('should be able to parse numbers', function() {
+            var val = new ListEditor.ValueInList("5")
+            assert.equal(val.toJSON(), 5)
+        })
+    })
+
+    describe("ListEditor", function() {
 
         beforeEach(function () {
 
         })
 
         it('should render an empty table when initialized with no collection', function () {
-            var editor = new KeyValuePairEditor({
+            var editor = new ListEditor({
                 el: fixture
             })
             assert(fixture.find("table").length > 0)
+            console.log(fixture.find("table tbody tr").html())
             assert.equal(fixture.find("table tbody tr").length, 0)
         })
 
-        it('should render a table row for each key-value pair', function () {
-            var list = new KeyValuePairEditor.KeyValuePairList()
-            list.fromJSON({
-                foo: "1",
-                bar: "2",
-                xyz: "3"
-            })
+        it('should render a table row for each list item', function () {
+            var list = new ListEditor.ValueList()
+            list.fromJSON(["1", "2", "3"])
 
-            var editor = new KeyValuePairEditor({
+            var editor = new ListEditor({
                 el: fixture,
                 collection: list
             })
             assert.equal(fixture.find("table tbody tr").length, 3)
-            assert.equal(fixture.find("table tbody tr:eq(2) input.key").val(), "xyz")
             assert.equal(fixture.find("table tbody tr:eq(2) input.value").val(), "3")
         })
 
         it('should should add an empty table row when the add button is clicked', function () {
-            var editor = new KeyValuePairEditor({
+            var editor = new ListEditor({
                 el: fixture
             })
             editor.getAddButton().click()
             assert.equal(fixture.find("table tbody tr").length, 1)
-            assert.equal(fixture.find("table tbody tr input.key").val(), "")
             assert.equal(fixture.find("table tbody tr input.value").val(), "")
         })
 
         it('should update the list with new keys and values', function () {
-            var list = new KeyValuePairEditor.KeyValuePairList()
-            list.fromJSON({
-                foo: "1",
-                bar: "2",
-                xyz: "3"
-            })
+            var list = new ListEditor.ValueList()
+            list.fromJSON(["1","2","3"])
 
-            var editor = new KeyValuePairEditor({
+            var editor = new ListEditor({
                 el: fixture,
                 collection: list
             })
@@ -102,45 +116,37 @@ describe('key-value-editor', function() {
 
             assert.equal(fixture.find("table tbody tr").length, 4)
 
-            fixture.find("table tbody tr:last input.key").val("new")
-            fixture.find("table tbody tr:last input.key").trigger("change")
-            fixture.find("table tbody tr:last input.value").val("value")
+            fixture.find("table tbody tr:last input.value").val("four")
             fixture.find("table tbody tr:last input.value").trigger("change")
 
             var result = list.toJSON()
-            assert.equal(Object.keys(result).length, 4)
-            assert.equal(result.foo, "1")
-            assert.equal(result.bar, "2")
-            assert.equal(result.xyz, "3")
-            assert.equal(result.new, "value")
+            assert.equal(result.length, 4)
+            assert.equal(result[0], "1")
+            assert.equal(result[1], "2")
+            assert.equal(result[2], "3")
+            assert.equal(result[3], "four")
         })
 
-        it('should ignore empty keys', function () {
-            var list = new KeyValuePairEditor.KeyValuePairList()
-            list.fromJSON({
-                foo: "1"
-            })
+        it('should ignore empty values', function () {
+            var list = new ListEditor.ValueList()
+            list.fromJSON(["1"])
 
-            var editor = new KeyValuePairEditor({
+            var editor = new ListEditor({
                 el: fixture,
                 collection: list
             })
             editor.getAddButton().click()
 
             var result = list.toJSON()
-            assert.equal(Object.keys(result).length, 1)
-            assert.equal(result.foo, "1")
+            assert.equal(result.length, 1)
+            assert.equal(result[0], "1")
         })
 
-        it('should remove key-value pairs when remove button is clicked', function () {
-            var list = new KeyValuePairEditor.KeyValuePairList()
-            list.fromJSON({
-                foo: "1",
-                bar: "2",
-                xyz: "3"
-            })
+        it('should remove rows when remove button is clicked', function () {
+            var list = new ListEditor.ValueList()
+            list.fromJSON(["1","2","3"])
 
-            var editor = new KeyValuePairEditor({
+            var editor = new ListEditor({
                 el: fixture,
                 collection: list
             })
@@ -149,8 +155,9 @@ describe('key-value-editor', function() {
             assert.equal(fixture.find("table tbody tr").length, 2)
 
             var result = list.toJSON()
-            assert.equal(Object.keys(result).length, 2)
-            assert.equal(result.bar, undefined)
+            assert.equal(result.length, 2)
+            assert.equal(result[0], "1")
+            assert.equal(result[1], "2")
         })
 
     })

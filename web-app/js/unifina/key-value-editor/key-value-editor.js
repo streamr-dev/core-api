@@ -1,4 +1,4 @@
-(function(exports) {
+(function() {
 
     var KeyValuePair = Backbone.Model.extend({
         defaults: {
@@ -109,7 +109,12 @@
     // Speeds up rendering
     Mustache.parse(KeyValuePairEditor.template)
 
-    exports.KeyValuePairList = KeyValuePairList
-    exports.KeyValuePairEditor = KeyValuePairEditor
+    KeyValuePairEditor.KeyValuePair = KeyValuePair
+    KeyValuePairEditor.KeyValuePairList = KeyValuePairList
+    KeyValuePairEditor.KeyValuePairView = KeyValuePairView
 
-})(typeof(exports) !== 'undefined' ? exports : window)
+    if (typeof module !== 'undefined' && module.exports)
+        module.exports = KeyValuePairEditor
+    else window.KeyValuePairEditor = KeyValuePairEditor
+
+})()
