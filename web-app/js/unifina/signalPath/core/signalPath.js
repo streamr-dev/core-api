@@ -578,8 +578,10 @@ var SignalPath = (function () {
 
 				$(pub).trigger('started', [response])
 			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+			error: function(jqXHR, textStatus, errorThrown) {
+				if (callback) {
+					callback(undefined, jqXHR.responseJSON)
+				} if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
 					handleError(jqXHR.responseJSON.message)
 				} else {
 					handleError(textStatus + "\n" + errorThrown)
@@ -715,8 +717,7 @@ var SignalPath = (function () {
 
 					if (callback) {
 						callback(undefined, jqXHR.responseJSON)
-					}
-					else {
+					} else {
 						handleError(textStatus + "\n" + errorThrown)
 					}
 				}
