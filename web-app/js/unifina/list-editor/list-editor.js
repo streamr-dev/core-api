@@ -20,12 +20,6 @@
         defaults: {
             value: ''
         },
-        constructor: function(valueOrAttrs) {
-            Backbone.Model.apply(this, [{value: parseValue(value)}]);
-        },
-        toJSON: function() {
-            return this.get('value')
-        },
         isEmpty: function() {
             var v = this.get('value')
             return v === undefined || v === ""
@@ -35,24 +29,29 @@
     var ValueList = Backbone.Collection.extend({
         model: ValueInList,
 
-        // Wrap values
         constructor: function(values) {
-            ListEditor.ValueList.apply(this, [values.map(function(value) {
-                return {
-                    value: parseValue(value)
+            // Wrap values
+            Backbone.Collection.apply(this, [values.map(function(value) {
+                if (value instanceof Backbone.Model) {
+                    return value
+                }
+                else {
+                    return {
+                        value: value
+                    }
                 }
             })]);
         },
-        
-        toJSON: function() {
-            // Filter empty values
-            var filtered = this.models.filter(function(model) {
+        filterEmpty: function() {
+            return this.models.filter(function(model) {
                 return !model.isEmpty()
             })
-
-            var converted = filtered.map(function(model) {
-                return model.toJSON()
-            })
+        },
+        toJSON: function() {
+            return this.filterEmpty()
+                .map(function(model) {
+                    return model.get('value')
+                })
         }
     });
 
@@ -67,7 +66,11 @@
             this.listenTo(this.model, 'remove', this.unrender)
         },
         render: function() {
-            this.$el.html(Mustache.render(this.template, this.model.attributes))
+            var model = $.extend({}, this.model.attributes)
+            if (typeof model.value !== 'string') {
+                model.value = JSON.stringify(model.value)
+            }
+            this.$el.html(Mustache.render(this.template, model))
             return this
         },
         update: function() {
@@ -84,8 +87,7 @@
     Mustache.parse(ValueInListView.template)
 
     var ListEditor = Backbone.View.extend({
-        // Wrap table in a form to get native tabbing
-        template: "<table class='table table-striped table-condensed'><thead><tr><th>Value</th><th><button class='btn btn-default btn-xs add'><i class='fa fa-plus'></i></button></th></tr></thead><tbody></tbody></table>",
+        template: "<table class='table table-striped table-condensed'><thead><th colspan='2'><button class='btn btn-default btn-block btn-xs add'><i class='fa fa-plus'></i> Add Item</button></th></tr></thead><tbody></tbody></table>",
         events: {
             'click .add': 'add'
         },

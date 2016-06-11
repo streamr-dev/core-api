@@ -253,8 +253,7 @@
 	MapParameterValueEditor.prototype.createElement = function() {
 		var _this = this
 		var div = $("<div/>")
-		var collection = new KeyValuePairEditor.KeyValuePairList()
-		collection.fromJSON(this.data.value || {})
+		var collection = new KeyValuePairEditor.KeyValuePairList(this.data.value || {})
 
 		this.editor = new KeyValuePairEditor({
 			el: div,
@@ -306,8 +305,7 @@
 	ListParameterValueEditor.prototype.createElement = function() {
 		var _this = this
 		var div = $("<div/>")
-		var collection = new ListEditor.ValueList()
-		collection.fromJSON(this.data.value || {})
+		var collection = new ListEditor.ValueList(this.data.value || [])
 
 		this.editor = new ListEditor({
 			el: div,

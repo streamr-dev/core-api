@@ -46,43 +46,13 @@ describe('list-editor', function() {
     })
 
     describe('ValueInList', function() {
-        describe('construction', function() {
-            it('should be able to parse a json object', function() {
-                var val = new ListEditor.ValueInList("{\"foo\":5}")
-                assert.deepEqual(val.get('value'), {foo:5})
-            })
-            it('should be able to parse a json array', function() {
-                var val = new ListEditor.ValueInList("[5,6]")
-                assert.deepStrictEqual(val.get('value'), [5,6])
-            })
-            it('should be able to parse numbers', function() {
-                var val = new ListEditor.ValueInList("5")
-                assert.strictEqual(val.get('value'), 5)
-            })
-            it('should leave a string untouched', function() {
-                var val = new ListEditor.ValueInList("foo")
-                assert.strictEqual(val.get('value'), "foo")
-            })
-        })
-
-        describe('toJSON()', function() {
-            it('should return the unwrapped value', function() {
-                var val = new ListEditor.ValueInList("foo")
-                assert.strictEqual(val.toJSON(), "foo")
-            })
-            it('should return the empty string for an empty string', function() {
-                var val = new ListEditor.ValueInList("")
-                assert.strictEqual(val.toJSON(), "")
-            })
-        })
-
         describe('isEmpty()', function() {
             it('should return true for empty strings', function() {
-                var val = new ListEditor.ValueInList("")
+                var val = new ListEditor.ValueInList({value: ""})
                 assert(val.isEmpty())
             })
-            it('should return false for non-empty strings', function() {
-                var val = new ListEditor.ValueInList("asd")
+            it('should return false for other objects', function() {
+                var val = new ListEditor.ValueInList({value: "asd"})
                 assert(!val.isEmpty())
             })
         })
@@ -90,21 +60,43 @@ describe('list-editor', function() {
 
     describe("ValueList", function() {
         describe("construction", function() {
-            it("should accept list of model values", function() {
+            it("should accept a list of primitive values", function() {
                 var list = new ListEditor.ValueList([1,"2","foo"])
                 assert.deepStrictEqual(
                     list.models.map(function(model) {
                         return model.get('value');
                     }),
-                    [1,2,"foo"]
+                    [1,"2","foo"]
+                )
+            })
+            it("should accept models in the list", function() {
+                var list = new ListEditor.ValueList([1,new ListEditor.ValueInList({value:"2"})])
+                assert.deepStrictEqual(
+                    list.models.map(function(model) {
+                        return model.get('value');
+                    }),
+                    [1,"2"]
                 )
             })
         })
 
         describe("toJSON()", function() {
+            it("should unwrap values", function() {
+                var list = new ListEditor.ValueList([
+                    new ListEditor.ValueInList({value: 1}),
+                    new ListEditor.ValueInList({value: "2"}),
+                    new ListEditor.ValueInList({value: "foo"})
+                ])
+                assert.deepStrictEqual(list.toJSON(), [1,"2","foo"])
+            })
             it("should filter out empty values", function() {
-                var list = new ListEditor.ValueList([1,"2","", "foo", ""])
-                assert.deepStrictEqual(list.toJSON(), [1,2,"foo"])
+                var list = new ListEditor.ValueList([
+                    new ListEditor.ValueInList({value: 1}),
+                    new ListEditor.ValueInList({value: ""}),
+                    new ListEditor.ValueInList({value: "foo"}),
+                    new ListEditor.ValueInList({value: ""})
+                ])
+                assert.deepStrictEqual(list.toJSON(), [1,"foo"])
             })
         })
     })
@@ -160,6 +152,27 @@ describe('list-editor', function() {
 
             var result = list.toJSON()
             assert.deepEqual(result, [1,2,3,"four"])
+        })
+
+        it('should render stringifications of non-string objects', function() {
+            var list = new ListEditor.ValueList([{foo: 4}, 5, true])
+            new ListEditor({
+                el: fixture,
+                collection: list
+            })
+
+            assert.equal(
+                fixture.find("table tbody tr:eq(0) input.value").val(),
+                JSON.stringify({foo: 4})
+            )
+            assert.equal(
+                fixture.find("table tbody tr:eq(1) input.value").val(),
+                "5"
+            )
+            assert.equal(
+                fixture.find("table tbody tr:eq(2) input.value").val(),
+                "true"
+            )
         })
 
         it('should ignore empty values', function () {
