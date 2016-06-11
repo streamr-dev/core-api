@@ -301,7 +301,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	pub.connect = connect;
 
 	// abstract, must be overridden
-	function disconnect(endpoint) {
+	function disconnect() {
 		throw new Exception("disconnect() called in Endpoint");
 	}
 	pub.disconnect = disconnect;

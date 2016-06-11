@@ -113,7 +113,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		}
 
 		then: "output values are as expected if no restarts had happened"
-		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], [Add: [300.0]]]
+		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], ["Add (old)": [300.0]]]
 
 		cleanup:
 		if (canvas.state == Canvas.State.RUNNING) {

@@ -4,7 +4,7 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModuleCategory
 import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.simplemath.AddMulti
+import com.unifina.signalpath.simplemath.VariadicAddMulti
 import com.unifina.utils.Globals
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
@@ -18,7 +18,7 @@ class ModuleServiceSpec extends Specification {
 
 	def module = new Module(
 			name: "Add",
-			implementingClass: AddMulti.canonicalName,
+			implementingClass: VariadicAddMulti.canonicalName,
 			jsModule: "jsModule",
 			type: "type",
 			category: new ModuleCategory(name: "category")
