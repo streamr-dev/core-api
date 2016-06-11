@@ -91,29 +91,34 @@ public class SignalPath extends ModuleWithUI {
 
 			Module moduleDomain = moduleDomainById.get(((Number) moduleConfig.get("id")).longValue());
 
-			AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain, moduleConfig, this, globals);
+			try {
+				AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain, moduleConfig, this, globals);
 
-			// Get parameter inputs and outputs if connected, or create constants if not connected
-			for (Map paramConfig : (List<Map>) moduleConfig.get("params")) {
-				Input i = moduleImpl.getInput(paramConfig.get("name").toString());
+				// Get parameter inputs and outputs if connected, or create constants if not connected
+				for (Map paramConfig : (List<Map>) moduleConfig.get("params")) {
+					Input i = moduleImpl.getInput(paramConfig.get("name").toString());
 
-				if (i == null) {
-					log.warn("No such parameter: " + paramConfig.get("name"));
-				} else {
-					if (paramConfig.containsKey("connected") && (boolean) paramConfig.get("connected")) {
-						inputs.add(new InputConnection(i, paramConfig.get("sourceId").toString()));
+					if (i == null) {
+						log.warn("No such parameter: " + paramConfig.get("name"));
 					} else {
-						// Param value has already been set in configuration. Should something more be done?
-					}
+						if (paramConfig.containsKey("connected") && (boolean) paramConfig.get("connected")) {
+							inputs.add(new InputConnection(i, paramConfig.get("sourceId").toString()));
+						} else {
+							// Param value has already been set in configuration. Should something more be done?
+						}
 
-					if (paramConfig.containsKey("export") && (boolean) paramConfig.get("export")) {
-						exportedInputs.add(i);
+						if (paramConfig.containsKey("export") && (boolean) paramConfig.get("export")) {
+							exportedInputs.add(i);
+						}
 					}
 				}
-			}
 
-			moduleConfigs.add(new ModuleConfig(moduleImpl, moduleConfig));
-			mods.add(moduleImpl);
+				moduleConfigs.add(new ModuleConfig(moduleImpl, moduleConfig));
+				mods.add(moduleImpl);
+
+			} catch (ModuleCreationFailedException e) {
+				log.warn("Failed to instantiate and configure module " + moduleConfig.get("id"));
+			}
 		}
 
 		// Collect inputs and outputs with endpoints from modules
