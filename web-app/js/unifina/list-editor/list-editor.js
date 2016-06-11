@@ -6,42 +6,53 @@
             return JSON.parse(value)
         } catch (err) {}
 
-        console.log("falling back")
         return value
+    }
+
+    // from http://stackoverflow.com/questions/3362471/how-can-i-call-a-javascript-constructor-using-call-or-apply
+    function newInstanceOf(constructor) {
+        var instance = Object.create(constructor.prototype);
+        var result = constructor.apply(instance, Array.prototype.slice.call(arguments, 1));
+        return (result !== null && typeof result === 'object') ? result : instance;
     }
 
     var ValueInList = Backbone.Model.extend({
         defaults: {
             value: ''
         },
-        constructor: function(value) {
+        constructor: function(valueOrAttrs) {
             Backbone.Model.apply(this, [{value: parseValue(value)}]);
         },
         toJSON: function() {
             return this.get('value')
+        },
+        isEmpty: function() {
+            var v = this.get('value')
+            return v === undefined || v === ""
         }
     });
 
     var ValueList = Backbone.Collection.extend({
         model: ValueInList,
 
-        fromJSON: function(list) {
-            var _this = this
-            console.log(list)
-            list.forEach(function(item) {
-                _this.add(_this.model.prototype.fromJSON(item))
-            })
-        },
-
-        toJSON: function() {
-            var list = []
-            this.models.forEach(function(model) {
-                var item = model.toJSON()
-                if (item !== undefined) {
-                    list.push(item)
+        // Wrap values
+        constructor: function(values) {
+            ListEditor.ValueList.apply(this, [values.map(function(value) {
+                return {
+                    value: parseValue(value)
                 }
+            })]);
+        },
+        
+        toJSON: function() {
+            // Filter empty values
+            var filtered = this.models.filter(function(model) {
+                return !model.isEmpty()
             })
-            return list
+
+            var converted = filtered.map(function(model) {
+                return model.toJSON()
+            })
         }
     });
 
@@ -62,10 +73,10 @@
         update: function() {
             this.model.set("value", parseValue($(this.el).find("input.value").val()))
         },
-        unrender: function(){
+        unrender: function() {
             $(this.el).remove();
         },
-        remove: function(){
+        remove: function() {
             this.model.collection.remove(this.model);
         }
     });
@@ -103,11 +114,11 @@
           return this.$el.find(".add")
         },
         add: function() {
-            var item = new ValueInList();
+            var item = newInstanceOf(this.listItemType)
             this.collection.add(item);
         },
         append: function(model) {
-            var view = new ValueInListView({
+            var view = newInstanceOf(this.listItemView, {
                 model: model
             });
             this.$el.find('table tbody').append(view.render().el);
@@ -122,7 +133,7 @@
             this.$el.show()
         },
         createCollection: function(list) {
-            return new this.collectionType.prototype.fromJSON(list)
+            return newInstanceOf(this.collectionType, list)
         }
     });
     // Speeds up rendering

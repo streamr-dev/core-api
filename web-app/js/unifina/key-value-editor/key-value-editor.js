@@ -1,31 +1,34 @@
 (function() {
 
-    var KeyValuePair = Backbone.Model.extend({
+    var KeyValuePair = ListEditor.ValueInList.extend({
         defaults: {
             key: '',
             value: ''
+        },
+        isEmpty: function() {
+            var v = model.get('key')
+            return v === undefined || v === ""
         }
     });
 
-    var KeyValuePairList = Backbone.Collection.extend({
+    var KeyValuePairList = ListEditor.ValueList.extend({
         model: KeyValuePair,
 
-        fromJSON: function(map) {
-            var _this = this
-            Object.keys(map).forEach(function(key) {
-                _this.add(new KeyValuePair({
+        constructor: function(object) {
+            var list = Object.keys(object).map(function(key) {
+                return {
                     key: key,
-                    value: map[key]
-                }))
+                    value: object[key]
+                }
             })
+            ListEditor.ValueList.apply(this, [list]);
         },
 
         toJSON: function() {
+            var list = ListEditor.ValueList.prototype.toJSON.apply(this);
             var map = {}
-            this.models.forEach(function(model) {
-                if (model.get('key') !== '') {
-                    map[model.get('key')] = model.get('value')
-                }
+            list.forEach(function(item) {
+                map[item.key] = item.value
             })
             return map
         }

@@ -45,26 +45,67 @@ describe('list-editor', function() {
         global.Mustache = undefined
     })
 
-    describe("ValueInList", function() {
-        it('should take a primitive value as constructor argument', function() {
-            var val = new ListEditor.ValueInList("foo")
-            assert.equal(val.get('value'), "foo")
+    describe('ValueInList', function() {
+        describe('construction', function() {
+            it('should be able to parse a json object', function() {
+                var val = new ListEditor.ValueInList("{\"foo\":5}")
+                assert.deepEqual(val.get('value'), {foo:5})
+            })
+            it('should be able to parse a json array', function() {
+                var val = new ListEditor.ValueInList("[5,6]")
+                assert.deepStrictEqual(val.get('value'), [5,6])
+            })
+            it('should be able to parse numbers', function() {
+                var val = new ListEditor.ValueInList("5")
+                assert.strictEqual(val.get('value'), 5)
+            })
+            it('should leave a string untouched', function() {
+                var val = new ListEditor.ValueInList("foo")
+                assert.strictEqual(val.get('value'), "foo")
+            })
         })
-        it('should convert back to the primitive value with toJSON', function() {
-            var val = new ListEditor.ValueInList("foo")
-            assert.equal(val.toJSON(), "foo")
+
+        describe('toJSON()', function() {
+            it('should return the unwrapped value', function() {
+                var val = new ListEditor.ValueInList("foo")
+                assert.strictEqual(val.toJSON(), "foo")
+            })
+            it('should return the empty string for an empty string', function() {
+                var val = new ListEditor.ValueInList("")
+                assert.strictEqual(val.toJSON(), "")
+            })
         })
-        it('should be able to parse a json object', function() {
-            var val = new ListEditor.ValueInList("{\"foo\":5}")
-            assert.equal(val.toJSON(), {foo:5})
+
+        describe('isEmpty()', function() {
+            it('should return true for empty strings', function() {
+                var val = new ListEditor.ValueInList("")
+                assert(val.isEmpty())
+            })
+            it('should return false for non-empty strings', function() {
+                var val = new ListEditor.ValueInList("asd")
+                assert(!val.isEmpty())
+            })
         })
-        it('should be able to parse a json array', function() {
-            var val = new ListEditor.ValueInList("[5,6]")
-            assert.equal(val.toJSON(), [5,6])
+    })
+
+    describe("ValueList", function() {
+        describe("construction", function() {
+            it("should accept list of model values", function() {
+                var list = new ListEditor.ValueList([1,"2","foo"])
+                assert.deepStrictEqual(
+                    list.models.map(function(model) {
+                        return model.get('value');
+                    }),
+                    [1,2,"foo"]
+                )
+            })
         })
-        it('should be able to parse numbers', function() {
-            var val = new ListEditor.ValueInList("5")
-            assert.equal(val.toJSON(), 5)
+
+        describe("toJSON()", function() {
+            it("should filter out empty values", function() {
+                var list = new ListEditor.ValueList([1,"2","", "foo", ""])
+                assert.deepStrictEqual(list.toJSON(), [1,2,"foo"])
+            })
         })
     })
 
@@ -84,8 +125,7 @@ describe('list-editor', function() {
         })
 
         it('should render a table row for each list item', function () {
-            var list = new ListEditor.ValueList()
-            list.fromJSON(["1", "2", "3"])
+            var list = new ListEditor.ValueList(["1", "2", "3"])
 
             var editor = new ListEditor({
                 el: fixture,
@@ -105,8 +145,7 @@ describe('list-editor', function() {
         })
 
         it('should update the list with new keys and values', function () {
-            var list = new ListEditor.ValueList()
-            list.fromJSON(["1","2","3"])
+            var list = new ListEditor.ValueList(["1","2","3"])
 
             var editor = new ListEditor({
                 el: fixture,
@@ -120,16 +159,11 @@ describe('list-editor', function() {
             fixture.find("table tbody tr:last input.value").trigger("change")
 
             var result = list.toJSON()
-            assert.equal(result.length, 4)
-            assert.equal(result[0], "1")
-            assert.equal(result[1], "2")
-            assert.equal(result[2], "3")
-            assert.equal(result[3], "four")
+            assert.deepEqual(result, [1,2,3,"four"])
         })
 
         it('should ignore empty values', function () {
-            var list = new ListEditor.ValueList()
-            list.fromJSON(["1"])
+            var list = new ListEditor.ValueList(["1"])
 
             var editor = new ListEditor({
                 el: fixture,
@@ -138,13 +172,11 @@ describe('list-editor', function() {
             editor.getAddButton().click()
 
             var result = list.toJSON()
-            assert.equal(result.length, 1)
-            assert.equal(result[0], "1")
+            assert.deepEqual(result, [1])
         })
 
         it('should remove rows when remove button is clicked', function () {
-            var list = new ListEditor.ValueList()
-            list.fromJSON(["1","2","3"])
+            var list = new ListEditor.ValueList(["1","2","3"])
 
             var editor = new ListEditor({
                 el: fixture,
@@ -155,9 +187,7 @@ describe('list-editor', function() {
             assert.equal(fixture.find("table tbody tr").length, 2)
 
             var result = list.toJSON()
-            assert.equal(result.length, 2)
-            assert.equal(result[0], "1")
-            assert.equal(result[1], "2")
+            assert.deepEqual(result, [1,3])
         })
 
     })
