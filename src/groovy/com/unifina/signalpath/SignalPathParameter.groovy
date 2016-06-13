@@ -16,8 +16,8 @@ class SignalPathParameter extends Parameter<Canvas> {
 			config.put("defaultValue", getValue().getId());
 		}
 
-		def permissionService = owner.globals?.grailsApplication?.mainContext?.getBean("permissionService")
-		def user = owner.globals?.getUser()
+		def permissionService = owner.globals.grailsApplication.mainContext.getBean("permissionService")
+		def user = owner.globals.getUser()
 		Collection signalPaths = permissionService.get(Canvas, user) {
 			projections {
 				property 'id', 'id'
