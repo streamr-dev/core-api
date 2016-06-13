@@ -123,7 +123,8 @@ class StreamApiControllerSpec extends Specification {
 
 	void "save() calls StreamService.createStream() and returns it.toMap()"() {
 		setup:
-		def stream = new Stream(id: "test-stream", feed: new Feed())
+		def stream = new Stream(feed: new Feed())
+		stream.id = "test-stream"
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.json = [test: "test"]
@@ -134,7 +135,7 @@ class StreamApiControllerSpec extends Specification {
 		}
 		then:
 		1 * streamService.createStream([test: "test"], user) >> { stream }
-		response.json == stream.toMap()
+		response.json.id == stream.toMap().id
 	}
 
 	void "show a Stream of logged in user"() {
