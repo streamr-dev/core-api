@@ -69,6 +69,8 @@ var SignalPath = (function () {
 	// Public
 	var pub = {};
 	pub.options = options;
+
+	var isBeingReloaded = false
 	
     // TODO: remove if not needed anymore!
     pub.replacedIds = {};
@@ -492,6 +494,7 @@ var SignalPath = (function () {
 	 * idOrObject can be either an id to fetch from the api, or json to apply as-is
 	 */
 	function load(idOrObject, callback) {
+		SignalPath.isBeingReloaded = true
 		$(pub).trigger('loading')
 
 		function doLoad(json) {
@@ -507,6 +510,8 @@ var SignalPath = (function () {
 			if (callback)
 				callback(json);
 
+			SignalPath.isBeingReloaded = false
+			
 			// Trigger loaded on pub and parentElement
 			$(pub).add(parentElement).trigger('loaded', [savedJson]);
 
@@ -573,8 +578,14 @@ var SignalPath = (function () {
 
 				$(pub).trigger('started', [response])
 			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(textStatus+"\n"+errorThrown)
+			error: function(jqXHR, textStatus, errorThrown) {
+				if (callback) {
+					callback(undefined, jqXHR.responseJSON)
+				} if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+					handleError(jqXHR.responseJSON.message)
+				} else {
+					handleError(textStatus + "\n" + errorThrown)
+				}
 			}
 		});
 	}
@@ -706,8 +717,7 @@ var SignalPath = (function () {
 
 					if (callback) {
 						callback(undefined, jqXHR.responseJSON)
-					}
-					else {
+					} else {
 						handleError(textStatus + "\n" + errorThrown)
 					}
 				}
@@ -733,6 +743,10 @@ var SignalPath = (function () {
 		else (parentElement.css("zoom", zoom))
 	}
 	pub.setZoom = setZoom
+
+	pub.isLoading = function() {
+		return SignalPath.isBeingReloaded;
+	}
 
 	return pub; 
 }());
