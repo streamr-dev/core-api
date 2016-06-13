@@ -3,14 +3,17 @@ package com.unifina.signalpath.simplemath
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
-class AddMultiSpec extends Specification {
+class VariadicAddMultiSpec extends Specification {
 	
-	AddMulti module
+	VariadicAddMulti module
 	
     def setup() {
-		module = new AddMulti()
+		module = new VariadicAddMulti()
 		module.init()
-		module.configure([options: [inputs: [value: 4]] ])
+		module.getInput("in3")
+		module.getInput("in4")
+		module.getInput("in5")
+		module.configure([:])
     }
 
 	void "addMulti gives the right answer"() {

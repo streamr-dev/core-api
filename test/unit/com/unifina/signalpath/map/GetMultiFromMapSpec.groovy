@@ -1,6 +1,5 @@
 package com.unifina.signalpath.map
 
-import com.unifina.signalpath.Output
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
@@ -10,18 +9,15 @@ class GetMultiFromMapSpec extends Specification {
 	def setup() {
 		module = new GetMultiFromMap()
 		module.init()
-		module.getOutput("endpoint-12312321")
-		module.getOutput("endpoint-23213242")
-		module.getOutput("endpoint-32423232")
-		module.getOutput("endpoint-45545454")
-		module.getOutput("endpoint-not-used-placeholder")
-		module.configure([:])
-
-		// Rename outputs
-		module.getOutput("endpoint-12312321").displayName = "a"
-		module.getOutput("endpoint-23213242").displayName = "b"
-		module.getOutput("endpoint-32423232").displayName = "c"
-		module.getOutput("endpoint-45545454").displayName = "deep.deep.inside"
+		module.configure([
+			options: [numOfKeys: [value: 4]],
+			outputs: [
+				[name: "out-1", displayName: "a"],
+				[name: "out-2", displayName: "b"],
+				[name: "out-3", displayName: "c"],
+				[name: "out-4", displayName: "deep.deep.inside"]
+			]
+		])
 	}
 
 	def "GetMultiFromMap works as expected"() {
@@ -41,11 +37,11 @@ class GetMultiFromMapSpec extends Specification {
 			"c": [null, [hello: "world"],        42,     3, 3],
 			"deep.deep.inside": [null,             null,       null, null, "oh, yeah"],
 			founds: [
-				[a: false, b: false, c: false, "deep.deep.inside": false],
-				[a: true, b: false, c: true, "deep.deep.inside": false],
-				[a: false, b: true, c: true, "deep.deep.inside": false],
-				[a: true, b: true, c: true, "deep.deep.inside": false],
-				[a: false, b: false, c: false, "deep.deep.inside": true]
+				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 0d],
+				[a: 1d, b: 0d, c: 1d, "deep.deep.inside": 0d],
+				[a: 0d, b: 1d, c: 1d, "deep.deep.inside": 0d],
+				[a: 1d, b: 1d, c: 1d, "deep.deep.inside": 0d],
+				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 1d]
 			]
 		]
 
