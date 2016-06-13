@@ -198,7 +198,6 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	public void receive(FeedEvent event) {
 		if (event.content instanceof HttpTransaction) {
 			sendOutput((HttpTransaction) event.content);
-			setSendPending(true);
 			getPropagator().propagate();
 		} else {
 			super.receive(event);
@@ -225,19 +224,15 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		public VerbParameter(AbstractSignalPathModule owner, String name) {
 			super(owner, name, "POST"); //this.getValueList()[0]);
 		}
-		private List<PossibleValue> getValueList() {
+		@Override
+		protected List<PossibleValue> getPossibleValues() {
 			return Arrays.asList(
-				new PossibleValue("GET", "GET"),
-				new PossibleValue("POST", "POST"),
-				new PossibleValue("PUT", "PUT"),
-				new PossibleValue("DELETE", "DELETE"),
-				new PossibleValue("PATCH", "PATCH")
+					new PossibleValue("GET", "GET"),
+					new PossibleValue("POST", "POST"),
+					new PossibleValue("PUT", "PUT"),
+					new PossibleValue("DELETE", "DELETE"),
+					new PossibleValue("PATCH", "PATCH")
 			);
-		}
-		@Override public Map<String, Object> getConfiguration() {
-			Map<String, Object> config = super.getConfiguration();
-			config.put("possibleValues", getValueList());
-			return config;
 		}
 		public boolean hasBody() {
 			String v = this.getValue();

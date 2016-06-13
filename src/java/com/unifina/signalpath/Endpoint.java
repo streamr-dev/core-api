@@ -3,16 +3,14 @@ package com.unifina.signalpath;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Endpoint<T> implements Serializable {
 	public AbstractSignalPathModule owner;
 	protected String name;
 	protected String displayName;
 	protected String typeName;
+	private String jsClass;
 	
 	private Map<String,Object> json;
 	private boolean configured = false;
@@ -87,15 +85,19 @@ public abstract class Endpoint<T> implements Serializable {
 		map.put("type",getTypeName());
 		map.put("connected", isConnected());
 		map.put("canConnect", canConnect);
-		
-		if (displayName!=null)
-			map.put("displayName",displayName);
-		
+
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (jsClass != null) {
+			map.put("jsClass", jsClass);
+		}
+
 		return map;
 	}
 	
 	public void setConfiguration(Map<String,Object> config) {
-		json = config;
+		json = new LinkedHashMap<>(config);
 		configured = true;
 		
 		if (config.containsKey("displayName"))
@@ -129,5 +131,8 @@ public abstract class Endpoint<T> implements Serializable {
 			return new ArrayList<String>(0);
 		else return aliases;
 	}
-	
+
+	public void setJsClass(String jsClass) {
+		this.jsClass = jsClass;
+	}
 }

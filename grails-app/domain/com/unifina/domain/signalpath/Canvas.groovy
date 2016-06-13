@@ -1,5 +1,6 @@
 package com.unifina.domain.signalpath
 
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -45,6 +46,7 @@ class Canvas {
 	String requestUrl
 	byte[] serialized
 	Date serializationTime
+	static hasMany = [dashboardItems: DashboardItem]
 
 	static constraints = {
 		runner(nullable: true)
@@ -62,6 +64,7 @@ class Canvas {
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
 		serialized sqlType: "mediumblob"
+		dashboardItems cascade: 'all-delete-orphan'
 	}
 
 	boolean isNotSerialized() {

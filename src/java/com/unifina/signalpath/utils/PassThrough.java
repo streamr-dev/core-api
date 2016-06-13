@@ -4,6 +4,7 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.Output;
 
+@Deprecated
 public class PassThrough extends AbstractSignalPathModule {
 
 	Input<Object> input = new Input<>(this,"in","Object");
