@@ -69,9 +69,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
@@ -103,33 +101,28 @@ public class SendToStream extends AbstractSignalPathModule {
 		JSONArray fields = streamConfig.getJSONArray("fields");
 		
 		for (Object o : fields) {
+			Input input = null;
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
 			
 			// TODO: add other types
 			if (type.equalsIgnoreCase("number") || type.equalsIgnoreCase("boolean")) {
-				TimeSeriesInput input = new TimeSeriesInput(this,name);
-				input.canHaveInitialValue = false;
-				addInput(input);
+				input = new TimeSeriesInput(this, name);
+				((TimeSeriesInput) input).canHaveInitialValue = false;
+			} else if (type.equalsIgnoreCase("string")) {
+				input = new StringInput(this, name);
+			} else if (type.equalsIgnoreCase("map")) {
+				input = new MapInput(this, name);
+			} else if (type.equalsIgnoreCase("list")) {
+				input = new ListInput(this, name);
 			}
-			else if (type.equalsIgnoreCase("string")) {
-				StringInput input = new StringInput(this, name);
-				addInput(input);
-			}
-			else if (type.equalsIgnoreCase("map")) {
-				addInput(new MapInput(this,name));
-			}
-			else if (type.equalsIgnoreCase("list")) {
-				addInput(new ListInput(this,name));
-			}
-		}
-		
-		for (Input input : getInputs()) {
-			if (!(input instanceof Parameter)) {
+
+			if (input != null) {
 				input.canToggleDrivingInput = false;
 				input.canBeFeedback = false;
 				input.requiresConnection = false;
+				addInput(input);
 			}
 		}
 		

@@ -9,6 +9,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		
 	// Dragging in the chart container or the controls must not move the module
 	prot.dragOptions.cancel = ".map-container"
+
+	prot.getMap = function() {
+		return map
+	}
 	
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
