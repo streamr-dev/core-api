@@ -20,7 +20,10 @@ class SortMapSpec extends Specification {
 		module.configure(module.getConfiguration())
 	}
 
-	def "sortMap() sorts map by key (default), ascending (default)"() {
+	def "sortMap() sorts map by key, ascending"() {
+		module.getInput("by").receive(SortMap.ByParameter.KEY)
+		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
+
 		Map outputValues = [
 			out: [
 				[:],
@@ -33,8 +36,9 @@ class SortMapSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
-	def "sortMap() sorts map by value, ascending (default)"() {
-		module.getInput("byValue").receive(true)
+	def "sortMap() sorts map by value, ascending"() {
+		module.getInput("by").receive(SortMap.ByParameter.VALUE)
+		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
 		Map outputValues = [
 			out: [
 				[:],
@@ -47,8 +51,9 @@ class SortMapSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
-	def "sortMap() sorts map by key (default), descending"() {
-		module.getInput("ordering").receive(true)
+	def "sortMap() sorts map by key, descending"() {
+		module.getInput("by").receive(SortMap.ByParameter.KEY)
+		module.getInput("order").receive(SortMap.OrderParameter.DESCENDING)
 		Map outputValues = [
 			out: [
 				[:],
@@ -62,8 +67,8 @@ class SortMapSpec extends Specification {
 	}
 
 	def "sortMap() sorts map by value, descending"() {
-		module.getInput("byValue").receive(true)
-		module.getInput("ordering").receive(true)
+		module.getInput("by").receive(SortMap.ByParameter.VALUE)
+		module.getInput("order").receive(SortMap.OrderParameter.DESCENDING)
 		Map outputValues = [
 			out: [
 				[:],
@@ -77,7 +82,8 @@ class SortMapSpec extends Specification {
 	}
 
 	def "sortMap() does not crash given given uncomparable values"() {
-		module.getInput("byValue").receive(true)
+		module.getInput("by").receive(SortMap.ByParameter.VALUE)
+		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
 
 		Map inputValues = [
 			in: [[a: new Object(), b: new Object(), d: new Object()]]
