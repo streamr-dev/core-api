@@ -1,34 +1,27 @@
 package com.unifina.signalpath.map;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.BooleanParameter;
-import com.unifina.signalpath.MapInput;
-import com.unifina.signalpath.MapOutput;
-import org.apache.log4j.Logger;
+import com.unifina.signalpath.*;
 
 import java.util.*;
 
 public class SortMap extends AbstractSignalPathModule {
-	private static final Logger log = Logger.getLogger(SortMap.class);
 
-	private BooleanParameter byValue = new BooleanParameter(this, "byValue", false);
+	private ByParameter by = new ByParameter(this, "by", ByParameter.VALUE);
+	private OrderParameter order = new OrderParameter(this, "order", OrderParameter.ASCENDING);
 	private MapInput in = new MapInput(this, "in");
 	private MapOutput out = new MapOutput(this, "out");
 
 	@Override
 	public void sendOutput() {
 		Map source = in.getValue();
-		Map target;
+		Map target = by.isByValue() ?
+			new ValueSortedMap(order.isDescending()) :
+			new TreeMap<>(order.isDescending() ? Collections.reverseOrder() : null);
 
-		if (!byValue.getValue()) {
-			target = new TreeMap<>(source);
-		} else {
-			target = new ValueSortedMap(true);
-			try {
-				target.putAll(source);
-			} catch (ClassCastException e) {
-				return;
-			}
+		try {
+			target.putAll(source);
+		} catch (ClassCastException e) {
+			return;
 		}
 
 		if (target != null) {
@@ -38,4 +31,48 @@ public class SortMap extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {}
+
+	public static class OrderParameter extends StringParameter {
+
+		public static final String ASCENDING = "asc";
+		public static final String DESCENDING = "desc";
+
+		public OrderParameter(AbstractSignalPathModule owner, String name, String defaultValue) {
+			super(owner, name, defaultValue);
+		}
+
+		@Override
+		protected List<PossibleValue> getPossibleValues() {
+			return Arrays.asList(
+				new PossibleValue("ascending", ASCENDING),
+				new PossibleValue("descending", DESCENDING)
+			);
+		}
+
+		public boolean isDescending() {
+			return getValue().equals(DESCENDING);
+		}
+	}
+
+	public static class ByParameter extends StringParameter {
+
+		public static final String KEY = "key";
+		public static final String VALUE = "value";
+
+		public ByParameter(AbstractSignalPathModule owner, String name, String defaultValue) {
+			super(owner, name, defaultValue);
+		}
+
+		@Override
+		protected List<PossibleValue> getPossibleValues() {
+			return Arrays.asList(
+					new PossibleValue("key", KEY),
+					new PossibleValue("value", VALUE)
+			);
+		}
+
+		public boolean isByValue() {
+			return getValue().equals(VALUE);
+		}
+	}
 }
