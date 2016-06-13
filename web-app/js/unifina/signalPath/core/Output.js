@@ -59,6 +59,13 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 	pub.connect = function(endpoint) {
 		jsPlumb.connect({source: endpoint.jsPlumbEndpoint, target:pub.jsPlumbEndpoint});
 	}
+
+	pub.disconnect = function() {
+		var connections = jsPlumb.getConnections({target:pub.getId(), scope:"*"});
+		$(connections).each(function(j,connection) {
+			jsPlumb.detach(connection)
+		});
+	}
 	
 	pub.getConnectedEndpoints = function() {
 		var result = [];

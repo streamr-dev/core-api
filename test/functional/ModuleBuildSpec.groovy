@@ -1,5 +1,6 @@
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
+import org.openqa.selenium.Keys
 
 class ModuleBuildSpec extends LoginTester1Spec {
 
@@ -52,13 +53,15 @@ class ModuleBuildSpec extends LoginTester1Spec {
 	}	
 	
 	def "module options button functionality"() {
-		when: "the Add module is added via module browser"
-			addModule 'Add'
+		when: "the Map module is added via module browser"
+			addModule 'Map'
 		then: "module should appear on canvas"
-			moduleShouldAppearOnCanvas 'Add'
+			moduleShouldAppearOnCanvas 'Map'
+		then: "module zoom level != 12"
+			mapZoomLevel() != 12
 			
 		when: "options button is clicked"
-			findModuleOnCanvas("Add").find(".modulebutton .options").click()
+			findModuleOnCanvas("Map").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
@@ -69,19 +72,23 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			waitFor { !$(".modal-dialog .optionEditor") }
 		
 		when: "options button is clicked"
-			findModuleOnCanvas("Add").find(".modulebutton .options").click()
+			findModuleOnCanvas("Map").find(".modulebutton .options").click()
 		then: "options modal is shown"
 			waitFor { $(".modal-dialog .optionEditor").displayed }
 			
-		when: "number of inputs is changed to 3 and options are OK'ed"
-			$(".modal-dialog .optionEditor input").firstElement().clear()
-			$(".modal-dialog .optionEditor input") << "3"
+		when: "zoom level is changed to 12 and options are OK'ed"
+			def zoomElementIndex = $(".modal-dialog .optionEditor input").findIndexOf { it.text() == "zoom" }
+			$(".modal-dialog .optionEditor input", zoomElementIndex).value("12")
 			$(".modal-dialog .optionEditor").parents(".modal-dialog").find(".btn.btn-primary").click()
 		then: "dialog is OK'ed"
 			waitFor { !$(".modal-dialog .optionEditor") }
-		then: "module must be reloaded with 3 inputs"
-			waitFor { findModuleOnCanvas("Add").find(".endpoint.input").size()==3 }
-			
+		then: "module must be reloaded with zoom level 12"
+			mapZoomLevel() == 12
+	}
+
+
+	def mapZoomLevel() {
+		js.exec('return $("#module_0").data("spObject").getMap().map.getZoom();')
 	}
 	
 	def "module context menu"() {
@@ -212,7 +219,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 		then: "a connector must appear"
 			$("._jsPlumb_connector").size()>0
 		then: "inputs must highlight"
-			$(".jsPlumb_input.highlight").size()==2
+			$(".jsPlumb_input.highlight").size()==3
 			
 		when: "connection is dropped"
 			interact {

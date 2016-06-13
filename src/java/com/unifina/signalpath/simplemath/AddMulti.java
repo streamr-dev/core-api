@@ -7,6 +7,7 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.TimeSeriesInput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
+@Deprecated
 public class AddMulti extends AbstractSignalPathModule {
 
 	int multiInputCount = 2;
