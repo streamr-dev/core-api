@@ -32,10 +32,10 @@ class GetMultiFromMapSpec extends Specification {
 		]
 
 		Map outputValues = [
-			"out-1": [null,              666,       666,     1, 1],
-			"out-2": [null,             null, "two-two",     2, 2],
-			"out-3": [null, [hello: "world"],        42,     3, 3],
-			"out-4": [null,             null,       null, null, "oh, yeah"],
+			"a": [null,              666,       666,     1, 1],
+			"b": [null,             null, "two-two",     2, 2],
+			"c": [null, [hello: "world"],        42,     3, 3],
+			"deep.deep.inside": [null,             null,       null, null, "oh, yeah"],
 			founds: [
 				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 0d],
 				[a: 1d, b: 0d, c: 1d, "deep.deep.inside": 0d],

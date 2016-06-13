@@ -197,11 +197,22 @@ $(document).ready(function() {
 	realtimeRunButton.on('start-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.started")}'.replace('{0}', SignalPath.getName()))
 	})
+	realtimeRunButton.on('start-error', function(err) {
+		var msg = '${message(code:"canvas.start.error")}'
+		if (err && err.code == "FORBIDDEN") {
+			msg = '${message(code:"canvas.start.forbidden")}'
+		}
+		Streamr.showError(msg)
+	})
 	realtimeRunButton.on('stop-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.stopped")}'.replace('{0}', SignalPath.getName()))
 	})
-	realtimeRunButton.on('stop-error', function() {
-		Streamr.showError('${message(code:"canvas.stop.error")}')
+	realtimeRunButton.on('stop-error', function(err) {
+		var msg = '${message(code:"canvas.stop.error")}'
+		if (err && err.code == "FORBIDDEN") {
+			msg = '${message(code:"canvas.stop.forbidden")}'
+		}
+		Streamr.showError(msg)
 	})
 
 	// Run and clear link

@@ -248,6 +248,7 @@
           "id": "myId_4_1447153931966",
           "longName": "Add.in1",
           "name": "in1",
+          "displayName": "in1",
           "requiresConnection": true,
           "sourceId": "myId_3_1447153904085",
           "type": "Double"
@@ -266,6 +267,7 @@
           "id": "myId_4_1447153931982",
           "longName": "Add.in2",
           "name": "in2",
+          "displayName": "in2",
           "requiresConnection": true,
           "sourceId": "myId_2_1447153895533",
           "type": "Double"
@@ -284,9 +286,36 @@
           "id": "myId_4_1447153936952",
           "longName": "Add.in3",
           "name": "in3",
+          "displayName": "in3",
           "requiresConnection": true,
           "sourceId": "myId_1_1447153883122",
-          "type": "Double"
+          "type": "Double",
+          "variadic": {
+            "index": 3,
+            "isLast": false
+          }
+        },
+        {
+          "acceptedTypes": [
+            "Double"
+          ],
+          "canBeFeedback": true,
+          "canConnect": true,
+          "canHaveInitialValue": true,
+          "canToggleDrivingInput": true,
+          "connected": false,
+          "drivingInput": true,
+          "feedback": false,
+          "id": "myId_5_1447153249952",
+          "longName": "Add.in4",
+          "name": "in4",
+          "displayName": "in4",
+          "requiresConnection": false,
+          "type": "Double",
+          "variadic": {
+            "index": 4,
+            "isLast": true
+          }
         }
       ],
       "jsModule": "GenericModule",
