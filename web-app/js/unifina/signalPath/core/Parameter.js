@@ -243,8 +243,7 @@
 	MapParameterValueEditor.prototype.createElement = function() {
 		var _this = this
 		var div = $("<div/>")
-		var collection = new KeyValuePairList()
-		collection.fromJSON(this.data.value || {})
+		var collection = new KeyValuePairEditor.KeyValuePairList(this.data.value || {})
 
 		this.editor = new KeyValuePairEditor({
 			el: div,
@@ -281,12 +280,63 @@
 	}
 
 
+	/**
+	 * Shows a list editor for parameters of type List
+	 *
+	 * @param parentElement The parent dom element
+	 * @param parameter The parameter this editor is attached to
+	 * @constructor
+	 */
+	var ListParameterValueEditor = function(parentElement, parameter) {
+		DefaultParameterValueEditor.call(this, parentElement, parameter)
+	}
+	ListParameterValueEditor.prototype = Object.create(DefaultParameterValueEditor.prototype)
+
+	ListParameterValueEditor.prototype.createElement = function() {
+		var _this = this
+		var div = $("<div/>")
+		var collection = new ListEditor.ValueList(this.data.value || [])
+
+		this.editor = new ListEditor({
+			el: div,
+			collection: collection
+		})
+
+		// collection add and remove will resize the component, so module needs to be redrawn
+		collection.on('add', function() {
+			_this.parameter.module.redraw()
+			// don't trigger change on add, as the value will be empty
+		})
+		collection.on('remove', function() {
+			_this.parameter.module.redraw()
+			$(_this).trigger('change')
+		})
+
+		div.on('change', function() {
+			$(_this).trigger('change')
+		})
+
+		return div
+	}
+
+	ListParameterValueEditor.prototype.getValue = function() {
+		return this.editor.collection.toJSON()
+	}
+
+	ListParameterValueEditor.prototype.disable = function() {
+		this.editor.disable()
+	}
+
+	ListParameterValueEditor.prototype.enable = function() {
+		this.editor.enable()
+	}
 
 	// Map types to value editors. DefaultParameterValueEditor is the default.
 	var editorMappings = {
 		"Stream": StreamParameterValueEditor,
 		"Color": ColorParameterValueEditor,
-		"Map": MapParameterValueEditor
+		"Map": MapParameterValueEditor,
+		"List": ListParameterValueEditor
 	}
 
 	SignalPath.Parameter = function(json, parentDiv, module, type, pub) {

@@ -271,9 +271,11 @@ public class SignalPath extends ModuleWithUI {
 
 	@Override
 	public void init() {
-		sp = new SignalPathParameter(this, "canvas");
-		sp.setUpdateOnChange(true);
-		addInput(sp);
+		if (!root) {
+			sp = new SignalPathParameter(this, "canvas");
+			sp.setUpdateOnChange(true);
+			addInput(sp);
+		}
 	}
 
 	@Override
