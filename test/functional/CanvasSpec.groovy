@@ -203,7 +203,7 @@ class CanvasSpec extends LoginTester1Spec {
 		setup:
 			addAndWaitModule 'Add'
 		when: "module help button is hovered"
-			def helpButton = $(".moduleheader .modulebutton", 1)
+			def helpButton = $(".moduleheader .modulebutton", 0)
 			interact {
 				moveToElement(helpButton)
 			}
