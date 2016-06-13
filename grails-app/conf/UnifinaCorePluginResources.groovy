@@ -188,8 +188,12 @@ modules = {
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	'key-value-editor' {
-		dependsOn 'bootstrap, backbone, mustache'
+		dependsOn 'bootstrap, backbone, mustache, list-editor'
 		resource url:[dir:'js/unifina/key-value-editor', file:'key-value-editor.js', plugin:'unifina-core']
+	}
+	'list-editor' {
+		dependsOn 'bootstrap, backbone, mustache'
+		resource url:[dir:'js/unifina/list-editor', file:'list-editor.js', plugin:'unifina-core']
 	}
 	toolbar {
 		dependsOn 'jquery'
@@ -271,6 +275,7 @@ modules = {
 		dependsOn 'spectrum'
 		dependsOn 'underscore'
 		dependsOn 'key-value-editor'
+		dependsOn 'list-editor'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
