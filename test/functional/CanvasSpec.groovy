@@ -82,7 +82,7 @@ class CanvasSpec extends LoginTester1Spec {
 			loadSignalPath 'CanvasSpec test loading a SignalPath'
 		then: "signalpath content must be loaded"
 			waitFor {
-				$("#module_2")
+				findModuleOnCanvas("Add")
 			}
 	}
 
@@ -187,13 +187,17 @@ class CanvasSpec extends LoginTester1Spec {
 		when: "canvas 1 is loaded"
 			loadSignalPath(name)
 		then: "Table can be found, no Label"
-			findModuleOnCanvas("Table")
-			!findModuleOnCanvas("Label")
+			waitFor {
+				findModuleOnCanvas("Table")
+				!findModuleOnCanvas("Label")
+			}
 		when: "canvas 2 is loaded"
 			loadSignalPath(name2)
 		then: "Label can be found"
-			!findModuleOnCanvas("Table")
-			findModuleOnCanvas("Label")
+			waitFor {
+				!findModuleOnCanvas("Table")
+				findModuleOnCanvas("Label")
+			}
 		when: "clicked back button"
 			driver.navigate().back()
 		then: "Table can be found, no Label"
@@ -267,7 +271,7 @@ class CanvasSpec extends LoginTester1Spec {
 			loadSignalPath 'CanvasSpec test loading a SignalPath'
 		then: "signalpath content must be loaded"
 			waitFor {
-				$("#module_2")
+				findModuleOnCanvas("Add")
 			}
 		when: "save dropdown button is clicked"
 			saveDropdownButton.click()
