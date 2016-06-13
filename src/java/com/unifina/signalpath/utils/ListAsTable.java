@@ -39,6 +39,7 @@ public class ListAsTable extends ModuleWithUI {
 	}
 
 	private Map buildHeaderMessage(List<String> headers) {
+		if (headers == null) { headers = emptyHeaders; }
 		Map headerDef = new HashMap<>();
 		headerDef.put("headers", headers);
 		Map headerMessage = new HashMap<>();
@@ -110,8 +111,7 @@ public class ListAsTable extends ModuleWithUI {
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		// We need to support unauthenticated initRequests for public views, so no authentication check
 		if (request.getType().equals("initRequest")) {
-			response.put("initRequest", buildHeaderMessage(emptyHeaders));
-			currentHeaders = emptyHeaders;
+			response.put("initRequest", buildHeaderMessage(currentHeaders));
 			response.setSuccess(true);
 		} else {
 			super.handleRequest(request, response);
