@@ -70,7 +70,7 @@ public class StreamParameter extends Parameter<Stream> {
 			try {
 				return fs.getStream((String) id);
 			} catch (StreamNotFoundException e) {
-				throw new ModuleCreationFailedException();
+				throw new ModuleCreationFailedException(e);
 			}
 		} else if (id instanceof Number) {
 			throw new RuntimeException("Numeric stream ids no longer supported");
