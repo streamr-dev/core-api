@@ -79,7 +79,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 			code: "\n" +
 				"TimeSeriesInput in = new TimeSeriesInput(this,\"in\");\n" +
 				"TimeSeriesOutput out = new TimeSeriesOutput(this,\"out\");\n" +
-				"public double inputCount = 0D;\n" +
+				"public double readyInputs = 0D;\n" +
 				"@Override\n" +
 				"public void sendOutput() {}\n" +
 				"@Override\n" +
@@ -88,7 +88,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 
 		then:
 		ModuleException ex = thrown()
-		ex.message.contains("'inputCount'")
+		ex.message.contains("'readyInputs'")
 	}
 
 	void "it throws ModuleException if field contains reference to anonymous inner class"() {
