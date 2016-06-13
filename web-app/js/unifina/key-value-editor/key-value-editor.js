@@ -22,6 +22,7 @@
                     value: object[key]
                 })
             })
+            // call superclass constructor
             ListEditor.ValueList.apply(this, [list]);
         },
 

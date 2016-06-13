@@ -112,7 +112,6 @@ describe('list-editor', function() {
                 el: fixture
             })
             assert(fixture.find("table").length > 0)
-            console.log(fixture.find("table tbody tr").html())
             assert.equal(fixture.find("table tbody tr").length, 0)
         })
 
@@ -136,7 +135,7 @@ describe('list-editor', function() {
             assert.equal(fixture.find("table tbody tr input.value").val(), "")
         })
 
-        it('should update the list with new keys and values', function () {
+        it('should update the list with new values', function () {
             var list = new ListEditor.ValueList(["1","2","3"])
 
             var editor = new ListEditor({
