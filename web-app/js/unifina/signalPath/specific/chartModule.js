@@ -103,8 +103,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					return function(resp) {
 						if (resp.success) {
 							$(div).remove();
-							var elemIF = document.createElement("iframe"); 
-							elemIF.src = "downloadCsv?filename="+resp.filename; 
+							var elemIF = document.createElement("iframe");
+							elemIF.src = Streamr.createLink("canvas", "downloadCsv") + "?filename=" + resp.filename
 							elemIF.style.display = "none"; 
 							document.body.appendChild(elemIF);
 						}
