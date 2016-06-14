@@ -296,7 +296,7 @@ class CanvasSpec extends LoginTester1Spec {
 		setup:
 			addAndWaitModule 'Add'
 		when: "input ioSwitch is hovered"
-		ioSwitch = $("td.input .ioSwitch.drivingInput")
+		ioSwitch = $("td.input .ioSwitch.drivingInput").first()
 			interact {
 				moveToElement(ioSwitch)
 			}
