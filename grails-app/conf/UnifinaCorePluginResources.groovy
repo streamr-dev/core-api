@@ -149,7 +149,7 @@ modules = {
 	 * In-house widgets and resources
 	 */
 	streamr {
-		dependsOn 'pnotify'
+		dependsOn 'pnotify, underscore'
 		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
 	}
 	tour {
