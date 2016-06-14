@@ -29,6 +29,5 @@ databaseChangeLog = {
 	include file: 'core/2016-05-09-boolean-modules.groovy'
 	include file: 'core/2016-05-09-stream-date-created-and-last-updated.groovy'
 	include file: 'core/2016-06-08-new-variadic-modules.groovy'
-	include file: 'core/2016-05-26-add-filter-specific-js-module.groovy'
 	include file: 'core/2016-04-06-tours.groovy'
 }

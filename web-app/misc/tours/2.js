@@ -105,14 +105,14 @@
         )
 
         .step("Remove the <b>Table</b> module from the canvas.",
-            '.tourTable2',
+            '.tourTable2', // == .tourTable1 (canvas was reloaded, classes were lost hence modules had to be rebinded)
             { placement: 'left' },
             function(cb) {
                 tour.waitForModuleRemoved('Table')(cb)
             }
         )
 
-        .step("Next, let's build some more advanced logic.<br><br>Start by adding module <strong>Count</strong> to the canvas.",
+        .step("Next, let's build some more advanced logic. We will build a system that alerts every time the frequency of Bitcoin mentions in tweets explodes.<br><br>Start by adding module <strong>Count</strong> to the canvas.",
             '#search',
             function(cb) {
                 tour.waitForModuleAdded('Count')(cb)
@@ -255,7 +255,7 @@
             tour.waitForCanvasStopped()
         )
 
-        .offerNextTour("Nice! In the next tour, we'll go even deeper.<br><br> Click Begin when you are ready!")
+        .step("That's it for now, stay tuned for new tours. Have fun using Streamr!")
 
         .ready()
 
