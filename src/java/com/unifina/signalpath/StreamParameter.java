@@ -2,6 +2,7 @@ package com.unifina.signalpath;
 
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.StreamNotFoundException;
 import com.unifina.service.FeedService;
 
 import java.util.Map;
@@ -66,7 +67,11 @@ public class StreamParameter extends Parameter<Stream> {
 	private Stream getStreamById(Object id) {
 		if (id instanceof String) {
 			FeedService fs = getFeedService();
-			return fs.getStream((String) id);
+			try {
+				return fs.getStream((String) id);
+			} catch (StreamNotFoundException e) {
+				throw new ModuleCreationFailedException(e);
+			}
 		} else if (id instanceof Number) {
 			throw new RuntimeException("Numeric stream ids no longer supported");
 		}

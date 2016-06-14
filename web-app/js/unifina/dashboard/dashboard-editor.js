@@ -1,12 +1,5 @@
 (function(exports) {
 
-//Change the variable signs from <%= var %> to {{ var }}
-_.templateSettings = {
-	evaluate : /\{\[([\s\S]+?)\]\}/g,
-	escape : /\[\[([\s\S]+?)\]\]/g,
-	interpolate : /\{\{([\s\S]+?)\}\}/g
-};
-
 var Module = Backbone.AssociatedModel.extend({
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
@@ -85,7 +78,7 @@ var CanvasView = Backbone.View.extend({
 	initialize: function (){
 		this.model.get('modules').on("change:checked", function() {
 			this.render()
-		},this)
+		}, this)
 		this.render()
 	},
 

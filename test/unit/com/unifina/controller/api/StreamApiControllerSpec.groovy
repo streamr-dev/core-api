@@ -13,6 +13,7 @@ import com.unifina.service.ApiService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.UserService
+import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor

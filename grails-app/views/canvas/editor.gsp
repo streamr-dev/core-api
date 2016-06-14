@@ -10,7 +10,7 @@
 		<r:require module="bootstrap-contextmenu"/>
 		<r:require module="bootstrap-datepicker"/>
 		<r:require module="slimscroll"/>
-		<r:require module="search-control"/>
+		<r:require module="streamr-search"/>
 		<r:require module="signalpath-browser"/>
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
@@ -116,15 +116,41 @@ $(document).ready(function() {
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
 	})
 
-	// show search control
-	new SearchControl(
-		'${ createLink(controller: "stream", action: "search") }',
-		'${ createLink(controller: "module", action: "jsonGetModules") }',
-		$('#search'))
-	
+	// Streamr search for modules and streams
+	var streamrSearch = new StreamrSearch('#search', [{
+		name: "module",
+		limit: 5
+	}, {
+		name: "stream",
+		limit: 3
+	}], {
+		inBody: true
+	}, function(item) {
+
+		if (item.resultType == "stream") { // is stream, specifies module
+			SignalPath.addModule(item.feed.module, {
+				params: [{
+					name: 'stream',
+					value: item.id
+				}]
+			})
+		} else { // is module
+			SignalPath.addModule(item.id, {})
+		}
+	})
+
+    $('#main-menu-inner').scroll(function() {
+    	streamrSearch.redrawMenu()
+    })
+
+	$(document).bind('keydown', 'alt+s', function(e) {
+		$("#search").focus()
+		e.preventDefault()
+	})
+
 	// Bind slimScroll to main menu
     $('#main-menu-inner').slimScroll({
-      height: '100%'
+      	height: '100%'
     })
 
 	loadBrowser = new SignalPathBrowser()

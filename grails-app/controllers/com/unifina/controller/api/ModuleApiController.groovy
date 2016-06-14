@@ -2,15 +2,38 @@ package com.unifina.controller.api
 
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.security.StreamrApi
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class ModuleApiController {
 
 	def permissionService
+
+	@StreamrApi
+	def index() {
+		Set<ModulePackage> allowedPackages = permissionService.getAll(ModulePackage, request.apiUser) ?: new HashSet<>()
+		List<Module> mods = []
+
+		if (!allowedPackages.isEmpty()) {
+			mods = Module.createCriteria().list {
+				isNull("hide")
+				or {
+					'in'("modulePackage", allowedPackages)
+					modulePackage {
+						eq("user", request.apiUser)
+					}
+				}
+			}
+		}
+
+		render mods as JSON
+	}
 
 	@StreamrApi(requiresAuthentication = false)
 	def help(Long id) {
