@@ -23,7 +23,6 @@ class StreamService {
 		stream.user = user
 		stream.config = params.config
 
-		AbstractStreamListener streamListener
 		// If no feed given, API feed is used
 		if (stream.feed == null) {
 			stream.feed = Feed.load(Feed.KAFKA_ID)
@@ -32,7 +31,7 @@ class StreamService {
 		if (!config.fields) {
 			config.fields = []
 		}
-		streamListener = instantiateListener(stream)
+		AbstractStreamListener streamListener = instantiateListener(stream)
 		streamListener.addToConfiguration(config, stream)
 		stream.config = config as JSON
 
@@ -69,7 +68,7 @@ class StreamService {
 	}
 
 	// TODO: move to FeedService
-	private AbstractStreamListener instantiateListener(Stream stream) {
+	public AbstractStreamListener instantiateListener(Stream stream) {
 		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
 		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
 		return clazz.newInstance(grailsApplication)

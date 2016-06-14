@@ -10,10 +10,12 @@ import com.unifina.feed.DataRange
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.feed.kafka.KafkaDataRangeProvider
 import com.unifina.feed.kafka.KafkaStreamListener
+import com.unifina.security.UserClassLoader
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.lang.Specification
 
 /**
@@ -99,7 +101,46 @@ class StreamServiceSpec extends Specification {
 		stream.feed == feed
 	}
 
-	// TODO: test calls to AbstractStreamListener
+	void "createStream initializes streamListener"() {
+		setup:
+		def service = Spy(StreamService)
+		def streamListener = Mock(AbstractStreamListener)
+		def params = [
+				name: "Test stream",
+				description: "Test stream",
+				feed: feed,
+				config: [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
+				]
+		]
+		when:
+
+		service.createStream(params, new SecUser(username: "me").save(validate: false))
+		then:
+		1 * service.instantiateListener(_ as Stream) >> streamListener
+		1 * streamListener.addToConfiguration(params.config, _ as Stream)
+	}
+
+	void "createStream throws exception if feed has no streamListenerClass"() {
+		when:
+		def params = [
+				name: "Test stream",
+				description: "Test stream",
+				feed: new Feed().save(validate: false),
+				config: [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
+				]
+		]
+		service.createStream(params, new SecUser(username: "me").save(validate: false))
+		then:
+		thrown IllegalArgumentException
+	}
 
 	void "getDataRange gives correct values"() {
 		DataRange dataRange
