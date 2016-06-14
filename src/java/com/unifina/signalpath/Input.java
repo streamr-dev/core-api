@@ -22,8 +22,6 @@ public class Input<T> extends Endpoint<T> {
 	
 	boolean drivingInput = true;
 	public boolean canToggleDrivingInput = true;
-	
-//	boolean clearState = true;
 
 	protected boolean proxying = false;
 	ArrayList<Input<T>> proxiedInputs = new ArrayList<>();
@@ -137,8 +135,9 @@ public class Input<T> extends Endpoint<T> {
 			owner.cancelReady(this);
 		}
 	}
-	
-	protected void doClear() {
+
+	@Override
+	public void clear() {
 		value = null;
 		ready = false;
 	}
@@ -194,8 +193,4 @@ public class Input<T> extends Endpoint<T> {
 		}
 	}
 
-//	public boolean isClearState() {
-//		return clearState;
-//	}
-	
 }
