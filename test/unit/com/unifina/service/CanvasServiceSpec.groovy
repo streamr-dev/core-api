@@ -182,7 +182,7 @@ class CanvasServiceSpec extends Specification {
 		)
 
 		when:
-		service.updateExisting(myFirstCanvas, command)
+		service.updateExisting(myFirstCanvas, command, me)
 		Canvas c = Canvas.findById(myFirstCanvas.id)
 
 		then:
@@ -219,7 +219,7 @@ class CanvasServiceSpec extends Specification {
 			name: "my_canvas_with_modules",
 			modules: newModules + modules
 		)
-		service.updateExisting(canvas, updateCommand)
+		service.updateExisting(canvas, updateCommand, me)
 		def updatedUiChannelIds = uiChannelIdsFromMap(canvas.toMap())
 
 		then:
@@ -238,7 +238,7 @@ class CanvasServiceSpec extends Specification {
 			modules: [],
 			settings: ["a" : "b"]
 		)
-		service.updateExisting(myFirstCanvas, command)
+		service.updateExisting(myFirstCanvas, command, me)
 
 		then:
 		Canvas c = Canvas.findById(myFirstCanvas.id)
@@ -257,7 +257,7 @@ class CanvasServiceSpec extends Specification {
 			modules: [],
 			settings: ["a" : "b"]
 		)
-		service.updateExisting(myFirstCanvas, command)
+		service.updateExisting(myFirstCanvas, command, me)
 
 		then:
 		thrown(InvalidStateException)

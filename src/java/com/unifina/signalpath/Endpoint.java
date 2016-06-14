@@ -135,4 +135,9 @@ public abstract class Endpoint<T> implements Serializable {
 	public void setJsClass(String jsClass) {
 		this.jsClass = jsClass;
 	}
+
+	/**
+	 * Clear the state of this Endpoint.
+	 */
+	public abstract void clear();
 }

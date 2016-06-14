@@ -80,20 +80,21 @@ public class SendToStream extends AbstractSignalPathModule {
 		if (stream==null)
 			return;
 		
-		// Check access to this Stream
-		if (permissionService.canWrite(globals.getUser(), stream)) {
-			authenticatedStream = stream;
-		} else {
-			throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
+		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas 
+		if (globals.isRunContext()) {
+			if (permissionService.canWrite(globals.getUser(), stream)) {
+				authenticatedStream = stream;
+			} else {
+				throw new AccessControlException(this.getName() + ": User " + globals.getUser().getUsername() + " does not have write access to Stream " + stream.getName());
+			}
 		}
-		
-		// TODO: don't rely on static ids
-		if (stream.getFeed().getId()!=7) {
-			throw new IllegalArgumentException("Can not send to this feed type!");
+
+		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
+			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: "+stream.getFeed().getName());
 		}
 		
 		if (stream.getConfig()==null) {
-			throw new IllegalStateException("Stream " + stream.getName() + " is not properly configured!");
+			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() + " is not properly configured!");
 		}
 		
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());

@@ -1,11 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
-import com.unifina.api.InvalidStateException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
@@ -23,6 +18,7 @@ import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 class CanvasService {
 
@@ -40,11 +36,12 @@ class CanvasService {
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
 		Canvas canvas = new Canvas(user: user)
-		updateExisting(canvas, command, true)
+		updateExisting(canvas, command, user, true)
 		return canvas
 	}
 
-	public void updateExisting(Canvas canvas, SaveCanvasCommand command, boolean resetUi = false) {
+	@CompileStatic
+	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -52,7 +49,7 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
-		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, resetUi)
+		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, user, resetUi)
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
@@ -148,12 +145,10 @@ class CanvasService {
 		}
 	}
 
-	@CompileStatic
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
 		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
 	}
 
-	@CompileStatic
 	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
 		if (!dashboardId) {
 			return false
@@ -167,7 +162,7 @@ class CanvasService {
 		} != null
 	}
 
-	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, boolean resetUi) {
+	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
 		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]
 
 		inputSignalPathMap.name = command.name
@@ -178,7 +173,7 @@ class CanvasService {
 			resetUiChannels(inputSignalPathMap)
 		}
 
-		return reconstructFrom(inputSignalPathMap)
+		return reconstructFrom(inputSignalPathMap, user)
 	}
 
 	private static void resetUiChannels(Map signalPathMap) {
@@ -198,8 +193,8 @@ class CanvasService {
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	private Map reconstructFrom(Map signalPathMap) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication)
+	private Map reconstructFrom(Map signalPathMap, SecUser user) {
+		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication, user)
 		try {
 			return signalPathService.reconstruct(signalPathMap, globals)
 		} catch (Exception e) {
