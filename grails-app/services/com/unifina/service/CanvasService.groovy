@@ -1,11 +1,6 @@
 package com.unifina.service
 
-import com.unifina.api.ApiException
-import com.unifina.api.InvalidStateException
-import com.unifina.api.NotFoundException
-import com.unifina.api.NotPermittedException
-import com.unifina.api.SaveCanvasCommand
-import com.unifina.api.ValidationException
+import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
@@ -22,14 +17,15 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 class CanvasService {
 
 	def grailsApplication
 	def signalPathService
 	def taskService
-	PermissionService permissionService
-	DashboardService dashboardService
+	def permissionService
+	def dashboardService
 
 	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
 		def query = Canvas.where { user == currentUser }
@@ -53,20 +49,26 @@ class CanvasService {
 		return query.order(sort, order).findAll()
 	}
 
-
-	public Map reconstruct(Canvas canvas) {
-		Map signalPathMap = JSON.parse(canvas.json)
-		return reconstructFrom(signalPathMap)
+	/**
+	 * Reconstructs the canvas: instantiates the SignalPath from the saved canvas.json,
+	 * then converts the SignalPath back to a Map and returns it. This adds any I/O, module
+	 * options etc. added since saving the json.
+     */
+	@CompileStatic
+	public Map reconstruct(Canvas canvas, SecUser user) {
+		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)
+		return reconstructFrom(signalPathMap, user)
 	}
 
 	@CompileStatic
 	public Canvas createNew(SaveCanvasCommand command, SecUser user) {
 		Canvas canvas = new Canvas(user: user)
-		updateExisting(canvas, command, true)
+		updateExisting(canvas, command, user, true)
 		return canvas
 	}
 
-	public void updateExisting(Canvas canvas, SaveCanvasCommand command, boolean resetUi = false) {
+	@CompileStatic
+	public void updateExisting(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi = false) {
 		if (!command.validate()) {
 			throw new ValidationException(command.errors)
 		}
@@ -74,7 +76,7 @@ class CanvasService {
 			throw new InvalidStateException("Cannot update canvas with state " + canvas.state)
 		}
 
-		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, resetUi)
+		Map newSignalPathMap = constructNewSignalPathMap(canvas, command, user, resetUi)
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
@@ -170,12 +172,10 @@ class CanvasService {
 		}
 	}
 
-	@CompileStatic
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
 		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
 	}
 
-	@CompileStatic
 	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
 		if (!dashboardId) {
 			return false
@@ -189,7 +189,7 @@ class CanvasService {
 		} != null
 	}
 
-	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, boolean resetUi) {
+	private Map constructNewSignalPathMap(Canvas canvas, SaveCanvasCommand command, SecUser user, boolean resetUi) {
 		Map inputSignalPathMap = canvas.json != null ? JSON.parse(canvas.json) : [:]
 
 		inputSignalPathMap.name = command.name
@@ -200,7 +200,7 @@ class CanvasService {
 			resetUiChannels(inputSignalPathMap)
 		}
 
-		return reconstructFrom(inputSignalPathMap)
+		return reconstructFrom(inputSignalPathMap, user)
 	}
 
 	private static void resetUiChannels(Map signalPathMap) {
@@ -220,8 +220,8 @@ class CanvasService {
 	/**
 	 * Rebuild JSON to check it is ok and up-to-date
 	 */
-	private Map reconstructFrom(Map signalPathMap) {
-		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication)
+	private Map reconstructFrom(Map signalPathMap, SecUser user) {
+		Globals globals = GlobalsFactory.createInstance(signalPathMap.settings ?: [:], grailsApplication, user)
 		try {
 			return signalPathService.reconstruct(signalPathMap, globals)
 		} catch (Exception e) {
