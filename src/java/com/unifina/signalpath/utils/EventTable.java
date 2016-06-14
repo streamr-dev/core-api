@@ -15,8 +15,7 @@ public class EventTable extends ModuleWithUI {
 	
 	public EventTable() {
 		super();
-		canClearState = false;
-		
+
 		// More sensible defaults, in line with default maxRows
 		resendAll = false;
 		resendLast = 20;

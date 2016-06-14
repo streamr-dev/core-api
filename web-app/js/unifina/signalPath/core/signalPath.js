@@ -243,7 +243,7 @@ var SignalPath = (function () {
 		})
 	}
 	
-	function addModule(id,configuration,callback) { 
+	function addModule(id, configuration, callback) {
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',
@@ -521,13 +521,11 @@ var SignalPath = (function () {
 
 		// Fetch from api by id
 		if (typeof idOrObject === 'string') {
-			$.getJSON(options.apiUrl + '/canvases/' + idOrObject, function(response) {
-				if (response.error) {
-					handleError(response.error)
-				} else {
-					doLoad(response);
-				}
-			});
+			$.getJSON(options.apiUrl + '/canvases/' + idOrObject)
+				.done(doLoad)
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					handleError(jqXHR.responseJSON.message)
+				})
 		}
 		else {
 			doLoad(idOrObject)

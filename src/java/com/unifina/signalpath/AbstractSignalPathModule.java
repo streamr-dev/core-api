@@ -54,15 +54,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	protected HashSet<Input> drivingInputs = new HashSet<Input>();
 
-	Date lastCleared = null;
-
-	/**
-	 * Module params
-	 */
-	protected boolean canClearState = true;
-	boolean clearState = false;
-
+	// Controls whether the refresh button is shown in the UI. Clicking it recreates the module.
 	protected boolean canRefresh = false;
+	// Sets if the module supports state clearing. If canClearState is false, calling clear() does nothing.
+	protected boolean canClearState = true;
 
 	protected String name;
 	protected Integer hash;
@@ -250,15 +245,14 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public abstract void sendOutput();
 
 	public void clear() {
-		if (clearState && (lastCleared == null || lastCleared.before(globals.time))) {
-			lastCleared = globals.time;
+		if (canClearState) {
 			clearState();
 
 			for (Output o : getOutputs()) {
-				o.doClear();
+				o.clear();
 			}
 			for (Input i : getInputs()) {
-				i.doClear();
+				i.clear();
 			}
 
 			// Rebuild
@@ -272,14 +266,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public abstract void clearState();
-
-	public boolean isClearState() {
-		return clearState;
-	}
-
-	public void setClearState(boolean clearState) {
-		this.clearState = clearState;
-	}
 
 	public String getName() {
 		return name;
@@ -441,7 +427,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		map.put("name", name);
 
 		map.put("canClearState", canClearState);
-		map.put("clearState", clearState);
 
 		if (canRefresh) {
 			map.put("canRefresh", canRefresh);
@@ -525,10 +510,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private void setConfiguration(Map<String, Object> config) {
 		json = config;
-
-		if (config.containsKey("clearState")) {
-			clearState = Boolean.parseBoolean(config.get("clearState").toString());
-		}
 
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());

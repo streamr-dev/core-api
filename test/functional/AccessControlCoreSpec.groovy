@@ -19,7 +19,7 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 		when: "the name of a forbidden module is entered"
 			search << "GroovyModule"
 		then: "no search results are displayed"
-			$('.tt-suggestion').size()==0
+			$('.streamr-search-suggestion').size()==0
 	}
 	
 	def "search won't show other users streams"() {
@@ -27,7 +27,7 @@ class AccessControlCoreSpec extends LoginTester2Spec {
 			search << "AccessControlCoreSpec"
 			Thread.sleep(2000)
 		then: "no search results are displayed"
-			$('.tt-suggestion').size()==0
+			$('.streamr-search-suggestion').size()==0
 	}
 	
 	def "user cannot access admin pages"() {

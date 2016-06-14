@@ -44,7 +44,7 @@ class CanvasApiController {
 	@StreamrApi(requiresAuthentication = false)
 	def show(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
-		Map result = canvasService.reconstruct(canvas)
+		Map result = canvasService.reconstruct(canvas, request.apiUser)
 		canvas.json = result as JSON
 		render canvas.toMap() as JSON
 	}
@@ -58,7 +58,7 @@ class CanvasApiController {
 	@StreamrApi
 	def update(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.updateExisting(canvas, readSaveCommand())
+		canvasService.updateExisting(canvas, readSaveCommand(), request.apiUser)
 		render canvas.toMap() as JSON
 	}
 
