@@ -192,8 +192,6 @@ public class SignalPath extends ModuleWithUI {
 				}
 			}
 		}
-
-		this.clearState = isDistributable();
 	}
 
 	public List<AbstractSignalPathModule> getModules() {
@@ -202,25 +200,6 @@ public class SignalPath extends ModuleWithUI {
 
 	public AbstractSignalPathModule getModule(int hash) {
 		return modulesByHash.get(hash);
-	}
-
-	/**
-	 * A SignalPath is distributable if it is independent over days, ie.
-	 * if no module or connection has overnight state.
-	 *
-	 * @return
-	 */
-	@Deprecated
-	public boolean isDistributable() {
-		boolean overnightState = false;
-		for (ModuleConfig mc : moduleConfigs) {
-			AbstractSignalPathModule m = mc.module;
-			if (!m.clearState) {
-				overnightState = true;
-				break;
-			}
-		}
-		return !overnightState;
 	}
 
 	public boolean hasExports() {

@@ -24,23 +24,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		var div = $("<div class='modulefooter'></div>")
 		prot.div.append(div)
 		prot.footer = div
-		
+
 		var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
 		div.append(container)
-		
-		if (prot.jsonData.canClearState==null || prot.jsonData.canClearState) {
-			var clear = new SignalPath.IOSwitch(container, "moduleSwitch clearState", {
-				getValue: (function(d){
-					return function() { return d.clearState; };
-				})(data),
-				setValue: (function(d){
-					return function(value) { return d.clearState = value; };
-				})(data),
-				buttonText: function() { return "CLEAR"; },
-				tooltip: 'Clear module state at end of day'
-			})
-		}
-		
+
 		return div
 	}
 	prot.createModuleFooter = createModuleFooter;

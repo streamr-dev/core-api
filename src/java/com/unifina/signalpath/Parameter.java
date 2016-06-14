@@ -1,6 +1,5 @@
 package com.unifina.signalpath;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 
@@ -89,8 +88,10 @@ public abstract class Parameter<T> extends Input<T> {
 	}
 	
 	@Override
-	protected void doClear() {
-		// Parameters need not be cleared
+	public void clear() {
+		// Parameters cannot be cleared - with the exception of connected Parameters, which behave like ordinary Inputs
+		if (isConnected())
+			super.clear();
 	}
 	
 	@Override
