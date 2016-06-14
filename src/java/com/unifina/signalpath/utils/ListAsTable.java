@@ -19,7 +19,6 @@ public class ListAsTable extends ModuleWithUI {
 
 	public ListAsTable() {
 		super();
-		canClearState = false;
 		resendAll = false;
 		resendLast = 1;
 	}
