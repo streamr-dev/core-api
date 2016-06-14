@@ -10,12 +10,10 @@ import com.unifina.feed.DataRange
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.feed.kafka.KafkaDataRangeProvider
 import com.unifina.feed.kafka.KafkaStreamListener
-import com.unifina.security.UserClassLoader
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.lang.Specification
 
 /**
