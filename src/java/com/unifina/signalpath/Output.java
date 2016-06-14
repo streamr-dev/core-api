@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Output<T> extends Endpoint<T> {
@@ -50,8 +51,9 @@ public class Output<T> extends Endpoint<T> {
 			proxy.send(value);
 		}
 	}
-	
-	public void doClear() {
+
+	@Override
+	public void clear() {
 		previousValue = null;
 	}
 	

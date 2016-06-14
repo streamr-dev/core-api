@@ -38,7 +38,7 @@ public abstract class Chart extends ModuleWithUI {
 	@Override
 	public void init() {
 		canClearState = false;
-		
+
 		if (globals.getSignalPathContext().containsKey("csv"))
 			initCsv();
 
