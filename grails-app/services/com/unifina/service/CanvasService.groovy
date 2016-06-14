@@ -28,8 +28,8 @@ class CanvasService {
 	def grailsApplication
 	def signalPathService
 	def taskService
-	PermissionService permissionService
-	DashboardService dashboardService
+	def permissionService
+	def dashboardService
 
 	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
 		def query = Canvas.where { user == currentUser }
@@ -170,12 +170,10 @@ class CanvasService {
 		}
 	}
 
-	@CompileStatic
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
 		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
 	}
 
-	@CompileStatic
 	private boolean hasModulePermissionViaDashboard(Canvas canvas, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
 		if (!dashboardId) {
 			return false
