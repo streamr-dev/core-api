@@ -13,6 +13,43 @@ class CollectFromMapsSpec extends Specification {
 	}
 
 	def "CollectFromMaps works as expected"() {
+
+		def mapOfMapsExample = [
+			mapOne: [
+				"a": 5,
+				"b": "hello",
+				"c": [d: true]
+			],
+			mapTwo: [
+				"a": 13,
+				"b": "world",
+				"c": [d: false, e: "e"]
+			],
+			mapThree: [
+				"a": 666,
+				"b": "!",
+				"c": "mine"
+			],
+		]
+
+		def listOfMapsExample = [
+			[
+				"a": 5,
+				"b": "hello",
+				"c": [d: true]
+			],
+			[
+				"a": 13,
+				"b": "world",
+				"c": [d: false, e: "e"]
+			],
+			[
+				"a": 666,
+				"b": "!",
+				"c": "mine"
+			],
+		]
+
 		when:
 		Map inputValues = [
 			selector: [
@@ -26,148 +63,20 @@ class CollectFromMapsSpec extends Specification {
 				"c.d"
 			],
 			listOrMap: [
-				[
-					mapOne: [
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					mapTwo: [
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					mapThree: [
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
-				[
-					mapOne: [
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					mapTwo: [
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					mapThree: [
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
-				[
-					mapOne: [
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					mapTwo: [
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					mapThree: [
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
-				[
-					mapOne: [
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					mapTwo: [
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					mapThree: [
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
+				mapOfMapsExample,
+				mapOfMapsExample,
+				mapOfMapsExample,
+				mapOfMapsExample,
 				[:],
-				[
-					[
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					[
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					[
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
-				[
-					[
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					[
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					[
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
-				[
-					[
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					[
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					[
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
+				listOfMapsExample,
+				listOfMapsExample,
+				listOfMapsExample,
 			]
 		]
 
 		Map outputValues = [
 			listOrMap: [
-				[
-					mapOne: [
-						"a": 5,
-						"b": "hello",
-						"c": [d: true]
-					],
-					mapTwo: [
-						"a": 13,
-						"b": "world",
-						"c": [d: false, e: "e"]
-					],
-					mapThree: [
-						"a": 666,
-						"b": "!",
-						"c": "mine"
-					],
-				],
+				mapOfMapsExample,
 				[mapOne: "hello", mapTwo: "world", mapThree: "!"],
 				[mapOne: [d: true], mapTwo: [d: false, e: "e"], mapThree: "mine"],
 				[mapOne: true, mapTwo: false],
