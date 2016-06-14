@@ -28,9 +28,10 @@ class CanvasService {
 	PermissionService permissionService
 	DashboardService dashboardService
 
-	public Map reconstruct(Canvas canvas) {
-		Map signalPathMap = JSON.parse(canvas.json)
-		return reconstructFrom(signalPathMap)
+	@CompileStatic
+	public Map reconstruct(Canvas canvas, SecUser user) {
+		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)
+		return reconstructFrom(signalPathMap, user)
 	}
 
 	@CompileStatic
