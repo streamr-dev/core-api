@@ -28,8 +28,10 @@ databaseChangeLog = {
 	include file: 'core/2016-03-18-add-http-module.groovy'
 	include file: 'core/2016-05-09-boolean-modules.groovy'
 	include file: 'core/2016-05-09-stream-date-created-and-last-updated.groovy'
+	include file: 'core/2016-05-23-add-list-table-module.groovy'
 	include file: 'core/2016-06-08-new-variadic-modules.groovy'
 	include file: 'core/2016-06-10-constant-list.groovy'
 	include file: 'core/2016-06-10-new-moving-average-module.groovy'
 	include file: 'core/2016-06-13-canvas-spec-test-canvas.groovy'
+	include file: 'core/2016-06-13-filter-map-module.groovy'
 }

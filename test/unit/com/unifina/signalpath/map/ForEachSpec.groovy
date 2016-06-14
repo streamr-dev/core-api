@@ -174,7 +174,7 @@ class ForEachSpec extends Specification {
 			B: [5, 6, 2, 4,   5, 1, 8,  1,  30, 1].collect { it.doubleValue() },
 		]
 		Map outputValues = [
-			out: [1, 1.5, 7.5, 0.25, 10, 0, 0.375, 17.5, 20, -30].collect { it.doubleValue() },
+			outout: [1, 1.5, 7.5, 0.25, 10, 0, 0.375, 17.5, 20, -30].collect { it.doubleValue() },
 			map: [
 				[k1: [outout: 1d]],
 				[k1: [outout: 1.5d]],
