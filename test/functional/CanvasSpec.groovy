@@ -267,30 +267,6 @@ class CanvasSpec extends LoginTester1Spec {
 			}
 	}
 
-	void "moduleSwitch shows tooltip"() {
-		setup:
-			addAndWaitModule 'Add'
-		when: "footer moduleSwitch is hovered"
-			def el = $(".modulefooter .moduleSwitch.clearState")
-			interact {
-				moveToElement(el)
-			}
-		then: "footer ioSwitch tooltip is displayed"
-			waitFor {
-				$(".tooltip").displayed
-				$(".tooltip .tooltip-inner").text().contains("Clear module state")
-			}
-		when: "mouse moved away"
-			def menu = $(".menu-content")
-			interact {
-				moveToElement(menu)
-			}
-		then: "footer moduleSwitch tooltip is no longer displayed"
-			waitFor {
-				!$(".tooltip").displayed
-			}
-	}
-
 	void "IOSwitch tooltip shows the value of the switch"() {
 		def ioSwitch
 		setup:

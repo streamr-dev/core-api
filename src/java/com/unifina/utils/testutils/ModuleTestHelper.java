@@ -439,17 +439,12 @@ public class ModuleTestHelper {
 	}
 
 	private void clearModuleAndCollectorsAndChannels() {
-
-		// Hack to ensure that clear() works
 		module.globals.time = null;
-		module.setClearState(true);
-
 		module.clear();
 		setUpGlobals(module);
 
 		for (Output<Object> output : module.getOutputs()) {
 			for (Input<Object> target : output.getTargets()) {
-				target.getOwner().setClearState(true);
 				target.getOwner().globals = new Globals();
 				target.getOwner().clear();
 				target.getOwner().globals = null;
