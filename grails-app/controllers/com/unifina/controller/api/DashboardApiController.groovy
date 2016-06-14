@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.SaveDashboardCommand
+import com.unifina.api.StreamrApiHelper
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission

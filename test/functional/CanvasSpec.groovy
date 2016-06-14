@@ -61,19 +61,21 @@ class CanvasSpec extends LoginTester1Spec {
 	def "searching for module with alternate name should show the module in results"() {
 		when: "Plus is searched"
 			search << 'plus'
+			search.click()
 		then: "Add is shown in results"
 			waitFor {
-				searchControl.find('.tt-suggestion p', text: contains("Add"))
+				$('.streamr-search-menu .streamr-search-suggestion p', text: contains("Add")).displayed
 			}
 	}
 
 	def "searching for stream with its description should show the stream in results"() {
 		when: "a search is entered"
 			search << 'to test running canvases'
+			search.click()
 		then: "CanvasSpec is shown in results"
 			waitFor {
-				searchControl.find('.tt-suggestion p', text: contains("CanvasSpec"))
-				searchControl.find('.tt-suggestion p', text: contains("to test running canvases"))
+				$('.streamr-search-menu .streamr-search-suggestion p', text: contains("CanvasSpec"))
+				$('.streamr-search-menu .streamr-search-suggestion p', text: contains("to test running canvases"))
 			}
 	}
 
