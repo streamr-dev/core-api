@@ -9,6 +9,7 @@ import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
@@ -16,14 +17,28 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
+import java.security.AccessControlException
+
 @TestMixin(GrailsUnitTestMixin)
 @Mock([Stream, Feed])
 class SendToStreamSpec extends Specification {
 
-	static class FakePermissionService extends PermissionService {
+	static class AllPermissionService extends PermissionService {
 		@Override boolean canRead(SecUser user, resource) { return true }
 		@Override boolean canWrite(SecUser user, resource) { return true }
 		@Override boolean canShare(SecUser user, resource) { return true }
+	}
+
+	static class ReadPermissionService extends PermissionService {
+		@Override boolean canRead(SecUser user, resource) { return true }
+		@Override boolean canWrite(SecUser user, resource) { return false }
+		@Override boolean canShare(SecUser user, resource) { return false }
+	}
+
+	static class WritePermissionService extends PermissionService {
+		@Override boolean canRead(SecUser user, resource) { return true }
+		@Override boolean canWrite(SecUser user, resource) { return true }
+		@Override boolean canShare(SecUser user, resource) { return false }
 	}
 
 	static class FakeKafkaService extends KafkaService {
@@ -43,12 +58,12 @@ class SendToStreamSpec extends Specification {
 		defineBeans {
 			kafkaService(FakeKafkaService)
 			feedService(FeedService)
-			permissionService(FakePermissionService)
+			permissionService(AllPermissionService)
 		}
 
 		def feed = new Feed()
-		feed.id = 7
-		feed.save(false)
+		feed.id = Feed.KAFKA_ID
+		feed.save(validate: false)
 
 		def s = new Stream()
 		s.feed = feed
@@ -59,20 +74,25 @@ class SendToStreamSpec extends Specification {
 		]]
 		s.save(false)
 
+		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
+		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, new SecUser(name: "test user")])
+    }
+
+	private void createModule() {
 		module = new SendToStream()
-		module.globals = globals = new Globals([:], grailsApplication, null)
+		module.globals = globals
 		module.parentSignalPath = new SignalPath()
 		module.init()
 		module.configure([
-			params: [
-				[name: "stream", value: "stream-0"]
-			],
+				params: [
+						[name: "stream", value: "stream-0"]
+				],
 		])
-
-		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
-    }
+	}
 	
 	void "sendToStream sends correct data to Kafka"() {
+		createModule()
+
 		when:
 		Map inputValues = [
 			strIn: ["a", "b", "c", "d"],
@@ -97,5 +117,41 @@ class SendToStreamSpec extends Specification {
 				]
 				fakeKafkaService.receivedMessages = []
 			}.test()
+	}
+
+	void "sendToStream throws exception if user does not have write access to stream"() {
+		defineBeans {
+			permissionService(ReadPermissionService)
+		}
+
+		when:
+		createModule()
+		then:
+		1 * globals.isRunContext() >> true
+		thrown(AccessControlException)
+	}
+
+	void "sendToStream does not throw AccessControlException if user has write permission to stream"() {
+		defineBeans {
+			permissionService(WritePermissionService)
+		}
+
+		when:
+		createModule()
+		then:
+		1 * globals.isRunContext() >> true
+		notThrown(AccessControlException)
+	}
+
+	void "sendToStream does not throw AccessControlException if not in run context"() {
+		defineBeans {
+			permissionService(ReadPermissionService)
+		}
+
+		when:
+		createModule()
+		then:
+		1 * globals.isRunContext() >> false
+		notThrown(AccessControlException)
 	}
 }
