@@ -243,7 +243,7 @@ var SignalPath = (function () {
 		})
 	}
 	
-	function addModule(id,configuration,callback) { 
+	function addModule(id, configuration, callback) {
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',

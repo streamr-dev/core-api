@@ -18,7 +18,7 @@ class ModuleBuildSpec extends LoginTester1Spec {
 		when: "clone option is selected from module context menu"
 			selectFromContextMenu(findModuleOnCanvas("Barify"), "Clone module")
 		then: "there should be another module on canvas"
-			waitFor { canvas.find(".component").size()==2 }
+			waitFor { canvas.find(".component").size() == 2 }
 	}
 	
 	def "module help button functionality"() {
@@ -305,15 +305,15 @@ class ModuleBuildSpec extends LoginTester1Spec {
 			ob.find(".streamSearch").displayed
 			
 		when: "search term is changed to 'xyzzy'"
-			ob.find(".streamSearch").firstElement().clear()
-			ob.find(".streamSearch") << "xyzzy"
+			ob.find(".streamSearch.streamr-search-input").firstElement().clear()
+			ob.find(".streamSearch.streamr-search-input") << "xyzzy"
 		then: "ModuleBuildSpec stream must be shown in suggestions"
 			waitFor {
-				ob.find('.tt-suggestion span', text: contains("ModuleBuildSpec"))
+				$('.streamr-search-suggestion-name', text: contains("ModuleBuildSpec"))
 			}
 			
 		when: "suggestion is clicked"
-			ob.find('.tt-suggestion span', text: contains("ModuleBuildSpec")).click()
+			$('.streamr-search-suggestion-name', text: contains("ModuleBuildSpec")).click()
 		then: "stream is changed"
 			waitFor {
 				$(".streamName", text: "ModuleBuildSpec")
