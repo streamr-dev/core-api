@@ -3,6 +3,7 @@ import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
+import core.mixins.KafkaMixin
 import grails.util.Holders
 import org.apache.log4j.Logger
 
@@ -12,6 +13,7 @@ import java.util.regex.Pattern
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
+@Mixin(KafkaMixin)
 class MapModulesSpec extends LoginTester1Spec {
 
 	Logger log = Logger.getLogger(MapModulesSpec)
@@ -25,13 +27,11 @@ class MapModulesSpec extends LoginTester1Spec {
 	}
 
 	def setup() {
-		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
+		kafka = makeKafkaProducer()
 	}
 
 	def cleanup() {
-		synchronized(kafka) {
-			kafka.close()
-		}
+		closeProducer(kafka)
 	}
 
 	void "countByKey counts key occurrences as expected"() {
@@ -209,14 +209,5 @@ class MapModulesSpec extends LoginTester1Spec {
 	private void produceToKafka(String key, Double value) {
 		kafka.sendJSON("pltRMd8rCfkij4mlZsQkJB", "", System.currentTimeMillis(),
 			'{"key":' + key + ', "value": ' + value  + '}')
-	}
-
-	private def makeKafkaConfiguration() {
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(Holders.config, "unifina.kafka"));
-		Properties properties = new Properties();
-		for (String s : kafkaConfig.keySet()) {
-			properties.setProperty(s, kafkaConfig.get(s).toString());
-		}
-		return properties;
 	}
 }
