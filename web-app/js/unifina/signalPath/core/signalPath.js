@@ -160,7 +160,7 @@ var SignalPath = (function () {
 	}
 	function loadJSON(data) {
 		// Reset signal path
-		clear();
+		clear(true);
 
 		jsPlumb.setSuspendDrawing(true);
 
@@ -400,7 +400,6 @@ var SignalPath = (function () {
 				callback(json);
 
 			$(pub).trigger('saved', [json]);
-			window.history.replaceState({}, 'Canvas ' + name, Streamr.createLink({controller: "canvas", action: "editor", id: json.id}));
 		}
 
 		var json = toJSON()
@@ -467,7 +466,7 @@ var SignalPath = (function () {
 		})
 	}
 	
-	function clear() {
+	function clear(isSilent) {
 		if (isRunning() && runningJson.adhoc)
 			stop();
 		
@@ -485,8 +484,9 @@ var SignalPath = (function () {
 		runningJson = null
 		
 		jsPlumb.reset();		
-		
-		$(pub).trigger('new');
+
+		if (!isSilent)
+			$(pub).trigger('new');
 	}
 	pub.clear = clear;
 	

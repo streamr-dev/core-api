@@ -112,7 +112,7 @@ class PermissionServiceSpec extends Specification {
 		service.getSingleUserPermissionsTo(dashOwned, anotherUser) == []
 		service.getSingleUserPermissionsTo(dashOwned, stranger) == []
 		service.getSingleUserPermissionsTo(dashOwned, null) == []
-		service.getSingleUserPermissionsTo(dashAllowed, me)*.operation == [Operation.READ]
+		service.getSingleUserPermissionsTo(dashAllowed, me)[0].operation == Operation.READ
 		service.getSingleUserPermissionsTo(dashAllowed, anotherUser).size() == 3
 		service.getSingleUserPermissionsTo(dashAllowed, stranger) == []
 		service.getSingleUserPermissionsTo(dashAllowed, null) == []
@@ -120,10 +120,10 @@ class PermissionServiceSpec extends Specification {
 		service.getSingleUserPermissionsTo(dashRestricted, anotherUser).size() == 3
 		service.getSingleUserPermissionsTo(dashRestricted, stranger) == []
 		service.getSingleUserPermissionsTo(dashRestricted, null) == []
-		service.getSingleUserPermissionsTo(dashPublic, me)*.operation == [Operation.READ]
+		service.getSingleUserPermissionsTo(dashPublic, me)[0].operation == Operation.READ
 		service.getSingleUserPermissionsTo(dashPublic, anotherUser).size() == 4
-		service.getSingleUserPermissionsTo(dashPublic, stranger)*.operation == [Operation.READ]
-		service.getSingleUserPermissionsTo(dashPublic, null)*.operation == [Operation.READ]
+		service.getSingleUserPermissionsTo(dashPublic, stranger)[0].operation == Operation.READ
+		service.getSingleUserPermissionsTo(dashPublic, null)[0].operation == Operation.READ
 	}
 
 	void "retrieve all readable Dashboards correctly"() {

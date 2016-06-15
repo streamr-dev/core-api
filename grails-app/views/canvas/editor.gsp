@@ -83,23 +83,17 @@ $(document).ready(function() {
 		if (settings.editorState && settings.editorState.runTab)
 			$("a[href="+settings.editorState.runTab+"]").tab('show')
 
-	});
-
-	// Show realtime tab when a running SignalPath is loaded
-	$(SignalPath).on('loaded', function(event, json) {
 		if (SignalPath.isRunning()) {
+			// Show realtime tab when a running SignalPath is loaded
 			$("a[href=#tab-realtime]").tab('show')
-		}
-	});
 
-	// Try to ping a running SignalPath on load, and show error if it can't be reached
-	$(SignalPath).on('loaded', function(event, json) {
-		if (SignalPath.isRunning()) {
+			// Try to ping a running SignalPath on load, and show error if it can't be reached
 			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
 				if (err)
 					Streamr.showError('${message(code:'canvas.ping.error')}')
 			})
 		}
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: json.id}))
 	});
 
 	$(SignalPath).on('error', function(error) {
@@ -114,7 +108,40 @@ $(document).ready(function() {
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
+
+	$(SignalPath).on("new", function(event) {
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor"}))
+	})
+
+	function setAddressbarUrl(url) {
+		if (window.history && window.history.pushState && window.history.replaceState) {
+			// If we haven't set the current url into history, replace the current state so we know to reload the page on back
+			if (!window.history.state || !window.history.state.streamr) {
+				window.history.replaceState({
+					streamr: {
+						urlPath: window.location.href
+					}
+				}, undefined, window.location.href)
+			}
+			// Push the new state to the history
+			if (url !== window.location.href) {
+				window.history.pushState({
+					streamr: {
+						urlPath: url
+					}
+				}, undefined, url)
+			}
+		}
+	}
+
+	window.onpopstate = function(e) {
+		if (e.state && e.state.streamr && e.state.streamr.urlPath) {
+			// location.reload() doesn't work because the event is fired before the location change
+			window.location = e.state.streamr.urlPath
+		}
+	}
 
 	// Streamr search for modules and streams
 	var streamrSearch = new StreamrSearch('#search', [{
@@ -267,16 +294,19 @@ $(document).ready(function() {
 
 	$(SignalPath).on('loaded saved', function(e, json) {
 		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
-		// Check share permission by knocking on the /permissions/ API endpoint
-		// Disabled without .forbidden means not checked yet
-		$("#share-button").attr("disabled", "disabled")
-		$("#share-button").removeClass("forbidden")
-		$.getJSON(canvasUrl + "/permissions").success(function () {
-			$("#share-button").data("url", canvasUrl)
-			$("#share-button").removeAttr("disabled")
-		}).fail(function () {
-			// Forbidden means no permission
-			$("#share-button").addClass("forbidden")
+		$.getJSON(canvasUrl + "/permissions/me", function(perm) {
+			var permissions = []
+			_.each(perm, function(permission) {
+				if (permission.id = "${id}") {
+					permissions.push(permission.operation)
+				}
+			})
+			if (_.contains(permissions, "share")) {
+				$("#share-button").data("url", canvasUrl)
+				$("#share-button").removeAttr("disabled")
+			} else {
+				$("#share-button").addClass("forbidden")
+			}
 		})
 	})
 

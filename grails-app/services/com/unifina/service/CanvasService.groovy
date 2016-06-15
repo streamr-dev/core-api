@@ -17,43 +17,17 @@ import grails.converters.JSON
 import grails.transaction.Transactional
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.json.JSONObject
 
 class CanvasService {
 
-	def grailsApplication
-	def signalPathService
-	def taskService
-	def permissionService
-	def dashboardService
+	GrailsApplication grailsApplication
+	SignalPathService signalPathService
+	TaskService taskService
+	PermissionService permissionService
+	DashboardService dashboardService
 
-	public List<Canvas> findAllBy(SecUser currentUser, String nameFilter, Boolean adhocFilter, Canvas.State stateFilter, String sort = "dateCreated", String order = "asc") {
-		def query = Canvas.where { user == currentUser }
-
-		if (nameFilter) {
-			query = query.where {
-				name == nameFilter
-			}
-		}
-		if (adhocFilter != null) {
-			query = query.where {
-				adhoc == adhocFilter
-			}
-		}
-		if (stateFilter) {
-			query = query.where {
-				state == stateFilter
-			}
-		}
-
-		return query.order(sort, order).findAll()
-	}
-
-	/**
-	 * Reconstructs the canvas: instantiates the SignalPath from the saved canvas.json,
-	 * then converts the SignalPath back to a Map and returns it. This adds any I/O, module
-	 * options etc. added since saving the json.
-     */
 	@CompileStatic
 	public Map reconstruct(Canvas canvas, SecUser user) {
 		Map signalPathMap = (JSONObject) JSON.parse(canvas.json)

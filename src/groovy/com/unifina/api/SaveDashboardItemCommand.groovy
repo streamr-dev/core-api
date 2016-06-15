@@ -8,7 +8,7 @@ import groovy.transform.CompileStatic
 @Validateable
 class SaveDashboardItemCommand {
 	String title
-	String canvasId
+	String canvas
 	Integer module
 	//String webcomponent TODO: inferred
 	int ord
@@ -16,7 +16,7 @@ class SaveDashboardItemCommand {
 
 	static constraints = {
 		title(blank: false)
-		canvasId(blank: false)
+		canvas(blank: false)
 		module(nullable: false)
 		ord(min: 0)
 		size(inList: ["small", "medium", "large"])
@@ -26,7 +26,7 @@ class SaveDashboardItemCommand {
 	DashboardItem toDashboardItem() {
 		def item = new DashboardItem(
 			title: title,
-			canvas: Canvas.get(canvasId),
+			canvas: Canvas.get(canvas),
 			module: module,
 			ord: ord,
 			size: size
@@ -38,7 +38,7 @@ class SaveDashboardItemCommand {
 	@CompileStatic
 	void copyValuesTo(DashboardItem dashboardItem) {
 		dashboardItem.title = title
-		dashboardItem.canvas = Canvas.get(canvasId)
+		dashboardItem.canvas = Canvas.get(canvas)
 		dashboardItem.module = module
 		dashboardItem.ord = ord
 		dashboardItem.size = size
