@@ -157,7 +157,7 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, toolbar, bootstrap'
+		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
