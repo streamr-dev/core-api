@@ -36,4 +36,6 @@ databaseChangeLog = {
 	include file: 'core/2016-06-13-canvas-spec-test-canvas.groovy'
 	include file: 'core/2016-06-13-filter-map-module.groovy'
 	include file: 'core/2016-06-14-collect-from-maps-module.groovy'
+	include file: 'core/2016-04-06-tours.groovy'
+	include file: 'core/2016-06-15-new-event-table-module.groovy'
 }

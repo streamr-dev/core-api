@@ -84,6 +84,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		$.extend(true, prot.jsonData, json)
 		return prot.jsonData
 	}
+
+	pub.getMap = function() {
+		return map;
+	}
 	
 	return pub;
 }
