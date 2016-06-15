@@ -23,7 +23,6 @@ public class VariadicEventTable extends ModuleWithUI {
 
 	public VariadicEventTable() {
 		super();
-		canClearState = false;
 
 		// More sensible defaults, in line with default maxRows
 		resendAll = false;
