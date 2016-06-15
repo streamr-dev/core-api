@@ -8,7 +8,8 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 		
 		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
-		
+
+		// The flags must be appended in reverse order
 		// NoRepeat. Default true. Add only for TimeSeries type
 		if (data.type=="Double" && (data.canBeNoRepeat==null || data.canBeNoRepeat)) {
 			var noRepeat = new SignalPath.IOSwitch(switchDiv, "ioSwitch noRepeat", {
@@ -57,6 +58,13 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 	
 	pub.connect = function(endpoint) {
 		jsPlumb.connect({source: endpoint.jsPlumbEndpoint, target:pub.jsPlumbEndpoint});
+	}
+
+	pub.disconnect = function() {
+		var connections = jsPlumb.getConnections({target:pub.getId(), scope:"*"});
+		$(connections).each(function(j,connection) {
+			jsPlumb.detach(connection)
+		});
 	}
 	
 	pub.getConnectedEndpoints = function() {

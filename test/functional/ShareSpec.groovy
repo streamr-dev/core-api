@@ -16,7 +16,7 @@ class ShareSpec extends GebReportingSpec {
 	}
 
 	def clickShareButton(name = "ShareSpec") {
-		def row = $("a.tr").findAll { it.text().trim().startsWith(name) }.first()
+		def row = findRow(name)
 		row.find(".dropdown-toggle").click()
 		row.find(".share-button").click()
 	}
@@ -591,7 +591,7 @@ class ShareSpec extends GebReportingSpec {
 		logout()
 		loginTester2()
 		to StreamListPage
-		then: "no share button in list"
+		then: "no any controls for the list item"
 		!getStreamRow().find(".dropdown-toggle")
 
 		when: "open stream edit view"
@@ -602,7 +602,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "check canvas"
 		to CanvasListPage
-		then: "no share button in list"
+		then: "no any controls for the list item"
 		!getCanvasRow().find(".dropdown-toggle")
 
 		when:
@@ -621,7 +621,7 @@ class ShareSpec extends GebReportingSpec {
 		findRow("ShareSpec").click()
 		then: "only read rights given"
 		waitFor { at DashboardShowPage }
-		!$("#share-button")
+		waitFor { shareButton.hasClass("forbidden") }
 
 		cleanup: "remove all access to ShareSpec resources"
 		to StreamListPage
@@ -712,7 +712,7 @@ class ShareSpec extends GebReportingSpec {
 
 		search << "ShareSp"
 		then: "found!"
-		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+		waitFor { $('.streamr-search-suggestion .streamr-search-suggestion-name', text: "ShareSpec") }
 
 		cleanup: "remove tester2 permission"
 		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
@@ -744,7 +744,7 @@ class ShareSpec extends GebReportingSpec {
 
 		search << "ShareSp"
 		then: "found!"
-		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+		waitFor { $('.streamr-search-suggestion .streamr-search-suggestion-name', text: "ShareSpec") }
 
 		when: "check list"
 		to StreamListPage

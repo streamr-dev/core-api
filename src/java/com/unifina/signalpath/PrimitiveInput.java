@@ -12,11 +12,11 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 	}
 
 	@Override
-	protected void doClear() {
+	public void clear() {
 		if (initialValue!=null || feedbackConnection) {
 			value = initialValue;
 		}
-		else super.doClear();
+		else super.clear();
 	}
 
 	public T getInitialValue() {

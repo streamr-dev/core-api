@@ -20,7 +20,7 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 		// Async callback signaling done is passed as last argument by executeAsyncScript
 		// https://groups.google.com/forum/#!topic/geb-user/Lpi_4lroTcQ
 		browser.driver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
-		browser.driver.executeAsyncScript("jQuery.ajax({url: Streamr.createLink('host', 'shutdown'), method: 'POST'}).done(arguments[arguments.length - 1]).fail(function(jqXHR, textStatus, errorThrown) { alert('Error shutting down: '+errorThrown); })")
+		browser.driver.executeAsyncScript("jQuery.ajax({url: Streamr.createLink('host', 'shutdown'), method: 'POST'}).done(arguments[arguments.length - 1])")
 	}
 
 	void startTaskWorker() {
@@ -40,9 +40,9 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 		String canvasName = "ShutdownSpec"+System.currentTimeMillis()
 		addModule("Button")
 		addModule("Count")
-		moveModuleBy("Count", 200, 0)
+		moveModuleBy("Count", 250, 0)
 		addModule("Label")
-		moveModuleBy("Label", 400, 0)
+		moveModuleBy("Label", 500, 0)
 		connectEndpoints(findOutput("Button", "out"), findInput("Count", "in"))
 		connectEndpoints(findOutput("Count", "count"), findInput("Label", "label"))
 

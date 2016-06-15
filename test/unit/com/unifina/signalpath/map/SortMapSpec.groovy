@@ -20,7 +20,10 @@ class SortMapSpec extends Specification {
 		module.configure(module.getConfiguration())
 	}
 
-	def "sortMap() sorts map (default: by key)"() {
+	def "sortMap() sorts map by key, ascending"() {
+		module.getInput("by").receive(SortMap.ByParameter.KEY)
+		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
+
 		Map outputValues = [
 			out: [
 				[:],
@@ -33,8 +36,9 @@ class SortMapSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
-	def "sortMap() sorts map by key (by value)"() {
-		module.getInput("byValue").receive(true)
+	def "sortMap() sorts map by value, ascending"() {
+		module.getInput("by").receive(SortMap.ByParameter.VALUE)
+		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
 		Map outputValues = [
 			out: [
 				[:],
@@ -47,8 +51,39 @@ class SortMapSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
+	def "sortMap() sorts map by key, descending"() {
+		module.getInput("by").receive(SortMap.ByParameter.KEY)
+		module.getInput("order").receive(SortMap.OrderParameter.DESCENDING)
+		Map outputValues = [
+			out: [
+				[:],
+				[z: "z", d: "d", c: "c", b: "b", a: "a"],
+				[z: 4, d: 8, c: 0, b: 1, a: 5]
+			]
+		]
+
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
+	def "sortMap() sorts map by value, descending"() {
+		module.getInput("by").receive(SortMap.ByParameter.VALUE)
+		module.getInput("order").receive(SortMap.OrderParameter.DESCENDING)
+		Map outputValues = [
+			out: [
+				[:],
+				[z: "z", d: "d", c: "c", b: "b", a: "a"],
+				[d: 8, a: 5, z: 4, b: 1, c: 0]
+			]
+		]
+
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+	}
+
 	def "sortMap() does not crash given given uncomparable values"() {
-		module.getInput("byValue").receive(true)
+		module.getInput("by").receive(SortMap.ByParameter.VALUE)
+		module.getInput("order").receive(SortMap.OrderParameter.ASCENDING)
 
 		Map inputValues = [
 			in: [[a: new Object(), b: new Object(), d: new Object()]]

@@ -52,7 +52,7 @@ modules = {
 	}
 	typeahead {
 		dependsOn 'jquery'
-		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/typeahead', file:'typeahead.bundle.js', plugin: 'unifina-core']
 	}
 	mustache {
 		resource url:[dir:'js/mustache-0.8.2', file:'mustache.js', plugin: 'unifina-core']
@@ -149,7 +149,7 @@ modules = {
 	 * In-house widgets and resources
 	 */
 	streamr {
-		dependsOn 'pnotify'
+		dependsOn 'pnotify, underscore'
 		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
 	}
 	tour {
@@ -157,7 +157,7 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, toolbar, bootstrap'
+		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
@@ -167,9 +167,9 @@ modules = {
 		dependsOn 'jquery, backbone'
 		resource url:[dir:'js/unifina/stream-fields', file:'stream-fields.js', plugin: 'unifina-core']
 	}
-	'search-control' {
+	'streamr-search' {
 		dependsOn 'typeahead'
-		resource url:[dir:'js/unifina/search-control', file:'search-control.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-search', file:'streamr-search.js', plugin: 'unifina-core']
 	}
 	'remote-tabs' {
 		dependsOn 'bootbox, mustache'
@@ -188,8 +188,12 @@ modules = {
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	'key-value-editor' {
-		dependsOn 'bootstrap, backbone, mustache'
+		dependsOn 'bootstrap, backbone, mustache, list-editor'
 		resource url:[dir:'js/unifina/key-value-editor', file:'key-value-editor.js', plugin:'unifina-core']
+	}
+	'list-editor' {
+		dependsOn 'bootstrap, backbone, mustache'
+		resource url:[dir:'js/unifina/list-editor', file:'list-editor.js', plugin:'unifina-core']
 	}
 	toolbar {
 		dependsOn 'jquery'
@@ -202,7 +206,7 @@ modules = {
 	}
 	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
+//		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
@@ -271,12 +275,15 @@ modules = {
 		dependsOn 'spectrum'
 		dependsOn 'underscore'
 		dependsOn 'key-value-editor'
+		dependsOn 'list-editor'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicInput.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
@@ -296,6 +303,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'

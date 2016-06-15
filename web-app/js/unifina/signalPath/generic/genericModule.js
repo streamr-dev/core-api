@@ -13,6 +13,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.inputs = [];
 	prot.outputsByName = {};
 	prot.outputs = [];
+	prot.moduleClosed = false
 	
 	// Updated on dragstart, used on drag event to repaint jsPlumb connectors
 	var _cachedEndpoints = []
@@ -20,26 +21,13 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	function createModuleFooter() {
 		// Button for toggling the clearState. Default true.
 		
-		var div = $("<div class='modulefooter'></div>");
-		prot.div.append(div);
-		prot.footer = div;
-		
+		var div = $("<div class='modulefooter'></div>")
+		prot.div.append(div)
+		prot.footer = div
+
 		var container = $("<div class='moduleSwitchContainer showOnFocus'></div>")
 		div.append(container)
-		
-		if (prot.jsonData.canClearState==null || prot.jsonData.canClearState) {
-			var clear = new SignalPath.IOSwitch(container, "moduleSwitch clearState", {
-				getValue: (function(d){
-					return function() { return d.clearState; };
-				})(data),
-				setValue: (function(d){
-					return function(value) { return d.clearState = value; };
-				})(data),
-				buttonText: function() { return "CLEAR"; },
-				tooltip: 'Clear module state at end of day'
-			})
-		}
-		
+
 		return div
 	}
 	prot.createModuleFooter = createModuleFooter;
@@ -96,7 +84,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				output.connect(item.endpoint);
 			}
 		});
-		
+
 		pub.redraw()
 	}
 	pub.updateFrom = updateFrom;
@@ -161,8 +149,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superClose = pub.close;
 	function close() {
+		prot.moduleClosed = true
 		disconnect();
-		
+
 		$(prot.div).find("div.input").each(function(i,div) {
 			jsPlumb.removeAllEndpoints(div);
 			// This call should not be necessary but there may be a bug in jsPlumb
@@ -183,15 +172,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		super_addFocus(hold);
 		
 		if (hold) {
-			$.each(getParameters(), function(i, endpoint) {
+			$.each(getEndpoints(), function(i, endpoint) {
 				endpoint.jsPlumbEndpoint.addClass("holdFocus");
-			});
-			$.each(getInputs(), function(i, endpoint) {
-				endpoint.jsPlumbEndpoint.addClass("holdFocus");
-			});
-			$.each(getOutputs(), function(i, endpoint) {
-				endpoint.jsPlumbEndpoint.addClass("holdFocus");
-			});
+			})
 		}
 	}
 	
@@ -233,16 +216,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	var super_removeFocus = prot.removeFocus;
 	prot.removeFocus = function() {
 		super_removeFocus();
-		
-		$.each(getParameters(), function(i, endpoint) {
+
+		$.each(getEndpoints(), function(i, endpoint) {
 			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
-		});
-		$.each(getInputs(), function(i, endpoint) {
-			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
-		});
-		$.each(getOutputs(), function(i, endpoint) {
-			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
-		});
+		})
 	}
 	
 	function getParameters() {
@@ -259,7 +236,12 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.outputs;
 	}
 	pub.getOutputs = getOutputs;
-	
+
+	function getEndpoints() {
+		return getParameters().concat(getInputs()).concat(getOutputs())
+	}
+	pub.getEndpoints = getEndpoints
+
 	/**
 	 * Returns an Input object
 	 */
@@ -267,7 +249,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.inputsByName[name];
 	}
 	pub.getInput = getInput;
-	
+
 	/**
 	 * Returns an Output object
 	 */
@@ -275,6 +257,30 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return prot.outputsByName[name];
 	}
 	pub.getOutput = getOutput;
+
+	function findInputByDisplayName(name) {
+		var found = null
+		$(prot.inputs).each(function(i, endpoint) {
+			if (endpoint.json.displayName === name || endpoint.json.name === name) {
+				found = endpoint
+				return
+			}
+		});
+		return found
+	}
+	pub.findInputByDisplayName = findInputByDisplayName
+
+	function findOutputByDisplayName(name) {
+		var found = null
+		$(prot.outputs).each(function(i, endpoint) {
+			if (endpoint.json.displayName === name || endpoint.json.name === name) {
+				found = endpoint
+				return
+			}
+		});
+		return found
+	}
+	pub.findOutputByDisplayName = findOutputByDisplayName
 	
 	function addParameter(data) {
 		// Create room for the parameter in paramTable
@@ -304,11 +310,19 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		}
 		return td;
 	}
+
+	prot.addPlaceholderOutput = function() {
+		var td = createRoomForIO("output");
+		td.append("<div class='endpoint placeholder'></div>")
+	}
 	
 	prot.addInput = function(data, clazz) {
-		clazz = clazz || SignalPath.Input
+		clazz = clazz || data.jsClass || SignalPath.Input
+		if (typeof clazz === "string") {
+			clazz = eval("SignalPath." + clazz);
+		}
 		
-		var td = createRoomForIO("input");
+ 		var td = createRoomForIO("input");
 
 		var endpoint = clazz(data, td, prot);
 		endpoint.createDiv();
@@ -319,7 +333,10 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 
 	prot.addOutput = function(data, clazz) {
-		clazz = clazz || SignalPath.Output
+		clazz = clazz || data.jsClass || SignalPath.Output
+		if (typeof clazz === "string") {
+			clazz = eval("SignalPath." + clazz);
+		}
 		
 		var td = createRoomForIO("output");
 
@@ -329,6 +346,56 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		prot.outputsByName[endpoint.getName()] = endpoint;
 		
 		return endpoint;
+	}
+	
+	prot.removeInput = function(name) {
+		var _this = this
+		setTimeout(function() {
+			var el = prot.inputsByName[name]
+			if (el) {
+				var index = prot.inputs.indexOf(el)
+				if (index <= -1) {
+					throw "Shouldn't be here!"
+				}
+				prot.inputs.splice(index, 1)
+				delete prot.inputsByName[name]
+
+				try {
+					jsPlumb.remove(el.div)
+				} finally {
+					el.parentDiv.empty()
+					_this.redraw()
+					if (el.parentDiv.parent().find("td.output:empty").length !== 0) {
+						el.parentDiv.parent().remove()
+					}
+				}
+			}
+		}, 0)
+	}
+
+	prot.removeOutput = function(name) {
+		var _this = this
+		setTimeout(function() {
+			var el = prot.outputsByName[name]
+			if (el) {
+				var index = prot.outputs.indexOf(el)
+				if (index <= -1) {
+					throw "Shouldn't be here!"
+				}
+				prot.outputs.splice(index, 1)
+				delete prot.outputsByName[name]
+
+				try {
+					jsPlumb.remove(el.div)
+				} finally {
+					el.parentDiv.empty()
+					_this.redraw()
+					if (el.parentDiv.parent().find("td.input:empty").length !== 0) {
+						el.parentDiv.parent().remove()
+					}
+				}
+			}
+		}, 0)
 	}
 
 	var superGetContextMenu = prot.getContextMenu;
@@ -377,15 +444,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	
 	function refreshConnections() {
-		$(getParameters()).each(function(i,endpoint) {
+		$(getEndpoints()).each(function(i,endpoint) {
 			endpoint.refreshConnections();
-		});
-		$(getInputs()).each(function(i,endpoint) {
-			endpoint.refreshConnections();
-		});
-		$(getOutputs()).each(function(i,endpoint) {
-			endpoint.refreshConnections();
-		});
+		})
 	}
 	pub.refreshConnections = refreshConnections;
 	
