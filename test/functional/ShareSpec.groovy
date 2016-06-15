@@ -609,7 +609,7 @@ class ShareSpec extends LoginTester1Spec {
 		clickRow("ShareSpec")
 		then: "only read rights given"
 		waitFor { at DashboardShowPage }
-		!$("#share-button")
+		waitFor { shareButton.hasClass("forbidden") }
 
 		cleanup: "remove all access to ShareSpec resources"
 		to StreamListPage
@@ -695,7 +695,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		search << "ShareSp"
 		then: "found!"
-		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+		waitFor { $('.streamr-search-suggestion .streamr-search-suggestion-name', text: "ShareSpec") }
 
 		cleanup: "remove tester2 permission"
 		to CanvasListPage	// hard-close the dialog if open (cleanup can be invoked elsewhere)
@@ -725,7 +725,7 @@ class ShareSpec extends LoginTester1Spec {
 
 		search << "ShareSp"
 		then: "found!"
-		waitFor { $('.tt-suggestion .tt-suggestion-name', text: "ShareSpec") }
+		waitFor { $('.streamr-search-suggestion .streamr-search-suggestion-name', text: "ShareSpec") }
 
 		when: "check list"
 		to StreamListPage

@@ -30,7 +30,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		dashboards = DashboardApiControllerSpec.initDashboards(me)
 
 		Canvas c = new Canvas(json: '{"modules": [{"hash": 1, "uiChannel": {"webcomponent": "streamr-chart"}}]}')
-		c.id = "canvasId"
+		c.id = "canvas"
 		c.save(failOnError: true, validate: false)
 	}
 
@@ -102,7 +102,7 @@ class DashboardItemApiControllerSpec extends Specification {
 		params.dashboardId = 3
 		request.JSON = [
 			title: "new-dashboard-item",
-			canvasId: "canvasId",
+			canvas: "canvas",
 			module: 1,
 			ord: 3,
 			size: "small",
@@ -120,7 +120,7 @@ class DashboardItemApiControllerSpec extends Specification {
 			dashboard: 3,
 			title: "new-dashboard-item",
 			ord: 3,
-			canvas: "canvasId",
+			canvas: "canvas",
 			module: 1,
 			webcomponent: "streamr-chart",
 			size: "small",
@@ -141,11 +141,11 @@ class DashboardItemApiControllerSpec extends Specification {
 		params.dashboardId = 2
 		params.id = 1
 		request.JSON = [
-			title      : "updated-dashboard-item",
-			canvasId   : "canvasId",
-			module     : 1,
-			ord        : 9,
-			size       : "large",
+			title	: "updated-dashboard-item",
+			canvas	: "canvas",
+			module	: 1,
+			ord		: 9,
+			size	: "large",
 		]
 		request.addHeader("Authorization", "Token myApiKey")
 		request.requestURI = "/api/v1/dashboards/3/items/1"
@@ -160,7 +160,7 @@ class DashboardItemApiControllerSpec extends Specification {
 			dashboard	 : 2,
 			title        : "updated-dashboard-item",
 			ord          : 9,
-			canvas       : "canvasId",
+			canvas       : "canvas",
 			module       : 1,
 			webcomponent : "streamr-chart",
 			size         : "large",

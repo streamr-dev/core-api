@@ -52,13 +52,13 @@
 
     var accessTemplate = _.template(
         '<div class="access-row col-xs-12">' +
-            '<span class="user-label col-xs-6"><%= user %></span>' +
+            '<span class="user-label col-xs-6">{{ user }}</span>' +
             '<div class="col-xs-6 access-button-row">' +
                 '<button class="form-group user-delete-button btn btn-danger pull-right">' +
                     '<span class="icon fa fa-trash-o"></span>' +
                 '</button>' +
                 '<button type="button" class="btn btn-default dropdown-toggle permission-dropdown-toggle pull-right" data-toggle="dropdown">' +
-                    '<span class="state"><%= state %></span> <span class="caret"></span>' +
+                    '<span class="state">{{ state }}</span> <span class="caret"></span>' +
                 '</button>' +
                 '<ul class="permission-dropdown-menu dropdown-menu">' +
                     '<li data-opt="read"><a href="#">make read-only</a></li>' +
@@ -117,10 +117,10 @@
     var accessListTemplate = _.template(
         '<div class="row">' +
             '<div class="owner-row col-xs-12">' +
-                '<span class="col-xs-12 col-sm-5">Owner: <strong><%= owner %></strong></span>' +
+                '<span class="col-xs-12 col-sm-5">Owner: <strong>{{ owner }}</strong></span>' +
                 '<div class="col-xs-12 col-sm-7">' +
                     '<div class="pull-right switcher-container">' +
-                        '<input type="checkbox" class="anonymous-switcher pull-right" <%= checked ? "checked" : "" %>>' +
+                        '<input type="checkbox" class="anonymous-switcher pull-right" {{ checked ? "checked" : "" }} >' +
                     '</div>' +
                     '<div class="publish-label pull-right"> Allow anonymous read access </div>' +
                 '</div>' +
@@ -450,7 +450,10 @@
     }
 
     exports.sharePopup.closeAndSaveChanges = function() {
-        if (!dialogIsOpen()) { console.error("Cannot close sharePopup, try opening it first!"); return }
+        if (!dialogIsOpen()) {
+            console.error("Cannot close sharePopup, try opening it first!");
+            return
+        }
         if (saveChanges()) {
             sharingDialog.modal("hide")
         }

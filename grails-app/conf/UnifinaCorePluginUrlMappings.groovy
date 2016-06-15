@@ -43,6 +43,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/dashboards/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Dashboard }
 		"/api/v1/dashboards/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Dashboard }
 
+		"/api/v1/modules"(resources: "moduleApi")
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
