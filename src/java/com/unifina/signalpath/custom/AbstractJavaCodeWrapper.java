@@ -53,14 +53,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
-	public void setClearState(boolean clearState) {
-		super.setClearState(clearState);
-		if (instance != null) {
-			instance.setClearState(clearState);
-		}
-	}
-
-	@Override
 	public void sendOutput() {
 		instance.sendOutput();
 	}

@@ -10,7 +10,7 @@
 		<r:require module="bootstrap-contextmenu"/>
 		<r:require module="bootstrap-datepicker"/>
 		<r:require module="slimscroll"/>
-		<r:require module="search-control"/>
+		<r:require module="streamr-search"/>
 		<r:require module="signalpath-browser"/>
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
@@ -117,15 +117,41 @@ $(document).ready(function() {
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
 	})
 
-	// show search control
-	new SearchControl(
-		'${ createLink(controller: "stream", action: "search") }',
-		'${ createLink(controller: "module", action: "jsonGetModules") }',
-		$('#search'))
-	
+	// Streamr search for modules and streams
+	var streamrSearch = new StreamrSearch('#search', [{
+		name: "module",
+		limit: 5
+	}, {
+		name: "stream",
+		limit: 3
+	}], {
+		inBody: true
+	}, function(item) {
+
+		if (item.resultType == "stream") { // is stream, specifies module
+			SignalPath.addModule(item.feed.module, {
+				params: [{
+					name: 'stream',
+					value: item.id
+				}]
+			})
+		} else { // is module
+			SignalPath.addModule(item.id, {})
+		}
+	})
+
+    $('#main-menu-inner').scroll(function() {
+    	streamrSearch.redrawMenu()
+    })
+
+	$(document).bind('keydown', 'alt+s', function(e) {
+		$("#search").focus()
+		e.preventDefault()
+	})
+
 	// Bind slimScroll to main menu
     $('#main-menu-inner').slimScroll({
-      height: '100%'
+      	height: '100%'
     })
 
 	loadBrowser = new SignalPathBrowser()
@@ -198,11 +224,22 @@ $(document).ready(function() {
 	realtimeRunButton.on('start-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.started")}'.replace('{0}', SignalPath.getName()))
 	})
+	realtimeRunButton.on('start-error', function(err) {
+		var msg = '${message(code:"canvas.start.error")}'
+		if (err && err.code == "FORBIDDEN") {
+			msg = '${message(code:"canvas.start.forbidden")}'
+		}
+		Streamr.showError(msg)
+	})
 	realtimeRunButton.on('stop-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.stopped")}'.replace('{0}', SignalPath.getName()))
 	})
-	realtimeRunButton.on('stop-error', function() {
-		Streamr.showError('${message(code:"canvas.stop.error")}')
+	realtimeRunButton.on('stop-error', function(err) {
+		var msg = '${message(code:"canvas.stop.error")}'
+		if (err && err.code == "FORBIDDEN") {
+			msg = '${message(code:"canvas.stop.forbidden")}'
+		}
+		Streamr.showError(msg)
 	})
 
 	// Run and clear link
@@ -231,16 +268,19 @@ $(document).ready(function() {
 
 	$(SignalPath).on('loaded saved', function(e, json) {
 		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
-		// Check share permission by knocking on the /permissions/ API endpoint
-		// Disabled without .forbidden means not checked yet
-		$("#share-button").attr("disabled", "disabled")
-		$("#share-button").removeClass("forbidden")
-		$.getJSON(canvasUrl + "/permissions").success(function () {
-			$("#share-button").data("url", canvasUrl)
-			$("#share-button").removeAttr("disabled")
-		}).fail(function () {
-			// Forbidden means no permission
-			$("#share-button").addClass("forbidden")
+		$.getJSON(canvasUrl + "/permissions/me", function(perm) {
+			var permissions = []
+			_.each(perm, function(permission) {
+				if (permission.id = "${id}") {
+					permissions.push(permission.operation)
+				}
+			})
+			if (_.contains(permissions, "share")) {
+				$("#share-button").data("url", canvasUrl)
+				$("#share-button").removeAttr("disabled")
+			} else {
+				$("#share-button").addClass("forbidden")
+			}
 		})
 	})
 

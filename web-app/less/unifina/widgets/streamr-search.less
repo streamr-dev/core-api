@@ -1,0 +1,46 @@
+
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-open {
+  display: block;
+  background-color: #FFFFFF;
+  z-index: 1000;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 0 0 3px 1px #ccc;
+  -moz-box-shadow: 0 0 3px 1px #ccc;
+  box-shadow: 0 0 3px 1px #ccc;
+
+  .streamr-search-dataset {
+    &:not(:empty) {
+      padding-top: 4px;
+      padding-bottom: 4px;
+      &:not(:last-child) {
+        border-bottom: 1px solid #dfdfdf;
+      }
+    }
+    p {
+      margin-bottom: 0;
+    }
+    .streamr-search-dataset-header {
+      margin-left: 8px;
+      margin-top: 2px;
+      font-weight: bold
+    }
+    .streamr-search-suggestion {
+      cursor: pointer;
+      padding: 5px 18px;
+      &:hover, &.streamr-search-cursor {
+        background-color: @primary-color;
+      }
+      p.streamr-search-suggestion-description {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-empty {
+  position: absolute;
+  display: none;
+}

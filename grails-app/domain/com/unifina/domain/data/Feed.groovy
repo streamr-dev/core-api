@@ -4,8 +4,8 @@ import com.unifina.domain.signalpath.Module;
 
 class Feed implements Serializable {
 
-	static final long KAFKA_ID = 7L
-	static final long MONGO_ID = 8L
+	public static final long KAFKA_ID = 7L
+	public static final long MONGO_ID = 8L
 
 	Long id
 	String name
@@ -63,5 +63,13 @@ class Feed implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Feed && obj.id == this.id
+	}
+
+	public Map toMap() {
+		return [
+		   	id: id,
+		   	name: name,
+			module: module?.id
+		]
 	}
 }

@@ -56,11 +56,16 @@ class DashboardService {
 	 * @throws NotFoundException when dashboard was not found.
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 */
-	@CompileStatic
 	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user)
 		throws NotFoundException, NotPermittedException {
 		def dashboard = authorizedGetById(id, user, Permission.Operation.WRITE)
 		dashboard.name = validCommand.name
+		if(validCommand.items != null) {
+			dashboard.items.clear()
+			validCommand.items.each { DashboardItem item ->
+				dashboard.addToItems(item)
+			}
+		}
 		dashboard.save(failOnError: true)
 	}
 
@@ -68,7 +73,7 @@ class DashboardService {
 	 * Find DashboardItem by (parent) dashboard id and item id, and authorize that user is permitted to read it.
 	 *
 	 * @param dashboardId dashboard it
-	 * @param itemId dasbhoard item id
+	 * @param itemId dashboard item id
 	 * @param user current user
 	 * @return
 	 * @throws NotFoundException either dashboard or dashboard item (under dashboard) was not found

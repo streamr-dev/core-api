@@ -27,9 +27,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			var x = ui.offset.left + canvas.scrollLeft()
 			var y = ui.offset.top + canvas.scrollTop()
 			
-			if (x < cpos.left-100 || y < cpos.top-50) {
+			if (x < cpos.left - 100 || y < cpos.top - 50) {
 				return false
 			}
+			$(prot).add(pub).trigger("drag")
 		}
 	}
 	
@@ -52,8 +53,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		} 
 		// Else add to default position in viewport
 		else {
-			prot.div.css('top',canvas.scrollTop() + 10);
-			prot.div.css('left',canvas.scrollLeft() + 10);
+			prot.div.css('top',canvas.scrollTop() + 20);
+			prot.div.css('left',canvas.scrollLeft() + 70);
 		}
 		
 		// Module header
@@ -88,7 +89,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
 		
-		var delay=500, tooltipDelayTimer		
+		var delay=500, tooltipDelayTimer
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
 	 			prot.getHelp(false, function(htext) {
@@ -213,7 +214,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			prot.addFocus(true);
 			event.stopPropagation();
 		});
-		
+
 		prot.div.hover(function() {
 			if (!prot.div.hasClass("focus")) {
 				prot.addFocus(false);
@@ -325,20 +326,20 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.div.removeClass("focus");
 		prot.div.removeClass("hoverFocus");
 		prot.div.removeClass("holdFocus");
-		prot.div.find(".showOnFocus").fadeTo(100,0);
 	}
 	prot.removeFocus = removeFocus;
 	
 	function addFocus(hold) {
 		prot.div.addClass("focus");
-		
-		if (hold) prot.div.addClass("holdFocus");
-		else prot.div.addClass("hoverFocus");
-		
-		prot.div.find(".showOnFocus").fadeTo(100,1);
+		if (hold) {
+			prot.div.addClass("holdFocus")
+		} else {
+			prot.div.addClass("hoverFocus")
+		}
 	}
 	prot.addFocus = addFocus;
 	
+
 	function createModuleButton(additionalClasses) {
 		var button = $("<div class='modulebutton'><a class='btn btn-default btn-xs showOnFocus' href='#' style='padding: 0px'><i class='fa fa-fw "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
 		return button;
@@ -450,7 +451,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		pub.clearWarnings()
 	}
 	
-	pub.onClose = function() {};
+	pub.onClose = function() {
+		$(prot).add(pub).trigger("closed")
+	}
 	
 	function toJSON() {
 		writePosition();
@@ -565,8 +568,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
 	}
 	prot.prepareCloneData = prepareCloneData;
-	
-	prot.onDrag = function() {}
 	
 	// Everything added to the public interface can be accessed from the
 	// protected interface too
