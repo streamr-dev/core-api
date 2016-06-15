@@ -35,4 +35,5 @@ databaseChangeLog = {
 	include file: 'core/2016-06-10-new-moving-average-module.groovy'
 	include file: 'core/2016-06-13-canvas-spec-test-canvas.groovy'
 	include file: 'core/2016-06-13-filter-map-module.groovy'
+	include file: 'core/2016-06-14-collect-from-maps-module.groovy'
 }
