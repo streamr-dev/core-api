@@ -1,3 +1,6 @@
+import core.mixins.ListPageMixin
+import core.pages.CanvasListPage
+import core.pages.CanvasPage
 import org.openqa.selenium.Keys
 
 import java.text.SimpleDateFormat
@@ -11,6 +14,7 @@ class CanvasSpec extends LoginTester1Spec {
 	
 	def setupSpec(){
 		CanvasSpec.metaClass.mixin(CanvasMixin)
+		CanvasSpec.metaClass.mixin(ListPageMixin)
 	}
 
 	def "clicking module close button in canvas should remove it"() {
@@ -63,7 +67,7 @@ class CanvasSpec extends LoginTester1Spec {
 				$('.streamr-search-menu .streamr-search-suggestion p', text: contains("Add")).displayed
 			}
 	}
-	
+
 	def "searching for stream with its description should show the stream in results"() {
 		when: "a search is entered"
 			search << 'to test running canvases'
@@ -74,13 +78,184 @@ class CanvasSpec extends LoginTester1Spec {
 				$('.streamr-search-menu .streamr-search-suggestion p', text: contains("to test running canvases"))
 			}
 	}
-	
+
 	def "clicking a canvas in the load browser should load the signalpath"() {
 		when: "load button is clicked"
 			loadSignalPath 'CanvasSpec test loading a SignalPath'
 		then: "signalpath content must be loaded"
 			waitFor {
-				$("#module_2")
+				findModuleOnCanvas("Add")
+			}
+	}
+
+	def "canvas can be saved"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		setup:
+			addAndWaitModule("Label")
+		when: "saved with name"
+			saveCanvasAs(name)
+			login()
+		then: "canvas can be loaded"
+			loadSignalPath(name)
+			findModuleOnCanvas("Label")
+	}
+
+	def "saving changes the url in address bar"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		expect: "the url is clear"
+			driver.currentUrl.endsWith("/canvas/editor")
+		when: "saved with name"
+			saveCanvasAs(name)
+		then: "url changes"
+			!driver.currentUrl.endsWith("/canvas/editor")
+			at CanvasPage
+		when: "login"
+			login()
+		then: "the url is clean again"
+			driver.currentUrl.endsWith("/canvas/editor")
+	}
+
+	def "loading changes the url in address bar"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		when: "saved with name"
+			saveCanvasAs(name)
+			login()
+		then: "url is clear"
+			driver.currentUrl.endsWith("/canvas/editor")
+		when: "canvas is loaded"
+			loadSignalPath(name)
+		then: "the url has changed"
+			!driver.currentUrl.endsWith("/canvas/editor")
+			at CanvasPage
+	}
+
+	def "creating new canvas clears the url"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		when: "saved with name"
+			saveCanvasAs(name)
+			login()
+		then: "url is clear"
+			driver.currentUrl.endsWith("/canvas/editor")
+		when: "canvas is loaded but then created new"
+			loadSignalPath(name)
+			$("#newSignalPath").click()
+		then: "the url is clean"
+			driver.currentUrl.endsWith("/canvas/editor")
+	}
+
+	def "going back after creating a new canvas reloads the last one"() {
+		def name = "CanvasSpec-" + System.currentTimeMillis()
+		when: "saved with name"
+			addAndWaitModule("Table")
+			saveCanvasAs(name)
+			login()
+		then: "no module"
+			waitFor {
+				at CanvasPage
+			}
+			!findModuleOnCanvas("Table")
+		when: "canvas is loaded"
+			loadSignalPath(name)
+		then: "module can be found"
+			findModuleOnCanvas("Table")
+		when: "new canvas is created"
+			$("#newSignalPath").click()
+		then: "no module"
+			!findModuleOnCanvas("Table")
+		when: "clicked back button"
+			driver.navigate().back()
+		then: "module can be found"
+			waitFor {
+				findModuleOnCanvas("Table")
+			}
+	}
+
+	def "going back after loading a canvas reloads the last one"() {
+		setup:
+			def name = "CanvasSpec-" + System.currentTimeMillis()
+			addAndWaitModule("Table")
+			saveCanvasAs(name)
+			login()
+			waitFor {
+				at CanvasPage
+			}
+			def name2 = "CanvasSpec-" + System.currentTimeMillis()
+			addAndWaitModule("Label")
+			saveCanvasAs(name2)
+			login()
+			waitFor {
+				at CanvasPage
+			}
+		when: "canvas 1 is loaded"
+			loadSignalPath(name)
+		then: "Table can be found, no Label"
+			waitFor {
+				findModuleOnCanvas("Table")
+				!findModuleOnCanvas("Label")
+			}
+		when: "canvas 2 is loaded"
+			loadSignalPath(name2)
+		then: "Label can be found"
+			waitFor {
+				!findModuleOnCanvas("Table")
+				findModuleOnCanvas("Label")
+			}
+		when: "clicked back button"
+			driver.navigate().back()
+		then: "Table can be found, no Label"
+			waitFor {
+				findModuleOnCanvas("Table")
+				!findModuleOnCanvas("Label")
+			}
+	}
+
+	def "going back after opening a canvas from list goes back to the list"() {
+		setup:
+			to CanvasListPage
+		when: "canvas 1 is loaded"
+			clickRow("CanvasSpec test loading a SignalPath")
+		then: "Add can be found"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "clicked back button"
+			driver.navigate().back()
+		then:
+			waitFor {
+				at CanvasListPage
+			}
+	}
+
+	def "going back after opening a canvas from list goes back to the list, even after reloading the canvas"() {
+		setup:
+			to CanvasListPage
+		when: "canvas 1 is loaded"
+			clickRow("CanvasSpec test loading a SignalPath")
+		then: "Add can be found"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "reloaded"
+			driver.navigate().refresh()
+		then: "Add can be found"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "reloaded again"
+			driver.navigate().refresh()
+		then: "Add can be found once again"
+			waitFor {
+				at CanvasPage
+				findModuleOnCanvas("Add")
+			}
+		when: "clicked back button"
+			driver.navigate().back()
+		then:
+			waitFor {
+				at CanvasListPage
 			}
 	}
 	
@@ -92,13 +267,13 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "save in place button should not be shown"
 			!saveButton.displayed
 	}
-	
+
 	def "saved canvases should show the save in place option"() {
 		when: "load button is clicked"
 			loadSignalPath 'CanvasSpec test loading a SignalPath'
 		then: "signalpath content must be loaded"
 			waitFor {
-				$("#module_2")
+				findModuleOnCanvas("Add")
 			}
 		when: "save dropdown button is clicked"
 			saveDropdownButton.click()
@@ -107,7 +282,7 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "save in place button should be shown"
 			saveButton.displayed
 	}
-	
+
 	def "begin- and end date datepickers"() {
 		when: "a signalpath is loaded"
 			loadSignalPath("CanvasSpec test loading a SignalPath")
@@ -116,13 +291,13 @@ class CanvasSpec extends LoginTester1Spec {
 				beginDate.value() == "2015-07-02"
 				endDate.value() == "2015-07-03"
 			}
-		
+
 		when: "the begin date field is clicked"
 			beginDate.click()
 		then: "a datepicker is displayed that shows the current date"
 			$(".datepicker").displayed
 			$(".datepicker .active.day").text() == "2"
-		
+
 		when: "a date is selected in the datepicker"
 			$(".datepicker .active.day").parent().find(".day", text:"3").click()
 		then: "the datepicker is closed"
@@ -130,7 +305,7 @@ class CanvasSpec extends LoginTester1Spec {
 		then: "the input field shows the selected value"
 			beginDate.value() == "2015-07-03"
 	}
-	
+
 	private void sleepForNSeconds(int n) {
 		def originalMilliseconds = System.currentTimeMillis()
 		waitFor(n + 1, 0.5) {
@@ -143,7 +318,7 @@ class CanvasSpec extends LoginTester1Spec {
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
 			moduleShouldAppearOnCanvas('Table')
-			
+
 		when: "run button is clicked"
 			runHistoricalButton.click()
 		then: "output should be produced"
@@ -151,7 +326,7 @@ class CanvasSpec extends LoginTester1Spec {
 				runHistoricalButton.text().contains("Abort")
 				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
 			}
-			
+
 		when: "abort button is clicked"
 			runHistoricalButton.click()
 			sleepForNSeconds(2) // Allow some time for server-side stuff to clean up
@@ -160,12 +335,12 @@ class CanvasSpec extends LoginTester1Spec {
 				runHistoricalButton.text().contains("Run")
 			}
 	}
-	
+
 	def "running a SignalPath on current day should read from Kafka"() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		Date now = new Date()
 		String sNow = df.format(now)
-		
+
 		when: "SignalPath is loaded"
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
