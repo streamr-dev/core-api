@@ -37,11 +37,11 @@ class GetMultiFromMapSpec extends Specification {
 			"c": [null, [hello: "world"],        42,     3, 3],
 			"deep.deep.inside": [null,             null,       null, null, "oh, yeah"],
 			founds: [
-				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 0d],
-				[a: 1d, b: 0d, c: 1d, "deep.deep.inside": 0d],
-				[a: 0d, b: 1d, c: 1d, "deep.deep.inside": 0d],
-				[a: 1d, b: 1d, c: 1d, "deep.deep.inside": 0d],
-				[a: 0d, b: 0d, c: 0d, "deep.deep.inside": 1d]
+				[a: false, b: false, c: false, "deep.deep.inside": false],
+				[a: true, b: false, c: true, "deep.deep.inside": false],
+				[a: false, b: true, c: true, "deep.deep.inside": false],
+				[a: true, b: true, c: true, "deep.deep.inside": false],
+				[a: false, b: false, c: false, "deep.deep.inside": true]
 			]
 		]
 
