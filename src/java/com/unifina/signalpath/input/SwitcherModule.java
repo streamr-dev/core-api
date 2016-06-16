@@ -53,9 +53,7 @@ public class SwitcherModule extends InputModule {
 		for (Input i : out.getTargets()) {
 			if (i instanceof BooleanInput)
 				((BooleanInput)i).setInitialValue(value);
-			else if (i instanceof IntegerParameter)
-				((IntegerParameter) i).receive(value ? 1 : 0);
-			else i.receive(value ? 1d : 0d);
+			else i.receive(value);
 		}
 	}
 
