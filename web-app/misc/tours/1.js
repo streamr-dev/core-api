@@ -175,8 +175,6 @@
             }
         )
 
-        .step("Placeholder", ".tourStream1")
-
         .step("Add the <code>Chart</code> module and feel free to position it as you please.",
             '#search',
             function(cb) {
