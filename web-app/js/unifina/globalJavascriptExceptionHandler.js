@@ -24,10 +24,10 @@ window.onerror = (function(oldHandler) {
 			});
 	  }
 	  
-	  if (reportedSuccessfully)
+/*	  if (reportedSuccessfully)
 		  alert("Oops! An error occurred on this page. The bug has been reported. Sorry!");
 	  else
-		  alert("Oops! An error occurred on this page. Please let us know!");
+		  alert("Oops! An error occurred on this page. Please let us know!");*/
 
 	  // Call previously installed handler or return false to continue default handling
 	  if (oldHandler)

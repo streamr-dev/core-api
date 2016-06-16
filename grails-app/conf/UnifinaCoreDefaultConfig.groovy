@@ -352,7 +352,7 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 /**
  * Signup Configs
  */
-streamr.signup.requireInvite = true
+streamr.signup.requireInvite = false
 
 /**
  * Miscellaneous
