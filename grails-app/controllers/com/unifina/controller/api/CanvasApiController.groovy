@@ -73,7 +73,7 @@ class CanvasApiController {
 	@StreamrApi
 	def start(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.start(canvas, request.JSON?.clearState ?: false)
+		canvasService.start(canvas, request.JSON?.clearState ?: false, request.JSON?.csvOptions)
 		render canvas.toMap() as JSON
 	}
 

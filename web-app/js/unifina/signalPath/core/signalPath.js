@@ -590,12 +590,14 @@ var SignalPath = (function () {
 	}
 	pub.start = start;
 
-	function startAdhoc(callback) {
+	function startAdhoc(startRequest, callback) {
+		startRequest = startRequest || {}
+		startRequest.clearState = false
 		var json = toJSON()
 		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
-			start({clearState:false}, callback, true)
+			start(startRequest, callback, true)
 		})
 	}
 	pub.startAdhoc = startAdhoc

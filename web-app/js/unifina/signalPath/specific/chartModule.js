@@ -91,7 +91,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		// Show csv download link
 		if (d.type==="csv") {
 			var div = $("<span class='csvDownload'></span>");
-			var link = $("<a href='"+d.link+"'></a>");
+			var downloadUrl = Streamr.createLink("canvas", "downloadCsv") + "?filename=" + d.filename
+			var link = $("<a href='" + downloadUrl + "'></a>");
 			link.append("<i class='fa fa-download'></i>&nbsp;"+d.filename);
 			div.append(link);
 			prot.body.append(div);
@@ -103,8 +104,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 					return function(resp) {
 						if (resp.success) {
 							$(div).remove();
-							var elemIF = document.createElement("iframe"); 
-							elemIF.src = "downloadCsv?filename="+resp.filename; 
+							var elemIF = document.createElement("iframe");
+							elemIF.src = downloadUrl
 							elemIF.style.display = "none"; 
 							document.body.appendChild(elemIF);
 						}
