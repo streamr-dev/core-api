@@ -94,9 +94,9 @@ public class VariadicEventTable extends ModuleWithUI {
 		for (Input<Object> i : ins.getEndpoints()) {
 			String name;
 			if (i.isConnected()) {
-				name = (i.getSource().getDisplayName() != null ? i.getSource().getDisplayName() : i.getSource().getName());
+				name = i.getSource().getEffectiveName();
 			} else {
-				name = i.getName();
+				name = i.getEffectiveName();
 			}
 
 			headers.add(name);

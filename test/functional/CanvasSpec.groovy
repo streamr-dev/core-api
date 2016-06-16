@@ -446,10 +446,16 @@ class CanvasSpec extends LoginTester1Spec {
 
 	void "IOSwitch tooltip shows the value of the switch"() {
 		def ioSwitch
-		setup:
+
+		when: "module is added"
 			addAndWaitModule 'Add'
+		then: "ioSwitches are visible by default"
+			waitFor {
+				$("td.input .ioSwitch.drivingInput").displayed
+			}
+
 		when: "input ioSwitch is hovered"
-		ioSwitch = $("td.input .ioSwitch.drivingInput").first()
+			ioSwitch = $("td.input .ioSwitch.drivingInput").first()
 			interact {
 				moveToElement(ioSwitch)
 			}
