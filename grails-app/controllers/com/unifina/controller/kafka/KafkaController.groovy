@@ -29,7 +29,7 @@ class KafkaController {
 				eq("feed", Feed.load(params.long("feed")))
 			}
 			if (params.stream) {
-				eq("id", params.long("stream"))
+				eq("id", params.stream)
 			}
 		}
 		List<Task> tasks = []

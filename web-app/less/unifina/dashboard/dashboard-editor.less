@@ -4,9 +4,9 @@ body.dashboard-show {
 	#dashboard-view {
 		overflow:auto;
 		height:100%;
-		padding:0px;
 		list-style-type: none;
-		
+		padding: 0px 0px 70px;
+
 		.dashboarditem {
 			&.editing {
 				.titlebar, .titlebar-clickable, .edit-btn {
@@ -22,11 +22,11 @@ body.dashboard-show {
 				}
 			}
 			
-			&.title {
+			.title {
 				border-top-right-radius: 4px;
 				border-top-left-radius: 4px;
 			}
-			&.widget-content {
+			.widget-content {
 				border-bottom-left-radius: 4px;
 				border-bottom-right-radius: 4px;
 			}
@@ -44,6 +44,9 @@ body.dashboard-show {
 				.dropdown-menu li:not(.checked) .fa {
 					opacity:0;
 				}
+			}
+			.stat-panel {
+				overflow: visible;
 			}
 
 			streamr-table {
@@ -107,18 +110,9 @@ body.dashboard-show {
 	&.editing {
 		overflow:auto;
 
-		.title.stat-cell {
-			border-top-right-radius: 4px;
-			border-top-left-radius: 4px;
-			cursor:move;
-		}
-		.widget-content.stat-cell {
-			border-bottom-left-radius: 4px;
-			border-bottom-right-radius: 4px;
-		}
 		.stat-row {
 			.stat-cell {
-			overflow:visible;
+				overflow:visible;
 			}
 			.titlebar {
 				display:none;
@@ -126,7 +120,7 @@ body.dashboard-show {
 		}
 	}
 	&.selected-theme #main-menu .navigation .module.checked a {
-		color:@primary-color;
+		color: @primary-color;
 	}
 	#main-menu {
 		.navigation {

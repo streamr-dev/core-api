@@ -32,6 +32,11 @@ class EndpointSpec extends Specification {
 		boolean isConnected() {
 			return false
 		}
+
+		@Override
+		void clear() {
+
+		}
 	}
 
 	class Endpoint2 extends Endpoint1 {

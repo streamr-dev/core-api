@@ -45,18 +45,18 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		when: "switcher is first clicked"
 		getSwitcher().click()
 
-		then: "table gets value 1.0"
+		then: "table gets value true"
 		waitFor {
-			getTable().find("tr td", text: "1.0").displayed
+			getTable().find("tr td", text: "true").displayed
 		}
 
 		when: "switcher is clicked again"
 		getSwitcher().click()
 
-		then: "table gets value 0.0"
+		then: "table gets value false"
 		waitFor {
 			getTable().find("tr").size() == 2
-			getTable().find("tr td", text: "0.0").displayed
+			getTable().find("tr td", text: "false").displayed
 		}
 	}
 
@@ -158,5 +158,8 @@ class InputModuleLiveSpec extends LoginTester1Spec {
 		waitFor {
 			table().find("tr").size() == 2
 		}
+
+		cleanup:
+		stopCanvasIfRunning()
 	}
 }

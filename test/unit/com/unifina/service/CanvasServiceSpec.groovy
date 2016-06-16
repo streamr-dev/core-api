@@ -1,6 +1,10 @@
 package com.unifina.service
 
-import com.unifina.api.*
+import com.unifina.api.InvalidStateException
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
+import com.unifina.api.SaveCanvasCommand
+import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
@@ -18,7 +22,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Dashboard, DashboardItem, Module, ModuleService, SpringSecurityService, SignalPathService])
+@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
@@ -115,27 +119,6 @@ class CanvasServiceSpec extends Specification {
 		).save(failOnError: true)
 	}
 
-	def "#findAllBy, by default, lists all Canvases of current user"() {
-		expect:
-		service.findAllBy(me, null, null, null)*.name == (1..6).collect { "my_canvas_" + it }
-	}
-
-	def "#findAllBy can filter by name"() {
-		expect:
-		service.findAllBy(me, "my_canvas_4", null, null)*.name == ["my_canvas_4"]
-	}
-
-	def "#findAllBy can filter by adhoc"() {
-		expect:
-		service.findAllBy(me, null, false, null)*.name == [1,2,3,6].collect { "my_canvas_" + it }
-		service.findAllBy(me, null, true, null)*.name == ["my_canvas_4", "my_canvas_5"]
-	}
-
-	def "#findAllBy can filter by state"() {
-		expect:
-		service.findAllBy(me, null, null, Canvas.State.RUNNING)*.name == ["my_canvas_3", "my_canvas_4"]
-	}
-
 	def "createNew() throws error when given null command object"() {
 		when:
 		service.createNew(null, me)
@@ -199,7 +182,7 @@ class CanvasServiceSpec extends Specification {
 		)
 
 		when:
-		service.updateExisting(myFirstCanvas, command)
+		service.updateExisting(myFirstCanvas, command, me)
 		Canvas c = Canvas.findById(myFirstCanvas.id)
 
 		then:
@@ -236,7 +219,7 @@ class CanvasServiceSpec extends Specification {
 			name: "my_canvas_with_modules",
 			modules: newModules + modules
 		)
-		service.updateExisting(canvas, updateCommand)
+		service.updateExisting(canvas, updateCommand, me)
 		def updatedUiChannelIds = uiChannelIdsFromMap(canvas.toMap())
 
 		then:
@@ -255,7 +238,7 @@ class CanvasServiceSpec extends Specification {
 			modules: [],
 			settings: ["a" : "b"]
 		)
-		service.updateExisting(myFirstCanvas, command)
+		service.updateExisting(myFirstCanvas, command, me)
 
 		then:
 		Canvas c = Canvas.findById(myFirstCanvas.id)
@@ -274,7 +257,7 @@ class CanvasServiceSpec extends Specification {
 			modules: [],
 			settings: ["a" : "b"]
 		)
-		service.updateExisting(myFirstCanvas, command)
+		service.updateExisting(myFirstCanvas, command, me)
 
 		then:
 		thrown(InvalidStateException)
