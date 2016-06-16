@@ -9,3 +9,10 @@
 [submodule "test/functional/core"]
 	path = test/functional/core
 	url = git@github.com:streamr-dev/core-functest-common.git
+[submodule "web-app/js/swagger-ui"]
+	path = web-app/js/swagger-ui
+	url = git@github.com:streamr-dev/swagger-ui
+[submodule "plugins/streamr-http-api"]
+	path = plugins/streamr-http-api
+	url = git@github.com:streamr-dev/streamr-http-api
+	branch = master

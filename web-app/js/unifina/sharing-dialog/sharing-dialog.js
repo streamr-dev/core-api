@@ -246,11 +246,8 @@
 
         var originalPermissionList = []
         $.getJSON(resourceUrl + "/permissions").success(function(data) {
-            originalOwner = _.chain(data)
-                .filter(function(p) { return p.operation === "share" && !p.id })
-                .pluck("user")
-                .first().value()
-            originalPermissionList = _(data).filter(function(p) { return !!p.id })
+            originalOwner = _(data).filter(function(p) { return p.operation === "share" && !p.id }).first().user
+            originalPermissionList = _.filter(data, "id")
         }).always(function() {
             sharingDialog = bootbox.dialog({
                 title: "Share <span class='resource-name-label'></span>",
@@ -277,7 +274,7 @@
             originalPermissions = {}
             var initialAccessMap = {}
             originalAnonPermission = undefined;
-            _(originalPermissionList).each(function(p) {
+            originalPermissionList.forEach(function(p) {
                 if (!p || !p.operation) { return }      // continue
                 if (p.anonymous) {
                     originalAnonPermission = p;
@@ -312,7 +309,7 @@
 
     var pendingRequests = []
     function savingChanges() {
-        pendingRequests = _(pendingRequests).filter(function(deferred) { return deferred.state() === "pending" })
+        pendingRequests = _.filter(pendingRequests, function(deferred) { return deferred.state() === "pending" })
         return pendingRequests.length > 0
     }
 
@@ -339,7 +336,7 @@
             testedUsers[user] = true;
         })
         // completely removed users don't show up in accessList, need to be tested separately
-        _(originalPermissions).each(function (before, user) {
+        _.each(originalPermissions, function (before, user) {
             if (user in testedUsers) { return }    // continue
             if (before.read)  { removedPermissions.push(before.read) }
             if (before.write) { removedPermissions.push(before.write) }
@@ -356,7 +353,7 @@
         var revokedFrom = {}
         var errorMessages = []
         if (addedPermissions.length > 0 || removedPermissions.length > 0) {
-            _(addedPermissions).each(function(permission) {
+            addedPermissions.forEach(function(permission) {
                 started += 1
                 pendingRequests.push($.ajax({
                     url: resourceUrl + "/permissions",
@@ -373,7 +370,7 @@
                     }
                 }))
             })
-            _(removedPermissions).each(function(p) {
+            removedPermissions.forEach(function(p) {
                 started += 1
                 pendingRequests.push($.ajax({
                     url: resourceUrl + "/permissions/" + p.id,

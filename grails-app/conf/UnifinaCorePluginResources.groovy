@@ -107,11 +107,11 @@ modules = {
 	webcomponents {
 		resource url:[dir:'js/webcomponentsjs', file:'webcomponents.min.js', plugin: 'unifina-core'], disposition:'head'
 	}
-	underscore {
-		resource url:[dir:'js/underscore', file:'underscore-min.js', plugin: 'unifina-core']
+	lodash {
+		resource url:[dir:'js/lodash-3.10.1', file:'lodash.min.js', plugin: 'unifina-core']
 	}
 	backbone {
-		dependsOn 'underscore,jquery'
+		dependsOn 'lodash,jquery'
 		resource url:[dir:'js/backbone', file:'backbone.js', plugin: 'unifina-core']
 	}
 	'backbone-associations' {
@@ -184,7 +184,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
 	}
 	'module-browser' {
-		dependsOn 'mathjax, bootstrap, underscore, streamr'
+		dependsOn 'mathjax, bootstrap, lodash, streamr'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	'key-value-editor' {
@@ -243,6 +243,9 @@ modules = {
 	'streamr-table' {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
+	'scrollspy-helper' {
+		resource url:[dir:'js/unifina/scrollspy-helper', file:'scrollspy-helper.js', plugin: 'unifina-core']
+	}
 	'canvas-controls' {
 		dependsOn 'signalpath-core, backbone'
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
@@ -273,7 +276,7 @@ modules = {
 		dependsOn 'signalpath-widgets'
 		dependsOn 'mathjax'
 		dependsOn 'spectrum'
-		dependsOn 'underscore'
+		dependsOn 'lodash'
 		dependsOn 'key-value-editor'
 		dependsOn 'list-editor'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
@@ -315,20 +318,22 @@ modules = {
 		resource url: "https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
 		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
 	}
+	'marked' {
+		resource url:[dir: 'js/marked/', file: 'marked.min.js', plugin: 'unifina-core']
+	}
 	'swagger' {
-		dependsOn 'jquery, underscore, jquery-migrate'
-		resource url:[dir: 'js/swagger/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/', file: 'swagger-ui.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'jsoneditor.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'marked.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'swagger-oauth.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
+		dependsOn 'jquery, lodash, jquery-migrate, marked'
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/', file: 'swagger-ui.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jsoneditor.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'swagger-oauth.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/css/', file: 'reset.css', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/css/', file: 'screen.css', plugin: 'unifina-core']
 	}
 
 }

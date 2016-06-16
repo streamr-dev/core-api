@@ -16836,6 +16836,7 @@ body.module-list #module-help-tree .panel .panel-body.editing .btn.edit-btn {
   display: none;
 }
 body.module-list .streamr-sidebar {
+  padding-top: 70px;
   margin-top: -15px;
 }
 body.module-list #sidebar .moduleSearch {
@@ -16852,6 +16853,37 @@ body.module-list .help-text .math-jax-ready span.mtext {
 }
 body.canvas-list-page .panel-heading-controls .input-group {
   width: 300px;
+}
+body.help-page {
+  line-height: 1.6;
+  /* Prevent FOUC by hiding the content initially, then shown using js */
+}
+@media (min-width: 700px) {
+  body.help-page .side-image {
+    float: right;
+    margin-left: 1em;
+  }
+}
+body.help-page hr {
+  width: 70%;
+  border-top: #E9570F solid 2px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+body.help-page pre {
+  background-color: white;
+}
+body.help-page .docs-wrapper {
+  display: none;
+}
+body.help-page h1,
+body.help-page .h1,
+body.help-page h2,
+body.help-page .h2,
+body.help-page h3,
+body.help-page .h3 {
+  margin-top: 40px;
+  margin-bottom: 20px;
 }
 table {
   background-color: transparent;
@@ -17220,7 +17252,6 @@ div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
 }
 .streamr-sidebar {
   position: fixed;
-  padding-top: 70px;
 }
 .streamr-sidebar ul.nav li.active:hover > a,
 .streamr-sidebar ul.nav li.active:focus > a,
@@ -17288,6 +17319,9 @@ div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
 }
 .streamr-sidebar ul.nav li.active > ul.nav {
   display: block;
+}
+.scrollspy-wrapper {
+  padding-bottom: 600px;
 }
 body.dashboard-show {
   height: 100%;
