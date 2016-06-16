@@ -24,7 +24,6 @@ modules = {
 	}
 	bootstrap {
 		dependsOn 'jquery'
-		// resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 	}
@@ -138,11 +137,11 @@ modules = {
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
 	}
 	moment {
-		resource url:[dir:'js/moment', file:'moment.js']
+		resource url:[dir:'js/moment', file:'moment.js', plugin:'unifina-core']
 	}
 	'moment-timezone' {
 		dependsOn 'moment'
-		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js']
+		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js', plugin:'unifina-core']
 	}
 
 	/**
@@ -206,7 +205,6 @@ modules = {
 	}
 	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
-//		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
