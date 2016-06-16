@@ -320,7 +320,7 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	return pub;
 }
 
-$(SignalPath).on("new", function() {
+$(SignalPath).on("new loaded", function() {
 	
 	// Bind connection and disconnection events
 	jsPlumb.bind("connection",function(connection) {
