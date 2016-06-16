@@ -5,9 +5,11 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
     pub = pub || {};
     pub = SignalPath.Output(json, parentDiv, module, type, pub);
 
+    var div;
+
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
-        var div = super_createDiv()
+        div = super_createDiv()
 
         if (!json.variadic.disableGrow) {
 
