@@ -118,6 +118,18 @@ databaseChangeLog = {
 		}
 	}
 
+	changeSet(author: "henri", id: "tour-resources-5") {
+		// Grant public read permission to demo streams
+		update(tableName: "permission") {
+			column(name: "anonymous", valueBoolean: true)
+			where("string_id = 'YpTAPDbvSAmj-iCUYz-dxA' and operation = 'read'")
+		}
+		update(tableName: "permission") {
+			column(name: "anonymous", valueBoolean: true)
+			where("string_id = 'ln2g8OKHSdi7BcL-bcnh2g' and operation = 'read'")
+		}
+	}
+
 	// Complete the tours for test users to avoid screwing up func tests etc.
 	changeSet(author: "henri", id: "tours-completed", context: "test") {
 		def date = "2016-04-11T15:00:00"
