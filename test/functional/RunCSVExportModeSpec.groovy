@@ -38,31 +38,30 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 		to CanvasPage
 		searchAndClick(streamName)
 		searchAndClick("Chart")
-		moveModuleBy("Chart", 400, 400)
+		moveModuleBy("Chart", 100, 100)
 		connectEndpoints(findOutput("Stream", "value"), findInput("Chart", "in1"))
 
 		and: "save sand start canvas in realtime mode"
 		ensureRealtimeTabDisplayed()
 		startCanvas(true)
 
-		and: "produce data to realtime canvas"
-		produceAllDataToKafka(topicId, 5000)
-		sleep(3000)
+		and: "produce data to realtime canvas and stop it"
+		produceAllDataToKafka(topicId, 1000)
 		stopCanvas()
 
-		when: "run as CSV export mode"
+		when: "run canvas in CSV export mode"
 		ensureHistoricalTabDisplayed()
 		runHistoricalDropdownButton.click()
 		runCsvExportModeButton.click()
 		waitForConfirmation()
 		acceptConfirmation()
-		def a = 5+5
-		closeProducer(null)
 
-		then:
-		waitFor {
-			false
-		}
+		then: "download link appears"
+		waitFor(30) { !$(".csvDownload a").isEmpty() }
+
+		and: "download link works"
+		def csvContent = downloadText($(".csvDownload a").attr("href"))
+		csvContent.readLines().size() == 100 + 1000
 	}
 
 	private void produceAllDataToKafka(String id, int iters = 100) {

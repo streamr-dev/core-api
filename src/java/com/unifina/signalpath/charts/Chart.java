@@ -107,7 +107,7 @@ public abstract class Chart extends ModuleWithUI {
 		if (csv) {
 			File file = csvWriter().finish();
 			if (hasRc) {
-				globals.getUiChannel().push(new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()), uiChannelId);
+				globals.getUiChannel().push(new CSVMessage(file.getName()), uiChannelId);
 			}
 		}
 	}
