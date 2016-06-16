@@ -89,7 +89,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			sleep(25)
 
 			// Synchronize with thread
-			conditions.within(10) { assert modules(canvasService, canvas)[3].inputs[0].value == i }
+			conditions.within(10) { assert modules(canvasService, canvas)[3].inputs[3].value == i }
 
 			// Log states of modules' outputs
 			log.info(modules(canvasService, canvas)*.outputs*.toString().join(" "))
