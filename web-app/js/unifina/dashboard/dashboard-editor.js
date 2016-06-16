@@ -362,57 +362,14 @@ var SidebarView = Backbone.View.extend({
 	render: function () {
 		var _this = this
 		this.$el.append(this.template(this.dashboard.toJSON()))
-		this.titleInput = this.$el.find("input.dashboard-name.title-input")
 		this.list = this.$el.find("#rsp-list")
 		this.saveButton = this.$el.find("#saveButton")
 		this.shareButton = this.$el.find("#share-button")
-		this.deleteButton = this.$el.find("#deleteDashboardButton")
 		_.each(this.canvases.models, function(canvas) {
 			var canvasView = new CanvasView({ model: canvas })
 			this.list.append(canvasView.el)
 		}, this)
-		new ConfirmButton(this.$el.find("#deleteDashboardButton"), {
-			title: "Are you sure?",
-			message: "Really delete dashboard " + _this.dashboard.get("name") + "?"
-		}, function(response) {
-			if(response) {
-				Backbone.sync("delete", _this.dashboard, {
-					success: function() {
-						// we dont want to accept exiting the page when we have just removed the whole dashboard
-						$(window).off("beforeunload")
-						Streamr.showSuccess("Dashboard deleted succesfully!", "", 2000)
-						setTimeout(function() {
-							window.location = _this.baseUrl + "dashboard/list"
-						}, 2000)
-					},
-					error: function(a, b, c) {
-						Streamr.showError()
-					}
-				})
-			}
-		})
-		this.checkPermissions()
-	},
-
-	checkPermissions: function() {
-		var _this = this
-		$.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(permissions) {
-			permissions = _.map(permissions, function(p) {
-				return p.operation
-			})
-			if (_.contains(permissions, "share")) {
-				_this.shareButton.removeAttr("disabled")
-			} else {
-				_this.shareButton.addClass("forbidden")
-			}
-			if (_.contains(permissions, "write")) {
-				_this.saveButton.removeAttr("disabled")
-				_this.deleteButton.removeAttr("disabled")
-			} else {
-				_this.saveButton.addClass("forbidden")
-				_this.deleteButton.addClass("forbidden")
-			}
-		})
+		this.trigger("ready")
 	},
 
 	setEditMode: function (active) {		
@@ -454,20 +411,16 @@ var SidebarView = Backbone.View.extend({
 		}
 	},
 
-	updateTitle: function (e) {
-		var a = this.titleInput.val()
-		this.dashboard.set({name: a})
-	},
-
     save: function() {
     	var _this = this
-    	this.updateTitle()
 
     	this.dashboard.save({}, {
     		success: function() {
+				_this.dashboard.trigger("saved")
 	    		_this.dashboard.saved = true
 	    		document.title = _this.dashboard.get("name")
 				Streamr.showSuccess('Dashboard ' +_this.dashboard.get("name")+ ' saved successfully', "Saved!")
+				window.history.replaceState({}, undefined, _this.baseUrl + 'dashboard/show/' +  _this.dashboard.get("id"))
 	    	},
 	    	error: function(model, response) {
 				Streamr.showError(response.responseText, "Error while saving")
@@ -495,7 +448,11 @@ var Dashboard = Backbone.AssociatedModel.extend({
 	},
 
 	initialize: function (){
+		var _this = this
 		this.saved = true
+		this.listenTo(this, "change", function() {
+			_this.saved = false
+		})
 	}
 })
 
@@ -515,7 +472,6 @@ var DashboardView = Backbone.View.extend({
 			})
 			this.$el.droppable()
 		}
-
 		_.each(this.model.get("items").models, this.addDashboardItem, this)
 
 		this.model.get("items").on("add", this.addDashboardItem, this)

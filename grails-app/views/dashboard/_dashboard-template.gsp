@@ -1,18 +1,17 @@
 <script id="sidebar-template" type="text/template">
     <div class="menu-content">
-        <label><g:message code="dashboard.name.label"/></label>
-        <input type="text" class="dashboard-name title-input form-control" name="dashboard-name" placeholder="<g:message code="dashboard.name.label"/>" value="{{ name }}" />
+		<button id="saveButton" class='save-button btn btn-block btn-primary' title='Save dashboard' {{ typeof id === 'undefined' ? '' : 'disabled="disabled' }}>
+			<i class="fa fa-save" /> Save
+		</button>
+		<ui:shareButton id="share-button" class="btn-block" name="Dashboard {{ name }}" url="${createLink(uri: "/api/v1/dashboards/" + id)}" disabled="disabled">
+			Share
+		</ui:shareButton>
     </div>
     <ul class="navigation" id="rsp-list">
         <li class="canvas-title">
             <label><g:message code="dashboard.canvases.label"/></label>
         </li>
     </ul>
-    <div class="menu-content">
-        <button id="saveButton" class='save-button btn btn-block btn-primary' title='Save dashboard' disabled="disabled">Save</button>
-		<ui:shareButton id="share-button" class="btn-block" name="Dashboard {{ name }}" url="${createLink(uri: "/api/v1/dashboards/" + id)}" disabled="disabled"> Share </ui:shareButton>
-		<button id='deleteDashboardButton' class='delete-button btn btn-block btn-default confirm' title='Delete dashboard' disabled="disabled">Delete</button>
-    </div>
 </script>
 
 <script id="canvas-template" type="text/template">

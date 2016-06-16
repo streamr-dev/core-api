@@ -16066,6 +16066,9 @@ div.dataTables_scrollFoot table {
 .selected-theme .widget-rating .active a {
   color: #e95b15;
 }
+.selected-theme .dropdown-menu > li.disabled > a:hover {
+  background: none;
+}
 .panel-heading {
   height: 40px;
 }
@@ -16648,9 +16651,6 @@ body.embedded #content-wrapper > :not(.embeddable) {
 .panel.list-panel:last-child {
   margin-bottom: 150px;
 }
-#main-menu-inner .menu-content:last-child {
-  margin-bottom: 100px;
-}
 body.canvas-editor-page {
   overflow: hidden;
   height: 100%;
@@ -16742,16 +16742,6 @@ body.canvas-editor-page #moduleTree {
 }
 body.canvas-editor-page #main-menu .twitter-typeahead {
   width: 100%;
-}
-body.canvas-editor-page #canvas-name-editor.editing .canvas-name {
-  display: none;
-}
-body.canvas-editor-page #canvas-name-editor:not(.editing) input,
-body.canvas-editor-page #canvas-name-editor:not(.editing) button {
-  display: none;
-}
-body.canvas-editor-page #canvas-name-editor .canvas-name {
-  cursor: pointer;
 }
 body.canvas-editor-page .breadcrumb {
   margin-bottom: 0;
@@ -17168,27 +17158,6 @@ div.table.clickable-table.table-bordered .thead > .tr > .th:not(:first-child) {
 div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   border-left: 1px solid #dddddd;
 }
-div.table.clickable-table div.dropdown {
-  text-align: center;
-}
-div.table.clickable-table div.dropdown span.dropdown-toggle {
-  cursor: pointer;
-  font-size: 20px;
-}
-div.table.clickable-table div.dropdown span.dropdown-toggle:hover {
-  color: #000000;
-}
-div.table.clickable-table div.dropdown ul.dropdown-menu > li > span {
-  font-size: 14px;
-  cursor: pointer;
-  margin: 0 -2px;
-  padding: 5px 18px;
-  display: block;
-}
-div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
-  background-color: #e95b15;
-  color: #FFFFFF;
-}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;
@@ -17429,6 +17398,9 @@ body.dashboard-show.editing .stat-row .titlebar {
 body.dashboard-show.selected-theme #main-menu .navigation .module.checked a {
   color: #e95b15;
 }
+body.dashboard-show #main-menu .navigation {
+  padding-top: 25px;
+}
 body.dashboard-show #main-menu .navigation .module.checked .menu-icon.fa-square,
 body.dashboard-show #main-menu .navigation .module:not(.checked) .menu-icon.fa-check-square {
   display: none;
@@ -17446,6 +17418,9 @@ body.dashboard-show #sidebar-view .canvas.stopped .canvas-title {
 body.dashboard-show #sidebar-view .canvas-title {
   margin-left: 20px;
   cursor: pointer;
+}
+body.dashboard-show #sidebar-view .canvas-title span {
+  word-break: break-all;
 }
 body.dashboard-show .titlebar-clickable {
   cursor: pointer;
@@ -17481,29 +17456,6 @@ body.dashboard-show .titlebar-clickable {
 }
 .sharing-dialog .modal-body .access-button-row .user-delete-button {
   margin-left: 5px;
-}
-.form-inline.search-form .search-input-group {
-  margin-top: 0;
-}
-.form-inline.search-form .search-input-group .form-control {
-  height: 26px;
-}
-.form-inline.search-form .search-input-group .input-group-btn {
-  height: 26px;
-  vertical-align: top;
-}
-.form-inline.search-form .search-input-group .input-group-btn .btn {
-  height: 26px;
-  padding-top: 3px;
-}
-.form-inline.search-form .filter-toggle-button {
-  display: inline-block;
-  float: left;
-  margin-right: 2px;
-  height: 26px;
-}
-.form-inline.search-form .filter-toggle-button:last-of-type {
-  margin-right: 7px;
 }
 .streamr-search-menu,
 .streamr-search-menu.streamr-search-open {
@@ -17554,6 +17506,106 @@ body.dashboard-show .titlebar-clickable {
 .streamr-search-menu.streamr-search-empty {
   position: absolute;
   display: none;
+}
+.form-inline.search-form .search-input-group {
+  margin-top: 0;
+}
+.form-inline.search-form .search-input-group .form-control {
+  height: 26px;
+}
+.form-inline.search-form .search-input-group .input-group-btn {
+  height: 26px;
+  vertical-align: top;
+}
+.form-inline.search-form .search-input-group .input-group-btn .btn {
+  height: 26px;
+  padding-top: 3px;
+}
+.form-inline.search-form .filter-toggle-button {
+  display: inline-block;
+  float: left;
+  margin-right: 2px;
+  height: 26px;
+}
+.form-inline.search-form .filter-toggle-button:last-of-type {
+  margin-right: 7px;
+}
+#main-menu-inner {
+  position: relative;
+}
+#main-menu-inner .menu-content:last-child {
+  margin-bottom: 100px;
+}
+.streamr-dropdown {
+  text-align: center;
+  position: relative;
+}
+.streamr-dropdown a.dropdown-toggle,
+.streamr-dropdown span.dropdown-toggle {
+  cursor: pointer;
+  font-size: 20px;
+}
+.streamr-dropdown a.dropdown-toggle:hover,
+.streamr-dropdown span.dropdown-toggle:hover {
+  color: #000000;
+}
+.streamr-dropdown ul.dropdown-menu > li > a,
+.streamr-dropdown ul.dropdown-menu > li > span {
+  font-size: 14px;
+  cursor: pointer;
+  margin: 0 -2px;
+  padding: 5px 18px;
+  display: block;
+}
+.streamr-dropdown ul.dropdown-menu > li > a:hover,
+.streamr-dropdown ul.dropdown-menu > li > span:hover {
+  background-color: #e95b15;
+  color: #FFFFFF;
+}
+.streamr-dropdown ul.dropdown-menu > li.disabled {
+  cursor: not-allowed;
+}
+.streamr-dropdown ul.dropdown-menu > li.disabled > a,
+.streamr-dropdown ul.dropdown-menu > li.disabled > span {
+  color: #999;
+}
+.streamr-dropdown ul.dropdown-menu > li.disabled > a:hover,
+.streamr-dropdown ul.dropdown-menu > li.disabled > span:hover {
+  background: none;
+}
+.breadcrumb .streamr-dropdown {
+  display: inline-block;
+  margin-left: 17px;
+}
+.breadcrumb .streamr-dropdown li,
+.breadcrumb .streamr-dropdown li a {
+  color: initial;
+  font-size: initial;
+  line-height: initial;
+  height: initial;
+}
+.breadcrumb .streamr-dropdown li + li:before {
+  content: none;
+}
+.breadcrumb .streamr-dropdown .dropdown-toggle {
+  margin-top: -1.5px;
+}
+.name-editor input.name-input {
+  height: 22px;
+  font-size: 12px;
+  padding-left: 3px;
+  padding-right: 0;
+  margin-left: -4px;
+  margin-top: -1px;
+}
+.name-editor.editing .name {
+  display: none;
+}
+.name-editor:not(.editing) input {
+  display: none;
+}
+.name-editor .canvas-name {
+  cursor: text;
 }
 .widget-notifications .notification {
   position: relative;

@@ -303,13 +303,29 @@ $(function() {
 		Streamr.showSuccess('${message(code:"canvas.clearAndStarted")}: '.replace('{0}', SignalPath.getName()))
 	})
 
-	new CanvasNameEditor({
-		el: $("#canvas-name-editor"),
-		signalPath: SignalPath
+	var nameEditor = new StreamrNameEditor({
+		el: $(".name-editor"),
+		signalPath: SignalPath,
+		opener: $(".rename-canvas-button"),
+		name: SignalPath.getName()
+	}).on("changed", function(name) {
+		SignalPath.setName(name)
+	})
+	$(SignalPath).on("saved loaded new", function() {
+		nameEditor.update()
+	})
+
+	$(".streamr-dropdown li.disabled").click(function(e) {
+		e.preventDefault()
 	})
 
 	$(SignalPath).on('new', function(e, json) {
-		$("#share-button").attr("disabled", "disabled")
+		$(".share-button").data("url", undefined)
+		$(".share-button").attr("disabled", "disabled")
+		$(".share-button").removeClass("forbidden")
+		$(".delete-canvas-button").addClass("disabled")
+		$(".delete-canvas-button").removeClass("forbidden")
+		$("li.share-canvas-button").addClass("disabled")
 	})
 
 	$(SignalPath).on('loaded saved', function(e, json) {
@@ -322,10 +338,16 @@ $(function() {
 				}
 			})
 			if (_.contains(permissions, "share")) {
-				$("#share-button").data("url", canvasUrl)
-				$("#share-button").removeAttr("disabled")
+				$(".share-button").data("url", canvasUrl)
+				$(".share-button").removeAttr("disabled")
+				$("li.share-canvas-button").removeClass("disabled")
 			} else {
-				$("#share-button").addClass("forbidden")
+				$(".share-button").addClass("forbidden")
+			}
+			if (_.contains(permissions, "write")) {
+				$(".delete-canvas-button").removeClass("disabled")
+			} else {
+				$(".delete-canvas-button").addClass("forbidden")
 			}
 		})
 	})
@@ -337,7 +359,22 @@ $(function() {
 		SignalPath.unload()
 	})
 
-
+	new ConfirmButton("#delete-canvas-button", {
+		title: "${ message(code: 'canvas.delete.title') }",
+		message: "${ message(code: 'canvas.delete.confirm') }"
+	}, function(result) {
+		if (result) {
+			$.ajax("${ createLink(uri:"/api/v1/canvases", absolute: true)}" + '/' + SignalPath.getId(), {
+				method: 'DELETE',
+				success: function() {
+					window.location = "${ createLink(controller: 'canvas', action:'editor')}"
+				},
+				error: function(e, t, msg) {
+					Streamr.showError("${ message(code: 'canvas.delete.error') }", "${ message(code: 'canvas.delete.error.title') }")
+				}
+			})
+		}
+	})
 })
 
 
@@ -427,11 +464,13 @@ $(function() {
 					<!-- Realtime run controls -->
 					<div role="tabpanel" class="tab-pane" id="tab-realtime">
 						<div class="menu-content-header">
-							<!--<label>Realtime Run Options</label>-->
-							<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">
-								<i class="fa fa-cog"></i>
-								Options
-							</a>
+							%{--Uncomment and remove &nbsp; when gets content--}%
+							&nbsp;
+							%{--<!--<label>Realtime Run Options</label>-->--}%
+							%{--<a href="#" id="realtime-options-button" class="btn btn-primary btn-outline dark btn-xs pull-right" title="Realtime Run Options" data-toggle="modal" data-target="#realtimeOptionsModal">--}%
+								%{--<i class="fa fa-cog"></i>--}%
+								%{--Options--}%
+							%{--</a>--}%
 						</div>
 						<div class="btn-group btn-block run-group">
 							<button id="run-realtime-button" class="btn btn-primary col-xs-10 run-button">
@@ -479,18 +518,36 @@ $(function() {
 	<div id="content-wrapper">
 		<ui:breadcrumb>
 			<li>
-				<a href="/streamr/canvas/list">
-					Canvases
-				</a>
+				<g:link controller="canvas" action="list">
+					<g:message code="canvas.list.label"/>
+				</g:link>
 			</li>
 			<li class="active">
-				<span id="canvas-name-editor"></span>
+				<span class="name-editor"></span>
 			</li>
+			<div class="streamr-dropdown">
+				<button class="canvas-menu-toggle dropdown-toggle btn btn-xs btn-outline" data-toggle="dropdown">
+					<i class="fa fa-cog"></i> <i class="navbar-icon fa fa-caret-down"></i>
+				</button>
+				<ul class="dropdown-menu">
+					<li class="disabled share-canvas-button">
+						<ui:shareButton type="link" getName="SignalPath.getName()">Share</ui:shareButton>
+					</li>
+					<li class="rename-canvas-button">
+						<a>
+							<i class="fa fa-pencil"></i> Rename
+						</a>
+					</li>
+					<li class="delete-canvas-button disabled">
+						<a id="delete-canvas-button">
+							<i class="fa fa-trash-o"></i> Delete
+						</a>
+					</li>
+				</ul>
+			</div>
 		</ui:breadcrumb>
 		<div id="canvas" class="scrollable embeddable"></div>
 	</div>
-
-	<div id="main-menu-bg"></div>
 
 	<div id="csvModal" class="modal fade">
 	  <div class="modal-dialog">
@@ -575,22 +632,24 @@ $(function() {
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
-	<div id="realtimeOptionsModal" class="modal fade">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-					<h4 class="modal-title">Realtime Run Options</h4>
-				</div>
-				<div class="modal-body">
+	%{--Uncomment when gets content--}%
 
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
+	%{--<div id="realtimeOptionsModal" class="modal fade">--}%
+		%{--<div class="modal-dialog">--}%
+			%{--<div class="modal-content">--}%
+				%{--<div class="modal-header">--}%
+					%{--<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>--}%
+					%{--<h4 class="modal-title">Realtime Run Options</h4>--}%
+				%{--</div>--}%
+				%{--<div class="modal-body">--}%
+
+				%{--</div>--}%
+				%{--<div class="modal-footer">--}%
+					%{--<button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>--}%
+				%{--</div>--}%
+			%{--</div><!-- /.modal-content -->--}%
+		%{--</div><!-- /.modal-dialog -->--}%
+	%{--</div><!-- /.modal -->--}%
 
 	<ul id="save-dropdown-menu" class="dropdown-menu" role="menu">
 		<li class="disabled"><a href="#" id="saveButton">Save</a></li>

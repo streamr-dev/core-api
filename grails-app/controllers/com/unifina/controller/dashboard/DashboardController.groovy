@@ -26,8 +26,6 @@ class DashboardController {
 		return [dashboards:dashboards, shareable:shareable, writable:writable, user:user]
 	}
 
-	def create() {}
-
 	def save() {
 		Dashboard dashboard = new Dashboard()
 		dashboard.name = params.name

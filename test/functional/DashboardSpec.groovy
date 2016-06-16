@@ -2,6 +2,8 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.mixins.DashboardMixin
+import core.mixins.ListPageMixin
+import core.mixins.NotificationMixin
 import core.pages.*
 import spock.lang.Shared
 import spock.lang.Stepwise
@@ -10,14 +12,27 @@ import spock.lang.Stepwise
 class DashboardSpec extends LoginTester1Spec {
 
 	@Shared
-	String dashboardName
+	String name
+	@Shared
+	String name2
+
+	void clickDeleteButton() {
+		menuToggle.click()
+		waitFor {
+			deleteButton.displayed
+		}
+		deleteButton.click()
+	}
 
 	def setupSpec() {
-		dashboardName = "test" + new Date().getTime()
+		name = "test" + new Date().getTime()
+		name2 = name + "2"
 		// @Mixin is buggy, use runtime mixins instead
 		this.class.metaClass.mixin(CanvasMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
 		this.class.metaClass.mixin(DashboardMixin)
+		this.class.metaClass.mixin(NotificationMixin)
+		this.class.metaClass.mixin(ListPageMixin)
 
 		super.login()
 		waitFor { at CanvasPage }
@@ -25,7 +40,7 @@ class DashboardSpec extends LoginTester1Spec {
 		// Go start the Canvas related to this spec
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		$(".table .td", text:"DashboardSpec").click()
+		clickRow("DashboardSpec")
 		waitFor { at CanvasPage }
 		// Wait for the canvas to load
 		waitFor { findModuleOnCanvas("Chart") }
@@ -45,7 +60,7 @@ class DashboardSpec extends LoginTester1Spec {
 
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		$(".table .td", text:"DashboardSpec").click()
+		clickRow("DashboardSpec")
 
 		waitFor { at CanvasPage }
 		stopCanvasIfRunning()
@@ -59,23 +74,22 @@ class DashboardSpec extends LoginTester1Spec {
 		// Create a dashboard
 		when: "clicked to create new dashboard"
 		createButton.click()
-		then: "go to the dashboard create page"
-		waitFor { at DashboardCreatePage }
+		then: "go to the dashboard show page"
+		waitFor { at DashboardShowPage }
 
-		when: "created a new dashboard"
-		nameInput << dashboardName
-		createButton.click()
+		when: "changed the name and saved"
+		setDashboardName(name)
+		saveButton.click()
 		then: "go to dashboard show page"
 		waitFor {
-			at DashboardShowPage
-			findCanvas("DashboardSpec").displayed
+			findSuccessNotification()
 		}
 	}
 
 	void "dashboard can be edited"() {
 		setup: "open the dashboard"
 			to DashboardListPage
-			$(".table .td", text: dashboardName).parent().click()
+			clickRow(name)
 			waitFor {
 				at DashboardShowPage
 			}
@@ -113,52 +127,12 @@ class DashboardSpec extends LoginTester1Spec {
 			findTitleInput("Label (Stream.temperature)").firstElement().clear()
 			findTitleInput("") << "Foo"
 			// Focus lost
-			nameInput.click()
+			runningCanvasesLabel.click()
 		then: "title changes"
 			waitFor { findDashboardItem("Foo").displayed }
 
-		when: "the dashboard name changed"
-			nameInput.firstElement().clear()
-			nameInput << dashboardName + "2"
-
-		then: "the name changes"
-			nameInput.value() == dashboardName + "2"
-
-		when: "saved"
-			saveButton.click()
-		then: "pnotify with title 'Saved!' appears"
-			waitFor { $(".ui-pnotify .ui-pnotify-title", text: "Saved!").displayed }
-
-		//Checking the modifications have been saved	
-		when: "went to the dashboard list page"
-			to DashboardListPage
-		then: "the new dashboard is visible"
-			waitFor { at DashboardListPage }
-			$(".table .td", text: dashboardName + "2").displayed
-
-		when: "clicked the new dashboard to open"
-			$(".table .td", text: dashboardName + "2").click()
-		then: "the dashboard should open in non-edit-mode"
-			waitFor { at DashboardShowPage }
-			waitFor { js.exec("return \$('#main-menu').width()") == 0 }
-			waitFor { js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true }
-		then: "the dashboarditem should have the same title"
-			findDashboardItem("Foo").displayed
-	}
-
-	void "dashboard can be deleted"() {
-		setup: "open the dashboard"
-			to DashboardListPage
-			$(".table .td", text: dashboardName + "2").parent().click()
-			waitFor {
-				at DashboardShowPage
-			}
-
-		when: "clicked to edit"
-			$("#main-menu-toggle").click()
-		then: "the dashboard should be in edit-mode"
-			waitFor { js.exec("return \$('#main-menu').width()") > 0 }
-			js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
+		expect: "the dashboard name changed"
+			setDashboardName(name2)
 
 		// Testing of dragging the items
 		when: "dragged the item everywhere"
@@ -184,27 +158,63 @@ class DashboardSpec extends LoginTester1Spec {
 				""")
 			}
 
+		when: "saved"
+			saveButton.click()
+		then: "pnotify with title 'Saved!' appears"
+			waitFor { $(".ui-pnotify .ui-pnotify-title", text: "Saved!").displayed }
+
+		//Checking the modifications have been saved	
+		when: "went to the dashboard list page"
+			to DashboardListPage
+		then: "the new dashboard is visible"
+			waitFor { at DashboardListPage }
+			findRow(name2)
+
+		when: "clicked the new dashboard to open"
+			clickRow(name2)
+		then: "the dashboard should open in non-edit-mode"
+			waitFor { at DashboardShowPage }
+			waitFor { js.exec("return \$('#main-menu').width()") == 0 }
+			waitFor { js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == true }
+		then: "the dashboarditem should have the same title"
+			findDashboardItem("Foo").displayed
+	}
+
+	void "dashboard can be deleted"() {
+		setup: "open the dashboard"
+			to DashboardListPage
+			clickRow(name2)
+			waitFor {
+				at DashboardShowPage
+			}
+
+		when: "clicked to edit"
+			$("#main-menu-toggle").click()
+		then: "the dashboard should be in edit-mode"
+			waitFor { js.exec("return \$('#main-menu').width()") > 0 }
+			js.exec("return \$('#dashboard-view').sortable( 'option', 'disabled' )") == false
+
 		// Click to delete the dashboard without accepting it
 		when: "clicked the delete-button"
-			deleteButton.click()
+			clickDeleteButton()
 		then: "confirmation should appear"
-			waitFor { $(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed }
+			waitFor { $(".modal-content .bootbox-body", text:contains("delete")).displayed }
 		
 		when: "clicked 'cancel'"
 			$(".modal-footer button", text:"Cancel").click()
 		then: "back to show-page"
 			waitFor { at DashboardShowPage }
 			then: "confirmation is not visible anymore"
-			waitFor { !($(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed) }
+			waitFor { !($(".modal-content .bootbox-body", text:contains("delete")).displayed) }
 		
 		when: "went to the dashboard list page"
 			to DashboardListPage
 		then: "the new dashboard is visible"
 			waitFor { at DashboardListPage }
-			$(".table .td", text:dashboardName + "2").displayed
+			findRow(name2)
 		
 		when: "clicked the new dashboard to open"
-			$(".table .td", text:dashboardName + "2").parent().click()
+			clickRow(name2)
 		then: "the dashboard should open in non-edit-mode"
 			waitFor { 
 				at DashboardShowPage
@@ -228,15 +238,15 @@ class DashboardSpec extends LoginTester1Spec {
 		
 		// Delete the dashboard
 		when: "clicked the delete button"
-			deleteButton.click()
+			clickDeleteButton()
 		then: "confirmation should appear"
-			waitFor { $(".modal-content .bootbox-body", text:"Really delete dashboard " +dashboardName+ "2?").displayed }
+			waitFor { $(".modal-content .bootbox-body", text: contains("delete")).displayed }
 		
 		when: "clicked 'Ok'"
 			$(".modal-footer button", text:"OK").click()
 		then: "pnotify 'Deleted' is shown"
 			waitFor {
-				$(".ui-pnotify-text", text: contains("deleted")).displayed
+				$(".ui-pnotify-text", text: contains("delete")).displayed
 			}
 		then: "go to list-page"
 			waitFor {
@@ -244,23 +254,21 @@ class DashboardSpec extends LoginTester1Spec {
 			}
 
 		then: "the old dashboard is not in the list anymore"
-			!($(".table .td", text:dashboardName + "2").displayed)		
+			!findRow(name2)
 	}
 
 	def "not shared dashboard cannot be opened"() {
 		when: "try to upload an existing dashboard without permission"
-		go "dashboard/show/456456"
-		then: "no sidebar, alert visible"
-		!$("#sidebar-view *").size()
-		$(".alert-danger", text: contains("not found"))
+			go "dashboard/show/456456"
+		then: "error shown"
+			waitForErrorNotification()
 	}
 
 	def "non-existing dashboard cannot be opened"() {
 		when: "try to upload a non-existing dashboard"
-		go "dashboard/show/asdfasfasdfsadfasfar"
-		then: "no sidebar, alert visible"
-		!$("#sidebar-view *").size()
-		$(".alert-danger", text: contains("not found"))
+			go "dashboard/show/asdfasfasdfsadfasfar"
+		then: "error shown"
+			waitForErrorNotification()
 	}
 
 	def "a dashboard with no share-permission doesn't show share button enabled"() {
@@ -272,6 +280,7 @@ class DashboardSpec extends LoginTester1Spec {
 		}
 		shareButton.displayed
 		shareButton.getAttribute("disabled")
+		dropdownShareButton.hasClass("disabled")
 	}
 
 	def "a dashboard with no write-permission doesn't show save and delete buttons enabled"() {
@@ -283,10 +292,9 @@ class DashboardSpec extends LoginTester1Spec {
 		}
 		saveButton.displayed
 		saveButton.getAttribute("disabled")
-		deleteButton.displayed
-		deleteButton.getAttribute("disabled")
+		deleteButton.hasClass("disabled")
 		// And shareButton is not
 		shareButton.displayed
-		!shareButton.getAttribute("disabled")
+		!shareButton.hasClass("disabled")
 	}
 }

@@ -32,8 +32,8 @@
 	<ui:flashMessage/>
 
 	<div class="btn-group toolbar">
-		<a id="createButton" class="btn btn-primary" href="${createLink(action:'create')}">
-			<i class="fa fa-plus"></i> Create a new dashboard
+		<a id="createButton" class="btn btn-primary" href="${createLink(action:'show')}">
+			<i class="fa fa-plus"></i> Create Dashboard
 		</a>        	
 	</div>
 	
@@ -60,7 +60,7 @@
 					            <ui:td class="hidden-xs"><g:formatDate date="${dashboard.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
 								<ui:td class="button-column">
 									<g:if test="${writable.contains(dashboard) || shareable.contains(dashboard)}">
-										<div class="dropdown">
+										<div class="streamr-dropdown">
 											<button class="dashboard-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
 												<i class="navbar-icon fa fa-caret-down"></i>
 											</button>

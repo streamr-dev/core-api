@@ -82,9 +82,11 @@ body.canvas-editor-page {
 			}
 		}
 	}
-	// There was problems with overriding Bootstrap's styles and I didn't want to put the whole closure above under #main-menu tag
-	#main-menu .nav-tabs.run-mode-tabs li.active > .nav-tab-background + a {
-		background: none;
+	#main-menu {
+		// There was problems with overriding Bootstrap's styles and I didn't want to put the whole closure above under #main-menu tag
+		.nav-tabs.run-mode-tabs li.active > .nav-tab-background + a {
+			background: none;
+		}
 	}
 
 	.run-button {
@@ -111,23 +113,6 @@ body.canvas-editor-page {
 
 	#main-menu .twitter-typeahead {
 		width: 100%;
-	}
-	
-	#canvas-name-editor {
-		&.editing {
-			.canvas-name {
-				display:none;
-			}
-		}
-		&:not(.editing) {
-			input, button {
-				display: none;
-			}
-		}
-
-		.canvas-name {
-			cursor: pointer;
-		}
 	}
 
 	.breadcrumb {
