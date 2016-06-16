@@ -234,30 +234,78 @@ describe('Tour', function() {
 	})
 
 	describe('waiting for connections', function() {
-		var filterEndpoints, speakerEndpoints, audioEndpoints
 
-		function mockModule(name, endpoints) {
-			return { getInputs: function() { return [] },
-					getInput: function() { return { getConnectedEndpoints: function() {
-					return endpoints
-			}}}}
+		var audio, filter, speaker
+
+		function mockModule(name) {
+			return {
+				inputs: [],
+				outputs: [],
+				getInputs: function() { 
+					return this.inputs
+				},
+				getInput: function(name) {
+					return this.inputs.find(function(ep) {
+						return ep.json.name === name
+					})
+				},
+				getOutputs: function() {
+					return this.inputs
+				},
+				getOutput: function(name) {
+					return this.outputs.find(function(ep) {
+						return ep.json.name === name
+					})
+				},
+				findInputByDisplayName: function(name) {
+					return this.inputs.find(function(ep) {
+						return ep.json.name === name
+					})
+				},
+				div: {
+					hasClass: function(className) {
+						return className === name
+					}
+				}
+			}
 		}
 
-		function mockEndpoint(name, moduleName) {
-			return { json: { name: name }, module: { div: { hasClass: function(className) {
-					return className === moduleName
-			}}}}
+		function mockEndpoint(name, module) {
+			return {
+				connectedEndpoints: [],
+				json: {
+					name: name
+				},
+				module: module,
+				connect: function(endpoint) {
+					this.connectedEndpoints.push(endpoint)
+				},
+				getConnectedEndpoints: function() {
+					return this.connectedEndpoints
+				}
+			}
+		}
+
+		function connect(endpoint1, endpoint2) {
+			endpoint1.connect(endpoint2)
+			endpoint2.connect(endpoint1)
 		}
 
 		beforeEach(function() {
-			filterEndpoints = []
-			speakerEndpoints = []
-			audioEndpoints = []
+			audio = mockModule('audio')
+			filter = mockModule('filter')
+			speaker = mockModule('speaker')
+
 			var _spObjects = {
-				'audio': mockModule('audio', audioEndpoints),
-				'filter': mockModule('filter', filterEndpoints),
-				'speaker': mockModule('speaker', speakerEndpoints)
+				'audio': audio,
+				'filter': filter,
+				'speaker': speaker
 			}
+
+			audio.outputs.push(mockEndpoint('out', audio))
+			filter.inputs.push(mockEndpoint('in', filter))
+			filter.outputs.push(mockEndpoint('out', filter))
+			speaker.inputs.push(mockEndpoint('in', speaker))
 
 			tour._getSpObject = function(name) {
 				return _spObjects[name]
@@ -279,8 +327,8 @@ describe('Tour', function() {
 			])()
 			$('.filter').off = counter;
 			$('.speaker').off = counter;
-			filterEndpoints.push(mockEndpoint('out', 'audio'))
-			speakerEndpoints.push(mockEndpoint('out', 'filter'))
+			connect(audio.getOutput("out"), filter.getInput("in"))
+			connect(filter.getOutput("out"), speaker.getInput("in"))
 			$('.speaker').trigger('spConnect')
 			$('.filter').trigger('spConnect')
 		})
@@ -291,11 +339,11 @@ describe('Tour', function() {
 				['audio.out', 'filter.in'],
 				['filter.out', 'speaker.in']
 			])()
-			filterEndpoints.push(mockEndpoint('out', 'audio'))
+			connect(audio.getOutput("out"), filter.getInput("in"))
 			$('.filter').trigger('spConnect')
 			$('.audio').trigger('spConnect')
 
-			speakerEndpoints.push(mockEndpoint('out', 'filter'))
+			connect(filter.getOutput("out"), speaker.getInput("in"))
 			$('.speaker').trigger('spConnect')
 			$('.filter').trigger('spConnect')
 		})
@@ -306,16 +354,8 @@ describe('Tour', function() {
 				['audio', 'filter'],
 				['filter', 'speaker']
 			])()
-			tour._getSpObject('filter').getInputs = function() {
-				return [{ getConnectedEndpoints: function() {
-					return [ mockEndpoint('out', 'audio') ]
-				}}]
-			}
-			tour._getSpObject('speaker').getInputs = function() {
-				return [{ getConnectedEndpoints: function() {
-					return [ mockEndpoint('out', 'filter') ]
-				}}]
-			}
+			connect(audio.getOutput("out"), filter.getInput("in"))
+			connect(filter.getOutput("out"), speaker.getInput("in"))
 			$('.speaker').trigger('spConnect')
 			$('.filter').trigger('spConnect')
 		})
@@ -326,16 +366,8 @@ describe('Tour', function() {
 				['audio.out', 'filter'],
 				['filter.out', 'speaker']
 			])()
-			tour._getSpObject('filter').getInputs = function() {
-				return [{ getConnectedEndpoints: function() {
-					return [ mockEndpoint('out', 'audio') ]
-				}}]
-			}
-			tour._getSpObject('speaker').getInputs = function() {
-				return [{ getConnectedEndpoints: function() {
-					return [ mockEndpoint('out', 'filter') ]
-				}}]
-			}
+			connect(audio.getOutput("out"), filter.getInput("in"))
+			connect(filter.getOutput("out"), speaker.getInput("in"))
 			$('.speaker').trigger('spConnect')
 			$('.filter').trigger('spConnect')
 		})
@@ -346,8 +378,8 @@ describe('Tour', function() {
 				['audio', 'filter.in'],
 				['filter', 'speaker.in']
 			])()
-			speakerEndpoints.push(mockEndpoint('out', 'filter'))
-			filterEndpoints.push(mockEndpoint('out', 'audio'))
+			connect(audio.getOutput("out"), filter.getInput("in"))
+			connect(filter.getOutput("out"), speaker.getInput("in"))
 			$('.speaker').trigger('spConnect')
 			$('.filter').trigger('spConnect')
 		})

@@ -4,7 +4,7 @@ Tour.list(function(tourList) {
 	$('#help-tour-list').prepend(
 		tourList.map(function(item, idx) {
 			var url = Streamr.createLink(item.controller, item.action) + "?playTour=" + idx
-			return $('<li><a href="'+url+'">Tour: '+item.title+'</a></li>')
+			return $('<li><a class="tour-link" href="'+url+'">Tour: '+item.title+'</a></li>')
 		})
 	)
 })
@@ -55,7 +55,7 @@ Tour.list(function(tourList) {
 						</a>
 						<ul class="dropdown-menu" id="help-tour-list">
 							<%-- Tours are dynamically inserted here --%>
-<%--							<li class="divider"></li>--%>
+							<li class="divider"></li>
 							<li><g:link elementId="navExamplesLink" controller="canvas" params="[examples:1]">Example Canvases</g:link></li>
 							<li><g:link controller="help" action="api">API documentation</g:link></li>
 						</ul>

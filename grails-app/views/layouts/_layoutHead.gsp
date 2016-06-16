@@ -26,6 +26,7 @@
 	<r:require module="global-error-handler"/>
 
 	<g:if test="${!login}">
+		<g:render template="/tours/tours"/>
 		<r:require module='tour'/>
 	</g:if>
 	

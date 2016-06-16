@@ -439,6 +439,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.getDiv = getDiv;
 	
 	function close() {
+		$(SignalPath).trigger('moduleBeforeClose', [ prot.jsonData, prot.div ])
 		prot.div.remove();
 		pub.onClose();
 	}
