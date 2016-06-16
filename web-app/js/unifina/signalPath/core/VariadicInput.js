@@ -9,6 +9,11 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
     pub.createDiv = function() {
         var div = super_createDiv()
 
+        if (json.variadic.isLast) {
+            div.addClass("last-variadic")
+            div.find(".ioname").append("&nbsp;<i class='variadic-plus fa fa-plus'>")
+        }
+
         div.bind("spConnect", function(event, output) {
             if (!SignalPath.isLoading() && !module.moduleClosed) {
 
@@ -16,6 +21,7 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
                     var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
 
                     json.variadic.isLast = false
+                    div.removeClass("last-variadic")
                     json.requiresConnection = true // does not work
                     json.connected = true
 
