@@ -357,7 +357,7 @@ class TourSpec extends LoginTester1Spec {
 		}
 
 		advance {
-			connectEndpoints(findOutput("Count", "count"), findInputByDisplayName("Filter", "in1"))
+			connectEndpoints(findOutput("GreaterThan", "A&gt;B"), findInputByDisplayName("Filter", "in1"))
 		}
 
 		advance { searchAndClickContains("Email") }

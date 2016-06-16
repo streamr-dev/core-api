@@ -760,7 +760,7 @@ class ShareSpec extends LoginTester1Spec {
 		addAndWaitModule("Button")
 		addAndWaitModule("Table")
 		moveModuleBy("Table", 300, 0)
-		connectEndpoints(findOutput("Button", "out"), findInput("Table", "in1"))
+		connectEndpoints(findOutput("Button", "out"), findInputByDisplayName("Table", "in1"))
 		ensureRealtimeTabDisplayed()
 		saveCanvasAs(name)
 		startCanvas(true)

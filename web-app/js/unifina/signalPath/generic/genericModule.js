@@ -378,23 +378,26 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 
 	prot.removeOutput = function(name) {
 		var _this = this
+		// Remove the endpoint async to ensure it is run after the spDisconnect event has been handled completely
 		setTimeout(function() {
-			var el = prot.outputsByName[name]
-			if (el) {
-				var index = prot.outputs.indexOf(el)
-				if (index <= -1) {
-					throw "Shouldn't be here!"
-				}
-				prot.outputs.splice(index, 1)
-				delete prot.outputsByName[name]
+			if (!prot.moduleClosed) {
+				var el = prot.outputsByName[name]
+				if (el) {
+					var index = prot.outputs.indexOf(el)
+					if (index <= -1) {
+						throw "Shouldn't be here!"
+					}
+					prot.outputs.splice(index, 1)
+					delete prot.outputsByName[name]
 
-				try {
-					jsPlumb.remove(el.div)
-				} finally {
-					el.parentDiv.empty()
-					_this.redraw()
-					if (el.parentDiv.parent().find("td.input:empty").length !== 0) {
-						el.parentDiv.parent().remove()
+					try {
+						jsPlumb.remove(el.div)
+					} finally {
+						el.parentDiv.empty()
+						_this.redraw()
+						if (el.parentDiv.parent().find("td.input:empty").length !== 0) {
+							el.parentDiv.parent().remove()
+						}
 					}
 				}
 			}

@@ -318,53 +318,57 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	}
 	
 	return pub;
-}
+};
 
-$(SignalPath).on("new loaded", function() {
-	
-	// Bind connection and disconnection events
-	jsPlumb.bind("connection",function(connection) {
-		$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
-		$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
-	});
-	jsPlumb.bind("connectionDetached",function(connection) {
-		if (!connection.connection.pending) {
-			$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
-			$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
-		}
-	});
-	// "connection" event is also fired on connection move, so need to report just the disconnect part
-	jsPlumb.bind("connectionMoved",function(info, originalEvent) {
-		// info.index: 0 if source was moved, 1 if target was moved
-		var originalElement = (info.index ? info.originalTargetEndpoint.element : info.originalSourceEndpoint.element)
-		var theOtherElement = (info.index ? info.originalSourceEndpoint.element : info.originalTargetEndpoint.element)
-		
-		$(originalElement).trigger("spDisconnect", $(theOtherElement).data("spObject"));
-		$(theOtherElement).trigger("spDisconnect", $(originalElement).data("spObject"));
-	});
-	
-	jsPlumb.bind("connectionDrag", function(conn) {
-		// Highlight valid targets
-		var $epDiv = $("#"+conn.sourceId)
-		var ep = $epDiv.data("spObject")
-		var inputOrOutput = ($epDiv.hasClass("input") && conn.pending || $epDiv.hasClass("output") && !conn.pending ? "output" : "input")
-		var acceptedTypes = ep.getAcceptedTypes()
-		$(acceptedTypes).each(function(i, type) {
-			var $validTargets = (type === "Object" ? $(".endpoint."+inputOrOutput) : $(".endpoint."+inputOrOutput+"."+type+","+".endpoint."+inputOrOutput+".Object"))
+(function() {
+	var jsPlumbReset = jsPlumb.reset
 
-			$validTargets.each(function(j,target) {
-				var spObject = $(target).data("spObject")
-				if (!spObject.jsPlumbEndpoint.isFull())
-					spObject.addClass("highlight")
+	jsPlumb.reset = function() {
+		jsPlumbReset.apply(jsPlumb)
+
+		// Bind connection and disconnection events
+		jsPlumb.bind("connection", function(connection) {
+			$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
+			$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
+		});
+		jsPlumb.bind("connectionDetached", function(connection) {
+			if (!connection.connection.pending) {
+				$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
+				$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
+			}
+		});
+		// "connection" event is also fired on connection move, so need to report just the disconnect part
+		jsPlumb.bind("connectionMoved", function(info, originalEvent) {
+			// info.index: 0 if source was moved, 1 if target was moved
+			var originalElement = (info.index ? info.originalTargetEndpoint.element : info.originalSourceEndpoint.element)
+			var theOtherElement = (info.index ? info.originalSourceEndpoint.element : info.originalTargetEndpoint.element)
+
+			$(originalElement).trigger("spDisconnect", $(theOtherElement).data("spObject"));
+			$(theOtherElement).trigger("spDisconnect", $(originalElement).data("spObject"));
+		});
+
+		jsPlumb.bind("connectionDrag", function (conn) {
+			// Highlight valid targets
+			var $epDiv = $("#" + conn.sourceId)
+			var ep = $epDiv.data("spObject")
+			var inputOrOutput = ($epDiv.hasClass("input") && conn.pending || $epDiv.hasClass("output") && !conn.pending ? "output" : "input")
+			var acceptedTypes = ep.getAcceptedTypes()
+			$(acceptedTypes).each(function(i, type) {
+				var $validTargets = (type === "Object" ? $(".endpoint." + inputOrOutput) : $(".endpoint." + inputOrOutput + "." + type + "," + ".endpoint." + inputOrOutput + ".Object"))
+
+				$validTargets.each(function(j, target) {
+					var spObject = $(target).data("spObject")
+					if (!spObject.jsPlumbEndpoint.isFull())
+						spObject.addClass("highlight")
+				})
 			})
 		})
-	})
-	
-	jsPlumb.bind("connectionDragStop", function(conn) {
-		// Un-highlight
-		$(".endpoint.highlight").each(function(i,target) {
-			$(target).data("spObject").removeClass("highlight")
+
+		jsPlumb.bind("connectionDragStop", function(conn) {
+			// Un-highlight
+			$(".endpoint.highlight").each(function(i, target) {
+				$(target).data("spObject").removeClass("highlight")
+			})
 		})
-	})
-	
-})
+	}
+})()

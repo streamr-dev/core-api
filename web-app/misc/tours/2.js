@@ -119,7 +119,7 @@
             }
         )
 
-        .step("Set parameter <code>windowLength</code> of Count to <strong>1</strong>",
+        .step("Let's count the tweets in a 1 minute window.<br/><br/>Set parameter <code>windowLength</code> of Count to <strong>1</strong>",
             '.tourCount1',
             tour.waitForInput(".tourCount1 .parameterInput:eq(0)", "1")
         )
@@ -163,7 +163,7 @@
             tour.waitForConnection(['tourConstant1.out', 'tourGreaterThan1.B'])
         )
 
-        .step("Add module <strong>Filter</strong> to the canvas.",
+        .step("Now, we only want alerts when the output of GreaterThan is true.<br/><br/>Add module <strong>Filter</strong> to the canvas.",
             '#search',
             function(cb) {
                 tour.waitForModuleAdded('Filter')(cb)
@@ -175,9 +175,9 @@
             tour.waitForConnection(['tourGreaterThan1.A>B', 'tourFilter1.pass'])
         )
 
-        .step("Connect <code>count</code> of Count to <code>in1</code> of Filter.",
+        .step("Also connect <code>A>B</code> of GreaterThan to <code>in1</code> of Filter.",
             '.tourGreaterThan1',
-            tour.waitForConnection(['tourCount1.count', 'tourFilter1.in1'])
+            tour.waitForConnection(['tourGreaterThan1.A>B', 'tourFilter1.in1'])
         )
 
         .step("Add module <strong>Email</strong> to the canvas.",
@@ -188,7 +188,7 @@
         )
 
         .step("Set parameter <code>subject</code> of Email to <strong>bitcoin mentions are exploding!</strong>",
-            '.tourConstant1',
+            '.tourEmail1',
             tour.waitForInput(".tourEmail1 .parameterInput:first-child", "bitcoin mentions are exploding!")
         )
 
@@ -239,7 +239,7 @@
             '.tourTable4'
         )
 
-        .step("<b>Stop</b> the running canvas when you feel you ready to continue.",
+        .step("<b>Stop</b> the running canvas when you feel you are ready to continue.",
             '#run-realtime-button',
             function() {
                 $(document).one("shown.bs.modal", function() {

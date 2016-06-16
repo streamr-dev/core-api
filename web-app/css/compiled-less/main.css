@@ -16282,6 +16282,19 @@ div.output .switchContainer .ioSwitch {
   height: 13px;
   cursor: pointer;
 }
+.endpoint.last-variadic .ioSwitch {
+  display: none;
+}
+.ioname i {
+  color: #888;
+  font-size: smaller;
+}
+.endpoint.last-variadic .variadic-plus {
+  display: inline-block;
+}
+.endpoint .variadic-plus {
+  display: none;
+}
 .option .optionTitle {
   width: 100px;
   display: inline-block;
@@ -17437,29 +17450,6 @@ body.dashboard-show .titlebar-clickable {
 .sharing-dialog .modal-body .access-button-row .user-delete-button {
   margin-left: 5px;
 }
-.form-inline.search-form .search-input-group {
-  margin-top: 0;
-}
-.form-inline.search-form .search-input-group .form-control {
-  height: 26px;
-}
-.form-inline.search-form .search-input-group .input-group-btn {
-  height: 26px;
-  vertical-align: top;
-}
-.form-inline.search-form .search-input-group .input-group-btn .btn {
-  height: 26px;
-  padding-top: 3px;
-}
-.form-inline.search-form .filter-toggle-button {
-  display: inline-block;
-  float: left;
-  margin-right: 2px;
-  height: 26px;
-}
-.form-inline.search-form .filter-toggle-button:last-of-type {
-  margin-right: 7px;
-}
 .streamr-search-menu,
 .streamr-search-menu.streamr-search-open {
   display: block;
@@ -17509,6 +17499,29 @@ body.dashboard-show .titlebar-clickable {
 .streamr-search-menu.streamr-search-empty {
   position: absolute;
   display: none;
+}
+.form-inline.search-form .search-input-group {
+  margin-top: 0;
+}
+.form-inline.search-form .search-input-group .form-control {
+  height: 26px;
+}
+.form-inline.search-form .search-input-group .input-group-btn {
+  height: 26px;
+  vertical-align: top;
+}
+.form-inline.search-form .search-input-group .input-group-btn .btn {
+  height: 26px;
+  padding-top: 3px;
+}
+.form-inline.search-form .filter-toggle-button {
+  display: inline-block;
+  float: left;
+  margin-right: 2px;
+  height: 26px;
+}
+.form-inline.search-form .filter-toggle-button:last-of-type {
+  margin-right: 7px;
 }
 .widget-notifications .notification {
   position: relative;
