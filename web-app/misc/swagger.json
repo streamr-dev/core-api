@@ -1374,24 +1374,32 @@
     "definitions": {
         "Stream": {
             "type": "object",
-            "allOf": [
-                {
-                    "$ref": "#/definitions/StreamCreateRequest"
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Unique identifier for this stream."
                 },
-                {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "string",
-                            "description": "Unique identifier for this stream."
-                        },
-                        "apiKey": {
-                            "type": "string",
-                            "description": "Api key needed to produce data to this stream."
-                        }
-                    }
+                "name": {
+                    "type": "string",
+                    "description": "Name of this stream.",
+                    "example": "My stream"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of this stream.",
+                    "example": "My stream description"
+                },
+                "config": {
+                    "$ref": "#/definitions/StreamConfig"
+                },
+                "apiKey": {
+                    "type": "string",
+                    "description": "Api key needed to produce data to this stream."
                 }
-            ]
+            }
         },
         "StreamCreateRequest": {
             "type": "object",
@@ -1453,47 +1461,56 @@
         },
         "Canvas": {
             "type": "object",
-            "allOf": [
-                {
-                    "$ref": "#/definitions/CanvasCreateRequest"
+            "required": [
+                "name",
+                "modules"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Unique identifier for Canvas"
                 },
-                {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "string",
-                            "description": "Unique identifier for Canvas"
-                        },
-                        "created": {
-                            "type": "string",
-                            "description": "when Canvas was created",
-                            "format": "dateTime"
-                        },
-                        "updated": {
-                            "type": "string",
-                            "description": "when Canvas was last updated",
-                            "format": "dateTime"
-                        },
-                        "hasExports": {
-                            "type": "boolean",
-                            "description": "whether module uses exported inputs or outputs"
-                        },
-                        "uiChannel": {
-                            "$ref": "#/definitions/UiChannel"
-                        },
-                        "state": {
-                            "$ref": "#/definitions/CanvasState"
-                        },
-                        "adhoc": {
-                            "type": "boolean"
-                        },
-                        "serialized": {
-                            "type": "boolean",
-                            "description": "indicates whether there exists a serialization of this canvas"
-                        }
+                "name": {
+                    "type": "string",
+                    "example": "My canvas"
+                },
+                "modules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Module"
                     }
+                },
+                "settings": {
+                    "$ref": "#/definitions/CanvasSettings"
+                },
+                "created": {
+                    "type": "string",
+                    "description": "when Canvas was created",
+                    "format": "dateTime"
+                },
+                "updated": {
+                    "type": "string",
+                    "description": "when Canvas was last updated",
+                    "format": "dateTime"
+                },
+                "hasExports": {
+                    "type": "boolean",
+                    "description": "whether module uses exported inputs or outputs"
+                },
+                "uiChannel": {
+                    "$ref": "#/definitions/UiChannel"
+                },
+                "state": {
+                    "$ref": "#/definitions/CanvasState"
+                },
+                "adhoc": {
+                    "type": "boolean"
+                },
+                "serialized": {
+                    "type": "boolean",
+                    "description": "indicates whether there exists a serialization of this canvas"
                 }
-            ]
+            }
         },
         "CanvasCreateRequest": {
             "type": "object",
