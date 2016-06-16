@@ -94,53 +94,34 @@ class CanvasSpec extends LoginTester1Spec {
 			addAndWaitModule("Label")
 		when: "saved with name"
 			saveCanvasAs(name)
-			login()
+			newButton.click()
 		then: "canvas can be loaded"
 			loadSignalPath(name)
 			findModuleOnCanvas("Label")
 	}
 
-	def "saving changes the url in address bar"() {
+	def "url in address bar reflects editor canvas"() {
 		def name = "CanvasSpec-" + System.currentTimeMillis()
+
 		expect: "the url is clear"
-			driver.currentUrl.endsWith("/canvas/editor")
+			waitFor { driver.currentUrl.endsWith("/canvas/editor") }
+
 		when: "saved with name"
 			saveCanvasAs(name)
 		then: "url changes"
-			!driver.currentUrl.endsWith("/canvas/editor")
+			waitFor { !driver.currentUrl.endsWith("/canvas/editor") }
 			at CanvasPage
-		when: "login"
-			login()
-		then: "the url is clean again"
-			driver.currentUrl.endsWith("/canvas/editor")
-	}
 
-	def "loading changes the url in address bar"() {
-		def name = "CanvasSpec-" + System.currentTimeMillis()
-		when: "saved with name"
-			saveCanvasAs(name)
-			login()
+		when: "click new button"
+			newButton.click()
 		then: "url is clear"
-			driver.currentUrl.endsWith("/canvas/editor")
+			waitFor { driver.currentUrl.endsWith("/canvas/editor") }
+
 		when: "canvas is loaded"
 			loadSignalPath(name)
 		then: "the url has changed"
-			!driver.currentUrl.endsWith("/canvas/editor")
-			at CanvasPage
-	}
+			waitFor { !driver.currentUrl.endsWith("/canvas/editor") }
 
-	def "creating new canvas clears the url"() {
-		def name = "CanvasSpec-" + System.currentTimeMillis()
-		when: "saved with name"
-			saveCanvasAs(name)
-			login()
-		then: "url is clear"
-			driver.currentUrl.endsWith("/canvas/editor")
-		when: "canvas is loaded but then created new"
-			loadSignalPath(name)
-			$("#newSignalPath").click()
-		then: "the url is clean"
-			driver.currentUrl.endsWith("/canvas/editor")
 	}
 
 	def "going back after creating a new canvas reloads the last one"() {
@@ -148,20 +129,20 @@ class CanvasSpec extends LoginTester1Spec {
 		when: "saved with name"
 			addAndWaitModule("Table")
 			saveCanvasAs(name)
-			login()
+			newButton.click()
 		then: "no module"
 			waitFor {
 				at CanvasPage
+				!findModuleOnCanvas("Table")
 			}
-			!findModuleOnCanvas("Table")
 		when: "canvas is loaded"
 			loadSignalPath(name)
 		then: "module can be found"
 			findModuleOnCanvas("Table")
 		when: "new canvas is created"
-			$("#newSignalPath").click()
+			newButton.click()
 		then: "no module"
-			!findModuleOnCanvas("Table")
+			waitFor { !findModuleOnCanvas("Table") }
 		when: "clicked back button"
 			driver.navigate().back()
 		then: "module can be found"
@@ -175,17 +156,11 @@ class CanvasSpec extends LoginTester1Spec {
 			def name = "CanvasSpec-" + System.currentTimeMillis()
 			addAndWaitModule("Table")
 			saveCanvasAs(name)
-			login()
-			waitFor {
-				at CanvasPage
-			}
+			newButton.click()
 			def name2 = "CanvasSpec-" + System.currentTimeMillis()
 			addAndWaitModule("Label")
 			saveCanvasAs(name2)
-			login()
-			waitFor {
-				at CanvasPage
-			}
+			newButton.click()
 		when: "canvas 1 is loaded"
 			loadSignalPath(name)
 		then: "Table can be found, no Label"
