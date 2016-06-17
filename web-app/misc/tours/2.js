@@ -187,9 +187,9 @@
             }
         )
 
-        .step("Set parameter <code>subject</code> of Email to <strong>bitcoin mentions are exploding!</strong>",
+        .step("Set parameter <code>subject</code> of Email to <strong>alert</strong>",
             '.tourEmail1',
-            tour.waitForInput(".tourEmail1 .parameterInput:first-child", "bitcoin mentions are exploding!")
+            tour.waitForInput(".tourEmail1 .parameterInput:first-child", "alert")
         )
 
         .step("Connect <code>out1</code> of Filter to <code>value1</code> of Email.",

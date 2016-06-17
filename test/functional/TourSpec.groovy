@@ -365,7 +365,7 @@ class TourSpec extends LoginTester1Spec {
 		moveModuleBy("Email", 1000, 25)
 
 		advance {
-			setParameterValueForModule("Email", "subject", "bitcoin mentions are exploding!")
+			setParameterValueForModule("Email", "subject", "alert")
 		}
 
 		advance {
