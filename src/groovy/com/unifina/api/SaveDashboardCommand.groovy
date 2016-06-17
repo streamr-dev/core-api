@@ -11,4 +11,8 @@ class SaveDashboardCommand {
 	static constraints = {
 		name(blank: false)
 	}
+
+	Map toMap() {
+		[name: name, items: items]
+	}
 }

@@ -68,6 +68,15 @@ class DashboardService {
 		}
 		dashboard.save(failOnError: true)
 	}
+	/**
+	 * Create a new Dashboard by a command
+	 * @param validCommand command containing name and items
+	 * @param user current user and the owner of the Dashboard
+     * @return created Dashboard
+     */
+	Dashboard create(SaveDashboardCommand validCommand, SecUser user) {
+		new Dashboard(validCommand.toMap() << [user: user]).save(failOnError: true, validate: true)
+	}
 
 	/**
 	 * Find DashboardItem by (parent) dashboard id and item id, and authorize that user is permitted to read it.
