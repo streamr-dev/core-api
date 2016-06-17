@@ -65,6 +65,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
+	public boolean wasReady() {
+		return instance != null && instance.wasReady();
+	}
+
+	@Override
 	public void onDay(Date day) {
 		instance.onDay(day);
 	}
@@ -270,6 +275,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				outputs,
 				outputsByName,
 				drivingInputs,
+				readyInputs,
 				globals);
 
 		storedEndpointFields.restoreFields(instance);

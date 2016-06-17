@@ -11,6 +11,7 @@
  * stopping
  * stopped
  * moduleAdded (jsonData, div)
+ * moduleBeforeClose (jsonData, div)
  * done
  * error (message)
  * 
@@ -160,7 +161,7 @@ var SignalPath = (function () {
 	}
 	function loadJSON(data) {
 		// Reset signal path
-		clear();
+		clear(true);
 
 		jsPlumb.setSuspendDrawing(true);
 
@@ -400,7 +401,6 @@ var SignalPath = (function () {
 				callback(json);
 
 			$(pub).trigger('saved', [json]);
-			window.history.replaceState({}, 'Canvas ' + name, Streamr.createLink({controller: "canvas", action: "editor", id: json.id}));
 		}
 
 		var json = toJSON()
@@ -467,7 +467,7 @@ var SignalPath = (function () {
 		})
 	}
 	
-	function clear() {
+	function clear(isSilent) {
 		if (isRunning() && runningJson.adhoc)
 			stop();
 		
@@ -485,8 +485,9 @@ var SignalPath = (function () {
 		runningJson = null
 		
 		jsPlumb.reset();		
-		
-		$(pub).trigger('new');
+
+		if (!isSilent)
+			$(pub).trigger('new');
 	}
 	pub.clear = clear;
 	
@@ -589,12 +590,14 @@ var SignalPath = (function () {
 	}
 	pub.start = start;
 
-	function startAdhoc(callback) {
+	function startAdhoc(startRequest, callback) {
+		startRequest = startRequest || {}
+		startRequest.clearState = false
 		var json = toJSON()
 		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
-			start({clearState:false}, callback, true)
+			start(startRequest, callback, true)
 		})
 	}
 	pub.startAdhoc = startAdhoc

@@ -5,11 +5,19 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
     pub = pub || {};
     pub = SignalPath.Output(json, parentDiv, module, type, pub);
 
+    var div;
+
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
-        var div = super_createDiv()
+        div = super_createDiv()
 
         if (!json.variadic.disableGrow) {
+
+            if (json.variadic.isLast) {
+                div.addClass("last-variadic")
+                div.find(".ioname").append("&nbsp;<i class='variadic-plus fa fa-plus'>")
+            }
+
             div.bind("spConnect", function(event, output) {
                 if (!SignalPath.isLoading() && !module.moduleClosed) {
                     pub.makeNewOutput()
@@ -35,6 +43,7 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
             var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
 
             json.variadic.isLast = false
+            div.removeClass("last-variadic")
             json.connected = true
 
             jsonCopy.connected = false

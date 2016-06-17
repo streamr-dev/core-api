@@ -40,7 +40,7 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 
 		config.put("canHaveInitialValue", canHaveInitialValue);
 
-		if (canHaveInitialValue && initialValue!=null && validateInitialValue(initialValue))
+		if (canHaveInitialValue && (initialValue==null || validateInitialValue(initialValue)))
 			config.put("initialValue", initialValue);
 
 		config.put("feedback", isFeedbackConnection());

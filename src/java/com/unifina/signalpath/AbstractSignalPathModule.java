@@ -43,7 +43,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private boolean wasReady = false;
 
-	private Set<Input> readyInputs = new HashSet<>();
+	protected Set<Input> readyInputs = new HashSet<>();
 
 	boolean sendPending = false;
 

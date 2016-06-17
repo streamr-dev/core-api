@@ -23,6 +23,7 @@
 var loadBrowser
 
 $('#moduleTree').bind('loaded.jstree', function() {
+	Tour.startableTours([0])
 	Tour.autoStart()
 })
 var saveAndAskName
@@ -134,23 +135,17 @@ $(function() {
 		if (settings.editorState && settings.editorState.runTab)
 			$("a[href="+settings.editorState.runTab+"]").tab('show')
 
-	});
-
-	// Show realtime tab when a running SignalPath is loaded
-	$(SignalPath).on('loaded', function(event, json) {
 		if (SignalPath.isRunning()) {
+			// Show realtime tab when a running SignalPath is loaded
 			$("a[href=#tab-realtime]").tab('show')
-		}
-	});
 
-	// Try to ping a running SignalPath on load, and show error if it can't be reached
-	$(SignalPath).on('loaded', function(event, json) {
-		if (SignalPath.isRunning()) {
+			// Try to ping a running SignalPath on load, and show error if it can't be reached
 			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
 				if (err)
 					Streamr.showError('${message(code:'canvas.ping.error')}')
 			})
 		}
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: json.id}))
 	});
 
 	$(SignalPath).on('error', function(error) {
@@ -165,7 +160,40 @@ $(function() {
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
+
+	$(SignalPath).on("new", function(event) {
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor"}))
+	})
+
+	function setAddressbarUrl(url) {
+		if (window.history && window.history.pushState && window.history.replaceState) {
+			// If we haven't set the current url into history, replace the current state so we know to reload the page on back
+			if (!window.history.state || !window.history.state.streamr) {
+				window.history.replaceState({
+					streamr: {
+						urlPath: window.location.href
+					}
+				}, undefined, window.location.href)
+			}
+			// Push the new state to the history
+			if (url !== window.location.href) {
+				window.history.pushState({
+					streamr: {
+						urlPath: url
+					}
+				}, undefined, url)
+			}
+		}
+	}
+
+	window.onpopstate = function(e) {
+		if (e.state && e.state.streamr && e.state.streamr.urlPath) {
+			// location.reload() doesn't work because the event is fired before the location change
+			window.location = e.state.streamr.urlPath
+		}
+	}
 
 	// Streamr search for modules and streams
 	var streamrSearch = new StreamrSearch('#search', [{
@@ -232,8 +260,12 @@ $(function() {
 		loadBrowser.modal()
 	})
 
-	$('#csv').click(function() {
-		var ctx = {
+	$(document).bind('keyup', 'alt+r', function() {
+		SignalPath.start();
+	});
+
+	$('#run-csv-button').click(function() {
+		var startRequest = {
 			csv: true,
 			csvOptions: {
 				timeFormat: $("#csvTimeFormat").val(),
@@ -243,7 +275,7 @@ $(function() {
 			}
 		}
 
-		SignalPath.start(ctx);
+		SignalPath.startAdhoc(startRequest);
 	});
 
 	// Historical run button
@@ -417,7 +449,7 @@ $(function() {
 					<li class="">
 						<div class="nav-tab-white-background nav-tab-background"></div>
 						<div class="nav-tab-orange-background nav-tab-background"></div>
-						<a href="#tab-realtime" role="tab" data-toggle="tab">Realtime</a>
+						<a href="#tab-realtime" id="open-realtime-tab-link" role="tab" data-toggle="tab">Realtime</a>
 					</li>
 				</ul>
 
@@ -593,7 +625,7 @@ $(function() {
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="csv" class="btn btn-primary" data-dismiss="modal">Run</button>
+	        <button id="run-csv-button" class="btn btn-primary" data-dismiss="modal">Run</button>
 	      </div>
 	    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->

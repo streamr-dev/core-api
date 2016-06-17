@@ -128,7 +128,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		switcher.click()
 		then: "The table gets the message"
 		waitFor {
-			$("table.event-table-module-content tbody tr td", text: "1.0").displayed
+			$("table.event-table-module-content tbody tr td", text: "true").displayed
 		}
 
 		when: "Logged out and reloaded"

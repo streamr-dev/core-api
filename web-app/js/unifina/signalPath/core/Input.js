@@ -84,7 +84,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					})
 				}
 				else {
-					iv.setValue(null);
+					iv.setValue(undefined);
 					iv.update();
 					iv.div.html(iv.buttonText());
 				}

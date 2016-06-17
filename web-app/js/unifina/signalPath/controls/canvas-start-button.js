@@ -55,7 +55,7 @@ var CanvasStartButton = Backbone.View.extend({
         }
 
         if (this.adhoc) {
-            this.signalPath.startAdhoc(callback)
+            this.signalPath.startAdhoc({}, callback)
         }
         else {
             var doStart = function() {

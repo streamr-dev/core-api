@@ -8,6 +8,7 @@
     <r:require module="bootbox"/>
     <r:require module="bootstrap-contextmenu"/>
     <r:require module="bootstrap-datepicker"/>
+	<r:require module="streamr-search"/>
     <r:require module="signalpath-theme"/>
     <r:require module="touchpunch"/>
 

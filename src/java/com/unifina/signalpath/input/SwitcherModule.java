@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class SwitcherModule extends InputModule {
 
-	TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
+	BooleanOutput out = new BooleanOutput(this, "out");
 
 	boolean value = false;
 
@@ -17,15 +17,14 @@ public class SwitcherModule extends InputModule {
 		super.init();
 		canClearState = false;
 		resendAll = false;
-
 		out.canBeNoRepeat = false;
 	}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		if(config.containsKey("switcherValue"))
-			value = (boolean)config.get("switcherValue");
+		if (config.containsKey("switcherValue"))
+			value = (boolean) config.get("switcherValue");
 	}
 
 	@Override
@@ -52,11 +51,9 @@ public class SwitcherModule extends InputModule {
 	@Override
 	public void initialize() {
 		for (Input i : out.getTargets()) {
-			if (i instanceof TimeSeriesInput)
-				((TimeSeriesInput)i).setInitialValue(value ? 1d : 0d);
-			else if (i instanceof IntegerParameter)
-				((IntegerParameter) i).receive(value ? 1 : 0);
-			else i.receive(value ? 1d : 0d);
+			if (i instanceof BooleanInput)
+				((BooleanInput)i).setInitialValue(value);
+			else i.receive(value);
 		}
 	}
 
@@ -67,7 +64,11 @@ public class SwitcherModule extends InputModule {
 
 	@Override
 	public void sendOutput() {
-		out.send(value ? 1d : 0d);
+		out.send(value);
+		updateUiState();
+	}
+
+	private void updateUiState() {
 		if (globals.getUiChannel()!=null) {
 			Map<String,Object> msg = new HashMap<String,Object>();
 			msg.put("switcherValue", value);
@@ -78,5 +79,6 @@ public class SwitcherModule extends InputModule {
 	@Override
 	public void clearState() {
 		value = false;
+		updateUiState();
 	}
 }

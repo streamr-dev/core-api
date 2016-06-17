@@ -10,7 +10,7 @@ $.pnotify.defaults.closer = true
 $.pnotify.defaults.sticker = false
 $.pnotify.defaults.closer_hover = false
 
-//Change the variable signs in Underscore from <%= var %> to {{ var }}
+//Change the variable signs in underscore/lodash from <%= var %> to {{ var }}
 _.templateSettings = {
 	evaluate : /\{\[([\s\S]+?)\]\}/g, // {[ ]}
 	escape : /\[\[([\s\S]+?)\]\]/g, // [[ ]]

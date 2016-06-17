@@ -9,9 +9,7 @@ SignalPath.Output = function(json, parentDiv, module, type, pub) {
 		var switchDiv = $("<div class='switchContainer showOnFocus'></div>");
 		div.append(switchDiv);
 
-		// The flags must be appended in reverse order
-		// NoRepeat. Default true. Add only for TimeSeries type
-		if (data.type=="Double" && (data.canBeNoRepeat==null || data.canBeNoRepeat)) {
+		if (data.canBeNoRepeat) {
 			var noRepeat = new SignalPath.IOSwitch(switchDiv, "ioSwitch noRepeat", {
 				getValue: (function(d){
 					return function() { return d.noRepeat; };

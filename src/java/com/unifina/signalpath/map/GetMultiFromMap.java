@@ -26,15 +26,15 @@ public class GetMultiFromMap extends AbstractSignalPathModule {
 	public void sendOutput() {
 		Map map = in.getValue();
 
-		Map<String, Double> foundList = new HashMap<>();
+		Map<String, Boolean> foundList = new HashMap<>();
 
 		for (Output<Object> out : outs) {
 			String key = out.getEffectiveName();
 			Object value = MapTraversal.getProperty(map, key);
 			if (value == null) {
-				foundList.put(key, 0.0);
+				foundList.put(key, false);
 			} else {
-				foundList.put(key, 1.0);
+				foundList.put(key, true);
 				out.send(value);
 			}
 		}
