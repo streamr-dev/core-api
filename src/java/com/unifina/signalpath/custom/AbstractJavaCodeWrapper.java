@@ -59,6 +59,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	@Override
 	public void clearState() {
+		super.clear();
 		if (instance != null) {
 			instance.clear();
 		}
@@ -270,6 +271,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				outputs,
 				outputsByName,
 				drivingInputs,
+				readyInputs,
 				globals);
 
 		storedEndpointFields.restoreFields(instance);
