@@ -19,7 +19,8 @@
 					el: $(".name-editor"),
 					opener: $(".rename-dashboard-button")
 				}).on("changed", function(name) {
-					dashboard.set("name", name)
+					if (dashboard)
+						dashboard.set("name", name)
 				})
 
 				function createDashboard(dbJson) {
@@ -84,6 +85,7 @@
 							setTimeout(function() {
 								if (_.contains(permissions, "share")) {
 									$(".share-button").data("url", Streamr.createLink({uri: "api/v1/dashboards/" + dashboard.get("id")}))
+									$(".share-button").attr("name", dashboard.get("name"))
 									$(".share-button").removeAttr("disabled")
 									$("li.share-dashboard-button").removeClass("disabled")
 								} else {

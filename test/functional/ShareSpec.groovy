@@ -21,6 +21,14 @@ class ShareSpec extends GebReportingSpec {
 		row.find(".share-button").click()
 	}
 
+	def clickDropdownShareButton() {
+		menuToggle.click()
+		waitFor {
+			shareButton.displayed
+		}
+		shareButton.click()
+	}
+
 	def save() {
 		$(".sharing-dialog .save-button").click()
 		waitFor { !$(".sharing-dialog") && !$(".modal-backdrop") }
@@ -74,6 +82,7 @@ class ShareSpec extends GebReportingSpec {
 	// We still don't know why it's so hard to type text into the input,
 	// just "$('.new-user-field') << text" won't work.
 	// That's why this hack.
+	// The same is used also in ShareMixin.groovy
 	def feedTextInput(String text) {
 		waitFor {
 			$('.new-user-field').displayed
@@ -340,7 +349,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -357,7 +366,7 @@ class ShareSpec extends GebReportingSpec {
 		!$(".ui-pnotify")
 
 		when: "re-open"
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -376,7 +385,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open"
 		closeNotifications()
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "...to double-check it's gone"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -482,7 +491,7 @@ class ShareSpec extends GebReportingSpec {
 		waitFor { shareButton.displayed && !shareButton.getAttribute("disabled") }
 
 		when:
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that the saved row is still there"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -499,7 +508,7 @@ class ShareSpec extends GebReportingSpec {
 		!$(".ui-pnotify")
 
 		when: "re-open"
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "check that row hasn't been deleted"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -518,7 +527,7 @@ class ShareSpec extends GebReportingSpec {
 
 		when: "re-open"
 		closeNotifications()
-		shareButton.click()
+		clickDropdownShareButton()
 		then: "...to double-check it's gone"
 		waitFor { $(".sharing-dialog") }
 		waitFor { $(".new-user-field").displayed }
@@ -793,7 +802,7 @@ class ShareSpec extends GebReportingSpec {
 		saveDashboard()
 
 		// Share to tester2
-		shareButton.click()
+		clickDropdownShareButton()
 		waitForShareDialog()
 		shareTo("tester2@streamr.com")
 		closeNotifications()
