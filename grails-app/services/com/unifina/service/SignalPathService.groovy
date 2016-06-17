@@ -448,7 +448,7 @@ class SignalPathService {
 			canvas.serializationTime = sp.globals.time
 			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
 				[canvas.serialized, canvas.serializationTime, canvas.id])
-			log.info("Canvas " + canvas.id + " serialized.")
+			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes)")
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
