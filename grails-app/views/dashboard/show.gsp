@@ -2,6 +2,8 @@
 	<head>
 		<meta name="layout" content="sidemenu" />
 
+		<title>Dashboard</title>
+
 		<r:require module="webcomponents"/>
 		<r:require module="slimscroll"/>
 		<r:require module="dashboard-editor"/>
