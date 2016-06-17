@@ -59,9 +59,24 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 	@Override
 	public void clearState() {
-		super.clear();
 		if (instance != null) {
 			instance.clear();
+		}
+	}
+
+	@Override
+	public void cancelReady(Input input) {
+		super.cancelReady(input);
+		if (instance != null) {
+			instance.cancelReady(input);
+		}
+	}
+
+	@Override
+	public void markReady(Input input) {
+		super.markReady(input);
+		if (instance != null) {
+			instance.markReady(input);
 		}
 	}
 
