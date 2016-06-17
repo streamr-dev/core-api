@@ -65,22 +65,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
-	public void cancelReady(Input input) {
-		super.cancelReady(input);
-		if (instance != null) {
-			instance.cancelReady(input);
-		}
-	}
-
-	@Override
-	public void markReady(Input input) {
-		super.markReady(input);
-		if (instance != null) {
-			instance.markReady(input);
-		}
-	}
-
-	@Override
 	public void onDay(Date day) {
 		instance.onDay(day);
 	}

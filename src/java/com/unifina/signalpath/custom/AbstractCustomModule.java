@@ -65,7 +65,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		this.outputs = new ArrayList<>(outputs);
 		this.outputsByName = new HashMap<>(outputsByName);
 		this.drivingInputs = new HashSet<>(drivingInputs);
-		this.readyInputs = new HashSet<>(readyInputs);
+		this.readyInputs = readyInputs;
 		this.globals = globals;
 	}
 }
