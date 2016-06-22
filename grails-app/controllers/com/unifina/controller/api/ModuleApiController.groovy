@@ -39,7 +39,7 @@ class ModuleApiController {
 	def help(Long id) {
 		getAuthorizedModule(id, Permission.Operation.READ) {Module module ->
 			response.setContentType("application/json")
-			render module.jsonHelp ?: "{}"
+			render (module.jsonHelp ? module.jsonHelp.replace("\n", "") : "{}")
 		}
 	}
 

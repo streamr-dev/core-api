@@ -282,7 +282,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			    	cb(prot.renderHelp(prot.cachedHelpResponse, extended))
 				},
 			    error: function() {
-			    	result = "An error occurred while loading module help.";
+					console.error("An error occurred while loading help for module "+prot.jsonData.id)
+			    	cb("Sorry, help is not available for this module.");
 			    }
 			});
 		}
