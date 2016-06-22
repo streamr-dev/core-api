@@ -11,7 +11,7 @@ public class ListOrMapOutput extends Output<Object> {
 	private final ListOrMapInput listOrMapInput;
 
 	public ListOrMapOutput(AbstractSignalPathModule owner, String name, ListOrMapInput listOrMapInput) {
-		super(owner, name, "List Map");
+		super(owner, name, "Object");
 		this.listOrMapInput = listOrMapInput;
 	}
 
