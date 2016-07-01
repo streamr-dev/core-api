@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.unifina.service.SerializationService;
 import com.unifina.utils.HibernateHelper;
 import org.apache.log4j.Logger;
 
@@ -25,6 +26,7 @@ import com.unifina.utils.MapTraversal;
  * - Call module.init()
  * - Call module.setName()
  * - Call module.setConfiguration()
+ * - Call module.setGlobals(globals)
  * - Call module.connectionsReady()
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
@@ -720,7 +722,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * Override to handle steps after deserialization
 	 */
-	public void afterDeserialization() {
+	public void afterDeserialization(SerializationService serializationService) {
 	}
 
 	public Globals getGlobals() {

@@ -193,7 +193,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
-		getGlobals().registerDynamicClass(clazz);
+		//getGlobals().registerDynamicClass(clazz);
 		return clazz;
 	}
 
@@ -251,11 +251,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
 		try {
 			compileAndRegister(className, fullCode);
-			instance = (AbstractCustomModule) serializationService().deserialize(serializedInstance, classLoader);
+			instance = (AbstractCustomModule) serializationService.deserialize(serializedInstance, classLoader);
 			// Need to restore values after deserialization
 			restoreInstanceAfterSerialization();
 		} catch (ClassNotFoundException e) {
