@@ -50,10 +50,9 @@ public class MongoHistoricalFeed extends AbstractHistoricalFeed<IStreamRequireme
 
 	@Override
 	protected FeedEventIterator<MapMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient) throws IOException {
-		if (iteratorReturned.contains(recipient))
+		if (iteratorReturned.contains(recipient)) {
 			return null;
-
-		else {
+		} else {
 			iteratorReturned.add(recipient);
 			Stream stream = recipient.getStream();
 			return new FeedEventIterator<>(new MongoHistoricalIterator(stream, globals.getStartDate(), globals.getEndDate()), this, recipient);
