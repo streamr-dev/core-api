@@ -4,6 +4,7 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.api.ApiException
 import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
+import com.unifina.feed.twitter.TwitterStreamConfig
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import org.apache.commons.lang.exception.ExceptionUtils
@@ -124,6 +125,12 @@ class StreamController {
 	def configureMongo() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			[stream: stream, mongo: MongoDbConfig.readFromStreamOrElseEmptyObject(stream)]
+		}
+	}
+
+	def configureTwitterStream() {
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			[stream: stream, twitter: TwitterStreamConfig.fromStreamOrEmpty(stream)]
 		}
 	}
 

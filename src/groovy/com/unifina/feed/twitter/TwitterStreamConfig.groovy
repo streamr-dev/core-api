@@ -13,7 +13,7 @@ class TwitterStreamConfig {
 	String accessTokenSecret
 
 	String keywordsToTrack
-	def List<String> getKeywords() { keywordsToTrack.split(",")*.trim() }
+	def List<String> getKeywords() { (keywordsToTrack ?: "").split(",")*.trim() }
 
 	static constraints = {
 		keywordsToTrack(blank: false)
