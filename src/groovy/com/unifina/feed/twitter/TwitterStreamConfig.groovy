@@ -1,44 +1,114 @@
 package com.unifina.feed.twitter
 
+import com.mongodb.util.JSON
+import com.unifina.api.InvalidArgumentsException
+import com.unifina.api.InvalidStateException
+import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
-import com.unifina.exceptions.InvalidStreamConfigException
-import grails.validation.Validateable
+import grails.util.Holders
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import twitter4j.Twitter
+import twitter4j.TwitterFactory
+import twitter4j.auth.AccessToken
+import twitter4j.auth.RequestToken
 
-@Validateable
+import javax.servlet.http.HttpSession
+
+/**
+ * Groovy equivalent of the stream.config.twitter (stream.config is stored as JSON string in MySQL)
+ * Also handles the OAuth rituals to get access tokens
+ */
+//@Validateable
 class TwitterStreamConfig {
-	public static final String consumerKey = "mosTwR1X0EgiR9lB81EGhYRrP"
-	public static final String consumerSecret = "W9G6fBWYCy4ywMJpG3TWrgj5LtHv0h4e5c4dmEQbc8BGdSTSaj"
+	// streamrinc's app
+	//public static final String consumerKey = "mosTwR1X0EgiR9lB81EGhYRrP"
+	//public static final String consumerSecret = "W9G6fBWYCy4ywMJpG3TWrgj5LtHv0h4e5c4dmEQbc8BGdSTSaj"
+	// juuso's test app
+	public static final String consumerKey = "PEPCKwh7OyDZ4GXpIVZ2JyA6C"
+	public static final String consumerSecret = "RmeQ3Q6PKsnKY6zvv4OXGAoAa66eFaGPahgRpKGjUDwbF6tpiP"
 
 	String accessToken
 	String accessTokenSecret
 
-	String keywordsToTrack
-	def List<String> getKeywords() { (keywordsToTrack ?: "").split(",")*.trim() }
+	List<String> keywords = []
 
 	static constraints = {
 		keywordsToTrack(blank: false)
 	}
 
-	static TwitterStreamConfig fromStreamOrEmpty(Stream stream) {
-		try {
-			return fromStream(stream)
-		} catch (InvalidStreamConfigException e) {
-			return new TwitterStreamConfig()
-		}
+	static {
+		Twitter twitter = TwitterFactory.singleton
+		twitter.setOAuthConsumer(consumerKey, consumerSecret)
 	}
 
-	static TwitterStreamConfig fromStream(Stream stream) {
-		def conf = stream.getStreamConfigAsMap()["twitter"]
-		if (conf == null) {
-			throw new InvalidStreamConfigException("Stream " + stream.getId() + " config does not contain the 'twitter' key!");
+	def String getSignInURL() { requestToken.authenticationURL }
+
+	private Map config
+	private RequestToken requestToken
+	private Stream stream
+
+	static TwitterStreamConfig fromStream(Stream stream, HttpSession session) {
+		Map config = stream.streamConfigAsMap["twitter"] ?: [:]
+		TwitterStreamConfig ret = new TwitterStreamConfig(config)
+		ret.stream = stream
+		ret.config = config
+
+		if (!ret.accessToken) {
+			if (!session.requestToken) {
+				def grailsLinkGenerator = Holders.getApplicationContext().getBean('grailsLinkGenerator', LinkGenerator.class)
+				String callbackURL = grailsLinkGenerator.link(controller: "stream", action: "configureTwitterStream", id: stream.id, absolute: true)
+
+				Twitter twitter = TwitterFactory.singleton
+				session.requestToken = twitter.getOAuthRequestToken(callbackURL)
+			}
+			ret.requestToken = session.requestToken
 		}
 
-		TwitterStreamConfig config = new TwitterStreamConfig(conf)
-		if (!config.validate()) {
-			throw new InvalidStreamConfigException("Stream " + stream.getId() + " does not have a valid Twitter stream configuration!");
-		}
-
-		return config
+		ret.save()
+		return ret
 	}
 
+	/**
+	 * Upgrade request token to access token after user authorizes app
+	 * Called from StreamController callback for twitter authorization that returns the oauth_verifier
+	 * @see see https://dev.twitter.com/web/sign-in/implementing
+	 * @param verifier returned from Twitter
+	 * @return
+     */
+	def setOAuthVerifier(String verifier) {
+		if (!requestToken) {
+			if (accessToken && accessTokenSecret) {
+				throw new InvalidStateException("Already have access token")
+			} else {
+				throw new InvalidStateException("No requestToken, was TwitterStreamConfig created using fromStream?")
+			}
+		}
+		Twitter twitter = TwitterFactory.singleton
+		AccessToken access = twitter.getOAuthAccessToken(requestToken, verifier)
+		accessToken = access.token
+		accessTokenSecret = access.tokenSecret
+		save()
+	}
+
+	private void save() {
+		config.twitter = toMap()
+		stream.config = JSON.serialize(config)
+		if (!stream.validate()) {
+			throw new ValidationException(stream.errors)
+		}
+		stream.save(failOnError: true)
+	}
+
+	Map toMap() {
+		Map ret = [
+			keywords: keywords
+		]
+		if (accessToken && accessTokenSecret) {
+			ret += [
+				accessToken: accessToken,
+				accessTokenSecret: accessTokenSecret
+			]
+		}
+		return ret
+	}
 }

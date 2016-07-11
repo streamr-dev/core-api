@@ -38,24 +38,23 @@ public class TwitterMessageSource extends AbstractMessageSource<Status, String> 
 	public TwitterMessageSource(Feed feed, Map<String,Object> config) {
 		super(feed, config);
 
-		FilterQuery query = new FilterQuery(0, new long[0], new String[] { "yolo" });
-
 		TwitterStreamConfig streamConf = new TwitterStreamConfig();
+		streamConf.setAccessToken("750594680841207808-08ws31Jwp44guWd3uh8YRYSslbdQ1Lp");
+		streamConf.setAccessTokenSecret("DNY6zU2FeZRyyRVqVmK2Vp4fHUPFlAsZUNKbKNgmFUgs0");
 
 		Configuration conf = new ConfigurationBuilder()
 				.setDebugEnabled(true)
-				//.setOAuthConsumerKey(TwitterStreamConfig.consumerKey)
-				//.setOAuthConsumerSecret(TwitterStreamConfig.consumerSecret)
-				//.setOAuthAccessToken(streamConf.getAccessToken())
-				//.setOAuthAccessTokenSecret(streamConf.getAccessTokenSecret())
-				.setOAuthConsumerKey("5uJ2yW9wkrsDxs1vvfWOkLDb1")
-				.setOAuthConsumerSecret("ngB2qff7OkbwCTX10EGoHucoWJSSmrKVSPEUpqb2YGlMyZJbpy")
-				.setOAuthAccessToken("750594680841207808-Ta8o3xDj7TrzfURGa87O1gnO7pPmwc0")
-				.setOAuthAccessTokenSecret("ErQKZjewd2bUpoaR1p6BMCEIDefjWvhJ24aL0M2wMyHeW")
+				.setOAuthConsumerKey(TwitterStreamConfig.consumerKey)
+				.setOAuthConsumerSecret(TwitterStreamConfig.consumerSecret)
+				.setOAuthAccessToken(streamConf.getAccessToken())
+				.setOAuthAccessTokenSecret(streamConf.getAccessTokenSecret())
 				.build();
 
 		TwitterStream twitterStream = new TwitterStreamFactory(conf).getInstance();
 		twitterStream.addListener(listener);
+
+		// TODO: start filtering in subscribe(), update the filter query
+		FilterQuery query = new FilterQuery(0, new long[0], new String[] { "yolo" });
 		twitterStream.filter(query);
 	}
 

@@ -13,7 +13,6 @@ public class TwitterModule extends AbstractStreamSourceModule {
 	public StringOutput language = new StringOutput(this, "language");
 	public TimeSeriesOutput followers = new TimeSeriesOutput(this, "followers");
 	public BooleanOutput isRetweet = new BooleanOutput(this, "retweet?");
-	public StringOutput replyTo = new StringOutput(this, "replyTo");
 	
 	@Override
 	public void init() {
@@ -28,7 +27,6 @@ public class TwitterModule extends AbstractStreamSourceModule {
 		followers.noRepeat = false;
 		addOutput(isRetweet);
 		isRetweet.noRepeat = false;
-		addOutput(replyTo);
 	}
 	
 	@Override

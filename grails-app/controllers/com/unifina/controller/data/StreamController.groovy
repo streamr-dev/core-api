@@ -128,9 +128,20 @@ class StreamController {
 		}
 	}
 
+	// also callback from Sign in with Twitter
 	def configureTwitterStream() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
-			[stream: stream, twitter: TwitterStreamConfig.fromStreamOrEmpty(stream)]
+			TwitterStreamConfig twitter = TwitterStreamConfig.fromStream(stream, session)
+			if (!twitter.accessToken && "oauth_verifier" in params) {
+				twitter.setOAuthVerifier(params.oauth_verifier)
+			}
+
+			if (twitter.accessToken && twitter.accessTokenSecret) {
+				return [stream: stream, twitter: twitter]
+			} else {
+				flash.message = "Twitter sign-in needs to be done before Twitter stream can be used!"
+				redirect(action: "show")
+			}
 		}
 	}
 

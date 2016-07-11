@@ -28,9 +28,6 @@ public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule, T
 			m.language.send(msg.getLang());
 			m.followers.send(msg.getUser().getFollowersCount());
 			m.isRetweet.send(msg.isRetweet());
-			if (msg.getInReplyToScreenName() != null) {
-				m.replyTo.send(msg.getInReplyToScreenName());
-			}
 		}
 	}
 
