@@ -23,8 +23,10 @@
 <r:script>
     $(function() {
     	<g:applyCodec encodeAs="none">
-			var keywordCollection = new ListEditor.ValueList(${twitter.keywords})
+		var streamData = ${stream.toMap() as grails.converters.JSON}
 		</g:applyCodec>
+		var twitterConfig = streamData.config.twitter || {}
+		var keywordCollection = new ListEditor.ValueList(twitterConfig.keywords || [])
 		var editor = new ListEditor({
 			el: $("#keywordList"),
 			collection: keywordCollection
@@ -34,30 +36,10 @@
 		var streamApiUrl = "${createLink(uri: "/api/v1/streams/${stream.id}")}"
 
 		$("#configure-twitter-form").submit(function(e) {
-			e.preventDefault()
+			//e.preventDefault()
 
-			$.getJSON(streamApiUrl, function(streamData) {
-
-				var twitterConfig = streamData.config.twitter || {}
-
-				twitterConfig.keywords = keywordCollection.toJSON()
-
-				streamData.config.twitter = twitterConfig
-
-				// Save using API call and redirect to stream page
-				$.ajax({
-					url: streamApiUrl,
-					data: JSON.stringify(streamData),
-					type: "PUT",
-					success: function(data) {
-						window.location.href = showStreamUrl
-						Streamr.showSuccess("Twitter stream settings saved", "Success")
-					},
-					error: function(xhr, ajaxOptions, thrownError) {
-						Streamr.showError(xhr.responseJSON.message, "Error")
-					}
-				})
-			})
+			twitterConfig.keywords = keywordCollection.toJSON()
+			$("#configure-twitter-form input#keywords").val(keywordCollection.toJSON())
 		})
 	})
 </r:script>
@@ -73,7 +55,9 @@
 			</div>
 		</div>
 
-		<g:form name="configure-twitter-form">
+		<g:form name="configure-twitter-form" action="saveTwitterStream">
+			<g:hiddenField name="keywords" />
+			<g:hiddenField name="id" value="${stream.id}" />
 			<g:submitButton name="submit" class="btn btn-lg btn-primary"
 							value="${message(code: "stream.update.label")}"/>
 		</g:form>

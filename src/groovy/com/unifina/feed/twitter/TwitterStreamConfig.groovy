@@ -1,7 +1,6 @@
 package com.unifina.feed.twitter
 
 import com.mongodb.util.JSON
-import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.InvalidStateException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
@@ -18,7 +17,6 @@ import javax.servlet.http.HttpSession
  * Groovy equivalent of the stream.config.twitter (stream.config is stored as JSON string in MySQL)
  * Also handles the OAuth rituals to get access tokens
  */
-//@Validateable
 class TwitterStreamConfig {
 	// streamrinc's app
 	//public static final String consumerKey = "mosTwR1X0EgiR9lB81EGhYRrP"
@@ -31,10 +29,6 @@ class TwitterStreamConfig {
 	String accessTokenSecret
 
 	List<String> keywords = []
-
-	static constraints = {
-		keywordsToTrack(blank: false)
-	}
 
 	static {
 		Twitter twitter = TwitterFactory.singleton
@@ -88,6 +82,16 @@ class TwitterStreamConfig {
 		accessToken = access.token
 		accessTokenSecret = access.tokenSecret
 		save()
+	}
+
+	/**
+	 * @param kwString Comma-separated list of keywords
+     */
+	def setKeywords(String kwString) {
+		keywords = kwString.split(",")*.trim()
+	}
+	def setKeywords(List<String> kw) {
+		keywords = kw
 	}
 
 	private void save() {

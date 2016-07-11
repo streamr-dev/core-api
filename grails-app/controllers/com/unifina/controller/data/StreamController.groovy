@@ -137,11 +137,21 @@ class StreamController {
 			}
 
 			if (twitter.accessToken && twitter.accessTokenSecret) {
-				return [stream: stream, twitter: twitter]
+				return [stream: stream]
 			} else {
 				flash.message = "Twitter sign-in needs to be done before Twitter stream can be used!"
 				redirect(action: "show")
 			}
+		}
+	}
+
+	// form action from configureTwitterStream
+	def saveTwitterStream() {
+		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
+			TwitterStreamConfig twitter = TwitterStreamConfig.fromStream(stream, session)
+			twitter.setKeywords(params.keywords)
+			twitter.save()
+			redirect(action: "show", id: stream.id)
 		}
 	}
 
