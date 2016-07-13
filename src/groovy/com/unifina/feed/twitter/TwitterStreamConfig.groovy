@@ -40,14 +40,15 @@ class TwitterStreamConfig {
 	private Map config
 	private RequestToken requestToken
 	private Stream stream
+	public Stream getStream() { stream }
 
-	static TwitterStreamConfig fromStream(Stream stream, HttpSession session) {
+	public static TwitterStreamConfig fromStream(Stream stream, HttpSession session=null) {
 		Map config = stream.streamConfigAsMap["twitter"] ?: [:]
 		TwitterStreamConfig ret = new TwitterStreamConfig(config)
 		ret.stream = stream
 		ret.config = config
 
-		if (!ret.accessToken) {
+		if (!ret.accessToken && session != null) {
 			if (!session.requestToken) {
 				def grailsLinkGenerator = Holders.getApplicationContext().getBean('grailsLinkGenerator', LinkGenerator.class)
 				String callbackURL = grailsLinkGenerator.link(controller: "stream", action: "configureTwitterStream", id: stream.id, absolute: true)
@@ -56,9 +57,9 @@ class TwitterStreamConfig {
 				session.requestToken = twitter.getOAuthRequestToken(callbackURL)
 			}
 			ret.requestToken = session.requestToken
+			// ret.save()  // TODO: after there is a way to "resume" or serialize requestToken (avoid putting it into session)
 		}
 
-		ret.save()
 		return ret
 	}
 

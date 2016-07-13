@@ -12,7 +12,7 @@ public class TwitterKeyProvider extends AbstractKeyProvider<TwitterModule, Twitt
 
 	@Override
 	public String getSubscriberKey(TwitterModule subscriber) {
-		return "twitter";
+		return subscriber.getStream().getId();
 	}
 
 	@Override
