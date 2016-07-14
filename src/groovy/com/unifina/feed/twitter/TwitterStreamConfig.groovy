@@ -5,7 +5,9 @@ import com.unifina.api.InvalidStateException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Stream
 import grails.util.Holders
+import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import twitter4j.Status
 import twitter4j.Twitter
 import twitter4j.TwitterFactory
 import twitter4j.auth.AccessToken
@@ -37,18 +39,23 @@ class TwitterStreamConfig {
 
 	def String getSignInURL() { requestToken.authenticationURL }
 
-	private Map config
+	private Map configMap
 	private RequestToken requestToken
 	private Stream stream
-	public Stream getStream() { stream }
+	public String getStreamId() { stream?.id }
 
-	public static TwitterStreamConfig fromStream(Stream stream, HttpSession session=null) {
-		Map config = stream.streamConfigAsMap["twitter"] ?: [:]
-		TwitterStreamConfig ret = new TwitterStreamConfig(config)
-		ret.stream = stream
-		ret.config = config
+	private static Map<Stream, TwitterStreamConfig> cache = new HashMap<>();
 
-		if (!ret.accessToken && session != null) {
+	public static TwitterStreamConfig forStream(Stream stream, HttpSession session=null) {
+		TwitterStreamConfig conf = cache.get(stream);
+		if (conf == null) {
+			Map configMap = stream.streamConfigAsMap["twitter"] ?: [:]
+			conf = new TwitterStreamConfig(configMap)
+			conf.stream = stream
+			conf.configMap = configMap
+		}
+
+		if (!conf.accessToken && session != null) {
 			if (!session.requestToken) {
 				def grailsLinkGenerator = Holders.getApplicationContext().getBean('grailsLinkGenerator', LinkGenerator.class)
 				String callbackURL = grailsLinkGenerator.link(controller: "stream", action: "configureTwitterStream", id: stream.id, absolute: true)
@@ -56,11 +63,11 @@ class TwitterStreamConfig {
 				Twitter twitter = TwitterFactory.singleton
 				session.requestToken = twitter.getOAuthRequestToken(callbackURL)
 			}
-			ret.requestToken = session.requestToken
+			conf.requestToken = session.requestToken
 			// ret.save()  // TODO: after there is a way to "resume" or serialize requestToken (avoid putting it into session)
 		}
 
-		return ret
+		return conf
 	}
 
 	/**
@@ -89,15 +96,15 @@ class TwitterStreamConfig {
 	 * @param kwString Comma-separated list of keywords
      */
 	def setKeywords(String kwString) {
-		keywords = kwString.split(",")*.trim()
+		setKeywords(kwString.split(",")*.trim())
 	}
 	def setKeywords(List<String> kw) {
 		keywords = kw
 	}
 
 	private void save() {
-		config.twitter = toMap()
-		stream.config = JSON.serialize(config)
+		configMap.twitter = toMap()
+		stream.config = JSON.serialize(configMap)
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
 		}
@@ -115,5 +122,14 @@ class TwitterStreamConfig {
 			]
 		}
 		return ret
+	}
+
+	/**
+	 * Transform tweet into string to scan for keywords (add expanded URLs)
+	 *   unrelated utility function, it's here simply because it's SO much nicer-looking in Groovy...
+	 */
+	@CompileStatic
+	static String getSearchStringFromTwitterStatus(Status status) {
+		return status.text + status.URLEntities*.expandedURL.join("")
 	}
 }

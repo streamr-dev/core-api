@@ -1,7 +1,7 @@
 <%@ page import="com.unifina.feed.twitter.TwitterStreamConfig" %>
 <div class="col-sm-6 col-md-4">
 	<div class="panel">
-		<g:set var="twitter" value="${com.unifina.feed.twitter.TwitterStreamConfig.fromStream(stream, session)}"/>
+		<g:set var="twitter" value="${com.unifina.feed.twitter.TwitterStreamConfig.forStream(stream, session)}"/>
 
 		<div class="panel-heading">
 			<span class="panel-title">Twitter Stream Settings</span>

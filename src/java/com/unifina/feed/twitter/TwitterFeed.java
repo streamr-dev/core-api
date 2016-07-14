@@ -6,6 +6,9 @@ import com.unifina.feed.AbstractFeedProxy;
 import com.unifina.signalpath.twitter.TwitterModule;
 import com.unifina.utils.Globals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TwitterFeed extends AbstractFeedProxy<TwitterModule, twitter4j.Status, TwitterMessage, String, TwitterEventRecipient> {
 
 	public TwitterFeed(Globals globals, Feed domainObject) {
@@ -14,10 +17,23 @@ public class TwitterFeed extends AbstractFeedProxy<TwitterModule, twitter4j.Stat
 
 	@Override
 	protected FeedEvent<TwitterMessage, TwitterEventRecipient>[] process(TwitterMessage msg) {
-		if (eventRecipients.size() < 1) { return new FeedEvent[] {}; }
+		List<FeedEvent> events = new ArrayList<>();
 
-		FeedEvent e = new FeedEvent(msg, msg.timestamp, eventRecipients.get(0));
+		// find streams whose keywords are found within tweet, forward to each of them
+		//   ("demux", see "mux" in TwitterMessageSource.updateTwitterStreamFor)
+		String tweet = TwitterStreamConfig.getSearchStringFromTwitterStatus(msg.status);
+		for (TwitterEventRecipient er : eventRecipients) {
+			TwitterStreamConfig conf = TwitterStreamConfig.forStream(er.getStream());
 
-		return new FeedEvent[] {e};
+			for (String kw : conf.getKeywords()) {
+				if (tweet.contains(kw)) {
+					FeedEvent e = new FeedEvent(msg, msg.timestamp, er);
+					events.add(e);
+					break;
+				}
+			}
+		}
+
+		return events.toArray(new FeedEvent[events.size()]);
 	}
 }

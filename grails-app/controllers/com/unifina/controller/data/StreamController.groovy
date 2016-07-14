@@ -131,7 +131,7 @@ class StreamController {
 	// also callback from Sign in with Twitter
 	def configureTwitterStream() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
-			TwitterStreamConfig twitter = TwitterStreamConfig.fromStream(stream, session)
+			TwitterStreamConfig twitter = TwitterStreamConfig.forStream(stream, session)
 			if (!twitter.accessToken && "oauth_verifier" in params) {
 				twitter.setOAuthVerifier(params.oauth_verifier)
 			}
@@ -148,8 +148,9 @@ class StreamController {
 	// form action from configureTwitterStream
 	def saveTwitterStream() {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
-			TwitterStreamConfig twitter = TwitterStreamConfig.fromStream(stream, session)
-			twitter.setKeywords(params.keywords)
+			TwitterStreamConfig twitter = TwitterStreamConfig.forStream(stream, session)
+			twitter.setKeywords(params.keywords as String)
+			// TODO: call TwitterMessageSource.updateTwitterStreamFor(object corresponding to params.id)
 			twitter.save()
 			redirect(action: "show", id: stream.id)
 		}
