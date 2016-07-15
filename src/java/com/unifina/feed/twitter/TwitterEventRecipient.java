@@ -19,15 +19,15 @@ public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule, T
 
 	@Override
 	protected void sendOutputFromModules(FeedEvent<TwitterMessage, ? extends IEventRecipient> event) {
-		twitter4j.Status msg = event.content.status;
+		TwitterMessage msg = event.content;
 
 		for (TwitterModule m : modules) {
-			m.tweet.send(msg.getText());
-			m.username.send(msg.getUser().getName());
-			m.name.send(msg.getUser().getScreenName());
-			m.language.send(msg.getLang());
-			m.followers.send(msg.getUser().getFollowersCount());
-			m.isRetweet.send(msg.isRetweet());
+			m.tweet.send(msg.text);
+			m.username.send(msg.username);
+			m.name.send(msg.name);
+			m.language.send(msg.language);
+			m.followers.send(msg.followers);
+			m.isRetweet.send(msg.isRetweet);
 		}
 	}
 

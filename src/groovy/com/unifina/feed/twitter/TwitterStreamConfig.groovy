@@ -7,7 +7,6 @@ import com.unifina.domain.data.Stream
 import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import twitter4j.Status
 import twitter4j.Twitter
 import twitter4j.TwitterFactory
 import twitter4j.auth.AccessToken
@@ -122,14 +121,5 @@ class TwitterStreamConfig {
 			]
 		}
 		return ret
-	}
-
-	/**
-	 * Transform tweet into string to scan for keywords (add expanded URLs)
-	 *   unrelated utility function, it's here simply because it's SO much nicer-looking in Groovy...
-	 */
-	@CompileStatic
-	static String getSearchStringFromTwitterStatus(Status status) {
-		return status.text + status.URLEntities*.expandedURL.join("")
 	}
 }

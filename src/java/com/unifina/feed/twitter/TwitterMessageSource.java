@@ -3,20 +3,17 @@ package com.unifina.feed.twitter;
 import com.unifina.api.InvalidStateException;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
-import com.unifina.domain.security.SecUser;
 import com.unifina.feed.AbstractMessageSource;
 
 import groovy.transform.CompileStatic;
 import org.codehaus.groovy.runtime.InvokerHelper;
-import org.grails.datastore.gorm.GormStaticApi;
-import org.grails.datastore.gorm.query.GormOperations;
 import twitter4j.*;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 import java.util.*;
 
-public class TwitterMessageSource extends AbstractMessageSource<Status, String> {
+public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, String> {
 
 	private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TwitterMessageSource.class);
 
@@ -41,9 +38,27 @@ public class TwitterMessageSource extends AbstractMessageSource<Status, String> 
 				return;
 			}
 
-			// doesn't matter which streamId we pick, they all point to same TwitterFeed instance
-			//   demux to relevant streams happens in TwitterFeed.process
-			messageSource.forward(status, streams.get(0).getStreamId(), counter++, false);
+			TwitterMessage msg = TwitterMessage.fromStatus(status);
+
+			// only one stream -> forward all incoming tweets to it
+			if (streams.size() == 1) {
+				msg.streamConfig = streams.get(0);
+				messageSource.forward(msg, msg.streamConfig.getStreamId(), counter++, false);
+			} else {
+				// find streams whose keywords are found within tweet, forward a copy to each of them
+				//   ("demux", see "mux" in updateTwitterStreamFor)
+				String tweet = msg.toString();
+				for (TwitterStreamConfig conf : streams) {
+					for (String kw : conf.getKeywords()) {
+						if (tweet.contains(kw)) {
+							TwitterMessage msg2 = TwitterMessage.fromStatus(status);
+							msg2.streamConfig = conf;
+							messageSource.forward(msg2, conf.getStreamId(), counter++, false);
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		@Override public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}

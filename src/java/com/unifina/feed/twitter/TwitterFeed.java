@@ -9,7 +9,7 @@ import com.unifina.utils.Globals;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TwitterFeed extends AbstractFeedProxy<TwitterModule, twitter4j.Status, TwitterMessage, String, TwitterEventRecipient> {
+public class TwitterFeed extends AbstractFeedProxy<TwitterModule, TwitterMessage, TwitterMessage, String, TwitterEventRecipient> {
 
 	public TwitterFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
@@ -17,23 +17,22 @@ public class TwitterFeed extends AbstractFeedProxy<TwitterModule, twitter4j.Stat
 
 	@Override
 	protected FeedEvent<TwitterMessage, TwitterEventRecipient>[] process(TwitterMessage msg) {
-		List<FeedEvent> events = new ArrayList<>();
-
-		// find streams whose keywords are found within tweet, forward to each of them
-		//   ("demux", see "mux" in TwitterMessageSource.updateTwitterStreamFor)
-		String tweet = TwitterStreamConfig.getSearchStringFromTwitterStatus(msg.status);
-		for (TwitterEventRecipient er : eventRecipients) {
-			TwitterStreamConfig conf = TwitterStreamConfig.forStream(er.getStream());
-
-			for (String kw : conf.getKeywords()) {
-				if (tweet.contains(kw)) {
-					FeedEvent e = new FeedEvent(msg, msg.timestamp, er);
-					events.add(e);
-					break;
+		FeedEvent[] events;
+		if (eventRecipients.size() == 0) {
+			events = new FeedEvent[] {};
+		} else if (eventRecipients.size() == 1) {
+			FeedEvent e = new FeedEvent(msg, msg.getTimestamp(), eventRecipients.get(0));
+			events = new FeedEvent[] {e};
+		} else {
+			List<FeedEvent> eventList = new ArrayList<>();
+			for (TwitterEventRecipient er : eventRecipients) {
+				if (er.getStream().getId().equals(msg.streamConfig.getStreamId())) {
+					FeedEvent e = new FeedEvent(msg, msg.getTimestamp(), er);
+					eventList.add(e);
 				}
 			}
+			events = eventList.toArray(new FeedEvent[eventList.size()]);
 		}
-
-		return events.toArray(new FeedEvent[events.size()]);
+		return events;
 	}
 }
