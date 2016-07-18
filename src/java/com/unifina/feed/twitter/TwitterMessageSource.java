@@ -33,7 +33,7 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 		@Override public void onStatus(Status status) {
 			log.info("Twitter message from " + status.getUser().getName() + " : " + status.getText());
 
-			if (streams.size() < 1) {
+			if (streams.size() == 0) {
 				log.error("Twitter status message was received after unsubscribing, dropping it.");
 				return;
 			}

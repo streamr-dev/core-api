@@ -15,21 +15,22 @@ import twitter4j.auth.RequestToken
 import javax.servlet.http.HttpSession
 
 /**
- * Groovy equivalent of the stream.config.twitter (stream.config is stored as JSON string in MySQL)
+ * Groovy equivalent of the stream.config.twitter database entry (stream.config is stored as JSON string in MySQL)
  * Also handles the OAuth rituals to get access tokens
  */
 class TwitterStreamConfig {
+
+	// per-stream properties that are stored in DB
+	List<String> keywords = []
+	String accessToken
+	String accessTokenSecret
+
 	// streamrinc's app
 	//public static final String consumerKey = "mosTwR1X0EgiR9lB81EGhYRrP"
 	//public static final String consumerSecret = "W9G6fBWYCy4ywMJpG3TWrgj5LtHv0h4e5c4dmEQbc8BGdSTSaj"
 	// juuso's test app
 	public static final String consumerKey = "PEPCKwh7OyDZ4GXpIVZ2JyA6C"
 	public static final String consumerSecret = "RmeQ3Q6PKsnKY6zvv4OXGAoAa66eFaGPahgRpKGjUDwbF6tpiP"
-
-	String accessToken
-	String accessTokenSecret
-
-	List<String> keywords = []
 
 	static {
 		Twitter twitter = TwitterFactory.singleton
@@ -92,7 +93,7 @@ class TwitterStreamConfig {
 	}
 
 	/**
-	 * @param kwString Comma-separated list of keywords
+	 * @param kwString Comma-separated list of keywords e.g. "key,word,list"
      */
 	def setKeywords(String kwString) {
 		setKeywords(kwString.split(",")*.trim())

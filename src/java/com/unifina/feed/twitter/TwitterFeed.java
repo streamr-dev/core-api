@@ -18,20 +18,20 @@ public class TwitterFeed extends AbstractFeedProxy<TwitterModule, TwitterMessage
 	@Override
 	protected FeedEvent<TwitterMessage, TwitterEventRecipient>[] process(TwitterMessage msg) {
 		FeedEvent[] events;
-		if (eventRecipients.size() == 0) {
-			events = new FeedEvent[] {};
-		} else if (eventRecipients.size() == 1) {
-			FeedEvent e = new FeedEvent(msg, msg.getTimestamp(), eventRecipients.get(0));
-			events = new FeedEvent[] {e};
-		} else {
-			List<FeedEvent> eventList = new ArrayList<>();
-			for (TwitterEventRecipient er : eventRecipients) {
-				if (er.getStream().getId().equals(msg.streamConfig.getStreamId())) {
-					FeedEvent e = new FeedEvent(msg, msg.getTimestamp(), er);
-					eventList.add(e);
+		if (eventRecipients.size() > 0) {
+			TwitterEventRecipient recipient = eventRecipients.get(0);
+			if (eventRecipients.size() > 1) {
+				for (int i = 1; i < eventRecipients.size(); i++) {
+					TwitterEventRecipient er = eventRecipients.get(i);
+					if (er.getStream().getId().equals(msg.streamConfig.getStreamId())) {
+						recipient = er;
+					}
 				}
 			}
-			events = eventList.toArray(new FeedEvent[eventList.size()]);
+			FeedEvent e = new FeedEvent(msg, msg.getTimestamp(), recipient);
+			events = new FeedEvent[] {e};
+		} else {
+			events = new FeedEvent[] {};
 		}
 		return events;
 	}

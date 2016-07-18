@@ -10,10 +10,8 @@ import java.util.List
 /**
  * Streamr representation of Twitter message, parsed from twitter4j.Status
  */
-@CompileStatic
 class TwitterMessage implements ITimestamped {
-	private Date timestamp
-
+	public Date timestamp
 	public String text
 	public String[] urls
 	public String username
@@ -23,12 +21,9 @@ class TwitterMessage implements ITimestamped {
 	public boolean isRetweet
 	public TwitterStreamConfig streamConfig
 
-	private TwitterMessage(Date timestamp) {
-		this.timestamp = timestamp
-	}
-
 	public static TwitterMessage fromStatus(Status s, Date t=null) {
-		TwitterMessage msg = new TwitterMessage(t ?: new Date())
+		TwitterMessage msg = new TwitterMessage()
+		msg.timestamp = t ?: new Date()
 		msg.text = s.text
 		msg.urls = s.URLEntities*.expandedURL
 		msg.username = s.user.name
@@ -46,6 +41,6 @@ class TwitterMessage implements ITimestamped {
 
 	@Override
 	String toString() {
-		return text + "[" + urls.join("") + "]"
+		return text + "[" + urls.join(",") + "]"
 	}
 }
