@@ -393,3 +393,13 @@ grails {
 	}
 }
 remove this line */
+
+//Chargify
+
+chargify.apiKey 	 	 		 = 'T95ZukMNkNhLyjs6Sp74L3vJTxEGzhL5TvdltRnQA'
+chargify.apiKeySuffix	 		 = ':x'
+chargify.directApiId 	 		 = 'f33e8d60-258b-0134-f468-0aabff73eae9'
+chargify.directApiSecret 		 = 'yUkmekMjuRVVLVjz11f5pkIUVA4GFSKaMU6cfg'
+chargify.directApiPwd	 		 = 'da8Hl7URArXuSorGCQDrmcX662SSTK623OEZ5qoZIA'
+chargify.subDomain	     		 = 'streamr-dev'
+chargify.defaultProductFamily	 = 'streamr-billing-plans'

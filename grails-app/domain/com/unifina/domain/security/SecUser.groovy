@@ -10,6 +10,7 @@ class SecUser {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	BillingAccount billingAccount
 	
 	String apiKey = generateApiKey()
 	
@@ -23,6 +24,7 @@ class SecUser {
 		password blank: false
 		name blank: false
 		apiKey nullable:true, unique: true
+		billingAccount nullable: true
 	}
 
 	static mapping = {
