@@ -70,7 +70,7 @@
 							<input type="text" class="form-control" name="payment_profile[expiration_month]" id="creditCardExpirationMonth" placeholder="" value="${subscriptions.subscription.credit_card.expiration_month}"/>
 						</div>
 					</div>
-					<input type="submit" class="save btn btn-lg btn-primary" value="Update"/>
+					<input type="submit" id="creditCardUpdate" class="save btn btn-lg btn-primary" value="Update"/>
 				</form>
 			</ui:panel>
 		</div>
@@ -96,7 +96,7 @@
 						   data-slider-value="1"
 						   data-slider-tooltip="hide" style="width:100%" />
 
-					<input type="submit" class="save btn btn-lg btn-primary" value="Your current plan" disabled/>
+					<input type="submit" id="planUpdate" class="save btn btn-lg btn-primary" value="Your current plan" disabled/>
 				</ui:panel>
 			</div>
 
@@ -250,17 +250,16 @@
 			$('#product-price').text(products[newVal-1].product.price_in_cents/100)
 
 			if (productIndex < (newVal-1)){
-				$('input[type="submit"]').prop('disabled',false);
-				$('input[type="submit"]').val('Upgrade');
+				$('#planUpdate').prop('disabled',false);
+				$('#planUpdate').val('Upgrade');
 			} else if (productIndex > (newVal -1)) {
-				$('input[type="submit"]').prop('disabled',false);
-				$('input[type="submit"]').val('Downgrade');
+				$('#planUpdate').prop('disabled',false);
+				$('#planUpdate').val('Downgrade');
 			}
 			else {
-				$('input[type="submit"]').prop('disabled',true);
-				$('input[type="submit"]').val('Your current plan');
+				$('#planUpdate').prop('disabled',true);
+				$('#planUpdate').val('Your current plan');
 			}
-
 		});
 	});
 

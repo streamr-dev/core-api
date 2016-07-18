@@ -176,7 +176,7 @@ class BillingAccountService {
 
 	//https://docs.chargify.com/api-metered-usage
 	def getMeteredUsage(subscriptionId, componentId){
-		def url = SUBSCRIPTIONS_URL + '/' + subscriptionId + '/components/' + componentId
+		def url = SUBSCRIPTIONS_URL + subscriptionId + '/components/' + componentId
 		HttpURLConnection conn = getChargifyConnection(url,GET)
 		conn.connect()
 		int responseCode = conn.getResponseCode()
@@ -188,6 +188,42 @@ class BillingAccountService {
 		//Todo add error handling
 		return content
 	}
+
+
+	def updateMeteredUsage(subscriptionId, componentId, amount, description) {
+		def url = SUBSCRIPTIONS_URL + subscriptionId + '/components/' + componentId + '/usages.json'
+		HttpURLConnection conn = getChargifyConnection(url,POST)
+		conn.setRequestProperty('Content-Type','application/json')
+		conn.connect()
+
+		def json = new JsonBuilder()
+
+		json.usage {
+			quantity amount
+			memo 	 description
+		}
+
+		OutputStream os = conn.getOutputStream();
+		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+		osw.write(json.toString());
+		osw.flush();
+		osw.close();
+
+		//conn.connect()
+		int responseCode = conn.getResponseCode()
+		//check response code
+		def responseMsg = conn.responseMessage
+		def errorStream = conn.getErrorStream()
+
+		//check response code
+		def content = []
+		if (responseCode == HTTP_RESPONSE_CODE_OK){
+			content = JSON.parse(conn.content?.text)
+		}
+		//Todo add error handling
+		return content
+	}
+
 
 	def updateSubscription(subscriptionId, productHandle){
 		def url = SUBSCRIPTIONS_URL + subscriptionId + ".json"
@@ -237,10 +273,6 @@ class BillingAccountService {
 		}
 		//Todo add error handling
 		return content
-	}
-
-	def updateMeteredUsage(subscriptionId, componentId) {
-
 	}
 
 	def getProductFamilies(){
