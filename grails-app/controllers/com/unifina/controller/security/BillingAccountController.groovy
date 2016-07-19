@@ -4,6 +4,7 @@ import grails.plugin.springsecurity.annotation.Secured
 import com.unifina.domain.security.SecUser
 import grails.transaction.Transactional
 import com.unifina.domain.security.BillingAccount
+import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 
 @Transactional
 @Secured(["IS_AUTHENTICATED_FULLY"])
@@ -16,13 +17,12 @@ class BillingAccountController {
 
 	static defaultAction = "edit"
 
-	//Todo fetch these from config
-	static DIRECT_API_ID = 'f33e8d60-258b-0134-f468-0aabff73eae9'
-	static DIRECT_API_SECRET = 'yUkmekMjuRVVLVjz11f5pkIUVA4GFSKaMU6cfg'
-	static DIRECT_API_PWD	= 'da8Hl7URArXuSorGCQDrmcX662SSTK623OEZ5qoZIA'
+	static DIRECT_API_ID 		= "${CH.config.chargify.directApiId}"
+	static DIRECT_API_SECRET 	= "${CH.config.chargify.directApiSecret}"
+	static DIRECT_API_PWD		= "${CH.config.chargify.directApiPwd}"
 	//Todo redirect back to current page
-	static REDIRECT_URI = 'redirect_uri='
-	static NONCE 	= 'SECRET'
+	static REDIRECT_URI 		= 'redirect_uri='
+	static NONCE 				= 'SECRET'
 
 
     def edit() {
@@ -39,16 +39,22 @@ class BillingAccountController {
 
 		if (!user.billingAccount){
 			flash.message = "User "+ user.username + " has no Billing Account" + "</br>" + "Create a new Billing Account by selecting a plan and subscribing or join an existing Billing Account"
-		} else if (subscriptions){
-			statements = billingAccountService.getStatements(subscriptions.subscription.id)
-			data = data + '&amp;subscription_id=' + subscriptions.subscription.id
+		} else if (subscriptions.code == 200){
+			statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
+			data = data + '&amp;subscription_id=' + subscriptions.content.subscription.id
+
+			//test metered usage, with component id 191081
+			def meteredUsage = billingAccountService.getMeteredUsage(subscriptions.content.subscription.id, 191081)
+			billingAccountService.updateMeteredUsage(subscriptions.content.subscription.id, 191081, 10, 'test')
+
+
 		}
 
 		if(params.containsKey("status_code") && params.containsKey("result_code") && params.containsKey("call_id")){
-			def callContent = billingAccountService.getCall(params.call_id)
+			def call = billingAccountService.getCall(params.call_id)
 			if (params.status_code == "422"){
-				if(callContent){
-					def errors = callContent.call.response.result.errors
+				if(call.content){
+					def errors = call.content.call.response.result.errors
 					def errorMsg = 'Following errors occured while trying to send a form: </br>'
 					//todo check how to loop json object attrs
 					errors.each{
@@ -58,17 +64,15 @@ class BillingAccountController {
 				}
 			}
 			else if (params.status_code == '401') {
-				//def call = billingAccountService.getCall(params['call_id'])
-
 				flash.error = "Something went wrong, please try again.."
 			}
-
 			else if (params.status_code == "200" && params.result_code == "2000"){
 				//todo check from call id what was done..?
 				//check if user has billing account attached to his domain model
 				//if user has billing account, updated billing account information if necessary
 
 				//check from call, was edit succesful
+				flash.message = "Update successful!"
 
 				if(user.billingAccount){
 					//todo we should show different form/view in billingAccount.gsp for migrations
@@ -82,7 +86,7 @@ class BillingAccountController {
 				else if (subscriptions) {
 					//todo check if subscription exists in billing account table
 					//if not create a new billing account with subscription
-					def billingAccount = new BillingAccount(chargifySubscriptionId: subscriptions.subscription.id,chargifyCustomerId: subscriptions.subscription.customer.id)
+					def billingAccount = new BillingAccount(chargifySubscriptionId: subscriptions.content.subscription.id, chargifyCustomerId: subscriptions.content.subscription.customer.id)
 					billingAccount.save()
 					user.billingAccount = billingAccount
 					user.save()
@@ -93,18 +97,19 @@ class BillingAccountController {
 
 
 
-		//def productFamilies = billingAccountService.getProductFamilies()
 
-		//def productFamilyComponents = billingAccountService.getProductFamilyComponents('566553')
+		def productFamilies = billingAccountService.getProductFamilies()
+
+		def productFamilyComponents = billingAccountService.getProductFamilyComponents('566553')
 
 
 		def now = new Date()
 
 		long timestamp = System.currentTimeMillis() / 1000L
-		[user:SecUser.get(springSecurityService.currentUser.id), products:products,
+		[user:SecUser.get(springSecurityService.currentUser.id), products: products.content,
 		hmac:billingAccountService.hmac(DIRECT_API_ID+timestamp+NONCE+data, DIRECT_API_SECRET),
 		apiId:DIRECT_API_ID, timestamp: timestamp, nonce: NONCE, data: data,
-		subscriptions: subscriptions, statements: statements, errors: errors
+		subscriptions: subscriptions.content, statements: statements.content, errors: errors
 		]
 	}
 
@@ -116,10 +121,10 @@ class BillingAccountController {
 		//todo check how subscription post works
 		if (user.billingAccount.chargifySubscriptionId && params['signup[product][handle]']){
 			def productHandle = params['signup[product][handle]']
-			def content = billingAccountService.updateSubscription(user.billingAccount.chargifySubscriptionId, productHandle)
+			def response = billingAccountService.updateSubscription(user.billingAccount.chargifySubscriptionId, productHandle)
 
-			if (content){
-				flash.message = 'Subscription updated to ' + content.subscription.product.name + ' plan'
+			if (response.content){
+				flash.message = 'Subscription updated to ' + response.content.subscription.product.name + ' plan'
 			}
 			else {
 				flash.error = 'Something went wrong, please try to update again'
