@@ -3,6 +3,21 @@
 
     var TRACE_REDRAW_BATCH_SIZE = 10000
 
+    var skins = {
+        default: {
+            layerUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            layerAttribution: "© OpenStreetMap contributors, Streamr"
+        },
+        cartoDark: {
+            layerUrl: "http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+            layerAttribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>, Streamr'
+        },
+        esriDark: {
+            layerUrl: "{s}.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+            layerAttribution: "Esri, HERE, DeLorme, MapmyIndia, © OpenStreetMap contributors, Streamr"
+        }
+    }
+
     function StreamrMap(parent, options) {
 
         var _this = this
@@ -26,7 +41,8 @@
             minZoom: 2,
             maxZoom: 18,
             traceRadius: 2,
-            drawTrace: false
+            drawTrace: false,
+            skin: "default"
         }, options || {})
 
         this.defaultAutoZoomBounds = {
@@ -44,9 +60,11 @@
         if (!this.parent.attr("id"))
             this.parent.attr("id", "map-"+Date.now())
 
+        this.skin = skins[this.options.skin] || skins.default
+
         this.baseLayer = L.tileLayer(
-            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-                attribution: '© OpenStreetMap contributors, Streamr',
+            this.skin.layerUrl, {
+                attribution: this.skin.layerAttribution,
                 minZoom: _this.options.minZoom,
                 maxZoom: _this.options.maxZoom
             }

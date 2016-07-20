@@ -79,6 +79,10 @@ public class MapModule extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("autoZoom", autoZoom, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("traceRadius", traceRadius, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("customMarkerLabel", customMarkerLabel, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("skin", "default", ModuleOption.OPTION_STRING)
+			.addPossibleValue("Default", "default")
+			.addPossibleValue("Dark", "cartoDark")
+		);
 
 		return config;
 	}
