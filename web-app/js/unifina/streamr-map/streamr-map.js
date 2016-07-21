@@ -159,9 +159,10 @@
 
     StreamrMap.prototype.addMarker = function(attr) {
         var id = attr.id
-        var label = attr.label
+        var label = attr.label || attr.id
         var lat = attr.lat
         var lng = attr.lng
+        var rotation = attr.dir
         // Needed for linePoints
         var color = attr.color
         var latlng = new L.LatLng(lat, lng)
@@ -171,10 +172,10 @@
         }
 
         var marker = this.markers[id]
-        if(marker === undefined) {
-            this.markers[id] = this.createMarker(id, label, latlng)
+        if (marker === undefined) {
+            this.markers[id] = this.createMarker(id, label, latlng, rotation)
         } else {
-            this.moveMarker(id, lat, lng)
+            this.moveMarker(id, lat, lng, rotation)
         }
         if(this.options.drawTrace)
             this.addLinePoint(id, lat, lng, color)
@@ -203,7 +204,7 @@
         }
     }
 
-    StreamrMap.prototype.createMarker = function(id, label, latlng) {
+    StreamrMap.prototype.createMarker = function(id, label, latlng, rotation) {
         var marker = L.marker(latlng, {
             icon: L.divIcon({
                 iconSize:     [19, 48], // size of the icon
@@ -227,9 +228,20 @@
         return marker
     }
 
-    StreamrMap.prototype.moveMarker = function(id, lat, lng) {
-        var latlng = L.latLng(lat,lng)
-        this.pendingMarkerUpdates[id] = latlng
+    StreamrMap.prototype.moveMarker = function(id, lat, lng, rotation) {
+        var latlng = L.latLng(lat, lng)
+        var update = { latlng: latlng }
+        if (this.options.directionalMarkers) {
+            if (rotation) {
+                update.rotation = rotation
+            } else {
+                // rotate so that it's "coming from" the previous latlng
+                var old = this.markers[id].getLatLng()
+                update.rotation = Math.atan2(latlng.lat - old.lat, latlng.lng - old.lng)
+            }
+        }
+
+        this.pendingMarkerUpdates[id] = update
         this.requestUpdate()
     }
 
@@ -243,10 +255,15 @@
     StreamrMap.prototype.animate = function() {
         var _this = this
         Object.keys(this.pendingMarkerUpdates).forEach(function(id) {
-            var latlng = _this.pendingMarkerUpdates[id]
+            var update = _this.pendingMarkerUpdates[id]
 
             // Update marker position
-            _this.markers[id].setLatLng(latlng)
+            var marker =_this.markers[id]
+            marker.setLatLng(update.latlng)
+            if (update.rotation) {
+                //$(marker._icon).css({"rotate": update.rotation + "rad"})
+                marker._icon.style.transform += " rotate(" + update.rotation + "rad)"
+            }
         })
 
         if(this.lineLayer)

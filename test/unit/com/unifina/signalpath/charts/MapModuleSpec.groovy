@@ -48,7 +48,7 @@ public class MapModuleSpec extends Specification {
 			uiChannel: [id: "mapPointData"],
 			options: [
 				drawTrace: [value: true],
-				customMarkerLabel: [value: true]
+				markerLabel: [value: true]
 			]
 		])
 

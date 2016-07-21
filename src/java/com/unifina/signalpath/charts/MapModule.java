@@ -11,12 +11,15 @@ public class MapModule extends ModuleWithUI {
 	Input<Object> label = new Input<>(this, "label", "Object");
 	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
 	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
+	TimeSeriesInput heading = new TimeSeriesInput(this, "heading");		// degrees clockwise ("right-handed down")
 	ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
 	boolean drawTrace = false;
 	boolean autoZoom = true;
 	int traceRadius = 2;
 	boolean customMarkerLabel = false;
+	String skin;	// e.g. "default", "cartoDark", "esriDark"
+	boolean directionalMarkers = false;
 
 	@Override
 	public void init() {
@@ -49,11 +52,12 @@ public class MapModule extends ModuleWithUI {
 	public void sendOutput() {
 		MapPoint mapPoint = new MapPoint(
 			id.getValue(),
-			customMarkerLabel ? label.getValue() : id.getValue(),
 			latitude.getValue(),
 			longitude.getValue(),
 			color.getValue()
 		);
+		if (customMarkerLabel) { mapPoint.put("label", label.getValue()); }
+		if (directionalMarkers) { mapPoint.put("dir", heading.getValue()); }
 		pushToUiChannel(mapPoint);
 	}
 
@@ -78,8 +82,9 @@ public class MapModule extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("drawTrace", drawTrace, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("autoZoom", autoZoom, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("traceRadius", traceRadius, ModuleOption.OPTION_INTEGER));
-		options.addIfMissing(new ModuleOption("customMarkerLabel", customMarkerLabel, ModuleOption.OPTION_BOOLEAN));
-		options.addIfMissing(new ModuleOption("skin", "default", ModuleOption.OPTION_STRING)
+		options.addIfMissing(new ModuleOption("markerLabel", customMarkerLabel, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("directionalMarkers", directionalMarkers, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("skin", skin, ModuleOption.OPTION_STRING)
 			.addPossibleValue("Default", "default")
 			.addPossibleValue("Dark", "cartoDark")
 		);
@@ -104,8 +109,12 @@ public class MapModule extends ModuleWithUI {
 			traceRadius = options.getOption("traceRadius").getInt();
 		}
 
-		if (options.containsKey("customMarkerLabel")) {
-			customMarkerLabel = options.getOption("customMarkerLabel").getBoolean();
+		if (options.containsKey("markerLabel")) {
+			customMarkerLabel = options.getOption("markerLabel").getBoolean();
+		}
+
+		if (options.containsKey("directionalMarkers")) {
+			directionalMarkers = options.getOption("directionalMarkers").getBoolean();
 		}
 
 		if (drawTrace) {
@@ -115,19 +124,22 @@ public class MapModule extends ModuleWithUI {
 		if (customMarkerLabel) {
 			addInput(label);
 		}
+
+		if (directionalMarkers) {
+			addInput(heading);
+		}
 	}
 
 	private static class MapPoint extends LinkedHashMap<String,Object> {
-		private MapPoint(Object id, Object label, Double latitude, Double longitude, StreamrColor color) {
+		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			super();
 			if (!(id instanceof Double || id instanceof String)) {
 				id = id.toString();
 			}
-			put("label", label);
+			put("id", id);
 			put("t", "p");
 			put("lat", latitude);
 			put("lng", longitude);
-			put("id", id);
 			put("color", color.toString());
 		}
 	}
