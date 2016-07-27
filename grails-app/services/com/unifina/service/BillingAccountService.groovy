@@ -40,6 +40,7 @@ class BillingAccountService {
 	public String SUBSCRIPTION_BY_CUSTOMER_ID_URL 	= "https://${CH.config.chargify.subDomain}.chargify.com/customers/"
 	public String SUBSCRIPTIONS_URL 				= "https://${CH.config.chargify.subDomain}.chargify.com/subscriptions/"
 	public String PRODUCT_FAMILY_URL 				= "https://${CH.config.chargify.subDomain}.chargify.com/product_families"
+	public String STATEMENTS_URL					= "https://${CH.config.chargify.subDomain}.chargify.com/statements/"
 
 	//api v2
 	public String DIRECT_API_ID     = "${CH.config.chargify.directApiId}"
@@ -307,6 +308,50 @@ class BillingAccountService {
 		conn.disconnect()
 		return response
 	}
+
+	def getStatementPdf(statementId){
+		//def response = ['code':'', 'msg':'', 'content': new ArrayList<>()]
+		def url = STATEMENTS_URL + statementId + '.pdf'
+		HttpURLConnection conn = getChargifyConnection(url, GET)
+		conn.connect()
+		def responseCode = conn.getResponseCode()
+		//check response code
+		def content = ['inputStream':'', 'disposition':'', 'contentType': '']
+		if (responseCode == HTTP_RESPONSE_CODE_OK){
+			/*response.content = JSON.parse(conn.content?.text)
+			response.msg = 'Fetched statement'*/
+
+			String fileName = "";
+			String disposition = conn.getHeaderField("Content-Disposition");
+			String contentType = conn.getContentType();
+			int contentLength = conn.getContentLength();
+			InputStream inputStream = conn.getInputStream();
+			if (disposition != null) {
+				// extracts file name from header field
+				int index = disposition.indexOf("filename=");
+				if (index > 0) {
+					fileName = disposition.substring(index + 10,
+							disposition.length() - 1);
+				}
+			} else {
+				// extracts file name from URL
+				fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
+						fileURL.length());
+			}
+
+			content.inputStream = inputStream
+			content.disposition = disposition
+			content.contentType = contentType
+
+
+		}
+		/*else {
+			response.msg = conn.getErrorStream()
+		}*/
+		conn.disconnect()
+		return content
+	}
+
 
 	def getProductFamilies(){
 		def response = ['code':'', 'msg':'', 'content': new ArrayList<>()]

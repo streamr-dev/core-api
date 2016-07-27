@@ -6,6 +6,7 @@
 	<r:require module="confirm-button"/>
 	<r:require module="moment-timezone"/>
 	<r:require module="bootstrap-slider"/>
+	<r:require module="bootstrap-credit-card"/>
 
 	<r:script>
 		$(document).ready(function() {
@@ -26,55 +27,162 @@
 </div>
 
 <g:if test="${user?.billingAccount}">
-
-	<div class="row">
-		<div class="col-sm-12 col-md-offset-2 col-md-8">
-			<ui:panel title="Billing Account Key">
-				<legend>Share this key with people whom you want to join to your Billing Account</legend>
-				<div><pre>${user?.billingAccount.apiKey}</pre></div>
-			</ui:panel>
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-sm-12 col-md-offset-2 col-md-8">
-			<ui:panel title="Subscription and Billing Information">
-				<legend>Current subscription period ends at</legend>
-				<div><pre>${subscriptions.subscription.current_period_ends_at}</pre></div>
-				<legend>Credit Card information</legend>
-				<form method="post" action="${'https://api.chargify.com/api/v2/subscriptions/'+subscriptions.subscription.id+'/card_update'}">
-					<input type="hidden" name="secure[api_id]" 	  value="${apiId}"/>
-					<input type="hidden" name="secure[timestamp]" value="${timestamp}" />
-					<input type="hidden" name="secure[nonce]"     value="${nonce}" />
-					<input type="hidden" name="secure[data]" 	  value="${data}"/>
-					<input type="hidden" name="secure[signature]" value="${hmac}"/>
-					<div class="form-group">
-						<label for="creditCardFirstName" class="col-sm-2 control-label">First Name</label>
-						<div class="col-sm-10">
-							<input type="text" class="form-control" name="payment_profile[first_name]" id="creditCardFirstName" placeholder="" value="${subscriptions.subscription.credit_card.first_name}"/>
-						</div>
-						<label for="creditCardLastName" class="col-sm-2 control-label">Last Name</label>
-						<div class="col-sm-10">
-							<input type="text" class="form-control" name="payment_profile[last_name]" id="creditCardLastName" placeholder="" value="${subscriptions.subscription.credit_card.last_name}"/>
-						</div>
-						<label for="creditCardNumber" class="col-sm-2 control-label">Credit Card</label>
-						<div class="col-sm-10">
-							<input type="text" class="form-control" name="payment_profile[card_number]"  id="creditCardNumber" placeholder="" value="${subscriptions.subscription.credit_card.masked_card_number}"/>
-						</div>
-						<label for="creditCardExpirationYear" class="col-sm-2 control-label">Expiration Year</label>
-						<div class="col-sm-10">
-							<input type="text" class="form-control" name="payment_profile[expiration_year]" id="creditCardExpirationYear" placeholder="" value="${subscriptions.subscription.credit_card.expiration_year}"/>
-						</div>
-						<label for="creditCardExpirationMonth" class="col-sm-2 control-label">Expiration Month</label>
-						<div class="col-sm-10">
-							<input type="text" class="form-control" name="payment_profile[expiration_month]" id="creditCardExpirationMonth" placeholder="" value="${subscriptions.subscription.credit_card.expiration_month}"/>
-						</div>
+	<form method="post" action="emailInvite">
+		<div class="row">
+			<div class="col-sm-12 col-md-offset-2 col-md-8">
+				<ui:panel title="Users">
+					<table class="table">
+						<thead>
+							<tr>
+								<td>Username</td>
+							</tr>
+						</thead>
+						<tbody>
+							<g:each in="${billingAccountUsers}">
+								<tr>
+									<td>${it.username}</td>
+								</tr>
+							</g:each>
+						</tbody>
+					</table>
+					<legend>Insert email address and invite person to this Billing Account</legend>
+					<div class="form-group col-sm-6">
+					   <input type="text" class="form-control" name="emailInvite" value=""/>
 					</div>
-					<input type="submit" id="creditCardUpdate" class="save btn btn-lg btn-primary" value="Update"/>
-				</form>
-			</ui:panel>
+					<input type="submit" class="save btn btn-lg btn-primary" value="Invite" />
+				</ui:panel>
+			</div>
 		</div>
-	</div>
+	</form>
+
+	<g:if test="${subscriptions}">
+		<div class="row">
+			<div class="col-sm-12 col-md-offset-2 col-md-8">
+				<ui:panel title="Subscription and Billing Information">
+					<legend>Current subscription period ends at</legend>
+					<div><pre>${subscriptions.subscription.current_period_ends_at}</pre></div>
+					<legend>Credit Card information</legend>
+
+					<div class="my-cc">
+							<div class="row">
+								<div class="col-xs-12">
+									<!-- Card -->
+									<div class="item item-black item-image">
+										<!-- Transparent Image -->
+										<img src="${resource(dir:'images',file:'transparent.png')}" alt="" class="img-responsive" />
+										<!-- Heading -->
+										<div class="item-heading clearfix">
+											<!-- Heading -->
+											<h3>Your Card</h3>
+											<!-- Bank Name -->
+											<h4></h4>
+										</div>
+										<!-- Account -->
+										<div class="item-account">
+											<!-- Value -->
+											<g:each in="${subscriptions.subscription.credit_card.masked_card_number.split('-')}">
+												<span>${it}</span>
+											</g:each>
+										</div>
+										<!-- Validity Starts -->
+										<div class="item-validity">
+											<div class="row">
+												<div class="col-md-6 col-sm-6 col-xs-6">
+													<!-- Item -->
+													%{--<div class="item-valid clearfix">
+														<!-- Valid From -->
+														<h5>Valid From</h5>
+														<!-- Date -->
+														<span>12/05</span>
+													</div>--}%
+												</div>
+												<div class="col-md-6 col-sm-6 col-xs-6">
+													<!-- Item -->
+													<div class="item-valid clearfix">
+														<!-- Valid Thru -->
+														<h5>Valid Thru</h5>
+														<!-- Date -->
+														<span>${subscriptions.subscription.credit_card.expiration_month}/${subscriptions.subscription.credit_card.expiration_year.toString()[-2..-1]}</span>
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Validity Ends -->
+
+										<!-- Card Type Starts -->
+										<div class="item-cc-type clearfix">
+											<!-- Type -->
+											<h6>${subscriptions.subscription.credit_card.first_name + " " + subscriptions.subscription.credit_card.last_name}</h6>
+											<!-- Icon -->
+											<i class="fa fa-cc-visa"></i>
+										</div>
+										<!-- Card Type Ends -->
+									</div>
+								</div>
+							</div>
+					</div>
+
+					<button type="button" id="credit-card-form-button" class="btn btn-info">Change</button>
+
+					<form id="credit-card-update-form" style="display:none;" method="post" action="${'https://api.chargify.com/api/v2/subscriptions/'+subscriptions.subscription.id+'/card_update'}">
+						<input type="hidden" name="secure[api_id]" 	  value="${apiId}"/>
+						<input type="hidden" name="secure[timestamp]" value="${timestamp}" />
+						<input type="hidden" name="secure[nonce]"     value="${nonce}" />
+						<input type="hidden" name="secure[data]" 	  value="${data}"/>
+						<input type="hidden" name="secure[signature]" value="${hmac}"/>
+						<div class="form-group">
+							<label for="creditCardFirstName" class="col-sm-2 control-label">First Name</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" name="payment_profile[first_name]" id="creditCardFirstName" placeholder="" value="${subscriptions.subscription.credit_card.first_name}"/>
+							</div>
+							<label for="creditCardLastName" class="col-sm-2 control-label">Last Name</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" name="payment_profile[last_name]" id="creditCardLastName" placeholder="" value="${subscriptions.subscription.credit_card.last_name}"/>
+							</div>
+							<label for="creditCardNumber" class="col-sm-2 control-label">Credit Card</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" name="payment_profile[card_number]"  id="creditCardNumber" placeholder="" value="${subscriptions.subscription.credit_card.masked_card_number}"/>
+							</div>
+
+							<label for="creditCardNumber" class="col-sm-2 control-label">Credit Card Expiration</label>
+							<div class="col-sm-10">
+								<label for="signup_payment_profile_expiration_month">Month</label> / <label for="signup_payment_profile_expiration_year">Year</label><br/>
+								<select name="payment_profile[expiration_month]" id="creditCardExpirationYear">
+									<option value="1">01</option>
+									<option value="2">02</option>
+									<option value="3">03</option>
+									<option value="4">04</option>
+									<option value="5">05</option>
+									<option value="6">06</option>
+									<option value="7">07</option>
+									<option value="8">08</option>
+									<option value="9">09</option>
+									<option value="10">10</option>
+									<option value="11">11</option>
+									<option value="12">12</option>
+								</select>
+								/
+								<select name="payment_profile[expiration_year]" id="creditCardExpirationMonth">
+									<option value="2016">2016</option>
+									<option value="2017">2017</option>
+									<option value="2018">2018</option>
+									<option value="2019">2019</option>
+									<option value="2020">2020</option>
+									<option value="2021">2021</option>
+									<option value="2022">2022</option>
+									<option value="2023">2023</option>
+									<option value="2024">2024</option>
+									<option value="2025">2025</option>
+									<option value="2026">2026</option>
+								</select>
+							</div>
+						</div>
+						<input type="submit" id="creditCardUpdate" class="save btn btn-lg btn-primary" value="Update"/>
+					</form>
+				</ui:panel>
+			</div>
+		</div>
+
 
 	<form method="post" action="update">
 		<div class="row">
@@ -105,12 +213,33 @@
 	<div class="row">
 			<div class="col-sm-12 col-md-offset-2 col-md-8">
 				<ui:panel title="Statements">
-					<g:each in="${statements.statement.html_view}">
-						${raw(it)}
-					</g:each>
+					<table class="table">
+						<thead>
+							<tr>
+								<td>Date</td>
+								<td>Sum</td>
+								<td>Link</td>
+							</tr>
+						</thead>
+						<tbody>
+							<g:each in="${statements.content.statement}">
+								<tr>
+									%{--${raw(it.created_at)}--}%
+									<td>${Date.parse("yyyy-MM-dd'T'HH:mm:ss",it.created_at).format("YYYY-MM-dd")}</td>
+									<td>${it.total_in_cents.toInteger()/100} €</td>
+									<td><g:link controller="billingAccount" action="statement" params="[statementId:it.id]">Statement ${it.id}</g:link></td>
+									%{--${SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it.created_at)}--}%
+									%{--${SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(now)}--}%
+									%{--<g:formatDate date="${new Date()}" format="yyyy-MM-dd'T'HH:mm:ssZ", locale="${Locale.ENGLISH}"/>--}%
+								</tr>
+							</g:each>
+						</tbody>
+					</table>
 				</ui:panel>
 			</div>
-	</div>
+	</div
+
+	</g:if>
 </g:if>
 
 <g:else>
@@ -231,7 +360,6 @@
 	</form>
 </g:else>
 
-
 <g:javascript>
 	var products = JSON.parse("${products}");
 	var productIndex = _.findIndex(products,{product:{handle:"${subscriptions.subscription.product.handle}"}})
@@ -262,6 +390,11 @@
 			}
 		});
 	});
+
+
+	$('#credit-card-form-button').on('click', function(e) {
+		$('#credit-card-update-form').toggle('slow');
+	})
 
 </g:javascript>
 

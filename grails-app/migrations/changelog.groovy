@@ -46,4 +46,9 @@ databaseChangeLog = {
 	include file: 'core/2016-07-11-billing-account-changes.groovy'
 
 	include file: 'core/2016-07-14-billing-account-changes.groovy'
+
+	include file: 'core/2016-07-25-billing-account-invites.groovy'
+
+
+	include file: 'core/2016-07-25-billing-account-invites-default-values.groovy'
 }

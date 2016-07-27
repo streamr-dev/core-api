@@ -50,6 +50,10 @@ modules = {
 		resource url:[dir:'js/seiyria-bootstrap-slider/dist', file:'bootstrap-slider.js', plugin: 'unifina-core']
 		resource url:[dir:'js/seiyria-bootstrap-slider/dist/css', file:'bootstrap-slider.css', plugin: 'unifina-core']
 	}
+	'bootstrap-credit-card' {
+		dependsOn 'bootstrap'
+		resource url:[dir:'css/bootstrap-credit-card',file:'credit-card-styles.css', plugin: 'unifina-core']
+	}
 	hopscotch {
 		resource url:[dir:'js/hopscotch', file:'hopscotch.css', plugin: 'unifina-core']
 		resource url:[dir:'js/hopscotch', file:'hopscotch.js', plugin: 'unifina-core']

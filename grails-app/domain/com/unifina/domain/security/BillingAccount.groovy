@@ -8,6 +8,7 @@ class BillingAccount {
 	String chargifyCustomerId
 	String chargifySubscriptionId
 	String apiKey = generateApiKey()
+	Date dateCreated
 
     static constraints = {
 

@@ -5,6 +5,7 @@ import com.unifina.domain.security.SecUser
 import grails.transaction.Transactional
 import com.unifina.domain.security.BillingAccount
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
+import com.unifina.domain.security.BillingAccountInvite
 
 @Transactional
 @Secured(["IS_AUTHENTICATED_FULLY"])
@@ -14,6 +15,8 @@ class BillingAccountController {
 	def userService
 	def billingAccountService
 	def billingAccount
+
+	def mailService
 
 	static defaultAction = "edit"
 
@@ -26,28 +29,23 @@ class BillingAccountController {
 
 
     def edit() {
-		//Todo catch url parameters, find if redirected?
-		//Todo Check if user has a billing account, if not then ask user to make one
-		//Todo if user has billing account, show upgrade/downgrade options
-		def params = params
+
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		def products = billingAccountService.getProducts()
 		def statements
 		def data = REDIRECT_URI
-		//todo what if user has been added to billing account, we should check instead the if user has a BA
 		def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
+		def billingAccountUsers = []
 
 		if (!user.billingAccount){
 			flash.message = "User "+ user.username + " has no Billing Account" + "</br>" + "Create a new Billing Account by selecting a plan and subscribing or join an existing Billing Account"
 		} else if (subscriptions.code == 200){
 			statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
 			data = data + '&amp;subscription_id=' + subscriptions.content.subscription.id
+		}
 
-			//test metered usage, with component id 191081
-			def meteredUsage = billingAccountService.getMeteredUsage(subscriptions.content.subscription.id, 191081)
-			billingAccountService.updateMeteredUsage(subscriptions.content.subscription.id, 191081, 10, 'test')
-
-
+		if (user.billingAccount) {
+			billingAccountUsers = SecUser.findAllByBillingAccount(user.billingAccount)
 		}
 
 		if(params.containsKey("status_code") && params.containsKey("result_code") && params.containsKey("call_id")){
@@ -56,7 +54,6 @@ class BillingAccountController {
 				if(call.content){
 					def errors = call.content.call.response.result.errors
 					def errorMsg = 'Following errors occured while trying to send a form: </br>'
-					//todo check how to loop json object attrs
 					errors.each{
 						errorMsg = errorMsg  + it.message + "</br>"
 					}
@@ -67,11 +64,6 @@ class BillingAccountController {
 				flash.error = "Something went wrong, please try again.."
 			}
 			else if (params.status_code == "200" && params.result_code == "2000"){
-				//todo check from call id what was done..?
-				//check if user has billing account attached to his domain model
-				//if user has billing account, updated billing account information if necessary
-
-				//check from call, was edit succesful
 				flash.message = "Update successful!"
 
 				if(user.billingAccount){
@@ -95,22 +87,75 @@ class BillingAccountController {
 			}
 		}
 
-
-
-
-		def productFamilies = billingAccountService.getProductFamilies()
-
-		def productFamilyComponents = billingAccountService.getProductFamilyComponents('566553')
-
-
 		def now = new Date()
 
 		long timestamp = System.currentTimeMillis() / 1000L
 		[user:SecUser.get(springSecurityService.currentUser.id), products: products.content,
 		hmac:billingAccountService.hmac(DIRECT_API_ID+timestamp+NONCE+data, DIRECT_API_SECRET),
 		apiId:DIRECT_API_ID, timestamp: timestamp, nonce: NONCE, data: data,
-		subscriptions: subscriptions.content, statements: statements.content, errors: errors
+		subscriptions: subscriptions.content, statements: statements, errors: errors, billingAccountUsers: billingAccountUsers
 		]
+	}
+
+	def emailInvite() {
+		def user = SecUser.get(springSecurityService.currentUser.id)
+
+		//todo validate that email has at least a correct form
+		if (params['emailInvite']){
+
+			//Todo create new billingAccountInvite, set used to false, add billinAccount to billingAccountInvite, add sec user (inviter) to billingAccountInvite
+			def billingAccountInvite = new BillingAccountInvite(billingAccount: user.billingAccount, users: user)
+			billingAccountInvite.save()
+
+			mailService.sendMail {
+				from grailsApplication.config.unifina.email.sender
+				to params['emailInvite']
+				subject	'You have been invited to Streamr Billing Account'
+				//Todo rename/replace email_welcome template with some other eg. billing account invite template
+				html g.render(template:"email_invite", model:[user: user, token: billingAccountInvite.token], plugin:'unifina-core')
+			}
+
+			flash.message = 'Invite sent to ' + params['emailInvite']
+		} else {
+			flash.error = 'Something went wrong, please try again soon'
+		}
+		redirect(action:"edit")
+	}
+
+	def joinToBillingAccount() {
+		//todo catch parameters
+		//todo check if invite has been already used
+		//
+		//todo check if user has an account, if not then reroute user to create an account / or check at email send phase if user has an account and give option to create one, then follow billingAccount link
+		//todo check if user is already in a billing account, what do we do then ?
+		//def params = params
+		def user = SecUser.get(springSecurityService.currentUser.id)
+
+		//todo refactor parameter to some other variable/namespace
+		if (params['token']){
+			def billingAccountInvite = BillingAccountInvite.findByToken(params['token'])
+
+			if (!billingAccountInvite || billingAccountInvite.used){
+				flash.error = 'Billing Account invite has already been used'
+			}
+
+			else if (billingAccountInvite && !billingAccountInvite.used) {
+				billingAccountInvite.used = Boolean.TRUE
+				billingAccountInvite.save()
+
+				def baId = billingAccountInvite.billingAccount.id
+				def ba = BillingAccount.findById(baId)
+
+				user.billingAccount = ba
+				user.save()
+				flash.message = 'You have joined succesfully to Billing Account'
+			}
+			else {
+				flash.error = 'Your account is already in a billing account'
+			}
+		}
+
+		redirect(action:"edit")
 	}
 
 	def update() {
@@ -166,5 +211,33 @@ class BillingAccountController {
 			}
 		}
 		redirect(action:"edit")
+	}
+
+	def statement() {
+		def user = SecUser.get(springSecurityService.currentUser.id)
+		if (params['statementId']){
+			def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
+			def statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
+			def content   = billingAccountService.getStatementPdf(params['statementId'])
+
+
+			String tempDir = System.getProperty('java.io.tmpdir')
+			def foo = new FileInputStream(tempDir+"foo.pdf")
+			foo << content.inputStream
+			foo.close()
+
+
+			response.setHeader("Content-disposition", content.disposition)
+			response.setHeader("Content-Length", "file-size")
+			response.setContentType(content.contentType)
+			/*response.outputStream << content.inputStream*/
+			/*webRequest.renderView = false*/
+			response.outputStream.flush()
+			/*response.outputStream.close()*/
+			return null
+
+
+
+		}
 	}
 }
