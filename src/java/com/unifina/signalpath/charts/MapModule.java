@@ -3,9 +3,12 @@ package com.unifina.signalpath.charts;
 import com.unifina.signalpath.*;
 import com.unifina.utils.StreamrColor;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class MapModule extends ModuleWithUI {
+	public final String DEFAULT_MARKER_ICON = "fa-long-arrow-up";
 
 	Input<Object> id = new Input<>(this, "id", "Object");
 	Input<Object> label = new Input<>(this, "label", "Object");
@@ -20,6 +23,7 @@ public class MapModule extends ModuleWithUI {
 	boolean customMarkerLabel = false;
 	String skin;	// e.g. "default", "cartoDark", "esriDark"
 	boolean directionalMarkers = false;
+	String markerIcon = DEFAULT_MARKER_ICON;
 
 	@Override
 	public void init() {
@@ -39,13 +43,15 @@ public class MapModule extends ModuleWithUI {
 		id.requiresConnection = false;
 		label.setDrivingInput(false);
 		label.canBeFeedback = false;
+		heading.requiresConnection = false;
 	}
 
 	@Override
 	public void initialize() {
 		super.initialize();
-		if (!id.isConnected())
-			id.receive("DefaultId");
+		if (!id.isConnected()) {
+			id.receive("id");
+		}
 	}
 
 	@Override
@@ -88,6 +94,22 @@ public class MapModule extends ModuleWithUI {
 			.addPossibleValue("Default", "default")
 			.addPossibleValue("Dark", "cartoDark")
 		);
+
+		if (directionalMarkers) {
+			options.addIfMissing(new ModuleOption("markerIcon", markerIcon, ModuleOption.OPTION_STRING)
+				.addPossibleValue("Default", DEFAULT_MARKER_ICON)
+				.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
+				.addPossibleValue("Short arrow", "fa fa-2x fa-arrow-up")
+				.addPossibleValue("Circled arrow", "fa fa-2x fa-arrow-circle-o-up")
+				.addPossibleValue("Wedge", "fa fa-3x fa-chevron-up")
+				.addPossibleValue("Double wedge", "fa fa-4x fa-angle-double-up")
+				.addPossibleValue("Circled wedge", "fa fa-2x fa-chevron-circle-up")
+				.addPossibleValue("Triangle", "fa fa-4x fa-caret-up")
+				.addPossibleValue("Triangle box", "fa fa-2x fa-caret-square-o-up")
+				.addPossibleValue("Airplane", "fa fa-4x fa-plane")
+				.addPossibleValue("Rocket", "fa fa-4x fa-rocket")
+			);
+		}
 
 		return config;
 	}
@@ -136,8 +158,8 @@ public class MapModule extends ModuleWithUI {
 			if (!(id instanceof Double || id instanceof String)) {
 				id = id.toString();
 			}
+			put("t", "p");	// type: MapPoint
 			put("id", id);
-			put("t", "p");
 			put("lat", latitude);
 			put("lng", longitude);
 			put("color", color.toString());

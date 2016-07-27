@@ -4,10 +4,6 @@ modules = {
 		dependsOn 'jquery'
 		resource url:[dir:'js/jquery-migrate-1.2.1', file:'jquery-migrate-1.2.1.min.js', plugin: 'unifina-core']
 	}
-	jquerytransit {
-		dependsOn 'jquery'
-		resource url:[dir:'js/jquery.transit', file:'jquery.transit.js', plugin: 'unifina-core']
-	}
 	"touchpunch" {
 		dependsOn 'jquery-ui'
 		resource url:[dir:'js/touchpunch/', file:'jquery.ui.touch-punch.min.js', disposition: 'head', plugin: 'unifina-core']
@@ -238,7 +234,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'streamr-heatmap.js', plugin: 'unifina-core']
 	}
 	'streamr-map' {
-		dependsOn 'jquery, leaflet, jquerytransit'
+		dependsOn 'jquery, leaflet, lodash'
 		resource url:[dir:'css/signalPath/widgets/', file:'streamr-map.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-map', file:'streamr-map.js', plugin: 'unifina-core']
 	}

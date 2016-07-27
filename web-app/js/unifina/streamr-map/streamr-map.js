@@ -258,11 +258,17 @@
             var update = _this.pendingMarkerUpdates[id]
 
             // Update marker position
-            var marker =_this.markers[id]
+            var marker = _this.markers[id]
             marker.setLatLng(update.latlng)
             if (update.rotation) {
-                //$(marker._icon).css({"rotate": update.rotation + "rad"})
                 marker._icon.style.transform += " rotate(" + update.rotation + "rad)"
+                // filter DOMTokenList classList into a copied [], then remove all Font Awesome classes
+                _(_(marker._icon.classList).filter(function(x) {
+                    return x.includes("fa")
+                }).value()).each(function(x) {
+                    marker._icon.classList.remove(x)
+                }).value()
+                marker._icon.classList.add(_this.options.markerIcon)
             }
         })
 
