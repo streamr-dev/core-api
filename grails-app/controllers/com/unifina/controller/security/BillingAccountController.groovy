@@ -37,17 +37,19 @@ class BillingAccountController {
 		def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
 		def billingAccountUsers = []
 
+		//check if user has a billing account
 		if (!user.billingAccount){
-			flash.message = "User "+ user.username + " has no Billing Account" + "</br>" + "Create a new Billing Account by selecting a plan and subscribing or join an existing Billing Account"
-		} else if (subscriptions.code == 200){
-			statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
-			data = data + '&amp;subscription_id=' + subscriptions.content.subscription.id
-		}
-
-		if (user.billingAccount) {
+			flash.message = "User "+ user.username + " has no Billing Account" + "</br>" + "Create a new Billing Account by selecting a plan and subscribing or ask for an invite to join a Billing Account"
+		} else {
 			billingAccountUsers = SecUser.findAllByBillingAccount(user.billingAccount)
+
+			if (subscriptions.code == 200){
+				statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
+				data = data + '&amp;subscription_id=' + subscriptions.content.subscription.id
+			}
 		}
 
+		//check if we have been redirected to page and we have a call id to request which was made to chargify v2 api
 		if(params.containsKey("status_code") && params.containsKey("result_code") && params.containsKey("call_id")){
 			def call = billingAccountService.getCall(params.call_id)
 			if (params.status_code == "422"){
@@ -66,18 +68,8 @@ class BillingAccountController {
 			else if (params.status_code == "200" && params.result_code == "2000"){
 				flash.message = "Update successful!"
 
-				if(user.billingAccount){
-					//todo we should show different form/view in billingAccount.gsp for migrations
-					//endpoint is different for migrations than it is for creating subscriptions
-					//https://docs.chargify.com/api-migrations
-
-					//migration needs information about product handle or product id,
-					//or should we do upgrade/downgrade on backend-side and show only options on view
-
-				}
-				else if (subscriptions) {
-					//todo check if subscription exists in billing account table
-					//if not create a new billing account with subscription
+				//if user doesn't have a billing account but we have a subscription for him, create a billing account
+				if (!user.billingAccount && subscriptions) {
 					def billingAccount = new BillingAccount(chargifySubscriptionId: subscriptions.content.subscription.id, chargifyCustomerId: subscriptions.content.subscription.customer.id)
 					billingAccount.save()
 					user.billingAccount = billingAccount
@@ -100,9 +92,9 @@ class BillingAccountController {
 	def emailInvite() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 
-		//todo validate that email has at least a correct form
 		if (params['emailInvite']){
 			EmailValidator emailValidator = EmailValidator.getInstance()
+
 			if (!emailValidator.isValid(params['emailInvite'])){
 				flash.error = 'Invalid email address'
 			}
@@ -125,12 +117,8 @@ class BillingAccountController {
 	}
 
 	def joinToBillingAccount() {
-		//todo check if user has an account, if not then reroute user to create an account / or check at email send phase if user has an account and give option to create one, then follow billingAccount link
-		//todo check if user is already in a billing account, what do we do then ?
-		//def params = params
 		def user = SecUser.get(springSecurityService.currentUser.id)
 
-		//todo refactor parameter to some other variable/namespace
 		if (params['token']){
 			def billingAccountInvite = BillingAccountInvite.findByToken(params['token'])
 
@@ -158,9 +146,6 @@ class BillingAccountController {
 	def update() {
 
 		def user = SecUser.get(springSecurityService.currentUser.id)
-		def params = params
-		//todo get product id values
-		//todo check how subscription post works
 		if (user.billingAccount.chargifySubscriptionId && params['signup[product][handle]']){
 			def productHandle = params['signup[product][handle]']
 			def response = billingAccountService.updateSubscription(user.billingAccount.chargifySubscriptionId, productHandle)

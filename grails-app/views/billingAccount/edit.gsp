@@ -28,9 +28,10 @@
 
 <g:if test="${user?.billingAccount}">
 
-	<g:render template="email_invite_form" model="${pageScope.variables}"/>
-
 	<g:if test="${subscriptions}">
+
+		<g:render template="subs_slider_form" model="${pageScope.variables}"/>
+
 		<div class="row">
 			<div class="col-sm-12 col-md-offset-2 col-md-8">
 				<ui:panel title="Subscription and Billing Information">
@@ -105,7 +106,7 @@
 			</div>
 		</div>
 
-		<g:render template="subs_slider_form" model="${pageScope.variables}"/>
+
 
 		<g:if test="${statements}">
 			<div class="row">
@@ -134,6 +135,8 @@
 			</div
 		</g:if>
 	</g:if>
+
+	<g:render template="email_invite_form" model="${pageScope.variables}"/>
 </g:if>
 
 <g:else>
