@@ -60,7 +60,7 @@
 			<div class="col-sm-12 col-md-offset-2 col-md-8">
 				<ui:panel title="Subscription and Billing Information">
 					<legend>Current subscription period ends at</legend>
-					<div><pre>${subscriptions.subscription.current_period_ends_at}</pre></div>
+					<div><pre>${Date.parse("yyyy-MM-dd'T'HH:mm:ss",subscriptions.subscription.current_period_ends_at).format("YYYY-MM-dd")}</pre></div>
 					<legend>Credit Card information</legend>
 
 					<div class="my-cc">
@@ -210,35 +210,36 @@
 
 		</div>
 	</form>
-	<div class="row">
-			<div class="col-sm-12 col-md-offset-2 col-md-8">
-				<ui:panel title="Statements">
-					<table class="table">
-						<thead>
-							<tr>
-								<td>Date</td>
-								<td>Sum</td>
-								<td>Link</td>
-							</tr>
-						</thead>
-						<tbody>
-							<g:each in="${statements.content.statement}">
+	<g:if test="${statements}">
+		<div class="row">
+				<div class="col-sm-12 col-md-offset-2 col-md-8">
+					<ui:panel title="Statements">
+						<table class="table">
+							<thead>
 								<tr>
-									%{--${raw(it.created_at)}--}%
-									<td>${Date.parse("yyyy-MM-dd'T'HH:mm:ss",it.created_at).format("YYYY-MM-dd")}</td>
-									<td>${it.total_in_cents.toInteger()/100} €</td>
-									<td><g:link controller="billingAccount" action="statement" params="[statementId:it.id]">Statement ${it.id}</g:link></td>
-									%{--${SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it.created_at)}--}%
-									%{--${SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(now)}--}%
-									%{--<g:formatDate date="${new Date()}" format="yyyy-MM-dd'T'HH:mm:ssZ", locale="${Locale.ENGLISH}"/>--}%
+									<td>Date</td>
+									<td>Sum</td>
+									<td>Link</td>
 								</tr>
-							</g:each>
-						</tbody>
-					</table>
-				</ui:panel>
-			</div>
-	</div
-
+							</thead>
+							<tbody>
+								<g:each in="${statements?.content.statement}">
+									<tr>
+										%{--${raw(it.created_at)}--}%
+										<td>${Date.parse("yyyy-MM-dd'T'HH:mm:ss",it.created_at).format("YYYY-MM-dd")}</td>
+										<td>${it.total_in_cents.toInteger()/100} €</td>
+										<td><g:link controller="billingAccount" action="statement" params="[statementId:it.id]">Statement ${it.id}</g:link></td>
+										%{--${SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").parse(it.created_at)}--}%
+										%{--${SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(now)}--}%
+										%{--<g:formatDate date="${new Date()}" format="yyyy-MM-dd'T'HH:mm:ssZ", locale="${Locale.ENGLISH}"/>--}%
+									</tr>
+								</g:each>
+							</tbody>
+						</table>
+					</ui:panel>
+				</div>
+		</div
+	</g:if>
 	</g:if>
 </g:if>
 
@@ -364,31 +365,30 @@
 	var products = JSON.parse("${products}");
 	var productIndex = _.findIndex(products,{product:{handle:"${subscriptions.subscription.product.handle}"}})
 	$(function() {
-		var newVal = $('#product-slider').data('slider').setValue(productIndex+1);
+		if ($('#product-slider').length){
+			var newVal = $('#product-slider').data('slider').setValue(productIndex+1);
+			$('#product-slider').slider().on('slideStop', function(ev){
+				var newVal = $('#product-slider').data('slider').getValue();
+				console.log(products[newVal-1].product.handle);
+				var productVal = products[newVal-1].product.handle;
+				$('input[name="signup[product][handle]"]').attr('value',productVal);
 
+				$('#product-description').text(products[newVal-1].product.description)
+				$('#product-price').text(products[newVal-1].product.price_in_cents/100)
 
-
-		$('#product-slider').slider().on('slideStop', function(ev){
-			var newVal = $('#product-slider').data('slider').getValue();
-			console.log(products[newVal-1].product.handle);
-			var productVal = products[newVal-1].product.handle;
-			$('input[name="signup[product][handle]"]').attr('value',productVal);
-
-			$('#product-description').text(products[newVal-1].product.description)
-			$('#product-price').text(products[newVal-1].product.price_in_cents/100)
-
-			if (productIndex < (newVal-1)){
-				$('#planUpdate').prop('disabled',false);
-				$('#planUpdate').val('Upgrade');
-			} else if (productIndex > (newVal -1)) {
-				$('#planUpdate').prop('disabled',false);
-				$('#planUpdate').val('Downgrade');
-			}
-			else {
-				$('#planUpdate').prop('disabled',true);
-				$('#planUpdate').val('Your current plan');
-			}
-		});
+				if (productIndex < (newVal-1)){
+					$('#planUpdate').prop('disabled',false);
+					$('#planUpdate').val('Upgrade');
+				} else if (productIndex > (newVal -1)) {
+					$('#planUpdate').prop('disabled',false);
+					$('#planUpdate').val('Downgrade');
+				}
+				else {
+					$('#planUpdate').prop('disabled',true);
+					$('#planUpdate').val('Your current plan');
+				}
+			});
+		}
 	});
 
 

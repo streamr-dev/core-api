@@ -15,11 +15,11 @@ This Project is licensed under the GPL.
 
 @font-face {
     font-family: 'Open Sans';
-    src: url('../credit-card-fonts/OpenSans-Regular-webfont.eot');
-    src: url('../credit-card-fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../credit-card-fonts/OpenSans-Regular-webfont.woff') format('woff'),
-         url('../credit-card-fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
-         url('../credit-card-fonts/OpenSans-Regular-webfont.svg#open_sansregular') format('svg');
+    src: url('credit-card-fonts/OpenSans-Regular-webfont.eot');
+    src: url('credit-card-fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('credit-card-fonts/OpenSans-Regular-webfont.woff') format('woff'),
+         url('credit-card-fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
+         url('credit-card-fonts/OpenSans-Regular-webfont.svg#open_sansregular') format('svg');
     font-weight: normal;
     font-style: normal;
 
@@ -28,92 +28,85 @@ This Project is licensed under the GPL.
 
 @font-face {
   font-family: 'OCRAStd';
-  src: url('../credit-card-fonts/OCRAStd.eot');
-  src: url('../credit-card-fonts/OCRAStd.eot?#iefix') format('embedded-opentype'),
-       url('../credit-card-fonts/OCRAStd.woff2') format('woff2'),
-       url('../credit-card-fonts/OCRAStd.woff') format('woff'),
-       url('../credit-card-fonts/OCRAStd.ttf') format('truetype'),
-       url('../credit-card-fonts/OCRAStd.svg#OCRAStd') format('svg');
+  src: url('credit-card-fonts/OCRAStd.eot');
+  src: url('credit-card-fonts/OCRAStd.eot?#iefix') format('embedded-opentype'),
+       url('credit-card-fonts/OCRAStd.woff2') format('woff2'),
+       url('credit-card-fonts/OCRAStd.woff') format('woff'),
+       url('credit-card-fonts/OCRAStd.ttf') format('truetype'),
+       url('credit-card-fonts/OCRAStd.svg#OCRAStd') format('svg');
   font-weight: normal;
   font-style: normal;
 }
 
 /* General */
 
-body {
-    color: #666666;
-    font-size: 13px;
-    line-height: 23px;
-    background: #fff;
-    font-family: 'Open Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+
+.my-cc h1,
+.my-cc h2,
+.my-cc h3,
+.my-cc h4,
+.my-cc h5,
+.my-cc h6 {
     color: #666;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     margin: 2px 0px;
     padding: 0px;
 }
-h1 {
+.my-cc h1 {
     font-size: 30px;
     line-height: 45px;
 }
-h2 {
+.my-cc h2 {
     font-size: 25px;
     line-height: 40px;
 }
-h3 {
+.my-cc h3 {
     font-size: 22px;
     line-height: 37px;
 }
-h4 {
+.my-cc h4 {
     font-size: 18px;
     line-height: 33px;
 }
-h5 {
+.my-cc h5 {
     font-size: 15px;
     line-height: 30px;
 }
-h6 {
+.my-cc h6 {
     font-size: 13px;
     line-height: 28px;
 }
-p {
+.my-cc p {
     margin: 2px 0px;
     padding: 0px;
     margin-bottom: 5px;
     line-height: 28px;
 }
-a {
+.my-cc a {
     text-decoration: none;
     color: #777;
 }
-a:hover,
-a:active,
-a:focus {
+.my-cc a:hover,
+.my-cc a:active,
+.my-cc a:focus {
     outline: 0;
     text-decoration: none;
     color: #999;
 }
-hr {
+.my-cc hr {
     margin: 10px 0px;
     padding: 0px;
     border-top: 0px;
     border-bottom: 1px solid #eee;
 }
-:focus {
+.my-cc :focus {
     outline: none;
 }
-::-moz-focus-inner {
+.my-cc ::-moz-focus-inner {
     border: 0;
 }
-/* Text color classes */
+/*!* Text color classes *!
 
 .white {
     color: #ffffff !important;
@@ -151,7 +144,7 @@ hr {
 .brown {
     color: #d08166 !important;
 }
-/* Background color classes */
+!* Background color classes *!
 
 .bg-white {
     background-color: #ffffff !important;
@@ -189,7 +182,7 @@ hr {
 .bg-brown {
     background-color: #d08166 !important;
 }
-/* Border color classes */
+!* Border color classes *!
 
 .br-white {
     border: 1px solid #ffffff !important;
@@ -227,7 +220,7 @@ hr {
 .br-brown {
     border: 1px solid #d08166;
 }
-/* Button classes */
+!* Button classes *!
 
 .btn {
     border-radius: 2px;
@@ -236,7 +229,7 @@ hr {
 .btn.btn-no-border {
     border: 0px !important;
 }
-/* Button colors */
+!* Button colors *!
 
 .btn.btn-white {
     background: #ffffff;
@@ -382,7 +375,7 @@ hr {
     background: #c4613f;
     color: #ffffff;
 }
-/* Label */
+!* Label *!
 
 .label {
     border-radius: 2px;
@@ -391,7 +384,7 @@ hr {
     font-size: 12px;
     line-height: 18px;
 }
-/* Label sizes */
+!* Label sizes *!
 
 .label.label-xs {
     font-size: 10px;
@@ -408,7 +401,7 @@ hr {
     padding: 5px 9px;
     line-height: 23px;
 }
-/* Label colors */
+!* Label colors *!
 
 .label.label-white {
     color: #666666 !important;
@@ -458,7 +451,7 @@ hr {
     background: #d08166;
     color: #ffffff;
 }
-/* Badges */
+!* Badges *!
 
 .badge {
     min-width: 10px;
@@ -523,7 +516,7 @@ hr {
     top: -13px;
     right: -8px;
 }
-/* Social Media */
+!* Social Media *!
 
 .facebook {
     background: #3280e7;
@@ -620,10 +613,16 @@ hr {
 }
 .youtube:hover {
     background: #b72411;
-}
+}*/
 /* General CSS */
 
 .my-cc {
+    color: #666666;
+    font-size: 13px;
+    line-height: 23px;
+    /*background: #fff;*/
+    font-family: 'Open Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
     margin: 60px 0px;
 }
 /* Card */

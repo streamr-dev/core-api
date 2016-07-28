@@ -325,7 +325,9 @@ class BillingAccountService {
 			String disposition = conn.getHeaderField("Content-Disposition");
 			String contentType = conn.getContentType();
 			int contentLength = conn.getContentLength();
+
 			InputStream inputStream = conn.getInputStream();
+
 			if (disposition != null) {
 				// extracts file name from header field
 				int index = disposition.indexOf("filename=");
@@ -345,10 +347,10 @@ class BillingAccountService {
 
 
 		}
-		/*else {
+		else {
 			response.msg = conn.getErrorStream()
-		}*/
-		conn.disconnect()
+		}
+		//conn.disconnect()
 		return content
 	}
 

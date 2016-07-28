@@ -219,25 +219,14 @@ class BillingAccountController {
 			def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
 			def statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
 			def content   = billingAccountService.getStatementPdf(params['statementId'])
-
-
-			String tempDir = System.getProperty('java.io.tmpdir')
-			def foo = new FileInputStream(tempDir+"foo.pdf")
-			foo << content.inputStream
-			foo.close()
-
-
+			
 			response.setHeader("Content-disposition", content.disposition)
 			response.setHeader("Content-Length", "file-size")
 			response.setContentType(content.contentType)
-			/*response.outputStream << content.inputStream*/
-			/*webRequest.renderView = false*/
+			response.outputStream << content.inputStream
 			response.outputStream.flush()
-			/*response.outputStream.close()*/
+			response.outputStream.close()
 			return null
-
-
-
 		}
 	}
 }
