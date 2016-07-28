@@ -7,6 +7,8 @@ import com.unifina.domain.security.BillingAccount
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 import com.unifina.domain.security.BillingAccountInvite
 
+import org.apache.commons.validator.EmailValidator
+
 @Transactional
 @Secured(["IS_AUTHENTICATED_FULLY"])
 class BillingAccountController {
@@ -23,10 +25,8 @@ class BillingAccountController {
 	static DIRECT_API_ID 		= "${CH.config.chargify.directApiId}"
 	static DIRECT_API_SECRET 	= "${CH.config.chargify.directApiSecret}"
 	static DIRECT_API_PWD		= "${CH.config.chargify.directApiPwd}"
-	//Todo redirect back to current page
 	static REDIRECT_URI 		= 'redirect_uri='
 	static NONCE 				= 'SECRET'
-
 
     def edit() {
 
@@ -102,20 +102,22 @@ class BillingAccountController {
 
 		//todo validate that email has at least a correct form
 		if (params['emailInvite']){
-
-			//Todo create new billingAccountInvite, set used to false, add billinAccount to billingAccountInvite, add sec user (inviter) to billingAccountInvite
-			def billingAccountInvite = new BillingAccountInvite(billingAccount: user.billingAccount, users: user)
-			billingAccountInvite.save()
-
-			mailService.sendMail {
-				from grailsApplication.config.unifina.email.sender
-				to params['emailInvite']
-				subject	'You have been invited to Streamr Billing Account'
-				//Todo rename/replace email_welcome template with some other eg. billing account invite template
-				html g.render(template:"email_invite", model:[user: user, token: billingAccountInvite.token], plugin:'unifina-core')
+			EmailValidator emailValidator = EmailValidator.getInstance()
+			if (!emailValidator.isValid(params['emailInvite'])){
+				flash.error = 'Invalid email address'
 			}
+			else {
+				def billingAccountInvite = new BillingAccountInvite(billingAccount: user.billingAccount, users: user)
+				billingAccountInvite.save()
 
-			flash.message = 'Invite sent to ' + params['emailInvite']
+				mailService.sendMail {
+					from grailsApplication.config.unifina.email.sender
+					to params['emailInvite']
+					subject 'You have been invited to Streamr Billing Account'
+					html g.render(template: "email_invite", model: [user: user, token: billingAccountInvite.token], plugin: 'unifina-core')
+				}
+				flash.message = 'Invite sent to ' + params['emailInvite']
+			}
 		} else {
 			flash.error = 'Something went wrong, please try again soon'
 		}
@@ -123,9 +125,6 @@ class BillingAccountController {
 	}
 
 	def joinToBillingAccount() {
-		//todo catch parameters
-		//todo check if invite has been already used
-		//
 		//todo check if user has an account, if not then reroute user to create an account / or check at email send phase if user has an account and give option to create one, then follow billingAccount link
 		//todo check if user is already in a billing account, what do we do then ?
 		//def params = params
@@ -138,7 +137,6 @@ class BillingAccountController {
 			if (!billingAccountInvite || billingAccountInvite.used){
 				flash.error = 'Billing Account invite has already been used'
 			}
-
 			else if (billingAccountInvite && !billingAccountInvite.used) {
 				billingAccountInvite.used = Boolean.TRUE
 				billingAccountInvite.save()
@@ -154,7 +152,6 @@ class BillingAccountController {
 				flash.error = 'Your account is already in a billing account'
 			}
 		}
-
 		redirect(action:"edit")
 	}
 
@@ -175,21 +172,6 @@ class BillingAccountController {
 				flash.error = 'Something went wrong, please try to update again'
 			}
 		}
-
-		redirect(action:"edit")
-	}
-
-	def updateCreditCardInformation(){
-		def params = params
-		def user = SecUser.get(springSecurityService.currentUser.id)
-
-		if (user.billingAccount.chargifySubscriptionId) {
-			//get payment profile id from billing account
-			//update payment profile
-			//
-
-		}
-
 		redirect(action:"edit")
 	}
 
@@ -219,7 +201,7 @@ class BillingAccountController {
 			def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
 			def statements = billingAccountService.getStatements(subscriptions.content.subscription.id)
 			def content   = billingAccountService.getStatementPdf(params['statementId'])
-			
+
 			response.setHeader("Content-disposition", content.disposition)
 			response.setHeader("Content-Length", "file-size")
 			response.setContentType(content.contentType)
