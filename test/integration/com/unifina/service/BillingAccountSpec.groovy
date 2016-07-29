@@ -5,7 +5,7 @@ import spock.lang.*
 /**
  *
  */
-class BillingAccountServiceSpec extends Specification {
+class BillingAccountSpec extends Specification {
 
 	BillingAccountService billingAccountService
 

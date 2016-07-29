@@ -1,4 +1,4 @@
-<form method="post" action="https://api.chargify.com/api/v2/signups">
+<form method="post" id="sign-up-form" action="https://api.chargify.com/api/v2/signups">
 	<div class="row">
 		<div class="col-sm-12 col-md-offset-2 col-md-8">
 			<ui:panel title="Streamr Subscription">

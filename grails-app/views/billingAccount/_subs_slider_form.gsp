@@ -1,4 +1,4 @@
-<form method="post" action="update">
+<form method="post" id="subsSliderForm" action="update">
 	<div class="row">
 		<div class="col-sm-12 col-md-offset-2 col-md-8">
 			<ui:panel title="Modify Streamr Subscription">

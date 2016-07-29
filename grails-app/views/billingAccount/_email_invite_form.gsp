@@ -1,4 +1,4 @@
-<form method="post" action="emailInvite">
+<form method="post" id="emailInvite" action="emailInvite">
 	<div class="row">
 		<div class="col-sm-12 col-md-offset-2 col-md-8">
 			<ui:panel title="Users">
