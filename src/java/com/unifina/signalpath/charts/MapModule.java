@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class MapModule extends ModuleWithUI {
-	public final String DEFAULT_MARKER_ICON = "fa-long-arrow-up";
+	public final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
 
 	Input<Object> id = new Input<>(this, "id", "Object");
 	Input<Object> label = new Input<>(this, "label", "Object");
@@ -44,6 +44,7 @@ public class MapModule extends ModuleWithUI {
 		label.setDrivingInput(false);
 		label.canBeFeedback = false;
 		heading.requiresConnection = false;
+		heading.canBeFeedback = false;
 	}
 
 	@Override

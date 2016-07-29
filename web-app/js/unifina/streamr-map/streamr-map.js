@@ -3,6 +3,9 @@
 
     var TRACE_REDRAW_BATCH_SIZE = 10000
 
+    // default non-directional marker icon
+    var DEFAULT_MARKER_ICON = "fa fa-map-marker fa-4x"
+
     var skins = {
         default: {
             layerUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -42,7 +45,8 @@
             maxZoom: 18,
             traceRadius: 2,
             drawTrace: false,
-            skin: "default"
+            skin: "default",
+            markerIcon: DEFAULT_MARKER_ICON
         }, options || {})
 
         this.defaultAutoZoomBounds = {
@@ -205,7 +209,15 @@
     }
 
     StreamrMap.prototype.createMarker = function(id, label, latlng, rotation) {
-        var marker = L.marker(latlng, {
+        this.latlng = latlng
+        var marker = this.options.directionalMarkers ? L.marker(latlng, {
+            icon: L.divIcon({
+                iconSize:     [19, 48], // size of the icon
+                iconAnchor:   [10, 10], // point of the icon which will correspond to marker's location
+                popupAnchor:  [0, -41], // point from which the popup should open relative to the iconAnchor,
+                className: 'streamr-map-icon ' + this.options.markerIcon
+            })
+        }) : L.marker(latlng, {
             icon: L.divIcon({
                 iconSize:     [19, 48], // size of the icon
                 iconAnchor:   [13.5, 43], // point of the icon which will correspond to marker's location
@@ -213,31 +225,30 @@
                 className: 'streamr-map-icon fa fa-map-marker fa-4x'
             })
         })
-        var popupContent = "<span style='text-align:center;width:100%'><span>"+label+"</span></span>"
-        var popupOptions = {
+        marker.bindPopup("<span>label</span>", {
             closeButton: false,
-        }
-        marker.bindPopup(popupContent, popupOptions)
-        marker.on("mouseover", function() {
-            marker.openPopup()
-        })
-        marker.on("mouseout", function() {
-            marker.closePopup()
         })
         marker.addTo(this.map)
         return marker
     }
 
     StreamrMap.prototype.moveMarker = function(id, lat, lng, rotation) {
-        var latlng = L.latLng(lat, lng)
-        var update = { latlng: latlng }
+        this.oldLatlng = this.latlng
+        this.latlng = L.latLng(lat, lng)
+        var update = { latlng: this.latlng }
         if (this.options.directionalMarkers) {
             if (rotation) {
                 update.rotation = rotation
-            } else {
-                // rotate so that it's "coming from" the previous latlng
-                var old = this.markers[id].getLatLng()
-                update.rotation = Math.atan2(latlng.lat - old.lat, latlng.lng - old.lng)
+            } else if (this.oldLatlng) {
+                // if "heading" input isn't connected,
+                //   rotate marker so that it's "coming from" the previous latlng
+                var oldP = this.map.project(this.oldLatlng)
+                var newP = this.map.project(this.latlng)
+                var dx = newP.x - oldP.x
+                var dy = newP.y - oldP.y
+                if (Math.abs(dx) > 0.0001 || Math.abs(dy) > 0.0001) {
+                    update.rotation = Math.atan2(dx, -dy) / Math.PI * 180;
+                }
             }
         }
 
@@ -261,14 +272,7 @@
             var marker = _this.markers[id]
             marker.setLatLng(update.latlng)
             if (update.rotation) {
-                marker._icon.style.transform += " rotate(" + update.rotation + "rad)"
-                // filter DOMTokenList classList into a copied [], then remove all Font Awesome classes
-                _(_(marker._icon.classList).filter(function(x) {
-                    return x.includes("fa")
-                }).value()).each(function(x) {
-                    marker._icon.classList.remove(x)
-                }).value()
-                marker._icon.classList.add(_this.options.markerIcon)
+                marker.setRotationAngle(update.rotation)
             }
         })
 
