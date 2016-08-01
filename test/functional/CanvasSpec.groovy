@@ -1,3 +1,4 @@
+import core.mixins.KafkaMixin
 import core.mixins.ListPageMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
@@ -15,6 +16,7 @@ class CanvasSpec extends LoginTester1Spec {
 	def setupSpec(){
 		CanvasSpec.metaClass.mixin(CanvasMixin)
 		CanvasSpec.metaClass.mixin(ListPageMixin)
+		CanvasSpec.metaClass.mixin(KafkaMixin)
 	}
 
 	def "clicking module close button in canvas should remove it"() {
@@ -334,7 +336,7 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor { !historicalOptionsModal.displayed }
 
 		when: "data is produced and signalpath is run on current date"
-			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
+			UnifinaKafkaProducer kafka = makeKafkaProducer()
 			// Procuce to the stream that test-run-canvas reads from
 			kafka.sendJSON("c1_fiG6PTxmtnCYGU-mKuQ", "", now.getTime(), '{"temperature": '+Math.random()+'}')
 			beginDate.click()
