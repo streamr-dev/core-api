@@ -1,4 +1,5 @@
 import com.unifina.feed.mongodb.MongoDbConfig
+import core.mixins.KafkaMixin
 import core.pages.ConfigureMongoPage
 import org.bson.Document
 import spock.lang.Shared
@@ -16,6 +17,7 @@ import core.pages.StreamListPage
 import core.pages.StreamShowPage
 
 
+@Mixin(KafkaMixin)
 class StreamSpec extends LoginTester1Spec {
 
 	@Shared def mongoDbConfig = new MongoDbConfig([
@@ -31,6 +33,7 @@ class StreamSpec extends LoginTester1Spec {
 		// @Mixin is buggy, don't use it
 		StreamSpec.metaClass.mixin(StreamMixin)
 		StreamSpec.metaClass.mixin(ConfirmationMixin)
+		StreamSpec.metaClass.mixin(KafkaMixin)
 
 		def client = mongoDbConfig.createMongoClient()
 		mongoDbConfig.openCollection().drop()
@@ -113,7 +116,7 @@ class StreamSpec extends LoginTester1Spec {
 			waitFor { at StreamConfigurePage }
 
 		when: "Produce an event into the stream and click autodetect button"
-			UnifinaKafkaProducer kafka = new UnifinaKafkaProducer("192.168.10.21:9092", "192.168.10.21:2181")
+			UnifinaKafkaProducer kafka = makeKafkaProducer()
 			kafka.sendJSON(streamId, "", System.currentTimeMillis(), '{"foo":"bar","xyz":45.5}')
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
