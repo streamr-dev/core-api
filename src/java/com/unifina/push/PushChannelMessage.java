@@ -13,7 +13,8 @@ public class PushChannelMessage {
 		this.channel = channel;
 		this.content = content;
 	}
-	
+
+	@Deprecated
 	public String toJSON(JSON json) {
 		if (content instanceof Map) {
 			json.setTarget(content);

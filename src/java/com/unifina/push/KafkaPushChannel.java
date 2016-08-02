@@ -4,6 +4,7 @@ import grails.converters.JSON;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -42,19 +43,11 @@ public class KafkaPushChannel extends PushChannel {
 	}
 	
 	@Override
-	public void addChannel(String channel) {
-		super.addChannel(channel);
-		
-		// Explicitly create the topics
-		ArrayList<String> topics = new ArrayList<>(1);
-		topics.add(channel);
-		kafkaService.createTopics(topics);
-	}
-	
-	@Override
 	protected void doPush(PushChannelMessage msg) {
-		String str = msg.toJSON(json);
-		kafkaService.getProducer().sendRaw(msg.getChannel(), "ui", str.getBytes());
+		if (msg.getContent() instanceof Map) {
+			kafkaService.sendMessage(msg.getChannel(), (Map) msg.getContent());
+		}
+		else throw new IllegalArgumentException("Unsupported content type: "+msg.getContent());
 	}
 	
 	public boolean isConnected() {

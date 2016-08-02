@@ -60,7 +60,7 @@ public class SendToStream extends AbstractSignalPathModule {
 			if (kafkaService == null) {
 				kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
 			}
-			kafkaService.sendMessage(authenticatedStream, "", msg);
+			kafkaService.sendMessage(authenticatedStream, msg);
 		}
 		else if (!historicalWarningShown && globals.getUiChannel()!=null) {
 			globals.getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '"+streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());

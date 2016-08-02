@@ -265,18 +265,23 @@ environments {
 /**
  * Kafka config
  */
-unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"
-unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2181"
-unifina.kafka.producer.type = "async"
-unifina.kafka.queue.buffering.max.ms = "100"
-unifina.kafka.retry.backoff.ms = "500"
-unifina.kafka.serializer.class = "kafka.serializer.StringEncoder"
-unifina.kafka.request.required.acks = "0"
-unifina.kafka.group.id = "streamr"
+streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"
+streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2181"
+streamr.kafka.producer.type = "async"
+streamr.kafka.queue.buffering.max.ms = "100"
+streamr.kafka.retry.backoff.ms = "500"
+streamr.kafka.serializer.class = "kafka.serializer.StringEncoder"
+streamr.kafka.request.required.acks = "0"
+streamr.kafka.dataTopic = "data-dev"
+
 environments {
+	test {
+		streamr.kafka.dataTopic = "data-test"
+	}
 	production {
-		unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
-		unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
+		streamr.kafka.dataTopic = "data-prod"
+		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
+		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
 	}
 }
 
