@@ -38,4 +38,5 @@ databaseChangeLog = {
 	include file: 'core/2016-06-14-collect-from-maps-module.groovy'
 	include file: 'core/2016-04-06-tours.groovy'
 	include file: 'core/2016-06-15-new-event-table-module.groovy'
+	include file: 'core/2016-08-03-new-data-pipeline.groovy'
 }

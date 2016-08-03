@@ -286,6 +286,17 @@ environments {
 }
 
 /**
+ * Redis config
+ */
+streamr.redis.hosts = Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) ?: ["dev.streamr"]
+
+/**
+ * Cassandra config
+ */
+streamr.cassandra.hosts = Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) ?: ["dev.streamr"]
+streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+
+/**
  * Serialization config
  */
 unifina.serialization.intervalInMillis = 30 * 1000

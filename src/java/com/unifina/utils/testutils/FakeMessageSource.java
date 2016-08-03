@@ -24,11 +24,6 @@ public class FakeMessageSource implements MessageSource {
 	}
 
 	@Override
-	public void setExpectedCounter(long expected) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void subscribe(Object key) {
 	}
 

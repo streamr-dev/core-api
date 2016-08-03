@@ -28,7 +28,7 @@ class TaskMessageListener implements UnifinaKafkaMessageHandler {
 		this.grailsApplication = grailsApplication
 		this.localTaskWorkers = localTaskWorkers
 		
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));
+		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "streamr.kafka"));
 		Properties properties = new Properties();
 		for (String s : kafkaConfig.keySet())
 			properties.setProperty(s, kafkaConfig.get(s).toString());

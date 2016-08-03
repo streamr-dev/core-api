@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.data.EncodedMessage
+import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Stream
 import com.unifina.kafkaclient.KafkaOffsetUtil
 import grails.converters.JSON
@@ -47,7 +47,7 @@ class KafkaService {
 
 	@CompileStatic
     void sendMessage(String streamId, byte[] content, byte contentType) {
-		EncodedMessage msg = new EncodedMessage(streamId, System.currentTimeMillis(), contentType, content)
+		StreamrBinaryMessage msg = new StreamrBinaryMessage(streamId, System.currentTimeMillis(), contentType, content)
 		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), streamId, msg.toBytes())
 		producer.send(record);
     }
@@ -55,13 +55,13 @@ class KafkaService {
 	@CompileStatic
 	void sendMessage(String streamId, Map message) {
 		String str = (message as JSON).toString();
-		sendMessage(streamId, str.getBytes(utf8), EncodedMessage.CONTENT_TYPE_JSON);
+		sendMessage(streamId, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON);
 	}
 	
 	@CompileStatic
 	void sendMessage(Stream stream, Map message) {
 		String str = (message as JSON).toString();
-		sendMessage(stream.getId(), str.getBytes(utf8), EncodedMessage.CONTENT_TYPE_JSON);
+		sendMessage(stream.getId(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON);
 	}
 
 	@CompileStatic
