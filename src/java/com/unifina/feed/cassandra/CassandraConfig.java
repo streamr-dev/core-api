@@ -10,24 +10,21 @@ import java.util.Map;
 
 public class CassandraConfig extends HashMap<String, Object> {
 
-	List<String> hosts;
-	String keySpace;
-
 	public CassandraConfig(Map<String, Object> map) {
 		super(map);
 	}
 
 	public CassandraConfig(List<String> hosts, String keySpace) {
-		this.hosts = hosts;
-		this.keySpace = keySpace;
+		this.put("hosts", hosts);
+		this.put("keySpace", keySpace);
 	}
 
 	public List<String> getHosts() {
-		return hosts;
+		return (List<String>) this.get("hosts");
 	}
 
 	public String getKeySpace() {
-		return keySpace;
+		return (String) this.get("keySpace");
 	}
 
 	/**

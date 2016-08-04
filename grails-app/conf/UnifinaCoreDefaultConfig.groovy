@@ -1,4 +1,4 @@
-import org.pegdown.Extensions
+import org.apache.kafka.clients.producer.ProducerConfig
 
 /*****
  * This config file gets merged with the application config file.
@@ -270,7 +270,8 @@ streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.co
 streamr.kafka.producer.type = "async"
 streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
-streamr.kafka.serializer.class = "kafka.serializer.StringEncoder"
+streamr.kafka.value.serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"
+streamr.kafka.key.serializer = "org.apache.kafka.common.serialization.StringSerializer"
 streamr.kafka.request.required.acks = "0"
 streamr.kafka.dataTopic = "data-dev"
 
@@ -288,12 +289,12 @@ environments {
 /**
  * Redis config
  */
-streamr.redis.hosts = Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) ?: ["dev.streamr"]
+streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
 
 /**
  * Cassandra config
  */
-streamr.cassandra.hosts = Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) ?: ["dev.streamr"]
+streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
 
 /**

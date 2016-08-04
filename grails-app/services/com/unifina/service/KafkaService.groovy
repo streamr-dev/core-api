@@ -49,7 +49,7 @@ class KafkaService {
     void sendMessage(String streamId, byte[] content, byte contentType) {
 		StreamrBinaryMessage msg = new StreamrBinaryMessage(streamId, System.currentTimeMillis(), contentType, content)
 		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), streamId, msg.toBytes())
-		producer.send(record);
+		getProducer().send(record);
     }
 	
 	@CompileStatic
