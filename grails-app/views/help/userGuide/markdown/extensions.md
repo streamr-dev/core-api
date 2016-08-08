@@ -52,7 +52,7 @@ public void clearState() {
 
 If you uncomment those lines (as we've done above), you will get a module with one numerical input and one numerical output. If you want to see the result on the canvas, first click the “Apply” button and then the “Close” button. 
 
-<g:img dir="images/user-guide" file="java-module-on-canvas.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="java-module-on-canvas.png" class="img-responsive center-block" />
 
 In this example, the inputs belong to the `TimeSeriesInput` class and the outputs to the `TimeSeriesOutput` class. The first argument of an input or output constructor is always `this`, a reference to the current module. The second argument is there for the display name, i.e. a visual label for the endpoint. The variable name on the left-hand side of the assignment can be any valid variable name in Java.
 
@@ -220,7 +220,7 @@ public void clearState() {
 
 The code in a JavaModule is compiled and validated when you click the “Apply” button. Unless there's syntax errors in the code, the module is now ready to use. This is what the output looks like with sample input data:
 
-<g:img dir="images/user-guide" file="java-module-example-on-canvas.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="java-module-example-on-canvas.png" class="img-responsive center-block" />
 
 
 
