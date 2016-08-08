@@ -1,6 +1,7 @@
 package com.unifina.signalpath.kafka;
 
 import com.unifina.service.PermissionService;
+import com.unifina.signalpath.*;
 import grails.converters.JSON;
 
 import java.security.AccessControlException;
@@ -13,15 +14,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.KafkaService;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ListInput;
-import com.unifina.signalpath.MapInput;
-import com.unifina.signalpath.NotificationMessage;
-import com.unifina.signalpath.Parameter;
-import com.unifina.signalpath.StreamParameter;
-import com.unifina.signalpath.StringInput;
-import com.unifina.signalpath.TimeSeriesInput;
 
 public class SendToStream extends AbstractSignalPathModule {
 
@@ -108,9 +100,11 @@ public class SendToStream extends AbstractSignalPathModule {
 			String name = j.getString("name");
 			
 			// TODO: add other types
-			if (type.equalsIgnoreCase("number") || type.equalsIgnoreCase("boolean")) {
+			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
 				((TimeSeriesInput) input).canHaveInitialValue = false;
+			} else if (type.equalsIgnoreCase("boolean")) {
+				input = new BooleanInput(this, name);
 			} else if (type.equalsIgnoreCase("string")) {
 				input = new StringInput(this, name);
 			} else if (type.equalsIgnoreCase("map")) {
