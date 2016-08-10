@@ -1,5 +1,7 @@
 package com.unifina.signalpath.kafka;
 
+import com.unifina.domain.security.SecUser;
+import com.unifina.service.FeedService;
 import com.unifina.service.PermissionService;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
@@ -17,19 +19,20 @@ import com.unifina.service.KafkaService;
 
 public class SendToStream extends AbstractSignalPathModule {
 
-	protected StreamParameter streamParameter = new StreamParameter(this,"stream");
+	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
 	transient protected JSONObject streamConfig = null;
-	
+
+	transient protected FeedService feedService = null;
 	transient protected KafkaService kafkaService = null;
-	transient protected PermissionService permissionService = null;
 	
 	protected boolean historicalWarningShown = false;
-	private Stream authenticatedStream = null;
+	private String lastStreamId = null;
 	
 	@Override
 	public void init() {
-		kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
-		permissionService = (PermissionService) globals.getGrailsApplication().getMainContext().getBean("permissionService");
+		// Pre-fetch services for more predictable performance
+		feedService = globals.getBean(FeedService.class);
+		kafkaService = globals.getBean(KafkaService.class);
 		
 		addInput(streamParameter);
 		
@@ -49,13 +52,16 @@ public class SendToStream extends AbstractSignalPathModule {
 			for (Input i : drivingInputs) {
 				msg.put(i.getName(), i.getValue());
 			}
-			if (kafkaService == null) {
-				kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
+			if (kafkaService == null) { // null after de-serialization
+				kafkaService = globals.getBean(KafkaService.class);
 			}
-			kafkaService.sendMessage(authenticatedStream, "", msg);
+			Stream stream = streamParameter.getValue();
+			authenticateStream(stream);
+			kafkaService.sendMessage(stream, "", msg);
 		}
 		else if (!historicalWarningShown && globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '"+streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
+			globals.getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +
+				streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
 			historicalWarningShown = true;
 		}
 	}
@@ -73,20 +79,16 @@ public class SendToStream extends AbstractSignalPathModule {
 			return;
 		
 		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas 
-		if (globals.isRunContext()) {
-			if (permissionService.canWrite(globals.getUser(), stream)) {
-				authenticatedStream = stream;
-			} else {
-				throw new AccessControlException(this.getName() + ": User " + globals.getUser().getUsername() + " does not have write access to Stream " + stream.getName());
-			}
-		}
+		authenticateStream(stream);
 
 		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
-			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: "+stream.getFeed().getName());
+			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
+				stream.getFeed().getName());
 		}
 		
 		if (stream.getConfig()==null) {
-			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() + " is not properly configured!");
+			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +
+				" is not properly configured!");
 		}
 		
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
@@ -124,5 +126,20 @@ public class SendToStream extends AbstractSignalPathModule {
 		if (streamConfig.containsKey("name"))
 			this.setName(streamConfig.get("name").toString());
 	}
-	
+
+	private void authenticateStream(Stream stream) {
+		if (globals.isRunContext() && !stream.getId().equals(lastStreamId) ) {
+			if (feedService == null) {
+				feedService = globals.getBean(FeedService.class);
+			}
+
+			if (feedService.isStreamWritable(stream.getId(), globals.getUser())) {
+				lastStreamId = stream.getId();
+			} else {
+				throw new AccessControlException(this.getName() + ": User " + globals.getUser().getUsername() +
+					" does not have write access to Stream " + stream.getName());
+			}
+		}
+	}
+
 }
