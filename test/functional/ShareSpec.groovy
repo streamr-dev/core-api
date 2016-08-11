@@ -16,7 +16,6 @@ class ShareSpec extends LoginTester1Spec {
 		this.class.metaClass.mixin(ListPageMixin)
 	}
 
-<<<<<<< HEAD
 	def clickShareButton(name = "ShareSpec") {
 		scrollToRow(name)
 		clickShareButton(name)
@@ -30,8 +29,6 @@ class ShareSpec extends LoginTester1Spec {
 		shareButton.click()
 	}
 
-=======
->>>>>>> origin/master
 	def save() {
 		$(".sharing-dialog .save-button").click()
 		waitFor { !$(".sharing-dialog") && !$(".modal-backdrop") }
