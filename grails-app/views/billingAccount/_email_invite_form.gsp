@@ -1,27 +1,37 @@
-<form method="post" id="emailInvite" action="emailInvite">
-	<div class="row">
-		<div class="col-sm-12 col-md-offset-2 col-md-8">
-			<ui:panel title="Users">
-				<table class="table">
-					<thead>
-					<tr>
-						<td>Username</td>
-					</tr>
-					</thead>
-					<tbody>
-					<g:each in="${billingAccountUsers}">
-						<tr>
-							<td>${it.username}</td>
-						</tr>
-					</g:each>
-					</tbody>
-				</table>
-				<legend>Insert email address and invite person to this Billing Account</legend>
-				<div class="form-group col-sm-6">
-					<input type="text" class="form-control" name="emailInvite" value=""/>
+
+<div class="col-md-6">
+	<form method="post" id="emailInvite" action="emailInvite">
+		<ui:panel title="Users">
+			<div class="row">
+				<div class="col-xs-12">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Username</th>
+							</tr>
+						</thead>
+						<tbody>
+							<g:each in="${billingAccountUsers}">
+								<tr>
+									<td>${it.username}</td>
+								</tr>
+							</g:each>
+						</tbody>
+					</table>
 				</div>
-				<input type="submit" class="save btn btn-lg btn-primary" value="Invite" />
-			</ui:panel>
-		</div>
-	</div>
-</form>
+				<div class="col-xs-12">
+					<div class="form-group col-xs-12">
+						<label>Insert email address and invite person to this Billing Account</label>
+						<div class="form-inline row">
+							<div class="col-xs-10">
+								<input type="text" class="form-control" name="emailInvite" value="" style="width: 100%;"/>
+							</div>
+							<button type="submit" class=" col-xs-2 save btn btn-primary pull-right">Invite</button>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</ui:panel>
+	</form>
+</div>
