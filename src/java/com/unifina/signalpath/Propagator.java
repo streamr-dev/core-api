@@ -48,20 +48,18 @@ public class Propagator implements Serializable {
 		if (newModule) { 
 			origins.add(module);
 			modArrDirty = true;
-
-			// The Propagator might be created lazily, in which case a source module
-			// that already has a send pending might be added.
-			if (module.isSendPending())
-				sendPending = true;
 		}
 	}
 	
 	public void initialize() {
 		if (modArrDirty) {
+			sendPending = true;
+
 			ArrayList<Output> outputs = new ArrayList<>();
 			for (AbstractSignalPathModule m : origins) {
-				for (Output o : m.getOutputs())
+				for (Output o : m.getOutputs()) {
 					outputs.add(o);
+				}
 			}
 
 			connectOutputs(outputs);
@@ -115,8 +113,7 @@ public class Propagator implements Serializable {
 			AbstractSignalPathModule module = i.getOwner();
 			
 			// Skip feedback connections, we don't want infinite dependency loops!
-			// We can also skip modules in the originSet as they don't participate in dependency resolution
-			if (i.isFeedbackConnection() || originSet.contains(module))
+			if (i.isFeedbackConnection())
 				continue;
 			
 			if (!visited.contains(i)) {
@@ -130,15 +127,47 @@ public class Propagator implements Serializable {
 			}
 		}
 	}
-	
+
+	/**
+	 * Returns the items in the origins set that depend directly or indirectly on one of the modules in dependantsToFind set.
+	 * @param origins
+	 * @param dependantsToFind
+	 * @return
+     */
+	private Set<AbstractSignalPathModule> findDependentModules(Set<AbstractSignalPathModule> origins, Set<AbstractSignalPathModule> dependantsToFind) {
+		Set<AbstractSignalPathModule> result = new HashSet<>();
+
+		for (AbstractSignalPathModule mod : origins) {
+			Set<AbstractSignalPathModule> sources = new HashSet<>();
+
+			for (Input i : mod.getInputs()) {
+				if (i.isConnected() && dependantsToFind.contains(i.getSource().getOwner())) {
+					result.add(i.getOwner());
+				}
+				else if (i.isConnected()) {
+					sources.add(i.getSource().getOwner());
+				}
+			}
+
+			if (!sources.isEmpty()) {
+				// Do any of the sources depend on those asked? If yes, then this module is also dependant
+				Set<AbstractSignalPathModule> dependantSources = findDependentModules(sources, dependantsToFind);
+				if (!dependantSources.isEmpty()) {
+					result.add(mod);
+				}
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * Performs module dependency resolution and produces a sequence in which
 	 * modules can be activated without violating the dependencies.
 	 */
 	private void calculateActivationOrder() {
-		
 		List<AbstractSignalPathModule> modules = new ArrayList<>();
-		
+
 		// Group the found inputs by module
 		HashMap<AbstractSignalPathModule,Set<Input>> inputsByModule = new HashMap<>();
 		for (Input i : reachable) {
@@ -150,7 +179,11 @@ public class Propagator implements Serializable {
 			}
 			inputs.add(i);
 		}
-		
+
+		// Find and remove interdependencies in originSet, we need this soon
+		Set<AbstractSignalPathModule> independentOriginSet = new HashSet<>(originSet);
+		independentOriginSet.removeAll(findDependentModules(originSet, originSet));
+
 		// Get first-order module dependencies via reachable inputs
 		HashMap<AbstractSignalPathModule,Set<AbstractSignalPathModule>> forwardDependencies = new HashMap<>();
 		HashMap<AbstractSignalPathModule,Set<AbstractSignalPathModule>> backwardDependencies = new HashMap<>();
@@ -161,12 +194,14 @@ public class Propagator implements Serializable {
 				bwdDepSet = new HashSet<>();
 				backwardDependencies.put(module, bwdDepSet);
 			}
+
+
 			
 			for (Input i : module.getInputs()) {
 				if (i.isConnected() && reachable.contains(i)) {
-					// Modules in the originSet must not be added to dependency resolution, as
-					// they have (by definition) already sent output prior to propagation.
-					if (!originSet.contains(i.getSource().getOwner())) {
+					// Modules in the independentOriginSet must not be added to dependency resolution.
+					// It would cause a deadlock or a module never activating, depending on traversal order.
+					if (!independentOriginSet.contains(i.getSource().getOwner())) {
 						bwdDepSet.add(i.getSource().getOwner());
 					}
 				}
@@ -181,10 +216,9 @@ public class Propagator implements Serializable {
 
 			for (Output o : module.getOutputs()) {
 				for (Input i : o.getTargets()) {
-					// Modules in the originSet must not be added to dependency resolution, as
-					// they have (by definition) already sent output prior to propagation.
 					// Also we can't traverse inputs that are not in the reachable set (the input might have been excluded in the DFS step).
-					if (reachable.contains(i) && !originSet.contains(i.getSource().getOwner())) {
+					// Note that module targets can't be in the independentOriginSet by definition, so that doesn't need to be checked
+					if (reachable.contains(i)) {
 						fwdDepSet.add(i.getOwner());
 					}
 				}

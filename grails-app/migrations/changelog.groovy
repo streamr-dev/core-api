@@ -38,17 +38,11 @@ databaseChangeLog = {
 	include file: 'core/2016-06-14-collect-from-maps-module.groovy'
 	include file: 'core/2016-04-06-tours.groovy'
 	include file: 'core/2016-06-15-new-event-table-module.groovy'
-
 	include file: 'core/2016-07-07-added-billing-account-domain-object.groovy'
-
 	include file: 'core/2016-07-07-billing-account-correction.groovy'
-
 	include file: 'core/2016-07-11-billing-account-changes.groovy'
-
 	include file: 'core/2016-07-14-billing-account-changes.groovy'
-
 	include file: 'core/2016-07-25-billing-account-invites.groovy'
-
-
 	include file: 'core/2016-07-25-billing-account-invites-default-values.groovy'
+	include file: 'core/2016-08-08-drop-unique-constraint-on-signupinvite.groovy'
 }

@@ -7,6 +7,11 @@ public class TimeSeriesInput extends PrimitiveInput<Double> {
 	}
 
 	@Override
+	public void receive(Object value) {
+		super.receive(((Number) value).doubleValue()); // Ensure that integers are received as Doubles
+	}
+
+	@Override
 	protected Double parseInitialValue(String initialValue) {
 		return Double.parseDouble(initialValue);
 	}

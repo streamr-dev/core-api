@@ -124,7 +124,7 @@ class RegisterController {
 
 		} else {
 			invite.sent = true
-			invite.save()
+			invite.save(flush: true, failOnError:true)
 			mailService.sendMail {
 				from grailsApplication.config.unifina.email.sender
 				to invite.username
