@@ -10,6 +10,6 @@ class SignupInvite {
 
     static constraints = {
 		code blank: false, unique: true
-		username blank: false, unique: true, email: true
+		username blank: false, email: true
     }
 }

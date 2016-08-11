@@ -56,15 +56,15 @@ You can create new streams either manually in the user interface or by using the
 
 If you want to create a stream manually, go to the <kbd>Streams</kbd> tab.  There’s a button which looks like this:
 
-<g:img dir="images/user-guide" file="create-stream-button.png" class="img-responsive" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="create-stream-button.png" class="img-responsive" />
 
 A click takes you to a dialog where you’ll fill in the stream name and an optional description.
 
-<g:img dir="images/user-guide" file="create-stream-dialog.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="create-stream-dialog.png" class="img-responsive center-block" />
 
 A new stream is created when you click the **Next** button.  You’ll be shown a stream view that includes the stream details (the name and description), API credentials, configured fields (there won’t be any yet), and a summary of stream history (there will be none yet). 
 
-<g:img dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="my-first-stream-view.png" class="img-responsive center-block" />
 
 If you want to delete a stream, first click on its name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead. You can also delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
 
@@ -72,13 +72,13 @@ If you want to delete a stream, first click on its name, and then click on the *
 
 If you want to edit stream details, you need to be in the <kbd>Streams</kbd> tab. Click on the stream name, and then click on the **Edit info** button. You'll see a dialog where you can rename a stream or modify its description.
 
-<g:img dir="images/user-guide" file="edit-stream-dialog.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="edit-stream-dialog.png" class="img-responsive center-block" />
 
 The stream view also includes the option of configuring the data fields.  If you’ll load real-time data through the API, you’ll need to configure the data fields now.  If you’ll first load historical data from a text file, you can skip this step.  We’ll be in many cases able to to autodetect the field types from the input.
 
 If you want to configure the data fields manually, the Configure Fields button takes you to a setup dialog.  To add a new data field, click on the **+ Add Field** button, give the field a name and change the field type as appropriate.  Remember to save the changes when done.
 
-<g:img dir="images/user-guide" file="configure-fields-dialog.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="configure-fields-dialog.png" class="img-responsive center-block" />
 
 You can also rename a stream, edit the description, add data fields and specify the field types using the [API](${createLink(controller:"help", action:"api")}).
 
@@ -86,7 +86,7 @@ You can also rename a stream, edit the description, add data fields and specify 
 
 Batches of historical events can be loaded into a stream by importing a CSV file. You need to be in the <kbd>Streams</kbd> tab to do this. When you click on an existing stream, you’ll see a History panel and a data drop.  This is where you can drop a text file with a batch of event history.
 
-<g:img dir="images/user-guide" file="csv-data-drop.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="csv-data-drop.png" class="img-responsive center-block" />
 
 You can also pick a local file for import by manually by clicking on the data drop.  Either way, Streamr will parse the given CSV file and load the events into the stream.
 
@@ -94,19 +94,19 @@ As to the format, the CSV file should have the column names on the first row, an
 
 If Streamr cannot find the event timestamps or doesn’t understand the timestamp format, you will see a dialog box like the one below.  This is where you can manually select the timestamp column and specify the format.
 
-<g:img dir="images/user-guide" file="csv-field-dialog.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="csv-field-dialog.png" class="img-responsive center-block" />
 
 We’ll do our best to make sense of the data columns in the CSV file, but the autodetection of field types will not always work.  For instance, a column of telephone numbers may be interpreted as numbers even if you’d probably want to import them as strings.  In such cases, you’ll need to configure the fields manually as shown above.  Mind you, making changes that don’t make sense will cause runtime exceptions due to incompatible data types.
 
 Let’s go ahead and upload some sample data.  We’ll import a text file which contains a collection of recent tweets found with the keywords `“augmented intelligence”`.  This is what the sample tweet data looks like, as at the time of writing, with only four columns and a subset of rows shown:
 
-<g:img dir="images/user-guide" file="sample-twitter-data.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="sample-twitter-data.png" class="img-responsive center-block" />
 
 The data file is called `“SampleTweets.csv”`, and you can download the latest version to your desktop from this [link](“SampleTweets.csv”). 
 
 If you drag the the sample file to the data drop, the events are uploaded to the stream.  Once the process is complete, the stream view is updated to show the extent of the archived history. 
 
-<g:img dir="images/user-guide" file="twitter-stream-view.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="twitter-stream-view.png" class="img-responsive center-block" />
 
 ##Built-in data types
 
@@ -204,7 +204,7 @@ Code | Description
 
 You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You just add a stream module to a Streamr canvas.  As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
 
-<g:img dir="images/user-guide" file="twitter-stream-with-table.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="twitter-stream-with-table.png" class="img-responsive center-block" />
 
 You can also subscribe to a stream in external applications via our [API](${createLink(controller:'help', action:'api')}).
 
