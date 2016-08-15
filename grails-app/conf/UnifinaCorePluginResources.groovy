@@ -50,10 +50,6 @@ modules = {
 		resource url:[dir:'js/seiyria-bootstrap-slider/dist', file:'bootstrap-slider.js', plugin: 'unifina-core']
 		resource url:[dir:'js/seiyria-bootstrap-slider/dist/css', file:'bootstrap-slider.css', plugin: 'unifina-core']
 	}
-	'bootstrap-credit-card' {
-		dependsOn 'bootstrap'
-		resource url:[dir:'css/bootstrap-credit-card',file:'credit-card-styles.css', plugin: 'unifina-core']
-	}
 	hopscotch {
 		resource url:[dir:'js/hopscotch', file:'hopscotch.css', plugin: 'unifina-core']
 		resource url:[dir:'js/hopscotch', file:'hopscotch.js', plugin: 'unifina-core']
@@ -151,6 +147,9 @@ modules = {
 	'moment-timezone' {
 		dependsOn 'moment'
 		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js', plugin:'unifina-core']
+	}
+	cardjs {
+		resource url:[dir:'js/cardjs', file:'jquery.card.js', plugin:'unifina-core']
 	}
 
 	/**

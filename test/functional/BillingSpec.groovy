@@ -21,7 +21,7 @@ public class BillingSpec extends LoginTester1Spec {
 		$("#signup_payment_profile_first_name")  << "Derp"
 		$("#signup_payment_profile_last_name")   << "Derpson"
 		$("#signup_payment_profile_card_number") << "1"
-		$('#sign-up-form .save').click()
+		$('#signup-form .save').click()
 		then: "should receive an error"
 		waitFor {at BillingAccountPage }
 		$(".alert-danger").text().contains("Credit card: cannot be expired.")
@@ -36,7 +36,7 @@ public class BillingSpec extends LoginTester1Spec {
 
 		$('#signup_payment_profile_expiration_month').find("option").find{ it.value() == "12"}.click()
 
-		$('#sign-up-form .save').click()
+		$('#signup-form .save').click()
 		then: "should receive an error"
 		waitFor {at BillingAccountPage }
 		$(".alert").text().contains("Subscription successful!")

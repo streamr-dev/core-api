@@ -28,6 +28,56 @@ class BillingAccountController {
 	static REDIRECT_URI 		= 'redirect_uri='
 	static NONCE 				= 'SECRET'
 
+	def create() {
+
+		def user = SecUser.get(springSecurityService.currentUser.id)
+		def products = billingAccountService.getProducts()
+		def data = REDIRECT_URI
+		def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
+
+		if (user.billingAccount) {
+			redirect action: "edit"
+		} else {
+			//check if we have been redirected to page and we have a call id to request which was made to chargify v2 api
+			if(params.containsKey("status_code") && params.containsKey("result_code") && params.containsKey("call_id")) {
+				def call = billingAccountService.getCall(params.call_id)
+				if (params.status_code == "422"){
+					if(call.content){
+						def errors = call.content.call.response.result.errors
+						def errorMsg = 'Following errors occured while trying to send a form: </br>'
+						errors.each{
+							errorMsg = errorMsg  + it.message + "</br>"
+						}
+						flash.error = errorMsg
+					}
+				}
+				else if (params.status_code == '401') {
+					flash.error = "Something went wrong, please try again.."
+				}
+				else if (params.status_code == "200" && params.result_code == "2000"){
+					flash.message = "Update successful!"
+
+					//if user doesn't have a billing account but we have a subscription for him, create a billing account
+					if (!user.billingAccount && subscriptions) {
+						def billingAccount = new BillingAccount(chargifySubscriptionId: subscriptions.content.subscription.id, chargifyCustomerId: subscriptions.content.subscription.customer.id)
+						billingAccount.save()
+						user.billingAccount = billingAccount
+						user.save()
+						flash.message = "Subscription successful!"
+						redirect action: "edit"
+					}
+				}
+			} else {
+				flash.message = "User "+ user.username + " has no Billing Account" + "</br>" + "Create a new Billing Account by selecting a plan and subscribing or ask for an invite to join a Billing Account"
+			}
+			long timestamp = System.currentTimeMillis() / 1000L
+			[user:SecUser.get(springSecurityService.currentUser.id), products: products.content,
+			 hmac:billingAccountService.hmac(DIRECT_API_ID+timestamp+NONCE+data, DIRECT_API_SECRET),
+			 apiId:DIRECT_API_ID, timestamp: timestamp, products: products.content, nonce: NONCE, data: data, errors: errors]
+		}
+
+	}
+
     def edit() {
 
 		def user = SecUser.get(springSecurityService.currentUser.id)
@@ -39,7 +89,7 @@ class BillingAccountController {
 
 		//check if user has a billing account
 		if (!user.billingAccount){
-			flash.message = "User "+ user.username + " has no Billing Account" + "</br>" + "Create a new Billing Account by selecting a plan and subscribing or ask for an invite to join a Billing Account"
+			redirect action: "create"
 		} else {
 			billingAccountUsers = SecUser.findAllByBillingAccount(user.billingAccount)
 
@@ -87,6 +137,16 @@ class BillingAccountController {
 		apiId:DIRECT_API_ID, timestamp: timestamp, nonce: NONCE, data: data,
 		subscriptions: subscriptions.content, statements: statements, errors: errors, billingAccountUsers: billingAccountUsers
 		]
+	}
+
+	def changeCreditCard() {
+		def user = SecUser.get(springSecurityService.currentUser.id)
+		def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
+		def timestamp = new Date()
+		def data = REDIRECT_URI + createLink(action:"edit", absolute: true).encodeAsURL()
+		[hmac:billingAccountService.hmac(DIRECT_API_ID+timestamp+NONCE+data, DIRECT_API_SECRET),
+		 apiId:DIRECT_API_ID, timestamp: timestamp, nonce: NONCE, data: data,
+		 subscriptions: subscriptions.content]
 	}
 
 	def emailInvite() {

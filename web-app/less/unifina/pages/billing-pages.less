@@ -1,18 +1,31 @@
 
-#product-information {
-  .plan-table {
-    th {
-      width: 20%;
+body.billing-account-page {
+  #content-wrapper {
+    padding-bottom: 100px;
+  }
+
+  #product-information {
+    .plan-table {
+      th {
+        width: 20%;
+      }
     }
+  }
+
+  .credit-card-container {
+    padding-top: 30px;
+    padding-bottom: 30px;
   }
 }
 
-#credit-card-update-form {
-  margin-top: 15px;
-}
+@media(max-width: 768px) {
+  body.billing-account-page {
+    .slider.slider-horizontal {
+      margin-bottom: 40px !important; // Have to be important to override the original margin written directly into the element
 
-.panel.billing-information.open {
-  #credit-card-form-button {
-    visibility: hidden;
+      .slider-tick-label {
+        transform: rotate(90deg);
+      }
+    }
   }
 }
