@@ -9,8 +9,10 @@ import com.unifina.domain.security.BillingAccountInvite
 
 import org.apache.commons.validator.EmailValidator
 
+import com.unifina.user.UserCreationFailedException
+
 @Transactional
-@Secured(["IS_AUTHENTICATED_FULLY"])
+
 class BillingAccountController {
 
 	def springSecurityService
@@ -28,6 +30,7 @@ class BillingAccountController {
 	static REDIRECT_URI 		= 'redirect_uri='
 	static NONCE 				= 'SECRET'
 
+	@Secured(["IS_AUTHENTICATED_FULLY"])
     def edit() {
 
 		def user = SecUser.get(springSecurityService.currentUser.id)
@@ -89,6 +92,7 @@ class BillingAccountController {
 		]
 	}
 
+	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def emailInvite() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 
@@ -98,17 +102,18 @@ class BillingAccountController {
 			if (!emailValidator.isValid(params['emailInvite'])){
 				flash.error = 'Invalid email address'
 			}
+			//todo refactor so that only one type of email is sent, if there's an user with that username don't ask to register but add him to billing account and reroute to login auth
 			else {
-				def billingAccountInvite = new BillingAccountInvite(billingAccount: user.billingAccount, users: user)
+				def billingAccountInvite = new BillingAccountInvite(billingAccount: user.billingAccount, users: user, email: params['emailInvite'])
 				billingAccountInvite.save()
 
 				mailService.sendMail {
 					from grailsApplication.config.unifina.email.sender
 					to params['emailInvite']
 					subject 'You have been invited to Streamr Billing Account'
-					html g.render(template: "email_invite", model: [user: user, token: billingAccountInvite.token], plugin: 'unifina-core')
+					html g.render(template: "email_invite_register", model: [user: user, invite: billingAccountInvite.token], plugin: 'unifina-core')
 				}
-				flash.message = 'Invite sent to ' + params['emailInvite']
+				flash.message = 'Billing Account invite sent to ' + params['emailInvite']
 			}
 		} else {
 			flash.error = 'Something went wrong, please try again soon'
@@ -116,11 +121,73 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
+	@Secured(["permitAll"])
+	def register(RegisterCommand cmd){
+		def params = params
+		def billingAccountInvite
+
+		if (params.containsKey("invite") & params['invite'] != ""){
+			billingAccountInvite = BillingAccountInvite.findByToken(params['invite'])
+
+			def existingUser = SecUser.findByUsername(billingAccountInvite.email)
+
+			if (existingUser && !billingAccountInvite.used && !existingUser.billingAccount) {
+				billingAccountInvite.used = true
+				existingUser.billingAccount = billingAccountInvite.billingAccount
+				flash.message = 'You have been added to Billing Account, please login'
+				return redirect(controller: 'login', action: 'auth', params: flash)
+			}
+		}
+
+		if (!billingAccountInvite || billingAccountInvite.used){
+			flash.message = 'Invalid Billing Account invite or invite has already been used'
+			def token = !billingAccountInvite ? '' : billingAccountInvite.token
+			def email = !billingAccountInvite ? '' : billingAccountInvite.email
+			return render(view: '/register/register', model:[user: [username: email], invite: token])
+		}
+
+		if (request.method == "GET") {
+			// activated the registration, but not yet submitted it
+			return render(view: '/register/register', model: [user: [username: billingAccountInvite.email], invite: billingAccountInvite.token])
+		}
+
+		else if (request.method == "POST") {
+
+			def user
+
+			if (SecUser.findByUsername(billingAccountInvite.email)){
+				flash.message = 'Username already exists'
+				return render(view: '/register/register', model: [user: [username: billingAccountInvite.email], invite: billingAccountInvite.token])
+			}
+
+			//todo verify that this works
+			if (cmd.hasErrors()) {
+				flash.message = 'Something went wrong, please try again'
+				log.warn("Registration command has errors: "+userService.checkErrors(cmd.errors.getAllErrors()))
+				return render(view: '/register/register', model: [user: [username: billingAccountInvite.email], invite: billingAccountInvite.token])
+				//return render(view: 'register', model: [user: cmd, invite: invite.code])
+			}
+
+			try {
+				user = userService.createUser(cmd.properties)
+				user.billingAccount = billingAccountInvite.getBillingAccount()
+				billingAccountInvite.used = true
+				//todo add user to billing account
+				//todo mark billing account invite to used
+			} catch (UserCreationFailedException e) {
+				flash.message = e.getMessage()
+				return render(view: '/register/register', model: [user: [username: billingAccountInvite.email], invite: billingAccountInvite.token])
+			}
+		}
+		redirect(action:"edit")
+	}
+
+	/*@Secured(["IS_AUTHENTICATED_FULLY"])
 	def joinToBillingAccount() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 
 		if (params['token']){
-			def billingAccountInvite = BillingAccountInvite.findByToken(params['token'])
+			def billingAccountInvite = BillingAccountInvite.findByToken(params['invite'])
 
 			if (!billingAccountInvite || billingAccountInvite.used){
 				flash.error = 'Billing Account invite has already been used'
@@ -141,8 +208,9 @@ class BillingAccountController {
 			}
 		}
 		redirect(action:"edit")
-	}
+	}*/
 
+	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def update() {
 
 		def user = SecUser.get(springSecurityService.currentUser.id)
@@ -160,6 +228,7 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
+	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def addBillingAccountKey() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		def params = params
@@ -180,6 +249,7 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
+	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def statement() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		if (params['statementId']){
@@ -195,5 +265,41 @@ class BillingAccountController {
 			response.outputStream.close()
 			return null
 		}
+	}
+}
+
+
+class RegisterCommand {
+	String invite
+	String username
+	String name
+	String password
+	String password2
+	String timezone
+	String tosConfirmed
+	Integer pwdStrength
+
+	def userService
+
+	static constraints = {
+		importFrom SecUser
+
+		invite blank: false
+
+		tosConfirmed blank: false, validator: { val ->
+			println('tosConfirmed '+ val)
+			val == 'on'
+		}
+
+		timezone blank: false
+		name blank: false
+
+		password validator: {String password, RegisterCommand command ->
+			return command.userService.passwordValidator(password, command)
+		}
+		password2 validator: {value, RegisterCommand command ->
+			return command.userService.password2Validator(value, command)
+		}
+
 	}
 }

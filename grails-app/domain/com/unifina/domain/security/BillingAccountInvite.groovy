@@ -4,12 +4,15 @@ import com.unifina.utils.IdGenerator;
 
 class BillingAccountInvite {
 
-	static hasMany = [billingAccount: BillingAccount, users: SecUser]
+	BillingAccount billingAccount
+	SecUser user
+	String email
 	Boolean used = Boolean.FALSE
 	String token = generateToken()
 
     static constraints = {
-
+		user(nullable: true)
+		email(nullable: true)
 	}
 
 	public static String generateToken() {
