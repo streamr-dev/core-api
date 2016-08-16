@@ -182,34 +182,6 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
-	/*@Secured(["IS_AUTHENTICATED_FULLY"])
-	def joinToBillingAccount() {
-		def user = SecUser.get(springSecurityService.currentUser.id)
-
-		if (params['token']){
-			def billingAccountInvite = BillingAccountInvite.findByToken(params['invite'])
-
-			if (!billingAccountInvite || billingAccountInvite.used){
-				flash.error = 'Billing Account invite has already been used'
-			}
-			else if (billingAccountInvite && !billingAccountInvite.used) {
-				billingAccountInvite.used = Boolean.TRUE
-				billingAccountInvite.save()
-
-				def baId = billingAccountInvite.billingAccount.id
-				def ba = BillingAccount.findById(baId)
-
-				user.billingAccount = ba
-				user.save()
-				flash.message = 'You have joined succesfully to Billing Account'
-			}
-			else {
-				flash.error = 'Your account is already in a billing account'
-			}
-		}
-		redirect(action:"edit")
-	}*/
-
 	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def update() {
 
