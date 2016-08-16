@@ -25,10 +25,10 @@
 </head>
 
 <body class="billing-account-page">
-	<div class="col-xs-12 col-md-6 col-md-offset-2 col-lg-4 col-lg-offset-4">
+	<div class="col-xs-12 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
 		<ui:panel title="Change credit Card">
 
-			<div class="credit-card-container"></div>
+			<div class="credit-card-container hidden-xs"></div>
 			<form id="credit-card-update-form" method="post" action="${'https://api.chargify.com/api/v2/subscriptions/'+subscriptions.subscription.id+'/card_update'}">
 				<input type="hidden" name="secure[api_id]" 	  value="${apiId}"/>
 				<input type="hidden" name="secure[timestamp]" value="${timestamp}" />

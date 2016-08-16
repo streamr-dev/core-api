@@ -32,7 +32,7 @@
 			<div class="row">
 				<div class="col-xs-12 col-md-6">
 					<ui:panel title="Payment Profile">
-						<div class="credit-card-container"></div>
+						<div class="credit-card-container hidden-xs"></div>
 						<g:render template="credit_card_form" model="[
 								'firstName': 'signup[payment_profile][first_name]',
 								'lastName': 'signup[payment_profile][last_name]',

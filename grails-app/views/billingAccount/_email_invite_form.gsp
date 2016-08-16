@@ -23,10 +23,10 @@
 					<div class="form-group col-xs-12">
 						<label>Insert email address and invite person to this Billing Account</label>
 						<div class="form-inline row">
-							<div class="col-xs-10">
+							<div class="col-xs-12 col-sm-8 col-md-10">
 								<input type="text" class="form-control" name="emailInvite" value="" style="width: 100%;"/>
 							</div>
-							<button type="submit" class=" col-xs-2 save btn btn-primary pull-right">Invite</button>
+							<button type="submit" class="col-xs-4 col-md-2 save btn btn-primary">Invite</button>
 						</div>
 					</div>
 

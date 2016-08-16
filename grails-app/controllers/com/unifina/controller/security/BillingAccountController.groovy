@@ -10,10 +10,10 @@ import com.unifina.domain.security.BillingAccountInvite
 import org.apache.commons.validator.EmailValidator
 
 import com.unifina.user.UserCreationFailedException
-import com.unifina.controller.security.RegisterCommand
 
 @Transactional
 
+@Secured(["IS_AUTHENTICATED_FULLY"])
 class BillingAccountController {
 
 	def springSecurityService
@@ -30,10 +30,8 @@ class BillingAccountController {
 	static DIRECT_API_PWD		= "${CH.config.chargify.directApiPwd}"
 	static REDIRECT_URI 		= 'redirect_uri='
 	static NONCE 				= 'SECRET'
-	
-	@Secured(["IS_AUTHENTICATED_FULLY"])
-	def create() {
 
+	def create() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		def products = billingAccountService.getProducts()
 		def data = REDIRECT_URI
@@ -82,9 +80,7 @@ class BillingAccountController {
 
 	}
 	
-	@Secured(["IS_AUTHENTICATED_FULLY"])
     def edit() {
-
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		def products = billingAccountService.getProducts()
 		def statements
@@ -144,7 +140,6 @@ class BillingAccountController {
 		]
 	}
 	
-	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def changeCreditCard() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		def subscriptions = billingAccountService.getSubscriptionsByCustomerReference(user.username)
@@ -244,9 +239,7 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
-	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def update() {
-
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		if (user.billingAccount.chargifySubscriptionId && params['signup[product][handle]']){
 			def productHandle = params['signup[product][handle]']
@@ -262,7 +255,6 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
-	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def addBillingAccountKey() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		def params = params
@@ -283,7 +275,6 @@ class BillingAccountController {
 		redirect(action:"edit")
 	}
 
-	@Secured(["IS_AUTHENTICATED_FULLY"])
 	def statement() {
 		def user = SecUser.get(springSecurityService.currentUser.id)
 		if (params['statementId']){
@@ -301,41 +292,3 @@ class BillingAccountController {
 		}
 	}
 }
-
-
-/*
-class RegisterCommand {
-	String invite
-	String username
-	String name
-	String password
-	String password2
-	String timezone
-	String tosConfirmed
-	Integer pwdStrength
-
-	def userService
-
-	static constraints = {
-		importFrom SecUser
-
-		invite blank: false
-
-		tosConfirmed blank: false, validator: { val ->
-			println('tosConfirmed '+ val)
-			val == 'on'
-		}
-
-		timezone blank: false
-		name blank: false
-
-		password validator: {String password, RegisterCommand command ->
-			return command.userService.passwordValidator(password, command)
-		}
-		password2 validator: {value, RegisterCommand command ->
-			return command.userService.password2Validator(value, command)
-		}
-
-	}
-}
-*/

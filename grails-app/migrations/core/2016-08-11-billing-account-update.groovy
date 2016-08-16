@@ -22,19 +22,19 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "jarno (generated)", id: "1470901118790-4") {
-		dropForeignKeyConstraint(baseTableName: "billing_account_invite_billing_account", baseTableSchemaName: "core_dev_jarno", constraintName: "FK365CCBC9AF8FDE9C")
+		dropForeignKeyConstraint(baseTableName: "billing_account_invite_billing_account", constraintName: "FK365CCBC9AF8FDE9C")
 	}
 
 	changeSet(author: "jarno (generated)", id: "1470901118790-5") {
-		dropForeignKeyConstraint(baseTableName: "billing_account_invite_billing_account", baseTableSchemaName: "core_dev_jarno", constraintName: "FK365CCBC953473E25")
+		dropForeignKeyConstraint(baseTableName: "billing_account_invite_billing_account", constraintName: "FK365CCBC953473E25")
 	}
 
 	changeSet(author: "jarno (generated)", id: "1470901118790-6") {
-		dropForeignKeyConstraint(baseTableName: "billing_account_invite_sec_user", baseTableSchemaName: "core_dev_jarno", constraintName: "FK8DDEDB99612BC826")
+		dropForeignKeyConstraint(baseTableName: "billing_account_invite_sec_user", constraintName: "FK8DDEDB99612BC826")
 	}
 
 	changeSet(author: "jarno (generated)", id: "1470901118790-7") {
-		dropForeignKeyConstraint(baseTableName: "billing_account_invite_sec_user", baseTableSchemaName: "core_dev_jarno", constraintName: "FK8DDEDB99872C9F44")
+		dropForeignKeyConstraint(baseTableName: "billing_account_invite_sec_user", constraintName: "FK8DDEDB99872C9F44")
 	}
 
 	changeSet(author: "jarno (generated)", id: "1470901118790-10") {
