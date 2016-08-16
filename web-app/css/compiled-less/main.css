@@ -16885,6 +16885,24 @@ body.help-page .h3 {
   margin-top: 40px;
   margin-bottom: 20px;
 }
+body.billing-account-page #content-wrapper {
+  padding-bottom: 100px;
+}
+body.billing-account-page #product-information .plan-table th {
+  width: 20%;
+}
+body.billing-account-page .credit-card-container {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+@media (max-width: 768px) {
+  body.billing-account-page .slider.slider-horizontal {
+    margin-bottom: 40px !important;
+  }
+  body.billing-account-page .slider.slider-horizontal .slider-tick-label {
+    transform: rotate(90deg);
+  }
+}
 table {
   background-color: transparent;
 }

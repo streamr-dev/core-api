@@ -51,6 +51,7 @@ databaseChangeLog = {
 
 
 	include file: 'core/2016-07-25-billing-account-invites-default-values.groovy'
+	include file: 'core/2016-08-08-drop-unique-constraint-on-signupinvite.groovy'
 
 	include file: 'core/2016-08-11-billing-account-update.groovy'
 }

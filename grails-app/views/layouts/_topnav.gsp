@@ -59,7 +59,7 @@ Tour.list(function(tourList) {
 							<li><g:link elementId="navUserGuideLink" controller="help" action="userGuide"><g:message code="help.userGuide.title" /></g:link></li>
 							<li><g:link elementId="navApiDocsLink" controller="help" action="api"><g:message code="help.api.title" /></g:link></li>
 							<li><g:link elementId="navModuleReferenceLink" controller="module" action="list"><g:message code="help.moduleReference.title"/></g:link></li>
-							<li><g:link elementId="navExamplesLink" controller="canvas" params="[examples:1]"><g:message code="help.examples.title"/></g:link></li>
+							%{--<li><g:link elementId="navExamplesLink" controller="canvas" params="[examples:1]"><g:message code="help.examples.title"/></g:link></li>--}%
 						</ul>
 					</li>
 			
@@ -69,7 +69,7 @@ Tour.list(function(tourList) {
 						</a>
 						<ul class="dropdown-menu">
 							<li><g:link elementId="navProfileLink" controller="profile"><g:message code="profile.edit.label"/></g:link></li>
-							<li><g:link elementId="navBillingAccountLink" controller="billingAccount"><g:message code="billingAccount.edit.label"/></g:link></li>
+							<li><g:link elementId="navBillingAccountLink" controller="billingAccount"><g:message code="billingAccount.label"/></g:link></li>
 							<li><g:link elementId="navLogoutLink" controller="logout"><i class="dropdown-icon fa fa-power-off"></i>&nbsp;&nbsp;Log Out</g:link></li>
 						</ul>
 					</li>
