@@ -254,7 +254,7 @@ class DashboardSpec extends LoginTester1Spec {
 			}
 
 		then: "the old dashboard is not in the list anymore"
-			!findRow(name2)
+			!findRow(name2, false)
 	}
 
 	def "not shared dashboard cannot be opened"() {
