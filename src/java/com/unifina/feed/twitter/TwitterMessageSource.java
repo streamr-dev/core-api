@@ -40,22 +40,27 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 
 			TwitterMessage msg = TwitterMessage.fromStatus(status);
 
-			// only one stream -> forward all incoming tweets to it
 			if (streams.size() == 1) {
+				// only one stream -> forward all incoming tweets to it
 				msg.streamConfig = streams.get(0);
 				messageSource.forward(msg, msg.streamConfig.getStreamId(), counter++, false);
 			} else {
-				// find streams whose keywords are found within tweet, forward a copy to each of them
-				//   ("demux", see "mux" in updateTwitterStreamFor)
+				// find streams whose keywords are found within tweet, forward a copy to each of them ("demux")
+				//   see "mux" in updateTwitterStreamFor method below
 				String tweet = msg.toString();
+				List<String> matches = new LinkedList<>();
 				for (TwitterStreamConfig conf : streams) {
 					for (String kw : conf.getKeywords()) {
 						if (tweet.contains(kw)) {
-							TwitterMessage msg2 = TwitterMessage.fromStatus(status);
-							msg2.streamConfig = conf;
-							messageSource.forward(msg2, conf.getStreamId(), counter++, false);
-							break;
+							matches.add(kw);
 						}
+					}
+					if (matches.size() > 0) {
+						TwitterMessage msg2 = TwitterMessage.fromStatus(status);
+						msg2.streamConfig = conf;
+						msg2.matchedKeywords = matches;
+						messageSource.forward(msg2, conf.getStreamId(), counter++, false);
+						matches = new LinkedList<>();
 					}
 				}
 			}
