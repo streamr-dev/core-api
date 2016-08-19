@@ -42,11 +42,18 @@ class CanvasApiController {
 	}
 
 	@StreamrApi(requiresAuthentication = false)
-	def show(String id) {
+	def show(String id, Boolean runtime) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
-		Map result = canvasService.reconstruct(canvas, request.apiUser)
-		canvas.json = result as JSON
-		render canvas.toMap() as JSON
+		if (runtime) {
+			Map result = canvas.toMap()
+			result.putAll(signalPathService.runtimeRequest([type: 'json'], canvas, null, request.apiUser).json)
+			render result as JSON
+		}
+		else {
+			Map result = canvasService.reconstruct(canvas, request.apiUser)
+			canvas.json = result as JSON
+			render canvas.toMap() as JSON
+		}
 	}
 
 	@StreamrApi
@@ -109,9 +116,15 @@ class CanvasApiController {
 	 * Gets the json of a single module on a canvas
 	 */
 	@StreamrApi(requiresAuthentication = false)
-	def module(String canvasId, Integer moduleId, Long dashboard) {
+	def module(String canvasId, Integer moduleId, Long dashboard, Boolean runtime) {
 		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
-		render moduleMap as JSON
+		if (runtime) {
+			Canvas canvas = Canvas.get(canvasId)
+			render signalPathService.runtimeRequest([type: 'json'], canvas, moduleId, request.apiUser).json as JSON
+		}
+		else {
+			render moduleMap as JSON
+		}
 	}
 
 	/**

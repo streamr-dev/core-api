@@ -61,7 +61,8 @@ public class Input<T> extends Endpoint<T> {
 	protected String[] getAcceptedTypes() {
 		return getTypeName().split(" ");
 	}
-	
+
+	@Override
 	public T getValue() {
 		return value;
 	}

@@ -212,6 +212,16 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		List<Map> modules = new ArrayList<>(mods.size());
+		for (AbstractSignalPathModule m : mods) {
+			modules.add(m.getConfiguration());
+		}
+		return config;
+	}
+
+	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (sp != null && sp.value != null) {

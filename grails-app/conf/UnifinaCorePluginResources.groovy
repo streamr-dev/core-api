@@ -305,6 +305,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'forEachModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'

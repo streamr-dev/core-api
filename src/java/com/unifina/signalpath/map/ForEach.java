@@ -27,6 +27,20 @@ public class ForEach extends AbstractSignalPathModule {
 	}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		LinkedHashMap<String, Map> canvasMapByKey = new LinkedHashMap<>();
+		config.put("canvasesByKey", canvasMapByKey);
+		for (String key : keyToSignalPath.keySet()) {
+			SubSignalPath ssp = keyToSignalPath.get(key);
+			canvasMapByKey.put(key, ssp.getSignalPath().getConfiguration());
+		}
+
+		return config;
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
@@ -110,6 +124,16 @@ public class ForEach extends AbstractSignalPathModule {
 
 		signalPath.connectionsReady();
 		return new SubSignalPath(signalPath, propagator, key);
+	}
+
+	@Override
+	public void afterDeserialization() {
+		super.afterDeserialization();
+
+		for (String key : keyToSignalPath.keySet()) {
+			SubSignalPath ssp = keyToSignalPath.get(key);
+			canvasMapByKey.put(key, ssp.getSignalPath().getConfiguration());
+		}
 	}
 
 	private Map<String, Object> instantiateCacheUpdateListeners(SubSignalPath subSignalPath) {

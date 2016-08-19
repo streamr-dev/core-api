@@ -166,6 +166,24 @@ class CanvasApiControllerSpec extends Specification {
 		1 * canvasService.reconstruct(canvas1, me) >> { Canvas c, SecUser user -> JSON.parse(c.json) }
 	}
 
+	void "show() supports runtime parameter"() {
+		when:
+		params.id = "1"
+		params.runtime = true
+		request.addHeader("Authorization", "Token $me.apiKey")
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "show") {
+			controller.show()
+		}
+
+		then:
+		response.status == 200
+		response.json?.size() > 0
+
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
+		1 * controller.signalPathService.runtimeRequest([type: 'json'], canvas1, null, me) >> [success:true, json:JSON.parse(canvas1.json)]
+	}
+
 	void "save() creates a new canvas and renders it as json"() {
 		def newCanvasId
 
@@ -418,6 +436,28 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == result
 		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> result
+	}
+
+	void "module() supports runtime parameter"() {
+		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
+
+		when:
+		request.addHeader("Authorization", "Token $me.apiKey")
+		params.canvasId = "1"
+		params.moduleId = 1
+		params.dashboard = 2
+		params.runtime = true
+		request.method = "GET"
+		request.requestURI = "/api/v1/canvases/$params.id/modules/"
+		withFilters(action: "module") {
+			controller.module()
+		}
+
+		then:
+		response.status == 200
+		response.json == result
+		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> result
+		1 * controller.signalPathService.runtimeRequest([type: "json"], canvas1, 1, me) >> [success:true, json:result]
 	}
 
 	void "request() must authorize and send a runtime request to the canvas"() {

@@ -1,12 +1,14 @@
 package com.unifina.signalpath;
 
+import org.codehaus.groovy.grails.web.json.JSONObject;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Holder map for ModuleOption instances
  */
-public class ModuleOptions extends LinkedHashMap<String, Object> {
+public class ModuleOptions extends JSONObject {
 	
 	public ModuleOptions() {}
 	

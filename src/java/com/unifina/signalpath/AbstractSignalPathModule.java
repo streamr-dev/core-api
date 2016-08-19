@@ -405,9 +405,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> map = (json != null ? json : new HashMap<String, Object>());
 
-		List<Map> params = new ArrayList<Map>();
-		List<Map> ins = new ArrayList<Map>();
-		List<Map> outs = new ArrayList<Map>();
+		List<Map> params = new ArrayList<>();
+		List<Map> ins = new ArrayList<>();
+		List<Map> outs = new ArrayList<>();
 		for (Input i : getInputs()) {
 			if (i instanceof Parameter) {
 				params.add(i.getConfiguration());
@@ -665,6 +665,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				log.error("Error making runtime parameter change!", e);
 				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
+		}
+		else if (request.getType().equals("json")) {
+			response.put("json", this.getConfiguration());
+			response.setSuccess(true);
 		}
 	}
 

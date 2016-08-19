@@ -2,7 +2,6 @@ package com.unifina.signalpath;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 
 public abstract class Endpoint<T> implements Serializable {
@@ -76,7 +75,7 @@ public abstract class Endpoint<T> implements Serializable {
 		json = null;
 		return getConfiguration();
 	}
-	
+
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
 		
@@ -91,6 +90,9 @@ public abstract class Endpoint<T> implements Serializable {
 		}
 		if (jsClass != null) {
 			map.put("jsClass", jsClass);
+		}
+		if (getValue() != null) {
+			map.put("value", getValue());
 		}
 
 		return map;
@@ -122,19 +124,24 @@ public abstract class Endpoint<T> implements Serializable {
 	 */
 	public void addAlias(String name) {
 		if (aliases==null)
-			aliases = new ArrayList<String>(1);
+			aliases = new ArrayList<>(1);
 		aliases.add(name);
 	}
 	
 	public List<String> getAliases() {
 		if (aliases==null)
-			return new ArrayList<String>(0);
+			return new ArrayList<>(0);
 		else return aliases;
 	}
 
 	public void setJsClass(String jsClass) {
 		this.jsClass = jsClass;
 	}
+
+	/**
+	 * Returns the most recent value at this Endpoint.
+     */
+	public abstract T getValue();
 
 	/**
 	 * Clear the state of this Endpoint.

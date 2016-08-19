@@ -90,7 +90,8 @@ public class Output<T> extends Endpoint<T> {
 	public boolean isConnected() {
 		return connected;
 	}
-	
+
+	@Override
 	public T getValue() {
 		return previousValue;
 	}
