@@ -169,12 +169,12 @@ public class SignalPath extends ModuleWithUI {
 		// If the io names in different modules clash, add a running number in the end to make the name unique
 		if (!root) {
 			for (Input it : exportedInputs) {
-				// Don't retain the saved json configuration
-				it.resetConfiguration();
-
+				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
+				it.regenerateId();
 				if (getInput(it.name) == null) {
 					addInput(it);
-				} else {
+				}
+				else {
 					int counter = 2;
 					while (getInput(it.name + counter) != null) {
 						counter++;
@@ -184,10 +184,12 @@ public class SignalPath extends ModuleWithUI {
 				}
 			}
 			for (Output it : exportedOutputs) {
-				it.resetConfiguration();
+				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
+				it.regenerateId();
 				if (getOutput(it.name) == null) {
 					addOutput(it);
-				} else {
+				}
+				else {
 					int counter = 2;
 					while (getOutput(it.name + counter) != null) {
 						counter++;
@@ -218,6 +220,7 @@ public class SignalPath extends ModuleWithUI {
 		for (AbstractSignalPathModule m : mods) {
 			modules.add(m.getConfiguration());
 		}
+		config.put("modules", modules);
 		return config;
 	}
 

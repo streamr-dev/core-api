@@ -19,8 +19,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	var _cachedEndpoints = []
 
 	function createModuleFooter() {
-		// Button for toggling the clearState. Default true.
-		
 		var div = $("<div class='modulefooter'></div>")
 		prot.div.append(div)
 		prot.footer = div

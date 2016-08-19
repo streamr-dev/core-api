@@ -1,6 +1,6 @@
 SignalPath.TableModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var area = null;
 	var headers = [];
@@ -44,7 +44,7 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		prot.table.receiveResponse(d)
 	}
 	

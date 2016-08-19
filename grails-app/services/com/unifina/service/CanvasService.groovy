@@ -154,6 +154,21 @@ class CanvasService {
 		}
 	}
 
+	@CompileStatic
+	void resetUiChannels(Map signalPathMap) {
+		HashMap<String,String> replacements = [:]
+		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
+			if (replacements.containsKey(element.uiChannelData.id)) {
+				element.uiChannelData.id = replacements[element.uiChannelData.id]
+			}
+			else {
+				String newId = IdGenerator.get()
+				replacements[element.uiChannelData.id] = newId
+				element.uiChannelData.id = newId
+			}
+		}
+	}
+
 	private boolean hasCanvasPermission(Canvas canvas, SecUser user, Permission.Operation op) {
 		return op == Permission.Operation.READ && canvas.example || permissionService.check(user, canvas, op)
 	}
@@ -183,20 +198,6 @@ class CanvasService {
 		}
 
 		return reconstructFrom(inputSignalPathMap, user)
-	}
-
-	private static void resetUiChannels(Map signalPathMap) {
-		HashMap<String,String> replacements = [:]
-		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
-			if (replacements.containsKey(element.uiChannelData.id)) {
-				element.uiChannelData.id = replacements[element.uiChannelData.id]
-			}
-			else {
-				String newId = IdGenerator.get()
-				replacements[element.uiChannelData.id] = newId
-				element.uiChannelData.id = newId
-			}
-		}
 	}
 
 	/**

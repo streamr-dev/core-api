@@ -137,6 +137,11 @@ public class Input<T> extends Endpoint<T> {
 		}
 	}
 
+	public void disconnect() {
+		this.source = null;
+		owner.cancelReady(this);
+	}
+
 	@Override
 	public void clear() {
 		value = null;

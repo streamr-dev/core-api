@@ -1,6 +1,6 @@
 SignalPath.ChartModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	prot.enableIONameChange = false;	
 		
@@ -86,7 +86,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 	}
 	
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		prot.chart.handleMessage(d)
 		// Show csv download link
 		if (d.type==="csv") {

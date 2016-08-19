@@ -15,7 +15,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 
 	protected transient SimpleDateFormat df = null;
 
-	protected void debug(String s) {
+	protected void debug(Object s) {
 		if (getGlobals().getUiChannel()!=null) {
 			if (df == null) {
 				df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -26,7 +26,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 
 			final HashMap<String, String> msg = new HashMap<>();
 			msg.put("type", "debug");
-			msg.put("msg", s);
+			msg.put("msg", s != null ? s.toString() : null);
 			msg.put("t", t);
 
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {

@@ -2,9 +2,11 @@ package com.unifina.signalpath.map;
 
 import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
+import com.unifina.service.CanvasService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
+import grails.util.Holders;
 
 import java.util.*;
 
@@ -15,7 +17,6 @@ public class ForEach extends AbstractSignalPathModule {
 	private StringOutput keyOut = new StringOutput(this, "key");
 	private MapOutput map = new MapOutput(this, "map");
 
-	private Map signalPathMap;
 	private Map<String, SubSignalPath> keyToSignalPath = new HashMap<>();
 	private Map<String, Map<String, Object>> cachedOutputValuesByKey = new HashMap<>();
 	private List<Output> outputsToPropagate = new ArrayList<>();
@@ -35,7 +36,9 @@ public class ForEach extends AbstractSignalPathModule {
 		config.put("canvasesByKey", canvasMapByKey);
 		for (String key : keyToSignalPath.keySet()) {
 			SubSignalPath ssp = keyToSignalPath.get(key);
-			canvasMapByKey.put(key, ssp.getSignalPath().getConfiguration());
+			Map<String, Object> subConfig = ssp.getSignalPath().getConfiguration();
+			subConfig.put("state", Canvas.State.RUNNING);
+			canvasMapByKey.put(key, subConfig);
 		}
 
 		return config;
@@ -52,7 +55,8 @@ public class ForEach extends AbstractSignalPathModule {
 		}
 
 		// Construct temporary signal path so that endpoints can be analyzed
-		signalPathMap = (Map) JSON.parse(canvas.getJson());
+		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
+		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
 		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
 		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), false);
 
@@ -67,12 +71,18 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Input input : exportedInputs) {
 			input.getOwner().removeInput(input);
 			input.setOwner(this);
+			// Reset id for stolen endpoint to avoid clashes
+			input.regenerateId();
+			input.disconnect();
 			addInput(input);
 			input.addProxiedInput(new InputTriggerTracker(this, triggeredInputs, input));
 		}
 		for (Output output : exportedOutputs) {
 			output.getOwner().removeOutput(output);
 			output.setOwner(this);
+			// Reset id for stolen endpoint to avoid clashes
+			output.regenerateId();
+			output.disconnect();
 			addOutput(output);
 			outputsToPropagate.add(output);
 		}
@@ -85,7 +95,7 @@ public class ForEach extends AbstractSignalPathModule {
 		// Instantiate a new sub-canvas if not yet instantiated for received key
 		String currentKey = key.getValue();
 		if (!keyToSignalPath.containsKey(currentKey)) {
-			SubSignalPath subSignalPath = makeSubSignalPath(this, currentKey);
+			SubSignalPath subSignalPath = makeSubSignalPath(currentKey);
 			subSignalPath.proxyToOutputs(outputsToPropagate);
 			cachedOutputValuesByKey.put(currentKey, instantiateCacheUpdateListeners(subSignalPath));
 			keyToSignalPath.put(currentKey, subSignalPath);
@@ -127,12 +137,20 @@ public class ForEach extends AbstractSignalPathModule {
 		}
 	}
 
-	private static SubSignalPath makeSubSignalPath(ForEach parent, String key) {
-		SignalPathService signalPathService = parent.getGlobals().getBean(SignalPathService.class);
-		SignalPath signalPath = signalPathService.mapToSignalPath(parent.signalPathMap, false, parent.getGlobals(), false);
-		signalPath.setParentSignalPath(parent.getParentSignalPath());
+	private SubSignalPath makeSubSignalPath(String key) {
+		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
+		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
 
-		Propagator propagator = new Propagator(signalPath.getExportedInputs(), parent);
+		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
+		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
+		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getValue().getJson());
+		canvasService.resetUiChannels(signalPathMap);
+		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
+		signalPath.setName(signalPath.getName() + " (" + key + ")");
+
+		signalPath.setParentSignalPath(getParentSignalPath());
+
+		Propagator propagator = new Propagator(signalPath.getExportedInputs(), this);
 
 		signalPath.connectionsReady();
 		return new SubSignalPath(signalPath, propagator, key);

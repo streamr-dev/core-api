@@ -46,7 +46,8 @@ class CanvasApiController {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
 		if (runtime) {
 			Map result = canvas.toMap()
-			result.putAll(signalPathService.runtimeRequest([type: 'json'], canvas, null, request.apiUser).json)
+			Map runtimeJson = signalPathService.runtimeRequest([type: 'json'], canvas, null, request.apiUser).json
+			result.putAll(runtimeJson)
 			render result as JSON
 		}
 		else {

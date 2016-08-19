@@ -485,22 +485,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.warnings = []
 	}
 	pub.clearWarnings = clearWarnings
-	
-	function receiveResponse(payload) {}
-	pub.receiveResponse = receiveResponse;
 
-	function getUIChannelOptions() {
-		// Check if module options contain channel options
-		if (prot.jsonData.options && prot.jsonData.options.uiResendAll && prot.jsonData.options.uiResendAll.value) {
-			return { resend_all: true }
-		}
-		else if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
-			return { resend_last: prot.jsonData.options.uiResendLast.value }
-		}
-		else return { resend_all: true }
-	}
-	pub.getUIChannelOptions = getUIChannelOptions
-	
 	function updateFrom(data) {
 		// Overwrite jsonData
 		prot.jsonData = data;
@@ -569,6 +554,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
 	}
 	prot.prepareCloneData = prepareCloneData;
+
+	pub.handleError = function(error) {}
 	
 	// Everything added to the public interface can be accessed from the
 	// protected interface too

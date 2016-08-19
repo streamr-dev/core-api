@@ -280,6 +280,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'uiChannelModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']

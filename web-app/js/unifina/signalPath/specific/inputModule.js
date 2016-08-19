@@ -1,6 +1,6 @@
 SignalPath.InputModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var widget;
 	
@@ -76,9 +76,10 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		return prot.jsonData
 	}
 	
-	pub.receiveResponse = function(p) {
-		if(widget.receiveResponse)
+	prot.receiveResponse = function(p) {
+		if (widget.receiveResponse) {
 			widget.receiveResponse(p)
+		}
 	}
 
 	prot.sendValue = function(value) {
