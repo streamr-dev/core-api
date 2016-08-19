@@ -1,11 +1,8 @@
 package com.unifina.signalpath.charts;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleOption;
@@ -59,7 +56,7 @@ public class TimeSeriesChart extends Chart {
 			}
 
 			if (hasRc) {
-				globals.getUiChannel().push(getInitMessage(), uiChannelId);
+				getGlobals().getUiChannel().push(getInitMessage(), uiChannelId);
 			}
 		}
 		else {
@@ -94,8 +91,8 @@ public class TimeSeriesChart extends Chart {
 			csvWriter().newLine();
 			myInputs = connectedInputs.toArray(new TimeSeriesInput[connectedInputs.size()]);
 
-			if (MapTraversal.getProperty(globals.getSignalPathContext(), "csvOptions.filterEmpty")!=null 
-					&& (boolean)MapTraversal.getProperty(globals.getSignalPathContext(), "csvOptions.filterEmpty")==false) {
+			if (MapTraversal.getProperty(getGlobals().getSignalPathContext(), "csvOptions.filterEmpty")!=null
+					&& (boolean)MapTraversal.getProperty(getGlobals().getSignalPathContext(), "csvOptions.filterEmpty")==false) {
 				for (TimeSeriesInput it : myInputs)
 					it.setInitialValue(Double.NaN);
 			}
@@ -148,23 +145,23 @@ public class TimeSeriesChart extends Chart {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
 			if (!Double.isNaN(input.value)
 					&& hasRc 
-					&& (!barify || globals.time.getTime() - input.previousTime >= 60000L)) {
+					&& (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
 				
 					PointMessage msg = new PointMessage(
 							input.seriesIndex, 
-							globals.getTzConverter().getFakeLocalTime(globals.time.getTime()),
+							getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time.getTime()),
 							input.value);
 					
-					globals.getUiChannel().push(msg, uiChannelId);
+					getGlobals().getUiChannel().push(msg, uiChannelId);
 					
-					input.previousTime = globals.time.getTime();
+					input.previousTime = getGlobals().time.getTime();
 			}
 		}
 	}
 
 	@Override
 	protected void recordCsvString() {
-		csvWriter().writeField(globals.time);
+		csvWriter().writeField(getGlobals().time);
 
 		for (int i=0;i<myInputs.length;i++) {
 			Double v = myInputs[i].getValue();
@@ -182,7 +179,7 @@ public class TimeSeriesChart extends Chart {
 			for (Input it : getInputs()) {
 				if (it instanceof TimeSeriesChartInput && it.isConnected()) {
 					// Send day break
-					globals.getUiChannel().push(new BreakMessage(((TimeSeriesChartInput)it).seriesIndex), uiChannelId);
+					getGlobals().getUiChannel().push(new BreakMessage(((TimeSeriesChartInput)it).seriesIndex), uiChannelId);
 				}
 			}
 		}

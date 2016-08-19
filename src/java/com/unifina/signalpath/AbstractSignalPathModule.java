@@ -62,7 +62,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	protected String name;
 	protected Integer hash;
 
-	transient public Globals globals;
+	private transient Globals globals;
 
 	private boolean initialized;
 
@@ -301,7 +301,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		// Only report the initialization of this module once
 		if (!initialized) {
-			globals.onModuleInitialized(this);
+			getGlobals().onModuleInitialized(this);
 			initialized = true;
 		}
 	}
@@ -588,7 +588,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 */
 	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
 		// Add event to message queue, don't do it right away 
-		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, globals.isRealtime() ? request.getTimestamp() : globals.time, this);
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
@@ -608,7 +608,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}, response);
 		request.setFuture(future);
 
-		globals.getDataSource().getEventQueue().enqueue(fe);
+		getGlobals().getDataSource().getEventQueue().enqueue(fe);
 		return future;
 	}
 
@@ -663,7 +663,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				response.setSuccess(true);
 			} catch (Exception e) {
 				log.error("Error making runtime parameter change!", e);
-				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
+				getGlobals().getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
 		else if (request.getType().equals("json")) {
@@ -714,5 +714,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * Override to handle steps after deserialization
 	 */
 	public void afterDeserialization() {
+	}
+
+	public Globals getGlobals() {
+		return globals;
+	}
+
+	public void setGlobals(Globals globals) {
+		this.globals = globals;
 	}
 }

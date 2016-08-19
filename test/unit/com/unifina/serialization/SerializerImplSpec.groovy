@@ -1,6 +1,5 @@
 package com.unifina.serialization
 
-import com.unifina.signalpath.ModuleOptions
 import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
@@ -24,10 +23,10 @@ class SerializerImplSpec extends Specification {
 		thrown(SerializationException)
 	}
 
-	def "serializing ModuleOptions inside JSONObject"() {
+	def "serializing Map inside JSONObject"() {
 		JSONObject object = new JSONObject()
 		object.put("foo", "bar")
-		object.put("options", new ModuleOptions())
+		object.put("options", new HashMap<String, Object>())
 
 		when:
 		def bytes = serializer.serializeToByteArray(object)

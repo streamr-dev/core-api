@@ -1,6 +1,5 @@
 package com.unifina.service
 
-import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
@@ -11,7 +10,6 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
@@ -149,7 +147,7 @@ class SignalPathService {
 		for (SignalPath sp : signalPaths) {
 			if (globals==null)
 				globals = sp.globals
-			else if (globals!=sp.globals)
+			else if (globals!= sp.globals)
 				throw new RuntimeException("All SignalPaths don't share the same Globals!")
 		}
 		

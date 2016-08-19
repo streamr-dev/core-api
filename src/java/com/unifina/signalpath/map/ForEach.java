@@ -4,6 +4,7 @@ import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
+import com.unifina.utils.Globals;
 
 import java.util.*;
 
@@ -52,8 +53,8 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Construct temporary signal path so that endpoints can be analyzed
 		signalPathMap = (Map) JSON.parse(canvas.getJson());
-		SignalPathService signalPathService = globals.getBean(SignalPathService.class);
-		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, globals, false);
+		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), false);
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = tempSignalPath.getExportedInputs();
@@ -115,25 +116,26 @@ public class ForEach extends AbstractSignalPathModule {
 		cachedOutputValuesByKey = new HashMap<>();
 	}
 
+	@Override
+	public void setGlobals(Globals globals) {
+		super.setGlobals(globals);
+
+		// Also set on sub-SignalPaths
+		for (String key : keyToSignalPath.keySet()) {
+			SubSignalPath ssp = keyToSignalPath.get(key);
+			ssp.getSignalPath().setGlobals(getGlobals());
+		}
+	}
+
 	private static SubSignalPath makeSubSignalPath(ForEach parent, String key) {
-		SignalPathService signalPathService = parent.globals.getBean(SignalPathService.class);
-		SignalPath signalPath = signalPathService.mapToSignalPath(parent.signalPathMap, false, parent.globals, false);
+		SignalPathService signalPathService = parent.getGlobals().getBean(SignalPathService.class);
+		SignalPath signalPath = signalPathService.mapToSignalPath(parent.signalPathMap, false, parent.getGlobals(), false);
 		signalPath.setParentSignalPath(parent.getParentSignalPath());
 
 		Propagator propagator = new Propagator(signalPath.getExportedInputs(), parent);
 
 		signalPath.connectionsReady();
 		return new SubSignalPath(signalPath, propagator, key);
-	}
-
-	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
-
-		for (String key : keyToSignalPath.keySet()) {
-			SubSignalPath ssp = keyToSignalPath.get(key);
-			canvasMapByKey.put(key, ssp.getSignalPath().getConfiguration());
-		}
 	}
 
 	private Map<String, Object> instantiateCacheUpdateListeners(SubSignalPath subSignalPath) {

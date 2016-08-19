@@ -52,7 +52,7 @@ public class SignalPath extends ModuleWithUI {
 	public SignalPath(Map iData, boolean isRoot, Globals globals) {
 		super();
 		this.root = isRoot;
-		this.globals = globals;
+		this.setGlobals(globals);
 		initPriority = 10;
 		canRefresh = true;
 
@@ -80,7 +80,7 @@ public class SignalPath extends ModuleWithUI {
 			modulesJSON = new ArrayList<>(0);
 		}
 
-		ModuleService moduleService = globals.getBean(ModuleService.class);
+		ModuleService moduleService = getGlobals().getBean(ModuleService.class);
 
 		HashMap<Long, Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON)) {
@@ -92,7 +92,7 @@ public class SignalPath extends ModuleWithUI {
 			Module moduleDomain = moduleDomainById.get(((Number) moduleConfig.get("id")).longValue());
 
 			try {
-				AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain, moduleConfig, this, globals);
+				AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain, moduleConfig, this, getGlobals());
 
 				// Get parameter inputs and outputs if connected, or create constants if not connected
 				for (Map paramConfig : (List<Map>) moduleConfig.get("params")) {
@@ -248,8 +248,8 @@ public class SignalPath extends ModuleWithUI {
 			sortedModules.get(i).connectionsReady();
 		}
 
-		if (globals.getDataSource() != null) {
-			globals.getDataSource().connectSignalPath(this);
+		if (getGlobals().getDataSource() != null) {
+			getGlobals().getDataSource().connectSignalPath(this);
 		}
 	}
 
@@ -317,8 +317,8 @@ public class SignalPath extends ModuleWithUI {
 							notReady.append(input.toString());
 							notReady.append("\n");
 
-							if (globals.getUiChannel() != null) {
-								globals.getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.name, input.getOwner().getHash()), uiChannelId);
+							if (getGlobals().getUiChannel() != null) {
+								getGlobals().getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.name, input.getOwner().getHash()), uiChannelId);
 							}
 						}
 					}
@@ -403,5 +403,14 @@ public class SignalPath extends ModuleWithUI {
 
 	public void setCanvas(Canvas canvas) {
 		this.canvas = canvas;
+	}
+
+	@Override
+	public void setGlobals(Globals globals) {
+		super.setGlobals(globals);
+
+		for (AbstractSignalPathModule m : mods) {
+			m.setGlobals(globals);
+		}
 	}
 }
