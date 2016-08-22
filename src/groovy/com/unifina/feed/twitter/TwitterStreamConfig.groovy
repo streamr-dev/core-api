@@ -26,8 +26,11 @@ class TwitterStreamConfig {
 	String accessTokenSecret
 
 	// streamrinc's app
-	public static final String consumerKey = "mosTwR1X0EgiR9lB81EGhYRrP"
-	public static final String consumerSecret = "W9G6fBWYCy4ywMJpG3TWrgj5LtHv0h4e5c4dmEQbc8BGdSTSaj"
+	//public static final String consumerKey = "mosTwR1X0EgiR9lB81EGhYRrP"
+	//public static final String consumerSecret = "W9G6fBWYCy4ywMJpG3TWrgj5LtHv0h4e5c4dmEQbc8BGdSTSaj"
+	// juuso's test app
+	public static final String consumerKey = "PEPCKwh7OyDZ4GXpIVZ2JyA6C"
+	public static final String consumerSecret = "RmeQ3Q6PKsnKY6zvv4OXGAoAa66eFaGPahgRpKGjUDwbF6tpiP"
 
 	static {
 		Twitter twitter = TwitterFactory.singleton
