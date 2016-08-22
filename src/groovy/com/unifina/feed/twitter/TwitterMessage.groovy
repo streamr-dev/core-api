@@ -21,6 +21,9 @@ class TwitterMessage implements ITimestamped {
 	public boolean isRetweet
 	public TwitterStreamConfig streamConfig
 
+	// those keywords that were found in this message
+	public List<String> matchedKeywords
+
 	public static TwitterMessage fromStatus(Status s, Date t=null) {
 		TwitterMessage msg = new TwitterMessage()
 		msg.timestamp = t ?: new Date()

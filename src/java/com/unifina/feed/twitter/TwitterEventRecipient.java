@@ -19,15 +19,8 @@ public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule, T
 
 	@Override
 	protected void sendOutputFromModules(FeedEvent<TwitterMessage, ? extends IEventRecipient> event) {
-		TwitterMessage msg = event.content;
-
 		for (TwitterModule m : modules) {
-			m.tweet.send(msg.text);
-			m.username.send(msg.username);
-			m.name.send(msg.name);
-			m.language.send(msg.language);
-			m.followers.send(msg.followers);
-			m.isRetweet.send(msg.isRetweet);
+			m.forward(event.content);
 		}
 	}
 

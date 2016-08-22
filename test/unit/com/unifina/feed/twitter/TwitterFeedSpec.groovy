@@ -86,18 +86,6 @@ class TwitterFeedSpec extends Specification {
 		events == []
 	}
 
-	// assumption here is that TwitterMessageSource only sends messages to subscribed streams
-	void "Feed sends all messages to a sole subscriber"() {
-		setupStreams(1)
-
-		def events = []
-		generateMessages(["1", "2"]).each {
-			events.addAll(feed.process(it))
-		}
-		expect:
-		events*.recipient == [eventRecipients[0], eventRecipients[0]]
-	}
-
 	void "Feed correctly passes messages when there's 5 subscribers"() {
 		setupStreams(5)
 

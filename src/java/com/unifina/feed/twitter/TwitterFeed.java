@@ -11,27 +11,34 @@ import java.util.List;
 
 public class TwitterFeed extends AbstractFeedProxy<TwitterModule, TwitterMessage, TwitterMessage, String, TwitterEventRecipient> {
 
+	private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(TwitterMessageSource.class);
+
 	public TwitterFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 	}
 
+	// TwitterFeed.process should ever receive messages that are meant for a single stream
+	//   "demux" happens in TwitterMessageSource.SubscribedUser.onStatus, and it passes
+	//	 one copy of TwitterMessage for each keyword-matched Stream to process
 	@Override
 	protected FeedEvent<TwitterMessage, TwitterEventRecipient>[] process(TwitterMessage msg) {
-		FeedEvent[] events;
-		if (eventRecipients.size() > 0) {
-			TwitterEventRecipient recipient = eventRecipients.get(0);
-			if (eventRecipients.size() > 1) {
-				for (int i = 1; i < eventRecipients.size(); i++) {
-					TwitterEventRecipient er = eventRecipients.get(i);
-					if (er.getStream().getId().equals(msg.streamConfig.getStreamId())) {
-						recipient = er;
-					}
-				}
+		TwitterEventRecipient recipient = null;
+		int erCount = eventRecipients.size();
+		for (int i = 0; i < erCount; i++) {
+			TwitterEventRecipient er = eventRecipients.get(i);
+			if (er.getStream().getId().equals(msg.streamConfig.getStreamId())) {
+				recipient = er;
+				break;
 			}
+		}
+
+		FeedEvent[] events;
+		if (recipient != null) {
 			FeedEvent e = new FeedEvent(msg, msg.getTimestamp(), recipient);
 			events = new FeedEvent[] {e};
 		} else {
 			events = new FeedEvent[] {};
+			log.error("Found no recipient (" + erCount + " in total) for TwitterMessage " + msg);
 		}
 		return events;
 	}

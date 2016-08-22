@@ -1,9 +1,7 @@
 package com.unifina.signalpath.twitter;
 
-import com.unifina.signalpath.AbstractStreamSourceModule;
-import com.unifina.signalpath.BooleanOutput;
-import com.unifina.signalpath.StringOutput;
-import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.feed.twitter.TwitterMessage;
+import com.unifina.signalpath.*;
 
 public class TwitterModule extends AbstractStreamSourceModule {
 	
@@ -13,7 +11,9 @@ public class TwitterModule extends AbstractStreamSourceModule {
 	public StringOutput language = new StringOutput(this, "language");
 	public TimeSeriesOutput followers = new TimeSeriesOutput(this, "followers");
 	public BooleanOutput isRetweet = new BooleanOutput(this, "retweet?");
-	
+
+	public ListOutput keywords = new ListOutput(this, "keywords");
+
 	@Override
 	public void init() {
 		super.init();
@@ -27,8 +27,21 @@ public class TwitterModule extends AbstractStreamSourceModule {
 		followers.noRepeat = false;
 		addOutput(isRetweet);
 		isRetweet.noRepeat = false;
+
+		addOutput(keywords);
 	}
-	
+
+	// called from TwitterEventRecipient
+	public void forward(TwitterMessage msg) {
+		tweet.send(msg.text);
+		username.send(msg.username);
+		name.send(msg.name);
+		language.send(msg.language);
+		followers.send(msg.followers);
+		isRetweet.send(msg.isRetweet);
+		keywords.send(msg.matchedKeywords);
+	}
+
 	@Override
 	public void sendOutput() {
 
