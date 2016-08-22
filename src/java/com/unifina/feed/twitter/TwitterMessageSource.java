@@ -6,6 +6,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractMessageSource;
 
 import groovy.transform.CompileStatic;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import twitter4j.*;
 import twitter4j.conf.Configuration;
@@ -38,30 +39,26 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 				return;
 			}
 
-			TwitterMessage msg = TwitterMessage.fromStatus(status);
+			// only one stream -> forward all incoming tweets to it
+			// if it has passed Twitter API filter, it must be legit, and
+			//   if there's only one stream, it can't go to wrong place either
+			boolean onlyOneStream = (streams.size() == 1);
 
-			if (streams.size() == 1) {
-				// only one stream -> forward all incoming tweets to it
-				msg.streamConfig = streams.get(0);
-				messageSource.forward(msg, msg.streamConfig.getStreamId(), counter++, false);
-			} else {
-				// find streams whose keywords are found within tweet, forward a copy to each of them ("demux")
-				//   see "mux" in updateTwitterStreamFor method below
-				String tweet = msg.toString();
+			// find streams whose keywords are found within tweet, forward a copy to each of them ("demux")
+			//   see "mux" in updateTwitterStreamFor method below
+			String tweet = TwitterMessage.fromStatus(status).toString();
+			for (TwitterStreamConfig conf : streams) {
 				List<String> matches = new LinkedList<>();
-				for (TwitterStreamConfig conf : streams) {
-					for (String kw : conf.getKeywords()) {
-						if (tweet.contains(kw)) {
-							matches.add(kw);
-						}
+				for (String kw : conf.getKeywords()) {
+					if (StringUtils.containsIgnoreCase(tweet, kw)) {
+						matches.add(kw);
 					}
-					if (matches.size() > 0) {
-						TwitterMessage msg2 = TwitterMessage.fromStatus(status);
-						msg2.streamConfig = conf;
-						msg2.matchedKeywords = matches;
-						messageSource.forward(msg2, conf.getStreamId(), counter++, false);
-						matches = new LinkedList<>();
-					}
+				}
+				if (matches.size() > 0 || onlyOneStream) {
+					TwitterMessage msg = TwitterMessage.fromStatus(status);
+					msg.streamConfig = conf;
+					msg.matchedKeywords = matches;
+					messageSource.forward(msg, conf.getStreamId(), counter++, false);
 				}
 			}
 		}
