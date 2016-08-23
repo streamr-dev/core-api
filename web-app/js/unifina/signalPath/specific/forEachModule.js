@@ -35,28 +35,12 @@ SignalPath.ForEachModule = function(data,canvas,prot) {
                         json.id = SignalPath.getId()
                         json.state = 'running'
                         SignalPath.load(json)
-                        /*SignalPath.loadJSON(json)*/
-
-/*                        $.ajax({
-                            type: 'POST',
-                            url: Streamr.createLink('canvas', 'editor'),
-                            data: canvasSelector.find('select').val(),
-                            contentType: 'application/json',
-                            success: function (data) {
-                                var w = window.open('about:blank', 'subcanvas');
-                                if (!w || !w.document) {
-                                    Streamr.showError("Please allow the popup to open the sub-canvas in another window.")
-                                }
-                                else {
-                                    w.document.write(data);
-                                    w.document.close();
-                                }
-                            }
-                        })*/
-
                     })
                 }
             })
+        }
+        else {
+            canvasSelector.remove()
         }
     }
 
@@ -65,6 +49,11 @@ SignalPath.ForEachModule = function(data,canvas,prot) {
         super_createDiv()
         setTimeout(refreshSubcanvases)
     }
+
+    $(SignalPath).on('started stopped', refreshSubcanvases)
+    $(prot).on('closed', function() {
+        $(SignalPath).off('started stopped', refreshSubcanvases)
+    })
 
     return pub;
 }
