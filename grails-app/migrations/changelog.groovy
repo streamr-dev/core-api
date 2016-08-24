@@ -43,4 +43,5 @@ databaseChangeLog = {
 	include file: 'core/2016-08-03-add-stream-modules.groovy'
 	include file: 'core/2016-08-22-list-modules.groovy'
 	include file: 'core/2016-08-22-get-from-list-module.groovy'
+	include file: 'core/2016-08-22-each-with-index-module.groovy'
 }
