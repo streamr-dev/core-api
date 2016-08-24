@@ -13,6 +13,7 @@ import java.util.Map;
 public class ForEachItem extends AbstractSignalPathModule {
 
 	private final SignalPathParameter signalPathParameter = new SignalPathParameter(this, "canvas");
+	private final BooleanParameter keepState = new BooleanParameter(this, "keepState", false);
 	private final Map<ListInput, Input> listInputToExportedInput = new HashMap<>();
 	private final Map<ListOutput, Output> listOutputToExportedOutput = new HashMap<>();
 	private final TimeSeriesOutput numOfItems = new TimeSeriesOutput(this, "numOfItems");
@@ -90,6 +91,10 @@ public class ForEachItem extends AbstractSignalPathModule {
 			entry.getKey().send(entry.getValue());
 		}
 		numOfItems.send(numOfItemsToProcess);
+
+		if (!keepState.getValue()) {
+			clearState();
+		}
 	}
 
 	@Override
