@@ -28,9 +28,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/canvases/$id/stop"(controller: "canvasApi", action: "stop")
 		"/api/v1/canvases/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Canvas }
 		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
-		"/api/v1/canvases/$id/request"(controller: "canvasApi", action: "request")
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
-		"/api/v1/canvases/$canvasId/modules/$moduleId/request"(controller: "canvasApi", action: "moduleRequest") // for internal use
 
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
@@ -47,5 +45,7 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/modules/$id/help"(controller: "moduleApi", action: "help")
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
+
+		"/api/v1/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
 	}
 }

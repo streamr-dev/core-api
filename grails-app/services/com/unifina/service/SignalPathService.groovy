@@ -1,10 +1,14 @@
 package com.unifina.service
 
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
+import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
@@ -42,6 +46,7 @@ class SignalPathService {
 	def kafkaService
 	def serializationService
 	def permissionService
+	CanvasService canvasService
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
@@ -273,30 +278,62 @@ class SignalPathService {
 	@NotTransactional
 	@CompileStatic
 	Map stopRemote(Canvas canvas, SecUser user) {
-		return runtimeRequest([type:"stopRequest"], canvas, null, user)
+		return runtimeRequest([type:"stopRequest"], "canvases/$canvas.id", user)
 	}
 	
 	@CompileStatic
 	boolean ping(Canvas canvas, SecUser user) {
-		runtimeRequest([type:'ping'], canvas, null, user)
+		runtimeRequest([type:'ping'], "canvases/$canvas.id", user)
 		return true
 	}
 	
 	@CompileStatic
-	Map sendRemoteRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user) {
+	private Map sendRemoteRequest(Map msg, Canvas canvas, String path, SecUser user) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
-		String url = canvas.requestUrl + (moduleId == null ? "/request" : "/modules/$moduleId/request") + "?local=true"
+		String url = canvas.requestUrl.replace("canvases/$canvas.id", path + "/request?local=true")
 		return apiService.post(url, msg, user)
 	}
 
 	private SignalPathRunner getLocalRunner(Canvas canvas) {
 		return servletContext["signalPathRunners"]?.get(canvas.runner)
 	}
-	
-	Map runtimeRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user, boolean localOnly = false) {
-		SignalPathRunner spr = getLocalRunner(canvas)
+
+	private RuntimeRequest buildRuntimeRequest(Map msg, String path, Deque<String> segmentedPath, SecUser user) {
+		if (segmentedPath.size() < 2) {
+			throw new IllegalArgumentException("Invalid runtime request: $path")
+		}
+
+		String token = segmentedPath.poll()
+
+		// Runtime requests via dashboard require read permission to the dashboard
+		if (token == "dashboards") {
+			String dashboardId = segmentedPath.poll()
+			if (!permissionService.canRead(user, Dashboard.load(dashboardId))) {
+				throw new NotPermittedException(user?.username, "Dashboard", dashboardId)
+			}
+
+			token = segmentedPath.poll()
+		}
+
+		if (token != "canvases") {
+			throw new IllegalArgumentException("Unexpected token! Expecting 'canvases', was: $token, path: $path")
+		}
+
+		// All runtime requests require at least read permission
+		String canvasId = segmentedPath.poll()
+		Canvas canvas = canvasService.authorizedGetById(canvasId, user, Permission.Operation.READ)
+
+		RuntimeRequest request = new RuntimeRequest(msg, user, canvas)
+		return request
+	}
+
+	Map runtimeRequest(Map msg, String path, SecUser user, boolean localOnly = false) {
+		Queue<String> segmentedPath = new LinkedList<>(Arrays.asList(path.split('/')))
+		RuntimeRequest req = buildRuntimeRequest(msg, path, segmentedPath, user)
+
+		SignalPathRunner spr = getLocalRunner(req.getCanvas())
 		
-		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $moduleId, localOnly: $localOnly")
+		log.info("runtimeRequest: $msg, path: $path, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
@@ -306,58 +343,43 @@ class SignalPathService {
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
-				return sendRemoteRequest(msg, canvas, moduleId, user)
+				return sendRemoteRequest(msg, req.getCanvas(), path, user)
 			} catch (Exception e) {
-				log.error("Unable to contact remote Canvas id $canvas.id at $canvas.requestUrl")
+				log.error("Unable to contact remote Canvas id ${req.getCanvas().id} at ${req.getCanvas().requestUrl}")
 				throw new CanvasUnreachableException("Unable to communicate with remote server!")
 			}
 		}
 		// If runner found
 		else {
 			SignalPath sp = spr.signalPaths.find {
-				it.canvas.id == canvas.id
+				it.canvas.id == req.getCanvas().id
 			}
 			
 			if (!sp) {
-				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $canvas, module: $moduleId")
+				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. Canvas: $req.canvas, path: $path")
 				throw new CanvasUnreachableException("Canvas not found in runner. This should not happen.")
 			}
-			else {				
-				RuntimeRequest request = new RuntimeRequest(msg, new Date())
-				request.setAuthenticated(user != null)
-				
+			else {
 				/**
-				 * Requests for the runner thread
+				 * Special handling for runner thread stop request
 				 */
-				if (request.type=="stopRequest") {
-					if (!request.isAuthenticated()) {
-						throw new AccessControlException("stopRequest requires authentication!");
+				if (req.type=="stopRequest") {
+					if (!permissionService.canWrite(user, req.getCanvas())) {
+						throw new AccessControlException("stopRequest requires write permission!");
 					}
 
-					if (stopLocal(canvas)) {
-						return request
-					} else {
+					if (stopLocal(req.getCanvas())) {
+						return req
+					}
+					else {
 						throw new CanvasUnreachableException("Canvas could not be stopped.")
 					}
-				} else if (request.type=="ping") {
-					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
-						throw new AccessControlException("ping requires authentication!");
-					
-					return request
 				}
 				/**
-				 * Requests for SignalPaths and modules
+				 * Requests for SignalPaths and modules within them
 				 */
 				else {
-					// Handle module-specific message
-					Future<RuntimeResponse> future
-					if (moduleId!=null) {
-						future = sp.getModule(moduleId).onRequest(request)
-					}
-					// Handle signalpath-specific message
-					else {
-						future = sp.onRequest(request)
-					}
+					Future<RuntimeResponse> future = sp.onRequest(req, segmentedPath)
 					
 					try {
 						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)

@@ -161,7 +161,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 
 	function sendInitRequest() {
 		if (SignalPath.isRunning()) {
-			SignalPath.sendRequest(prot.hash, {type: 'initRequest'}, function (response, err) {
+			SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type: 'initRequest'}, function (response, err) {
 				if (err)
 					console.error("Failed initRequest for ChartModule: %o", err)
 				else

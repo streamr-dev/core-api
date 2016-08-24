@@ -586,18 +586,20 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
-	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
+	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, Queue<String> path) {
 		// Add event to message queue, don't do it right away 
 		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
 
+		final AbstractSignalPathModule recipient = resolveRuntimeRequestRecipient(request, path);
+
 		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					handleRequest(request, response);
+					recipient.handleRequest(request, response);
 				} catch (AccessControlException e) {
 					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
 					log.error(error);
@@ -610,6 +612,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		getGlobals().getDataSource().getEventQueue().enqueue(fe);
 		return future;
+	}
+
+	/**
+	 * Can be overridden to dig RuntimeRequest recipients from within this module. The default implementation returns "this".
+     */
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, Queue<String> path) {
+		return this;
 	}
 
 	@Override
@@ -636,8 +645,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param request
 	 */
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
-		// By default all modules support runtime parameter changes
-		if (request.getType().equals("paramChange")) {
+		// By default all modules support runtime parameter changes, ping requests and json requests
+		if (request.getType().equals("ping")) {
+			response.setSuccess(true);
+		}
+		else if (request.getType().equals("paramChange")) {
 
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {

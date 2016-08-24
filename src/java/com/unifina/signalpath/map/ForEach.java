@@ -8,6 +8,8 @@ import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 import grails.util.Holders;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class ForEach extends AbstractSignalPathModule {
@@ -165,6 +167,31 @@ public class ForEach extends AbstractSignalPathModule {
 			subSignalPath.connectTo(output.getName(), cacheUpdaterInput);
 		}
 		return outputCache;
+	}
+
+	@Override
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, Queue<String> path) {
+		if (path.isEmpty()) {
+			return super.resolveRuntimeRequestRecipient(request, path);
+		}
+		else if (!path.poll().equals("keys")) {
+			throw new IllegalArgumentException("Invalid request path: "+path);
+		}
+		else {
+			String key = path.poll();
+			// URLDecode twice, see forEachModule.js
+			try {
+				key = URLDecoder.decode(URLDecoder.decode(key, "UTF-8"), "UTF-8");
+			} catch (UnsupportedEncodingException e) {}
+
+			SubSignalPath ssp = keyToSignalPath.get(key);
+			if (ssp == null) {
+				throw new IllegalArgumentException("Subcanvas not found: "+key);
+			}
+			else {
+				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
+			}
+		}
 	}
 
 	/**

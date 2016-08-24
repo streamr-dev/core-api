@@ -133,6 +133,8 @@ class CanvasService {
 	 *
 	 * - Permission to the canvas that contains the module
 	 * - Permission to a dashboard that contains the module from that canvas
+	 *
+	 * Deprecated: runtime permission checking now much more comprehensive in SignalPathService
 	 */
 	@CompileStatic
 	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {

@@ -113,44 +113,51 @@ var SignalPath = (function () {
 			connection.unsubscribe()
 		}
 	};
-	// hash argument can be undefined if the request is aimed at the canvas/runner
-	pub.sendRequest = function(hash, msg, callback) {
-		if (runningJson) {
-			var url = options.apiUrl + '/canvases/'+runningJson.id+(hash==null ? '/request' : '/modules/'+hash+'/request')
-			$.ajax({
-				type: 'POST',
-				url: url,
-				data: JSON.stringify(msg),
-				dataType: 'json',
-				contentType: 'application/json; charset=utf-8',
-				success: function(data) {
-					if (callback)
-						callback(data)
-				},
-				error: function(xhr) {
-					var errorMsg
-					var errorObject
-					try {
-						var response = JSON.parse(xhr.responseText)
-						errorObject = response
-						errorMsg = response.message
-					} catch (err) {
-						errorObject = {message: xhr.responseText}
-						errorMsg = xhr.responseText
-					}
-
-					if (callback) {
-						callback(errorObject, errorMsg)
-					}
-					else {
-						handleError(errorMsg)
-					}
+	pub.runtimeRequest = function(url, msg, callback) {
+		$.ajax({
+			type: 'POST',
+			url: url,
+			data: JSON.stringify(msg),
+			dataType: 'json',
+			contentType: 'application/json; charset=utf-8',
+			success: function(data) {
+				if (callback)
+					callback(data)
+			},
+			error: function(xhr) {
+				var errorMsg
+				var errorObject
+				try {
+					var response = JSON.parse(xhr.responseText)
+					errorObject = response
+					errorMsg = response.message
+				} catch (err) {
+					errorObject = {message: xhr.responseText}
+					errorMsg = xhr.responseText
 				}
-			});
-			return true;
+
+				if (callback) {
+					callback(errorObject, errorMsg)
+				}
+				else {
+					handleError(errorMsg)
+				}
+			}
+		})
+	}
+	pub.getURL = function() {
+		if (runningJson && (runningJson.id || runningJson.baseURL)) {
+			return runningJson.baseURL || options.apiUrl + '/canvases/'+(runningJson.id)
 		}
-		
-		return false;
+		else if (savedJson && (savedJson.id || savedJson.baseURL)) {
+			return savedJson.baseURL || options.apiUrl + '/canvases/'+(savedJson.id)
+		}
+		else {
+			return undefined
+		}
+	}
+	pub.getRuntimeRequestURL = function() {
+		return pub.getURL() ? pub.getURL() + '/request' : undefined
 	}
 	pub.getParentElement = function() {
 		return parentElement;

@@ -1,5 +1,7 @@
 package com.unifina.signalpath;
 
+import com.unifina.domain.security.SecUser;
+import com.unifina.domain.signalpath.Canvas;
 import com.unifina.feed.ITimestamped;
 
 import java.util.Date;
@@ -10,12 +12,16 @@ import java.util.concurrent.Future;
 public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITimestamped {
 
 	private final Date timestamp;
+
+	private final Canvas canvas;
+	private final SecUser user;
 	Future<RuntimeResponse> future = null;
-	boolean authenticated = false;
 	
-	public RuntimeRequest(Map<String, Object> msg, Date timestamp) {
+	public RuntimeRequest(Map<String, Object> msg, SecUser user, Canvas canvas) {
 		super();
-		this.timestamp = timestamp;
+		this.timestamp = new Date();
+		this.user = user;
+		this.canvas = canvas;
 
 		if (msg.get("type")==null)
 			throw new IllegalArgumentException("RuntimeRequests must contain the key 'type', with a String value identifying the type of request.");
@@ -38,15 +44,19 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 	}
 
 	public boolean isAuthenticated() {
-		return authenticated;
-	}
-
-	public void setAuthenticated(boolean authenticated) {
-		this.authenticated = authenticated;
+		return user != null;
 	}
 
 	@Override
 	public Date getTimestamp() {
 		return timestamp;
+	}
+
+	public Canvas getCanvas() {
+		return canvas;
+	}
+
+	public SecUser getUser() {
+		return user;
 	}
 }

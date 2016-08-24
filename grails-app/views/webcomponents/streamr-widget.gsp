@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="canvas module dashboard resendAll resendLast">
+<polymer-element name="streamr-widget" attributes="uri dashboard resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
@@ -100,7 +100,7 @@
 					// Get JSON from the server to initialize options
 					$.ajax({
 						type: 'GET',
-						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module + "?" + $.param(_this.getAccessContext()),
+						url: _this.uri + "?" + $.param(_this.getAccessContext()),
 						dataType: 'json',
 						success: function(response) {
 							_this.cachedModuleJson = response

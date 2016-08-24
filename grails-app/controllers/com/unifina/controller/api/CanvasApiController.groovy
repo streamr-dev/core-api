@@ -101,19 +101,6 @@ class CanvasApiController {
 	}
 
 	/**
-	 * Sends a runtime request to a running canvas
-	 */
-	@StreamrApi(requiresAuthentication = false)
-	def request(String id, Boolean local) {
-		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
-		def msg = request.JSON
-		Map response = signalPathService.runtimeRequest(msg, canvas, null, request.apiUser, local ? true : false)
-
-		log.info("request: responding with $response")
-		render response as JSON
-	}
-
-	/**
 	 * Gets the json of a single module on a canvas
 	 */
 	@StreamrApi(requiresAuthentication = false)
@@ -121,7 +108,7 @@ class CanvasApiController {
 		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
 		if (runtime) {
 			Canvas canvas = Canvas.get(canvasId)
-			render signalPathService.runtimeRequest([type: 'json'], canvas, moduleId, request.apiUser).json as JSON
+			render signalPathService.runtimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser).json as JSON
 		}
 		else {
 			render moduleMap as JSON
@@ -129,16 +116,13 @@ class CanvasApiController {
 	}
 
 	/**
-	 * Sends a runtime request to a module on a canvas
+	 * Sends a runtime request to a running canvas or module
      */
 	@StreamrApi(requiresAuthentication = false)
-	def moduleRequest(String canvasId, Integer moduleId, Long dashboard, Boolean local) {
-		// Always asks for read permission only. Problem?
-		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
-		Canvas canvas = Canvas.get(canvasId)
+	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 
-		Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, local ? true : false)
+		Map response = signalPathService.runtimeRequest(msg, path, request.apiUser, local ? true : false)
 		log.info("request: responding with $response")
 		render response as JSON
 	}

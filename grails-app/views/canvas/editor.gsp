@@ -90,7 +90,7 @@ $(document).ready(function() {
 			$("a[href=#tab-realtime]").tab('show')
 
 			// Try to ping a running SignalPath on load, and show error if it can't be reached
-			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
+			SignalPath.runtimeRequest(SignalPath.getRuntimeRequestURL(), {type:"ping"}, function(response, err) {
 				if (err)
 					Streamr.showError('${message(code:'canvas.ping.error')}')
 			})

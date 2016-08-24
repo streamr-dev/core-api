@@ -1,5 +1,6 @@
 package com.unifina.signalpath;
 
+import com.unifina.api.NotFoundException;
 import com.unifina.data.FeedEvent;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
@@ -9,6 +10,7 @@ import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
+import org.codehaus.groovy.runtime.dgmimpl.arrays.IntegerArrayGetAtMetaMethod;
 
 import java.io.Serializable;
 import java.util.*;
@@ -414,6 +416,26 @@ public class SignalPath extends ModuleWithUI {
 
 		for (AbstractSignalPathModule m : mods) {
 			m.setGlobals(globals);
+		}
+	}
+
+	@Override
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, Queue<String> path) {
+		if (path.isEmpty()) {
+			return super.resolveRuntimeRequestRecipient(request, path);
+		}
+		else if (!path.poll().equals("modules")) {
+			throw new IllegalArgumentException("Invalid request path: "+path);
+		}
+		else {
+			Integer moduleId = Integer.parseInt(path.poll());
+			AbstractSignalPathModule module = getModule(moduleId);
+			if (module == null) {
+				throw new IllegalArgumentException("Module not found: "+moduleId);
+			}
+			else {
+				return module.resolveRuntimeRequestRecipient(request, path);
+			}
 		}
 	}
 }

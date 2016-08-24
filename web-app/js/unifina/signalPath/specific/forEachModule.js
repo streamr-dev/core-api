@@ -24,16 +24,21 @@ SignalPath.ForEachModule = function(data,canvas,prot) {
                     keys.forEach(function(key) {
                         var option = $("<option/>", {
                             text: key,
-                            value: JSON.stringify(runtimeJson.canvasesByKey[key])
+                            value: key
                         })
                         select.append(option)
                     })
 
                     prot.body.append(canvasSelector)
                     canvasSelector.find('button').click(function() {
-                        var json = JSON.parse(canvasSelector.find('select').val())
-                        json.id = SignalPath.getId()
+                        var key = canvasSelector.find('select').val()
+                        var subJson = runtimeJson.canvasesByKey[key]
+                        var parentJson = SignalPath.toJSON()
+                        var json = $.extend({}, parentJson, subJson)
+                        delete json.id
                         json.state = 'running'
+                        // We need to double-encode the key just in case it contains any slashes. Encoding it once won't work because many servers don't allow %2F in URLs
+                        json.baseURL = pub.getURL() + '/keys/' + encodeURIComponent(encodeURIComponent(key))
                         SignalPath.load(json)
                     })
                 }

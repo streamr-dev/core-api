@@ -184,6 +184,7 @@ var DashboardItemView = Backbone.View.extend({
 		if (webcomponent !== undefined) {
 			var templateName = "#" + webcomponent + "-template"
 			var template = _.template($(templateName).html(), {variable: 'item'})
+
 			this.$el.find(".widget-content").append(template(this.model.toJSON()))
 		} else {
 			throw "No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!"

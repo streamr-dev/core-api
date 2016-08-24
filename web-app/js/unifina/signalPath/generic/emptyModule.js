@@ -296,7 +296,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var embedCode = prot.getEmbedCode()
 		if (extended && embedCode) {
 			result += "<div class='note note-info'>"
-			result += "<p>To use this visualization on an external page, use the following tag:</p>";
+			result += "<p>To embed this visualization, enable public read access in the sharing settings, and paste the following tag to your website:</p>";
 			result += "<code>"+embedCode+"</code>"
 			result += "</div>"
 		}
@@ -306,8 +306,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.renderHelp = renderHelp;
 	
 	prot.getEmbedCode = function() {
-		if (SignalPath.isSaved() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
-			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" canvas='"+SignalPath.getId()+"' module='"+prot.getHash()+"' /&gt;"
+		if (pub.getURL() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
+			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" url='"+pub.getURL()+"' /&gt;"
 		}
 		else return undefined;
 	}
@@ -556,7 +556,15 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.prepareCloneData = prepareCloneData;
 
 	pub.handleError = function(error) {}
-	
+
+	pub.getURL = function() {
+		return SignalPath.getURL() ? SignalPath.getURL() + '/modules/' + pub.getHash() : undefined
+	}
+
+	pub.getRuntimeRequestURL = function() {
+		return pub.getURL() ? pub.getURL() + '/request' : undefined
+	}
+
 	// Everything added to the public interface can be accessed from the
 	// protected interface too
 	$.extend(prot,pub);
