@@ -49,12 +49,12 @@ public class ForEachItem extends AbstractSignalPathModule {
 
 		// Make list versions of exported endpoints
 		for (Input exportedInput : exportedInputs) {
-			ListInput input = new ListInput(this, exportedInput.getName());
+			ListInput input = new ListInput(this, exportedInput.getEffectiveName());
 			listInputToExportedInput.put(input, exportedInput);
 			addInput(input);
 		}
 		for (Output exportedOutput: exportedOutputs) {
-			ListOutput output = new ListOutput(this, exportedOutput.getName());
+			ListOutput output = new ListOutput(this, exportedOutput.getEffectiveName());
 			listOutputToExportedOutput.put(output, exportedOutput);
 			addOutput(output);
 		}
