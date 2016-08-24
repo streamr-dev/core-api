@@ -38,7 +38,7 @@ public class TwitterModule extends AbstractStreamSourceModule {
 		name.send(msg.name);
 		language.send(msg.language);
 		followers.send(msg.followers);
-		isRetweet.send(msg.isRetweet);
+		isRetweet.send(msg.quotedText != null);
 		keywords.send(msg.matchedKeywords);
 	}
 
