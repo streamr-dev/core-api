@@ -8,6 +8,7 @@ import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.dashboard.Dashboard
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -288,30 +289,56 @@ class SignalPathService {
 	}
 	
 	@CompileStatic
-	private Map sendRemoteRequest(Map msg, Canvas canvas, String path, SecUser user) {
+	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
-		String url = canvas.requestUrl.replace("canvases/$canvas.id", path + "/request?local=true")
-		return apiService.post(url, msg, user)
+		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getPath() + "/request?local=true")
+		return apiService.post(url, req, req.getUser())
 	}
 
 	private SignalPathRunner getLocalRunner(Canvas canvas) {
 		return servletContext["signalPathRunners"]?.get(canvas.runner)
 	}
 
-	private RuntimeRequest buildRuntimeRequest(Map msg, String path, Deque<String> segmentedPath, SecUser user) {
+	public RuntimeRequest buildRuntimeRequest(Map msg, String path, SecUser user) {
+		LinkedList<String> segmentedPath = RuntimeRequest.getSegmentedPath(path)
+
 		if (segmentedPath.size() < 2) {
 			throw new IllegalArgumentException("Invalid runtime request: $path")
 		}
 
 		String token = segmentedPath.poll()
+		if (token != "canvases") {
+			throw new IllegalArgumentException("Unexpected token! Expecting 'canvases', was: $token, path: $path")
+		}
+
+		// All runtime requests require at least read permission
+		String canvasId = segmentedPath.poll()
+		Canvas canvas = canvasService.authorizedGetById(canvasId, user, Permission.Operation.READ)
+		Set<Permission.Operation> checkedOperations = new HashSet<>()
+		checkedOperations.add(Permission.Operation.READ)
+
+		RuntimeRequest request = new RuntimeRequest(msg, user, path, canvas, checkedOperations)
+		return request
+	}
+
+	// TODO: I was about to move the dashboard-specific runtime request stuff to dashboardService and dashboardApiController
+
+	private RuntimeRequest buildRuntimeRequest(Map msg, String path, LinkedList<String> segmentedPath, SecUser user) {
+		if (segmentedPath.size() < 2) {
+			throw new IllegalArgumentException("Invalid runtime request: $path")
+		}
+
+		String token = segmentedPath.poll()
+		Dashboard accessGrantingDashboard
+		boolean accessCheckedViaDashboard = false
 
 		// Runtime requests via dashboard require read permission to the dashboard
 		if (token == "dashboards") {
 			String dashboardId = segmentedPath.poll()
-			if (!permissionService.canRead(user, Dashboard.load(dashboardId))) {
+			accessGrantingDashboard = Dashboard.get(dashboardId)
+			if (!permissionService.canRead(user, accessGrantingDashboard)) {
 				throw new NotPermittedException(user?.username, "Dashboard", dashboardId)
 			}
-
 			token = segmentedPath.poll()
 		}
 
@@ -321,29 +348,52 @@ class SignalPathService {
 
 		// All runtime requests require at least read permission
 		String canvasId = segmentedPath.poll()
-		Canvas canvas = canvasService.authorizedGetById(canvasId, user, Permission.Operation.READ)
+		Canvas canvas = Canvas.get(canvasId)
 
-		RuntimeRequest request = new RuntimeRequest(msg, user, canvas)
+		if (accessGrantingDashboard) {
+			// Peek the module id
+			if (segmentedPath.peek() != "modules") {
+				throw new IllegalArgumentException("Unexpected token! Expecting 'modules', was: ${segmentedPath.peek()}, path: $path")
+			}
+			Integer moduleId = Integer.parseInt(segmentedPath.get(1))
+
+			// Does this Dashboard have an item that corresponds to the given canvas and module?
+			// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
+			// Otherwise, the user must have access to the Canvas itself.
+			DashboardItem item = DashboardItem.withCriteria(uniqueResult: true) {
+				eq("dashboard", dashboard)
+				eq("canvas", canvas)
+				eq("module", moduleId)
+			}
+
+			if (item) {
+				accessCheckedViaDashboard = true
+			}
+		}
+
+		// All runtime reqs need at least read permission
+		if (!accessCheckedViaDashboard && !permissionService.canRead(user, canvas)) {
+			throw new NotPermittedException(user?.username, "Canvas", canvas.id)
+		}
+
+		RuntimeRequest request = new RuntimeRequest(msg, user, path, canvas)
 		return request
 	}
 
-	Map runtimeRequest(Map msg, String path, SecUser user, boolean localOnly = false) {
-		Queue<String> segmentedPath = new LinkedList<>(Arrays.asList(path.split('/')))
-		RuntimeRequest req = buildRuntimeRequest(msg, path, segmentedPath, user)
-
+	Map runtimeRequest(RuntimeRequest req, boolean localOnly = false) {
 		SignalPathRunner spr = getLocalRunner(req.getCanvas())
 		
-		log.info("runtimeRequest: $msg, path: $path, localOnly: $localOnly")
+		log.info("runtimeRequest: $req, path: ${req.getPath()}, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
-			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
+			log.error("runtimeRequest: $req, runner not found with localOnly=true, responding with error")
 			throw new CanvasUnreachableException("Canvas does not appear to be running!")
 		}
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
-				return sendRemoteRequest(msg, req.getCanvas(), path, user)
+				return sendRemoteRequest(req)
 			} catch (Exception e) {
 				log.error("Unable to contact remote Canvas id ${req.getCanvas().id} at ${req.getCanvas().requestUrl}")
 				throw new CanvasUnreachableException("Unable to communicate with remote server!")

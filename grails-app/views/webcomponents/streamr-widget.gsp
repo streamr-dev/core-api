@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="uri dashboard resendAll resendLast">
+<polymer-element name="streamr-widget" attributes="url dashboard resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
@@ -40,9 +40,6 @@
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
 					options = options || _this.getResendOptions(moduleJson)
-
-					// Pass on the access context to the subscribe request
-					options = $.extend(options, _this.getAccessContext())
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
@@ -100,7 +97,7 @@
 					// Get JSON from the server to initialize options
 					$.ajax({
 						type: 'GET',
-						url: _this.uri + "?" + $.param(_this.getAccessContext()),
+						url: _this.url,
 						dataType: 'json',
 						success: function(response) {
 							_this.cachedModuleJson = response
@@ -123,7 +120,7 @@
 				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request' + "?" + $.param(_this.getAccessContext()),
+					url: _this.url + '/request',
 					data: JSON.stringify(msg),
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
@@ -137,13 +134,6 @@
 					}
 
 				});
-			},
-			getAccessContext: function() {
-				// extend cleans off keys with undefined values
-				return $.extend({}, {
-					canvas: this.canvas,
-					dashboard: this.dashboard ? this.dashboard : undefined
-				})
 			},
 
 			<g:if test="${params.lightDOM}">

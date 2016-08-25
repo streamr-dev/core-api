@@ -16,6 +16,7 @@
 		<r:script>
 			$(document).ready(function() {
 				var dashboard
+				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
 
 				function successHandler(dbJson) {
 					window.title = dbJson.name
@@ -23,13 +24,12 @@
 					dashboard = new Dashboard(dbJson)
 					var dashboardView = new DashboardView({
 						model: dashboard,
-						el: $("#dashboard-view")
+						el: $("#dashboard-view"),
+						baseUrl: baseUrl
 					})
 					dashboardView.on('error', function(error, itemTitle) {
 						Streamr.showError(itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error)
 					})
-
-					dashboard.urlRoot = "${createLink(uri:'/api/v1/dashboards/', absolute:true)}"
 
 					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false, sort:'dateCreated', order:'desc'}, function(canvases) {
 						var sidebar = new SidebarView({
@@ -38,7 +38,7 @@
 							canvases: canvases,
 							el: $("#sidebar-view"),
 							menuToggle: $("#main-menu-toggle"),
-							baseUrl: '${ createLink(uri: "/", absolute:true) }'
+							baseUrl: baseUrl
 						})
 					})
 					$(window).on('beforeunload', function(){
