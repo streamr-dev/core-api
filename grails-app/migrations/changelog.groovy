@@ -38,5 +38,9 @@ databaseChangeLog = {
 	include file: 'core/2016-06-14-collect-from-maps-module.groovy'
 	include file: 'core/2016-04-06-tours.groovy'
 	include file: 'core/2016-06-15-new-event-table-module.groovy'
+	include file: 'core/2016-07-06-twitter-feed.groovy'
 	include file: 'core/2016-08-08-drop-unique-constraint-on-signupinvite.groovy'
+	include file: 'core/2016-08-03-add-stream-modules.groovy'
+	include file: 'core/2016-08-22-list-modules.groovy'
+	include file: 'core/2016-08-22-get-from-list-module.groovy'
 }

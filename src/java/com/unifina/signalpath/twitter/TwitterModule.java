@@ -1,6 +1,7 @@
 package com.unifina.signalpath.twitter;
 
 import com.unifina.signalpath.AbstractStreamSourceModule;
+import com.unifina.signalpath.BooleanOutput;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.TimeSeriesOutput;
 
@@ -11,8 +12,7 @@ public class TwitterModule extends AbstractStreamSourceModule {
 	public StringOutput name = new StringOutput(this, "name");
 	public StringOutput language = new StringOutput(this, "language");
 	public TimeSeriesOutput followers = new TimeSeriesOutput(this, "followers");
-	public TimeSeriesOutput isRetweet = new TimeSeriesOutput(this, "retweet?");
-	public TimeSeriesOutput isReply = new TimeSeriesOutput(this, "reply?");
+	public BooleanOutput isRetweet = new BooleanOutput(this, "retweet?");
 	
 	@Override
 	public void init() {
@@ -27,8 +27,6 @@ public class TwitterModule extends AbstractStreamSourceModule {
 		followers.noRepeat = false;
 		addOutput(isRetweet);
 		isRetweet.noRepeat = false;
-		addOutput(isReply);
-		isReply.noRepeat = false;
 	}
 	
 	@Override

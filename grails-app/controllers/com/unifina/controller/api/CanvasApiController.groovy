@@ -119,9 +119,9 @@ class CanvasApiController {
      */
 	@StreamrApi(requiresAuthentication = false)
 	def moduleRequest(String canvasId, Integer moduleId, Long dashboard, Boolean local) {
-		// Always asks for read permission only. Problem?
+		// Always asks for read permission only. TODO: Problem?
 		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
-		Canvas canvas = Canvas.get(canvasId)
+		Canvas canvas = Canvas.get(canvasId)	// TODO: direct .get should be avoided, instead get an authorizedCanvas
 		def msg = request.JSON
 
 		Map response = signalPathService.runtimeRequest(msg, canvas, moduleId, request.apiUser, local ? true : false)
