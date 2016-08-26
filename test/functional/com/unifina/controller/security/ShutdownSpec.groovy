@@ -38,11 +38,11 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 
 		to CanvasPage
 		String canvasName = "ShutdownSpec"+System.currentTimeMillis()
-		addModule("Button")
+		addAndWaitModule("Button")
 		moveModuleBy("Button", 0, 300)
-		addModule("Count")
+		addAndWaitModule("Count")
 		moveModuleBy("Count", 250, 0)
-		addModule("Label")
+		addAndWaitModule("Label")
 		moveModuleBy("Label", 500, 0)
 		connectEndpoints(findOutput("Button", "out"), findInput("Count", "in"))
 		connectEndpoints(findOutput("Count", "count"), findInput("Label", "label"))
@@ -57,7 +57,11 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 
 		then: "Label shows 1"
 		waitFor {
-			Double.parseDouble(findModuleOnCanvas("Label").find(".modulelabel").text()) == 1D
+			try {
+				Double.parseDouble(findModuleOnCanvas("Label").find(".modulelabel").text()) == 1D
+			} catch (NumberFormatException e) {
+				false
+			}
 		}
 
 		when: "Shutdown command given"
@@ -78,7 +82,7 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 		startTaskWorker()
 
 		then: "Canvas must end up in running state"
-		waitFor {
+		waitFor(30, 3) {
 			getCanvasState(canvasId) == Canvas.State.RUNNING
 		}
 	}
