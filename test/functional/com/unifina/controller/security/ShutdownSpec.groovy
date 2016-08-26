@@ -70,7 +70,7 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 			taskWorkerTable.find("tbody tr td", text: "False").size() > 0
 		}
 		and: "The canvas must be in stopped state"
-		waitFor {
+		waitFor(30, 3) {
 			getCanvasState(canvasId) == Canvas.State.STOPPED
 		}
 
