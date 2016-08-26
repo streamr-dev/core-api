@@ -15,26 +15,24 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 	private final Canvas canvas;
 	private final String path;
 	private final SecUser user;
-	Future<RuntimeResponse> future = null;
-	Set<Permission.Operation> checkedOperations = new HashSet<>();
-	
-	public RuntimeRequest(Map<String, Object> msg, SecUser user, String path, Canvas canvas) {
+	private Future<RuntimeResponse> future = null;
+	private Set<Permission.Operation> checkedOperations = new HashSet<>();
+	private String originalPath = null;
+
+	public RuntimeRequest(Map<String, Object> msg, SecUser user, Canvas canvas, String path, String originalPath, Set<Permission.Operation> checkedOperations) {
 		super();
 		this.timestamp = new Date();
 		this.user = user;
 		this.canvas = canvas;
 		this.path = path;
+		this.originalPath = originalPath;
 
 		if (msg.get("type")==null)
 			throw new IllegalArgumentException("RuntimeRequests must contain the key 'type', with a String value identifying the type of request.");
-		
+
 		for (String key : msg.keySet()) {
 			this.put(key, msg.get(key));
 		}
-	}
-
-	public RuntimeRequest(Map<String, Object> msg, SecUser user, Canvas canvas, String path, Set<Permission.Operation> checkedOperations) {
-		this(msg, user, path, canvas);
 		this.checkedOperations.addAll(checkedOperations);
 	}
 	
@@ -71,6 +69,10 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 		return path;
 	}
 
+	public LinkedList<String> getSegmentedPath() {
+		return getSegmentedPath(getPath());
+	}
+
 	public static LinkedList<String> getSegmentedPath(String path) {
 		return new LinkedList<>(Arrays.asList(path.split("/")));
 	}
@@ -78,4 +80,9 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 	public Set<Permission.Operation> getCheckedOperations() {
 		return checkedOperations;
 	}
+
+	public String getOriginalPath() {
+		return originalPath;
+	}
+
 }

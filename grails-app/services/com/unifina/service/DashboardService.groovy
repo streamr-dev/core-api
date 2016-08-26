@@ -10,11 +10,14 @@ import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.signalpath.RuntimeRequest
 import groovy.transform.CompileStatic
 
 class DashboardService {
 
 	PermissionService permissionService
+	SignalPathService signalPathService
 
 	List<Dashboard> findAllDashboards(SecUser user) {
 		return permissionService.getAll(Dashboard, user) { order "dateCreated", "desc" }
@@ -151,7 +154,6 @@ class DashboardService {
 		return item
 	}
 
-
 	@CompileStatic
 	DashboardItem authorizedGetDashboardItem(Long dashboardId, Long itemId, SecUser user, Operation operation) {
 		def dashboard = authorizedGetById(dashboardId, user, operation)
@@ -172,5 +174,56 @@ class DashboardService {
 			throw new NotPermittedException(user.username, Dashboard.simpleName, id.toString())
 		}
 		return dashboard
+	}
+
+	@CompileStatic
+	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+		LinkedList<String> segmentedPath = RuntimeRequest.getSegmentedPath(path)
+
+		if (segmentedPath.size() < 2) {
+			throw new IllegalArgumentException("Invalid runtime request: $path")
+		}
+
+		String token = segmentedPath.poll()
+		if (token != "dashboards") {
+			throw new IllegalArgumentException("Unexpected token! Expecting 'dashboards', was: $token, path: $path")
+		}
+
+		Long dashboardId = Long.parseLong(segmentedPath.poll())
+		Dashboard dashboard = authorizedGetById(dashboardId, user, Operation.READ)
+		if (!permissionService.canRead(user, dashboard)) {
+			throw new NotPermittedException(user?.username, "Dashboard", dashboardId.toString())
+		}
+
+		token = segmentedPath.poll()
+		if (token != "canvases") {
+			throw new IllegalArgumentException("Unexpected token! Expecting 'canvases', was: $token, path: $path")
+		}
+		Canvas canvas = Canvas.get(segmentedPath.poll())
+
+		token = segmentedPath.poll()
+		if (token != "modules") {
+			throw new IllegalArgumentException("Unexpected token! Expecting 'modules', was: $token, path: $path")
+		}
+		Integer moduleId = Integer.parseInt(segmentedPath.poll())
+
+		// Does this Dashboard have an item that corresponds to the given canvas and module?
+		// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
+		// Otherwise, the user must have access to the Canvas itself.
+		DashboardItem item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
+			eq("dashboard", dashboard)
+			eq("canvas", canvas)
+			eq("module", moduleId)
+		}
+
+		if (item) {
+			Set<Operation> checkedOperations = new HashSet<>()
+			checkedOperations.add(Operation.READ)
+			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboardId/", ""), path, checkedOperations)
+			return request
+		}
+		else {
+			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboardId/", ""), path, user)
+		}
 	}
 }

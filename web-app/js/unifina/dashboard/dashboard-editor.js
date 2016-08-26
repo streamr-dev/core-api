@@ -190,6 +190,7 @@ var DashboardItemView = Backbone.View.extend({
 			var template = _.template($(templateName).html())
 			// Can't use the dashboard item id in the url because it might be unsaved
 			var url = this.baseUrl
+				+ 'api/v1/'
 				+ 'dashboards/' + this.model.get('dashboard')
 				+ '/canvases/' + this.model.get('canvas')
 				+ '/modules/' + this.model.get('module')

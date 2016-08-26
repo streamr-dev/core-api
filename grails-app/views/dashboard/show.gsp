@@ -22,6 +22,8 @@
 					window.title = dbJson.name
 					$("#dashboardBreadcrumbName").text(dbJson.name)
 					dashboard = new Dashboard(dbJson)
+					// urlRoot needs to be set for saving to work
+					dashboard.urlRoot = baseUrl + "api/v1/dashboards/"
 					var dashboardView = new DashboardView({
 						model: dashboard,
 						el: $("#dashboard-view"),

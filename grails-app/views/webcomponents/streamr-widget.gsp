@@ -53,7 +53,10 @@
 			unsubscribe: function() {
 				var _this = this
 				this.$.client.getClient(function(client) {
-					client.unsubscribe(_this.sub)
+					if (_this.sub) {
+						client.unsubscribe(_this.sub)
+						_this.sub = undefined
+					}
 				})
 			},
 			getResendOptions: function(json) {
@@ -96,13 +99,15 @@
 				else {
 					// Get JSON from the server to initialize options
 					$.ajax({
-						type: 'GET',
-						url: _this.url,
+						type: 'POST',
+						url: _this.url + '/request',
 						dataType: 'json',
+						contentType: 'application/json; charset=utf-8',
+						data: JSON.stringify({type: 'json'}),
 						success: function(response) {
-							_this.cachedModuleJson = response
+							_this.cachedModuleJson = response.json
 							if (callback)
-								callback(response)
+								callback(response.json)
 						},
 						error: function (xhr) {
 							console.log("Error while communicating with widget: " + xhr.responseText)

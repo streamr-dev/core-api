@@ -46,6 +46,7 @@ class UnifinaCorePluginUrlMappings {
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
 
-		"/api/v1/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
+		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
+		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards
 	}
 }

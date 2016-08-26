@@ -46,7 +46,7 @@ class CanvasApiController {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.READ)
 		if (runtime) {
 			Map result = canvas.toMap()
-			Map runtimeJson = signalPathService.runtimeRequest([type: 'json'], canvas, null, request.apiUser).json
+			Map runtimeJson = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvas.id", request.apiUser)).json
 			result.putAll(runtimeJson)
 			render result as JSON
 		}
@@ -105,12 +105,11 @@ class CanvasApiController {
 	 */
 	@StreamrApi(requiresAuthentication = false)
 	def module(String canvasId, Integer moduleId, Long dashboard, Boolean runtime) {
-		Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
 		if (runtime) {
-			Canvas canvas = Canvas.get(canvasId)
-			render signalPathService.runtimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser).json as JSON
+			render signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest([type: 'json'], "canvases/$canvasId/modules/$moduleId", request.apiUser)).json as JSON
 		}
 		else {
+			Map moduleMap = canvasService.authorizedGetModuleOnCanvas(canvasId, moduleId, dashboard, request.apiUser, Operation.READ)
 			render moduleMap as JSON
 		}
 	}
@@ -121,8 +120,7 @@ class CanvasApiController {
 	@StreamrApi(requiresAuthentication = false)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
-
-		Map response = signalPathService.runtimeRequest(msg, path, request.apiUser, local ? true : false)
+		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser), local ? true : false)
 		log.info("request: responding with $response")
 		render response as JSON
 	}
