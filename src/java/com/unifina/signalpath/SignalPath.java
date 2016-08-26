@@ -171,6 +171,7 @@ public class SignalPath extends ModuleWithUI {
 			for (Input it : exportedInputs) {
 				// Don't retain the saved json configuration
 				it.resetConfiguration();
+				it.setJsClass(null); // Ensure variadic endpoints are imported as normal endpoints
 
 				if (getInput(it.name) == null) {
 					addInput(it);
@@ -185,6 +186,8 @@ public class SignalPath extends ModuleWithUI {
 			}
 			for (Output it : exportedOutputs) {
 				it.resetConfiguration();
+				it.setJsClass(null); // Ensure variadic endpoints are imported as normal endpoints
+
 				if (getOutput(it.name) == null) {
 					addOutput(it);
 				} else {
