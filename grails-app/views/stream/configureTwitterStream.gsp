@@ -32,14 +32,9 @@
 			collection: keywordCollection
 		})
 
-		var showStreamUrl = "${createLink(controller: "stream", action: "show", params: [id: stream.id])}"
-		var streamApiUrl = "${createLink(uri: "/api/v1/streams/${stream.id}")}"
-
 		$("#configure-twitter-form").submit(function(e) {
-			//e.preventDefault()
-
 			twitterConfig.keywords = keywordCollection.toJSON()
-			$("#configure-twitter-form input#keywords").val(keywordCollection.toJSON())
+			$("#configure-twitter-form input#keywords").val(twitterConfig.keywords)
 		})
 	})
 </r:script>
