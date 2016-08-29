@@ -153,11 +153,11 @@
 			</div>
 			
 			<div id="tc-content" style="display:none">
-				<g:render template="terms_and_conditions"/>
+				<g:render template="/register/terms_and_conditions"/>
 			</div>
 
 			<div id="privacy-content" style="display:none">
-				<g:render template="privacy_policy"/>
+				<g:render template="/register/privacy_policy"/>
 			</div>			
 			
 		</g:form>

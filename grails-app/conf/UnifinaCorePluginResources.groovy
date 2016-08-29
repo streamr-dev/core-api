@@ -45,6 +45,11 @@ modules = {
 		// due to this issue not yet fixed: https://github.com/eternicode/bootstrap-datepicker/issues/775
 		resource url:[dir:'js/bootstrap-datepicker/js', file:'bootstrap-datepicker.js', plugin: 'unifina-core']
 	}
+	'bootstrap-slider' {
+		dependsOn 'bootstrap'
+		resource url:[dir:'js/seiyria-bootstrap-slider/dist', file:'bootstrap-slider.js', plugin: 'unifina-core']
+		resource url:[dir:'js/seiyria-bootstrap-slider/dist/css', file:'bootstrap-slider.css', plugin: 'unifina-core']
+	}
 	hopscotch {
 		resource url:[dir:'js/hopscotch', file:'hopscotch.css', plugin: 'unifina-core']
 		resource url:[dir:'js/hopscotch', file:'hopscotch.js', plugin: 'unifina-core']
@@ -142,6 +147,9 @@ modules = {
 	'moment-timezone' {
 		dependsOn 'moment'
 		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js', plugin:'unifina-core']
+	}
+	cardjs {
+		resource url:[dir:'js/cardjs', file:'jquery.card.js', plugin:'unifina-core']
 	}
 
 	/**

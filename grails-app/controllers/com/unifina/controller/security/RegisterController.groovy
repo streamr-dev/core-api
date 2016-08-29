@@ -277,7 +277,7 @@ class RegisterCommand {
     String timezone
     String tosConfirmed
     Integer pwdStrength
-	
+
     def userService
 
     static constraints = {
@@ -292,7 +292,7 @@ class RegisterCommand {
 
         timezone blank: false
         name blank: false
-				
+
         password validator: {String password, RegisterCommand command ->
             return command.userService.passwordValidator(password, command)
         }
