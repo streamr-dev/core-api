@@ -171,6 +171,8 @@ public class SignalPath extends ModuleWithUI {
 		// If the io names in different modules clash, add a running number in the end to make the name unique
 		if (!root) {
 			for (Input it : exportedInputs) {
+				// Ensure variadic endpoints are imported as normal endpoints
+				it.setJsClass(null);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
 				if (getInput(it.name) == null) {
@@ -186,6 +188,8 @@ public class SignalPath extends ModuleWithUI {
 				}
 			}
 			for (Output it : exportedOutputs) {
+				// Ensure variadic endpoints are imported as normal endpoints
+				it.setJsClass(null);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
 				if (getOutput(it.name) == null) {

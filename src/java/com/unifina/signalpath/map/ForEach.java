@@ -73,6 +73,8 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Input input : exportedInputs) {
 			input.getOwner().removeInput(input);
 			input.setOwner(this);
+			// Ensure variadic endpoints are imported as normal endpoints
+			input.setJsClass(null);
 			// Reset id for stolen endpoint to avoid clashes
 			input.regenerateId();
 			input.disconnect();
@@ -82,6 +84,7 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Output output : exportedOutputs) {
 			output.getOwner().removeOutput(output);
 			output.setOwner(this);
+			output.setJsClass(null); // Ensure variadic endpoints are imported as normal endpoints
 			// Reset id for stolen endpoint to avoid clashes
 			output.regenerateId();
 			output.disconnect();
