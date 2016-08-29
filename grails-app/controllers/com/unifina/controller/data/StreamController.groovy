@@ -150,7 +150,6 @@ class StreamController {
 		getAuthorizedStream(params.id, Operation.WRITE) { stream, user ->
 			TwitterStreamConfig twitter = TwitterStreamConfig.forStream(stream, session)
 			twitter.setKeywords(params.keywords as String)
-			// TODO: call TwitterMessageSource.updateTwitterStreamFor(object corresponding to params.id)
 			twitter.save()
 			redirect(action: "show", id: stream.id)
 		}

@@ -18,8 +18,8 @@ public class TwitterFeed extends AbstractFeedProxy<TwitterModule, TwitterMessage
 	}
 
 	// TwitterFeed.process should ever receive messages that are meant for a single stream
-	//   "demux" happens in TwitterMessageSource.SubscribedUser.onStatus, and it passes
-	//	 one copy of TwitterMessage for each keyword-matched Stream to process
+	// "Demux" happens already in TwitterMessageSource.SubscribedUser.onStatus, and it passes
+	//	 one copy of TwitterMessage for each keyword-matched Stream to process(msg)
 	@Override
 	protected FeedEvent<TwitterMessage, TwitterEventRecipient>[] process(TwitterMessage msg) {
 		TwitterEventRecipient recipient = null;
@@ -38,7 +38,7 @@ public class TwitterFeed extends AbstractFeedProxy<TwitterModule, TwitterMessage
 			events = new FeedEvent[] {e};
 		} else {
 			events = new FeedEvent[] {};
-			log.error("Found no recipient (" + erCount + " in total) for TwitterMessage " + msg);
+			log.error("Found no recipient (out of " + erCount + " recipients) for TwitterMessage " + msg);
 		}
 		return events;
 	}

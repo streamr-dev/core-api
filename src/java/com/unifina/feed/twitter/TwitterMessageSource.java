@@ -157,6 +157,19 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 		}
 	}
 
+	// notification from TwitterStreamConfig that keywords have been changed (e.g. through StreamController)
+	public void keywordsChanged(TwitterStreamConfig conf) {
+		SubscribedUser sub = userForStream.get(conf.getStreamId());
+		for (int i = 0; i < sub.streams.size(); i++) {
+			TwitterStreamConfig c = sub.streams.get(i);
+			if (c.getStreamId().equals(conf.getStreamId())) {
+				c.setKeywords(conf.getKeywords());
+				break;
+			}
+		}
+		updateTwitterStreamFor(sub);
+	}
+
 	private void updateTwitterStreamFor(SubscribedUser sub) {
 		// get union of keywords of streams this user has subscribed to ("mux", see "demux" in TwitterFeed.process)
 		Set<String> keywords = new HashSet<>();

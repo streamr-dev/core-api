@@ -3,8 +3,12 @@ package com.unifina.feed.twitter
 import com.mongodb.util.JSON
 import com.unifina.api.InvalidStateException
 import com.unifina.api.ValidationException
+import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.feed.FeedFactory
+import com.unifina.feed.MessageHub
 import grails.util.Holders
+import groovy.beans.ListenerList
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import twitter4j.Twitter
@@ -19,6 +23,8 @@ import javax.servlet.http.HttpSession
  * Also handles the OAuth rituals to get access tokens
  */
 class TwitterStreamConfig {
+
+	public final Long TWITTER_FEED_ID = 9
 
 	// per-stream properties that are stored in DB
 	List<String> keywords = []
@@ -44,16 +50,11 @@ class TwitterStreamConfig {
 	private Stream stream
 	public String getStreamId() { stream?.id }
 
-	private static Map<Stream, TwitterStreamConfig> cache = new HashMap<>();
-
 	public static TwitterStreamConfig forStream(Stream stream, HttpSession session=null) {
-		TwitterStreamConfig conf = cache.get(stream);
-		if (conf == null) {
-			Map configMap = stream.streamConfigAsMap["twitter"] ?: [:]
-			conf = new TwitterStreamConfig(configMap)
-			conf.stream = stream
-			conf.configMap = configMap
-		}
+		Map configMap = stream.streamConfigAsMap["twitter"] ?: [:]
+		TwitterStreamConfig conf = new TwitterStreamConfig(configMap)
+		conf.stream = stream
+		conf.configMap = configMap
 
 		if (!conf.accessToken && session != null) {
 			if (!session.requestToken) {
@@ -95,20 +96,33 @@ class TwitterStreamConfig {
 	/**
 	 * @param kwString Comma-separated list of keywords e.g. "key,word,list"
      */
+	private boolean keywordsChanged = false
 	def setKeywords(String kwString) {
 		setKeywords(kwString.split(",")*.trim())
 	}
 	def setKeywords(List<String> kw) {
 		keywords = kw
+		keywordsChanged = true
 	}
 
-	private void save() {
+	def save() {
 		configMap.twitter = toMap()
 		stream.config = JSON.serialize(configMap)
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
 		}
 		stream.save(failOnError: true)
+
+		// If keywords are changed while the stream is being used, changes must be updated in TwitterMessageSource
+		if (keywordsChanged) {
+			Feed domainObject = Feed.get(TWITTER_FEED_ID)
+			MessageHub twitterFeed = FeedFactory.getRunningInstance(domainObject)
+			if (twitterFeed) {
+				TwitterMessageSource s = twitterFeed.getSource()
+				s.keywordsChanged(this)
+			}
+			keywordsChanged = false
+		}
 	}
 
 	Map toMap() {

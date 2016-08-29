@@ -87,6 +87,10 @@ public class FeedFactory {
 		return instanceByFeed.get(feed.getId());
 	}
 
+	public static synchronized MessageHub getRunningInstance(Feed feed) {
+		return instanceByFeed.get(feed.getId());
+	}
+
 	/**
 	 * For testing
 	 */
