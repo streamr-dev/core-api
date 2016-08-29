@@ -581,6 +581,10 @@ var SignalPath = (function () {
 					callback(response)
 
 				$(pub).trigger('started', [response])
+
+				response.modules.forEach(function(runningModuleJson) {
+					$(pub.getModuleById(runningModuleJson.hash)).trigger('started', [runningModuleJson])
+				})
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				if (callback) {
@@ -659,6 +663,10 @@ var SignalPath = (function () {
 	}
 	pub.isRunning = isRunning;
 
+	pub.isAdhoc = function() {
+		return isRunning() && runningJson.adhoc
+	}
+
 	function setSavedJson(data) {
 		savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
 	}
@@ -666,12 +674,19 @@ var SignalPath = (function () {
 	function stop(callback) {
 		$(pub).trigger('stopping')
 
-		if (isRunning()) {
-			var onStopped = function(data) {
-				if (data)
-					setSavedJson(data)
+		function triggerStopped() {
+			$(pub).trigger('stopped');
+			getModules().forEach(function(module) {
+				$(module).trigger('stopped');
+			})
+		}
 
-				$(pub).trigger('stopped');
+		if (isRunning()) {
+			function onStopped(data) {
+				if (data) {
+					setSavedJson(data)
+				}
+				triggerStopped()
 			}
 
 			$.ajax({
@@ -701,7 +716,7 @@ var SignalPath = (function () {
 			});
 		}
 		else {
-			$(pub).trigger('stopped')
+			triggerStopped()
 		}
 	}
 	pub.stop = stop;

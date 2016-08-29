@@ -1,6 +1,8 @@
 /**
  * Events emitted on spObject:
  * updated - when eg. the stream is changed, updated is triggered with the new data
+ * started - when the canvas is started. The running module json is passed as argument.
+ * stopped - when the canvas is stopped.
  */
 SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot = prot || {};
