@@ -90,6 +90,7 @@ class SignalPathServiceSpec extends Specification {
 		def service = Spy(SignalPathService)
 		def runner = Mock(SignalPathRunner)
 		def sp = Mock(SignalPath)
+		service.permissionService = Mock(PermissionService)
 		service.servletContext = service.servletContext ?: [:]
 		service.servletContext.signalPathRunners = [:]
 		service.servletContext.signalPathRunners[c1.runner] = runner
@@ -100,6 +101,7 @@ class SignalPathServiceSpec extends Specification {
 		then:
 		1 * runner.getSignalPaths() >> [sp]
 		1 * sp.getCanvas() >> c1
+		1 * service.permissionService.canWrite(c1.user, c1) >> true
 		1 * service.stopLocal(c1) >> false
 		thrown(CanvasUnreachableException)
 	}
@@ -110,10 +112,12 @@ class SignalPathServiceSpec extends Specification {
 
 		then:
 		1 * service.canvasService.authorizedGetById(c1.id, c1.user, Permission.Operation.READ) >> c1
-		req.type == 'test'
+		req.getType() == 'test'
+		req.get("type") == 'test'
 		req.getCheckedOperations().contains(Permission.Operation.READ)
-		req.path == "canvases/$c1.id"
-		req.user == c1.user
+		req.getPath() == "canvases/$c1.id"
+		req.getOriginalPath() == req.getPath()
+		req.getUser() == c1.user
 	}
 
 	def "buildRuntimeRequest() must throw if the path is malformed"() {
