@@ -65,7 +65,6 @@ class TwitterStreamConfig {
 				session.requestToken = twitter.getOAuthRequestToken(callbackURL)
 			}
 			conf.requestToken = session.requestToken
-			// ret.save()  // TODO: after there is a way to "resume" or serialize requestToken (avoid putting it into session)
 		}
 
 		return conf
