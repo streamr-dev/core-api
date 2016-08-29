@@ -33,7 +33,7 @@ A module can have inputs, outputs, and parameters.  Whilst a module does not nee
 
 When placed on a canvas, the inputs are shown as circular connectors along the left-hand side of the module.  The outputs are shown as connectors along the right-hand side.
 
-<g:img dir="images/user-guide" file="round-to-step-module.png" class="side-image" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="round-to-step-module.png" class="side-image" />
 
 Many modules have parameters which control their operation.  Module parameters can be hardcoded, but their values are typically not immutable.  If a parameter can be modified at run-time, there is an associated parameter input at the left-hand edge of the module.
 
@@ -41,7 +41,7 @@ As an example, the **RoundToStep** module has three inputs, two parameters, and 
 
 Inputs, outputs, and parameters can be renamed.  If you move the mouse on top of a name, a click brings up a pop-up menu which allows you to give the endpoint or parameter a new display name.  Renaming has no bearing on functionality.
 
-<g:img dir="images/user-guide" file="module-popup-menu.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="module-popup-menu.png" class="img-responsive center-block" />
 
 You’ll see a number of small icons next to the endpoints when you hover on top of a module.  These icons correspond to additional controls which are relevant to module activation.  We’ll have more to say on this below, but let’s first discuss the data flow between modules.
 
@@ -49,7 +49,7 @@ You’ll see a number of small icons next to the endpoints when you hover on top
 
 Modules can have options which control their behaviour or appearance.  Options apply to a specific instance of the module, and they can only be changed through the editor.
 
-<g:img dir="images/user-guide" file="table-module-options.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="table-module-options.png" class="img-responsive center-block" />
 
 As an example, **Table** only shows one data column by default.  If you hover on top of the module and click on the wrench icon, you’ll see the available options in a pop-up window.  Change the number of inputs to 3, press **OK**, and you’ll get a **Table** with three columns.
 
@@ -59,13 +59,13 @@ A module processes its inputs as soon as it is activated.  This happens when the
 1. Every input has a value.
 2. An event arrives at one of the driving inputs.
 
-<g:img dir="images/user-guide" file="and-module.png" class="side-image" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="and-module.png" class="side-image" />
 
 At least one endpoint in any module is designated as a driving input by default.  To change the default settings, hover on top of a module and you’ll see a number of additional controls.  You can make any input a driver by clicking on the associated **DR** icon (a toggle button) next to an input connector.  A module with no driving inputs will never activate.
 
 As mentioned, every input must a have a value before anything happens.  The input values typically arrive either as events from a stream, or from the output endpoints in some other module(s).  If the input corresponds to a numeric value or a string, you can specify an explicit initial value.  If you click on a **IV** icon next to an input, you’ll see an initial value dialog.
 
-<g:img dir="images/user-guide" file="initial-value-dialog.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="initial-value-dialog.png" class="img-responsive center-block" />
 
 <a name="feedbackloops"></a>
 
