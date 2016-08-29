@@ -73,7 +73,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 
 	function initChart() {
 		prot.body.find(".ioTable").css("width","0px");
-		prot.chart = new StreamrChart(prot.body, SignalPath.defaultChartOptions)
+		prot.chart = new StreamrChart(prot.body, prot.jsonData.options)
 		prot.chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
 		$(prot.chart).on('destroyed', function() {
 			prot.body.find("div.csvDownload").remove()
