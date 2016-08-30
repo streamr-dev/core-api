@@ -12,7 +12,7 @@ public abstract class Endpoint<T> implements Serializable {
 	protected String displayName;
 	protected String typeName;
 	private String jsClass;
-	private String id = IdGenerator.get();
+	private String id = "ep_" + IdGenerator.get();
 	
 	private Map<String,Object> json;
 	private boolean configured = false;
