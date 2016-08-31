@@ -52,12 +52,14 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Input input : exportedInputs) {
 			input.getOwner().removeInput(input);
 			input.setOwner(this);
+			input.setJsClass(null); // Ensure variadic endpoints are imported as normal endpoints
 			addInput(input);
 			input.addProxiedInput(new InputTriggerTracker(this, triggeredInputs, input));
 		}
 		for (Output output : exportedOutputs) {
 			output.getOwner().removeOutput(output);
 			output.setOwner(this);
+			output.setJsClass(null); // Ensure variadic endpoints are imported as normal endpoints
 			addOutput(output);
 			outputsToPropagate.add(output);
 		}
