@@ -223,4 +223,32 @@ databaseChangeLog = {
 			column(name: "json_help", value: '{"params":{},"paramNames":[],"inputs":{"list":"list with possible duplicates"},"inputNames":["list"],"outputs":{"list":"list without duplicates"},"outputNames":["list"],"helpText":"<p>Removes duplicate items from a list resulting in a list of unique items. The first occurrence of an item is kept&nbsp;and subsequent occurrences removed.</p>\\n"}')
 		}
 	}
+
+	changeSet(author: "eric", id: "useful-list-modules-17") {
+		insert(tableName: "module") {
+			column(name: "id", valueNumeric: 560)
+			column(name: "version", valueNumeric: 0)
+			column(name: "category_id", valueNumeric: 52)
+			column(name: "implementing_class", value: "com.unifina.signalpath.list.IndexOfItem")
+			column(name: "name", value: "IndexOfItem")
+			column(name: "js_module", value: "GenericModule")
+			column(name: "type", value: "module")
+			column(name: "module_package_id", valueNumeric: 1)
+			column(name: "json_help", value: '{"params":{},"paramNames":[],"inputs":{"item":"item to look for","list":"list to look in"},"inputNames":["item","list"],"outputs":{"index":"outputs the index of the first occurrence; does not output anything if no occurrences"},"outputNames":["index"],"helpText":"<p>Finds the index of the first occurrence of an item in a list.</p>\\n"}')
+		}
+	}
+
+	changeSet(author: "eric", id: "useful-list-modules-18") {
+		insert(tableName: "module") {
+			column(name: "id", valueNumeric: 561)
+			column(name: "version", valueNumeric: 0)
+			column(name: "category_id", valueNumeric: 52)
+			column(name: "implementing_class", value: "com.unifina.signalpath.list.IndexesOfItem")
+			column(name: "name", value: "IndexesOfItem")
+			column(name: "js_module", value: "GenericModule")
+			column(name: "type", value: "module")
+			column(name: "module_package_id", valueNumeric: 1)
+			column(name: "json_help", value: '{"params":{},"paramNames":[],"inputs":{"item":"item to look for","list":"item to look for"},"inputNames":["item","list"],"outputs":{"indexes":"list of indexes of occurrences; empty list if none"},"outputNames":["indexes"],"helpText":"<p>Finds indexes of all&nbsp;occurrences of an item in a list.</p>\\n"}')
+		}
+	}
 }
