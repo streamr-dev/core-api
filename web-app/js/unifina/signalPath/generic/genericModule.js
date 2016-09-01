@@ -125,10 +125,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 				jsPlumb.repaint(_cachedEndpoints)
 		});
 		
-		$(SignalPath).on("_signalPathLoadModulesReady", function() {
-			prot.refreshConnections();
-		});
-		
 		// A module is focused by default when it is created
 		// Repeat the command here as focusing changes z-index of endpoints
 		prot.addFocus(true);
@@ -495,6 +491,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	// Everything added to the public interface can be accessed from the
 	// private interface too
 	$.extend(prot,pub);
-	
+
+	$(SignalPath).on("_signalPathLoadModulesReady", prot.refreshConnections);
+	$(prot).on('closed', function() {
+		$(SignalPath).off("_signalPathLoadModulesReady", prot.refreshConnections);
+	})
+
 	return pub;
 }
