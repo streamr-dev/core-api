@@ -514,11 +514,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
 		}
-
-		// Embedded modules inherit the hash-id of their parents
-		if (parentSignalPath != null && parentSignalPath.getHash() != null) {
-			hash = parentSignalPath.getHash();
-		}
 	}
 
 	public Module getDomainObject() {
