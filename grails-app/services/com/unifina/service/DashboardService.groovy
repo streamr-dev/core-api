@@ -178,34 +178,11 @@ class DashboardService {
 
 	@CompileStatic
 	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
-		LinkedList<String> segmentedPath = RuntimeRequest.getSegmentedPath(path)
+		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
-		if (segmentedPath.size() < 2) {
-			throw new IllegalArgumentException("Invalid runtime request: $path")
-		}
-
-		String token = segmentedPath.poll()
-		if (token != "dashboards") {
-			throw new IllegalArgumentException("Unexpected token! Expecting 'dashboards', was: $token, path: $path")
-		}
-
-		Long dashboardId = Long.parseLong(segmentedPath.poll())
-		Dashboard dashboard = authorizedGetById(dashboardId, user, Operation.READ)
-		if (!permissionService.canRead(user, dashboard)) {
-			throw new NotPermittedException(user?.username, "Dashboard", dashboardId.toString())
-		}
-
-		token = segmentedPath.poll()
-		if (token != "canvases") {
-			throw new IllegalArgumentException("Unexpected token! Expecting 'canvases', was: $token, path: $path")
-		}
-		Canvas canvas = Canvas.get(segmentedPath.poll())
-
-		token = segmentedPath.poll()
-		if (token != "modules") {
-			throw new IllegalArgumentException("Unexpected token! Expecting 'modules', was: $token, path: $path")
-		}
-		Integer moduleId = Integer.parseInt(segmentedPath.poll())
+		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.READ)
+		Canvas canvas = Canvas.get(pathReader.readCanvasId());
+		Integer moduleId = pathReader.readModuleId();
 
 		// Does this Dashboard have an item that corresponds to the given canvas and module?
 		// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
@@ -219,11 +196,11 @@ class DashboardService {
 		if (item) {
 			Set<Operation> checkedOperations = new HashSet<>()
 			checkedOperations.add(Operation.READ)
-			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboardId/", ""), path, checkedOperations)
+			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
 			return request
 		}
 		else {
-			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboardId/", ""), path, user)
+			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboard.id/", ""), path, user)
 		}
 	}
 }

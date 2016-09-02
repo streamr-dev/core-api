@@ -69,12 +69,12 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 		return path;
 	}
 
-	public LinkedList<String> getSegmentedPath() {
-		return getSegmentedPath(getPath());
+	public PathReader getPathReader() {
+		return new PathReader(getPath());
 	}
 
-	public static LinkedList<String> getSegmentedPath(String path) {
-		return new LinkedList<>(Arrays.asList(path.split("/")));
+	public static PathReader getPathReader(String path) {
+		return new PathReader(path);
 	}
 
 	public Set<Permission.Operation> getCheckedOperations() {
@@ -83,6 +83,54 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 
 	public String getOriginalPath() {
 		return originalPath;
+	}
+
+	public static class PathReader {
+
+		private LinkedList<String> list;
+		private String path;
+
+		public PathReader(String path) {
+			this.path = path;
+
+			list = new LinkedList<>(Arrays.asList(path.split("/")));
+			if (list.size() < 2) {
+				throw new IllegalArgumentException("Runtime request path is too short: "+path);
+			}
+		}
+
+		public boolean isEmpty() {
+			return list.isEmpty();
+		}
+
+		public String readString(String tokenName) {
+			String token = list.poll();
+			if (!token.equals(tokenName)) {
+				throw new IllegalArgumentException("Unexpected token! Expecting '"+tokenName+"', was: "+token+", path: "+path);
+			}
+			return list.poll();
+		}
+
+		public Long readLong(String tokenName) {
+			return Long.parseLong(readString(tokenName));
+		}
+
+		public Integer readInt(String tokenName) {
+			return Integer.parseInt(readString(tokenName));
+		}
+
+		public String readCanvasId() {
+			return readString("canvases");
+		}
+
+		public Long readDashboardId() {
+			return readLong("dashboards");
+		}
+
+		public Integer readModuleId() {
+			return readInt("modules");
+		}
+
 	}
 
 }

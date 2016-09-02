@@ -297,20 +297,10 @@ class SignalPathService {
 
 	@CompileStatic
 	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
-		LinkedList<String> segmentedPath = RuntimeRequest.getSegmentedPath(path)
-
-		if (segmentedPath.size() < 2) {
-			throw new IllegalArgumentException("Invalid runtime request: $path")
-		}
-
-		String token = segmentedPath.poll()
-		if (token != "canvases") {
-			throw new IllegalArgumentException("Unexpected token! Expecting 'canvases', was: $token, path: $path")
-		}
+		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
-		String canvasId = segmentedPath.poll()
-		Canvas canvas = canvasService.authorizedGetById(canvasId, user, Permission.Operation.READ)
+		Canvas canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
 		Set<Permission.Operation> checkedOperations = new HashSet<>()
 		checkedOperations.add(Permission.Operation.READ)
 
@@ -368,14 +358,14 @@ class SignalPathService {
 				 * Requests for SignalPaths and modules within them
 				 */
 				else {
-					LinkedList<String> segmentedPath = req.getSegmentedPath()
+					RuntimeRequest.PathReader pathReader = req.getPathReader()
 
-					// Consume the already-processed parts of the path
-					if (segmentedPath.poll() != "canvases" || segmentedPath.poll() != req.getCanvas().getId()) {
+					// Consume the already-processed parts of the path and double-sanity-check canvas id
+					if (pathReader.readCanvasId() != req.getCanvas().getId()) {
 						throw new IllegalStateException("Unexpected path: ${req.getPath()}")
 					}
 
-					Future<RuntimeResponse> future = sp.onRequest(req, segmentedPath)
+					Future<RuntimeResponse> future = sp.onRequest(req, pathReader)
 					
 					try {
 						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
