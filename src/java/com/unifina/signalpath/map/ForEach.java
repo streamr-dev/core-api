@@ -143,8 +143,8 @@ public class ForEach extends AbstractSignalPathModule {
 	}
 
 	private SubSignalPath makeSubSignalPath(String key) {
-		SignalPathService signalPathService = Holders.getApplicationContext().getBean(SignalPathService.class);
-		CanvasService canvasService = Holders.getApplicationContext().getBean(CanvasService.class);
+		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		CanvasService canvasService = getGlobals().getBean(CanvasService.class);
 
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
