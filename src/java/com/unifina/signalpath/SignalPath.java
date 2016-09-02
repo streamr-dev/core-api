@@ -1,16 +1,15 @@
 package com.unifina.signalpath;
 
-import com.unifina.api.NotFoundException;
 import com.unifina.data.FeedEvent;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
-import org.codehaus.groovy.runtime.dgmimpl.arrays.IntegerArrayGetAtMetaMethod;
 
 import java.io.Serializable;
 import java.util.*;
@@ -233,8 +232,15 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-		if (sp != null && sp.value != null) {
-			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())));
+		if (!root && sp.getValue() != null) {
+			/**
+			 * Reset uiChannels if this is a subcanvas (not the root canvas). Otherwise
+			 * there will be problems if many instances of the same canvas are used
+			 * as subcanvases, as all the instances would produce to same uiChannels.
+			 */
+			Map json = (JSONObject) JSON.parse(sp.getValue().getJson());
+			getGlobals().getBean(CanvasService.class).resetUiChannels(json);
+			initFromRepresentation(json);
 		} else {
 			initFromRepresentation(config);
 		}
@@ -278,15 +284,6 @@ public class SignalPath extends ModuleWithUI {
 			sp = new SignalPathParameter(this, "canvas");
 			sp.setUpdateOnChange(true);
 			addInput(sp);
-		}
-	}
-
-	@Override
-	public void initialize() {
-		super.initialize();
-		// Embedded SignalPaths inherit the uiChannelId of their parent
-		if (parentSignalPath != null && parentSignalPath.getUiChannelId() != null) {
-			uiChannelId = parentSignalPath.getUiChannelId();
 		}
 	}
 
@@ -424,15 +421,12 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, Queue<String> path) {
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
 		if (path.isEmpty()) {
 			return super.resolveRuntimeRequestRecipient(request, path);
 		}
-		else if (!path.poll().equals("modules")) {
-			throw new IllegalArgumentException("Invalid request path: "+path);
-		}
 		else {
-			Integer moduleId = Integer.parseInt(path.poll());
+			Integer moduleId = path.readModuleId();
 			AbstractSignalPathModule module = getModule(moduleId);
 			if (module == null) {
 				throw new IllegalArgumentException("Module not found: "+moduleId);

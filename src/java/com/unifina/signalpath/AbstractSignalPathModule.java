@@ -514,11 +514,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
 		}
-
-		// Embedded modules inherit the hash-id of their parents
-		if (parentSignalPath != null && parentSignalPath.getHash() != null) {
-			hash = parentSignalPath.getHash();
-		}
 	}
 
 	public Module getDomainObject() {
@@ -586,7 +581,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
-	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, Queue<String> path) {
+	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, RuntimeRequest.PathReader path) {
 		// Add event to message queue, don't do it right away 
 		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
 
@@ -617,7 +612,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * Can be overridden to dig RuntimeRequest recipients from within this module. The default implementation returns "this".
      */
-	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, Queue<String> path) {
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
 		return this;
 	}
 
