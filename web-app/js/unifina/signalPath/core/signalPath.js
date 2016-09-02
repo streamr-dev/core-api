@@ -473,6 +473,8 @@ var SignalPath = (function () {
 	}
 	
 	function clear(isSilent) {
+		unsubscribe()
+
 		if (isRunning() && runningJson.adhoc)
 			stop();
 		
