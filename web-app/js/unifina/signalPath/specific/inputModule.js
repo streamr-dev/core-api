@@ -16,12 +16,6 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		)
 		widget.render()
 
-		$(SignalPath).on("started loaded", prot.start)
-
-		$(SignalPath).on("loaded", prot.requestState)
-
-		$(SignalPath).on("stopped", prot.stop)
-
 		$(widget).on("update", function() {
 			prot.redraw()
 		})
@@ -92,11 +86,15 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.onClose = function() {
+	$(SignalPath).on("started loaded", prot.start)
+	$(SignalPath).on("loaded", prot.requestState)
+	$(SignalPath).on("stopped", prot.stop)
+	$(prot).on('closed', function() {
 		$(widget).off()
 		$(SignalPath).off("started loaded", prot.start)
 		$(SignalPath).off("loaded", prot.requestState)
-	}
+		$(SignalPath).off("stopped", prot.stop)
+	})
 	
 	return pub;
 }
