@@ -70,7 +70,7 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 	}
 
 	public PathReader getPathReader() {
-		return new PathReader(getPath());
+		return RuntimeRequest.getPathReader(getPath());
 	}
 
 	public static PathReader getPathReader(String path) {

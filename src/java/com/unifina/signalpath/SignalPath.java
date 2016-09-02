@@ -232,9 +232,13 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-		if (sp != null && sp.value != null) {
-			// For subcanvases, regenerate unique uiChannels - otherwise multiple instances of the same subcanvas become a problem
-			Map json = (JSONObject) JSON.parse(sp.value.getJson());
+		if (!root && sp.getValue() != null) {
+			/**
+			 * Reset uiChannels if this is a subcanvas (not the root canvas). Otherwise
+			 * there will be problems if many instances of the same canvas are used
+			 * as subcanvases, as all the instances would produce to same uiChannels.
+			 */
+			Map json = (JSONObject) JSON.parse(sp.getValue().getJson());
 			getGlobals().getBean(CanvasService.class).resetUiChannels(json);
 			initFromRepresentation(json);
 		} else {
@@ -280,15 +284,6 @@ public class SignalPath extends ModuleWithUI {
 			sp = new SignalPathParameter(this, "canvas");
 			sp.setUpdateOnChange(true);
 			addInput(sp);
-		}
-	}
-
-	@Override
-	public void initialize() {
-		super.initialize();
-		// Embedded SignalPaths inherit the uiChannelId of their parent
-		if (parentSignalPath != null && parentSignalPath.getUiChannelId() != null) {
-			uiChannelId = parentSignalPath.getUiChannelId();
 		}
 	}
 
