@@ -5,6 +5,7 @@ import com.unifina.data.FeedEvent;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
@@ -234,7 +235,10 @@ public class SignalPath extends ModuleWithUI {
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
 		if (sp != null && sp.value != null) {
-			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())));
+			// For subcanvases, regenerate unique uiChannels - otherwise multiple instances of the same subcanvas become a problem
+			Map json = (JSONObject) JSON.parse(sp.value.getJson());
+			getGlobals().getBean(CanvasService.class).resetUiChannels(json);
+			initFromRepresentation(json);
 		} else {
 			initFromRepresentation(config);
 		}

@@ -21,7 +21,7 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		noNotificationsVisible()
 
 		expect: "View Canvas button is displayed on Canvas module"
-		findModuleOnCanvas("SubCanvasSpec-sub").find(".view-canvas-button").displayed
+		waitFor { findModuleOnCanvas("SubCanvasSpec-sub").find(".view-canvas-button").displayed }
 
 		when: "The string is sent to the Canvas module"
 		findModuleOnCanvas("TextField").find("textarea").firstElement().clear()
@@ -41,21 +41,21 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		then: "The ui modules should show the correct content"
 		waitFor { findModuleOnCanvas("Label").find(".modulelabel").text() == unique }
 		waitFor { findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").size() == 1 }
-		findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").text().contains(unique)
+		waitFor { findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").text().contains(unique) }
 
 		/**
 		 * Check that the subcanvas is not using the original saved Canvas' uiChannels
 		 */
 		when: "Load and start subcanvas to subscribe the uiChannels"
-		loadSignalPath("SubCanvasSpec-top")
+		loadSignalPath("SubCanvasSpec-sub")
 		ensureRealtimeTabDisplayed()
 		stopCanvasIfRunning()
 		resetAndStartCanvas(true)
 		noNotificationsVisible()
 
 		then: "The unique string for this test must not be shown on the label and table"
-		findModuleOnCanvas("Label").find(".modulelabel").text() != unique
-		!findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").text().contains(unique)
+		findModuleOnCanvas("Label").find(".modulelabel")?.text() != unique
+		!findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr")?.text()?.contains(unique)
 	}
 
 	def "Subcanvas is loadable on ForEach module and ui modules work"() {
@@ -96,7 +96,7 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		then: "The ui modules should show the correct content"
 		waitFor { findModuleOnCanvas("Label").find(".modulelabel").text() == unique }
 		waitFor { findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").size() == 1 }
-		findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").text().contains(unique)
+		waitFor { findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr").text().contains(unique) }
 	}
 
 }
