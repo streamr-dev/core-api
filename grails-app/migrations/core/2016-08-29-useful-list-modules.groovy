@@ -42,20 +42,6 @@ databaseChangeLog = {
 		}
 	}
 
-	changeSet(author: "eric", id: "useful-list-modules-4") {
-		insert(tableName: "module") {
-			column(name: "id", valueNumeric: 547)
-			column(name: "version", valueNumeric: 0)
-			column(name: "category_id", valueNumeric: 52)
-			column(name: "implementing_class", value: "com.unifina.signalpath.list.ListToMap")
-			column(name: "name", value: "ListToMap")
-			column(name: "js_module", value: "GenericModule")
-			column(name: "type", value: "module")
-			column(name: "module_package_id", valueNumeric: 1)
-			column(name: "json_help", value: '{"params":{},"paramNames":[],"inputs":{},"inputNames":[],"outputs":{},"outputNames":[],"helpText":"<p>Turn a list into a map, with&nbsp;list items as values and indices as keys.</p>"}')
-		}
-	}
-
 	changeSet(author: "eric", id: "useful-list-modules-5") {
 		insert(tableName: "module") {
 			column(name: "id", valueNumeric: 548)
