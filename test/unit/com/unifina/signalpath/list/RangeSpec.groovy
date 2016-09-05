@@ -3,11 +3,11 @@ package com.unifina.signalpath.list
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
-class SequenceSpec extends Specification {
-	Sequence module
+class RangeSpec extends Specification {
+	Range module
 
 	def setup() {
-		module = new Sequence()
+		module = new Range()
 		module.init()
 		module.configure(module.getConfiguration())
 		module.getInput("from").drivingInput = true
@@ -15,7 +15,7 @@ class SequenceSpec extends Specification {
 		module.getInput("step").drivingInput = true
 	}
 
-	def "Sequence works as expected"() {
+	def "Range works as expected"() {
 		Map inputValues = [
 		    from: [1, null, null, null, null,    2, null,   -5, null,     0]*.doubleValue(),
 			to:   [1, null, null,    2, null,    1, null,    5, null,  -600]*.doubleValue(),

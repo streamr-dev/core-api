@@ -5,7 +5,7 @@ import com.unifina.signalpath.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Sequence extends AbstractSignalPathModule implements Pullable<List<Double>> {
+public class Range extends AbstractSignalPathModule implements Pullable<List<Double>> {
 	private static final double DELTA = 0.000000001;
 
 	private final DoubleParameter from = new DoubleParameter(this, "from", 0d);
