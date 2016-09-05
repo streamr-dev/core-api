@@ -15,7 +15,7 @@ class FlattenListSpec extends Specification {
 	def "FlattenList works as expected"() {
 
 		Map inputValues = [
-			deep: [false, null,  null, true, null, null, null, null, null],
+			deep: [false, null,  null, true, null, null, null, null, null, null],
 			in:   [
 				[],
 				[1, 2],
