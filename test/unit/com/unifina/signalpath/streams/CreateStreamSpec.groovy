@@ -58,7 +58,11 @@ class CreateStreamSpec extends Specification {
 			s.id = "666"
 			return s
 		}
-		4 * streamService.createStream([name: "stream-2", description: "", config: [fields: [[a: "boolean"], [b: "string"]]]], null) >> {
+		4 * streamService.createStream([
+			name: "stream-2",
+			description: "",
+			config: [fields: [[name: "a", type: "boolean"], [name: "b", type: "string"]]]
+		], null) >> {
 			Stream s = new Stream()
 			s.id = "111"
 			return s

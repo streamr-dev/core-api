@@ -5,10 +5,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CreateStream extends AbstractSignalPathModule {
 
@@ -19,7 +16,9 @@ public class CreateStream extends AbstractSignalPathModule {
 	private final StringOutput stream = new StringOutput(this, "stream");
 	private final BooleanOutput created = new BooleanOutput(this, "created");
 
+	private final Set<String> createdStreams = new HashSet<>();
 	private transient StreamService streamService;
+
 
 	@Override
 	public void init() {
@@ -36,17 +35,25 @@ public class CreateStream extends AbstractSignalPathModule {
 			streamService = globals.getBean(StreamService.class);
 		}
 
+		if (createdStreams.contains(nameInput.getValue())) {
+			created.send(false);
+			return;
+		}
+
 		try {
 			Stream s = streamService.createStream(buildParams(), globals.getUser());
 			created.send(true);
 			stream.send(s.getId());
+			createdStreams.add(nameInput.getValue());
 		} catch (ValidationException ex) {
 			created.send(false);
 		}
 	}
 
 	@Override
-	public void clearState() {}
+	public void clearState() {
+		createdStreams.clear();
+	}
 
 	private Map<String, Object> buildParams() {
 		Map<String, Object> params = new HashMap<>();
