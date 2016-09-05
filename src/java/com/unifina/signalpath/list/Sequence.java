@@ -13,10 +13,10 @@ public class Sequence extends AbstractSignalPathModule implements Pullable<List<
 	private final DoubleParameter step = new AbsDoubleParameter(this, "step", 1d);
 	private final ListOutput out = new ListOutput(this, "out");
 
-	private double currrentFrom = from.getValue();
+	private double currentFrom = from.getValue();
 	private double currentTo = to.getValue();
 	private double currentStep = step.getValue();
-	private List<Double> sequence = buildSequence(currrentFrom, currentTo, currentStep);
+	private List<Double> sequence = buildSequence(currentFrom, currentTo, currentStep);
 
 	@Override
 	public void initialize() {
@@ -40,15 +40,15 @@ public class Sequence extends AbstractSignalPathModule implements Pullable<List<
 	}
 
 	private void updateSequenceIfNeeded() {
-		boolean paramsChanged = Math.abs(currrentFrom - from.getValue()) > DELTA ||
+		boolean paramsChanged = Math.abs(currentFrom - from.getValue()) > DELTA ||
 			Math.abs(currentTo - to.getValue()) > DELTA ||
 			Math.abs(currentStep - step.getValue()) > DELTA;
 
 		if (paramsChanged) {
-			currrentFrom = from.getValue();
+			currentFrom = from.getValue();
 			currentTo = to.getValue();
 			currentStep = step.getValue();
-			sequence = buildSequence(currrentFrom, currentTo, currentStep);
+			sequence = buildSequence(currentFrom, currentTo, currentStep);
 		}
 	}
 
