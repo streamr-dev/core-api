@@ -11,6 +11,7 @@
  * stopping
  * stopped
  * moduleAdded (jsonData, div)
+ * moduleBeforeClose (jsonData, div)
  * done
  * error (message)
  * 
@@ -69,6 +70,8 @@ var SignalPath = (function () {
 	// Public
 	var pub = {};
 	pub.options = options;
+
+	var isBeingReloaded = false
 	
     // TODO: remove if not needed anymore!
     pub.replacedIds = {};
@@ -158,7 +161,7 @@ var SignalPath = (function () {
 	}
 	function loadJSON(data) {
 		// Reset signal path
-		clear();
+		clear(true);
 
 		jsPlumb.setSuspendDrawing(true);
 
@@ -241,7 +244,7 @@ var SignalPath = (function () {
 		})
 	}
 	
-	function addModule(id,configuration,callback) { 
+	function addModule(id, configuration, callback) {
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',
@@ -464,7 +467,7 @@ var SignalPath = (function () {
 		})
 	}
 	
-	function clear() {
+	function clear(isSilent) {
 		if (isRunning() && runningJson.adhoc)
 			stop();
 		
@@ -482,8 +485,9 @@ var SignalPath = (function () {
 		runningJson = null
 		
 		jsPlumb.reset();		
-		
-		$(pub).trigger('new');
+
+		if (!isSilent)
+			$(pub).trigger('new');
 	}
 	pub.clear = clear;
 	
@@ -491,6 +495,7 @@ var SignalPath = (function () {
 	 * idOrObject can be either an id to fetch from the api, or json to apply as-is
 	 */
 	function load(idOrObject, callback) {
+		SignalPath.isBeingReloaded = true
 		$(pub).trigger('loading')
 
 		function doLoad(json) {
@@ -506,6 +511,8 @@ var SignalPath = (function () {
 			if (callback)
 				callback(json);
 
+			SignalPath.isBeingReloaded = false
+			
 			// Trigger loaded on pub and parentElement
 			$(pub).add(parentElement).trigger('loaded', [savedJson]);
 
@@ -515,13 +522,11 @@ var SignalPath = (function () {
 
 		// Fetch from api by id
 		if (typeof idOrObject === 'string') {
-			$.getJSON(options.apiUrl + '/canvases/' + idOrObject, function(response) {
-				if (response.error) {
-					handleError(response.error)
-				} else {
-					doLoad(response);
-				}
-			});
+			$.getJSON(options.apiUrl + '/canvases/' + idOrObject)
+				.done(doLoad)
+				.fail(function(jqXHR, textStatus, errorThrown) {
+					handleError(jqXHR.responseJSON.message)
+				})
 		}
 		else {
 			doLoad(idOrObject)
@@ -572,19 +577,27 @@ var SignalPath = (function () {
 
 				$(pub).trigger('started', [response])
 			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(textStatus+"\n"+errorThrown)
+			error: function(jqXHR, textStatus, errorThrown) {
+				if (callback) {
+					callback(undefined, jqXHR.responseJSON)
+				} if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+					handleError(jqXHR.responseJSON.message)
+				} else {
+					handleError(textStatus + "\n" + errorThrown)
+				}
 			}
 		});
 	}
 	pub.start = start;
 
-	function startAdhoc(callback) {
+	function startAdhoc(startRequest, callback) {
+		startRequest = startRequest || {}
+		startRequest.clearState = false
 		var json = toJSON()
 		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
-			start({clearState:false}, callback, true)
+			start(startRequest, callback, true)
 		})
 	}
 	pub.startAdhoc = startAdhoc
@@ -705,8 +718,7 @@ var SignalPath = (function () {
 
 					if (callback) {
 						callback(undefined, jqXHR.responseJSON)
-					}
-					else {
+					} else {
 						handleError(textStatus + "\n" + errorThrown)
 					}
 				}
@@ -732,6 +744,10 @@ var SignalPath = (function () {
 		else (parentElement.css("zoom", zoom))
 	}
 	pub.setZoom = setZoom
+
+	pub.isLoading = function() {
+		return SignalPath.isBeingReloaded;
+	}
 
 	return pub; 
 }());

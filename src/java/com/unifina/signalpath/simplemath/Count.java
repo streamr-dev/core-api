@@ -1,25 +1,46 @@
 package com.unifina.signalpath.simplemath;
 
+import com.unifina.signalpath.AbstractModuleWithWindow;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.TimeSeriesOutput;
+import com.unifina.utils.window.WindowListener;
 
-public class Count extends AbstractSignalPathModule {
+public class Count extends AbstractModuleWithWindow<Object> {
 
-	Input<Object> input = new Input<>(this,"in","Object");
-	TimeSeriesOutput out = new TimeSeriesOutput(this, "count");
+	private Input<Object> input = new Input<>(this, "in", "Object");
+	private TimeSeriesOutput out = new TimeSeriesOutput(this, "count");
 	
-	double count = 0;
-	
+	private double count = 0;
+
 	@Override
-	public void sendOutput() {
-		count += 1;
+	protected void handleInputValues() {
+		addToWindow(input.getValue());
+	}
+
+	@Override
+	protected void doSendOutput() {
 		out.send(count);
 	}
 
 	@Override
-	public void clearState() {
-		count = 0;
-	}
+	protected WindowListener<Object> createWindowListener(Object key) {
+		return new WindowListener<Object>() {
 
+			@Override
+			public void onAdd(Object item) {
+				++count;
+			}
+
+			@Override
+			public void onRemove(Object item) {
+				--count;
+			}
+
+			@Override
+			public void onClear() {
+				count = 0;
+			}
+		};
+	}
 }

@@ -63,7 +63,7 @@ class DateConversionSpec extends Specification {
 			months: [10, 1, 1].collect { it?.doubleValue() },
 			days: [15, 1, 1].collect { it?.doubleValue() },
 			hours: [10,
-					Date.parse("HH", "00").format("HH").toInteger(),
+					12,
 					new Date(1000 * 60 * 15).format("HH").toInteger()
 			].collect { it?.doubleValue() },
 			minutes: [35, 45, 15].collect { it?.doubleValue() },

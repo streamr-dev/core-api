@@ -47,7 +47,7 @@
 }
 
 .modulebody {
-	padding: 5px;
+	padding: 5px 10px;
 }
 
 .modulefooter {
@@ -122,10 +122,6 @@ td.output {
 	padding: 2px;
 }
 
-div.input:hover, div.output:hover {
-	cursor: pointer;
-}
-
 .ioname {
 	display: inline-block;
 	max-width: 100px;
@@ -134,14 +130,37 @@ div.input:hover, div.output:hover {
 
 .switchContainer {
 	display: inline-block;
+	position: absolute;
+	width: 60px;
+	margin-top: 2px;
+}
+
+div.input, div.output {
+	cursor: pointer;
+}
+
+div.input {
+	text-align: left;
 }
 
 div.input .switchContainer {
-	float: left;
+	left: -75px;
+}
+
+div.input .switchContainer .ioSwitch {
+	float: right;
+}
+
+div.output {
+	text-align: right;
 }
 
 div.output .switchContainer {
-	float: right;
+	right: -70px;
+}
+
+div.output .switchContainer .ioSwitch {
+	float: left;
 }
 
 .ioSwitch {
@@ -152,6 +171,23 @@ div.output .switchContainer {
 	width: 13px;
 	height: 13px;
 	cursor: pointer;
+}
+
+.endpoint.last-variadic .ioSwitch {
+	display: none;
+}
+
+.ioname i {
+	color: #888;
+	font-size: smaller;
+}
+
+.endpoint.last-variadic .variadic-plus {
+	display: inline-block;
+}
+
+.endpoint .variadic-plus {
+	display: none;
 }
 
 .option .optionTitle {
@@ -253,6 +289,25 @@ div.output .switchContainer {
 .component.dashboard.dashboardEnabled:hover .modulefooter,
 .component.dashboard.dashboardEnabled:hover .ui-resizable-handle {
 	opacity: 1.0;
+}
+
+.component .showOnFocus {
+	transition: opacity 0.1s linear;
+	opacity: 0;
+}
+
+.component.holdFocus .showOnFocus {
+	opacity: 1;
+}
+
+// This is to use the delay only when hiding the buttons, not when showing them
+.component:not(:hover) .showOnFocus {
+	transition-delay: 0.5s;
+}
+
+.component:hover .showOnFocus,
+.component .showOnFocus:hover {
+	opacity: 1;
 }
 
 .showOnHover {

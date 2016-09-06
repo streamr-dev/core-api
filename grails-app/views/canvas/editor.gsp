@@ -10,7 +10,7 @@
 		<r:require module="bootstrap-contextmenu"/>
 		<r:require module="bootstrap-datepicker"/>
 		<r:require module="slimscroll"/>
-		<r:require module="search-control"/>
+		<r:require module="streamr-search"/>
 		<r:require module="signalpath-browser"/>
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
@@ -23,6 +23,7 @@
 var loadBrowser
 
 $('#moduleTree').bind('loaded.jstree', function() {
+	Tour.startableTours([0])
 	Tour.autoStart()
 })
 
@@ -83,23 +84,17 @@ $(document).ready(function() {
 		if (settings.editorState && settings.editorState.runTab)
 			$("a[href="+settings.editorState.runTab+"]").tab('show')
 
-	});
-
-	// Show realtime tab when a running SignalPath is loaded
-	$(SignalPath).on('loaded', function(event, json) {
 		if (SignalPath.isRunning()) {
+			// Show realtime tab when a running SignalPath is loaded
 			$("a[href=#tab-realtime]").tab('show')
-		}
-	});
 
-	// Try to ping a running SignalPath on load, and show error if it can't be reached
-	$(SignalPath).on('loaded', function(event, json) {
-		if (SignalPath.isRunning()) {
+			// Try to ping a running SignalPath on load, and show error if it can't be reached
 			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
 				if (err)
 					Streamr.showError('${message(code:'canvas.ping.error')}')
 			})
 		}
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: json.id}))
 	});
 
 	$(SignalPath).on('error', function(error) {
@@ -114,17 +109,76 @@ $(document).ready(function() {
 	$(SignalPath).on('saved', function(event, savedJson) {
 		$('#modal-spinner').hide()
 		Streamr.showSuccess('${message(code:"signalpath.saved")}: '+savedJson.name)
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
 
-	// show search control
-	new SearchControl(
-		'${ createLink(controller: "stream", action: "search") }',
-		'${ createLink(controller: "module", action: "jsonGetModules") }',
-		$('#search'))
-	
+	$(SignalPath).on("new", function(event) {
+		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor"}))
+	})
+
+	function setAddressbarUrl(url) {
+		if (window.history && window.history.pushState && window.history.replaceState) {
+			// If we haven't set the current url into history, replace the current state so we know to reload the page on back
+			if (!window.history.state || !window.history.state.streamr) {
+				window.history.replaceState({
+					streamr: {
+						urlPath: window.location.href
+					}
+				}, undefined, window.location.href)
+			}
+			// Push the new state to the history
+			if (url !== window.location.href) {
+				window.history.pushState({
+					streamr: {
+						urlPath: url
+					}
+				}, undefined, url)
+			}
+		}
+	}
+
+	window.onpopstate = function(e) {
+		if (e.state && e.state.streamr && e.state.streamr.urlPath) {
+			// location.reload() doesn't work because the event is fired before the location change
+			window.location = e.state.streamr.urlPath
+		}
+	}
+
+	// Streamr search for modules and streams
+	var streamrSearch = new StreamrSearch('#search', [{
+		name: "module",
+		limit: 5
+	}, {
+		name: "stream",
+		limit: 3
+	}], {
+		inBody: true
+	}, function(item) {
+
+		if (item.resultType == "stream") { // is stream, specifies module
+			SignalPath.addModule(item.feed.module, {
+				params: [{
+					name: 'stream',
+					value: item.id
+				}]
+			})
+		} else { // is module
+			SignalPath.addModule(item.id, {})
+		}
+	})
+
+    $('#main-menu-inner').scroll(function() {
+    	streamrSearch.redrawMenu()
+    })
+
+	$(document).bind('keydown', 'alt+s', function(e) {
+		$("#search").focus()
+		e.preventDefault()
+	})
+
 	// Bind slimScroll to main menu
     $('#main-menu-inner').slimScroll({
-      height: '100%'
+      	height: '100%'
     })
 
 	loadBrowser = new SignalPathBrowser()
@@ -156,11 +210,11 @@ $(document).ready(function() {
 	})
 
 	$(document).bind('keyup', 'alt+r', function() {
-		SignalPath.run();
+		SignalPath.start();
 	});
 
-	$('#csv').click(function() {
-		var ctx = {
+	$('#run-csv-button').click(function() {
+		var startRequest = {
 			csv: true,
 			csvOptions: {
 				timeFormat: $("#csvTimeFormat").val(),
@@ -170,7 +224,7 @@ $(document).ready(function() {
 			}
 		}
 
-		SignalPath.run(ctx);
+		SignalPath.startAdhoc(startRequest);
 	});
 
 	// Historical run button
@@ -197,11 +251,22 @@ $(document).ready(function() {
 	realtimeRunButton.on('start-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.started")}'.replace('{0}', SignalPath.getName()))
 	})
+	realtimeRunButton.on('start-error', function(err) {
+		var msg = '${message(code:"canvas.start.error")}'
+		if (err && err.code == "FORBIDDEN") {
+			msg = '${message(code:"canvas.start.forbidden")}'
+		}
+		Streamr.showError(msg)
+	})
 	realtimeRunButton.on('stop-confirmed', function() {
 		Streamr.showSuccess('${message(code:"canvas.stopped")}'.replace('{0}', SignalPath.getName()))
 	})
-	realtimeRunButton.on('stop-error', function() {
-		Streamr.showError('${message(code:"canvas.stop.error")}')
+	realtimeRunButton.on('stop-error', function(err) {
+		var msg = '${message(code:"canvas.stop.error")}'
+		if (err && err.code == "FORBIDDEN") {
+			msg = '${message(code:"canvas.stop.forbidden")}'
+		}
+		Streamr.showError(msg)
 	})
 
 	// Run and clear link
@@ -230,16 +295,19 @@ $(document).ready(function() {
 
 	$(SignalPath).on('loaded saved', function(e, json) {
 		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
-		// Check share permission by knocking on the /permissions/ API endpoint
-		// Disabled without .forbidden means not checked yet
-		$("#share-button").attr("disabled", "disabled")
-		$("#share-button").removeClass("forbidden")
-		$.getJSON(canvasUrl + "/permissions").success(function () {
-			$("#share-button").data("url", canvasUrl)
-			$("#share-button").removeAttr("disabled")
-		}).fail(function () {
-			// Forbidden means no permission
-			$("#share-button").addClass("forbidden")
+		$.getJSON(canvasUrl + "/permissions/me", function(perm) {
+			var permissions = []
+			_.each(perm, function(permission) {
+				if (permission.id = "${id}") {
+					permissions.push(permission.operation)
+				}
+			})
+			if (_.contains(permissions, "share")) {
+				$("#share-button").data("url", canvasUrl)
+				$("#share-button").removeAttr("disabled")
+			} else {
+				$("#share-button").addClass("forbidden")
+			}
 		})
 	})
 
@@ -287,7 +355,7 @@ $(document).unload(function () {
 						<a href="#tab-historical" role="tab" data-toggle="tab">Historical</a>
 					</li>
 					<li class="">
-						<a href="#tab-realtime" role="tab" data-toggle="tab">Realtime</a>
+						<a href="#tab-realtime" id="open-realtime-tab-link" role="tab" data-toggle="tab">Realtime</a>
 					</li>
 				</ul>
 
@@ -367,9 +435,9 @@ $(document).unload(function () {
 				<div class="menu-content-header">
 					<label for="moduleTree">Module Browser</label>
 				</div>
-				
+
 				<sp:moduleBrowser id="moduleTree" buttonId="addModule" />
-				
+
 				<sp:moduleAddButton buttonId="addModule" browserId="moduleTree" class="btn-block">
 					<i class="fa fa-plus"></i>
 					<g:message code="signalPath.addModule.label" default="Add Module" />
@@ -438,7 +506,7 @@ $(document).unload(function () {
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="csv" class="btn btn-primary" data-dismiss="modal">Run</button>
+	        <button id="run-csv-button" class="btn btn-primary" data-dismiss="modal">Run</button>
 	      </div>
 	    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->

@@ -74,6 +74,17 @@ describe('streamr-table', function() {
 			assert($($($parent.find("table tbody tr")[1]).find("td")[0]).text() == "value1")
 			assert($($($parent.find("table tbody tr")[1]).find("td")[1]).text() == "value2")
 		})
+
+		it('should replace the contents when message has field nc', function() {
+			table.receiveResponse({nr:["value1", "value2"]})
+			assert($($($parent.find("table tbody tr")[0]).find("td")[0]).text() == "value1")
+			assert($($($parent.find("table tbody tr")[0]).find("td")[1]).text() == "value2")
+			table.receiveResponse({nc:[["A", "B"], ["C", "D"]]})
+			assert($($($parent.find("table tbody tr")[0]).find("td")[0]).text() == "A")
+			assert($($($parent.find("table tbody tr")[0]).find("td")[1]).text() == "B")
+			assert($($($parent.find("table tbody tr")[1]).find("td")[0]).text() == "C")
+			assert($($($parent.find("table tbody tr")[1]).find("td")[1]).text() == "D")
+		})
 	})
 
 })

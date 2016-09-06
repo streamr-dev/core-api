@@ -1,6 +1,7 @@
 package com.unifina.signalpath.kafka;
 
 import com.unifina.service.PermissionService;
+import com.unifina.signalpath.*;
 import grails.converters.JSON;
 
 import java.security.AccessControlException;
@@ -13,15 +14,6 @@ import org.codehaus.groovy.grails.web.json.JSONObject;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.KafkaService;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ListInput;
-import com.unifina.signalpath.MapInput;
-import com.unifina.signalpath.NotificationMessage;
-import com.unifina.signalpath.Parameter;
-import com.unifina.signalpath.StreamParameter;
-import com.unifina.signalpath.StringInput;
-import com.unifina.signalpath.TimeSeriesInput;
 
 public class SendToStream extends AbstractSignalPathModule {
 
@@ -69,9 +61,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
@@ -82,20 +72,21 @@ public class SendToStream extends AbstractSignalPathModule {
 		if (stream==null)
 			return;
 		
-		// Check access to this Stream
-		if (permissionService.canWrite(globals.getUser(), stream)) {
-			authenticatedStream = stream;
-		} else {
-			throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
+		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas 
+		if (globals.isRunContext()) {
+			if (permissionService.canWrite(globals.getUser(), stream)) {
+				authenticatedStream = stream;
+			} else {
+				throw new AccessControlException(this.getName() + ": User " + globals.getUser().getUsername() + " does not have write access to Stream " + stream.getName());
+			}
 		}
-		
-		// TODO: don't rely on static ids
-		if (stream.getFeed().getId()!=7) {
-			throw new IllegalArgumentException("Can not send to this feed type!");
+
+		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
+			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: "+stream.getFeed().getName());
 		}
 		
 		if (stream.getConfig()==null) {
-			throw new IllegalStateException("Stream " + stream.getName() + " is not properly configured!");
+			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() + " is not properly configured!");
 		}
 		
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
@@ -103,33 +94,30 @@ public class SendToStream extends AbstractSignalPathModule {
 		JSONArray fields = streamConfig.getJSONArray("fields");
 		
 		for (Object o : fields) {
+			Input input = null;
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
 			
 			// TODO: add other types
-			if (type.equalsIgnoreCase("number") || type.equalsIgnoreCase("boolean")) {
-				TimeSeriesInput input = new TimeSeriesInput(this,name);
-				input.canHaveInitialValue = false;
-				addInput(input);
+			if (type.equalsIgnoreCase("number")) {
+				input = new TimeSeriesInput(this, name);
+				((TimeSeriesInput) input).canHaveInitialValue = false;
+			} else if (type.equalsIgnoreCase("boolean")) {
+				input = new BooleanInput(this, name);
+			} else if (type.equalsIgnoreCase("string")) {
+				input = new StringInput(this, name);
+			} else if (type.equalsIgnoreCase("map")) {
+				input = new MapInput(this, name);
+			} else if (type.equalsIgnoreCase("list")) {
+				input = new ListInput(this, name);
 			}
-			else if (type.equalsIgnoreCase("string")) {
-				StringInput input = new StringInput(this, name);
-				addInput(input);
-			}
-			else if (type.equalsIgnoreCase("map")) {
-				addInput(new MapInput(this,name));
-			}
-			else if (type.equalsIgnoreCase("list")) {
-				addInput(new ListInput(this,name));
-			}
-		}
-		
-		for (Input input : getInputs()) {
-			if (!(input instanceof Parameter)) {
+
+			if (input != null) {
 				input.canToggleDrivingInput = false;
 				input.canBeFeedback = false;
 				input.requiresConnection = false;
+				addInput(input);
 			}
 		}
 		

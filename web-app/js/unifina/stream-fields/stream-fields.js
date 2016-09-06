@@ -74,7 +74,7 @@
 
 			var $table = $("<table class='table table-striped table-condensed'><thead><tr><th>Name</th><th>Type</th><th></th></tr></thead><tbody></tbody></table>")
 			$(this.el).html($table);
-			_(this.collection.models).each(function(item){ // in case collection is not empty
+			this.collection.models.forEach(function(item){ // in case collection is not empty
 				self.appendItem(item);
 			}, this);
 

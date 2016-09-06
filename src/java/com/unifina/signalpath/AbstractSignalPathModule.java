@@ -5,14 +5,7 @@ import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -50,8 +43,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private boolean wasReady = false;
 
-	private int readyInputs = 0;
-	private int inputCount = 0;
+	protected Set<Input> readyInputs = new HashSet<>();
 
 	boolean sendPending = false;
 
@@ -62,15 +54,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	protected HashSet<Input> drivingInputs = new HashSet<Input>();
 
-	Date lastCleared = null;
-
-	/**
-	 * Module params
-	 */
-	protected boolean canClearState = true;
-	boolean clearState = false;
-
+	// Controls whether the refresh button is shown in the UI. Clicking it recreates the module.
 	protected boolean canRefresh = false;
+	// Sets if the module supports state clearing. If canClearState is false, calling clear() does nothing.
+	protected boolean canClearState = true;
 
 	protected String name;
 	protected Integer hash;
@@ -177,10 +164,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.put(alias.toString(), input);
 		}
 
-		inputCount = inputs.size();
-
-		// re-count because inputs already contained in the counters might be added
-		checkDirtyAndReadyCounters();
+		if (input.isReady()) {
+			readyInputs.add(input);
+		}
 	}
 
 	public void removeInput(Input input) {
@@ -195,10 +181,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.remove(alias.toString());
 		}
 
-		inputCount = inputs.size();
-
-		// re-count because inputs already contained in the counters might be removed
-		checkDirtyAndReadyCounters();
+		readyInputs.remove(input);
 	}
 
 	public void addOutput(Output output) {
@@ -220,7 +203,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	public void removeOutput(Output output) {
 		if (!outputs.contains(output)) {
-			throw new IllegalArgumentException("Unable to remove output: output not foudn: "+output);
+			throw new IllegalArgumentException("Unable to remove output: output not found: "+output);
 		}
 
 		outputs.remove(output);
@@ -248,44 +231,41 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public void markReady(Input input) {
-		readyInputs++;
+		readyInputs.add(input);
 	}
 
 	public void cancelReady(Input input) {
-		readyInputs--;
+		readyInputs.remove(input);
 	}
 
 	public boolean allInputsReady() {
-		return readyInputs == inputCount;
+		return readyInputs.size() == inputs.size();
 	}
 
 	public abstract void sendOutput();
 
 	public void clear() {
-		if (clearState && (lastCleared == null || lastCleared.before(globals.time))) {
-			lastCleared = globals.time;
+		if (canClearState) {
 			clearState();
 
 			for (Output o : getOutputs()) {
-				o.doClear();
+				o.clear();
 			}
 			for (Input i : getInputs()) {
-				i.doClear();
+				i.clear();
 			}
 
-			checkDirtyAndReadyCounters();
+			// Rebuild
+			readyInputs.clear();
+			for (Input i : getInputs()) {
+				if (i.isReady()) {
+					readyInputs.add(i);
+				}
+			}
 		}
 	}
 
 	public abstract void clearState();
-
-	public boolean isClearState() {
-		return clearState;
-	}
-
-	public void setClearState(boolean clearState) {
-		this.clearState = clearState;
-	}
 
 	public String getName() {
 		return name;
@@ -447,7 +427,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		map.put("name", name);
 
 		map.put("canClearState", canClearState);
-		map.put("clearState", clearState);
 
 		if (canRefresh) {
 			map.put("canRefresh", canRefresh);
@@ -531,10 +510,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private void setConfiguration(Map<String, Object> config) {
 		json = config;
-
-		if (config.containsKey("clearState")) {
-			clearState = Boolean.parseBoolean(config.get("clearState").toString());
-		}
 
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
@@ -691,18 +666,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
-	}
-
-	public void checkDirtyAndReadyCounters() {
-		// Set the quick dirty/ready counters
-		int readyCount = 0;
-		for (Input i : getInputs()) {
-			if (i.isReady()) {
-				readyCount++;
-			}
-		}
-
-		readyInputs = readyCount;
 	}
 
 	@Override

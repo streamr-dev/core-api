@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
@@ -15,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.opencsv.CSVParser;
 import com.unifina.utils.CSVImporter.LineValues;
+import org.grails.datastore.mapping.model.types.Simple;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.*;
 
@@ -26,7 +28,7 @@ public class CSVImporter implements Iterable<LineValues> {
 	private static final Logger log = Logger.getLogger(CSVImporter.class);
 
 	/**
-	 * @param file The File to read
+	 * @param file The File to read, required
 	 * @param fields Existing field config, if available
 	 * @param timestampIndex Index of the timestamp column, if available
 	 * @param format Timestamp format (in JodaTime syntax), if available
@@ -87,9 +89,9 @@ public class CSVImporter implements Iterable<LineValues> {
 	public class LineValuesIterator implements Iterator<LineValues> {
 		private LineIterator it;
 		private Schema schema;
-		
-		boolean headerRead = false;
-		
+
+		private int lineNumber = 0;
+
 		public LineValuesIterator(File file, Schema schema) throws IOException {
 			 this.it = FileUtils.lineIterator(file, "UTF-8");
 			 this.schema = schema;
@@ -102,19 +104,15 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		@Override
 		public LineValues next() {
-			String line = it.next();
-			
-			if (!headerRead) {
-				headerRead = true;
+			String line;
+			do {
 				line = it.next();
-			}
-
-			// Empty line or a line with only spaces/tabs
-			while (line.matches("^\\s*$"))
-				line = it.next();
+				lineNumber++;
+			// Is a header line or is an empty line or a line with only spaces/tabs
+			} while (lineNumber < 2 || line.matches("^\\s*$"));
 
 			try {
-				return schema.parseLine(line);
+				return schema.parseLine(line, lineNumber);
 			} catch (IOException | ParseException | RuntimeException e) {
 				throw new RuntimeException(e);
 			}
@@ -172,7 +170,7 @@ public class CSVImporter implements Iterable<LineValues> {
 				int undetectedSchemaEntries = Integer.MAX_VALUE;
 			    String line;
 			    
-			    while (undetectedSchemaEntries>0 && (line = reader.readLine()) != null) {
+			    while (undetectedSchemaEntries > 0 && (line = reader.readLine()) != null) {
 			    	
 			    	// Try to detect separator format and parse headers from first line
 			    	if (lineCount==0) {
@@ -241,7 +239,7 @@ public class CSVImporter implements Iterable<LineValues> {
 		}
 		
 		private SchemaEntry detectEntry(String value, String name) {
-			if (value==null || value.length()==0)
+			if (value == null || value.length() == 0)
 				return null;
 
 			if(fields != null && fields.containsKey(name)) {
@@ -249,7 +247,7 @@ public class CSVImporter implements Iterable<LineValues> {
 			} else {
 				// Try to parse as ISO dateTime
 				try {
-					CustomDateTimeParser parser = new CustomDateTimeParser("", timeZone);
+					CustomDateTimeParser parser = new CustomDateTimeParser(format, timeZone);
 					parser.parse(value);
 					return new SchemaEntry(name, parser);
 				} catch (Exception e) {}
@@ -270,19 +268,24 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		}
 		
-		LineValues parseLine(String line) throws IOException, ParseException {
+		LineValues parseLine(String line, int lineNumber) throws IOException, ParseException {
 			String[] values = parser.parseLine(line);
 			Object[] parsed = new Object[values.length];
 
-			int i=0;
+			// The timestamp column cannot be empty
+			if (timestampColumnIndex == null) {
+				throw new CSVImporterException("The date column couldn't be recognized.");
+			}
+
+			int i = 0;
 			// Ignore missing or extra columns
 			try {
-				for (i=0; i < values.length && i < entries.length; i++) {
+				for (i = 0; i < values.length && i < entries.length; i++) {
 					// The timestamp column cannot be empty
 					if (i == timestampColumnIndex) {
 						Date d = entries[i].dateTimeParser.parse(values[i]);
 						if (lastDate != null && d.before(lastDate)) {
-							throw new CSVImporterException("The lines must be in a chronological order!");
+							throw new CSVImporterException("The lines must be in a chronological order!", lineNumber);
 						}
 						parsed[i] = d;
 						lastDate = d;
@@ -305,7 +308,7 @@ public class CSVImporter implements Iterable<LineValues> {
 						parsed[i] = values[i];
 				}
 			} catch (NumberFormatException e) {
-				throw new CSVImporterException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type);
+				throw new CSVImporterException("Invalid value '"+values[i]+"' in column '"+entries[i].name+"', detected column type was: "+entries[i].type + ".", lineNumber);
 			}
 			
 			return new LineValues(schema, parsed);
@@ -357,7 +360,8 @@ public class CSVImporter implements Iterable<LineValues> {
 
 	public class CustomDateTimeParser {
 
-		private DateTimeFormatter fmt;
+		private DateTimeFormatter jodaFormatter;
+		private SimpleDateFormat simpleFormatter;
 		private String format;
 
 		public CustomDateTimeParser() {
@@ -366,33 +370,33 @@ public class CSVImporter implements Iterable<LineValues> {
 
 		public CustomDateTimeParser(String format, String timeZone) {
 			this.format = format;
-			if (format.equals("")) {
+			if (usesJodaTime()) {
 				// A formatter with regular ISO8601 format and a custom one where 'T' is replaced by whitespace
-				fmt = new DateTimeFormatterBuilder()
+				jodaFormatter = new DateTimeFormatterBuilder()
 						.append(ISODateTimeFormat.dateParser())
 						.appendOptional(new DateTimeFormatterBuilder().appendLiteral(' ').toParser())
 						.appendOptional(new DateTimeFormatterBuilder().appendLiteral('T').toParser())
 						.append(ISODateTimeFormat.timeParser())
-						.toFormatter().withZoneUTC();
-			} else if (!(format.equals("unix") || format.equals("unix-s"))) {
-				fmt = DateTimeFormat.forPattern(format);
-			}
-			if(fmt != null && timeZone != null) {
-				fmt = fmt.withZone(DateTimeZone.forID(timeZone));
+						.toFormatter().withZone(DateTimeZone.forID(timeZone != null ? timeZone : "UTC"));
+			} else if (usesSimpleDateFormat()) {
+				simpleFormatter = new SimpleDateFormat(format);
+				if (timeZone != null)
+					simpleFormatter.setTimeZone(TimeZone.getTimeZone(timeZone));
 			}
 		}
 
 		public Date parse(String date) {
 			try {
-				if (format.equals("unix") || format.equals("unix-s")) {
-					long l;
-					l = Long.parseLong(date);
-					if (format.equals("unix-s")) {
+				if (usesJodaTime()) {
+					return jodaFormatter.parseDateTime(date).toDate();
+				} else if (usesSimpleDateFormat()) {
+					return simpleFormatter.parse(date);
+				} else {
+					long l = Long.parseLong(date);
+					if (usesSeconds()) {
 						l *= 1000;
 					}
 					return new Date(l);
-				} else {
-					return fmt.parseDateTime(date).toDate();
 				}
 			} catch (Exception e) {
 				throw new RuntimeException("Invalid date!");
@@ -402,11 +406,27 @@ public class CSVImporter implements Iterable<LineValues> {
 		public Date parse(long date) {
 			return parse("" + date);
 		}
+
+		private boolean usesJodaTime() {
+			return format == null || format.isEmpty();
+		}
+
+		private boolean usesSimpleDateFormat() {
+			return !usesJodaTime() && !format.equals("unix") && !format.equals("unix-s");
+		}
+
+		private boolean usesSeconds() {
+			return format.equals("unix-s");
+		}
 	}
 
 	public class CSVImporterException extends RuntimeException {
 		public CSVImporterException(String message) {
 			super(message);
+		}
+
+		public CSVImporterException(String message, int lineNumber) {
+			super(message + " (Line: " + lineNumber + ")");
 		}
 	}
 }

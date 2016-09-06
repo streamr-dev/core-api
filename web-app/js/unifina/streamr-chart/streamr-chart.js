@@ -143,6 +143,47 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 			useUTC: true
 		}
 	});
+
+	var approximations = {
+		"min/max": function (points) {
+			// Smarter data grouping: for all-positive values choose max, for all-negative choose min, for neither choose avg
+			var sum = 0
+			var min = Number.POSITIVE_INFINITY
+			var max = Number.NEGATIVE_INFINITY
+
+			points.forEach(function (it) {
+				sum += it
+				min = Math.min(it, min)
+				max = Math.max(it, max)
+			})
+
+			// If original had only nulls, Highcharts expects null
+			if (!points.length && points.hasNulls) {
+				return null
+			}
+			// "Ordinary" empty group, Highcharts expects undefined
+			else if (!points.length) {
+				return undefined
+			}
+			// All positive
+			else if (min >= 0) {
+				return max
+			}
+			// All negative
+			else if (max <= 0) {
+				return min
+			}
+			// Mixed positive and negative
+			else {
+				return sum / points.length
+			}
+		},
+		"average": "average",
+		"open": "open",
+		"high": "high",
+		"low": "low",
+		"close": "close"
+	}
 	
 	var opts = {
 		chart: {
@@ -188,7 +229,10 @@ StreamrChart.prototype.createHighstocksInstance = function(title, series, yAxis)
 		
 		plotOptions: {
 			series: {
-				animation: false
+				animation: false,
+				dataGrouping: {
+					approximation: approximations[this.options.dataGrouping ? this.options.dataGrouping.value : "min/max"]
+				}
 			}
 		},
 		

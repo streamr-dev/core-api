@@ -53,14 +53,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
-	public void setClearState(boolean clearState) {
-		super.setClearState(clearState);
-		if (instance != null) {
-			instance.setClearState(clearState);
-		}
-	}
-
-	@Override
 	public void sendOutput() {
 		instance.sendOutput();
 	}
@@ -70,6 +62,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		if (instance != null) {
 			instance.clear();
 		}
+	}
+
+	@Override
+	public boolean wasReady() {
+		return instance != null && instance.wasReady();
 	}
 
 	@Override
@@ -278,6 +275,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				outputs,
 				outputsByName,
 				drivingInputs,
+				readyInputs,
 				globals);
 
 		storedEndpointFields.restoreFields(instance);

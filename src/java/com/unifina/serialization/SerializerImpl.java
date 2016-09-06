@@ -32,6 +32,7 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
 		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
 		conf.registerSerializer(JSONArray.class, new JSONArraySerializer(), true);
+		conf.registerSerializer(JSONObject.Null.class, new JSONNullSerializer(), true);
 
 		conf.registerSerializer(Canvas.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
@@ -72,6 +73,9 @@ public class SerializerImpl implements Serializer {
 
 	@Override
 	public Object deserializeFromByteArray(byte[] bytes) throws SerializationException {
+		if (bytes.length == 0) {
+			throw new SerializationException("Zero bytes given as input");
+		}
 		return deserialize(new ByteArrayInputStream(bytes));
 	}
 
@@ -195,6 +199,27 @@ public class SerializerImpl implements Serializer {
 								  FSTClazzInfo.FSTFieldInfo referencee,
 								  int streamPosition) throws Exception {
 			return new JSONObject(in.readStringUTF());
+		}
+	}
+
+	private static class JSONNullSerializer extends FSTBasicObjectSerializer {
+		@Override
+		public void writeObject(FSTObjectOutput out,
+								Object toWrite,
+								FSTClazzInfo clzInfo,
+								FSTClazzInfo.FSTFieldInfo referencedBy,
+								int streamPosition) throws IOException {
+			out.writeUTF("null");
+		}
+
+		@Override
+		public Object instantiate(Class objectClass,
+								  FSTObjectInput in,
+								  FSTClazzInfo serializationInfo,
+								  FSTClazzInfo.FSTFieldInfo referencee,
+								  int streamPosition) throws Exception {
+			in.readStringUTF();
+			return JSONObject.NULL;
 		}
 	}
 

@@ -101,6 +101,30 @@ public class UiTagLib {
 	}
 	
 	/**
+	 * Renders a Bootstrap panel and generates an id for it automatically. The id is used with the bootstrap scrollspy.
+	 * @attr title REQUIRED Title of the panel
+	 * @attr class Classes added to the panel
+	 */
+	def scrollSpyPanel = {attrs, body->
+		out << "<div id='${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase()  + '-panel'}' class='panel ${attrs.class ?: ''}'>"
+		out << "<div class='panel-heading'>"
+		out << "<span class='panel-title'>${attrs.title}</span>"
+		out << "</div>"
+		out << "<div class='panel-body'>"
+		out << body()
+		out << "</div>" // end panel body
+		out << "</div>" // end panel
+	}
+	
+	/**
+	 * Renders a first-level category to a list with scrollspy. Generates the id automatically
+	 * @attr title REQUIRED title of the category
+	 */
+	def scrollspyCategory = {attrs, body ->
+		out << "<h3 id='${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase() + '-category'}'>${ attrs.title }</h3>"
+	}
+	
+	/**
 	 * Renders a labeled element.
 	 * @attr label REQUIRED The label
 	 * @attr for In forms, the name of the form input that this label is for
@@ -279,6 +303,36 @@ public class UiTagLib {
 			out << body()
 			out << "</div>"
 		}
+	}
+	
+	/**
+	 * Renders a bootstrap style sidebar which can be used e.g. with scrollspy. Consists of sidebarElements
+	 *
+	 */
+	def sidebarNav = {attrs, body ->
+		out << "<nav class='streamr-sidebar'>"
+		out << "<ul class='nav'>"
+		out << body()
+		out << "</ul>"
+		out << "</nav>"
+	}
+	
+	/**
+	 * An element to the sidebarNav
+	 *
+	 * @attr title the title of the domain object
+	 */
+	def sidebarElement = {attrs, body ->
+		out << "<li>"
+		if(body) {
+			out << "<a href='#${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase() + '-category'}'>${ attrs.title }</a>"
+			out << "<ul class='nav'>"
+			out << body()
+			out << "</ul>"
+		} else {
+			out << "<a href='#${ attrs.title.replaceAll('[^A-Za-z0-9]', '').toLowerCase() + '-panel'}'>${ attrs.title }</a>"
+		}
+		out << "</li>"
 	}
 
 	/**

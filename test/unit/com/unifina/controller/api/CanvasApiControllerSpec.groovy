@@ -163,7 +163,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.json?.size() > 0
 
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
-		1 * canvasService.reconstruct(canvas1) >> { Canvas c -> JSON.parse(c.json) }
+		1 * canvasService.reconstruct(canvas1, me) >> { Canvas c, SecUser user -> JSON.parse(c.json) }
 	}
 
 	void "save() creates a new canvas and renders it as json"() {
@@ -211,7 +211,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.updateExisting(canvas1, _) >> { Canvas canvas, SaveCanvasCommand command ->
+		1 * canvasService.updateExisting(canvas1, _, me) >> { Canvas canvas, SaveCanvasCommand command, SecUser user ->
 			assert command.name == "updated, new name"
 			assert command.modules == []
 		}
@@ -287,7 +287,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, false)
+		1 * canvasService.start(canvas1, false, null)
 	}
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
@@ -305,7 +305,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, true)
+		1 * canvasService.start(canvas1, true, null)
 	}
 
 	void "start() must not start a canvas if authorization fails"() {

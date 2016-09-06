@@ -29,6 +29,7 @@ public abstract class Chart extends ModuleWithUI {
 	private static final Logger log = Logger.getLogger(Chart.class);
 	
 	protected boolean hasRc = false;
+	protected String dataGrouping = "min/max";
 	
 	private void initCsv() {
 		csv = true;
@@ -38,7 +39,7 @@ public abstract class Chart extends ModuleWithUI {
 	@Override
 	public void init() {
 		canClearState = false;
-		
+
 		if (globals.getSignalPathContext().containsKey("csv"))
 			initCsv();
 
@@ -107,7 +108,7 @@ public abstract class Chart extends ModuleWithUI {
 		if (csv) {
 			File file = csvWriter().finish();
 			if (hasRc) {
-				globals.getUiChannel().push(new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()), uiChannelId);
+				globals.getUiChannel().push(new CSVMessage(file.getName()), uiChannelId);
 			}
 		}
 	}
@@ -120,7 +121,16 @@ public abstract class Chart extends ModuleWithUI {
 		options.add(new ModuleOption("ignoreEnabled", false, "boolean"));
 		options.add(new ModuleOption("ignoreBefore", todUtil==null ? "00:00:00" : todUtil.getStartString(), "string"));
 		options.add(new ModuleOption("ignoreAfter", todUtil==null ? "23:59:59" : todUtil.getEndString(), "string"));
-		
+
+		ModuleOption dataGroupingOption = ModuleOption.createString("dataGrouping", dataGrouping);
+		dataGroupingOption.addPossibleValue("max positive/min negative", "min/max");
+		dataGroupingOption.addPossibleValue("average", "average");
+		dataGroupingOption.addPossibleValue("first", "open");
+		dataGroupingOption.addPossibleValue("last", "close");
+		dataGroupingOption.addPossibleValue("max", "high");
+		dataGroupingOption.addPossibleValue("min", "low");
+		options.addIfMissing(dataGroupingOption);
+
 		return config;
 	}
 	
@@ -136,6 +146,10 @@ public abstract class Chart extends ModuleWithUI {
 			String begin = options.getOption("ignoreBefore").getString();
 			String end = options.getOption("ignoreAfter").getString();
 			todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
+		}
+
+		if (options.getOption("dataGrouping") != null) {
+			dataGrouping = options.getOption("dataGrouping").toString();
 		}
 	}
 

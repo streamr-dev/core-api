@@ -152,7 +152,7 @@ class SimpleHttpSpec extends Specification {
 	void "no input, object response"() {
 		init(0, ["foo"])
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [null, null, null], out1: [3, 3, 3]]
+		outputs = [errors: [null, null, null], foo: [3, 3, 3]]
 		response = [foo: 3]
 		expect:
 		test()
@@ -171,7 +171,7 @@ class SimpleHttpSpec extends Specification {
 		init(1, ["foo"])
 		def messages = ["4", "20", "everyday"]
 		inputs = [in1: messages]
-		outputs = [errors: [null, null, null], out1: messages]
+		outputs = [errors: [null, null, null], foo: messages]
 		response = { HttpPost r ->
 			def jsonString = EntityUtils.toString(r.entity)
 			def ob = new JSONObject(jsonString)
@@ -215,7 +215,7 @@ class SimpleHttpSpec extends Specification {
 			[name: "URL", value: "localhost"],
 			[name: "verb", value: "GET"]
 		])
-		inputs = [in1: [666, "666", 2 * 333], in2: [1 + 1 == 2, true, "true"]]
+		inputs = [inputput: [666, "666", 2 * 333], nother: [1 + 1 == 2, true, "true"]]
 		outputs = [errors: [null, null, null]]
 		response = { HttpUriRequest request ->
 			assert request.URI.toString().equals("localhost?inputput=666&nother=true")
@@ -250,8 +250,8 @@ class SimpleHttpSpec extends Specification {
 	void "JSON object dot notation works for output parsing"() {
 		init(0, ["seasons", "best.pony", "best.pals.human"])
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [null, null, null], out1: [4, 4, 4],
-							out2: ["Pink", "Pink", "Pink"], out3: ["Finn", "Finn", "Finn"]]
+		outputs = [errors: [null, null, null], seasons: [4, 4, 4],
+							"best.pony": ["Pink", "Pink", "Pink"], "best.pals.human": ["Finn", "Finn", "Finn"]]
 		response = [best: [pony: "Pink", pals: [dog: "Jake", human: "Finn"]], seasons: 4]
 		expect:
 		test()
@@ -260,8 +260,8 @@ class SimpleHttpSpec extends Specification {
 	void "JSON object dot notation supports array indexing too"() {
 		init(0, ["seasons[1]", "best.pals.count", "best.pals[1].name"])
 		inputs = [trigger: [1, true, "test"]]
-		outputs = [errors: [null, null, null], out1: [3, 3, 3],
-							out2: [2, 2, 2], out3: ["Finn", "Finn", "Finn"]]
+		outputs = [errors: [null, null, null], "seasons[1]": [3, 3, 3],
+				   "best.pals.count": [2, 2, 2], "best.pals[1].name": ["Finn", "Finn", "Finn"]]
 		response = [best: [pals: [[name: "Jake", species: "Dog"], [name: "Finn", species: "Human"]]], seasons: [4,3,2,1]]
 		expect:
 		test()
