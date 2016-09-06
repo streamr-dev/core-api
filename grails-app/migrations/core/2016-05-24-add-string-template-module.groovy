@@ -2,7 +2,7 @@ package core
 databaseChangeLog = {
 	changeSet(author: "jtakalai", id: "20160524-1226-1") {
 		insert(tableName: "module") {
-			column(name: "id", valueNumeric: 1012)
+			column(name: "id", valueNumeric: 1019)
 			column(name: "version", valueNumeric: 0)
 			column(name: "category_id", valueNumeric: 27)	// Text
 			column(name: "implementing_class", value: "com.unifina.signalpath.text.StringTemplate")
@@ -29,7 +29,7 @@ databaseChangeLog = {
 
 	changeSet(author: "jtakalai", id: "20160525-1713") {
 		insert(tableName: "module") {
-			column(name: "id", valueNumeric: 1013)
+			column(name: "id", valueNumeric: 1020)
 			column(name: "version", valueNumeric: 0)
 			column(name: "category_id", valueNumeric: 27) // Text
 			column(name: "implementing_class", value: "com.unifina.signalpath.text.JsonParser")

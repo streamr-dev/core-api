@@ -2,7 +2,7 @@ package core
 databaseChangeLog = {
 	changeSet(author: "jtakalai", id: "20160822-1438-1") {
 		insert(tableName: "module") {
-			column(name: "id", valueNumeric: 1016)
+			column(name: "id", valueNumeric: 1012)
 			column(name: "version", valueNumeric: 0)
 			column(name: "category_id", valueNumeric: 52)	// List
 			column(name: "implementing_class", value: "com.unifina.signalpath.list.GetFromList")
