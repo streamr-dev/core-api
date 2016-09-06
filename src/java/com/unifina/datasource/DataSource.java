@@ -2,6 +2,7 @@ package com.unifina.datasource;
 
 import java.util.*;
 
+import com.unifina.domain.signalpath.Canvas;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.IFeedRequirement;
@@ -155,9 +156,10 @@ public abstract class DataSource {
 			log.error("Exception thrown while stopping feed",e);
 			throw new RuntimeException("Error while stopping feed",e);
 		}
-		
-		for (IStopListener it : stopListeners)
+
+		for (IStopListener it : stopListeners) {
 			it.onStop();
+		}
 	}
 	
 	protected abstract void doStopFeed() throws Exception;
@@ -176,7 +178,14 @@ public abstract class DataSource {
 		}
 	}
 
-	protected Iterable<SignalPath> getSignalPaths() {
-		return signalPaths;
+	protected Iterable<SignalPath> getSerializableSignalPaths() {
+		List<SignalPath> serializableSps = new ArrayList<>();
+		for (SignalPath sp : signalPaths) {
+			Canvas canvas = sp.getCanvas();
+			if (canvas != null && !canvas.getAdhoc()) {
+				serializableSps.add(sp);
+			}
+		}
+		return serializableSps;
 	}
 }
