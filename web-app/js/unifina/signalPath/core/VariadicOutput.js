@@ -14,7 +14,7 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
     }
 
     var shrinkVariadic = function(div) {
-        if (!SignalPath.isLoading() && !module.moduleClosed) {
+        if (!SignalPath.isLoading() && !module.moduleClosed && !module.getOutput(json.name).isConnected()) {
             if (!div.hasClass("export") && !div.data("spObject").isConnected()) {
                 module.removeOutput(json.name)
             }
