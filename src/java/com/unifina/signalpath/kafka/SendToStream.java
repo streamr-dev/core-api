@@ -28,8 +28,8 @@ public class SendToStream extends AbstractSignalPathModule {
 	
 	@Override
 	public void init() {
-		kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
-		permissionService = (PermissionService) globals.getGrailsApplication().getMainContext().getBean("permissionService");
+		kafkaService = (KafkaService) getGlobals().getGrailsApplication().getMainContext().getBean("kafkaService");
+		permissionService = (PermissionService) getGlobals().getGrailsApplication().getMainContext().getBean("permissionService");
 		
 		addInput(streamParameter);
 		
@@ -44,18 +44,18 @@ public class SendToStream extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if (globals.isRealtime()) {
+		if (getGlobals().isRealtime()) {
 			Map msg = new LinkedHashMap<>();
 			for (Input i : drivingInputs) {
 				msg.put(i.getName(), i.getValue());
 			}
 			if (kafkaService == null) {
-				kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
+				kafkaService = (KafkaService) getGlobals().getGrailsApplication().getMainContext().getBean("kafkaService");
 			}
 			kafkaService.sendMessage(authenticatedStream, "", msg);
 		}
-		else if (!historicalWarningShown && globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '"+streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
+		else if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
+			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '"+streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
 			historicalWarningShown = true;
 		}
 	}
@@ -73,11 +73,11 @@ public class SendToStream extends AbstractSignalPathModule {
 			return;
 		
 		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas 
-		if (globals.isRunContext()) {
-			if (permissionService.canWrite(globals.getUser(), stream)) {
+		if (getGlobals().isRunContext()) {
+			if (permissionService.canWrite(getGlobals().getUser(), stream)) {
 				authenticatedStream = stream;
 			} else {
-				throw new AccessControlException(this.getName() + ": User " + globals.getUser().getUsername() + " does not have write access to Stream " + stream.getName());
+				throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() + " does not have write access to Stream " + stream.getName());
 			}
 		}
 

@@ -1,6 +1,6 @@
 SignalPath.GaugeModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 	
 	var area = null;	
 	var chart = null;
@@ -218,7 +218,7 @@ SignalPath.GaugeModule = function(data,canvas,prot) {
 
 	}
 	
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		
 		if (area==null)
 			initArea();

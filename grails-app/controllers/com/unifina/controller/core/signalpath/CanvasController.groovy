@@ -51,7 +51,9 @@ class CanvasController {
 		def beginDate = new Date()
 		def endDate = new Date()
 
-		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id)]
+		def json = request.JSON
+
+		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id), json: (json as JSON)?.toString()]
 	}
 
 	// Can be accessed anonymously for embedding canvases in iframes (eg. the landing page)
