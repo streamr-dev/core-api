@@ -61,7 +61,8 @@ public class Input<T> extends Endpoint<T> {
 	protected String[] getAcceptedTypes() {
 		return getTypeName().split(" ");
 	}
-	
+
+	@Override
 	public T getValue() {
 		return value;
 	}
@@ -134,6 +135,11 @@ public class Input<T> extends Endpoint<T> {
 		if (!isReady()) {
 			owner.cancelReady(this);
 		}
+	}
+
+	public void disconnect() {
+		this.source = null;
+		owner.cancelReady(this);
 	}
 
 	@Override

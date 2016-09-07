@@ -258,7 +258,7 @@ public class ModuleTestHelper {
 			// Time is set at start of event
 			if (isTimedMode() && ticks.containsKey(i)) {
 				((ITimeListener)module).setTime(ticks.get(i));
-				module.globals.time = ticks.get(i);
+				module.getGlobals().time = ticks.get(i);
 			}
 
 			// Set input values
@@ -359,12 +359,12 @@ public class ModuleTestHelper {
 		int timeStep = timeSteps.get(i);
 
 		if (timeStep != 0) {
-			module.globals.time = new Date(module.globals.time.getTime() + timeStep);
+			module.getGlobals().time = new Date(module.getGlobals().time.getTime() + timeStep);
 		}
 	}
 
 	private void validateUiChannelMessages() {
-		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
+		FakePushChannel uiChannel = (FakePushChannel) module.getGlobals().getUiChannel();
 		if (uiChannel == null) {
 			throw new TestHelperException("uiChannel: module.globals.uiChannel unexpectedly null", this);
 		}
@@ -421,7 +421,7 @@ public class ModuleTestHelper {
 			validateThatModuleDoesNotHaveKnownSerializationIssues();
 
 			// Globals is transient, we need to restore it after deserialization
-			Globals globalsTempHolder = module.globals;
+			Globals globalsTempHolder = module.getGlobals();
 
 			module.beforeSerialization();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -431,7 +431,7 @@ public class ModuleTestHelper {
 			if (serializationMode == SerializationMode.SERIALIZE_DESERIALIZE) {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
-				module.globals = globalsTempHolder;
+				module.setGlobals(globalsTempHolder);
 				module.afterDeserialization();
 				moduleInstanceChanged.call(module);
 			}
@@ -439,15 +439,15 @@ public class ModuleTestHelper {
 	}
 
 	private void clearModuleAndCollectorsAndChannels() {
-		module.globals.time = null;
+		module.getGlobals().time = null;
 		module.clear();
 		setUpGlobals(module);
 
 		for (Output<Object> output : module.getOutputs()) {
 			for (Input<Object> target : output.getTargets()) {
-				target.getOwner().globals = new Globals();
+				target.getOwner().setGlobals(new Globals());
 				target.getOwner().clear();
-				target.getOwner().globals = null;
+				target.getOwner().setGlobals(null);
 			}
 		}
 		module.connectionsReady();
@@ -529,10 +529,10 @@ public class ModuleTestHelper {
 	}
 
 	private void setUpGlobals(AbstractSignalPathModule module) {
-		module.globals = new Globals();
-		module.globals.time = new Date(0);
-		module.globals.setUiChannel(new FakePushChannel());
-		module.globals = overrideGlobalsClosure.call(module.globals);
+		module.setGlobals(new Globals());
+		module.getGlobals().time = new Date(0);
+		module.getGlobals().setUiChannel(new FakePushChannel());
+		module.setGlobals(overrideGlobalsClosure.call(module.getGlobals()));
 	}
 
 	/** create dummy outputs for each tested input */

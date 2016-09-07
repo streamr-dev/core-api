@@ -19,8 +19,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	var _cachedEndpoints = []
 
 	function createModuleFooter() {
-		// Button for toggling the clearState. Default true.
-		
 		var div = $("<div class='modulefooter'></div>")
 		prot.div.append(div)
 		prot.footer = div
@@ -125,10 +123,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		prot.div.on("drag", function(event, ui) {
 			if (_cachedEndpoints.length)
 				jsPlumb.repaint(_cachedEndpoints)
-		});
-		
-		$(SignalPath).on("_signalPathLoadModulesReady", function() {
-			prot.refreshConnections();
 		});
 		
 		// A module is focused by default when it is created
@@ -497,6 +491,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	// Everything added to the public interface can be accessed from the
 	// private interface too
 	$.extend(prot,pub);
-	
+
+	$(SignalPath).on("_signalPathLoadModulesReady", prot.refreshConnections);
+	$(prot).on('closed', function() {
+		$(SignalPath).off("_signalPathLoadModulesReady", prot.refreshConnections);
+	})
+
 	return pub;
 }

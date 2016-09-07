@@ -11,7 +11,7 @@ SignalPath.CustomModuleOptions = {
 
 SignalPath.CustomModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var dialog = null;
 	var debug = null;
@@ -154,18 +154,17 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	function updateJson() {
 		prot.jsonData.code = editor.getValue();
 	}
-	
-	var superReceiveResponse = pub.receiveResponse;
-	
-	pub.receiveResponse = function(payload) {
-		superReceiveResponse(payload);
-		
+
+	prot.receiveResponse = function(payload) {
 		if (payload.type=="debug" && debug != null) {
 			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
 		}
-		else if (payload.type=="compilationErrors") {
-			for (var i=0;i<payload.errors.length;i++) {
-				editor.setGutterMarker(payload.errors[i].line-1, "breakpoints", makeMarker());
+	}
+
+	pub.handleError = prot.handleError = function(error) {
+		if (error.type=="compilationErrors") {
+			for (var i=0;i<error.errors.length;i++) {
+				editor.setGutterMarker(error.errors[i].line-1, "breakpoints", makeMarker());
 			}
 		}
 	}

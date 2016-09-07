@@ -20,7 +20,7 @@ class ListAsTableSpec extends Specification {
 
 	def "initial headers are set correctly"() {
 		when:
-		module.handleRequest(new RuntimeRequest([type: "initRequest"], new Date()), initResponse);
+		module.handleRequest(new RuntimeRequest([type: "initRequest"], null, null, null, null, new HashSet<>()), initResponse);
 		then:
 		initResponse.initRequest.hdr.headers == ["List is empty"]
 	}
