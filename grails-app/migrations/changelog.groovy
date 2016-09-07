@@ -44,5 +44,6 @@ databaseChangeLog = {
 	include file: 'core/2016-08-22-get-from-list-module.groovy'
 	include file: 'core/2016-08-22-each-with-index-module.groovy'
 	include file: 'core/2016-08-19-foreach-module-js.groovy'
+	include file: 'core/2016-08-29-useful-list-modules.groovy'
 	include file: 'core/2016-08-30-test-fixtures-foreach-subcanvas.groovy'
 }
