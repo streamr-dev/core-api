@@ -370,8 +370,8 @@
 						className: "bootbox-sm",
 						callback: function(result) {
 							if (result) {
-								SignalPath.sendRequest(
-									module.getHash(),
+								SignalPath.runtimeRequest(
+									module.getRuntimeRequestURL(),
 									{
 										type: "paramChange",
 										param: pub.getName(),

@@ -62,7 +62,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	protected String name;
 	protected Integer hash;
 
-	transient public Globals globals;
+	private transient Globals globals;
 
 	private boolean initialized;
 
@@ -301,7 +301,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		// Only report the initialization of this module once
 		if (!initialized) {
-			globals.onModuleInitialized(this);
+			getGlobals().onModuleInitialized(this);
 			initialized = true;
 		}
 	}
@@ -405,9 +405,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> map = (json != null ? json : new HashMap<String, Object>());
 
-		List<Map> params = new ArrayList<Map>();
-		List<Map> ins = new ArrayList<Map>();
-		List<Map> outs = new ArrayList<Map>();
+		List<Map> params = new ArrayList<>();
+		List<Map> ins = new ArrayList<>();
+		List<Map> outs = new ArrayList<>();
 		for (Input i : getInputs()) {
 			if (i instanceof Parameter) {
 				params.add(i.getConfiguration());
@@ -514,11 +514,6 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
 		}
-
-		// Embedded modules inherit the hash-id of their parents
-		if (parentSignalPath != null && parentSignalPath.getHash() != null) {
-			hash = parentSignalPath.getHash();
-		}
 	}
 
 	public Module getDomainObject() {
@@ -586,18 +581,20 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
-	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
+	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, RuntimeRequest.PathReader path) {
 		// Add event to message queue, don't do it right away 
-		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, globals.isRealtime() ? request.getTimestamp() : globals.time, this);
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
+
+		final AbstractSignalPathModule recipient = resolveRuntimeRequestRecipient(request, path);
 
 		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					handleRequest(request, response);
+					recipient.handleRequest(request, response);
 				} catch (AccessControlException e) {
 					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
 					log.error(error);
@@ -608,8 +605,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}, response);
 		request.setFuture(future);
 
-		globals.getDataSource().getEventQueue().enqueue(fe);
+		getGlobals().getDataSource().getEventQueue().enqueue(fe);
 		return future;
+	}
+
+	/**
+	 * Can be overridden to dig RuntimeRequest recipients from within this module. The default implementation returns "this".
+     */
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
+		return this;
 	}
 
 	@Override
@@ -636,8 +640,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param request
 	 */
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
-		// By default all modules support runtime parameter changes
-		if (request.getType().equals("paramChange")) {
+		// By default all modules support runtime parameter changes, ping requests and json requests
+		if (request.getType().equals("ping")) {
+			response.setSuccess(true);
+		}
+		else if (request.getType().equals("paramChange")) {
 
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
@@ -663,8 +670,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				response.setSuccess(true);
 			} catch (Exception e) {
 				log.error("Error making runtime parameter change!", e);
-				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
+				getGlobals().getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
+		}
+		else if (request.getType().equals("json")) {
+			response.put("json", this.getConfiguration());
+			response.setSuccess(true);
 		}
 	}
 
@@ -710,5 +721,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * Override to handle steps after deserialization
 	 */
 	public void afterDeserialization() {
+	}
+
+	public Globals getGlobals() {
+		return globals;
+	}
+
+	public void setGlobals(Globals globals) {
+		this.globals = globals;
 	}
 }

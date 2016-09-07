@@ -59,8 +59,8 @@ public class DateConversion extends AbstractSignalPathModule {
 	@Override
 	public void initialize() {
 		super.initialize();
-		if (globals.getUser()!=null)
-			tz.receive(globals.getUser().getTimezone());
+		if (getGlobals().getUser()!=null)
+			tz.receive(getGlobals().getUser().getTimezone());
 	}
 	
 	@Override
@@ -90,7 +90,7 @@ public class DateConversion extends AbstractSignalPathModule {
 		yearsOut.send(cal.get(Calendar.YEAR));
 		monthsOut.send(cal.get(Calendar.MONTH)+1);
 		daysOut.send(cal.get(Calendar.DAY_OF_MONTH));
-		hoursOut.send(cal.get(Calendar.HOUR));
+		hoursOut.send(cal.get(Calendar.HOUR_OF_DAY));
 		minutesOut.send(cal.get(Calendar.MINUTE));
 		secondsOut.send(cal.get(Calendar.SECOND));
 		msOut.send(cal.get(Calendar.MILLISECOND));
@@ -104,15 +104,15 @@ public class DateConversion extends AbstractSignalPathModule {
 		if (cal == null) {
 			cal = Calendar.getInstance();
 
-			if (globals.getUser()!=null)
-				cal.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+			if (getGlobals().getUser()!=null)
+				cal.setTimeZone(TimeZone.getTimeZone(getGlobals().getUser().getTimezone()));
 		}
 
 		if (df == null) {
 			df = new SimpleDateFormat();
 
-			if (globals.getUser()!=null)
-				df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+			if (getGlobals().getUser()!=null)
+				df.setTimeZone(TimeZone.getTimeZone(getGlobals().getUser().getTimezone()));
 		}
 	}
 

@@ -52,7 +52,8 @@ public class Input<T> extends Endpoint<T> {
 				p.receive(value);
 		}
 	}
-	
+
+	@Override
 	public T getValue() {
 		return value;
 	}
@@ -125,6 +126,11 @@ public class Input<T> extends Endpoint<T> {
 		if (!isReady()) {
 			owner.cancelReady(this);
 		}
+	}
+
+	public void disconnect() {
+		this.source = null;
+		owner.cancelReady(this);
 	}
 
 	@Override

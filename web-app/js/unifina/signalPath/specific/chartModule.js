@@ -1,6 +1,6 @@
 SignalPath.ChartModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	prot.enableIONameChange = false;	
 		
@@ -73,7 +73,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 
 	function initChart() {
 		prot.body.find(".ioTable").css("width","0px");
-		prot.chart = new StreamrChart(prot.body, SignalPath.defaultChartOptions)
+		prot.chart = new StreamrChart(prot.body, prot.jsonData.options)
 		prot.chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
 		$(prot.chart).on('destroyed', function() {
 			prot.body.find("div.csvDownload").remove()
@@ -86,7 +86,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		}
 	}
 	
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		prot.chart.handleMessage(d)
 		// Show csv download link
 		if (d.type==="csv") {
@@ -161,7 +161,7 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 
 	function sendInitRequest() {
 		if (SignalPath.isRunning()) {
-			SignalPath.sendRequest(prot.hash, {type: 'initRequest'}, function (response, err) {
+			SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type: 'initRequest'}, function (response, err) {
 				if (err)
 					console.error("Failed initRequest for ChartModule: %o", err)
 				else

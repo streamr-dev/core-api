@@ -84,7 +84,7 @@ public class StreamParameter extends Parameter<Stream> {
 	}
 
 	private FeedService getFeedService() {
-		return getOwner().globals.getBean(FeedService.class);
+		return getOwner().getGlobals().getBean(FeedService.class);
 	}
 
 	public boolean getCheckModuleId() {

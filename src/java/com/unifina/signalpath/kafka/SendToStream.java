@@ -1,21 +1,17 @@
 package com.unifina.signalpath.kafka;
 
-import com.unifina.domain.security.SecUser;
+import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.Stream;
 import com.unifina.service.FeedService;
-import com.unifina.service.PermissionService;
+import com.unifina.service.KafkaService;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
+import org.codehaus.groovy.grails.web.json.JSONArray;
+import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.codehaus.groovy.grails.web.json.JSONArray;
-import org.codehaus.groovy.grails.web.json.JSONObject;
-
-import com.unifina.domain.data.Feed;
-import com.unifina.domain.data.Stream;
-import com.unifina.service.KafkaService;
 
 public class SendToStream extends AbstractSignalPathModule {
 
@@ -31,8 +27,8 @@ public class SendToStream extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
-		feedService = globals.getBean(FeedService.class);
-		kafkaService = globals.getBean(KafkaService.class);
+		feedService = getGlobals().getBean(FeedService.class);
+		kafkaService = getGlobals().getBean(KafkaService.class);
 		
 		addInput(streamParameter);
 		
@@ -47,20 +43,20 @@ public class SendToStream extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if (globals.isRealtime()) {
+		if (getGlobals().isRealtime()) {
 			Map msg = new LinkedHashMap<>();
 			for (Input i : drivingInputs) {
 				msg.put(i.getName(), i.getValue());
 			}
 			if (kafkaService == null) { // null after de-serialization
-				kafkaService = globals.getBean(KafkaService.class);
+				kafkaService = getGlobals().getBean(KafkaService.class);
 			}
 			Stream stream = streamParameter.getValue();
 			authenticateStream(stream);
 			kafkaService.sendMessage(stream, "", msg);
 		}
-		else if (!historicalWarningShown && globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +
+		else if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
+			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +
 				streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
 			historicalWarningShown = true;
 		}
@@ -77,8 +73,7 @@ public class SendToStream extends AbstractSignalPathModule {
 		
 		if (stream==null)
 			return;
-		
-		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas 
+
 		authenticateStream(stream);
 
 		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
@@ -128,15 +123,16 @@ public class SendToStream extends AbstractSignalPathModule {
 	}
 
 	private void authenticateStream(Stream stream) {
-		if (globals.isRunContext() && !stream.getId().equals(lastStreamId) ) {
+		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
+		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
 			if (feedService == null) {
-				feedService = globals.getBean(FeedService.class);
+				feedService = getGlobals().getBean(FeedService.class);
 			}
 
-			if (feedService.isStreamWritable(stream.getId(), globals.getUser())) {
+			if (feedService.isStreamWritable(stream.getId(), getGlobals().getUser())) {
 				lastStreamId = stream.getId();
 			} else {
-				throw new AccessControlException(this.getName() + ": User " + globals.getUser().getUsername() +
+				throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +
 					" does not have write access to Stream " + stream.getName());
 			}
 		}

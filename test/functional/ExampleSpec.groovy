@@ -4,6 +4,9 @@ import core.LoginTester2Spec
 import core.mixins.CanvasMixin
 
 @Mixin(CanvasMixin)
+// Examples are commented out
+// https://github.com/streamr-dev/unifina-core/commit/9ba0a477358336750546f1350578d1272c59467c
+@Ignore
 class ExampleSpec extends LoginTester2Spec {
 
 	def "examples tabs must be shown in the load browser"() {
