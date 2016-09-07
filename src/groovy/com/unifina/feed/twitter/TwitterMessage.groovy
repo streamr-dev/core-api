@@ -18,7 +18,8 @@ class TwitterMessage implements ITimestamped {
 	public String name
 	public String language
 	public int followers
-	public boolean isRetweet
+	public String quotedText
+	public String[] quotedUrls
 	public TwitterStreamConfig streamConfig
 
 	// those keywords that were found in this message
@@ -31,9 +32,18 @@ class TwitterMessage implements ITimestamped {
 		msg.urls = s.URLEntities*.expandedURL
 		msg.username = s.user.name
 		msg.name = s.user.screenName
-		msg.language = s.lang		// TODO: or s.user.lang? s.lang is often "Und" (undefined)
+		msg.language = s.lang
 		msg.followers = s.user.followersCount
-		msg.isRetweet = s.retweet
+
+		// It seems a tweet is only either retweet (without comments) or quote tweet (with added comments)
+		// see https://support.twitter.com/articles/20169873
+		if (s.quotedStatus) {
+			msg.quotedText = s.quotedStatus.text
+			msg.quotedUrls = s.quotedStatus.URLEntities*.expandedURL
+		} else if (s.retweetedStatus) {
+			msg.quotedText = s.retweetedStatus.text
+			msg.quotedUrls = s.retweetedStatus.URLEntities*.expandedURL
+		}
 		return msg
 	}
 
@@ -44,6 +54,16 @@ class TwitterMessage implements ITimestamped {
 
 	@Override
 	String toString() {
-		return text + "[" + urls.join(",") + "]"
+		String ret = text
+		if (urls) {
+			ret += "[" + urls.join(",") + "]"
+		}
+		if (quotedText) {
+			ret += " => " + quotedText
+			if (quotedUrls) {
+				ret += "[" + quotedUrls.join(",") + "]"
+			}
+		}
+		return ret
 	}
 }
