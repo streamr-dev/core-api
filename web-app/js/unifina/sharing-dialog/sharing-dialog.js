@@ -122,7 +122,7 @@
                     '<div class="pull-right switcher-container">' +
                         '<input type="checkbox" class="anonymous-switcher pull-right" {{ checked ? "checked" : "" }} >' +
                     '</div>' +
-                    '<div class="publish-label pull-right"> Allow anonymous read access </div>' +
+                    '<div class="publish-label pull-right"> Public read access </div>' +
                 '</div>' +
             '</div>' +
             '<div class="access-list col-xs-12"></div>' +

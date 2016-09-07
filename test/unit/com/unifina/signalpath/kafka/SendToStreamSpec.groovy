@@ -9,7 +9,6 @@ import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock

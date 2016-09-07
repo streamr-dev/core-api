@@ -40,4 +40,6 @@ databaseChangeLog = {
 	include file: 'core/2016-06-15-new-event-table-module.groovy'
 	include file: 'core/2016-08-08-drop-unique-constraint-on-signupinvite.groovy'
 	include file: 'core/2016-08-22-get-from-list-module.groovy'
+	include file: 'core/2016-08-19-foreach-module-js.groovy'
+	include file: 'core/2016-08-30-test-fixtures-foreach-subcanvas.groovy'
 }

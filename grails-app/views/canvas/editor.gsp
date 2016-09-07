@@ -1,3 +1,4 @@
+<%@ page import="grails.converters.JSON" %>
 <html>
 	<head>
 		<meta name="layout" content="sidemenu" />
@@ -55,7 +56,7 @@ $(document).ready(function() {
 		},
 		connectionOptions: {
 			server: "${grailsApplication.config.streamr.ui.server}",
-			autoConnect: false,
+			autoConnect: true,
 			autoDisconnect: true
 		}
 	});
@@ -89,7 +90,7 @@ $(document).ready(function() {
 			$("a[href=#tab-realtime]").tab('show')
 
 			// Try to ping a running SignalPath on load, and show error if it can't be reached
-			SignalPath.sendRequest(undefined, {type:"ping"}, function(response, err) {
+			SignalPath.runtimeRequest(SignalPath.getRuntimeRequestURL(), {type:"ping"}, function(response, err) {
 				if (err)
 					Streamr.showError('${message(code:'canvas.ping.error')}')
 			})
@@ -314,6 +315,9 @@ $(document).ready(function() {
 	<g:if test="${id}">
 		SignalPath.load('${id}');
 	</g:if>
+	<g:elseif test="${json}">
+		SignalPath.loadJSON(${raw(json)})
+	</g:elseif>
 })
 
 $(document).unload(function () {

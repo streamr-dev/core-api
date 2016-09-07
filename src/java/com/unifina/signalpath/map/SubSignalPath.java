@@ -41,4 +41,8 @@ public class SubSignalPath implements Serializable {
 	public String getKey() {
 		return key;
 	}
+
+	public SignalPath getSignalPath() {
+		return signalPath;
+	}
 }

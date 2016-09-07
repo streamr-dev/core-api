@@ -16,6 +16,9 @@ public class TimeSeriesChartInput extends TimeSeriesInput {
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
 		config.put("yAxis", yAxis);
+		if (value.equals(Double.NaN)) {
+			config.remove("value");
+		}
 		return config;
 	}
 	

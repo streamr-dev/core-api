@@ -1,6 +1,6 @@
 SignalPath.LabelModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var label;
 	
@@ -11,11 +11,11 @@ SignalPath.LabelModule = function(data,canvas,prot) {
 		prot.body.append(label);
 	}
 	
-	pub.receiveResponse = function(payload) {
+	prot.receiveResponse = function(payload) {
 		label.html(payload.value);
 	}
 
-	pub.getUIChannelOptions = function() {
+	prot.getUIChannelOptions = function() {
 		// Force resending of only last value
 		return { resend_last: 1 }
 	}
