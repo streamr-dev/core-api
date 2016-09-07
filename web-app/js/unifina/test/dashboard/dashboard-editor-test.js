@@ -124,7 +124,8 @@ describe('dashboard-editor', function() {
 
 			dashboardView = new db.DashboardView({
 				model: dashboard,
-				el: $("#dashboard-view")
+				el: $("#dashboard-view"),
+				baseUrl: "/"
 			})
 
 			sidebar = new db.SidebarView({
@@ -431,7 +432,8 @@ describe('dashboard-editor', function() {
 
 				dashboardView = new db.DashboardView({
 					model: dashboard,
-					el: $("#dashboard-view")
+					el: $("#dashboard-view"),
+					baseUrl: "/"
 				})
 
 				sidebar = new db.SidebarView({
@@ -462,7 +464,8 @@ describe('dashboard-editor', function() {
 
 				dashboardView = new db.DashboardView({
 					model: dashboard,
-					el: $("#dashboard-view")
+					el: $("#dashboard-view"),
+					baseUrl: "/"
 				})
 
 				sidebar = new db.SidebarView({

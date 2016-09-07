@@ -64,9 +64,9 @@ public abstract class Parameter<T> extends Input<T> {
 		// Also check the existence of a DataSource, because an empty
 		// but required parameter is only a problem when actually running
 		// the path (not when creating, loading or saving)
-		if (!canBeEmpty && owner.globals!=null && owner.globals.getDataSource()!=null && isEmpty(v)) {
-			if (owner.globals.getUiChannel()!=null)
-				owner.globals.getUiChannel().push(new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash), owner.parentSignalPath.getUiChannelId());
+		if (!canBeEmpty && owner.getGlobals() !=null && owner.getGlobals().getDataSource()!=null && isEmpty(v)) {
+			if (owner.getGlobals().getUiChannel()!=null)
+				owner.getGlobals().getUiChannel().push(new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash), owner.parentSignalPath.getUiChannelId());
 			
 			throw new IllegalArgumentException("Parameter "+(getOwner()!=null ? getOwner().getName()+"." : "")+(getDisplayName()==null ? getName() : getDisplayName())+" does not have a value!");
 		}

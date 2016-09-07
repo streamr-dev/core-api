@@ -5,8 +5,6 @@ import com.unifina.datasource.DataSource
 import com.unifina.feed.MasterClock
 import com.unifina.signalpath.simplemath.Count
 import com.unifina.signalpath.time.ClockModule
-import com.unifina.signalpath.utils.PassThrough
-import com.unifina.signalpath.utils.VariadicPassThrough
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import org.codehaus.groovy.grails.commons.GrailsApplication
@@ -29,7 +27,7 @@ class PropagatorSpec extends Specification {
 		ClockModule clock = new ClockModule()
 
 		[count, clock].each {
-			it.globals= globals
+			it.globals = globals
 			it.init()
 			it.configure[:]
 		}
@@ -78,7 +76,7 @@ class PropagatorSpec extends Specification {
 		}
 
 		[count, clock, mod, mod2].each {
-			it.globals= globals
+			it.globals = globals
 			it.init()
 			it.configure[:]
 		}

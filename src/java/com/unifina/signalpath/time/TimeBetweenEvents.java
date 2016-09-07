@@ -33,7 +33,7 @@ public class TimeBetweenEvents extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		date = globals.time;
+		date = getGlobals().time;
 		Long ts = date.getTime();
 		if(lastTs != null){
 			out.send((double)(ts-lastTs));

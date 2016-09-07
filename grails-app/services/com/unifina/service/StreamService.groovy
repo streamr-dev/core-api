@@ -15,6 +15,10 @@ import org.springframework.util.Assert
 class StreamService {
 
 	def grailsApplication
+
+	Stream findByName(String name) {
+		return Stream.findByName(name)
+	}
 	
 	Stream createStream(params, SecUser user) {
 		Stream stream = new Stream(params)
