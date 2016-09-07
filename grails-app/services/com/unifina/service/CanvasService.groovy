@@ -54,7 +54,7 @@ class CanvasService {
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
-		canvas.json = new JsonBuilder(newSignalPathMap).toString()
+		canvas.json = newSignalPathMap as JSON
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
 
