@@ -45,4 +45,5 @@ databaseChangeLog = {
 	include file: 'core/2016-08-22-get-from-list-module.groovy'
 	include file: 'core/2016-08-22-each-with-index-module.groovy'
 	include file: 'core/2016-05-24-add-string-template-module.groovy'
+	include file: 'core/2016-09-07-current-time-module.groovy'
 }
