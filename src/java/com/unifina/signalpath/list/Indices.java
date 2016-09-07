@@ -7,7 +7,7 @@ import com.unifina.signalpath.ListOutput;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EachWithIndex extends AbstractSignalPathModule {
+public class Indices extends AbstractSignalPathModule {
 
 	private final ListInput listIn = new ListInput(this, "list");
 	private final ListOutput listOut = new ListOutput(this, "list");

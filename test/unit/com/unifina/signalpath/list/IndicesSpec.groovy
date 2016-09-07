@@ -3,11 +3,11 @@ package com.unifina.signalpath.list
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
-class EachWithIndexSpec extends Specification {
-	EachWithIndex module
+class IndicesSpec extends Specification {
+	Indices module
 
 	def setup() {
-		module = new EachWithIndex()
+		module = new Indices()
 		module.init()
 		module.configure(module.configuration)
 	}
