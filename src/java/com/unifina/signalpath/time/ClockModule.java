@@ -42,8 +42,8 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 			if(df == null){
 				df = new SimpleDateFormat(format.getValue());
 
-				if (globals.getUser()!=null)
-					df.setTimeZone(TimeZone.getTimeZone(globals.getUser().getTimezone()));
+				if (getGlobals().getUser()!=null)
+					df.setTimeZone(TimeZone.getTimeZone(getGlobals().getUser().getTimezone()));
 			}
 			else if (!df.toPattern().equals(format.getValue()))
 				df.applyPattern(format.getValue());

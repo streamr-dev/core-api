@@ -1,6 +1,6 @@
 SignalPath.MapModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var $container = null
 	var map = null
@@ -61,7 +61,7 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		map.handleMessage(d)
 	}
 	

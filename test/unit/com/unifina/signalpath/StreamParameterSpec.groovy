@@ -10,8 +10,8 @@ import spock.lang.Specification
 @Mock([Feed, Stream])
 class StreamParameterSpec extends Specification {
 
-	AbstractSignalPathModule ownerModule = Stub(AbstractSignalPathModule)
-	StreamParameter streamParameter = new StreamParameter(ownerModule, "name")
+	AbstractSignalPathModule ownerModule
+	StreamParameter streamParameter
 
 	def setup() {
 
@@ -25,7 +25,11 @@ class StreamParameterSpec extends Specification {
 		stream.feed = feed
 		stream.save(failOnError: true, validate: false)
 
-		ownerModule.globals = Stub(Globals) { getBean(FeedService) >> new FeedService() }
+		ownerModule = Mock(AbstractSignalPathModule)
+		streamParameter = new StreamParameter(ownerModule, "name")
+		Globals globals = Mock(Globals)
+		ownerModule.getGlobals() >> globals
+		globals.getBean(FeedService) >> new FeedService()
 	}
 
 	def "has typeName of 'Stream'"() {
@@ -64,8 +68,6 @@ class StreamParameterSpec extends Specification {
 		Stream stream = new Stream()
 		stream.id = "stream-id"
 		stream.save(failOnError: true, validate: false)
-
-		ownerModule.globals = Stub(Globals) { getBean(FeedService) >> new FeedService() }
 
 		when:
 		streamParameter.receive("stream-id")

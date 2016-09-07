@@ -1,7 +1,6 @@
 package com.unifina.signalpath.custom
 
 import com.unifina.service.SerializationService
-import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
