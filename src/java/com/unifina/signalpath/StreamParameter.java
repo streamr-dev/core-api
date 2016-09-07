@@ -64,6 +64,11 @@ public class StreamParameter extends Parameter<Stream> {
 		return getStreamById(s);
 	}
 
+	@Override
+	public Object formatValue(Stream value) {
+		return value == null ? null : value.getId(); // Controls how value and defaultValue are turned to config
+	}
+
 	private Stream getStreamById(Object id) {
 		if (id instanceof String) {
 			FeedService fs = getFeedService();

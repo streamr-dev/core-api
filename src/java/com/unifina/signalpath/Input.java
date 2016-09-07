@@ -52,15 +52,6 @@ public class Input<T> extends Endpoint<T> {
 				p.receive(value);
 		}
 	}
-	
-	/**
-	 * Returns an array of typenames that this Input accepts.
-	 * By default returns an array with one element: the one returned by getTypeName()
-	 * @return
-	 */
-	protected String[] getAcceptedTypes() {
-		return getTypeName().split(" ");
-	}
 
 	@Override
 	public T getValue() {

@@ -100,6 +100,15 @@ public abstract class Endpoint<T> implements Serializable {
 
 		return map;
 	}
+
+	/**
+	 * Returns an array of typenames that this Input accepts.
+	 * By default returns an array with one element: the one returned by getTypeName()
+	 * @return
+	 */
+	protected String[] getAcceptedTypes() {
+		return getTypeName().split(" ");
+	}
 	
 	public void setConfiguration(Map<String,Object> config) {
 		json = new LinkedHashMap<>(config);
