@@ -37,8 +37,8 @@ public class ForEachItem extends AbstractSignalPathModule {
 
 		// Construct signal path
 		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
-		SignalPathService signalPathService = globals.getBean(SignalPathService.class);
-		subCanvas = signalPathService.mapToSignalPath(signalPathMap, true, globals, false);
+		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		subCanvas = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), false);
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = subCanvas.getExportedInputs();

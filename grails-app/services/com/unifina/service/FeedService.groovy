@@ -76,9 +76,4 @@ class FeedService {
 		return Stream.findAllByFeed(feed)
 	}
 
-	// TODO: better way than making this method?
-	boolean isStreamWritable(String streamId, SecUser user) {
-		Stream stream = Stream.get(streamId)
-		return permissionService.canWrite(user, stream)
-	}
 }

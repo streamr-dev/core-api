@@ -22,7 +22,7 @@ public class SearchStream extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		if (streamService == null) {
-			streamService = globals.getBean(StreamService.class);
+			streamService = getGlobals().getBean(StreamService.class);
 		}
 
 		Stream stream = streamService.findByName(searchName.getValue());

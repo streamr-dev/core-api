@@ -2,8 +2,8 @@ package com.unifina.signalpath.kafka;
 
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
-import com.unifina.service.FeedService;
 import com.unifina.service.KafkaService;
+import com.unifina.service.PermissionService;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
@@ -18,7 +18,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
 	transient protected JSONObject streamConfig = null;
 
-	transient protected FeedService feedService = null;
+	transient protected PermissionService permissionService = null;
 	transient protected KafkaService kafkaService = null;
 	
 	protected boolean historicalWarningShown = false;
@@ -27,7 +27,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
-		feedService = getGlobals().getBean(FeedService.class);
+		permissionService = getGlobals().getBean(PermissionService.class);
 		kafkaService = getGlobals().getBean(KafkaService.class);
 		
 		addInput(streamParameter);
@@ -125,11 +125,11 @@ public class SendToStream extends AbstractSignalPathModule {
 	private void authenticateStream(Stream stream) {
 		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
 		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
-			if (feedService == null) {
-				feedService = getGlobals().getBean(FeedService.class);
+			if (permissionService == null) {
+				permissionService = getGlobals().getBean(PermissionService.class);
 			}
 
-			if (feedService.isStreamWritable(stream.getId(), getGlobals().getUser())) {
+			if (permissionService.canWrite(getGlobals().getUser(), stream)) {
 				lastStreamId = stream.getId();
 			} else {
 				throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +

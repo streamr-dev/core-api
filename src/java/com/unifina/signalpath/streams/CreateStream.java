@@ -32,7 +32,7 @@ public class CreateStream extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		if (streamService == null) {
-			streamService = globals.getBean(StreamService.class);
+			streamService = getGlobals().getBean(StreamService.class);
 		}
 
 		if (createdStreams.contains(nameInput.getValue())) {
@@ -41,7 +41,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		}
 
 		try {
-			Stream s = streamService.createStream(buildParams(), globals.getUser());
+			Stream s = streamService.createStream(buildParams(), getGlobals().getUser());
 			created.send(true);
 			stream.send(s.getId());
 			createdStreams.add(nameInput.getValue());
