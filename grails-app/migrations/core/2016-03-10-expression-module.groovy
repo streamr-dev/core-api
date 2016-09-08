@@ -4,7 +4,7 @@ databaseChangeLog = {
 
 	changeSet(author: "eric", id: "expression-module-1") {
 		insert(tableName: "module") {
-			column(name: "id", valueNumeric: 528)
+			column(name: "id", valueNumeric: 567)
 			column(name: "version", valueNumeric: 0)
 			column(name: "category_id", valueNumeric: 1)
 			column(name: "implementing_class", value: "com.unifina.signalpath.simplemath.Expression")
