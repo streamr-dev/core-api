@@ -1,6 +1,6 @@
 SignalPath.HeatmapModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var $container = null
 	var heatmap = null
@@ -48,7 +48,7 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		heatmap.handleMessage(d)
 	}
 	

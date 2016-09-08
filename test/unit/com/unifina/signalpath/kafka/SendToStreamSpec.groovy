@@ -9,7 +9,6 @@ import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
@@ -20,7 +19,7 @@ import spock.lang.Specification
 import java.security.AccessControlException
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Stream, Feed])
+@Mock([SecUser, Stream, Feed])
 class SendToStreamSpec extends Specification {
 
 	static class AllPermissionService extends PermissionService {
@@ -42,14 +41,18 @@ class SendToStreamSpec extends Specification {
 	}
 
 	static class FakeKafkaService extends KafkaService {
-		def receivedMessages = []
+		def receivedMessages = [:]
 
 		@Override
 		void sendMessage(Stream stream, Object key, Map message) {
-			receivedMessages << message
+			if (!receivedMessages.containsKey(stream.id)) {
+				receivedMessages[stream.id] = []
+			}
+			receivedMessages[stream.id] << message
 		}
 	}
 
+	SecUser user
 	FakeKafkaService fakeKafkaService
 	Globals globals
 	SendToStream module
@@ -61,21 +64,28 @@ class SendToStreamSpec extends Specification {
 			permissionService(AllPermissionService)
 		}
 
+		def user = new SecUser(name: "test user")
+		user.save(failOnError: true, validate: false)
+
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
-		feed.save(validate: false)
+		feed.save(validate: false, failOnError: true)
 
 		def s = new Stream()
 		s.feed = feed
 		s.id = s.name = "stream-0"
+		s.user = user
 		s.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
 		]]
-		s.save(false)
+		s.save(validate: false, failOnError: true)
 
 		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
-		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, new SecUser(name: "test user")])
+		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
+		globals.realtime = true
+		globals.uiChannel = new FakePushChannel()
+		globals.dataSource = new RealtimeDataSource()
     }
 
 	private void createModule() {
@@ -102,20 +112,17 @@ class SendToStreamSpec extends Specification {
 		
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.overrideGlobals {
-				globals.realtime = true
-				globals.uiChannel = new FakePushChannel()
-				globals.dataSource = new RealtimeDataSource()
-				globals
-			}
+			.overrideGlobals { globals }
 			.afterEachTestCase {
 				assert fakeKafkaService.receivedMessages == [
-					[strIn:"a", numIn:1.0],
-					[strIn:"b", numIn:2.0],
-					[strIn:"c", numIn:3.0],
-					[strIn:"d", numIn:4.0]
+					"stream-0": [
+						[strIn:"a", numIn:1.0],
+						[strIn:"b", numIn:2.0],
+						[strIn:"c", numIn:3.0],
+						[strIn:"d", numIn:4.0]
+					]
 				]
-				fakeKafkaService.receivedMessages = []
+				fakeKafkaService.receivedMessages = [:]
 			}.test()
 	}
 
@@ -153,5 +160,41 @@ class SendToStreamSpec extends Specification {
 		then:
 		1 * globals.isRunContext() >> false
 		notThrown(AccessControlException)
+	}
+
+	void "changing stream parameter during run time re-routes messages to new stream"() {
+		createModule()
+
+		def s2 = new Stream()
+		s2.feed = Feed.load(Feed.KAFKA_ID)
+		s2.id = s2.name = "stream-1"
+		s2.config = Stream.load("stream-0").config
+		s2.user = user
+		s2.save(validate: false, failOnError: true)
+
+		when:
+		Map inputValues = [
+			stream: ["stream-0", null, "stream-1", null],
+			strIn: ["a", "b", "c", "d"],
+			numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+				assert fakeKafkaService.receivedMessages == [
+					"stream-0": [
+						[strIn:"a", numIn:1.0],
+						[strIn:"b", numIn:2.0],
+					],
+					"stream-1": [
+						[strIn:"c", numIn:3.0],
+						[strIn:"d", numIn:4.0],
+					]
+				]
+				fakeKafkaService.receivedMessages = [:]
+			}.test()
 	}
 }

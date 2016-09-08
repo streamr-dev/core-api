@@ -19,7 +19,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	}
 
 	protected boolean pushToUiChannel(Object data) {
-		PushChannel rc = globals.getUiChannel();
+		PushChannel rc = getGlobals().getUiChannel();
 		if (rc == null) {
 			return false;
 		} else {
@@ -33,8 +33,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		if (getUiChannelId() == null) {
 			throw new NullPointerException("uiChannelId of moduleWithUi " + name + " was unexpectedly null");
 		}
-		if (globals!=null && globals.getUiChannel()!=null) {
-			globals.getUiChannel().addChannel(uiChannelId);
+		if (getGlobals() !=null && getGlobals().getUiChannel()!=null) {
+			getGlobals().getUiChannel().addChannel(uiChannelId);
 		}
 		super.connectionsReady();
 	}
@@ -75,7 +75,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		Map<String, Object> config = super.getConfiguration();
 		Map uiChannel = getUiChannelMap();
 		
-		if (getWebcomponentName() != null && globals.isRealtime())
+		if (getWebcomponentName() != null && getGlobals().isRealtime())
 			uiChannel.put("webcomponent", getWebcomponentName());
 		
 		config.put("uiChannel", uiChannel);

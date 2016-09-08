@@ -73,7 +73,8 @@ grails.project.dependency.resolution = {
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		runtime('com.github.nkzawa:socket.io-client:0.3.0')
 		runtime('joda-time:joda-time:2.9.3')
-		
+		compile('com.udojava:EvalEx:1.3')
+
         compile('com.unifina:kafka-client:0.1.16') {
             excludes "slf4j-log4j12"
         }
@@ -87,10 +88,11 @@ grails.project.dependency.resolution = {
         test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
         test "org.gebish:geb-spock:$gebVersion"
 
-        runtime('org.twitter4j:twitter4j-core:[4.0,)')
-        runtime('com.twitter:hbc-core:2.2.0') {
+		runtime('org.twitter4j:twitter4j-core:[4.0,)')
+		runtime('com.twitter:hbc-core:2.2.0') {
 			excludes 'com.google.guava:guava:14.0.1'
 		}
+
 		compile 'org.mongodb:mongodb-driver:3.2.1'
 		compile('redis.clients:jedis:2.8.1')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')

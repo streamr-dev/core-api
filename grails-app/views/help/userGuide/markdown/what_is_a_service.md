@@ -10,7 +10,7 @@ Computation in a Streamr service is entirely event-based. Any module will execut
 
 As a simple example, here's a service consisting of one stream and a chart module connected together.  When you run the service, the events flow from the stream to the chart, and the chart draws the data points as they arrive.
 
-<g:img dir="images/user-guide" file="my-first-stream-on-canvas.png" class="img-responsive center-block" />
+<r:img plugin="unifina-core" dir="images/user-guide" file="my-first-stream-on-canvas.png" class="img-responsive center-block" />
 
 You can run a service with either historical or real-time data.
 
