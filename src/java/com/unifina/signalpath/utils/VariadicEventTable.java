@@ -16,6 +16,7 @@ public class VariadicEventTable extends ModuleWithUI {
 	private VariadicInput<Object> ins = new VariadicInput<>(this, new EventTableInputInstantiator());
 
 	int maxRows = 20;
+	private boolean showOnlyNewValues = false;
 
 	@Override
 	public void init() {
@@ -56,7 +57,7 @@ public class VariadicEventTable extends ModuleWithUI {
 			nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
 
 			for (Input<Object> i : ins.getEndpoints()) {
-				if (i.hasValue()) {
+				if (i.hasValue() && (!showOnlyNewValues || drivingInputs.contains(i))) {
 					nr.add(i.getValue().toString());
 				} else {
 					nr.add(null);
@@ -110,7 +111,8 @@ public class VariadicEventTable extends ModuleWithUI {
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("maxRows", maxRows, "int"));
+		options.add(ModuleOption.createInt("maxRows", maxRows));
+		options.add(ModuleOption.createBoolean("showOnlyNewValues", showOnlyNewValues));
 		config.put("tableConfig", getHeaderDefinition());
 
 		return config;
@@ -124,6 +126,9 @@ public class VariadicEventTable extends ModuleWithUI {
 		ModuleOptions options = ModuleOptions.get(config);
 		if (options.getOption("maxRows") != null) {
 			maxRows = options.getOption("maxRows").getInt();
+		}
+		if (options.getOption("showOnlyNewValues") != null) {
+			showOnlyNewValues = options.getOption("showOnlyNewValues").getBoolean();
 		}
 	}
 
