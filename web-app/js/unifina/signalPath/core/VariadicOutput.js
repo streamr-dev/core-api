@@ -7,6 +7,32 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
 
     var div;
 
+    var growVariadic = function(div) {
+        if (!SignalPath.isLoading() && !module.moduleClosed) {
+            pub.makeNewOutput()
+        }
+    }
+
+    var shrinkVariadic = function(div) {
+        if (!SignalPath.isLoading() && !module.moduleClosed && !module.getOutput(json.name).isConnected()) {
+            if (!div.hasClass("export") && !div.data("spObject").isConnected()) {
+                module.removeOutput(json.name)
+            }
+        }
+    }
+
+    var super_setExport = pub.setExport
+    pub.setExport = function (div, data, value) {
+        super_setExport(div, data, value)
+        if (!json.variadic.disableGrow) {
+            if (value) {
+                growVariadic(div)
+            } else {
+                shrinkVariadic(div)
+            }
+        }
+    }
+
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
         div = super_createDiv()
@@ -19,15 +45,11 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
             }
 
             div.bind("spConnect", function(event, output) {
-                if (!SignalPath.isLoading() && !module.moduleClosed) {
-                    pub.makeNewOutput()
-                }
+                growVariadic(div)
             })
 
             div.bind("spDisconnect", function(event, output) {
-                if (!SignalPath.isLoading() && !module.moduleClosed) {
-                    module.removeOutput(json.name)
-                }
+                shrinkVariadic(div)
             })
         }
 
@@ -44,7 +66,7 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
 
             json.variadic.isLast = false
             div.removeClass("last-variadic")
-            json.connected = true
+            json.connected = div.data("spObject").isConnected()
 
             jsonCopy.connected = false
             delete jsonCopy.id
@@ -53,6 +75,7 @@ SignalPath.VariadicOutput = function(json, parentDiv, module, type, pub) {
             jsonCopy.targets = []
             jsonCopy.name = "endpoint" + Date.now()
             jsonCopy.displayName = "out" + (json.variadic.index + 1)
+            jsonCopy.export = false
             jsonCopy.variadic.isLast = true
             jsonCopy.variadic.index += 1
             return module.addOutput(jsonCopy)

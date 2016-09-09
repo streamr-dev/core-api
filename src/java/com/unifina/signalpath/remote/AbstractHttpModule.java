@@ -122,7 +122,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 
 	@Override
 	public void sendOutput() {
-		final HttpTransaction response = new HttpTransaction(globals.time);
+		final HttpTransaction response = new HttpTransaction(getGlobals().time);
 
 		// get HTTP request from subclass
 		HttpRequestBase request = null;
@@ -168,9 +168,9 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 
 			private void returnResponse() {
 				response.responseTime = System.currentTimeMillis() - startTime;
-				response.timestamp = globals.isRealtime() ? new Date() : globals.time;
+				response.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
 				if (async) {
-					globals.getDataSource().getEventQueue().enqueue(new FeedEvent<>(response, response.timestamp, self));
+					getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(response, response.timestamp, self));
 				} else {
 					latch.countDown();	// goto latch.await() below
 				}

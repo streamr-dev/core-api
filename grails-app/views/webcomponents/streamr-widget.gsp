@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="canvas module dashboard resendAll resendLast">
+<polymer-element name="streamr-widget" attributes="url dashboard resendAll resendLast">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
@@ -41,9 +41,6 @@
 
 					options = options || _this.getResendOptions(moduleJson)
 
-					// Pass on the access context to the subscribe request
-					options = $.extend(options, _this.getAccessContext())
-
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
 								moduleJson.uiChannel.id,
@@ -56,7 +53,10 @@
 			unsubscribe: function() {
 				var _this = this
 				this.$.client.getClient(function(client) {
-					client.unsubscribe(_this.sub)
+					if (_this.sub) {
+						client.unsubscribe(_this.sub)
+						_this.sub = undefined
+					}
 				})
 			},
 			getResendOptions: function(json) {
@@ -99,13 +99,15 @@
 				else {
 					// Get JSON from the server to initialize options
 					$.ajax({
-						type: 'GET',
-						url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}" + '/' + this.canvas + "/modules/" + this.module + "?" + $.param(_this.getAccessContext()),
+						type: 'POST',
+						url: _this.url + '/request',
 						dataType: 'json',
+						contentType: 'application/json; charset=utf-8',
+						data: JSON.stringify({type: 'json'}),
 						success: function(response) {
-							_this.cachedModuleJson = response
+							_this.cachedModuleJson = response.json
 							if (callback)
-								callback(response)
+								callback(response.json)
 						},
 						error: function (xhr) {
 							console.log("Error while communicating with widget: " + xhr.responseText)
@@ -123,7 +125,7 @@
 				var _this = this
 				$.ajax({
 					type: 'POST',
-					url: "${createLink(uri: '/api/v1/canvases', absolute:'true')}"+'/'+this.canvas+'/modules/'+this.module+'/request' + "?" + $.param(_this.getAccessContext()),
+					url: _this.url + '/request',
 					data: JSON.stringify(msg),
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
@@ -137,13 +139,6 @@
 					}
 
 				});
-			},
-			getAccessContext: function() {
-				// extend cleans off keys with undefined values
-				return $.extend({}, {
-					canvas: this.canvas,
-					dashboard: this.dashboard ? this.dashboard : undefined
-				})
 			},
 
 			<g:if test="${params.lightDOM}">

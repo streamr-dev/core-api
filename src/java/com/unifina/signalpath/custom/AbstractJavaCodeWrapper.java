@@ -193,7 +193,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
-		globals.registerDynamicClass(clazz);
+		getGlobals().registerDynamicClass(clazz);
 		return clazz;
 	}
 
@@ -212,7 +212,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		}
 
 		// Inject stuff into the module
-		instance.globals = globals;
+		instance.setGlobals(getGlobals());
 		instance.setHash(hash);
 		instance.setParentSignalPath(parentSignalPath);
 		instance.configure(config);
@@ -276,7 +276,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				outputsByName,
 				drivingInputs,
 				readyInputs,
-				globals);
+				getGlobals());
 
 		storedEndpointFields.restoreFields(instance);
 		storedEndpointFields = null;
@@ -294,6 +294,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	private SerializationService serializationService() {
-		return globals.getBean(SerializationService.class);
+		return getGlobals().getBean(SerializationService.class);
 	}
 }

@@ -1,6 +1,6 @@
 SignalPath.TableModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var area = null;
 	var headers = [];
@@ -35,7 +35,7 @@ SignalPath.TableModule = function(data,canvas,prot) {
 
 	function sendInitRequest() {
 		if (SignalPath.isRunning()) {
-			SignalPath.sendRequest(prot.hash, {type:'initRequest'}, function(response, err) {
+			SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type:'initRequest'}, function(response, err) {
 				if (err)
 					console.error("Failed initRequest for TableModule: %o", err)
 				else
@@ -44,7 +44,7 @@ SignalPath.TableModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		prot.table.receiveResponse(d)
 	}
 	

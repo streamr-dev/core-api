@@ -333,4 +333,12 @@ class PermissionServiceSpec extends Specification {
 		!service.canWrite(stranger, dashPublic)
 		!service.canShare(stranger, dashPublic)
 	}
+
+	void "check() can handle detached resource instances"() {
+		Dashboard detached = new Dashboard()
+		detached.id = dashOwned.id
+
+		expect:
+		service.check(me, detached, Operation.READ)
+	}
 }
