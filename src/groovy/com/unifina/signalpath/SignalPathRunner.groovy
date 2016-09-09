@@ -171,7 +171,6 @@ public class SignalPathRunner extends Thread {
 
 	public void abort() {
 		log.info("Aborting SignalPathRunner..")
-		globals.abort = true
 		globals.dataSource?.stopFeed()
 
 		// Will be called in run() before exiting

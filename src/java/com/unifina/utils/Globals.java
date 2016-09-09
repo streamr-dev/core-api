@@ -38,7 +38,6 @@ public class Globals {
 	private TimezoneConverter tzConverter;
 	
 	protected DataSource dataSource = null;
-	public boolean abort = false; // TODO: is this even needed? no one reads it?
 	
 	private List<Class> dynamicClasses = new ArrayList<>();
 	
