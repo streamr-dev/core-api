@@ -44,20 +44,27 @@ public class Sql extends AbstractSignalPathModule {
 		ResultSet cursor = null;
 		try {
 			statement = createStatement();
-			cursor = statement.executeQuery(sqlString.getValue());
+			boolean hasResult = statement.execute(sqlString.getValue());
 
-			ResultSetMetaData meta = cursor.getMetaData();
-			int propCount = meta.getColumnCount();
+			if (hasResult) {
+				cursor = statement.getResultSet();
 
-			List<Map<String, Object>> ret = new ArrayList<>();
-			while (cursor.next()) {
-				Map<String, Object> row = new HashMap<>();
-				for (int i = 1; i <= propCount; i++) {
-					row.put(meta.getColumnName(i), cursor.getObject(i));
+				ResultSetMetaData meta = cursor.getMetaData();
+				int propCount = meta.getColumnCount();
+
+				List<Map<String, Object>> ret = new ArrayList<>();
+				while (cursor.next()) {
+					Map<String, Object> row = new HashMap<>();
+					for (int i = 1; i <= propCount; i++) {
+						row.put(meta.getColumnName(i), cursor.getObject(i));
+					}
+					ret.add(row);
 				}
-				ret.add(row);
+				rows.send(ret);
+			} else {
+				Map countMap = Collections.singletonMap("updateCount", statement.getUpdateCount());
+				rows.send(Collections.singletonList(countMap));
 			}
-			rows.send(ret);
 		} catch (SQLException e) {
 			err.add(e.toString());
 		} finally {
