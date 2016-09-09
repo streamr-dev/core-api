@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageFromRedis, String> {
+public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageRedis, String> {
 
 	private static final Charset utf8 = Charset.forName("UTF-8");
 
@@ -33,7 +33,7 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 		handler = new BinaryJedisPubSub() {
 			public void onMessage(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);
-				StreamrBinaryMessageFromRedis msg = new StreamrBinaryMessageFromRedis(ByteBuffer.wrap(messageBytes));
+				StreamrBinaryMessageRedis msg = new StreamrBinaryMessageRedis(ByteBuffer.wrap(messageBytes));
 				forward(msg, streamId, msg.getOffset(), false);
 			}
 
