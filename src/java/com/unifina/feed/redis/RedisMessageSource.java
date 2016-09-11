@@ -30,6 +30,11 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 
 		host = config.get("host").toString();
 		jedis = new Jedis(host);
+
+		if (config.containsKey("password")) {
+			jedis.auth(config.get("password").toString());
+		}
+
 		handler = new BinaryJedisPubSub() {
 			public void onMessage(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);

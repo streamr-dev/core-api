@@ -290,6 +290,7 @@ environments {
  * Redis config
  */
 streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
+streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
 
 /**
  * Cassandra config

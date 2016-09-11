@@ -25,15 +25,17 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 		super(feed, config);
 
 		List<String> hosts = MapTraversal.getList(Holders.getConfig(), "streamr.redis.hosts");
+		String password = MapTraversal.getString(Holders.getConfig(), "streamr.redis.password");
 		for (String host : hosts) {
-			addHost(host);
+			addHost(host, password);
 		}
 	}
 
-	private void addHost(String host) {
+	private void addHost(String host, String password) {
 		Map<String, Object> singleRedisConfig = new HashMap<>();
 		singleRedisConfig.putAll(config);
 		singleRedisConfig.put("host", host);
+		singleRedisConfig.put("password", password);
 		RedisMessageSource messageSource = new RedisMessageSource(feed, singleRedisConfig);
 		if (recipient != null) {
 			messageSource.setRecipient(recipient);
