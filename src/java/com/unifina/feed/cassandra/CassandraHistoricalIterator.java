@@ -47,13 +47,22 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 		session = getSession();
 		session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
 
-		resultSet = session.execute("select payload from stream_events where stream = ? and ts >= ? and ts <= ?", stream.getId(), startDate, endDate);
+
+		// Get timestamp limits as offsets, then execute query using offsets
+		Row firstOffsetRow = session.execute("SELECT kafka_offset FROM stream_timestamps WHERE stream = ? AND ts >= ? ORDER BY ts ASC LIMIT 1", stream.getId(), startDate).one();
+		if (firstOffsetRow == null) {
+			return;
+		}
+		Long firstOffset = firstOffsetRow.getLong("kafka_offset");
+		Long lastOffset = session.execute("SELECT kafka_offset FROM stream_timestamps WHERE stream = ? AND ts <= ? ORDER BY ts DESC LIMIT 1", stream.getId(), endDate).one().getLong("kafka_offset");
+
+		resultSet = session.execute("SELECT payload FROM stream_events WHERE stream = ? AND kafka_offset >= ? and kafka_offset <= ? ORDER BY kafka_offset ASC", stream.getId(), firstOffset, lastOffset);
 		resultSetIterator = resultSet.iterator();
 	}
 
 	@Override
 	public boolean hasNext() {
-		return resultSetIterator.hasNext();
+		return resultSetIterator != null && resultSetIterator.hasNext();
 	}
 
 	@Override

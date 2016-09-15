@@ -6,19 +6,19 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.StreamEventRecipient;
-import com.unifina.feed.kafka.KafkaMessage;
+import com.unifina.feed.StreamrMessage;
 import com.unifina.signalpath.twitter.TwitterModule;
 import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
 
-public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule, KafkaMessage> {
+public class TwitterEventRecipient extends StreamEventRecipient<TwitterModule, StreamrMessage> {
 
 	public TwitterEventRecipient(Globals globals, Stream stream) {
 		super(globals, stream);
 	}
 
 	@Override
-	protected void sendOutputFromModules(FeedEvent<KafkaMessage, ? extends IEventRecipient> event) {
+	protected void sendOutputFromModules(FeedEvent<StreamrMessage, ? extends IEventRecipient> event) {
 		Map msg = event.content.payload;
 		
 		String tweet = (msg.containsKey("retweeted_status") ? MapTraversal.getString(msg, "retweeted_status.text") : MapTraversal.getString(msg, "text"));

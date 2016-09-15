@@ -1,11 +1,10 @@
 package com.unifina.feed;
 
 import com.unifina.data.IStreamRequirement;
-import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 
-public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamrBinaryMessage, String> {
+public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamrMessage, String> {
 
 	public StreamrBinaryMessageKeyProvider(Globals globals, Feed feed) {
 		super(globals, feed);
@@ -17,8 +16,8 @@ public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStream
 	}
 
 	@Override
-	public String getMessageKey(StreamrBinaryMessage message) {
-		return message.getStreamId();
+	public String getMessageKey(StreamrMessage message) {
+		return message.streamId;
 	}
 
 }

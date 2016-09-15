@@ -94,7 +94,7 @@ grails.project.dependency.resolution = {
 		}
 
 		compile 'org.mongodb:mongodb-driver:3.2.1'
-		compile('redis.clients:jedis:2.8.1')
+		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
     }
 

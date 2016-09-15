@@ -1,10 +1,9 @@
 package com.unifina.feed.kafka;
 
 import com.unifina.data.IStreamRequirement;
-import com.unifina.feed.ITimestamped;
+import com.unifina.feed.StreamrMessage;
 import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.utils.TimeOfDayUtil;
-import grails.converters.JSON;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -23,12 +22,10 @@ import com.unifina.feed.AbstractHistoricalFileFeed;
 import com.unifina.feed.FeedEventIterator;
 import com.unifina.feed.StreamEventRecipient;
 import com.unifina.kafkaclient.UnifinaKafkaIterator;
-import com.unifina.kafkaclient.UnifinaKafkaMessage;
 import com.unifina.utils.Globals;
 import com.unifina.utils.MapTraversal;
-import org.apache.commons.lang.time.DateUtils;
 
-public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, KafkaMessage, String, MapMessageEventRecipient> {
+public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequirement, StreamrMessage, String, MapMessageEventRecipient> {
 
 	Map<Stream, Boolean> kafkaIteratorReturnedForStream = new HashMap<>();
 	Map<Stream, Boolean> feedfileIteratorReturnedForStream = new HashMap<>();
@@ -49,8 +46,8 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 	}
 
 	@Override
-	protected Iterator<KafkaMessage> createContentIterator(FeedFile feedFile, Date day,
-			InputStream inputStream, MapMessageEventRecipient recipient) {
+	protected Iterator<StreamrMessage> createContentIterator(FeedFile feedFile, Date day,
+															 InputStream inputStream, MapMessageEventRecipient recipient) {
 		try {
 			return new KafkaHistoricalIterator(inputStream,feedFile.getStream().getId());
 		} catch (IOException e) {
@@ -59,9 +56,9 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 	}
 
 	@Override
-	protected FeedEventIterator<KafkaMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient)
+	protected FeedEventIterator<StreamrMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient)
 			throws IOException {
-		FeedEventIterator<KafkaMessage, MapMessageEventRecipient> iterator = super.getNextIterator(recipient);
+		FeedEventIterator<StreamrMessage, MapMessageEventRecipient> iterator = super.getNextIterator(recipient);
 
 		Stream stream = getStream(recipient);
 
@@ -86,7 +83,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 		return iterator;
 	}
 
-	class ParsingKafkaIterator implements Iterator<KafkaMessage>, Closeable {
+	class ParsingKafkaIterator implements Iterator<StreamrMessage>, Closeable {
 
 		KafkaMessageParser parser = new KafkaMessageParser();
 		UnifinaKafkaIterator kafkaIterator;
@@ -101,7 +98,7 @@ public class KafkaHistoricalFeed extends AbstractHistoricalFileFeed<IStreamRequi
 		}
 
 		@Override
-		public KafkaMessage next() {
+		public StreamrMessage next() {
 			return parser.parse(kafkaIterator.next());
 		}
 

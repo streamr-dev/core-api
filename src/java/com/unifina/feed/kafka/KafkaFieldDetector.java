@@ -2,6 +2,7 @@ package com.unifina.feed.kafka;
 
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
+import com.unifina.feed.StreamrMessage;
 import com.unifina.feed.map.MapMessage;
 import com.unifina.kafkaclient.KafkaOffsetUtil;
 import com.unifina.kafkaclient.UnifinaKafkaMessage;
@@ -12,7 +13,6 @@ import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 public class KafkaFieldDetector extends FieldDetector {
 	private final KafkaService kafkaService;
@@ -46,7 +46,7 @@ public class KafkaFieldDetector extends FieldDetector {
 		if (latestMessage==null)
 			return new MapMessage(null, null, new HashMap());
 		else {
-			KafkaMessage msg = new KafkaMessageParser().parse(latestMessage);
+			StreamrMessage msg = new KafkaMessageParser().parse(latestMessage);
 			return new MapMessage(msg.getTimestamp(), msg.getTimestamp(), msg.payload);
 		}
 	}

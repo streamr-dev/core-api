@@ -139,8 +139,8 @@ class SignalPathService {
 			canvas.delete()
 		}
 
-		// Delayed-delete the topics in one hour
-		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
+		// TODO: Delete the messages from Cassandra
+		//kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {

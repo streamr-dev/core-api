@@ -6,12 +6,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Iterator;
 
+import com.unifina.feed.StreamrMessage;
 import org.apache.log4j.Logger;
 
 import com.unifina.feed.util.RawMessageIterator;
 import com.unifina.kafkaclient.UnifinaKafkaMessageFactory;
 
-public class KafkaHistoricalIterator implements Iterator<KafkaMessage> {
+public class KafkaHistoricalIterator implements Iterator<StreamrMessage> {
 
 	private RawMessageIterator rawIterator;
 	private KafkaMessageParser parser;
@@ -37,7 +38,7 @@ public class KafkaHistoricalIterator implements Iterator<KafkaMessage> {
 	}
 
 	@Override
-	public KafkaMessage next() {
+	public StreamrMessage next() {
 		msgLength = rawIterator.nextMessageLength();
 		raw = rawIterator.next();
 		if (raw==null)
