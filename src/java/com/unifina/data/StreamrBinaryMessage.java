@@ -17,6 +17,7 @@ public class StreamrBinaryMessage {
 	private final byte contentType;
 	private final byte[] streamIdAsBytes;
 	private final byte[] content;
+	private final int ttl;
 
 	public StreamrBinaryMessage(ByteBuffer bb) {
 		byte version = bb.get();
@@ -34,6 +35,8 @@ public class StreamrBinaryMessage {
 			int contentLength = bb.getInt();
 			content = new byte[contentLength];
 			bb.get(content);
+
+			ttl = bb.getInt();
 		}
 		else {
 			throw new IllegalArgumentException("Unknown version byte: "+version);
@@ -41,11 +44,16 @@ public class StreamrBinaryMessage {
 	}
 
 	public StreamrBinaryMessage(String streamId, long timestamp, byte contentType, byte[] content) {
+		this(streamId, timestamp, contentType, content, 0);
+	}
+
+	public StreamrBinaryMessage(String streamId, long timestamp, byte contentType, byte[] content, int ttl) {
 		this.streamId = streamId;
 		this.streamIdAsBytes = this.streamId.getBytes(utf8);
 		this.timestamp = timestamp;
 		this.contentType = contentType;
 		this.content = content;
+		this.ttl = ttl;
 	}
 
 	/**
@@ -56,10 +64,11 @@ public class StreamrBinaryMessage {
 	 * 	content type 1 byte
 	 * 	content length 4 bytes
 	 * 	payload, N bytes
+	 * 	ttl, 4 bytes
 	 */
 	public byte[] toBytes() {
 		ByteBuffer bb;
-		bb = ByteBuffer.allocate(15+streamIdAsBytes.length+content.length); // 15 == version + timestamp + stream id length + content type + content length + content
+		bb = ByteBuffer.allocate(19+streamIdAsBytes.length+content.length); // 15 == version + timestamp + stream id length + content type + content length + content + ttl
 		bb.put(VERSION); // 1 byte
 		bb.putLong(timestamp); // 8 bytes
 		if (streamIdAsBytes.length > 255) {
@@ -69,7 +78,8 @@ public class StreamrBinaryMessage {
 		bb.put(streamIdAsBytes);
 		bb.put(contentType); // 1 byte
 		bb.putInt(content.length); // 4 bytes
-		bb.put(content);
+		bb.put(content); // contentLength bytes
+		bb.putInt(ttl); // 4 bytes
 		return bb.array();
 	}
 
@@ -87,6 +97,10 @@ public class StreamrBinaryMessage {
 
 	public byte getContentType() {
 		return contentType;
+	}
+
+	public int getTTL() {
+		return ttl;
 	}
 
 	@Override

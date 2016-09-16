@@ -8,6 +8,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.FieldDetector;
 import com.unifina.feed.StreamrBinaryMessageParser;
 import com.unifina.feed.map.MapMessage;
+import com.unifina.service.CassandraService;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 /**
@@ -40,11 +41,10 @@ public class CassandraFieldDetector extends FieldDetector {
 	}
 
 	protected Session getSession(Stream stream) {
-		CassandraConfig config = new CassandraConfig(stream.getStreamConfigAsMap());
-		return config.createSession();
+		return grailsApplication.getMainContext().getBean(CassandraService.class).getSession();
 	}
 
 	protected void cleanup(Session session) {
-		session.getCluster().close();
+		// don't close the reusable session
 	}
 }

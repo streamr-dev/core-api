@@ -46,22 +46,22 @@ class KafkaService {
 	}
 
 	@CompileStatic
-    void sendMessage(String streamId, byte[] content, byte contentType) {
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(streamId, System.currentTimeMillis(), contentType, content)
+    void sendMessage(String streamId, byte[] content, byte contentType, int ttl=0) {
+		StreamrBinaryMessage msg = new StreamrBinaryMessage(streamId, System.currentTimeMillis(), contentType, content, ttl)
 		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), streamId, msg.toBytes())
 		getProducer().send(record);
     }
 	
 	@CompileStatic
-	void sendMessage(String streamId, Map message) {
+	void sendMessage(String streamId, Map message, int ttl=0) {
 		String str = (message as JSON).toString();
-		sendMessage(streamId, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON);
+		sendMessage(streamId, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 	
 	@CompileStatic
-	void sendMessage(Stream stream, Map message) {
+	void sendMessage(Stream stream, Map message, int ttl=0) {
 		String str = (message as JSON).toString();
-		sendMessage(stream.getId(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON);
+		sendMessage(stream.getId(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
 	@CompileStatic

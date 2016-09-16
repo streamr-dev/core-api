@@ -14,6 +14,8 @@ import java.util.List;
 
 public class CassandraHistoricalFeed extends AbstractHistoricalFeed<ConfigurableStreamModule, MapMessage, String, MapMessageEventRecipient> {
 
+	private boolean singletonIteratorReturned = false;
+
 	public CassandraHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 	}
@@ -25,7 +27,12 @@ public class CassandraHistoricalFeed extends AbstractHistoricalFeed<Configurable
 
 	@Override
 	protected FeedEventIterator<MapMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient) throws IOException {
-		return new FeedEventIterator<>(new CassandraHistoricalIterator(recipient.getStream(), globals.getStartDate(), globals.getEndDate()), this, recipient);
+		if (!singletonIteratorReturned) {
+			singletonIteratorReturned = true;
+			return new FeedEventIterator<>(new CassandraHistoricalIterator(recipient.getStream(), globals.getStartDate(), globals.getEndDate()), this, recipient);
+		} else {
+			return null;
+		}
 	}
 
 }

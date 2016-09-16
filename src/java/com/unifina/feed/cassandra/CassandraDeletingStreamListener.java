@@ -12,11 +12,11 @@ import java.util.Map;
 /**
  * Connects to the Cassandra cluster configured in Grails config and deletes data when the Stream is deleted.
  */
-public class StreamrCassandraDeletingStreamListener extends AbstractStreamListener {
+public class CassandraDeletingStreamListener extends AbstractStreamListener {
 
 	GrailsApplication grails;
 
-	public StreamrCassandraDeletingStreamListener(GrailsApplication grailsApplication) {
+	public CassandraDeletingStreamListener(GrailsApplication grailsApplication) {
 		super(grailsApplication);
 		this.grails = grailsApplication;
 	}

@@ -9,6 +9,7 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractDataRangeProvider;
 import com.unifina.feed.DataRange;
 import com.unifina.feed.StreamrBinaryMessageParser;
+import com.unifina.service.CassandraService;
 import com.unifina.service.FeedFileService;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
@@ -46,11 +47,10 @@ public class CassandraDataRangeProvider extends AbstractDataRangeProvider {
 	}
 
 	protected Session getSession(Stream stream) {
-		CassandraConfig config = new CassandraConfig(stream.getStreamConfigAsMap());
-		return config.createSession();
+		return grailsApplication.getMainContext().getBean(CassandraService.class).getSession();
 	}
 
 	protected void cleanup(Session session) {
-		session.getCluster().close();
+		// Don't close the session, it's reusable
 	}
 }
