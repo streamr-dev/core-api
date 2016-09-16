@@ -25,7 +25,7 @@ public class StreamrBinaryMessage {
 		// If the message starts with a version byte, parse timestamp and contentType headers
 		if (version==28) {
 			timestamp = bb.getLong();
-
+			ttl = bb.getInt();
 			int streamIdLength = bb.get() & 0xFF; // java bytes are signed, converts -128..127 to 0..255
 			streamIdAsBytes = new byte[streamIdLength];
 			bb.get(streamIdAsBytes);
@@ -35,8 +35,6 @@ public class StreamrBinaryMessage {
 			int contentLength = bb.getInt();
 			content = new byte[contentLength];
 			bb.get(content);
-
-			ttl = bb.getInt();
 		}
 		else {
 			throw new IllegalArgumentException("Unknown version byte: "+version);
@@ -71,6 +69,7 @@ public class StreamrBinaryMessage {
 		bb = ByteBuffer.allocate(19+streamIdAsBytes.length+content.length); // 15 == version + timestamp + stream id length + content type + content length + content + ttl
 		bb.put(VERSION); // 1 byte
 		bb.putLong(timestamp); // 8 bytes
+		bb.putInt(ttl); // 4 bytes
 		if (streamIdAsBytes.length > 255) {
 			throw new IllegalArgumentException("Stream id too long: "+streamId+", length "+streamIdAsBytes.length);
 		}
@@ -79,7 +78,6 @@ public class StreamrBinaryMessage {
 		bb.put(contentType); // 1 byte
 		bb.putInt(content.length); // 4 bytes
 		bb.put(content); // contentLength bytes
-		bb.putInt(ttl); // 4 bytes
 		return bb.array();
 	}
 
