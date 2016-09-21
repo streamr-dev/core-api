@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.security.SecUser
 import groovy.transform.CompileStatic
 
 import com.unifina.domain.data.Feed
@@ -13,6 +14,7 @@ import com.unifina.utils.Globals
 class FeedService {
 
 	def grailsApplication
+	def permissionService
 	
 	@CompileStatic
 	String getFeedClass(Feed domain, boolean historical) {
@@ -73,4 +75,5 @@ class FeedService {
 	List<Stream> getStreams(Feed feed) {
 		return Stream.findAllByFeed(feed)
 	}
+
 }

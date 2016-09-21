@@ -5,6 +5,7 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.feed.kafka.KafkaDataRangeProvider
@@ -50,7 +51,94 @@ class StreamServiceSpec extends Specification {
 		Stream.list().first().name == "name"
 	}
 
-	// TODO: test calls to AbstractStreamListener
+	void "createStream uses its params"() {
+		setup:
+		def feed = new Feed(id: 0, streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener").save(validate: false)
+		when:
+		def params = [
+				name: "Test stream",
+				description: "Test stream",
+				feed: feed,
+				config: [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
+				]
+		]
+		service.createStream(params, new SecUser(username: "me").save(validate: false))
+		then:
+		Stream.count() == 1
+		def stream = Stream.findAll().get(0)
+		stream.name == "Test stream"
+		stream.description == "Test stream"
+		stream.feed == feed
+		stream.user.username == "me"
+	}
+
+	void "createStream uses Feed.KAFKA_ID as default value for feed"() {
+		setup:
+		def feed = new Feed(streamListenerClass: "com.unifina.feed.kafka.KafkaStreamListener")
+		feed.id = Feed.KAFKA_ID
+		feed.save(validate: false)
+		when:
+		def params = [
+				name: "Test stream",
+				description: "Test stream",
+				config: [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
+				]
+		]
+		service.createStream(params, new SecUser(username: "me").save(validate: false))
+		then:
+		Stream.count() == 1
+		def stream = Stream.findAll().get(0)
+		stream.feed == feed
+	}
+
+	void "createStream initializes streamListener"() {
+		setup:
+		def service = Spy(StreamService)
+		def streamListener = Mock(AbstractStreamListener)
+		def params = [
+				name: "Test stream",
+				description: "Test stream",
+				feed: feed,
+				config: [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
+				]
+		]
+		when:
+
+		service.createStream(params, new SecUser(username: "me").save(validate: false))
+		then:
+		1 * service.instantiateListener(_ as Stream) >> streamListener
+		1 * streamListener.addToConfiguration(params.config, _ as Stream)
+	}
+
+	void "createStream throws exception if feed has no streamListenerClass"() {
+		when:
+		def params = [
+				name: "Test stream",
+				description: "Test stream",
+				feed: new Feed().save(validate: false),
+				config: [
+						fields: [
+								[name: "profit", type: "number"],
+								[name: "keyword", type: "string"]
+						]
+				]
+		]
+		service.createStream(params, new SecUser(username: "me").save(validate: false))
+		then:
+		thrown IllegalArgumentException
+	}
 
 	void "getDataRange gives correct values"() {
 		DataRange dataRange

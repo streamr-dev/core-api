@@ -1,5 +1,5 @@
 <head>
-    <title><g:layoutTitle default="Unifina" /></title>
+    <title><g:layoutTitle default="Streamr" /></title>
 <%--    <link rel="shortcut icon" href="${resource(dir:'images',file:'favicon.ico')}" type="image/x-icon" />--%>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -26,6 +26,7 @@
 	<r:require module="global-error-handler"/>
 
 	<g:if test="${!login}">
+		<g:render template="/tours/tours"/>
 		<r:require module='tour'/>
 	</g:if>
 	

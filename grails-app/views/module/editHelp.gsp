@@ -128,7 +128,7 @@
         });
         </r:script>
     </head>
-    <body>
+    <body class="help-page">
         <div class="body">
             <h1>Module help editor: ${module.name} (Package: ${module.modulePackage.name})</h1>
             

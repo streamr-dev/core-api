@@ -1,43 +1,34 @@
 package com.unifina.signalpath.kafka;
 
+import com.unifina.domain.data.Feed;
+import com.unifina.domain.data.Stream;
+import com.unifina.service.KafkaService;
 import com.unifina.service.PermissionService;
+import com.unifina.signalpath.*;
 import grails.converters.JSON;
+import org.codehaus.groovy.grails.web.json.JSONArray;
+import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.codehaus.groovy.grails.web.json.JSONArray;
-import org.codehaus.groovy.grails.web.json.JSONObject;
-
-import com.unifina.domain.data.Feed;
-import com.unifina.domain.data.Stream;
-import com.unifina.service.KafkaService;
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ListInput;
-import com.unifina.signalpath.MapInput;
-import com.unifina.signalpath.NotificationMessage;
-import com.unifina.signalpath.Parameter;
-import com.unifina.signalpath.StreamParameter;
-import com.unifina.signalpath.StringInput;
-import com.unifina.signalpath.TimeSeriesInput;
-
 public class SendToStream extends AbstractSignalPathModule {
 
-	protected StreamParameter streamParameter = new StreamParameter(this,"stream");
+	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
 	transient protected JSONObject streamConfig = null;
-	
-	transient protected KafkaService kafkaService = null;
+
 	transient protected PermissionService permissionService = null;
+	transient protected KafkaService kafkaService = null;
 	
 	protected boolean historicalWarningShown = false;
-	private Stream authenticatedStream = null;
+	private String lastStreamId = null;
 	
 	@Override
 	public void init() {
-		kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
-		permissionService = (PermissionService) globals.getGrailsApplication().getMainContext().getBean("permissionService");
+		// Pre-fetch services for more predictable performance
+		permissionService = getGlobals().getBean(PermissionService.class);
+		kafkaService = getGlobals().getBean(KafkaService.class);
 		
 		addInput(streamParameter);
 		
@@ -52,26 +43,27 @@ public class SendToStream extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		if (globals.isRealtime()) {
+		if (getGlobals().isRealtime()) {
 			Map msg = new LinkedHashMap<>();
 			for (Input i : drivingInputs) {
 				msg.put(i.getName(), i.getValue());
 			}
-			if (kafkaService == null) {
-				kafkaService = (KafkaService) globals.getGrailsApplication().getMainContext().getBean("kafkaService");
+			if (kafkaService == null) { // null after de-serialization
+				kafkaService = getGlobals().getBean(KafkaService.class);
 			}
-			kafkaService.sendMessage(authenticatedStream, "", msg);
+			Stream stream = streamParameter.getValue();
+			authenticateStream(stream);
+			kafkaService.sendMessage(stream, "", msg);
 		}
-		else if (!historicalWarningShown && globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '"+streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
+		else if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
+			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +
+				streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
 			historicalWarningShown = true;
 		}
 	}
 
 	@Override
-	public void clearState() {
-
-	}
+	public void clearState() {}
 
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
@@ -81,21 +73,17 @@ public class SendToStream extends AbstractSignalPathModule {
 		
 		if (stream==null)
 			return;
-		
-		// Check access to this Stream
-		if (permissionService.canWrite(globals.getUser(), stream)) {
-			authenticatedStream = stream;
-		} else {
-			throw new AccessControlException(this.getName()+": Access denied to Stream "+stream.getName());
-		}
-		
-		// TODO: don't rely on static ids
-		if (stream.getFeed().getId()!=7) {
-			throw new IllegalArgumentException("Can not send to this feed type!");
+
+		authenticateStream(stream);
+
+		if (stream.getFeed().getId() != Feed.KAFKA_ID) {
+			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
+				stream.getFeed().getName());
 		}
 		
 		if (stream.getConfig()==null) {
-			throw new IllegalStateException("Stream " + stream.getName() + " is not properly configured!");
+			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +
+				" is not properly configured!");
 		}
 		
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
@@ -103,38 +91,51 @@ public class SendToStream extends AbstractSignalPathModule {
 		JSONArray fields = streamConfig.getJSONArray("fields");
 		
 		for (Object o : fields) {
+			Input input = null;
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
 			
 			// TODO: add other types
-			if (type.equalsIgnoreCase("number") || type.equalsIgnoreCase("boolean")) {
-				TimeSeriesInput input = new TimeSeriesInput(this,name);
-				input.canHaveInitialValue = false;
-				addInput(input);
+			if (type.equalsIgnoreCase("number")) {
+				input = new TimeSeriesInput(this, name);
+				((TimeSeriesInput) input).canHaveInitialValue = false;
+			} else if (type.equalsIgnoreCase("boolean")) {
+				input = new BooleanInput(this, name);
+			} else if (type.equalsIgnoreCase("string")) {
+				input = new StringInput(this, name);
+			} else if (type.equalsIgnoreCase("map")) {
+				input = new MapInput(this, name);
+			} else if (type.equalsIgnoreCase("list")) {
+				input = new ListInput(this, name);
 			}
-			else if (type.equalsIgnoreCase("string")) {
-				StringInput input = new StringInput(this, name);
-				addInput(input);
-			}
-			else if (type.equalsIgnoreCase("map")) {
-				addInput(new MapInput(this,name));
-			}
-			else if (type.equalsIgnoreCase("list")) {
-				addInput(new ListInput(this,name));
-			}
-		}
-		
-		for (Input input : getInputs()) {
-			if (!(input instanceof Parameter)) {
+
+			if (input != null) {
 				input.canToggleDrivingInput = false;
 				input.canBeFeedback = false;
 				input.requiresConnection = false;
+				addInput(input);
 			}
 		}
 		
 		if (streamConfig.containsKey("name"))
 			this.setName(streamConfig.get("name").toString());
 	}
-	
+
+	private void authenticateStream(Stream stream) {
+		// Only check write access in run context to avoid exception when eg. loading and reconstructing canvas
+		if (getGlobals().isRunContext() && !stream.getId().equals(lastStreamId) ) {
+			if (permissionService == null) {
+				permissionService = getGlobals().getBean(PermissionService.class);
+			}
+
+			if (permissionService.canWrite(getGlobals().getUser(), stream)) {
+				lastStreamId = stream.getId();
+			} else {
+				throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +
+					" does not have write access to Stream " + stream.getName());
+			}
+		}
+	}
+
 }

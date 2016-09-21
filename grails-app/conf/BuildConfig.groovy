@@ -73,7 +73,7 @@ grails.project.dependency.resolution = {
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		
-        compile('com.unifina:kafka-client:0.1.12') {
+        compile('com.unifina:kafka-client:0.1.16') {
             excludes "slf4j-log4j12"
         }
 		
@@ -95,6 +95,8 @@ grails.project.dependency.resolution = {
 		
         runtime('com.github.nkzawa:socket.io-client:0.3.0')
 		runtime('joda-time:joda-time:2.9.3')
+
+		compile('com.udojava:EvalEx:1.3')
     }
 
     plugins {
@@ -107,6 +109,7 @@ grails.project.dependency.resolution = {
         }
         
         compile ":mail:1.0.7"
+        compile ":markdown:1.1.1"
 
 	    // plugins needed at runtime but not for compilation
 		runtime ':hibernate:3.6.10.19'

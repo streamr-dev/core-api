@@ -7,7 +7,7 @@ class BooleanInputSpec extends Specification {
 
 
 	def setup() {
-		input.doClear()
+		input.clear()
 		input.drivingInput = false
 	}
 

@@ -47,14 +47,18 @@ class PermissionService {
 	 */
 	public boolean check(SecUser user, resource, Operation op) {
 		if (!resource?.id) { return false; }
+
+		Class resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+		// Make sure we are operating on an instance attached to the session
+		resource = resourceClass.get(resource.id)
+
 		if (isOwner(user, resource)) { return true; }		// owner has all access
-		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
 		return hasPermission(user, resourceClass, resource.id, op)
 	}
 
 	private boolean hasPermission(user, Class resourceClass, resourceId, Operation op) {
 		String idProp = getIdPropertyName(resourceClass)
-		return !Permission.withCriteria {
+		def p = Permission.withCriteria {
 			or {
 				eq "anonymous", true
 				if (isValidUser(user)) {
@@ -65,13 +69,26 @@ class PermissionService {
 			eq "clazz", resourceClass.name
 			eq idProp, resourceId
 			eq "operation", op
-		}.empty
+		}
+		return !p.empty
 	}
 
 	/**
 	 * @return List of all Permissions granted to a specific resource
      */
 	public List<Permission> getPermissionsTo(resource) {
+		return getPermissionsList(resource, null, true)
+	}
+
+	/**
+	 * @param user whose permissions are asked, or null for anonymous permissions only
+	 * @return List of all Permissions granted to the user for the resource
+	 */
+	public List<Permission> getSingleUserPermissionsTo(resource, SecUser user) {
+		return getPermissionsList(resource, user, false)
+	}
+
+	private List<Permission> getPermissionsList(resource, SecUser user, boolean getAllPermissions) {
 		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
 
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
@@ -82,10 +99,19 @@ class PermissionService {
 		List<Permission> perms = Permission.withCriteria {
 			eq("clazz", resourceClass.name)
 			eq(idProp, resource.id)
+			if (!getAllPermissions) {
+				or {
+					eq "anonymous", true
+					if (isValidUser(user)) {
+						String userProp = getUserPropertyName(user)
+						eq userProp, user
+					}
+				}
+			}
 		}.toList()
 
 		// Generated non-saved "dummy permissions" for owner
-		if (resource.hasProperty("user")) {
+		if (resource.hasProperty("user") && (getAllPermissions || resource.user == user)) {
 			Permission.Operation.enumConstants.each {
 				perms << new Permission(
 					id: null,
@@ -424,6 +450,8 @@ class PermissionService {
 			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
 		}
 	}
+
+	/** null is often a valid value (but not a valid user), and means "anonymous Permissions only" */
     private boolean isValidUser(userish) {
         return userish != null && (userish instanceof SecUser || userish instanceof SignupInvite)
     }

@@ -1,12 +1,14 @@
 package com.unifina.controller.api
 
 import com.unifina.api.SaveDashboardCommand
+import com.unifina.api.StreamrApiHelper
 import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.security.StreamrApi
 import com.unifina.service.DashboardService
+import com.unifina.service.SignalPathService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -14,6 +16,7 @@ import grails.plugin.springsecurity.annotation.Secured
 class DashboardApiController {
 
 	DashboardService dashboardService
+	SignalPathService signalPathService
 	def permissionService
 	def apiService
 
@@ -61,5 +64,16 @@ class DashboardApiController {
 	def delete(Long id) {
 		dashboardService.deleteById(id, (SecUser) request.apiUser)
 		render(status: 204)
+	}
+
+	/**
+	 * Handles a runtime requests from dashboard view
+	 */
+	@StreamrApi(requiresAuthentication = false)
+	def runtimeRequest(String path, Boolean local) {
+		def msg = request.JSON
+		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser), local ? true : false)
+		log.info("request: responding with $response")
+		render response as JSON
 	}
 }

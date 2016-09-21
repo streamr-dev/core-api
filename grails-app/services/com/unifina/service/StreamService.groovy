@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ValidationException
+import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.AbstractDataRangeProvider
@@ -14,6 +15,10 @@ import org.springframework.util.Assert
 class StreamService {
 
 	def grailsApplication
+
+	Stream findByName(String name) {
+		return Stream.findByName(name)
+	}
 	
 	Stream createStream(params, SecUser user) {
 		Stream stream = new Stream(params)
@@ -22,16 +27,17 @@ class StreamService {
 		stream.user = user
 		stream.config = params.config
 
-		AbstractStreamListener streamListener
-		if (stream.feed != null) {
-			Map config = stream.getStreamConfigAsMap()
-			if (!config.fields) {
-				config.fields = []
-			}
-			streamListener = instantiateListener(stream)
-			streamListener.addToConfiguration(config, stream)
-			stream.config = config as JSON
+		// If no feed given, API feed is used
+		if (stream.feed == null) {
+			stream.feed = Feed.load(Feed.KAFKA_ID)
 		}
+		Map config = stream.getStreamConfigAsMap()
+		if (!config.fields) {
+			config.fields = []
+		}
+		AbstractStreamListener streamListener = instantiateListener(stream)
+		streamListener.addToConfiguration(config, stream)
+		stream.config = config as JSON
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
@@ -66,7 +72,7 @@ class StreamService {
 	}
 
 	// TODO: move to FeedService
-	private AbstractStreamListener instantiateListener(Stream stream) {
+	public AbstractStreamListener instantiateListener(Stream stream) {
 		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
 		Class clazz = getClass().getClassLoader().loadClass(stream.feed.streamListenerClass)
 		return clazz.newInstance(grailsApplication)

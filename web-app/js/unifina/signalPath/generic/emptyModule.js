@@ -1,6 +1,8 @@
 /**
  * Events emitted on spObject:
  * updated - when eg. the stream is changed, updated is triggered with the new data
+ * started - when the canvas is started. The running module json is passed as argument.
+ * stopped - when the canvas is stopped.
  */
 SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot = prot || {};
@@ -27,9 +29,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			var x = ui.offset.left + canvas.scrollLeft()
 			var y = ui.offset.top + canvas.scrollTop()
 			
-			if (x < cpos.left-100 || y < cpos.top-50) {
+			if (x < cpos.left - 100 || y < cpos.top - 50) {
 				return false
 			}
+			$(prot).add(pub).trigger("drag")
 		}
 	}
 	
@@ -52,8 +55,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		} 
 		// Else add to default position in viewport
 		else {
-			prot.div.css('top',canvas.scrollTop() + 10);
-			prot.div.css('left',canvas.scrollLeft() + 10);
+			prot.div.css('top',canvas.scrollTop() + 20);
+			prot.div.css('left',canvas.scrollLeft() + 70);
 		}
 		
 		// Module header
@@ -88,7 +91,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
 		
-		var delay=500, tooltipDelayTimer		
+		var delay=500, tooltipDelayTimer
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
 	 			prot.getHelp(false, function(htext) {
@@ -213,7 +216,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			prot.addFocus(true);
 			event.stopPropagation();
 		});
-		
+
 		prot.div.hover(function() {
 			if (!prot.div.hasClass("focus")) {
 				prot.addFocus(false);
@@ -281,7 +284,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			    	cb(prot.renderHelp(prot.cachedHelpResponse, extended))
 				},
 			    error: function() {
-			    	result = "An error occurred while loading module help.";
+					console.error("An error occurred while loading help for module "+prot.jsonData.id)
+			    	cb("Sorry, help is not available for this module.");
 			    }
 			});
 		}
@@ -294,7 +298,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var embedCode = prot.getEmbedCode()
 		if (extended && embedCode) {
 			result += "<div class='note note-info'>"
-			result += "<p>To use this visualization on an external page, use the following tag:</p>";
+			result += "<p>To embed this visualization, enable public read access in the sharing settings, and paste the following tag to your website:</p>";
 			result += "<code>"+embedCode+"</code>"
 			result += "</div>"
 		}
@@ -304,8 +308,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.renderHelp = renderHelp;
 	
 	prot.getEmbedCode = function() {
-		if (SignalPath.isSaved() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
-			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" canvas='"+SignalPath.getId()+"' module='"+prot.getHash()+"' /&gt;"
+		if (pub.getURL() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
+			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" url='"+pub.getURL()+"' /&gt;"
 		}
 		else return undefined;
 	}
@@ -325,20 +329,20 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.div.removeClass("focus");
 		prot.div.removeClass("hoverFocus");
 		prot.div.removeClass("holdFocus");
-		prot.div.find(".showOnFocus").fadeTo(100,0);
 	}
 	prot.removeFocus = removeFocus;
 	
 	function addFocus(hold) {
 		prot.div.addClass("focus");
-		
-		if (hold) prot.div.addClass("holdFocus");
-		else prot.div.addClass("hoverFocus");
-		
-		prot.div.find(".showOnFocus").fadeTo(100,1);
+		if (hold) {
+			prot.div.addClass("holdFocus")
+		} else {
+			prot.div.addClass("hoverFocus")
+		}
 	}
 	prot.addFocus = addFocus;
 	
+
 	function createModuleButton(additionalClasses) {
 		var button = $("<div class='modulebutton'><a class='btn btn-default btn-xs showOnFocus' href='#' style='padding: 0px'><i class='fa fa-fw "+(additionalClasses ? additionalClasses : "")+"'></span></div>");
 		return button;
@@ -373,7 +377,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 
 		if (option.possibleValues) {
 			var $select = $("<select>");
-			_(option.possibleValues).each(function(opt) {
+			_.each(option.possibleValues, function(opt) {
 				var $option = $("<option>");
 				$option.attr("value", opt.value);
 				$option.append(opt.text);
@@ -438,6 +442,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.getDiv = getDiv;
 	
 	function close() {
+		$(SignalPath).trigger('moduleBeforeClose', [ prot.jsonData, prot.div ])
 		prot.div.remove();
 		pub.onClose();
 	}
@@ -449,7 +454,9 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		pub.clearWarnings()
 	}
 	
-	pub.onClose = function() {};
+	pub.onClose = function() {
+		$(prot).add(pub).trigger("closed")
+	}
 	
 	function toJSON() {
 		writePosition();
@@ -480,22 +487,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.warnings = []
 	}
 	pub.clearWarnings = clearWarnings
-	
-	function receiveResponse(payload) {}
-	pub.receiveResponse = receiveResponse;
 
-	function getUIChannelOptions() {
-		// Check if module options contain channel options
-		if (prot.jsonData.options && prot.jsonData.options.uiResendAll && prot.jsonData.options.uiResendAll.value) {
-			return { resend_all: true }
-		}
-		else if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
-			return { resend_last: prot.jsonData.options.uiResendLast.value }
-		}
-		else return { resend_all: true }
-	}
-	pub.getUIChannelOptions = getUIChannelOptions
-	
 	function updateFrom(data) {
 		// Overwrite jsonData
 		prot.jsonData = data;
@@ -546,7 +538,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 
 		promise.done(function(data) {
 			var module = SignalPath.createModuleFromJSON(data)
-			if (module) {
+			if (module && callback) {
 				callback(module)
 			}
 		})
@@ -564,9 +556,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
 	}
 	prot.prepareCloneData = prepareCloneData;
-	
-	prot.onDrag = function() {}
-	
+
+	pub.handleError = function(error) {}
+
+	pub.getURL = function() {
+		return SignalPath.getURL() ? SignalPath.getURL() + '/modules/' + pub.getHash() : undefined
+	}
+
+	pub.getRuntimeRequestURL = function() {
+		return pub.getURL() ? pub.getURL() + '/request' : undefined
+	}
+
 	// Everything added to the public interface can be accessed from the
 	// protected interface too
 	$.extend(prot,pub);

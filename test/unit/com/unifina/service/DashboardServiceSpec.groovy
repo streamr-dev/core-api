@@ -154,7 +154,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 666,
 			size: "large"
@@ -171,7 +171,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 666,
 			size: "large"
@@ -202,7 +202,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "added-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 666,
 			size: "large"
@@ -215,7 +215,7 @@ class DashboardServiceSpec extends Specification {
 		item instanceof DashboardItem
 		item.id != null
 		item.title == "added-item"
-		item.canvasId == "1"
+		item.canvas.id == "1"
 		item.module == 1
 		item.webcomponent == "streamr-chart"
 		item.ord == 666
@@ -239,7 +239,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 42,
 			size: "small"
@@ -262,7 +262,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 42,
 			size: "small"
@@ -285,7 +285,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 42,
 			size: "small"
@@ -315,7 +315,7 @@ class DashboardServiceSpec extends Specification {
 
 		def command = new SaveDashboardItemCommand(
 			title: "updated-item",
-			canvasId: canvas.id,
+			canvas: canvas.id,
 			module: 1,
 			ord: 42,
 			size: "small"

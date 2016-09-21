@@ -16,6 +16,12 @@ describe('scheduler', function() {
 	before(function(){
 		global.$ = $
 		global._ = _
+		// Normally done in streamr.js
+		_.templateSettings = {
+			evaluate : /\{\[([\s\S]+?)\]\}/g, // {[ ]}
+			escape : /\[\[([\s\S]+?)\]\]/g, // [[ ]]
+			interpolate : /\{\{([\s\S]+?)\}\}/g // {{ }}
+		}
 		global.window = window
 		global.document = window.document
 		global.Backbone = Backbone

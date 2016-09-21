@@ -1,18 +1,18 @@
 package com.unifina.signalpath;
 
+import com.unifina.utils.IdGenerator;
+
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Endpoint<T> implements Serializable {
 	public AbstractSignalPathModule owner;
 	protected String name;
 	protected String displayName;
 	protected String typeName;
+	private String jsClass;
+	private String id = "ep_" + IdGenerator.get();
 	
 	private Map<String,Object> json;
 	private boolean configured = false;
@@ -74,32 +74,53 @@ public abstract class Endpoint<T> implements Serializable {
 	
 	public abstract boolean isConnected();
 	
-	public Map<String,Object> resetConfiguration() {
-		json = null;
-		return getConfiguration();
+	public void regenerateId() {
+		id = IdGenerator.get();
 	}
-	
+
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
-		
+
+		map.put("id", id);
 		map.put("name", name);
 		map.put("longName", owner.getName()+"."+name);
 		map.put("type",getTypeName());
 		map.put("connected", isConnected());
 		map.put("canConnect", canConnect);
-		
-		if (displayName!=null)
-			map.put("displayName",displayName);
-		
+
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (jsClass != null) {
+			map.put("jsClass", jsClass);
+		}
+		if (getValue() != null) {
+			map.put("value", getValue());
+		}
+
 		return map;
+	}
+
+	/**
+	 * Returns an array of typenames that this Input accepts.
+	 * By default returns an array with one element: the one returned by getTypeName()
+	 * @return
+	 */
+	protected String[] getAcceptedTypes() {
+		return getTypeName().split(" ");
 	}
 	
 	public void setConfiguration(Map<String,Object> config) {
-		json = config;
+		json = new LinkedHashMap<>(config);
 		configured = true;
 		
-		if (config.containsKey("displayName"))
-			displayName = (String)config.get("displayName");
+		if (config.containsKey("displayName")) {
+			displayName = (String) config.get("displayName");
+		}
+
+		if (config.containsKey("id")) {
+			id = config.get("id").toString();
+		}
 	}
 	
 	@Override
@@ -120,14 +141,32 @@ public abstract class Endpoint<T> implements Serializable {
 	 */
 	public void addAlias(String name) {
 		if (aliases==null)
-			aliases = new ArrayList<String>(1);
+			aliases = new ArrayList<>(1);
 		aliases.add(name);
 	}
 	
 	public List<String> getAliases() {
 		if (aliases==null)
-			return new ArrayList<String>(0);
+			return new ArrayList<>(0);
 		else return aliases;
 	}
-	
+
+	public void setJsClass(String jsClass) {
+		this.jsClass = jsClass;
+	}
+
+	/**
+	 * Returns the most recent value at this Endpoint.
+     */
+	public abstract T getValue();
+
+	/**
+	 * Clear the state of this Endpoint.
+	 */
+	public abstract void clear();
+
+	/**
+	 * Disconnects this Endpoint.
+	 */
+	public abstract void disconnect();
 }

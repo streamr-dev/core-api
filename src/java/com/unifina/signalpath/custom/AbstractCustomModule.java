@@ -15,24 +15,24 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 
 	protected transient SimpleDateFormat df = null;
 
-	protected void debug(String s) {
-		if (globals.getUiChannel()!=null) {
+	protected void debug(Object s) {
+		if (getGlobals().getUiChannel()!=null) {
 			if (df == null) {
 				df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 			}
 			String t = null;
-			if (globals.time != null)
-				t = df.format(globals.getTzConverter().getFakeLocalTime(globals.time));
+			if (getGlobals().time != null)
+				t = df.format(getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time));
 
 			final HashMap<String, String> msg = new HashMap<>();
 			msg.put("type", "debug");
-			msg.put("msg", s);
+			msg.put("msg", s != null ? s.toString() : null);
 			msg.put("t", t);
 
 			AccessController.doPrivileged(new PrivilegedAction<Void>() {
 				@Override
 				public Void run() {
-					globals.getUiChannel().push(msg, uiChannelId);
+					getGlobals().getUiChannel().push(msg, uiChannelId);
 					return null;
 				}
 			});
@@ -48,6 +48,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		outputs = null;
 		outputsByName = null;
 		drivingInputs = null;
+		readyInputs = null;
 	}
 
 	public void copyStateFromWrapper(SignalPath parentSignalPath,
@@ -56,6 +57,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 									 ArrayList<Output> outputs,
 									 Map outputsByName,
 									 HashSet<Input> drivingInputs,
+									 Set<Input> readyInputs,
 									 Globals globals) {
 		this.parentSignalPath = parentSignalPath;
 		this.inputs = new ArrayList<>(inputs);
@@ -63,6 +65,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		this.outputs = new ArrayList<>(outputs);
 		this.outputsByName = new HashMap<>(outputsByName);
 		this.drivingInputs = new HashSet<>(drivingInputs);
-		this.globals = globals;
+		this.readyInputs = readyInputs;
+		this.setGlobals(globals);
 	}
 }

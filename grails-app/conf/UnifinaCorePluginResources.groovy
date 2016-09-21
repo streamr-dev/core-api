@@ -24,7 +24,6 @@ modules = {
 	}
 	bootstrap {
 		dependsOn 'jquery'
-		// resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.min.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 	}
@@ -52,7 +51,7 @@ modules = {
 	}
 	typeahead {
 		dependsOn 'jquery'
-		resource url:[dir:'js/typeahead', file:'typeahead.bundle.min.js', plugin: 'unifina-core']
+		resource url:[dir:'js/typeahead', file:'typeahead.bundle.js', plugin: 'unifina-core']
 	}
 	mustache {
 		resource url:[dir:'js/mustache-0.8.2', file:'mustache.js', plugin: 'unifina-core']
@@ -107,11 +106,11 @@ modules = {
 	webcomponents {
 		resource url:[dir:'js/webcomponentsjs', file:'webcomponents.min.js', plugin: 'unifina-core'], disposition:'head'
 	}
-	underscore {
-		resource url:[dir:'js/underscore', file:'underscore-min.js', plugin: 'unifina-core']
+	lodash {
+		resource url:[dir:'js/lodash-3.10.1', file:'lodash.min.js', plugin: 'unifina-core']
 	}
 	backbone {
-		dependsOn 'underscore,jquery'
+		dependsOn 'lodash,jquery'
 		resource url:[dir:'js/backbone', file:'backbone.js', plugin: 'unifina-core']
 	}
 	'backbone-associations' {
@@ -138,18 +137,18 @@ modules = {
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
 	}
 	moment {
-		resource url:[dir:'js/moment', file:'moment.js']
+		resource url:[dir:'js/moment', file:'moment.js', plugin:'unifina-core']
 	}
 	'moment-timezone' {
 		dependsOn 'moment'
-		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js']
+		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js', plugin:'unifina-core']
 	}
 
 	/**
 	 * In-house widgets and resources
 	 */
 	streamr {
-		dependsOn 'pnotify'
+		dependsOn 'pnotify, lodash'
 		resource url:[dir:'js/unifina', file:'streamr.js', plugin: 'unifina-core']
 	}
 	tour {
@@ -157,7 +156,7 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, toolbar, bootstrap'
+		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
@@ -167,9 +166,9 @@ modules = {
 		dependsOn 'jquery, backbone'
 		resource url:[dir:'js/unifina/stream-fields', file:'stream-fields.js', plugin: 'unifina-core']
 	}
-	'search-control' {
+	'streamr-search' {
 		dependsOn 'typeahead'
-		resource url:[dir:'js/unifina/search-control', file:'search-control.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-search', file:'streamr-search.js', plugin: 'unifina-core']
 	}
 	'remote-tabs' {
 		dependsOn 'bootbox, mustache'
@@ -184,12 +183,16 @@ modules = {
 		resource url:[dir:'js/unifina/signalpath-browser', file:'signalpath-browser.js', plugin: 'unifina-core']
 	}
 	'module-browser' {
-		dependsOn 'mathjax, bootstrap, underscore, streamr'
+		dependsOn 'mathjax, bootstrap, lodash, streamr'
 		resource url:[dir:'js/unifina/module-browser', file:'module-browser.js', plugin:'unifina-core']
 	}
 	'key-value-editor' {
-		dependsOn 'bootstrap, backbone, mustache'
+		dependsOn 'bootstrap, backbone, mustache, list-editor'
 		resource url:[dir:'js/unifina/key-value-editor', file:'key-value-editor.js', plugin:'unifina-core']
+	}
+	'list-editor' {
+		dependsOn 'bootstrap, backbone, mustache'
+		resource url:[dir:'js/unifina/list-editor', file:'list-editor.js', plugin:'unifina-core']
 	}
 	toolbar {
 		dependsOn 'jquery'
@@ -202,7 +205,6 @@ modules = {
 	}
 	'signalpath-widgets' {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/widgets', file:'typeahead.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
 		dependsOn 'socket-io'
@@ -239,6 +241,9 @@ modules = {
 	'streamr-table' {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
+	'scrollspy-helper' {
+		resource url:[dir:'js/unifina/scrollspy-helper', file:'scrollspy-helper.js', plugin: 'unifina-core']
+	}
 	'canvas-controls' {
 		dependsOn 'signalpath-core, backbone'
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
@@ -269,14 +274,18 @@ modules = {
 		dependsOn 'signalpath-widgets'
 		dependsOn 'mathjax'
 		dependsOn 'spectrum'
-		dependsOn 'underscore'
+		dependsOn 'lodash'
 		dependsOn 'key-value-editor'
+		dependsOn 'list-editor'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'uiChannelModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicInput.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
@@ -296,6 +305,10 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'subCanvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'canvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'forEachModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
@@ -307,20 +320,22 @@ modules = {
 		resource url: "https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
 		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
 	}
+	'marked' {
+		resource url:[dir: 'js/marked/', file: 'marked.min.js', plugin: 'unifina-core']
+	}
 	'swagger' {
-		dependsOn 'jquery, underscore, jquery-migrate'
-		resource url:[dir: 'js/swagger/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/', file: 'swagger-ui.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'jsoneditor.min.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'marked.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/lib/', file: 'swagger-oauth.js', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/css/', file: 'reset.css', plugin: 'unifina-core']
-		resource url:[dir: 'js/swagger/css/', file: 'screen.css', plugin: 'unifina-core']
+		dependsOn 'jquery, lodash, jquery-migrate, marked'
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jquery.slideto.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jquery.wiggle.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jquery.ba-bbq.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'handlebars-2.0.0.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'backbone-min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/', file: 'swagger-ui.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'highlight.7.3.pack.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'jsoneditor.min.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/lib/', file: 'swagger-oauth.js', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/css/', file: 'reset.css', plugin: 'unifina-core']
+		resource url:[dir: 'js/swagger-ui/dist/css/', file: 'screen.css', plugin: 'unifina-core']
 	}
 
 }

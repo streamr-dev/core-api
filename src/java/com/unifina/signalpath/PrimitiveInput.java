@@ -12,11 +12,11 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 	}
 
 	@Override
-	protected void doClear() {
+	public void clear() {
 		if (initialValue!=null || feedbackConnection) {
 			value = initialValue;
 		}
-		else super.doClear();
+		else super.clear();
 	}
 
 	public T getInitialValue() {
@@ -40,7 +40,7 @@ public abstract class PrimitiveInput<T> extends Input<T> {
 
 		config.put("canHaveInitialValue", canHaveInitialValue);
 
-		if (canHaveInitialValue && initialValue!=null && validateInitialValue(initialValue))
+		if (canHaveInitialValue && (initialValue==null || validateInitialValue(initialValue)))
 			config.put("initialValue", initialValue);
 
 		config.put("feedback", isFeedbackConnection());

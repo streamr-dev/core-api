@@ -6,6 +6,8 @@ import org.springframework.validation.ObjectError;
 
 public class ValidationException extends RuntimeException {
 
+	public ValidationException() {}
+
 	public ValidationException(Errors errors) {
 		super(turnToMessage(errors));
 	}

@@ -6,6 +6,7 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
+import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
@@ -19,7 +20,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
 @TestMixin(GrailsUnitTestMixin)
-@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService])
+@Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
 class ForEachSpec extends Specification {
 
 	CanvasService canvasService
@@ -28,6 +29,8 @@ class ForEachSpec extends Specification {
 	ForEach module
 	SecUser user
 
+	def modulesJson
+
 	def setup() {
 		canvasService = mainContext.getBean(CanvasService)
 		canvasService.signalPathService = mainContext.getBean(SignalPathService)
@@ -35,26 +38,10 @@ class ForEachSpec extends Specification {
 		module.globals = globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.init()
 		user = new SecUser().save(failOnError: true, validate: false)
-	}
 
-	def "throws RuntimeException if canvas has no exported inputs"() {
-		def command = new SaveCanvasCommand(name: "canvas-wo-exported-inputs", modules: [])
-		def canvas = canvasService.createNew(command, user)
-
-		when:
-		module.getInput("canvas").receive(canvas)
-		module.configure(module.getConfiguration())
-
-		then:
-		RuntimeException e = thrown()
-		e.message.contains("canvas")
-	}
-
-	def "forEach works correctly"() {
 		def divideModule = new Module(implementingClass: Divide.canonicalName).save(failOnError: true, validate: false)
 		def sumModule = new Module(implementingClass: Sum.canonicalName).save(failOnError: true, validate: false)
-
-		def modules = [
+		modulesJson = [
 			[
 				id: divideModule.id,
 				hash: 0,
@@ -122,7 +109,23 @@ class ForEachSpec extends Specification {
 				]
 			]
 		]
-		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modules)
+	}
+
+	def "throws RuntimeException if canvas has no exported inputs"() {
+		def command = new SaveCanvasCommand(name: "canvas-wo-exported-inputs", modules: [])
+		def canvas = canvasService.createNew(command, user)
+
+		when:
+		module.getInput("canvas").receive(canvas)
+		module.configure(module.getConfiguration())
+
+		then:
+		RuntimeException e = thrown()
+		e.message.contains("canvas")
+	}
+
+	def "forEach works correctly"() {
+		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
 		def canvas = canvasService.createNew(command, user)
 
 		module.getInput("canvas").receive(canvas)
@@ -147,6 +150,42 @@ class ForEachSpec extends Specification {
 				[k1: [out: 17.5d], k2: [out: 0.375d], k3: [out: 10d], k4: [out: 0d]],
 				[k1: [out: 17.5d], k2: [out: 0.375d], k3: [out: 10d], k4: [out: 0d], k5: [out: 20d]],
 				[k1: [out: 17.5d], k2: [out: 0.375d], k3: [out: 10d], k4: [out: 0d], k5: [out: -30d]],
+			]
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.test()
+	}
+
+	def "forEach handles displayName correctly"() {
+		modulesJson[1].outputs[0].displayName = "outout"
+		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
+		def canvas = canvasService.createNew(command, user)
+
+		module.getInput("canvas").receive(canvas)
+		module.configure(module.getConfiguration())
+
+		when:
+		Map inputValues = [
+			key: ["k1", "k1", "k1", "k2", "k3", "k4", "k2", "k1", "k5", "k5"],
+			A: [5, 3, 12, 1, 50, 0, 1, 10, 600, -50].collect { it.doubleValue() },
+			B: [5, 6, 2, 4,   5, 1, 8,  1,  30, 1].collect { it.doubleValue() },
+		]
+		Map outputValues = [
+			outout: [1, 1.5, 7.5, 0.25, 10, 0, 0.375, 17.5, 20, -30].collect { it.doubleValue() },
+			map: [
+				[k1: [outout: 1d]],
+				[k1: [outout: 1.5d]],
+				[k1: [outout: 7.5d]],
+				[k1: [outout: 7.5d], k2: [outout: 0.25d]],
+				[k1: [outout: 7.5d], k2: [outout: 0.25d], k3: [outout: 10d]],
+				[k1: [outout: 7.5d], k2: [outout: 0.25d], k3: [outout: 10d], k4: [outout: 0d]],
+				[k1: [outout: 7.5d], k2: [outout: 0.375d], k3: [outout: 10d], k4: [outout: 0d]],
+				[k1: [outout: 17.5d], k2: [outout: 0.375d], k3: [outout: 10d], k4: [outout: 0d]],
+				[k1: [outout: 17.5d], k2: [outout: 0.375d], k3: [outout: 10d], k4: [outout: 0d], k5: [outout: 20d]],
+				[k1: [outout: 17.5d], k2: [outout: 0.375d], k3: [outout: 10d], k4: [outout: 0d], k5: [outout: -30d]],
 			]
 		]
 

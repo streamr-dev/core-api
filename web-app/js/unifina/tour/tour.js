@@ -1,6 +1,5 @@
 (function(exports) {
 
-var tourUrlRoot = Streamr.createLink({ uri: 'static/js/tours/' })
 var tourIdPrefix = Streamr.user
 var startableTours = []
 var continuableTours = []
@@ -20,7 +19,7 @@ function Tour() {
 	}
 
 	hopscotch.listen('error', function(e) {
-		console.log("Hopscotch error")
+		console.error("Hopscotch error", e)
 	})
 }
 
@@ -98,7 +97,6 @@ Tour.playTour = function(tourNumber, currentStep) {
 }
 
 Tour.loadTour = function(tourNumber, cb) {
-	var url = tourUrlRoot + tourNumber + '.js'
 
 	Tour.create = function() {
 		console.log('Tour.create', tourNumber)
@@ -117,13 +115,14 @@ Tour.loadTour = function(tourNumber, cb) {
 	}
 
 	//Use jQuery instead of appending script tag to head due to caching issues
-	$.getScript(url)
+	Tour.list(function(tours) {
+		$.getScript(tours[tourNumber].url)
+	})
+
 }
 
 Tour.list = function(cb) {
-	$.getJSON(tourUrlRoot + 'index.json', function(resp) {
-		cb(resp)
-	})
+	cb(Streamr.Tours)
 }
 
 // ---
@@ -348,6 +347,45 @@ Tour.prototype.waitForModuleAdded = function(moduleName) {
 	}
 }
 
+Tour.prototype.waitForCanvasStopped = function() {
+	var that = this
+	var _cb = this.next.bind(this)
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		function listener() {
+			_cb()
+		}
+
+		$(SignalPath).one('stopped', listener)
+	}
+}
+
+Tour.prototype.waitForModuleRemoved = function(moduleName) {
+	var that = this
+	var _cb = this.next.bind(this)
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		function listener(e, jsonData, div) {
+			if (jsonData.name !== moduleName)
+				return;
+
+			that.bindModule(moduleName, div)
+
+			$(SignalPath).off('moduleBeforeClose.tour', listener)
+
+			_cb()
+		}
+
+		$(SignalPath).on('moduleBeforeClose.tour', listener)
+	}
+}
+
 Tour.prototype.waitForInput = function(selector, content) {
 	var _cb = this.next.bind(this)
 
@@ -435,6 +473,10 @@ Tour.prototype.waitForStream = function(selector, streamName) {
 	}
 }
 
+Tour.prototype.waitForConnection = function(conn) {
+	return this.waitForConnections([conn])
+}
+
 Tour.prototype.waitForConnections = function(conns) {
 	var that = this
 	var _triggered = false
@@ -463,15 +505,20 @@ Tour.prototype.waitForConnections = function(conns) {
 			var targetModule = that._getSpObject(c.toModule)
 			var targetEndpoints = targetModule.getInputs()
 
-			if (c.toEndpoint)
-				targetEndpoints = [ targetModule.getInput(c.toEndpoint) ]
+			if (c.toEndpoint) {
+				var singleInput = targetModule.findInputByDisplayName(c.toEndpoint)
+				if (!singleInput) {
+					return
+				}
+				targetEndpoints = [singleInput]
+			}
 
 			targetEndpoints.forEach(function(targetEp) {
 				targetEp.getConnectedEndpoints().forEach(function(xEndpoint) {
 					if (!xEndpoint.module.div.hasClass(c.fromModule))
 						return;
 
-					if (c.fromEndpoint && xEndpoint.json.name !== c.fromEndpoint)
+					if (c.fromEndpoint && xEndpoint.json.name !== c.fromEndpoint && (xEndpoint.json.displayName && xEndpoint.json.displayName !== c.fromEndpoint))
 						return;
 
 					connsMade++
@@ -496,6 +543,64 @@ Tour.prototype.waitForConnections = function(conns) {
 		if (cb)
 			_cb = cb
 		setListeners(true)
+	}
+}
+
+Tour.prototype.highlightOutputUntilDraggingStarts = function(qualifiedName) {
+
+	var module = qualifiedName.split('.')[0]
+	var output = qualifiedName.split('.')[1]
+
+	var _cb = this.next.bind(this)
+	var that = this
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		// Flash-highlight the endpoint
+		var $ep = that._getSpObject(module).findOutputByDisplayName(output)
+		var i = 0;
+		var interval = setInterval(function () {
+			if (i++ % 2 === 0)
+				$ep.addClass("highlight")
+			else
+				$ep.removeClass("highlight")
+		}, 500)
+		// Clear interval on dragstart
+		$($ep.jsPlumbEndpoint.canvas).one('dragstart', function () {
+			clearInterval(interval)
+			_cb()
+		})
+	}
+}
+
+Tour.prototype.highlightInputUntilConnected = function(qualifiedName) {
+
+	var module = qualifiedName.split('.')[0]
+	var input = qualifiedName.split('.')[1]
+
+	var _cb = this.next.bind(this)
+	var that = this
+
+	return function(cb) {
+		if (cb)
+			_cb = cb
+
+		// Flash-highlight the endpoint
+		var $ep = that._getSpObject(module).findInputByDisplayName(input)
+		var i = 0;
+		var interval = setInterval(function () {
+			if (i++ % 2 === 0)
+				$ep.addClass("highlight")
+			else
+				$ep.removeClass("highlight")
+		}, 500)
+		// Clear interval on dragstart
+		$($ep.div).one('spConnect', function () {
+			clearInterval(interval)
+			_cb()
+		})
 	}
 }
 

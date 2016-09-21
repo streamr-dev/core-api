@@ -29,17 +29,18 @@ public abstract class Chart extends ModuleWithUI {
 	private static final Logger log = Logger.getLogger(Chart.class);
 	
 	protected boolean hasRc = false;
+	protected String dataGrouping = "min/max";
 	
 	private void initCsv() {
 		csv = true;
-		csvWriter = new CSVWriter(null, globals.getGrailsApplication().getConfig(), globals.getSignalPathContext(), globals.getUserTimeZone());
+		csvWriter = new CSVWriter(null, getGlobals().getGrailsApplication().getConfig(), getGlobals().getSignalPathContext(), getGlobals().getUserTimeZone());
 	}
 
 	@Override
 	public void init() {
 		canClearState = false;
-		
-		if (globals.getSignalPathContext().containsKey("csv"))
+
+		if (getGlobals().getSignalPathContext().containsKey("csv"))
 			initCsv();
 
 		// Create visible input connections
@@ -49,14 +50,14 @@ public abstract class Chart extends ModuleWithUI {
 	@Override
 	public void initialize() {
 		super.initialize();
-		hasRc = (globals!=null && globals.getUiChannel()!=null);
+		hasRc = (getGlobals() !=null && getGlobals().getUiChannel()!=null);
 	}
 	
 	protected abstract void addDefaultInputs();
 	
 	@Override
 	public void sendOutput() {
-		Date timestamp = globals.time;
+		Date timestamp = getGlobals().time;
 		if (timestamp==null) 
 			return;
 		else if (csv) {
@@ -69,9 +70,9 @@ public abstract class Chart extends ModuleWithUI {
 		}
 		else {
 			if (timeOfDayFilterEnabled && !todUtil.hasBaseDate())
-				todUtil.setBaseDate(globals.time);
+				todUtil.setBaseDate(getGlobals().time);
 			
-			if (!timeOfDayFilterEnabled || todUtil.isInRange(globals.time)) {
+			if (!timeOfDayFilterEnabled || todUtil.isInRange(getGlobals().time)) {
 				record();
 			}
 		}
@@ -107,7 +108,7 @@ public abstract class Chart extends ModuleWithUI {
 		if (csv) {
 			File file = csvWriter().finish();
 			if (hasRc) {
-				globals.getUiChannel().push(new CSVMessage(file.getName(),"downloadCsv?filename="+file.getName()), uiChannelId);
+				getGlobals().getUiChannel().push(new CSVMessage(file.getName()), uiChannelId);
 			}
 		}
 	}
@@ -120,7 +121,16 @@ public abstract class Chart extends ModuleWithUI {
 		options.add(new ModuleOption("ignoreEnabled", false, "boolean"));
 		options.add(new ModuleOption("ignoreBefore", todUtil==null ? "00:00:00" : todUtil.getStartString(), "string"));
 		options.add(new ModuleOption("ignoreAfter", todUtil==null ? "23:59:59" : todUtil.getEndString(), "string"));
-		
+
+		ModuleOption dataGroupingOption = ModuleOption.createString("dataGrouping", dataGrouping);
+		dataGroupingOption.addPossibleValue("max positive/min negative", "min/max");
+		dataGroupingOption.addPossibleValue("average", "average");
+		dataGroupingOption.addPossibleValue("first", "open");
+		dataGroupingOption.addPossibleValue("last", "close");
+		dataGroupingOption.addPossibleValue("max", "high");
+		dataGroupingOption.addPossibleValue("min", "low");
+		options.addIfMissing(dataGroupingOption);
+
 		return config;
 	}
 	
@@ -135,16 +145,20 @@ public abstract class Chart extends ModuleWithUI {
 		if (timeOfDayFilterEnabled && options.getOption("ignoreBefore")!=null) {
 			String begin = options.getOption("ignoreBefore").getString();
 			String end = options.getOption("ignoreAfter").getString();
-			todUtil = new TimeOfDayUtil(begin,end,globals.getUserTimeZone());
+			todUtil = new TimeOfDayUtil(begin,end, getGlobals().getUserTimeZone());
+		}
+
+		if (options.getOption("dataGrouping") != null) {
+			dataGrouping = options.getOption("dataGrouping").toString();
 		}
 	}
 
 	protected CSVWriter csvWriter() {
 		if (csvWriter == null) {
 			csvWriter = new CSVWriter(null,
-					globals.getGrailsApplication().getConfig(),
-					globals.getSignalPathContext(),
-					globals.getUserTimeZone());
+					getGlobals().getGrailsApplication().getConfig(),
+					getGlobals().getSignalPathContext(),
+					getGlobals().getUserTimeZone());
 		}
 		return csvWriter;
 	}

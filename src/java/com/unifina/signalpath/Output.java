@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Output<T> extends Endpoint<T> {
@@ -50,8 +51,9 @@ public class Output<T> extends Endpoint<T> {
 			proxy.send(value);
 		}
 	}
-	
-	public void doClear() {
+
+	@Override
+	public void clear() {
 		previousValue = null;
 	}
 	
@@ -76,6 +78,12 @@ public class Output<T> extends Endpoint<T> {
 		cachedTargets = targets.toArray(new Input[targets.size()]);
 	}
 
+	public void disconnect() {
+		targets.clear();
+		connected = false;
+		cachedTargets = targets.toArray(new Input[targets.size()]);
+	}
+
 	public void addProxiedOutput(Output<T> output) {
 		proxiedOutputs.add(output);
 	}
@@ -88,7 +96,8 @@ public class Output<T> extends Endpoint<T> {
 	public boolean isConnected() {
 		return connected;
 	}
-	
+
+	@Override
 	public T getValue() {
 		return previousValue;
 	}

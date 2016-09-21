@@ -1,6 +1,6 @@
 SignalPath.MapModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var $container = null
 	var map = null
@@ -9,6 +9,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		
 	// Dragging in the chart container or the controls must not move the module
 	prot.dragOptions.cancel = ".map-container"
+
+	prot.getMap = function() {
+		return map
+	}
 	
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
@@ -57,7 +61,7 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		map.handleMessage(d)
 	}
 	
@@ -79,6 +83,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 		var json = map.toJSON()
 		$.extend(true, prot.jsonData, json)
 		return prot.jsonData
+	}
+
+	pub.getMap = function() {
+		return map;
 	}
 	
 	return pub;

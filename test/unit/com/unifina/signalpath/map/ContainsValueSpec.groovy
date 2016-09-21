@@ -25,7 +25,7 @@ class ContainsValueSpec extends Specification {
 		]
 
 		Map outputValues = [
-		    found: [1, 0, 1, 1]*.doubleValue()
+		    found: [true, false, true, true]
 		]
 
 		then:

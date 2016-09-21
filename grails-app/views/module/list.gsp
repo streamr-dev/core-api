@@ -25,10 +25,11 @@
     	
     	<div class="row">
     		<div class="col-sm-12 col-md-8 col-md-offset-2">
-                
-		        <div class="col-md-9" id="module-help-tree">
+				<div class="panel col-md-9">
+					<div class="panel-body" id="module-help-tree">
 
-		        </div>
+					</div>
+				</div>
                 <div class="col-xs-0 col-sm-0 col-md-3">
                     <div id="sidebar">
                         <div class="hidden-sm hidden-xs moduleSearch">
@@ -37,7 +38,7 @@
                         </div>
                     </div>
                 </div>
-		        
+
         	</div>
         </div>
     </body>

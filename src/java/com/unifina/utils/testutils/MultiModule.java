@@ -33,7 +33,7 @@ public class MultiModule extends AbstractSignalPathModule {
 	public void init() {
 		super.init();
 
-		addMulti = addModule(new AddMulti());
+		addMulti = addModule(new VariadicAddMulti());
 		count = addModule(new Count());
 		max = addModule(new Max());
 

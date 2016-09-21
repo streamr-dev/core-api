@@ -101,13 +101,6 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 			if (lastReportedSec > nextDay.getMillis()) {
 				dlCount = dayListeners.size();
 
-				// TODO: remove this hack. The point is that all modules must be cleared before calling onDay(d)
-				for (i = 0; i < dlCount; i++) {
-					if (dayListeners.get(i) instanceof AbstractSignalPathModule) {
-						((AbstractSignalPathModule) dayListeners.get(i)).clear();
-					}
-				}
-
 				// Report the new day
 				for (i = 0; i < dlCount; i++) {
 					dayListeners.get(i).onDay(d);
