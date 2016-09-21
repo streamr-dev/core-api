@@ -1,6 +1,6 @@
 SignalPath.InputModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
 	var widget;
 	
@@ -15,12 +15,6 @@ SignalPath.InputModule = function(data,canvas,prot) {
 			prot.jsonData
 		)
 		widget.render()
-
-		$(SignalPath).on("started loaded", prot.start)
-
-		$(SignalPath).on("loaded", prot.requestState)
-
-		$(SignalPath).on("stopped", prot.stop)
 
 		$(widget).on("update", function() {
 			prot.redraw()
@@ -61,8 +55,8 @@ SignalPath.InputModule = function(data,canvas,prot) {
 
 
 	function requestState(json) {
-		if (json && !json.adhoc) {
-			SignalPath.sendRequest(prot.hash, {type:'getState'}, function(response) {
+		if (json && !json.adhoc && SignalPath.isRunning()) {
+			SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type:'getState'}, function(response) {
 				widget.updateState(response.state)
 			})
 		}
@@ -76,23 +70,31 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		return prot.jsonData
 	}
 	
-	pub.receiveResponse = function(p) {
-		if(widget.receiveResponse)
+	prot.receiveResponse = function(p) {
+		if (widget.receiveResponse) {
 			widget.receiveResponse(p)
+		}
 	}
 
 	prot.sendValue = function(value) {
-		SignalPath.sendRequest(pub.getHash(), {
-			type: "uiEvent",
-			value: value
-		}, function(resp) {});
+		if (SignalPath.isRunning()) {
+			SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {
+					type: "uiEvent",
+					value: value
+				}, function (resp) {
+			});
+		}
 	}
 
-	pub.onClose = function() {
+	$(SignalPath).on("started loaded", prot.start)
+	$(SignalPath).on("loaded", prot.requestState)
+	$(SignalPath).on("stopped", prot.stop)
+	$(prot).on('closed', function() {
 		$(widget).off()
 		$(SignalPath).off("started loaded", prot.start)
 		$(SignalPath).off("loaded", prot.requestState)
-	}
+		$(SignalPath).off("stopped", prot.stop)
+	})
 	
 	return pub;
 }

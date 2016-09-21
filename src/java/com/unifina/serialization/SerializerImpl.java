@@ -9,15 +9,19 @@ import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONArray;
+import org.codehaus.groovy.grails.web.json.JSONElement;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.nustaq.serialization.*;
 import org.nustaq.serialization.coders.Unknown;
-import org.nustaq.serialization.serializers.FSTBigNumberSerializers;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SerializerImpl implements Serializer {
@@ -30,10 +34,9 @@ public class SerializerImpl implements Serializer {
 		conf.registerSerializer(PearsonsCorrelation.class, new PearsonsCorrelationSerializer(), false);
 		conf.registerSerializer(Pattern.class, new PatternSerializer(), false);
 		conf.registerSerializer(DescriptiveStatistics.class, new DescriptiveStatisticsSerializer(), false);
-		conf.registerSerializer(JSONObject.class, new JSONObjectSerializer(), true);
-		conf.registerSerializer(JSONArray.class, new JSONArraySerializer(), true);
-		conf.registerSerializer(JSONObject.Null.class, new JSONNullSerializer(), true);
-
+		conf.registerSerializer(JSONObject.class, new JSONElementSerializer(), true);
+		conf.registerSerializer(JSONObject.Null.class, new JSONElementSerializer(), true);
+		conf.registerSerializer(JSONArray.class, new JSONElementSerializer(), true);
 		conf.registerSerializer(Canvas.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Feed.class, new DomainClassSerializer(), false);
 		conf.registerSerializer(Module.class, new DomainClassSerializer(), false);
@@ -182,14 +185,46 @@ public class SerializerImpl implements Serializer {
 		}
 	}
 
-	private static class JSONObjectSerializer extends FSTBasicObjectSerializer {
+	private static class JSONElementSerializer extends FSTBasicObjectSerializer {
+
+		private Map<String, Object> objectToMap(JSONObject ob) {
+			LinkedHashMap<String, Object> result = new LinkedHashMap<>(ob.size());
+			for (Object key : ob.keySet()) {
+				result.put(key.toString(), getSafeValue(ob.get(key)));
+			}
+			return result;
+		}
+
+		private List<Object> arrayToList(JSONArray arr) {
+			List<Object> result = new ArrayList<>(arr.size());
+			for (Object item : arr) {
+				result.add(getSafeValue(item));
+			}
+			return result;
+		}
+
+		private Object getSafeValue(Object ob) {
+			if (ob instanceof JSONObject) {
+				return objectToMap((JSONObject) ob);
+			}
+			else if (ob instanceof JSONArray) {
+				return arrayToList((JSONArray) ob);
+			}
+			else if (ob instanceof JSONObject.Null) {
+				return null;
+			}
+			else {
+				return ob;
+			}
+		}
+
 		@Override
 		public void writeObject(FSTObjectOutput out,
 								Object toWrite,
 								FSTClazzInfo clzInfo,
 								FSTClazzInfo.FSTFieldInfo referencedBy,
 								int streamPosition) throws IOException {
-			out.writeUTF(toWrite.toString());
+			out.writeObject(getSafeValue(toWrite));
 		}
 
 		@Override
@@ -198,49 +233,19 @@ public class SerializerImpl implements Serializer {
 								  FSTClazzInfo serializationInfo,
 								  FSTClazzInfo.FSTFieldInfo referencee,
 								  int streamPosition) throws Exception {
-			return new JSONObject(in.readStringUTF());
-		}
-	}
-
-	private static class JSONNullSerializer extends FSTBasicObjectSerializer {
-		@Override
-		public void writeObject(FSTObjectOutput out,
-								Object toWrite,
-								FSTClazzInfo clzInfo,
-								FSTClazzInfo.FSTFieldInfo referencedBy,
-								int streamPosition) throws IOException {
-			out.writeUTF("null");
-		}
-
-		@Override
-		public Object instantiate(Class objectClass,
-								  FSTObjectInput in,
-								  FSTClazzInfo serializationInfo,
-								  FSTClazzInfo.FSTFieldInfo referencee,
-								  int streamPosition) throws Exception {
-			in.readStringUTF();
-			return JSONObject.NULL;
-		}
-	}
-
-	private static class JSONArraySerializer extends FSTBasicObjectSerializer {
-
-		@Override
-		public void writeObject(FSTObjectOutput out,
-								Object toWrite,
-								FSTClazzInfo clzInfo,
-								FSTClazzInfo.FSTFieldInfo referencedBy,
-								int streamPosition) throws IOException {
-			out.writeUTF(toWrite.toString());
-		}
-
-		@Override
-		public Object instantiate(Class objectClass,
-								  FSTObjectInput in,
-								  FSTClazzInfo serializationInfo,
-								  FSTClazzInfo.FSTFieldInfo referencee,
-								  int streamPosition) throws Exception {
-			return new JSONArray(in.readStringUTF());
+			Object mapOrList = in.readObject();
+			if (mapOrList instanceof Map) {
+				return new JSONObject((Map) mapOrList);
+			}
+			else if (mapOrList instanceof List) {
+				return new JSONArray((List) mapOrList);
+			}
+			else if (mapOrList == null) {
+				return null;
+			}
+			else {
+				throw new IllegalStateException("Serialized JSON object was of type: "+mapOrList.getClass());
+			}
 		}
 	}
 

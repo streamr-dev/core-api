@@ -34,7 +34,17 @@ class EndpointSpec extends Specification {
 		}
 
 		@Override
+		Integer getValue() {
+			return null
+		}
+
+		@Override
 		void clear() {
+
+		}
+
+		@Override
+		void disconnect() {
 
 		}
 	}

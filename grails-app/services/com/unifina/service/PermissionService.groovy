@@ -47,8 +47,12 @@ class PermissionService {
 	 */
 	public boolean check(SecUser user, resource, Operation op) {
 		if (!resource?.id) { return false; }
+
+		Class resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+		// Make sure we are operating on an instance attached to the session
+		resource = resourceClass.get(resource.id)
+
 		if (isOwner(user, resource)) { return true; }		// owner has all access
-		def resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
 		return hasPermission(user, resourceClass, resource.id, op)
 	}
 

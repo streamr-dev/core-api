@@ -4,8 +4,6 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
-import java.util.HashMap;
-import java.util.Map;
 
 import spock.lang.Specification
 

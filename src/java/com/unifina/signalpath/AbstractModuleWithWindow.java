@@ -81,7 +81,7 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		if (selectedWindowType == WindowType.EVENTS) {
 			getWindowForKey(key).add(item);
 		} else {
-			((TimeWindow) getWindowForKey(key)).add(item, globals.time);
+			((TimeWindow) getWindowForKey(key)).add(item, getGlobals().time);
 		}
 	}
 

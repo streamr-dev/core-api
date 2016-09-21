@@ -78,6 +78,12 @@ public class Output<T> extends Endpoint<T> {
 		cachedTargets = targets.toArray(new Input[targets.size()]);
 	}
 
+	public void disconnect() {
+		targets.clear();
+		connected = false;
+		cachedTargets = targets.toArray(new Input[targets.size()]);
+	}
+
 	public void addProxiedOutput(Output<T> output) {
 		proxiedOutputs.add(output);
 	}
@@ -90,7 +96,8 @@ public class Output<T> extends Endpoint<T> {
 	public boolean isConnected() {
 		return connected;
 	}
-	
+
+	@Override
 	public T getValue() {
 		return previousValue;
 	}

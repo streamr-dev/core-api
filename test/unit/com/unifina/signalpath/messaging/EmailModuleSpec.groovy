@@ -3,9 +3,6 @@ package com.unifina.signalpath.messaging
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
-
-import org.codehaus.groovy.grails.commons.GrailsApplication
-
 import spock.lang.Specification
 
 import com.unifina.datasource.RealtimeDataSource
@@ -41,7 +38,7 @@ public class EmailModuleSpec extends Specification {
 	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
 		globals = new Globals(context, grailsApplication, user)
 		globals.time = new Date()
-		
+
 		module.globals = globals
 		module.init()
 		module.emailInputCount = 2

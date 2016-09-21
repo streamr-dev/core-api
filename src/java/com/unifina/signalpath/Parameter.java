@@ -19,6 +19,7 @@ public abstract class Parameter<T> extends Input<T> {
 	
 	public boolean canBeEmpty = true;
 	private boolean updateOnChange = false;
+	private boolean unconnectable = false;
 	
 	public Parameter(AbstractSignalPathModule owner, String name, T defaultValue, String typeName) {
 		super(owner, name, typeName);
@@ -34,9 +35,7 @@ public abstract class Parameter<T> extends Input<T> {
 		onValue(getValue());
 	}
 	
-	protected void onValue(T value) {
-		
-	}
+	protected void onValue(T value) {}
 	
 	/**
 	 * Returns the value of this parameter. If there is a current value,
@@ -46,17 +45,18 @@ public abstract class Parameter<T> extends Input<T> {
 	 * @return
 	 */
 	public T getValue() {
-		if (value!=null)
+		if (value != null) {
 			return value;
-		else if (isConnected() && source.owner instanceof Pullable<?>) {
-			Object pulledObject =((Pullable<?>)source.owner).pullValue(source); 
-			value = handlePulledObject(pulledObject);
-			checkEmpty(value);
-			return value;
-		}
-		else {
-			checkEmpty(defaultValue);
-			return defaultValue;
+		} else {
+			if (isConnected() && source.owner instanceof Pullable<?>) {
+				Object pulledObject = ((Pullable<?>) source.owner).pullValue(source);
+				value = handlePulledObject(pulledObject);
+				checkEmpty(value);
+				return value;
+			} else {
+				checkEmpty(defaultValue);
+				return defaultValue;
+			}
 		}
 	}
 	
@@ -64,9 +64,9 @@ public abstract class Parameter<T> extends Input<T> {
 		// Also check the existence of a DataSource, because an empty
 		// but required parameter is only a problem when actually running
 		// the path (not when creating, loading or saving)
-		if (!canBeEmpty && owner.globals!=null && owner.globals.getDataSource()!=null && isEmpty(v)) {
-			if (owner.globals.getUiChannel()!=null)
-				owner.globals.getUiChannel().push(new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash), owner.parentSignalPath.getUiChannelId());
+		if (!canBeEmpty && owner.getGlobals() !=null && owner.getGlobals().getDataSource()!=null && isEmpty(v)) {
+			if (owner.getGlobals().getUiChannel()!=null)
+				owner.getGlobals().getUiChannel().push(new ModuleWarningMessage("Parameter "+getDisplayName()+" does not have a value!", owner.hash), owner.parentSignalPath.getUiChannelId());
 			
 			throw new IllegalArgumentException("Parameter "+(getOwner()!=null ? getOwner().getName()+"." : "")+(getDisplayName()==null ? getName() : getDisplayName())+" does not have a value!");
 		}
@@ -114,6 +114,10 @@ public abstract class Parameter<T> extends Input<T> {
 		if (updateOnChange) {
 			config.put("updateOnChange", true);
 		}
+
+		if (unconnectable) {
+			config.put("unconnectable", true);
+		}
 		
 		return config;
 	}
@@ -159,7 +163,6 @@ public abstract class Parameter<T> extends Input<T> {
 				value = null;
 				defaultValue = val;
 			}
-			
 		}
 	}
 	
@@ -192,5 +195,12 @@ public abstract class Parameter<T> extends Input<T> {
 	public void setUpdateOnChange(boolean updateOnChange) {
 		this.updateOnChange = updateOnChange;
 	}
-	
+
+	public boolean isUnconnectable() {
+		return unconnectable;
+	}
+
+	public void setUnconnectable(boolean unconnectable) {
+		this.unconnectable = unconnectable;
+	}
 }
