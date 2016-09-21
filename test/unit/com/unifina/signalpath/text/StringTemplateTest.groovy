@@ -23,8 +23,7 @@ class StringTemplateTest extends Specification {
 			args: [[first: 111, second: 22, third: 3], [first: 3, second: 4, third: 5], [:], [first: 1, second: 22, third: 333]]
 		]
 		Map outputValues = [
-			// errors from missing args are unreliable (fails at SERIALIZE_DESERIALIZE) until https://github.com/antlr/stringtemplate4/pull/145 is fixed
-			//"errors": [[], [], ["context [anonymous] 1:1 attribute first isn't defined", "context [anonymous] 1:9 attribute second isn't defined", "context [anonymous] 1:18 attribute third isn't defined"], []],
+			"errors": [[], [], ["context [anonymous] 1:1 attribute first isn't defined", "context [anonymous] 1:9 attribute second isn't defined", "context [anonymous] 1:18 attribute third isn't defined"], []],
 			"result": ["111 22 3", "3 4 5", "  ", "1 22 333"]
 		]
 
@@ -32,7 +31,6 @@ class StringTemplateTest extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
-	/* Error reporting is unreliable and fails at SERIALIZE_DESERIALIZE. Results remain correct though.
 	void "Missing entries are reported"() {
 		when:
 		module.configure([
@@ -52,6 +50,7 @@ class StringTemplateTest extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 
+	/*
 	void "Error is reported for malformed template"() {
 		when:
 		module.configure([
@@ -69,7 +68,8 @@ class StringTemplateTest extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
-	}*/
+	}
+	*/
 
 	void "Dot notation works"() {
 		when:

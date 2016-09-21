@@ -1,15 +1,15 @@
 package com.unifina.signalpath.text;
 
 import com.unifina.signalpath.*;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STErrorListener;
-import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.*;
 import org.stringtemplate.v4.compiler.STException;
 import org.stringtemplate.v4.misc.ErrorManager;
 import org.stringtemplate.v4.misc.STMessage;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -33,7 +33,6 @@ public class StringTemplate extends AbstractSignalPathModule implements STErrorL
 		addOutput(result);
 
 		template.setTextArea(true);
-		STGroup.defaultGroup.errMgr = new ErrorManager(this);
 	}
 
 	@Override
@@ -53,8 +52,14 @@ public class StringTemplate extends AbstractSignalPathModule implements STErrorL
 			for (Map.Entry<String, Object> kvp : args.getValue().entrySet()) {
 				st.add(kvp.getKey(), kvp.getValue());
 			}
-			result.send(st.render());
 
+			// copied from st.render(), only st.write has "this" as STErrorListener
+			StringWriter out = new StringWriter();
+			STWriter wr = new NoIndentWriter(out);
+			wr.setLineWidth(-1);
+			st.write(wr, this);
+
+			result.send(out.toString());
 		} catch (STException e) {
 			// errorList has been accumulated by STErrorListener interface
 		}
