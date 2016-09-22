@@ -14,7 +14,8 @@ class SqlSpec extends Specification {
 
 	void setup() {
 		TestableSql.statement = Stub(Statement) {
-			executeQuery(_) >> { getMockCursor(result) }
+			execute(_) >> { true }
+			getResultSet() >> { getMockCursor(result) }
 		}
 		module = new TestableSql();
 		module.init()
