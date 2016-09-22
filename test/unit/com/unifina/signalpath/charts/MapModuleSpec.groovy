@@ -30,10 +30,10 @@ public class MapModuleSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			mapPointData: [
-				[t: "p", id: "id-1", label: "id-1", lat: 60.412D, lng: 24.079D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-2", label: "id-2", lat: 59.666D, lng: 66.999D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-1", label: "id-1", lat: 30.000D, lng: -21.758D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-3", label: "id-3", lat: 0D, lng: 1D, color: "rgb(6, 6, 6)"],
+				[t: "p", id: "id-1", lat: 60.412D, lng: 24.079D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-2", lat: 59.666D, lng: 66.999D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-1", lat: 30.000D, lng: -21.758D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-3", lat: 0D, lng: 1D, color: "rgb(6, 6, 6)"],
 			]
 		]
 
