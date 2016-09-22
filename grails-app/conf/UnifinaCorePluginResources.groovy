@@ -235,7 +235,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'streamr-heatmap.js', plugin: 'unifina-core']
 	}
 	'streamr-map' {
-		dependsOn 'jquery, leaflet, lodash'
+		dependsOn 'jquery, leaflet'
 		resource url:[dir:'css/signalPath/widgets/', file:'streamr-map.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-map', file:'streamr-map.js', plugin: 'unifina-core']
 	}

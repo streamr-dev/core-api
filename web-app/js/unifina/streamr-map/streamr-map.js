@@ -228,6 +228,12 @@
         marker.bindPopup("<span>label</span>", {
             closeButton: false,
         })
+        marker.on("mouseover", function() {
+            marker.openPopup()
+        })
+        marker.on("mouseout", function() {
+            marker.closePopup()
+        })
         marker.addTo(this.map)
         return marker
     }
