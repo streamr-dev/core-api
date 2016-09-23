@@ -46,7 +46,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	
 	@Override
 	public String getUiChannelName() {
-		return getName();
+		return getEffectiveName();
 	}
 
 	public Map getUiChannelMap() {
