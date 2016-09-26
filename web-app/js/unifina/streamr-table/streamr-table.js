@@ -9,10 +9,11 @@ function StreamrTable(parent, options) {
 	} else {
 		this.options = {}
 		this.options.maxRows = 0
+		this.options.displayTitle = false
 	}
 }
 
-StreamrTable.prototype.initTable = function (headers) {
+StreamrTable.prototype.initTable = function (title, headers) {
 		
 	if (this.tableContainer)
 		this.tableContainer.remove()
@@ -22,6 +23,12 @@ StreamrTable.prototype.initTable = function (headers) {
 
 	this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
 	this.tableContainer.append(this.table);
+
+	if (this.options.displayTitle) {
+		this.tableCaption = $("<caption>");
+		this.tableCaption.text(title);
+		this.table.append(this.tableCaption);
+	}
 
 	this.tableHeader = $("<thead><tr></tr></thead>");
 	this.table.append(this.tableHeader);
@@ -80,7 +87,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 		cell.html(d.c);
 	}
 	else if (d.hdr) {
-		this.initTable(d.hdr.headers)
+		this.initTable(d.hdr.title, d.hdr.headers)
 	}
 }
 

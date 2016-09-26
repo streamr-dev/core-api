@@ -15,6 +15,7 @@ function StreamrChart(parent, options) {
 	this.options = $.extend({
 		rangeDropdown: true,
 		showHideButtons: true,
+		displayTitle: false,
 		init: undefined
 	}, options || {})
 
@@ -111,6 +112,13 @@ function StreamrChart(parent, options) {
 	$(window).on('resize', function() {
 		_this.resize()
 	})
+
+	// Create title
+	if (this.options.displayTitle) {
+		var title = $("<h4 class='title'>")
+		this.$parent.append(title)
+		this.$title = title
+	}
 	
 	// Create the chart area
 	var areaId = "chartArea_"+(new Date()).getTime()
@@ -421,7 +429,10 @@ StreamrChart.prototype.initMetaData = function(d) {
 			meta.max = -Infinity
 		})
 
-		this.title = d.title;
+		if (this.options.displayTitle) {
+			this.title = d.title;
+			this.$title.text(this.title);
+		}
 		this.metaDataInitialized = true
 
 		// If messageQueue contains messages, process them now
