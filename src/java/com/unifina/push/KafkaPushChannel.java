@@ -35,6 +35,7 @@ public class KafkaPushChannel extends PushChannel {
 	public void destroy() {
 		if (sendByeOnDestroy) {
 			for (String channel : channels) {
+				log.info("Sending bye message to "+channel);
 				push(byeMsg, channel);
 			}
 		}
@@ -48,7 +49,9 @@ public class KafkaPushChannel extends PushChannel {
 		// Explicitly create the topics
 		ArrayList<String> topics = new ArrayList<>(1);
 		topics.add(channel);
+		log.info("Creating channel "+channel);
 		kafkaService.createTopics(topics);
+		log.info("Channel "+channel+" created");
 	}
 	
 	@Override
