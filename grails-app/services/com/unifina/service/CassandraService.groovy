@@ -1,7 +1,8 @@
 package com.unifina.service
 
+import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.Session
-import com.unifina.feed.cassandra.CassandraConfig
+import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 class CassandraService {
@@ -17,10 +18,16 @@ class CassandraService {
 	/**
 	 * Returns a thread-safe session connected to the Streamr Cassandra cluster.
      */
+	@CompileStatic
 	Session getSession() {
 		if (session==null) {
-			CassandraConfig config = new CassandraConfig(grailsApplication.config.streamr.cassandra)
-			session = config.createSession()
+			Cluster.Builder builder = Cluster.builder();
+			for (String host : grailsApplication.config["streamr"]["cassandra"]["hosts"]) {
+				builder.addContactPoint(host);
+			}
+			Cluster cluster = builder.build();
+
+			session = cluster.connect(grailsApplication.config["streamr"]["cassandra"]["keySpace"].toString());
 			session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
 		}
 

@@ -7,9 +7,11 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.utils.Utils
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.nio.charset.Charset
+import java.util.concurrent.ThreadLocalRandom
 
 class KafkaService {
 
@@ -46,22 +48,32 @@ class KafkaService {
 	}
 
 	@CompileStatic
-    void sendMessage(String streamId, byte[] content, byte contentType, int ttl=0) {
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(streamId, System.currentTimeMillis(), contentType, content, ttl)
-		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), streamId, msg.toBytes())
+	int partition(String partitionKey, int numOfPartitions) {
+		if (numOfPartitions == 1) {
+			// Fast common case
+			return 0
+		} else if (partitionKey) {
+			// Borrow Kafka partitioning algorithm
+			return Utils.abs(Utils.murmur2(partitionKey.getBytes(utf8))) % numOfPartitions;
+		} else {
+			// Fallback to random partition if no key
+			return ThreadLocalRandom.current().nextInt(numOfPartitions);
+		}
+	}
+
+	@CompileStatic
+    void sendMessage(Stream stream, String partitionKey=null, byte[] content, byte contentType, int ttl=0) {
+		int streamPartition = partition(partitionKey, stream.getPartitions())
+		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, System.currentTimeMillis(), contentType, content, ttl)
+		String kafkaPartitionKey = "${stream.id}-$streamPartition"
+		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), kafkaPartitionKey, msg.toBytes())
 		getProducer().send(record);
     }
 	
 	@CompileStatic
-	void sendMessage(String streamId, Map message, int ttl=0) {
+	void sendMessage(Stream stream, String partitionKey=null, Map message, int ttl=0) {
 		String str = (message as JSON).toString();
-		sendMessage(streamId, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
-	}
-	
-	@CompileStatic
-	void sendMessage(Stream stream, Map message, int ttl=0) {
-		String str = (message as JSON).toString();
-		sendMessage(stream.getId(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+		sendMessage(stream, partitionKey, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
 	@CompileStatic

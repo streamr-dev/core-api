@@ -13,6 +13,7 @@ public class StreamrBinaryMessage {
 	private static final Charset utf8 = Charset.forName("UTF-8");
 
 	private final String streamId;
+	private final int partition;
 	private final long timestamp;
 	private final byte contentType;
 	private final byte[] streamIdAsBytes;
@@ -26,11 +27,11 @@ public class StreamrBinaryMessage {
 		if (version==28) {
 			timestamp = bb.getLong();
 			ttl = bb.getInt();
-			int streamIdLength = bb.get() & 0xFF; // java bytes are signed, converts -128..127 to 0..255
+			int streamIdLength = bb.get() & 0xFF; // unsigned byte
 			streamIdAsBytes = new byte[streamIdLength];
 			bb.get(streamIdAsBytes);
 			streamId = new String(streamIdAsBytes, utf8);
-
+			partition = bb.get() & 0xff; // unsigned byte
 			contentType = bb.get();
 			int contentLength = bb.getInt();
 			content = new byte[contentLength];
@@ -41,12 +42,9 @@ public class StreamrBinaryMessage {
 		}
 	}
 
-	public StreamrBinaryMessage(String streamId, long timestamp, byte contentType, byte[] content) {
-		this(streamId, timestamp, contentType, content, 0);
-	}
-
-	public StreamrBinaryMessage(String streamId, long timestamp, byte contentType, byte[] content, int ttl) {
+	public StreamrBinaryMessage(String streamId, int partition, long timestamp, byte contentType, byte[] content, int ttl) {
 		this.streamId = streamId;
+		this.partition = partition;
 		this.streamIdAsBytes = this.streamId.getBytes(utf8);
 		this.timestamp = timestamp;
 		this.contentType = contentType;
@@ -75,6 +73,10 @@ public class StreamrBinaryMessage {
 		}
 		bb.put((byte) streamIdAsBytes.length); // 1 byte
 		bb.put(streamIdAsBytes);
+		if (partition > 255) {
+			throw new IllegalArgumentException("Partition out of range: "+partition);
+		}
+		bb.put((byte) partition); // 1 byte
 		bb.put(contentType); // 1 byte
 		bb.putInt(content.length); // 4 bytes
 		bb.put(content); // contentLength bytes
@@ -92,6 +94,8 @@ public class StreamrBinaryMessage {
 	public long getTimestamp() {
 		return timestamp;
 	}
+
+	public int getPartition() { return partition; }
 
 	public byte getContentType() {
 		return contentType;

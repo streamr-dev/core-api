@@ -1,14 +1,12 @@
 package com.unifina.push;
 
+import com.unifina.domain.data.Stream;
+import com.unifina.service.KafkaService;
 import grails.converters.JSON;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
-import com.unifina.service.KafkaService;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KafkaPushChannel extends PushChannel {
 
@@ -45,7 +43,13 @@ public class KafkaPushChannel extends PushChannel {
 	@Override
 	protected void doPush(PushChannelMessage msg) {
 		if (msg.getContent() instanceof Map) {
-			kafkaService.sendMessage(msg.getChannel(), (Map) msg.getContent());
+			// UI channels don't exist as streams in the database
+			Stream s = new Stream();
+			s.setId(msg.getChannel());
+			// UI channels always have one partition
+			s.setPartitions(1);
+
+			kafkaService.sendMessage(s, /*partition key*/ null, (Map) msg.getContent(), msg.getTTL());
 		}
 		else throw new IllegalArgumentException("Unsupported content type: "+msg.getContent());
 	}

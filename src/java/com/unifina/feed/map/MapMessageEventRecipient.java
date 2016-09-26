@@ -1,9 +1,6 @@
 package com.unifina.feed.map;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;
@@ -26,8 +23,8 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 
 	Map<String, List<Output>> outputsByName = null;
 	
-	public MapMessageEventRecipient(Globals globals, Stream stream) {
-		super(globals, stream);
+	public MapMessageEventRecipient(Globals globals, Stream stream, Set<Integer> partitions) {
+		super(globals, stream, partitions);
 	}
 
 	private void initCacheMap() {

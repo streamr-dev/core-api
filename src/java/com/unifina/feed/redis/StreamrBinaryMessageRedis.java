@@ -32,8 +32,8 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 		else throw new IllegalArgumentException("Invalid version: "+version);
 	}
 
-	public StreamrBinaryMessageRedis(String streamId, long timestamp, byte contentType, byte[] content, long offset, Long previousOffset, int partition) {
-		super(streamId, timestamp, contentType, content);
+	public StreamrBinaryMessageRedis(String streamId, int partition, long timestamp, byte contentType, byte[] content, int ttl, long offset, Long previousOffset) {
+		super(streamId, partition, timestamp, contentType, content, ttl);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
 		this.partition = partition;
