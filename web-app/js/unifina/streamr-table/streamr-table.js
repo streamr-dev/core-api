@@ -21,14 +21,14 @@ StreamrTable.prototype.initTable = function (title, headers) {
 	this.tableContainer = $("<div class='table-module-container'></div>");
 	this.$parent.append(this.tableContainer);
 
+	if (this.options.displayTitle) {
+		this.tableCaption = $("<h4 class='streamr-widget-title'>");
+		this.tableCaption.text(title);
+		this.tableContainer.append(this.tableCaption);
+	}
+
 	this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
 	this.tableContainer.append(this.table);
-
-	if (this.options.displayTitle) {
-		this.tableCaption = $("<caption>");
-		this.tableCaption.text(title);
-		this.table.append(this.tableCaption);
-	}
 
 	this.tableHeader = $("<thead><tr></tr></thead>");
 	this.table.append(this.tableHeader);

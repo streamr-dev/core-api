@@ -18,7 +18,7 @@
 			publish: {
 				rangeDropdown: false,
 				showHideButtons: false,
-				displayTitle: true
+				displayTitle: false
 			},
 			ready: function() {
 				var _this = this

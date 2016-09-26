@@ -115,7 +115,7 @@ function StreamrChart(parent, options) {
 
 	// Create title
 	if (this.options.displayTitle) {
-		var title = $("<h4 class='title'>")
+		var title = $("<h4 class='streamr-widget-title'>")
 		this.$parent.append(title)
 		this.$title = title
 	}

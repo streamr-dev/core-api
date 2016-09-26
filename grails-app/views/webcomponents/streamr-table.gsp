@@ -16,7 +16,7 @@
 		Polymer('streamr-table', {
 			publish: {
 				maxRows: 0,
-				displayTitle: true
+				displayTitle: false
 			},
 			ready: function() {				
 				var _this = this
