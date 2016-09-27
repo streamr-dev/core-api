@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.utils.Utils
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
+import javax.annotation.Nullable
 import java.nio.charset.Charset
 import java.util.concurrent.ThreadLocalRandom
 
@@ -40,7 +41,7 @@ class KafkaService {
 	}
 	
 	@CompileStatic
-	KafkaProducer<String, byte[]> getProducer() {
+	private KafkaProducer<String, byte[]> getProducer() {
 		if (producer == null) {
 			producer = new KafkaProducer<String, byte[]>(getProperties());
 		}
@@ -62,16 +63,16 @@ class KafkaService {
 	}
 
 	@CompileStatic
-    void sendMessage(Stream stream, String partitionKey=null, byte[] content, byte contentType, int ttl=0) {
+    void sendMessage(Stream stream, @Nullable String partitionKey=null, byte[] content, byte contentType, int ttl=0) {
 		int streamPartition = partition(partitionKey, stream.getPartitions())
-		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, System.currentTimeMillis(), contentType, content, ttl)
+		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, System.currentTimeMillis(), ttl, contentType, content)
 		String kafkaPartitionKey = "${stream.id}-$streamPartition"
 		ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(getDataTopic(), kafkaPartitionKey, msg.toBytes())
 		getProducer().send(record);
     }
 	
 	@CompileStatic
-	void sendMessage(Stream stream, String partitionKey=null, Map message, int ttl=0) {
+	void sendMessage(Stream stream, @Nullable String partitionKey=null, Map message, int ttl=0) {
 		String str = (message as JSON).toString();
 		sendMessage(stream, partitionKey, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}

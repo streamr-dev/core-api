@@ -42,14 +42,14 @@ public class StreamrBinaryMessage {
 		}
 	}
 
-	public StreamrBinaryMessage(String streamId, int partition, long timestamp, byte contentType, byte[] content, int ttl) {
+	public StreamrBinaryMessage(String streamId, int partition, long timestamp, int ttl, byte contentType, byte[] content) {
 		this.streamId = streamId;
 		this.partition = partition;
 		this.streamIdAsBytes = this.streamId.getBytes(utf8);
 		this.timestamp = timestamp;
+		this.ttl = ttl;
 		this.contentType = contentType;
 		this.content = content;
-		this.ttl = ttl;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class StreamrBinaryMessage {
 	 */
 	public byte[] toBytes() {
 		ByteBuffer bb;
-		bb = ByteBuffer.allocate(19+streamIdAsBytes.length+content.length); // 15 == version + timestamp + stream id length + content type + content length + content + ttl
+		bb = ByteBuffer.allocate(20+streamIdAsBytes.length+content.length); // 20 == version + timestamp + ttl + stream id length + partition + content type + content length + content
 		bb.put(VERSION); // 1 byte
 		bb.putLong(timestamp); // 8 bytes
 		bb.putInt(ttl); // 4 bytes

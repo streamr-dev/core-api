@@ -14,11 +14,13 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
+import javax.annotation.Nullable
 import java.security.AccessControlException
 
-@TestMixin(GrailsUnitTestMixin)
+@TestMixin(ControllerUnitTestMixin) // to get JSON converter
 @Mock([SecUser, Stream, Feed])
 class SendToStreamSpec extends Specification {
 
@@ -44,7 +46,7 @@ class SendToStreamSpec extends Specification {
 		def receivedMessages = [:]
 
 		@Override
-		void sendMessage(Stream stream, Object key, Map message) {
+		void sendMessage(Stream stream, @Nullable String partitionKey=null, Map message, int ttl=0) {
 			if (!receivedMessages.containsKey(stream.id)) {
 				receivedMessages[stream.id] = []
 			}
@@ -82,6 +84,7 @@ class SendToStreamSpec extends Specification {
 		s.save(validate: false, failOnError: true)
 
 		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
+		fakeKafkaService.grailsApplication = grailsApplication
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
 		globals.realtime = true
 		globals.uiChannel = new FakePushChannel()

@@ -1,5 +1,6 @@
 package com.unifina.controller.security
 
+import com.unifina.domain.data.Stream
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 
@@ -38,11 +39,11 @@ class ProfileController {
 		SecUser user = SecUser.get(springSecurityService.currentUser.id)
 		String oldApiKey = user.apiKey
 		user.apiKey = user.generateApiKey()
-		kafkaService.sendMessage("revoked-api-keys", "", [
+		kafkaService.sendMessage(new Stream(id: "revoked-api-keys"), null, [
 		        action: "revoked",
 				user: user.id,
 				key: oldApiKey
-		])
+		], 60)
 		log.info("User $user.username regenerated api key!")
 		render ([success: true] as JSON)
 	}

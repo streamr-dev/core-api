@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.SaveCanvasCommand
+import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
@@ -19,6 +20,7 @@ import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
 import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.commons.logging.LogFactory
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.util.concurrent.PollingConditions
@@ -45,6 +47,8 @@ class SerializeCanvasSpec extends IntegrationSpec {
 	SecUser user
 	Stream stream
 
+	KafkaProducer mockProducer
+
 	def setup() {
 		// Update feed 7 to use fake message source in place of real one
 		Feed feed = Feed.get(7L)
@@ -54,7 +58,8 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		hackServiceForTestFriendliness(signalPathService)
 
 		// Wire up classes
-		kafkaService = new FakeKafkaService()
+		mockProducer = Mock(KafkaProducer)
+		kafkaService = new FakeKafkaService(mockProducer)
 		signalPathService.kafkaService = kafkaService
 		canvasService.signalPathService = signalPathService
 
@@ -133,17 +138,19 @@ class SerializeCanvasSpec extends IntegrationSpec {
 
 		Globals globals
 
-		@Override
-		void createTopics(List<String> topics) {
+		KafkaProducer mockProducer
+
+		public FakeKafkaService(KafkaProducer mockProducer) {
+			this.mockProducer = mockProducer
 		}
 
 		@Override
-		UnifinaKafkaProducer getProducer() {
-			return new FakeUnifinaKafkaProducer()
+		KafkaProducer<String, byte[]> getProducer() {
+			return mockProducer
 		}
 
 		@Override
-		void sendMessage(Stream stream, Object key, Map message) {
+		void sendMessage(Stream stream, String partitionKey=null, Map message, int ttl=0) {
 			Collection<AbstractFeed> feeds = globals.getDataSource().getFeeds();
 			if (feeds.size() != 1) {
 				throw new RuntimeException("Feeds was of unexpected size " + feeds.size() + "!= 1")
@@ -151,133 +158,14 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			AbstractFeedProxy feedProxy = (AbstractFeedProxy) feeds.iterator().next()
 			FakeMessageSource source = (FakeMessageSource) feedProxy.hub.source
 
-			source.handleMessage(new UnifinaKafkaMessage(
-				stream.getId(),
-				stream.getId(),
+			source.handleMessage(new StreamrBinaryMessage(
+				stream.getId(), 0,
 				System.currentTimeMillis(),
-				UnifinaKafkaMessage.CONTENT_TYPE_JSON,
-				new JsonBuilder(message).toString().getBytes("UTF-8")))
+				StreamrBinaryMessage.CONTENT_TYPE_JSON,
+				new JsonBuilder(message).toString().getBytes("UTF-8"),
+				0))
 		}
 
-		// Unsupported operations below
-
-		@Override
-		List<Task> createCollectTasks(Stream stream) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void sendMessage(String channelId, Object key, String message, boolean isJson) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void sendMessage(String channelId, Object key, String message) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void createTopics(List<String> topics, int partitions, int replicationFactor) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void createTopics(List<String> topics, int partitions) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		List<FeedFile> createFeedFilesFromCsv(CSVImporter csv, Stream stream, FeedFileService feedFileService) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		List<FeedFile> createFeedFilesFromCsv(CSVImporter csv, Stream stream) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		GrailsApplication getGrailsApplication() {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void setGrailsApplication(GrailsApplication grailsApplication) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void setProducer(UnifinaKafkaProducer producer) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void setTopicCreateConsumer(SimpleConsumer topicCreateConsumer) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void sendMessage(String channelId, Object key, Map message) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		boolean topicExists(String topic) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void deleteTopics(List topics) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void createDeleteTopicTask(List topics, long delayMs) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		Date getFirstTimestamp(String topic) {
-			throw new UnsupportedOperationException()
-		}
 	}
 
-	static class FakeUnifinaKafkaProducer extends UnifinaKafkaProducer {
-		Logger log = Logger.getLogger(getClass())
-
-		FakeUnifinaKafkaProducer() {
-			super("", "")
-		}
-
-		@Override
-		void sendRaw(String channel, String key, byte[] bytes) {
-			String s = "Unexpected message %s (channel = %s, key = %s)"
-			log.debug(String.format(s, new String(bytes, Charset.forName("UTF-8")), channel, key))
-		}
-
-		@Override
-		protected void connect() {}
-
-		// Unsupported operations below
-
-		@Override
-		void close() {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void send(UnifinaKafkaMessage msg) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void sendString(String channel, String key, long timestamp, String msg) {
-			throw new UnsupportedOperationException()
-		}
-
-		@Override
-		void sendJSON(String channel, String key, long timestamp, String json) {
-			throw new UnsupportedOperationException()
-		}
-	}
 }

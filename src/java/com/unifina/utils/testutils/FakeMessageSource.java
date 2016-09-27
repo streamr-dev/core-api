@@ -1,5 +1,6 @@
 package com.unifina.utils.testutils;
 
+import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.Message;
 import com.unifina.feed.MessageRecipient;
@@ -32,8 +33,8 @@ public class FakeMessageSource implements MessageSource {
 		throw new UnsupportedOperationException();
 	}
 
-	public void handleMessage(UnifinaKafkaMessage kafkaMessage) {
-		Message msg = new Message(kafkaMessage.getChannel(), offset++, kafkaMessage);
+	public void handleMessage(StreamrBinaryMessage rawMsg) {
+		Message msg = new Message(rawMsg.getStreamId()+"-"+rawMsg.getPartition(), offset++, rawMsg);
 		msg.checkCounter = false;
 		recipient.receive(msg);
 	}

@@ -40,8 +40,6 @@ Tour.list(function(tourList) {
 						<a id="navAdminLink" href="#" class="dropdown-toggle" data-toggle="dropdown">Admin</a>
 						<ul class="dropdown-menu">
 							<li><g:link controller="taskWorker" action="status">Task workers</g:link></li>
-							<li><g:link controller="kafka" action="collect">Collect Kafka feeds</g:link></li>
-							<li><g:link controller="feedFile">Feed files</g:link></li>
 							<li><g:link controller="user">Users</g:link></li>
 							<li><g:link controller="register" action="list">Invitations</g:link></li>
 						</ul>

@@ -71,7 +71,6 @@ grails.project.dependency.resolution = {
         runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
-		runtime('com.github.nkzawa:socket.io-client:0.3.0')
 		runtime('joda-time:joda-time:2.9.3')
 		compile('com.udojava:EvalEx:1.3')
 

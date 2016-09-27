@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 public class StreamrBinaryMessageRedisSpec extends Specification {
 
 	def "data is not altered on encode/decode"() {
-		def msg = new StreamrBinaryMessageRedis("testId", System.currentTimeMillis(), StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"), 123, 122, 5)
+		def msg = new StreamrBinaryMessageRedis("testId", 0, System.currentTimeMillis(), 5, StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"), 123, 122)
 
 		when:
 		byte[] encoded = msg.toBytes()
@@ -25,7 +25,7 @@ public class StreamrBinaryMessageRedisSpec extends Specification {
 	}
 
 	def "null previousOffset"() {
-		def msg = new StreamrBinaryMessageRedis("testId", System.currentTimeMillis(), StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"), 123, null, 5)
+		def msg = new StreamrBinaryMessageRedis("testId", 0, System.currentTimeMillis(), 5, StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"), 123, null)
 
 		when:
 		byte[] encoded = msg.toBytes()

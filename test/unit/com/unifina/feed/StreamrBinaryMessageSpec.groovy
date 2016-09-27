@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 public class StreamrBinaryMessageSpec extends Specification {
 
 	def "data is not altered on encode/decode"() {
-		def msg = new StreamrBinaryMessage("testId", 0, System.currentTimeMillis(), StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"), 100)
+		def msg = new StreamrBinaryMessage("testId", 0, System.currentTimeMillis(), 100, StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"))
 
 		when:
 		byte[] encoded = msg.toBytes()
