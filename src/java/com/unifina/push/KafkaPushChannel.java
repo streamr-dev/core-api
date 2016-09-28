@@ -34,12 +34,13 @@ public class KafkaPushChannel extends PushChannel {
 	public void destroy() {
 		if (sendByeOnDestroy) {
 			for (String channel : channels) {
+				log.info("Sending bye message to "+channel);
 				push(byeMsg, channel);
 			}
 		}
 		super.destroy();
 	}
-	
+
 	@Override
 	protected void doPush(PushChannelMessage msg) {
 		if (msg.getContent() instanceof Map) {
