@@ -72,7 +72,7 @@ class RunCanvasSpec extends IntegrationSpec {
 		canvasService.start(canvas, true)
 
 		// Produce data
-		(1..100).each { kafkaService.sendMessage(stream, stream.id, [numero: it, areWeDoneYet: false]) }
+		(1..100).each { kafkaService.sendMessage(stream, null, [numero: it, areWeDoneYet: false]) }
 
 		// Terminator data package to know when we're done
 		kafkaService.sendMessage(stream, stream.id, [numero: 0, areWeDoneYet: true])

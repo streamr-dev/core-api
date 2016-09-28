@@ -3,29 +3,19 @@ package com.unifina.service
 import com.unifina.api.SaveCanvasCommand
 import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Feed
-import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractFeed
 import com.unifina.feed.AbstractFeedProxy
-import com.unifina.kafkaclient.UnifinaKafkaMessage
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.utils.CSVImporter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeMessageSource
 import grails.converters.JSON
 import grails.test.spock.IntegrationSpec
 import groovy.json.JsonBuilder
-import kafka.javaapi.consumer.SimpleConsumer
 import org.apache.commons.logging.LogFactory
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import spock.util.concurrent.PollingConditions
-
-import java.nio.charset.Charset
 
 import static com.unifina.service.CanvasTestHelper.*
 

@@ -5,7 +5,6 @@ import com.unifina.domain.data.Feed;
 import com.unifina.feed.Message;
 import com.unifina.feed.MessageRecipient;
 import com.unifina.feed.MessageSource;
-import com.unifina.kafkaclient.UnifinaKafkaMessage;
 
 import java.io.IOException;
 import java.util.Map;

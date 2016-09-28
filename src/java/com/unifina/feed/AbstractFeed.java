@@ -65,7 +65,7 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 
 			// Construction of StreamEventRecipients (represented by a Stream object in the database)
 			if (subscriber instanceof IStreamRequirement && StreamEventRecipient.class.isAssignableFrom(eventRecipientClass)) {
-				Constructor constructor = eventRecipientClass.getConstructor(Globals.class, Stream.class);
+				Constructor constructor = eventRecipientClass.getConstructor(Globals.class, Stream.class, Set.class);
 				return (EventRecipientClass) constructor.newInstance(globals, ((IStreamRequirement)subscriber).getStream(), ((IStreamRequirement)subscriber).getPartitions());
 			}
 			// Construction of other IEventRecipients (legacy/hardwired)

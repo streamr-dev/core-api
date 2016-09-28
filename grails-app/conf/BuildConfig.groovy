@@ -74,10 +74,7 @@ grails.project.dependency.resolution = {
 		runtime('joda-time:joda-time:2.9.3')
 		compile('com.udojava:EvalEx:1.3')
 
-        compile('com.unifina:kafka-client:0.1.16') {
-            excludes "slf4j-log4j12"
-        }
-		
+		compile('org.apache.kafka:kafka-clients:0.9.0.1')
         compile('com.mashape.unirest:unirest-java:1.3.3')
 		
         runtime('com.amazonaws:aws-java-sdk:1.7.5')

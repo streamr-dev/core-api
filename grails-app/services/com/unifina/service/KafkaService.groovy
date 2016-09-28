@@ -2,7 +2,6 @@ package com.unifina.service
 
 import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Stream
-import com.unifina.kafkaclient.KafkaOffsetUtil
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -77,9 +76,4 @@ class KafkaService {
 		sendMessage(stream, partitionKey, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
-	@CompileStatic
-	@Deprecated
-	KafkaOffsetUtil getOffsetUtil() {
-		return new KafkaOffsetUtil(getProperties())
-	}
 }
