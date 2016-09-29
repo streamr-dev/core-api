@@ -276,9 +276,6 @@ streamr.kafka.request.required.acks = "0"
 streamr.kafka.dataTopic = "data-dev"
 
 environments {
-	test {
-		streamr.kafka.dataTopic = "data-test"
-	}
 	production {
 		streamr.kafka.dataTopic = "data-prod"
 		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
@@ -291,12 +288,14 @@ environments {
  */
 streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
 streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+// TODO: set prod config when going to prod
 
 /**
  * Cassandra config
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+// TODO: set prod config when going to prod
 
 /**
  * Serialization config

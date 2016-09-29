@@ -18,7 +18,7 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 
 	private final long offset;
 	private final Long previousOffset;
-	private final int partition;
+	private final int kafkaPartition;
 
 	public StreamrBinaryMessageRedis(ByteBuffer bb) {
 		super(bb);
@@ -27,16 +27,16 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 		if (version == 0) {
 			offset = bb.getLong();
 			previousOffset = bb.getLong();
-			partition = bb.getInt();
+			kafkaPartition = bb.getInt();
 		}
 		else throw new IllegalArgumentException("Invalid version: "+version);
 	}
 
-	public StreamrBinaryMessageRedis(String streamId, int partition, long timestamp, int ttl, byte contentType, byte[] content, long offset, Long previousOffset) {
-		super(streamId, partition, timestamp, ttl, contentType, content);
+	public StreamrBinaryMessageRedis(String streamId, int streamPartition, long timestamp, int ttl, byte contentType, byte[] content, int kafkaPartition, long offset, Long previousOffset) {
+		super(streamId, streamPartition, timestamp, ttl, contentType, content);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
-		this.partition = partition;
+		this.kafkaPartition = kafkaPartition;
 	}
 
 	public long getOffset() {
@@ -47,8 +47,8 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 		return previousOffset >= 0 ? previousOffset : null;
 	}
 
-	public int getPartition() {
-		return partition;
+	public int getKafkaPartition() {
+		return kafkaPartition;
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 		bb.put(VERSION); // 1
 		bb.putLong(offset); // 8
 		bb.putLong(previousOffset != null ? previousOffset : -1); // 8
-		bb.putInt(partition); // 4
+		bb.putInt(kafkaPartition); // 4
 		return bb.array();
 	}
 }

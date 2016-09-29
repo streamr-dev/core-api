@@ -2,8 +2,8 @@ package com.unifina.signalpath.kafka;
 
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
-import com.unifina.service.KafkaService;
 import com.unifina.service.PermissionService;
+import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
@@ -19,7 +19,7 @@ public class SendToStream extends AbstractSignalPathModule {
 	transient protected JSONObject streamConfig = null;
 
 	transient protected PermissionService permissionService = null;
-	transient protected KafkaService kafkaService = null;
+	transient protected StreamService streamService = null;
 
 	protected boolean historicalWarningShown = false;
 	private String lastStreamId = null;
@@ -28,10 +28,9 @@ public class SendToStream extends AbstractSignalPathModule {
 	public void init() {
 		// Pre-fetch services for more predictable performance
 		permissionService = getGlobals().getBean(PermissionService.class);
-		kafkaService = getGlobals().getBean(KafkaService.class);
+		streamService = getGlobals().getBean(StreamService.class);
 		
 		addInput(streamParameter);
-		
 
 		streamParameter.setUpdateOnChange(true);
 		
@@ -48,12 +47,12 @@ public class SendToStream extends AbstractSignalPathModule {
 			for (Input i : drivingInputs) {
 				msg.put(i.getName(), i.getValue());
 			}
-			if (kafkaService == null) { // null after de-serialization
-				kafkaService = getGlobals().getBean(KafkaService.class);
+			if (streamService == null) { // null after de-serialization
+				streamService = getGlobals().getBean(StreamService.class);
 			}
 			Stream stream = streamParameter.getValue();
 			authenticateStream(stream);
-			kafkaService.sendMessage(stream, msg);
+			streamService.sendMessage(stream, msg);
 		}
 		else if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
 			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +

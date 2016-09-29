@@ -1,16 +1,29 @@
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.mixins.KafkaMixin
+import core.mixins.StreamMixin
 import core.pages.CanvasPage
 import core.pages.StreamConfigurePage
 import core.pages.StreamCreatePage
 import core.pages.StreamShowPage
+import spock.lang.Shared
 
-@Mixin(KafkaMixin)
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
+@Mixin(StreamMixin)
 class RunCSVExportModeSpec extends LoginTester1Spec {
+
+	@Shared StreamService streamService
+
+	def setupSpec() {
+		streamService = createStreamService()
+	}
+
+	def cleanupSpec() {
+		cleanupStreamService(streamService)
+	}
 
 	void "running CSV export mode results in file"() {
 		setup: "create stream"
@@ -22,7 +35,7 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 
 		and: "produce data to stream"
 		String topicId = streamId.text()
-		produceAllDataToKafka(topicId)
+		produceAllDataToStream(topicId)
 
 		and: "configure stream with autodetect"
 		configureFieldsButton.click()
@@ -46,7 +59,7 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 		startCanvas(true)
 
 		and: "produce data to realtime canvas and stop it"
-		produceAllDataToKafka(topicId, 1000)
+		produceAllDataToStream(topicId, 1000)
 		stopCanvas()
 
 		when: "run canvas in CSV export mode"
@@ -64,11 +77,10 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 		csvContent.readLines().size() == 100 + 1000
 	}
 
-	private void produceAllDataToKafka(String id, int iters = 100) {
-		def kafka = makeKafkaProducer()
+	private void produceAllDataToStream(String id, int iters = 100) {
+		Stream stream = new Stream(id: id)
 		(1..iters).each { num ->
-			kafka.sendJSON(id, "", System.currentTimeMillis(), '{"key": "key-' + num + '", "value": ' + num + '}')
+			streamService.sendMessage(stream, [key: "key-$num", value: "$num"], 30)
 		}
-		closeProducer(kafka)
 	}
 }

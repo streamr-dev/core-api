@@ -12,7 +12,7 @@ import java.util.*;
 
 /**
  * Creates multiple RedisMessageSources that connect to different hosts as defined config.
- * All the RedisMessageSources forward their received messages to the same recipient: the on
+ * All the RedisMessageSources forward their received messages to the same recipient: the one
  * set on the MultipleRedisMessageSource instance.
  */
 public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageRedis, String> {

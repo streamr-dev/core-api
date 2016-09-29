@@ -1,11 +1,11 @@
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.utils.MapTraversal
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import core.mixins.KafkaMixin
-import grails.util.Holders
+import core.mixins.StreamMixin
 import org.apache.log4j.Logger
+import spock.lang.Shared
 
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -13,25 +13,26 @@ import java.util.regex.Pattern
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-@Mixin(KafkaMixin)
+@Mixin(StreamMixin)
 class MapModulesSpec extends LoginTester1Spec {
 
-	Logger log = Logger.getLogger(MapModulesSpec)
-
-	UnifinaKafkaProducer kafka
+	@Shared Logger log = Logger.getLogger(MapModulesSpec)
+	@Shared Stream testStream
+	@Shared StreamService streamService
 
 	def setupSpec() {
 		// @Mixin is buggy, use runtime mixins instead
 		this.class.metaClass.mixin(CanvasMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(StreamMixin)
+
+		testStream = new Stream()
+		testStream.id = "pltRMd8rCfkij4mlZsQkJB"
+		streamService = createStreamService()
 	}
 
-	def setup() {
-		kafka = makeKafkaProducer()
-	}
-
-	def cleanup() {
-		closeProducer(kafka)
+	def cleanupSpec() {
+		cleanupStreamService(streamService)
 	}
 
 	void "countByKey counts key occurrences as expected"() {
@@ -44,7 +45,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		startCanvas(true)
 
 		and: "data produced to Kafka topic"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then: "TableAsMap for map shows correct key-count pairs"
 		tableContains(["key-1 2", "key-2 2", "key-3 1", "key-4 3", "key-5 1"])
@@ -65,7 +66,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		startCanvas(true)
 
 		and: "data produced to Kafka topic"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then: "TableAsMap for map shows correct key-count pairs"
 		tableContains(["key-1 70", "key-2 -65", "key-3 115", "key-4 34", "key-5 0"])
@@ -128,7 +129,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		startCanvas(true)
 
 		and: "data produced to Kafka topic"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then:
 		waitFor {
@@ -181,16 +182,16 @@ class MapModulesSpec extends LoginTester1Spec {
 		connectEndpoints(findOutput(moduleName, "map"), findInput("MapAsTable", "map"))
 	}
 
-	private void produceAllDataToKafka() {
-		produceToKafka("key-1", 30)
-		produceToKafka("key-1", 40)
-		produceToKafka("key-2", -50)
-		produceToKafka("key-3", 115)
-		produceToKafka("key-4", 0)
-		produceToKafka("key-2", -15)
-		produceToKafka("key-4", 1)
-		produceToKafka("key-5", 0)
-		produceToKafka("key-4", 33)
+	private void produceAllDataToStream() {
+		produceToStream("key-1", 30)
+		produceToStream("key-1", 40)
+		produceToStream("key-2", -50)
+		produceToStream("key-3", 115)
+		produceToStream("key-4", 0)
+		produceToStream("key-2", -15)
+		produceToStream("key-4", 1)
+		produceToStream("key-5", 0)
+		produceToStream("key-4", 33)
 	}
 
 	private boolean tableContains(Collection<String> patterns) {
@@ -206,8 +207,7 @@ class MapModulesSpec extends LoginTester1Spec {
 		}
 	}
 
-	private void produceToKafka(String key, Double value) {
-		kafka.sendJSON("pltRMd8rCfkij4mlZsQkJB", "", System.currentTimeMillis(),
-			'{"key":' + key + ', "value": ' + value  + '}')
+	private void produceToStream(String key, Double value) {
+		streamService.sendMessage(testStream, [key: key, value: value], 30)
 	}
 }

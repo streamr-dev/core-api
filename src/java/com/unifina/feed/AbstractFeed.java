@@ -101,18 +101,21 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
 			EventRecipientClass recipient;
-			KeyClass key = keyProvider.getSubscriberKey(subscriber);
-			if (!eventRecipientsByKey.containsKey(key)) {
-				recipient = createEventRecipient(subscriber);
-				eventRecipients.add(recipient);
-				eventRecipientsByKey.put(key, recipient);
-				globals.getDataSource().register(recipient);
-			}
-			else recipient = eventRecipientsByKey.get(key);
-			
-			// Register the subscription with the event recipient
-			if (recipient instanceof AbstractEventRecipient) {
-				((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
+
+			for (KeyClass key : keyProvider.getSubscriberKeys(subscriber)) {
+				if (!eventRecipientsByKey.containsKey(key)) {
+					recipient = createEventRecipient(subscriber);
+					eventRecipients.add(recipient);
+					eventRecipientsByKey.put(key, recipient);
+					globals.getDataSource().register(recipient);
+				} else {
+					recipient = eventRecipientsByKey.get(key);
+				}
+
+				// Register the subscription with the event recipient
+				if (recipient instanceof AbstractEventRecipient) {
+					((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
+				}
 			}
 			
 		}

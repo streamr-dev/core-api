@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.api.ValidationException
+import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
@@ -10,11 +11,21 @@ import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
+import groovy.transform.CompileStatic
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.utils.Utils
 import org.springframework.util.Assert
+
+import javax.annotation.Nullable
+import java.nio.charset.Charset
+import java.util.concurrent.ThreadLocalRandom
 
 class StreamService {
 
 	def grailsApplication
+	KafkaService kafkaService
+
+	private static final Charset utf8 = Charset.forName("UTF-8")
 
 	Stream findByName(String name) {
 		return Stream.findByName(name)
@@ -71,6 +82,39 @@ class StreamService {
 		}
 	}
 
+	@CompileStatic
+	void sendMessage(Stream stream, @Nullable String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
+		int streamPartition = partition(stream, partitionKey)
+		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
+
+		String kafkaPartitionKey = "${stream.id}-$streamPartition"
+		kafkaService.sendMessage(msg, kafkaPartitionKey)
+	}
+
+	@CompileStatic
+	void sendMessage(Stream stream, Map message, int ttl=0) {
+		String str = (message as JSON).toString();
+		sendMessage(stream, null, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+	}
+
+	@CompileStatic
+	void sendMessage(Stream stream, long timestamp, Map message, int ttl=0) {
+		String str = (message as JSON).toString();
+		sendMessage(stream, null, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+	}
+
+	@CompileStatic
+	void sendMessage(Stream stream, @Nullable String partitionKey, Map message, int ttl=0) {
+		String str = (message as JSON).toString();
+		sendMessage(stream, partitionKey, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+	}
+
+	@CompileStatic
+	void sendMessage(Stream stream, long timestamp, @Nullable String partitionKey, Map message, int ttl=0) {
+		String str = (message as JSON).toString();
+		sendMessage(stream, partitionKey, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
+	}
+
 	// TODO: move to FeedService
 	public AbstractStreamListener instantiateListener(Stream stream) {
 		Assert.notNull(stream.feed.streamListenerClass, "feed's streamListenerClass is unexpectedly null")
@@ -104,5 +148,19 @@ class StreamService {
 		if (provider)
 			return provider.getDataRange(stream)
 		else return null
+	}
+
+	@CompileStatic
+	private int partition(Stream stream, String partitionKey) {
+		if (stream.getPartitions() == 1) {
+			// Fast common case
+			return 0
+		} else if (partitionKey) {
+			// Borrow Kafka partitioning algorithm
+			return Utils.abs(Utils.murmur2(partitionKey.getBytes(utf8))) % stream.getPartitions();
+		} else {
+			// Fallback to random partition if no key
+			return ThreadLocalRandom.current().nextInt(stream.getPartitions());
+		}
 	}
 }

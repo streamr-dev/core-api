@@ -176,7 +176,7 @@ class SignalPathService {
 	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
-		globals.uiChannel = new KafkaPushChannel(kafkaService, canvas.adhoc)
+		globals.uiChannel = new KafkaPushChannel(canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread

@@ -1,22 +1,21 @@
-import core.mixins.KafkaMixin
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
+import core.LoginTester1Spec
+import core.mixins.CanvasMixin
 import core.mixins.ListPageMixin
+import core.mixins.StreamMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
 import org.openqa.selenium.Keys
 
 import java.text.SimpleDateFormat
 
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-
-import core.LoginTester1Spec
-import core.mixins.CanvasMixin
-
 class CanvasSpec extends LoginTester1Spec {
-	
-	def setupSpec(){
+
+	def setupSpec() {
 		CanvasSpec.metaClass.mixin(CanvasMixin)
 		CanvasSpec.metaClass.mixin(ListPageMixin)
-		CanvasSpec.metaClass.mixin(KafkaMixin)
+		CanvasSpec.metaClass.mixin(StreamMixin)
 	}
 
 	def "clicking module close button in canvas should remove it"() {
@@ -313,7 +312,7 @@ class CanvasSpec extends LoginTester1Spec {
 			}
 	}
 
-	def "running a SignalPath on current day should read from Kafka"() {
+	def "running a SignalPath on current day should get the latest message"() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		Date now = new Date()
 		String sNow = df.format(now)
@@ -336,9 +335,14 @@ class CanvasSpec extends LoginTester1Spec {
 			waitFor { !historicalOptionsModal.displayed }
 
 		when: "data is produced and signalpath is run on current date"
-			UnifinaKafkaProducer kafka = makeKafkaProducer()
-			// Procuce to the stream that test-run-canvas reads from
-			kafka.sendJSON("c1_fiG6PTxmtnCYGU-mKuQ", "", now.getTime(), '{"temperature": '+Math.random()+'}')
+			Stream stream = new Stream(id:"c1_fiG6PTxmtnCYGU-mKuQ")
+			Date date = new Date()
+
+			// Produce to the stream that test-run-canvas reads from
+			withStreamService { StreamService streamService ->
+				streamService.sendMessage(stream, date.getTime(), [temperature: Math.random()], 30)
+			}
+
 			beginDate.click()
 			beginDate = "2015-02-27"
 			beginDate << Keys.TAB
@@ -346,9 +350,9 @@ class CanvasSpec extends LoginTester1Spec {
 			endDate = df.format(new Date())
 			endDate << Keys.TAB
 			runHistoricalButton.click()
-		then: "output should be produced and there should be more rows than what exists for 2015-02-27"
+		then: "the table should contain the message sent"
 			waitFor(30) {
-				$('.modulebody .table tr').size() > 554
+				$('.modulebody .table tr').text().contains(df.format(date))
 			}
 
 	}
