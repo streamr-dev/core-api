@@ -22,6 +22,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 	private final Integer partition;
 	private final Date startDate;
 	private final Date endDate;
+	private final CassandraService cassandraService;
 
 	private Session session;
 
@@ -35,6 +36,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 		this.partition = partition;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.cassandraService = Holders.getApplicationContext().getBean(CassandraService.class);
 		connect();
 	}
 
@@ -42,22 +44,19 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 	 * Returns a session with the Streamr Cassandra cluster.
 	 */
 	protected Session getSession() {
-		return Holders.getApplicationContext().getBean(CassandraService.class).getSession();
+		return cassandraService.getSession();
 	}
-
 
 	private void connect() {
 		session = getSession();
 		session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
 
-
 		// Get timestamp limits as offsets, then execute query using offsets
-		Row firstOffsetRow = session.execute("SELECT kafka_offset FROM stream_timestamps WHERE stream = ? AND stream_partition = ? AND ts >= ? ORDER BY ts ASC LIMIT 1", stream.getId(), partition, startDate).one();
-		if (firstOffsetRow == null) {
+		Long firstOffset = cassandraService.getFirstKafkaOffsetAfter(stream, partition, startDate);
+		Long lastOffset = cassandraService.getLastKafkaOffsetBefore(stream, partition, endDate);
+		if (firstOffset == null || lastOffset == null) {
 			return;
 		}
-		Long firstOffset = firstOffsetRow.getLong("kafka_offset");
-		Long lastOffset = session.execute("SELECT kafka_offset FROM stream_timestamps WHERE stream = ? AND stream_partition = ? AND ts <= ? ORDER BY ts DESC LIMIT 1", stream.getId(), partition, endDate).one().getLong("kafka_offset");
 
 		resultSet = session.execute("SELECT payload FROM stream_events WHERE stream = ? AND stream_partition = ? AND kafka_offset >= ? and kafka_offset <= ? ORDER BY kafka_offset ASC", stream.getId(), partition, firstOffset, lastOffset);
 	}

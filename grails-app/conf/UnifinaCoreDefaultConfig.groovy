@@ -186,6 +186,7 @@ environments {
  */
 cors.url.pattern = '/api/*'
 cors.headers = ['Access-Control-Allow-Origin': '*']
+streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
  * Application properties
@@ -246,19 +247,20 @@ environments {
  * UI update server address
  */
 streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
+streamr.ui.serverPath = System.getProperty("streamr.ui.serverPath") ?: "/api/v1/socket.io"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com/api/v1"
 	}
 }
 
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
+		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com/api/v1"
 	}
 }
 

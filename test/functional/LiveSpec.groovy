@@ -1,3 +1,4 @@
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
 import core.LoginTester1Spec
@@ -6,8 +7,10 @@ import core.mixins.ConfirmationMixin
 import core.mixins.StreamMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
+import grails.test.mixin.TestFor
 import spock.lang.Shared
 
+@TestFor(CanvasController) // for JSON conversion to work
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
 @Mixin(StreamMixin)
@@ -26,11 +29,11 @@ public class LiveSpec extends LoginTester1Spec {
 		final Stream testStream = new Stream()
 		testStream.id = "RUj6iJggS3iEKsUx5C07Ig"
 
-		streamService = createStreamService()
+		final StreamService ss = streamService = createStreamService()
 
 		final TimerTask task = new TimerTask() {
 			void run() {
-				streamService.sendMessage(testStream, [rand: Math.random()], 30)
+				ss.sendMessage(testStream, [rand: Math.random()], 30)
 			}
 		}
 		

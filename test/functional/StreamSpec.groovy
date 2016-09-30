@@ -1,3 +1,4 @@
+import com.unifina.controller.data.StreamController
 import com.unifina.domain.data.Stream
 import com.unifina.feed.mongodb.MongoDbConfig
 import com.unifina.service.StreamService
@@ -5,11 +6,13 @@ import core.LoginTester1Spec
 import core.mixins.ConfirmationMixin
 import core.mixins.StreamMixin
 import core.pages.*
+import grails.test.mixin.TestFor
 import org.bson.Document
 import spock.lang.Shared
 
 import java.nio.file.Paths
 
+@TestFor(StreamController) // for JSON conversion to work
 class StreamSpec extends LoginTester1Spec {
 
 	@Shared def mongoDbConfig = new MongoDbConfig([
@@ -112,7 +115,9 @@ class StreamSpec extends LoginTester1Spec {
 			waitFor { at StreamConfigurePage }
 
 		when: "Produce an event into the stream and click autodetect button"
-			streamService.sendMessage(new Stream(id: streamId), [foo: "bar", "xyz": 45.5])
+			Stream testStream = new Stream()
+			testStream.id = streamId
+			streamService.sendMessage(testStream, [foo: "bar", "xyz": 45.5], 30)
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
 			waitFor {

@@ -1,3 +1,4 @@
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.SerializationService
 import com.unifina.service.StreamService
@@ -6,16 +7,18 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.mixins.StreamMixin
+import grails.test.mixin.TestFor
 import grails.util.Holders
 import spock.lang.Shared
 
+@TestFor(CanvasController) // for JSON conversion to work
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
 @Mixin(StreamMixin)
 class SerializationSpec extends LoginTester1Spec {
 
 	@Shared long serializationIntervalInMillis
-	@Shared Stream testStream = new Stream(id: "mvGKMdDrTeaij6mmZsQliA")
+	@Shared Stream testStream
 	@Shared StreamService streamService
 
 	def setupSpec() {
@@ -26,6 +29,9 @@ class SerializationSpec extends LoginTester1Spec {
 
 		serializationIntervalInMillis = MapTraversal.getLong(Holders.config, SerializationService.INTERVAL_CONFIG_KEY)
 		streamService = createStreamService()
+
+		testStream = new Stream()
+		testStream.id = "mvGKMdDrTeaij6mmZsQliA"
 	}
 
 	def cleanupSpec() {
@@ -34,7 +40,6 @@ class SerializationSpec extends LoginTester1Spec {
 
 	def "resuming paused live canvas retains modules' states"() {
 		String canvasName = "SerializationSpec" + new Date().getTime()
-		StreamService streamService = Holders.applicationContext.getBean(StreamService)
 
 		when: "Modules are added and canvas started"
 			// The stream

@@ -10,12 +10,11 @@ import com.unifina.feed.AbstractMessageSource;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageRedis, String> {
+public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageWithKafkaMetadata, String> {
 
 	private static final Charset utf8 = Charset.forName("UTF-8");
 
@@ -39,7 +38,7 @@ public class RedisMessageSource extends AbstractMessageSource<StreamrBinaryMessa
 			@Override
 			public void message(byte[] channel, byte[] messageBytes) {
 				String streamId = new String(channel, utf8);
-				StreamrBinaryMessageRedis msg = new StreamrBinaryMessageRedis(ByteBuffer.wrap(messageBytes));
+				StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(ByteBuffer.wrap(messageBytes));
 				forward(msg, streamId, msg.getOffset(), false);
 			}
 			@Override

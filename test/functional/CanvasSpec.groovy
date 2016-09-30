@@ -1,3 +1,4 @@
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
 import core.LoginTester1Spec
@@ -6,16 +7,30 @@ import core.mixins.ListPageMixin
 import core.mixins.StreamMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
-import org.openqa.selenium.Keys
+import grails.test.mixin.TestFor
+import spock.lang.Shared
 
 import java.text.SimpleDateFormat
 
+@TestFor(CanvasController) // to get JSON conversion working
 class CanvasSpec extends LoginTester1Spec {
 
+	@Shared StreamService streamService
+	@Shared Stream testStream
+
 	def setupSpec() {
+		// Making sure mixins work
 		CanvasSpec.metaClass.mixin(CanvasMixin)
 		CanvasSpec.metaClass.mixin(ListPageMixin)
 		CanvasSpec.metaClass.mixin(StreamMixin)
+
+		streamService = createStreamService()
+		testStream = new Stream()
+		testStream.id = "c1_fiG6PTxmtnCYGU-mKuQ"
+	}
+
+	def cleanupSpec() {
+		cleanupStreamService(streamService)
 	}
 
 	def "clicking module close button in canvas should remove it"() {
@@ -289,7 +304,12 @@ class CanvasSpec extends LoginTester1Spec {
 		}
 	}
 
-	def "running a SignalPath should produce output"() {
+	def "running a SignalPath in historical mode should produce output"() {
+		String uniqueText = "test-"+System.currentTimeMillis()
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		Date date = df.parse("2015-02-23 18:30:00.011")
+		streamService.saveMessage(testStream, null, date.getTime(), [temperature: 24, rpm: 100, text: uniqueText], 30, 0, null)
+
 		when: "SignalPath is loaded"
 			loadSignalPath 'test-run-canvas'
 		then: "signalpath content must be loaded"
@@ -298,63 +318,12 @@ class CanvasSpec extends LoginTester1Spec {
 		when: "run button is clicked"
 			runHistoricalButton.click()
 		then: "output should be produced"
-			waitFor(30) {
-				runHistoricalButton.text().contains("Abort")
-				$('.modulebody .table td', text: "2015-02-23 18:30:00.011")
+			waitFor(10) {
+				$('.modulebody .table td', text: contains(uniqueText))
 			}
-
-		when: "abort button is clicked"
-			runHistoricalButton.click()
-			sleepForNSeconds(2) // Allow some time for server-side stuff to clean up
-		then: "button must change back to run"
-			waitFor {
+			waitFor(10) {
 				runHistoricalButton.text().contains("Run")
 			}
-	}
-
-	def "running a SignalPath on current day should get the latest message"() {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-		Date now = new Date()
-		String sNow = df.format(now)
-
-		when: "SignalPath is loaded"
-			loadSignalPath 'test-run-canvas'
-		then: "signalpath content must be loaded"
-			moduleShouldAppearOnCanvas('Table')
-
-		when: "Run options button is clicked"
-			historicalOptionsButton.click()
-		then: "Speed option must be shown"
-			waitFor { speed.displayed }
-
-		when: "The Full speed option is selected and modal is dismissed"
-			speed.click()
-			speed.find("option").find{ it.value() == "0" }.click()
-			historicalOptionsModal.find(".btn-primary").click()
-		then: "Modal must disappear"
-			waitFor { !historicalOptionsModal.displayed }
-
-		when: "data is produced and signalpath is run on current date"
-			Stream stream = new Stream(id:"c1_fiG6PTxmtnCYGU-mKuQ")
-			Date date = new Date()
-
-			// Produce to the stream that test-run-canvas reads from
-			withStreamService { StreamService streamService ->
-				streamService.sendMessage(stream, date.getTime(), [temperature: Math.random()], 30)
-			}
-
-			beginDate.click()
-			beginDate = "2015-02-27"
-			beginDate << Keys.TAB
-			endDate.click()
-			endDate = df.format(new Date())
-			endDate << Keys.TAB
-			runHistoricalButton.click()
-		then: "the table should contain the message sent"
-			waitFor(30) {
-				$('.modulebody .table tr').text().contains(df.format(date))
-			}
-
 	}
 
 	void "module help shows and hides tooltip"() {

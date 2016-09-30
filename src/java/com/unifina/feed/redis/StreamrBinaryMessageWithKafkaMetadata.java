@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  * - previousOffset 8 bytes (long)
  * - partition 4 bytes (int)
  */
-public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
+public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage {
 
 	private static final byte VERSION = 0;
 
@@ -20,7 +20,11 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 	private final Long previousOffset;
 	private final int kafkaPartition;
 
-	public StreamrBinaryMessageRedis(ByteBuffer bb) {
+	/**
+	 * Creates a new StreamrBinaryMessageWithKafkaMetadata from a byte buffer
+	 * obtained from toBytesWithKafkaMetadata()
+     */
+	public StreamrBinaryMessageWithKafkaMetadata(ByteBuffer bb) {
 		super(bb);
 
 		byte version = bb.get();
@@ -32,7 +36,21 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 		else throw new IllegalArgumentException("Invalid version: "+version);
 	}
 
-	public StreamrBinaryMessageRedis(String streamId, int streamPartition, long timestamp, int ttl, byte contentType, byte[] content, int kafkaPartition, long offset, Long previousOffset) {
+	/**
+	 * Creates a new StreamrBinaryMessageWithKafkaMetadata from a byte buffer
+	 * obtained from (super.)toBytes(), adding the Kafka metadata using the other args
+	 */
+	public StreamrBinaryMessageWithKafkaMetadata(ByteBuffer parentBytes, int kafkaPartition, long offset, Long previousOffset) {
+		super(parentBytes);
+		this.offset = offset;
+		this.previousOffset = previousOffset;
+		this.kafkaPartition = kafkaPartition;
+	}
+
+	/**
+	 * Creates a new StreamrBinaryMessageWithKafkaMetadata using given values.
+	 */
+	public StreamrBinaryMessageWithKafkaMetadata(String streamId, int streamPartition, long timestamp, int ttl, byte contentType, byte[] content, int kafkaPartition, long offset, Long previousOffset) {
 		super(streamId, streamPartition, timestamp, ttl, contentType, content);
 		this.offset = offset;
 		this.previousOffset = previousOffset;
@@ -44,15 +62,14 @@ public class StreamrBinaryMessageRedis extends StreamrBinaryMessage {
 	}
 
 	public Long getPreviousOffset() {
-		return previousOffset >= 0 ? previousOffset : null;
+		return previousOffset != null && previousOffset >= 0 ? previousOffset : null;
 	}
 
 	public int getKafkaPartition() {
 		return kafkaPartition;
 	}
 
-	@Override
-	public byte[] toBytes() {
+	public byte[] toBytesWithKafkaMetadata() {
 		byte[] orig = super.toBytes();
 		ByteBuffer bb = ByteBuffer.allocate(orig.length + 21);
 		bb.put(orig);

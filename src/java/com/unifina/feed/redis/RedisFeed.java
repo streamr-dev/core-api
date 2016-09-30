@@ -8,7 +8,7 @@ import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
 
-public class RedisFeed extends AbstractFeedProxy<ConfigurableStreamModule, StreamrBinaryMessageRedis, MapMessage, String, MapMessageEventRecipient> {
+public class RedisFeed extends AbstractFeedProxy<ConfigurableStreamModule, StreamrBinaryMessageWithKafkaMetadata, MapMessage, String, MapMessageEventRecipient> {
 
 	public RedisFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);

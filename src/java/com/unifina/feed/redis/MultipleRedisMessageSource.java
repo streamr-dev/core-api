@@ -15,7 +15,7 @@ import java.util.*;
  * All the RedisMessageSources forward their received messages to the same recipient: the one
  * set on the MultipleRedisMessageSource instance.
  */
-public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageRedis, String> {
+public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBinaryMessageWithKafkaMetadata, String> {
 
 	private static final Logger log = Logger.getLogger(MultipleRedisMessageSource.class);
 	private final Map<String, RedisMessageSource> messageSourceByHost = new HashMap<>();
@@ -78,7 +78,7 @@ public class MultipleRedisMessageSource extends AbstractMessageSource<StreamrBin
 	}
 
 	@Override
-	public void setRecipient(MessageRecipient<StreamrBinaryMessageRedis, String> recipient) {
+	public void setRecipient(MessageRecipient<StreamrBinaryMessageWithKafkaMetadata, String> recipient) {
 		super.setRecipient(recipient);
 		for (RedisMessageSource ms : messageSourceByHost.values()) {
 			ms.setRecipient(recipient);

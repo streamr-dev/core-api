@@ -3,14 +3,10 @@ package com.unifina.feed.cassandra;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.unifina.data.StreamrBinaryMessage;
-import com.unifina.domain.data.FeedFile;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractDataRangeProvider;
 import com.unifina.feed.DataRange;
-import com.unifina.feed.StreamrBinaryMessageParser;
 import com.unifina.service.CassandraService;
-import com.unifina.service.FeedFileService;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.Date;
