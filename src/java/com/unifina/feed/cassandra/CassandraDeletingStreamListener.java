@@ -37,6 +37,9 @@ public class CassandraDeletingStreamListener extends AbstractStreamListener {
 	@Override
 	public void beforeDelete(Stream stream) {
 		Session session = getSession();
-		session.execute("delete from stream_events where stream = ?", stream.getId());
+		for (int partition=0; partition < stream.getPartitions(); partition++) {
+			session.execute("delete from stream_events where stream = ? and stream_partition = ?", stream.getId(), partition);
+			session.execute("delete from stream_timestamps where stream = ? and stream_partition = ?", stream.getId(), partition);
+		}
 	}
 }
