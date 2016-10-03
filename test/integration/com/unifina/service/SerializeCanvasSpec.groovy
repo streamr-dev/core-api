@@ -25,11 +25,9 @@ class SerializeCanvasSpec extends IntegrationSpec {
 
 	def log = LogFactory.getLog(getClass())
 
-
 	def globals
 	def grailsApplication
 	def canvasService
-	def kafkaService
 	def streamService
 	def serializationService
 	def signalPathService
@@ -37,27 +35,14 @@ class SerializeCanvasSpec extends IntegrationSpec {
 	SecUser user
 	Stream stream
 
-	KafkaProducer mockProducer
-
 	def setup() {
-		// Update feed 7 to use fake message source in place of real one
-		Feed feed = Feed.get(7L)
-		feed.messageSourceClass = FakeMessageSource.canonicalName
-		feed.save(failOnError: true)
-
 		hackServiceForTestFriendliness(signalPathService)
-
-		// Wire up classes
-		mockProducer = Mock(KafkaProducer)
-		kafkaService = new FakeKafkaService(mockProducer)
-		signalPathService.kafkaService = kafkaService
-		canvasService.signalPathService = signalPathService
 
 		// Load user
 		user = SecUser.load(1L)
 
 		// Create stream
-		stream = streamService.createStream([name: "serializationTestStream", feed: 7L], user)
+		stream = streamService.createStream([name: "SerializeCanvasSpec-"+System.currentTimeMillis(), feed: 7L], user)
 		stream.config = (
 			[
 				fields: [
@@ -79,8 +64,8 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		when: "running Canvas and abruptly stopping and restarting"
 		for (int i = 0; i < 100; ++i) {
 
-			// Produce message to kafka
-			kafkaService.sendMessage(stream, stream.id, [a: i, b: i * 2.5, c: i % 3 == 0])
+			// Produce message to Stream
+			streamService.sendMessage(stream, [a: i, b: i * 2.5, c: i % 3 == 0], 30)
 			sleep(25)
 
 			// Synchronize with thread
@@ -95,7 +80,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 				canvasService.stop(canvas, user)
 				canvas.state = Canvas.State.STOPPED
 				canvasService.start(canvas, false)
-				globals = kafkaService.globals = globals(canvasService, canvas)
+				globals = globals(canvasService, canvas)
 				sleep(1000) // msgs might be sent before the canvas is really running
 			}
 		}
@@ -120,42 +105,8 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		SaveCanvasCommand command = new SaveCanvasCommand(savedStructure)
 		Canvas c = canvasService.createNew(command, user)
 		canvasService.start(c, true)
-		globals = kafkaService.globals = globals(canvasService, c)
+		globals = globals(canvasService, c)
 		return c
-	}
-
-	static class FakeKafkaService extends KafkaService {
-
-		Globals globals
-
-		KafkaProducer mockProducer
-
-		public FakeKafkaService(KafkaProducer mockProducer) {
-			this.mockProducer = mockProducer
-		}
-
-		@Override
-		KafkaProducer<String, byte[]> getProducer() {
-			return mockProducer
-		}
-
-		@Override
-		void sendMessage(Stream stream, String partitionKey=null, Map message, int ttl=0) {
-			Collection<AbstractFeed> feeds = globals.getDataSource().getFeeds();
-			if (feeds.size() != 1) {
-				throw new RuntimeException("Feeds was of unexpected size " + feeds.size() + "!= 1")
-			}
-			AbstractFeedProxy feedProxy = (AbstractFeedProxy) feeds.iterator().next()
-			FakeMessageSource source = (FakeMessageSource) feedProxy.hub.source
-
-			source.handleMessage(new StreamrBinaryMessage(
-				stream.getId(), 0,
-				System.currentTimeMillis(),
-				StreamrBinaryMessage.CONTENT_TYPE_JSON,
-				new JsonBuilder(message).toString().getBytes("UTF-8"),
-				0))
-		}
-
 	}
 
 }
