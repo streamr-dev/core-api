@@ -5,19 +5,17 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.service.FeedService
-import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
+import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
-import javax.annotation.Nullable
 import java.security.AccessControlException
 
 @TestMixin(ControllerUnitTestMixin) // to get JSON converter
@@ -42,26 +40,28 @@ class SendToStreamSpec extends Specification {
 		@Override boolean canShare(SecUser user, resource) { return false }
 	}
 
-	static class FakeKafkaService extends KafkaService {
+	static class MockStreamService extends StreamService {
 		def receivedMessages = [:]
 
 		@Override
-		void sendMessage(Stream stream, @Nullable String partitionKey=null, Map message, int ttl=0) {
+		void sendMessage(Stream stream, Map message, int ttl=0) {
 			if (!receivedMessages.containsKey(stream.id)) {
 				receivedMessages[stream.id] = []
 			}
 			receivedMessages[stream.id] << message
 		}
+		
 	}
 
 	SecUser user
-	FakeKafkaService fakeKafkaService
+	MockStreamService mockStreamService
+	StreamService streamService
 	Globals globals
 	SendToStream module
 
     def setup() {
 		defineBeans {
-			kafkaService(FakeKafkaService)
+			streamService(MockStreamService)
 			feedService(FeedService)
 			permissionService(AllPermissionService)
 		}
@@ -83,7 +83,7 @@ class SendToStreamSpec extends Specification {
 		]]
 		s.save(validate: false, failOnError: true)
 
-		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
+		mockStreamService = (MockStreamService) grailsApplication.getMainContext().getBean("streamService")
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
 		globals.realtime = true
 		globals.uiChannel = new FakePushChannel()
@@ -105,18 +105,21 @@ class SendToStreamSpec extends Specification {
 	void "sendToStream sends correct data to Kafka"() {
 		createModule()
 
-		when:
+
 		Map inputValues = [
 			strIn: ["a", "b", "c", "d"],
 			numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
 		]
 		Map outputValues = [:]
+
+		when:
+		true
 		
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert fakeKafkaService.receivedMessages == [
+				assert mockStreamService.receivedMessages == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -124,7 +127,7 @@ class SendToStreamSpec extends Specification {
 						[strIn:"d", numIn:4.0]
 					]
 				]
-				fakeKafkaService.receivedMessages = [:]
+				mockStreamService.receivedMessages = [:]
 			}.test()
 	}
 
@@ -186,7 +189,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert fakeKafkaService.receivedMessages == [
+				assert mockStreamService.receivedMessages == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -196,7 +199,7 @@ class SendToStreamSpec extends Specification {
 						[strIn:"d", numIn:4.0],
 					]
 				]
-				fakeKafkaService.receivedMessages = [:]
+				mockStreamService.receivedMessages = [:]
 			}.test()
 	}
 }
