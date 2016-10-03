@@ -84,7 +84,6 @@ class SendToStreamSpec extends Specification {
 		s.save(validate: false, failOnError: true)
 
 		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
-		fakeKafkaService.grailsApplication = grailsApplication
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
 		globals.realtime = true
 		globals.uiChannel = new FakePushChannel()
