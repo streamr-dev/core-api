@@ -32,6 +32,7 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		waitFor { findModuleOnCanvas("Table").text().contains(unique) }
 
 		when: "View Canvas button is clicked"
+		Thread.sleep(1000) // allow time for message to be sent to stream
 		findModuleOnCanvas("SubCanvasSpec-sub").find(".view-canvas-button").click()
 
 		then: "The subcanvas should be shown"

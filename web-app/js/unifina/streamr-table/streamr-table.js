@@ -23,17 +23,25 @@ StreamrTable.prototype.initTable = function (headers) {
 	this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
 	this.tableContainer.append(this.table);
 
-	this.tableHeader = $("<thead><tr></tr></thead>");
-	this.table.append(this.tableHeader);
-
-	if (headers) {
-		for (var i=0; i<headers.length; i++)
-			this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
-	}
+	this.setHeaders(headers)
 
 	this.tableBody = $("<tbody></tbody>");
 	this.table.append(this.tableBody);
 }
+
+	StreamrTable.prototype.setHeaders = function(headers) {
+		this.tableHeader = $("<thead><tr></tr></thead>");
+		if (this.table.find('thead').length) {
+			this.table.find('thead').replaceWith(this.tableHeader);
+		} else {
+			this.table.prepend(this.tableHeader)
+		}
+
+		if (headers) {
+			for (var i=0; i<headers.length; i++)
+				this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
+		}
+	}
 
 StreamrTable.prototype.addRow = function (row, rowId, op) {
 	if (op != "append") { op = "prepend" }
@@ -80,7 +88,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 		cell.html(d.c);
 	}
 	else if (d.hdr) {
-		this.initTable(d.hdr.headers)
+		this.setHeaders(d.hdr.headers)
 	}
 }
 
