@@ -3,7 +3,7 @@ import core.pages.ModuleBrowserPage
 
 class ModuleBrowserSpec extends LoginTester1Spec {
 
-	void "module browser can be opened via help menu"() {
+	void "module browser table of contents works"() {
 		when:
 		$("#navHelpLink").click()
 		then:
@@ -14,11 +14,12 @@ class ModuleBrowserSpec extends LoginTester1Spec {
 		then:
 		waitFor { at ModuleBrowserPage }
 
-		when: "click on last top-level title of user guide"
+		when: "click on last top-level title"
 		def link = tableOfContents.children().last().children("a")
+		def text = link.text()
 		link.click()
 		then: "the corresponding header should be visible"
-		$("h2", text:link.text()).displayed
+		$("h2", text: text).displayed
 	}
 
 }

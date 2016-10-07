@@ -26,13 +26,22 @@ public class CassandraFieldDetector extends FieldDetector {
 		Session session = null;
 		try {
 			session = getSession(stream);
-			ResultSet resultSet = session.execute("SELECT payload FROM stream_events WHERE stream = ? ORDER BY kafka_offset DESC LIMIT 1", stream.getId());
-			Row row = resultSet.one();
-			if (row != null) {
+			Row latestRow = null;
+			// When we get Java 8 this would be faster using async queries and CompletableFuture.allOf to wait for Futures to complete
+			for (int partition=0; partition<stream.getPartitions(); partition++) {
+				ResultSet resultSet = session.execute("SELECT payload FROM stream_events WHERE stream = ? AND stream_partition = ? ORDER BY kafka_offset DESC LIMIT 1", stream.getId(), partition);
+				Row row = resultSet.one();
+				if (row != null && (latestRow == null || latestRow.getTimestamp("ts").before(row.getTimestamp("ts")))) {
+					latestRow = row;
+				}
+			}
+			if (latestRow != null) {
 				StreamrBinaryMessageParser parser = new StreamrBinaryMessageParser();
-				return parser.parse(new StreamrBinaryMessage(row.getBytes("payload")));
+				return parser.parse(new StreamrBinaryMessage(latestRow.getBytes("payload")));
 			}
 			else return null;
+		} catch(Exception e) {
+			throw new RuntimeException(e);
 		} finally {
 			if (session != null) {
 				cleanup(session);

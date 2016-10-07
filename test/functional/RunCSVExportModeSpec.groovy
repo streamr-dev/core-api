@@ -1,3 +1,4 @@
+import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
 import core.LoginTester1Spec
@@ -8,11 +9,13 @@ import core.pages.CanvasPage
 import core.pages.StreamConfigurePage
 import core.pages.StreamCreatePage
 import core.pages.StreamShowPage
+import grails.test.mixin.TestFor
 import spock.lang.Shared
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
 @Mixin(StreamMixin)
+@TestFor(CanvasController) // for JSON conversion to work
 class RunCSVExportModeSpec extends LoginTester1Spec {
 
 	@Shared StreamService streamService
@@ -54,14 +57,6 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 		moveModuleBy("Chart", 100, 100)
 		connectEndpoints(findOutput("Stream", "value"), findInput("Chart", "in1"))
 
-		and: "save sand start canvas in realtime mode"
-		ensureRealtimeTabDisplayed()
-		startCanvas(true)
-
-		and: "produce data to realtime canvas and stop it"
-		produceAllDataToStream(topicId, 1000)
-		stopCanvas()
-
 		when: "run canvas in CSV export mode"
 		ensureHistoricalTabDisplayed()
 		runHistoricalDropdownButton.click()
@@ -74,13 +69,14 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 
 		and: "download link works"
 		def csvContent = downloadText($(".csvDownload a").attr("href"))
-		csvContent.readLines().size() == 100 + 1000
+		csvContent.readLines().size() == 100 + 1 // + 1 is header row
 	}
 
 	private void produceAllDataToStream(String id, int iters = 100) {
-		Stream stream = new Stream(id: id)
+		Stream stream = new Stream()
+		stream.id = id
 		(1..iters).each { num ->
-			streamService.sendMessage(stream, [key: "key-$num", value: "$num"], 30)
+			streamService.sendMessage(stream, [key: "key-$num", value: num], 30)
 		}
 	}
 }
