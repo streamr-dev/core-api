@@ -29,7 +29,7 @@ grails.project.dependency.resolver = "maven" // or ivy
 //	test: false
 //]
 grails.project.fork = [
-    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
     test: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 400, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
