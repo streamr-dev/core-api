@@ -1,8 +1,8 @@
-#Extensions
+# Extensions
 
 You can easily extend Streamr by writing custom modules in Java programming language. When a custom module is activated in a Streamr canvas, your code is executed as if the module were a part of the built-in machinery. As an alternative to custom code, you can also do abstraction, i.e. reuse existing canvases as modules. 
 
-##JavaModule
+## JavaModule
 
 JavaModule is the tool to use for custom code. Start by creating a new canvas or by opening an existing canvas in the editor. Then insert a JavaModule on the workspace, click on the “Edit code” button, and a code editor will open in a resizable pop-up window. This is what you'll see:
 
@@ -26,7 +26,7 @@ public void clearState() {
 
 The Java editor contains a code template that you need to fill in with the appropriate components. A custom module consists of inputs, parameters, outputs, an optional state, and a few specific methods. For the magic to happen, you'll need to specify the inputs and outputs and override the relevant methods. We'll go through the components below.
 
-##Inputs and outputs
+## Inputs and outputs
 
 Module inputs correspond to the endpoints that receive incoming events. On the canvas, they are shown as small circles on the left-hand side of a module. The outputs correspond to the endpoints which send out computed values after module activation. The output endpoints are shown as small circles on the right-hand side of a module.
 
@@ -120,7 +120,7 @@ TimeSeriesOutput score = new TimeSeriesOutput(this,"Score");
 BooleanOutput match = new BooleanOutput(this,"Match?");
 ```
 
-##State and methods
+## State and methods
 
 Every Streamr module can have a state. If present, the state persists between module activations and even when a live service is stopped and later restarted. Whilst a module does not need to have a state, there are many streaming data operations which simply cannot be implemented without one.
 
@@ -145,7 +145,7 @@ Any manipulation of the module state and the generation of module output is hand
 `clearState()`
 :   This is where you reset the module state. Any module **must** be able to reset itself to its initial state on request. This is typically done by reinitialising the instance variables.
 
-##Custom module example
+## Custom module example
 
 For the sake of illustration, let's create a new JavaModule. It will be similar to the built-in **Sum**, but instead of keeping a running sum, we'll calculate a running product of successive numerical events.
 
