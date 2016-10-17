@@ -357,17 +357,6 @@ streamr.signup.requireInvite = false
  */
 tomcat.nio = true // in run-app or test-app
 
-// markdown configuration options
-markdown.hardwraps = true
-markdown.autoLinks = true
-markdown.definitionLists = true
-markdown.smartPunctuation = false
-markdown.smartQuotes = false
-markdown.smart = false
-markdown.fencedCodeBlocks = true
-markdown.tables = true
-
-
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 
 /* remove this line
