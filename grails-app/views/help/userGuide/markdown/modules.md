@@ -1,4 +1,4 @@
-#Modules
+# Modules
 
 Modules process the data emanating from event streams. All Streamr [canvases](#canvases) consist of streams (they provide the data) and modules (they process the data).
 
@@ -8,7 +8,7 @@ There’s no limitations on the number of module instances, i.e. on the number o
 
 A module has an internal state, and it can and typically will update that state when it is executed. How this is done depends on the particular module. The statefulness is an important feature and one the key ingredients in real-time stream processing.
 
-##Built-in modules
+## Built-in modules
 
 There's a number of built-in modules on the Streamr platform. They fall into the following categories:
 
@@ -27,7 +27,7 @@ There's a number of built-in modules on the Streamr platform. They fall into the
 
 For details on different modules, either see the individual module help in the Streamr editor or have a look at the <g:link controller="module" action="list">module reference</g:link>.
 
-##Inputs, outputs, and parameters
+## Inputs, outputs, and parameters
 
 A module can have inputs, outputs, and parameters.  Whilst a module does not need to have any inputs or outputs, useful modules will typically allow for either incoming or outgoing data (and usually both).
 
@@ -45,7 +45,7 @@ Inputs, outputs, and parameters can be renamed.  If you move the mouse on top of
 
 You’ll see a number of small icons next to the endpoints when you hover on top of a module.  These icons correspond to additional controls which are relevant to module activation.  We’ll have more to say on this below, but let’s first discuss the data flow between modules.
 
-##Module options
+## Module options
 
 Modules can have options which control their behaviour or appearance.  Options apply to a specific instance of the module, and they can only be changed through the editor.
 
@@ -53,7 +53,7 @@ Modules can have options which control their behaviour or appearance.  Options a
 
 As an example, **Table** only shows one data column by default.  If you hover on top of the module and click on the wrench icon, you’ll see the available options in a pop-up window.  Change the number of inputs to 3, press **OK**, and you’ll get a **Table** with three columns.
 
-##Activation 
+## Activation
 
 A module processes its inputs as soon as it is activated.  This happens when the following conditions are both satisfied.
 1. Every input has a value.

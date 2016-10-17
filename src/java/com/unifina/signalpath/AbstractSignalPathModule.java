@@ -25,7 +25,7 @@ import com.unifina.utils.MapTraversal;
  * - Call module.init()
  * - Call module.setName()
  * - Call module.setConfiguration()
- * - Call module.connectionsReady()
+ * - Call module.connectionsReady() -> module.initialize()
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 

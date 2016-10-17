@@ -53,6 +53,13 @@ public class Input<T> extends Endpoint<T> {
 		}
 	}
 
+	// TODO: horrible hack for DNI project
+	public void setReadyHack() {
+		ready = true;
+		wasReady = true;
+		owner.markReady(this);
+	}
+
 	@Override
 	public T getValue() {
 		return value;

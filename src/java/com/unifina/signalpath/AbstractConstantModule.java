@@ -33,9 +33,11 @@ public abstract class AbstractConstantModule<ValueType> extends AbstractSignalPa
 
 	@Override
 	public void initialize() {
-		// Send out the value to any connected inputs to mark them ready.
-		// Otherwise the receiving module won't be able to activate.
-		out.send(constant.getValue());
+		if (!constant.isConnected() || constant.isReady()) {
+			// Send out the value to any connected inputs to mark them ready.
+			// Otherwise the receiving module won't be able to activate.
+			out.send(constant.getValue());
+		}
 	}
 
 	@Override
