@@ -6,8 +6,8 @@ import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.unifina.domain.data.Stream
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
-import grails.util.Holders
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
 
 import java.nio.ByteBuffer
@@ -15,6 +15,8 @@ import java.nio.ByteBuffer
 @CompileStatic
 class CassandraService implements DisposableBean {
 	static transactional = false
+
+	GrailsApplication grailsApplication
 
 	private static final int FETCH_SIZE = 5000;
 
@@ -27,12 +29,12 @@ class CassandraService implements DisposableBean {
 	Session getSession() {
 		if (session==null) {
 			Cluster.Builder builder = Cluster.builder();
-			for (String host : Holders.grailsApplication.config["streamr"]["cassandra"]["hosts"]) {
+			for (String host : grailsApplication.config["streamr"]["cassandra"]["hosts"]) {
 				builder.addContactPoint(host);
 			}
 			Cluster cluster = builder.build();
 
-			session = cluster.connect(Holders.grailsApplication.config["streamr"]["cassandra"]["keySpace"].toString());
+			session = cluster.connect(grailsApplication.config["streamr"]["cassandra"]["keySpace"].toString());
 			session.getCluster().getConfiguration().getQueryOptions().setFetchSize(FETCH_SIZE);
 		}
 
