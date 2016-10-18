@@ -11,9 +11,6 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.regex.Pattern
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@Mixin(StreamMixin)
 class MapModulesSpec extends LoginTester1Spec {
 
 	@Shared Logger log = Logger.getLogger(MapModulesSpec)
@@ -183,6 +180,7 @@ class MapModulesSpec extends LoginTester1Spec {
 	}
 
 	private void produceAllDataToStream() {
+		Thread.sleep(2000)
 		produceToStream("key-1", 30)
 		produceToStream("key-1", 40)
 		produceToStream("key-2", -50)

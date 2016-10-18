@@ -5,24 +5,27 @@ import grails.util.Holders
 import groovy.transform.CompileStatic
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
 
 class KafkaService implements DisposableBean {
 
 	static transactional = false
 
+	GrailsApplication grailsApplication
+
 	private KafkaProducer<String, byte[]> producer = null
 	private String dataTopic
 	
 	@CompileStatic
 	private Properties getProperties() {
-		return ((ConfigObject) Holders.grailsApplication.config["streamr"]["kafka"]).toProperties()
+		return ((ConfigObject) grailsApplication.config["streamr"]["kafka"]).toProperties()
 	}
 
 	@CompileStatic
 	private String getDataTopic() {
 		if (!dataTopic) {
-			dataTopic = Holders.grailsApplication.config["streamr"]["kafka"]["dataTopic"]
+			dataTopic = grailsApplication.config["streamr"]["kafka"]["dataTopic"]
 			if (!dataTopic)
 				throw new RuntimeException("streamr.kafka.dataTopic not configured!")
 		}
