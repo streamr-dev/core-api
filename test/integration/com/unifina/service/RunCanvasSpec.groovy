@@ -70,6 +70,8 @@ class RunCanvasSpec extends IntegrationSpec {
 		when:
 		canvasService.start(canvas, true)
 
+		Thread.sleep(2000)
+
 		// Produce data
 		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false], 30) }
 
