@@ -1,4 +1,3 @@
-import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.StreamService
 import core.LoginTester1Spec
@@ -7,22 +6,19 @@ import core.mixins.ListPageMixin
 import core.mixins.StreamMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
-import grails.test.mixin.TestFor
 import spock.lang.Shared
 
 import java.text.SimpleDateFormat
 
-@TestFor(CanvasController) // to get JSON conversion working
 class CanvasSpec extends LoginTester1Spec {
 
 	@Shared StreamService streamService
 	@Shared Stream testStream
 
 	def setupSpec() {
-		// Making sure mixins work
-		CanvasSpec.metaClass.mixin(CanvasMixin)
-		CanvasSpec.metaClass.mixin(ListPageMixin)
-		CanvasSpec.metaClass.mixin(StreamMixin)
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ListPageMixin)
+		this.class.metaClass.mixin(StreamMixin)
 
 		streamService = createStreamService()
 		testStream = new Stream()

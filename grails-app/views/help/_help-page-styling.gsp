@@ -1,9 +1,19 @@
 <r:require module="scrollspy-helper"/>
 <r:require module="codemirror"/>
+<r:require module="marked"/>
 
 <r:script>
 	$(function() {
+		var markdownEl = $("#${markdownEl}")
 		var wrapper = $("#${wrapper}")
+
+		// Render markdown
+		marked.setOptions({
+			gfm: true
+		})
+		var markdown = markdownEl.text()
+		wrapper.prepend(marked(markdown))
+
 		var sidebar = $("<div class='col-xs-0 col-sm-0 col-md-3 col-lg-4' />")
 
 		wrapper.addClass("scrollspy-wrapper col-md-9 col-lg-offset-1 col-lg-7")

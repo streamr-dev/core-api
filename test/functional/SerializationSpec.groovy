@@ -1,4 +1,3 @@
-import com.unifina.controller.core.signalpath.CanvasController
 import com.unifina.domain.data.Stream
 import com.unifina.service.SerializationService
 import com.unifina.service.StreamService
@@ -7,14 +6,9 @@ import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.mixins.StreamMixin
-import grails.test.mixin.TestFor
 import grails.util.Holders
 import spock.lang.Shared
 
-@TestFor(CanvasController) // for JSON conversion to work
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@Mixin(StreamMixin)
 class SerializationSpec extends LoginTester1Spec {
 
 	@Shared long serializationIntervalInMillis

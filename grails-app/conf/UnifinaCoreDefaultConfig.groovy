@@ -1,5 +1,3 @@
-import org.apache.kafka.clients.producer.ProducerConfig
-
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
