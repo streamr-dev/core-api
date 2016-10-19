@@ -17,7 +17,6 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
-@TestMixin(ControllerUnitTestMixin) // JSON support
 @TestFor(StreamService)
 @Mock([Stream, Feed, FeedFile, SecUser, KafkaService, FeedFileService])
 class StreamServiceSpec extends Specification {

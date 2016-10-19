@@ -1,5 +1,7 @@
 package com.unifina.service
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Feed
@@ -19,6 +21,7 @@ import org.springframework.util.Assert
 
 import javax.annotation.Nullable
 import java.nio.charset.Charset
+import java.text.DateFormat
 import java.util.concurrent.ThreadLocalRandom
 
 class StreamService {
@@ -26,6 +29,12 @@ class StreamService {
 	def grailsApplication
 	KafkaService kafkaService
 	CassandraService cassandraService
+
+	// Use Gson instead of Grails "as JSON" converter because there's no easy way to get that working in func tests that want to produce data to Streams
+	private Gson gson = new GsonBuilder()
+		.serializeNulls()
+		.setDateFormat(DateFormat.LONG)
+		.create()
 
 	private static final Charset utf8 = Charset.forName("UTF-8")
 
@@ -50,7 +59,7 @@ class StreamService {
 		}
 		AbstractStreamListener streamListener = instantiateListener(stream)
 		streamListener.addToConfiguration(config, stream)
-		stream.config = config as JSON
+		stream.config = gson.toJson(config)
 
 		if (!stream.validate()) {
 			throw new ValidationException(stream.errors)
@@ -76,7 +85,7 @@ class StreamService {
 		if (fields) {
 			Map config = stream.getStreamConfigAsMap()
 			config.fields = fields
-			stream.config = config as JSON
+			stream.config = gson.toJson(config)
 			stream.save(flush: true, failOnError: true)
 			return true
 		} else {
@@ -96,25 +105,25 @@ class StreamService {
 
 	@CompileStatic
 	void sendMessage(Stream stream, Map message, int ttl=0) {
-		String str = (message as JSON).toString();
+		String str = gson.toJson(message)
 		sendMessage(stream, null, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
 	@CompileStatic
 	void sendMessage(Stream stream, long timestamp, Map message, int ttl=0) {
-		String str = (message as JSON).toString();
+		String str = gson.toJson(message)
 		sendMessage(stream, null, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
 	@CompileStatic
 	void sendMessage(Stream stream, @Nullable String partitionKey, Map message, int ttl=0) {
-		String str = (message as JSON).toString();
+		String str = gson.toJson(message)
 		sendMessage(stream, partitionKey, System.currentTimeMillis(), str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
 	@CompileStatic
 	void sendMessage(Stream stream, long timestamp, @Nullable String partitionKey, Map message, int ttl=0) {
-		String str = (message as JSON).toString();
+		String str = gson.toJson(message)
 		sendMessage(stream, partitionKey, timestamp, str.getBytes(utf8), StreamrBinaryMessage.CONTENT_TYPE_JSON, ttl);
 	}
 
@@ -128,9 +137,9 @@ class StreamService {
 	}
 
 	@CompileStatic
-	void saveMessage(Stream stream, @Nullable String partitionKey, long timestamp, Map content, int ttl, long messageNumber, Long previousMessageNumber) {
+	void saveMessage(Stream stream, @Nullable String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
 		int streamPartition = partition(stream, partitionKey)
-		String str = (content as JSON).toString();
+		String str = gson.toJson(message)
 		// Fake Kafka partition to be 0 (does not matter)
 		StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(stream.id, streamPartition, timestamp, ttl, StreamrBinaryMessage.CONTENT_TYPE_JSON, str.getBytes(utf8), 0, messageNumber, previousMessageNumber)
 		cassandraService.save(msg)
