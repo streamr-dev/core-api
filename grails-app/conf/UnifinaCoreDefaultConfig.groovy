@@ -265,8 +265,8 @@ environments {
 /**
  * Kafka config
  */
-streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"
-streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2181"
+streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9093"
+streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2182"
 streamr.kafka.producer.type = "async"
 streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
