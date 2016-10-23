@@ -1,5 +1,8 @@
 package com.unifina.service
 
+import com.google.common.collect.Lists
+import com.google.common.hash.HashFunction
+import com.google.common.primitives.Bytes
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.ValidationException
@@ -16,8 +19,9 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-import org.apache.kafka.common.utils.Utils
+import org.apache.commons.codec.binary.Hex
 import org.springframework.util.Assert
+import sun.misc.Hashing
 
 import javax.annotation.Nullable
 import java.nio.charset.Charset
@@ -29,6 +33,8 @@ class StreamService {
 	def grailsApplication
 	KafkaService kafkaService
 	CassandraService cassandraService
+
+	private static HashFunction murmur3_32 = com.google.common.hash.Hashing.murmur3_32(0);
 
 	// Use Gson instead of Grails "as JSON" converter because there's no easy way to get that working in func tests that want to produce data to Streams
 	private Gson gson = new GsonBuilder()
@@ -252,13 +258,19 @@ class StreamService {
 	}
 
 	@CompileStatic
-	private int partition(Stream stream, String partitionKey) {
+	public int partition(Stream stream, String partitionKey) {
 		if (stream.getPartitions() == 1) {
 			// Fast common case
 			return 0
 		} else if (partitionKey) {
-			// Borrow Kafka partitioning algorithm
-			return Utils.abs(Utils.murmur2(partitionKey.getBytes(utf8))) % stream.getPartitions();
+			byte[] result = murmur3_32.newHasher()
+					.putBytes(partitionKey.getBytes(utf8))
+					.hash()
+					.asBytes();
+
+			// Big-endian interpretation of the result as int
+			int intHash = ((result[0] & 0xFF) << 24) | ((result[1] & 0xFF) << 16) | ((result[2] & 0xFF) << 8) | (result[3] & 0xFF);
+			return Math.abs(intHash) % stream.getPartitions()
 		} else {
 			// Fallback to random partition if no key
 			return ThreadLocalRandom.current().nextInt(stream.getPartitions());
