@@ -1,3 +1,5 @@
+import com.unifina.service.KafkaService
+
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
@@ -270,8 +272,9 @@ streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.co
 streamr.kafka.producer.type = "async"
 streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
-streamr.kafka.value.serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"
-streamr.kafka.key.serializer = "org.apache.kafka.common.serialization.StringSerializer"
+streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArraySerializer.getName()
+streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
+streamr.kafka.partitioner.class = KafkaService.CustomPartitioner.class.getName()
 streamr.kafka.request.required.acks = "0"
 streamr.kafka.dataTopic = "data-dev"
 

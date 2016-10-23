@@ -258,22 +258,27 @@ class StreamService {
 	}
 
 	@CompileStatic
-	public int partition(Stream stream, String partitionKey) {
-		if (stream.getPartitions() == 1) {
+	public static int partition(Stream stream, String partitionKey) {
+		return partition(stream.getPartitions(), partitionKey.getBytes(utf8))
+	}
+
+	@CompileStatic
+	public static int partition(int partitionCount, byte[] partitionKey) {
+		if (partitionCount == 1) {
 			// Fast common case
 			return 0
 		} else if (partitionKey) {
 			byte[] result = murmur3_32.newHasher()
-					.putBytes(partitionKey.getBytes(utf8))
+					.putBytes(partitionKey)
 					.hash()
 					.asBytes();
 
 			// Big-endian interpretation of the result as int
 			int intHash = ((result[0] & 0xFF) << 24) | ((result[1] & 0xFF) << 16) | ((result[2] & 0xFF) << 8) | (result[3] & 0xFF);
-			return Math.abs(intHash) % stream.getPartitions()
+			return Math.abs(intHash) % partitionCount
 		} else {
 			// Fallback to random partition if no key
-			return ThreadLocalRandom.current().nextInt(stream.getPartitions());
+			return ThreadLocalRandom.current().nextInt(partitionCount);
 		}
 	}
 }
