@@ -3,11 +3,11 @@ package com.unifina.service
 import com.unifina.data.StreamrBinaryMessage
 import groovy.transform.CompileStatic
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.Partitioner
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.Cluster
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
+
+import javax.annotation.PostConstruct
 
 class KafkaService implements DisposableBean {
 
@@ -17,7 +17,13 @@ class KafkaService implements DisposableBean {
 
 	private KafkaProducer<String, byte[]> producer = null
 	private String dataTopic
-	
+
+	@PostConstruct
+	void init() {
+		// Connects to the cluster on startup
+		getProducer()
+	}
+
 	@CompileStatic
 	private Properties getProperties() {
 		return ((ConfigObject) grailsApplication.config["streamr"]["kafka"]).toProperties()
@@ -50,32 +56,6 @@ class KafkaService implements DisposableBean {
 	void destroy() {
 		if (producer) {
 			producer.close()
-		}
-	}
-
-	/**
-	 * Use the same partitioner used to partition messages to different stream partitions.
-	 * The default partitioner is not nice, because the Java and JS Kafka clients have different
-	 * default partitioners.
-	 */
-	@CompileStatic
-	public class CustomPartitioner implements Partitioner {
-
-		@Override
-		int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
-			List partitions = cluster.partitionsForTopic(topic);
-			int numPartitions = partitions.size();
-			StreamService.partition(numPartitions, keyBytes)
-		}
-
-		@Override
-		void close() {
-
-		}
-
-		@Override
-		void configure(Map<String, ?> map) {
-
 		}
 	}
 }

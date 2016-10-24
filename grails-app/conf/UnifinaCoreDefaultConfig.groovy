@@ -1,4 +1,4 @@
-import com.unifina.service.KafkaService
+import com.unifina.data.KafkaPartitioner
 
 /*****
  * This config file gets merged with the application config file.
@@ -274,7 +274,7 @@ streamr.kafka.queue.buffering.max.ms = "100"
 streamr.kafka.retry.backoff.ms = "500"
 streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArraySerializer.getName()
 streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
-streamr.kafka.partitioner.class = KafkaService.CustomPartitioner.class.getName()
+streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
 streamr.kafka.request.required.acks = "0"
 streamr.kafka.dataTopic = "data-dev"
 

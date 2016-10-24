@@ -1,11 +1,9 @@
 package com.unifina.service
 
-import com.google.common.collect.Lists
-import com.google.common.hash.HashFunction
-import com.google.common.primitives.Bytes
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.unifina.api.ValidationException
+import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
@@ -19,14 +17,11 @@ import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
-import org.apache.commons.codec.binary.Hex
 import org.springframework.util.Assert
-import sun.misc.Hashing
 
 import javax.annotation.Nullable
 import java.nio.charset.Charset
 import java.text.DateFormat
-import java.util.concurrent.ThreadLocalRandom
 
 class StreamService {
 
@@ -34,7 +29,7 @@ class StreamService {
 	KafkaService kafkaService
 	CassandraService cassandraService
 
-	private static HashFunction murmur3_32 = com.google.common.hash.Hashing.murmur3_32(0);
+	private final StreamPartitioner partitioner = new StreamPartitioner()
 
 	// Use Gson instead of Grails "as JSON" converter because there's no easy way to get that working in func tests that want to produce data to Streams
 	private Gson gson = new GsonBuilder()
@@ -102,7 +97,7 @@ class StreamService {
 	// Ref to Kafka will be abstracted out when Feed abstraction is reworked
 	@CompileStatic
 	void sendMessage(Stream stream, @Nullable String partitionKey, long timestamp, byte[] content, byte contentType, int ttl=0) {
-		int streamPartition = partition(stream, partitionKey)
+		int streamPartition = partitioner.partition(stream, partitionKey)
 		StreamrBinaryMessage msg = new StreamrBinaryMessage(stream.id, streamPartition, timestamp, ttl, contentType, content)
 
 		String kafkaPartitionKey = "${stream.id}-$streamPartition"
@@ -136,7 +131,7 @@ class StreamService {
 	// Ref to Cassandra will be abstracted out when Feed abstraction is reworked
 	@CompileStatic
 	void saveMessage(Stream stream, @Nullable String partitionKey, long timestamp, byte[] content, byte contentType, int ttl, long messageNumber, Long previousMessageNumber) {
-		int streamPartition = partition(stream, partitionKey)
+		int streamPartition = partitioner.partition(stream, partitionKey)
 		// Fake Kafka partition to be 0 (does not matter)
 		StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(stream.id, streamPartition, timestamp, ttl, contentType, content, 0, messageNumber, previousMessageNumber)
 		cassandraService.save(msg)
@@ -144,7 +139,7 @@ class StreamService {
 
 	@CompileStatic
 	void saveMessage(Stream stream, @Nullable String partitionKey, long timestamp, Map message, int ttl, long messageNumber, Long previousMessageNumber) {
-		int streamPartition = partition(stream, partitionKey)
+		int streamPartition = partitioner.partition(stream, partitionKey)
 		String str = gson.toJson(message)
 		// Fake Kafka partition to be 0 (does not matter)
 		StreamrBinaryMessageWithKafkaMetadata msg = new StreamrBinaryMessageWithKafkaMetadata(stream.id, streamPartition, timestamp, ttl, StreamrBinaryMessage.CONTENT_TYPE_JSON, str.getBytes(utf8), 0, messageNumber, previousMessageNumber)
@@ -198,7 +193,7 @@ class StreamService {
 				}
 			}
 
-			int partition = partition(stream, null)
+			int partition = partitioner.partition(stream, null)
 			long offset = latestOffsetByPartition[partition] + 1
 			latestOffsetByPartition[partition] = offset
 			saveMessage(stream, null, date.time, message, 0, offset, offset > Long.MIN_VALUE ? offset-1 : null)
@@ -255,30 +250,5 @@ class StreamService {
 		if (provider)
 			return provider.getDataRange(stream)
 		else return null
-	}
-
-	@CompileStatic
-	public static int partition(Stream stream, String partitionKey) {
-		return partition(stream.getPartitions(), partitionKey.getBytes(utf8))
-	}
-
-	@CompileStatic
-	public static int partition(int partitionCount, byte[] partitionKey) {
-		if (partitionCount == 1) {
-			// Fast common case
-			return 0
-		} else if (partitionKey) {
-			byte[] result = murmur3_32.newHasher()
-					.putBytes(partitionKey)
-					.hash()
-					.asBytes();
-
-			// Big-endian interpretation of the result as int
-			int intHash = ((result[0] & 0xFF) << 24) | ((result[1] & 0xFF) << 16) | ((result[2] & 0xFF) << 8) | (result[3] & 0xFF);
-			return Math.abs(intHash) % partitionCount
-		} else {
-			// Fallback to random partition if no key
-			return ThreadLocalRandom.current().nextInt(partitionCount);
-		}
 	}
 }

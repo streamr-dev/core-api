@@ -10,6 +10,7 @@ import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
 
+import javax.annotation.PostConstruct
 import java.nio.ByteBuffer
 
 @CompileStatic
@@ -22,6 +23,12 @@ class CassandraService implements DisposableBean {
 
 	// Thread-safe
 	private Session session
+
+	@PostConstruct
+	void init() {
+		// Connects to the cluster on startup
+		getSession()
+	}
 
 	/**
 	 * Returns a thread-safe session connected to the Streamr Cassandra cluster.
