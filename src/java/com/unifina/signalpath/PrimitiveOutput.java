@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class PrimitiveOutput<T> extends Output<T> {
 
-	public boolean noRepeat = true;
+	public boolean noRepeat = false;
 	public boolean canBeNoRepeat = true;
 
 	public PrimitiveOutput(AbstractSignalPathModule owner, String name, String type) {
@@ -18,7 +18,7 @@ public class PrimitiveOutput<T> extends Output<T> {
 
 	@Override
 	public void send(T value) {
-		if (!noRepeat || previousValue==null || !value.equals(previousValue)) {
+		if (!noRepeat || previousValue == null || !value.equals(previousValue)) {
 			super.send(value);
 		}
 	}
@@ -34,9 +34,9 @@ public class PrimitiveOutput<T> extends Output<T> {
 	@Override
 	public void setConfiguration(Map<String,Object> config) {
 		super.setConfiguration(config);
-		
-		if (config.containsKey("noRepeat"))
+
+		if (config.containsKey("noRepeat")) {
 			noRepeat = Boolean.parseBoolean(config.get("noRepeat").toString());
+		}
 	}
-	
 }
