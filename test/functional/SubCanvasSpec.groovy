@@ -73,7 +73,7 @@ public class SubCanvasSpec extends LoginTester1Spec {
 
 	def "Subcanvas is loadable on ForEach module and ui modules work"() {
 		String unique = "test" + new Date().getTime()
-		
+
 		when: "The string is sent to the ForEach module"
 		findModuleOnCanvas("TextField").find("textarea").firstElement().clear()
 		findModuleOnCanvas("TextField").find("textarea") << unique

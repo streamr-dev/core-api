@@ -251,4 +251,5 @@ class StreamService {
 			return provider.getDataRange(stream)
 		else return null
 	}
+
 }

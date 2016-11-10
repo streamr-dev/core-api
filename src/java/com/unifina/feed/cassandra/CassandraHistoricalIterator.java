@@ -1,14 +1,13 @@
 package com.unifina.feed.cassandra;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.*;
 import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.map.MapMessage;
 import com.unifina.service.CassandraService;
 import grails.converters.JSON;
 import grails.util.Holders;
+import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.io.Closeable;
@@ -28,7 +27,9 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 
 	private ResultSet resultSet;
 
-	private static final int PREFETCH_WHEN_REMAINING = 500;
+	private static final Logger log = Logger.getLogger(CassandraHistoricalIterator.class);
+
+	private static final int PREFETCH_WHEN_REMAINING = 4500;
 	private static final int FETCH_SIZE = 5000;
 
 	public CassandraHistoricalIterator(Stream stream, Integer partition, Date startDate, Date endDate) {
@@ -58,12 +59,14 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 			return;
 		}
 
-		resultSet = session.execute("SELECT payload FROM stream_events WHERE stream = ? AND stream_partition = ? AND kafka_offset >= ? and kafka_offset <= ? ORDER BY kafka_offset ASC", stream.getId(), partition, firstOffset, lastOffset);
+		Statement s = new SimpleStatement("SELECT payload FROM stream_events WHERE stream = ? AND stream_partition = ? AND kafka_offset >= ? and kafka_offset <= ? ORDER BY kafka_offset ASC", stream.getId(), partition, firstOffset, lastOffset);
+		s.setIdempotent(true);
+		resultSet = session.execute(s);
 	}
 
 	@Override
 	public boolean hasNext() {
-		return !resultSet.isExhausted();
+		return resultSet != null && !resultSet.isExhausted();
 	}
 
 	@Override
@@ -72,6 +75,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 
 		// Async-fetch more rows if not many left
 		if (resultSet.getAvailableWithoutFetching() == PREFETCH_WHEN_REMAINING && !resultSet.isFullyFetched()) {
+			log.info("Fetching more results.");
 			resultSet.fetchMoreResults(); // this is asynchronous
 		}
 
