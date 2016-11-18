@@ -2,7 +2,7 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
-	var $container = null
+	var container = null
 	var heatmap = null
 
 	prot.enableIONameChange = false;	
