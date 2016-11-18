@@ -60,6 +60,7 @@ public class Output<T> extends Endpoint<T> {
 	public void addPropagator(Propagator p) {
 		if (propagators == null) { // after de-serialization
 			propagators = new ArrayList<>();
+			cachedPropagators = new Propagator[0];
 		}
 		if (!propagators.contains(p)) {
 			propagators.add(p);
