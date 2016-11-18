@@ -110,8 +110,6 @@ public class Sql extends AbstractSignalPathModule {
 			return Arrays.asList(
 				new PossibleValue("MySQL", "MySQL"),
 				new PossibleValue("PostgreSQL", "PostgreSQL")
-				//new PossibleValue("Oracle", "Oracle"),			// TODO: fix, now got error downloading ojdbc14
-				//new PossibleValue("SQL Server", "SQLServer")	// TODO: install; it's probably not in Maven
 			);
 		}
 
@@ -125,8 +123,6 @@ public class Sql extends AbstractSignalPathModule {
 			switch (getValue()) {
 				case "MySQL": return "jdbc:mysql";
 				case "PostgreSQL": return "jdbc:postgresql";
-				//case "Oracle": return "jdbc:oracle:thin";
-				//case "SQLServer": return "jdbc:sqlserver";
 				default:
 					// TODO: log error
 					return "jdbc:mysql";
