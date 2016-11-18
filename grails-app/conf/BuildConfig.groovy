@@ -80,7 +80,11 @@ grails.project.dependency.resolution = {
         }
 		
         compile('com.mashape.unirest:unirest-java:1.3.3')
-		
+
+		// http://www.stringtemplate.org/
+		// http://mvnrepository.com/artifact/org.antlr/ST4
+		compile group: 'org.antlr', name: 'ST4', version: '4.0.8'
+
         runtime('com.amazonaws:aws-java-sdk:1.7.5')
 
         test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
