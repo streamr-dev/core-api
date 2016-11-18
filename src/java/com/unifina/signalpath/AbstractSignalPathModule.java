@@ -59,7 +59,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	// Sets if the module supports state clearing. If canClearState is false, calling clear() does nothing.
 	protected boolean canClearState = true;
 
-	protected String name;
+	private String name;
+	private String displayName;
 	protected Integer hash;
 
 	private transient Globals globals;
@@ -431,6 +432,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		if (canRefresh) {
 			map.put("canRefresh", canRefresh);
 		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
 
 		return map;
 	}
@@ -513,6 +517,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
+		}
+		if (config.containsKey("displayName")) {
+			setDisplayName(config.get("displayName").toString());
 		}
 	}
 
@@ -729,5 +736,17 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	public void setGlobals(Globals globals) {
 		this.globals = globals;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getEffectiveName() {
+		return getDisplayName() != null ? getDisplayName() : getName();
 	}
 }
