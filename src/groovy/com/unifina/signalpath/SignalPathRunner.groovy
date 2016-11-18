@@ -126,7 +126,7 @@ public class SignalPathRunner extends Thread {
 			}
 		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
-			log.error("Error while running SignalPaths!", e)
+			log.error("Error while running SignalPaths: "+signalPaths.collect {it.getCanvas()?.id}, e)
 			reportException = e
 		}
 
