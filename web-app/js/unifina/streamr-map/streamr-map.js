@@ -93,7 +93,11 @@
         this.map._container.addEventListener("DOMMouseScroll", mouseEventHandler)
 
         this.map.on("moveend", function() {
-            $(_this).trigger("move", _this.getCenterAndZoom())
+            $(_this).trigger("move", {
+                centerLat: _this.getCenter().lat,
+                centerLng: _this.getCenter().lng,
+                zoom: _this.getZoom()
+            })
         })
 
         if(this.options.drawTrace)
@@ -155,6 +159,14 @@
 
         var layer = new LinePointLayer().addTo(this.map)
         return layer
+    }
+
+    StreamrMap.prototype.getZoom = function() {
+        return this.map.getZoom()
+    }
+
+    StreamrMap.prototype.getCenter = function() {
+        return this.map.getCenter()
     }
 
     StreamrMap.prototype.setCenter = function(lat, lng) {

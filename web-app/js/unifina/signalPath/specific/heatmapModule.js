@@ -30,6 +30,13 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 
 		heatmap = new StreamrHeatMap(container, heatMapOptions)
 
+		$(heatmap).on("move", function(e, data) {
+			$.each(data, function(k, v) {
+				if(prot.jsonData.options[k] && prot.jsonData.options[k].value)
+					prot.jsonData.options[k].value = v
+			})
+		})
+
 		prot.initResizable({
 			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
 			minHeight: parseInt(prot.div.css("min-height").replace("px","")),

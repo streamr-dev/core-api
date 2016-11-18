@@ -52,6 +52,9 @@
 				})
 
 			},
+			getMap: function() {
+				return this.map
+			}
 			centerChanged: function(oldValue, newValue) {
 				this.map.setCenter(newValue)
 			},
