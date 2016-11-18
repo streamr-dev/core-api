@@ -1,4 +1,4 @@
-#Introduction
+# Introduction
 
 Streamr is a cloud-based platform for creating and managing microservices that process events in real-time data streams.  It abstracts the complexity of the underlying stream processing technology and provides a user-friendly front end, saving you time and money along the way.
 
@@ -12,7 +12,7 @@ The development environment includes a playback mode where you can simulate the 
 
 The secret sauce of Streamr is the hidden technology which makes creating and managing real-time microservices easy. Apart from the browser-based user interface and visual programming tools, Streamr takes care of the data flow, event propagation, message queues, load balancing, and other technical issues under the hood. It also manages your live canvases and stores the full event history on your behalf.
 
-##Data live in streams
+## Data live in streams
 
 All real-time data in Streamr is stored in [streams](#streams). A stream is essentially a timestamped sequence of events. Each event may contain more than one field. You can create and work on dozens, hundreds, or thousands of streams. A stream is persistent, identified by a unique ID, and stored in the cloud.
 
@@ -24,7 +24,7 @@ There are a few different ways to get data into a stream. Streamr has a simple H
 
 Streams implement a publish-subscribe paradigm, or pub/sub for short. A stream can receive data from many sources (or publishers), and there can be several listeners who subscribe to a stream. There are several variations on the possible pub/sub topologies, such as many-to-one, one-to-many, or many-to-many.  Streamr supports all of these.
 
-##Turn the data into action
+## Turn the data into action
 
 You can build any kind of automatic real-time functionality with Streamr [canvases](#canvases) (i.e. microservices). We make it easy to create and manage your digital workforce. There is an extensive collection of built-in [modules](#modules) as a source of building blocks. You can abstract modules and re-use them later, and you can code custom modules in Java.
 
@@ -44,7 +44,7 @@ Although we sometimes find it hard to admit, there's life outside Streamr. We're
 - Embed live visualisation elements in external web pages by inserting a single line of HTML code.
 - Subscribe to a stream in external web pages and applications. You'll receive every event as soon as it’s available.
 
-##Who is Streamr for?
+## Who is Streamr for?
 
 The short answer is that Streamr is for anyone who wants to create new, interesting, and valuable things on top of real-time data, and wants to do it quickly and with minimum fuss.
 

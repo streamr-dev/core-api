@@ -8,7 +8,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-chart" extends="streamr-widget" attributes="rangeDropdown showHideButtons">
+<polymer-element name="streamr-chart" extends="streamr-widget" attributes="rangeDropdown showHideButtons displayTitle">
 	<template>
 		<shadow></shadow>
 	</template>
@@ -17,7 +17,8 @@
 		Polymer('streamr-chart',{
 			publish: {
 				rangeDropdown: false,
-				showHideButtons: false
+				showHideButtons: false,
+				displayTitle: false
 			},
 			ready: function() {
 				var _this = this
@@ -26,7 +27,8 @@
 				this.getModuleJson(function(json) {
 					_this.chart = new StreamrChart(_this.$["streamr-widget-container"], {
 						rangeDropdown: _this.rangeDropdown,	// default: true
-						showHideButtons: _this.showHideButtons	// default: true
+						showHideButtons: _this.showHideButtons,	// default: true
+						displayTitle: _this.displayTitle // default: true
 					})
 
 					_this.sendRequest({type:'initRequest'}, function(response) {

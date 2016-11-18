@@ -23,18 +23,6 @@ public class Delay extends AbstractSignalPathModule {
 	}
 	
 	@Override
-	public void initialize() {
-		// Input source and Output targets must be of same type
-		if (input.isConnected() && out.getTargets().length>0) {
-			String type = input.getSource().getTypeName();
-			
-			for (Input i : out.getTargets())
-				if (!type.equals(i.getTypeName()))
-					throw new RuntimeException("Delay: input is connected to type "+type+", connection to "+(i.getDisplayName()!=null ? i.getDisplayName() : i.getName())+" is of wrong type ("+i.getTypeName()+")!");
-		}
-	}
-	
-	@Override
 	public void sendOutput() {
 		while (window.size()>length.getValue())
 			window.removeFirst();
