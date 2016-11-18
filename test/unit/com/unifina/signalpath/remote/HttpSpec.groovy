@@ -45,7 +45,7 @@ class HttpSpec extends Specification {
 
 	Map<String, List> outputs = [
 		data: [[], [], []],
-		errors: [[], [], []],
+		errors: [null, null, null],
 		statusCode: [200d, 200d, 200d],
 		//ping: [0, 0, 0],
 		headers: [dummyHeader, dummyHeader, dummyHeader]

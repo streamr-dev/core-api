@@ -163,6 +163,9 @@ public class Http extends AbstractHttpModule {
 		}
 
 		roundtripMillis.send(call.responseTime);
-		errors.send(call.errors);
+
+		if (call.errors.size() > 0) {
+			errors.send(call.errors);
+		}
 	}
 }

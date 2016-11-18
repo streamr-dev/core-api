@@ -28,6 +28,7 @@ databaseChangeLog = {
 	include file: 'core/2016-03-18-add-http-module.groovy'
 	include file: 'core/2016-05-09-boolean-modules.groovy'
 	include file: 'core/2016-05-09-stream-date-created-and-last-updated.groovy'
+	include file: 'core/2016-05-20-add-sql-module.groovy'
 	include file: 'core/2016-05-23-add-list-table-module.groovy'
 	include file: 'core/2016-06-07-test-dashboard.groovy'
 	include file: 'core/2016-06-08-new-variadic-modules.groovy'
