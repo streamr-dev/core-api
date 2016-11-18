@@ -16,3 +16,6 @@
 	path = plugins/streamr-http-api
 	url = git@github.com:streamr-dev/streamr-http-api
 	branch = master
+[submodule "web-app/js/webcomponentsjs"]
+	path = web-app/js/webcomponentsjs
+	url = git@github.com:streamr-dev/webcomponentsjs
