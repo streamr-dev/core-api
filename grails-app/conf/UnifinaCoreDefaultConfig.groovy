@@ -281,7 +281,7 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 30 * 1000
+unifina.serialization.intervalInMillis = 5 * 60 * 1000
 environments {
 	test {
 		unifina.serialization.intervalInMillis = 1000
