@@ -1,8 +1,8 @@
 package com.unifina.signalpath.remote;
+import com.google.gson.Gson;
 import com.unifina.signalpath.*;
 
-import org.apache.commons.collections.list.UnmodifiableList;
-import org.apache.commons.collections.map.UnmodifiableMap;
+import com.unifina.signalpath.text.JsonParser;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -15,7 +15,6 @@ import org.apache.http.util.EntityUtils;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONException;
 import org.codehaus.groovy.grails.web.json.JSONObject;
-import org.codehaus.groovy.grails.web.json.JSONTokener;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -105,9 +104,7 @@ public class Http extends AbstractHttpModule {
 				switch (bodyContentType) {
 					case BODY_FORMAT_JSON:
 						Object b = body.getValue();
-						String bodyString = b instanceof Map ? new JSONObject((Map) b).toString() :
-											b instanceof List ? new JSONArray((List) b).toString() :
-											b.toString();
+						String bodyString = new Gson().toJson(b);
 						((HttpEntityEnclosingRequestBase) request).setEntity(new StringEntity(bodyString));
 						break;
 					case BODY_FORMAT_FORMDATA:
@@ -142,14 +139,7 @@ public class Http extends AbstractHttpModule {
 				if (responseString.isEmpty()) {
 					call.errors.add("Empty response from server");
 				} else {
-					JSONTokener parser = new JSONTokener(responseString);
-					Object jsonObject = parser.nextValue();    // parser returns Map, List, or String
-					if (jsonObject instanceof Map) {
-						jsonObject = UnmodifiableMap.decorate((Map)jsonObject);
-					} else if (jsonObject instanceof List) {
-						jsonObject = UnmodifiableList.decorate((List)jsonObject);
-					}
-					responseData.send(jsonObject);
+					responseData.send(JsonParser.jsonStringToOutputObject(responseString));
 				}
 
 				Map<String, String> headerMap = new HashMap<>();
@@ -164,6 +154,9 @@ public class Http extends AbstractHttpModule {
 		}
 
 		roundtripMillis.send(call.responseTime);
-		errors.send(call.errors);
+
+		if (call.errors.size() > 0) {
+			errors.send(call.errors);
+		}
 	}
 }

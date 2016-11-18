@@ -43,8 +43,13 @@
 
 			result = select
 		}
+		else if (this.data.isTextArea) {
+			result = $("<textarea class='parameterInput form-control' />");
+			result.val(this.data.value);
+		}
 		else {
-			result = $("<input class='parameterInput form-control' type='text' value='"+this.data.value+"'>");
+			result = $("<input class='parameterInput form-control' type='text' />");
+			result.val(this.data.value);
 		}
 
 		result.change(function() {

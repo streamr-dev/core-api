@@ -7,8 +7,8 @@ SignalPath.SubCanvasModule = function(data,canvas,prot) {
 
     function updateSubCanvasSelector() {
         if (SignalPath.isRunning()) {
-            $.getJSON(Streamr.createLink({uri: 'api/v1/canvases/' + SignalPath.getId() + '/modules/' + prot.getHash()}), {runtime: true}, function(runtimeJson) {
-                var controls = prot.createSubCanvasControls(runtimeJson)
+            SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type: 'json'}, function(response) {
+                var controls = prot.createSubCanvasControls(response.json)
                 controls.addClass("subcanvas-controls")
                 prot.body.find(".subcanvas-controls").remove()
                 prot.body.append(controls)
