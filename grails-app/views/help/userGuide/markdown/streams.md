@@ -1,4 +1,4 @@
-#Streams
+# Streams
 
 All data in Streamr is stored in a stream. A stream is simply a sequence of events in time. You can add new data to the end of a stream, and a stream will give the data back to you in the correct order. 
 
@@ -14,7 +14,7 @@ In this chapter, we’ll show stream examples and describe the built-in data typ
 - Push events to a stream.
 - Subscribe to a stream.
 
-##Stream examples
+## Stream examples
 
 Here’s an example of what a small part of a stream could look like. Each row shows one event, and the columns correspond to the timestamp followed by two data fields: A measurement of the operating temperature and the number of rotations per minute (RPM).
 
@@ -50,7 +50,7 @@ As an example of a more complicated event, here’s a data point in a stock mark
               {"Price": 118, "Size": 50000}
     ]}
 
-##Working with streams
+## Working with streams
 
 You can create new streams either manually in the user interface or by using the <g:link controller="help" action="api">stream API</g:link>. Each stream is identified by a unique ID. There’s no technical limit on the total number of streams.
 
@@ -68,7 +68,7 @@ A new stream is created when you click the **Next** button.  You’ll be shown a
 
 If you want to delete a stream, first click on its name, and then click on the **Delete stream** button. You’ll be asked to confirm that you really want to go ahead. You can also delete a stream using the <g:link controller="help" action="api">stream API</g:link>.
 
-##Editing stream details
+## Editing stream details
 
 If you want to edit stream details, you need to be in the <kbd>Streams</kbd> tab. Click on the stream name, and then click on the **Edit info** button. You'll see a dialog where you can rename a stream or modify its description.
 
@@ -82,7 +82,7 @@ If you want to configure the data fields manually, the Configure Fields button t
 
 You can also rename a stream, edit the description, add data fields and specify the field types using the [API](${createLink(controller:"help", action:"api")}).
 
-##Uploading historical data
+## Uploading historical data
 
 Batches of historical events can be loaded into a stream by importing a CSV file. You need to be in the <kbd>Streams</kbd> tab to do this. When you click on an existing stream, you’ll see a History panel and a data drop.  This is where you can drop a text file with a batch of event history.
 
@@ -108,7 +108,7 @@ If you drag the the sample file to the data drop, the events are uploaded to the
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="twitter-stream-view.png" class="img-responsive center-block" />
 
-##Built-in data types
+## Built-in data types
 
 There’s a number of built-in data types that can be used in a stream. These are the following:
 
@@ -133,7 +133,7 @@ Data types can be freely mixed in one event. And you can freely add new fields t
 
 There is no theoretical limitation as to the format or type of data in Streamr. Anything which can be expressed in digital form is fair game. It is perfectly possible to create streams which contain digital images, streaming video, or other domain-specific data. If your use case takes you beyond the built-in data types, come and talk to us about what you have in mind.
 
-##Pushing events to a stream
+## Pushing events to a stream
 
 Streamr has a simple API which allows you to push events in JSON format to a stream.  The events are immediately processed by any canvas which subscribes to the stream.  The events are also available for historical playback as soon as they are received by Streamr.
 
@@ -200,7 +200,7 @@ Code | Description
 404  | Unknown endpoint
 500  | Unexpected error
 
-##Subscribing to a stream
+## Subscribing to a stream
 
 You’ll need to be a stream subscriber in order to receive events. Streamr makes the subscription process trivially easy: You just add a stream module to a Streamr canvas.  As a simple taster of how this works, here's a stream of social media messages connected to a **Table** module.
 

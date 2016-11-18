@@ -101,6 +101,7 @@ public class VariadicEventTable extends ModuleWithUI {
 
 			headers.add(name);
 		}
+		headerDef.put("title", getUiChannelName());
 		headerDef.put("headers", headers);
 		return headerDef;
 	}

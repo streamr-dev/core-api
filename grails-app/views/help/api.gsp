@@ -4,7 +4,7 @@
     <title><g:message code="help.api.title" /></title>
 
     <r:require module="swagger"/>
-	<g:render template="help-page-styling" model="[wrapper: 'api-docs-wrapper']"/>
+	<g:render template="help-page-styling" model="[markdownEl: 'api-docs-markdown', wrapper: 'api-docs-wrapper']" />
 
 </head>
 
@@ -16,15 +16,18 @@
 		<g:render template="/help/apiBreadcrumb"/>
 	</ui:breadcrumb>
 
-	<div id="api-docs-wrapper" class="docs-wrapper">
-		<markdown:renderHtml template="api/introduction" />
-		<hr>
-		<markdown:renderHtml template="api/data-input" />
+<script id="api-docs-markdown" type="text/x-markdown">
+<g:render template="api/introduction" />
+<hr>
+<g:render template="api/data-input" />
 
-		<hr>
-		<markdown:renderHtml template="api/data-output" />
-		<hr>
-		<markdown:renderHtml template="api/resources" />
+<hr>
+<g:render template="api/data-output" />
+<hr>
+<g:render template="api/resources" />
+</script>
+	<div id="api-docs-wrapper" class="docs-wrapper">
+		<g:render template="api/swagger"/>
 	</div>
 </body>
 </html>

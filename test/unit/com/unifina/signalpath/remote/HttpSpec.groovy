@@ -9,6 +9,7 @@ import org.apache.http.Header
 import org.apache.http.HttpResponse
 import org.apache.http.StatusLine
 import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.concurrent.FutureCallback
 import org.apache.http.entity.StringEntity
@@ -104,8 +105,9 @@ class HttpSpec extends Specification {
 					if (ret instanceof Closure) {
 						ret = ret(request)
 					}
-					// wrap mock response object in JSON and HttpEntity
-					return new StringEntity(new JsonBuilder(ret).toString())
+					// convert into JSON if not String
+					ret = ret instanceof String ? ret : new JsonBuilder(ret).toString()
+					return new StringEntity(ret)
 				}
 				getStatusLine() >> Stub(StatusLine) {
 					getStatusCode() >> 200
@@ -179,5 +181,46 @@ class HttpSpec extends Specification {
 			}
 		}
 		outputs.errors = [["Sending HTTP Request failed", "java.net.SocketTimeoutException"]] * 3
+	}
+
+	void "nested Maps/Lists are correctly encoded into nested JSON objects/arrays"() {
+		module.configure([
+			params : [
+				[name: "URL", value: "localhost"],
+				[name: "verb", value: "POST"],
+			]
+		])
+
+		// set module input to groovy objects
+		inputs.body = [
+			"testing", [[1, 2], 3], [testing: [1, [2, 3]], 3: [true, [true: false]]]
+		]
+
+		// assert properly encoded JSON must arrive to server ("response generator closure" in test harness)
+		def jsonInputs = [
+			'"testing"', "[[1,2],3]", '{"testing":[1,[2,3]],"3":[true,{"true":false}]}'
+		]
+		response = { HttpUriRequest request ->
+			HttpEntityEnclosingRequestBase r = (HttpEntityEnclosingRequestBase)request;
+			ByteArrayOutputStream baos = new ByteArrayOutputStream()
+			r.entity.writeTo(baos)
+			String bodyJson = baos.toString()
+			assert jsonInputs.contains(bodyJson)
+			return []
+		}
+		expect:
+		test()
+	}
+
+	void "nested JSON objects/arrays are correctly decoded into nested Maps/Lists"() {
+		// server sends JSON
+		response = [
+			"testing", "[[1,2],3]", '{"testing":[1,[2,3]],"3":[true,{"true":false}]}'
+		]
+		outputs.data = [
+			"testing", [[1, 2], 3], [testing: [1, [2, 3]], "3": [true, [true: false]]]
+		]
+		expect:
+		test()
 	}
 }

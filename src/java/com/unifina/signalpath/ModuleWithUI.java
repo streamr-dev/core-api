@@ -31,7 +31,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	@Override
 	public void connectionsReady() {
 		if (getUiChannelId() == null) {
-			throw new NullPointerException("uiChannelId of moduleWithUi " + name + " was unexpectedly null");
+			throw new NullPointerException("uiChannelId of moduleWithUi " + getName() + " was unexpectedly null");
 		}
 		if (getGlobals() !=null && getGlobals().getUiChannel()!=null) {
 			getGlobals().getUiChannel().addChannel(uiChannelId);
@@ -46,7 +46,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	
 	@Override
 	public String getUiChannelName() {
-		return getName();
+		return getEffectiveName();
 	}
 
 	public Map getUiChannelMap() {
