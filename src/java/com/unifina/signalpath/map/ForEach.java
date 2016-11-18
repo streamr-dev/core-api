@@ -6,7 +6,6 @@ import com.unifina.service.CanvasService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
-import grails.util.Holders;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -22,6 +21,8 @@ public class ForEach extends AbstractSignalPathModule {
 	private Map<String, SubSignalPath> keyToSignalPath = new HashMap<>();
 	private Map<String, Map<String, Object>> cachedOutputValuesByKey = new HashMap<>();
 	private List<Output> outputsToPropagate = new ArrayList<>();
+	private List<Input> stolenInputs = new ArrayList<>();
+	private Set<Parameter> exportedUnconnectedParameters = new HashSet<>();
 	private final Set<Input> triggeredInputs = new HashSet<>();
 
 	public ForEach() {
@@ -80,6 +81,7 @@ public class ForEach extends AbstractSignalPathModule {
 			input.disconnect();
 			addInput(input);
 			input.addProxiedInput(new InputTriggerTracker(this, triggeredInputs, input));
+			stolenInputs.add(input);
 		}
 		for (Output output : exportedOutputs) {
 			output.getOwner().removeOutput(output);
@@ -90,6 +92,16 @@ public class ForEach extends AbstractSignalPathModule {
 			output.disconnect();
 			addOutput(output);
 			outputsToPropagate.add(output);
+		}
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		for (Input input : stolenInputs) {
+			if (input instanceof Parameter && !input.isConnected()) {
+				exportedUnconnectedParameters.add((Parameter) input);
+			}
 		}
 	}
 
@@ -152,6 +164,15 @@ public class ForEach extends AbstractSignalPathModule {
 		canvasService.resetUiChannels(signalPathMap);
 		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
 		signalPath.setName(signalPath.getName() + " (" + key + ")");
+
+		// Copy parameter default values
+		for (Parameter p : exportedUnconnectedParameters) {
+			Parameter p2 = (Parameter) signalPath.getInput(p.getName());
+			p2.setDefaultValue(p.getValue());
+
+			// Runtime changes are received
+			p.addProxiedInput(p2);
+		}
 
 		signalPath.setParentSignalPath(getParentSignalPath());
 

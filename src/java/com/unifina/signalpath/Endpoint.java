@@ -125,7 +125,7 @@ public abstract class Endpoint<T> implements Serializable {
 	
 	@Override
 	public String toString() {
-		return owner.getName()+"."+name;
+		return owner.getName() + "." + name;
 	}
 	
 

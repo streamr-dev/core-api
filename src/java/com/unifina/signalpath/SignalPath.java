@@ -71,7 +71,9 @@ public class SignalPath extends ModuleWithUI {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void initFromRepresentation(Map iData) {
 		representation = iData;
-		name = (iData.containsKey("name") && iData.get("name") != null ? iData.get("name").toString() : name);
+		if (iData.get("name") != null) {
+			setName(iData.get("name").toString());
+		}
 
 		List<InputConnection> inputs = new ArrayList<>();
 		Map<String, Output> outputs = new HashMap<>();

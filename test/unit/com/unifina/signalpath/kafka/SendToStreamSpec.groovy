@@ -88,7 +88,7 @@ class SendToStreamSpec extends Specification {
 		globals.dataSource = new RealtimeDataSource()
     }
 
-	private void createModule() {
+	private void createModule(options = [:]) {
 		module = new SendToStream()
 		module.globals = globals
 		module.parentSignalPath = new SignalPath()
@@ -97,10 +97,11 @@ class SendToStreamSpec extends Specification {
 				params: [
 						[name: "stream", value: "stream-0"]
 				],
+				options: options
 		])
 	}
 	
-	void "sendToStream sends correct data to Kafka"() {
+	void "SendToStream sends correct data to Kafka"() {
 		createModule()
 
 		when:
@@ -126,7 +127,7 @@ class SendToStreamSpec extends Specification {
 			}.test()
 	}
 
-	void "sendToStream throws exception if user does not have write access to stream"() {
+	void "SendToStream throws exception if user does not have write access to stream"() {
 		defineBeans {
 			permissionService(ReadPermissionService)
 		}
@@ -138,7 +139,7 @@ class SendToStreamSpec extends Specification {
 		thrown(AccessControlException)
 	}
 
-	void "sendToStream does not throw AccessControlException if user has write permission to stream"() {
+	void "SendToStream does not throw AccessControlException if user has write permission to stream"() {
 		defineBeans {
 			permissionService(WritePermissionService)
 		}
@@ -150,7 +151,7 @@ class SendToStreamSpec extends Specification {
 		notThrown(AccessControlException)
 	}
 
-	void "sendToStream does not throw AccessControlException if not in run context"() {
+	void "SendToStream does not throw AccessControlException if not in run context"() {
 		defineBeans {
 			permissionService(ReadPermissionService)
 		}
@@ -162,7 +163,7 @@ class SendToStreamSpec extends Specification {
 		notThrown(AccessControlException)
 	}
 
-	void "changing stream parameter during run time re-routes messages to new stream"() {
+	void "Changing stream parameter during run time re-routes messages to new stream"() {
 		createModule()
 
 		def s2 = new Stream()
@@ -196,5 +197,59 @@ class SendToStreamSpec extends Specification {
 				]
 				fakeKafkaService.receivedMessages = [:]
 			}.test()
+	}
+
+	void "SendToStream by default sends old values along with new values"() {
+		createModule()
+
+		when:
+		Map inputValues = [
+			strIn: ["a", null, "c", "d", null, "f"],
+			numIn: [  1,    2, null,  4, null,   6].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+			assert fakeKafkaService.receivedMessages == [
+				"stream-0": [
+					[strIn: "a", numIn: 1.0],
+					[strIn: "a", numIn: 2.0],
+					[strIn: "c", numIn: 2.0],
+					[strIn: "d", numIn: 4.0],
+					[strIn: "f", numIn: 6.0]
+				]
+			]
+			fakeKafkaService.receivedMessages = [:]
+		}.test()
+	}
+
+	void "SendToStream can be configured to send only new values"() {
+		createModule([sendOnlyNewValues: [value: true]])
+
+		when:
+		Map inputValues = [
+			strIn: ["a", null, "c", "d", null, "f"],
+			numIn: [  1,    2, null,  4, null,   6].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+			assert fakeKafkaService.receivedMessages == [
+				"stream-0": [
+					[strIn: "a", numIn: 1.0],
+					[numIn: 2.0],
+					[strIn: "c"],
+					[strIn: "d", numIn: 4.0],
+					[strIn: "f", numIn: 6.0]
+				]
+			]
+			fakeKafkaService.receivedMessages = [:]
+		}.test()
 	}
 }

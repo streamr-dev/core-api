@@ -205,7 +205,9 @@ public class SimpleHttp extends AbstractHttpModule {
 			}
 		}
 
-		errors.send(call.errors);
+		if (call.errors.size() > 0) {
+			errors.send(call.errors);
+		}
 	}
 
 	/**

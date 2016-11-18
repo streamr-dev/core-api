@@ -14,5 +14,3 @@ You authenticate to the resource API using your API key, found on your [profile 
 ## API Explorer
 
 Use the below tool to explore and test the resource API.
-
-<g:render template="api/swagger"/>
