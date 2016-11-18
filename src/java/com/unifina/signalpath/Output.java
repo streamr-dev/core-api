@@ -11,9 +11,9 @@ public class Output<T> extends Endpoint<T> {
 	private Input<T>[] cachedTargets = new Input[0];
 	
 	// Used to flag the Propagators that contain this Output that a value has been sent
-	private ArrayList<Propagator> propagators = new ArrayList<>();
+	private transient ArrayList<Propagator> propagators = new ArrayList<>();
 	// For super fast looping use an array instead of a List Iterator
-	private Propagator[] cachedPropagators = new Propagator[0];
+	private transient Propagator[] cachedPropagators = new Propagator[0];
 	
 	protected T previousValue = null;
 	
@@ -58,6 +58,9 @@ public class Output<T> extends Endpoint<T> {
 	}
 	
 	public void addPropagator(Propagator p) {
+		if (propagators == null) { // after de-serialization
+			propagators = new ArrayList<>();
+		}
 		if (!propagators.contains(p)) {
 			propagators.add(p);
 			cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
@@ -65,7 +68,7 @@ public class Output<T> extends Endpoint<T> {
 	}
 	
 	public void removePropagator(Propagator p) {
-		if (propagators.contains(p)) {
+		if (propagators != null && propagators.contains(p)) {
 			propagators.remove(p);
 			cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
 		}
