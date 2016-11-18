@@ -122,6 +122,7 @@ modules = {
 		resource url:[dir:'js/leaflet', file:'leaflet-src.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet', file:'leaflet_canvas_layer.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet', file:'leaflet.css', plugin: 'unifina-core']
+		resource url:[dir:'js/Leaflet.RotatedMarker', file:'leaflet.rotatedMarker.js', plugin: 'unifina-core']
 	}
 	dropzone {
 		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
