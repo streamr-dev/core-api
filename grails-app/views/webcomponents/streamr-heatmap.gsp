@@ -24,29 +24,12 @@
 				this.$["streamr-widget-container"].setAttribute("style", "min-height:400px")
 
 				this.getModuleJson(function(json) {
-					var mapOptions = {}
-					if (json.options) {
-						Object.keys(json.options).forEach(function(key) {
-							mapOptions[key] = json.options[key].value
-						})
-					}
-					_this.map = new StreamrHeatMap(_this.$["streamr-widget-container"], {
-						lifeTime: this.lifeTime !== undefined ? this.lifeTime : mapOptions.lifeTime,
-						fadeInTime: this.fadeInTime !== undefined ? this.fadeInTime : mapOptions.fadeInTime,
-						fadeOutTime: this.fadeOutTime !== undefined ? this.fadeOutTime : mapOptions.fadeOutTime,
-						min: this.min !== undefined ? this.min : mapOptions.min,
-						max: this.max !== undefined ? this.max : mapOptions.max,
-						centerLat: this.centerLat !== undefined ? this.centerLat : mapOptions.centerLat,
-						centerLng: this.centerLng !== undefined ? this.centerLng : mapOptions.centerLng,
-						zoom: this.zoom !== undefined ? this.zoom : mapOptions.zoom,
-						minZoom: this.minZoom !== undefined ? this.minZoom : mapOptions.minZoom,
-						maxZoom: this.maxZoom !== undefined ? this.maxZoom : mapOptions.maxZoom
-					})
+					var options = _this.getModuleOptionsWithOverrides(json)
+					_this.map = new StreamrHeatMap(_this.$["streamr-widget-container"], options)
 
 					_this.subscribe(function(message) {
 						_this.map.handleMessage(message)
 					})
-
 				})
 
 			},

@@ -14,18 +14,12 @@
 	
 	<script>
 		Polymer('streamr-table', {
-			publish: {
-				maxRows: 0,
-				displayTitle: false
-			},
 			ready: function() {				
 				var _this = this
 				this.bindEvents(_this.$["streamr-widget-container"])
 
 				this.getModuleJson(function(json) {
-					var options = {}
-					options.maxRows = _this.maxRows
-					options.displayTitle = _this.displayTitle
+					var options = _this.getModuleOptionsWithOverrides(json)
 
 					_this.table = new StreamrTable(_this.$["streamr-widget-container"], options)
 					_this.table.initTable()
