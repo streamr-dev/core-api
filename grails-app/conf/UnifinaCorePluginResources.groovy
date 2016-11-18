@@ -27,6 +27,9 @@ modules = {
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 	}
+	'font-awesome' {
+		resource url: "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+	}
 	'bootstrap-docs' {
 		dependsOn "bootstrap"
 		resource url:[dir:'js/bootstrap-3.2.0-assets/css', file:'docs.min.css', plugin: 'unifina-core']
@@ -235,7 +238,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'streamr-heatmap.js', plugin: 'unifina-core']
 	}
 	'streamr-map' {
-		dependsOn 'jquery, leaflet'
+		dependsOn 'jquery, leaflet, font-awesome'
 		resource url:[dir:'css/signalPath/widgets/', file:'streamr-map.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-map', file:'streamr-map.js', plugin: 'unifina-core']
 	}
