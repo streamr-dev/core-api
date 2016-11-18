@@ -1,5 +1,6 @@
 package com.unifina.signalpath.simplemath;
 
+import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 
 import java.util.*;
@@ -55,8 +56,8 @@ public class Expression extends AbstractSignalPathModule {
 	public void clearState() {}
 
 	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
 		initExpressionAndVariables();
 	}
 
