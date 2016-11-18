@@ -3,6 +3,24 @@
 
     var TRACE_REDRAW_BATCH_SIZE = 10000
 
+    // default non-directional marker icon
+    var DEFAULT_MARKER_ICON = "fa fa-map-marker fa-4x"
+
+    var skins = {
+        default: {
+            layerUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            layerAttribution: "© OpenStreetMap contributors, Streamr"
+        },
+        cartoDark: {
+            layerUrl: "http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+            layerAttribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>, Streamr'
+        },
+        esriDark: {
+            layerUrl: "{s}.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+            layerAttribution: "Esri, HERE, DeLorme, MapmyIndia, © OpenStreetMap contributors, Streamr"
+        }
+    }
+
     function StreamrMap(parent, options) {
 
         var _this = this
@@ -26,7 +44,9 @@
             minZoom: 2,
             maxZoom: 18,
             traceRadius: 2,
-            drawTrace: false
+            drawTrace: false,
+            skin: "default",
+            markerIcon: DEFAULT_MARKER_ICON
         }, options || {})
 
         this.defaultAutoZoomBounds = {
@@ -44,9 +64,11 @@
         if (!this.parent.attr("id"))
             this.parent.attr("id", "map-"+Date.now())
 
+        this.skin = skins[this.options.skin] || skins.default
+
         this.baseLayer = L.tileLayer(
-            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-                attribution: '© OpenStreetMap contributors, Streamr',
+            this.skin.layerUrl, {
+                attribution: this.skin.layerAttribution,
                 minZoom: _this.options.minZoom,
                 maxZoom: _this.options.maxZoom
             }
@@ -141,9 +163,10 @@
 
     StreamrMap.prototype.addMarker = function(attr) {
         var id = attr.id
-        var label = attr.label
+        var label = attr.label || attr.id
         var lat = attr.lat
         var lng = attr.lng
+        var rotation = attr.dir
         // Needed for linePoints
         var color = attr.color
         var latlng = new L.LatLng(lat, lng)
@@ -153,10 +176,10 @@
         }
 
         var marker = this.markers[id]
-        if(marker === undefined) {
-            this.markers[id] = this.createMarker(id, label, latlng)
+        if (marker === undefined) {
+            this.markers[id] = this.createMarker(id, label, latlng, rotation)
         } else {
-            this.moveMarker(id, lat, lng)
+            this.moveMarker(id, lat, lng, rotation)
         }
         if(this.options.drawTrace)
             this.addLinePoint(id, lat, lng, color)
@@ -185,8 +208,16 @@
         }
     }
 
-    StreamrMap.prototype.createMarker = function(id, label, latlng) {
-        var marker = L.marker(latlng, {
+    StreamrMap.prototype.createMarker = function(id, label, latlng, rotation) {
+        this.latlng = latlng
+        var marker = this.options.directionalMarkers ? L.marker(latlng, {
+            icon: L.divIcon({
+                iconSize:     [19, 48], // size of the icon
+                iconAnchor:   [10, 10], // point of the icon which will correspond to marker's location
+                popupAnchor:  [0, -41], // point from which the popup should open relative to the iconAnchor,
+                className: 'streamr-map-icon ' + this.options.markerIcon
+            })
+        }) : L.marker(latlng, {
             icon: L.divIcon({
                 iconSize:     [19, 48], // size of the icon
                 iconAnchor:   [13.5, 43], // point of the icon which will correspond to marker's location
@@ -194,11 +225,9 @@
                 className: 'streamr-map-icon fa fa-map-marker fa-4x'
             })
         })
-        var popupContent = "<span style='text-align:center;width:100%'><span>"+label+"</span></span>"
-        var popupOptions = {
+        marker.bindPopup("<span>label</span>", {
             closeButton: false,
-        }
-        marker.bindPopup(popupContent, popupOptions)
+        })
         marker.on("mouseover", function() {
             marker.openPopup()
         })
@@ -209,9 +238,27 @@
         return marker
     }
 
-    StreamrMap.prototype.moveMarker = function(id, lat, lng) {
-        var latlng = L.latLng(lat,lng)
-        this.pendingMarkerUpdates[id] = latlng
+    StreamrMap.prototype.moveMarker = function(id, lat, lng, rotation) {
+        this.oldLatlng = this.latlng
+        this.latlng = L.latLng(lat, lng)
+        var update = { latlng: this.latlng }
+        if (this.options.directionalMarkers) {
+            if (rotation) {
+                update.rotation = rotation
+            } else if (this.oldLatlng) {
+                // if "heading" input isn't connected,
+                //   rotate marker so that it's "coming from" the previous latlng
+                var oldP = this.map.project(this.oldLatlng)
+                var newP = this.map.project(this.latlng)
+                var dx = newP.x - oldP.x
+                var dy = newP.y - oldP.y
+                if (Math.abs(dx) > 0.0001 || Math.abs(dy) > 0.0001) {
+                    update.rotation = Math.atan2(dx, -dy) / Math.PI * 180;
+                }
+            }
+        }
+
+        this.pendingMarkerUpdates[id] = update
         this.requestUpdate()
     }
 
@@ -225,10 +272,14 @@
     StreamrMap.prototype.animate = function() {
         var _this = this
         Object.keys(this.pendingMarkerUpdates).forEach(function(id) {
-            var latlng = _this.pendingMarkerUpdates[id]
+            var update = _this.pendingMarkerUpdates[id]
 
             // Update marker position
-            _this.markers[id].setLatLng(latlng)
+            var marker = _this.markers[id]
+            marker.setLatLng(update.latlng)
+            if (update.rotation) {
+                marker.setRotationAngle(update.rotation)
+            }
         })
 
         if(this.lineLayer)

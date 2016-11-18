@@ -10,7 +10,9 @@ import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SendToStream extends AbstractSignalPathModule {
@@ -20,21 +22,23 @@ public class SendToStream extends AbstractSignalPathModule {
 
 	transient protected PermissionService permissionService = null;
 	transient protected KafkaService kafkaService = null;
-	
+
 	protected boolean historicalWarningShown = false;
 	private String lastStreamId = null;
-	
+	private boolean sendOnlyNewValues = false;
+	private List<Input> fieldInputs = new ArrayList<>();
+
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
 		permissionService = getGlobals().getBean(PermissionService.class);
 		kafkaService = getGlobals().getBean(KafkaService.class);
-		
+
 		addInput(streamParameter);
-		
+
 
 		streamParameter.setUpdateOnChange(true);
-		
+
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
 		feedFilter.setId(7L);
@@ -45,7 +49,8 @@ public class SendToStream extends AbstractSignalPathModule {
 	public void sendOutput() {
 		if (getGlobals().isRealtime()) {
 			Map msg = new LinkedHashMap<>();
-			for (Input i : drivingInputs) {
+			Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
+			for (Input i : inputs) {
 				msg.put(i.getName(), i.getValue());
 			}
 			if (kafkaService == null) { // null after de-serialization
@@ -66,11 +71,25 @@ public class SendToStream extends AbstractSignalPathModule {
 	public void clearState() {}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		ModuleOptions options = ModuleOptions.get(config);
+		options.addIfMissing(ModuleOption.createBoolean("sendOnlyNewValues", sendOnlyNewValues));
+		return config;
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		
+
 		Stream stream = streamParameter.getValue();
-		
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ModuleOption sendOnlyNewValuesOption = options.getOption("sendOnlyNewValues");
+		if (sendOnlyNewValuesOption != null) {
+			sendOnlyNewValues = sendOnlyNewValuesOption.getBoolean();
+		}
+
 		if (stream==null)
 			return;
 
@@ -80,22 +99,22 @@ public class SendToStream extends AbstractSignalPathModule {
 			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
 				stream.getFeed().getName());
 		}
-		
+
 		if (stream.getConfig()==null) {
 			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +
 				" is not properly configured!");
 		}
-		
+
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
-		
+
 		for (Object o : fields) {
 			Input input = null;
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
-			
+
 			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
@@ -115,9 +134,10 @@ public class SendToStream extends AbstractSignalPathModule {
 				input.canBeFeedback = false;
 				input.requiresConnection = false;
 				addInput(input);
+				fieldInputs.add(input);
 			}
 		}
-		
+
 		if (streamConfig.containsKey("name"))
 			this.setName(streamConfig.get("name").toString());
 	}

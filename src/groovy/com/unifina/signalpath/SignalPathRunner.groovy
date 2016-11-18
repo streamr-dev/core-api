@@ -80,6 +80,7 @@ public class SignalPathRunner extends Thread {
 
 	public synchronized void setRunning(boolean running) {
 		this.running = running
+		log.debug("setRunning (${getRunnerId()}: $running")
 		this.notify()
 	}
 
@@ -97,8 +98,10 @@ public class SignalPathRunner extends Thread {
 
 	public synchronized void waitRunning(boolean target = true) {
 		int i = 0
-		while (getRunning() != target && i++ < 60)
+		while (getRunning() != target && i++ < 60) {
+			log.debug("Waiting for "+this.getRunnerId()+" to start...")
 			this.wait(500)
+		}
 	}
 
 	@Override
@@ -171,7 +174,6 @@ public class SignalPathRunner extends Thread {
 
 	public void abort() {
 		log.info("Aborting SignalPathRunner..")
-		globals.abort = true
 		globals.dataSource?.stopFeed()
 
 		// Will be called in run() before exiting

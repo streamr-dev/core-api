@@ -38,7 +38,6 @@ public class Globals {
 	private TimezoneConverter tzConverter;
 	
 	protected DataSource dataSource = null;
-	public boolean abort = false;
 	
 	private List<Class> dynamicClasses = new ArrayList<>();
 	

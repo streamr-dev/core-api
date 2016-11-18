@@ -29,7 +29,7 @@ grails.project.dependency.resolver = "maven" // or ivy
 //	test: false
 //]
 grails.project.fork = [
-    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
     test: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 400, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
@@ -61,10 +61,12 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        runtime 'mysql:mysql-connector-java:5.1.20'
-		compile 'org.mongodb:mongodb-driver:3.2.1'
         compile('log4j:log4j:1.2.16')
-		
+
+	runtime 'mysql:mysql-connector-java:5.1.20'
+	compile 'org.mongodb:mongodb-driver:3.2.1'
+	compile 'org.postgresql:postgresql:9.4.1208.jre7'
+
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
@@ -109,7 +111,6 @@ grails.project.dependency.resolution = {
         }
         
         compile ":mail:1.0.7"
-        compile ":markdown:1.1.1"
 
 	    // plugins needed at runtime but not for compilation
 		runtime ':hibernate:3.6.10.19'

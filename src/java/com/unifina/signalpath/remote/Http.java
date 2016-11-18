@@ -1,4 +1,5 @@
 package com.unifina.signalpath.remote;
+import com.google.gson.Gson;
 import com.unifina.signalpath.*;
 
 import com.unifina.signalpath.text.JsonParser;
@@ -103,9 +104,7 @@ public class Http extends AbstractHttpModule {
 				switch (bodyContentType) {
 					case BODY_FORMAT_JSON:
 						Object b = body.getValue();
-						String bodyString = b instanceof Map ? new JSONObject((Map) b).toString() :
-											b instanceof List ? new JSONArray((List) b).toString() :
-											b.toString();
+						String bodyString = new Gson().toJson(b);
 						((HttpEntityEnclosingRequestBase) request).setEntity(new StringEntity(bodyString));
 						break;
 					case BODY_FORMAT_FORMDATA:
@@ -155,6 +154,9 @@ public class Http extends AbstractHttpModule {
 		}
 
 		roundtripMillis.send(call.responseTime);
-		errors.send(call.errors);
+
+		if (call.errors.size() > 0) {
+			errors.send(call.errors);
+		}
 	}
 }

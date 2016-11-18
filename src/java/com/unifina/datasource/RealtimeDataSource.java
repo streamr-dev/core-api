@@ -9,10 +9,12 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.unifina.data.IEventRecipient;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.SignalPath;
+import com.unifina.signalpath.StopRequest;
 import org.apache.log4j.Logger;
 
 import com.unifina.data.FeedEvent;
@@ -99,21 +101,13 @@ public class RealtimeDataSource extends DataSource {
 			// Serialization
 			SerializationService serializationService = globals.getBean(SerializationService.class);
 
-			for (final SignalPath signalPath : getSignalPaths()) {
-				Canvas canvas = signalPath.getCanvas();
-
-				if (canvas != null) {
-					if (canvas.getAdhoc()) {
-						log.info("Canvas " + canvas.getId() + " is adhoc and thus won't be serialized.");
-					} else {
-						secTimer.scheduleAtFixedRate(new TimerTask() {
-							@Override
-							public void run() {
-								eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
-							}
-						}, 0, serializationService.serializationIntervalInMillis());
-					}
-				}
+			for (final SignalPath signalPath : getSerializableSignalPaths()) {
+					secTimer.scheduleAtFixedRate(new TimerTask() {
+						@Override
+						public void run() {
+							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+						}
+					}, 0, serializationService.serializationIntervalInMillis());
 			}
 
 			// This will block indefinitely until the feed is stopped!
@@ -170,7 +164,15 @@ public class RealtimeDataSource extends DataSource {
 				log.error(e);
 			}
 		}
-		eventQueue.abort();
+
+		// Final serialization requests
+		for (SignalPath signalPath : getSerializableSignalPaths()) {
+			eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
+		}
+
+		// Stop request
+		Date date = new Date();
+		eventQueue.enqueue(new FeedEvent(new StopRequest(date), date, (RealtimeEventQueue) eventQueue));
 	}
 
 
