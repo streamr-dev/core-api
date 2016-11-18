@@ -237,7 +237,7 @@
                 className: 'streamr-map-icon fa fa-map-marker fa-4x'
             })
         })
-        marker.bindPopup("<span>label</span>", {
+        marker.bindPopup("<span>"+label+"</span>", {
             closeButton: false,
         })
         marker.on("mouseover", function() {
