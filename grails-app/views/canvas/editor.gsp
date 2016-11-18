@@ -55,8 +55,7 @@ $(document).ready(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}",
-			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			url: "${grailsApplication.config.streamr.ui.server}",
 			autoConnect: true,
 			autoDisconnect: true
 		}

@@ -246,11 +246,10 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
-streamr.ui.serverPath = System.getProperty("streamr.ui.serverPath") ?: "/api/v1/socket.io"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev-data.streamr/api/v1/ws"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com/api/v1"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "wss://data.streamr.com/api/v1/ws"
 	}
 }
 
