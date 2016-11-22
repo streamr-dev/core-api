@@ -32,6 +32,7 @@ public class MapModule extends ModuleWithUI {
 		addInput(longitude);
 		this.canClearState = false;
 		this.resendAll = false;
+		this.resendLast = 0;
 		latitude.setDrivingInput(true);
 		latitude.canHaveInitialValue = false;
 		latitude.canBeFeedback = false;

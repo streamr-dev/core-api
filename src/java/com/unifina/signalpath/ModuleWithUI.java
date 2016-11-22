@@ -11,7 +11,7 @@ import com.unifina.utils.MapTraversal;
 public abstract class ModuleWithUI extends AbstractSignalPathModule implements IHasPushChannel {
 
 	protected String uiChannelId;
-	protected boolean resendAll = true;
+	protected boolean resendAll = false;
 	protected int resendLast = 0;
 	
 	public ModuleWithUI() {
