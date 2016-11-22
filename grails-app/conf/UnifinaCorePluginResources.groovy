@@ -320,7 +320,7 @@ modules = {
 		resource url:[dir:'css/signalPath/themes/light', file:'light.js', plugin: 'unifina-core']
 	}
 	'main-theme' {
-		dependsOn 'bootstrap'
+		dependsOn 'bootstrap, font-awesome'
 		resource url: "https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
 		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
 	}
