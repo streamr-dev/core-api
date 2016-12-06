@@ -32,7 +32,8 @@ public class PackageAccessHelper {
 			"org.apache.commons.math3",
 			"org.springsource.loaded.TypeRegistry", // safe?
 			"sun.reflect.SerializationConstructorAccessorImpl", // safe?
-			"org.codehaus.groovy.grails.web.json."
+			"org.codehaus.groovy.grails.web.json.",
+			"org.apache.commons.collections.list.UnmodifiableList"
 	};
 	
 	private static boolean checkMatches(String className, String[] packages) {
