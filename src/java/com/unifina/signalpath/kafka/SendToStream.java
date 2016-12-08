@@ -45,7 +45,6 @@ public class SendToStream extends AbstractSignalPathModule {
 
 		addInput(streamParameter);
 
-
 		streamParameter.setUpdateOnChange(true);
 
 		// TODO: don't rely on static ids
@@ -63,7 +62,7 @@ public class SendToStream extends AbstractSignalPathModule {
 		}
 
 		Globals globals = getGlobals();
-		
+
 		if (globals.isRealtime()) {
 			if (kafkaService == null) { // null after de-serialization
 				kafkaService = getGlobals().getBean(KafkaService.class);
@@ -85,7 +84,7 @@ public class SendToStream extends AbstractSignalPathModule {
 			getGlobals().getDataSource().getEventQueue().enqueue(event);
 
 			// Show notification about historical mode
-			if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
+			if (!historicalWarningShown && getGlobals().getUiChannel()!=null && parentSignalPath != null) {
 				getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": In historical mode, events written to Stream '" +
 						streamParameter.getValue().getName()+"' are only available within this Canvas."), parentSignalPath.getUiChannelId());
 				historicalWarningShown = true;

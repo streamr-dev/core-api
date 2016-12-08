@@ -1,11 +1,13 @@
 package com.unifina.signalpath.remote
 
+import com.unifina.signalpath.ModuleOption
+import com.unifina.signalpath.ModuleOptions
+import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
-import java.sql.SQLException
 import java.sql.Statement
 
 class SqlSpec extends Specification {
@@ -52,19 +54,71 @@ class SqlSpec extends Specification {
 
 		when:
 		Map inputValues = [
-			sql: [query, query],
+				sql: [query, query],
 		]
 		Map outputValues = [
-			errors: [null, null],
-			result: [result, result]
+				errors: [null, null],
+				result: [result, result]
 		]
 
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.overrideGlobals { Globals globals ->
+			globals.setRealtime(true)
+			return globals
+		}.test()
 	}
 
 	void "SQL module builds the connection URL correctly"() {
 		expect:
 		module.getConnectionURL() == "jdbc:postgresql://test.com/mydatabase"
+	}
+
+	void "SQL module does not execute queries in historical mode by default"() {
+		String query = "select * from table"
+
+		when:
+		Map inputValues = [
+				sql: [query],
+		]
+		Map outputValues = [
+				errors: [null],
+				result: [null]
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.overrideGlobals { Globals globals ->
+			globals.setRealtime(false)
+			return globals
+		}.test()
+
+		0 * TestableSql.statement.execute(_)
+	}
+
+	void "SQL module executes queries in historical mode if configured to do so"() {
+		String query = "select * from table"
+
+		Map config = [:]
+		ModuleOptions options = ModuleOptions.get(config)
+		options.add(new ModuleOption("executeInHistoricalMode", true, ModuleOption.OPTION_BOOLEAN))
+		module.configure(config)
+		result = [[a:1, b:2], [a:4, b:6]]
+
+		when:
+		Map inputValues = [
+				sql: [query],
+		]
+		Map outputValues = [
+				errors: [null],
+				result: [result]
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.overrideGlobals { Globals globals ->
+			globals.setRealtime(false)
+			return globals
+		}.test()
 	}
 }

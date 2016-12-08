@@ -10,7 +10,8 @@ import java.util.*;
  * Module that lets user make SQL queries to given database server
  */
 public class Sql extends AbstractSignalPathModule {
-	private transient Logger log = Logger.getLogger(Sql.class);
+
+	private static final Logger log = Logger.getLogger(Sql.class);
 
 	private EngineParameter engine = new EngineParameter(this, "engine");
 	private StringParameter loginUrl = new StringParameter(this, "host", "");
@@ -23,7 +24,11 @@ public class Sql extends AbstractSignalPathModule {
 	private ListOutput errors = new ListOutput(this, "errors");
 	private ListOutput rows = new ListOutput(this, "result");
 
-	private transient Connection db;
+	transient private Connection db;
+
+	private boolean historicalWarningShown = false;
+	private boolean executeInHistoricalMode = false;
+
 
 	@Override
 	public void init() {
@@ -39,41 +44,59 @@ public class Sql extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
-		List<String> err = new ArrayList<>();
-		Statement statement = null;
-		ResultSet cursor = null;
-		try {
-			statement = createStatement();
-			boolean hasResult = statement.execute(sqlString.getValue());
+		if (getGlobals().isRealtime() || executeInHistoricalMode) {
+			List<String> err = new ArrayList<>();
+			Statement statement = null;
+			ResultSet cursor = null;
+			try {
+				statement = createStatement();
+				boolean hasResult = statement.execute(sqlString.getValue());
 
-			if (hasResult) {
-				cursor = statement.getResultSet();
+				if (hasResult) {
+					cursor = statement.getResultSet();
 
-				ResultSetMetaData meta = cursor.getMetaData();
-				int propCount = meta.getColumnCount();
+					ResultSetMetaData meta = cursor.getMetaData();
+					int propCount = meta.getColumnCount();
 
-				List<Map<String, Object>> ret = new ArrayList<>();
-				while (cursor.next()) {
-					Map<String, Object> row = new HashMap<>();
-					for (int i = 1; i <= propCount; i++) {
-						row.put(meta.getColumnName(i), cursor.getObject(i));
+					List<Map<String, Object>> ret = new ArrayList<>();
+					while (cursor.next()) {
+						Map<String, Object> row = new HashMap<>();
+						for (int i = 1; i <= propCount; i++) {
+							row.put(meta.getColumnName(i), cursor.getObject(i));
+						}
+						ret.add(row);
 					}
-					ret.add(row);
+					rows.send(ret);
+				} else {
+					Map countMap = Collections.singletonMap("updateCount", statement.getUpdateCount());
+					rows.send(Collections.singletonList(countMap));
 				}
-				rows.send(ret);
-			} else {
-				Map countMap = Collections.singletonMap("updateCount", statement.getUpdateCount());
-				rows.send(Collections.singletonList(countMap));
+			} catch (SQLException e) {
+				err.add(e.toString());
+			} finally {
+				if (cursor != null) {
+					try {
+						cursor.close();
+					} catch (SQLException e) {
+						err.add(e.toString());
+					}
+				}
+				if (statement != null) {
+					try {
+						statement.close();
+					} catch (SQLException e) {
+						err.add(e.toString());
+					}
+				}
 			}
-		} catch (SQLException e) {
-			err.add(e.toString());
-		} finally {
-			if (cursor != null) { try { cursor.close(); } catch (SQLException e) { err.add(e.toString()); } }
-			if (statement != null) { try { statement.close(); } catch (SQLException e) { err.add(e.toString()); } }
-		}
 
-		if (err.size() > 0) {
-			errors.send(err);
+			if (err.size() > 0) {
+				errors.send(err);
+			}
+		} else if (!historicalWarningShown && getGlobals().getUiChannel()!=null && parentSignalPath != null) {
+			// Show notification about historical mode unless it's already been shown
+			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Statements are not executed in historical mode by default. This can be changed in module options."), parentSignalPath.getUiChannelId());
+			historicalWarningShown = true;
 		}
 	}
 
@@ -101,6 +124,25 @@ public class Sql extends AbstractSignalPathModule {
 		if (db != null) { try { db.close(); } catch (SQLException e) { } }
 	}
 
+	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("executeInHistoricalMode", executeInHistoricalMode, ModuleOption.OPTION_BOOLEAN));
+
+		return config;
+	}
+
+	@Override
+	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+		ModuleOptions options = ModuleOptions.get(config);
+		if (options.getOption("executeInHistoricalMode") != null) {
+			executeInHistoricalMode = options.getOption("executeInHistoricalMode").getBoolean();
+		}
+	}
+
 	public static class EngineParameter extends StringParameter {
 		public EngineParameter(AbstractSignalPathModule owner, String name) {
 			super(owner, name, "MySQL"); //this.getValueList()[0]);
@@ -124,7 +166,7 @@ public class Sql extends AbstractSignalPathModule {
 				case "MySQL": return "jdbc:mysql";
 				case "PostgreSQL": return "jdbc:postgresql";
 				default:
-					// TODO: log error
+					log.error("Unexpected value in EngineParameter: "+getValue()+", falling back to MySQL");
 					return "jdbc:mysql";
 			}
 		}
