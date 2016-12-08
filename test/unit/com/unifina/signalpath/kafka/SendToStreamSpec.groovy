@@ -1,13 +1,19 @@
 package com.unifina.signalpath.kafka
 
+import com.unifina.data.FeedEvent
+import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.kafka.KafkaHistoricalFeed
+import com.unifina.feed.kafka.KafkaKeyProvider
+import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.KafkaService
 import com.unifina.service.PermissionService
 import com.unifina.signalpath.SignalPath
+import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
@@ -56,6 +62,7 @@ class SendToStreamSpec extends Specification {
 	FakeKafkaService fakeKafkaService
 	Globals globals
 	SendToStream module
+	Stream stream
 
     def setup() {
 		defineBeans {
@@ -69,17 +76,21 @@ class SendToStreamSpec extends Specification {
 
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
+		feed.backtestFeed = KafkaHistoricalFeed.getName()
+		feed.eventRecipientClass = MapMessageEventRecipient.getName()
+		feed.keyProviderClass = KafkaKeyProvider.getName()
+		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
 
-		def s = new Stream()
-		s.feed = feed
-		s.id = s.name = "stream-0"
-		s.user = user
-		s.config = [fields: [
+		stream = new Stream()
+		stream.feed = feed
+		stream.id = stream.name = "stream-0"
+		stream.user = user
+		stream.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
 		]]
-		s.save(validate: false, failOnError: true)
+		stream.save(validate: false, failOnError: true)
 
 		fakeKafkaService = (FakeKafkaService) grailsApplication.getMainContext().getBean("kafkaService")
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
@@ -251,5 +262,51 @@ class SendToStreamSpec extends Specification {
 			]
 			fakeKafkaService.receivedMessages = [:]
 		}.test()
+	}
+
+	void "events should be produced to DataSource event queue in historical mode"() {
+		globals.dataSource = new HistoricalDataSource(globals)
+		globals.setRealtime(false)
+		createModule()
+
+		// Create the module that subscribes to our target stream
+		ConfigurableStreamModule sourceModule = new ConfigurableStreamModule()
+		sourceModule.init()
+		sourceModule.getInput("stream").receive(stream)
+		globals.dataSource.register(sourceModule)
+
+		when:
+		Map inputValues = [
+				strIn: ["a", "b", "c", "d"],
+				numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.overrideGlobals { globals }
+				.beforeEachTestCase {
+					globals.time = new Date()
+				}.afterEachTestCase {
+					// No messages have really been sent to Kafka
+					assert fakeKafkaService.receivedMessages.isEmpty()
+
+					// Correct events have been inserted to event queue
+					for (int i=0; i<inputValues.strIn.size(); i++) {
+						FeedEvent e = globals.getDataSource().getEventQueue().poll()
+						assert e != null
+
+						// Values are correct
+						assert e.content.payload.strIn == inputValues.strIn[i]
+						assert e.content.payload.numIn == inputValues.numIn[i]
+
+						// Event recipient is correct
+						assert e.recipient.modules.find {it == sourceModule}
+					}
+
+					// No other events have been inserted
+					assert globals.getDataSource().getEventQueue().isEmpty()
+				}.test()
+
 	}
 }
