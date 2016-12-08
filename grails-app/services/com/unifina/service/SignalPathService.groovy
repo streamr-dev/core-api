@@ -447,6 +447,7 @@ class SignalPathService {
 
 	@Transactional
 	def saveState(SignalPath sp) {
+		long startTime = System.currentTimeMillis()
 		Canvas canvas = sp.canvas
 
 		try {
@@ -454,7 +455,8 @@ class SignalPathService {
 			canvas.serializationTime = sp.globals.time
 			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
 				[canvas.serialized, canvas.serializationTime, canvas.id])
-			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes)")
+			long timeTaken = System.currentTimeMillis() - startTime
+			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes, processing time: ${timeTaken} ms)")
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex

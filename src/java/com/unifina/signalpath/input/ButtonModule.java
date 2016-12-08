@@ -20,7 +20,6 @@ public class ButtonModule extends InputModule {
 	public void init() {
 		super.init();
 		canClearState = false;
-		resendAll = false;
 
 		buttonName.setDrivingInput(true);
 

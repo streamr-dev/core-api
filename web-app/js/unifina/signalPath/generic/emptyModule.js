@@ -64,7 +64,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.div.append(prot.header);
 		
 		// Create title
-		prot.title = $("<span class='modulename'>"+prot.jsonData.name+"</span>");
+		var moduleName = prot.jsonData.displayName || prot.jsonData.name
+		prot.title = $("<span class='modulename'>" + moduleName + "</span>");
 		prot.header.append(prot.title);
 	
 		// Close button
@@ -351,14 +352,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function getContextMenu() {
 		return [
-		        {title: "Clone module", cmd: "clone"}
+		        {title: "Clone module", cmd: "clone"},
+				{title: "Rename", cmd: "rename"}
 		]
 	}
 	prot.getContextMenu = getContextMenu;
 	
 	function handleContextMenuSelection(target,selection) {
-		if (selection=="clone") {
+		if (selection == "clone" ) {
 			prot.clone();
+		} else if (selection == "rename") {
+			prot.rename()
 		}
 	}
 	prot.handleContextMenuSelection = handleContextMenuSelection;
@@ -548,6 +552,28 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		})
 	}
 	prot.clone = clone;
+
+	prot.rename = function(callback) {
+		var defaultValue = prot.title.text();
+
+		bootbox.prompt({
+			title: "Display name for " + prot.jsonData.name,
+			value: defaultValue,
+			className: 'rename-endpoint-dialog',
+			callback: function(displayName) {
+				if (displayName != null) {
+					if (displayName != "" && displayName != prot.jsonData.name) {
+						prot.jsonData.displayName = displayName;
+					} else {
+						delete prot.jsonData.displayName;
+						displayName = prot.jsonData.name;
+					}
+					prot.title.text(displayName)
+				}
+			}
+		});
+		pub.redraw()
+	}
 	
 	function prepareCloneData(cloneData) {
 		// Set hash to null so that a new id will be assigned

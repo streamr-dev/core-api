@@ -45,6 +45,9 @@ public abstract class Chart extends ModuleWithUI {
 
 		// Create visible input connections
 		addDefaultInputs();
+
+		resendAll = false;
+		resendLast = 500;
 	}
 
 	@Override

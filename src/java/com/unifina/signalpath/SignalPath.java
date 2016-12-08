@@ -6,6 +6,7 @@ import com.unifina.domain.signalpath.Module;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
+import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
@@ -71,7 +72,9 @@ public class SignalPath extends ModuleWithUI {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void initFromRepresentation(Map iData) {
 		representation = iData;
-		name = (iData.containsKey("name") && iData.get("name") != null ? iData.get("name").toString() : name);
+		if (iData.get("name") != null) {
+			setName(iData.get("name").toString());
+		}
 
 		List<InputConnection> inputs = new ArrayList<>();
 		Map<String, Output> outputs = new HashMap<>();
@@ -360,10 +363,10 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
 		for (AbstractSignalPathModule module : mods) {
-			module.afterDeserialization();
+			module.afterDeserialization(serializationService);
 		}
 	}
 

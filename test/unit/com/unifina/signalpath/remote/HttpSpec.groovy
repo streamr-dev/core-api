@@ -9,6 +9,7 @@ import org.apache.http.Header
 import org.apache.http.HttpResponse
 import org.apache.http.StatusLine
 import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.concurrent.FutureCallback
 import org.apache.http.entity.StringEntity
@@ -44,16 +45,13 @@ class HttpSpec extends Specification {
 
 	Map<String, List> outputs = [
 		data: [[], [], []],
-		errors: [[], [], []],
+		errors: [null, null, null],
 		statusCode: [200d, 200d, 200d],
 		//ping: [0, 0, 0],
 		headers: [dummyHeader, dummyHeader, dummyHeader]
 	]
 
 	def setup() {
-		// TestableHttp is Http module wrapped so that we can inject our own mock HttpClient
-		// Separate class is needed in same path as Http.java; anonymous class won't work with de-serializer
-		TestableHttp.httpClient = mockClient
 		module = new TestableHttp()
 		module.init()
 		module.configure([
@@ -65,6 +63,9 @@ class HttpSpec extends Specification {
 	}
 
 	private boolean test() {
+		// TestableHttp is Http module wrapped so that we can inject our own mock HttpClient
+		// Separate class is needed in same path as Http.java; anonymous class won't work with de-serializer
+		TestableHttp.httpClient = mockClient
 		return new ModuleTestHelper.Builder(module, inputs, outputs)
 			.overrideGlobals { mockGlobals }
 			.onModuleInstanceChange { newInstance -> module = newInstance }
@@ -104,8 +105,9 @@ class HttpSpec extends Specification {
 					if (ret instanceof Closure) {
 						ret = ret(request)
 					}
-					// wrap mock response object in JSON and HttpEntity
-					return new StringEntity(new JsonBuilder(ret).toString())
+					// convert into JSON if not String
+					ret = ret instanceof String ? ret : new JsonBuilder(ret).toString()
+					return new StringEntity(ret)
 				}
 				getStatusLine() >> Stub(StatusLine) {
 					getStatusCode() >> 200
@@ -178,6 +180,75 @@ class HttpSpec extends Specification {
 				module.sendOutput(transaction)
 			}
 		}
+		outputs.data = [null, null, null]
+		outputs.statusCode = [null, null, null]
+		outputs.headers = [null, null, null]
 		outputs.errors = [["Sending HTTP Request failed", "java.net.SocketTimeoutException"]] * 3
+		expect:
+		test()
+	}
+
+	void "nested Maps/Lists are correctly encoded into nested JSON objects/arrays"() {
+		module.configure([
+			params : [
+				[name: "URL", value: "localhost"],
+				[name: "verb", value: "POST"],
+			]
+		])
+
+		// set module input to groovy objects
+		inputs.body = [
+			"testing", [[1, 2], 3], [testing: [1, [2, 3]], 3: [true, [true: false]]]
+		]
+
+		// assert properly encoded JSON must arrive to server ("response generator closure" in test harness)
+		def jsonInputs = [
+			'"testing"', "[[1,2],3]", '{"testing":[1,[2,3]],"3":[true,{"true":false}]}'
+		]
+		response = { HttpUriRequest request ->
+			HttpEntityEnclosingRequestBase r = (HttpEntityEnclosingRequestBase)request;
+			ByteArrayOutputStream baos = new ByteArrayOutputStream()
+			r.entity.writeTo(baos)
+			String bodyJson = baos.toString()
+			assert jsonInputs.contains(bodyJson)
+			return []
+		}
+		expect:
+		test()
+	}
+
+	void "nested JSON objects/arrays are correctly decoded into nested Maps/Lists"() {
+		// server sends JSON
+		response = [
+			"testing", "[[1,2],3]", '{"testing":[1,[2,3]],"3":[true,{"true":false}]}'
+		]
+		outputs.data = [
+			"testing", [[1, 2], 3], [testing: [1, [2, 3]], "3": [true, [true: false]]]
+		]
+		expect:
+		test()
+	}
+
+	void "bodyless response outputs other things except data"() {
+		mockClient = Stub(HttpAsyncClient) {
+			execute(_, _) >> { HttpUriRequest request, FutureCallback<HttpResponse> future ->
+				def mockHttpResponse = Stub(CloseableHttpResponse) {
+					getEntity() >> null
+					getStatusLine() >> Stub(StatusLine) {
+						getStatusCode() >> 204
+					}
+					getAllHeaders() >> [Stub(Header) {
+						getName() >> dummyHeaderName
+						getValue() >> dummyHeaderValue
+					}]
+				}
+				future.completed(mockHttpResponse)
+				module.sendOutput(transaction)
+			}
+		}
+		outputs.data = [null, null, null];
+		outputs.statusCode = [204d, 204d, 204d];
+		expect:
+		test()
 	}
 }

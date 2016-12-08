@@ -112,7 +112,7 @@ public class TimeSeriesChart extends Chart {
 			}
 		}
 
-		return new InitMessage(seriesData, null);
+		return new InitMessage(getUiChannelName(), seriesData, null);
 	}
 	
 	public TimeSeriesInput getInputConnection(String name) {

@@ -24,22 +24,8 @@
 				this.$["streamr-widget-container"].classList.add("map-container")
 
 				this.getModuleJson(function(json) {
-					var mapOptions = {}
-					if (json.options) {
-						Object.keys(json.options).forEach(function(key) {
-							mapOptions[key] = json.options[key].value
-						})
-					}
-					_this.map = new StreamrMap(_this.$["streamr-widget-container"], {
-						autoZoom: this.autoZoom !== undefined ? (this.autoZoom==="true") : mapOptions.autoZoom,
-						centerLat: this.centerLat !== undefined ? this.centerLat : mapOptions.centerLat,
-						centerLng: this.centerLng !== undefined ? this.centerLng : mapOptions.centerLng,
-						zoom: this.zoom !== undefined ? this.zoom : mapOptions.zoom,
-						minZoom: this.minZoom !== undefined ? this.minZoom : mapOptions.minZoom,
-						maxZoom: this.maxZoom !== undefined ? this.maxZoom : mapOptions.maxZoom,
-						drawTrace: this.drawTrace !== undefined ? (this.drawTrace==="true") : mapOptions.drawTrace,
-						traceRadius: this.traceRadius !== undefined ? this.traceRadius : mapOptions.traceRadius
-					})
+					var options = _this.getModuleOptionsWithOverrides(json)
+					_this.map = new StreamrMap(_this.$["streamr-widget-container"], options)
 
 					_this.$["streamr-widget-container"].addEventListener("resize", function() {
 						_this.map.resize()
@@ -51,6 +37,9 @@
 
 				})
 
+			},
+			getMap: function() {
+				return this.map
 			},
 			centerChanged: function(oldValue, newValue) {
 				this.map.setCenter(newValue)

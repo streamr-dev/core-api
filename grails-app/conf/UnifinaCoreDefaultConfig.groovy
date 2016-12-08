@@ -1,5 +1,3 @@
-import org.pegdown.Extensions
-
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
@@ -283,7 +281,7 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 30 * 1000
+unifina.serialization.intervalInMillis = 5 * 60 * 1000
 environments {
 	test {
 		unifina.serialization.intervalInMillis = 1000
@@ -358,17 +356,6 @@ streamr.signup.requireInvite = false
  * Miscellaneous
  */
 tomcat.nio = true // in run-app or test-app
-
-// markdown configuration options
-markdown.hardwraps = true
-markdown.autoLinks = true
-markdown.definitionLists = true
-markdown.smartPunctuation = false
-markdown.smartQuotes = false
-markdown.smart = false
-markdown.fencedCodeBlocks = true
-markdown.tables = true
-
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 

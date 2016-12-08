@@ -140,6 +140,20 @@
 
 				});
 			},
+			getModuleOptionsWithOverrides: function(moduleJson) {
+				var _this = this
+				var options = {}
+				Object.keys(moduleJson.options || {}).forEach(function(key) {
+					// Webcomponent attributes override module options
+
+					if (_this[key] !== undefined) {
+						options[key] = _this[key]
+					} else {
+						options[key] = moduleJson.options[key].value
+					}
+				})
+				return options
+			},
 
 			<g:if test="${params.lightDOM}">
 				parseDeclaration: function(elementElement) {
