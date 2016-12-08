@@ -2,6 +2,7 @@ package com.unifina.signalpath.remote
 
 import com.unifina.signalpath.ModuleOption
 import com.unifina.signalpath.ModuleOptions
+import com.unifina.signalpath.ModuleWithSideEffects
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
@@ -101,7 +102,7 @@ class SqlSpec extends Specification {
 
 		Map config = [:]
 		ModuleOptions options = ModuleOptions.get(config)
-		options.add(new ModuleOption("executeInHistoricalMode", true, ModuleOption.OPTION_BOOLEAN))
+		options.add(new ModuleOption(ModuleWithSideEffects.OPTION_ACTIVATE_IN_HISTORICAL_MODE, true, ModuleOption.OPTION_BOOLEAN))
 		module.configure(config)
 		result = [[a:1, b:2], [a:4, b:6]]
 
