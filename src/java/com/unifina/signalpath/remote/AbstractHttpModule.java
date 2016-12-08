@@ -83,8 +83,8 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		ModuleOptions options = ModuleOptions.get(config);
 
 		ModuleOption bodyContentTypeOption = new ModuleOption("bodyContentType", bodyContentType, ModuleOption.OPTION_STRING);
-		bodyContentTypeOption.addPossibleValue(AbstractHttpModule.BODY_FORMAT_JSON, AbstractHttpModule.BODY_FORMAT_JSON);
-		bodyContentTypeOption.addPossibleValue(AbstractHttpModule.BODY_FORMAT_FORMDATA, AbstractHttpModule.BODY_FORMAT_FORMDATA);
+		bodyContentTypeOption.addPossibleValue(BODY_FORMAT_JSON, BODY_FORMAT_JSON);
+		bodyContentTypeOption.addPossibleValue(BODY_FORMAT_FORMDATA, BODY_FORMAT_FORMDATA);
 		options.add(bodyContentTypeOption);
 
 		ModuleOption asyncOption = new ModuleOption("syncMode", isAsync ? "async" : "sync", ModuleOption.OPTION_BOOLEAN);

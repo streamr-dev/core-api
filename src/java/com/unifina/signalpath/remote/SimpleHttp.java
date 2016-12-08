@@ -3,6 +3,7 @@ import com.unifina.signalpath.*;
 
 import com.unifina.utils.MapTraversal;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -159,24 +160,28 @@ public class SimpleHttp extends AbstractHttpModule {
 		List<Object> values = new LinkedList<>();
 		JSONObject result = null;
 		try {
-			// parse response into a JSONObject (or simple list of values)
-			String responseString = EntityUtils.toString(call.response.getEntity(), "UTF-8");
-			if (responseString.isEmpty()) {
-				call.errors.add("Empty response from server");
-			} else {
-				JSONTokener parser = new JSONTokener(responseString);
-				Object response = parser.nextValue();
-				if (response instanceof JSONObject) {
-					// TODO: http://jsonapi.org/format/ suggests we should read "data" member if available
-					result = (JSONObject) response;
-				} else if (response instanceof JSONArray) {
-					// array => send first-found object to outputs, or send one JSON value for each output if found first
-					result = findJSONObjectFromJSONArray((JSONArray) response, values, httpOutputs.size());
+			// entity is null for bodyless response 204, and that's not an error
+			HttpEntity entity = call.response.getEntity();
+			if (entity != null) {
+				// parse response into a JSONObject (or simple list of values)
+				String responseString = EntityUtils.toString(entity, "UTF-8");
+				if (responseString.isEmpty()) {
+					call.errors.add("Empty response from server");
 				} else {
-					// first raw JSON value => send values to outputs as-is
-					values.add(response);
-					while (parser.more() && values.size() < httpOutputs.size()) {
-						values.add(parser.nextValue());
+					JSONTokener parser = new JSONTokener(responseString);
+					Object response = parser.nextValue();
+					if (response instanceof JSONObject) {
+						// TODO: http://jsonapi.org/format/ suggests we should read "data" member if available
+						result = (JSONObject) response;
+					} else if (response instanceof JSONArray) {
+						// array => send first-found object to outputs, or send one JSON value for each output if found first
+						result = findJSONObjectFromJSONArray((JSONArray) response, values, httpOutputs.size());
+					} else {
+						// first raw JSON value => send values to outputs as-is
+						values.add(response);
+						while (parser.more() && values.size() < httpOutputs.size()) {
+							values.add(parser.nextValue());
+						}
 					}
 				}
 			}

@@ -4,6 +4,7 @@ import com.unifina.signalpath.*;
 
 import com.unifina.signalpath.text.JsonParser;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
@@ -135,11 +136,15 @@ public class Http extends AbstractHttpModule {
 	protected void sendOutput(HttpTransaction call) {
 		if (call.response != null) {
 			try {
-				String responseString = EntityUtils.toString(call.response.getEntity(), "UTF-8");
-				if (responseString.isEmpty()) {
-					call.errors.add("Empty response from server");
-				} else {
-					responseData.send(JsonParser.jsonStringToOutputObject(responseString));
+				// entity is null for bodyless response 204, and that's not an error
+				HttpEntity entity = call.response.getEntity();
+				if (entity != null) {
+					String responseString = EntityUtils.toString(entity, "UTF-8");
+					if (responseString.isEmpty()) {
+						call.errors.add("Empty response from server");
+					} else {
+						responseData.send(JsonParser.jsonStringToOutputObject(responseString));
+					}
 				}
 
 				Map<String, String> headerMap = new HashMap<>();
