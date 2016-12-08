@@ -94,6 +94,13 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		return window;
 	}
 
+	/**
+	 * Get the window for one-dimensional case
+	 */
+	public AbstractWindow<T> get1DWindow() {
+		return getWindowForKey(0);
+	}
+
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		selectedWindowType = WindowType.valueOf(windowType.getValue().toUpperCase());
