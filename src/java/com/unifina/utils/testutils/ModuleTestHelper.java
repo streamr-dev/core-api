@@ -219,6 +219,7 @@ public class ModuleTestHelper {
 		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
+	private SerializationService dummySerializationService = new SerializationService();
 
 	private Serializer serializer = new SerializerImpl();
 
@@ -433,7 +434,7 @@ public class ModuleTestHelper {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
 				module.setGlobals(globalsTempHolder);
-				module.afterDeserialization(module.getGlobals().getBean(SerializationService.class));
+				module.afterDeserialization(dummySerializationService);
 				moduleInstanceChanged.call(module);
 			}
 		}
