@@ -74,7 +74,7 @@ grails.project.dependency.resolution = {
         runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
-		compile('org.apache.commons:commons-collections4:4.1')
+		compile('commons-collections:commons-collections:3.2.2')
 
 
 		compile('com.unifina:kafka-client:0.1.16') {
