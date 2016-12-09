@@ -24,14 +24,10 @@ import com.unifina.utils.Globals;
 public abstract class DataSource {
 
 	private Set<SignalPath> signalPaths = new HashSet<>();
-	
-//	public static long eventStartNanos;
-	
+
 	protected DataSourceEventQueue eventQueue;
 	
-	HashMap<String,AbstractFeed> feedByClass = new HashMap<>();
-//	protected List<ITimeListener> timeListeners = []
-//	protected List<IDayListener> dateListeners = []
+	private HashMap<Long, AbstractFeed> feedById = new HashMap<>();
 	protected List<IStartListener> startListeners = new ArrayList<>();
 	protected List<IStopListener> stopListeners = new ArrayList<>();
 	protected boolean isHistoricalFeed = true;
@@ -55,7 +51,7 @@ public abstract class DataSource {
 	/**
 	 * Checks if the DataSource understands what to do with the object.
 	 * If true is returned, a subsequent call to register(object) must succeed.
-	 * @param object
+	 * @param o
 	 * @return
 	 */
 	public boolean canRegister(Object o) {
@@ -64,7 +60,7 @@ public abstract class DataSource {
 	
 	/**
 	 * Registers an object with this DataSource. Must succeed if canRegister has returned true.
-	 * @param object
+	 * @param o
 	 */
 	public void register(Object o) {
 		if (o instanceof IStreamRequirement) {
@@ -107,37 +103,34 @@ public abstract class DataSource {
 		FeedService feedService = (FeedService) globals.getGrailsApplication().getMainContext().getBean("feedService");
 		if (feedService == null)
 			feedService = new FeedService();
-		
-		// Create the feed implementation
-		String feedClass = feedService.getFeedClass(domain, isHistoricalFeed);
-		
-		// Feed already created?
-		AbstractFeed feed = feedByClass.get(feedClass);
-		
-		// Should we instantiate a new feed?
+
+		// Feed implementation already instantiated?
+		AbstractFeed feed = feedById.get(domain.getId());
 		if (feed==null) {
-			log.debug("createFeed: Instatiating new feed "+feedClass);
+			// Create the instance
+			log.debug("createFeed: Instantiating new feed described by domain object "+domain+(isHistoricalFeed ? " in historical mode" : " in realtime mode"));
 			feed = feedService.instantiateFeed(domain, isHistoricalFeed, globals);
 			feed.setEventQueue(getEventQueue());
-			feedByClass.put(feedClass, feed);
+			feedById.put(domain.getId(), feed);
 		}
 		else {
-			log.debug("createFeed: Feed "+feedClass+" exists, using that instance.");
+			log.debug("createFeed: Feed "+feed+" exists, using that instance.");
 		}
 		
 		return feed;
 	}
-	
+
+	public AbstractFeed getFeedById(Long id) {
+		return feedById.get(id);
+	}
+
 	public Collection<AbstractFeed> getFeeds() {
-		return feedByClass.values();
+		return feedById.values();
 	}
 	
 	public void startFeed() {
 		for (int i=0;i<startListeners.size();i++)
 			startListeners.get(i).onStart();
-		// Possible ConcurrentModificationException
-//		for (IStartListener it : startListeners)
-//			it.onStart(); 
 
 		try {
 			doStartFeed();

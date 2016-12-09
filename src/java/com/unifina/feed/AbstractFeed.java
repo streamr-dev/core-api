@@ -77,8 +77,12 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			throw new RuntimeException("Could not create an EventRecipient of class "+domainObject.getEventRecipientClass()+" for subscriber "+subscriber,e);
 		}
 	}
-	
-	protected EventRecipientClass getEventRecipientForMessage(MessageClass message) {
+
+	public EventRecipientClass getEventRecipientByKey(KeyClass key) {
+		return eventRecipientsByKey.get(key);
+	}
+
+	public EventRecipientClass getEventRecipientForMessage(MessageClass message) {
 		return eventRecipientsByKey.get(keyProvider.getMessageKey(message));
 	}
 	
@@ -100,15 +104,15 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			subscribers.add(subscriber);
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
-			EventRecipientClass recipient;
 			KeyClass key = keyProvider.getSubscriberKey(subscriber);
-			if (!eventRecipientsByKey.containsKey(key)) {
+			EventRecipientClass recipient = getEventRecipientByKey(key);
+
+			if (recipient == null) {
 				recipient = createEventRecipient(subscriber);
 				eventRecipients.add(recipient);
 				eventRecipientsByKey.put(key, recipient);
 				globals.getDataSource().register(recipient);
 			}
-			else recipient = eventRecipientsByKey.get(key);
 			
 			// Register the subscription with the event recipient
 			if (recipient instanceof AbstractEventRecipient) {

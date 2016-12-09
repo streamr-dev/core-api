@@ -48,7 +48,7 @@ public class RealtimeDataSource extends DataSource {
 		// Check catchup
 		List<ICatchupFeed> catchupFeeds = new ArrayList<>();
 
-		for (AbstractFeed it : feedByClass.values()) {
+		for (AbstractFeed it : getFeeds()) {
 			if (it instanceof ICatchupFeed && ((ICatchupFeed) it).startCatchup()) {
 				catchupFeeds.add((ICatchupFeed) it);
 			}
@@ -67,7 +67,7 @@ public class RealtimeDataSource extends DataSource {
 		// Let all catchup feeds know that catchup has ended,
 		// even if their startCatchup() returned false and thus
 		// they are not in catchupFeeds
-		for (AbstractFeed it : feedByClass.values()) {
+		for (AbstractFeed it : getFeeds()) {
 			if (it instanceof ICatchupFeed) {
 				((ICatchupFeed) it).endCatchup();
 			}
@@ -80,7 +80,7 @@ public class RealtimeDataSource extends DataSource {
 		}
 
 		if (!abort) {
-			for (AbstractFeed it : feedByClass.values()) {
+			for (AbstractFeed it : getFeeds()) {
 				it.startFeed();
 			}
 
@@ -124,8 +124,6 @@ public class RealtimeDataSource extends DataSource {
 			FeedEvent[] events = feed.getNextEvents();
 			if (events != null) {
 				for (FeedEvent it : events) {
-//					it.queueTicket = catchupQueueTicket++
-//					catchupQueue.add(it)
 					eventQueue.enqueue(it);
 				}
 			}
@@ -140,11 +138,7 @@ public class RealtimeDataSource extends DataSource {
 				if (events != null) {
 					for (FeedEvent it : events) {
 						eventQueue.enqueue(it);
-//						it.queueTicket = catchupQueueTicket++
-//						catchupQueue.add(it) 
 					}
-				} else {
-//					log.debug("Catchup feed "+event.feed+" depleted.");
 				}
 			}
 		}
@@ -157,7 +151,7 @@ public class RealtimeDataSource extends DataSource {
 		secTimer.cancel();
 		secTimer.purge();
 
-		for (AbstractFeed it : feedByClass.values()) {
+		for (AbstractFeed it : getFeeds()) {
 			try {
 				it.stopFeed();
 			} catch (Exception e) {

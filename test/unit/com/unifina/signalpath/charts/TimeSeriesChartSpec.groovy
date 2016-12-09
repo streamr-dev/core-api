@@ -37,6 +37,7 @@ class TimeSeriesChartSpec extends Specification {
 			timeSeries: [
 				[
 					type: "init",
+					title: null,
 					series: [
 						[name: "outputForin1", idx: 0, step: true, yAxis: 0],
 						[name: "outputForin2", idx: 1, step: true, yAxis: 0],

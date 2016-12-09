@@ -3,6 +3,7 @@ package com.unifina.signalpath;
 import com.unifina.data.FeedEvent;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.push.PushChannel;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
@@ -12,6 +13,7 @@ import grails.converters.JSON;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -344,6 +346,16 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	public String getUiChannelName() {
 		return "Notifications";
+	}
+
+	/**
+	 * Sends a notification to this SignalPath's UI channel.
+     */
+	public void showNotification(@NotNull String notification) {
+		PushChannel pushChannel = getGlobals().getUiChannel();
+		if (pushChannel != null) {
+			pushChannel.push(new NotificationMessage(notification), getUiChannelId());
+		}
 	}
 
 	@Override

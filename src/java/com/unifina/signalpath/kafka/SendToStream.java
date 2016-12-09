@@ -1,10 +1,15 @@
 package com.unifina.signalpath.kafka;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.AbstractFeed;
+import com.unifina.feed.kafka.KafkaMessage;
 import com.unifina.service.KafkaService;
 import com.unifina.service.PermissionService;
 import com.unifina.signalpath.*;
+import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
@@ -15,7 +20,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SendToStream extends AbstractSignalPathModule {
+/**
+ * This module (only) supports sending messages to Kafka/json streams (feed id 7)
+ */
+public class SendToStream extends ModuleWithSideEffects {
 
 	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
 	transient protected JSONObject streamConfig = null;
@@ -36,7 +44,6 @@ public class SendToStream extends AbstractSignalPathModule {
 
 		addInput(streamParameter);
 
-
 		streamParameter.setUpdateOnChange(true);
 
 		// TODO: don't rely on static ids
@@ -46,25 +53,50 @@ public class SendToStream extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void sendOutput() {
-		if (getGlobals().isRealtime()) {
-			Map msg = new LinkedHashMap<>();
-			Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
-			for (Input i : inputs) {
-				msg.put(i.getName(), i.getValue());
-			}
-			if (kafkaService == null) { // null after de-serialization
-				kafkaService = getGlobals().getBean(KafkaService.class);
-			}
-			Stream stream = streamParameter.getValue();
-			authenticateStream(stream);
-			kafkaService.sendMessage(stream, "", msg);
+	protected boolean allowSideEffectsInHistoricalMode() {
+		// SendToStream cannot be configured to really write to the stream in historical mode (for now)
+		return false;
+	}
+
+	@Override
+	public void activateWithSideEffects() {
+		if (kafkaService == null) { // null after de-serialization
+			kafkaService = getGlobals().getBean(KafkaService.class);
 		}
-		else if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
-			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +
-				streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
-			historicalWarningShown = true;
+		Stream stream = streamParameter.getValue();
+		authenticateStream(stream);
+		kafkaService.sendMessage(stream, "", inputValuesToMap());
+	}
+
+	@Override
+	protected void activateWithoutSideEffects() {
+		Globals globals = getGlobals();
+
+		// Create the message locally and route it to the stream locally, without actually producing to the stream
+		KafkaMessage kafkaMessage = new KafkaMessage(streamParameter.getValue().getId(), globals.time, globals.time, inputValuesToMap());
+
+		// Find the Feed implementation for the target Stream
+		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
+
+		// Find the IEventRecipient for this message
+		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(kafkaMessage);
+
+		FeedEvent event = new FeedEvent(kafkaMessage, globals.time, eventRecipient);
+		getGlobals().getDataSource().getEventQueue().enqueue(event);
+	}
+
+	@Override
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
+		return this.getName()+": In historical mode, events written to Stream '" + streamParameter.getValue().getName()+"' are only available within this Canvas.";
+	}
+
+	private Map<String, Object> inputValuesToMap() {
+		Map msg = new LinkedHashMap<>();
+		Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
+		for (Input i : inputs) {
+			msg.put(i.getName(), i.getValue());
 		}
+		return msg;
 	}
 
 	@Override
