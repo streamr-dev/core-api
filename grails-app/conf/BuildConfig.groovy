@@ -92,9 +92,12 @@ grails.project.dependency.resolution = {
         test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
         test "org.gebish:geb-spock:$gebVersion"
-		
-        runtime('org.twitter4j:twitter4j-core:[4.0,)')
-        runtime('com.twitter:hbc-core:2.2.0')
+
+		// https://mvnrepository.com/artifact/org.twitter4j/twitter4j-core
+		compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.4'
+		compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '4.0.4'
+
+		runtime('com.twitter:hbc-core:2.2.0')
 		
         runtime('com.github.nkzawa:socket.io-client:0.3.0')
 		runtime('joda-time:joda-time:2.9.3')

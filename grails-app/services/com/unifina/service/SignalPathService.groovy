@@ -214,7 +214,7 @@ class SignalPathService {
 		canvas.runner = runnerId
 
 		// Use the link generator to get the protocol and port, but use network IP address
-		// as the host to get the address of this individual server
+		//   as the host to get the address of this individual server
 		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
 		URL url = new URL(root)
 
