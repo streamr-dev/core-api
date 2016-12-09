@@ -9,8 +9,9 @@ import java.util.*;
 /**
  * Module that lets user make SQL queries to given database server
  */
-public class Sql extends AbstractSignalPathModule {
-	private transient Logger log = Logger.getLogger(Sql.class);
+public class Sql extends ModuleWithSideEffects {
+
+	private static final Logger log = Logger.getLogger(Sql.class);
 
 	private EngineParameter engine = new EngineParameter(this, "engine");
 	private StringParameter loginUrl = new StringParameter(this, "host", "");
@@ -23,7 +24,7 @@ public class Sql extends AbstractSignalPathModule {
 	private ListOutput errors = new ListOutput(this, "errors");
 	private ListOutput rows = new ListOutput(this, "result");
 
-	private transient Connection db;
+	transient private Connection db;
 
 	@Override
 	public void init() {
@@ -38,7 +39,7 @@ public class Sql extends AbstractSignalPathModule {
 	}
 
 	@Override
-	public void sendOutput() {
+	public void activateWithSideEffects() {
 		List<String> err = new ArrayList<>();
 		Statement statement = null;
 		ResultSet cursor = null;
@@ -68,13 +69,30 @@ public class Sql extends AbstractSignalPathModule {
 		} catch (SQLException e) {
 			err.add(e.toString());
 		} finally {
-			if (cursor != null) { try { cursor.close(); } catch (SQLException e) { err.add(e.toString()); } }
-			if (statement != null) { try { statement.close(); } catch (SQLException e) { err.add(e.toString()); } }
+			if (cursor != null) {
+				try {
+					cursor.close();
+				} catch (SQLException e) {
+					err.add(e.toString());
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					err.add(e.toString());
+				}
+			}
 		}
 
 		if (err.size() > 0) {
 			errors.send(err);
 		}
+	}
+
+	@Override
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
+		return this.getName() + ": SQL statements are not executed in historical mode by default. This can be changed in module options.";
 	}
 
 	// separated method so it can be mocked in a test
@@ -124,7 +142,7 @@ public class Sql extends AbstractSignalPathModule {
 				case "MySQL": return "jdbc:mysql";
 				case "PostgreSQL": return "jdbc:postgresql";
 				default:
-					// TODO: log error
+					log.error("Unexpected value in EngineParameter: "+getValue()+", falling back to MySQL");
 					return "jdbc:mysql";
 			}
 		}
