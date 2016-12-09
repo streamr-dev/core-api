@@ -29,7 +29,7 @@ class VariadicEventTableSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			table: [
-				[hdr: [headers: ["timestamp", "outputForin1", "outputForin2", "outputForin3"]]],
+				[hdr: [headers: ["timestamp", "outputForin1", "outputForin2", "outputForin3"], title: null]],
 				[nr: [new Date(0).format(format), "a", "1", null]],
 				[nr: [new Date(60 * 1000).format(format), "b", "2", null]],
 				[nr: [new Date(60 * 1000 * 2).format(format), "c", "3", "hello"]],
