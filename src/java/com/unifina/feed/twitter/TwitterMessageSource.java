@@ -44,7 +44,7 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 
 			// find streams whose keywords are found within tweet, forward a copy to each of them ("demux")
 			//   see "mux" in updateTwitterStreamFor method below
-			String tweet = TwitterMessage.fromStatus(status).toString();
+			String tweet = status.toString();
 			for (TwitterStreamConfig conf : streams) {
 				List<String> matches = new LinkedList<>();
 				for (String kw : conf.getKeywords()) {
