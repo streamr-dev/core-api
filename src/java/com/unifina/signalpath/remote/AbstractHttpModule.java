@@ -191,7 +191,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	}
 
 	@Override
-	protected String getOneTimeHistoricalNotification() {
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
 		return getName() + ": Requests are not being made in historical mode by default. This can be changed in module options.";
 	}
 

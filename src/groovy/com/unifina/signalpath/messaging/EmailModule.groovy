@@ -50,8 +50,9 @@ class EmailModule extends ModuleWithSideEffects {
 	}
 
 	@Override
-	protected String getHistoricalNotification() {
-		return getMessageBody()
+	public void activateWithoutSideEffects() {
+		// Show email contents as notifications in the UI
+		parentSignalPath?.showNotification(getMessageBody())
 	}
 
 	private String getMessageBody() {

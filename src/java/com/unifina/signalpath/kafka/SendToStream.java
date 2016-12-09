@@ -86,7 +86,7 @@ public class SendToStream extends ModuleWithSideEffects {
 	}
 
 	@Override
-	protected String getOneTimeHistoricalNotification() {
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
 		return this.getName()+": In historical mode, events written to Stream '" + streamParameter.getValue().getName()+"' are only available within this Canvas.";
 	}
 

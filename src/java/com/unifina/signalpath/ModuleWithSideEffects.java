@@ -9,10 +9,11 @@ import java.util.Map;
  * These side effects usually need to be turned off in historical mode, but can be enabled if necessary.
  * The main method to implement is activateWithSideEffects().
  *
- * This module supports showing a notification once on the first activation in historical mode,
- * or on every historical mode activation.
+ * Also alternative side-effect-less activation is supported via activateWithoutSideEffects().
  *
- * Also a backup activation strategy is supported via activateWithoutSideEffects().
+ * A notification can be shown once on the first activation without side effects
+ * to let the user know that the side effects are being skipped. The notification content
+ * can be set by overriding getNotificationAboutActivatingWithoutSideEffects().
  */
 public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 
@@ -28,22 +29,17 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 		if (globals.isRealtime() || activateInHistoricalMode) {
 			// Normal operation
 			activateWithSideEffects();
-		} else if (globals.getUiChannel() != null && parentSignalPath != null) {
+		} else {
+			// Without side effects
 			activateWithoutSideEffects();
 
-			// Show notification about historical mode unless it's already been shown
+			// Show one-time-notification unless it's already been shown
 			if (!oneTimeNotificationShown) {
-				String notification = getOneTimeHistoricalNotification();
-				if (notification != null) {
-					getGlobals().getUiChannel().push(new NotificationMessage(notification), parentSignalPath.getUiChannelId());
+				String notification = getNotificationAboutActivatingWithoutSideEffects();
+				if (notification != null && parentSignalPath != null) {
+					parentSignalPath.showNotification(notification);
 				}
 				oneTimeNotificationShown = true;
-			}
-
-			// Can also show a notification on every activation
-			String notification = getHistoricalNotification();
-			if (notification != null) {
-				getGlobals().getUiChannel().push(new NotificationMessage(notification), parentSignalPath.getUiChannelId());
 			}
 		}
 	}
@@ -66,18 +62,10 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 	protected void activateWithoutSideEffects() {}
 
 	/**
-	 * Returns a notification shown on the first historical activation, or null if none should be shown.
-	 * Defaults to null.
+	 * Returns a notification shown on the first activation without side effects, or null if
+	 * no notification should be shown. Defaults to null.
      */
-	protected String getOneTimeHistoricalNotification() {
-		return null;
-	}
-
-	/**
-	 * Returns a notification shown on historical activation, or null if none should be shown.
-	 * Defaults to null.
-	 */
-	protected String getHistoricalNotification() {
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
 		return null;
 	}
 

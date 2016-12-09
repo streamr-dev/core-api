@@ -91,7 +91,7 @@ public class Sql extends ModuleWithSideEffects {
 	}
 
 	@Override
-	protected String getOneTimeHistoricalNotification() {
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
 		return this.getName() + ": SQL statements are not executed in historical mode by default. This can be changed in module options.";
 	}
 
