@@ -286,6 +286,9 @@ public class ModuleTestHelper {
 			furtherTime(i);
 		}
 
+		// End of data feed, destroy module
+		module.destroy();
+
 		// Test ui channel messages
 		if (isUiChannelMode()) {
 			validateUiChannelMessages();
