@@ -185,20 +185,26 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 			className: 'rename-endpoint-dialog',
 			callback: function(displayName) {
 				if (displayName != null) {
-					if (displayName != "" && displayName != data.name) {
-						data.displayName = displayName;
-					} else {
-						delete data.displayName;
-						displayName = data.name;
-					}
-					$(iodiv).find(".ioname").html(displayName);
+					pub.setDisplayName(displayName)
 				}
 			}
 		});
 		module.redraw()
 	}
-	
-	function getContextMenu(div) {
+
+	function setDisplayName(displayName) {
+		var data = pub.json;
+        if (displayName != "" && displayName != data.name) {
+            data.displayName = displayName;
+        } else {
+            delete data.displayName;
+            displayName = data.name;
+        }
+        $(pub.div).find(".ioname").html(displayName);
+	}
+	pub.setDisplayName = setDisplayName
+
+    function getContextMenu(div) {
 		var menu = pub.module.getContextMenu(div);
 		
 		menu.push({title: "Rename", cmd: "rename"});
