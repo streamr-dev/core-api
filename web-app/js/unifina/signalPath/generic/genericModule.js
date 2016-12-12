@@ -159,6 +159,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		});
 		
 		superClose();
+		prot.moduleClosed = false
 	}
 	pub.close = close;
 	
