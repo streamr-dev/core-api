@@ -7,7 +7,8 @@ import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
-import com.unifina.utils.CSVWriter2;
+import com.unifina.utils.RFC4180CSVWriter;
+import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -15,54 +16,58 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class WriteToCsvFile extends ModuleWithUI {
+public class ExportCSV extends ModuleWithUI {
+	public static final long MIN_MS_BETWEEN_UI_UPDATES = 1000;
 
 	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
 
 	private boolean includeTimestamps = true;
 	private boolean writeHeader = true;
-	private String separator = "\t";
-	private boolean quoteColumns = false;
-	private TimeFormat timeFormat = TimeFormat.MILLISECONDS_SINCE_EPOCH;
+	private TimeFormat timeFormat = TimeFormat.ISO_8601_UTC;
 
-	private FileHolder fileHolder;
-	private transient CSVWriter2 csvWriter;
+	private Context context;
+	private transient RFC4180CSVWriter csvWriter;
+	private transient TimeFormatter timeFormatter;
+	private long lastMessageSentAt = -MIN_MS_BETWEEN_UI_UPDATES;
 
-	public WriteToCsvFile() {
-		this(new FileHolder());
+	public ExportCSV() {
+		this(new Context());
 	}
 
-	WriteToCsvFile(FileHolder fileHolder) {
-		this.fileHolder = fileHolder;
+	ExportCSV(Context context) {
+		this.context = context;
 	}
 
 	@Override
 	public void initialize() {
 		super.initialize();
 		openCsvWriter();
+		timeFormatter = timeFormat.getTimeFormatter(getGlobals());
 	}
 
 	@Override
 	public void sendOutput() {
 		List<Object> row = new ArrayList<>();
 		if (includeTimestamps) {
-			row.add(timeFormat.formatTime(getGlobals().time));
+			row.add(timeFormatter.getDate(getGlobals().time));
 		}
 		row.addAll(ins.getValues());
-		try {
-			csvWriter.writeRow(row);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		csvWriter.writeRow(row);
 
-		Map<String, Object> msg = new LinkedHashMap<>();
-		msg.put("type", "csvRowCount");
-		msg.put("value", csvWriter.getNumOfRowsWritten());
-		pushToUiChannel(msg);
+		if (context.currentTimeInMillis() - lastMessageSentAt >= MIN_MS_BETWEEN_UI_UPDATES) {
+			Map<String, Object> msg = new LinkedHashMap<>();
+			msg.put("type", "csvUpdate");
+			msg.put("rows", csvWriter.getNumOfRowsWritten());
+			msg.put("kilobytes", context.getFileSizeInKilobytes());
+			pushToUiChannel(msg);
+			lastMessageSentAt = context.currentTimeInMillis();
+		}
 	}
 
 	@Override
-	public void clearState() {}
+	public void clearState() {
+		lastMessageSentAt = -MIN_MS_BETWEEN_UI_UPDATES;
+	}
 
 	@Override
 	public void destroy() {
@@ -75,9 +80,10 @@ public class WriteToCsvFile extends ModuleWithUI {
 		}
 
 		Map<String, Object> msg = new LinkedHashMap<>();
-		msg.put("type", "csvFileReady");
-		msg.put("file", fileHolder.getFileName());
-		msg.put("kilobytes", fileHolder.getFileSizeInKilobytes());
+		msg.put("type", "csvUpdate");
+		msg.put("file", context.getFileName());
+		msg.put("rows", csvWriter.getNumOfRowsWritten());
+		msg.put("kilobytes", context.getFileSizeInKilobytes());
 		pushToUiChannel(msg);
 	}
 
@@ -108,16 +114,8 @@ public class WriteToCsvFile extends ModuleWithUI {
 		if (includeTimestampsOption != null) {
 			includeTimestamps = includeTimestampsOption.getBoolean();
 		}
-		ModuleOption separatorOption = options.getOption("separator");
-		if (separatorOption != null) {
-			separator = separatorOption.getString();
-		}
-		ModuleOption quoteColumnsOption = options.getOption("quoteColumns");
-		if (quoteColumnsOption != null) {
-			quoteColumns = quoteColumnsOption.getBoolean();
-		}
-		timeFormat = TimeFormat.fromModuleOptions(options);
 
+		timeFormat = TimeFormat.fromModuleOptions(options);
 	}
 
 	@Override
@@ -126,8 +124,6 @@ public class WriteToCsvFile extends ModuleWithUI {
 		ModuleOptions options = ModuleOptions.get(config);
 		options.addIfMissing(ModuleOption.createBoolean("writeHeader", writeHeader));
 		options.addIfMissing(ModuleOption.createBoolean("includeTimestamps", includeTimestamps));
-		options.addIfMissing(ModuleOption.createString("separator", separator));
-		options.addIfMissing(ModuleOption.createBoolean("quoteColumns", quoteColumns));
 		options.addIfMissing(timeFormat.asModuleOption());
 		return config;
 	}
@@ -136,37 +132,38 @@ public class WriteToCsvFile extends ModuleWithUI {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
+		timeFormatter = timeFormat.getTimeFormatter(getGlobals());
 	}
 
 	private void openCsvWriter() {
-		try {
-			fileHolder.openNewFile();
-			csvWriter = new CSVWriter2(fileHolder.getWriter(), separator, quoteColumns);
+		context.openNewFile();
+		csvWriter = new RFC4180CSVWriter(context.getWriter());
 
-			if (writeHeader) {
-				List<String> inputNames = new ArrayList<>();
-				if (includeTimestamps) {
-					inputNames.add("timestamp");
-				}
-				for (Input in : ins.getEndpoints()) {
-					inputNames.add(in.getEffectiveName());
-				}
-				csvWriter.writeRow(inputNames);
+		if (writeHeader) {
+			List<String> inputNames = new ArrayList<>();
+			if (includeTimestamps) {
+				inputNames.add("timestamp");
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			for (Input in : ins.getEndpoints()) {
+				inputNames.add(in.getEffectiveName());
+			}
+			csvWriter.writeRow(inputNames);
 		}
 	}
 
-	public static class FileHolder implements Serializable {
-		private static final Logger log = Logger.getLogger(FileHolder.class);
+	public static class Context implements Serializable {
+		private static final Logger log = Logger.getLogger(Context.class);
 		private transient File file;
 		private transient Writer writer;
 
-		public void openNewFile() throws IOException {
-			file = File.createTempFile("streamr_csv_", ".csv");
-			writer = new FileWriter(file);
-			log.info("Created temporary file " + file.getAbsolutePath() + " for writing.");
+		public void openNewFile() {
+			try {
+				file = File.createTempFile("streamr_csv_", ".csv");
+				writer = new FileWriter(file);
+				log.info("Created temporary file " + file.getAbsolutePath() + " for writing.");
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to open temporary file for writing");
+			}
 		}
 
 		public Writer getWriter() {
@@ -180,6 +177,14 @@ public class WriteToCsvFile extends ModuleWithUI {
 		public long getFileSizeInKilobytes() {
 			return file.length() / 1024;
 		}
+
+		public long currentTimeInMillis() {
+			return System.currentTimeMillis();
+		}
+	}
+
+	private interface TimeFormatter {
+		String getDate(Date date);
 	}
 
 	private enum TimeFormat {
@@ -187,7 +192,6 @@ public class WriteToCsvFile extends ModuleWithUI {
 		ISO_8601_LOCAL,
 		ISO_8601_UTC;
 
-		private static final DateFormat DF_LOCAL = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		private static final DateFormat DF_UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
 		static {
@@ -201,18 +205,40 @@ public class WriteToCsvFile extends ModuleWithUI {
 				addPossibleValue("ISO 8601 UTC", TimeFormat.ISO_8601_UTC.name());
 		}
 
-		private String formatTime(Date date) {
-			if (this == ISO_8601_LOCAL) {
-				return DF_LOCAL.format(date);
-			} else if (this == ISO_8601_UTC) {
-				return DF_UTC.format(date);
-			}
-			return String.valueOf(date.getTime());
-		}
-
 		private static TimeFormat fromModuleOptions(ModuleOptions options) {
 			ModuleOption option = options.getOption("timeFormat");
-			return option == null ? MILLISECONDS_SINCE_EPOCH : valueOf(option.getString());
+			return option == null ? ISO_8601_UTC : valueOf(option.getString());
+		}
+
+		private TimeFormatter getTimeFormatter(final Globals globals) {
+			if (this == ISO_8601_LOCAL) {
+				return new TimeFormatter() {
+					private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+					{
+						df.setTimeZone(globals.getUserTimeZone());
+					}
+
+					@Override
+					public String getDate(Date date) {
+						return df.format(date);
+					}
+				};
+			} else if (this == ISO_8601_UTC) {
+				return new TimeFormatter() {
+					@Override
+					public String getDate(Date date) {
+						return DF_UTC.format(date);
+					}
+				};
+			} else {
+				return new TimeFormatter() {
+					@Override
+					public String getDate(Date date) {
+						return String.valueOf(date.getTime());
+					}
+				};
+			}
 		}
 	}
 }

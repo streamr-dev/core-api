@@ -10,12 +10,12 @@ import core.pages.StreamShowPage
 @Mixin(KafkaMixin)
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
-class WriteToCsvFileFunctionalSpec extends LoginTester1Spec {
+class ExportCSVFunctionalSpec extends LoginTester1Spec {
 
-	void "running CSV export mode results in file"() {
+	void "ExportCSV module produces a file"() {
 		setup: "create stream"
 		to StreamCreatePage
-		def streamName = "WriteToCsvFileFunctionalSpec" + System.currentTimeMillis()
+		def streamName = "ExportCSVFunctionalSpec" + System.currentTimeMillis()
 		name << streamName
 		nextButton.click()
 		waitFor { at StreamShowPage }
@@ -37,10 +37,10 @@ class WriteToCsvFileFunctionalSpec extends LoginTester1Spec {
 		and: "create canvas"
 		to CanvasPage
 		searchAndClick(streamName)
-		searchAndClick("WriteToCsvFile")
-		moveModuleBy("WriteToCsvFile", 100, 100)
-		connectEndpoints(findOutput("Stream", "key"), findInputByDisplayName("WriteToCsvFile", "in1"))
-		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("WriteToCsvFile", "in2"))
+		searchAndClick("ExportCSV")
+		moveModuleBy("ExportCSV", 100, 100)
+		connectEndpoints(findOutput("Stream", "key"), findInputByDisplayName("ExportCSV", "in1"))
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("ExportCSV", "in2"))
 
 		and: "save sand start canvas in realtime mode"
 		ensureRealtimeTabDisplayed()
