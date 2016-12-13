@@ -167,7 +167,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		
 		if (hold) {
 			$.each(getEndpoints(), function(i, endpoint) {
-				endpoint.jsPlumbEndpoint.addClass("holdFocus");
+				if (endpoint.jsPlumbEndpoint) {
+					endpoint.jsPlumbEndpoint.addClass("holdFocus");
+				}
 			})
 		}
 	}
@@ -212,7 +214,9 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		super_removeFocus();
 
 		$.each(getEndpoints(), function(i, endpoint) {
-			endpoint.jsPlumbEndpoint.removeClass("holdFocus");
+			if (endpoint.jsPlumbEndpoint) {
+				endpoint.jsPlumbEndpoint.removeClass("holdFocus");
+			}
 		})
 	}
 	

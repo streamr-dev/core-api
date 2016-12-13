@@ -6,6 +6,7 @@ class SignalPathParameter extends Parameter<Canvas> {
 	
 	public SignalPathParameter(AbstractSignalPathModule owner, String name) {
 		super(owner, name, null, "Canvas");
+		setCanConnect(false)
 	}
 	
 	public Map<String,Object> getConfiguration() {
