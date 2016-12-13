@@ -71,6 +71,9 @@ The optional closure `{ it.autowire = true }` automatically injects the services
 #### Injecting mock/stub or instances of services and beans
 
 ```groovy
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.context.ApplicationContext
+
 class FooSpec extends spock.lang.Specification {
     KafkaService kafkaService = Mock(KafkaService)
 	FeedFileService feedFileService = Mock(FeedFileService)
