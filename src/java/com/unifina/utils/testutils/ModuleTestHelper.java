@@ -10,6 +10,7 @@ import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
+import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
@@ -218,6 +219,7 @@ public class ModuleTestHelper {
 		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
+	private SerializationService dummySerializationService = new SerializationService();
 
 	private Serializer serializer = new SerializerImpl();
 
@@ -432,7 +434,7 @@ public class ModuleTestHelper {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
 				module.setGlobals(globalsTempHolder);
-				module.afterDeserialization();
+				module.afterDeserialization(dummySerializationService);
 				moduleInstanceChanged.call(module);
 			}
 		}

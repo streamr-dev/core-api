@@ -17,6 +17,9 @@ public class Label extends ModuleWithUI {
 		label.canToggleDrivingInput = false;
 		
 		canClearState = false;
+
+		resendAll = false;
+		resendLast = 1;
 	}
 
 	@Override

@@ -30,6 +30,9 @@ public class Heatmap extends ModuleWithUI {
 		value.canToggleDrivingInput = false;
 		value.canHaveInitialValue = false;
 		value.canBeFeedback = false;
+
+		resendAll = false;
+		resendLast = 0;
 	}
 	
 	@Override

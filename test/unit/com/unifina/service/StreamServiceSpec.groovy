@@ -6,27 +6,42 @@ import com.unifina.domain.data.FeedFile
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.AbstractStreamListener
-import com.unifina.feed.DataRange
 import com.unifina.feed.NoOpStreamListener
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestFor(StreamService)
-@Mock([Stream, Feed, FeedFile, SecUser, KafkaService, FeedFileService])
+@Mock([Stream, Feed, FeedFile, SecUser])
 class StreamServiceSpec extends Specification {
 
+	StreamService service
 	Feed feed
+	KafkaService kafkaService = Stub(KafkaService)
+	FeedFileService feedFileService = new FeedFileService()
 
 	def setup() {
 		feed = new Feed(
 			streamListenerClass: NoOpStreamListener.name
 		).save(validate: false)
+
+		// Setup application context
+		def applicationContext = Stub(ApplicationContext) {
+			getBean(KafkaService) >> kafkaService
+			getBean(FeedFileService) >> feedFileService
+		}
+
+		// Setup grailsApplication
+		def grailsApplication = new DefaultGrailsApplication()
+		grailsApplication.setMainContext(applicationContext)
+
+		service = new StreamService()
+		service.grailsApplication = grailsApplication
 	}
 
 	void "createStream throws ValidationException input incomplete"() {

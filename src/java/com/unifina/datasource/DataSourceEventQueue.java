@@ -6,6 +6,7 @@ import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventQueue;
 import com.unifina.feed.MasterClock;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import org.joda.time.DateTime;
 

@@ -8,7 +8,8 @@
 		this.options = $.extend({}, {
 			min: 0,
 			max: 20,
-			center: [35,15],
+			centerLat: 35,
+			centerLng: 15,
 			zoom: 2,
 			minZoom: 2,
 			maxZoom: 18,
@@ -49,7 +50,7 @@
 		);
 
 		this.map = new L.Map(this.parent[0], {
-			center: new L.LatLng(this.options.center[0], this.options.center[1]),
+			center: new L.LatLng(this.options.centerLat, this.options.centerLng),
 			zoom: this.options.zoom,
 			layers: [baseLayer]
 		});
@@ -61,6 +62,14 @@
 		this.syncData()
 		this.data = []
 		this.syncData()
+
+		this.map.on("moveend", function() {
+			$(_this).trigger("move", {
+				centerLat: _this.getCenter().lat,
+				centerLng: _this.getCenter().lng,
+				zoom: _this.getZoom()
+			})
+		})
 
 		// From https://github.com/pa7/heatmap.js/issues/120
 		this.map.on("resize", function() {
@@ -74,8 +83,16 @@
 		})
 	}
 
-	StreamrHeatMap.prototype.setCenter = function(coords) {
-		this.map.setView(new L.LatLng(coords[0],coords[1]))
+	StreamrHeatMap.prototype.getZoom = function() {
+		return this.map.getZoom()
+	}
+
+	StreamrHeatMap.prototype.getCenter = function() {
+		return this.map.getCenter()
+	}
+
+	StreamrHeatMap.prototype.setCenter = function(lat, lng) {
+		this.map.setView(new L.LatLng(lat, lng))
 	}
 
 	StreamrHeatMap.prototype.requestUpdate = function() {

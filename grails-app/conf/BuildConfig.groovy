@@ -61,7 +61,6 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        runtime 'mysql:mysql-connector-java:5.1.20'
         compile('log4j:log4j:1.2.16')
 		
         runtime('commons-net:commons-net:3.3')
@@ -76,19 +75,28 @@ grails.project.dependency.resolution = {
 
 		compile('org.apache.kafka:kafka-clients:0.9.0.1')
         compile('com.mashape.unirest:unirest-java:1.3.3')
-		
+
+		// http://www.stringtemplate.org/
+		// http://mvnrepository.com/artifact/org.antlr/ST4
+		compile group: 'org.antlr', name: 'ST4', version: '4.0.8'
+
         runtime('com.amazonaws:aws-java-sdk:1.7.5')
+
+		runtime('joda-time:joda-time:2.9.3')
 
         test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
         test "org.gebish:geb-spock:$gebVersion"
 
-		runtime('org.twitter4j:twitter4j-core:[4.0,)')
+		runtime('org.twitter4j:twitter4j-core:4.0.4')
+		runtime('org.twitter4j:twitter4j-stream:4.0.4')
 		runtime('com.twitter:hbc-core:2.2.0') {
 			excludes 'com.google.guava:guava:14.0.1'
 		}
 
+		runtime 'mysql:mysql-connector-java:5.1.20'
+		compile 'org.postgresql:postgresql:9.4.1208.jre7'
 		compile 'org.mongodb:mongodb-driver:3.2.1'
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')

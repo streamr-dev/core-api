@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  *  - body formatting
  *  - SSL
  */
-public abstract class AbstractHttpModule extends AbstractSignalPathModule implements IEventRecipient {
+public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient {
 
 	protected static final String BODY_FORMAT_JSON = "application/json";
 	protected static final String BODY_FORMAT_FORMDATA = "application/x-www-form-urlencoded";
@@ -83,11 +83,11 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 		ModuleOptions options = ModuleOptions.get(config);
 
 		ModuleOption bodyContentTypeOption = new ModuleOption("bodyContentType", bodyContentType, ModuleOption.OPTION_STRING);
-		bodyContentTypeOption.addPossibleValue(AbstractHttpModule.BODY_FORMAT_JSON, AbstractHttpModule.BODY_FORMAT_JSON);
-		bodyContentTypeOption.addPossibleValue(AbstractHttpModule.BODY_FORMAT_FORMDATA, AbstractHttpModule.BODY_FORMAT_FORMDATA);
+		bodyContentTypeOption.addPossibleValue(BODY_FORMAT_JSON, BODY_FORMAT_JSON);
+		bodyContentTypeOption.addPossibleValue(BODY_FORMAT_FORMDATA, BODY_FORMAT_FORMDATA);
 		options.add(bodyContentTypeOption);
 
-		ModuleOption asyncOption = new ModuleOption("syncMode", isAsync ? "async" : "sync", ModuleOption.OPTION_BOOLEAN);
+		ModuleOption asyncOption = new ModuleOption("syncMode", isAsync ? "async" : "sync", ModuleOption.OPTION_STRING);
 		asyncOption.addPossibleValue("asynchronous", "async");
 		asyncOption.addPossibleValue("synchronized", "sync");
 		options.add(asyncOption);
@@ -121,7 +121,7 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 	protected abstract HttpRequestBase createRequest();
 
 	@Override
-	public void sendOutput() {
+	public void activateWithSideEffects() {
 		final HttpTransaction response = new HttpTransaction(getGlobals().time);
 
 		// get HTTP request from subclass
@@ -188,6 +188,11 @@ public abstract class AbstractHttpModule extends AbstractSignalPathModule implem
 			}
 			sendOutput(response);
 		}
+	}
+
+	@Override
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
+		return getName() + ": Requests are not being made in historical mode by default. This can be changed in module options.";
 	}
 
 	/**

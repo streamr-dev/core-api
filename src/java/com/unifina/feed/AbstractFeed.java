@@ -15,8 +15,8 @@ import com.unifina.domain.data.Stream;
 import com.unifina.utils.Globals;
 
 /**
- * An AbstractFeed is responsible for starting and stopping an event
- * stream as well as matching the events and their IEventRecipients.
+ * An AbstractFeed is responsible for starting and stopping an event stream
+ *   as well as matching the events and their IEventRecipients.
  * @param <ModuleClass> Describes the kind of subscribers this Feed can take. The subscribers are usually modules that require a certain Stream, and you should use the most general type you can (often the IStreamRequirement interface).
  * @param <MessageClass> The kind of messages this Feed produces and sends to the relevant IEventRecipients. Must implement ITimestamped.
  * @param <KeyClass> The key is also used to subscribe the MessageSource with MessageSource#subscribe(key). The key also binds subscribers and messages together.
@@ -77,8 +77,12 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			throw new RuntimeException("Could not create an EventRecipient of class "+domainObject.getEventRecipientClass()+" for subscriber "+subscriber,e);
 		}
 	}
-	
-	protected EventRecipientClass getEventRecipientForMessage(MessageClass message) {
+
+	public EventRecipientClass getEventRecipientByKey(KeyClass key) {
+		return eventRecipientsByKey.get(key);
+	}
+
+	public EventRecipientClass getEventRecipientForMessage(MessageClass message) {
 		return eventRecipientsByKey.get(keyProvider.getMessageKey(message));
 	}
 	
@@ -100,16 +104,14 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			subscribers.add(subscriber);
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
-			EventRecipientClass recipient;
-
 			for (KeyClass key : keyProvider.getSubscriberKeys(subscriber)) {
-				if (!eventRecipientsByKey.containsKey(key)) {
+				EventRecipientClass recipient = getEventRecipientByKey(key);
+
+				if (recipient == null) {
 					recipient = createEventRecipient(subscriber);
 					eventRecipients.add(recipient);
 					eventRecipientsByKey.put(key, recipient);
 					globals.getDataSource().register(recipient);
-				} else {
-					recipient = eventRecipientsByKey.get(key);
 				}
 
 				// Register the subscription with the event recipient

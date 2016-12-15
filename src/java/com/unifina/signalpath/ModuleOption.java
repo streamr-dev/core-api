@@ -41,7 +41,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	 * @param description shown to user
 	 * @param value written into canvas JSON and sent back from UI
      */
-	public void addPossibleValue(String description, String value) {
+	public ModuleOption addPossibleValue(String description, String value) {
 		List<Map<String, String>> choices = (List<Map<String, String>>)this.get("possibleValues");
 		if (choices == null) {
 			choices = new LinkedList<>();
@@ -51,6 +51,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		choice.put("text", description);
 		choice.put("value", value);
 		choices.add(choice);
+		return this;
 	}
 
 	public void addTo(Map<String,Object> options) {

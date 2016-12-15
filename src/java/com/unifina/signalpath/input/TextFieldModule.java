@@ -16,9 +16,6 @@ public class TextFieldModule extends InputModule {
 
 	@Override
 	public void initialize() {
-		resendAll = false;
-		resendLast = 1;
-
 		for (Input i : out.getTargets()) {
 			if (!value.equals(""))
 				i.receive(value);

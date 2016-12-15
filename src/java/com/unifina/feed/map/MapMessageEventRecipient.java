@@ -53,6 +53,7 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 				Object val = msg.get(name);
 				
 				// Convert boolean to 1/0
+				// TODO: is this relevant now that there are boolean inputs/outputs?
 				if (val instanceof Boolean)
 					val = (((Boolean)val) ? 1D : 0D);
 				
