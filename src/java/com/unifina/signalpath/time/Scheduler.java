@@ -26,6 +26,8 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 	@Override
 	public void init() {
 		addOutput(out);
+		resendAll = false;
+		resendLast = 1;
 	}
 
 	public void clearState() {

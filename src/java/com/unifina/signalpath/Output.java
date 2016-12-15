@@ -11,9 +11,9 @@ public class Output<T> extends Endpoint<T> {
 	private Input<T>[] cachedTargets = new Input[0];
 	
 	// Used to flag the Propagators that contain this Output that a value has been sent
-	private ArrayList<Propagator> propagators = new ArrayList<>();
+	private transient ArrayList<Propagator> propagators;
 	// For super fast looping use an array instead of a List Iterator
-	private Propagator[] cachedPropagators = new Propagator[0];
+	private transient Propagator[] cachedPropagators;
 	
 	protected T previousValue = null;
 	
@@ -38,6 +38,11 @@ public class Output<T> extends Endpoint<T> {
 		previousValue = value;
 		
 		if (connected) {
+
+			if (cachedPropagators == null) {
+				updateCachedPropagators();
+			}
+
 			for (i=0; i < cachedPropagators.length; i++) {
 				cachedPropagators[i].sendPending = true;
 			}
@@ -56,18 +61,25 @@ public class Output<T> extends Endpoint<T> {
 	public void clear() {
 		previousValue = null;
 	}
-	
+
+	private void updateCachedPropagators() {
+		cachedPropagators = (propagators == null ? new Propagator[0] : propagators.toArray(new Propagator[propagators.size()]));
+	}
+
 	public void addPropagator(Propagator p) {
+		if (propagators == null) { // after de-serialization
+			propagators = new ArrayList<>();
+		}
 		if (!propagators.contains(p)) {
 			propagators.add(p);
-			cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
+			updateCachedPropagators();
 		}
 	}
 	
 	public void removePropagator(Propagator p) {
-		if (propagators.contains(p)) {
+		if (propagators != null && propagators.contains(p)) {
 			propagators.remove(p);
-			cachedPropagators = propagators.toArray(new Propagator[propagators.size()]);
+			updateCachedPropagators();
 		}
 	}
 	

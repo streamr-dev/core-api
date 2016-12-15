@@ -9,16 +9,21 @@ function StreamrTable(parent, options) {
 	} else {
 		this.options = {}
 		this.options.maxRows = 0
+		this.options.displayTitle = false
 	}
 }
 
-StreamrTable.prototype.initTable = function (headers) {
+StreamrTable.prototype.initTable = function(title, headers) {
 		
 	if (this.tableContainer)
 		this.tableContainer.remove()
 
 	this.tableContainer = $("<div class='table-module-container'></div>");
 	this.$parent.append(this.tableContainer);
+
+	if (this.options.displayTitle) {
+        this.setTitle(title)
+	}
 
 	this.table = $("<table class='event-table-module-content table table-condensed table-striped'></table>");
 	this.tableContainer.append(this.table);
@@ -29,19 +34,29 @@ StreamrTable.prototype.initTable = function (headers) {
 	this.table.append(this.tableBody);
 }
 
-	StreamrTable.prototype.setHeaders = function(headers) {
-		this.tableHeader = $("<thead><tr></tr></thead>");
-		if (this.table.find('thead').length) {
-			this.table.find('thead').replaceWith(this.tableHeader);
-		} else {
-			this.table.prepend(this.tableHeader)
-		}
+StreamrTable.prototype.setTitle = function(title) {
+    if (!this.tableCaption) {
+        this.tableCaption = $("<h4 class='streamr-widget-title'/>");
+        this.tableCaption.text(title);
+        this.tableContainer.append(this.tableCaption);
+    } else {
+        this.tableCaption.text(title);
+    }
+}
 
-		if (headers) {
-			for (var i=0; i<headers.length; i++)
-				this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
-		}
-	}
+StreamrTable.prototype.setHeaders = function(headers) {
+    this.tableHeader = $("<thead><tr></tr></thead>");
+    if (this.table.find('thead').length) {
+        this.table.find('thead').replaceWith(this.tableHeader);
+    } else {
+        this.table.prepend(this.tableHeader)
+    }
+
+    if (headers) {
+        for (var i=0; i<headers.length; i++)
+            this.tableHeader.find("tr").append("<th>"+headers[i]+"</th>");
+    }
+}
 
 StreamrTable.prototype.addRow = function (row, rowId, op) {
 	if (op != "append") { op = "prepend" }
@@ -89,6 +104,7 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	}
 	else if (d.hdr) {
 		this.setHeaders(d.hdr.headers)
+		this.setTitle(d.hdr.title)
 	}
 }
 

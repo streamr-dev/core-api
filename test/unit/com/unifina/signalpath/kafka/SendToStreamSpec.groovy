@@ -1,13 +1,19 @@
 package com.unifina.signalpath.kafka
 
+import com.unifina.data.FeedEvent
+import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.kafka.KafkaHistoricalFeed
+import com.unifina.feed.kafka.KafkaKeyProvider
+import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
+import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakePushChannel
 import com.unifina.utils.testutils.ModuleTestHelper
@@ -58,6 +64,7 @@ class SendToStreamSpec extends Specification {
 	StreamService streamService
 	Globals globals
 	SendToStream module
+	Stream stream
 
     def setup() {
 		defineBeans {
@@ -71,17 +78,21 @@ class SendToStreamSpec extends Specification {
 
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
+		feed.backtestFeed = KafkaHistoricalFeed.getName()
+		feed.eventRecipientClass = MapMessageEventRecipient.getName()
+		feed.keyProviderClass = KafkaKeyProvider.getName()
+		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
 
-		def s = new Stream()
-		s.feed = feed
-		s.id = s.name = "stream-0"
-		s.user = user
-		s.config = [fields: [
+		stream = new Stream()
+		stream.feed = feed
+		stream.id = stream.name = "stream-0"
+		stream.user = user
+		stream.config = [fields: [
 			[name: "strIn", type: "string"],
 			[name: "numIn", type: "number"],
 		]]
-		s.save(validate: false, failOnError: true)
+		stream.save(validate: false, failOnError: true)
 
 		mockStreamService = (MockStreamService) grailsApplication.getMainContext().getBean("streamService")
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
@@ -90,19 +101,21 @@ class SendToStreamSpec extends Specification {
 		globals.dataSource = new RealtimeDataSource()
     }
 
-	private void createModule() {
+	private void createModule(options = [:]) {
 		module = new SendToStream()
 		module.globals = globals
 		module.parentSignalPath = new SignalPath()
+		module.parentSignalPath.setGlobals(globals)
 		module.init()
 		module.configure([
 				params: [
 						[name: "stream", value: "stream-0"]
 				],
+				options: options
 		])
 	}
 	
-	void "sendToStream sends correct data to Kafka"() {
+	void "SendToStream sends correct data to Kafka"() {
 		createModule()
 
 
@@ -131,7 +144,7 @@ class SendToStreamSpec extends Specification {
 			}.test()
 	}
 
-	void "sendToStream throws exception if user does not have write access to stream"() {
+	void "SendToStream throws exception if user does not have write access to stream"() {
 		defineBeans {
 			permissionService(ReadPermissionService)
 		}
@@ -143,7 +156,7 @@ class SendToStreamSpec extends Specification {
 		thrown(AccessControlException)
 	}
 
-	void "sendToStream does not throw AccessControlException if user has write permission to stream"() {
+	void "SendToStream does not throw AccessControlException if user has write permission to stream"() {
 		defineBeans {
 			permissionService(WritePermissionService)
 		}
@@ -155,7 +168,7 @@ class SendToStreamSpec extends Specification {
 		notThrown(AccessControlException)
 	}
 
-	void "sendToStream does not throw AccessControlException if not in run context"() {
+	void "SendToStream does not throw AccessControlException if not in run context"() {
 		defineBeans {
 			permissionService(ReadPermissionService)
 		}
@@ -167,7 +180,7 @@ class SendToStreamSpec extends Specification {
 		notThrown(AccessControlException)
 	}
 
-	void "changing stream parameter during run time re-routes messages to new stream"() {
+	void "Changing stream parameter during run time re-routes messages to new stream"() {
 		createModule()
 
 		def s2 = new Stream()
@@ -201,5 +214,105 @@ class SendToStreamSpec extends Specification {
 				]
 				mockStreamService.receivedMessages = [:]
 			}.test()
+	}
+
+	void "SendToStream by default sends old values along with new values"() {
+		createModule()
+
+		when:
+		Map inputValues = [
+			strIn: ["a", null, "c", "d", null, "f"],
+			numIn: [  1,    2, null,  4, null,   6].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+			assert fakeKafkaService.receivedMessages == [
+				"stream-0": [
+					[strIn: "a", numIn: 1.0],
+					[strIn: "a", numIn: 2.0],
+					[strIn: "c", numIn: 2.0],
+					[strIn: "d", numIn: 4.0],
+					[strIn: "f", numIn: 6.0]
+				]
+			]
+			fakeKafkaService.receivedMessages = [:]
+		}.test()
+	}
+
+	void "SendToStream can be configured to send only new values"() {
+		createModule([sendOnlyNewValues: [value: true]])
+
+		when:
+		Map inputValues = [
+			strIn: ["a", null, "c", "d", null, "f"],
+			numIn: [  1,    2, null,  4, null,   6].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.afterEachTestCase {
+			assert fakeKafkaService.receivedMessages == [
+				"stream-0": [
+					[strIn: "a", numIn: 1.0],
+					[numIn: 2.0],
+					[strIn: "c"],
+					[strIn: "d", numIn: 4.0],
+					[strIn: "f", numIn: 6.0]
+				]
+			]
+			fakeKafkaService.receivedMessages = [:]
+		}.test()
+	}
+
+	void "events should be produced to DataSource event queue in historical mode"() {
+		globals.dataSource = new HistoricalDataSource(globals)
+		globals.setRealtime(false)
+		createModule()
+
+		// Create the module that subscribes to our target stream
+		ConfigurableStreamModule sourceModule = new ConfigurableStreamModule()
+		sourceModule.init()
+		sourceModule.getInput("stream").receive(stream)
+		globals.dataSource.register(sourceModule)
+
+		when:
+		Map inputValues = [
+				strIn: ["a", "b", "c", "d"],
+				numIn: [1, 2, 3, 4].collect {it?.doubleValue()},
+		]
+		Map outputValues = [:]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.overrideGlobals { globals }
+				.beforeEachTestCase {
+					globals.time = new Date()
+				}.afterEachTestCase {
+					// No messages have really been sent to Kafka
+					assert fakeKafkaService.receivedMessages.isEmpty()
+
+					// Correct events have been inserted to event queue
+					for (int i=0; i<inputValues.strIn.size(); i++) {
+						FeedEvent e = globals.getDataSource().getEventQueue().poll()
+						assert e != null
+
+						// Values are correct
+						assert e.content.payload.strIn == inputValues.strIn[i]
+						assert e.content.payload.numIn == inputValues.numIn[i]
+
+						// Event recipient is correct
+						assert e.recipient.modules.find {it == sourceModule}
+					}
+
+					// No other events have been inserted
+					assert globals.getDataSource().getEventQueue().isEmpty()
+				}.test()
+
 	}
 }

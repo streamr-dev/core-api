@@ -3,14 +3,17 @@ package com.unifina.signalpath;
 import com.unifina.data.FeedEvent;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.push.PushChannel;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
+import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -71,7 +74,9 @@ public class SignalPath extends ModuleWithUI {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void initFromRepresentation(Map iData) {
 		representation = iData;
-		name = (iData.containsKey("name") && iData.get("name") != null ? iData.get("name").toString() : name);
+		if (iData.get("name") != null) {
+			setName(iData.get("name").toString());
+		}
 
 		List<InputConnection> inputs = new ArrayList<>();
 		Map<String, Output> outputs = new HashMap<>();
@@ -324,7 +329,7 @@ public class SignalPath extends ModuleWithUI {
 							notReady.append("\n");
 
 							if (getGlobals().getUiChannel() != null) {
-								getGlobals().getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.name, input.getOwner().getHash()), uiChannelId);
+								getGlobals().getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()), uiChannelId);
 							}
 						}
 					}
@@ -341,6 +346,16 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	public String getUiChannelName() {
 		return "Notifications";
+	}
+
+	/**
+	 * Sends a notification to this SignalPath's UI channel.
+     */
+	public void showNotification(@NotNull String notification) {
+		PushChannel pushChannel = getGlobals().getUiChannel();
+		if (pushChannel != null) {
+			pushChannel.push(new NotificationMessage(notification), getUiChannelId());
+		}
 	}
 
 	@Override
@@ -360,10 +375,10 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
 		for (AbstractSignalPathModule module : mods) {
-			module.afterDeserialization();
+			module.afterDeserialization(serializationService);
 		}
 	}
 

@@ -3,13 +3,14 @@ package com.unifina.data;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import com.unifina.signalpath.StopRequest;
 import org.apache.log4j.Logger;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.datasource.DataSourceEventQueue;
 import com.unifina.utils.Globals;
 
-public class RealtimeEventQueue extends DataSourceEventQueue {
+public class RealtimeEventQueue extends DataSourceEventQueue implements IEventRecipient {
 
 	private long elapsedTime;
 	private int eventCounter;
@@ -105,4 +106,11 @@ public class RealtimeEventQueue extends DataSourceEventQueue {
 		}
 	}
 
+	@Override
+	public void receive(FeedEvent event) {
+		if (event.content instanceof StopRequest) {
+			log.info("Received abort request, aborting...");
+			abort();
+		}
+	}
 }

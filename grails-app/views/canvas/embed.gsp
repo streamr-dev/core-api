@@ -27,7 +27,7 @@ $(document).ready(function() {
 		},
 		connectionOptions: {
 			server: "${grailsApplication.config.streamr.ui.server}",
-			autoConnect: false,
+			autoConnect: true,
 			autoDisconnect: true
 		}
 	});

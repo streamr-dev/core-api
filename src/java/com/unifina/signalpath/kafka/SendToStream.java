@@ -1,19 +1,31 @@
 package com.unifina.signalpath.kafka;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.AbstractFeed;
+import com.unifina.feed.StreamrMessage;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
+import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.web.json.JSONArray;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.security.AccessControlException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-public class SendToStream extends AbstractSignalPathModule {
+/**
+ * This module (only) supports sending messages to Kafka/json streams (feed id 7)
+ *
+ * // TODO: partitioning key
+ */
+public class SendToStream extends ModuleWithSideEffects {
 
 	protected StreamParameter streamParameter = new StreamParameter(this, "stream");
 	transient protected JSONObject streamConfig = null;
@@ -23,53 +35,101 @@ public class SendToStream extends AbstractSignalPathModule {
 
 	protected boolean historicalWarningShown = false;
 	private String lastStreamId = null;
-	
+	private boolean sendOnlyNewValues = false;
+	private List<Input> fieldInputs = new ArrayList<>();
+
 	@Override
 	public void init() {
 		// Pre-fetch services for more predictable performance
-		permissionService = getGlobals().getBean(PermissionService.class);
-		streamService = getGlobals().getBean(StreamService.class);
+		ensureServices();
 		
 		addInput(streamParameter);
-
 		streamParameter.setUpdateOnChange(true);
-		
+
 		// TODO: don't rely on static ids
 		Feed feedFilter = new Feed();
 		feedFilter.setId(7L);
 		streamParameter.setFeedFilter(feedFilter);
 	}
 
+	private void ensureServices() {
+		// will be null after deserialization
+		if (streamService == null) {
+			streamService = getGlobals().getBean(StreamService.class);
+		}
+		if (permissionService == null) {
+			permissionService = getGlobals().getBean(PermissionService.class);
+		}
+	}
+
 	@Override
-	public void sendOutput() {
-		if (getGlobals().isRealtime()) {
-			Map msg = new LinkedHashMap<>();
-			for (Input i : drivingInputs) {
-				msg.put(i.getName(), i.getValue());
-			}
-			if (streamService == null) { // null after de-serialization
-				streamService = getGlobals().getBean(StreamService.class);
-			}
-			Stream stream = streamParameter.getValue();
-			authenticateStream(stream);
-			streamService.sendMessage(stream, msg);
+	protected boolean allowSideEffectsInHistoricalMode() {
+		// SendToStream cannot be configured to really write to the stream in historical mode (for now)
+		return false;
+	}
+
+	@Override
+	public void activateWithSideEffects() {
+		ensureServices();
+		Stream stream = streamParameter.getValue();
+		authenticateStream(stream);
+		streamService.sendMessage(stream, inputValuesToMap());
+	}
+
+	@Override
+	protected void activateWithoutSideEffects() {
+		Globals globals = getGlobals();
+
+		// Create the message locally and route it to the stream locally, without actually producing to the stream
+		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
+
+		// Find the Feed implementation for the target Stream
+		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());
+
+		// Find the IEventRecipient for this message
+		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
+
+		FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
+		getGlobals().getDataSource().getEventQueue().enqueue(event);
+	}
+
+	@Override
+	protected String getNotificationAboutActivatingWithoutSideEffects() {
+		return this.getName()+": In historical mode, events written to Stream '" + streamParameter.getValue().getName()+"' are only available within this Canvas.";
+	}
+
+	private Map<String, Object> inputValuesToMap() {
+		Map msg = new LinkedHashMap<>();
+		Iterable<Input> inputs = sendOnlyNewValues ? drivingInputs : fieldInputs;
+		for (Input i : inputs) {
+			msg.put(i.getName(), i.getValue());
 		}
-		else if (!historicalWarningShown && getGlobals().getUiChannel()!=null) {
-			getGlobals().getUiChannel().push(new NotificationMessage(this.getName()+": Not sending to Stream '" +
-				streamParameter.getValue()+"' in historical playback mode."), parentSignalPath.getUiChannelId());
-			historicalWarningShown = true;
-		}
+		return msg;
 	}
 
 	@Override
 	public void clearState() {}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		ModuleOptions options = ModuleOptions.get(config);
+		options.addIfMissing(ModuleOption.createBoolean("sendOnlyNewValues", sendOnlyNewValues));
+		return config;
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		
+
 		Stream stream = streamParameter.getValue();
-		
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ModuleOption sendOnlyNewValuesOption = options.getOption("sendOnlyNewValues");
+		if (sendOnlyNewValuesOption != null) {
+			sendOnlyNewValues = sendOnlyNewValuesOption.getBoolean();
+		}
+
 		if (stream==null)
 			return;
 
@@ -79,22 +139,22 @@ public class SendToStream extends AbstractSignalPathModule {
 			throw new IllegalArgumentException(this.getName()+": Unable to write to stream type: " +
 				stream.getFeed().getName());
 		}
-		
+
 		if (stream.getConfig()==null) {
 			throw new IllegalStateException(this.getName()+": Stream " + stream.getName() +
 				" is not properly configured!");
 		}
-		
+
 		streamConfig = (JSONObject) JSON.parse(stream.getConfig());
 
 		JSONArray fields = streamConfig.getJSONArray("fields");
-		
+
 		for (Object o : fields) {
 			Input input = null;
 			JSONObject j = (JSONObject) o;
 			String type = j.getString("type");
 			String name = j.getString("name");
-			
+
 			// TODO: add other types
 			if (type.equalsIgnoreCase("number")) {
 				input = new TimeSeriesInput(this, name);
@@ -114,9 +174,10 @@ public class SendToStream extends AbstractSignalPathModule {
 				input.canBeFeedback = false;
 				input.requiresConnection = false;
 				addInput(input);
+				fieldInputs.add(input);
 			}
 		}
-		
+
 		if (streamConfig.containsKey("name"))
 			this.setName(streamConfig.get("name").toString());
 	}

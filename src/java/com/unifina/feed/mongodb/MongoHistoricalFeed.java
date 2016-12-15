@@ -1,6 +1,5 @@
 package com.unifina.feed.mongodb;
 
-import com.unifina.data.IEventRecipient;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
@@ -10,10 +9,8 @@ import com.unifina.feed.map.MapMessage;
 import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.utils.Globals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 /**
