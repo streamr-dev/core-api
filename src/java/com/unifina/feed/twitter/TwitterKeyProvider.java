@@ -4,15 +4,19 @@ import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractKeyProvider;
 import com.unifina.signalpath.twitter.TwitterModule;
 import com.unifina.utils.Globals;
+import edu.emory.mathcs.backport.java.util.Collections;
+
+import java.util.List;
 
 public class TwitterKeyProvider extends AbstractKeyProvider<TwitterModule, TwitterMessage, String> {
+
 	public TwitterKeyProvider(Globals globals, Feed feed) {
 			super(globals, feed);
 	}
 
 	@Override
-	public String getSubscriberKey(TwitterModule subscriber) {
-		return subscriber.getStream().getId();
+	public List<String> getSubscriberKeys(TwitterModule subscriber) {
+		return Collections.singletonList(subscriber.getStream().getId());
 	}
 
 	@Override

@@ -6,8 +6,8 @@ import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.kafka.KafkaHistoricalFeed
-import com.unifina.feed.kafka.KafkaKeyProvider
+import com.unifina.feed.StreamrBinaryMessageKeyProvider
+import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
@@ -78,9 +78,9 @@ class SendToStreamSpec extends Specification {
 
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
-		feed.backtestFeed = KafkaHistoricalFeed.getName()
+		feed.backtestFeed = CassandraHistoricalFeed.getName()
 		feed.eventRecipientClass = MapMessageEventRecipient.getName()
-		feed.keyProviderClass = KafkaKeyProvider.getName()
+		feed.keyProviderClass = StreamrBinaryMessageKeyProvider.getName()
 		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
 
@@ -230,7 +230,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert fakeKafkaService.receivedMessages == [
+			assert mockStreamService.receivedMessages == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[strIn: "a", numIn: 2.0],
@@ -239,7 +239,7 @@ class SendToStreamSpec extends Specification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
-			fakeKafkaService.receivedMessages = [:]
+			mockStreamService.receivedMessages = [:]
 		}.test()
 	}
 
@@ -257,7 +257,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert fakeKafkaService.receivedMessages == [
+			assert mockStreamService.receivedMessages == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[numIn: 2.0],
@@ -266,7 +266,7 @@ class SendToStreamSpec extends Specification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
-			fakeKafkaService.receivedMessages = [:]
+			mockStreamService.receivedMessages = [:]
 		}.test()
 	}
 
@@ -295,7 +295,7 @@ class SendToStreamSpec extends Specification {
 					globals.time = new Date()
 				}.afterEachTestCase {
 					// No messages have really been sent to Kafka
-					assert fakeKafkaService.receivedMessages.isEmpty()
+					assert mockStreamService.receivedMessages.isEmpty()
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
