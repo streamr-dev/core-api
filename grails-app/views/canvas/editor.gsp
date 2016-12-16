@@ -290,6 +290,19 @@ $(document).ready(function() {
 		signalPath: SignalPath
 	})
 
+	var moduleDebugMessageList = new ModuleDebugMessageList()
+	new CanvasDebugViewer({
+	    el: $("#canvas-debug-viewer"),
+	    collection: moduleDebugMessageList,
+	    isAdhoc: SignalPath.isAdhoc.bind(SignalPath)
+	})
+	$(SignalPath).on("moduleDebugMessage", function(event, msg) {
+	    moduleDebugMessageList.add(msg)
+	})
+	$(SignalPath).on("loaded starting", function() {
+	   moduleDebugMessageList.reset()
+	})
+
 	$(SignalPath).on('new', function(e, json) {
 		$("#share-button").attr("disabled", "disabled")
 	})
@@ -462,6 +475,7 @@ $(document).unload(function () {
 			</li>
 		</ui:breadcrumb>
 		<div id="canvas" class="scrollable embeddable"></div>
+		<div id="canvas-debug-viewer"></div>
 	</div>
 
 	<div id="main-menu-bg"></div>

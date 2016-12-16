@@ -14837,6 +14837,9 @@ a:hover {
 .module {
   min-width: 150px;
 }
+.module:target .moduleheader {
+  background-color: yellow;
+}
 .moduleheader {
   width: 100%;
   height: 18px;
@@ -15383,6 +15386,19 @@ body.canvas-editor-page #canvas-name-editor:not(.editing) button {
 }
 body.canvas-editor-page #canvas-name-editor .canvas-name {
   cursor: pointer;
+}
+body.canvas-editor-page #canvas-debug-viewer {
+  position: fixed;
+  top: 500px;
+}
+body.canvas-editor-page #canvas-debug-viewer td {
+  padding: 0em 0.5em;
+}
+body.canvas-editor-page #canvas-debug-viewer td:first-child {
+  padding-left: 0;
+}
+body.canvas-editor-page #canvas-debug-viewer td:last-child {
+  padding-right: 0;
 }
 body.canvas-editor-page .breadcrumb {
   margin-bottom: 0px;

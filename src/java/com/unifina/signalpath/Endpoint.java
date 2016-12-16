@@ -78,6 +78,10 @@ public abstract class Endpoint<T> implements Serializable {
 		id = IdGenerator.get();
 	}
 
+	public String getId() {
+		return id;
+	}
+
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
 
