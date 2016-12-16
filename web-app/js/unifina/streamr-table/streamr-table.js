@@ -104,7 +104,9 @@ StreamrTable.prototype.receiveResponse = function (d) {
 	}
 	else if (d.hdr) {
 		this.setHeaders(d.hdr.headers)
-		this.setTitle(d.hdr.title)
+		if (this.options.displayTitle) {
+			this.setTitle(d.hdr.title)
+		}
 	}
 }
 
