@@ -16,7 +16,11 @@ class ModuleBrowserSpec extends LoginTester1Spec {
 
 		when: "click on last top-level title of user guide"
 		def link = tableOfContents.children().last().children("a")
+
+		// Wait for JavaScript logic to finish
+		waitFor { !link.text().empty }
 		link.click()
+
 		then: "the corresponding header should be visible"
 		$("h2", text:link.text()).displayed
 	}
