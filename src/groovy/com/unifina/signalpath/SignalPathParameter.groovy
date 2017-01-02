@@ -24,6 +24,7 @@ class SignalPathParameter extends Parameter<Canvas> {
 				property 'name', 'name'
 			}
 			eq("hasExports", true)
+			eq("adhoc", false)
 			order("lastUpdated", "desc")
 		}
 
