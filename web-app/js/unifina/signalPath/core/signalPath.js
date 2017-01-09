@@ -752,7 +752,7 @@ var SignalPath = (function () {
 			debugLoopInterval = setInterval(function () {
 				$.ajax({
 					type: 'POST',
-					url: options.apiUrl + '/canvases/' + runningJson.id + "/request",
+					url: pub.getURL() + "/request",
 					data: JSON.stringify({type: "json"}),
 					contentType: "application/json",
 					dataType: "json",
