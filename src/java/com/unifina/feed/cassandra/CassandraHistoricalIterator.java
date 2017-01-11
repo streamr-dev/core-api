@@ -3,6 +3,7 @@ package com.unifina.feed.cassandra;
 import com.datastax.driver.core.*;
 import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.StreamrBinaryMessageParser;
 import com.unifina.feed.map.MapMessage;
 import com.unifina.service.CassandraService;
 import grails.converters.JSON;
@@ -31,6 +32,8 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 
 	private static final int PREFETCH_WHEN_REMAINING = 4500;
 	private static final int FETCH_SIZE = 5000;
+
+	private StreamrBinaryMessageParser parser = new StreamrBinaryMessageParser();
 
 	public CassandraHistoricalIterator(Stream stream, Integer partition, Date startDate, Date endDate) {
 		this.stream = stream;
@@ -80,12 +83,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 		}
 
 		StreamrBinaryMessage msg = new StreamrBinaryMessage(row.getBytes("payload"));
-		if (msg.getContentType() == StreamrBinaryMessage.CONTENT_TYPE_JSON) {
-			return new MapMessage(new Date(msg.getTimestamp()), new Date(msg.getTimestamp()), (JSONObject) JSON.parse(msg.toString()));
-		}
-		else {
-			throw new RuntimeException("Received payload in unknown format: "+msg.toString());
-		}
+		return parser.parse(msg);
 	}
 
 	@Override
