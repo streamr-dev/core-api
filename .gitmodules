@@ -18,4 +18,4 @@
 	branch = master
 [submodule "web-app/js/webcomponentsjs"]
 	path = web-app/js/webcomponentsjs
-	url = git@github.com:streamr-dev/swagger-ui.git
+	url = git@github.com:streamr-dev/webcomponentsjs.git
