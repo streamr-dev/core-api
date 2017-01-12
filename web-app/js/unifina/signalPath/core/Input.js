@@ -26,6 +26,15 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		// No warning if has initialvalue
 		return (pub.getInitialValue()===null || pub.getInitialValue()===undefined) && super_hasWarning()
 	}
+
+	var super_updateState = pub.updateState;
+	pub.updateState = function(value) {
+        if (value) {
+            super_updateState('"' + value + '"');
+        } else {
+            super_updateState("");
+        }
+    }
 	
 	var super_createSettings = pub.createSettings;
 	pub.createSettings = function(div,data) {
@@ -63,7 +72,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return function() { return d.initialValue; };
 				})(data),
 				setValue: (function(d){
-					return function(value) { return d.initialValue = value; };
+					return function(value) {
+						pub.updateState(value)
+						return d.initialValue = value;
+					};
 				})(data),
 				buttonText: function(currentValue) { return "IV" },
 				tooltip: 'Initial value',
@@ -71,6 +83,8 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return currentValue != null;
 				}
 			});
+
+			pub.updateState(iv.getValue())
 
 			// Override click handler
 			iv.click = function() {

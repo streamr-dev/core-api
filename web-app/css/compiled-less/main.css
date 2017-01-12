@@ -14907,6 +14907,11 @@ td.output {
   max-width: 100px;
   white-space: pre-wrap;
 }
+.iostate {
+  display: inline-block;
+  padding-left: 4px;
+  font-style: italic;
+}
 .switchContainer {
   display: inline-block;
   position: absolute;
