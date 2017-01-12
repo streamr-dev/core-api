@@ -14957,9 +14957,15 @@ div.output .switchContainer .ioSwitch {
 .endpoint .variadic-plus {
   display: none;
 }
+.option {
+  display: table-row;
+}
 .option .optionTitle {
-  width: 100px;
-  display: inline-block;
+  display: table-cell;
+  padding-right: 0.5em;
+}
+.option .optionValue {
+  display: table-cell;
 }
 ._jsPlumb_endpoint {
   z-index: 10;

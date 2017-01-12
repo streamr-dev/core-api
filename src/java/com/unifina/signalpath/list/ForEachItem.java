@@ -26,6 +26,12 @@ public class ForEachItem extends AbstractSignalPathModule {
 	}
 
 	@Override
+	public void init() {
+		addInput(signalPathParameter);
+		addInput(keepState);
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 

@@ -159,6 +159,15 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * By default, test all SerializationModes (NONE, SERIALIZE and SERIALIZE_DESERIALIZE).
+		 * This can be changed by calling this method with a subset of those SerializationModes.
+         */
+		public Builder serializationModes(Set<SerializationMode> serializationModes) {
+			testHelper.selectedSerializationModes = serializationModes;
+			return this;
+		}
+
+		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
 		 */
@@ -225,23 +234,42 @@ public class ModuleTestHelper {
 
 	private ModuleTestHelper() {}
 
+	// By default, test all serialization modes
+	private Set<SerializationMode> selectedSerializationModes = new HashSet<>(Arrays.asList(SerializationMode.values()));
+
 	public boolean test() throws IOException, ClassNotFoundException {
 		try {
-			boolean a = runTestCase();        // Clean slate test
+			boolean pass = true;
 
-			clearModuleAndCollectorsAndChannels();
-			clearStateCalled = true;
-			boolean b = runTestCase();      // Test that clearState() works
+			if (selectedSerializationModes.contains(SerializationMode.NONE)) {
+				if (!runTestCase()) {        // Clean slate test
+					pass = false;
+				}
 
-			clearModuleAndCollectorsAndChannels();
-			serializationMode = SerializationMode.SERIALIZE;
-			boolean c = runTestCase();       // Test that serialization works and has no side effects
+				clearModuleAndCollectorsAndChannels();
+				clearStateCalled = true;
+				if (!runTestCase()) {        // Test that clearState() works
+					pass = false;
+				}
+			}
 
-			clearModuleAndCollectorsAndChannels();
-			serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
-			boolean d = runTestCase();       // Test that serialization + deserialization works
+			if (selectedSerializationModes.contains(SerializationMode.SERIALIZE)) {
+				clearModuleAndCollectorsAndChannels();
+				serializationMode = SerializationMode.SERIALIZE;
+				if (!runTestCase()) {       // Test that serialization works and has no side effects
+					pass = false;
+				}
+			}
 
-			return a && b && c && d;
+			if (selectedSerializationModes.contains(SerializationMode.SERIALIZE_DESERIALIZE)) {
+				clearModuleAndCollectorsAndChannels();
+				serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
+				if (!runTestCase()) {       // Test that serialization + deserialization works
+					pass = false;
+				}
+			}
+
+			return pass;
 		} catch (TestHelperException ex) {
 			throw ex;
 		} catch (Exception ex) {
@@ -285,6 +313,9 @@ public class ModuleTestHelper {
 			// Further global time
 			furtherTime(i);
 		}
+
+		// End of data feed, destroy module
+		module.destroy();
 
 		// Test ui channel messages
 		if (isUiChannelMode()) {

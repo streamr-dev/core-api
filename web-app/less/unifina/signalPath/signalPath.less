@@ -190,9 +190,17 @@ div.output .switchContainer .ioSwitch {
 	display: none;
 }
 
+.option {
+	display: table-row;
+}
+
 .option .optionTitle {
-	width: 100px;
-	display: inline-block;
+	display: table-cell;
+	padding-right: 0.5em;
+}
+
+.option .optionValue {
+	display: table-cell;
 }
 
 ._jsPlumb_endpoint {
@@ -209,14 +217,6 @@ div.output .switchContainer .ioSwitch {
 
 ._jsPlumb_connector {
 	z-index:1;
-}
-
-.csvDownload {
-	display: block;
-}
-
-.csvDownload img {
-	vertical-align:middle; 	
 }
 
 .ui-menu {

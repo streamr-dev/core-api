@@ -38,6 +38,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 
 		// The flags must be appended in reverse order
 
+		if (data.canConnect === false) {
+			return;
+		}
+
 		// Feedback connection. Default false. Switchable for TimeSeries types.
 		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
 			var feedback = new SignalPath.IOSwitch(switchDiv, "ioSwitch feedback", {
