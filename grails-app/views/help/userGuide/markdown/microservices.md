@@ -98,8 +98,6 @@ By default, playback events are processed sequentially but at a much faster pace
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="playback-options.png" class="img-responsive" />
 
-You can use the dropdown menu to save all Chart inputs in a CSV file during a historical run. If there’s more than one Chart in the canvas, each one will produce a separate output file.
-
 ## Running live services
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="start-realtime-run.png" class="side-image"/>
