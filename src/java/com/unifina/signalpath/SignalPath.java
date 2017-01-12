@@ -177,6 +177,8 @@ public class SignalPath extends ModuleWithUI {
 			for (Input it : exportedInputs) {
 				// Ensure variadic endpoints are imported as normal endpoints
 				it.setJsClass(null);
+				// Prevent exported Endpoints from being exported on wrapping module
+				it.setExported(false);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
 				if (getInput(it.name) == null) {
@@ -194,6 +196,8 @@ public class SignalPath extends ModuleWithUI {
 			for (Output it : exportedOutputs) {
 				// Ensure variadic endpoints are imported as normal endpoints
 				it.setJsClass(null);
+				// Prevent exported Endpoints from being exported on wrapping module
+				it.setExported(false);
 				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
 				it.regenerateId();
 				if (getOutput(it.name) == null) {

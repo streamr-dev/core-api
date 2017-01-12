@@ -26,6 +26,15 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		// No warning if has initialvalue
 		return (pub.getInitialValue()===null || pub.getInitialValue()===undefined) && super_hasWarning()
 	}
+
+	var super_updateState = pub.updateState;
+	pub.updateState = function(value) {
+        if (value) {
+            super_updateState('"' + value + '"');
+        } else {
+            super_updateState("");
+        }
+    }
 	
 	var super_createSettings = pub.createSettings;
 	pub.createSettings = function(div,data) {
@@ -37,6 +46,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		div.append(switchDiv);
 
 		// The flags must be appended in reverse order
+
+		if (data.canConnect === false) {
+			return;
+		}
 
 		// Feedback connection. Default false. Switchable for TimeSeries types.
 		if (data.type=="Double" && (data.canBeFeedback==null || data.canBeFeedback)) {
@@ -59,7 +72,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return function() { return d.initialValue; };
 				})(data),
 				setValue: (function(d){
-					return function(value) { return d.initialValue = value; };
+					return function(value) {
+						pub.updateState(value)
+						return d.initialValue = value;
+					};
 				})(data),
 				buttonText: function(currentValue) { return "IV" },
 				tooltip: 'Initial value',
@@ -67,6 +83,8 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 					return currentValue != null;
 				}
 			});
+
+			pub.updateState(iv.getValue())
 
 			// Override click handler
 			iv.click = function() {

@@ -16,7 +16,7 @@ import spock.lang.Shared
 @Mixin(ConfirmationMixin)
 @Mixin(StreamMixin)
 @TestFor(CanvasController) // for JSON conversion to work
-class RunCSVExportModeSpec extends LoginTester1Spec {
+class ExportCSVFunctionalSpec extends LoginTester1Spec {
 
 	@Shared StreamService streamService
 
@@ -28,17 +28,17 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 		cleanupStreamService(streamService)
 	}
 
-	void "running CSV export mode results in file"() {
+	void "ExportCSV module produces a file"() {
 		setup: "create stream"
 		to StreamCreatePage
-		def streamName = "RunCSVExportModeSpec" + System.currentTimeMillis()
+		def streamName = "ExportCSVFunctionalSpec" + System.currentTimeMillis()
 		name << streamName
 		nextButton.click()
 		waitFor { at StreamShowPage }
 
 		and: "produce data to stream"
 		String topicId = streamId.text()
-		produceAllDataToStream(topicId)
+		produceAllDataToStream(topicId, 5)
 
 		and: "configure stream with autodetect"
 		configureFieldsButton.click()
@@ -53,26 +53,28 @@ class RunCSVExportModeSpec extends LoginTester1Spec {
 		and: "create canvas"
 		to CanvasPage
 		searchAndClick(streamName)
-		searchAndClick("Chart")
-		moveModuleBy("Chart", 100, 100)
-		connectEndpoints(findOutput("Stream", "value"), findInput("Chart", "in1"))
+		searchAndClick("ExportCSV")
+		moveModuleBy("ExportCSV", 100, 100)
+		connectEndpoints(findOutput("Stream", "key"), findInputByDisplayName("ExportCSV", "in1"))
+		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("ExportCSV", "in2"))
 
-		when: "run canvas in CSV export mode"
-		ensureHistoricalTabDisplayed()
-		runHistoricalDropdownButton.click()
-		runCsvExportModeButton.click()
-		waitForConfirmation()
-		acceptConfirmation()
+		and: "save and start canvas in realtime mode"
+		ensureRealtimeTabDisplayed()
+		startCanvas(true)
 
-		then: "download link appears"
-		waitFor(30) { !$(".csvDownload a").isEmpty() }
+		and: "produce data to realtime canvas and stop it"
+		produceAllDataToStream(topicId, 1000)
+		stopCanvas()
 
-		and: "download link works"
-		def csvContent = downloadText($(".csvDownload a").attr("href"))
-		csvContent.readLines().size() == 100 + 1 // + 1 is header row
+		when: "download link appears"
+		waitFor(30) { !$(".moduleDownloadLink a").isEmpty() }
+
+		then: "download link works"
+		def csvContent = downloadText($(".moduleDownloadLink a").attr("href"))
+		csvContent.readLines().size() == 1000 + 1 // data + header
 	}
 
-	private void produceAllDataToStream(String id, int iters = 100) {
+	private void produceAllDataToStream(String id, int iters) {
 		Stream stream = new Stream()
 		stream.id = id
 		(1..iters).each { num ->

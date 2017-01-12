@@ -19,7 +19,7 @@ public class Expression extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		expressionParam.setUpdateOnChange(true);
-		expressionParam.setUnconnectable(true);
+		expressionParam.setCanConnect(false);
 
 		addInput(expressionParam);
 		addOutput(out);

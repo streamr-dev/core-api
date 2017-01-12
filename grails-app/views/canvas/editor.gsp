@@ -215,20 +215,6 @@ $(document).ready(function() {
 		SignalPath.start();
 	});
 
-	$('#run-csv-button').click(function() {
-		var startRequest = {
-			csv: true,
-			csvOptions: {
-				timeFormat: $("#csvTimeFormat").val(),
-				separator: $("#csvSeparator").val(),
-				filterEmpty: $("#csvFilterEmpty").attr("checked") ? true : false,
-				lastOfDayOnly: $("#csvLastOfDayOnly").attr("checked") ? true : false
-			}
-		}
-
-		SignalPath.startAdhoc(startRequest);
-	});
-
 	// Historical run button
 	var historicalRunButton = new CanvasStartButton({
 		el: $("#run-historical-button"),
@@ -388,18 +374,10 @@ $(document).unload(function () {
 							</div>
 
 							<div class="btn-group btn-block run-group">
-								<button id="run-historical-button" class="btn btn-primary col-xs-10 run-button">
+								<button id="run-historical-button" class="btn btn-primary col-xs-12 run-button">
 									<i class="fa fa-play"></i>
 									Run
 								</button>
-								<button id="runDropdown" type="button" class="btn btn-primary col-xs-2 dropdown-toggle"
-										data-toggle="dropdown">
-									<span class="caret"></span>
-									<span class="sr-only">Toggle Dropdown</span>
-								</button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a id="csvModalButton" href="#" data-toggle="modal" data-target="#csvModal">Run as CSV export..</a></li>
-								</ul>
 							</div>
 						</form>
 					</div>
@@ -466,56 +444,6 @@ $(document).unload(function () {
 	</div>
 
 	<div id="main-menu-bg"></div>
-
-	<div id="csvModal" class="modal fade">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	        <h4 class="modal-title">CSV Export Options</h4>
-	      </div>
-	      <div class="modal-body">
-				<div class="form-group">
-					<label>Time Format</label>
-					
-					<select id="csvTimeFormat" class="form-control">
-						<option value="1">Java timestamp (milliseconds since January 1st 1970 UTC)</option>
-						<option value="2" selected>ISO 8601 in your timezone</option>
-						<option value="3">ISO 8601 in UTC</option>
-					</select>
-					
-					<label>Separator</label>
-					
-					<select id="csvSeparator" class="form-control">
-						<option value="," selected>Comma (,)</option>
-						<option value=";">Semicolon (;)</option>
-						<option value="tab">Tab</option>
-					</select>
-					
-					<label>Filters</label>
-					
-					<div class="checkbox">
-						<label>
-							<input type="checkbox" id="csvFilterEmpty" value="true" checked/>
-							Require data in all columns
-						</label>
-					</div>
-					
-					<div class="checkbox">
-						<label>
-							<input type="checkbox" id="csvLastOfDayOnly" value="false"/>
-							Last row of day only
-						</label>
-					</div>
-				</div>
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        <button id="run-csv-button" class="btn btn-primary" data-dismiss="modal">Run</button>
-	      </div>
-	    </div><!-- /.modal-content -->
-	  </div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
 	
 	<div id="historicalOptionsModal" class="modal fade">
 	  <div class="modal-dialog">
