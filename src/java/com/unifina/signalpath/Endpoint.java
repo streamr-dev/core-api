@@ -18,7 +18,8 @@ public abstract class Endpoint<T> implements Serializable {
 	private boolean configured = false;
 	
 	protected boolean canConnect = true;
-	private boolean export = false;
+
+	private boolean exported = false;
 	protected List<String> aliases = null;
 	
 	public Endpoint(AbstractSignalPathModule owner, String name, String typeName) {
@@ -42,7 +43,15 @@ public abstract class Endpoint<T> implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	public boolean isExported() {
+		return exported;
+	}
+
+	public void setExported(boolean exported) {
+		this.exported = exported;
+	}
+
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -79,10 +88,6 @@ public abstract class Endpoint<T> implements Serializable {
 		id = IdGenerator.get();
 	}
 
-	public void unexport() {
-		export = false;
-	}
-
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
 
@@ -92,7 +97,7 @@ public abstract class Endpoint<T> implements Serializable {
 		map.put("type", getTypeName());
 		map.put("connected", isConnected());
 		map.put("canConnect", canConnect);
-		map.put("export", export);
+		map.put("export", isExported());
 
 		if (displayName != null) {
 			map.put("displayName", displayName);
@@ -129,7 +134,7 @@ public abstract class Endpoint<T> implements Serializable {
 		}
 
 		if (config.containsKey("export")) {
-			export = Boolean.parseBoolean(config.get("export").toString());
+			setExported(Boolean.parseBoolean(config.get("export").toString()));
 		}
 	}
 	
