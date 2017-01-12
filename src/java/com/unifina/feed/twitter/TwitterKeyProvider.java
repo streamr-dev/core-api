@@ -4,8 +4,8 @@ import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractKeyProvider;
 import com.unifina.signalpath.twitter.TwitterModule;
 import com.unifina.utils.Globals;
-import edu.emory.mathcs.backport.java.util.Collections;
 
+import java.util.Collections;
 import java.util.List;
 
 public class TwitterKeyProvider extends AbstractKeyProvider<TwitterModule, TwitterMessage, String> {
