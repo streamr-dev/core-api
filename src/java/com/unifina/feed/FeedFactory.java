@@ -97,8 +97,8 @@ public class FeedFactory {
 	public synchronized static void stopAndClearAll() {
 		for (Long key : instanceByFeed.keySet()) {
 			instanceByFeed.get(key).quit();
-			instanceByFeed.remove(key);
 		}
+		instanceByFeed.clear();
 	}
 
 }

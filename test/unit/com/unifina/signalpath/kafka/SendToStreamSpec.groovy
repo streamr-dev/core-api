@@ -103,6 +103,7 @@ class SendToStreamSpec extends Specification {
 		module = new SendToStream()
 		module.globals = globals
 		module.parentSignalPath = new SignalPath()
+		module.parentSignalPath.setGlobals(globals)
 		module.init()
 		module.configure([
 				params: [
