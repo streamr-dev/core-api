@@ -91,6 +91,9 @@ public class Output<T> extends Endpoint<T> {
 	}
 
 	public void disconnect() {
+		for (Input input : targets) {
+			input.disconnect();
+		}
 		targets.clear();
 		connected = false;
 		cachedTargets = targets.toArray(new Input[targets.size()]);

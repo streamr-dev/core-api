@@ -353,7 +353,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function getContextMenu() {
 		return [
 		        {title: "Clone module", cmd: "clone"},
-				{title: "Rename", cmd: "rename"}
+				{title: "Rename module", cmd: "renameModule"}
 		]
 	}
 	prot.getContextMenu = getContextMenu;
@@ -361,7 +361,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function handleContextMenuSelection(target,selection) {
 		if (selection == "clone" ) {
 			prot.clone();
-		} else if (selection == "rename") {
+		} else if (selection == "renameModule") {
 			prot.rename()
 		}
 	}

@@ -66,9 +66,6 @@ public class SubCanvasSpec extends LoginTester1Spec {
 		then: "The unique string for this test must not be shown on the label and table"
 		findModuleOnCanvas("Label").find(".modulelabel")?.text() != unique
 		!findModuleOnCanvas("Table").find("table.event-table-module-content tbody tr")?.text()?.contains(unique)
-
-		cleanup:
-		stopCanvasIfRunning()
 	}
 
 	def "Subcanvas is loadable on ForEach module and ui modules work"() {
