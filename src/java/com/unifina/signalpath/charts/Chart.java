@@ -1,51 +1,23 @@
 package com.unifina.signalpath.charts;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
 import com.unifina.signalpath.ModuleOption;
 import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.utils.CSVWriter;
 import com.unifina.utils.TimeOfDayUtil;
 
-public abstract class Chart extends ModuleWithUI {
+import java.util.Date;
+import java.util.Map;
 
-	protected File f;
-	protected BufferedWriter outFile;
-	
-	Date lastHandledDate = new Date(0);
-	
-	protected boolean csv = false;
-	
-	protected boolean timeOfDayFilterEnabled = false;
-	protected TimeOfDayUtil todUtil = null;
-	transient protected CSVWriter csvWriter = null;
-	
-	private static final Logger log = Logger.getLogger(Chart.class);
+public abstract class Chart extends ModuleWithUI {
+	private boolean timeOfDayFilterEnabled = false;
+	private TimeOfDayUtil todUtil = null;
 	
 	protected boolean hasRc = false;
-	protected String dataGrouping = "min/max";
-	
-	private void initCsv() {
-		csv = true;
-		csvWriter = new CSVWriter(null, getGlobals().getGrailsApplication().getConfig(), getGlobals().getSignalPathContext(), getGlobals().getUserTimeZone());
-	}
+	private String dataGrouping = "min/max";
 
 	@Override
 	public void init() {
 		canClearState = false;
-
-		if (getGlobals().getSignalPathContext().containsKey("csv"))
-			initCsv();
-
-		// Create visible input connections
-		addDefaultInputs();
-
 		resendAll = false;
 		resendLast = 500;
 	}
@@ -56,25 +28,13 @@ public abstract class Chart extends ModuleWithUI {
 		hasRc = (getGlobals() !=null && getGlobals().getUiChannel()!=null);
 	}
 	
-	protected abstract void addDefaultInputs();
-	
 	@Override
 	public void sendOutput() {
 		Date timestamp = getGlobals().time;
-		if (timestamp==null) 
-			return;
-		else if (csv) {
-			// Time of day filter
-			if (timeOfDayFilterEnabled && !todUtil.isInRange(timestamp))
-				return;
-			
-			recordCsvString();
-			csvWriter().newLine();
-		}
-		else {
-			if (timeOfDayFilterEnabled && !todUtil.hasBaseDate())
+		if (timestamp != null) {
+			if (timeOfDayFilterEnabled && !todUtil.hasBaseDate()) {
 				todUtil.setBaseDate(getGlobals().time);
-			
+			}
 			if (!timeOfDayFilterEnabled || todUtil.isInRange(getGlobals().time)) {
 				record();
 			}
@@ -82,39 +42,18 @@ public abstract class Chart extends ModuleWithUI {
 	}
 
 	protected abstract void record();
-	protected abstract void recordCsvString();
 	
 	@Override
 	public void onDay(Date day) {
 		super.onDay(day);
-		
-		if (csvWriter!=null)
-			csvWriter().newDay();
-		
-		if (todUtil!=null)
-			todUtil.setBaseDate(day);
-	}
-	
-	@Override
-	public void clearState() {
 
-	}
-	
-	// This method can be overridden to do some post-processing on the csv
-	public File getFile() {
-		return csvWriter().finish();
-	}
-	
-	@Override
-	public void destroy() {
-		super.destroy();
-		if (csv) {
-			File file = csvWriter().finish();
-			if (hasRc) {
-				getGlobals().getUiChannel().push(new CSVMessage(file.getName()), uiChannelId);
-			}
+		if (todUtil != null) {
+			todUtil.setBaseDate(day);
 		}
 	}
+	
+	@Override
+	public void clearState() {}
 	
 	@Override
 	public Map<String,Object> getConfiguration() {
@@ -154,15 +93,5 @@ public abstract class Chart extends ModuleWithUI {
 		if (options.getOption("dataGrouping") != null) {
 			dataGrouping = options.getOption("dataGrouping").toString();
 		}
-	}
-
-	protected CSVWriter csvWriter() {
-		if (csvWriter == null) {
-			csvWriter = new CSVWriter(null,
-					getGlobals().getGrailsApplication().getConfig(),
-					getGlobals().getSignalPathContext(),
-					getGlobals().getUserTimeZone());
-		}
-		return csvWriter;
 	}
 }
