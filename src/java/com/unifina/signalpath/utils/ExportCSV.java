@@ -8,7 +8,6 @@ import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
 import com.unifina.utils.RFC4180CSVWriter;
-import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -39,14 +38,14 @@ public class ExportCSV extends ModuleWithUI {
 	}
 
 	@Override
-	public void initialize() {
-		super.initialize();
-		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(getGlobals());
-	}
-
-	@Override
 	public void sendOutput() {
+		if (csvWriter == null) {
+			openCsvWriter();
+		}
+		if (timeFormatter == null) {
+			timeFormatter = timeFormat.getTimeFormatter(getGlobals().getUserTimeZone());
+		}
+
 		List<Object> row = new ArrayList<>();
 		if (includeTimestamps) {
 			row.add(timeFormatter.getDate(getGlobals().time));
@@ -66,6 +65,7 @@ public class ExportCSV extends ModuleWithUI {
 
 	@Override
 	public void clearState() {
+		csvWriter = null;
 		lastMessageSentAt = -MIN_MS_BETWEEN_UI_UPDATES;
 	}
 
@@ -132,7 +132,7 @@ public class ExportCSV extends ModuleWithUI {
 	public void afterDeserialization(SerializationService serializationService) {
 		super.afterDeserialization(serializationService);
 		openCsvWriter();
-		timeFormatter = timeFormat.getTimeFormatter(getGlobals());
+		timeFormatter = timeFormat.getTimeFormatter(getGlobals().getUserTimeZone());
 	}
 
 	private void openCsvWriter() {
@@ -210,13 +210,13 @@ public class ExportCSV extends ModuleWithUI {
 			return option == null ? ISO_8601_UTC : valueOf(option.getString());
 		}
 
-		private TimeFormatter getTimeFormatter(final Globals globals) {
+		private TimeFormatter getTimeFormatter(final TimeZone localTimeZone) {
 			if (this == ISO_8601_LOCAL) {
 				return new TimeFormatter() {
 					private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 					{
-						df.setTimeZone(globals.getUserTimeZone());
+						df.setTimeZone(localTimeZone);
 					}
 
 					@Override

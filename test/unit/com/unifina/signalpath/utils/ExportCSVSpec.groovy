@@ -1,5 +1,6 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.datasource.DataSource
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.FakeExportCSVContext
 import com.unifina.utils.testutils.ModuleTestHelper
@@ -32,6 +33,8 @@ class ExportCSVSpec extends Specification {
 		def builder = new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.timeToFurtherPerIteration(60 * 1000)
 			.uiChannelMessages(channelMessages)
+			// Don't test deserialization, since resuming to write the same csv file will not be possible
+			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.SERIALIZE]))
 			.overrideGlobals { Globals globals ->
 				globals.setUserTimeZone(TimeZone.getTimeZone("EST"))
 				return globals
