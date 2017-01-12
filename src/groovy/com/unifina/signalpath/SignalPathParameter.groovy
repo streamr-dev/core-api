@@ -6,6 +6,7 @@ class SignalPathParameter extends Parameter<Canvas> {
 	
 	public SignalPathParameter(AbstractSignalPathModule owner, String name) {
 		super(owner, name, null, "Canvas");
+		setCanConnect(false)
 	}
 	
 	public Map<String,Object> getConfiguration() {
@@ -24,6 +25,8 @@ class SignalPathParameter extends Parameter<Canvas> {
 				property 'name', 'name'
 			}
 			eq("hasExports", true)
+			eq("adhoc", false)
+			order("lastUpdated", "desc")
 		}
 
 		List possibleValues = signalPaths.collect {[value:it[0], name:it[1]]}

@@ -49,21 +49,25 @@ public class TimeWindow<T> extends AbstractWindow<TimedValue<T>> {
 	}
 
 	private static <T> WindowListener<TimedValue<T>> wrapWindowListener(final WindowListener<T> originalListener) {
-		return new WindowListener<TimedValue<T>>() {
-			@Override
-			public void onAdd(TimedValue<T> item) {
-				originalListener.onAdd(item.value);
-			}
+		if (originalListener == null) {
+			return null;
+		} else {
+			return new WindowListener<TimedValue<T>>() {
+				@Override
+				public void onAdd(TimedValue<T> item) {
+					originalListener.onAdd(item.value);
+				}
 
-			@Override
-			public void onRemove(TimedValue<T> item) {
-				originalListener.onRemove(item.value);
-			}
+				@Override
+				public void onRemove(TimedValue<T> item) {
+					originalListener.onRemove(item.value);
+				}
 
-			@Override
-			public void onClear() {
-				originalListener.onClear();
-			}
-		};
+				@Override
+				public void onClear() {
+					originalListener.onClear();
+				}
+			};
+		}
 	}
 }

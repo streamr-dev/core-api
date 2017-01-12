@@ -16,10 +16,8 @@ public abstract class Endpoint<T> implements Serializable {
 	
 	private Map<String,Object> json;
 	private boolean configured = false;
-	
-	protected boolean canConnect = true;
-
 	private boolean exported = false;
+	private boolean canConnect = true;
 	protected List<String> aliases = null;
 	
 	public Endpoint(AbstractSignalPathModule owner, String name, String typeName) {
@@ -83,7 +81,11 @@ public abstract class Endpoint<T> implements Serializable {
 	}
 	
 	public abstract boolean isConnected();
-	
+
+	public void setCanConnect(boolean canConnect) {
+		this.canConnect = canConnect;
+	}
+
 	public void regenerateId() {
 		id = IdGenerator.get();
 	}

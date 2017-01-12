@@ -42,10 +42,6 @@ public class SignalPathRunner extends Thread {
 		globals.dataSource = signalPathService.createDataSource(adhoc, globals)
 		globals.realtime = !adhoc
 		globals.init()
-
-		if (globals.signalPathContext.csv) {
-			globals.signalPathContext.speed = 0
-		}
 	}
 
 	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean adhoc = true) {
