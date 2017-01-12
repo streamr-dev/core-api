@@ -232,7 +232,7 @@ class SignalPathService {
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
 			runner.abort()
-			def msg = "Timed out while waiting for canvas $canvas.id to start on runner $runnerId."
+			def msg = "Timed out while waiting for canvas $canvas.id to start."
 			throw new CanvasCommunicationException(msg)
 		}
 	}
