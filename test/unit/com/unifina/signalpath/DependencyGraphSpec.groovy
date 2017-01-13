@@ -38,7 +38,7 @@ class DependencyGraphSpec extends Specification {
 		graph.put("c", [] as Set, ["a"] as Set)
 
 		then:
-		graph.topologicalSort() == ["b", "c", "a"]
+		graph.topologicalSort() == ["c", "b", "a"]
 	}
 
 	void "topological sort works on graph with A depending on B and C, and B depending on C"() {
@@ -53,21 +53,21 @@ class DependencyGraphSpec extends Specification {
 
 	void "topological sort works on rather involved graph"() {
 		when:
-		graph.put("a", []         as Set, ["b", "c", "e", "h"] as Set)
-		graph.put("b", ["a"]      as Set, ["c","e"]            as Set)
-		graph.put("c", ["a", "b"] as Set, ["d", "g"]           as Set)
-		graph.put("d", ["c"]      as Set, ["f"]                as Set)
-		graph.put("e", ["a", "b"] as Set, ["f", "g"]           as Set)
-		graph.put("f", ["d", "e"] as Set, []                   as Set)
-		graph.put("g", ["c", "e"] as Set, ["h"]                as Set)
-		graph.put("h", ["a", "g"] as Set, ["l"]                as Set)
-		graph.put("i", ["l"]      as Set, ["j", "k"]           as Set)
-		graph.put("j", ["i"]      as Set, ["k"]                as Set)
-		graph.put("k", ["i", "j"] as Set, []                   as Set)
-		graph.put("l", ["h"]      as Set, ["i"]                as Set)
+		graph.put("a", []              as Set, ["b", "c", "e", "h"] as Set)
+		graph.put("b", ["a"]           as Set, ["c","e"]            as Set)
+		graph.put("c", ["a", "b"]      as Set, ["d", "e", "g"]      as Set)
+		graph.put("d", ["c", "e"]      as Set, ["f", "g"]           as Set)
+		graph.put("e", ["a", "b", "c"] as Set, ["d", "f", "g"]      as Set)
+		graph.put("f", ["d", "e"]      as Set, []                   as Set)
+		graph.put("g", ["c", "d", "e"] as Set, ["h"]                as Set)
+		graph.put("h", ["a", "g"]      as Set, ["l"]                as Set)
+		graph.put("i", ["l"]           as Set, ["j", "k"]           as Set)
+		graph.put("j", ["i"]           as Set, ["k"]                as Set)
+		graph.put("k", ["i", "j"]      as Set, []                   as Set)
+		graph.put("l", ["h"]           as Set, ["i"]                as Set)
 
 		then:
-		graph.topologicalSort() == ["a", "b", "c", "e", "d", "g", "f", "h", "l", "i", "j", "k"]
+		graph.topologicalSort() == ["a", "b", "c", "e", "d", "g", "h", "l", "i", "j", "k", "f"]
 	}
 
 	// TODO: test error cases

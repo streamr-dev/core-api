@@ -3,60 +3,57 @@ package com.unifina.signalpath;
 import java.util.*;
 
 /**
- * Provides the means for building up a DAG (directed acyclic graph) and then performing a topological sort
- * (dependency resolution) on it.
+ * Provides topological sorting (dependency resolution) of a DAG (directed acyclic graph) using Kahn's algorithm.
  */
 class DependencyGraph<T> {
-	private final Map<T, Set<T>> allBackwardDeps = new HashMap<>();
-	private final Map<T, Set<T>> allForwardDeps = new HashMap<>();
-	private final Queue<T> keysByDependencyCount = new PriorityQueue<>(11,
-		new Comparator<T>() {
-			@Override
-			public int compare(T o1, T o2) {
-				return Integer.compare(allBackwardDeps.get(o1).size(), allBackwardDeps.get(o2).size());
-			}
-	});
+	private final Map<T, Set<T>> backwardDependencies = new HashMap<>();
+	private final Map<T, Set<T>> forwardDependencies = new HashMap<>();
+	private final List<T> independentNodes = new ArrayList<>();
 
-	void put(T dependent, Set<T> backwardDependencies, Set<T> forwardDependencies) {
-		if (allBackwardDeps.containsKey(dependent)) {
-			throw new IllegalArgumentException("Dependent " + dependent + " has been already put.");
+	void put(T node, Set<T> backwardDeps, Set<T> forwardDeps) {
+		if (forwardDependencies.containsKey(node)) {
+			throw new IllegalArgumentException("Dependent " + node + " is already in the graph.");
 		}
-		allBackwardDeps.put(dependent, backwardDependencies);
-		allForwardDeps.put(dependent, forwardDependencies);
-		keysByDependencyCount.add(dependent);
+
+		if (backwardDeps.isEmpty()) {
+			independentNodes.add(node);
+		} else {
+			backwardDependencies.put(node, backwardDeps);
+		}
+
+		forwardDependencies.put(node, forwardDeps);
 	}
 
 	List<T> topologicalSort() {
-		List<T> modules = new ArrayList<>(keysByDependencyCount.size());
+		List<T> sorted = new ArrayList<>(forwardDependencies.size());
 		while (!isEmpty()) {
-			modules.add(pop());
+			sorted.add(pop());
 		}
-		return modules;
+		if (forwardDependencies.isEmpty() && backwardDependencies.isEmpty()) {
+			return sorted;
+		} else {
+			throw new RuntimeException("Deadlocked! Not all dependencies could be resolved.");
+		}
 	}
 
 	private boolean isEmpty() {
-		return keysByDependencyCount.isEmpty();
+		return independentNodes.isEmpty();
 	}
 
 	private T pop() {
-		T nonDependentModule = keysByDependencyCount.remove();
-		Set<T> backwardDependencies = allBackwardDeps.remove(nonDependentModule);
-		Set<T> forwardDependencies = allForwardDeps.remove(nonDependentModule);
+		T independentNode = independentNodes.remove(independentNodes.size() - 1);
+		Set<T> forwardDependentNodes = forwardDependencies.remove(independentNode);
 
-		if (!backwardDependencies.isEmpty()) {
-			String msg = "Propagation deadlocked! Module " + nonDependentModule + " still has dependencies "
-				+ backwardDependencies + " but should be empty.";
-			throw new RuntimeException(msg);
+		// Remove independent node from dependents' (backward) dependencies. Then check whether any became independent.
+		for (T dependentNode : forwardDependentNodes) {
+			Set<T> backwardDeps = backwardDependencies.get(dependentNode);
+			backwardDeps.remove(independentNode);
+			if (backwardDeps.isEmpty()) {
+				backwardDependencies.remove(dependentNode);
+				independentNodes.add(dependentNode);
+			}
 		}
 
-		for (T dependency : forwardDependencies) {
-			allBackwardDeps.get(dependency).remove(nonDependentModule);
-
-			// Backward dependency count has changed so update position in queue.
-			keysByDependencyCount.remove(dependency);
-			keysByDependencyCount.add(dependency);
-		}
-
-		return nonDependentModule;
+		return independentNode;
 	}
 }
