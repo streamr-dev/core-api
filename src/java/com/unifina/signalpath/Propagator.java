@@ -12,13 +12,12 @@ import org.apache.log4j.Logger;
 
 @SuppressWarnings("rawtypes")
 public class Propagator implements Serializable {
-	Set<Input> reachable;
+	private Set<Input> reachable;
 	
-	Set<AbstractSignalPathModule> originSet = new HashSet<>();
-	ArrayList<AbstractSignalPathModule> origins = new ArrayList<>();
-	ArrayList<Output> connectedOutputs = new ArrayList<>();
+	private Set<AbstractSignalPathModule> originSet = new HashSet<>();
+	private ArrayList<AbstractSignalPathModule> origins = new ArrayList<>();
 	
-	AbstractSignalPathModule[] modArr;
+	private AbstractSignalPathModule[] modArr;
 	private boolean modArrDirty = true;
 
 	// Outputs associated with this Propagator set sendPending to true when sending output
@@ -166,37 +165,22 @@ public class Propagator implements Serializable {
 	 * modules can be activated without violating the dependencies.
 	 */
 	private void calculateActivationOrder() {
-		List<AbstractSignalPathModule> modules = new ArrayList<>();
-
-		// Group the found inputs by module
-		HashMap<AbstractSignalPathModule,Set<Input>> inputsByModule = new HashMap<>();
+		// Find the modules that are reachable
+		Set<AbstractSignalPathModule> reachableModules = new HashSet<>(reachable.size());
 		for (Input i : reachable) {
-			Set<Input> inputs = inputsByModule.get(i.getOwner());
-			
-			if (inputs==null) {
-				inputs = new HashSet<Input>();
-				inputsByModule.put(i.getOwner(), inputs);
-			}
-			inputs.add(i);
+			reachableModules.add(i.getOwner());
 		}
 
 		// Find and remove interdependencies in originSet, we need this soon
 		Set<AbstractSignalPathModule> independentOriginSet = new HashSet<>(originSet);
 		independentOriginSet.removeAll(findDependentModules(originSet, originSet));
 
-		// Get first-order module dependencies via reachable inputs
-		HashMap<AbstractSignalPathModule,Set<AbstractSignalPathModule>> forwardDependencies = new HashMap<>();
-		HashMap<AbstractSignalPathModule,Set<AbstractSignalPathModule>> backwardDependencies = new HashMap<>();
-		for (AbstractSignalPathModule module : inputsByModule.keySet()) {
+		// Build up dependency graph
+		DependencyGraph<AbstractSignalPathModule> dependencyGraph = new DependencyGraph<>();
+		for (AbstractSignalPathModule module : reachableModules) {
 
-			Set<AbstractSignalPathModule> bwdDepSet = backwardDependencies.get(module);
-			if (bwdDepSet==null) {
-				bwdDepSet = new HashSet<>();
-				backwardDependencies.put(module, bwdDepSet);
-			}
-
-
-			
+			// Resolve 1st order backward dependencies by reachable inputs
+			Set<AbstractSignalPathModule> bwdDepSet = new HashSet<>();
 			for (Input i : module.getInputs()) {
 				if (i.isConnected() && reachable.contains(i)) {
 					// Modules in the independentOriginSet must not be added to dependency resolution.
@@ -206,14 +190,9 @@ public class Propagator implements Serializable {
 					}
 				}
 			}
-			
-			Set<AbstractSignalPathModule> fwdDepSet = forwardDependencies.get(module);
-			if (fwdDepSet==null) {
-				fwdDepSet = new HashSet<>();
-				forwardDependencies.put(module, fwdDepSet);
-			}
-			
 
+			// Resolve 1st order forward dependencies by reachable outputs
+			Set<AbstractSignalPathModule> fwdDepSet = new HashSet<>();
 			for (Output o : module.getOutputs()) {
 				for (Input i : o.getTargets()) {
 					// Also we can't traverse inputs that are not in the reachable set (the input might have been excluded in the DFS step).
@@ -223,47 +202,32 @@ public class Propagator implements Serializable {
 					}
 				}
 			}
+
+			dependencyGraph.put(module, bwdDepSet, fwdDepSet);
 		}
 		
-		while (!backwardDependencies.isEmpty()) {
-			// Find a module that has no dependencies
-			AbstractSignalPathModule noDep = null;
-			for (AbstractSignalPathModule m : backwardDependencies.keySet()) {
-				if (backwardDependencies.get(m).size()==0) {
-					noDep = m;
-					break;
-				}
-			}
-			if (noDep==null)
-				throw new RuntimeException("Deadlock!");
-			
-			modules.add(noDep);
-			backwardDependencies.remove(noDep);
-			
-			if (forwardDependencies.get(noDep)!=null) {
-				
-				// Module noDep was activated and has sent output, update backwardDependencies to reflect this
-				for (AbstractSignalPathModule m : forwardDependencies.get(noDep)) {
-					backwardDependencies.get(m).remove(noDep);
-				}
-				
-				forwardDependencies.remove(noDep);
-			}
-		}
+		// Retrieve module activation order by topologically sorting dependency graph.
+		List<AbstractSignalPathModule> activationOrder = dependencyGraph.topologicalSort();
 		
-		// This must hold or something's wrong
-		if (modules.size()!=inputsByModule.keySet().size())
+		// Invariant: all reachable modules must be present in activation sequence
+		if (activationOrder.size() != reachableModules.size()) {
 			throw new IllegalStateException("Not all modules were activated!");
+		}
 		
 		// Convert to array for speed
-		modArr = modules.toArray(new AbstractSignalPathModule[modules.size()]);
+		modArr = activationOrder.toArray(new AbstractSignalPathModule[activationOrder.size()]);
 		modArrDirty = false;
 	}
 	
 	public void propagate() {
 		// Lazy initialize if not explicitly called yet
-		if (modArrDirty)
+		if (modArrDirty) {
+			long startTime = System.currentTimeMillis();
+			log.info("Initializing Propagator");
 			initialize();
+			double diffInSecs = (System.currentTimeMillis() - startTime) / 1000.0;
+			log.info("Initialization of Propagator finished. Handled " + modArr.length + " modules. Took " + diffInSecs + " secs.");
+		}
 		
 		if (sendPending || alwaysPropagate) {
 			sendPending = false;
