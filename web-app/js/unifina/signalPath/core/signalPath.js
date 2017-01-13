@@ -750,24 +750,26 @@ var SignalPath = (function () {
 			return false
 		} else {
 			debugLoopInterval = setInterval(function () {
-				$.ajax({
-					type: 'POST',
-					url: pub.getURL() + "/request",
-					data: JSON.stringify({type: "json"}),
-					contentType: "application/json",
-					dataType: "json",
-					success: function (response) {
-						console.log(response)
-						var outputs = _.pluck(response.json.modules, "outputs")
-						var inputs = _.pluck(response.json.modules, "inputs")
-						var params = _.pluck(response.json.modules, "params")
-						var endpoints = _.flatten(outputs.concat(inputs, params))
-						_.each(endpoints, function (endpoint) {
-							$("#" + endpoint.id).data("spObject").updateState(endpoint.value);
-						})
+				if (SignalPath.isRunning() && !SignalPath.isLoading()) {
+					$.ajax({
+						type: 'POST',
+						url: pub.getURL() + "/request",
+						data: JSON.stringify({type: "json"}),
+						contentType: "application/json",
+						dataType: "json",
+						success: function (response) {
+							console.log(response)
+							var outputs = _.pluck(response.json.modules, "outputs")
+							var inputs = _.pluck(response.json.modules, "inputs")
+							var params = _.pluck(response.json.modules, "params")
+							var endpoints = _.flatten(outputs.concat(inputs, params))
+							_.each(endpoints, function (endpoint) {
+								$("#" + endpoint.id).data("spObject").updateState(endpoint.value);
+							})
 
-					}
-				})
+						}
+					})
+				}
 			}, intervalInMs || 10000)
 			return true
 		}
