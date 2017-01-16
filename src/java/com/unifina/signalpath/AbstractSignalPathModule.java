@@ -31,6 +31,8 @@ import com.unifina.utils.MapTraversal;
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
+	private static final List<String> CONFIG_KEYS_TO_KEEP = Arrays.asList("id", "jsModule", "type", "layout");
+
 	private Map<String, Object> json;
 
 	protected SignalPath parentSignalPath;
@@ -431,6 +433,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		map.put("canClearState", canClearState);
 
+		if (hash != null) {
+			map.put("hash", hash);
+		}
 		if (canRefresh) {
 			map.put("canRefresh", canRefresh);
 		}
@@ -515,7 +520,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	private void setConfiguration(Map<String, Object> config) {
-		json = config;
+		json = new HashMap<>();
+
+		for (String configKey : CONFIG_KEYS_TO_KEEP) {
+			if (config.containsKey(configKey)) {
+				json.put(configKey, config.get(configKey));
+			}
+		}
 
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());

@@ -7,6 +7,8 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 public abstract class Endpoint<T> implements Serializable {
+	private static final List<String> CONFIG_KEYS_TO_KEEP = Arrays.asList("variadic");
+
 	public AbstractSignalPathModule owner;
 	protected String name;
 	protected String displayName;
@@ -24,6 +26,11 @@ public abstract class Endpoint<T> implements Serializable {
 		this.owner = owner;
 		this.name = name;
 		this.typeName = typeName;
+	}
+
+
+	String getId() {
+		return id;
 	}
 
 	public AbstractSignalPathModule getOwner() {
@@ -124,8 +131,14 @@ public abstract class Endpoint<T> implements Serializable {
 	}
 	
 	public void setConfiguration(Map<String,Object> config) {
-		json = new LinkedHashMap<>(config);
+		json = new LinkedHashMap<>();
 		configured = true;
+
+		for (String configKey : CONFIG_KEYS_TO_KEEP) {
+			if (config.containsKey(configKey)) {
+				json.put(configKey, config.get(configKey));
+			}
+		}
 		
 		if (config.containsKey("displayName")) {
 			displayName = (String) config.get("displayName");
