@@ -36,7 +36,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 		super.onConfiguration(config);
 
 		// Load canvas
-		Canvas canvas = signalPathParameter.getValue();
+		Canvas canvas = signalPathParameter.getCanvas();
 		if (canvas == null) {
 			return;
 		}

@@ -406,7 +406,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	@SuppressWarnings("rawtypes")
 	public Map<String, Object> getConfiguration() {
-		Map<String, Object> map = (json != null ? json : new HashMap<String, Object>());
+		Map<String, Object> map = json != null ? new HashMap<>(json) : new HashMap<String, Object>();
 
 		List<Map> params = new ArrayList<>();
 		List<Map> ins = new ArrayList<>();

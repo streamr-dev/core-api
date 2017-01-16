@@ -91,7 +91,7 @@ public abstract class Endpoint<T> implements Serializable {
 	}
 
 	public Map<String,Object> getConfiguration() {
-		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
+		Map<String, Object> map = json != null ? new HashMap<>(json) : new HashMap<String, Object>();
 
 		map.put("id", id);
 		map.put("name", name);
