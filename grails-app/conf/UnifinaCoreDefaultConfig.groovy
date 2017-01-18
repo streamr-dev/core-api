@@ -281,10 +281,11 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 5 * 60 * 1000
+streamr.serialization.intervalInMillis = 5 * 60 * 1000
+streamr.serialization.maxBytes = 1024 * 1024 * 8
 environments {
 	test {
-		unifina.serialization.intervalInMillis = 1000
+		streamr.serialization.intervalInMillis = 1000
 	}
 }
 
