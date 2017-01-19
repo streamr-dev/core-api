@@ -372,7 +372,7 @@ class SignalPathService {
 					
 					try {
 						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
-						log.info("runtimeRequest: responding with $resp")
+						log.debug("runtimeRequest: responding with $resp")
 						return resp
 					} catch (TimeoutException e) {
 						throw new CanvasUnreachableException("Timed out while waiting for response.")
