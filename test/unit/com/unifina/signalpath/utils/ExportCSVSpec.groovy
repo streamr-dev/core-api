@@ -22,11 +22,14 @@ class ExportCSVSpec extends Specification {
 	}
 
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {
-		Map inputValues = [
-			firstInput : ["first", "second", "third"],
-			secondInput: [1, 2, 3]*.doubleValue(),
-			in3        : [true, false, false]
-		]
+		testForFileContentAndUiMessages([
+				firstInput : ["first", "second", "third"],
+				secondInput: [1, 2, 3]*.doubleValue(),
+				in3        : [true, false, false]
+		], s, channelMessages)
+	}
+
+	private boolean testForFileContentAndUiMessages(Map inputValues, String s, Map channelMessages) {
 		Map outputValues = [:]
 
 		ModuleTestHelper moduleTestHelper
@@ -40,8 +43,12 @@ class ExportCSVSpec extends Specification {
 				return globals
 			}
 			.afterEachTestCase {
-				String fileContents = fakeFileHolder.resolveStringsAndReset()
-				assert fileContents == s
+				if (s) {
+					String fileContents = fakeFileHolder.resolveStringsAndReset()
+					assert fileContents == s
+				} else {
+					assert !fakeFileHolder.isFileOpened()
+				}
 			}
 		moduleTestHelper = builder.build()
 		return moduleTestHelper.test()
@@ -64,6 +71,26 @@ class ExportCSVSpec extends Specification {
 					[type: "csvUpdate", rows: 4l, kilobytes: 666l],
 					[type: "csvUpdate", rows: 4l, kilobytes: 666l, file: "test.csv"]
 			]]
+		)
+	}
+
+	void "ExportCSV reports 0 rows and 0 kB if nothing is written"() {
+		when:
+		module.configure([
+				uiChannel: [id: "uiChannelId"]
+		])
+
+		then:
+		testForFileContentAndUiMessages(
+				[
+						firstInput : [],
+						secondInput: [],
+						in3        : []
+				],
+				null, // no file content
+				[uiChannelId: [
+						[type: "csvUpdate", rows: 0l, kilobytes: 0l],
+				]]
 		)
 	}
 
