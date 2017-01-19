@@ -7,11 +7,13 @@ SignalPath.SubCanvasModule = function(data,canvas,prot) {
 
     function updateSubCanvasSelector() {
         if (SignalPath.isRunning()) {
-            SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type: 'json'}, function(response) {
-                var controls = prot.createSubCanvasControls(response.json)
-                controls.addClass("subcanvas-controls")
-                prot.body.find(".subcanvas-controls").remove()
-                prot.body.append(controls)
+            SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), {type: 'json'}, function(response, err) {
+                if (!err) {
+                    var controls = prot.createSubCanvasControls(response.json)
+                    controls.addClass("subcanvas-controls")
+                    prot.body.find(".subcanvas-controls").remove()
+                    prot.body.append(controls)
+                }
             })
         }
         else {
@@ -20,8 +22,8 @@ SignalPath.SubCanvasModule = function(data,canvas,prot) {
     }
 
     prot.loadSubCanvas = function(baseUrl) {
-        SignalPath.runtimeRequest(baseUrl + "/request", { type: 'json' }, function(response) {
-            if (response instanceof Error) {
+        SignalPath.runtimeRequest(baseUrl + "/request", { type: 'json' }, function(response, err) {
+            if (err) {
                 console.error("Could not fetch sub canvas for URL", baseUrl)
             } else {
                 var subJson = response.json

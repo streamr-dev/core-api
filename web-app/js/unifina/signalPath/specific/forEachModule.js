@@ -25,7 +25,9 @@ SignalPath.ForEachModule = function(data,canvas,prot) {
                 var key = canvasSelector.find('select').val()
                 // We need to double-encode the key just in case it contains any slashes. Encoding it once won't work
                 // because many servers don't allow %2F in URLs
-                prot.loadSubCanvas(pub.getURL() + '/keys/' + encodeURIComponent(encodeURIComponent(key)))
+                if (key !== null) {
+                    prot.loadSubCanvas(pub.getURL() + '/keys/' + encodeURIComponent(encodeURIComponent(key)))
+                }
             })
 
             return canvasSelector
