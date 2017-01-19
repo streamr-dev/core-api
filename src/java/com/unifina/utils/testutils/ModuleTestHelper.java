@@ -532,7 +532,7 @@ public class ModuleTestHelper {
 	}
 
 	private void validateThatListSizesMatch() {
-		if (skip >= inputValueCount && extraIterationsAfterInput == 0) {
+		if (skip > 0 && skip >= inputValueCount && extraIterationsAfterInput == 0) {
 			throw new IllegalArgumentException("All values would be skipped and not a single output tested.");
 		}
 		for (List<Object> inputValues : inputValuesByName.values()) {
