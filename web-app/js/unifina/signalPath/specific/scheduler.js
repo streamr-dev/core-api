@@ -1,12 +1,5 @@
 (function(exports) {
-
-//Change the variable signs from <%= var %> to {{ var }}
-_.templateSettings = {
-	evaluate : /\{\[([\s\S]+?)\]\}/g,
-	escape : /\[\[([\s\S]+?)\]\]/g,
-	interpolate : /\{\{([\s\S]+?)\}\}/g
-};
-
+	
 var Rule = Backbone.Model.extend({
 	initialize: function(attributes, options){
 		if($.isEmptyObject(attributes)){
@@ -56,7 +49,7 @@ var Rule = Backbone.Model.extend({
 			})
 			this.view.errorHighlight()
 			return false
-		} else
+		} else 
 			return true
 	},
 
@@ -142,7 +135,7 @@ var RuleView = Backbone.View.extend({
 				_this.$el.addClass("first")
 			_this.$el.addClass("active-highlight")
 		})
-		this.model.on("unactive", function(){
+		this.model.on("inactive", function(){
 			_this.$el.removeClass("first")
 			_this.$el.removeClass("active-highlight")
 		})
@@ -347,7 +340,7 @@ var Scheduler = Backbone.View.extend({
 				j++;
 			}
 			else
-				model.trigger("unactive")
+				model.trigger("inactive")
 		})
 	},
 
@@ -380,54 +373,54 @@ var Scheduler = Backbone.View.extend({
 	}
 })
 
-var Templates = {}
+	var Templates = {}
 
-Templates["scheduler-template"] = ''+
-	'<ol class="table scheduler-table">'+
+	Templates["scheduler-template"] = ''+
+		'<ol class="table scheduler-table">'+
 
-	'</ol>';
+		'</ol>';
 
 
-Templates["scheduler-footer-template"] = ''+
-	'<div class="setup col-xs-12">'+
-		'<div class="add-rule">'+
-			'<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>'+
-		'</div>'+
-		'<div class="default-value">'+
-			'<span>Default value:</span><input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>'+
-		'</div>'+
-	'</div>';
-
-Templates["rule-view-template"] = ''+
-	'<li class="rule">'+
-		'<div class="td">Every</div>'+
-		'<div class="td interval-type">'+
-			'<select name="interval-type" class="form-control input-sm">'+
-				'<option value="0">hour</option>'+
-				'<option value="1">day</option>'+
-				'<option value="2">week</option>'+
-				'<option value="3">month</option>'+
-				'<option value="4">year</option>'+
-			'</select>'+
-		'</div>'+
-		'<div class="td date"></div>'+
-		'<div class="td value">'+
-			'Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>'+
-		'</div>'+
-		'<div class="td move">'+
-			'<div class="move-up-btn" title="Move up">'+
-				'<i class=" fa fa-caret-up"></i>'+
+	Templates["scheduler-footer-template"] = ''+
+		'<div class="setup col-xs-12">'+
+			'<div class="add-rule">'+
+				'<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>'+
 			'</div>'+
-			'<div class="move-down-btn" title="Move down">'+
-				'<i class=" fa fa-caret-down"></i>'+
+			'<div class="default-value">'+
+				'<span>Default value:</span><input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>'+
 			'</div>'+
-		'</div>'+
-		'<div class="td delete">'+
-			'<i class="delete-btn fa fa-trash-o" title="Remove"></i>'+
-		'</div>'+
-	'</li>';
+		'</div>';
 
-Templates["rule-view-year-template"] = ''+
+	Templates["rule-view-template"] = ''+
+		'<li class="rule">'+
+			'<div class="td">Every</div>'+
+			'<div class="td interval-type">'+
+				'<select name="interval-type" class="form-control input-sm">'+
+					'<option value="0">hour</option>'+
+					'<option value="1">day</option>'+
+					'<option value="2">week</option>'+
+					'<option value="3">month</option>'+
+					'<option value="4">year</option>'+
+				'</select>'+
+			'</div>'+
+			'<div class="td date"></div>'+
+			'<div class="td value">'+
+				'Value: <input name="value" type="number" step="any" class="form-control input-sm" value="0.0"/>'+
+			'</div>'+
+			'<div class="td move">'+
+				'<div class="move-up-btn" title="Move up">'+
+					'<i class=" fa fa-caret-up"></i>'+
+				'</div>'+
+				'<div class="move-down-btn" title="Move down">'+
+					'<i class=" fa fa-caret-down"></i>'+
+				'</div>'+
+			'</div>'+
+			'<div class="td delete">'+
+				'<i class="delete-btn fa fa-trash-o" title="Remove"></i>'+
+			'</div>'+
+		'</li>';
+
+	Templates["rule-view-year-template"] = ''+
 		'the'+
 		'<select name="day" class="form-control input-sm">'+
 			'{[ _.each(_.range(31), function(i){ ]}'+
@@ -484,7 +477,7 @@ Templates["rule-view-year-template"] = ''+
 			'{[ }); ]}'+
 		'</select>';
 
-Templates["rule-view-month-template"] = ''+
+	Templates["rule-view-month-template"] = ''+
 		'the'+
 		'<select name="day" class="form-control input-sm">'+
 			'{[ _.each(_.range(31), function(i){ ]}'+
@@ -526,7 +519,7 @@ Templates["rule-view-month-template"] = ''+
 			'{[ }); ]}'+
 		'</select>';
 
-Templates["rule-view-week-template"] = ''+
+	Templates["rule-view-week-template"] = ''+
 		'<select name="weekday" class="form-control input-sm">'+
 			'<option value="2">Monday</option>'+
 			'<option value="3">Tuesday</option>'+
@@ -552,16 +545,16 @@ Templates["rule-view-week-template"] = ''+
 		'<select name="minute" class="form-control input-sm">'+
 			'{[ _.each(_.range(60), function(i){ ]}'+
 				'<option value="{{i}}">'+
-					'{[ if(i<10){ ]} '+
-						'0{{i}}'+
-					'{[ } else { ]}'+
-						'{{i}}'+
-					'{[ } ]}'+
-				'</option>'+
+				'{[ if(i<10){ ]} '+
+					'0{{i}}'+
+				'{[ } else { ]}'+
+					'{{i}}'+
+				'{[ } ]}'+
+			'</option>'+
 			'{[ }); ]}'+
 		'</select>';
 
-Templates["rule-view-day-template"] = ''+
+	Templates["rule-view-day-template"] = ''+
 		'<select name="hour" class="form-control input-sm">'+
 			'{[ _.each(_.range(24), function(i){ ]}'+
 				'<option value="{{i}}">'+
@@ -586,7 +579,7 @@ Templates["rule-view-day-template"] = ''+
 			'{[ }); ]}'+
 		'</select>';
 
-Templates["rule-view-hour-template"] = ''+
+	Templates["rule-view-hour-template"] = ''+
 		'<select name="minute" class="form-control input-sm">'+
 			'{[ _.each(_.range(60), function(i){ ]}'+
 				'<option value="{{i}}">'+

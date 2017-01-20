@@ -29,7 +29,7 @@ grails.project.dependency.resolver = "maven" // or ivy
 //	test: false
 //]
 grails.project.fork = [
-    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
     test: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 400, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
@@ -61,10 +61,12 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
-        runtime 'mysql:mysql-connector-java:5.1.20'
-		compile 'org.mongodb:mongodb-driver:3.2.1'
         compile('log4j:log4j:1.2.16')
-		
+
+	runtime 'mysql:mysql-connector-java:5.1.20'
+	compile 'org.mongodb:mongodb-driver:3.2.1'
+	compile 'org.postgresql:postgresql:9.4.1208.jre7'
+
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
@@ -72,25 +74,35 @@ grails.project.dependency.resolution = {
         runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
-		
-        compile('com.unifina:kafka-client:0.1.12') {
+
+
+		compile('com.unifina:kafka-client:0.1.16') {
             excludes "slf4j-log4j12"
         }
 		
         compile('com.mashape.unirest:unirest-java:1.3.3')
-		
+
+		// http://www.stringtemplate.org/
+		// http://mvnrepository.com/artifact/org.antlr/ST4
+		compile group: 'org.antlr', name: 'ST4', version: '4.0.8'
+
         runtime('com.amazonaws:aws-java-sdk:1.7.5')
 
         test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
         test "org.gebish:geb-spock:$gebVersion"
-		
-        runtime('org.twitter4j:twitter4j-core:[4.0,)')
-        runtime('com.twitter:hbc-core:2.2.0')
+
+		// https://mvnrepository.com/artifact/org.twitter4j/twitter4j-core
+		compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.4'
+		compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '4.0.4'
+
+		runtime('com.twitter:hbc-core:2.2.0')
 		
         runtime('com.github.nkzawa:socket.io-client:0.3.0')
 		runtime('joda-time:joda-time:2.9.3')
+
+		compile('com.udojava:EvalEx:1.3')
     }
 
     plugins {

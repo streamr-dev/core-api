@@ -1,12 +1,5 @@
 (function(exports) {
 
-//Change the variable signs from <%= var %> to {{ var }}
-_.templateSettings = {
-	evaluate : /\{\[([\s\S]+?)\]\}/g,
-	escape : /\[\[([\s\S]+?)\]\]/g,
-	interpolate : /\{\{([\s\S]+?)\}\}/g
-};
-
 var Module = Backbone.AssociatedModel.extend({
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
@@ -85,7 +78,7 @@ var CanvasView = Backbone.View.extend({
 	initialize: function (){
 		this.model.get('modules').on("change:checked", function() {
 			this.render()
-		},this)
+		}, this)
 		this.render()
 	},
 
@@ -169,6 +162,10 @@ var DashboardItemView = Backbone.View.extend({
 		"click .make-large-btn" : "changeSize"
 	},
 
+	initialize: function(options) {
+		this.baseUrl = options.baseUrl
+	},
+
 	render: function() {
 		var _this = this
 		
@@ -190,8 +187,16 @@ var DashboardItemView = Backbone.View.extend({
 		}
 		if (webcomponent !== undefined) {
 			var templateName = "#" + webcomponent + "-template"
-			var template = _.template($(templateName).html(), {variable: 'item'})
-			this.$el.find(".widget-content").append(template(this.model.toJSON()))
+			var template = _.template($(templateName).html())
+			// Can't use the dashboard item id in the url because it might be unsaved
+			var url = this.baseUrl
+				+ 'api/v1/'
+				+ 'dashboards/' + this.model.get('dashboard')
+				+ '/canvases/' + this.model.get('canvas')
+				+ '/modules/' + this.model.get('module')
+			this.$el.find(".widget-content").append(template({
+				url: url
+			}))
 		} else {
 			throw "No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!"
 		}
@@ -307,7 +312,7 @@ var SidebarView = Backbone.View.extend({
 
 		this.el = options.el
 
-		var requiredOptions = ['dashboard', 'menuToggle', 'canvases']
+		var requiredOptions = ['dashboard', 'menuToggle', 'canvases', 'baseUrl']
 
 		requiredOptions.forEach(function(requiredOption) {
 			if (options[requiredOption] === undefined)
@@ -316,6 +321,7 @@ var SidebarView = Backbone.View.extend({
 
 		this.dashboard = options.dashboard
 		this.menuToggle = options.menuToggle
+		this.baseUrl = options.baseUrl
 		this.canvases = new CanvasList(options.canvases)
 		this.syncCheckedState()
 
@@ -342,7 +348,6 @@ var SidebarView = Backbone.View.extend({
 		})
 
 		this.dashboard.on('invalid', function(error) {
-			console.log(error)
 			Streamr.showError(_this.dashboard.validationError, 'Invalid value')
 		})
 
@@ -367,16 +372,59 @@ var SidebarView = Backbone.View.extend({
 	},
 
 	render: function () {
+		var _this = this
 		this.$el.append(this.template(this.dashboard.toJSON()))
 		this.titleInput = this.$el.find("input.dashboard-name.title-input")
 		this.list = this.$el.find("#rsp-list")
+		this.saveButton = this.$el.find("#saveButton")
+		this.shareButton = this.$el.find("#share-button")
+		this.deleteButton = this.$el.find("#deleteDashboardButton")
 		_.each(this.canvases.models, function(canvas) {
 			var canvasView = new CanvasView({ model: canvas })
 			this.list.append(canvasView.el)
 		}, this)
+		new ConfirmButton(this.$el.find("#deleteDashboardButton"), {
+			title: "Are you sure?",
+			message: "Really delete dashboard " + _this.dashboard.get("name") + "?"
+		}, function(response) {
+			if(response) {
+				Backbone.sync("delete", _this.dashboard, {
+					success: function() {
+						// we dont want to accept exiting the page when we have just removed the whole dashboard
+						$(window).off("beforeunload")
+						Streamr.showSuccess("Dashboard deleted succesfully!", "", 2000)
+						setTimeout(function() {
+							window.location = _this.baseUrl + "dashboard/list"
+						}, 2000)
+					},
+					error: function(a, b, c) {
+						Streamr.showError()
+					}
+				})
+			}
+		})
+		this.checkPermissions()
+	},
 
-	// This is changed to ConfirmButton in branch CORE-647-shared-canvases-on-dashboard
-		new Toolbar(this.$el.find("#deleteDashboardForm"))
+	checkPermissions: function() {
+		var _this = this
+		$.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(permissions) {
+			permissions = _.map(permissions, function(p) {
+				return p.operation
+			})
+			if (_.contains(permissions, "share")) {
+				_this.shareButton.removeAttr("disabled")
+			} else {
+				_this.shareButton.addClass("forbidden")
+			}
+			if (_.contains(permissions, "write")) {
+				_this.saveButton.removeAttr("disabled")
+				_this.deleteButton.removeAttr("disabled")
+			} else {
+				_this.saveButton.addClass("forbidden")
+				_this.deleteButton.addClass("forbidden")
+			}
+		})
 	},
 
 	setEditMode: function (active) {		
@@ -435,7 +483,10 @@ var SidebarView = Backbone.View.extend({
 	    	},
 	    	error: function(model, response) {
 				Streamr.showError(response.responseText, "Error while saving")
-	    	}
+	    	},
+			// save() returns the complete model with id, and
+			// Backbone wants to re-render the view. Since we don't need that, we don't want any events to be triggered.
+			silent: true
 	    })
     }
 })
@@ -464,6 +515,15 @@ var DashboardView = Backbone.View.extend({
 
 	initialize: function(options) {
 		var _this = this
+
+		var requiredOptions = ['baseUrl']
+
+		requiredOptions.forEach(function(requiredOption) {
+			if (options[requiredOption] === undefined)
+				throw "Required option is missing: "+requiredOption
+		})
+		this.baseUrl = options.baseUrl
+
 		this.dashboardItemViews = []
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
@@ -507,7 +567,8 @@ var DashboardView = Backbone.View.extend({
 
 	addDashboardItem: function(model) {
 		var DIView = new DashboardItemView({
-			model: model
+			model: model,
+			baseUrl: this.baseUrl
 		})
 		this.$el.append(DIView.render().el)
 		this.dashboardItemViews.push(DIView)

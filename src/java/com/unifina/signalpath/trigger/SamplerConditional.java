@@ -1,13 +1,10 @@
 package com.unifina.signalpath.trigger;
 
-import com.unifina.signalpath.AbstractSignalPathModule;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.Output;
-import com.unifina.signalpath.TimeSeriesInput;
+import com.unifina.signalpath.*;
 
 public class SamplerConditional extends AbstractSignalPathModule {
 
-	TimeSeriesInput trigger = new TimeSeriesInput(this,"triggerIf");
+	BooleanInput trigger = new BooleanInput(this,"triggerIf");
 	Input<Object> value = new Input<>(this,"value","Object");
 	
 	Output<Object> out = new Output<>(this,"value","Object");
@@ -28,7 +25,7 @@ public class SamplerConditional extends AbstractSignalPathModule {
 	
 	@Override
 	public void sendOutput() {
-		if (drivingInputs.contains(trigger) && trigger.getValue().equals(1D)) {
+		if (drivingInputs.contains(trigger) && trigger.getValue()) {
 			out.send(value.value);
 		}
 	}

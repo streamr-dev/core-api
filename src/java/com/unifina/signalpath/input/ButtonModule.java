@@ -20,7 +20,6 @@ public class ButtonModule extends InputModule {
 	public void init() {
 		super.init();
 		canClearState = false;
-		resendAll = false;
 
 		buttonName.setDrivingInput(true);
 
@@ -44,10 +43,10 @@ public class ButtonModule extends InputModule {
 	@Override
 	public void sendOutput() {
 		if (drivingInputs.contains(buttonName)) {
-			if (globals.getUiChannel()!=null) {
+			if (getGlobals().getUiChannel()!=null) {
 				Map<String,Object> msg = new HashMap<String,Object>();
 				msg.put("buttonName", buttonName.getValue());
-				globals.getUiChannel().push(msg, uiChannelId);
+				getGlobals().getUiChannel().push(msg, uiChannelId);
 			}
 		}
 		if (uiEventSendPending) {

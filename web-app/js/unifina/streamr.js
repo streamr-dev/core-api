@@ -10,6 +10,13 @@ $.pnotify.defaults.closer = true
 $.pnotify.defaults.sticker = false
 $.pnotify.defaults.closer_hover = false
 
+//Change the variable signs in underscore/lodash from <%= var %> to {{ var }}
+_.templateSettings = {
+	evaluate : /\{\[([\s\S]+?)\]\}/g, // {[ ]}
+	escape : /\[\[([\s\S]+?)\]\]/g, // [[ ]]
+	interpolate : /\{\{([\s\S]+?)\}\}/g // {{ }}
+};
+
 Streamr.createLink = function(optsOrController, action, id) {
 	opts = optsOrController
 

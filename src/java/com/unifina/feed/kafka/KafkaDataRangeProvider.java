@@ -19,7 +19,7 @@ public class KafkaDataRangeProvider extends AbstractDataRangeProvider {
 
 	public KafkaDataRangeProvider(GrailsApplication grailsApplication) {
 		super(grailsApplication);
-		feedFileService = (FeedFileService) grailsApplication.getMainContext().getBean("feedFileService");
+		feedFileService = grailsApplication.getMainContext().getBean(FeedFileService.class);
 	}
 
 	@Override

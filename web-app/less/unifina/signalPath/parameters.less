@@ -5,7 +5,32 @@
 	font-size: 12px;
 }
 
+.paramTable textarea.form-control {
+	height: 90px;
+	width: 200px;
+}
+
 .paramTable select.form-control {
 	padding-top: 1px;
+}
+
+.stream-parameter-wrapper .twitter-typeahead input {
+	width: 100%;
+}
+
+.stream-parameter-wrapper .twitter-typeahead input:not(:disabled) {
+	background-color: white;
+}
+
+.stream-parameter-wrapper:not(.toggled) {
+	.twitter-typeahead * {
+		display: none;
+	}
+}
+
+.stream-parameter-wrapper.toggled {
+	.streamName {
+		display: none;
+	}
 }
 

@@ -1,17 +1,17 @@
 package com.unifina.service
 
-import com.unifina.datasource.HistoricalDataSource
+import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.ModuleWithUI
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
@@ -43,7 +43,8 @@ class SignalPathService {
 	def grailsLinkGenerator
 	def kafkaService
 	def serializationService
-	def permissionService
+	PermissionService permissionService
+	CanvasService canvasService
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
@@ -149,7 +150,7 @@ class SignalPathService {
 		for (SignalPath sp : signalPaths) {
 			if (globals==null)
 				globals = sp.globals
-			else if (globals!=sp.globals)
+			else if (globals!= sp.globals)
 				throw new RuntimeException("All SignalPaths don't share the same Globals!")
 		}
 		
@@ -214,7 +215,7 @@ class SignalPathService {
 		canvas.runner = runnerId
 
 		// Use the link generator to get the protocol and port, but use network IP address
-		// as the host to get the address of this individual server
+		//   as the host to get the address of this individual server
 		String root = grailsLinkGenerator.link(uri:"/", absolute: true)
 		URL url = new URL(root)
 
@@ -230,7 +231,9 @@ class SignalPathService {
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
-			log.error("Timed out while waiting for runner $runnerId to start!")
+			runner.abort()
+			def msg = "Timed out while waiting for canvas $canvas.id to start."
+			throw new CanvasCommunicationException(msg)
 		}
 	}
 
@@ -275,91 +278,97 @@ class SignalPathService {
 	@NotTransactional
 	@CompileStatic
 	Map stopRemote(Canvas canvas, SecUser user) {
-		return runtimeRequest([type:"stopRequest"], canvas, null, user)
+		return runtimeRequest(buildRuntimeRequest([type:"stopRequest"], "canvases/$canvas.id", user))
 	}
-	
+
 	@CompileStatic
 	boolean ping(Canvas canvas, SecUser user) {
-		runtimeRequest([type:'ping'], canvas, null, user)
+		runtimeRequest(buildRuntimeRequest([type:'ping'], "canvases/$canvas.id", user))
 		return true
 	}
-	
+
 	@CompileStatic
-	Map sendRemoteRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user) {
+	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
-		String url = canvas.requestUrl + (moduleId == null ? "/request" : "/modules/$moduleId/request") + "?local=true"
-		return apiService.post(url, msg, user)
+		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getOriginalPath() + "/request?local=true")
+		return apiService.post(url, req, req.getUser())
 	}
 
 	private SignalPathRunner getLocalRunner(Canvas canvas) {
 		return servletContext["signalPathRunners"]?.get(canvas.runner)
 	}
-	
-	Map runtimeRequest(Map msg, Canvas canvas, Integer moduleId, SecUser user, boolean localOnly = false) {
-		SignalPathRunner spr = getLocalRunner(canvas)
+
+	@CompileStatic
+	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
+
+		// All runtime requests require at least read permission
+		Canvas canvas = canvasService.authorizedGetById(pathReader.readCanvasId(), user, Permission.Operation.READ)
+		Set<Permission.Operation> checkedOperations = new HashSet<>()
+		checkedOperations.add(Permission.Operation.READ)
+
+		RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path, originalPath, checkedOperations)
+		return request
+	}
+
+	@CompileStatic
+	Map runtimeRequest(RuntimeRequest req, boolean localOnly = false) {
+		SignalPathRunner spr = getLocalRunner(req.getCanvas())
 		
-		log.info("runtimeRequest: $msg, Canvas: $canvas.id, module: $moduleId, localOnly: $localOnly")
+		log.info("runtimeRequest: $req, path: ${req.getPath()}, localOnly: $localOnly")
 		
 		// Give an error if the runner was not found locally although it should have been
 		if (localOnly && !spr) {
-			log.error("runtimeRequest: $msg, runner not found with localOnly=true, responding with error")
+			log.error("runtimeRequest: $req, runner not found with localOnly=true, responding with error")
 			throw new CanvasUnreachableException("Canvas does not appear to be running!")
 		}
 		// May be a remote runner, check server and send a message
 		else if (!localOnly && !spr) {
 			try {
-				return sendRemoteRequest(msg, canvas, moduleId, user)
+				return sendRemoteRequest(req)
 			} catch (Exception e) {
-				log.error("Unable to contact remote Canvas id $canvas.id at $canvas.requestUrl")
+				log.error("Unable to contact remote Canvas id ${req.getCanvas().id} at ${req.getCanvas().requestUrl}")
 				throw new CanvasUnreachableException("Unable to communicate with remote server!")
 			}
 		}
 		// If runner found
 		else {
-			SignalPath sp = spr.signalPaths.find {
-				it.canvas.id == canvas.id
+			SignalPath sp = spr.signalPaths.find {SignalPath it->
+				it.canvas.id == req.getCanvas().id
 			}
 			
 			if (!sp) {
-				log.error("runtimeRequest: $msg, runner found but canvas not found. This should not happen. RSP: $canvas, module: $moduleId")
+				log.error("runtimeRequest: $req, runner found but canvas not found. This should not happen. Canvas: ${req.canvas}, path: ${req.path}")
 				throw new CanvasUnreachableException("Canvas not found in runner. This should not happen.")
 			}
-			else {				
-				RuntimeRequest request = new RuntimeRequest(msg, new Date())
-				request.setAuthenticated(user != null)
-				
+			else {
 				/**
-				 * Requests for the runner thread
+				 * Special handling for runner thread stop request
 				 */
-				if (request.type=="stopRequest") {
-					if (!request.isAuthenticated()) {
-						throw new AccessControlException("stopRequest requires authentication!");
+				if (req.type=="stopRequest") {
+					if (!permissionService.canWrite(req.getUser(), req.getCanvas())) {
+						throw new AccessControlException("stopRequest requires write permission!");
 					}
 
-					if (stopLocal(canvas)) {
-						return request
-					} else {
+					if (stopLocal(req.getCanvas())) {
+						return req
+					}
+					else {
 						throw new CanvasUnreachableException("Canvas could not be stopped.")
 					}
-				} else if (request.type=="ping") {
-					if (!permissionService.canRead(null, canvas) && !request.isAuthenticated())
-						throw new AccessControlException("ping requires authentication!");
-					
-					return request
 				}
 				/**
-				 * Requests for SignalPaths and modules
+				 * Requests for SignalPaths and modules within them
 				 */
 				else {
-					// Handle module-specific message
-					Future<RuntimeResponse> future
-					if (moduleId!=null) {
-						future = sp.getModule(moduleId).onRequest(request)
+					RuntimeRequest.PathReader pathReader = req.getPathReader()
+
+					// Consume the already-processed parts of the path and double-sanity-check canvas id
+					if (pathReader.readCanvasId() != req.getCanvas().getId()) {
+						throw new IllegalStateException("Unexpected path: ${req.getPath()}")
 					}
-					// Handle signalpath-specific message
-					else {
-						future = sp.onRequest(request)
-					}
+
+					Future<RuntimeResponse> future = sp.onRequest(req, pathReader)
 					
 					try {
 						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
@@ -441,6 +450,7 @@ class SignalPathService {
 
 	@Transactional
 	def saveState(SignalPath sp) {
+		long startTime = System.currentTimeMillis()
 		Canvas canvas = sp.canvas
 
 		try {
@@ -448,7 +458,8 @@ class SignalPathService {
 			canvas.serializationTime = sp.globals.time
 			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
 				[canvas.serialized, canvas.serializationTime, canvas.id])
-			log.info("Canvas " + canvas.id + " serialized.")
+			long timeTaken = System.currentTimeMillis() - startTime
+			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes, processing time: ${timeTaken} ms)")
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex

@@ -7,23 +7,19 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-table" extends="streamr-widget" attributes="maxRows">
+<polymer-element name="streamr-table" extends="streamr-widget" attributes="maxRows displayTitle">
 	<template>
 		<shadow></shadow>
 	</template>
 	
 	<script>
 		Polymer('streamr-table', {
-			publish: {
-				maxRows: 0
-			},
 			ready: function() {				
 				var _this = this
 				this.bindEvents(_this.$["streamr-widget-container"])
 
 				this.getModuleJson(function(json) {
-					var options = {}
-					options.maxRows = _this.maxRows
+					var options = _this.getModuleOptionsWithOverrides(json)
 
 					_this.table = new StreamrTable(_this.$["streamr-widget-container"], options)
 					_this.table.initTable()

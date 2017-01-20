@@ -43,8 +43,26 @@
 
 			result = select
 		}
+		else if (this.data.isTextArea) {
+			result = $("<textarea class='parameterInput form-control' />");
+			result.val(this.data.value);
+		}
 		else {
-			result = $("<input class='parameterInput form-control' type='text' value='"+this.data.value+"'>");
+			result = $("<input class='parameterInput form-control' type='text' />");
+			result.val(this.data.value);
+			result.dblclick(function() {
+				bootbox.prompt({
+					title: "Set value for '" + _this.parameter.getDisplayName() + "':",
+					value: result.val(),
+					callback: function(newValue) {
+						if (newValue != null) {
+							result.val(newValue)
+							$(_this).trigger('change')
+						}
+					},
+					className: 'set-parameter-value-dialog'
+				})
+			})
 		}
 
 		result.change(function() {
@@ -93,31 +111,32 @@
 	StreamParameterValueEditor.prototype.createElement = function() {
 		var _this = this
 
-		var span = $("<span class='stream-parameter-wrapper'></span>");
+		this.span = $("<span class='stream-parameter-wrapper'></span>");
 
 		// Show search if no value is selected
-		var search = $("<input type='text' style='"+(this.data.value ? "display:none" : "")+"' class='parameterInput streamSearch form-control' value='"+(this.data.streamName || "")+"'>");
+		if(!this.data.value)
+			this.showInput()
+		var search = $("<input type='text' class='parameterInput streamSearch form-control' value='"+(this.data.streamName || "")+"'>");
 		this.search = search
-		span.append(search);
+		this.span.append(search);
 
-		// Show name if a value is set
-		this.label = $("<span class='streamName' style='"+(this.data.value ? "" : "display:none")+"'><a href='#'>"+this.data.streamName+"</a></span>");
-		span.append(this.label);
+		this.label = $("<span class='streamName'><a href='#'>"+this.data.streamName+"</a></span>");
+		this.span.append(this.label);
 
-		this.label.click(function() {
-			$(_this.label).hide();
-			$(_this.search).show();
-			return false;
+		this.label.click(function(e) {
+			e.preventDefault()
+			_this.showInput()
 		})
 
-		var onSel = function(event,item) {
+		var onSel = function(item) {
+			_this.hideInput()
 			if (item) {
 				// If the current module corresponds to the selected feed module and the new one
 				// does not, the module needs to be replaced
-				if (_this.parameter.module && _this.data.checkModuleId && _this.parameter.module.getModuleId() != item.module) {
+				if (_this.parameter.module && _this.data.checkModuleId && _this.parameter.module.getModuleId() != item.feed.module) {
 					bootbox.confirm("This stream is implemented by a different module. Replace current module? This will break current connections.", function(result) {
 						if (result)
-							SignalPath.replaceModule(_this.parameter.module, item.module,{params:[{name:"stream", value:item.id}]});
+							SignalPath.replaceModule(_this.parameter.module, item.feed.module,{params:[{name:"stream", value:item.id}]});
 					});
 				}
 				// Handle same module implementation
@@ -125,14 +144,7 @@
 					_this.data.value = item.id
 					_this.label.find("a").html(item.name)
 					_this.data.streamName = item.name
-
-					$(_this.search).hide()
-					$(_this.label).show()
 				}
-			}
-			else {
-				$(_this.search).hide();
-				$(_this.label).show();
 			}
 			$(_this).trigger('change')
 		}
@@ -142,36 +154,21 @@
 		if (this.data.feedFilter)
 			searchParams.feed = this.data.feedFilter
 
-		$(search).typeahead({
-				highlight: true,
-				hint: false,
-				minLength: 1
-			}, {
-				name: 'streams',
-				displayKey: 'name',
-				source: function(q, callback) {
-					$.ajax({
-						url: Streamr.projectWebroot+"stream/search",
-						data: $.extend({}, searchParams, { term: q }),
-						dataType: 'json',
-						success: callback,
-						error: function(jqXHR, textStatus, errorThrown) {
-							SignalPath.options.errorHandler({msg: errorThrown});
-							callback([]);
-						}
-					})
-				},
-				templates: {
-					suggestion: function(item) {
-						if (item.description)
-							return"<p><span class='tt-suggestion-name'>"+item.name+"</span><br><span class='tt-suggestion-description'>"+item.description+"</span></p>"
-						else return "<p><span class='tt-suggestion-name'>"+item.name+"</span></p>"
-					}
-				}
-			})
-			.on('typeahead:selected', onSel)
+		this.streamrSearch = new StreamrSearch(search, [{
+			name: "stream"
+		}], {
+			inBody: true
+		}, onSel)
 
-		return span;
+		$(this.parameter.module).on("drag", function() {
+			_this.streamrSearch.redrawMenu()
+		})
+
+		$(this.parameter.module).on("closed", function() {
+			_this.streamrSearch.streamrSearchMenu.remove()
+		})
+
+		return this.span;
 	}
 
 	StreamParameterValueEditor.prototype.getValue = function() {
@@ -189,6 +186,17 @@
 	StreamParameterValueEditor.prototype.enable = function() {
 		this.search.removeAttr('disabled')
 	}
+
+	StreamParameterValueEditor.prototype.showInput = function() {
+		$(this).trigger('change')
+		this.span.addClass("toggled")
+	}
+
+	StreamParameterValueEditor.prototype.hideInput = function() {
+		$(this).trigger('change')
+		this.span.removeClass("toggled")
+	}
+
 
 	/**
 	 * Shows a colorpicker for params of type Color.
@@ -253,8 +261,7 @@
 	MapParameterValueEditor.prototype.createElement = function() {
 		var _this = this
 		var div = $("<div/>")
-		var collection = new KeyValuePairList()
-		collection.fromJSON(this.data.value || {})
+		var collection = new KeyValuePairEditor.KeyValuePairList(this.data.value || {})
 
 		this.editor = new KeyValuePairEditor({
 			el: div,
@@ -291,12 +298,63 @@
 	}
 
 
+	/**
+	 * Shows a list editor for parameters of type List
+	 *
+	 * @param parentElement The parent dom element
+	 * @param parameter The parameter this editor is attached to
+	 * @constructor
+	 */
+	var ListParameterValueEditor = function(parentElement, parameter) {
+		DefaultParameterValueEditor.call(this, parentElement, parameter)
+	}
+	ListParameterValueEditor.prototype = Object.create(DefaultParameterValueEditor.prototype)
+
+	ListParameterValueEditor.prototype.createElement = function() {
+		var _this = this
+		var div = $("<div/>")
+		var collection = new ListEditor.ValueList(this.data.value || [])
+
+		this.editor = new ListEditor({
+			el: div,
+			collection: collection
+		})
+
+		// collection add and remove will resize the component, so module needs to be redrawn
+		collection.on('add', function() {
+			_this.parameter.module.redraw()
+			// don't trigger change on add, as the value will be empty
+		})
+		collection.on('remove', function() {
+			_this.parameter.module.redraw()
+			$(_this).trigger('change')
+		})
+
+		div.on('change', function() {
+			$(_this).trigger('change')
+		})
+
+		return div
+	}
+
+	ListParameterValueEditor.prototype.getValue = function() {
+		return this.editor.collection.toJSON()
+	}
+
+	ListParameterValueEditor.prototype.disable = function() {
+		this.editor.disable()
+	}
+
+	ListParameterValueEditor.prototype.enable = function() {
+		this.editor.enable()
+	}
 
 	// Map types to value editors. DefaultParameterValueEditor is the default.
 	var editorMappings = {
 		"Stream": StreamParameterValueEditor,
 		"Color": ColorParameterValueEditor,
-		"Map": MapParameterValueEditor
+		"Map": MapParameterValueEditor,
+		"List": ListParameterValueEditor
 	}
 
 	SignalPath.Parameter = function(json, parentDiv, module, type, pub) {
@@ -310,7 +368,8 @@
 			// Create the parameter input form
 			var inputTd = $("<td></td>");
 			parentDiv.parent().append(inputTd);
-			pub.editor = createParameterValueEditor(inputTd);
+
+			pub.editor = createParameterValueEditor(inputTd, this);
 
 			// Disable editor on connect, enable on disconnect
 			div.bind("spConnect", function() {
@@ -329,8 +388,8 @@
 						className: "bootbox-sm",
 						callback: function(result) {
 							if (result) {
-								SignalPath.sendRequest(
-									module.getHash(),
+								SignalPath.runtimeRequest(
+									module.getRuntimeRequestURL(),
 									{
 										type: "paramChange",
 										param: pub.getName(),

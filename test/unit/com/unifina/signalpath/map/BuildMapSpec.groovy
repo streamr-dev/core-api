@@ -21,9 +21,9 @@ class BuildMapSpec extends Specification {
 
 	def "BuildMap works as expected"() {
 		Map inputValues = [
-			"in-1": ["hello", 6,    0],
-			"in-2": [    ",", 6, null],
-			"in-3": ["world", 6,    0],
+			"a": ["hello", 6,    0],
+			"b": [    ",", 6, null],
+			"c": ["world", 6,    0],
 		]
 
 		Map outputValues = [

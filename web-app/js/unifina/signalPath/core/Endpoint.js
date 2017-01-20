@@ -5,7 +5,8 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	pub.parentDiv = parentDiv;
 	pub.module = module;
 	pub.type = type;
-	
+	pub.iostate = null;
+
 	function createDiv() {
 		
 		// Create connection div
@@ -25,10 +26,14 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		div.attr("id",pub.json.id);
 		
 		// Name holder
-		var ioname = $("<div class='ioname'></span>");
+		var ioname = $("<div class='ioname'></div>");
 		ioname.append(pub.getDisplayName())
 		div.append(ioname);
-		
+
+		// State holder
+		pub.iostate = $("<div class='iostate'></div>")
+		div.append(pub.iostate)
+
 		// Add to parent
 		pub.parentDiv.append(div);
 
@@ -177,20 +182,24 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	pub.createJSPlumbEndpoint = createJSPlumbEndpoint;
 	
 	function rename(iodiv,data) {
-		var n = $(iodiv).find(".ioname").text();
+		var defaultValue = $(iodiv).find(".ioname").text();
 
-		var displayName = prompt("Display name for "+data.name+":",n);
-		if (displayName != null) {
-			if (displayName != "" && displayName != data.name) {
-				data.displayName = displayName;
+		bootbox.prompt({
+			title: "Display name for "+data.name,
+			value: defaultValue,
+			className: 'rename-endpoint-dialog',
+			callback: function(displayName) {
+				if (displayName != null) {
+					if (displayName != "" && displayName != data.name) {
+						data.displayName = displayName;
+					} else {
+						delete data.displayName;
+						displayName = data.name;
+					}
+					$(iodiv).find(".ioname").html(displayName);
+				}
 			}
-			else {
-				delete data.displayName;
-				displayName = data.name;
-			}
-
-			$(iodiv).find(".ioname").html(displayName);
-		}
+		});
 		module.redraw()
 	}
 	
@@ -224,6 +233,11 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		return (pub.json.displayName ? pub.json.displayName : pub.json.name);
 	}
 	pub.getDisplayName = getDisplayName;
+
+	function updateState(stateString) {
+		pub.iostate.text(stateString)
+	}
+	pub.updateState = updateState;
 	
 	function checkTypeArrays(arr1, arr2) {
 		for(var i = 0; i<arr1.length; i++)
@@ -295,6 +309,12 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		throw new Exception("connect() called in Endpoint");
 	}
 	pub.connect = connect;
+
+	// abstract, must be overridden
+	function disconnect() {
+		throw new Exception("disconnect() called in Endpoint");
+	}
+	pub.disconnect = disconnect;
 	
 	// abstract, must be overridden
 	function getConnectedEndpoints() {
@@ -308,53 +328,57 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 	}
 	
 	return pub;
-}
+};
 
-$(SignalPath).on("new", function() {
-	
-	// Bind connection and disconnection events
-	jsPlumb.bind("connection",function(connection) {
-		$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
-		$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
-	});
-	jsPlumb.bind("connectionDetached",function(connection) {
-		if (!connection.connection.pending) {
-			$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
-			$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
-		}
-	});
-	// "connection" event is also fired on connection move, so need to report just the disconnect part
-	jsPlumb.bind("connectionMoved",function(info, originalEvent) {
-		// info.index: 0 if source was moved, 1 if target was moved
-		var originalElement = (info.index ? info.originalTargetEndpoint.element : info.originalSourceEndpoint.element)
-		var theOtherElement = (info.index ? info.originalSourceEndpoint.element : info.originalTargetEndpoint.element)
-		
-		$(originalElement).trigger("spDisconnect", $(theOtherElement).data("spObject"));
-		$(theOtherElement).trigger("spDisconnect", $(originalElement).data("spObject"));
-	});
-	
-	jsPlumb.bind("connectionDrag", function(conn) {
-		// Highlight valid targets
-		var $epDiv = $("#"+conn.sourceId)
-		var ep = $epDiv.data("spObject")
-		var inputOrOutput = ($epDiv.hasClass("input") && conn.pending || $epDiv.hasClass("output") && !conn.pending ? "output" : "input")
-		var acceptedTypes = ep.getAcceptedTypes()
-		$(acceptedTypes).each(function(i, type) {
-			var $validTargets = (type === "Object" ? $(".endpoint."+inputOrOutput) : $(".endpoint."+inputOrOutput+"."+type+","+".endpoint."+inputOrOutput+".Object"))
+(function() {
+	var jsPlumbReset = jsPlumb.reset
 
-			$validTargets.each(function(j,target) {
-				var spObject = $(target).data("spObject")
-				if (!spObject.jsPlumbEndpoint.isFull())
-					spObject.addClass("highlight")
+	jsPlumb.reset = function() {
+		jsPlumbReset.apply(jsPlumb)
+
+		// Bind connection and disconnection events
+		jsPlumb.bind("connection", function(connection) {
+			$(connection.source).trigger("spConnect", $(connection.target).data("spObject"));
+			$(connection.target).trigger("spConnect", $(connection.source).data("spObject"));
+		});
+		jsPlumb.bind("connectionDetached", function(connection) {
+			if (!connection.connection.pending) {
+				$(connection.source).trigger("spDisconnect", $(connection.target).data("spObject"));
+				$(connection.target).trigger("spDisconnect", $(connection.source).data("spObject"));
+			}
+		});
+		// "connection" event is also fired on connection move, so need to report just the disconnect part
+		jsPlumb.bind("connectionMoved", function(info, originalEvent) {
+			// info.index: 0 if source was moved, 1 if target was moved
+			var originalElement = (info.index ? info.originalTargetEndpoint.element : info.originalSourceEndpoint.element)
+			var theOtherElement = (info.index ? info.originalSourceEndpoint.element : info.originalTargetEndpoint.element)
+
+			$(originalElement).trigger("spDisconnect", $(theOtherElement).data("spObject"));
+			$(theOtherElement).trigger("spDisconnect", $(originalElement).data("spObject"));
+		});
+
+		jsPlumb.bind("connectionDrag", function (conn) {
+			// Highlight valid targets
+			var $epDiv = $("#" + conn.sourceId)
+			var ep = $epDiv.data("spObject")
+			var inputOrOutput = ($epDiv.hasClass("input") && conn.pending || $epDiv.hasClass("output") && !conn.pending ? "output" : "input")
+			var acceptedTypes = ep.getAcceptedTypes()
+			$(acceptedTypes).each(function(i, type) {
+				var $validTargets = (type === "Object" ? $(".endpoint." + inputOrOutput) : $(".endpoint." + inputOrOutput + "." + type + "," + ".endpoint." + inputOrOutput + ".Object"))
+
+				$validTargets.each(function(j, target) {
+					var spObject = $(target).data("spObject")
+					if (!spObject.jsPlumbEndpoint.isFull())
+						spObject.addClass("highlight")
+				})
 			})
 		})
-	})
-	
-	jsPlumb.bind("connectionDragStop", function(conn) {
-		// Un-highlight
-		$(".endpoint.highlight").each(function(i,target) {
-			$(target).data("spObject").removeClass("highlight")
+
+		jsPlumb.bind("connectionDragStop", function(conn) {
+			// Un-highlight
+			$(".endpoint.highlight").each(function(i, target) {
+				$(target).data("spObject").removeClass("highlight")
+			})
 		})
-	})
-	
-})
+	}
+})()

@@ -20,7 +20,7 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 		// Async callback signaling done is passed as last argument by executeAsyncScript
 		// https://groups.google.com/forum/#!topic/geb-user/Lpi_4lroTcQ
 		browser.driver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
-		browser.driver.executeAsyncScript("jQuery.ajax({url: Streamr.createLink('host', 'shutdown'), method: 'POST'}).done(arguments[arguments.length - 1]).fail(function(jqXHR, textStatus, errorThrown) { alert('Error shutting down: '+errorThrown); })")
+		browser.driver.executeAsyncScript("jQuery.ajax({url: Streamr.createLink('host', 'shutdown'), method: 'POST'}).done(arguments[arguments.length - 1])")
 	}
 
 	void startTaskWorker() {
@@ -38,11 +38,12 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 
 		to CanvasPage
 		String canvasName = "ShutdownSpec"+System.currentTimeMillis()
-		addModule("Button")
-		addModule("Count")
-		moveModuleBy("Count", 200, 0)
-		addModule("Label")
-		moveModuleBy("Label", 400, 0)
+		addAndWaitModule("Button")
+		moveModuleBy("Button", 0, 300)
+		addAndWaitModule("Count")
+		moveModuleBy("Count", 250, 0)
+		addAndWaitModule("Label")
+		moveModuleBy("Label", 500, 0)
 		connectEndpoints(findOutput("Button", "out"), findInput("Count", "in"))
 		connectEndpoints(findOutput("Count", "count"), findInput("Label", "label"))
 
@@ -56,7 +57,11 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 
 		then: "Label shows 1"
 		waitFor {
-			Double.parseDouble(findModuleOnCanvas("Label").find(".modulelabel").text()) == 1D
+			try {
+				Double.parseDouble(findModuleOnCanvas("Label").find(".modulelabel").text()) == 1D
+			} catch (NumberFormatException e) {
+				false
+			}
 		}
 
 		when: "Shutdown command given"
@@ -69,7 +74,7 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 			taskWorkerTable.find("tbody tr td", text: "False").size() > 0
 		}
 		and: "The canvas must be in stopped state"
-		waitFor {
+		waitFor(30, 3) {
 			getCanvasState(canvasId) == Canvas.State.STOPPED
 		}
 
@@ -77,7 +82,7 @@ public class ShutdownSpec extends LoginTesterAdminSpec {
 		startTaskWorker()
 
 		then: "Canvas must end up in running state"
-		waitFor {
+		waitFor(30, 3) {
 			getCanvasState(canvasId) == Canvas.State.RUNNING
 		}
 	}

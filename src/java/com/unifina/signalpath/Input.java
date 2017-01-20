@@ -22,8 +22,6 @@ public class Input<T> extends Endpoint<T> {
 	
 	boolean drivingInput = true;
 	public boolean canToggleDrivingInput = true;
-	
-//	boolean clearState = true;
 
 	protected boolean proxying = false;
 	ArrayList<Input<T>> proxiedInputs = new ArrayList<>();
@@ -54,16 +52,15 @@ public class Input<T> extends Endpoint<T> {
 				p.receive(value);
 		}
 	}
-	
-	/**
-	 * Returns an array of typenames that this Input accepts.
-	 * By default returns an array with one element: the one returned by getTypeName()
-	 * @return
-	 */
-	protected String[] getAcceptedTypes() {
-		return getTypeName().split(" ");
+
+	// TODO: horrible hack for DNI project
+	public void setReadyHack() {
+		ready = true;
+		wasReady = true;
+		owner.markReady(this);
 	}
-	
+
+	@Override
 	public T getValue() {
 		return value;
 	}
@@ -107,8 +104,13 @@ public class Input<T> extends Endpoint<T> {
 			input.receive(getValue());
 		}
 
-		if (input.getOwner() != null) {
-			input.getOwner().checkDirtyAndReadyCounters();
+		AbstractSignalPathModule owner = input.getOwner();
+		if (owner != null) {
+			if (input.isReady()) {
+				owner.markReady(input);
+			} else {
+				owner.cancelReady(input);
+			}
 		}
 
 		// TODO: might be necessary to mark owner as originatingmodule and mark it dirty, fix it when generalizing from subclasses
@@ -128,9 +130,18 @@ public class Input<T> extends Endpoint<T> {
 
 	public void setSource(Output<T> source) {
 		this.source = source;
+		if (!isReady()) {
+			owner.cancelReady(this);
+		}
 	}
-	
-	protected void doClear() {
+
+	public void disconnect() {
+		this.source = null;
+		owner.cancelReady(this);
+	}
+
+	@Override
+	public void clear() {
 		value = null;
 		ready = false;
 	}
@@ -149,7 +160,7 @@ public class Input<T> extends Endpoint<T> {
 	}
 
 	public boolean isReady() {
-		return ready;
+		return ready || (!isConnected() && !requiresConnection);
 	}
 
 	public boolean wasReady() {
@@ -186,8 +197,4 @@ public class Input<T> extends Endpoint<T> {
 		}
 	}
 
-//	public boolean isClearState() {
-//		return clearState;
-//	}
-	
 }

@@ -453,7 +453,7 @@ describe('streamr-map', function() {
 			global.L.divIcon = function(attr) {
 				assert.deepEqual(attr, {
 					iconSize:     [19, 48],
-					iconAnchor:   [14, 53],
+					iconAnchor:   [13.5, 43],
 					popupAnchor:  [0, -41],
 					className: 'streamr-map-icon fa fa-map-marker fa-4x'
 				})

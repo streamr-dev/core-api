@@ -53,14 +53,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
-	public void setClearState(boolean clearState) {
-		super.setClearState(clearState);
-		if (instance != null) {
-			instance.setClearState(clearState);
-		}
-	}
-
-	@Override
 	public void sendOutput() {
 		instance.sendOutput();
 	}
@@ -70,6 +62,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		if (instance != null) {
 			instance.clear();
 		}
+	}
+
+	@Override
+	public boolean wasReady() {
+		return instance != null && instance.wasReady();
 	}
 
 	@Override
@@ -196,7 +193,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 
 		// Register the created class so that it will be cleaned when Globals is destroyed
 		Class<AbstractCustomModule> clazz = (Class<AbstractCustomModule>) classLoader.loadClass(className);
-		globals.registerDynamicClass(clazz);
+		//getGlobals().registerDynamicClass(clazz);
 		return clazz;
 	}
 
@@ -215,7 +212,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 		}
 
 		// Inject stuff into the module
-		instance.globals = globals;
+		instance.setGlobals(getGlobals());
 		instance.setHash(hash);
 		instance.setParentSignalPath(parentSignalPath);
 		instance.configure(config);
@@ -254,11 +251,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
 		try {
 			compileAndRegister(className, fullCode);
-			instance = (AbstractCustomModule) serializationService().deserialize(serializedInstance, classLoader);
+			instance = (AbstractCustomModule) serializationService.deserialize(serializedInstance, classLoader);
 			// Need to restore values after deserialization
 			restoreInstanceAfterSerialization();
 		} catch (ClassNotFoundException e) {
@@ -278,7 +275,8 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 				outputs,
 				outputsByName,
 				drivingInputs,
-				globals);
+				readyInputs,
+				getGlobals());
 
 		storedEndpointFields.restoreFields(instance);
 		storedEndpointFields = null;
@@ -296,6 +294,6 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	}
 
 	private SerializationService serializationService() {
-		return globals.getBean(SerializationService.class);
+		return getGlobals().getBean(SerializationService.class);
 	}
 }

@@ -1,8 +1,8 @@
 SignalPath.HeatmapModule = function(data,canvas,prot) {
 	prot = prot || {};
-	var pub = SignalPath.GenericModule(data,canvas,prot)
+	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
-	var $container = null
+	var container = null
 	var heatmap = null
 
 	prot.enableIONameChange = false;	
@@ -32,6 +32,13 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 
 		heatmap = new StreamrHeatMap(container, heatMapOptions)
 
+		$(heatmap).on("move", function(e, data) {
+			$.each(data, function(k, v) {
+				if(prot.jsonData.options[k] && prot.jsonData.options[k].value)
+					prot.jsonData.options[k].value = v
+			})
+		})
+
 		prot.initResizable({
 			minWidth: 350,
 			minHeight: 250,
@@ -47,7 +54,7 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 		}
 	}
 
-	pub.receiveResponse = function(d) {
+	prot.receiveResponse = function(d) {
 		heatmap.handleMessage(d)
 	}
 	

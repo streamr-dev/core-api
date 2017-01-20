@@ -17,8 +17,8 @@
     "jquery-ui": "*",
     "jsdom": "8.1.0",
     "underscore": "*",
-    "backbone": "*",
+    "backbone": "file:web-app/js/backbone",
     "mustache": "*",
-    "backbone-associations": "*"
+    "backbone-associations": "file:web-app/js/backbone-associations"
   }
 }

@@ -10,6 +10,7 @@ import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
+import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
@@ -158,6 +159,15 @@ public class ModuleTestHelper {
 		}
 
 		/**
+		 * By default, test all SerializationModes (NONE, SERIALIZE and SERIALIZE_DESERIALIZE).
+		 * This can be changed by calling this method with a subset of those SerializationModes.
+         */
+		public Builder serializationModes(Set<SerializationMode> serializationModes) {
+			testHelper.selectedSerializationModes = serializationModes;
+			return this;
+		}
+
+		/**
 		 * Build the <code>ModuleTestHelper</code>. Throws <code>RuntimeException</code> if test setting has been
 		 * configured inappropriately.
 		 */
@@ -218,28 +228,48 @@ public class ModuleTestHelper {
 		NONE, SERIALIZE, SERIALIZE_DESERIALIZE
 	}
 	private SerializationMode serializationMode = SerializationMode.NONE;
+	private SerializationService dummySerializationService = new SerializationService();
 
 	private Serializer serializer = new SerializerImpl();
 
 	private ModuleTestHelper() {}
 
+	// By default, test all serialization modes
+	private Set<SerializationMode> selectedSerializationModes = new HashSet<>(Arrays.asList(SerializationMode.values()));
+
 	public boolean test() throws IOException, ClassNotFoundException {
 		try {
-			boolean a = runTestCase();        // Clean slate test
+			boolean pass = true;
 
-			clearModuleAndCollectorsAndChannels();
-			clearStateCalled = true;
-			boolean b = runTestCase();      // Test that clearState() works
+			if (selectedSerializationModes.contains(SerializationMode.NONE)) {
+				if (!runTestCase()) {        // Clean slate test
+					pass = false;
+				}
 
-			clearModuleAndCollectorsAndChannels();
-			serializationMode = SerializationMode.SERIALIZE;
-			boolean c = runTestCase();       // Test that serialization works and has no side effects
+				clearModuleAndCollectorsAndChannels();
+				clearStateCalled = true;
+				if (!runTestCase()) {        // Test that clearState() works
+					pass = false;
+				}
+			}
 
-			clearModuleAndCollectorsAndChannels();
-			serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
-			boolean d = runTestCase();       // Test that serialization + deserialization works
+			if (selectedSerializationModes.contains(SerializationMode.SERIALIZE)) {
+				clearModuleAndCollectorsAndChannels();
+				serializationMode = SerializationMode.SERIALIZE;
+				if (!runTestCase()) {       // Test that serialization works and has no side effects
+					pass = false;
+				}
+			}
 
-			return a && b && c && d;
+			if (selectedSerializationModes.contains(SerializationMode.SERIALIZE_DESERIALIZE)) {
+				clearModuleAndCollectorsAndChannels();
+				serializationMode = SerializationMode.SERIALIZE_DESERIALIZE;
+				if (!runTestCase()) {       // Test that serialization + deserialization works
+					pass = false;
+				}
+			}
+
+			return pass;
 		} catch (TestHelperException ex) {
 			throw ex;
 		} catch (Exception ex) {
@@ -258,7 +288,7 @@ public class ModuleTestHelper {
 			// Time is set at start of event
 			if (isTimedMode() && ticks.containsKey(i)) {
 				((ITimeListener)module).setTime(ticks.get(i));
-				module.globals.time = ticks.get(i);
+				module.getGlobals().time = ticks.get(i);
 			}
 
 			// Set input values
@@ -284,6 +314,9 @@ public class ModuleTestHelper {
 			furtherTime(i);
 		}
 
+		// End of data feed, destroy module
+		module.destroy();
+
 		// Test ui channel messages
 		if (isUiChannelMode()) {
 			validateUiChannelMessages();
@@ -303,7 +336,7 @@ public class ModuleTestHelper {
 
 	private void feedInputs(int i) {
 		for (Map.Entry<String, List<Object>> entry : inputValuesByName.entrySet()) {
-			Input input = module.getInput(entry.getKey());
+			Input input = getInputByEffectiveName(entry.getKey());
 			if (input == null) {
 				throw new IllegalArgumentException("No input found with name " + entry.getKey());
 			}
@@ -327,7 +360,7 @@ public class ModuleTestHelper {
 	private void validateOutput(int outputIndex, int i) {
 		for (Map.Entry<String, List<Object>> entry : outputValuesByName.entrySet()) {
 
-			Object actual = module.getOutput(entry.getKey()).getTargets()[0].getValue();
+			Object actual = getOutputByEffectiveName(entry.getKey()).getTargets()[0].getValue();
 			Object expected = entry.getValue().get(outputIndex);
 
 			if (expected instanceof Double) {
@@ -359,12 +392,12 @@ public class ModuleTestHelper {
 		int timeStep = timeSteps.get(i);
 
 		if (timeStep != 0) {
-			module.globals.time = new Date(module.globals.time.getTime() + timeStep);
+			module.getGlobals().time = new Date(module.getGlobals().time.getTime() + timeStep);
 		}
 	}
 
 	private void validateUiChannelMessages() {
-		FakePushChannel uiChannel = (FakePushChannel) module.globals.getUiChannel();
+		FakePushChannel uiChannel = (FakePushChannel) module.getGlobals().getUiChannel();
 		if (uiChannel == null) {
 			throw new TestHelperException("uiChannel: module.globals.uiChannel unexpectedly null", this);
 		}
@@ -421,7 +454,7 @@ public class ModuleTestHelper {
 			validateThatModuleDoesNotHaveKnownSerializationIssues();
 
 			// Globals is transient, we need to restore it after deserialization
-			Globals globalsTempHolder = module.globals;
+			Globals globalsTempHolder = module.getGlobals();
 
 			module.beforeSerialization();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -431,28 +464,23 @@ public class ModuleTestHelper {
 			if (serializationMode == SerializationMode.SERIALIZE_DESERIALIZE) {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
-				module.globals = globalsTempHolder;
-				module.afterDeserialization();
+				module.setGlobals(globalsTempHolder);
+				module.afterDeserialization(dummySerializationService);
 				moduleInstanceChanged.call(module);
 			}
 		}
 	}
 
 	private void clearModuleAndCollectorsAndChannels() {
-
-		// Hack to ensure that clear() works
-		module.globals.time = null;
-		module.setClearState(true);
-
+		module.getGlobals().time = null;
 		module.clear();
 		setUpGlobals(module);
 
 		for (Output<Object> output : module.getOutputs()) {
 			for (Input<Object> target : output.getTargets()) {
-				target.getOwner().setClearState(true);
-				target.getOwner().globals = new Globals();
+				target.getOwner().setGlobals(new Globals());
 				target.getOwner().clear();
-				target.getOwner().globals = null;
+				target.getOwner().setGlobals(null);
 			}
 		}
 		module.connectionsReady();
@@ -504,7 +532,7 @@ public class ModuleTestHelper {
 	}
 
 	private void validateThatListSizesMatch() {
-		if (skip >= inputValueCount && extraIterationsAfterInput == 0) {
+		if (skip > 0 && skip >= inputValueCount && extraIterationsAfterInput == 0) {
 			throw new IllegalArgumentException("All values would be skipped and not a single output tested.");
 		}
 		for (List<Object> inputValues : inputValuesByName.values()) {
@@ -534,16 +562,16 @@ public class ModuleTestHelper {
 	}
 
 	private void setUpGlobals(AbstractSignalPathModule module) {
-		module.globals = new Globals();
-		module.globals.time = new Date(0);
-		module.globals.setUiChannel(new FakePushChannel());
-		module.globals = overrideGlobalsClosure.call(module.globals);
+		module.setGlobals(new Globals());
+		module.getGlobals().time = new Date(0);
+		module.getGlobals().setUiChannel(new FakePushChannel());
+		module.setGlobals(overrideGlobalsClosure.call(module.getGlobals()));
 	}
 
 	/** create dummy outputs for each tested input */
 	private void initAndAttachOutputsToModuleInputs() {
 		for (String inputName : inputValuesByName.keySet()) {
-			Input input = module.getInput(inputName);
+			Input input = getInputByEffectiveName(inputName);
 			if (input == null) {
 				throw new IllegalArgumentException("No input found with name " + inputName);
 			}
@@ -553,10 +581,28 @@ public class ModuleTestHelper {
 		}
 	}
 
+	private Input getInputByEffectiveName(String name) {
+		for (Input input : module.getInputs()) {
+			if (name.equals(input.getEffectiveName())) {
+				return input;
+			}
+		}
+		return null;
+	}
+
+	private Output getOutputByEffectiveName(String name) {
+		for (Output output : module.getOutputs()) {
+			if (name.equals(output.getEffectiveName())) {
+				return output;
+			}
+		}
+		return null;
+	}
+
 	/** create (one-input dummy) Collector modules for each tested output */
 	private void connectCollectorsToModule(AbstractSignalPathModule module) {
 		for (String outputName : outputValuesByName.keySet()) {
-			Output output = module.getOutput(outputName);
+			Output output = getOutputByEffectiveName(outputName);
 			if (output == null) {
 				throw new IllegalArgumentException("No output found with name " + outputName);
 			}

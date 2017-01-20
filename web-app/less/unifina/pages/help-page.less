@@ -1,0 +1,33 @@
+body.help-page {
+
+  line-height: 1.6;
+
+  @media (min-width: 700px) {
+    .side-image {
+      float: right;
+      margin-left: 1em;
+    }
+  }
+
+  hr {
+    width: 70%;
+    border-top: #E9570F solid 2px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  pre {
+    background-color: white;
+  }
+
+  /* Prevent FOUC by hiding the content initially, then shown using js */
+  .docs-wrapper {
+    display: none;
+  }
+
+  h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+}

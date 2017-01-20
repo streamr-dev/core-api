@@ -26,6 +26,8 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 	@Override
 	public void init() {
 		addOutput(out);
+		resendAll = false;
+		resendLast = 1;
 	}
 
 	public void clearState() {
@@ -58,10 +60,10 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 			if(!foundActive)
 				out.send(defaultValue);
 			
-			if (globals.getUiChannel()!=null) {
+			if (getGlobals().getUiChannel()!=null) {
 				Map<String,Object> msg = new HashMap<>();
 				msg.put("activeRules", activeRules);
-				globals.getUiChannel().push(msg, uiChannelId);
+				getGlobals().getUiChannel().push(msg, uiChannelId);
 			}
 		}
 	}
@@ -103,7 +105,7 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 					r = new YearlyRule(rule);
 				else
 					r = new Rule();
-				r.setTimeZone(globals.getUser().getTimezone());
+				r.setTimeZone(getGlobals().getUser().getTimezone());
 				rules.add(r);
 			}
 		}

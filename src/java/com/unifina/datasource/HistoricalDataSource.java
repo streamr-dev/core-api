@@ -47,7 +47,6 @@ public class HistoricalDataSource extends DataSource {
 	
 	@Override
 	protected void doStopFeed() throws Exception {
-		globals.abort = true;
 		eventQueue.abort();
 	}
 	

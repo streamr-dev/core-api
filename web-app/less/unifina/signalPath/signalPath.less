@@ -23,6 +23,10 @@
 			z-index: 15;
 		}
 
+		.modulebody {
+			padding: 5px 10px;
+		}
+
 		input {
 			width: 50px;
 		}
@@ -116,6 +120,96 @@
 	//	padding: 0.2em 0.7em;
 	// }
 
+.ioname {
+	display: inline-block;
+	max-width: 100px;
+	white-space: pre-wrap;
+}
+
+.iostate {
+	display: inline-block;
+	padding-left: 4px;
+	font-style: italic;
+}
+
+.switchContainer {
+	display: inline-block;
+	position: absolute;
+	width: 60px;
+	margin-top: 2px;
+}
+
+div.input, div.output {
+	cursor: pointer;
+}
+
+div.input {
+	text-align: left;
+}
+
+div.input .switchContainer {
+	left: -75px;
+}
+
+div.input .switchContainer .ioSwitch {
+	float: right;
+}
+
+div.output {
+	text-align: right;
+}
+
+div.output .switchContainer {
+	right: -70px;
+}
+
+div.output .switchContainer .ioSwitch {
+	float: left;
+}
+
+.ioSwitch {
+	display: inline-block;
+	font-size: 7px;
+	vertical-align: text-bottom;
+	text-align: center;
+	width: 13px;
+	height: 13px;
+	cursor: pointer;
+}
+
+.endpoint.last-variadic .ioSwitch {
+	display: none;
+}
+
+.ioname i {
+	color: #888;
+	font-size: smaller;
+}
+
+.endpoint.last-variadic .variadic-plus {
+	display: inline-block;
+}
+
+.endpoint .variadic-plus {
+	display: none;
+}
+
+.option {
+	display: table-row;
+}
+
+.option .optionTitle {
+	display: table-cell;
+	padding-right: 0.5em;
+}
+
+.option .optionValue {
+	display: table-cell;
+}
+
+._jsPlumb_endpoint {
+	z-index:10;
+}
 
 
 
@@ -124,3 +218,156 @@
 	//}
 	//
 
+.ui-menu {
+	z-index:200;
+}
+
+/**
+ * jQuery UI stuff
+ **/
+ .ui-autocomplete-loading { background: white url('../../images/spinner_16x16.gif') right center no-repeat; }
+ .ui-button-text-only .ui-button-text {
+	padding: 0.2em 0.7em;
+ }
+ 
+ /**
+  * PanicButtons
+  */
+  table.panic tbody tr.blocked {
+  	background-color: red;
+  }
+  
+  table.panic tbody tr.blocked td {
+  	background-color: red;
+  }
+  
+  .panicButtons {
+  	width: 200px;
+  }
+  
+  button.arrow {
+	padding-right: 1.5em;
+  }
+  
+  button.arrow:after {  
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 1em;
+	margin-top: -3px;
+	height: 0;
+	width: 0;
+	/* order of following 3 rules important for fallbacks to work */
+	border: 5px solid transparent;
+	border-top-color: #1c94c4;
+  }
+
+/**
+ * Dashboard mode
+ **/
+.dashboard.dashboardEnabled .ioTable, .dashboard.dashboardEnabled .paramTable {
+	display:none;
+}
+
+.component.dashboard.dashboardEnabled {
+	background-color: transparent;
+	box-shadow: none;
+}
+
+.component.dashboard.dashboardEnabled .modulebody {
+	box-shadow: none;
+}
+
+.component.dashboard.dashboardEnabled .moduleheader,
+.component.dashboard.dashboardEnabled .modulefooter,
+.component.dashboard.dashboardEnabled .ui-resizable-handle {
+	opacity: 0.0;
+}
+
+.component.dashboard.dashboardEnabled:hover .moduleheader,
+.component.dashboard.dashboardEnabled:hover .modulefooter,
+.component.dashboard.dashboardEnabled:hover .ui-resizable-handle {
+	opacity: 1.0;
+}
+
+.component .showOnFocus {
+	transition: opacity 0.1s linear;
+	opacity: 0;
+}
+
+.component.holdFocus .showOnFocus {
+	opacity: 1;
+}
+
+// This is to use the delay only when hiding the buttons, not when showing them
+.component:not(:hover) .showOnFocus {
+	transition-delay: 0.5s;
+}
+
+.component:hover .showOnFocus,
+.component .showOnFocus:hover {
+	opacity: 1;
+}
+
+.showOnHover {
+	opacity: 0.0;
+}
+.showOnHover:hover {
+	opacity: 1.0;
+}
+
+.ui-pnotify-title {
+	font-weight: bold;
+}
+
+.joyride-fixed {
+	position: fixed !important;
+}
+
+.tooltip-inner {
+	max-width: 350px;
+	white-space: nowrap;
+}
+
+.modulehelp-tooltip {
+	width: 350px !important;
+	text-align: left;
+	white-space: normal;
+}
+
+.tooltip-inner .message {
+	background-color: #101020;
+}
+
+/**
+ * Module help styles
+ **/
+.modulehelp h3 {
+	margin-top: 7px;
+}
+
+.modulehelp table {
+	border: 0;
+}
+
+.modulehelp table tbody tr td:first-child {
+	font-weight: bolder;
+	width: 100px;
+}
+
+.modulehelp p {
+	margin-bottom: 1em;
+}
+
+.modulehelp .highlight {
+	font-weight: bolder;
+}
+
+.modulehelp .formula {
+	display: inline-block;
+	font-weight: bolder;
+}
+
+.bootbox-body .modulehelp {
+	overflow: auto;
+}

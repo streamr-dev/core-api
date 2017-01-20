@@ -13,6 +13,12 @@ public abstract class InputModule extends ModuleWithUI {
 
 	protected boolean uiEventSendPending = false;
 
+	public InputModule() {
+		super();
+		resendAll = false;
+		resendLast = 1;
+	}
+
 	@Override
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
 		super.handleRequest(request, response);

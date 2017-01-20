@@ -71,7 +71,7 @@ log4j = {
  //grails.urlmapping.cache.maxsize = 1000
  
  // What URL patterns should be processed by the resources plugin
- grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/tours/*", "/js/leaflet", "/misc/*"]
+ grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', "/js/polymer/*", "/js/leaflet", "/misc/*"]
  grails.resources.adhoc.includes = ['/images/**', '/css/**', '/js/**', '/plugins/**', '/misc/**']
 
  grails.resources.processing.enabled = true
@@ -281,7 +281,7 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 30 * 1000
+unifina.serialization.intervalInMillis = 5 * 60 * 1000
 environments {
 	test {
 		unifina.serialization.intervalInMillis = 1000
@@ -350,13 +350,12 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 /**
  * Signup Configs
  */
-streamr.signup.requireInvite = true
+streamr.signup.requireInvite = false
 
 /**
  * Miscellaneous
  */
 tomcat.nio = true // in run-app or test-app
-
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 

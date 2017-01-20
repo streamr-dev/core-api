@@ -89,7 +89,7 @@ class SerializeCanvasSpec extends IntegrationSpec {
 			sleep(25)
 
 			// Synchronize with thread
-			conditions.within(10) { assert modules(canvasService, canvas)[3].inputs[0].value == i }
+			conditions.within(10) { assert modules(canvasService, canvas)[3].inputs.find { it.name == "in" }.value == i }
 
 			// Log states of modules' outputs
 			log.info(modules(canvasService, canvas)*.outputs*.toString().join(" "))
@@ -113,10 +113,12 @@ class SerializeCanvasSpec extends IntegrationSpec {
 		}
 
 		then: "output values are as expected if no restarts had happened"
-		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], [Add: [300.0]]]
+		actual == [[Stream: [99.0, 247.5, 1.0]], [Count: [100.0]], [Count: [100.0]], [Count: [100.0]], ["Add (old)": [300.0]]]
 
 		cleanup:
-		canvasService.stop(canvas, user)
+		if (canvas.state == Canvas.State.RUNNING) {
+			canvasService.stop(canvas, user)
+		}
 	}
 
 	private Canvas createAndRun(savedStructure) {

@@ -38,7 +38,6 @@ public class Globals {
 	private TimezoneConverter tzConverter;
 	
 	protected DataSource dataSource = null;
-	public boolean abort = false;
 	
 	private List<Class> dynamicClasses = new ArrayList<>();
 	
@@ -229,5 +228,13 @@ public class Globals {
 
 	public <T> T getBean(Class<T> requiredType) {
 		return grailsApplication.getMainContext().getBean(requiredType);
+	}
+
+	/**
+	 * Returns true if we are about to run something, and not eg. reconstructing canvases or something like that.
+	 * Currently returns true if the DataSource is set.
+     */
+	public boolean isRunContext() {
+		return getDataSource() != null;
 	}
 }

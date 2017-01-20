@@ -1,7 +1,6 @@
 package com.unifina.signalpath.utils;
 
 import com.unifina.signalpath.*;
-import com.unifina.utils.Globals;
 
 import java.util.ArrayList;
 import java.util.*;
@@ -21,8 +20,8 @@ public class RateLimit extends AbstractSignalPathModule {
 	@Override
 	public void sendOutput() {
 		if (time.getValue() != 0) {
-			times.add(globals.time.getTime());
-			while (globals.time.getTime() - times.get(0).longValue() >= time.getValue().longValue()) {
+			times.add(getGlobals().time.getTime());
+			while (getGlobals().time.getTime() - times.get(0).longValue() >= time.getValue().longValue()) {
 				times.remove(0);
 			}
 		}

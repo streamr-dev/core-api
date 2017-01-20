@@ -8,6 +8,7 @@
     <r:require module="bootbox"/>
     <r:require module="bootstrap-contextmenu"/>
     <r:require module="bootstrap-datepicker"/>
+	<r:require module="streamr-search"/>
     <r:require module="signalpath-theme"/>
     <r:require module="touchpunch"/>
 
@@ -26,7 +27,7 @@ $(document).ready(function() {
 		},
 		connectionOptions: {
 			server: "${grailsApplication.config.streamr.ui.server}",
-			autoConnect: false,
+			autoConnect: true,
 			autoDisconnect: true
 		}
 	});

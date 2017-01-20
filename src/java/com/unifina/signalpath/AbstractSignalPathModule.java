@@ -5,17 +5,11 @@ import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
+import com.unifina.service.SerializationService;
 import com.unifina.utils.HibernateHelper;
 import org.apache.log4j.Logger;
 
@@ -30,9 +24,10 @@ import com.unifina.utils.MapTraversal;
  * The usual init procedure:
  * - Construct the module
  * - Call module.init()
+ * - Call module.setGlobals(globals)
  * - Call module.setName()
  * - Call module.setConfiguration()
- * - Call module.connectionsReady()
+ * - Call module.connectionsReady() -> module.initialize()
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
 
@@ -50,8 +45,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	private boolean wasReady = false;
 
-	private int readyInputs = 0;
-	private int inputCount = 0;
+	protected Set<Input> readyInputs = new HashSet<>();
 
 	boolean sendPending = false;
 
@@ -62,20 +56,16 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	protected HashSet<Input> drivingInputs = new HashSet<Input>();
 
-	Date lastCleared = null;
-
-	/**
-	 * Module params
-	 */
-	protected boolean canClearState = true;
-	boolean clearState = false;
-
+	// Controls whether the refresh button is shown in the UI. Clicking it recreates the module.
 	protected boolean canRefresh = false;
+	// Sets if the module supports state clearing. If canClearState is false, calling clear() does nothing.
+	protected boolean canClearState = true;
 
-	protected String name;
+	private String name;
+	private String displayName;
 	protected Integer hash;
 
-	transient public Globals globals;
+	private transient Globals globals;
 
 	private boolean initialized;
 
@@ -177,10 +167,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.put(alias.toString(), input);
 		}
 
-		inputCount = inputs.size();
-
-		// re-count because inputs already contained in the counters might be added
-		checkDirtyAndReadyCounters();
+		if (input.isReady()) {
+			readyInputs.add(input);
+		}
 	}
 
 	public void removeInput(Input input) {
@@ -195,10 +184,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 			inputsByName.remove(alias.toString());
 		}
 
-		inputCount = inputs.size();
-
-		// re-count because inputs already contained in the counters might be removed
-		checkDirtyAndReadyCounters();
+		readyInputs.remove(input);
 	}
 
 	public void addOutput(Output output) {
@@ -220,7 +206,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	public void removeOutput(Output output) {
 		if (!outputs.contains(output)) {
-			throw new IllegalArgumentException("Unable to remove output: output not foudn: "+output);
+			throw new IllegalArgumentException("Unable to remove output: output not found: "+output);
 		}
 
 		outputs.remove(output);
@@ -248,44 +234,41 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	}
 
 	public void markReady(Input input) {
-		readyInputs++;
+		readyInputs.add(input);
 	}
 
 	public void cancelReady(Input input) {
-		readyInputs--;
+		readyInputs.remove(input);
 	}
 
 	public boolean allInputsReady() {
-		return readyInputs == inputCount;
+		return readyInputs.size() == inputs.size();
 	}
 
 	public abstract void sendOutput();
 
 	public void clear() {
-		if (clearState && (lastCleared == null || lastCleared.before(globals.time))) {
-			lastCleared = globals.time;
+		if (canClearState) {
 			clearState();
 
 			for (Output o : getOutputs()) {
-				o.doClear();
+				o.clear();
 			}
 			for (Input i : getInputs()) {
-				i.doClear();
+				i.clear();
 			}
 
-			checkDirtyAndReadyCounters();
+			// Rebuild
+			readyInputs.clear();
+			for (Input i : getInputs()) {
+				if (i.isReady()) {
+					readyInputs.add(i);
+				}
+			}
 		}
 	}
 
 	public abstract void clearState();
-
-	public boolean isClearState() {
-		return clearState;
-	}
-
-	public void setClearState(boolean clearState) {
-		this.clearState = clearState;
-	}
 
 	public String getName() {
 		return name;
@@ -321,7 +304,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		// Only report the initialization of this module once
 		if (!initialized) {
-			globals.onModuleInitialized(this);
+			getGlobals().onModuleInitialized(this);
 			initialized = true;
 		}
 	}
@@ -425,9 +408,9 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> map = (json != null ? json : new HashMap<String, Object>());
 
-		List<Map> params = new ArrayList<Map>();
-		List<Map> ins = new ArrayList<Map>();
-		List<Map> outs = new ArrayList<Map>();
+		List<Map> params = new ArrayList<>();
+		List<Map> ins = new ArrayList<>();
+		List<Map> outs = new ArrayList<>();
 		for (Input i : getInputs()) {
 			if (i instanceof Parameter) {
 				params.add(i.getConfiguration());
@@ -447,10 +430,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		map.put("name", name);
 
 		map.put("canClearState", canClearState);
-		map.put("clearState", clearState);
 
 		if (canRefresh) {
 			map.put("canRefresh", canRefresh);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
 		}
 
 		return map;
@@ -532,17 +517,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	private void setConfiguration(Map<String, Object> config) {
 		json = config;
 
-		if (config.containsKey("clearState")) {
-			clearState = Boolean.parseBoolean(config.get("clearState").toString());
-		}
-
 		if (config.containsKey("hash")) {
 			hash = Integer.parseInt(config.get("hash").toString());
 		}
-
-		// Embedded modules inherit the hash-id of their parents
-		if (parentSignalPath != null && parentSignalPath.getHash() != null) {
-			hash = parentSignalPath.getHash();
+		if (config.containsKey("displayName")) {
+			setDisplayName(config.get("displayName").toString());
 		}
 	}
 
@@ -611,18 +590,20 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
-	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
+	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, RuntimeRequest.PathReader path) {
 		// Add event to message queue, don't do it right away 
-		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, globals.isRealtime() ? request.getTimestamp() : globals.time, this);
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
+
+		final AbstractSignalPathModule recipient = resolveRuntimeRequestRecipient(request, path);
 
 		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					handleRequest(request, response);
+					recipient.handleRequest(request, response);
 				} catch (AccessControlException e) {
 					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
 					log.error(error);
@@ -633,8 +614,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}, response);
 		request.setFuture(future);
 
-		globals.getDataSource().getEventQueue().enqueue(fe);
+		getGlobals().getDataSource().getEventQueue().enqueue(fe);
 		return future;
+	}
+
+	/**
+	 * Can be overridden to dig RuntimeRequest recipients from within this module. The default implementation returns "this".
+     */
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
+		return this;
 	}
 
 	@Override
@@ -661,8 +649,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param request
 	 */
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
-		// By default all modules support runtime parameter changes
-		if (request.getType().equals("paramChange")) {
+		// By default all modules support runtime parameter changes, ping requests and json requests
+		if (request.getType().equals("ping")) {
+			response.setSuccess(true);
+		}
+		else if (request.getType().equals("paramChange")) {
 
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
@@ -688,21 +679,13 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				response.setSuccess(true);
 			} catch (Exception e) {
 				log.error("Error making runtime parameter change!", e);
-				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
+				getGlobals().getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
 		}
-	}
-
-	public void checkDirtyAndReadyCounters() {
-		// Set the quick dirty/ready counters
-		int readyCount = 0;
-		for (Input i : getInputs()) {
-			if (i.isReady()) {
-				readyCount++;
-			}
+		else if (request.getType().equals("json")) {
+			response.put("json", this.getConfiguration());
+			response.setSuccess(true);
 		}
-
-		readyInputs = readyCount;
 	}
 
 	@Override
@@ -746,6 +729,26 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * Override to handle steps after deserialization
 	 */
-	public void afterDeserialization() {
+	public void afterDeserialization(SerializationService serializationService) {
+	}
+
+	public Globals getGlobals() {
+		return globals;
+	}
+
+	public void setGlobals(Globals globals) {
+		this.globals = globals;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getEffectiveName() {
+		return getDisplayName() != null ? getDisplayName() : getName();
 	}
 }
