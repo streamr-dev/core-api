@@ -15150,8 +15150,8 @@ button.arrow:after {
   width: 100%;
   padding: 0;
   -ms-flex: 0;
-  flex: 0;
-  -webkit-flex: 0;
+  flex: 1;
+  -webkit-flex: 1;
 }
 #canvas .module .modulebody table.ioTable td {
   padding-right: 5px;
@@ -15227,6 +15227,103 @@ button.arrow:after {
 }
 .ui-widget-content.module-help-tooltip {
   background: #333;
+}
+.component .modulebody .button-module-button {
+  margin-top: 5px;
+}
+#canvas .module.chart {
+  min-width: 600px;
+  min-height: 350px;
+  width: 800px;
+  height: 500px;
+  z-index: 4;
+}
+#canvas .module.chart .modulebody {
+  -ms-flex-direction: row;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+#canvas .module.chart .modulebody .ioTable {
+  width: 23px;
+}
+#canvas .module.chart .modulebody .ioTable div.endpoint:not(.connected) {
+  visibility: hidden;
+}
+#canvas .module.chart .modulebody .ioTable td.input,
+#canvas .module.chart .modulebody .ioTable td.output {
+  padding: 0;
+}
+#canvas .module.chart .modulebody .content {
+  -webkit-flex: 1;
+  flex: 1;
+  width: 100%;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+}
+#canvas .module.chart .modulebody .content .toolbar {
+  display: inline-block;
+  padding-right: 15px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  -webkit-flex: 0;
+  flex: 0;
+}
+#canvas .module.chart .modulebody .content .toolbar .inner > * {
+  display: inline-block;
+  margin-bottom: 6px;
+}
+#canvas .module.chart .modulebody .content .chartDrawArea {
+  width: 100%;
+  height: 100%;
+  -webkit-flex: 1;
+  flex: 1;
+}
+#canvas .module.chart .chart-range-selector {
+  width: auto;
+  height: 25px;
+  line-height: 25px;
+  padding: 2px 8px;
+  margin-bottom: 3px;
+  margin-right: 5px;
+}
+#canvas .module.chart .chart-show-on-run {
+  display: none;
+}
+#canvas .module.chart table {
+  width: auto;
+}
+#canvas .module.chart .chart-resize-helper {
+  border: 2px dotted black;
+}
+#canvas .module.chart .seriesLink {
+  margin-left: 10px;
+}
+#canvas .module.chart .y-axis-number {
+  display: none;
+}
+div.comment {
+  color: black;
+  background-color: #FFFA8B;
+  width: 150px;
+  min-width: 100px;
+  height: 100px;
+  min-height: 50px;
+}
+div.comment .modulebody {
+  border: none;
+  box-shadow: none;
+}
+textarea.comment {
+  background-color: white;
+  resize: none;
+}
+.event-table-module-content {
+  display: block;
+  max-height: 400px;
+  overflow: auto;
 }
 div.module div.modulebody div.scheduler {
   font-size: 14px;
@@ -15375,6 +15472,24 @@ div.module div.modulefooter div.setup div.default-value input.form-control.input
 div.module div.modulefooter div.setup div.default-value input.form-control.input-sm.error-highlight {
   background-color: #ffdede;
 }
+.component .modulebody.switcher-container {
+  text-align: center;
+}
+.component .modulebody.switcher-container .switcher {
+  display: inline-block;
+  margin: 10px auto;
+}
+.text-field div.form-inline {
+  margin: 10px;
+}
+.text-field textarea.form-control {
+  height: 90px;
+  width: 200px;
+  margin-right: 10px;
+}
+.text-field .btn.send-btn {
+  height: 34px;
+}
 .dashboard streamr-label {
   font-size: 70px;
 }
@@ -15512,24 +15627,39 @@ body.canvas-editor-page .breadcrumb {
 body.canvas-editor-page #addModule {
   margin-top: 4px;
 }
-.login-page .btn-sign-up {
+body.canvas-list-page .panel-heading-controls .input-group {
+  width: 300px;
+}
+body.help-page {
+  line-height: 1.6;
+  /* Prevent FOUC by hiding the content initially, then shown using js */
+}
+@media (min-width: 700px) {
+  body.help-page .side-image {
+    float: right;
+    margin-left: 1em;
+  }
+}
+body.help-page hr {
+  width: 70%;
+  border-top: #E9570F solid 2px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+body.help-page pre {
+  background-color: white;
+}
+body.help-page .docs-wrapper {
   display: none;
 }
-.login-page .btn-sign-in {
-  display: none;
-}
-.login-page label.checkbox-inline {
-  margin-top: 15px;
-  width: 100%;
-}
-.login-page label.checkbox-inline a.forgot {
-  float: right;
-}
-.login-page.show-sign-up .btn-sign-up {
-  display: inline-block;
-}
-.login-page.show-sign-in .btn-sign-in {
-  display: inline-block;
+body.help-page h1,
+body.help-page .h1,
+body.help-page h2,
+body.help-page .h2,
+body.help-page h3,
+body.help-page .h3 {
+  margin-top: 40px;
+  margin-bottom: 20px;
 }
 body.live-show-view #content-wrapper {
   padding-bottom: 0px;
@@ -15554,24 +15684,24 @@ body.live-show-view #canvas {
   height: 100%;
   width: 100%;
 }
-body.stream-show table.file-table td.text-center {
-  width: 40px;
+.login-page .btn-sign-up {
+  display: none;
 }
-body.stream-show table.file-table td.text-center .lbl {
-  position: absolute;
-  vertical-align: top;
-  margin-left: 2px;
+.login-page .btn-sign-in {
+  display: none;
 }
-body.stream-show .dropzone-box {
-  margin-top: 5px;
-  min-height: 200px;
+.login-page label.checkbox-inline {
+  margin-top: 15px;
+  width: 100%;
 }
-body.stream-show .history .delete-btn {
-  height: 30px;
+.login-page label.checkbox-inline a.forgot {
+  float: right;
 }
-body.stream-show .history-start-date,
-body.stream-show .history-end-date {
-  font-weight: bold;
+.login-page.show-sign-up .btn-sign-up {
+  display: inline-block;
+}
+.login-page.show-sign-in .btn-sign-in {
+  display: inline-block;
 }
 body.module-list {
   position: relative;
@@ -15582,7 +15712,7 @@ body.module-list h1.title {
   padding-bottom: 15px;
 }
 body.module-list #module-help-tree {
-  padding-bottom: 600px;
+  padding-bottom: 1000px;
 }
 body.module-list #module-help-tree .highlight {
   padding: inherit;
@@ -15635,39 +15765,24 @@ body.module-list .help-text .math-jax-ready span.mtext {
   font-size: 14px;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
-body.canvas-list-page .panel-heading-controls .input-group {
-  width: 300px;
+body.stream-show table.file-table td.text-center {
+  width: 40px;
 }
-body.help-page {
-  line-height: 1.6;
-  /* Prevent FOUC by hiding the content initially, then shown using js */
+body.stream-show table.file-table td.text-center .lbl {
+  position: absolute;
+  vertical-align: top;
+  margin-left: 2px;
 }
-@media (min-width: 700px) {
-  body.help-page .side-image {
-    float: right;
-    margin-left: 1em;
-  }
+body.stream-show .dropzone-box {
+  margin-top: 5px;
+  min-height: 200px;
 }
-body.help-page hr {
-  width: 70%;
-  border-top: #E9570F solid 2px;
-  margin-top: 30px;
-  margin-bottom: 30px;
+body.stream-show .history .delete-btn {
+  height: 30px;
 }
-body.help-page pre {
-  background-color: white;
-}
-body.help-page .docs-wrapper {
-  display: none;
-}
-body.help-page h1,
-body.help-page .h1,
-body.help-page h2,
-body.help-page .h2,
-body.help-page h3,
-body.help-page .h3 {
-  margin-top: 40px;
-  margin-bottom: 20px;
+body.stream-show .history-start-date,
+body.stream-show .history-end-date {
+  font-weight: bold;
 }
 table {
   background-color: transparent;
@@ -16015,8 +16130,28 @@ div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
   position: absolute;
   padding: 5px;
 }
-.remote-tabs-content {
-  outline: none;
+.form-inline.search-form .search-input-group {
+  margin-top: 0;
+}
+.form-inline.search-form .search-input-group .form-control {
+  height: 26px;
+}
+.form-inline.search-form .search-input-group .input-group-btn {
+  height: 26px;
+  vertical-align: top;
+}
+.form-inline.search-form .search-input-group .input-group-btn .btn {
+  height: 26px;
+  padding-top: 3px;
+}
+.form-inline.search-form .filter-toggle-button {
+  display: inline-block;
+  float: left;
+  margin-right: 2px;
+  height: 26px;
+}
+.form-inline.search-form .filter-toggle-button:last-of-type {
+  margin-right: 7px;
 }
 #modal-spinner {
   display: none;
@@ -16033,6 +16168,94 @@ div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
   z-index: 101;
   top: 50%;
   left: 50%;
+}
+.remote-tabs-content {
+  outline: none;
+}
+.scrollspy-wrapper {
+  padding-bottom: 600px;
+}
+/** @see sharing-dialog.js */
+.sharing-dialog .modal-body .publish-label {
+  margin-right: 10px;
+}
+.sharing-dialog .modal-body .access-list {
+  padding-top: 25px;
+  padding-bottom: 20px;
+}
+.sharing-dialog .modal-body .user-label {
+  padding-left: 15px;
+  font-weight: bold;
+  word-wrap: break-word;
+}
+.sharing-dialog .modal-body .new-user-field.has-error {
+  color: #ff0000;
+}
+.sharing-dialog .modal-body .new-user-button {
+  height: 34px;
+}
+.sharing-dialog .modal-body .access-row {
+  margin-bottom: 10px;
+}
+.sharing-dialog .modal-body .new-user-row {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.sharing-dialog .modal-body .access-button-row {
+  padding-right: 0;
+}
+.sharing-dialog .modal-body .access-button-row .user-delete-button {
+  margin-left: 5px;
+}
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-open {
+  display: block;
+  background-color: #FFFFFF;
+  z-index: 1000;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 0 0 3px 1px #ccc;
+  -moz-box-shadow: 0 0 3px 1px #ccc;
+  box-shadow: 0 0 3px 1px #ccc;
+}
+.streamr-search-menu .streamr-search-dataset:not(:empty),
+.streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty) {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.streamr-search-menu .streamr-search-dataset:not(:empty):not(:last-child),
+.streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty):not(:last-child) {
+  border-bottom: 1px solid #dfdfdf;
+}
+.streamr-search-menu .streamr-search-dataset p,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset p {
+  margin-bottom: 0;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-dataset-header,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-dataset-header {
+  margin-left: 8px;
+  margin-top: 2px;
+  font-weight: bold;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion {
+  cursor: pointer;
+  padding: 5px 18px;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion:hover,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion:hover,
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion.streamr-search-cursor,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion.streamr-search-cursor {
+  background-color: #e95b15;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description {
+  font-size: 12px;
+}
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-empty {
+  position: absolute;
+  display: none;
 }
 .streamr-sidebar {
   position: fixed;
@@ -16103,9 +16326,6 @@ div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
 }
 .streamr-sidebar ul.nav li.active > ul.nav {
   display: block;
-}
-.scrollspy-wrapper {
-  padding-bottom: 600px;
 }
 body.dashboard-show {
   height: 100%;
@@ -16235,111 +16455,6 @@ body.dashboard-show #sidebar-view .canvas-title {
 }
 body.dashboard-show .titlebar-clickable {
   cursor: pointer;
-}
-/** @see sharing-dialog.js */
-.sharing-dialog .modal-body .publish-label {
-  margin-right: 10px;
-}
-.sharing-dialog .modal-body .access-list {
-  padding-top: 25px;
-  padding-bottom: 20px;
-}
-.sharing-dialog .modal-body .user-label {
-  padding-left: 15px;
-  font-weight: bold;
-  word-wrap: break-word;
-}
-.sharing-dialog .modal-body .new-user-field.has-error {
-  color: #ff0000;
-}
-.sharing-dialog .modal-body .new-user-button {
-  height: 34px;
-}
-.sharing-dialog .modal-body .access-row {
-  margin-bottom: 10px;
-}
-.sharing-dialog .modal-body .new-user-row {
-  padding-left: 30px;
-  padding-right: 30px;
-}
-.sharing-dialog .modal-body .access-button-row {
-  padding-right: 0;
-}
-.sharing-dialog .modal-body .access-button-row .user-delete-button {
-  margin-left: 5px;
-}
-.streamr-search-menu,
-.streamr-search-menu.streamr-search-open {
-  display: block;
-  background-color: #FFFFFF;
-  z-index: 1000;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  -webkit-box-shadow: 0 0 3px 1px #ccc;
-  -moz-box-shadow: 0 0 3px 1px #ccc;
-  box-shadow: 0 0 3px 1px #ccc;
-}
-.streamr-search-menu .streamr-search-dataset:not(:empty),
-.streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty) {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-.streamr-search-menu .streamr-search-dataset:not(:empty):not(:last-child),
-.streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty):not(:last-child) {
-  border-bottom: 1px solid #dfdfdf;
-}
-.streamr-search-menu .streamr-search-dataset p,
-.streamr-search-menu.streamr-search-open .streamr-search-dataset p {
-  margin-bottom: 0;
-}
-.streamr-search-menu .streamr-search-dataset .streamr-search-dataset-header,
-.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-dataset-header {
-  margin-left: 8px;
-  margin-top: 2px;
-  font-weight: bold;
-}
-.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion,
-.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion {
-  cursor: pointer;
-  padding: 5px 18px;
-}
-.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion:hover,
-.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion:hover,
-.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion.streamr-search-cursor,
-.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion.streamr-search-cursor {
-  background-color: #e95b15;
-}
-.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description,
-.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description {
-  font-size: 12px;
-}
-.streamr-search-menu,
-.streamr-search-menu.streamr-search-empty {
-  position: absolute;
-  display: none;
-}
-.form-inline.search-form .search-input-group {
-  margin-top: 0;
-}
-.form-inline.search-form .search-input-group .form-control {
-  height: 26px;
-}
-.form-inline.search-form .search-input-group .input-group-btn {
-  height: 26px;
-  vertical-align: top;
-}
-.form-inline.search-form .search-input-group .input-group-btn .btn {
-  height: 26px;
-  padding-top: 3px;
-}
-.form-inline.search-form .filter-toggle-button {
-  display: inline-block;
-  float: left;
-  margin-right: 2px;
-  height: 26px;
-}
-.form-inline.search-form .filter-toggle-button:last-of-type {
-  margin-right: 7px;
 }
 .widget-notifications .notification {
   position: relative;

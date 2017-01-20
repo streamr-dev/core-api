@@ -1,0 +1,90 @@
+#canvas .module.chart {
+	min-width: 600px;
+	min-height: 350px;
+	width: 800px;
+	height: 500px;
+	z-index: 4;
+
+  .modulebody {
+    -ms-flex-direction: row;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    padding-right: 20px;
+    padding-bottom: 20px;
+
+    .ioTable {
+      width: 23px;
+
+      div.endpoint:not(.connected) {
+        visibility: hidden;
+      }
+
+      td.input,
+      td.output {
+        padding: 0;
+      }
+    }
+
+    .content {
+      -webkit-flex: 1;
+      flex: 1;
+      width: 100%;
+      display: -webkit-flex;
+      display: flex;
+      flex-direction: column;
+
+      .toolbar {
+        display: inline-block;
+        padding-right: 15px;
+        padding-bottom: 5px;
+        padding-top: 5px;
+        -webkit-flex: 0;
+        flex: 0;
+
+        .inner > * {
+          display: inline-block;
+          margin-bottom: 6px;
+        }
+      }
+
+      .chartDrawArea {
+        width: 100%;
+        height: 100%;
+        -webkit-flex: 1;
+        flex: 1;
+      }
+    }
+  }
+
+  .chart-range-selector {
+      width: auto;
+      height: 25px;
+      line-height: 25px;
+      padding: 2px 8px;
+      margin-bottom: 3px;
+      margin-right: 5px;
+  }
+
+  .chart-show-on-run {
+      display:none;
+  }
+
+  table {
+    width: auto;
+  }
+
+  .chart-resize-helper {
+    border: 2px dotted black;
+  }
+
+  .seriesLink {
+    margin-left: 10px;
+  }
+
+  .y-axis-number {
+    display:none;
+  }
+}
+
+
+

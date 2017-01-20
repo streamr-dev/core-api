@@ -15,7 +15,12 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		if (!prot.jsonData.disableAxisSelection) {
 			prot.div.find("div.input.Double").removeClass("default-context-menu").addClass("chart-context-menu");
 		}
-
+        
+		prot.content = $("<div/>", {
+            class: "content"
+        })
+        prot.body.append(prot.content)
+		
 		initChart()
 		
 		prot.initResizable({
@@ -72,8 +77,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	prot.getChart = getChart;
 
 	function initChart() {
-		prot.body.find(".ioTable").css("width","0px");
-		prot.chart = new StreamrChart(prot.body, prot.jsonData.options)
+		//prot.body.find(".ioTable").css("width","0px");
+		prot.chart = new StreamrChart(prot.content, prot.jsonData.options)
 		prot.chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
 	}
 	
