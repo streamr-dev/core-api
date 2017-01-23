@@ -17,7 +17,7 @@ public abstract class Endpoint<T> implements Serializable {
 	private Map<String, Object> variadicConfig;
 
 	private boolean configured = false;
-	private boolean exported = false;
+	private boolean export = false;
 	private boolean canConnect = true;
 	protected List<String> aliases = null;
 	
@@ -47,12 +47,12 @@ public abstract class Endpoint<T> implements Serializable {
 		this.name = name;
 	}
 
-	public boolean isExported() {
-		return exported;
+	public boolean isExport() {
+		return export;
 	}
 
-	public void setExported(boolean exported) {
-		this.exported = exported;
+	public void setExport(boolean export) {
+		this.export = export;
 	}
 
 	public String getDisplayName() {
@@ -106,7 +106,7 @@ public abstract class Endpoint<T> implements Serializable {
 		map.put("type", typeName);
 		map.put("connected", isConnected()); // generated
 		map.put("canConnect", canConnect);
-		map.put("export", exported);
+		map.put("export", export);
 
 		// Avoid writing null keys for efficiency
 		if (displayName != null) {
@@ -138,8 +138,8 @@ public abstract class Endpoint<T> implements Serializable {
 		if (config.containsKey("canConnect")) {
 			canConnect = MapTraversal.getBoolean(config, "canConnect");
 		}
-		if (config.containsKey("exported")) {
-			exported = MapTraversal.getBoolean(config, "exported");
+		if (config.containsKey("export")) {
+			export = MapTraversal.getBoolean(config, "export");
 		}
 		if (config.containsKey("displayName")) {
 			displayName = MapTraversal.getString(config, "displayName");
