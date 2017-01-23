@@ -59,9 +59,8 @@ class CanvasService {
 		canvas.adhoc = command.isAdhoc()
 
 		// clear serialization
-		canvas.serialized = null
-		canvas.serializationTime = null
-
+		canvas.serialization?.delete()
+		canvas.serialization = null
 		canvas.save(flush: true, failOnError: true)
 	}
 

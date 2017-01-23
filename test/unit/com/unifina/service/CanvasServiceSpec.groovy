@@ -11,6 +11,7 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
+import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.signalpath.UiChannelIterator
 import com.unifina.signalpath.charts.Heatmap
@@ -22,7 +23,7 @@ import groovy.json.JsonBuilder
 import spock.lang.Specification
 
 @TestFor(CanvasService)
-@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Dashboard, DashboardItem])
+@Mock([SecUser, Canvas, Module, ModuleService, SpringSecurityService, SignalPathService, PermissionService, Permission, Serialization, Dashboard, DashboardItem])
 class CanvasServiceSpec extends Specification {
 
 	SecUser me
@@ -155,8 +156,7 @@ class CanvasServiceSpec extends Specification {
 		c.server == null
 		c.requestUrl == null
 		!c.adhoc
-		c.serialized == null
-		c.serializationTime == null
+		c.serialization == null
 
 		List uiChannelIds = uiChannelIdsFromMap(c.toMap())
 		uiChannelIds.size() == 1
@@ -229,8 +229,10 @@ class CanvasServiceSpec extends Specification {
 
 	def "updateExisting clears serialization"() {
 		setup:
-		myFirstCanvas.serialized = "{}"
-		myFirstCanvas.serializationTime = new Date()
+		myFirstCanvas.serialization = new Serialization(date: new Date(), bytes: new byte[12])
+		myFirstCanvas.save(failOnError: true)
+		def serializationId = myFirstCanvas.serialization.id
+		assert serializationId != null
 
 		when:
 		def command = new SaveCanvasCommand(
@@ -242,8 +244,11 @@ class CanvasServiceSpec extends Specification {
 
 		then:
 		Canvas c = Canvas.findById(myFirstCanvas.id)
-		c.serialized == null
-		c.serializationTime == null
+		c.serialization == null
+
+		and:
+		Serialization s = Serialization.findById(serializationId)
+		s == null
 
 	}
 
@@ -332,8 +337,7 @@ class CanvasServiceSpec extends Specification {
 	def "start() raises ApiException about serialization if deserializing canvas fails"() {
 		def signalPathService = Mock(SignalPathService)
 		service.signalPathService = signalPathService
-		myFirstCanvas.serialized = "serialized_content_be_here"
-		myFirstCanvas.serializationTime = new Date()
+		myFirstCanvas.serialization = new Serialization(date: new Date(), bytes: "invalid_content_be_here".bytes)
 		myFirstCanvas.save(failOnError: true)
 
 		when:

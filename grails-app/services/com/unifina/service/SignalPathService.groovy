@@ -9,6 +9,7 @@ import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
@@ -181,11 +182,11 @@ class SignalPathService {
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (canvas.isNotSerialized() || canvas.adhoc) {
+		if (canvas.serialization == null || canvas.adhoc) {
 			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
 		} else {
-			SignalPath sp = serializationService.deserialize(canvas.serialized)
+			SignalPath sp = serializationService.deserialize(canvas.serialization.bytes)
 			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 		}
@@ -454,12 +455,19 @@ class SignalPathService {
 		Canvas canvas = sp.canvas
 
 		try {
-			canvas.serialized = serializationService.serialize(sp)
-			canvas.serializationTime = sp.globals.time
-			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
-				[canvas.serialized, canvas.serializationTime, canvas.id])
+			boolean isFirst = canvas.serialization == null
+			def serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
+
+			serialization.bytes = serializationService.serialize(sp)
+			serialization.date = sp.globals.time
+			serialization.save(failOnError: true, flush: true)
+			canvas.serialization = serialization
+
+			if (isFirst) {
+				Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+			}
 			long timeTaken = System.currentTimeMillis() - startTime
-			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes, processing time: ${timeTaken} ms)")
+			log.info("Canvas " + canvas.id + " serialized (size: ${serialization.bytes.length} bytes, processing time: ${timeTaken} ms)")
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
@@ -468,9 +476,9 @@ class SignalPathService {
 
 	@Transactional
 	def clearState(Canvas canvas) {
-		canvas.serialized = null
-		canvas.serializationTime = null
+		canvas.serialization?.delete()
+		canvas.serialization = null
 		canvas.save(failOnError: true)
-		log.info("Canvas " + canvas.id + " serialized state cleared.")
+		log.info("Canvas $canvas.id serialized state cleared.")
 	}
 }
