@@ -17,16 +17,13 @@ class ModuleService {
 		AbstractSignalPathModule m = (AbstractSignalPathModule) cl.loadClass(mod.implementingClass).newInstance()
 		m.globals = globals
 		m.init()
-		m.setName(mod.name)
 		m.setDomainObject(mod)
-		if (parent != null) { m.parentSignalPath = parent }
 
-		// Make sure the config contains up-to-date info about the Module
+		if (parent != null) {
+			m.setParentSignalPath(parent)
+		}
+
 		if (config != null) {
-			config["id"] = mod.id
-			config["jsModule"] = mod.jsModule
-			config["name"] = mod.name
-			config["type"] = mod.type
 			m.configure(config)
 		}
 

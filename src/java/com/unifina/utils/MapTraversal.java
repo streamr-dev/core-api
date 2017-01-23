@@ -72,8 +72,8 @@ public class MapTraversal {
      */
 	public static int getInt(Map map, String name) throws NumberFormatException, NullPointerException {
 		Object raw = getProperty(map, name);
-		if (raw instanceof Integer) {
-			return ((Integer)raw).intValue();
+		if (raw instanceof Number) {
+			return ((Number)raw).intValue();
 		} else {
 			return Integer.parseInt(raw.toString());
 		}
@@ -90,16 +90,16 @@ public class MapTraversal {
 	public static Long getLong(Map map, String name) {
 		Object raw = getProperty(map,name);
 		if (raw==null) return null;
-		else if (raw instanceof Long)
-			return (Long) raw;
+		else if (raw instanceof Number)
+			return ((Number) raw).longValue();
 		else return Long.parseLong(raw.toString());
 	}
 	
 	public static Double getDouble(Map map, String name) {
 		Object raw = getProperty(map,name);
 		if (raw==null) return null;
-		else if (raw instanceof Double)
-			return (Double) raw;
+		else if (raw instanceof Number)
+			return ((Number) raw).doubleValue();
 		else return Double.parseDouble(raw.toString());
 	}
 	
