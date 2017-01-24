@@ -39,15 +39,16 @@ public class PropagatorUtils {
 	}
 
 	/**
-	 * Finds the items in the <code>origins</code> that are reachable from <code>dependantsToFind</code>.
+	 * Filters <code>targets</code>, returning those modules that depend on any module in <code>sources</code>.
+	 * Dependencies are found by traversing connections backwards starting from each module in <code>targets</code>.
 	 */
-	public static Set<AbstractSignalPathModule> findDependentModules(Set<AbstractSignalPathModule> origins,
-																	 Set<AbstractSignalPathModule> dependentsToFind) {
+	public static Set<AbstractSignalPathModule> findDependentModules(Set<AbstractSignalPathModule> targets,
+																	 Set<AbstractSignalPathModule> sources) {
 		Set<AbstractSignalPathModule> result = new HashSet<>();
 
-		for (AbstractSignalPathModule originModule : origins) {
+		for (AbstractSignalPathModule targetModule : targets) {
 			Queue<AbstractSignalPathModule> queue = new ArrayDeque<>();
-			queue.add(originModule);
+			queue.add(targetModule);
 			boolean found = false;
 
 			while (!found && !queue.isEmpty()) {
@@ -55,7 +56,7 @@ public class PropagatorUtils {
 				for (Input i : source.getInputs()) {
 					if (i.isConnected()) {
 						AbstractSignalPathModule outputOwner = i.getSource().getOwner();
-						if (dependentsToFind.contains(outputOwner)) {
+						if (sources.contains(outputOwner)) {
 							found = true;
 							break;
 						} else {
@@ -66,7 +67,7 @@ public class PropagatorUtils {
 			}
 
 			if (found) {
-				result.add(originModule);
+				result.add(targetModule);
 			}
 		}
 
