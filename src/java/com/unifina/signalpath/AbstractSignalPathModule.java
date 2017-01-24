@@ -452,12 +452,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		if (config.containsKey("hash")) {
 			hash = MapTraversal.getInt(config, "hash");
 		}
-		if (config.containsKey("canClearState")) {
-			canClearState = MapTraversal.getBoolean(config, "canClearState");
-		}
-		if (config.containsKey("canRefresh")) {
-			canRefresh = MapTraversal.getBoolean(config, "canRefresh");
-		}
+		// skip canClearState: read-only
+		// skip canRefresh: read-only
 		if (config.containsKey("displayName")) {
 			displayName = MapTraversal.getString(config, "displayName");
 		}

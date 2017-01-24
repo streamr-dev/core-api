@@ -95,8 +95,6 @@ public abstract class Endpoint<T> implements Serializable {
 		id = IdGenerator.get();
 	}
 
-	private static final List<String> CONFIG_KEYS_TO_KEEP = Arrays.asList("variadic");
-
 	public Map<String,Object> getConfiguration() {
 		Map<String, Object> map = new LinkedHashMap<>();
 
@@ -135,18 +133,14 @@ public abstract class Endpoint<T> implements Serializable {
 		// skip longName: it's generated
 		// skip type: already set by constructor
 		// skip connected: it's generated
-		if (config.containsKey("canConnect")) {
-			canConnect = MapTraversal.getBoolean(config, "canConnect");
-		}
+		// skip canConnect: read-only
 		if (config.containsKey("export")) {
 			export = MapTraversal.getBoolean(config, "export");
 		}
 		if (config.containsKey("displayName")) {
 			displayName = MapTraversal.getString(config, "displayName");
 		}
-		if (config.containsKey("jsClass")) {
-			jsClass = MapTraversal.getString(config, "jsClass");
-		}
+		// skip jsClass: read-only
 		if (config.containsKey("variadic")) {
 			variadicConfig = MapTraversal.getMap(config, "variadic");
 		}
