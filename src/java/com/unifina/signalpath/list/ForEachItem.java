@@ -65,7 +65,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 			addOutput(output);
 		}
 
-		subCanvasPropagator = new Propagator(exportedInputs, this);
+		subCanvasPropagator = new Propagator(exportedInputs);
 	}
 
 	@Override

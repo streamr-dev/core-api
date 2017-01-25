@@ -712,8 +712,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 				if (isSendPending()) {
 					if (uiEventPropagator == null) {
-						uiEventPropagator = new Propagator();
-						uiEventPropagator.addModule(this);
+						uiEventPropagator = new Propagator(this);
 					}
 					trySendOutput();
 					if (wasReady) {
