@@ -34,16 +34,7 @@ public class ForEach extends AbstractSignalPathModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-
-		LinkedHashMap<String, Map> canvasMapByKey = new LinkedHashMap<>();
-		config.put("canvasesByKey", canvasMapByKey);
-		for (String key : keyToSignalPath.keySet()) {
-			SubSignalPath ssp = keyToSignalPath.get(key);
-			Map<String, Object> subConfig = ssp.getSignalPath().getConfiguration();
-			subConfig.put("state", Canvas.State.RUNNING);
-			canvasMapByKey.put(key, subConfig);
-		}
-
+		config.put("canvasKeys", keyToSignalPath.keySet());
 		return config;
 	}
 
@@ -197,8 +188,7 @@ public class ForEach extends AbstractSignalPathModule {
 	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
 		if (path.isEmpty()) {
 			return super.resolveRuntimeRequestRecipient(request, path);
-		}
-		else {
+		} else {
 			String key = path.readString("keys");
 			// URLDecode twice, see forEachModule.js
 			try {
@@ -208,8 +198,7 @@ public class ForEach extends AbstractSignalPathModule {
 			SubSignalPath ssp = keyToSignalPath.get(key);
 			if (ssp == null) {
 				throw new IllegalArgumentException("Subcanvas not found: "+key);
-			}
-			else {
+			} else {
 				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
 			}
 		}
