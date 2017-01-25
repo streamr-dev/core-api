@@ -176,7 +176,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		signalPath.setParentSignalPath(getParentSignalPath());
 
-		Propagator propagator = new Propagator(signalPath.getExportedInputs(), this);
+		Propagator propagator = new Propagator(signalPath.getExportedInputs());
 
 		signalPath.connectionsReady();
 		return new SubSignalPath(signalPath, propagator, key);
