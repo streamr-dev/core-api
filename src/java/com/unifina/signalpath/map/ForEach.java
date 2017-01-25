@@ -52,7 +52,7 @@ public class ForEach extends AbstractSignalPathModule {
 		super.onConfiguration(config);
 
 		// Load canvas
-		Canvas canvas = signalPathParameter.getValue();
+		Canvas canvas = signalPathParameter.getCanvas();
 		if (canvas == null) {
 			return;
 		}
@@ -160,7 +160,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
-		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getValue().getJson());
+		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
 		canvasService.resetUiChannels(signalPathMap);
 		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
 		signalPath.setName(signalPath.getName() + " (" + key + ")");
