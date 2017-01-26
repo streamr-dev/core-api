@@ -1,13 +1,20 @@
 package com.unifina.signalpath.blockchain;
 
-
-import com.unifina.signalpath.AbstractSignalPathModule;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.*;
 import com.unifina.signalpath.Input;
+import com.unifina.signalpath.ListOutput;
 import com.unifina.signalpath.StringOutput;
 import com.unifina.signalpath.StringParameter;
+import com.unifina.signalpath.remote.AbstractHttpModule;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,121 +22,205 @@ import java.util.Map;
 /**
  * Send out a call to specified function in Ethereum block chain
  */
-public class EthereumCall extends AbstractSignalPathModule {
+public class EthereumCall extends AbstractHttpModule {
 
+	public static final String ETH_WRAPPER_URL = "http://localhost:3000/call";
 	private static final Logger log = Logger.getLogger(EthereumCall.class);
 
+	private StringParameter abiString = new StringParameter(this, "interface", "");
 	private StringParameter address = new StringParameter(this, "address", "");
-	private StringParameter method = new StringParameter(this, "method", "");
+	private StringParameter function = new StringParameter(this, "function", "");	// TODO: change into drop-down list
+	private ListOutput errors = new ListOutput(this, "errors");
 
-	private StringOutput transactionHash = new StringOutput(this, "transactionHash");
+	private StringOutput result = new StringOutput(this, "result");
 
 	private List<Input<Object>> arguments = new ArrayList<>();
 
-	private String currentAddress = "";
+	// TODO: proper check if param changed
+	//private String currentAbiString = "";
+	//private String currentFunctionString = "";
+
+	private Function chosenFunction;
 	private boolean isValid = false;
-	/*
-	private Web3j web3;
-	private Credentials credentials;
-	*/
+
+	private JsonElement abi;
+
+	private static class Slot {
+		String name;
+		String type;
+	}
+
+	private static class Function {
+		String name;
+		List<Slot> inputs;
+		List<Slot> outputs;
+		Boolean payable;
+		Boolean constant;
+	}
+
+	private List<Function> functions;
+
 	@Override
 	public void init() {
+		addInput(abiString);
 		addInput(address);
-		addInput(method);
-		address.setUpdateOnChange(true);
-		method.setUpdateOnChange(true);
+		addInput(function);
+		abiString.setUpdateOnChange(true);		// update function list parameter
+		function.setUpdateOnChange(true);		// update argument inputs
 
-		addOutput(transactionHash);
+		addOutput(result);
+		addOutput(errors);
 	}
 
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		if (!currentAddress.equals(address.getValue())) {
-			currentAddress = address.getValue();
-			log.debug("Reading ABI (argument count and types) from Ethereum contract " + currentAddress);
-			int argCount = 1;
-			arguments = new ArrayList<>(argCount);
-			for (int i = 0; i < argCount; i++) {
-				String name = "test";
-				String type = "Object";
-				Input<Object> input = new Input<>(this, name, type);
-				addInput(input);
-				arguments.add(input);
+		// TODO: proper check if param changed
+		//if (!currentAbiString.equals(abiString.getValue())) {
+			String currentAbiString = abiString.getValue();
+			isValid = false;
+
+			log.info("Parsing interface: " + currentAbiString);
+			abi = new JsonParser().parse(currentAbiString);
+
+			// re-read function arguments
+			//chosenFunction = null;
+			//currentFunctionString = "";
+
+			functions = new ArrayList<>();
+			for (JsonElement e : abi.getAsJsonArray()) {
+				JsonObject member = e.getAsJsonObject();
+				if (member.get("type").getAsString().equals("function")) {
+					Function f = new Gson().fromJson(member, Function.class);
+					log.info("Found function " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
+					functions.add(f);
+				}
 			}
-			isValid = true;
-		}
+
+			// TODO: update ContractFunctionParameter
+		//}
+
+		// TODO: proper check if param changed
+		//if (!currentFunctionString.equals(function.getValue())) {
+			String currentFunctionString = function.getValue();
+
+			Function newF = null;
+			for (Function f : functions) {
+				if (f.name.equals(currentFunctionString)) {
+					newF = f;
+					break;
+				}
+			}
+			if (newF != null) {
+				chosenFunction = newF;
+				log.info("Chose function " + chosenFunction.name);
+			} else {
+				log.info("Can't find " + currentFunctionString);
+			}
+
+			if (chosenFunction != null) {
+				arguments = new ArrayList<>();
+				for (Slot s : chosenFunction.inputs) {
+					String name = s.name;
+					String type = ethToStreamrType(s.type);
+					Input<Object> input = new Input<>(this, name, type);
+					addInput(input);
+					arguments.add(input);
+				}
+				isValid = true;
+			}
+		//}
+	}
+
+	/**
+	 * Maps Ethereum types to Streamr types
+	 * @param ethType
+	 * @return Streamr type: "Double" for numbers, "String" for addresses/strings, otherwise "Object"
+     */
+	public static String ethToStreamrType(String ethType) {
+		return  ethType.equals("address") ? "String" :
+				ethType.equals("string") ? "String" :
+				ethType.substring(0, 5).equals("bytes") ? "String" :
+				ethType.substring(0, 4).equals("uint") ? "Double" :
+				ethType.substring(0, 3).equals("int") ? "Double" : "Object";
 	}
 
 	@Override
 	public void clearState() {
-		currentAddress = "";
+		//currentAbiString = "";
+		//currentFunctionString = "";
+		chosenFunction = null;
 		isValid = false;
 	}
 
+	/**
+	 * Prepare HTTP request based on module inputs
+	 * @return HTTP request that will be sent to server
+	 */
 	@Override
-	public void sendOutput() {
+	protected HttpRequestBase createRequest() {
 		if (!isValid) {
-			log.error("Module activated in bad state!");
-			return;
-		}
-
-		log.debug("Sending function call to Ethereum contract " + currentAddress);
-		//for (int i = 0; i < arguments.size(); i++) { Input input = arguments[i];
-		for (Input<Object> input : arguments) {
-			String name = input.getName();
-			String value = input.getValue().toString();
-			log.debug("  " + name + ": " + value);
+			throw new RuntimeException("Need valid address to call!");
 		}
 
 		String sourceAddress = "0xb3428050ea2448ed2e4409be47e1a50ebac0b2d2";
-		String targetAddress = address.toString();
+		String targetAddress = address.getValue();
+		String functionName = chosenFunction.name;
+
+		List<JsonPrimitive> argList = new ArrayList<>();
+		for (Input<Object> input : arguments) {
+			String name = input.getName();
+			String value = input.getValue().toString();
+			log.info("  " + name + ": " + value);
+			argList.add(new JsonPrimitive(value));
+		}
+
+		Map args = ImmutableMap.of(
+				"source", sourceAddress,
+				"target", targetAddress,
+				"function", functionName,
+				"arguments", argList,
+				"abi", abi
+		);
+		String jsonString = new Gson().toJson(args);
+
+		HttpPost request = new HttpPost(ETH_WRAPPER_URL);
+		try {
+			log.info("Sending function call: " + jsonString);
+			request.setEntity(new StringEntity(jsonString));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+		return request;
+	}
+
+	private static class EthWrapperResponse {
+		String result;
+	}
+
+	@Override
+	public void sendOutput(HttpTransaction call) {
 
 		try {
-			/*
-			if (web3 == null) {
-				// On Java 8: Web3j.build
-				web3 = new JsonRpc2_0Web3j(new HttpService());
-				//credentials = WalletUtils.loadCredentials("password", "/path/to/walletfile");
-				credentials = Credentials.create("6e340f41a1c6e03e6e0a4e9805d1cea342f6a299e7c931d6f3da6dd34cb6e17d");
-			}
+			if (call.response == null) { throw new RuntimeException("No response from server"); }
 
-			Function function = new Function(
-					"owner",
-					Arrays.<Type>asList(),
-					Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-			String encodedFunction = FunctionEncoder.encode(function);
+			HttpEntity entity = call.response.getEntity();
+			if (entity == null) { throw new RuntimeException("Empty response from server"); }
 
-			Request r = web3.ethCall(Transaction.createEthCallTransaction(targetAddress, encodedFunction), DefaultBlockParameterName.LATEST);
-			Response<EthCall> resp = r.send();
+			String responseString = EntityUtils.toString(entity, "UTF-8");
+			if (responseString.isEmpty()) { throw new RuntimeException("Empty response from server"); }
 
-			EthCall res = resp.getResult();
-			String resValue = res.getValue();
+			EthWrapperResponse resp = new Gson().fromJson(responseString, EthWrapperResponse.class);
 
-			transactionHash.send(resValue);
-			*/
+			result.send(resp.result);
 
-			/*
-			// get the next available nonce
-			EthGetTransactionCount ethGetTransactionCount = web3.ethGetTransactionCount(sourceAddress, DefaultBlockParameterName.LATEST).send();
-			BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+		} catch (Exception e) {
+			call.errors.add(e.getMessage());
+		}
 
-			// create our transaction
-			String data = "lol";
-			RawTransaction rawTransaction = RawTransaction.createTransaction(nonce, GAS_PRICE, GAS_LIMIT, targetAddress, data);
-
-			// sign & send our transaction
-			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
-			String hexValue = Hex.encodeHexString(signedMessage);
-			EthSendTransaction ethSendTransaction = web3.ethSendRawTransaction(hexValue).send();
-			String txHash = ethSendTransaction.getTransactionHash();
-
-			transactionHash.send(txHash);
-			*/
-
-		} catch (IOException e) {
-			log.error(e);
+		if (call.errors.size() > 0) {
+			errors.send(call.errors);
 		}
 	}
 
