@@ -278,7 +278,9 @@ public class SignalPath extends ModuleWithUI {
 
 	@Override
 	public void clearState() {
-
+		for (AbstractSignalPathModule module : getModules()) {
+			module.clear();
+		}
 	}
 
 	@Override
