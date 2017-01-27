@@ -18,11 +18,11 @@ public class Merge extends AbstractSignalPathModule {
 		addInput(inA);
 		inA.setDrivingInput(true);
 		inA.canToggleDrivingInput = false;
-		inA.setReadyHack();
+		inA.setReady(true);
 		addInput(inB);
 		inB.setDrivingInput(true);
 		inB.canToggleDrivingInput = false;
-		inB.setReadyHack();
+		inB.setReady(true);
 		addOutput(out);
 	}
 
