@@ -37,9 +37,7 @@ public class Input<T> extends Endpoint<T> {
 		this.value = (T) value;
 		
 		if (!ready) {
-			ready = true;
-			wasReady = true;
-			owner.markReady(this);
+			setReady(true);
 		}
 		
 		if (drivingInput) {
@@ -53,22 +51,42 @@ public class Input<T> extends Endpoint<T> {
 		}
 	}
 
-	// TODO: horrible hack for DNI project
-	public void setReadyHack() {
-		ready = true;
-		wasReady = true;
-		owner.markReady(this);
+	// TODO: should be private, but hacked public for Merge
+	public void setReady(boolean ready) {
+		if (ready) {
+			this.ready = true;
+			wasReady = true;
+			owner.markReady(this);
+		} else {
+			this.ready = false;
+			owner.cancelReady(this);
+		}
 	}
 
 	@Override
 	public T getValue() {
+		if (value == null && isConnected() && source.getOwner() instanceof Pullable) {
+			Object pulledObject = ((Pullable<?>) source.getOwner()).pullValue(source);
+			value = handlePulledObject(pulledObject);
+		}
 		return value;
 	}
 	
 	public boolean hasValue() {
 		return getValue() != null;
 	}
-	
+
+	/**
+	 * If the pulled object is not necessarily an instance of T, this method
+	 * should be overridden in a subclass to handle that situation (for example,
+	 * an IntegerParameter might pull a Double from Constant).
+	 * @param o
+	 * @return
+	 */
+	protected T handlePulledObject(Object o) {
+		return (T) o;
+	}
+
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
@@ -134,20 +152,27 @@ public class Input<T> extends Endpoint<T> {
 
 	public void setSource(Output<T> source) {
 		this.source = source;
-		if (!isReady()) {
-			owner.cancelReady(this);
+
+		if (source.getOwner() instanceof Pullable) {
+			setReady(true);
+		} else if (!isReady()) {
+			setReady(false);
 		}
 	}
 
 	public void disconnect() {
-		this.source = null;
-		owner.cancelReady(this);
+		if (isConnected()) {
+			this.source = null;
+			setReady(false);
+		}
 	}
 
 	@Override
 	public void clear() {
-		value = null;
-		ready = false;
+		if (!isConnected() || !(source.getOwner() instanceof Pullable)) {
+			value = null;
+			setReady(false);
+		}
 	}
 
 	public boolean isFeedbackConnection() {

@@ -74,17 +74,6 @@ public abstract class Parameter<T> extends Input<T> {
 	protected boolean isEmpty(T value) {
 		return value == null;
 	}
-
-	/**
-	 * If the pulled object is not necessarily an instance of T, this method
-	 * should be overridden in a subclass to handle that situation (for example,
-	 * an IntegerParameter might pull a Double from Constant).
-	 * @param o
-	 * @return
-	 */
-	protected T handlePulledObject(Object o) {
-		return (T) o;
-	}
 	
 	@Override
 	public void clear() {

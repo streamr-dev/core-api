@@ -98,7 +98,7 @@ class InputSpec extends Specification {
 		input2.value == 64
 	}
 
-	def "pullable works after clearState"() {
+	def "Input can pull value from a Pullable even after clearing"() {
 		when:
 		def concatenateModule = new StringConcatenate()
 		concatenateModule.init()
