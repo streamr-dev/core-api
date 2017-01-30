@@ -7,14 +7,14 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.map.MapMessage;
 import org.bson.Document;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
 
-public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable {
+public class MongoHistoricalIterator implements Iterator<MongoMessage>, Closeable {
 
 	private final Stream stream;
 	private final Date startDate;
@@ -61,10 +61,10 @@ public class MongoHistoricalIterator implements Iterator<MapMessage>, Closeable 
 	}
 
 	@Override
-	public MapMessage next() {
+	public MongoMessage next() {
 		Document document = mongoCursor.next();
 		Date timestamp = config.getTimestamp(document);
-		return new MapMessage(timestamp, timestamp, new DocumentFromStream(document, stream));
+		return new MongoMessage(stream.getId(), 0, timestamp, timestamp, new DocumentFromStream(document, stream));
 	}
 
 	@Override

@@ -8,7 +8,8 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.StreamrBinaryMessageKeyProvider
 import com.unifina.feed.cassandra.CassandraHistoricalFeed
-import com.unifina.feed.map.MapMessageEventRecipient
+import com.unifina.feed.json.JSONStreamrMessage
+import com.unifina.feed.map.StreamrMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
@@ -79,7 +80,7 @@ class SendToStreamSpec extends Specification {
 		def feed = new Feed()
 		feed.id = Feed.KAFKA_ID
 		feed.backtestFeed = CassandraHistoricalFeed.getName()
-		feed.eventRecipientClass = MapMessageEventRecipient.getName()
+		feed.eventRecipientClass = StreamrMessageEventRecipient.getName()
 		feed.keyProviderClass = StreamrBinaryMessageKeyProvider.getName()
 		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
@@ -299,12 +300,12 @@ class SendToStreamSpec extends Specification {
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
-						FeedEvent e = globals.getDataSource().getEventQueue().poll()
+						FeedEvent<JSONStreamrMessage> e = globals.getDataSource().getEventQueue().poll()
 						assert e != null
 
 						// Values are correct
-						assert e.content.payload.strIn == inputValues.strIn[i]
-						assert e.content.payload.numIn == inputValues.numIn[i]
+						assert e.content.get("strIn") == inputValues.strIn[i]
+						assert e.content.get("numIn") == inputValues.numIn[i]
 
 						// Event recipient is correct
 						assert e.recipient.modules.find {it == sourceModule}

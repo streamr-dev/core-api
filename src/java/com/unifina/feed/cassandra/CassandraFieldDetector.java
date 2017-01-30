@@ -5,9 +5,9 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Stream;
+import com.unifina.feed.AbstractStreamrMessage;
 import com.unifina.feed.FieldDetector;
 import com.unifina.feed.StreamrBinaryMessageParser;
-import com.unifina.feed.map.MapMessage;
 import com.unifina.service.CassandraService;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
@@ -22,7 +22,7 @@ public class CassandraFieldDetector extends FieldDetector {
 	}
 
 	@Override
-	protected MapMessage fetchExampleMessage(Stream stream) {
+	protected AbstractStreamrMessage fetchExampleMessage(Stream stream) {
 		Session session = null;
 		try {
 			session = getSession(stream);

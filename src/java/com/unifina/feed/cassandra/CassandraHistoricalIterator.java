@@ -4,19 +4,17 @@ import com.datastax.driver.core.*;
 import com.unifina.data.StreamrBinaryMessage;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.StreamrBinaryMessageParser;
-import com.unifina.feed.map.MapMessage;
+import com.unifina.feed.AbstractStreamrMessage;
 import com.unifina.service.CassandraService;
-import grails.converters.JSON;
 import grails.util.Holders;
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
-public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closeable {
+public class CassandraHistoricalIterator implements Iterator<AbstractStreamrMessage>, Closeable {
 
 	private final Stream stream;
 	private final Integer partition;
@@ -73,7 +71,7 @@ public class CassandraHistoricalIterator implements Iterator<MapMessage>, Closea
 	}
 
 	@Override
-	public MapMessage next() {
+	public AbstractStreamrMessage next() {
 		Row row = resultSet.one();
 
 		// Async-fetch more rows if not many left

@@ -1,6 +1,5 @@
 package com.unifina.signalpath.twitter;
 
-import com.unifina.feed.twitter.TwitterMessage;
 import com.unifina.signalpath.*;
 
 public class TwitterModule extends AbstractStreamSourceModule {
@@ -29,17 +28,6 @@ public class TwitterModule extends AbstractStreamSourceModule {
 		isRetweet.noRepeat = false;
 
 		addOutput(keywords);
-	}
-
-	// called from TwitterEventRecipient
-	public void forward(TwitterMessage msg) {
-		tweet.send(msg.text);
-		username.send(msg.username);
-		name.send(msg.name);
-		language.send(msg.language);
-		followers.send(msg.followers);
-		isRetweet.send(msg.quotedText != null);
-		keywords.send(msg.matchedKeywords);
 	}
 
 	@Override

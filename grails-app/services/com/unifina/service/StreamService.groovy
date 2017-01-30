@@ -79,9 +79,8 @@ class StreamService {
 		stream.delete(flush:true)
 	}
 
-	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
+	boolean autodetectFields(Stream stream) {
 		FieldDetector fieldDetector = instantiateDetector(stream)
-		fieldDetector.setFlattenMap(flattenHierarchies)
 		def fields = fieldDetector?.detectFields(stream)
 		if (fields) {
 			Map config = stream.getStreamConfigAsMap()

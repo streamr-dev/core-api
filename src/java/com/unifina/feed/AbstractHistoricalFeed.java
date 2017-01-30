@@ -6,8 +6,10 @@ import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 
 /**
  * Implements a basic interface for iterating over FeedEvents from a historical feed. The FeedEvent have
@@ -93,17 +95,7 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 	public void remove() {
 		throw new RuntimeException("Remove operation is not supported!");
 	}
-
-	/**
-	 * Should return a list of date pairs, over which the calculation can be distributed (units).
-	 * Date[0] represents unit start datetime and date[1] represents unit end datetime.
-
-	 * @param beginDate Earliest unit start datetime than can be returned
-	 * @param endDate Latest unit end datetime that can be returned
-	 * @return
-	 */
-	public abstract List<Date[]> getUnitsBetween(Date beginDate, Date endDate) throws Exception;
-
+	
 	/**
 	 * Wraps the iterator creation in a check that ensures an iterator is created only once per recipient.
      */
@@ -120,6 +112,13 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 	 * Returns an Iterator for FeedEvents required by the given event recipient.
 	 * It is guaranteed that this method only gets called once per each recipient.
 	 */
-	protected abstract Iterator<FeedEvent<MessageClass, EventRecipientClass>> iterator(EventRecipientClass recipient);
+	protected Iterator<FeedEvent<MessageClass, EventRecipientClass>> iterator(EventRecipientClass recipient) {
+		return new FeedEventIterator<>(createContentIterator(recipient), this, recipient);
+	}
+
+	/**
+	 * Should return an Iterator that iterates over messages of type MessageClass in this Feed.
+     */
+	protected abstract Iterator<MessageClass> createContentIterator(EventRecipientClass recipient);
 
 }

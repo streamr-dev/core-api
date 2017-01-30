@@ -1,7 +1,7 @@
 package com.unifina.feed
 
 import com.unifina.domain.data.Stream
-import com.unifina.feed.map.MapMessage
+import com.unifina.feed.json.JSONStreamrMessage
 import spock.lang.Specification
 
 class FieldDetectorSpec extends Specification {
@@ -14,8 +14,8 @@ class FieldDetectorSpec extends Specification {
 		stream = new Stream()
 		detector = new FieldDetector(null) {
 			@Override
-			protected MapMessage fetchExampleMessage(Stream stream) {
-				return new MapMessage(null, null, mapToReturn)
+			protected AbstractStreamrMessage fetchExampleMessage(Stream stream) {
+				return new JSONStreamrMessage("streamId", 0, new Date(), new Date(), (Map) mapToReturn)
 			}
 		}
 	}
@@ -65,22 +65,6 @@ class FieldDetectorSpec extends Specification {
 		result == [
 			[name: "a", type: "list"],
 			[name: "b", type: "map"],
-		]
-	}
-
-	def "can flatten to simple fields given structured message"() {
-		mapToReturn = [a: [1,2,3], b: [hello: "world", "beast": 666], c: true]
-
-		when:
-		detector.flattenMap = true
-		def result = detector.detectFields(stream)
-
-		then:
-		result == [
-			[name: "a", type: "list"],
-			[name: "b.hello", type: "string"],
-			[name: "b.beast", type: "number"],
-			[name: "c", type: "boolean"]
 		]
 	}
 

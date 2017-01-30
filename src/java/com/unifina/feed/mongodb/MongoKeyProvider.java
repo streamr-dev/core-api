@@ -4,13 +4,12 @@ import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractKeyProvider;
-import com.unifina.feed.map.MapMessage;
 import com.unifina.utils.Globals;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class MongoKeyProvider extends AbstractKeyProvider<IStreamRequirement, MapMessage, Stream> {
+public class MongoKeyProvider extends AbstractKeyProvider<IStreamRequirement, MongoMessage, Stream> {
 
 	public MongoKeyProvider(Globals globals, Feed feed) {
 		super(globals, feed);
@@ -22,8 +21,8 @@ public class MongoKeyProvider extends AbstractKeyProvider<IStreamRequirement, Ma
 	}
 
 	@Override
-	public Stream getMessageKey(MapMessage message) {
-		return ((DocumentFromStream)message.payload).getStream();
+	public Stream getMessageKey(MongoMessage message) {
+		return message.getStream();
 	}
 
 }

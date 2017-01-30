@@ -4,8 +4,6 @@ import com.unifina.api.InvalidStateException;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractMessageSource;
-
-import groovy.transform.CompileStatic;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import twitter4j.*;
@@ -53,9 +51,7 @@ public class TwitterMessageSource extends AbstractMessageSource<TwitterMessage, 
 					}
 				}
 				if (matches.size() > 0 || onlyOneStream) {
-					TwitterMessage msg = TwitterMessage.fromStatus(status);
-					msg.streamConfig = conf;
-					msg.matchedKeywords = matches;
+					TwitterMessage msg = new TwitterMessage(conf.getStreamId(), 0, status.getCreatedAt(), new Date(), status, matches);
 					messageSource.forward(msg, conf.getStreamId(), counter++, false);
 				}
 			}

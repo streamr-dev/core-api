@@ -51,18 +51,6 @@ public abstract class AbstractHistoricalFileFeed<ModuleClass, MessageClass exten
 	 */
 	protected abstract Stream getStream(IEventRecipient recipient);
 
-	@Override
-	public List<Date[]> getUnitsBetween(Date beginDate, Date endDate) throws Exception {
-		ArrayList<Feed> feeds = new ArrayList<>(1);
-		for (IEventRecipient r : eventRecipients)
-			if (!feeds.contains(getStream(r).getFeed()))
-				feeds.add(getStream(r).getFeed());
-		
-		FeedFileService feedFileService = (FeedFileService)globals.getGrailsApplication().getMainContext().getBean("feedFileService");
-		
-		return feedFileService.getUnits(beginDate, endDate, feeds);
-	}
-
 	private FeedEventIterator<MessageClass, EventRecipientClass> createIterator(FeedFile feedFile, Date day, InputStream inputStream, EventRecipientClass recipient) {
 		Iterator<MessageClass> contentIterator = createContentIterator(feedFile, day, inputStream, recipient);
 		return new FeedEventIterator<>(contentIterator, this, recipient);

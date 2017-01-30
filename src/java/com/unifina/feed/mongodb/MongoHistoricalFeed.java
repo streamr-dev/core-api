@@ -4,14 +4,11 @@ import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractHistoricalFeed;
-import com.unifina.feed.FeedEventIterator;
-import com.unifina.feed.map.MapMessage;
-import com.unifina.feed.map.MapMessageEventRecipient;
+import com.unifina.feed.json.JSONStreamrMessage;
+import com.unifina.feed.map.StreamrMessageEventRecipient;
 import com.unifina.utils.Globals;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 
 /**
  * Example streamConfig:
@@ -30,23 +27,15 @@ import java.util.List;
  * 		}
  * 	}
  */
-public class MongoHistoricalFeed extends AbstractHistoricalFeed<IStreamRequirement, MapMessage, Stream, MapMessageEventRecipient> {
+public class MongoHistoricalFeed extends AbstractHistoricalFeed<IStreamRequirement, MongoMessage, Stream, StreamrMessageEventRecipient> {
 
 	public MongoHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 	}
 
 	@Override
-	public List<Date[]> getUnitsBetween(Date beginDate, Date endDate) throws Exception {
-		List<Date[]> result = new ArrayList(1);
-		result.add(new Date[] {beginDate, endDate});
-		return result;
-	}
-
-	@Override
-	protected FeedEventIterator<MapMessage, MapMessageEventRecipient> iterator(MapMessageEventRecipient recipient) {
-		Stream stream = recipient.getStream();
-		return new FeedEventIterator<>(new MongoHistoricalIterator(stream, globals.getStartDate(), globals.getEndDate()), this, recipient);
+	protected Iterator<MongoMessage> createContentIterator(StreamrMessageEventRecipient recipient) {
+		return new MongoHistoricalIterator(recipient.getStream(), globals.getStartDate(), globals.getEndDate());
 	}
 
 }

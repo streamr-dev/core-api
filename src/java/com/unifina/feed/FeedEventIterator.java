@@ -11,6 +11,9 @@ import java.util.Iterator;
 /**
  * A helper class to apply a static recipient and iterator to FeedEvents,
  * whose content is pulled from a separate content iterator.
+ *
+ * This iterator assumes that each item returned by the content iterator
+ * produces one FeedEvent.
  * @author Henri
  */
 public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient>

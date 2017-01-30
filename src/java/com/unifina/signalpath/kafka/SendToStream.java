@@ -5,7 +5,8 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractFeed;
-import com.unifina.feed.StreamrMessage;
+import com.unifina.feed.AbstractStreamrMessage;
+import com.unifina.feed.json.JSONStreamrMessage;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
@@ -81,7 +82,7 @@ public class SendToStream extends ModuleWithSideEffects {
 		Globals globals = getGlobals();
 
 		// Create the message locally and route it to the stream locally, without actually producing to the stream
-		StreamrMessage msg = new StreamrMessage(streamParameter.getValue().getId(), 0, globals.time, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
+		AbstractStreamrMessage msg = new JSONStreamrMessage(streamParameter.getValue().getId(), 0, globals.time, globals.time, inputValuesToMap()); // TODO: fix hard-coded partition
 
 		// Find the Feed implementation for the target Stream
 		AbstractFeed feed = getGlobals().getDataSource().getFeedById(streamParameter.getValue().getFeed().getId());

@@ -10,16 +10,14 @@ import com.unifina.domain.data.Stream;
 import com.unifina.feed.Message;
 import com.unifina.feed.Poller;
 import com.unifina.feed.PollingMessageSource;
-import com.unifina.feed.map.MapMessage;
-import org.apache.log4j.Logger;
 import org.bson.Document;
 
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Created by henripihkala on 09/02/16.
- */
-public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream> {
+public class MongoMessageSource extends PollingMessageSource<MongoMessage, Stream> {
 
 	public MongoMessageSource(Feed feed, Map<String, Object> config) {
 		super(feed, config);
@@ -52,16 +50,16 @@ public class MongoMessageSource extends PollingMessageSource<MapMessage, Stream>
 			}
 
 			@Override
-			public List<Message<MapMessage, Stream>> poll() {
+			public List<Message<MongoMessage, Stream>> poll() {
 				// Update the date filter
 				startDateFilter.put("$gt", config.convertDateToMongoFormat(lastDate));
 
-				List<Message<MapMessage, Stream>> list = new LinkedList<>();
+				List<Message<MongoMessage, Stream>> list = new LinkedList<>();
 				FindIterable<Document> iterable = collection.find(query).sort(Sorts.ascending(config.getTimestampKey()));
 				for (Document document : iterable) {
 					Date timestamp = config.getTimestamp(document);
-					MapMessage mapMsg = new MapMessage(timestamp, new Date(), new DocumentFromStream(document, stream));
-					Message<MapMessage, Stream> msg = new Message<>(stream, counter++, mapMsg);
+					MongoMessage mapMsg = new MongoMessage(stream.getId(), 0, timestamp, new Date(), new DocumentFromStream(document, stream));
+					Message<MongoMessage, Stream> msg = new Message<>(stream, counter++, mapMsg);
 					msg.checkCounter = false;
 					list.add(msg);
 					lastDate = timestamp;
