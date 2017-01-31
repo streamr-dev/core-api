@@ -45,7 +45,7 @@ public class EthereumCall extends AbstractHttpModule {
 
 	private Output<Object> result;
 	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "valueSent");
-	private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "valueSent");
+	private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "valueReceived");
 	private TimeSeriesOutput gasUsed = new TimeSeriesOutput(this, "gasUsed");
 	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPrice");
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
@@ -232,13 +232,13 @@ public class EthereumCall extends AbstractHttpModule {
 		return request;
 	}
 
-	private static class Response {
+	public static class Response {
 		public String error;
 	}
-	private static class CallResponse extends Response {
+	public static class CallResponse extends Response {
 		public String result;
 	}
-	private static class TransactionResponse extends Response {
+	public static class TransactionResponse extends Response {
 		public Double valueSent;
 		public Double valueReceived;
 		public Double gasUsed;
