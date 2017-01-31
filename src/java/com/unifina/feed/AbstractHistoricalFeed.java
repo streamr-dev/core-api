@@ -15,7 +15,7 @@ import java.util.PriorityQueue;
  * Implements a basic interface for iterating over FeedEvents from a historical feed. The FeedEvent have
  * a content of type MessageClass.
  */
-public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient>
+public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends AbstractStreamrMessage, KeyClass, EventRecipientClass extends IEventRecipient>
 		extends AbstractFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass>
 		implements Iterator<FeedEvent<MessageClass, EventRecipientClass>> {
 	
@@ -42,8 +42,12 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 		for (EventRecipientClass recipient : eventRecipients) {
 			Iterator<FeedEvent<MessageClass, EventRecipientClass>> iterator = createIteratorFor(recipient);
 			if (iterator!=null && iterator.hasNext()) {
-				FeedEvent<MessageClass, EventRecipientClass> event = iterator.next();
-				queue.add(event);
+				try {
+					FeedEvent<MessageClass, EventRecipientClass> next = iterator.next();
+					queue.add(next);
+				} catch (NoSuchElementException e) {
+					// Ignore exception: no more elements, so don't queue anything
+				}
 			}
 		}
 		
@@ -85,7 +89,12 @@ public abstract class AbstractHistoricalFeed<ModuleClass, MessageClass extends I
 
 		// If the next event exists, add it to the queue
 		if (iterator!=null && iterator.hasNext()) {
-			queue.add(iterator.next());
+			try {
+				FeedEvent<MessageClass, EventRecipientClass> next = iterator.next();
+				queue.add(next);
+			} catch (NoSuchElementException e) {
+				// Ignore exception: no more elements, so don't queue anything
+			}
 		}
 		
 		return event;

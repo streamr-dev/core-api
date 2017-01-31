@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * A helper class to apply a static recipient and iterator to FeedEvents,
@@ -16,7 +17,7 @@ import java.util.Iterator;
  * produces one FeedEvent.
  * @author Henri
  */
-public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient>
+public class FeedEventIterator<MessageClass extends AbstractStreamrMessage, EventRecipientClass extends IEventRecipient>
 		implements Iterator<FeedEvent<MessageClass, EventRecipientClass>>, Closeable {
 
 	private Iterator<MessageClass> contentIterator;
@@ -24,6 +25,9 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 	private AbstractHistoricalFeed feed;
 	
 	private final Logger log = Logger.getLogger(FeedEventIterator.class);
+
+	private int currentEventsIndex = 0;
+	private FeedEvent[] currentEvents = null;
 	
 	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
 		this.contentIterator = contentIterator;
@@ -33,16 +37,23 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 	
 	@Override
 	public boolean hasNext() {
-		return contentIterator.hasNext();
+		return contentIterator.hasNext() || currentEvents != null && currentEventsIndex < currentEvents.length;
 	}
 
 	@Override
 	public FeedEvent<MessageClass, EventRecipientClass> next() {
-		MessageClass content = contentIterator.next();
-		if (content==null)
-			return null;
+		while (currentEvents==null || currentEvents.length==0 || currentEventsIndex >= currentEvents.length) {
+			MessageClass content = contentIterator.next();
 
-		FeedEvent<MessageClass, EventRecipientClass> fe = new FeedEvent<>(content, content.getTimestamp(), recipient);
+			if (content == null) {
+				throw new NoSuchElementException("No more content from iterator "+contentIterator);
+			} else {
+				currentEvents = content.toFeedEvents(recipient);
+				currentEventsIndex = 0;
+			}
+		}
+
+		FeedEvent<MessageClass, EventRecipientClass> fe = currentEvents[currentEventsIndex++];
 		fe.feed = feed;
 		fe.iterator = this;
 		return fe;

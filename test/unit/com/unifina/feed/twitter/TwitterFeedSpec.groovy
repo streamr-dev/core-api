@@ -3,7 +3,7 @@ package com.unifina.feed.twitter
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
-import com.unifina.feed.map.StreamrMessageEventRecipient
+import com.unifina.feed.StreamrMessageEventRecipient
 import com.unifina.utils.GlobalsFactory
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin

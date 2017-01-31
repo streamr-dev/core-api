@@ -9,7 +9,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.feed.StreamrBinaryMessageKeyProvider
 import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.json.JSONStreamrMessage
-import com.unifina.feed.map.StreamrMessageEventRecipient
+import com.unifina.feed.StreamrMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService

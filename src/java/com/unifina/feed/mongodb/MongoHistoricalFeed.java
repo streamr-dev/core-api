@@ -4,8 +4,7 @@ import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractHistoricalFeed;
-import com.unifina.feed.json.JSONStreamrMessage;
-import com.unifina.feed.map.StreamrMessageEventRecipient;
+import com.unifina.feed.StreamrMessageEventRecipient;
 import com.unifina.utils.Globals;
 
 import java.util.Iterator;

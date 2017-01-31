@@ -1,4 +1,4 @@
-package com.unifina.feed.map;
+package com.unifina.feed;
 
 import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventRecipient;

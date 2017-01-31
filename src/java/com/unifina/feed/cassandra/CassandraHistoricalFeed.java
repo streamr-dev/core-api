@@ -3,7 +3,7 @@ package com.unifina.feed.cassandra;
 import com.unifina.domain.data.Feed;
 import com.unifina.feed.AbstractHistoricalFeed;
 import com.unifina.feed.AbstractStreamrMessage;
-import com.unifina.feed.map.StreamrMessageEventRecipient;
+import com.unifina.feed.StreamrMessageEventRecipient;
 import com.unifina.feed.util.MergingIterator;
 import com.unifina.signalpath.utils.ConfigurableStreamModule;
 import com.unifina.utils.Globals;
