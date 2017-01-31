@@ -11,16 +11,17 @@ import java.util.NoSuchElementException;
 
 /**
  * A helper class to apply a static recipient and iterator to FeedEvents,
- * whose content is pulled from a separate content iterator.
+ * whose content messages (AbstractStreamrMessages) are pulled from an underlying
+ * message iterator.
  *
- * This iterator assumes that each item returned by the content iterator
- * produces one FeedEvent.
+ * If an AbstractStreamrMessage produces multiple FeedEvents, they are returned before
+ * the message iterator is consulted for more messages.
  * @author Henri
  */
 public class FeedEventIterator<MessageClass extends AbstractStreamrMessage, EventRecipientClass extends IEventRecipient>
 		implements Iterator<FeedEvent<MessageClass, EventRecipientClass>>, Closeable {
 
-	private Iterator<MessageClass> contentIterator;
+	private Iterator<MessageClass> messageIterator;
 	private EventRecipientClass recipient;
 	private AbstractHistoricalFeed feed;
 	
@@ -29,26 +30,26 @@ public class FeedEventIterator<MessageClass extends AbstractStreamrMessage, Even
 	private int currentEventsIndex = 0;
 	private FeedEvent[] currentEvents = null;
 	
-	public FeedEventIterator(Iterator<MessageClass> contentIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
-		this.contentIterator = contentIterator;
+	public FeedEventIterator(Iterator<MessageClass> messageIterator, AbstractHistoricalFeed feed, EventRecipientClass recipient) {
+		this.messageIterator = messageIterator;
 		this.recipient = recipient;
 		this.feed = feed;
 	}
 	
 	@Override
 	public boolean hasNext() {
-		return contentIterator.hasNext() || currentEvents != null && currentEventsIndex < currentEvents.length;
+		return messageIterator.hasNext() || currentEvents != null && currentEventsIndex < currentEvents.length;
 	}
 
 	@Override
 	public FeedEvent<MessageClass, EventRecipientClass> next() {
 		while (currentEvents==null || currentEvents.length==0 || currentEventsIndex >= currentEvents.length) {
-			MessageClass content = contentIterator.next();
+			MessageClass message = messageIterator.next();
 
-			if (content == null) {
-				throw new NoSuchElementException("No more content from iterator "+contentIterator);
+			if (message == null) {
+				throw new NoSuchElementException("No more messages from iterator "+ messageIterator);
 			} else {
-				currentEvents = content.toFeedEvents(recipient);
+				currentEvents = message.toFeedEvents(recipient);
 				currentEventsIndex = 0;
 			}
 		}
@@ -66,11 +67,11 @@ public class FeedEventIterator<MessageClass extends AbstractStreamrMessage, Even
 
 	@Override
 	public void close() {
-		if (contentIterator instanceof Closeable)
+		if (messageIterator instanceof Closeable)
 			try {
-				((Closeable)contentIterator).close();
+				((Closeable) messageIterator).close();
 			} catch (IOException e) {
-				log.error("Failed to close content iterator: "+contentIterator);
+				log.error("Failed to close message iterator: "+ messageIterator);
 			}
 	}
 
