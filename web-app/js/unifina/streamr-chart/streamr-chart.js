@@ -37,7 +37,7 @@ function StreamrChart(parent, options) {
 	this.lastValue = null;
     
     this.toolbar = $("<div/>", {
-        class: 'toolbar'
+        class: 'chart-toolbar'
     })
     this.toolbarInner = $("<div/>", {
         class: "inner pull-right"

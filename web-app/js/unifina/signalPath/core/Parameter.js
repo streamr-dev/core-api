@@ -160,7 +160,7 @@
 			inBody: true
 		}, onSel)
 
-		$(this.parameter.module).on("drag", function() {
+		$(this.parameter.module).on("dragMove", function() {
 			_this.streamrSearch.redrawMenu()
 		})
 

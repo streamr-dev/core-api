@@ -13,12 +13,12 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
-
-		prot.body.css("height", "100%")
-		
-		container = $("<div class='heatmap-container'></div>")
-		prot.div.width(500)
-		prot.div.height(400)
+        
+        prot.div.addClass('map-module heatmap-module')
+        
+		container = $("<div class='heatmap-container content'></div>")
+		prot.body.width(500)
+		prot.body.height(400)
 		prot.body.append(container)
 
 		var heatMapOptions = {}

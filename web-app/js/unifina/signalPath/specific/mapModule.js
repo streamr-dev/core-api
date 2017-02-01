@@ -2,13 +2,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.UIChannelModule(data,canvas,prot)
 
-	var $container = null
+	var container = null
 	var map = null
 
-	prot.enableIONameChange = false;	
-		
-	// Dragging in the chart container or the controls must not move the module
-	prot.dragOptions.cancel = ".map-container"
+	prot.enableIONameChange = false;
 
 	prot.getMap = function() {
 		return map
@@ -18,11 +15,11 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	function createDiv() {
 		superCreateDiv();
 
-		prot.body.css("height", "100%")
+        prot.div.addClass('map-module')
 
-		container = $("<div class='map-container'></div>")
-		prot.div.width(500)
-		prot.div.height(400)
+		container = $("<div class='map-container content'></div>")
+		prot.body.width(500)
+		prot.body.height(400)
 		prot.body.append(container)
 
 		var mapOptions = {

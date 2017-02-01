@@ -24,13 +24,17 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		initChart()
 		
 		prot.initResizable({
-			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
-			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
+			minWidth: 350,
+			minHeight: 250,
 			stop: function(event,ui) {
-				if (prot.chart)
-					prot.chart.resize(ui.size.width, ui.size.height);
+				//if (prot.chart)
+				//	prot.chart.resize(ui.size.width, ui.size.height);
+                prot.body.trigger("resize")
 			}
 		});
+        
+        prot.body.width(500)
+        prot.body.height(300)
 	}
 	prot.createDiv = createDiv;	
 	
@@ -77,9 +81,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	prot.getChart = getChart;
 
 	function initChart() {
-		//prot.body.find(".ioTable").css("width","0px");
 		prot.chart = new StreamrChart(prot.content, prot.jsonData.options)
-		prot.chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
+        prot.chart.$area.addClass("drag-exclude")
 	}
 	
 	function destroyChart() {

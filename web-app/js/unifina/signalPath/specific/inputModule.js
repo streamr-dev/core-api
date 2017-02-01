@@ -25,11 +25,9 @@ SignalPath.InputModule = function(data,canvas,prot) {
 		})
 
 		if(widget.getDragCancelAreas !== undefined) {
-			var list = prot.div.draggable("option", "cancel")
 			widget.getDragCancelAreas().forEach(function(area) {
-				list += "," + area
+				prot.body.find(area).addClass("drag-exclude")
 			})
-			prot.div.draggable("option", "cancel", list)
 		}
 	}
 

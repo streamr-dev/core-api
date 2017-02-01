@@ -289,7 +289,7 @@ var SignalPath = (function () {
 		}
 		
 		// Generate an internal index for the module and store a reference in a table
-		if (data.hash==null) {
+		if (data.hash == null) {
 			data.hash = moduleHashGenerator++
 		}
 		// Else check that the moduleHashGenerator keeps up

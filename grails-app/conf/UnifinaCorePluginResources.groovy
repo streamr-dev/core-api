@@ -4,9 +4,12 @@ modules = {
 	}
 	"jquery-ui" {
 		dependsOn "jquery"
-		resource url:[dir:'js/jquery-ui-1.11.4', file:'jquery-ui.min.js']
-		resource url:[dir:'js/jquery-ui-1.11.4', file:'jquery-ui.min.css']
-		resource url:[dir:'js/jquery-ui-1.11.4', file:'jquery-ui.theme.min.css']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.min.js']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.min.css']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.theme.min.css']
+	}
+	"draggabilly" {
+		resource url:[dir:'js/draggabilly/dist', file:'draggabilly.pkgd.js']
 	}
 	// jquery-migrate can be removed when there are no longer dependencies on pre-1.9 jquery
 	"jquery-migrate" {
@@ -289,6 +292,7 @@ modules = {
 		dependsOn 'lodash'
 		dependsOn 'key-value-editor'
 		dependsOn 'list-editor'
+		dependsOn 'draggabilly'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']

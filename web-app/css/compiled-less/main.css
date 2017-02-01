@@ -1,4 +1,39 @@
 @charset "UTF-8";
+._display-flex {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
+  display: flex;
+}
+._flex-column {
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  -o-flex-direction: column;
+  flex-direction: column;
+}
+._flex-row {
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  -o-flex-direction: row;
+  flex-direction: row;
+}
+._flex-0 {
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+._flex-1 {
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
+}
 /*!
 Animate.css - http://daneden.me/animate
 Licensed under the MIT license
@@ -14806,11 +14841,27 @@ fieldset[disabled] .btn {
 .stream-parameter-wrapper.toggled .streamName {
   display: none;
 }
+body.canvas-editor-page #main-wrapper #content-wrapper {
+  overflow: auto;
+  padding-top: 0;
+  margin-top: 38px;
+}
+body.canvas-editor-page #main-wrapper #content-wrapper .breadcrumb {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  background-color: rgba(246, 246, 246, 0.5);
+  z-index: 100;
+  margin-left: 0;
+}
+body.canvas-editor-page #main-wrapper #content-wrapper .breadcrumb li:first-child {
+  padding-left: 0;
+}
 .streamr-canvas {
   position: relative;
   font-size: 12px;
   overflow: auto;
-  height: 100%;
+  height: calc(100% - 38px);
   width: 100%;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -15092,20 +15143,36 @@ button.arrow:after {
 }
 #canvas .module {
   min-width: 150px;
-  display: -ms-flexbox;
   display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
   display: flex;
-  -ms-flex-direction: column;
   -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  -o-flex-direction: column;
   flex-direction: column;
+}
+#canvas .module .dragging-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  color: transparent;
+  z-index: 10;
 }
 #canvas .module .moduleheader {
   width: 100%;
   height: 18px;
   margin-bottom: 5px;
-  -ms-flex: 0;
-  -webkit-flex: 0;
-  flex: 0;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 #canvas .module .moduleheader .modulename {
   font-weight: bold;
@@ -15120,14 +15187,20 @@ button.arrow:after {
 }
 #canvas .module .modulebody {
   padding: 5px;
-  -ms-flex: 1;
-  -webkit-flex: 1;
-  flex: 1;
-  display: -ms-flexbox;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
   display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
   display: flex;
-  -ms-flex-direction: column;
   -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  -o-flex-direction: column;
   flex-direction: column;
 }
 #canvas .module .modulebody .table th {
@@ -15149,9 +15222,11 @@ button.arrow:after {
   border: none;
   width: 100%;
   padding: 0;
-  -ms-flex: 0;
-  flex: 1;
-  -webkit-flex: 1;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 #canvas .module .modulebody table.ioTable td {
   padding-right: 5px;
@@ -15184,6 +15259,13 @@ button.arrow:after {
   height: 13px;
   cursor: pointer;
 }
+#canvas .module .modulebody div.content {
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
+}
 #canvas .module .modulebody div.ioname {
   display: inline-block;
   max-width: 100px;
@@ -15191,14 +15273,15 @@ button.arrow:after {
 }
 #canvas .module .modulebody .leaflet-container {
   width: 100%;
-  height: 100%;
 }
 #canvas .module .modulefooter {
   width: 100%;
   margin-top: 3px;
-  -ms-flex: 0;
-  -webkit-flex: 0;
-  flex: 0;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 #canvas .module .modulefooter .moduleSwitchContainer {
   float: right;
@@ -15225,25 +15308,30 @@ button.arrow:after {
 #canvas .module .showOnHover:hover {
   opacity: 1.0;
 }
+#canvas .module .drag-exclude {
+  cursor: initial;
+}
 .ui-widget-content.module-help-tooltip {
   background: #333;
+}
+.module-resize-helper {
+  border: 2px dotted black;
 }
 .component .modulebody .button-module-button {
   margin-top: 5px;
 }
 #canvas .module.chart {
-  min-width: 600px;
-  min-height: 350px;
-  width: 800px;
-  height: 500px;
   z-index: 4;
 }
 #canvas .module.chart .modulebody {
-  -ms-flex-direction: row;
+  min-width: 350px;
+  min-height: 250px;
   -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  -o-flex-direction: row;
   flex-direction: row;
-  padding-right: 20px;
-  padding-bottom: 20px;
+  width: calc(100% - 23px);
 }
 #canvas .module.chart .modulebody .ioTable {
   width: 23px;
@@ -15256,30 +15344,47 @@ button.arrow:after {
   padding: 0;
 }
 #canvas .module.chart .modulebody .content {
-  -webkit-flex: 1;
-  flex: 1;
-  width: 100%;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
   display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
   display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  -o-flex-direction: column;
   flex-direction: column;
+  width: calc(100% - 23px);
 }
-#canvas .module.chart .modulebody .content .toolbar {
+#canvas .module.chart .modulebody .content .chart-toolbar {
   display: inline-block;
   padding-right: 15px;
   padding-bottom: 5px;
   padding-top: 5px;
-  -webkit-flex: 0;
-  flex: 0;
+  height: 37px;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
-#canvas .module.chart .modulebody .content .toolbar .inner > * {
+#canvas .module.chart .modulebody .content .chart-toolbar .inner > * {
   display: inline-block;
   margin-bottom: 6px;
 }
 #canvas .module.chart .modulebody .content .chartDrawArea {
   width: 100%;
-  height: 100%;
-  -webkit-flex: 1;
-  flex: 1;
+  height: calc(100% - 37px);
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
 }
 #canvas .module.chart .chart-range-selector {
   width: auto;
@@ -15294,9 +15399,6 @@ button.arrow:after {
 }
 #canvas .module.chart table {
   width: auto;
-}
-#canvas .module.chart .chart-resize-helper {
-  border: 2px dotted black;
 }
 #canvas .module.chart .seriesLink {
   margin-left: 10px;
@@ -15318,12 +15420,22 @@ div.comment .modulebody {
 }
 textarea.comment {
   background-color: white;
-  resize: none;
 }
-.event-table-module-content {
+.event-table-module .table-module-container {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.event-table-module .event-table-module-content {
   display: block;
   max-height: 400px;
   overflow: auto;
+}
+.module.map-module .modulebody {
+  min-width: 350px;
+  min-height: 250px;
+}
+.module.map-module .switchContainer {
+  left: -85px;
 }
 div.module div.modulebody div.scheduler {
   font-size: 14px;

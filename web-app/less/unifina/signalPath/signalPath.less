@@ -1,10 +1,29 @@
 @import "parameters.less";
 
+body.canvas-editor-page #main-wrapper #content-wrapper {
+    overflow: auto;
+    padding-top: 0;
+    margin-top: 38px;
+
+    .breadcrumb {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background-color: rgba(246, 246, 246, 0.5);
+      z-index: 100;
+      margin-left: 0;
+
+      li:first-child {
+        padding-left: 0;
+      }
+    }
+}
+
 .streamr-canvas {
 	position: relative;
 	font-size: 12px;
 	overflow: auto;
-	height: 100%;
+	height: ~"calc(100% - 38px)";
 	width: 100%;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;

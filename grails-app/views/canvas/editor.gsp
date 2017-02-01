@@ -432,12 +432,14 @@ $(document).unload(function () {
 		</div> <!-- / #main-menu-inner -->
 	</div> <!-- / #main-menu -->
 
+
 	<div id="content-wrapper">
 		<ui:breadcrumb>
 			<li class="active">
 				<span id="canvas-name-editor"></span>
 			</li>
 		</ui:breadcrumb>
+
 		<div id="canvas" class="streamr-canvas scrollable embeddable"></div>
 	</div>
 
