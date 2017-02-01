@@ -32,7 +32,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
         // Easiest way to exclude custom module element from dragging is to add class 'drag-exclude' for it
         exclude: 'input, textarea, select, button, a, .ui-resizable-handle, .chart-resize-helper, .drag-exclude'
 	}
-	
+    
 	pub.getDragOptions = function() {
 		return prot.dragOptions;
 	}
@@ -206,6 +206,22 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		canvas.append(prot.div);
 		prot.div.addClass("draggable")
 		prot.div.draggabilly(prot.dragOptions)
+        
+        prot.div.on("dragMove", function() {
+            var position = {
+                top: $(this).position().top,
+                bottom: $(this).position().top + prot.div.height(),
+                left: $(this).position().left,
+                right: $(this).position().left + prot.div.width()
+            }
+            var offset = 20
+            if (position.right + offset > canvas.width()) {
+                $("#canvas")[0].scrollBy(canvas.width() - position.right + 2 * offset, 0)
+            } else if (position.left - offset <= 0) {
+                $("#canvas")[0].scrollBy(position.left - 2 * offset, 0)
+                console.log(position.left - 2 * offset)
+            }
+        })
 		
 		prot.div.on("click dragStart", function(event) {
 			$(".component.focus").each(function(i,c) {
