@@ -7,7 +7,6 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.Message
 import com.unifina.feed.MessageRecipient
-import com.unifina.feed.map.MapMessage
 import grails.converters.JSON
 import grails.test.spock.IntegrationSpec
 import org.apache.log4j.Logger
@@ -47,10 +46,10 @@ class MongoMessageSourceSpec extends IntegrationSpec {
 		Feed feed = Feed.load(8)
 		source = new MongoMessageSource(feed, [:])
 		int counter = 0
-		Message<MapMessage, Stream> latestMessage = null
-		source.recipient = new MessageRecipient<MapMessage, Stream>() {
+		Message<MongoMessage, Stream> latestMessage = null
+		source.recipient = new MessageRecipient<MongoMessage, Stream>() {
 			@Override
-			void receive(Message<MapMessage, Stream> message) {
+			void receive(Message<MongoMessage, Stream> message) {
 				counter++
 				latestMessage = message
 			}

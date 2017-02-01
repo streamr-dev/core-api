@@ -23,6 +23,6 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "aapeli", id:"update-stream-dates-to-current-if-missing") {
-		sql("update stream set date_created=CURRENT_TIMESTAMP, last_updated=CURRENT_TIMESTAMP where date_created = '0000-00-00 00:00:00'")
+		sql("update stream set date_created=CURRENT_TIMESTAMP, last_updated=CURRENT_TIMESTAMP where date_created < '2000-01-01 00:00:00'")
 	}
 }

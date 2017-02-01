@@ -276,11 +276,11 @@ streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArray
 streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
 streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
 streamr.kafka.request.required.acks = "0"
-streamr.kafka.dataTopic = "data-dev"
+streamr.kafka.dataTopic = System.getProperty("streamr.kafka.dataTopic") ?: "data-dev"
 
 environments {
 	production {
-		streamr.kafka.dataTopic = "data-prod"
+		streamr.kafka.dataTopic = System.getProperty("streamr.kafka.dataTopic") ?: "data-prod"
 		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
 		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
 	}
@@ -290,7 +290,7 @@ environments {
  * Redis config
  */
 streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
-streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+streamr.redis.password =  System.getProperty("streamr.redis.password") ?: "AFuPxeVMwBKHV5Hm5SK3PkRZA"
 // TODO: set prod config when going to prod
 
 /**

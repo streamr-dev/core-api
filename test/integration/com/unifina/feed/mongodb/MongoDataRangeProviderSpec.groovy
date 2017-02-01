@@ -6,17 +6,10 @@ import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.DataRange
-import com.unifina.feed.Message
-import com.unifina.feed.MessageRecipient
-import com.unifina.feed.map.MapMessage
 import grails.converters.JSON
 import grails.test.spock.IntegrationSpec
 import org.apache.log4j.Logger
 import org.bson.Document
-import spock.util.concurrent.PollingConditions
-
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 
 class MongoDataRangeProviderSpec extends IntegrationSpec {
 
