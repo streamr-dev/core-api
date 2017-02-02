@@ -1,11 +1,11 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
@@ -14,9 +14,9 @@ import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Send out a call to specified function in Ethereum block chain
@@ -30,20 +30,24 @@ public class EthereumCall extends AbstractHttpModule {
 	private StringParameter abiString = new StringParameter(this, "interface", "");
 	private StringParameter address = new StringParameter(this, "address", "");
 	private ListOutput errors = new ListOutput(this, "errors");
-
-	private List<Function> functions = new ArrayList<>();
-	private FunctionNameParameter function = new FunctionNameParameter(this, "function", functions);
-	private List<Input<Object>> arguments = new ArrayList<>();
+	private TimeSeriesInput ether = new TimeSeriesInput(this, "ether");
+	private Input<Object> trigger = new Input<>(this, "trigger", "Object");		// shown if there are no inputs
 
 	// TODO: is this proper way to check if param changed?
 	private String currentAbiString = "";
 	//private String currentFunctionString = "";
 
 	private transient JsonElement abi;
+	private List<Function> contractFunctions = new ArrayList<>();
+	private List<Event> contractEvents = new ArrayList<>();
 	private Function chosenFunction;
 	private boolean isValid = false;
 
-	private Output<Object> result;
+	private FunctionNameParameter function = new FunctionNameParameter(this, "function", contractFunctions);
+	private List<Input<Object>> arguments = new ArrayList<>();
+	private List<Output<Object>> results = new ArrayList<>();
+	private List<Output<Object>> events = new ArrayList<>();
+
 	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "valueSent");
 	private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "valueReceived");
 	private TimeSeriesOutput gasUsed = new TimeSeriesOutput(this, "gasUsed");
@@ -53,17 +57,23 @@ public class EthereumCall extends AbstractHttpModule {
 
 	/** Ethereum contract input/output */
 	public static class Slot implements Serializable {
-		String name;
-		String type;
+		public String name;
+		public String type;
 	}
 
 	/** Ethereum contract member function */
 	public static class Function implements Serializable {
-		String name;
-		List<Slot> inputs;
-		List<Slot> outputs;
-		Boolean payable;
-		Boolean constant;
+		public String name;
+		public List<Slot> inputs;
+		public List<Slot> outputs;
+		public Boolean payable;
+		public Boolean constant;
+	}
+
+	public static class Event implements Serializable {
+		public String name;
+		public List<Slot> inputs;				// "inputs" that receive value from Solidity contract
+		public List<Output<Object>> outputs;	// "outputs" from Streamr module on canvas
 	}
 
 	@Override
@@ -78,6 +88,11 @@ public class EthereumCall extends AbstractHttpModule {
 //		if (functions.size() > 0) {
 //			addInput(function);
 //		}
+
+		trigger.canToggleDrivingInput = false;
+		trigger.setDrivingInput(true);
+		trigger.requiresConnection = false;
+		ether.requiresConnection = false;
 
 		addOutput(errors);
 	}
@@ -95,32 +110,52 @@ public class EthereumCall extends AbstractHttpModule {
 		if (currentAbiString.equals(abiString.getValue())) { return; }
 		String currentAbiString = abiString.getValue();
 		isValid = false;
-		if (gson == null) { gson = new Gson(); }
 		//currentFunctionString = ""; // force re-read function arguments (maybe signature changed in abi)
 
 		log.info("Parsing interface: " + currentAbiString);
 		abi = new JsonParser().parse(currentAbiString);
 
-		functions.clear();	// don't re-create; the reference is used in FunctionNameParameter
+		if (gson == null) { gson = new Gson(); }
+		contractFunctions.clear();	// don't re-create; the reference is used in FunctionNameParameter
+		contractEvents.clear();
 		for (JsonElement e : abi.getAsJsonArray()) {
 			JsonObject member = e.getAsJsonObject();
-			if (member.get("type").getAsString().equals("function")) {
+			String ethType = member.get("type").getAsString();
+			if (ethType.equals("function")) {
 				Function f = gson.fromJson(member, Function.class);
 				log.info("Found function " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
-				functions.add(f);
+				// TODO: move function input creation here (like events below)
+				contractFunctions.add(f);
+			} else if (ethType.equals("event")) {
+				Event ev = gson.fromJson(member, Event.class);
+				log.info("Found event " + ev.name);
+				contractEvents.add(ev);
+				ev.outputs = new ArrayList<>();
+				if (ev.inputs.size() > 0) {
+					for (Slot arg : ev.inputs) {
+						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + ")");
+						// TODO: use ethToStreamrType(arg.type) for output
+						Output<Object> output = new Output<>(this, displayName, "Object");
+						ev.outputs.add(output);
+					}
+				} else {
+					// event without parameters/arguments/inputs
+					Output<Object> output = new Output<>(this, ev.name, "Object");
+					ev.outputs.add(output);
+				}
 			}
 		}
 	}
 
 	private void updateFunction(String functionName) {
-		if (functions.size() < 1) { return; }
+		if (contractFunctions.size() < 1) { return; }
 
 		addInput(function);
 		function.receive(functionName); // hack to work around onConfiguration-inserted param bug
 		chosenFunction = function.getSelected();
 		if (chosenFunction == null) {
 			log.info("Can't find " + function.getValue());
-			chosenFunction = functions.get(0);
+			chosenFunction = contractFunctions.get(0);
 			function.receive(chosenFunction.name);
 			//return;		// remain !isValid
 		}
@@ -130,23 +165,28 @@ public class EthereumCall extends AbstractHttpModule {
 		for (Slot s : chosenFunction.inputs) {
 			String name = s.name;
 			String type = ethToStreamrType(s.type);
-			if ("".equals(name)) { name = "key"; }	// public mapping getters
+			if (name.length() < 1) { name = "(" + s.type + ")"; }
 			Input<Object> input = new Input<>(this, name, type);
 			addInput(input);
 			arguments.add(input);
 		}
-		isValid = true;
+		if (chosenFunction.inputs.size() == 0) {
+			addInput(trigger);
+		}
 
 		if (chosenFunction.constant) {
-			// constant functions send an eth_call and get back returned result
-			if (chosenFunction.outputs.size() > 0) {
-				Slot out = chosenFunction.outputs.get(0);
-				//String type = ethToStreamrType(out.type);
-				//result = new Output<>(this, "result", type);	// outputs' name in ABI is always ""
-				result = new Output<>(this, "result", "String");
-				addOutput(result);
+			// constant functions send an eth_call and get back returned result(s)
+			results.clear();
+			for (Slot s : chosenFunction.outputs) {
+				String name = s.name;
+				String type = "String"; //ethToStreamrType(s.type);		// TODO: support other return types
+				if (name.length() < 1) { name = "(" + s.type + ")"; }
+				Output<Object> output = new Output<>(this, name, type);
+				addOutput(output);
+				results.add(output);
 			}
 		} else {
+			addInput(ether);
 			// non-constant functions modify contract state,
 			// 	 and thus require a transaction to be written into blockchain block (eth_sendTransaction)
 			// this takes time (module is async) and result can NOT be returned,
@@ -157,7 +197,15 @@ public class EthereumCall extends AbstractHttpModule {
 			addOutput(gasPrice);
 			addOutput(blockNumber);
 			addOutput(nonce);
+			// TODO: any way to find out which events can be raised from which functions? (probably not...)
+			for (Event ev : contractEvents) {
+				for (Output<Object> output : ev.outputs) {
+					addOutput(output);
+				}
+			}
 		}
+
+		isValid = true;
 	}
 
 
@@ -199,10 +247,12 @@ public class EthereumCall extends AbstractHttpModule {
 		if (!isValid) {
 			throw new RuntimeException("Need valid function to call!");
 		}
+		Map args = new HashMap<>();
 
-		//String sourceAddress = "0xb3428050ea2448ed2e4409be47e1a50ebac0b2d2";
-		String targetAddress = address.getValue();
-		String functionName = chosenFunction.name;
+		// TODO: source address should be Ethereum account of the current user
+		args.put("source", "0xb3428050ea2448ed2e4409be47e1a50ebac0b2d2");
+		args.put("target", address.getValue());
+		args.put("function", chosenFunction.name);
 
 		List<JsonPrimitive> argList = new ArrayList<>();
 		for (Input<Object> input : arguments) {
@@ -211,18 +261,31 @@ public class EthereumCall extends AbstractHttpModule {
 			log.info("  " + name + ": " + value);
 			argList.add(new JsonPrimitive(value));
 		}
+		args.put("arguments", argList);
 
 		if (abi == null) { abi = new JsonParser().parse(currentAbiString); }
-		Map args = ImmutableMap.of(
-				"target", targetAddress,
-				"function", functionName,
-				"arguments", argList,
-				"abi", abi
-		);
+		args.put("abi", abi);
+
+		if (!chosenFunction.constant) {
+			if (ether.isConnected()) {
+				BigInteger valueWei = BigDecimal.valueOf(ether.getValue() * Math.pow(10, 18)).toBigInteger();
+				args.put("value", valueWei.toString());
+			}
+			// args.put("returnEvents", eventArguments.exist(o => o.isConnected()))
+//			boolean returnEvents = false;
+//			for (Output<Object> output : events) {
+//				if (output.isConnected()) { returnEvents = true; }
+//			}
+//			args.put("returnEvents", returnEvents);
+		}
+
 		if (gson == null) { gson = new Gson(); }
 		String jsonString = gson.toJson(args);
 
 		HttpPost request = new HttpPost(ETH_WRAPPER_URL);
+		request.setConfig(RequestConfig.custom()
+				.setSocketTimeout(60 * 1000) // 1 minute
+				.build());
 		try {
 			log.info("Sending function call: " + jsonString);
 			request.setEntity(new StringEntity(jsonString));
@@ -232,13 +295,8 @@ public class EthereumCall extends AbstractHttpModule {
 		return request;
 	}
 
-	public static class Response {
-		public String error;
-	}
-	public static class CallResponse extends Response {
-		public String result;
-	}
-	public static class TransactionResponse extends Response {
+	public static class TransactionResponse {
+		public Map<String, List<Object>> events;		// event name -> args in order they're in ABI
 		public Double valueSent;
 		public Double valueReceived;
 		public Double gasUsed;
@@ -258,15 +316,20 @@ public class EthereumCall extends AbstractHttpModule {
 			String responseString = EntityUtils.toString(entity, "UTF-8");
 			if (responseString.isEmpty()) { throw new RuntimeException("Empty response from server"); }
 
-			if (gson == null) { gson = new Gson(); }
-			Response r = gson.fromJson(responseString, Response.class);
-			if (r.error != null) { throw new RuntimeException(r.error); }
+			JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
+			if (response.get("error") != null) { throw new RuntimeException(response.get("error").toString()); }
 
 			if (chosenFunction.constant) {
-				// TODO: cast result to correct type
-				CallResponse resp = gson.fromJson(responseString, CallResponse.class);
-				result.send(resp.result);
+				JsonArray resultValues = response.get("results").getAsJsonArray();
+				int n = Math.min(results.size(), resultValues.size());
+				for (int i = 0; i < n; i++) {
+					// TODO: cast result(s) to correct type(s)
+					String result = resultValues.get(i).toString();
+					Output<Object> output = results.get(i);
+					output.send(result);
+				}
 			} else {
+				if (gson == null) { gson = new Gson(); }
 				TransactionResponse resp = gson.fromJson(responseString, TransactionResponse.class);
 				valueSent.send(resp.valueSent);
 				valueReceived.send(resp.valueReceived);
@@ -274,6 +337,22 @@ public class EthereumCall extends AbstractHttpModule {
 				gasPrice.send(resp.gasPrice);
 				blockNumber.send(resp.blockNumber);
 				nonce.send(resp.nonce);
+				for (Event event : contractEvents) {
+					List<Object> args = resp.events.get(event.name);
+					if (args != null) {
+						if (event.inputs.size() > 0) {
+							int n = Math.min(event.outputs.size(), args.size());
+							for (int i = 0; i < n; i++) {
+								// TODO: cast result(s) to correct type(s)
+								String value = args.get(i).toString();
+								Output<Object> output = event.outputs.get(i);
+								output.send(value);
+							}
+						} else {
+							event.outputs.get(0).send(Boolean.TRUE);
+						}
+					}
+				}
 			}
 		} catch (Exception e) {
 			call.errors.add(e.getMessage());
