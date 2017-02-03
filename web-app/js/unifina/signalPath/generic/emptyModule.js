@@ -216,10 +216,10 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
             }
             var offset = 20
             if (position.right + offset > canvas.width()) {
-                $("#canvas")[0].scrollBy(canvas.width() - position.right + 2 * offset, 0)
-            } else if (position.left - offset <= 0) {
-                $("#canvas")[0].scrollBy(position.left - 2 * offset, 0)
-                console.log(position.left - 2 * offset)
+                $("#canvas")[0].scrollBy(canvas.width() - position.right + offset, 0)
+            }
+            if (position.bottom + offset > canvas.height()) {
+                $("#canvas")[0].scrollBy(0, canvas.height() - position.bottom + offset)
             }
         })
 		
