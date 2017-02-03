@@ -83,7 +83,7 @@ var SignalPath = (function () {
 		
 		parentElement = $(options.parentElement);
 		jsPlumb.Defaults.Container = parentElement;
-		parentElement.data("spObject",pub)
+		parentElement.data("spObject", pub)
 		
 		jsPlumb.bind('ready', function() {
 			pub.clear();
@@ -94,26 +94,48 @@ var SignalPath = (function () {
 		pub.setZoom(opts.zoom)
 		pub.jsPlumb = jsPlumb
 
-		$(pub).on('new', unsubscribe)
-		$(pub).on('started', subscribe)
+		$(pub).on('new', pub.unsubscribe)
+		$(pub).on('started', pub.subscribe)
 		$(pub).on('stopped', function() {
 			// Simply unsubscribe when a canvas is stopped. It is important to let adhoc canvases auto-unsubscribe when done.
 			if (runningJson && !runningJson.adhoc) {
-				unsubscribe()
+                pub.unsubscribe()
 			}
 			runningJson = null
 		})
 		$(pub).on('loaded', function() {
-			if (isRunning())
-				subscribe()
+			if (pub.isRunning())
+                pub.subscribe()
 		})
+        
+        pub.floatingSearchBar = new FloatingSearchBar(parentElement, {}, function(item, position) {
+            var moduleId = item.id
+            var options = {
+                layout: {
+                    position: {
+                        top: position.y,
+                        left: position.x
+                    }
+                }
+            }
+            if (item.resultType == "stream") { // is stream, specifies module
+                moduleId = item.feed.module
+                options.params = [{
+                    name: 'stream',
+                    value: item.id
+                }]
+            }
+            pub.addModule(moduleId, options)
+        })
 	};
+	
 	pub.unload = function() {
 		jsPlumb.reset();
 		if (connection && connection.isConnected()) {
 			connection.unsubscribe()
 		}
 	};
+	
 	pub.runtimeRequest = function(url, msg, callback) {
 		$.ajax({
 			type: 'POST',
@@ -141,11 +163,12 @@ var SignalPath = (function () {
 					callback(errorObject, errorMsg)
 				}
 				else {
-					handleError(errorMsg)
+					_handleError(errorMsg)
 				}
 			}
 		})
 	}
+	
 	pub.getURL = function() {
 		if (runningJson && (runningJson.id || runningJson.baseURL)) {
 			return runningJson.baseURL || options.apiUrl + '/canvases/'+(runningJson.id)
@@ -157,34 +180,36 @@ var SignalPath = (function () {
 			return undefined
 		}
 	}
+	
 	pub.getRuntimeRequestURL = function() {
 		return pub.getURL() ? pub.getURL() + '/request' : undefined
 	}
+	
 	pub.getParentElement = function() {
 		return parentElement;
 	}
+	
 	pub.getConnection = function() {
 		return connection;
 	}
-	function loadJSON(data) {
+	
+    pub.loadJSON = function(data) {
 		// Reset signal path
-		clear(true);
+        pub.clear(true);
 
 		jsPlumb.setSuspendDrawing(true);
 
 		$(data.modules).each(function(i,mod) {
-			createModuleFromJSON(mod);
+            pub.createModuleFromJSON(mod);
 		});
 
 		$(pub).trigger("_signalPathLoadModulesReady");
 		
-		checkJsPlumbEndpoints()
+		_checkJsPlumbEndpoints()
 		jsPlumb.setSuspendDrawing(false,true);
 	}
-	pub.loadJSON = loadJSON;
 	
 	pub.updateModule = function(module,callback) {
-		
 		$.ajax({
 			type: 'POST',
 			url: options.getModuleUrl, 
@@ -195,7 +220,7 @@ var SignalPath = (function () {
 					module.updateFrom(data);
 					
 					var div = module.getDiv();					
-					setModuleById(module.getHash(), module);
+					_setModuleById(module.getHash(), module);
 					module.redraw(); // Just in case
 					if (callback)
 						callback();
@@ -203,54 +228,39 @@ var SignalPath = (function () {
 				else {
 					if (data.moduleErrors) {
 						for (var i=0;i<data.moduleErrors.length;i++) {
-							getModuleById(data.moduleErrors[i].hash).handleError(data.moduleErrors[i].payload);
+                            pub.getModuleById(data.moduleErrors[i].hash)._handleError(data.moduleErrors[i].payload);
 						}
 					}
-					handleError(data.message)
+					_handleError(data.message)
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(errorThrown)
+				_handleError(errorThrown)
 			}
 		});
 	}
-
-	function isSaved() {
-		return savedJson != null && savedJson.id != null && savedJson.type !== 'example'
-	}
-	pub.isSaved = isSaved
-
-	function getId() {
+    
+    pub.isSaved = function() {
+        return savedJson != null && savedJson.id != null && savedJson.type !== 'example'
+    }
+    
+    pub.getId = function() {
 		return savedJson ? savedJson.id : undefined
 	}
-	pub.getId = getId
-	
-	function replaceModule(module,id,configuration) {
-		addModule(id,configuration,function(newModule) {
-			deleteModuleById(newModule.getHash())
+    
+    pub.replaceModule = function(module,id,configuration) {
+        pub.addModule(id,configuration,function(newModule) {
+			_deleteModuleById(newModule.getHash())
 			
 			newModule.setLayoutData(module.getLayoutData());
 			// TODO: replace connections
 			module.close();
-			setModuleById(module.getHash(), newModule)
+			_setModuleById(module.getHash(), newModule)
 			newModule.redraw();
 		});
 	}
-	pub.replaceModule = replaceModule;
-	
-	// Attempted workaround for CORE-283
-	function checkJsPlumbEndpoints() {
-		// Make sure that jsPlumb agrees with the DOM on which elements exist, otherwise the following call may fail
-		// There were some random problems with this due to unknown reason
-		jsPlumb.selectEndpoints().each(function(it) {
-			if ($("#"+it.elementId).length==0) {
-				console.log("WARN: deleting unexisting jsPlumb endpoint "+it.elementId+" to workaround jsPlumb bug")
-				jsPlumb.deleteEndpoint(it, true)
-			} 
-		})
-	}
-	
-	function addModule(id, configuration, callback) {
+    
+    pub.addModule = function(id, configuration, callback) {
 		// Get indicator JSON from server
 		$.ajax({
 			type: 'POST',
@@ -260,31 +270,25 @@ var SignalPath = (function () {
 			success: function(data) {
 				if (!data.error) {
 					jsPlumb.setSuspendDrawing(true);
-					var module = createModuleFromJSON(data);
-					checkJsPlumbEndpoints()
+					var module = pub.createModuleFromJSON(data);
+					_checkJsPlumbEndpoints()
 					jsPlumb.setSuspendDrawing(false,true);
 					if (callback)
 						callback(module);
 				}
 				else {
-					handleError(data.message)
+					_handleError(data.message)
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(errorThrown)
+				_handleError(errorThrown)
 			}
 		});
 	}
-	pub.addModule = addModule;
-	
-	function handleError(message) {
-		$(pub).trigger("error", [message])
-		options.errorHandler({msg:message})
-	}
-	
-	function createModuleFromJSON(data) {
+    
+    pub.createModuleFromJSON = function(data) {
 		if (data.error) {
-			handleError(data.message)
+			_handleError(data.message)
 			return undefined;
 		}
 		
@@ -299,7 +303,7 @@ var SignalPath = (function () {
 		
 		var mod = eval("SignalPath."+data.jsModule+"(data,parentElement,{signalPath:pub})");
 		
-		setModuleById(mod.getHash(), mod)
+		_setModuleById(mod.getHash(), mod)
 		
 		var div = mod.getDiv();
 		
@@ -310,53 +314,41 @@ var SignalPath = (function () {
 		mod.onClose = function() {
 			// Remove hash entry
 			var hash = mod.getHash();
-			deleteModuleById(hash)
+			_deleteModuleById(hash)
 			if (oldClose)
 				oldClose();
 		}
 		
 		return mod;
 	}
-	pub.createModuleFromJSON = createModuleFromJSON;
-	
-	function redraw() {
+    
+    pub.redraw = function() {
 		pub.getModules().forEach(function(module) {
 			module.redraw()
 		})
 		jsPlumb.repaintEverything()
 	}
-	pub.redraw = redraw
-	
-	function getModules() {
+    
+    pub.getModules = function() {
 		var result = []
 		Object.keys(modules).forEach(function(key) {
 			result.push(modules[key])
 		})
 		return result
 	}
-	pub.getModules = getModules;
-	
-	function getModuleById(id) {
+    
+    pub.getModuleById = function(id) {
 		return modules[id.toString()];
 	}
-	pub.getModuleById = getModuleById;
-	
-	function setModuleById(id, module) {
-		modules[id.toString()] = module
-	}
-	
-	function deleteModuleById(id) {
-		delete modules[id.toString()]
-	}
-	
-	function toJSON(settings) {
+    
+    pub.toJSON = function(settings) {
 		var result = {
 			name: getName(),
 			settings: (settings ? settings : options.settings()),
 			modules: []
 		}
-		
-		getModules().forEach(function(module) {
+    
+        pub.getModules().forEach(function(module) {
 			var json = module.toJSON()
 			result.modules.push(json);
 		})
@@ -365,43 +357,38 @@ var SignalPath = (function () {
 
 		return result;
 	}
-	pub.toJSON = toJSON;
-
-	function getName() {
+    
+    pub.getName = function() {
 		return name;
 	}
-	pub.getName = getName
-	
-	function setName(n) {
+    
+    pub.setName = function(n) {
 		name = n
 	}
-	pub.setName = setName
 
 	/**
 	 * Checks if this SignalPath has unsaved changes
 	 */
-	function isDirty() {
+    pub.isDirty = function() {
 		var currentJson = $.extend(true, {}, savedJson, toJSON())
 		var dirty = (JSON.stringify(savedJson) !== JSON.stringify(currentJson))
 		return dirty
 	}
-	pub.isDirty = isDirty
-
-	function saveAs(name, callback) {
-		setName(name)
-		save(function(json) {
-			load(json, function() {
+	
+    pub.saveAs = function(name, callback) {
+        pub.setName(name)
+        pub.save(function(json) {
+            pub.load(json, function() {
 				setTimeout(callback, 0)
 			})
 		}, true)
 	}
-	pub.saveAs = saveAs
-
-	function save(callback, forceCreateNew) {
+    
+    pub.save = function(callback, forceCreateNew) {
 		$(pub).trigger('saving')
 
 		function onSuccess(json) {
-			setSavedJson(json)
+			_setSavedJson(json)
 
 			if (callback)
 				callback(json);
@@ -409,10 +396,10 @@ var SignalPath = (function () {
 			$(pub).trigger('saved', [json]);
 		}
 
-		var json = toJSON()
+		var json = pub.toJSON()
 
 		// If already saved, update
-		if (isSaved() && !forceCreateNew) {
+		if (pub.isSaved() && !forceCreateNew) {
 			_update(json, onSuccess)
 		}
 		// Otherwise create new
@@ -420,66 +407,14 @@ var SignalPath = (function () {
 			_create(json, onSuccess)
 		}
 	}
-	pub.save = save;
+    
+    pub.clear = function(isSilent) {
+		pub.unsubscribe()
 
-	function _create(json, callback) {
-		$.ajax({
-			type: 'POST',
-			url: options.apiUrl + "/canvases",
-			data: JSON.stringify(json),
-			contentType: 'application/json',
-			dataType: 'json',
-			success: function(response) {
-				if (!response.error) {
-					if (callback)
-						callback(response)
-				}
-				else {
-					handleError(response.error)
-				}
-			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				handleError(errorThrown)
-			}
-		})
-	}
-
-	function _update(json, callback) {
-		$.ajax({
-			type: 'PUT',
-			url: options.apiUrl + "/canvases/"+json.id,
-			data: JSON.stringify(json),
-			contentType: 'application/json',
-			dataType: 'json',
-			success: function(response) {
-				if (!response.error) {
-					callback(json)
-				}
-				else {
-					handleError(response.error)
-				}
-			},
-			error: function(jqXHR,textStatus,errorThrown) {
-				if (jqXHR.responseJSON) {
-					var apiError = jqXHR.responseJSON;
-					if (apiError && apiError.message) {
-						handleError(apiError.message)
-						return;
-					}
-
-				}
-				handleError(errorThrown)
-			}
-		})
-	}
-	
-	function clear(isSilent) {
-		unsubscribe()
-
-		if (isRunning() && runningJson.adhoc)
-			stop();
-		
-		getModules().forEach(function(module) {
+		if (pub.isRunning() && runningJson.adhoc)
+            pub.stop();
+    
+        pub.getModules().forEach(function(module) {
 			module.close()
 		})
 		
@@ -497,19 +432,18 @@ var SignalPath = (function () {
 		if (!isSilent)
 			$(pub).trigger('new');
 	}
-	pub.clear = clear;
 	
 	/**
 	 * idOrObject can be either an id to fetch from the api, or json to apply as-is
 	 */
-	function load(idOrObject, callback) {
+    pub.load = function(idOrObject, callback) {
 		SignalPath.isBeingReloaded = true
 		$(pub).trigger('loading')
 
 		function doLoad(json) {
-			loadJSON(json);
-			setName(json.name)
-			setSavedJson(json)
+            pub.loadJSON(json);
+            pub.setName(json.name)
+			_setSavedJson(json)
 
 			if (json.state.toLowerCase() === 'running')
 				runningJson = json
@@ -533,24 +467,23 @@ var SignalPath = (function () {
 			$.getJSON(options.apiUrl + '/canvases/' + idOrObject)
 				.done(doLoad)
 				.fail(function(jqXHR, textStatus, errorThrown) {
-					handleError(jqXHR.responseJSON.message)
+					_handleError(jqXHR.responseJSON.message)
 				})
 		}
 		else {
-			doLoad(idOrObject)
+            doLoad(idOrObject)
 		}
 	}
-	pub.load = load;
-	
-	function start(startRequest, callback, ignoreDirty) {
+    
+    pub.start = function(startRequest, callback, ignoreDirty) {
 		startRequest = startRequest || {}
 
-		if (isRunning()) {
-			handleError("Canvas is already running.")
+		if (pub.isRunning()) {
+			_handleError("Canvas is already running.")
 			return
 		}
-		if (!ignoreDirty && isDirty()) {
-			handleError("Canvas has unsaved changes. Please save it before starting.")
+		if (!ignoreDirty && pub.isDirty()) {
+			_handleError("Canvas has unsaved changes. Please save it before starting.")
 			return
 		}
 
@@ -560,7 +493,7 @@ var SignalPath = (function () {
 			runningJson = savedJson
 
 		// Clean modules before running
-		getModules().forEach(function(module) {
+        pub.getModules().forEach(function(module) {
 			module.clean()
 		})
 		
@@ -572,7 +505,7 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(response) {
 				if (response.error) {
-					handleError("Error:\n"+response.error)
+					_handleError("Error:\n"+response.error)
 				}
 
 				runningJson = response
@@ -593,32 +526,30 @@ var SignalPath = (function () {
 				if (callback) {
 					callback(undefined, jqXHR.responseJSON)
 				} if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-					handleError(jqXHR.responseJSON.message)
+					_handleError(jqXHR.responseJSON.message)
 				} else {
-					handleError(textStatus + "\n" + errorThrown)
+					_handleError(textStatus + "\n" + errorThrown)
 				}
 			}
 		});
 	}
-	pub.start = start;
-
-	function startAdhoc(startRequest, callback) {
+    
+    pub.startAdhoc = function(startRequest, callback) {
 		startRequest = startRequest || {}
 		startRequest.clearState = false
 		var json = toJSON()
 		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
-			start(startRequest, callback, true)
+            pub.start(startRequest, callback, true)
 		})
 	}
-	pub.startAdhoc = startAdhoc
-	
-	function subscribe() {
-		if (isRunning() && runningJson.uiChannel) {
+    
+    pub.subscribe = function() {
+		if (pub.isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
 				runningJson.uiChannel.id,
-				processMessage,
+				_processMessage,
 				{
 					resend_all: (runningJson.adhoc ? true : undefined),
 					canvas: runningJson.id
@@ -626,68 +557,40 @@ var SignalPath = (function () {
 			)
 		}
 	}
-	pub.subscribe = subscribe
-	
-	function reconnect() {
-		subscribe();
+    
+    pub.reconnect = function() {
+        pub.subscribe();
 	}
-	pub.reconnect = reconnect;
-	
-	function processMessage(message) {
-		if (message.type=="MW") {
-			var hash = message.hash;
-			getModuleById(hash).addWarning(message.msg);
-		}
-		else if (message.type=="D") {
-			$(pub).trigger("done")
-
-			if (runningJson && runningJson.adhoc)
-				$(pub).trigger("stopped")
-		}
-		else if (message.type=="E") {
-			$(pub).trigger("stopped")
-			handleError(message.error)
-		}
-		else if (message.type=="N") {
-			options.notificationHandler(message);
-		}
-	}
-	
-	function unsubscribe() {
+    
+    pub.unsubscribe = function () {
 		if (subscription) {
 			connection.unsubscribe(subscription)
 			subscription = undefined
 		}
 	}
-	pub.unsubscribe = unsubscribe;
-	
-	function isRunning() {
-		return runningJson!=null && runningJson.state!==undefined && runningJson.state.toLowerCase() === 'running'
+    
+    pub.isRunning = function() {
+		return runningJson != null && runningJson.state !== undefined && runningJson.state.toLowerCase() === 'running'
 	}
-	pub.isRunning = isRunning;
 
 	pub.isAdhoc = function() {
-		return isRunning() && runningJson.adhoc
+		return pub.isRunning() && runningJson.adhoc
 	}
-
-	function setSavedJson(data) {
-		savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
-	}
-
-	function stop(callback) {
+    
+    pub.stop = function(callback) {
 		$(pub).trigger('stopping')
 
 		function triggerStopped() {
 			$(pub).trigger('stopped');
-			getModules().forEach(function(module) {
+            pub.getModules().forEach(function(module) {
 				$(module).trigger('stopped');
 			})
 		}
 
-		if (isRunning()) {
+		if (pub.isRunning()) {
 			function onStopped(data) {
 				if (data) {
-					setSavedJson(data)
+					_setSavedJson(data)
 				}
 				triggerStopped()
 			}
@@ -713,7 +616,7 @@ var SignalPath = (function () {
 					if (callback) {
 						callback(undefined, jqXHR.responseJSON)
 					} else {
-						handleError(textStatus + "\n" + errorThrown)
+						_handleError(textStatus + "\n" + errorThrown)
 					}
 				}
 			});
@@ -722,14 +625,12 @@ var SignalPath = (function () {
 			triggerStopped()
 		}
 	}
-	pub.stop = stop;
-	
-	function getZoom() {
+    
+    pub.getZoom = function() {
 		return parentElement.css("zoom") != null ? parseFloat(parentElement.css("zoom")) : 1
 	}
-	pub.getZoom = getZoom
-
-	function setZoom(zoom, animate) {
+    
+    pub.setZoom = function(zoom, animate) {
 		if (animate===undefined)
 			animate = true
 		
@@ -737,7 +638,6 @@ var SignalPath = (function () {
 			parentElement.animate({ zoom: zoom }, 300);
 		else (parentElement.css("zoom", zoom))
 	}
-	pub.setZoom = setZoom
 
 	pub.isLoading = function() {
 		return SignalPath.isBeingReloaded;
@@ -779,6 +679,108 @@ var SignalPath = (function () {
 			return true
 		}
 	}
+    
+    // Attempted workaround for CORE-283
+    function _checkJsPlumbEndpoints() {
+        // Make sure that jsPlumb agrees with the DOM on which elements exist, otherwise the following call may fail
+        // There were some random problems with this due to unknown reason
+        jsPlumb.selectEndpoints().each(function(it) {
+            if ($("#"+it.elementId).length==0) {
+                console.log("WARN: deleting unexisting jsPlumb endpoint "+it.elementId+" to workaround jsPlumb bug")
+                jsPlumb.deleteEndpoint(it, true)
+            }
+        })
+    }
+    
+    function _setSavedJson(data) {
+        savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
+    }
+    
+    function _update(json, callback) {
+        $.ajax({
+            type: 'PUT',
+            url: options.apiUrl + "/canvases/"+json.id,
+            data: JSON.stringify(json),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (!response.error) {
+                    callback(json)
+                }
+                else {
+                    _handleError(response.error)
+                }
+            },
+            error: function(jqXHR,textStatus,errorThrown) {
+                if (jqXHR.responseJSON) {
+                    var apiError = jqXHR.responseJSON;
+                    if (apiError && apiError.message) {
+                        _handleError(apiError.message)
+                        return;
+                    }
+                    
+                }
+                _handleError(errorThrown)
+            }
+        })
+    }
+    
+    function _create(json, callback) {
+        $.ajax({
+            type: 'POST',
+            url: options.apiUrl + "/canvases",
+            data: JSON.stringify(json),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (!response.error) {
+                    if (callback)
+                        callback(response)
+                }
+                else {
+                    _handleError(response.error)
+                }
+            },
+            error: function(jqXHR,textStatus,errorThrown) {
+                _handleError(errorThrown)
+            }
+        })
+    }
+    
+    function _processMessage(message) {
+        if (message.type == "MW") {
+            var hash = message.hash;
+            pub.getModuleById(hash).addWarning(message.msg);
+        }
+        else if (message.type == "D") {
+            $(pub).trigger("done")
+            
+            if (runningJson && runningJson.adhoc)
+                $(pub).trigger("stopped")
+        }
+        else if (message.type == "E") {
+            $(pub).trigger("stopped")
+            _handleError(message.error)
+        }
+        else if (message.type == "N") {
+            options.notificationHandler(message);
+        }
+    }
+    
+    function _setModuleById(id, module) {
+        modules[id.toString()] = module
+    }
+    
+    function _deleteModuleById(id) {
+        delete modules[id.toString()]
+    }
+    
+    function _handleError(message) {
+        $(pub).trigger("error", [message])
+        options.errorHandler({msg:message})
+    }
+    
+    
 
 	return pub; 
 }());
