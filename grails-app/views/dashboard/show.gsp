@@ -17,6 +17,7 @@
 			$(function() {
 				var dashboard
 				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
+				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
 				var sidebar
 				var nameEditor = new StreamrNameEditor({
 					el: $(".name-editor"),
@@ -34,6 +35,8 @@
 					dashboard.urlRoot = baseUrl + "api/v1/dashboards/"
 					var dashboardView = new DashboardView({
 						model: dashboard,
+						el: $("#dashboard-view"),
+						baseUrl: baseUrl
 						el: $("#dashboard-view"),
 						baseUrl: baseUrl
 					})
