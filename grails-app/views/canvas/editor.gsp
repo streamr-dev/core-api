@@ -21,14 +21,14 @@
 		<r:script>
 
 // Make the loadBrowser global to allow apps that use this plugin to extend it by adding tabs
-var loadBrowser
+	var loadBrowser
+	var saveAndAskName
 
-$('#moduleTree').bind('loaded.jstree', function() {
-	Tour.startableTours([0])
-	Tour.autoStart()
-})
-var saveAndAskName
 $(function() {
+	$('#moduleTree').bind('loaded.jstree', function() {
+		Tour.startableTours([0])
+		Tour.autoStart()
+	})
 	saveAsAndAskName = function() {
 		bootbox.prompt({
 			title: 'Save As..',
@@ -378,7 +378,6 @@ $(function() {
 	<g:elseif test="${json}">
 		SignalPath.loadJSON(${raw(json)})
 	</g:elseif>
-})
 
     $(document).unload(function () {
         SignalPath.unload()
