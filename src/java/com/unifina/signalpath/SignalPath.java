@@ -3,13 +3,17 @@ package com.unifina.signalpath;
 import com.unifina.data.FeedEvent;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
+import com.unifina.push.PushChannel;
 import com.unifina.serialization.SerializationRequest;
+import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
+import com.unifina.service.SerializationService;
 import com.unifina.utils.Globals;
 import grails.converters.JSON;
 import org.apache.log4j.Logger;
 import org.codehaus.groovy.grails.web.json.JSONObject;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -23,17 +27,15 @@ public class SignalPath extends ModuleWithUI {
 		}
 	};
 
-	SignalPathParameter sp;
+	private SignalPathParameter signalPathParameter;
 
-	List<ModuleConfig> moduleConfigs = new ArrayList<>();
-	List<AbstractSignalPathModule> mods = new ArrayList<>();
+	private List<AbstractSignalPathModule> mods = new ArrayList<>();
 
-	List<Input> exportedInputs = new ArrayList<Input>();
-	List<Output> exportedOutputs = new ArrayList<Output>();
+	private List<Input> exportedInputs = new ArrayList<Input>();
+	private List<Output> exportedOutputs = new ArrayList<Output>();
 
-	Canvas canvas = null;
-	Map representation = null;
-	Map<Integer, AbstractSignalPathModule> modulesByHash = new HashMap<>();
+	private Canvas canvas = null;
+	private Map<Integer, AbstractSignalPathModule> modulesByHash = new HashMap<>();
 
 	private boolean root = false;
 
@@ -52,7 +54,7 @@ public class SignalPath extends ModuleWithUI {
 	public SignalPath(Map iData, boolean isRoot, Globals globals) {
 		super();
 		this.root = isRoot;
-		this.globals = globals;
+		this.setGlobals(globals);
 		initPriority = 10;
 		canRefresh = true;
 
@@ -69,8 +71,9 @@ public class SignalPath extends ModuleWithUI {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void initFromRepresentation(Map iData) {
-		representation = iData;
-		name = (iData.containsKey("name") && iData.get("name") != null ? iData.get("name").toString() : name);
+		if (iData.get("name") != null) {
+			setName(iData.get("name").toString());
+		}
 
 		List<InputConnection> inputs = new ArrayList<>();
 		Map<String, Output> outputs = new HashMap<>();
@@ -80,19 +83,20 @@ public class SignalPath extends ModuleWithUI {
 			modulesJSON = new ArrayList<>(0);
 		}
 
-		ModuleService moduleService = globals.getBean(ModuleService.class);
+		ModuleService moduleService = getGlobals().getBean(ModuleService.class);
 
 		HashMap<Long, Module> moduleDomainById = new HashMap<>();
 		for (Module m : moduleService.getModuleDomainObjects(modulesJSON)) {
 			moduleDomainById.put(m.getId(), m);
 		}
 
+		List<ModuleConfig> moduleConfigs = new ArrayList<>();
 		for (Map moduleConfig : modulesJSON) {
 
 			Module moduleDomain = moduleDomainById.get(((Number) moduleConfig.get("id")).longValue());
 
 			try {
-				AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain, moduleConfig, this, globals);
+				AbstractSignalPathModule moduleImpl = moduleService.getModuleInstance(moduleDomain, moduleConfig, this, getGlobals());
 
 				// Get parameter inputs and outputs if connected, or create constants if not connected
 				for (Map paramConfig : (List<Map>) moduleConfig.get("params")) {
@@ -169,12 +173,16 @@ public class SignalPath extends ModuleWithUI {
 		// If the io names in different modules clash, add a running number in the end to make the name unique
 		if (!root) {
 			for (Input it : exportedInputs) {
-				// Don't retain the saved json configuration
-				it.resetConfiguration();
-
+				// Ensure variadic endpoints are imported as normal endpoints
+				it.setJsClass(null);
+				// Prevent exported Endpoints from being exported on wrapping module
+				it.setExport(false);
+				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
+				it.regenerateId();
 				if (getInput(it.name) == null) {
 					addInput(it);
-				} else {
+				}
+				else {
 					int counter = 2;
 					while (getInput(it.name + counter) != null) {
 						counter++;
@@ -184,10 +192,16 @@ public class SignalPath extends ModuleWithUI {
 				}
 			}
 			for (Output it : exportedOutputs) {
-				it.resetConfiguration();
+				// Ensure variadic endpoints are imported as normal endpoints
+				it.setJsClass(null);
+				// Prevent exported Endpoints from being exported on wrapping module
+				it.setExport(false);
+				// Id needs to be regenerated to avoid clashes with other instances of the same canvas-as-a-module
+				it.regenerateId();
 				if (getOutput(it.name) == null) {
 					addOutput(it);
-				} else {
+				}
+				else {
 					int counter = 2;
 					while (getOutput(it.name + counter) != null) {
 						counter++;
@@ -203,19 +217,33 @@ public class SignalPath extends ModuleWithUI {
 		return mods;
 	}
 
-	public AbstractSignalPathModule getModule(int hash) {
-		return modulesByHash.get(hash);
-	}
-
 	public boolean hasExports() {
 		return exportedInputs.size() + exportedOutputs.size() > 0;
 	}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		List<Map> modules = new ArrayList<>(mods.size());
+		for (AbstractSignalPathModule m : mods) {
+			modules.add(m.getConfiguration());
+		}
+		config.put("modules", modules);
+		return config;
+	}
+
+	@Override
 	public void onConfiguration(Map config) {
 		super.onConfiguration(config);
-		if (sp != null && sp.value != null) {
-			initFromRepresentation(((JSONObject) JSON.parse(sp.value.getJson())));
+		if (!root && signalPathParameter.hasValue()) {
+			/**
+			 * Reset uiChannels if this is a subcanvas (not the root canvas). Otherwise
+			 * there will be problems if many instances of the same canvas are used
+			 * as subcanvases, as all the instances would produce to same uiChannels.
+			 */
+			Map json = (JSONObject) JSON.parse(signalPathParameter.getCanvas().getJson());
+			getGlobals().getBean(CanvasService.class).resetUiChannels(json);
+			initFromRepresentation(json);
 		} else {
 			initFromRepresentation(config);
 		}
@@ -226,9 +254,9 @@ public class SignalPath extends ModuleWithUI {
 		super.connectionsReady();
 
 		List<AbstractSignalPathModule> sortedModules = new ArrayList<>();
-		for (ModuleConfig mc : moduleConfigs) {
-			modulesByHash.put(mc.module.hash, mc.module);
-			sortedModules.add(mc.module);
+		for (AbstractSignalPathModule module : getModules()) {
+			modulesByHash.put(module.getHash(), module);
+			sortedModules.add(module);
 		}
 
 		// Call connectionsReady in modules in ascending init priority order
@@ -238,8 +266,8 @@ public class SignalPath extends ModuleWithUI {
 			sortedModules.get(i).connectionsReady();
 		}
 
-		if (globals.getDataSource() != null) {
-			globals.getDataSource().connectSignalPath(this);
+		if (getGlobals().getDataSource() != null) {
+			getGlobals().getDataSource().connectSignalPath(this);
 		}
 	}
 
@@ -256,18 +284,9 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	public void init() {
 		if (!root) {
-			sp = new SignalPathParameter(this, "canvas");
-			sp.setUpdateOnChange(true);
-			addInput(sp);
-		}
-	}
-
-	@Override
-	public void initialize() {
-		super.initialize();
-		// Embedded SignalPaths inherit the uiChannelId of their parent
-		if (parentSignalPath != null && parentSignalPath.getUiChannelId() != null) {
-			uiChannelId = parentSignalPath.getUiChannelId();
+			signalPathParameter = new SignalPathParameter(this, "canvas");
+			signalPathParameter.setUpdateOnChange(true);
+			addInput(signalPathParameter);
 		}
 	}
 
@@ -307,8 +326,8 @@ public class SignalPath extends ModuleWithUI {
 							notReady.append(input.toString());
 							notReady.append("\n");
 
-							if (globals.getUiChannel() != null) {
-								globals.getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.name, input.getOwner().getHash()), uiChannelId);
+							if (getGlobals().getUiChannel() != null) {
+								getGlobals().getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()), uiChannelId);
 							}
 						}
 					}
@@ -325,6 +344,16 @@ public class SignalPath extends ModuleWithUI {
 	@Override
 	public String getUiChannelName() {
 		return "Notifications";
+	}
+
+	/**
+	 * Sends a notification to this SignalPath's UI channel.
+     */
+	public void showNotification(@NotNull String notification) {
+		PushChannel pushChannel = getGlobals().getUiChannel();
+		if (pushChannel != null) {
+			pushChannel.push(new NotificationMessage(notification), getUiChannelId());
+		}
 	}
 
 	@Override
@@ -344,10 +373,10 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	public void afterDeserialization() {
-		super.afterDeserialization();
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
 		for (AbstractSignalPathModule module : mods) {
-			module.afterDeserialization();
+			module.afterDeserialization(serializationService);
 		}
 	}
 
@@ -375,16 +404,8 @@ public class SignalPath extends ModuleWithUI {
 		return exportedInputs;
 	}
 
-	public void setExportedInputs(List<Input> exportedInputs) {
-		this.exportedInputs = exportedInputs;
-	}
-
 	public List<Output> getExportedOutputs() {
 		return exportedOutputs;
-	}
-
-	public void setExportedOutputs(List<Output> exportedOutputs) {
-		this.exportedOutputs = exportedOutputs;
 	}
 
 	public Canvas getCanvas() {
@@ -393,5 +414,30 @@ public class SignalPath extends ModuleWithUI {
 
 	public void setCanvas(Canvas canvas) {
 		this.canvas = canvas;
+	}
+
+	@Override
+	public void setGlobals(Globals globals) {
+		super.setGlobals(globals);
+
+		for (AbstractSignalPathModule m : mods) {
+			m.setGlobals(globals);
+		}
+	}
+
+	@Override
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
+		if (path.isEmpty()) {
+			return super.resolveRuntimeRequestRecipient(request, path);
+		}
+		else {
+			Integer moduleId = path.readModuleId();
+			AbstractSignalPathModule module = modulesByHash.get(moduleId);
+			if (module == null) {
+				throw new IllegalArgumentException("Module not found: " + moduleId);
+			} else {
+				return module.resolveRuntimeRequestRecipient(request, path);
+			}
+		}
 	}
 }

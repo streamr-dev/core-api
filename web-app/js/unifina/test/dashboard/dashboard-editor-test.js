@@ -113,10 +113,48 @@ describe('dashboard-editor', function() {
 
 		global.Toolbar = undefined
 	})
-	describe("Dashboard", function() {
-		it('should return the same JSON representation it was initialized with', function () {
-			assert.deepEqual(dashboard.toJSON(), dashboardJson)
+
+	describe('with all permissions', function() {
+		var super_toJSON
+		before(function() {
+			super_toJSON = global.$.toJSON
 		})
+		beforeEach(function () {
+			global.$.getJSON = function(url, cb) {
+				// Does not contain permission/me
+				if (url.indexOf("permissions/me") < 0) {
+					super_getJSON(url, cb)
+				} else {
+					cb([{
+						operation: "read"
+					},{
+						operation: "write"
+					},{
+						operation: "share"
+					}])
+				}
+			}
+			dashboard = new db.Dashboard(dashboardJson)
+			dashboard.urlRoot = "nourl"
+
+			dashboardView = new db.DashboardView({
+				model: dashboard,
+				el: $("#dashboard-view"),
+				baseUrl: "/"
+			})
+
+			sidebar = new db.SidebarView({
+				el: $("#sidebar-view"),
+				dashboard: dashboard,
+				canvases: canvases,
+				menuToggle: $("#main-menu-toggle"),
+				baseUrl: "/"
+			})
+		})
+		describe("Dashboard", function() {
+			it('should return the same JSON representation it was initialized with', function () {
+				assert.deepEqual(dashboard.toJSON(), dashboardJson)
+			})
 
 		it('should throw error when trying to create module without webcomponent', function () {
 			assert.throws(
@@ -364,6 +402,90 @@ describe('dashboard-editor', function() {
 				done()
 			}
 			$("#sidebar-view .save-button").click()
+		describe("save button", function() {
+			it("must call backbone model save function", function(done) {
+				dashboard.save = function() {
+					done()
+				}
+				$("#sidebar-view .save-button").click()
+			})
+		})
+	})
+
+	describe('with limited permissions', function() {
+		var super_toJSON
+		before(function() {
+			super_toJSON = global.$.toJSON
+		})
+		afterEach(function() {
+			global.$.toJSON = super_toJSON
+		})
+		describe('Sidebar', function() {
+
+			it('must not enable shareButton without share-permission', function(done) {
+				global.$.getJSON = function(url, cb) {
+					// Does not contain permission/me
+					if (url.indexOf("permissions/me") < 0) {
+						super_getJSON(url, cb)
+					} else {
+						cb([{
+							operation: "read"
+						},{
+							operation: "write"
+						}])
+						assert($("#share-button").attr("disabled"))
+						done()
+					}
+				}
+				dashboard = new db.Dashboard(dashboardJson)
+				dashboard.urlRoot = "nourl"
+
+				dashboardView = new db.DashboardView({
+					model: dashboard,
+					el: $("#dashboard-view"),
+					baseUrl: "/"
+				})
+
+				sidebar = new db.SidebarView({
+					el: $("#sidebar-view"),
+					dashboard: dashboard,
+					canvases: canvases,
+					menuToggle: $("#main-menu-toggle"),
+					baseUrl: "/"
+				})
+			})
+
+			it('must not enable saveButton and deleteButton without write-permission', function(done) {
+				global.$.getJSON = function(url, cb) {
+					// Does not contain permission/me
+					if (url.indexOf("permissions/me") < 0) {
+						super_getJSON(url, cb)
+					} else {
+						cb([{
+							operation: "read"
+						}])
+						assert($("#saveButton").attr("disabled"))
+						assert($("#deleteDashboardButton").attr("disabled"))
+						done()
+					}
+				}
+				dashboard = new db.Dashboard(dashboardJson)
+				dashboard.urlRoot = "nourl"
+
+				dashboardView = new db.DashboardView({
+					model: dashboard,
+					el: $("#dashboard-view"),
+					baseUrl: "/"
+				})
+
+				sidebar = new db.SidebarView({
+					el: $("#sidebar-view"),
+					dashboard: dashboard,
+					canvases: canvases,
+					menuToggle: $("#main-menu-toggle"),
+					baseUrl: "/"
+				})
+			})
 		})
 	})
 })

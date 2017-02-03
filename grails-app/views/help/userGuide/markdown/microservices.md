@@ -1,4 +1,4 @@
-#Canvases
+# Canvases
 
 A Streamr canvas is a microservice which consumes and acts upon real-time data.  A canvas contains one or more [streams](#streams) (these provide the data) and one or more [modules](#modules) (these do the processing). Streams and modules are connected in the configuration that you'll design.  The connections determine how the data flows through the canvas.
 
@@ -24,7 +24,7 @@ In this chapter, we’ll show how to do the following:
 - Start or stop a live canvas.
 - Reuse canvases as modules.
 
-##Using the editor
+## Using the editor
 
 You create a new service or modify an existing service by using the Streamr editor. When you log in to Streamr, the editor with a blank workspace is what you’ll first see. The editor is always accessible by clicking on the **Editor** tab.
 
@@ -54,7 +54,7 @@ There's a natural iterative workflow where you first build a perhaps rudimentary
 
 You can also create a service programmatically by using the <g:link controller="help" action="api">canvas API</g:link>. 
 
-##Building a canvas
+## Building a canvas
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="add-twitter-stream.png" class="side-image"/>
 
@@ -84,7 +84,7 @@ When you view a canvas, the direction of a data connection is indicated by an ar
 
 The topology of a service can be arbitrarily complex. You can of course design a simple sequential work flow, and in many cases it will be perfectly adequate. In other cases the flow of data may involve merging data pathways, branches and even loops. Go ahead, be adventurous, but also bear in mind Streamr's abstraction capabilities. Reusing existing canvases will help you manage the development process and keep things tidy and neat.
 
-##Running a playback
+## Running a playback
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="start-historical-run.png" class="side-image"/>
 
@@ -98,9 +98,7 @@ By default, playback events are processed sequentially but at a much faster pace
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="playback-options.png" class="img-responsive" />
 
-You can use the dropdown menu to save all Chart inputs in a CSV file during a historical run. If there’s more than one Chart in the canvas, each one will produce a separate output file.
-
-##Running live services
+## Running live services
 
 <r:img plugin="unifina-core" dir="images/user-guide" file="start-realtime-run.png" class="side-image"/>
 
@@ -114,7 +112,7 @@ A live canvas keeps running until you explictly tell it to stop. When you stop a
 
 You'll see all of your canvases (and their state) in the Canvases tab. Click on a canvas to open it in the editor. You can then stop it (if it is live) or launch it live (if it is stopped).
 
-##Reusing canvases as modules
+## Reusing canvases as modules
 
 You can easily reuse a canvas as a component of another canvas. This is done via *abstraction*, where you encapsulate a canvas as a module. You can then use the new module when you build additional microservices.
 

@@ -1,6 +1,8 @@
 /**
  * Events emitted on spObject:
  * updated - when eg. the stream is changed, updated is triggered with the new data
+ * started - when the canvas is started. The running module json is passed as argument.
+ * stopped - when the canvas is stopped.
  */
 SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot = prot || {};
@@ -62,7 +64,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.div.append(prot.header);
 		
 		// Create title
-		prot.title = $("<span class='modulename'>"+prot.jsonData.name+"</span>");
+		var moduleName = prot.jsonData.displayName || prot.jsonData.name
+		prot.title = $("<span class='modulename'>" + moduleName + "</span>");
 		prot.header.append(prot.title);
 	
 		// Close button
@@ -296,7 +299,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var embedCode = prot.getEmbedCode()
 		if (extended && embedCode) {
 			result += "<div class='note note-info'>"
-			result += "<p>To use this visualization on an external page, use the following tag:</p>";
+			result += "<p>To embed this visualization, enable public read access in the sharing settings, and paste the following tag to your website:</p>";
 			result += "<code>"+embedCode+"</code>"
 			result += "</div>"
 		}
@@ -306,8 +309,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.renderHelp = renderHelp;
 	
 	prot.getEmbedCode = function() {
-		if (SignalPath.isSaved() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
-			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" canvas='"+SignalPath.getId()+"' module='"+prot.getHash()+"' /&gt;"
+		if (pub.getURL() && prot.jsonData.uiChannel && prot.jsonData.uiChannel.webcomponent) {
+			return "&lt;"+prot.jsonData.uiChannel.webcomponent+" url='"+pub.getURL()+"' /&gt;"
 		}
 		else return undefined;
 	}
@@ -349,14 +352,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	
 	function getContextMenu() {
 		return [
-		        {title: "Clone module", cmd: "clone"}
+		        {title: "Clone module", cmd: "clone"},
+				{title: "Rename module", cmd: "renameModule"}
 		]
 	}
 	prot.getContextMenu = getContextMenu;
 	
 	function handleContextMenuSelection(target,selection) {
-		if (selection=="clone") {
+		if (selection == "clone" ) {
 			prot.clone();
+		} else if (selection == "renameModule") {
+			prot.rename()
 		}
 	}
 	prot.handleContextMenuSelection = handleContextMenuSelection;
@@ -485,22 +491,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		prot.warnings = []
 	}
 	pub.clearWarnings = clearWarnings
-	
-	function receiveResponse(payload) {}
-	pub.receiveResponse = receiveResponse;
 
-	function getUIChannelOptions() {
-		// Check if module options contain channel options
-		if (prot.jsonData.options && prot.jsonData.options.uiResendAll && prot.jsonData.options.uiResendAll.value) {
-			return { resend_all: true }
-		}
-		else if (prot.jsonData.options && prot.jsonData.options.uiResendLast) {
-			return { resend_last: prot.jsonData.options.uiResendLast.value }
-		}
-		else return { resend_all: true }
-	}
-	pub.getUIChannelOptions = getUIChannelOptions
-	
 	function updateFrom(data) {
 		// Overwrite jsonData
 		prot.jsonData = data;
@@ -561,6 +552,28 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		})
 	}
 	prot.clone = clone;
+
+	prot.rename = function(callback) {
+		var defaultValue = prot.title.text();
+
+		bootbox.prompt({
+			title: "Display name for " + prot.jsonData.name,
+			value: defaultValue,
+			className: 'rename-endpoint-dialog',
+			callback: function(displayName) {
+				if (displayName != null) {
+					if (displayName != "" && displayName != prot.jsonData.name) {
+						prot.jsonData.displayName = displayName;
+					} else {
+						delete prot.jsonData.displayName;
+						displayName = prot.jsonData.name;
+					}
+					prot.title.text(displayName)
+				}
+			}
+		});
+		pub.redraw()
+	}
 	
 	function prepareCloneData(cloneData) {
 		// Set hash to null so that a new id will be assigned
@@ -569,7 +582,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		cloneData.layout.position.top = parseInt(cloneData.layout.position.top, 10) + 30 + 'px'
 	}
 	prot.prepareCloneData = prepareCloneData;
-	
+
+	pub.handleError = function(error) {}
+
+	pub.getURL = function() {
+		return SignalPath.getURL() ? SignalPath.getURL() + '/modules/' + pub.getHash() : undefined
+	}
+
+	pub.getRuntimeRequestURL = function() {
+		return pub.getURL() ? pub.getURL() + '/request' : undefined
+	}
+
 	// Everything added to the public interface can be accessed from the
 	// protected interface too
 	$.extend(prot,pub);

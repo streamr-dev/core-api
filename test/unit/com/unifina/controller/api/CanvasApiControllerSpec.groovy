@@ -13,6 +13,7 @@ import com.unifina.service.CanvasService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
 import com.unifina.service.UserService
+import com.unifina.signalpath.RuntimeRequest
 import grails.converters.JSON
 import grails.orm.HibernateCriteriaBuilder
 import grails.plugin.springsecurity.SpringSecurityService
@@ -166,6 +167,24 @@ class CanvasApiControllerSpec extends Specification {
 		1 * canvasService.reconstruct(canvas1, me) >> { Canvas c, SecUser user -> JSON.parse(c.json) }
 	}
 
+	void "show() supports runtime parameter"() {
+		when:
+		params.id = canvas1.id
+		params.runtime = true
+		request.addHeader("Authorization", "Token $me.apiKey")
+		request.requestURI = "/api/v1/canvases/$params.id"
+		withFilters(action: "show") {
+			controller.show()
+		}
+
+		then:
+		response.status == 200
+		response.json?.size() > 0
+
+		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
+		1 * controller.signalPathService.runtimeRequest(_, false) >> [success:true, json:JSON.parse(canvas1.json)]
+	}
+
 	void "save() creates a new canvas and renders it as json"() {
 		def newCanvasId
 
@@ -287,7 +306,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, false, null)
+		1 * canvasService.start(canvas1, false)
 	}
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
@@ -305,7 +324,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, true, null)
+		1 * canvasService.start(canvas1, true)
 	}
 
 	void "start() must not start a canvas if authorization fails"() {
@@ -420,127 +439,67 @@ class CanvasApiControllerSpec extends Specification {
 		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> result
 	}
 
-	void "request() must authorize and send a runtime request to the canvas"() {
+	void "module() supports runtime parameter"() {
+		def result = JSON.parse(canvas1.json).modules.find {it.hash == 1}
+
+		when:
+		request.addHeader("Authorization", "Token $me.apiKey")
+		params.canvasId = "1"
+		params.moduleId = 1
+		params.dashboard = 2
+		params.runtime = true
+		request.method = "GET"
+		request.requestURI = "/api/v1/canvases/$params.id/modules/$params.moduleId"
+		withFilters(action: "module") {
+			controller.module()
+		}
+
+		then:
+		response.status == 200
+		response.json == result
+		1 * controller.signalPathService.runtimeRequest(_, false) >> [success:true, json:result]
+	}
+
+	void "runtimeRequest() must build and send a runtime request to the canvas"() {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
 		request.addHeader("Authorization", "Token $me.apiKey")
-		params.id = "1"
+		params.id = canvas1.id
+		params.path = canvas1.id
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/request"
-		withFilters(action: "request") {
-			controller.request()
+		withFilters(action: "runtimeRequest") {
+			controller.runtimeRequest()
 		}
 
 		then:
 		response.status == 200
 		response.json == runtimeResponse
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
-		1 * controller.signalPathService.runtimeRequest([bar: 'foo'], canvas1, null, me, false) >> runtimeResponse
-		0 * controller.signalPathService.runtimeRequest(_, _, _, _, _)
+		1 * controller.signalPathService.buildRuntimeRequest([bar: 'foo'], "canvases/$canvas1.id", me)
+		1 * controller.signalPathService.runtimeRequest(_, false) >> runtimeResponse
 	}
 
-	void "request() must not send a runtime request to the canvas if authorization fails"() {
-		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
-		params.id = "1"
-		request.JSON = [bar: 'foo']
-		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.id/request"
-		withFilters(action: "request") {
-			controller.request()
-		}
-
-		then:
-		thrown(NotPermittedException)
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> { throw new NotPermittedException("mock")}
-	}
-
-	void "request() must force a local request if params.local is true"() {
+	void "runtimeRequest() must force a local request if params.local is true"() {
 		def runtimeResponse = [foo: 'bar']
 
 		when:
 		request.addHeader("Authorization", "Token $me.apiKey")
-		params.id = "1"
+		params.id = canvas1.id
+		params.path = canvas1.id
 		params.local = "true"
 		request.JSON = [bar: 'foo']
 		request.method = "POST"
 		request.requestURI = "/api/v1/canvases/$params.id/request"
-		withFilters(action: "request") {
-			controller.request()
+		withFilters(action: "runtimeRequest") {
+			controller.runtimeRequest()
 		}
 
 		then:
 		response.status == 200
 		response.json == runtimeResponse
-		1 * canvasService.authorizedGetById("1", me, Permission.Operation.READ) >> canvas1
-		1 * controller.signalPathService.runtimeRequest([bar: 'foo'], canvas1, null, me, true) >> runtimeResponse
+		1 * controller.signalPathService.runtimeRequest(_, true) >> runtimeResponse
 	}
 
-	void "moduleRequest() must authorize and send a runtime request to the module"() {
-		def module = JSON.parse(canvas1.json).modules.find {it.hash == 1}
-		def runtimeResponse = [foo: 'bar']
-
-		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
-		params.canvasId = "1"
-		params.moduleId = 1
-		params.dashboard = 2
-		request.JSON = [bar: 'foo']
-		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.canvasId/modules/$params.moduleId/request"
-		withFilters(action: "moduleRequest") {
-			controller.moduleRequest()
-		}
-
-		then:
-		response.status == 200
-		response.json == runtimeResponse
-		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> module
-		1 * controller.signalPathService.runtimeRequest([bar: 'foo'], canvas1, 1, me, false) >> runtimeResponse
-	}
-
-	void "moduleRequest() must not send a runtime request to the canvas if authorization fails"() {
-		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
-		params.canvasId = "1"
-		params.moduleId = 1
-		params.dashboard = 2
-		request.JSON = [bar: 'foo']
-		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.canvasId/modules/$params.moduleId/request"
-		withFilters(action: "moduleRequest") {
-			controller.moduleRequest()
-		}
-
-		then:
-		thrown(NotPermittedException)
-		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> {throw new NotPermittedException("mock")}
-		0 * controller.signalPathService._
-	}
-
-	void "moduleRequest() must send a local request if params.local is true"() {
-		def module = JSON.parse(canvas1.json).modules.find {it.hash == 1}
-		def runtimeResponse = [foo: 'bar']
-
-		when:
-		request.addHeader("Authorization", "Token $me.apiKey")
-		params.canvasId = "1"
-		params.moduleId = 1
-		params.dashboard = 2
-		params.local = "true"
-		request.JSON = [bar: 'foo']
-		request.method = "POST"
-		request.requestURI = "/api/v1/canvases/$params.canvasId/modules/$params.moduleId/request"
-		withFilters(action: "moduleRequest") {
-			controller.moduleRequest()
-		}
-
-		then:
-		response.status == 200
-		response.json == runtimeResponse
-		1 * canvasService.authorizedGetModuleOnCanvas("1", 1, 2, me, Permission.Operation.READ) >> module
-		1 * controller.signalPathService.runtimeRequest([bar: 'foo'], canvas1, 1, me, true) >> runtimeResponse
-	}
 }

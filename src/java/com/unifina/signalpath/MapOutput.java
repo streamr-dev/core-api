@@ -1,8 +1,6 @@
 package com.unifina.signalpath;
 
-import org.apache.commons.collections.map.UnmodifiableMap;
-import org.apache.commons.collections.map.UnmodifiableSortedMap;
-
+import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -22,9 +20,9 @@ public class MapOutput extends Output<Map> {
 		//   for now, we only have T \in {Object, Map}
 		//   if in future we need e.g. ConcurrentMapInput/Output, this needs to be changed, too
 		if (value instanceof SortedMap) {
-			value = UnmodifiableSortedMap.decorate((SortedMap) value);
-		} else if (value instanceof Map) {
-			value = UnmodifiableMap.decorate(value);
+			value = Collections.unmodifiableSortedMap((SortedMap) value);
+		} else {
+			value = Collections.unmodifiableMap(value);
 		}
 
 		super.send(value);

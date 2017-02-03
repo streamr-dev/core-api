@@ -30,12 +30,15 @@ public class Heatmap extends ModuleWithUI {
 		value.canToggleDrivingInput = false;
 		value.canHaveInitialValue = false;
 		value.canBeFeedback = false;
+
+		resendAll = false;
+		resendLast = 0;
 	}
 	
 	@Override
 	public void sendOutput() {
-		if (globals.getUiChannel()!=null) {
-			globals.getUiChannel().push(new HeatPoint(latitude.getValue(), longitude.getValue(), value.getValue()), uiChannelId);
+		if (getGlobals().getUiChannel()!=null) {
+			getGlobals().getUiChannel().push(new HeatPoint(latitude.getValue(), longitude.getValue(), value.getValue()), uiChannelId);
 		}
 	}
 

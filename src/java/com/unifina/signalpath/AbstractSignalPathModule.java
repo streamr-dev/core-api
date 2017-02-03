@@ -1,5 +1,16 @@
 package com.unifina.signalpath;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
+import com.unifina.datasource.IDayListener;
+import com.unifina.domain.signalpath.Module;
+import com.unifina.service.SerializationService;
+import com.unifina.utils.Globals;
+import com.unifina.utils.HibernateHelper;
+import com.unifina.utils.MapTraversal;
+import org.apache.log4j.Logger;
+import org.codehaus.groovy.runtime.InvokerHelper;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
@@ -9,27 +20,16 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import com.unifina.utils.HibernateHelper;
-import org.apache.log4j.Logger;
-
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
-import com.unifina.datasource.IDayListener;
-import com.unifina.domain.signalpath.Module;
-import com.unifina.utils.Globals;
-import com.unifina.utils.MapTraversal;
-
 /**
  * The usual init procedure:
  * - Construct the module
  * - Call module.init()
+ * - Call module.setGlobals(globals)
  * - Call module.setName()
  * - Call module.setConfiguration()
- * - Call module.connectionsReady()
+ * - Call module.connectionsReady() -> module.initialize()
  */
 public abstract class AbstractSignalPathModule implements IEventRecipient, IDayListener, Serializable {
-
-	private Map<String, Object> json;
 
 	protected SignalPath parentSignalPath;
 	transient private SignalPath cachedTopParentSignalPath;
@@ -59,10 +59,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	// Sets if the module supports state clearing. If canClearState is false, calling clear() does nothing.
 	protected boolean canClearState = true;
 
-	protected String name;
+	private String name;
+	private String displayName;
 	protected Integer hash;
+	protected Map<String, Object> layout;
 
-	transient public Globals globals;
+	private transient Globals globals;
 
 	private boolean initialized;
 
@@ -301,7 +303,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		// Only report the initialization of this module once
 		if (!initialized) {
-			globals.onModuleInitialized(this);
+			getGlobals().onModuleInitialized(this);
 			initialized = true;
 		}
 	}
@@ -398,41 +400,66 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	@Override
 	public String toString() {
-		return name;
+		return getName();
 	}
 
+	/**
+	 * Writes this module's configuration to a Map.
+     */
 	@SuppressWarnings("rawtypes")
 	public Map<String, Object> getConfiguration() {
-		Map<String, Object> map = (json != null ? json : new HashMap<String, Object>());
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.putAll(getIOConfiguration());
 
-		List<Map> params = new ArrayList<Map>();
-		List<Map> ins = new ArrayList<Map>();
-		List<Map> outs = new ArrayList<Map>();
-		for (Input i : getInputs()) {
-			if (i instanceof Parameter) {
-				params.add(i.getConfiguration());
-			} else {
-				ins.add(i.getConfiguration());
-			}
+		if (getDomainObject() != null) {
+			map.put("id", getDomainObject().getId());
+			map.put("jsModule", getDomainObject().getJsModule());
+			map.put("type", getDomainObject().getType());
 		}
-
-		for (Output o : getOutputs()) {
-			outs.add(o.getConfiguration());
-		}
-
-		map.put("params", params);
-		map.put("inputs", ins);
-		map.put("outputs", outs);
 
 		map.put("name", name);
-
 		map.put("canClearState", canClearState);
+		map.put("canRefresh", canRefresh);
 
-		if (canRefresh) {
-			map.put("canRefresh", canRefresh);
+		// Avoid writing null keys for efficiency
+		if (hash != null) {
+			map.put("hash", hash);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (layout != null) {
+			map.put("layout", layout);
 		}
 
 		return map;
+	}
+
+	/**
+	 * Reads this module's configuration from a Map.
+     */
+	private void setConfiguration(Map<String, Object> config) {
+		// Only load the domain object from config if it's unset.
+		if (config.containsKey("id") && getDomainObject() == null) {
+			// Module.load(id) may return an uninitialized Hibernate proxy. Watch out.
+			Module domain = (Module) InvokerHelper.invokeMethod(Module.class, "load", MapTraversal.getLong(config, "id"));
+			setDomainObject(domain);
+		}
+
+		if (config.containsKey("name")) {
+			name = MapTraversal.getString(config, "name");
+		}
+		if (config.containsKey("hash")) {
+			hash = MapTraversal.getInt(config, "hash");
+		}
+		// skip canClearState: read-only
+		// skip canRefresh: read-only
+		if (config.containsKey("displayName")) {
+			displayName = MapTraversal.getString(config, "displayName");
+		}
+		if (config.containsKey("layout")) {
+			layout = MapTraversal.getMap(config, "layout");
+		}
 	}
 
 	/**
@@ -462,7 +489,39 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	}
 
+	/**
+	 * Writes configuration for inputs and outputs to a Map.
+	 */
+	private Map<String, Object> getIOConfiguration() {
+		Map<String, Object> map = new LinkedHashMap<>();
 
+		List<Map> params = new ArrayList<>();
+		List<Map> ins = new ArrayList<>();
+		List<Map> outs = new ArrayList<>();
+		for (Input i : getInputs()) {
+			if (i instanceof Parameter) {
+				params.add(i.getConfiguration());
+			} else {
+				ins.add(i.getConfiguration());
+			}
+		}
+
+		for (Output o : getOutputs()) {
+			outs.add(o.getConfiguration());
+		}
+
+		map.put("params", params);
+		map.put("inputs", ins);
+		map.put("outputs", outs);
+
+		return map;
+	}
+
+	/**
+	 * Reads configuration for inputs and outputs from the given Map.
+	 * @param config
+	 * @param ignoreNotFound
+     */
 	private void setIOConfiguration(Map<String, Object> config, boolean ignoreNotFound) {
 		// Set IO config automatically
 		if (config.get("params") != null) {
@@ -508,25 +567,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}
 	}
 
-	private void setConfiguration(Map<String, Object> config) {
-		json = config;
-
-		if (config.containsKey("hash")) {
-			hash = Integer.parseInt(config.get("hash").toString());
-		}
-
-		// Embedded modules inherit the hash-id of their parents
-		if (parentSignalPath != null && parentSignalPath.getHash() != null) {
-			hash = parentSignalPath.getHash();
-		}
-	}
-
 	public Module getDomainObject() {
 		return domainObject;
 	}
 
 	public void setDomainObject(Module domainObject) {
 		this.domainObject = domainObject;
+		if (name==null) {
+			setName(domainObject.getName());
+		}
 	}
 
 	public Integer getHash() {
@@ -586,18 +635,20 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 *
 	 * @param request The RuntimeRequest, which should contain at least the key "type", holding a String and indicating the type of request
 	 */
-	public Future<RuntimeResponse> onRequest(final RuntimeRequest request) {
+	public Future<RuntimeResponse> onRequest(final RuntimeRequest request, RuntimeRequest.PathReader path) {
 		// Add event to message queue, don't do it right away 
-		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, globals.isRealtime() ? request.getTimestamp() : globals.time, this);
+		FeedEvent<RuntimeRequest, AbstractSignalPathModule> fe = new FeedEvent<>(request, getGlobals().isRealtime() ? request.getTimestamp() : getGlobals().time, this);
 
 		final RuntimeResponse response = new RuntimeResponse();
 		response.put("request", request);
+
+		final AbstractSignalPathModule recipient = resolveRuntimeRequestRecipient(request, path);
 
 		FutureTask<RuntimeResponse> future = new FutureTask<>(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					handleRequest(request, response);
+					recipient.handleRequest(request, response);
 				} catch (AccessControlException e) {
 					String error = "Unauthenticated request! Type: " + request.getType() + ", Msg: " + e.getMessage();
 					log.error(error);
@@ -608,8 +659,15 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}, response);
 		request.setFuture(future);
 
-		globals.getDataSource().getEventQueue().enqueue(fe);
+		getGlobals().getDataSource().getEventQueue().enqueue(fe);
 		return future;
+	}
+
+	/**
+	 * Can be overridden to dig RuntimeRequest recipients from within this module. The default implementation returns "this".
+     */
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
+		return this;
 	}
 
 	@Override
@@ -636,8 +694,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 * @param request
 	 */
 	protected void handleRequest(RuntimeRequest request, RuntimeResponse response) {
-		// By default all modules support runtime parameter changes
-		if (request.getType().equals("paramChange")) {
+		// By default all modules support runtime parameter changes, ping requests and json requests
+		if (request.getType().equals("ping")) {
+			response.setSuccess(true);
+		}
+		else if (request.getType().equals("paramChange")) {
 
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
@@ -651,8 +712,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 				if (isSendPending()) {
 					if (uiEventPropagator == null) {
-						uiEventPropagator = new Propagator();
-						uiEventPropagator.addModule(this);
+						uiEventPropagator = new Propagator(this);
 					}
 					trySendOutput();
 					if (wasReady) {
@@ -663,8 +723,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				response.setSuccess(true);
 			} catch (Exception e) {
 				log.error("Error making runtime parameter change!", e);
-				globals.getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
+				getGlobals().getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
+		}
+		else if (request.getType().equals("json")) {
+			response.put("json", this.getConfiguration());
+			response.setSuccess(true);
 		}
 	}
 
@@ -709,6 +773,26 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	/**
 	 * Override to handle steps after deserialization
 	 */
-	public void afterDeserialization() {
+	public void afterDeserialization(SerializationService serializationService) {
+	}
+
+	public Globals getGlobals() {
+		return globals;
+	}
+
+	public void setGlobals(Globals globals) {
+		this.globals = globals;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getEffectiveName() {
+		return getDisplayName() != null ? getDisplayName() : getName();
 	}
 }

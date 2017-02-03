@@ -14,8 +14,9 @@
 		<link rel="import" href="${createLink(uri:"/webcomponents/index.html?lightDOM=true&noDependencies=true", plugin:"unifina-core")}">
 
 		<r:script>
-			var dashboard
 			$(function() {
+				var dashboard
+				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
 				var sidebar
 				var nameEditor = new StreamrNameEditor({
 					el: $(".name-editor"),
@@ -29,9 +30,12 @@
 					document.title = dbJson.name
 					nameEditor.setName(dbJson.name)
 					dashboard = new Dashboard(dbJson)
+					// urlRoot needs to be set for saving to work
+					dashboard.urlRoot = baseUrl + "api/v1/dashboards/"
 					var dashboardView = new DashboardView({
 						model: dashboard,
-						el: $("#dashboard-view")
+						el: $("#dashboard-view"),
+						baseUrl: baseUrl
 					})
 					dashboard.on("saved", function(name) {
 						nameEditor.setName(name)
@@ -41,8 +45,6 @@
 						Streamr.showError(itemTitle ? "<strong>"+itemTitle+"</strong>:<br>"+error : error)
 					})
 
-					dashboard.urlRoot = "${createLink(uri:'/api/v1/dashboards/', absolute:true)}"
-
 					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false, sort:'dateCreated', order:'desc'}, function(canvases) {
 						sidebar = new SidebarView({
 							edit: ${params.edit ? "true" : "undefined"},
@@ -50,7 +52,7 @@
 							canvases: canvases,
 							el: $("#sidebar-view"),
 							menuToggle: $("#main-menu-toggle"),
-							baseUrl: '${ createLink(uri: "/", absolute:true) }'
+							baseUrl: baseUrl
 						})
 						checkPermissions()
 					})

@@ -72,7 +72,7 @@ public class TimeOfDay extends AbstractSignalPathModule implements ITimeListener
 
 	private void initUtilIfNeeded() {
 		if (util == null) {
-			util = new TimeOfDayUtil(lastStartTime, lastEndTime, globals.getUserTimeZone());
+			util = new TimeOfDayUtil(lastStartTime, lastEndTime, getGlobals().getUserTimeZone());
 			if (lastBaseDay != null) {
 				util.setBaseDate(lastBaseDay);
 			}

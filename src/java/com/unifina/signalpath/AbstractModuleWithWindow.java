@@ -81,7 +81,7 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 		if (selectedWindowType == WindowType.EVENTS) {
 			getWindowForKey(key).add(item);
 		} else {
-			((TimeWindow) getWindowForKey(key)).add(item, globals.time);
+			((TimeWindow) getWindowForKey(key)).add(item, getGlobals().time);
 		}
 	}
 
@@ -92,6 +92,13 @@ public abstract class AbstractModuleWithWindow<T> extends AbstractSignalPathModu
 			windowByKey.put(key, window);
 		}
 		return window;
+	}
+
+	/**
+	 * Get the window for one-dimensional case
+	 */
+	public AbstractWindow<T> get1DWindow() {
+		return getWindowForKey(0);
 	}
 
 	@Override

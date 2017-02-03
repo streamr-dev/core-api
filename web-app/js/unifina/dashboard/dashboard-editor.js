@@ -162,6 +162,10 @@ var DashboardItemView = Backbone.View.extend({
 		"click .make-large-btn" : "changeSize"
 	},
 
+	initialize: function(options) {
+		this.baseUrl = options.baseUrl
+	},
+
 	render: function() {
 		var _this = this
 		
@@ -183,8 +187,16 @@ var DashboardItemView = Backbone.View.extend({
 		}
 		if (webcomponent !== undefined) {
 			var templateName = "#" + webcomponent + "-template"
-			var template = _.template($(templateName).html(), {variable: 'item'})
-			this.$el.find(".widget-content").append(template(this.model.toJSON()))
+			var template = _.template($(templateName).html())
+			// Can't use the dashboard item id in the url because it might be unsaved
+			var url = this.baseUrl
+				+ 'api/v1/'
+				+ 'dashboards/' + this.model.get('dashboard')
+				+ '/canvases/' + this.model.get('canvas')
+				+ '/modules/' + this.model.get('module')
+			this.$el.find(".widget-content").append(template({
+				url: url
+			}))
 		} else {
 			throw "No webcomponent defined for uiChannel "+this.model.get("uiChannel").id+"!"
 		}
@@ -457,6 +469,15 @@ var DashboardView = Backbone.View.extend({
 
 	initialize: function(options) {
 		var _this = this
+
+		var requiredOptions = ['baseUrl']
+
+		requiredOptions.forEach(function(requiredOption) {
+			if (options[requiredOption] === undefined)
+				throw "Required option is missing: "+requiredOption
+		})
+		this.baseUrl = options.baseUrl
+
 		this.dashboardItemViews = []
 		// Avoid needing jquery ui in tests
 		if (this.$el.sortable) {
@@ -499,7 +520,8 @@ var DashboardView = Backbone.View.extend({
 
 	addDashboardItem: function(model) {
 		var DIView = new DashboardItemView({
-			model: model
+			model: model,
+			baseUrl: this.baseUrl
 		})
 		this.$el.append(DIView.render().el)
 		this.dashboardItemViews.push(DIView)

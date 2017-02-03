@@ -1,17 +1,13 @@
 package com.unifina.security;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FilePermission;
 import java.lang.reflect.ReflectPermission;
-import java.security.AllPermission;
-import java.security.CodeSource;
-import java.security.PermissionCollection;
-import java.security.Permissions;
-import java.security.Policy;
-import java.security.ProtectionDomain;
+import java.security.*;
+import java.util.Enumeration;
 import java.util.PropertyPermission;
-
-import org.apache.log4j.Logger;
 
 public class MyPolicy extends Policy {
 
@@ -24,8 +20,7 @@ public class MyPolicy extends Policy {
 	public MyPolicy() {
 		log.info("Installing security policy.");
 		
-		all = new Permissions();
-		all.add(new AllPermission());
+		all = new RMICompatibleAllowingPermissionCollection();
 
 		java = new Permissions();
 		java.add(new RuntimePermission("accessDeclaredMembers"));
@@ -64,6 +59,45 @@ public class MyPolicy extends Policy {
 	@Override
 	public PermissionCollection getPermissions(ProtectionDomain domain) {
 		return getPermissions(domain.getCodeSource());
+	}
+
+	/**
+	 * PermissionCollection that allows everything. Basically like adding AllPermissions to a normal
+	 * java.security.Permissions collection, but this one works around a stupidity in Sun Java.
+	 *
+	 * More specifically the problem is in sun.rmi.server.LoaderHandler, which forcefully tries to add
+	 * a few Permission objects to a PermissionCollection obtained for CodeSource null, without checking
+	 * if it has AllPermissions or whether the PermissionCollection is read only.
+	 *
+	 * This will lead to failure eg. when trying to use JMX monitoring on the JVM process.
+	 */
+	class RMICompatibleAllowingPermissionCollection extends PermissionCollection {
+
+		@Override
+		public void add(Permission permission) {
+			// Do nothing, since this collection already contains all possible permissions
+		}
+
+		@Override
+		public boolean implies(Permission permission) {
+			// Always allow
+			return true;
+		}
+
+		@Override
+		public Enumeration<Permission> elements() {
+			return new Enumeration<Permission>() {
+				@Override
+				public boolean hasMoreElements() {
+					return false;
+				}
+
+				@Override
+				public Permission nextElement() {
+					return null;
+				}
+			};
+		}
 	}
 	
 }

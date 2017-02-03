@@ -26,13 +26,13 @@ class SerializationService {
 
 	AbstractSignalPathModule deserialize(byte[] data) throws SerializationException {
 		AbstractSignalPathModule module = (AbstractSignalPathModule) serializer.deserializeFromByteArray(data)
-		module.afterDeserialization()
+		module.afterDeserialization(this)
 		return module
 	}
 
 	AbstractSignalPathModule deserialize(byte[] data, ClassLoader classLoader) throws SerializationException {
 		AbstractSignalPathModule module = (AbstractSignalPathModule) new SerializerImpl(classLoader).deserializeFromByteArray(data)
-		module.afterDeserialization()
+		module.afterDeserialization(this)
 		return module
 	}
 

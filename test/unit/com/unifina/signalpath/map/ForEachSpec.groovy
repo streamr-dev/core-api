@@ -17,9 +17,10 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
+@TestMixin(ControllerUnitTestMixin)
 @Mock([Canvas, Module, SecUser, ModuleService, SpringSecurityService, SignalPathService, CanvasService, PermissionService])
 class ForEachSpec extends Specification {
 
@@ -116,7 +117,7 @@ class ForEachSpec extends Specification {
 		def canvas = canvasService.createNew(command, user)
 
 		when:
-		module.getInput("canvas").receive(canvas)
+		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		then:
@@ -128,7 +129,7 @@ class ForEachSpec extends Specification {
 		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
 		def canvas = canvasService.createNew(command, user)
 
-		module.getInput("canvas").receive(canvas)
+		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		when:
@@ -164,7 +165,7 @@ class ForEachSpec extends Specification {
 		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
 		def canvas = canvasService.createNew(command, user)
 
-		module.getInput("canvas").receive(canvas)
+		module.getInput("canvas").receive(canvas.id)
 		module.configure(module.getConfiguration())
 
 		when:

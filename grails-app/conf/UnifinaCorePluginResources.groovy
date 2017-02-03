@@ -27,6 +27,9 @@ modules = {
 		resource url:[dir:'js/bootstrap-3.2.0-dist/js', file:'bootstrap.js', plugin: 'unifina-core']
 		resource url:[dir:'js/bootstrap-3.2.0-dist/css', file:'bootstrap.min.css', plugin: 'unifina-core']
 	}
+	'font-awesome' {
+		resource url: "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+	}
 	'bootstrap-docs' {
 		dependsOn "bootstrap"
 		resource url:[dir:'js/bootstrap-3.2.0-assets/css', file:'docs.min.css', plugin: 'unifina-core']
@@ -122,6 +125,7 @@ modules = {
 		resource url:[dir:'js/leaflet', file:'leaflet-src.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet', file:'leaflet_canvas_layer.js', plugin: 'unifina-core']
 		resource url:[dir:'js/leaflet', file:'leaflet.css', plugin: 'unifina-core']
+		resource url:[dir:'js/Leaflet.RotatedMarker', file:'leaflet.rotatedMarker.js', plugin: 'unifina-core']
 	}
 	dropzone {
 		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
@@ -234,7 +238,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-heatmap', file:'streamr-heatmap.js', plugin: 'unifina-core']
 	}
 	'streamr-map' {
-		dependsOn 'jquery, leaflet'
+		dependsOn 'jquery, leaflet, font-awesome'
 		resource url:[dir:'css/signalPath/widgets/', file:'streamr-map.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/streamr-map', file:'streamr-map.js', plugin: 'unifina-core']
 	}
@@ -284,6 +288,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'uiChannelModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
@@ -309,6 +314,10 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/generic', file:'subCanvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'canvasModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'forEachModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'exportCSVModule.js', plugin: 'unifina-core']
 	}
 	'signalpath-theme' {
 		dependsOn 'signalpath-core'
@@ -316,7 +325,7 @@ modules = {
 		resource url:[dir:'css/signalPath/themes/light', file:'light.js', plugin: 'unifina-core']
 	}
 	'main-theme' {
-		dependsOn 'bootstrap'
+		dependsOn 'bootstrap, font-awesome'
 		resource url: "https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin", attrs: [type: "css"]
 		resource url:[dir:'css/compiled-less', file:'main.css', plugin: 'unifina-core']
 	}

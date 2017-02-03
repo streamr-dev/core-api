@@ -2,9 +2,13 @@ package com.unifina.signalpath.map;
 
 import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
+import com.unifina.service.CanvasService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
+import com.unifina.utils.Globals;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class ForEach extends AbstractSignalPathModule {
@@ -14,10 +18,11 @@ public class ForEach extends AbstractSignalPathModule {
 	private StringOutput keyOut = new StringOutput(this, "key");
 	private MapOutput map = new MapOutput(this, "map");
 
-	private Map signalPathMap;
 	private Map<String, SubSignalPath> keyToSignalPath = new HashMap<>();
 	private Map<String, Map<String, Object>> cachedOutputValuesByKey = new HashMap<>();
 	private List<Output> outputsToPropagate = new ArrayList<>();
+	private List<Input> stolenInputs = new ArrayList<>();
+	private Set<Parameter> exportedUnconnectedParameters = new HashSet<>();
 	private final Set<Input> triggeredInputs = new HashSet<>();
 
 	public ForEach() {
@@ -27,19 +32,27 @@ public class ForEach extends AbstractSignalPathModule {
 	}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+		config.put("canvasKeys", keyToSignalPath.keySet());
+		return config;
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
 		// Load canvas
-		Canvas canvas = signalPathParameter.getValue();
+		Canvas canvas = signalPathParameter.getCanvas();
 		if (canvas == null) {
 			return;
 		}
 
 		// Construct temporary signal path so that endpoints can be analyzed
-		signalPathMap = (Map) JSON.parse(canvas.getJson());
-		SignalPathService signalPathService = globals.getBean(SignalPathService.class);
-		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, globals, false);
+		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
+		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
+		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), false);
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = tempSignalPath.getExportedInputs();
@@ -52,14 +65,34 @@ public class ForEach extends AbstractSignalPathModule {
 		for (Input input : exportedInputs) {
 			input.getOwner().removeInput(input);
 			input.setOwner(this);
+			// Ensure variadic endpoints are imported as normal endpoints
+			input.setJsClass(null);
+			// Reset id for stolen endpoint to avoid clashes
+			input.regenerateId();
+			input.disconnect();
 			addInput(input);
 			input.addProxiedInput(new InputTriggerTracker(this, triggeredInputs, input));
+			stolenInputs.add(input);
 		}
 		for (Output output : exportedOutputs) {
 			output.getOwner().removeOutput(output);
 			output.setOwner(this);
+			output.setJsClass(null); // Ensure variadic endpoints are imported as normal endpoints
+			// Reset id for stolen endpoint to avoid clashes
+			output.regenerateId();
+			output.disconnect();
 			addOutput(output);
 			outputsToPropagate.add(output);
+		}
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		for (Input input : stolenInputs) {
+			if (input instanceof Parameter && !input.isConnected()) {
+				exportedUnconnectedParameters.add((Parameter) input);
+			}
 		}
 	}
 
@@ -70,7 +103,7 @@ public class ForEach extends AbstractSignalPathModule {
 		// Instantiate a new sub-canvas if not yet instantiated for received key
 		String currentKey = key.getValue();
 		if (!keyToSignalPath.containsKey(currentKey)) {
-			SubSignalPath subSignalPath = makeSubSignalPath(this, currentKey);
+			SubSignalPath subSignalPath = makeSubSignalPath(currentKey);
 			subSignalPath.proxyToOutputs(outputsToPropagate);
 			cachedOutputValuesByKey.put(currentKey, instantiateCacheUpdateListeners(subSignalPath));
 			keyToSignalPath.put(currentKey, subSignalPath);
@@ -101,12 +134,40 @@ public class ForEach extends AbstractSignalPathModule {
 		cachedOutputValuesByKey = new HashMap<>();
 	}
 
-	private static SubSignalPath makeSubSignalPath(ForEach parent, String key) {
-		SignalPathService signalPathService = parent.globals.getBean(SignalPathService.class);
-		SignalPath signalPath = signalPathService.mapToSignalPath(parent.signalPathMap, false, parent.globals, false);
-		signalPath.setParentSignalPath(parent.getParentSignalPath());
+	@Override
+	public void setGlobals(Globals globals) {
+		super.setGlobals(globals);
 
-		Propagator propagator = new Propagator(signalPath.getExportedInputs(), parent);
+		// Also set on sub-SignalPaths
+		for (String key : keyToSignalPath.keySet()) {
+			SubSignalPath ssp = keyToSignalPath.get(key);
+			ssp.getSignalPath().setGlobals(getGlobals());
+		}
+	}
+
+	private SubSignalPath makeSubSignalPath(String key) {
+		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
+		CanvasService canvasService = getGlobals().getBean(CanvasService.class);
+
+		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
+		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
+		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
+		canvasService.resetUiChannels(signalPathMap);
+		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
+		signalPath.setName(signalPath.getName() + " (" + key + ")");
+
+		// Copy parameter default values
+		for (Parameter p : exportedUnconnectedParameters) {
+			Parameter p2 = (Parameter) signalPath.getInput(p.getName());
+			p2.setDefaultValue(p.getValue());
+
+			// Runtime changes are received
+			p.addProxiedInput(p2);
+		}
+
+		signalPath.setParentSignalPath(getParentSignalPath());
+
+		Propagator propagator = new Propagator(signalPath.getExportedInputs());
 
 		signalPath.connectionsReady();
 		return new SubSignalPath(signalPath, propagator, key);
@@ -121,6 +182,26 @@ public class ForEach extends AbstractSignalPathModule {
 			subSignalPath.connectTo(output.getName(), cacheUpdaterInput);
 		}
 		return outputCache;
+	}
+
+	@Override
+	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
+		if (path.isEmpty()) {
+			return super.resolveRuntimeRequestRecipient(request, path);
+		} else {
+			String key = path.readString("keys");
+			// URLDecode twice, see forEachModule.js
+			try {
+				key = URLDecoder.decode(URLDecoder.decode(key, "UTF-8"), "UTF-8");
+			} catch (UnsupportedEncodingException e) {}
+
+			SubSignalPath ssp = keyToSignalPath.get(key);
+			if (ssp == null) {
+				throw new IllegalArgumentException("Subcanvas not found: "+key);
+			} else {
+				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
+			}
+		}
 	}
 
 	/**

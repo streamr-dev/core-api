@@ -54,7 +54,7 @@ class CanvasService {
 
 		canvas.name = newSignalPathMap.name
 		canvas.hasExports = newSignalPathMap.hasExports
-		canvas.json = new JsonBuilder(newSignalPathMap).toString()
+		canvas.json = newSignalPathMap as JSON
 		canvas.state = Canvas.State.STOPPED
 		canvas.adhoc = command.isAdhoc()
 
@@ -65,7 +65,7 @@ class CanvasService {
 		canvas.save(flush: true, failOnError: true)
 	}
 
-	public void start(Canvas canvas, boolean clearSerialization, Map csvOptions = null) {
+	public void start(Canvas canvas, boolean clearSerialization) {
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -75,12 +75,6 @@ class CanvasService {
 		}
 
 		Map signalPathContext = canvas.toMap().settings
-
-		// CSV mode
-		if (csvOptions) {
-			signalPathContext.csv = true
-			signalPathContext.csvOptions = csvOptions
-		}
 
 		try {
 			signalPathService.startLocal(canvas, signalPathContext)
@@ -133,6 +127,8 @@ class CanvasService {
 	 *
 	 * - Permission to the canvas that contains the module
 	 * - Permission to a dashboard that contains the module from that canvas
+	 *
+	 * Deprecated: runtime permission checking now much more comprehensive in SignalPathService
 	 */
 	@CompileStatic
 	Map authorizedGetModuleOnCanvas(String canvasId, Integer moduleId, Long dashboardId, SecUser user, Permission.Operation op) {
@@ -151,6 +147,21 @@ class CanvasService {
 			}
 
 			return moduleMap
+		}
+	}
+
+	@CompileStatic
+	void resetUiChannels(Map signalPathMap) {
+		HashMap<String,String> replacements = [:]
+		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
+			if (replacements.containsKey(element.uiChannelData.id)) {
+				element.uiChannelData.id = replacements[element.uiChannelData.id]
+			}
+			else {
+				String newId = IdGenerator.get()
+				replacements[element.uiChannelData.id] = newId
+				element.uiChannelData.id = newId
+			}
 		}
 	}
 
@@ -183,20 +194,6 @@ class CanvasService {
 		}
 
 		return reconstructFrom(inputSignalPathMap, user)
-	}
-
-	private static void resetUiChannels(Map signalPathMap) {
-		HashMap<String,String> replacements = [:]
-		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
-			if (replacements.containsKey(element.uiChannelData.id)) {
-				element.uiChannelData.id = replacements[element.uiChannelData.id]
-			}
-			else {
-				String newId = IdGenerator.get()
-				replacements[element.uiChannelData.id] = newId
-				element.uiChannelData.id = newId
-			}
-		}
 	}
 
 	/**

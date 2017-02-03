@@ -48,35 +48,35 @@
 </script>
 
 <script id="streamr-label-template" type="text/template">
-    <h1><streamr-label class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-label></h1>
+    <h1><streamr-label class="streamr-widget non-draggable" url="{{url}}"></streamr-label></h1>
 </script>
 
 <script id="streamr-heatmap-template" type="text/template">
-    <streamr-heatmap class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-heatmap>
+    <streamr-heatmap class="streamr-widget non-draggable" url="{{url}}"></streamr-heatmap>
 </script>
 
 <script id="streamr-chart-template" type="text/template">
-    <streamr-chart class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-chart>
+    <streamr-chart class="streamr-widget non-draggable" url="{{url}}"></streamr-chart>
 </script>
 
 <script id="streamr-table-template" type="text/template">
-    <streamr-table class="streamr-widget non-draggable text-left" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-table>
+    <streamr-table class="streamr-widget non-draggable text-left" url="{{url}}"></streamr-table>
 </script>
 
 <script id="streamr-button-template" type="text/template">
-    <streamr-button class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-button>
+    <streamr-button class="streamr-widget non-draggable" url="{{url}}"></streamr-button>
 </script>
 
 <script id="streamr-switcher-template" type="text/template">
-    <streamr-switcher class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-switcher>
+    <streamr-switcher class="streamr-widget non-draggable" url="{{url}}"></streamr-switcher>
 </script>
 
 <script id="streamr-text-field-template" type="text/template">
-    <streamr-text-field class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-text-field>
+    <streamr-text-field class="streamr-widget non-draggable" url="{{url}}"></streamr-text-field>
 </script>
 
 <script id="streamr-map-template" type="text/template">
-    <streamr-map class="streamr-widget non-draggable" canvas="{{ item.canvas }}" module="{{ item.module }}" dashboard="{{ item.dashboard }}" dashboardItem="{{ item.id }}"></streamr-map>
+    <streamr-map class="streamr-widget non-draggable" url="{{url}}"></streamr-map>
 </script>
 
 <script id="titlebar-template" type="text/template">

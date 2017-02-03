@@ -42,10 +42,6 @@ public class SignalPathRunner extends Thread {
 		globals.dataSource = signalPathService.createDataSource(adhoc, globals)
 		globals.realtime = !adhoc
 		globals.init()
-
-		if (globals.signalPathContext.csv) {
-			globals.signalPathContext.speed = 0
-		}
 	}
 
 	public SignalPathRunner(List<Map> signalPathMaps, Globals globals, boolean adhoc = true) {
@@ -60,10 +56,7 @@ public class SignalPathRunner extends Thread {
 
 	public SignalPathRunner(SignalPath signalPath, Globals globals, boolean adhoc = true) {
 		this(globals, adhoc)
-		signalPath.globals = globals
-		for (AbstractSignalPathModule module : signalPath.getModules()) {
-			module.globals = globals
-		}
+		signalPath.setGlobals(globals)
 		signalPaths.add(signalPath)
 	}
 
@@ -83,6 +76,7 @@ public class SignalPathRunner extends Thread {
 
 	public synchronized void setRunning(boolean running) {
 		this.running = running
+		log.debug("setRunning (${getRunnerId()}: $running")
 		this.notify()
 	}
 
@@ -100,8 +94,10 @@ public class SignalPathRunner extends Thread {
 
 	public synchronized void waitRunning(boolean target = true) {
 		int i = 0
-		while (getRunning() != target && i++ < 60)
+		while (getRunning() != target && i++ < 60) {
+			log.debug("Waiting for "+this.getRunnerId()+" to start...")
 			this.wait(500)
+		}
 	}
 
 	@Override
@@ -126,7 +122,7 @@ public class SignalPathRunner extends Thread {
 			}
 		} catch (Throwable e) {
 			e = GrailsUtil.deepSanitize(e)
-			log.error("Error while running SignalPaths!", e)
+			log.error("Error while running SignalPaths: "+signalPaths.collect {it.getCanvas()?.id}, e)
 			reportException = e
 		}
 
@@ -174,7 +170,6 @@ public class SignalPathRunner extends Thread {
 
 	public void abort() {
 		log.info("Aborting SignalPathRunner..")
-		globals.abort = true
 		globals.dataSource?.stopFeed()
 
 		// Will be called in run() before exiting
