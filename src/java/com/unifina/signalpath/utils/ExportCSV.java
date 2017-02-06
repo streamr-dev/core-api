@@ -38,6 +38,7 @@ public class ExportCSV extends ModuleWithUI {
 
 	ExportCSV(Context context) {
 		this.context = context;
+		resendLast = 1;
 	}
 
 	@Override
