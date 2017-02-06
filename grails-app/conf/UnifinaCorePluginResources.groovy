@@ -302,6 +302,8 @@ modules = {
 		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'solidityModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'ethereumContractInput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']

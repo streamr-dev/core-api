@@ -1,14 +1,3 @@
-SignalPath.CustomModuleOptions = {
-	codeMirrorOptions: {
-		lineNumbers: true,
-		matchBrackets: true,
-		mode: "text/x-groovy",
-		theme: "default",
-		viewportMargin: Infinity,
-		gutters: ["CodeMirror-linenumbers", "breakpoints"]
-	}
-};
-
 SignalPath.CustomModule = function(data,canvas,prot) {
 	prot = prot || {};
 	var pub = SignalPath.UIChannelModule(data,canvas,prot)
@@ -78,9 +67,8 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 
 			$(SignalPath).on("started", clearDebug);
 			
-			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
-				value: prot.jsonData.code,
-				mode:  "groovy"
+			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({}, prot.getEditorOptions(), {
+				value: prot.jsonData.code || "\n\n\n\n\n\n\n\n\n\n"
 			}));
 
 			dialog.resizable({
@@ -144,7 +132,19 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			})
 		} else debug.show()
 	}
-	
+
+	prot.getEditorOptions = function() {
+		return {
+			lineNumbers: true,
+			matchBrackets: true,
+			indentUnit: 4,
+			mode: "text/x-groovy",
+			theme: "default",
+			viewportMargin: Infinity,
+			gutters: ["CodeMirror-linenumbers", "breakpoints"]
+		}
+	}
+
 	function createEditCodeButton() {
 		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
 		editButton.click(createCodeWindow);

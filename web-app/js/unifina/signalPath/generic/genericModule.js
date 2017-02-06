@@ -83,6 +83,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			}
 		});
 
+		prot.moduleClosed = false
 		pub.redraw()
 	}
 	pub.updateFrom = updateFrom;

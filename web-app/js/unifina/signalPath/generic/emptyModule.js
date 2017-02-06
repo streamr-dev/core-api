@@ -514,6 +514,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		pub.onClose = oldCloseHandler
 		prot.div.attr('class', classes)
 
+		
 		$prot.trigger('updated', data)
 	}
 	pub.updateFrom = updateFrom;
