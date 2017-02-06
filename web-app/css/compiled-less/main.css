@@ -14787,6 +14787,10 @@ fieldset[disabled] .btn {
   padding: 2px 5px;
   font-size: 12px;
 }
+.paramTable textarea.form-control {
+  height: 90px;
+  width: 200px;
+}
 .paramTable select.form-control {
   padding-top: 1px;
 }
@@ -14907,6 +14911,11 @@ td.output {
   max-width: 100px;
   white-space: pre-wrap;
 }
+.iostate {
+  display: inline-block;
+  padding-left: 4px;
+  font-style: italic;
+}
 .switchContainer {
   display: inline-block;
   position: absolute;
@@ -14957,9 +14966,15 @@ div.output .switchContainer .ioSwitch {
 .endpoint .variadic-plus {
   display: none;
 }
+.option {
+  display: table-row;
+}
 .option .optionTitle {
-  width: 100px;
-  display: inline-block;
+  display: table-cell;
+  padding-right: 0.5em;
+}
+.option .optionValue {
+  display: table-cell;
 }
 ._jsPlumb_endpoint {
   z-index: 10;

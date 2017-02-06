@@ -27,7 +27,7 @@ public class EventTable extends ModuleWithUI {
 
 		PushChannel rc = null;
 
-		if (getGlobals().getUiChannel()!=null && !getGlobals().getSignalPathContext().containsKey("csv")) {
+		if (getGlobals().getUiChannel()!=null) {
 			rc = getGlobals().getUiChannel();
 		}
 		

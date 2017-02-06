@@ -1,35 +1,28 @@
 package com.unifina.signalpath.time
 
-import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-
-import java.text.SimpleDateFormat
-
-import spock.lang.Specification
-
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.Input
 import com.unifina.utils.Globals
+import com.unifina.utils.testutils.ModuleTestHelper
+import spock.lang.Ignore
+import spock.lang.Specification
 
-@TestMixin(GrailsUnitTestMixin)
+import java.text.SimpleDateFormat
+
 class ClockModuleSpec extends Specification {
 
 	Globals globals
 	ClockModule module
 	
     def setup() {
-		initContext([:], new SecUser(timezone:"UTC", username: "username"))
-    }
-
-	private void initContext(Map context, SecUser user = new SecUser(timezone:"UTC", username: "username")) {
-		globals = new Globals(context, grailsApplication, user)
+		globals = new Globals()
+		globals.setUser(new SecUser(timezone:"UTC", username: "username"))
+		globals.init()
 		module = new ClockModule()
 		module.globals = globals
 		module.init()
 		module.connectionsReady()
-	}
-
+    }
 
 	void "clockModule gives the right answer"() {
 		when:
@@ -61,6 +54,37 @@ class ClockModuleSpec extends Specification {
 			.overrideGlobals { globals }
 			.ticks(ticks)
 			.extraIterationsAfterInput(5)
+			.test()
+	}
+
+	void "clockModule gives the right answer when varying time units and rates"() {
+		when:
+		module.getInput("format").receive("HH:mm:ss")
+		Map inputValues = [
+			unit: [null, null, null, "MINUTE"] + (1..496).collect { null },
+			rate: (1..120).collect { null } + [6] + (1..379).collect { null }
+		]
+		Map outputValues = [
+			date:
+				["00:00:00", "00:00:01", "00:00:02", "00:00:03"] +
+					(1..56).collect { "00:00:03" } + ["00:01:00"] +
+					(1..59).collect { "00:01:00" } + ["00:02:00"] +
+					(1..239).collect { "00:02:00" } + ["00:06:00"] +
+					(1..139).collect { "00:06:00" },
+			timestamp:
+				[0d, 1000d, 2000d, 3000d] +
+					(1..56).collect { 3000d } + [60000d] +
+					(1..59).collect { 60000d } + [60000d * 2] +
+					(1..239).collect { 60000d * 2 } + [60000d * 6] +
+					(1..139).collect { 60000d * 6 },
+		]
+		Map everySecondTick = (0..499).collectEntries { Integer v -> [(v): new Date(v * 1000) ]}
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.overrideGlobals { globals }
+			.ticks(everySecondTick)
+			.extraIterationsAfterInput(4)
 			.test()
 	}
 	
@@ -113,10 +137,4 @@ class ClockModuleSpec extends Specification {
 		then: "the time is sent out"
 		module.getOutput("date").getValue() == "2015/01/15 07:32"
 	}
-
-	void "can be instantiated without a user"() {
-		expect:
-			initContext([:], null)
-	}
-	
 }

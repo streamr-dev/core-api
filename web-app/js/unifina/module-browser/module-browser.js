@@ -139,7 +139,8 @@ Module.prototype.renderHelp = function(){
 		var paramNames = []
 		if(moduleData.inputs){
 			$.each(moduleData.inputs, function(i, input){
-				inputNames.push(input.name)
+				inputNames.push(input.displayName || input.name)
+
 			})
 		}
 		if(moduleHelp.inputNames){
@@ -151,7 +152,7 @@ Module.prototype.renderHelp = function(){
 		}
 		if(moduleData.outputs){
 			$.each(moduleData.outputs, function(i, output){
-				outputNames.push(output.name)
+				outputNames.push(output.displayName || output.name)
 			})
 		}
 		if(moduleHelp.outputNames){
@@ -163,7 +164,7 @@ Module.prototype.renderHelp = function(){
 		}
 		if(moduleData.params){
 			$.each(moduleData.params, function(i, param){
-				paramNames.push(param.name)
+				paramNames.push(param.displayName || param.name)
 			})
 		}
 		if(moduleHelp.paramNames){

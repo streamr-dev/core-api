@@ -19,7 +19,6 @@ public abstract class Parameter<T> extends Input<T> {
 	
 	public boolean canBeEmpty = true;
 	private boolean updateOnChange = false;
-	private boolean unconnectable = false;
 	
 	public Parameter(AbstractSignalPathModule owner, String name, T defaultValue, String typeName) {
 		super(owner, name, typeName);
@@ -114,10 +113,6 @@ public abstract class Parameter<T> extends Input<T> {
 		if (updateOnChange) {
 			config.put("updateOnChange", true);
 		}
-
-		if (unconnectable) {
-			config.put("unconnectable", true);
-		}
 		
 		return config;
 	}
@@ -194,13 +189,5 @@ public abstract class Parameter<T> extends Input<T> {
 
 	public void setUpdateOnChange(boolean updateOnChange) {
 		this.updateOnChange = updateOnChange;
-	}
-
-	public boolean isUnconnectable() {
-		return unconnectable;
-	}
-
-	public void setUnconnectable(boolean unconnectable) {
-		this.unconnectable = unconnectable;
 	}
 }

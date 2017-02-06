@@ -2,18 +2,24 @@ package com.unifina.signalpath
 
 import com.unifina.domain.signalpath.Canvas
 
-class SignalPathParameter extends Parameter<Canvas> {
-	
-	public SignalPathParameter(AbstractSignalPathModule owner, String name) {
-		super(owner, name, null, "Canvas");
+class SignalPathParameter extends StringParameter {
+
+	SignalPathParameter(AbstractSignalPathModule owner, String name) {
+		super(owner, name, null)
+		setCanConnect(false)
 	}
-	
-	public Map<String,Object> getConfiguration() {
+
+	Canvas getCanvas() {
+		return Canvas.get(getValue())
+	}
+
+	@Override
+	Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration()
 		
 		if (getValue() != null) {
-			config.put("value", getValue().getId());
-			config.put("defaultValue", getValue().getId());
+			config.put("value", getValue())
+			config.put("defaultValue", getValue())
 		}
 
 		def permissionService = owner.globals.grailsApplication.mainContext.getBean("permissionService")
@@ -24,6 +30,8 @@ class SignalPathParameter extends Parameter<Canvas> {
 				property 'name', 'name'
 			}
 			eq("hasExports", true)
+			eq("adhoc", false)
+			order("lastUpdated", "desc")
 		}
 
 		List possibleValues = signalPaths.collect {[value:it[0], name:it[1]]}
@@ -35,14 +43,4 @@ class SignalPathParameter extends Parameter<Canvas> {
 
 		return config
 	}
-
-	@Override
-	Canvas parseValue(String s) {
-		try {
-			return Canvas.get(s);
-		} catch (NumberFormatException e) {
-			return null
-		}
-	}
-	
 }

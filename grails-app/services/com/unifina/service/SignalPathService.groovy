@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.api.CanvasCommunicationException
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
@@ -230,7 +231,9 @@ class SignalPathService {
 		// Wait for runner to be in running state
 		runner.waitRunning(true)
 		if (!runner.getRunning()) {
-			log.error("Timed out while waiting for runner $runnerId to start!")
+			runner.abort()
+			def msg = "Timed out while waiting for canvas $canvas.id to start."
+			throw new CanvasCommunicationException(msg)
 		}
 	}
 
@@ -369,7 +372,7 @@ class SignalPathService {
 					
 					try {
 						RuntimeResponse resp = future.get(30, TimeUnit.SECONDS)
-						log.info("runtimeRequest: responding with $resp")
+						log.debug("runtimeRequest: responding with $resp")
 						return resp
 					} catch (TimeoutException e) {
 						throw new CanvasUnreachableException("Timed out while waiting for response.")

@@ -26,11 +26,17 @@ public class ForEachItem extends AbstractSignalPathModule {
 	}
 
 	@Override
+	public void init() {
+		addInput(signalPathParameter);
+		addInput(keepState);
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
 		// Load canvas
-		Canvas canvas = signalPathParameter.getValue();
+		Canvas canvas = signalPathParameter.getCanvas();
 		if (canvas == null) {
 			return;
 		}
@@ -59,7 +65,7 @@ public class ForEachItem extends AbstractSignalPathModule {
 			addOutput(output);
 		}
 
-		subCanvasPropagator = new Propagator(exportedInputs, this);
+		subCanvasPropagator = new Propagator(exportedInputs);
 	}
 
 	@Override

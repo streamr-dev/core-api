@@ -8,8 +8,7 @@ SignalPath.CanvasModule = function(data,canvas,prot) {
         var button = $(canvasSelectorTemplate)
 
         button.click(function() {
-            var baseUrl = pub.getURL()
-            prot.loadSubCanvas(runtimeJson, baseUrl)
+            prot.loadSubCanvas(pub.getURL())
         })
 
         return button
