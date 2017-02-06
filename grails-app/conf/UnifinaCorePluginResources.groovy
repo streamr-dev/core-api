@@ -288,6 +288,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'IOSwitch.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Endpoint.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Input.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicContext.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicInput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']

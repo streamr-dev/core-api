@@ -13,13 +13,14 @@ import java.util.Map;
 
 public class VariadicEventTable extends ModuleWithUI {
 
-	private VariadicInput<Object> ins = new VariadicInput<>(this, new EventTableInputInstantiator());
+	private final VariadicInput<Object> ins = new VariadicInput<>("in", this, new EventTableInputInstantiator());
 
-	int maxRows = 20;
+	private int maxRows = 20;
 	private boolean showOnlyNewValues = false;
 
 	@Override
 	public void init() {
+		addVariadic(ins);
 	}
 
 	public VariadicEventTable() {
@@ -77,15 +78,6 @@ public class VariadicEventTable extends ModuleWithUI {
 		return true;
 	}
 
-	@Override
-	public Input getInput(String name) {
-		Input input = super.getInput(name);
-		if (input == null) {
-			input = ins.addEndpoint(name);
-		}
-		return input;
-	}
-
 	private Map<String, Object> getHeaderDefinition() {
 		// Table config
 		Map<String, Object> headerDef = new HashMap<>();
@@ -122,7 +114,6 @@ public class VariadicEventTable extends ModuleWithUI {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		ins.onConfiguration(config);
 
 		ModuleOptions options = ModuleOptions.get(config);
 		if (options.getOption("maxRows") != null) {

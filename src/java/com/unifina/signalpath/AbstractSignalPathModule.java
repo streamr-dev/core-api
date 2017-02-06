@@ -5,6 +5,7 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.datasource.IDayListener;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.service.SerializationService;
+import com.unifina.signalpath.variadic.VariadicEndpoint;
 import com.unifina.utils.Globals;
 import com.unifina.utils.HibernateHelper;
 import com.unifina.utils.MapTraversal;
@@ -40,6 +41,8 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	protected ArrayList<Output> outputs = new ArrayList<Output>();
 	protected Map<String, Output> outputsByName = new HashMap<String, Output>();
+
+	private final List<VariadicEndpoint> variadics = new ArrayList<>();
 
 	private boolean wasReady = false;
 
@@ -123,10 +126,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	    					// This is required to avoid java.lang.IllegalAccessException and requires privileges
 	    					f.setAccessible(true);
 	    					Object obj = f.get(AbstractSignalPathModule.this);
-	    					if (Input.class.isInstance(obj) && !inputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+							if (VariadicEndpoint.class.isInstance(obj) && !variadics.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+								addVariadic((VariadicEndpoint) obj);
+							} else if (Input.class.isInstance(obj) && !inputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
 								addInput((Input) obj);
-							}
-	    					else if (Output.class.isInstance(obj) && !outputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
+							} else if (Output.class.isInstance(obj) && !outputs.contains(obj) && f.getAnnotation(ExcludeInAutodetection.class) == null) {
 								addOutput((Output) obj);
 							}
 	    				} catch (Exception e) {
@@ -148,6 +152,10 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 */
 	public void initialize() {
 
+	}
+
+	public void addVariadic(VariadicEndpoint variadic) {
+		variadics.add(variadic);
 	}
 
 	public void addInput(Input input) {
@@ -409,6 +417,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	@SuppressWarnings("rawtypes")
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("variadics", getVariadicConfiguration());
 		map.putAll(getIOConfiguration());
 
 		if (getDomainObject() != null) {
@@ -469,6 +478,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	 */
 	public void configure(Map<String, Object> config) {
 		setConfiguration(config);
+		setVariadicConfiguration(config);
 		setIOConfiguration(config, true);
 		onConfiguration(config);
 		// Ignore not found inputs here too. For example, if the
@@ -565,6 +575,51 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Writes configuration for variadics to a Map.
+	 */
+	private List<Map<String, Object>> getVariadicConfiguration() {
+		List<Map<String, Object>> configList = new ArrayList<>(variadics.size());
+
+		for (VariadicEndpoint variadic : variadics) {
+			configList.add(variadic.getConfiguration());
+		}
+
+		return configList;
+	}
+
+	/**
+	 * Reads configuration for variadics from the given Map.
+	 */
+	private void setVariadicConfiguration(Map<String, Object> config) {
+		List<VariadicEndpoint> variadicsYetToBeConfigured = new ArrayList<>(variadics);
+		if (config.containsKey("variadics")) {
+			List<Map<String, Object>> configList = (List<Map<String, Object>>) config.get("variadics");
+			for (Map<String, Object> variadicConfig : configList) {
+				VariadicEndpoint variadic = getVariadic((String) variadicConfig.get("baseName"));
+				if (variadic == null) {
+					throw new RuntimeException("Variadic not found: " + variadicConfig.get("baseName"));
+				} else {
+					variadic.setConfiguration(variadicConfig);
+					variadicsYetToBeConfigured.remove(variadic);
+				}
+			}
+		}
+		for (VariadicEndpoint variadic : variadicsYetToBeConfigured) {
+			variadic.setConfiguration(Collections.emptyMap());
+		}
+	}
+
+	private VariadicEndpoint getVariadic(String baseName) {
+		for (VariadicEndpoint variadic : variadics) {
+			if (variadic.getBaseName().equals(baseName)) {
+				return variadic;
+			}
+		}
+		return null;
 	}
 
 	public Module getDomainObject() {

@@ -5,77 +5,57 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
     pub = pub || {};
     pub = SignalPath.Input(json, parentDiv, module, type, pub);
 
-    var growVariadic = function(div) {
-        if (!SignalPath.isLoading() && !module.moduleClosed) {
+    var div = null;
+    var variadicContext = null;
 
-            if (json.variadic.isLast) {
-                var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
+    pub.registerToVariadic = function(variadicCtx) {
+        variadicContext = variadicCtx;
+    };
 
-                json.variadic.isLast = false
-                div.removeClass("last-variadic")
-                json.requiresConnection = true // does not work
-                json.connected = div.data("spObject").isConnected()
+    pub.makeNewPlaceholder = function(newName) {
+        var jsonCopy = jQuery.extend(true, {}, json); // deep-copy object
 
-                jsonCopy.connected = false
-                delete jsonCopy.id
-                delete jsonCopy.longName
-                delete jsonCopy.sourceId
-                jsonCopy.name = "endpoint" + Date.now()
-                jsonCopy.displayName = "in" + (json.variadic.index + 1)
-                jsonCopy.requiresConnection = false
-                jsonCopy.export = false
-                jsonCopy.variadic.isLast = true
-                jsonCopy.variadic.index += 1
+        delete jsonCopy.id
+        delete jsonCopy.longName
+        delete jsonCopy.sourceId
+        delete jsonCopy.displayName
+        jsonCopy.connected = false
+        jsonCopy.export = false
+        jsonCopy.requiresConnection = false
+        jsonCopy.name = newName
 
-                if (json.variadic.linkedOutput) {
-                    var linkedOutput = module.getOutput(json.variadic.linkedOutput)
-                    linkedOutput.div.css("display", "")
-                    var newOutput = linkedOutput.makeNewOutput()
-                    jsonCopy.variadic.linkedOutput = newOutput.getName()
-                    module.redraw()
-                }
+        return module.addInput(jsonCopy);
+    };
 
-                module.addInput(jsonCopy)
-            }
+    pub.markPlaceholder = function(hide) {
+        div.addClass("last-variadic");
+        div.find(".ioname").append("&nbsp;<i class='variadic-plus fa fa-plus'>");
+        if (hide) {
+            div.css("display", "none");
         }
-    }
+    };
 
-    var shrinkVariadic = function(div) {
-        if (!SignalPath.isLoading() && !module.moduleClosed) {
-            if (json.variadic.linkedOutput) {
-                module.removeOutput(json.variadic.linkedOutput)
-            }
-            if (!div.hasClass("export") && !div.data("spObject").isConnected()) {
-                module.removeInput(json.name)
-            }
-        }
-    }
+    pub.unmarkPlaceholder = function() {
+        div.css("display", "");
+        div.removeClass("last-variadic");
+        json.connected = div.data("spObject").isConnected();
+        json.requiresConnection = true;
+    };
 
-    var super_setExport = pub.setExport
-    pub.setExport = function (div, data, value) {
-        super_setExport(div, data, value)
-        if (value) {
-            growVariadic(div)
-        } else {
-            shrinkVariadic(div)
-        }
-    }
+    pub.deleteMe = function() {
+        module.removeInput(pub.getName());
+    };
 
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
-        var div = super_createDiv()
+        div = super_createDiv()
 
-        if (json.variadic.isLast) {
-            div.addClass("last-variadic")
-            div.find(".ioname").append("&nbsp;<i class='variadic-plus fa fa-plus'>")
-        }
-
-        div.bind("spConnect", function(event, output) {
-            growVariadic(div)
+        div.bind("spConnect spExport", function(event, output) {
+            variadicContext.onConnectOrSetExport(pub);
         })
 
-        div.bind("spDisconnect", function(event, output) {
-            shrinkVariadic(div)
+        div.bind("spDisconnect spUnexport", function(event, output) {
+            variadicContext.onDisconnectOrUnexport(pub, div);
         })
 
         return div

@@ -21,7 +21,7 @@ public class ExportCSV extends ModuleWithUI {
 
 	private static final Logger log = Logger.getLogger(ExportCSV.class);
 
-	private final VariadicInput<Object> ins = new VariadicInput<>(this, new InputInstantiator.SimpleObject());
+	private final VariadicInput<Object> ins = new VariadicInput<>("in", this, new InputInstantiator.SimpleObject());
 
 	private boolean includeTimestamps = true;
 	private boolean writeHeader = true;
@@ -99,22 +99,9 @@ public class ExportCSV extends ModuleWithUI {
 		}
 	}
 
-	/**
-	 * Boilerplate for variadic inputs
-	 */
-	@Override
-	public Input getInput(String name) {
-		Input input = super.getInput(name);
-		if (input == null) {
-			input = ins.addEndpoint(name);
-		}
-		return input;
-	}
-
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		ins.onConfiguration(config);
 
 		ModuleOptions options = ModuleOptions.get(config);
 

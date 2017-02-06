@@ -118,10 +118,11 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		if (value) {
 			iodiv.addClass("export");
 			data["export"] = true;
-		}
-		else {
+			iodiv.trigger("spExport");
+		} else {
 			iodiv.removeClass("export");
 			data["export"] = false;
+            iodiv.trigger("spUnexport");
 		}
 	}
 	pub.setExport = setExport;
@@ -223,11 +224,17 @@ SignalPath.Endpoint = function(json, parentDiv, module, type, pub) {
 		else module.handleContextMenuSelection(target, selection);
 	}
 	pub.handleContextMenuSelection = handleContextMenuSelection;
-	
+
 	function getName() {
 		return pub.json.name;
 	}
 	pub.getName = getName;
+
+	function setName(name) {
+		pub.json.name = name;
+		pub.div.find(".ioname").text(getDisplayName());
+    }
+    pub.setName = setName;
 
 	function getDisplayName() {
 		return (pub.json.displayName ? pub.json.displayName : pub.json.name);

@@ -12,12 +12,13 @@ import java.util.Map;
  */
 public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 
-	public VariadicOutput(AbstractSignalPathModule module, OutputInstantiator<T> outputInstantiator) {
-		super(module, outputInstantiator);
+	public VariadicOutput(String baseName, AbstractSignalPathModule module, OutputInstantiator<T> outputInstantiator) {
+		super(baseName, module, outputInstantiator);
 	}
 
-	public VariadicOutput(AbstractSignalPathModule module, OutputInstantiator<T> outputInstantiator, int startIndex) {
-		super(module, outputInstantiator, startIndex);
+	public VariadicOutput(String baseName, AbstractSignalPathModule module, OutputInstantiator<T> outputInstantiator,
+						  int startIndex) {
+		super(baseName, module, outputInstantiator, startIndex);
 	}
 
 	public void send(List<T> values) {
@@ -38,12 +39,7 @@ public class VariadicOutput<T> extends VariadicEndpoint<Output<T>, T> {
 	}
 
 	@Override
-	void furtherConfigurePlaceholder(Output<T> placeholder) {}
-
-	@Override
-	String getDisplayName() {
-		return "out";
-	}
+	void configurePlaceholder(Output<T> placeholder) {}
 
 	@Override
 	String getJsClass() {

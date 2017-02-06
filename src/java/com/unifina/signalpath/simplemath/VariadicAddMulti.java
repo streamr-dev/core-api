@@ -10,13 +10,14 @@ public class VariadicAddMulti extends AbstractSignalPathModule {
 
 	private TimeSeriesInput in1 = new TimeSeriesInput(this, "in1");
 	private TimeSeriesInput in2 = new TimeSeriesInput(this, "in2");
-	private VariadicInput<Double> variadicInput = new VariadicInput<>(this, new InputInstantiator.TimeSeries(), 3);
+	private VariadicInput<Double> variadicInput = new VariadicInput<>("in", this, new InputInstantiator.TimeSeries(), 3);
 	private TimeSeriesOutput out = new TimeSeriesOutput(this, "sum");
 
 	@Override
 	public void init() {
 		addInput(in1);
 		addInput(in2);
+		addVariadic(variadicInput);
 		addOutput(out);
 	}
 
@@ -30,20 +31,5 @@ public class VariadicAddMulti extends AbstractSignalPathModule {
 			sum += val;
 		}
 		out.send(sum);
-	}
-
-	@Override
-	public Input getInput(String name) {
-		Input input = super.getInput(name);
-		if (input == null) {
-			input = variadicInput.addEndpoint(name);
-		}
-		return input;
-	}
-
-	@Override
-	protected void onConfiguration(Map<String, Object> config) {
-		super.onConfiguration(config);
-		variadicInput.onConfiguration(config);
 	}
 }

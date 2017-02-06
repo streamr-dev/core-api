@@ -13,12 +13,13 @@ import java.util.Map;
  */
 public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 
-	public VariadicInput(AbstractSignalPathModule module, InputInstantiator<T> inputInstantiator) {
-		super(module, inputInstantiator);
+	public VariadicInput(String baseName, AbstractSignalPathModule module, InputInstantiator<T> inputInstantiator) {
+		super(baseName, module, inputInstantiator);
 	}
 
-	public VariadicInput(AbstractSignalPathModule module, InputInstantiator<T> inputInstantiator, int startIndex) {
-		super(module, inputInstantiator, startIndex);
+	public VariadicInput(String baseName, AbstractSignalPathModule module, InputInstantiator<T> inputInstantiator,
+						 int startIndex) {
+		super(baseName, module, inputInstantiator, startIndex);
 	}
 
 	public List<T> getValues() {
@@ -35,13 +36,8 @@ public class VariadicInput<T> extends VariadicEndpoint<Input<T>, T> {
 	}
 
 	@Override
-	void furtherConfigurePlaceholder(Input<T> placeholder) {
+	void configurePlaceholder(Input<T> placeholder) {
 		placeholder.requiresConnection = false;
-	}
-
-	@Override
-	String getDisplayName() {
-		return "in";
 	}
 
 	@Override

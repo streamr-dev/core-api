@@ -13,13 +13,13 @@ import java.util.Map;
 public class VariadicGetMultiFromMap extends AbstractSignalPathModule {
 
 	private MapInput in = new MapInput(this, "in");
-	private VariadicOutput<Object> outs = new VariadicOutput<>(this, new OutputInstantiator.SimpleObject(), 1);
+	private VariadicOutput<Object> outs = new VariadicOutput<>("in", this, new OutputInstantiator.SimpleObject(), 1);
 	private MapOutput founds = new MapOutput(this, "founds");
-
 
 	@Override
 	public void init() {
 		addInput(in);
+		addVariadic(outs);
 		addOutput(founds);
 	}
 
@@ -46,19 +46,4 @@ public class VariadicGetMultiFromMap extends AbstractSignalPathModule {
 
 	@Override
 	public void clearState() {}
-
-	@Override
-	public Output getOutput(String name) {
-		Output output = super.getOutput(name);
-		if (output == null) {
-			output = outs.addEndpoint(name);
-		}
-		return output;
-	}
-
-	@Override
-	protected void onConfiguration(Map<String, Object> config) {
-		super.onConfiguration(config);
-		outs.onConfiguration(config);
-	}
 }

@@ -7,7 +7,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	prot.ioTable = null;
 
 	prot.enableIONameChange = true;
-	
+
+	prot.variadics = [];
 	prot.inputsByName = {};
 	prot.params = [];
 	prot.inputs = [];
@@ -58,6 +59,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		collectRemoteEndpoints(prot.outputs, oldOutputConnections);
 
 		// Reset the lookups
+        prot.variadics = [];
 		prot.inputsByName = {};
 		prot.params = [];
 		prot.inputs = [];
@@ -111,6 +113,13 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		$(prot.jsonData.outputs).each(function(i,data) {
 			prot.addOutput(data);
 		});
+
+        // Module variadics
+        if (prot.jsonData.variadics) {
+            _.each(prot.jsonData.variadics, function(variadicConfig) {
+                prot.variadics.push(new SignalPath.VariadicContext(variadicConfig, pub))
+            })
+        }
 
 		prot.createModuleFooter()
 		
@@ -256,6 +265,20 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	}
 	pub.getOutput = getOutput;
 
+	pub.getVariadic = function(name) {
+		for (var i=0; i < prot.variadics.length; ++i) {
+			var variadic = prot.variadics[i];
+			if (variadic.getBaseName() === name) {
+				return variadic;
+			}
+		}
+		return null;
+	};
+
+	pub.getModuleClosed = function() {
+		return prot.moduleClosed;
+	};
+
 	function findInputByDisplayName(name) {
 		var found = null
 		$(prot.inputs).each(function(i, endpoint) {
@@ -346,7 +369,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		return endpoint;
 	}
 	
-	prot.removeInput = function(name) {
+	pub.removeInput = function(name) {
 		var _this = this
 		// Remove the endpoint async to ensure it is run after the spDisconnect event has been handled completely
 		setTimeout(function() {
@@ -374,7 +397,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		}, 0)
 	}
 
-	prot.removeOutput = function(name) {
+	pub.removeOutput = function(name) {
 		var _this = this
 		// Remove the endpoint async to ensure it is run after the spDisconnect event has been handled completely
 		setTimeout(function() {
@@ -469,6 +492,11 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	var superToJSON = pub.toJSON;
 	function toJSON() {
 		prot.jsonData = superToJSON();
+
+		prot.jsonData.variadics = [];
+		$(prot.variadics).each(function(i,variadic) {
+			prot.jsonData.variadics.push(variadic.toJSON());
+		});
 
 		// Get parameter JSON
 		prot.jsonData.params = [];
