@@ -493,6 +493,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.clearWarnings = clearWarnings
 
 	function updateFrom(data) {
+		prot.updating = true
 		// Overwrite jsonData
 		prot.jsonData = data;
 		// But keep the hash
@@ -514,7 +515,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		pub.onClose = oldCloseHandler
 		prot.div.attr('class', classes)
 
-		
+		prot.updating = false
 		$prot.trigger('updated', data)
 	}
 	pub.updateFrom = updateFrom;

@@ -43,7 +43,9 @@ public class EthereumContract implements Serializable {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("address", getAddress());
+		if (address != null) {
+			map.put("address", address);
+		}
 		map.put("abi", getABI().toList());
 		return map;
 	}

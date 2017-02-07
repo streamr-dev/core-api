@@ -2,25 +2,35 @@ SignalPath.EthereumContractInput = function(json, parentDiv, module, type, pub) 
     pub = pub || {};
     pub = SignalPath.Input(json, parentDiv, module, type, pub);
 
+    pub.setContract = function(contract) {
+        var oldContract = pub.json.value
+        pub.json.value = contract
+
+        // Update this module if the contract has changed
+        if (!_.isEqual(oldContract, contract)) {
+            SignalPath.updateModule(pub.module)
+        }
+    }
+
     var super_createDiv = pub.createDiv
     pub.createDiv = function() {
         var div = super_createDiv()
-        div.bind("spConnect", function(event, output) {
-            var hadContract = pub.json.value
-            pub.json.value = output.module.getContract()
 
-            // Update this module if got contract for the first time
-            if (pub.json.value && !hadContract) {
-                SignalPath.updateModule(pub.module)
+        function setContractOnSourceUpdate() {
+            pub.setContract(pub.getSource().module.getContract())
+        }
+
+        div.bind("spConnect", function(event, output) {
+            if (!pub.module.updating && !output.module.updating) {
+                pub.setContract(output.module.getContract())
             }
+            $(output.module).on('updated', setContractOnSourceUpdate)
         })
         div.bind("spDisconnect", function(event, output) {
-            var hadContract = pub.json.value
-            delete pub.json.value
-
-            if (hadContract && !pub.module.moduleClosed) {
-                SignalPath.updateModule(pub.module)
+            if (!pub.module.updating && !output.module.updating) {
+                pub.setContract(undefined)
             }
+            $(output.module).off('updated', setContractOnSourceUpdate)
         })
 
         return div

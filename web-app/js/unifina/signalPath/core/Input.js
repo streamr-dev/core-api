@@ -8,12 +8,14 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 
 		div.bind("spConnect", (function(me) {
 			return function(event, output) {
+				me.source = output
 				me.json.sourceId = output.getId();
 			}
 		})(pub));
 		
 		div.bind("spDisconnect", (function(me) {
 			return function(event, output) {
+				delete me.source
 				delete me.json.sourceId;
 			}
 		})(pub));
@@ -184,6 +186,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				console.log("Warning: input "+pub.getId()+" should be connected to "+pub.json.sourceId+", but is connected to "+connectedEndpoints[0].getId()+" instead!");
 			}
 		}
+	}
+
+	pub.getSource = function() {
+		return pub.source
 	}
 	
 	return pub;
