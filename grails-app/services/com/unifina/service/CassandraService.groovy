@@ -78,6 +78,7 @@ class CassandraService implements DisposableBean {
 			Long fromOffset = getFirstKafkaOffsetAfter(stream, partition, from);
 			Long toOffset = getLastKafkaOffsetBefore(stream, partition, to);
 			session.execute("DELETE FROM stream_events WHERE stream = ? AND stream_partition = ? AND kafka_offset >= ? AND kafka_offset <= ?", stream.id, partition, fromOffset, toOffset)
+			session.execute("DELETE FROM stream_timestamps WHERE stream = ? AND stream_partition = ? AND ts >= ? AND ts <= ?", stream.id, partition, from, to)
 		}
 	}
 
@@ -85,6 +86,7 @@ class CassandraService implements DisposableBean {
 		for (int partition=0; partition<stream.partitions; partition++) {
 			Long toOffset = getLastKafkaOffsetBefore(stream, partition, to);
 			session.execute("DELETE FROM stream_events WHERE stream = ? AND stream_partition = ? AND kafka_offset <= ?", stream.id, partition, toOffset)
+			session.execute("DELETE FROM stream_timestamps WHERE stream = ? AND stream_partition = ? AND ts <= ?", stream.id, partition, to)
 		}
 	}
 
