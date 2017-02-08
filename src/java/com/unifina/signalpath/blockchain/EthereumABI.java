@@ -39,10 +39,15 @@ public class EthereumABI {
 		for (JsonElement element : jsonArray) {
 			JsonObject functionOrEvent = element.getAsJsonObject();
 			String type = functionOrEvent.get("type").getAsString();
+
+			// from https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#json: "type can be omitted, defaulting to function"
 			if (type == null) {
 				type = "function";
 			}
 
+			// fallback is the unnamed function that gets called when contract receives a
+			//   transaction without specified function call (e.g. transaction with only ether)
+			//   it has no inputs or outputs, so it gets EthereumABI.Function default values except for payable
 			if (type.equals("function") || type.equals("fallback")) {
 				EthereumABI.Function f = gson.fromJson(functionOrEvent, EthereumABI.Function.class);
 				log.info("Found function " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
@@ -51,7 +56,7 @@ public class EthereumABI {
 				EthereumABI.Function f = gson.fromJson(functionOrEvent, EthereumABI.Function.class);
 				log.info("Found constructor " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
 				constructor = f;
-			} else if (functionOrEvent.get("type").getAsString().equals("event")) {
+			} else if (type.equals("event")) {
 				EthereumABI.Event e = gson.fromJson(functionOrEvent, EthereumABI.Event.class);
 				log.info("Found event " + e.name);
 				events.add(e);
