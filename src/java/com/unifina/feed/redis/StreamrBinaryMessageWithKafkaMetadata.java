@@ -48,6 +48,15 @@ public class StreamrBinaryMessageWithKafkaMetadata extends StreamrBinaryMessage 
 	}
 
 	/**
+	 * Creates a new StreamrBinaryMessageWithKafkaMetadata from an existing StreamrBinaryMessage
+	 * adding the Kafka metadata using the other args
+	 */
+	public StreamrBinaryMessageWithKafkaMetadata(StreamrBinaryMessage original, int kafkaPartition, long offset, Long previousOffset) {
+		this(original.getStreamId(), original.getPartition(), original.getTimestamp(), original.getTTL(),
+			original.getContentType(), original.getContentBytes(), kafkaPartition, offset, previousOffset);
+	}
+
+	/**
 	 * Creates a new StreamrBinaryMessageWithKafkaMetadata using given values.
 	 */
 	public StreamrBinaryMessageWithKafkaMetadata(String streamId, int streamPartition, long timestamp, int ttl, byte contentType, byte[] content, int kafkaPartition, long offset, Long previousOffset) {
