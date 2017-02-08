@@ -1,13 +1,17 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+import com.amazonaws.services.simpleworkflow.model.Run;
+import com.google.gson.*;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.Output;
 import com.unifina.signalpath.Parameter;
 import com.unifina.signalpath.Pullable;
 import com.unifina.utils.MapTraversal;
 
+import java.util.List;
 import java.util.Map;
 
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
@@ -55,13 +59,17 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			deployed = MapTraversal.getBoolean(config, "deployed");
 		}
 
-		if (deployed && !contract.isDeployed()) {
-			contract = deploy(code);
-			createContractOutput();
-		} else if (code != null) {
-			contract = compile(code);
-			createContractOutput();
-			createParameters(contract.getABI());
+		try {
+			if (deployed && !contract.isDeployed()) {
+				contract = deploy(code);
+				createContractOutput();
+			} else if (code != null) {
+				contract = compile(code);
+				createContractOutput();
+				createParameters(contract.getABI());
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -83,176 +91,40 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		}
 	}
 
-	private static EthereumContract compile(String code) {
-		// TODO: api call to compile code and get abi as json in return
-
-		return new EthereumContract(new EthereumABI("\n" +
-				"\t [{\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"weiPerUnit\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": false,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"withdraw\",\n" +
-				"\t\"outputs\": [],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"STREAMR_ADDRESS\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"address\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"recipient\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"address\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"unpaidWei\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": false,\n" +
-				"\t\"inputs\": [{\n" +
-				"\t\t\"name\": \"addedUnits\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"name\": \"update\",\n" +
-				"\t\"outputs\": [],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"inputs\": [{\n" +
-				"\t\t\"name\": \"_recipient\",\n" +
-				"\t\t\"type\": \"address\"\n" +
-				"\t}, {\n" +
-				"\t\t\"name\": \"_weiPerUnit\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": true,\n" +
-				"\t\"type\": \"constructor\"\n" +
-				"}, {\n" +
-				"\t\"payable\": true,\n" +
-				"\t\"type\": \"fallback\"\n" +
-				"}, {\n" +
-				"\t\"anonymous\": false,\n" +
-				"\t\"inputs\": [{\n" +
-				"\t\t\"indexed\": false,\n" +
-				"\t\t\"name\": \"debt\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"name\": \"OutOfFunds\",\n" +
-				"\t\"type\": \"event\"\n" +
-				"}]"));
+	/** @returns EthereumContract with isDeployed() false */
+	private static EthereumContract compile(String code) throws Exception {
+		return getContractFrom("http://localhost:3000/compile", code);
 	}
 
+	/** @returns EthereumContract that isDeployed() */
+	private static EthereumContract deploy(String code) throws Exception {
+		return getContractFrom("http://localhost:3000/deploy", code);
+	}
 
-	private static EthereumContract deploy(String code) {
-		// TODO: api call
-		return new EthereumContract("address", new EthereumABI("\n" +
-				"\t [{\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"weiPerUnit\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": false,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"withdraw\",\n" +
-				"\t\"outputs\": [],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"STREAMR_ADDRESS\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"address\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"recipient\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"address\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": true,\n" +
-				"\t\"inputs\": [],\n" +
-				"\t\"name\": \"unpaidWei\",\n" +
-				"\t\"outputs\": [{\n" +
-				"\t\t\"name\": \"\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"constant\": false,\n" +
-				"\t\"inputs\": [{\n" +
-				"\t\t\"name\": \"addedUnits\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"name\": \"update\",\n" +
-				"\t\"outputs\": [],\n" +
-				"\t\"payable\": false,\n" +
-				"\t\"type\": \"function\"\n" +
-				"}, {\n" +
-				"\t\"inputs\": [{\n" +
-				"\t\t\"name\": \"_recipient\",\n" +
-				"\t\t\"type\": \"address\"\n" +
-				"\t}, {\n" +
-				"\t\t\"name\": \"_weiPerUnit\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"payable\": true,\n" +
-				"\t\"type\": \"constructor\"\n" +
-				"}, {\n" +
-				"\t\"payable\": true,\n" +
-				"\t\"type\": \"fallback\"\n" +
-				"}, {\n" +
-				"\t\"anonymous\": false,\n" +
-				"\t\"inputs\": [{\n" +
-				"\t\t\"indexed\": false,\n" +
-				"\t\t\"name\": \"debt\",\n" +
-				"\t\t\"type\": \"uint256\"\n" +
-				"\t}],\n" +
-				"\t\"name\": \"OutOfFunds\",\n" +
-				"\t\"type\": \"event\"\n" +
-				"}]"));
+	private static class CompileResponse {
+		List<ContractMetadata> contracts;
+		List<String> errors;
+	}
+
+	private static class ContractMetadata {
+		String name;
+		String bytecode;
+		JsonArray abi;
+		String address;
+	}
+
+	private static EthereumContract getContractFrom(String url, String code) throws Exception {
+		String responseJson = Unirest.post(url).body(code).asString().getBody();
+		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
+		if (returned.contracts.size() > 0) {
+			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
+			// TODO: handle several contracts returned?
+			ContractMetadata c = returned.contracts.get(0);
+			return new EthereumContract(c.address, new EthereumABI(c.abi));
+		} else {
+			// TODO java 8: String.join
+			throw new RuntimeException(new Gson().toJson(returned.errors));
+		}
 	}
 
 	@Override
