@@ -261,6 +261,16 @@ environments {
 }
 
 /**
+ * Streamr-web3 Ethereum bridge address
+ */
+streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "http://dev-data.streamr"
+environments {
+	production {
+		streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "https://data.streamr.com"
+	}
+}
+
+/**
  * Kafka config
  */
 unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"

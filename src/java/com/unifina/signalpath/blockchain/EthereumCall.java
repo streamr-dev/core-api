@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
+import grails.util.Holders;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 public class EthereumCall extends AbstractHttpModule {
 
-	public static final String ETH_WRAPPER_URL = "http://localhost:3000/call";
+	public static final String ETH_WRAPPER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server") + "/call";
 	private static final Logger log = Logger.getLogger(EthereumCall.class);
 
 	private transient Gson gson; // not guaranteed thread-safe
@@ -36,22 +37,24 @@ public class EthereumCall extends AbstractHttpModule {
 	private TimeSeriesInput ether = new TimeSeriesInput(this, "ether");
 	private Input<Object> trigger = new Input<>(this, "trigger", "Object");		// shown if there are no inputs
 
-	private List<EthereumABI.Function> contractFunctions = new ArrayList<>();
-	private List<EthereumABI.Event> contractEvents = new ArrayList<>();
+	private EthereumABI abi;
 	private EthereumABI.Function chosenFunction;
 	private boolean isValid = false;
 
-	private FunctionNameParameter function = new FunctionNameParameter(this, "function", contractFunctions);
+	private FunctionNameParameter function = new FunctionNameParameter(this, "function");
 	private List<Input<Object>> arguments = new ArrayList<>();
-	private List<Output<Object>> results = new ArrayList<>();
-	private List<Output<Object>> events = new ArrayList<>();
 
+	// constant function outputs
+	private List<Output<Object>> results = new ArrayList<>();
+
+	// transaction outputs
 	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "valueSent");
 	private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "valueReceived");
 	private TimeSeriesOutput gasUsed = new TimeSeriesOutput(this, "gasUsed");
 	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPrice");
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
 	private TimeSeriesOutput nonce = new TimeSeriesOutput(this, "nonce");
+	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;		// outputs for each event separately
 
 	@Override
 	public void init() {
@@ -74,9 +77,10 @@ public class EthereumCall extends AbstractHttpModule {
 		// Find the function input config and configure it manually.
 		// The input is not yet configured, so otherwise it won't hold the correct value yet.
 		if (config.containsKey("params")) {
-			for (Object inputConfig : MapTraversal.getList(config, "params")) {
-				if (MapTraversal.getString((Map) inputConfig, "name").equals(function.getName())) {
-					function.setConfiguration((Map<String, Object>) inputConfig);
+			for (Object configObject : MapTraversal.getList(config, "params")) {
+				Map<String, Object> inputConfig = (Map<String, Object>)configObject;
+				if (function.getName().equals(MapTraversal.getString(inputConfig, "name"))) {
+					function.setConfiguration(inputConfig);
 					break;
 				}
 			}
@@ -85,48 +89,39 @@ public class EthereumCall extends AbstractHttpModule {
 	}
 
 	private void updateInterface() {
-		isValid = false;
-		//currentFunctionString = ""; // force re-read function arguments (maybe signature changed in abi)
-
-		contractFunctions.clear();	// don't re-create; the reference is used in FunctionNameParameter
-		contractEvents.clear();
+		clearState();
 
 		if (contract.hasValue()) {
-			EthereumABI abi = contract.getValue().getABI();
-
-			for (EthereumABI.Function f : abi.getFunctions()) {
-				contractFunctions.add(f);
-				// TODO: move function input creation here (like events below)
-			}
+			abi = contract.getValue().getABI();
+			function.list = abi.getFunctions();
 
 			for (EthereumABI.Event ev : abi.getEvents()) {
-				contractEvents.add(ev);
-				ev.outputs = new ArrayList<>();
+				List<Output<Object>> evOutputs = new ArrayList<>();
 				if (ev.inputs.size() > 0) {
 					for (EthereumABI.Slot arg : ev.inputs) {
 						String displayName = ev.name + "." + (arg.name.length() > 0 ? arg.name : "(" + arg.type + ")");
 						Output output = EthereumToStreamrTypes.asOutput(arg.type, displayName, this);
-						ev.outputs.add(output);
+						evOutputs.add(output);
 					}
 				} else {
 					// event without parameters/arguments/inputs
 					Output<Object> output = new Output<>(this, ev.name, "Object");
-					ev.outputs.add(output);
+					evOutputs.add(output);
 				}
+				eventOutputs.put(ev, evOutputs);
 			}
 		}
 	}
 
 	private void updateFunction() {
-		if (contractFunctions.size() < 1) { return; }
+		if (function.list == null || function.list.size() < 1) { return; }
 
 		addInput(function);
 		chosenFunction = function.getSelected();
 		if (chosenFunction == null) {
 			log.warn("Can't find function" + function.getValue());
-			chosenFunction = contractFunctions.get(0);
+			chosenFunction = function.list.get(0);
 			function.receive(chosenFunction.name);
-			//return;		// remain !isValid
 		}
 		log.info("Chose function " + chosenFunction.name);
 
@@ -165,9 +160,9 @@ public class EthereumCall extends AbstractHttpModule {
 			addOutput(gasPrice);
 			addOutput(blockNumber);
 			addOutput(nonce);
-			// TODO: any way to find out which events can be raised from which functions? (probably not...)
-			for (EthereumABI.Event ev : contractEvents) {
-				for (Output<Object> output : ev.outputs) {
+			// TODO: any way to find out which events can be raised from chosenFunction? (probably not...)
+			for (EthereumABI.Event ev : abi.getEvents()) {
+				for (Output<Object> output : eventOutputs.get(ev)) {
 					addOutput(output);
 				}
 			}
@@ -179,10 +174,10 @@ public class EthereumCall extends AbstractHttpModule {
 
 	@Override
 	public void clearState() {
-		//currentAbiString = "";
-		//currentFunctionString = "";
-		chosenFunction = null;
 		isValid = false;
+		abi = null;
+		function.list = null;
+		eventOutputs = new HashMap<>();
 	}
 
 	/**
@@ -216,12 +211,6 @@ public class EthereumCall extends AbstractHttpModule {
 				BigInteger valueWei = BigDecimal.valueOf(ether.getValue() * Math.pow(10, 18)).toBigInteger();
 				args.put("value", valueWei.toString());
 			}
-			// args.put("returnEvents", eventArguments.exist(o => o.isConnected()))
-//			boolean returnEvents = false;
-//			for (Output<Object> output : events) {
-//				if (output.isConnected()) { returnEvents = true; }
-//			}
-//			args.put("returnEvents", returnEvents);
 		}
 
 		if (gson == null) { gson = new Gson(); }
@@ -282,19 +271,20 @@ public class EthereumCall extends AbstractHttpModule {
 				gasPrice.send(resp.gasPrice);
 				blockNumber.send(resp.blockNumber);
 				nonce.send(resp.nonce);
-				for (EthereumABI.Event event : contractEvents) {
-					List<Object> args = resp.events.get(event.name);
+				for (EthereumABI.Event ev : abi.getEvents()) {
+					List<Object> args = resp.events.get(ev.name);
+					List<Output<Object>> evOutputs = eventOutputs.get(ev);
 					if (args != null) {
-						if (event.inputs.size() > 0) {
-							int n = Math.min(event.outputs.size(), args.size());
+						if (ev.inputs.size() > 0) {
+							int n = Math.min(evOutputs.size(), args.size());
 							for (int i = 0; i < n; i++) {
 								// TODO: cast result(s) to correct type(s)
 								String value = args.get(i).toString();
-								Output<Object> output = event.outputs.get(i);
+								Output<Object> output = evOutputs.get(i);
 								output.send(value);
 							}
 						} else {
-							event.outputs.get(0).send(Boolean.TRUE);
+							evOutputs.get(0).send(Boolean.TRUE);
 						}
 					}
 				}
@@ -309,16 +299,16 @@ public class EthereumCall extends AbstractHttpModule {
 	}
 
 	public static class FunctionNameParameter extends StringParameter {
-		private List<EthereumABI.Function> functionList;
-		public FunctionNameParameter(AbstractSignalPathModule owner, String name, List<EthereumABI.Function> functions) {
+		public List<EthereumABI.Function> list;
+
+		public FunctionNameParameter(AbstractSignalPathModule owner, String name) {
 			super(owner, name, "");
-			functionList = functions;
 		}
 
 		@Override
 		protected List<PossibleValue> getPossibleValues() {
 			List<PossibleValue> ret = new ArrayList<>();
-			for (EthereumABI.Function f : functionList) {
+			for (EthereumABI.Function f : list) {
 				ret.add(new PossibleValue(f.name, f.name));
 			}
 			return ret;
@@ -326,7 +316,7 @@ public class EthereumCall extends AbstractHttpModule {
 
 		public EthereumABI.Function getSelected() {
 			String v = this.getValue();
-			for (EthereumABI.Function f : functionList) {
+			for (EthereumABI.Function f : list) {
 				if (f.name.equals(v)) {
 					return f;
 				}

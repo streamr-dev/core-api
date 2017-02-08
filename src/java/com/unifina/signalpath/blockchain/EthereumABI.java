@@ -34,7 +34,7 @@ public class EthereumABI {
 		Gson gson = new Gson();
 		this.json = gson.toJson(jsonArray);
 
-		log.info("Parsing interface: " + jsonArray);
+		log.debug("Parsing interface: " + jsonArray);
 
 		for (JsonElement element : jsonArray) {
 			JsonObject functionOrEvent = element.getAsJsonObject();
@@ -50,15 +50,15 @@ public class EthereumABI {
 			//   it has no inputs or outputs, so it gets EthereumABI.Function default values except for payable
 			if (type.equals("function") || type.equals("fallback")) {
 				EthereumABI.Function f = gson.fromJson(functionOrEvent, EthereumABI.Function.class);
-				log.info("Found function " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
+				log.debug("Found function " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
 				functions.add(f);
 			} else if (type.equals("constructor")) {
 				EthereumABI.Function f = gson.fromJson(functionOrEvent, EthereumABI.Function.class);
-				log.info("Found constructor " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
+				log.debug("Found constructor " + f.name + (f.constant ? " [constant]" : "") + (f.payable ? " [payable]" : ""));
 				constructor = f;
 			} else if (type.equals("event")) {
 				EthereumABI.Event e = gson.fromJson(functionOrEvent, EthereumABI.Event.class);
-				log.info("Found event " + e.name);
+				log.debug("Found event " + e.name);
 				events.add(e);
 			} else {
 				throw new RuntimeException("Whoa! Found unknown item type in ABI: "+type);
@@ -104,8 +104,7 @@ public class EthereumABI {
 
 	public static class Event implements Serializable {
 		public String name = null;
-		public List<Slot> inputs = Collections.emptyList();				// "inputs" that receive value from Solidity contract
-		public List<Output<Object>> outputs;	// "outputs" from Streamr module on canvas
+		public List<Slot> inputs = Collections.emptyList();	 // "inputs" that receive value from Solidity contract
 	}
 
 }
