@@ -149,7 +149,9 @@ public class EthereumCall extends AbstractHttpModule {
 				results.add(output);
 			}
 		} else {
-			addInput(ether);
+			if (chosenFunction.payable) {
+				addInput(ether);
+			}
 			// non-constant functions modify contract state,
 			// 	 and thus require a transaction to be written into blockchain block (eth_sendTransaction)
 			// this takes time (module is async) and result can NOT be returned,
