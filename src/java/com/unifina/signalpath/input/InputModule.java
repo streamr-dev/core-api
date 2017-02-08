@@ -27,8 +27,7 @@ public abstract class InputModule extends ModuleWithUI {
 			setSendPending(true);
 			uiEventSendPending = true;
 			if (uiEventPropagator==null) {
-				uiEventPropagator = new Propagator();
-				uiEventPropagator.addModule(this);
+				uiEventPropagator = new Propagator(this);
 				uiEventPropagator.initialize();
 			}
 			trySendOutput();

@@ -743,6 +743,11 @@ var SignalPath = (function () {
 		return SignalPath.isBeingReloaded;
 	}
 
+	// Whether canvas represents something that cannot be edited but only viewed, e.g., a running sub-canvas.
+	pub.isReadOnly = function() {
+		return runningJson && runningJson.readOnly;
+    }
+
 	pub.toggleDebugMode = function(intervalInMs) {
 		if (debugLoopInterval) {
 			clearInterval(debugLoopInterval)

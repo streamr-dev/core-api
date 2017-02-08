@@ -68,7 +68,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 		def configuration = module.configuration
 
 		then:
-		configuration.keySet() == ["name", "displayName", "canClearState", "params", "inputs", "outputs"] as Set
+		configuration.keySet() == ["params", "inputs", "outputs", "name", "displayName", "canClearState", "canRefresh"] as Set
 		configuration.name == "MyModule"
 		configuration.displayName == "MyModuleDisplayName"
 		configuration.canClearState

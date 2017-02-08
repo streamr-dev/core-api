@@ -77,6 +77,10 @@ public class Input<T> extends Endpoint<T> {
 		config.put("canToggleDrivingInput", canToggleDrivingInput);
 		config.put("acceptedTypes", getAcceptedTypes());
 		config.put("requiresConnection", requiresConnection);
+
+		if (isConnected()) {
+			config.put("sourceId", getSource().getId());
+		}
 		
 		return config;
 	}
