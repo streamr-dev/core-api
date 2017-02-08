@@ -95,7 +95,6 @@ modules = {
 	}
 	pnotify {
 		dependsOn 'jquery'
-//		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.min.js']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.1.2.2-snapshot.js', plugin: 'unifina-core']
 		resource url:[dir:'js/pnotify-1.2.0', file:'jquery.pnotify.default.css', plugin: 'unifina-core']
 	}
@@ -260,16 +259,8 @@ modules = {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
 		dependsOn 'streamr'
 		dependsOn 'streamr-client'
-		dependsOn 'streamr-chart'
-		dependsOn 'streamr-table'
-		dependsOn 'streamr-heatmap'
-		dependsOn 'streamr-map'
-		dependsOn 'streamr-button'
-		dependsOn 'streamr-switcher'
-		dependsOn 'streamr-text-field'
 		dependsOn 'jsplumb'
 		dependsOn 'jstree'
-		dependsOn 'highstock'
 		dependsOn 'codemirror'
 		dependsOn 'tablesorter'
 		dependsOn 'bootstrap-contextmenu'
@@ -281,6 +272,8 @@ modules = {
 		dependsOn 'lodash'
 		dependsOn 'key-value-editor'
 		dependsOn 'list-editor'
+
+		// Core files
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
@@ -292,22 +285,46 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/core', file:'VariadicOutput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Parameter.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/core', file:'Output.js', plugin: 'unifina-core']
+
+		// Chart module
+		dependsOn 'streamr-chart'
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
+
+		// Map modules
+		dependsOn 'streamr-heatmap'
+		dependsOn 'streamr-map'
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
+
+		// Table module
+		dependsOn 'streamr-table'
+		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
+		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
+
+		// Other visualizing modules
+		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+
+		// Input modules
+		dependsOn 'streamr-button'
+		dependsOn 'streamr-switcher'
+		dependsOn 'streamr-text-field'
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
+
+		// Java module
 		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
+
+		// Comment module
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
+
+		// Scheduler module
 		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']
+
 		resource url:[dir:'js/unifina/signalPath/specific', file:'streamModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'filterModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'subCanvasModule.js', plugin: 'unifina-core']
