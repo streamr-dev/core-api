@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class EthereumCall extends AbstractHttpModule {
 
-	public static final String ETH_WRAPPER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server") + "/call";
+	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 	private static final Logger log = Logger.getLogger(EthereumCall.class);
 
 	private transient Gson gson; // not guaranteed thread-safe
@@ -218,7 +218,7 @@ public class EthereumCall extends AbstractHttpModule {
 		if (gson == null) { gson = new Gson(); }
 		String jsonString = gson.toJson(args);
 
-		HttpPost request = new HttpPost(ETH_WRAPPER_URL);
+		HttpPost request = new HttpPost(ETH_SERVER_URL + "/call");
 		request.setConfig(RequestConfig.custom()
 				.setSocketTimeout(60 * 1000) // 1 minute
 				.build());

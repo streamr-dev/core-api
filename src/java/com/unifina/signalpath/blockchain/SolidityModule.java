@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import grails.util.Holders;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
+	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
 
 	private Output<EthereumContract> contractOutput = null;
@@ -105,12 +107,12 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 	/** @returns EthereumContract with isDeployed() false */
 	private static EthereumContract compile(String code) throws Exception {
-		return getContractFrom("http://localhost:3000/compile", code);
+		return getContractFrom(ETH_SERVER_URL + "/compile", code);
 	}
 
 	/** @returns EthereumContract that isDeployed() */
 	private static EthereumContract deploy(String code) throws Exception {
-		return getContractFrom("http://localhost:3000/deploy", code);
+		return getContractFrom(ETH_SERVER_URL + "/deploy", code);
 	}
 
 	private static class CompileResponse {
