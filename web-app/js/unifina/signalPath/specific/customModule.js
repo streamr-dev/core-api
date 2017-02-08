@@ -7,9 +7,6 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 	var debugTextArea = null;
 	var editor = null;
 	
-	createEditCodeButton();
-	$(prot).on('updated', createEditCodeButton)
-	
 	var codeWindow = ''
     +   '<div class="code-editor-dialog" style="width:600px; height:400px">'
     +   	'<div class="modal-content flexing">'
@@ -54,9 +51,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			})
 			
 			dialog.find(".apply-btn").click(function() {
-				editor.clearGutter("breakpoints");
-				updateJson();
-				SignalPath.updateModule(pub);
+				prot.compile()
 			})
 			dialog.find(".close-btn").click(function(){
 				dialog.hide()
@@ -145,10 +140,21 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 		}
 	}
 
-	function createEditCodeButton() {
-		var editButton = $("<button class='btn btn-primary btn-sm'>Edit code</button>");
+	prot.compile = function(callback) {
+		editor.clearGutter("breakpoints");
+		updateJson();
+		SignalPath.updateModule(pub, callback);
+	}
+
+	var super_createModuleFooter = prot.createModuleFooter
+	prot.createModuleFooter = function() {
+		var footer = super_createModuleFooter()
+
+		var editButton = $("<button class='btn btn-block btn-default btn-sm'>Edit code</button>");
 		editButton.click(createCodeWindow);
-		pub.getDiv().find(".modulefooter").prepend(editButton);
+		footer.append(editButton);
+
+		return footer
 	}
 	
 	function updateJson() {

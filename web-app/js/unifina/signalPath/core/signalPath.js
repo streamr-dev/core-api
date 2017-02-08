@@ -183,7 +183,7 @@ var SignalPath = (function () {
 	}
 	pub.loadJSON = loadJSON;
 	
-	pub.updateModule = function(module,callback) {
+	pub.updateModule = function(module, callback) {
 		
 		$.ajax({
 			type: 'POST',
@@ -197,8 +197,9 @@ var SignalPath = (function () {
 					var div = module.getDiv();					
 					setModuleById(module.getHash(), module);
 					module.redraw(); // Just in case
-					if (callback)
-						callback();
+					if (callback) {
+						callback(data);
+					}
 				}
 				else {
 					if (data.moduleErrors) {
@@ -206,7 +207,12 @@ var SignalPath = (function () {
 							getModuleById(data.moduleErrors[i].hash).handleError(data.moduleErrors[i].payload);
 						}
 					}
+
 					handleError(data.message)
+
+					if (callback) {
+						callback(data, data.message)
+					}
 				}
 			},
 			error: function(jqXHR,textStatus,errorThrown) {

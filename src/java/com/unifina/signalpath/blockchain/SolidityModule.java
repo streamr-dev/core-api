@@ -1,20 +1,20 @@
 package com.unifina.signalpath.blockchain;
 
-import com.amazonaws.services.simpleworkflow.model.Run;
-import com.google.gson.*;
-import com.mashape.unirest.http.JsonNode;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.Output;
-import com.unifina.signalpath.Parameter;
-import com.unifina.signalpath.Pullable;
+import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
 
+import java.net.ConnectException;
 import java.util.List;
 import java.util.Map;
 
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
+
+	private static final Logger log = Logger.getLogger(SolidityModule.class);
 
 	private Output<EthereumContract> contractOutput = null;
 
@@ -64,16 +64,24 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		}
 
 		try {
-			if (deployed && !contract.isDeployed()) {
+			if (config.containsKey("compile") && code != null) {
+				contract = compile(code);
+			} else if (config.containsKey("deploy") && !contract.isDeployed()) {
 				contract = deploy(code);
 				createContractOutput();
-			} else if (code != null) {
-				contract = compile(code);
-				createContractOutput();
-				createParameters(contract.getABI());
+				deployed = true;
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			if (ExceptionUtils.getRootCause(e) instanceof java.net.ConnectException){
+				log.error("Could not connect to web3 backend!", e);
+				throw new RuntimeException("Sorry, we couldn't contact Ethereum at this time. We'll try to fix this soon.");
+			}
+
+		}
+
+		if (contract != null) {
+			createContractOutput();
+			createParameters(contract.getABI());
 		}
 	}
 
