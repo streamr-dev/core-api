@@ -32,6 +32,11 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 	}
 
+	/** Override to provide contract template that will be compiled when module is added to canvas */
+	public String getCodeTemplate() {
+		return null;
+	}
+
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
@@ -49,9 +54,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
-		if (config.containsKey("code")) {
-			code = MapTraversal.getString(config, "code");
-		}
+		code = config.containsKey("code") ? config.get("code").toString() : getCodeTemplate();
+
 		if (config.containsKey("contract")) {
 			contract = EthereumContract.fromMap(MapTraversal.getMap(config, "contract"));
 		}

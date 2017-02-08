@@ -26,7 +26,7 @@ databaseChangeLog = {
 
 		// Move EthereumCall module to Ethereum module category
 		update(tableName: "module") {
-			column(name: "category_id", valueNumeric: 1001) // Integrations
+			column(name: "category_id", valueNumeric: 1001) // Ethereum
 			where("id = 1020")
 		}
 	}
