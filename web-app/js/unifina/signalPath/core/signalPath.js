@@ -390,6 +390,7 @@ var SignalPath = (function () {
 	function saveAs(name, callback) {
 		setName(name)
 		save(function(json) {
+			pub.clear()
 			load(json, function() {
 				setTimeout(callback, 0)
 			})
