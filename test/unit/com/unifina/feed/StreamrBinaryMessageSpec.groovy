@@ -5,10 +5,12 @@ import spock.lang.Specification
 
 import java.nio.ByteBuffer
 
-public class StreamrBinaryMessageSpec extends Specification {
+class StreamrBinaryMessageSpec extends Specification {
+
+	def msg = new StreamrBinaryMessage("testId", 0, System.currentTimeMillis(), 100,
+		StreamrBinaryMessage.CONTENT_TYPE_STRING, "foobar hello world 666".getBytes("UTF-8"))
 
 	def "data is not altered on encode/decode"() {
-		def msg = new StreamrBinaryMessage("testId", 0, System.currentTimeMillis(), 100, StreamrBinaryMessage.CONTENT_TYPE_STRING, "foo".getBytes("UTF-8"))
 
 		when:
 		byte[] encoded = msg.toBytes()
@@ -21,6 +23,11 @@ public class StreamrBinaryMessageSpec extends Specification {
 		decoded.getContentType() == msg.getContentType()
 		decoded.getTTL() == msg.getTTL()
 		new String(decoded.getContentBytes(), "UTF-8") == new String(msg.getContentBytes(), "UTF-8")
+	}
+
+	def "sizeInBytes reports correct size"() {
+		expect:
+		msg.toBytes().length == msg.sizeInBytes()
 	}
 
 }
