@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class EthereumABI {
+public class EthereumABI implements Serializable {
 
 	private static final Logger log = Logger.getLogger(EthereumABI.class);
 
