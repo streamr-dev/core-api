@@ -22,17 +22,17 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 	prot.createModuleFooter = function() {
 		var footer = super_createModuleFooter()
 
-		var deployButton = $("<button class='btn btn-block btn-default btn-sm'>Deploy</button>");
-		deployButton.click(function() {
-			prot.jsonData.deploy = true
-			SignalPath.updateModule(pub, function(data, err) {
-				delete prot.jsonData.deploy
-			})
-		});
-		footer.append(deployButton);
-
 		if (pub.getContract() && pub.getContract().address) {
-			footer.append("<p>" + pub.getContract().address +"</p>")
+			footer.append("<input style='width:100%' value='" + pub.getContract().address +"'>")
+		} else {
+			var deployButton = $("<button class='btn btn-block btn-default btn-sm'>Deploy</button>");
+			deployButton.click(function() {
+				prot.jsonData.deploy = true
+				SignalPath.updateModule(pub, function(data, err) {
+					delete prot.jsonData.deploy
+				})
+			});
+			footer.append(deployButton);
 		}
 
 		return footer

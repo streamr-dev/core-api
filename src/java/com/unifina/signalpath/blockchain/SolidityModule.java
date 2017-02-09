@@ -22,7 +22,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 	private String code = null;
 	private EthereumContract contract = null;
-	private boolean deployed = false;
 
 	@Override
 	public void sendOutput() {
@@ -44,7 +43,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		Map<String, Object> config = super.getConfiguration();
 
 		config.put("code", code);
-		config.put("deployed", deployed);
 		if (contract != null) {
 			config.put("contract", contract.toMap());
 		}
@@ -55,25 +53,27 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+		boolean compileRequested = config.containsKey("compile");
 
-		code = config.containsKey("code") ? config.get("code").toString() : getCodeTemplate();
+		if (config.containsKey("code")) {
+			code = config.get("code").toString();
+		} else {
+			code = getCodeTemplate();
+			compileRequested = true;
+		}
 
 		if (config.containsKey("contract")) {
 			contract = EthereumContract.fromMap(MapTraversal.getMap(config, "contract"));
 		}
-		if (config.containsKey("deployed")) {
-			deployed = MapTraversal.getBoolean(config, "deployed");
-		}
 
 		try {
-			if (config.containsKey("compile") && code != null) {
+			if (compileRequested && code != null) {
 				contract = compile(code);
 			} else if (config.containsKey("deploy") && !contract.isDeployed()) {
 				contract = deploy(code);
-				createContractOutput();
-				deployed = true;
 			}
 		} catch (Exception e) {
+			// TODO: currently I got no notification when URL was incorrect
 			if (ExceptionUtils.getRootCause(e) instanceof java.net.ConnectException){
 				log.error("Could not connect to web3 backend!", e);
 				throw new RuntimeException("Sorry, we couldn't contact Ethereum at this time. We'll try to fix this soon.");
