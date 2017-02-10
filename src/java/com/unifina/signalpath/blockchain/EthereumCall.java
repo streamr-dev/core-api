@@ -105,7 +105,7 @@ public class EthereumCall extends AbstractHttpModule {
 					}
 				} else {
 					// event without parameters/arguments/inputs
-					Output<Object> output = new Output<>(this, ev.name, "Object");
+					Output output = new BooleanOutput(this, ev.name);
 					evOutputs.add(output);
 				}
 				eventOutputs.put(ev, evOutputs);
@@ -142,9 +142,8 @@ public class EthereumCall extends AbstractHttpModule {
 			results.clear();
 			for (EthereumABI.Slot s : chosenFunction.outputs) {
 				String name = s.name;
-				String type = "String"; //ethToStreamrType(s.type);		// TODO: support other return types
 				if (name.length() < 1) { name = "(" + s.type + ")"; }
-				Output<Object> output = new Output<>(this, name, type);
+				Output output = EthereumToStreamrTypes.asOutput(s.type, name, this);
 				addOutput(output);
 				results.add(output);
 			}
@@ -210,8 +209,8 @@ public class EthereumCall extends AbstractHttpModule {
 
 		if (!chosenFunction.constant) {
 			if (ether.isConnected()) {
-				BigInteger valueWei = BigDecimal.valueOf(ether.getValue() * Math.pow(10, 18)).toBigInteger();
-				args.put("value", valueWei.toString());
+				BigDecimal valueWei = BigDecimal.valueOf(ether.getValue()).multiply(BigDecimal.TEN.pow(18));
+				args.put("value", valueWei.toBigInteger().toString());
 			}
 		}
 
@@ -259,10 +258,9 @@ public class EthereumCall extends AbstractHttpModule {
 				JsonArray resultValues = response.get("results").getAsJsonArray();
 				int n = Math.min(results.size(), resultValues.size());
 				for (int i = 0; i < n; i++) {
-					// TODO: cast result(s) to correct type(s)
-					String result = resultValues.get(i).toString();
+					Object result = resultValues.get(i);
 					Output<Object> output = results.get(i);
-					output.send(result);
+					convertAndSend(output, result);
 				}
 			} else {
 				if (gson == null) { gson = new Gson(); }
@@ -280,10 +278,9 @@ public class EthereumCall extends AbstractHttpModule {
 						if (ev.inputs.size() > 0) {
 							int n = Math.min(evOutputs.size(), args.size());
 							for (int i = 0; i < n; i++) {
-								// TODO: cast result(s) to correct type(s)
-								String value = args.get(i).toString();
-								Output<Object> output = evOutputs.get(i);
-								output.send(value);
+								Object value = args.get(i);
+								Output output = evOutputs.get(i);
+								convertAndSend(output, value);
 							}
 						} else {
 							evOutputs.get(0).send(Boolean.TRUE);
@@ -297,6 +294,18 @@ public class EthereumCall extends AbstractHttpModule {
 
 		if (call.errors.size() > 0) {
 			errors.send(call.errors);
+		}
+	}
+
+	public static void convertAndSend(Output output, Object value) {
+		if (output instanceof StringOutput) {
+			output.send(value);
+		} else if (output instanceof BooleanOutput) {
+			output.send(Boolean.parseBoolean(value.toString()));
+		} else if (output instanceof TimeSeriesOutput) {
+			output.send(Double.parseDouble(value.toString()));
+		} else {
+			output.send(value);
 		}
 	}
 

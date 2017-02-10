@@ -1,5 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.mashape.unirest.http.Unirest;
@@ -9,9 +10,12 @@ import grails.util.Holders;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
-import java.net.ConnectException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
@@ -22,6 +26,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 	private String code = null;
 	private EthereumContract contract = null;
+	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
 
 	@Override
 	public void sendOutput() {
@@ -70,7 +75,24 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			if (compileRequested && code != null) {
 				contract = compile(code);
 			} else if (config.containsKey("deploy") && !contract.isDeployed()) {
-				contract = deploy(code);
+				EthereumABI.Function constructor = contract.getABI().getConstructor();
+				String sendWei = "0";
+				Stack<Object> args = new Stack<>();
+
+				if (constructor != null) {
+					List<Map> params = (List)config.get("params");
+					for (Map param : params) {
+						args.push(param.get("value"));
+					}
+					if (constructor.payable) {
+						BigDecimal valueWei = BigDecimal.valueOf(sendEtherParam.getValue()).multiply(BigDecimal.TEN.pow(18));
+						sendWei = valueWei.toBigInteger().toString();
+						args.pop();
+					}
+				}
+
+				// augment with address
+				contract = deploy(code, args, sendWei);
 			}
 		} catch (Exception e) {
 			// TODO: currently I got no notification when URL was incorrect
@@ -78,7 +100,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 				log.error("Could not connect to web3 backend!", e);
 				throw new RuntimeException("Sorry, we couldn't contact Ethereum at this time. We'll try to fix this soon.");
 			}
-
 		}
 
 		if (contract != null) {
@@ -96,23 +117,55 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		EthereumABI.Function constructor = abi.getConstructor();
 		if (constructor != null) {
 			for (EthereumABI.Slot input : constructor.inputs) {
-				Parameter p = EthereumToStreamrTypes.asParameter(input.type, input.name, this);
+				String name = input.name.replace("_", " ");
+				Parameter p = EthereumToStreamrTypes.asParameter(input.type, name, this);
 				p.setCanConnect(false);
 				p.canToggleDrivingInput = false;
 				p.canBeFeedback = false;
 				addInput(p);
+			}
+			if (constructor.payable) {
+				addInput(sendEtherParam);
 			}
 		}
 	}
 
 	/** @returns EthereumContract with isDeployed() false */
 	private static EthereumContract compile(String code) throws Exception {
-		return getContractFrom(ETH_SERVER_URL + "/compile", code);
+		String responseJson = Unirest.post(ETH_SERVER_URL + "/compile").body(code).asString().getBody();
+		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
+		if (returned.contracts.size() > 0) {
+			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
+			// TODO: handle several contracts returned?
+			ContractMetadata c = returned.contracts.get(0);
+			return new EthereumContract(c.address, new EthereumABI(c.abi));
+		} else {
+			// TODO java 8: String.join
+			throw new RuntimeException(new Gson().toJson(returned.errors));
+		}
 	}
 
-	/** @returns EthereumContract that isDeployed() */
-	private static EthereumContract deploy(String code) throws Exception {
-		return getContractFrom(ETH_SERVER_URL + "/deploy", code);
+	/**
+	 * @param sendWei String representation of decimal value of wei to send
+	 * @returns EthereumContract that isDeployed()
+	 **/
+	private static EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
+		String bodyJson = new Gson().toJson(ImmutableMap.of(
+			"code", code,
+			"args", args,
+			"value", sendWei
+		)).toString();
+		String responseJson = Unirest.post(ETH_SERVER_URL + "/deploy").body(bodyJson).asString().getBody();
+		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
+		if (returned.contracts.size() > 0) {
+			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
+			// TODO: handle several contracts returned?
+			ContractMetadata c = returned.contracts.get(0);
+			return new EthereumContract(c.address, new EthereumABI(c.abi));
+		} else {
+			// TODO java 8: String.join
+			throw new RuntimeException(new Gson().toJson(returned.errors));
+		}
 	}
 
 	private static class CompileResponse {
@@ -125,20 +178,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		String bytecode;
 		JsonArray abi;
 		String address;
-	}
-
-	private static EthereumContract getContractFrom(String url, String code) throws Exception {
-		String responseJson = Unirest.post(url).body(code).asString().getBody();
-		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
-		if (returned.contracts.size() > 0) {
-			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
-			// TODO: handle several contracts returned?
-			ContractMetadata c = returned.contracts.get(0);
-			return new EthereumContract(c.address, new EthereumABI(c.abi));
-		} else {
-			// TODO java 8: String.join
-			throw new RuntimeException(new Gson().toJson(returned.errors));
-		}
 	}
 
 	@Override
