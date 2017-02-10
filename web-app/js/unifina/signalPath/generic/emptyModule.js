@@ -496,7 +496,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.clearWarnings = clearWarnings
 
 	function updateFrom(data) {
-		// Guard against an update being in-flight when the module is closed
+		// Guard against updating after module has been closed
 		if (!prot.moduleClosed) {
 			prot.updating = true
 			// Overwrite jsonData
@@ -527,7 +527,11 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		}
 	}
 	pub.updateFrom = updateFrom;
-	
+
+	pub.isClosed = function() {
+		return prot.moduleClosed
+	}
+
 	function clone(callback) {
 		var cloneData = jQuery.extend(true, {}, pub.toJSON());
 		prot.prepareCloneData(cloneData);
