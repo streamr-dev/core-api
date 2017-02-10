@@ -1,20 +1,17 @@
 package com.unifina.feed.mongodb;
 
-import com.unifina.data.IEventRecipient;
 import com.unifina.data.IStreamRequirement;
 import com.unifina.domain.data.Feed;
 import com.unifina.domain.data.Stream;
 import com.unifina.feed.AbstractHistoricalFeed;
 import com.unifina.feed.FeedEventIterator;
-import com.unifina.feed.ITimestamped;
-import com.unifina.feed.StreamEventRecipient;
 import com.unifina.feed.map.MapMessage;
 import com.unifina.feed.map.MapMessageEventRecipient;
 import com.unifina.utils.Globals;
-import org.bson.Document;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Example streamConfig:
@@ -35,8 +32,6 @@ import java.util.*;
  */
 public class MongoHistoricalFeed extends AbstractHistoricalFeed<IStreamRequirement, MapMessage, Stream, MapMessageEventRecipient> {
 
-	private HashSet<IEventRecipient> iteratorReturned = new HashSet<>();
-
 	public MongoHistoricalFeed(Globals globals, Feed domainObject) {
 		super(globals, domainObject);
 	}
@@ -49,14 +44,9 @@ public class MongoHistoricalFeed extends AbstractHistoricalFeed<IStreamRequireme
 	}
 
 	@Override
-	protected FeedEventIterator<MapMessage, MapMessageEventRecipient> getNextIterator(MapMessageEventRecipient recipient) throws IOException {
-		if (iteratorReturned.contains(recipient)) {
-			return null;
-		} else {
-			iteratorReturned.add(recipient);
-			Stream stream = recipient.getStream();
-			return new FeedEventIterator<>(new MongoHistoricalIterator(stream, globals.getStartDate(), globals.getEndDate()), this, recipient);
-		}
+	protected FeedEventIterator<MapMessage, MapMessageEventRecipient> iterator(MapMessageEventRecipient recipient) {
+		Stream stream = recipient.getStream();
+		return new FeedEventIterator<>(new MongoHistoricalIterator(stream, globals.getStartDate(), globals.getEndDate()), this, recipient);
 	}
 
 }

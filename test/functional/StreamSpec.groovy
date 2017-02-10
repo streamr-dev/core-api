@@ -1,23 +1,15 @@
+import com.unifina.domain.data.Stream
 import com.unifina.feed.mongodb.MongoDbConfig
-import core.mixins.KafkaMixin
-import core.pages.ConfigureMongoPage
+import com.unifina.service.StreamService
+import core.LoginTester1Spec
+import core.mixins.ConfirmationMixin
+import core.mixins.StreamMixin
+import core.pages.*
 import org.bson.Document
 import spock.lang.Shared
 
 import java.nio.file.Paths
 
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-
-import core.LoginTester1Spec
-import core.mixins.ConfirmationMixin;
-import core.mixins.StreamMixin
-import core.pages.StreamConfigurePage
-import core.pages.StreamCreatePage
-import core.pages.StreamListPage
-import core.pages.StreamShowPage
-
-
-@Mixin(KafkaMixin)
 class StreamSpec extends LoginTester1Spec {
 
 	@Shared def mongoDbConfig = new MongoDbConfig([
@@ -29,11 +21,14 @@ class StreamSpec extends LoginTester1Spec {
 		timestampType: MongoDbConfig.TimestampType.DATETIME
 	])
 
+	@Shared StreamService streamService
+
 	def setupSpec() {
 		// @Mixin is buggy, don't use it
 		StreamSpec.metaClass.mixin(StreamMixin)
 		StreamSpec.metaClass.mixin(ConfirmationMixin)
-		StreamSpec.metaClass.mixin(KafkaMixin)
+
+		streamService = createStreamService()
 
 		def client = mongoDbConfig.createMongoClient()
 		mongoDbConfig.openCollection().drop()
@@ -43,6 +38,7 @@ class StreamSpec extends LoginTester1Spec {
 
 	def cleanupSpec() {
 		mongoDbConfig.openCollection().drop()
+		cleanupStreamService(streamService)
 	}
 	
 	private File getFile(String filename) {
@@ -116,8 +112,9 @@ class StreamSpec extends LoginTester1Spec {
 			waitFor { at StreamConfigurePage }
 
 		when: "Produce an event into the stream and click autodetect button"
-			UnifinaKafkaProducer kafka = makeKafkaProducer()
-			kafka.sendJSON(streamId, "", System.currentTimeMillis(), '{"foo":"bar","xyz":45.5}')
+			Stream testStream = new Stream()
+			testStream.id = streamId
+			streamService.sendMessage(testStream, [foo: "bar", "xyz": 45.5], 30)
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
 			waitFor {

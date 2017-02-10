@@ -140,8 +140,8 @@ class SignalPathService {
 			canvas.delete()
 		}
 
-		// Delayed-delete the topics in one hour
-		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
+		// TODO: Delete the messages from Cassandra
+		//kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -177,7 +177,7 @@ class SignalPathService {
 	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
-		globals.uiChannel = new KafkaPushChannel(kafkaService, canvas.adhoc)
+		globals.uiChannel = new KafkaPushChannel(canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread

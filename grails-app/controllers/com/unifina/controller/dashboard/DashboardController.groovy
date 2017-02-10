@@ -39,7 +39,7 @@ class DashboardController {
 
 	def show() {
 		return [
-			serverUrl: grailsApplication.config.streamr.ui.server,
+			config: grailsApplication.config,
 			id: params.id
 		]
 	}
