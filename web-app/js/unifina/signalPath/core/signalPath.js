@@ -192,13 +192,17 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
-					module.updateFrom(data);
-					
-					var div = module.getDiv();					
-					setModuleById(module.getHash(), module);
-					module.redraw(); // Just in case
-					if (callback)
-						callback();
+					// Guard against the situation where module has been closed while the update was in flight
+					if (!module.isClosed()) {
+						module.updateFrom(data);
+
+						var div = module.getDiv();
+						setModuleById(module.getHash(), module);
+						module.redraw(); // Just in case
+						if (callback) {
+							callback(data);
+						}
+					}
 				}
 				else {
 					if (data.moduleErrors) {

@@ -49,7 +49,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superUpdateFrom = pub.updateFrom;
 	function updateFrom(data) {
-		// Guard against an update being in-flight when the module is closed
+		// Guard against updating after module has been closed
 		if (!prot.moduleClosed) {
 			var oldInputConnections = [];
 			var oldOutputConnections = [];
