@@ -5,9 +5,11 @@ import com.unifina.data.KafkaPartitioner
  * The application config file can override anything defined here.
  */
 
+def prodBaseUrl = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+
 environments {
 	production {
-		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+		grails.serverURL = prodBaseUrl
 	}
 }
 
@@ -250,7 +252,7 @@ streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.
 streamr.ui.serverPath = System.getProperty("streamr.ui.serverPath") ?: "/api/v1/socket.io"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com/api/v1"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
@@ -260,7 +262,7 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com/api/v1"
+		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
@@ -281,8 +283,8 @@ streamr.kafka.dataTopic = "data-dev"
 environments {
 	production {
 		streamr.kafka.dataTopic = "data-prod"
-		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
-		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
+		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "kafka1:9092"
+		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
 	}
 }
 
@@ -291,15 +293,24 @@ environments {
  */
 streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
 streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
-// TODO: set prod config when going to prod
+environments {
+	production {
+		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
+	}
+}
 
 /**
  * Cassandra config
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
-// TODO: set prod config when going to prod
 
+environments {
+	production {
+		streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["cassandra1"])
+		streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_prod"
+	}
+}
 /**
  * Serialization config
  */
