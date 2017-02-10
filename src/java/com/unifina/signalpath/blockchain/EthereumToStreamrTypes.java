@@ -17,15 +17,19 @@ public class EthereumToStreamrTypes {
 				|| type.startsWith("bytes"); // variable length
 	}
 
+	private static boolean isNumberType(String type) {
+		return type.startsWith("fixed")
+				|| type.startsWith("ufixed")
+				|| type.startsWith("uint")
+				|| type.startsWith("int");
+	}
+
 	public static Input asInput(String type, String name, AbstractSignalPathModule owner) {
 		if (isStringType(type)) {
 			return new StringInput(owner, name);
 		} else if (type.equals("bool")) {
 			return new BooleanInput(owner, name);
-		} else if (type.startsWith("fixed")
-				|| type.startsWith("ufixed")
-				|| type.startsWith("uint")
-				|| type.startsWith("int")) {
+		} else if (isNumberType(type)) {
 			return new TimeSeriesInput(owner, name);
 		} else {
 			return new Input(owner, name, "Object");
@@ -53,10 +57,7 @@ public class EthereumToStreamrTypes {
 			return new StringOutput(owner, name);
 		} else if (type.equals("bool")) {
 			return new BooleanOutput(owner, name);
-		} else if (type.startsWith("fixed")
-				|| type.startsWith("ufixed")
-				|| type.startsWith("uint")
-				|| type.startsWith("int")) {
+		} else if (isNumberType(type)) {
 			return new TimeSeriesOutput(owner, name);
 		} else {
 			return new Output(owner, name, "Object");
