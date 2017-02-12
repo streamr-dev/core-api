@@ -1,11 +1,13 @@
 package com.unifina.signalpath.blockchain.templates;
 
 import com.unifina.signalpath.blockchain.SolidityModule;
+import com.unifina.utils.MapTraversal;
+import grails.util.Holders;
 
 public class PayByUse extends SolidityModule {
 	@Override
 	public String getCodeTemplate() {
-		String streamrAddress = "0xb3428050ea2448ed2e4409be47e1a50ebac0b2d2";
+		String streamrAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
 
 		// TODO: should unitCost/recipient be public?
 		//   + These are supplied to constructor, so they show up on canvas already
