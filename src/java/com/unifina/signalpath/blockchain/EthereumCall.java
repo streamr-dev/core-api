@@ -193,7 +193,7 @@ public class EthereumCall extends AbstractHttpModule {
 		Map args = new HashMap<>();
 
 		// TODO: source address should be Ethereum account of the current user
-		args.put("source", "0xb3428050ea2448ed2e4409be47e1a50ebac0b2d2");
+		args.put("source", MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address"));
 		args.put("target", contract.getValue().getAddress());
 		args.put("function", chosenFunction.name);
 
