@@ -48,10 +48,10 @@ public class EthereumCall extends AbstractHttpModule {
 	private List<Output<Object>> results = new ArrayList<>();
 
 	// transaction outputs
-	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "valueSent");
-	private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "valueReceived");
+	private TimeSeriesOutput valueSent = new TimeSeriesOutput(this, "spentWei");
+	private TimeSeriesOutput valueReceived = new TimeSeriesOutput(this, "targetChangeWei");
 	private TimeSeriesOutput gasUsed = new TimeSeriesOutput(this, "gasUsed");
-	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPrice");
+	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPriceWei");
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
 	private TimeSeriesOutput nonce = new TimeSeriesOutput(this, "nonce");
 	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;		// outputs for each event separately

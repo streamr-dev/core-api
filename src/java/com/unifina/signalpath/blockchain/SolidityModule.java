@@ -99,6 +99,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			if (ExceptionUtils.getRootCause(e) instanceof java.net.ConnectException){
 				log.error("Could not connect to web3 backend!", e);
 				throw new RuntimeException("Sorry, we couldn't contact Ethereum at this time. We'll try to fix this soon.");
+			} else {
+				throw new RuntimeException(e);
 			}
 		}
 
