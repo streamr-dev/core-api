@@ -1,4 +1,4 @@
-var MAP
+
 (function(exports) {
 
     var TRACE_REDRAW_BATCH_SIZE = 10000
@@ -66,14 +66,14 @@ var MAP
 
         this.skin = skins[this.options.skin] || skins.default
 
-        MAP = this.map = new L.Map(this.parent[0], {
+        this.map = new L.Map(this.parent[0], {
             center: new L.LatLng(this.options.centerLat, this.options.centerLng),
             zoom: this.options.zoom,
             minZoom: this.options.minZoom,
             maxZoom: this.options.maxZoom
         })
         
-        if (!this.options.customImageUrl && this.options.skin) {
+        if (!this.options.customImageUrl) {
             this.baseLayer = this.createMapLayer()
         } else {
             this.customImageLayer = this.createCustomImageLayer()
