@@ -199,6 +199,18 @@
         return marker
     }
     
+    StreamrMap.prototype.removeMarkerById = function(id) {
+        var marker = this.markers[id]
+        this.map.removeLayer(marker)
+    }
+    
+    StreamrMap.prototype.removeMarkersByIds = function(list) {
+        var _this = this
+        list.forEach(function(id) {
+            _this.removeMarkerById(id)
+        })
+    }
+    
     StreamrMap.prototype.setAutoZoom = function(lat, lng) {
         var _this = this
 
@@ -312,8 +324,12 @@
     }
 
     StreamrMap.prototype.handleMessage = function(d) {
-        if(d.t && d.t == "p") {
-            this.addMarker(d)
+        if (d.t) {
+            if (d.t === "p") {
+                this.addMarker(d)
+            } else if (d.t === "d") {
+                this.removeMarkersByIds(d.list)
+            }
         }
     }
 
