@@ -20,6 +20,8 @@ public class PayByUse extends SolidityModule {
 				"    \n" +
 				"    event OutOfFunds(uint debt);\n" +
 				"    event Paid(uint amount);\n" +
+				"    event Recipient(uint balance);\n" +
+				"    event Contract(uint balance);\n" +
 				"    \n" +
 				"    function PayByUse(address recipientAddress, uint unitPrice_wei) payable {\n" +
 				"        unitPriceWei = unitPrice_wei;\n" +
@@ -39,6 +41,8 @@ public class PayByUse extends SolidityModule {
 				"        if (this.balance == 0) {\n" +
 				"            OutOfFunds(unpaidWei);\n" +
 				"        }\n" +
+				"        Contract(this.balance);\n" +
+				"        Recipient(recipient.balance);\n" +
 				"    }\n" +
 				"    \n" +
 				"    function update(uint addedUnits) canvasCommand {\n" +
