@@ -11,7 +11,6 @@ import com.unifina.signalpath.RuntimeRequest;
 import com.unifina.signalpath.RuntimeResponse;
 import com.unifina.signalpath.TimeSeriesChartInput;
 import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.utils.MapTraversal;
 
 public class TimeSeriesChart extends Chart {
 	

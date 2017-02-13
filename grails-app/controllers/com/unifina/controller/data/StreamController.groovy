@@ -274,7 +274,7 @@ class StreamController {
 		for (int i=0; i < csv.schema.entries.length; i++) {
 			if (i != csv.getSchema().timestampColumnIndex) {
 				CSVImporter.SchemaEntry e = csv.getSchema().entries[i]
-				if (e!=null)
+				if (e != null)
 					fields << [name:e.name, type:e.type]
 			}
 		}

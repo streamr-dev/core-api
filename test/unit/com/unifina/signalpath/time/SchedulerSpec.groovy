@@ -35,6 +35,14 @@ class SchedulerSpec extends Specification {
 		config.put("schedule", schedule)
 		schedule.defaultValue = 100
 		schedule.rules = []
+		/*
+			Interval types:
+				0	-	HourlyRule
+				1	-	DailyRule
+				2	-	WeeklyRule
+				3	-	MonthlyRule
+				4	-	YearlyRule
+		 */
 		schedule.rules.add([value: 10, intervalType: 0, startDate:[minute:55], endDate:[minute:05]])
 		schedule.rules.add([value: 20, intervalType: 1, startDate:[hour:6, minute:30], endDate:[hour: 6, minute:59]])
 		schedule.rules.add([value: 30, intervalType: 2, startDate:[weekday:2, hour:12, minute:30], endDate:[weekday:6, hour: 10, minute:45]])
@@ -130,11 +138,27 @@ class SchedulerSpec extends Specification {
 	void "the right rules should be active"() {
 		when: "now is set"
 		then: "2. , 3. and 4. rule should be active"
-		scheduler.getRule(0).isActive(now) == false
-		scheduler.getRule(1).isActive(now) == true
-		scheduler.getRule(2).isActive(now) == true
-		scheduler.getRule(3).isActive(now) == true
-		scheduler.getRule(4).isActive(now) == false
+		!scheduler.getRule(0).isActive(now)
+		scheduler.getRule(1).isActive(now)
+		scheduler.getRule(2).isActive(now)
+		scheduler.getRule(3).isActive(now)
+		!scheduler.getRule(4).isActive(now)
+	}
+
+	void "the rules should active again"() {
+		when: "now is set"
+		then: "2. rule is active"
+		scheduler.getRule(1).isActive(now)
+
+		when: "now is incremented by 12 hours"
+		now = new Date(now.getTime() + 12 * 60 * 60 * 1000)
+		then: "2. rule is not active"
+		!scheduler.getRule(1).isActive(now)
+
+		when: "now is incremented again by 12 hours"
+		now = new Date(now.getTime() + 12 * 60 * 60 * 1000)
+		then: "2. rule is active again"
+		scheduler.getRule(1).isActive(now)
 	}
 	
 	void "getMinimumNext should give right value"() {

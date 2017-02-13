@@ -295,6 +295,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'imageMapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
