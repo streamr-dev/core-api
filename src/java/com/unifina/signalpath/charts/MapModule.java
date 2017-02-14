@@ -161,7 +161,7 @@ public class MapModule extends ModuleWithUI {
 		}
 
 		if (options.containsKey("markerIcon")) {
-			markerIcon = options.getOption(markerIcon).getString();
+			markerIcon = options.getOption("markerIcon").getString();
 		}
 
 		if (drawTrace) {

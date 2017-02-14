@@ -107,7 +107,7 @@ var SignalPath = (function () {
 			if (pub.isRunning())
                 pub.subscribe()
 		})
-        
+
         pub.floatingSearchBar = new FloatingSearchBar(parentElement, {}, function(item, position) {
             var moduleId = item.id
             var options = {
@@ -128,14 +128,14 @@ var SignalPath = (function () {
             pub.addModule(moduleId, options)
         })
 	};
-	
+
 	pub.unload = function() {
 		jsPlumb.reset();
 		if (connection && connection.isConnected()) {
 			connection.unsubscribe()
 		}
 	};
-	
+
 	pub.runtimeRequest = function(url, msg, callback) {
 		$.ajax({
 			type: 'POST',
@@ -168,7 +168,7 @@ var SignalPath = (function () {
 			}
 		})
 	}
-	
+
 	pub.getURL = function() {
 		if (runningJson && (runningJson.id || runningJson.baseURL)) {
 			return runningJson.baseURL || options.apiUrl + '/canvases/'+(runningJson.id)
@@ -180,19 +180,19 @@ var SignalPath = (function () {
 			return undefined
 		}
 	}
-	
+
 	pub.getRuntimeRequestURL = function() {
 		return pub.getURL() ? pub.getURL() + '/request' : undefined
 	}
-	
+
 	pub.getParentElement = function() {
 		return parentElement;
 	}
-	
+
 	pub.getConnection = function() {
 		return connection;
 	}
-	
+
     pub.loadJSON = function(data) {
 		// Reset signal path
         pub.clear(true);
@@ -217,13 +217,17 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
-					module.updateFrom(data);
-					
-					var div = module.getDiv();					
-					_setModuleById(module.getHash(), module);
-					module.redraw(); // Just in case
-					if (callback)
-						callback();
+					// Guard against the situation where module has been closed while the update was in flight
+					if (!module.isClosed()) {
+						module.updateFrom(data);
+
+						var div = module.getDiv();
+						_setModuleById(module.getHash(), module);
+						module.redraw(); // Just in case
+						if (callback) {
+							callback(data);
+						}
+					}
 				}
 				else {
 					if (data.moduleErrors) {
@@ -239,15 +243,15 @@ var SignalPath = (function () {
 			}
 		});
 	}
-    
+
     pub.isSaved = function() {
         return savedJson != null && savedJson.id != null && savedJson.type !== 'example'
     }
-    
+
     pub.getId = function() {
 		return savedJson ? savedJson.id : undefined
 	}
-    
+
     pub.replaceModule = function(module,id,configuration) {
         pub.addModule(id,configuration,function(newModule) {
 			_deleteModuleById(newModule.getHash())
@@ -259,7 +263,7 @@ var SignalPath = (function () {
 			newModule.redraw();
 		});
 	}
-    
+
     pub.addModule = function(id, configuration, callback) {
 		// Get indicator JSON from server
 		$.ajax({
@@ -285,7 +289,7 @@ var SignalPath = (function () {
 			}
 		});
 	}
-    
+
     pub.createModuleFromJSON = function(data) {
 		if (data.error) {
 			_handleError(data.message)
@@ -321,14 +325,14 @@ var SignalPath = (function () {
 		
 		return mod;
 	}
-    
+
     pub.redraw = function() {
 		pub.getModules().forEach(function(module) {
 			module.redraw()
 		})
 		jsPlumb.repaintEverything()
 	}
-    
+
     pub.getModules = function() {
 		var result = []
 		Object.keys(modules).forEach(function(key) {
@@ -336,18 +340,18 @@ var SignalPath = (function () {
 		})
 		return result
 	}
-    
+
     pub.getModuleById = function(id) {
 		return modules[id.toString()];
 	}
-    
+
     pub.toJSON = function(settings) {
 		var result = {
 			name: getName(),
 			settings: (settings ? settings : options.settings()),
 			modules: []
 		}
-    
+
         pub.getModules().forEach(function(module) {
 			var json = module.toJSON()
 			result.modules.push(json);
@@ -357,11 +361,11 @@ var SignalPath = (function () {
 
 		return result;
 	}
-    
+
     pub.getName = function() {
 		return name;
 	}
-    
+
     pub.setName = function(n) {
 		name = n
 	}
@@ -374,16 +378,17 @@ var SignalPath = (function () {
 		var dirty = (JSON.stringify(savedJson) !== JSON.stringify(currentJson))
 		return dirty
 	}
-	
+
     pub.saveAs = function(name, callback) {
         pub.setName(name)
         pub.save(function(json) {
+			pub.clear()
             pub.load(json, function() {
 				setTimeout(callback, 0)
 			})
 		}, true)
 	}
-    
+
     pub.save = function(callback, forceCreateNew) {
 		$(pub).trigger('saving')
 
@@ -407,13 +412,13 @@ var SignalPath = (function () {
 			_create(json, onSuccess)
 		}
 	}
-    
+
     pub.clear = function(isSilent) {
 		pub.unsubscribe()
 
 		if (pub.isRunning() && runningJson.adhoc)
             pub.stop();
-    
+
         pub.getModules().forEach(function(module) {
 			module.close()
 		})
@@ -474,7 +479,7 @@ var SignalPath = (function () {
             doLoad(idOrObject)
 		}
 	}
-    
+
     pub.start = function(startRequest, callback, ignoreDirty) {
 		startRequest = startRequest || {}
 
@@ -533,7 +538,7 @@ var SignalPath = (function () {
 			}
 		});
 	}
-    
+
     pub.startAdhoc = function(startRequest, callback) {
 		startRequest = startRequest || {}
 		startRequest.clearState = false
@@ -544,7 +549,7 @@ var SignalPath = (function () {
             pub.start(startRequest, callback, true)
 		})
 	}
-    
+
     pub.subscribe = function() {
 		if (pub.isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
@@ -557,18 +562,18 @@ var SignalPath = (function () {
 			)
 		}
 	}
-    
+
     pub.reconnect = function() {
         pub.subscribe();
 	}
-    
+
     pub.unsubscribe = function () {
 		if (subscription) {
 			connection.unsubscribe(subscription)
 			subscription = undefined
 		}
 	}
-    
+
     pub.isRunning = function() {
 		return runningJson != null && runningJson.state !== undefined && runningJson.state.toLowerCase() === 'running'
 	}
@@ -576,7 +581,7 @@ var SignalPath = (function () {
 	pub.isAdhoc = function() {
 		return pub.isRunning() && runningJson.adhoc
 	}
-    
+
     pub.stop = function(callback) {
 		$(pub).trigger('stopping')
 
@@ -625,11 +630,11 @@ var SignalPath = (function () {
 			triggerStopped()
 		}
 	}
-    
+
     pub.getZoom = function() {
 		return parentElement.css("zoom") != null ? parseFloat(parentElement.css("zoom")) : 1
 	}
-    
+
     pub.setZoom = function(zoom, animate) {
 		if (animate===undefined)
 			animate = true
@@ -679,7 +684,7 @@ var SignalPath = (function () {
 			return true
 		}
 	}
-    
+
     // Attempted workaround for CORE-283
     function _checkJsPlumbEndpoints() {
         // Make sure that jsPlumb agrees with the DOM on which elements exist, otherwise the following call may fail
@@ -691,11 +696,11 @@ var SignalPath = (function () {
             }
         })
     }
-    
+
     function _setSavedJson(data) {
         savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
     }
-    
+
     function _update(json, callback) {
         $.ajax({
             type: 'PUT',
@@ -718,13 +723,13 @@ var SignalPath = (function () {
                         _handleError(apiError.message)
                         return;
                     }
-                    
+
                 }
                 _handleError(errorThrown)
             }
         })
     }
-    
+
     function _create(json, callback) {
         $.ajax({
             type: 'POST',
@@ -746,7 +751,7 @@ var SignalPath = (function () {
             }
         })
     }
-    
+
     function _processMessage(message) {
         if (message.type == "MW") {
             var hash = message.hash;
@@ -754,7 +759,7 @@ var SignalPath = (function () {
         }
         else if (message.type == "D") {
             $(pub).trigger("done")
-            
+
             if (runningJson && runningJson.adhoc)
                 $(pub).trigger("stopped")
         }
@@ -766,21 +771,21 @@ var SignalPath = (function () {
             options.notificationHandler(message);
         }
     }
-    
+
     function _setModuleById(id, module) {
         modules[id.toString()] = module
     }
-    
+
     function _deleteModuleById(id) {
         delete modules[id.toString()]
     }
-    
+
     function _handleError(message) {
         $(pub).trigger("error", [message])
         options.errorHandler({msg:message})
     }
-    
-    
+
+
 
 	return pub; 
 }());
