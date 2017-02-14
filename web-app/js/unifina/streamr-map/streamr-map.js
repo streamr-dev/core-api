@@ -201,14 +201,12 @@
     
     StreamrMap.prototype.removeMarkerById = function(id) {
         var marker = this.markers[id]
+        delete this.markers[id]
         this.map.removeLayer(marker)
     }
     
     StreamrMap.prototype.removeMarkersByIds = function(list) {
-        var _this = this
-        list.forEach(function(id) {
-            _this.removeMarkerById(id)
-        })
+        list.forEach(this.removeMarkerById.bind(this))
     }
     
     StreamrMap.prototype.setAutoZoom = function(lat, lng) {
