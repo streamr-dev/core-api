@@ -1,10 +1,10 @@
 package com.unifina.signalpath.charts
 
 import com.unifina.utils.StreamrColor
-import com.unifina.utils.testutils.ModuleTestHelper;
-import spock.lang.Specification;
+import com.unifina.utils.testutils.ModuleTestHelper
+import spock.lang.Specification
 
-public class MapModuleSpec extends Specification {
+class MapModuleSpec extends Specification {
 	MapModule module
 
 	def setup() {
@@ -66,6 +66,77 @@ public class MapModuleSpec extends Specification {
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.uiChannelMessages(channelMessages)
+			.test()
+	}
+
+	void "MapModule works correctly with expiring markers"() {
+		module.configure([
+			uiChannel: [id: "mapPointData"],
+			options: [
+				drawTrace: [value: true],
+				expiringTimeInSecs: [value: 2]
+			]
+		])
+
+		Map inputValues = [
+			id: [
+				"id-1",
+				"id-2", "id-3", "id-4",
+				"id-3", "id-5", "id-6",
+				"id-6", "id-3",
+				"id-7", "id-1"
+			],
+			latitude: [
+				1,
+				2, 3, 4,
+				33, 5, 6,
+				66, 333,
+				7, 11
+			]*.doubleValue(),
+			longitude: [
+			    0,
+				0, 0, 0,
+				0, 0, 0,
+				0, 0,
+				0, 0
+			]*.doubleValue(),
+		]
+		Map<Integer, Date> ticks = [
+			0: new Date(0),
+		    1: new Date(1000),
+			4: new Date(2000),
+			7: new Date(3000),
+			9: new Date(4000),
+			11: new Date(5000),
+			12: new Date(6000)
+		]
+		Map outputValues = [:]
+		Map channelMessages = [
+			mapPointData: [
+				[t: "p", id: "id-1", lat: 1D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-2", lat: 2D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-3", lat: 3D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-4", lat: 4D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "d", list: ["id-1"]],
+				[t: "p", id: "id-3", lat: 33D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-5", lat: 5D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-6", lat: 6D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "d", list: ["id-2", "id-4"]],
+				[t: "p", id: "id-6", lat: 66D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-3", lat: 333D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "d", list: ["id-5"]],
+				[t: "p", id: "id-7", lat: 7D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "p", id: "id-1", lat: 11D, lng: 0D, color: "rgb(233, 87, 15)"],
+				[t: "d", list: ["id-6", "id-3"]],
+				[t: "d", list: ["id-7", "id-1"]],
+			]
+		]
+
+		expect:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+			.uiChannelMessages(channelMessages)
+			.ticks(ticks)
+			.extraIterationsAfterInput(3)
 			.test()
 	}
 }

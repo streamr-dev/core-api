@@ -69,10 +69,10 @@ public class MapModule extends ModuleWithUI implements ITimeListener {
 			id.getValue(),
 			latitude.getValue(),
 			longitude.getValue(),
-			color.getValue(),
-			expiringTimeInSecs > 0 ? currentTime + (expiringTimeInSecs * 1000) : null
+			color.getValue()
 		);
 		if (expiringTimeInSecs > 0) {
+			mapPoint.setExpirationTime(currentTime + (expiringTimeInSecs * 1000));
 			expiringMapPoints.remove(mapPoint);
 			expiringMapPoints.add(mapPoint);
 		}
@@ -204,7 +204,8 @@ public class MapModule extends ModuleWithUI implements ITimeListener {
 			List<String> expiredMapPointIds = new ArrayList<>();
 			Iterator<MapPoint> iterator = expiringMapPoints.iterator();
 			MapPoint mapPoint;
-			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpires() < currentTime) {
+
+			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpirationTime() <= currentTime) {
 				iterator.remove();
 				expiredMapPointIds.add((String) mapPoint.get("id"));
 			}
@@ -215,22 +216,26 @@ public class MapModule extends ModuleWithUI implements ITimeListener {
 	}
 
 	private static class MapPoint extends LinkedHashMap<String,Object> {
-		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color, Long expires) {
-			super();
+		private Long expirationTime;
+
+		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			put("t", "p");	// type: MapPoint
 			put("id", id.toString());
 			put("lat", latitude);
 			put("lng", longitude);
 			put("color", color.toString());
-			put("expires", expires);
 		}
 
 		public String getId() {
 			return (String) get("id");
 		}
 
-		public Long getExpires() {
-			return (Long) get("expires");
+		public Long getExpirationTime() {
+			return expirationTime;
+		}
+
+		void setExpirationTime(long expirationTime) {
+			this.expirationTime = expirationTime;
 		}
 
 		@Override
