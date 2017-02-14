@@ -10,8 +10,9 @@ public class StreamrColor implements Serializable{
 	private int blue;
 
 	public StreamrColor(int red, int green, int blue) {
-		if(red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255)
+		if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255) {
 			throw new IllegalArgumentException("RGB value must be between 0 and 255. r: " + red + ", g: " + green + ", b: " + blue);
+		}
 		this.red = red;
 		this.green = green;
 		this.blue = blue;

@@ -1,14 +1,13 @@
 package com.unifina.signalpath.charts;
 
+import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
 import com.unifina.utils.StreamrColor;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
-public class MapModule extends ModuleWithUI {
-	public final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
+public class MapModule extends ModuleWithUI implements ITimeListener {
+	private static final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
 
 	private final Input<Object> id = new Input<>(this, "id", "Object");
 	private final Input<Object> label = new Input<>(this, "label", "Object");
@@ -27,6 +26,11 @@ public class MapModule extends ModuleWithUI {
 	private String skin;	// e.g. "default", "cartoDark", "esriDark"
 	private boolean directionalMarkers = false;
 	private String markerIcon = DEFAULT_MARKER_ICON;
+
+	private int expiringTimeInSecs = 0;
+	private Set<MapPoint> expiringMapPoints = new LinkedHashSet<>();
+
+	private long currentTime;
 
 	@Override
 	public void init() {
@@ -67,8 +71,18 @@ public class MapModule extends ModuleWithUI {
 			longitude.getValue(),
 			color.getValue()
 		);
-		if (customMarkerLabel) { mapPoint.put("label", label.getValue()); }
-		if (directionalMarkers) { mapPoint.put("dir", heading.getValue()); }
+		if (expiringTimeInSecs > 0) {
+			mapPoint.setExpirationTime(currentTime + (expiringTimeInSecs * 1000));
+			expiringMapPoints.remove(mapPoint);
+			expiringMapPoints.add(mapPoint);
+		}
+		if (customMarkerLabel) {
+			mapPoint.put("label", label.getValue());
+		}
+		if (directionalMarkers) {
+			mapPoint.put("dir", heading.getValue());
+		}
+
 		pushToUiChannel(mapPoint);
 	}
 
@@ -88,6 +102,7 @@ public class MapModule extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("centerLat", centerLat, ModuleOption.OPTION_DOUBLE));
 		options.addIfMissing(new ModuleOption("centerLng", centerLng, ModuleOption.OPTION_DOUBLE));
 		options.addIfMissing(new ModuleOption("zoom", zoom, ModuleOption.OPTION_INTEGER));
+		options.addIfMissing(new ModuleOption("expiringTimeInSecs", expiringTimeInSecs, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("minZoom", 2, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("maxZoom", 18, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("drawTrace", drawTrace, ModuleOption.OPTION_BOOLEAN));
@@ -164,6 +179,10 @@ public class MapModule extends ModuleWithUI {
 			markerIcon = options.getOption("markerIcon").getString();
 		}
 
+		if (options.containsKey("expiringTimeInSecs")) {
+			expiringTimeInSecs = options.getOption("expiringTimeInSecs").getInt();
+		}
+
 		if (drawTrace) {
 			addInput(color);
 		}
@@ -177,17 +196,63 @@ public class MapModule extends ModuleWithUI {
 		}
 	}
 
-	private static class MapPoint extends LinkedHashMap<String,Object> {
-		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
-			super();
-			if (!(id instanceof Double || id instanceof String)) {
-				id = id.toString();
+	@Override
+	public void setTime(Date time) {
+		if (expiringTimeInSecs > 0) {
+			currentTime = time.getTime();
+
+			List<String> expiredMapPointIds = new ArrayList<>();
+			Iterator<MapPoint> iterator = expiringMapPoints.iterator();
+			MapPoint mapPoint;
+
+			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpirationTime() <= currentTime) {
+				iterator.remove();
+				expiredMapPointIds.add((String) mapPoint.get("id"));
 			}
+			if (!expiredMapPointIds.isEmpty()) {
+				pushToUiChannel(new MarkerDeletionList(expiredMapPointIds));
+			}
+		}
+	}
+
+	private static class MapPoint extends LinkedHashMap<String,Object> {
+		private Long expirationTime;
+
+		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			put("t", "p");	// type: MapPoint
-			put("id", id);
+			put("id", id.toString());
 			put("lat", latitude);
 			put("lng", longitude);
 			put("color", color.toString());
+		}
+
+		public String getId() {
+			return (String) get("id");
+		}
+
+		public Long getExpirationTime() {
+			return expirationTime;
+		}
+
+		void setExpirationTime(long expirationTime) {
+			this.expirationTime = expirationTime;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return o != null && o instanceof MapPoint && getId().equals(((MapPoint) o).getId());
+		}
+
+		@Override
+		public int hashCode() {
+			return get("id").hashCode();
+		}
+	}
+
+	private static class MarkerDeletionList extends LinkedHashMap<String, Object> {
+		private MarkerDeletionList(List<String> listOfIds) {
+			put("t", "d");
+			put("list", listOfIds);
 		}
 	}
 }
