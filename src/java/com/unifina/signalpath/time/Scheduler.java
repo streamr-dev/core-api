@@ -68,6 +68,11 @@ public class Scheduler extends ModuleWithUI implements ITimeListener {
 		}
 	}
 
+	@Override
+	public int tickRateInSec() {
+		return 1;
+	}
+
 	private Date getMinimumNextTime(Date time) {
 		Date firstNextTime = null;
 		for(Rule r : rules){
