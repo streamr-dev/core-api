@@ -84,8 +84,7 @@ abstract class MapModule extends ModuleWithUI {
 	}
 
 	@Override
-	public void clearState() {
-	}
+	public void clearState() {}
 
 	@Override
 	public java.util.Map<String, Object> getConfiguration() {
