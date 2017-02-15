@@ -295,8 +295,6 @@ public class ModuleTestHelper {
 			if (i < inputValueCount) {
 				serializeAndDeserializeModule();
 				feedInputs(i);
-			} else {
-				module.setSendPending(true); // TODO: hack, isn't concern of user of module!
 			}
 
 			// Activate module

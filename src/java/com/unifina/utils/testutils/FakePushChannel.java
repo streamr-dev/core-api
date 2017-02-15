@@ -3,10 +3,7 @@ package com.unifina.utils.testutils;
 import com.unifina.push.PushChannel;
 import com.unifina.push.PushChannelMessage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FakePushChannel extends PushChannel {
 
@@ -18,6 +15,10 @@ public class FakePushChannel extends PushChannel {
 		if (!receivedContentByChannel.containsKey(c)) {
 			receivedContentByChannel.put(c, new ArrayList<>());
 		}
-		receivedContentByChannel.get(c).add(msg.getContent());
+		receivedContentByChannel.get(c).add(handleContent(msg.getContent()));
+	}
+
+	private static Object handleContent(Object content) {
+		return content instanceof Map ? new LinkedHashMap((Map) content) : content;
 	}
 }

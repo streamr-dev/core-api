@@ -1,13 +1,12 @@
 package com.unifina.signalpath.charts;
 
+import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
 import com.unifina.utils.StreamrColor;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
-abstract class MapModule extends ModuleWithUI {
+abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
 
 	private final Input<Object> id = new Input<>(this, "id", "Object");
@@ -29,6 +28,10 @@ abstract class MapModule extends ModuleWithUI {
 
 	private boolean directionalMarkers = false;
 	private String markerIcon = DEFAULT_MARKER_ICON;
+
+	private int expiringTimeInSecs = 0;
+	private Set<MapPoint> expiringMapPoints = new LinkedHashSet<>();
+	private long currentTime;
 
 	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
 		this.centerLat = centerLat;
@@ -78,8 +81,18 @@ abstract class MapModule extends ModuleWithUI {
 			longitude.getValue(),
 			color.getValue()
 		);
-		if (customMarkerLabel) { mapPoint.put("label", label.getValue()); }
-		if (directionalMarkers) { mapPoint.put("dir", heading.getValue()); }
+		if (expiringTimeInSecs > 0) {
+			mapPoint.setExpirationTime(currentTime + (expiringTimeInSecs * 1000));
+			expiringMapPoints.remove(mapPoint);
+			expiringMapPoints.add(mapPoint);
+		}
+		if (customMarkerLabel) {
+			mapPoint.put("label", label.getValue());
+		}
+		if (directionalMarkers) {
+			mapPoint.put("dir", heading.getValue());
+		}
+
 		pushToUiChannel(mapPoint);
 	}
 
@@ -101,16 +114,17 @@ abstract class MapModule extends ModuleWithUI {
 		options.addIfMissing(new ModuleOption("traceRadius", traceRadius, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("markerLabel", customMarkerLabel, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("directionalMarkers", directionalMarkers, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("expiringTimeInSecs", expiringTimeInSecs, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("markerIcon", markerIcon, ModuleOption.OPTION_STRING)
-						.addPossibleValue("Default", DEFAULT_MARKER_ICON)
-						.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
-						.addPossibleValue("Short arrow", "fa fa-2x fa-arrow-up")
-						.addPossibleValue("Circled arrow", "fa fa-2x fa-arrow-circle-o-up")
-						.addPossibleValue("Wedge", "fa fa-3x fa-chevron-up")
-						.addPossibleValue("Double wedge", "fa fa-4x fa-angle-double-up")
-						.addPossibleValue("Circled wedge", "fa fa-2x fa-chevron-circle-up")
-						.addPossibleValue("Triangle", "fa fa-4x fa-caret-up")
-						.addPossibleValue("Triangle box", "fa fa-2x fa-caret-square-o-up")
+				.addPossibleValue("Default", DEFAULT_MARKER_ICON)
+				.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
+				.addPossibleValue("Short arrow", "fa fa-2x fa-arrow-up")
+				.addPossibleValue("Circled arrow", "fa fa-2x fa-arrow-circle-o-up")
+				.addPossibleValue("Wedge", "fa fa-3x fa-chevron-up")
+				.addPossibleValue("Double wedge", "fa fa-4x fa-angle-double-up")
+				.addPossibleValue("Circled wedge", "fa fa-2x fa-chevron-circle-up")
+				.addPossibleValue("Triangle", "fa fa-4x fa-caret-up")
+				.addPossibleValue("Triangle box", "fa fa-2x fa-caret-square-o-up")
 // 			TODO: Implement rotation logic for these markers (default is 45 deg too much)
 //			.addPossibleValue("Airplane", "fa fa-4x fa-plane")
 //			.addPossibleValue("Rocket", "fa fa-4x fa-rocket")
@@ -148,24 +162,28 @@ abstract class MapModule extends ModuleWithUI {
 			autoZoom = options.getOption("autoZoom").getBoolean();
 		}
 
-		if (options.containsKey("directionalMarkers")) {
-			directionalMarkers = options.getOption("directionalMarkers").getBoolean();
-		}
-
 		if (options.containsKey("drawTrace")) {
 			drawTrace = options.getOption("drawTrace").getBoolean();
 		}
 
-		if (options.containsKey("markerIcon")) {
-			markerIcon = options.getOption("markerIcon").getString();
+		if (options.containsKey("traceRadius")) {
+			traceRadius = options.getOption("traceRadius").getInt();
 		}
 
 		if (options.containsKey("markerLabel")) {
 			customMarkerLabel = options.getOption("markerLabel").getBoolean();
 		}
 
-		if (options.containsKey("traceRadius")) {
-			traceRadius = options.getOption("traceRadius").getInt();
+		if (options.containsKey("directionalMarkers")) {
+			directionalMarkers = options.getOption("directionalMarkers").getBoolean();
+		}
+
+		if (options.containsKey("expiringTimeInSecs")) {
+			expiringTimeInSecs = options.getOption("expiringTimeInSecs").getInt();
+		}
+
+		if (options.containsKey("markerIcon")) {
+			markerIcon = options.getOption("markerIcon").getString();
 		}
 
 		if (drawTrace) {
@@ -181,17 +199,63 @@ abstract class MapModule extends ModuleWithUI {
 		}
 	}
 
-	private static class MapPoint extends LinkedHashMap<String,Object> {
-		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
-			super();
-			if (!(id instanceof Double || id instanceof String)) {
-				id = id.toString();
+	@Override
+	public void setTime(Date time) {
+		if (expiringTimeInSecs > 0) {
+			currentTime = time.getTime();
+
+			List<String> expiredMapPointIds = new ArrayList<>();
+			Iterator<MapPoint> iterator = expiringMapPoints.iterator();
+			MapPoint mapPoint;
+
+			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpirationTime() <= currentTime) {
+				iterator.remove();
+				expiredMapPointIds.add((String) mapPoint.get("id"));
 			}
+			if (!expiredMapPointIds.isEmpty()) {
+				pushToUiChannel(new MarkerDeletionList(expiredMapPointIds));
+			}
+		}
+	}
+
+	private static class MapPoint extends LinkedHashMap<String, Object> {
+		private Long expirationTime;
+
+		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			put("t", "p");	// type: MapPoint
-			put("id", id);
+			put("id", id.toString());
 			put("lat", latitude);
 			put("lng", longitude);
 			put("color", color.toString());
+		}
+
+		public String getId() {
+			return (String) get("id");
+		}
+
+		Long getExpirationTime() {
+			return expirationTime;
+		}
+
+		void setExpirationTime(long expirationTime) {
+			this.expirationTime = expirationTime;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return o != null && o instanceof MapPoint && getId().equals(((MapPoint) o).getId());
+		}
+
+		@Override
+		public int hashCode() {
+			return get("id").hashCode();
+		}
+	}
+
+	private static class MarkerDeletionList extends LinkedHashMap<String, Object> {
+		private MarkerDeletionList(List<String> listOfIds) {
+			put("t", "d");
+			put("list", listOfIds);
 		}
 	}
 }
