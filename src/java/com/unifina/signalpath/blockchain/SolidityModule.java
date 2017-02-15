@@ -134,7 +134,19 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 	/** @returns EthereumContract with isDeployed() false */
 	private static EthereumContract compile(String code) throws Exception {
-		String responseJson = Unirest.post(ETH_SERVER_URL + "/compile").body(code).asString().getBody();
+		String bodyJson = new Gson().toJson(ImmutableMap.of(
+				"code", code
+		)).toString();
+
+		log.info("compile request: "+bodyJson);
+
+		String responseJson = Unirest.post(ETH_SERVER_URL + "/compile")
+				.header("Accept", "application/json")
+				.header("Content-Type", "application/json")
+				.body(bodyJson)
+				.asString()
+				.getBody();
+
 		CompileResponse returned;
 		try {
 			returned = new Gson().fromJson(responseJson, CompileResponse.class);
@@ -142,6 +154,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
 			throw e;
 		}
+
+		log.info("compile response: "+responseJson);
 
 		if (returned.contracts != null && returned.contracts.size() > 0) {
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
@@ -164,8 +178,19 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			"args", args,
 			"value", sendWei
 		)).toString();
+
 		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
-		String responseJson = Unirest.post(ETH_SERVER_URL + "/deploy").body(bodyJson).asString().getBody();
+
+		log.info("deploy request: "+bodyJson);
+
+		String responseJson = Unirest.post(ETH_SERVER_URL + "/deploy")
+				.header("Accept", "application/json")
+				.header("Content-Type", "application/json")
+				.body(bodyJson)
+				.asString()
+				.getBody();
+
+		log.info("deploy response: "+responseJson);
 
 		CompileResponse returned;
 		try {
