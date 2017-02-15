@@ -329,7 +329,7 @@
             // Update marker position
             var marker = _this.markers[id]
             marker.setLatLng(update.latlng)
-            if (update.rotation) {
+            if (update.hasOwnProperty("rotation")) {
                 marker.setRotationAngle(update.rotation)
             }
         })
