@@ -143,7 +143,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			throw e;
 		}
 
-		if (returned.contracts.size() > 0) {
+		if (returned.contracts != null && returned.contracts.size() > 0) {
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
 			// TODO: handle several contracts returned?
 			ContractMetadata c = returned.contracts.get(0);
@@ -175,7 +175,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			throw e;
 		}
 
-		if (returned.contracts.size() > 0) {
+		if (returned.contracts != null && returned.contracts.size() > 0) {
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
 			// TODO: handle several contracts returned?
 			ContractMetadata c = returned.contracts.get(0);
