@@ -261,7 +261,6 @@
     }
 
     StreamrMap.prototype.createMarker = function(id, label, latlng, rotation) {
-        this.latlng = latlng
         var marker = this.options.directionalMarkers ? L.marker(latlng, {
             icon: L.divIcon({
                 iconSize:     [19, 48], // size of the icon
@@ -291,17 +290,17 @@
     }
 
     StreamrMap.prototype.moveMarker = function(id, lat, lng, rotation) {
-        this.oldLatlng = this.latlng
-        this.latlng = L.latLng(lat, lng)
-        var update = { latlng: this.latlng }
+        var newLatLng = L.latLng(lat, lng)
+        var update = { latlng: newLatLng }
         if (this.options.directionalMarkers) {
             if (rotation) {
                 update.rotation = rotation
-            } else if (this.oldLatlng) {
+            } else if (this.markers[id] !== undefined) {
                 // if "heading" input isn't connected,
                 //   rotate marker so that it's "coming from" the previous latlng
-                var oldP = this.map.project(this.oldLatlng)
-                var newP = this.map.project(this.latlng)
+                var oldLatLng = this.markers[id].getLatLng()
+                var oldP = this.map.project(oldLatLng)
+                var newP = this.map.project(newLatLng)
                 var dx = newP.x - oldP.x
                 var dy = newP.y - oldP.y
                 if (Math.abs(dx) > 0.000001 || Math.abs(dy) > 0.000001) {
@@ -316,8 +315,8 @@
 
     StreamrMap.prototype.requestUpdate = function() {
         if (!this.animationFrameRequested) {
-            L.Util.requestAnimFrame(this.animate, this, true);
             this.animationFrameRequested = true;
+            L.Util.requestAnimFrame(this.animate, this, true);
         }
     }
 
@@ -334,8 +333,9 @@
             }
         })
 
-        if(this.lineLayer)
+        if (this.lineLayer) {
             this.lineLayer.render(true)
+        }
 
         this.pendingMarkerUpdates = {}
         this.animationFrameRequested = false
