@@ -231,6 +231,7 @@
     StreamrMap.prototype.removeMarkerById = function(id) {
         var marker = this.markers[id]
         delete this.markers[id]
+        delete this.pendingMarkerUpdates[id]
         this.map.removeLayer(marker)
     }
     
