@@ -1,39 +1,30 @@
-SignalPath.MapModule = function(data,canvas,prot) {
+SignalPath.MapModule = function(data, canvas, prot) {
 	prot = prot || {};
-	var pub = SignalPath.UIChannelModule(data,canvas,prot)
-
-	var $container = null
+	var pub = SignalPath.UIChannelModule(data, canvas, prot)
+    var container
 	var map = null
 
 	prot.enableIONameChange = false;	
 		
 	// Dragging in the chart container or the controls must not move the module
 	prot.dragOptions.cancel = ".map-container"
-
-	prot.getMap = function() {
-		return map
-	}
-	
+    
 	var superCreateDiv = prot.createDiv;
-	function createDiv() {
+    prot.createDiv = function() {
 		superCreateDiv();
 
 		prot.body.css("height", "100%")
 
-		container = $("<div class='map-container' style='width: 500px; height: 400px;'></div>")
+		container = $("<div/>", {
+            class: 'map-container',
+            width: '500px',
+            height: '400px'
+        })
 		prot.body.append(container)
 
-		var mapOptions = {
-			centerLat: prot.jsonData.centerLat,
-			centerLng: prot.jsonData.centerLng,
-			zoom: prot.jsonData.zoom
-		}
-		if (prot.jsonData.options) {
-			Object.keys(prot.jsonData.options).forEach(function(key) {
-				mapOptions[key] = prot.jsonData.options[key].value
-			})
-		}
-
+        var mapOptions = _.mapValues(prot.jsonData.options, function(o) {
+            return o.value
+        })
 		map = new StreamrMap(container, mapOptions)
 
 		$(map).on("move", function(e, data) {
@@ -51,7 +42,10 @@ SignalPath.MapModule = function(data,canvas,prot) {
 
 		$(SignalPath).on("loaded", updateSize)
 	}
-	prot.createDiv = createDiv;	
+    
+    prot.getMap = function() {
+        return map
+    }
 	
 	function updateSize() {
 		if (map) {
@@ -80,8 +74,12 @@ SignalPath.MapModule = function(data,canvas,prot) {
 	var superToJSON = pub.toJSON;
 	pub.toJSON = function() {
 		prot.jsonData = superToJSON();
-		var json = map.toJSON()
-		$.extend(true, prot.jsonData, json)
+		var json = _.mapValues(map.toJSON(), function(v) {
+            return {
+                value: v
+            }
+        })
+		$.extend(true, prot.jsonData.options, json)
 		return prot.jsonData
 	}
 

@@ -62,25 +62,22 @@
         this.autoZoomBounds = this.defaultAutoZoomBounds
 
         if (!this.parent.attr("id"))
-            this.parent.attr("id", "map-"+Date.now())
+            this.parent.attr("id", "map-" + Date.now())
 
         this.skin = skins[this.options.skin] || skins.default
-
-        this.baseLayer = L.tileLayer(
-            this.skin.layerUrl, {
-                attribution: this.skin.layerAttribution,
-                minZoom: _this.options.minZoom,
-                maxZoom: _this.options.maxZoom
-            }
-        )
 
         this.map = new L.Map(this.parent[0], {
             center: new L.LatLng(this.options.centerLat, this.options.centerLng),
             zoom: this.options.zoom,
             minZoom: this.options.minZoom,
-            maxZoom: this.options.maxZoom,
-            layers: [this.baseLayer]
+            maxZoom: this.options.maxZoom
         })
+        
+        if (!this.options.customImageUrl) {
+            this.baseLayer = this.createMapLayer()
+        } else {
+            this.customImageLayer = this.createCustomImageLayer()
+        }
 
         var mouseEventHandler = function() {
             _this.untouched = false
@@ -100,8 +97,18 @@
             })
         })
 
-        if(this.options.drawTrace)
+        if (this.options.drawTrace)
             this.lineLayer = this.createLinePointLayer()
+    }
+    
+    StreamrMap.prototype.createMapLayer = function() {
+        return L.tileLayer(
+            this.skin.layerUrl, {
+                attribution: this.skin.layerAttribution,
+                minZoom: this.options.minZoom,
+                maxZoom: this.options.maxZoom
+            }
+        ).addTo(this.map)
     }
 
     StreamrMap.prototype.createLinePointLayer = function() {
@@ -161,6 +168,15 @@
         return layer
     }
 
+    StreamrMap.prototype.createCustomImageLayer = function() {
+        this.map.options.crs = L.CRS.Simple
+        this.map.setView(L.latLng(this.options.centerLat, this.options.centerLng), this.options.zoom, {
+            animate: false
+        })
+        var bounds = L.latLngBounds(L.latLng(this.options.customImageHeight, 0), L.latLng(0, this.options.customImageWidth))
+        return L.imageOverlay(this.options.customImageUrl, bounds).addTo(this.map)
+    }
+    
     StreamrMap.prototype.getZoom = function() {
         return this.map.getZoom()
     }
