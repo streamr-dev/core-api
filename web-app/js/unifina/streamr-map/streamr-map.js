@@ -35,7 +35,7 @@
         this.allLineUpdates = []
 
         this.animationFrameRequested = false
-        
+
         // Default options
         this.options = $.extend({}, {
             centerLat: 35,
@@ -371,7 +371,7 @@
         this.pendingLineUpdates = []
         this.allLineUpdates = []
     }
-    
+
     exports.StreamrMap = StreamrMap
 
 })(typeof(exports) !== 'undefined' ? exports : window)

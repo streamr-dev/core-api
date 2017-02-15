@@ -3,7 +3,9 @@ package com.unifina.signalpath.charts;
 import com.unifina.signalpath.*;
 import com.unifina.utils.StreamrColor;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 abstract class MapModule extends ModuleWithUI {
 	private final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
@@ -11,9 +13,8 @@ abstract class MapModule extends ModuleWithUI {
 	private final Input<Object> id = new Input<>(this, "id", "Object");
 	private final Input<Object> label = new Input<>(this, "label", "Object");
 	private final TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
-
 	private final TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
-	private final TimeSeriesInput heading = new TimeSeriesInput(this, "heading");        // degrees clockwise ("right-handed down")
+	private final TimeSeriesInput heading = new TimeSeriesInput(this, "heading");		// degrees clockwise ("right-handed down")
 	private final ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
 	private double centerLat;
@@ -72,17 +73,13 @@ abstract class MapModule extends ModuleWithUI {
 	@Override
 	public void sendOutput() {
 		MapPoint mapPoint = new MapPoint(
-				id.getValue(),
-				latitude.getValue(),
-				longitude.getValue(),
-				color.getValue()
+			id.getValue(),
+			latitude.getValue(),
+			longitude.getValue(),
+			color.getValue()
 		);
-		if (customMarkerLabel) {
-			mapPoint.put("label", label.getValue());
-		}
-		if (directionalMarkers) {
-			mapPoint.put("dir", heading.getValue());
-		}
+		if (customMarkerLabel) { mapPoint.put("label", label.getValue()); }
+		if (directionalMarkers) { mapPoint.put("dir", heading.getValue()); }
 		pushToUiChannel(mapPoint);
 	}
 
@@ -185,13 +182,13 @@ abstract class MapModule extends ModuleWithUI {
 		}
 	}
 
-	private static class MapPoint extends LinkedHashMap<String, Object> {
+	private static class MapPoint extends LinkedHashMap<String,Object> {
 		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
 			super();
 			if (!(id instanceof Double || id instanceof String)) {
 				id = id.toString();
 			}
-			put("t", "p");    // type: MapPoint
+			put("t", "p");	// type: MapPoint
 			put("id", id);
 			put("lat", latitude);
 			put("lng", longitude);
