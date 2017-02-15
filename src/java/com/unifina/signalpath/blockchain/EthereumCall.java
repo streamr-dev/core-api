@@ -231,7 +231,7 @@ public class EthereumCall extends AbstractHttpModule {
 	}
 
 	public static class TransactionResponse {
-		public Map<String, List<Object>> events;		// event name -> args in order they're in ABI
+		public Map<String, List<JsonElement>> events;		// event name -> args in order they're in ABI
 		public Double valueSent;
 		public Double valueReceived;
 		public Double gasUsed;
@@ -258,7 +258,7 @@ public class EthereumCall extends AbstractHttpModule {
 				JsonArray resultValues = response.get("results").getAsJsonArray();
 				int n = Math.min(results.size(), resultValues.size());
 				for (int i = 0; i < n; i++) {
-					Object result = resultValues.get(i);
+					String result = resultValues.get(i).getAsString();
 					Output<Object> output = results.get(i);
 					convertAndSend(output, result);
 				}
@@ -272,13 +272,13 @@ public class EthereumCall extends AbstractHttpModule {
 				blockNumber.send(resp.blockNumber);
 				nonce.send(resp.nonce);
 				for (EthereumABI.Event ev : abi.getEvents()) {
-					List<Object> args = resp.events.get(ev.name);
+					List<JsonElement> args = resp.events.get(ev.name);
 					List<Output<Object>> evOutputs = eventOutputs.get(ev);
 					if (args != null) {
 						if (ev.inputs.size() > 0) {
 							int n = Math.min(evOutputs.size(), args.size());
 							for (int i = 0; i < n; i++) {
-								Object value = args.get(i);
+								String value = args.get(i).getAsString();
 								Output output = evOutputs.get(i);
 								convertAndSend(output, value);
 							}
@@ -297,13 +297,13 @@ public class EthereumCall extends AbstractHttpModule {
 		}
 	}
 
-	public static void convertAndSend(Output output, Object value) {
+	public static void convertAndSend(Output output, String value) {
 		if (output instanceof StringOutput) {
 			output.send(value);
 		} else if (output instanceof BooleanOutput) {
-			output.send(Boolean.parseBoolean(value.toString()));
+			output.send(Boolean.parseBoolean(value));
 		} else if (output instanceof TimeSeriesOutput) {
-			output.send(Double.parseDouble(value.toString()));
+			output.send(Double.parseDouble(value));
 		} else {
 			output.send(value);
 		}
