@@ -6,8 +6,6 @@ import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
@@ -16,7 +14,6 @@ import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +26,7 @@ public class EthereumCall extends AbstractHttpModule {
 
 	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 	private static final Logger log = Logger.getLogger(EthereumCall.class);
-	private static final int ETHEREUM_TRANSACTION_TIMEOUT = 10 * 60 * 1000;
+	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 600;
 
 	private transient Gson gson; // not guaranteed thread-safe
 
@@ -69,14 +66,14 @@ public class EthereumCall extends AbstractHttpModule {
 		ether.requiresConnection = false;
 
 		addOutput(errors);
+
+		// by default wait patiently for the next mined block, at least 10 minutes
+		timeoutMillis = ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS * 1000;
 	}
 
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-
-		// wait patiently for the next mined block, at least 10 minutes
-		if (timeoutMillis < ETHEREUM_TRANSACTION_TIMEOUT) { timeoutMillis = ETHEREUM_TRANSACTION_TIMEOUT; }
 
 		// ethereum RPC is JSON only
 		bodyContentType = AbstractHttpModule.BODY_FORMAT_JSON;

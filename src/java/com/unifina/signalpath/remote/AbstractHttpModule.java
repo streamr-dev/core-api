@@ -105,7 +105,11 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 		bodyContentType = MapTraversal.getString(config, "options.bodyContentType.value", AbstractHttpModule.BODY_FORMAT_JSON);
 		trustSelfSigned = MapTraversal.getBoolean(config, "options.trustSelfSigned.value");
 		isAsync = MapTraversal.getString(config, "options.syncMode.value", "async").equals("async");
-		timeoutMillis = 1000 * MapTraversal.getInt(config, "options.timeoutSeconds.value", DEFAULT_TIMEOUT_SECONDS);
+
+		Integer timeoutSeconds = MapTraversal.getInteger(config, "options.timeoutSeconds.value");
+		if (timeoutSeconds != null) {
+			timeoutMillis = 1000 * timeoutSeconds;
+		}
 
 		// HTTP module in async mode won't send outputs on SendOutput(),
 		// 	but only in receive() where it creates its own Propagator
