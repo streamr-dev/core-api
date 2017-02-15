@@ -6,6 +6,7 @@ import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -218,9 +219,9 @@ public class EthereumCall extends AbstractHttpModule {
 		String jsonString = gson.toJson(args);
 
 		HttpPost request = new HttpPost(ETH_SERVER_URL + "/call");
-		request.setConfig(RequestConfig.custom()
-				.setSocketTimeout(60 * 1000) // 1 minute
-				.build());
+		request.setHeader(HttpHeaders.ACCEPT, "application/json");
+		request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		request.setConfig(RequestConfig.custom().setSocketTimeout(10 * 60 * 1000).build()); // wait patiently for the next mined block, up to 10 minutes
 		try {
 			log.info("Sending function call: " + jsonString);
 			request.setEntity(new StringEntity(jsonString));
