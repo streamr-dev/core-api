@@ -96,7 +96,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			}
 		} catch (Exception e) {
 			// TODO: currently I got no notification when URL was incorrect
-			if (ExceptionUtils.getRootCause(e) instanceof java.net.ConnectException){
+			if (ExceptionUtils.getRootCause(e) instanceof java.net.ConnectException) {
 				log.error("Could not connect to web3 backend!", e);
 				throw new RuntimeException("Sorry, we couldn't contact Ethereum at this time. We'll try to fix this soon.");
 			} else {
@@ -135,7 +135,14 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	/** @returns EthereumContract with isDeployed() false */
 	private static EthereumContract compile(String code) throws Exception {
 		String responseJson = Unirest.post(ETH_SERVER_URL + "/compile").body(code).asString().getBody();
-		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
+		CompileResponse returned;
+		try {
+			returned = new Gson().fromJson(responseJson, CompileResponse.class);
+		} catch (Exception e) {
+			log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
+			throw e;
+		}
+
 		if (returned.contracts.size() > 0) {
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
 			// TODO: handle several contracts returned?
@@ -159,7 +166,15 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		)).toString();
 		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
 		String responseJson = Unirest.post(ETH_SERVER_URL + "/deploy").body(bodyJson).asString().getBody();
-		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
+
+		CompileResponse returned;
+		try {
+			returned = new Gson().fromJson(responseJson, CompileResponse.class);
+		} catch (Exception e) {
+			log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
+			throw e;
+		}
+
 		if (returned.contracts.size() > 0) {
 			// TODO: bring returned.errors to UI somehow? They're warnings probably since compilation was successful
 			// TODO: handle several contracts returned?

@@ -269,11 +269,11 @@ environments {
 /**
  * Streamr-web3 Ethereum bridge address
  */
-streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "http://dev-data.streamr"
+streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "http://localhost:3000"
 streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: "0x65078b902ca3455dcefe5c1c2cea4df6053ab50f"
 environments {
 	production {
-		streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "https://data.streamr.com"
+		streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "http://localhost:3000"
 	}
 }
 
