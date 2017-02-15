@@ -27,6 +27,7 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 		} else {
 			var deployButton = $("<button class='btn btn-block btn-default btn-sm'>Deploy</button>");
 			deployButton.click(function() {
+				deployButton.html("<i class='fa fa-spinner fa-pulse'></i>")
 				prot.jsonData.deploy = true
 				SignalPath.updateModule(pub, function(data, err) {
 					delete prot.jsonData.deploy
