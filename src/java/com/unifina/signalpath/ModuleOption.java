@@ -3,7 +3,6 @@ package com.unifina.signalpath;
 import java.util.*;
 
 public class ModuleOption extends LinkedHashMap<String, Object> {
-
 	public static final String OPTION_STRING = "string";
 	public static final String OPTION_INTEGER = "int";
 	public static final String OPTION_BOOLEAN = "boolean";
@@ -25,7 +24,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	@SuppressWarnings("unused")
 	public ModuleOption() {}
 	
-	ModuleOption(String key, Map<String, Object> map) {
+	private ModuleOption(String key, Map<String, Object> map) {
 		this.key = key;
 		this.putAll(map);
 	}
@@ -52,10 +51,6 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		choice.put("value", value);
 		choices.add(choice);
 		return this;
-	}
-
-	public void addTo(Map<String,Object> options) {
-		options.put(key, this);
 	}
 	
 	public String getKey() {
