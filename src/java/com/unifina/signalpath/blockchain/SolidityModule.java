@@ -157,6 +157,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			"args", args,
 			"value", sendWei
 		)).toString();
+		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
 		String responseJson = Unirest.post(ETH_SERVER_URL + "/deploy").body(bodyJson).asString().getBody();
 		CompileResponse returned = new Gson().fromJson(responseJson, CompileResponse.class);
 		if (returned.contracts.size() > 0) {
