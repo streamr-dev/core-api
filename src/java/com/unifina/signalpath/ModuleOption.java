@@ -94,6 +94,10 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		return new ModuleOption(key, value, OPTION_INTEGER);
 	}
 
+	public static ModuleOption createDouble(String key, Double value) {
+		return new ModuleOption(key, value, OPTION_DOUBLE);
+	}
+
 	public static ModuleOption createString(String key, String value) {
 		return new ModuleOption(key, value, OPTION_STRING);
 	}

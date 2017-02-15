@@ -22,9 +22,9 @@ public class GeographicalMapModule extends MapModule {
 		java.util.Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(new ModuleOption("skin", skin, ModuleOption.OPTION_STRING)
-				.addPossibleValue("Default", "default")
-				.addPossibleValue("Dark", "cartoDark")
+		options.addIfMissing(ModuleOption.createString("skin", skin)
+			.addPossibleValue("Default", "default")
+			.addPossibleValue("Dark", "cartoDark")
 		);
 
 		return config;
