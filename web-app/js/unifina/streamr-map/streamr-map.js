@@ -76,7 +76,9 @@
         if (!this.options.customImageUrl) {
             this.baseLayer = this.createMapLayer()
         } else {
-            this.customImageLayer = this.createCustomImageLayer()
+            this.createCustomImageLayer(function(customImageLayer) {
+                _this.customImageLayer = customImageLayer
+            })
         }
 
         var mouseEventHandler = function() {
@@ -168,13 +170,24 @@
         return layer
     }
 
-    StreamrMap.prototype.createCustomImageLayer = function() {
-        this.map.options.crs = L.CRS.Simple
-        this.map.setView(L.latLng(this.options.centerLat, this.options.centerLng), this.options.zoom, {
-            animate: false
+    StreamrMap.prototype.createCustomImageLayer = function(cb) {
+        // Load image with jQuery to get width/height
+        var _this = this
+        $("<img/>", {
+            src: this.options.customImageUrl,
+            load: function() {
+                _this.customImageWidth = this.width;
+                _this.customImageHeight = this.height;
+                console.info("Read", _this.options.customImageUrl, "with dimensions", this.width, "x", this.height)
+
+                _this.map.options.crs = L.CRS.Simple
+                _this.map.setView(L.latLng(_this.options.centerLat, _this.options.centerLng), _this.options.zoom, {
+                    animate: false
+                })
+                var bounds = L.latLngBounds(L.latLng(_this.customImageHeight, 0), L.latLng(0, _this.customImageWidth))
+                cb(L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map))
+            }
         })
-        var bounds = L.latLngBounds(L.latLng(this.options.customImageHeight, 0), L.latLng(0, this.options.customImageWidth))
-        return L.imageOverlay(this.options.customImageUrl, bounds).addTo(this.map)
     }
     
     StreamrMap.prototype.getZoom = function() {
