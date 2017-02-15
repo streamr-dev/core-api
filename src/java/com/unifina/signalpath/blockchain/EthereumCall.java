@@ -29,6 +29,7 @@ public class EthereumCall extends AbstractHttpModule {
 
 	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 	private static final Logger log = Logger.getLogger(EthereumCall.class);
+	private static final int ETHEREUM_TRANSACTION_TIMEOUT = 10 * 60 * 1000;
 
 	private transient Gson gson; // not guaranteed thread-safe
 
@@ -73,6 +74,13 @@ public class EthereumCall extends AbstractHttpModule {
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+
+		// wait patiently for the next mined block, at least 10 minutes
+		if (timeoutMillis < ETHEREUM_TRANSACTION_TIMEOUT) { timeoutMillis = ETHEREUM_TRANSACTION_TIMEOUT; }
+
+		// ethereum RPC is JSON only
+		bodyContentType = AbstractHttpModule.BODY_FORMAT_JSON;
+
 		updateInterface();
 
 		// Find the function input config and configure it manually.
@@ -219,9 +227,7 @@ public class EthereumCall extends AbstractHttpModule {
 		String jsonString = gson.toJson(args);
 
 		HttpPost request = new HttpPost(ETH_SERVER_URL + "/call");
-		request.setHeader(HttpHeaders.ACCEPT, "application/json");
-		request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-		request.setConfig(RequestConfig.custom().setSocketTimeout(10 * 60 * 1000).build()); // wait patiently for the next mined block, up to 10 minutes
+
 		try {
 			log.info("Sending function call: " + jsonString);
 			request.setEntity(new StringEntity(jsonString));

@@ -5,6 +5,7 @@ import com.unifina.data.IEventRecipient;
 import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
@@ -134,6 +135,10 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 			sendOutput(response);
 			return;
 		}
+		if (request instanceof HttpEntityEnclosingRequestBase && BODY_FORMAT_JSON.equals(bodyContentType)) {
+			request.setHeader(HttpHeaders.ACCEPT, "application/json");
+			request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		}	// FORMDATA headers are correct already if the entity is UrlEncodedFormEntity
 		RequestConfig requestConfig = RequestConfig.custom()
 				.setConnectTimeout(timeoutMillis)
 				.setConnectionRequestTimeout(timeoutMillis)
