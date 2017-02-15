@@ -304,7 +304,7 @@
                 var newP = this.map.project(this.latlng)
                 var dx = newP.x - oldP.x
                 var dy = newP.y - oldP.y
-                if (Math.abs(dx) > 0.0001 || Math.abs(dy) > 0.0001) {
+                if (Math.abs(dx) > 0.000001 || Math.abs(dy) > 0.000001) {
                     update.rotation = Math.atan2(dx, -dy) / Math.PI * 180;
                 }
             }
