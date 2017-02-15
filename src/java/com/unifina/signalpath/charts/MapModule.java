@@ -5,7 +5,7 @@ import com.unifina.utils.StreamrColor;
 
 import java.util.LinkedHashMap;
 
-public class MapModule extends ModuleWithUI {
+abstract class MapModule extends ModuleWithUI {
 	private final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
 
 	private final Input<Object> id = new Input<>(this, "id", "Object");
@@ -16,13 +16,27 @@ public class MapModule extends ModuleWithUI {
 	private final TimeSeriesInput heading = new TimeSeriesInput(this, "heading");        // degrees clockwise ("right-handed down")
 	private final ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
+	private double centerLat;
+	private double centerLng;
+	private int minZoom;
+	private int maxZoom;
+	private int zoom;
+	private boolean autoZoom;
 	private boolean drawTrace = false;
-	private boolean autoZoom = true;
 	private int traceRadius = 2;
 	private boolean customMarkerLabel = false;
 
 	private boolean directionalMarkers = false;
 	private String markerIcon = DEFAULT_MARKER_ICON;
+
+	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
+		this.centerLat = centerLat;
+		this.centerLng = centerLng;
+		this.minZoom = minZoom;
+		this.maxZoom = maxZoom;
+		this.zoom = zoom;
+		this.autoZoom = autoZoom;
+	}
 
 	@Override
 	public void init() {
@@ -81,10 +95,16 @@ public class MapModule extends ModuleWithUI {
 		java.util.Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
+		options.addIfMissing(new ModuleOption("centerLat", centerLat, ModuleOption.OPTION_DOUBLE));
+		options.addIfMissing(new ModuleOption("centerLng", centerLng, ModuleOption.OPTION_DOUBLE));
+		options.addIfMissing(new ModuleOption("minZoom", minZoom, ModuleOption.OPTION_INTEGER));
+		options.addIfMissing(new ModuleOption("maxZoom", maxZoom, ModuleOption.OPTION_INTEGER));
+		options.addIfMissing(new ModuleOption("zoom", zoom, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("autoZoom", autoZoom, ModuleOption.OPTION_BOOLEAN));
-		options.addIfMissing(new ModuleOption("directionalMarkers", directionalMarkers, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("drawTrace", drawTrace, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("traceRadius", traceRadius, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("markerLabel", customMarkerLabel, ModuleOption.OPTION_BOOLEAN));
+		options.addIfMissing(new ModuleOption("directionalMarkers", directionalMarkers, ModuleOption.OPTION_BOOLEAN));
 		options.addIfMissing(new ModuleOption("markerIcon", markerIcon, ModuleOption.OPTION_STRING)
 						.addPossibleValue("Default", DEFAULT_MARKER_ICON)
 						.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
@@ -99,7 +119,6 @@ public class MapModule extends ModuleWithUI {
 //			.addPossibleValue("Airplane", "fa fa-4x fa-plane")
 //			.addPossibleValue("Rocket", "fa fa-4x fa-rocket")
 		);
-		options.addIfMissing(new ModuleOption("traceRadius", traceRadius, ModuleOption.OPTION_INTEGER));
 
 		return config;
 	}
@@ -108,6 +127,26 @@ public class MapModule extends ModuleWithUI {
 	protected void onConfiguration(java.util.Map<String, Object> config) {
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);
+
+		if (options.containsKey("centerLat")) {
+			centerLat = options.getOption("centerLat").getDouble();
+		}
+
+		if (options.containsKey("centerLng")) {
+			centerLng = options.getOption("centerLng").getDouble();
+		}
+
+		if (options.containsKey("minZoom")) {
+			minZoom = options.getOption("minZoom").getInt();
+		}
+
+		if (options.containsKey("maxZoom")) {
+			maxZoom = options.getOption("maxZoom").getInt();
+		}
+
+		if (options.containsKey("zoom")) {
+			zoom = options.getOption("zoom").getInt();
+		}
 
 		if (options.containsKey("autoZoom")) {
 			autoZoom = options.getOption("autoZoom").getBoolean();
