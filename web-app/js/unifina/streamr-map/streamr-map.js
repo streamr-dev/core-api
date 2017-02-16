@@ -74,11 +74,9 @@
         })
         
         if (!this.options.customImageUrl) {
-            this.baseLayer = this.createMapLayer()
+            this.createMapLayer()
         } else {
-            this.createCustomImageLayer(function(customImageLayer) {
-                _this.customImageLayer = customImageLayer
-            })
+            this.createCustomImageLayer()
         }
 
         var mouseEventHandler = function() {
@@ -104,13 +102,33 @@
     }
     
     StreamrMap.prototype.createMapLayer = function() {
-        return L.tileLayer(
+        L.tileLayer(
             this.skin.layerUrl, {
                 attribution: this.skin.layerAttribution,
                 minZoom: this.options.minZoom,
                 maxZoom: this.options.maxZoom
             }
         ).addTo(this.map)
+    }
+
+    StreamrMap.prototype.createCustomImageLayer = function() {
+        // Load image with jQuery to get width/height
+        var _this = this
+        $("<img/>", {
+            src: this.options.customImageUrl,
+            load: function() {
+                _this.customImageWidth = this.width;
+                _this.customImageHeight = this.height;
+                console.info("Read", _this.options.customImageUrl, "with dimensions", this.width, "x", this.height)
+
+                _this.map.options.crs = L.CRS.Simple
+                _this.map.setView(L.latLng(_this.options.centerLat, _this.options.centerLng), _this.options.zoom, {
+                    animate: false
+                })
+                var bounds = L.latLngBounds(L.latLng(_this.customImageHeight, 0), L.latLng(0, _this.customImageWidth))
+                L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map).bringToBack()
+            }
+        })
     }
 
     StreamrMap.prototype.createLinePointLayer = function() {
@@ -166,28 +184,7 @@
             }
         })
 
-        var layer = new LinePointLayer().addTo(this.map)
-        return layer
-    }
-
-    StreamrMap.prototype.createCustomImageLayer = function(cb) {
-        // Load image with jQuery to get width/height
-        var _this = this
-        $("<img/>", {
-            src: this.options.customImageUrl,
-            load: function() {
-                _this.customImageWidth = this.width;
-                _this.customImageHeight = this.height;
-                console.info("Read", _this.options.customImageUrl, "with dimensions", this.width, "x", this.height)
-
-                _this.map.options.crs = L.CRS.Simple
-                _this.map.setView(L.latLng(_this.options.centerLat, _this.options.centerLng), _this.options.zoom, {
-                    animate: false
-                })
-                var bounds = L.latLngBounds(L.latLng(_this.customImageHeight, 0), L.latLng(0, _this.customImageWidth))
-                cb(L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map))
-            }
-        })
+        return new LinePointLayer().addTo(this.map).bringToFront()
     }
     
     StreamrMap.prototype.getZoom = function() {
