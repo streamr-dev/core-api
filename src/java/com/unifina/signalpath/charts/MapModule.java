@@ -23,7 +23,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private int zoom;
 	private boolean autoZoom;
 	private boolean drawTrace = false;
-	private int traceRadius = 2;
+	private int traceWidth = 2;
 	private boolean customMarkerLabel = false;
 
 	private boolean directionalMarkers = false;
@@ -31,7 +31,9 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	private int expiringTimeInSecs = 0;
 	private Set<MapPoint> expiringMapPoints = new LinkedHashSet<>();
-	private long currentTime;
+
+	private int expiringTimeOfTraceInSecs = 0;
+	private Set<Point> expiringPoints = new LinkedHashSet<>();
 
 	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
 		this.centerLat = centerLat;
@@ -81,10 +83,18 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			longitude.getValue(),
 			color.getValue()
 		);
+
 		if (expiringTimeInSecs > 0) {
-			mapPoint.setExpirationTime(currentTime + (expiringTimeInSecs * 1000));
+			mapPoint.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeInSecs * 1000));
 			expiringMapPoints.remove(mapPoint);
 			expiringMapPoints.add(mapPoint);
+		}
+
+		if (drawTrace && expiringTimeOfTraceInSecs > 0) {
+			Point point = new Point(id.getValue().toString(), latitude.getValue(), longitude.getValue());
+			point.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000));
+			expiringPoints.remove(point);
+			expiringPoints.add(point);
 		}
 		if (customMarkerLabel) {
 			mapPoint.put("label", label.getValue());
@@ -92,12 +102,13 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		if (directionalMarkers) {
 			mapPoint.put("dir", heading.getValue());
 		}
-
 		pushToUiChannel(mapPoint);
 	}
 
 	@Override
-	public void clearState() {}
+	public void clearState() {
+		expiringPoints.clear();
+	}
 
 	@Override
 	public java.util.Map<String, Object> getConfiguration() {
@@ -109,9 +120,10 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createInt("minZoom", minZoom));
 		options.addIfMissing(ModuleOption.createInt("maxZoom", maxZoom));
 		options.addIfMissing(ModuleOption.createInt("zoom", zoom));
+		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
 		options.addIfMissing(ModuleOption.createBoolean("autoZoom", autoZoom));
 		options.addIfMissing(ModuleOption.createBoolean("drawTrace", drawTrace));
-		options.addIfMissing(ModuleOption.createInt("traceRadius", traceRadius));
+		options.addIfMissing(ModuleOption.createInt("traceWidth", traceWidth));
 		options.addIfMissing(ModuleOption.createBoolean("markerLabel", customMarkerLabel));
 		options.addIfMissing(ModuleOption.createBoolean("directionalMarkers", directionalMarkers));
 		options.addIfMissing(ModuleOption.createInt("expiringTimeInSecs", expiringTimeInSecs));
@@ -166,8 +178,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			drawTrace = options.getOption("drawTrace").getBoolean();
 		}
 
-		if (options.containsKey("traceRadius")) {
-			traceRadius = options.getOption("traceRadius").getInt();
+		if (options.containsKey("traceWidth")) {
+			traceWidth = options.getOption("traceWidth").getInt();
 		}
 
 		if (options.containsKey("markerLabel")) {
@@ -186,6 +198,10 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			markerIcon = options.getOption("markerIcon").getString();
 		}
 
+		if (options.containsKey("expiringTimeOfTraceInSecs")) {
+			expiringTimeOfTraceInSecs = options.getOption("expiringTimeOfTraceInSecs").getInt();
+		}
+
 		if (drawTrace) {
 			addInput(color);
 		}
@@ -201,20 +217,29 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	@Override
 	public void setTime(Date time) {
-		if (expiringTimeInSecs > 0) {
-			currentTime = time.getTime();
+		List<String> expiredMapPointIds = new ArrayList<>();
+		List<String> expiredPoints = new ArrayList<>();
 
-			List<String> expiredMapPointIds = new ArrayList<>();
+		if (expiringTimeInSecs > 0) {
 			Iterator<MapPoint> iterator = expiringMapPoints.iterator();
 			MapPoint mapPoint;
 
-			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpirationTime() <= currentTime) {
+			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpirationTime() <= time.getTime()) {
 				iterator.remove();
 				expiredMapPointIds.add((String) mapPoint.get("id"));
 			}
-			if (!expiredMapPointIds.isEmpty()) {
-				pushToUiChannel(new MarkerDeletionList(expiredMapPointIds));
+		}
+		if (expiringTimeOfTraceInSecs > 0) {
+			Iterator<Point> iterator = expiringPoints.iterator();
+			Point point;
+
+			while (iterator.hasNext() && (point = iterator.next()).getExpirationTime() <= time.getTime()) {
+				iterator.remove();
+				expiredPoints.add((String) point.getId());
 			}
+		}
+		if (!expiredMapPointIds.isEmpty() || !expiredPoints.isEmpty()) {
+			pushToUiChannel(new ExpirementList(expiredMapPointIds, expiredPoints));
 		}
 	}
 
@@ -252,10 +277,52 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		}
 	}
 
-	private static class MarkerDeletionList extends LinkedHashMap<String, Object> {
-		private MarkerDeletionList(List<String> listOfIds) {
+	private static class Point {
+		private Object id;
+		private double lat;
+		private double lng;
+		private long expirationTime;
+
+		public Point(Object id, double lat, double lng) {
+			this.id = id;
+			this.lat = lat;
+			this.lng = lng;
+		}
+
+		public void setExpirationTime(long expirationTime) {
+			this.expirationTime = expirationTime;
+		}
+
+		private long getExpirationTime() {
+			return expirationTime;
+		}
+
+		public double getLat() {
+			return lat;
+		}
+
+		public void setLat(double lat) {
+			this.lat = lat;
+		}
+
+		public double getLng() {
+			return lng;
+		}
+
+		public void setLng(double lng) {
+			this.lng = lng;
+		}
+
+		public Object getId() {
+			return id;
+		}
+	}
+
+	private static class ExpirementList extends LinkedHashMap<String, Object> {
+		private ExpirementList(List<String> markerList, List<String> pointList) {
 			put("t", "d");
-			put("list", listOfIds);
+			put("markerList", markerList);
+			put("pointList", pointList);
 		}
 	}
 }

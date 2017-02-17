@@ -20,6 +20,7 @@ public class Globals {
 	private static final Logger log = Logger.getLogger(Globals.class);
 
 	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 	public SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -104,6 +105,10 @@ public class Globals {
 		if (System.getSecurityManager()!=null)
 			AccessController.checkPermission(new UserPermission());
 		this.user = user;
+	}
+
+	public Date getTime() {
+		return time;
 	}
 	
 	protected String detectTimeZone() {

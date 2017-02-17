@@ -43,7 +43,7 @@
             zoom: 2,
             minZoom: 2,
             maxZoom: 18,
-            traceRadius: 2,
+            traceWidth: 2,
             drawTrace: false,
             skin: "default",
             markerIcon: DEFAULT_MARKER_ICON
@@ -97,8 +97,9 @@
             })
         })
 
-        if (this.options.drawTrace)
+        if (this.options.drawTrace) {
             this.lineLayer = this.createLinePointLayer()
+        }
     }
     
     StreamrMap.prototype.createMapLayer = function() {
@@ -133,24 +134,30 @@
 
     StreamrMap.prototype.createLinePointLayer = function() {
         var _this = this
-        this.circles = []
         var LinePointLayer = L.CanvasLayer.extend({
-            renderCircle: function(ctx, point, radius, color) {
-                color = color || 'rgba(255,0,0,1)'
-                ctx.fillStyle = color;
-                ctx.strokeStyle = color;
-                ctx.beginPath();
-                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2.0, true, true);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                _this.circles.push(ctx)
+            initialize: function() {
+                L.CanvasLayer.prototype.initialize.apply(this)
+                this.currentLatLngsById = {}
+            },
+            renderLine: function(id, ctx, latlng, point, color) {
+                var lastLatLng = this.currentLatLngsById[id]
+                if (lastLatLng) {
+                    var lastPoint = _this.map.latLngToContainerPoint(lastLatLng)
+                    color = color || 'rgba(255,0,0,1)'
+                    ctx.strokeStyle = color
+                    ctx.lineWidth = _this.options.traceWidth
+                    ctx.beginPath()
+                    ctx.moveTo(lastPoint.x, lastPoint.y)
+                    ctx.lineTo(point.x, point.y)
+                    ctx.stroke()
+                }
+                this.currentLatLngsById[id] = latlng
             },
 
             render: function(changesOnly) {
-                var bigPointLayer = this
-                var canvas = this.getCanvas();
-                var ctx = canvas.getContext('2d');
+                var linePointLayer = this
+                var canvas = this.getCanvas()
+                var ctx = canvas.getContext('2d')
 
                 var updates
                 if (changesOnly) {
@@ -159,7 +166,7 @@
                 else {
                     updates = _this.allLineUpdates
                     // clear canvas
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
                 }
 
                 if(!changesOnly)
@@ -170,8 +177,8 @@
                     _this.traceRedrawTimeout = setTimeout(function() {
                         var count = i + TRACE_REDRAW_BATCH_SIZE
                         while (i < count && i < updates.length) {
-                            var point = bigPointLayer._map.latLngToContainerPoint(updates[i].latlng);
-                            bigPointLayer.renderCircle(ctx, point, _this.options.traceRadius, updates[i].color)
+                            var point = linePointLayer._map.latLngToContainerPoint(updates[i].latlng)
+                            linePointLayer.renderLine(updates[i].id, ctx, updates[i].latlng, point, updates[i].color)
                             i++
                         }
                         if (i < updates.length)
@@ -341,6 +348,7 @@
     StreamrMap.prototype.addLinePoint = function(id, lat, lng, color) {
         var latlng = L.latLng(lat,lng)
         var update = {
+            id: id,
             latlng: latlng,
             color: color
         }
@@ -383,10 +391,9 @@
         $.each(this.markers, function(k, v) {
             _this.map.removeLayer(v)
         })
-        if(this.circles && this.circles.length) {
-            var ctx = this.circles[0]
+        if(this.lineLayer) {
+            var ctx = this.lineLayer.getCanvas().getContext('2d')
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            this.circles = []
         }
 
         this.autoZoomBounds = this.defaultAutoZoomBounds
