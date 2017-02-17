@@ -11,11 +11,11 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 		// Slight hack: set temporary flag in json to communicate command to backend
 		prot.jsonData.compile = true
 		super_compile(function(data, err) {
-			delete prot.jsonData.compile
 			if (callback) {
 				callback(data, err)
 			}
 		})
+		delete prot.jsonData.deploy
 	}
 
 	var super_createModuleFooter = prot.createModuleFooter
@@ -29,9 +29,8 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 			deployButton.click(function() {
 				deployButton.html("<i class='fa fa-spinner fa-pulse'></i>")
 				prot.jsonData.deploy = true
-				SignalPath.updateModule(pub, function(data, err) {
-					delete prot.jsonData.deploy
-				})
+				SignalPath.updateModule(pub)
+				delete prot.jsonData.deploy
 			});
 			footer.append(deployButton);
 		}
