@@ -74,7 +74,7 @@ class GeographicalMapModuleSpec extends Specification {
 			uiChannel: [id: "mapPointData"],
 			options: [
 				drawTrace: [value: true],
-				expiringTimeInSecs: [value: 2]
+				expiringTimeOfMarkerInSecs: [value: 2]
 			]
 		])
 
@@ -140,7 +140,7 @@ class GeographicalMapModuleSpec extends Specification {
 			.test()
 	}
 
-	void "MapModule works correctly with expiring points"() {
+	void "MapModule works correctly with expiring (trace)points"() {
 		module.configure([
 				uiChannel: [id: "mapPointData"],
 				options: [
@@ -186,7 +186,6 @@ class GeographicalMapModuleSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 				.uiChannelMessages(channelMessages)
 				.ticks(ticks)
-				.extraIterationsAfterInput(3)
 				.test()
 	}
 }

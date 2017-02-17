@@ -4,6 +4,7 @@ import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
 import com.unifina.utils.StreamrColor;
 
+import java.io.Serializable;
 import java.util.*;
 
 abstract class MapModule extends ModuleWithUI implements ITimeListener {
@@ -29,8 +30,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private boolean directionalMarkers = false;
 	private String markerIcon = DEFAULT_MARKER_ICON;
 
-	private int expiringTimeInSecs = 0;
-	private Set<MapPoint> expiringMapPoints = new LinkedHashSet<>();
+	private int expiringTimeOfMarkerInSecs = 0;
+	private Set<Marker> expiringMarkers = new LinkedHashSet<>();
 
 	private int expiringTimeOfTraceInSecs = 0;
 	private Set<Point> expiringPoints = new LinkedHashSet<>();
@@ -49,7 +50,6 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		addInput(id);
 		addInput(latitude);
 		addInput(longitude);
-		this.canClearState = false;
 		this.resendAll = false;
 		this.resendLast = 0;
 		latitude.setDrivingInput(true);
@@ -77,17 +77,17 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	@Override
 	public void sendOutput() {
-		MapPoint mapPoint = new MapPoint(
+		Marker marker = new Marker(
 			id.getValue(),
 			latitude.getValue(),
 			longitude.getValue(),
 			color.getValue()
 		);
 
-		if (expiringTimeInSecs > 0) {
-			mapPoint.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeInSecs * 1000));
-			expiringMapPoints.remove(mapPoint);
-			expiringMapPoints.add(mapPoint);
+		if (expiringTimeOfMarkerInSecs > 0) {
+			marker.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfMarkerInSecs * 1000));
+			expiringMarkers.remove(marker);
+			expiringMarkers.add(marker);
 		}
 
 		if (drawTrace && expiringTimeOfTraceInSecs > 0) {
@@ -97,16 +97,17 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			expiringPoints.add(point);
 		}
 		if (customMarkerLabel) {
-			mapPoint.put("label", label.getValue());
+			marker.put("label", label.getValue());
 		}
 		if (directionalMarkers) {
-			mapPoint.put("dir", heading.getValue());
+			marker.put("dir", heading.getValue());
 		}
-		pushToUiChannel(mapPoint);
+		pushToUiChannel(marker);
 	}
 
 	@Override
 	public void clearState() {
+		expiringMarkers.clear();
 		expiringPoints.clear();
 	}
 
@@ -120,13 +121,13 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createInt("minZoom", minZoom));
 		options.addIfMissing(ModuleOption.createInt("maxZoom", maxZoom));
 		options.addIfMissing(ModuleOption.createInt("zoom", zoom));
-		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
 		options.addIfMissing(ModuleOption.createBoolean("autoZoom", autoZoom));
 		options.addIfMissing(ModuleOption.createBoolean("drawTrace", drawTrace));
 		options.addIfMissing(ModuleOption.createInt("traceWidth", traceWidth));
 		options.addIfMissing(ModuleOption.createBoolean("markerLabel", customMarkerLabel));
 		options.addIfMissing(ModuleOption.createBoolean("directionalMarkers", directionalMarkers));
-		options.addIfMissing(ModuleOption.createInt("expiringTimeInSecs", expiringTimeInSecs));
+		options.addIfMissing(ModuleOption.createInt("expiringTimeOfMarkerInSecs", expiringTimeOfMarkerInSecs));
+		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
 		options.addIfMissing(ModuleOption.createString("markerIcon", markerIcon)
 			.addPossibleValue("Default", DEFAULT_MARKER_ICON)
 			.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
@@ -190,16 +191,16 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			directionalMarkers = options.getOption("directionalMarkers").getBoolean();
 		}
 
-		if (options.containsKey("expiringTimeInSecs")) {
-			expiringTimeInSecs = options.getOption("expiringTimeInSecs").getInt();
-		}
-
-		if (options.containsKey("markerIcon")) {
-			markerIcon = options.getOption("markerIcon").getString();
+		if (options.containsKey("expiringTimeOfMarkerInSecs")) {
+			expiringTimeOfMarkerInSecs = options.getOption("expiringTimeOfMarkerInSecs").getInt();
 		}
 
 		if (options.containsKey("expiringTimeOfTraceInSecs")) {
 			expiringTimeOfTraceInSecs = options.getOption("expiringTimeOfTraceInSecs").getInt();
+		}
+
+		if (options.containsKey("markerIcon")) {
+			markerIcon = options.getOption("markerIcon").getString();
 		}
 
 		if (drawTrace) {
@@ -220,13 +221,13 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		List<String> expiredMapPointIds = new ArrayList<>();
 		List<String> expiredPoints = new ArrayList<>();
 
-		if (expiringTimeInSecs > 0) {
-			Iterator<MapPoint> iterator = expiringMapPoints.iterator();
-			MapPoint mapPoint;
+		if (expiringTimeOfMarkerInSecs > 0) {
+			Iterator<Marker> iterator = expiringMarkers.iterator();
+			Marker marker;
 
-			while (iterator.hasNext() && (mapPoint = iterator.next()).getExpirationTime() <= time.getTime()) {
+			while (iterator.hasNext() && (marker = iterator.next()).getExpirationTime() <= time.getTime()) {
 				iterator.remove();
-				expiredMapPointIds.add((String) mapPoint.get("id"));
+				expiredMapPointIds.add(marker.getId());
 			}
 		}
 		if (expiringTimeOfTraceInSecs > 0) {
@@ -243,10 +244,13 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		}
 	}
 
-	private static class MapPoint extends LinkedHashMap<String, Object> {
+	/**
+	 * Marker point
+	 */
+	private static class Marker extends LinkedHashMap<String, Object> {
 		private Long expirationTime;
 
-		private MapPoint(Object id, Double latitude, Double longitude, StreamrColor color) {
+		private Marker(Object id, Double latitude, Double longitude, StreamrColor color) {
 			put("t", "p");	// type: MapPoint
 			put("id", id.toString());
 			put("lat", latitude);
@@ -254,7 +258,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			put("color", color.toString());
 		}
 
-		public String getId() {
+		String getId() {
 			return (String) get("id");
 		}
 
@@ -268,7 +272,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 		@Override
 		public boolean equals(Object o) {
-			return o != null && o instanceof MapPoint && getId().equals(((MapPoint) o).getId());
+			return o != null && o instanceof Marker && getId().equals(((Marker) o).getId());
 		}
 
 		@Override
@@ -277,7 +281,10 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		}
 	}
 
-	private static class Point {
+	/**
+	 * Trace point
+	 */
+	private static class Point implements Serializable {
 		private Object id;
 		private double lat;
 		private double lng;
