@@ -38,7 +38,6 @@ public class EthereumCall extends AbstractHttpModule {
 
 	private EthereumABI abi;
 	private EthereumABI.Function chosenFunction;
-	private boolean isValid = false;
 
 	private FunctionNameParameter function = new FunctionNameParameter(this, "function");
 	private List<Input<Object>> arguments = new ArrayList<>();
@@ -174,17 +173,15 @@ public class EthereumCall extends AbstractHttpModule {
 				}
 			}
 		}
-
-		isValid = true;
 	}
 
 
 	@Override
 	public void clearState() {
-		isValid = false;
 		abi = null;
 		function.list = null;
 		eventOutputs = new HashMap<>();
+		chosenFunction = null;
 	}
 
 	/**
@@ -193,14 +190,16 @@ public class EthereumCall extends AbstractHttpModule {
 	 */
 	@Override
 	protected HttpRequestBase createRequest() {
-		if (!isValid) {
-			throw new RuntimeException("Need valid function to call!");
-		}
+		EthereumContract c = contract.getValue();
+		if (c == null || c.getABI() == null || function.list == null) { throw new RuntimeException("Faulty contract"); }
+		if (chosenFunction == null) { throw new RuntimeException("Need valid function to call"); }
+		if (c.getAddress() == null) { throw new RuntimeException("Contract must be deployed before calling"); }
+
 		Map args = new HashMap<>();
 
 		// TODO: source address should be Ethereum account of the current user
 		args.put("source", MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address"));
-		args.put("target", contract.getValue().getAddress());
+		args.put("target", c.getAddress());
 		args.put("function", chosenFunction.name);
 
 		List<JsonPrimitive> argList = new ArrayList<>();
@@ -211,7 +210,7 @@ public class EthereumCall extends AbstractHttpModule {
 			argList.add(new JsonPrimitive(value));
 		}
 		args.put("arguments", argList);
-		args.put("abi", contract.getValue().getABI().toList());
+		args.put("abi", c.getABI().toList());
 
 		if (!chosenFunction.constant) {
 			if (ether.isConnected()) {
