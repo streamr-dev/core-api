@@ -61,8 +61,9 @@
         }
         this.autoZoomBounds = this.defaultAutoZoomBounds
 
-        if (!this.parent.attr("id"))
+        if (!this.parent.attr("id")) {
             this.parent.attr("id", "map-" + Date.now())
+        }
 
         this.skin = skins[this.options.skin] || skins.default
 
@@ -98,7 +99,7 @@
         })
 
         if (this.options.drawTrace) {
-            this.lineLayer = this.createLinePointLayer()
+            this.lineLayer = this.createTraceLayer()
         }
     }
     
@@ -132,9 +133,10 @@
         })
     }
 
-    StreamrMap.prototype.createLinePointLayer = function() {
+    StreamrMap.prototype.createTraceLayer = function() {
         var _this = this
-        var LinePointLayer = L.CanvasLayer.extend({
+        this.tracesById = {}
+        var TraceLayer = L.CanvasLayer.extend({
             initialize: function() {
                 L.CanvasLayer.prototype.initialize.apply(this)
                 this.currentLatLngsById = {}
@@ -153,24 +155,25 @@
                 }
                 this.currentLatLngsById[id] = latlng
             },
-
             render: function(changesOnly) {
                 var linePointLayer = this
                 var canvas = this.getCanvas()
                 var ctx = canvas.getContext('2d')
 
-                var updates
+                var updates = []
                 if (changesOnly) {
                     updates = _this.pendingLineUpdates
-                }
-                else {
-                    updates = _this.allLineUpdates
+                } else {
+                    for (var key in _this.tracesById) {
+                        Array.prototype.push(updates, _this.tracesById[key])
+                    }
                     // clear canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                 }
 
-                if(!changesOnly)
+                if (!changesOnly) {
                     clearTimeout(_this.traceRedrawTimeout)
+                }
 
                 var i = 0
                 function redrawTrace() {
@@ -191,7 +194,9 @@
             }
         })
 
-        return new LinePointLayer().addTo(this.map).bringToFront()
+        return new TraceLayer({
+            zIndexOffset: 10
+        }).addTo(this.map)
     }
     
     StreamrMap.prototype.getZoom = function() {
@@ -212,7 +217,6 @@
         var lat = attr.lat
         var lng = attr.lng
         var rotation = attr.dir
-        // Needed for linePoints
         var color = attr.color
         var latlng = new L.LatLng(lat, lng)
 
@@ -226,8 +230,10 @@
         } else {
             this.moveMarker(id, lat, lng, rotation)
         }
-        if(this.options.drawTrace)
-            this.addLinePoint(id, lat, lng, color)
+        if(this.options.drawTrace) {
+            var tracePointId = attr.tracePointId
+            this.addTracePoint(id, lat, lng, color, tracePointId)
+        }
 
         return marker
     }
@@ -239,8 +245,22 @@
         this.map.removeLayer(marker)
     }
     
-    StreamrMap.prototype.removeMarkersByIds = function(list) {
-        list.forEach(this.removeMarkerById.bind(this))
+    StreamrMap.prototype.removeMarkersByIds = function(idList) {
+        for (var i in idList) {
+            this.removeMarkerById(idList[i])
+        }
+    }
+    
+    StreamrMap.prototype.removeTracePoints = function(tracePointListsByMarkerId) {
+        for (var markerId in tracePointListsByMarkerId) {
+            var tracePoints = tracePointListsByMarkerId[markerId].reverse()
+            for (var i in tracePoints) {
+                if (this.tracesById[markerId].peek().tracePointId == tracePoints[i]) {
+                    tracePoints.pop()
+                }
+            }
+        }
+        this.lineLayer.render()
     }
     
     StreamrMap.prototype.setAutoZoom = function(lat, lng) {
@@ -289,6 +309,9 @@
         marker.on("mouseout", function() {
             marker.closePopup()
         })
+        if (rotation) {
+            marker.setRotationAngle(rotation)
+        }
         marker.addTo(this.map)
         return marker
     }
@@ -345,7 +368,7 @@
         this.animationFrameRequested = false
     }
 
-    StreamrMap.prototype.addLinePoint = function(id, lat, lng, color) {
+    StreamrMap.prototype.addTracePoint = function(id, lat, lng, color) {
         var latlng = L.latLng(lat,lng)
         var update = {
             id: id,
@@ -353,7 +376,8 @@
             color: color
         }
         this.pendingLineUpdates.push(update)
-        this.allLineUpdates.push(update)
+        this.tracesById[id] = this.tracesById[id] || []
+        this.tracesById[id].push(update)
     }
 
     StreamrMap.prototype.handleMessage = function(d) {
@@ -361,7 +385,12 @@
             if (d.t === "p") {
                 this.addMarker(d)
             } else if (d.t === "d") {
-                this.removeMarkersByIds(d.list)
+                if (d.markerList && d.markerList.length) {
+                    this.removeMarkersByIds(d.markerList)
+                }
+                if (d.pointList) {
+                    this.removeTracePoints(d.pointList)
+                }
             }
         }
     }

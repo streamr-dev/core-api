@@ -2,6 +2,7 @@ package com.unifina.signalpath.charts;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
+import com.unifina.utils.IdGenerator;
 import com.unifina.utils.StreamrColor;
 
 import java.io.Serializable;
@@ -90,11 +91,16 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			expiringMarkers.add(marker);
 		}
 
-		if (drawTrace && expiringTimeOfTraceInSecs > 0) {
-			Point point = new Point(id.getValue().toString(), latitude.getValue(), longitude.getValue());
-			point.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000));
-			expiringPoints.remove(point);
-			expiringPoints.add(point);
+		if (drawTrace) {
+			String tracePointId = IdGenerator.get();
+			marker.setTracePointId(tracePointId);
+			if (expiringTimeOfTraceInSecs > 0) {
+				Point point = new Point(id.getValue().toString());
+				point.setTracePointId(tracePointId);
+				point.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000));
+				expiringPoints.remove(point);
+				expiringPoints.add(point);
+			}
 		}
 		if (customMarkerLabel) {
 			marker.put("label", label.getValue());
@@ -219,7 +225,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	@Override
 	public void setTime(Date time) {
 		List<String> expiredMapPointIds = new ArrayList<>();
-		List<String> expiredPoints = new ArrayList<>();
+		Map<Object, List<String>> expiredTracePoints = new HashMap<>();
 
 		if (expiringTimeOfMarkerInSecs > 0) {
 			Iterator<Marker> iterator = expiringMarkers.iterator();
@@ -227,7 +233,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 			while (iterator.hasNext() && (marker = iterator.next()).getExpirationTime() <= time.getTime()) {
 				iterator.remove();
-				expiredMapPointIds.add(marker.getId());
+				expiredMapPointIds.add(marker.getId().toString());
 			}
 		}
 		if (expiringTimeOfTraceInSecs > 0) {
@@ -236,11 +242,14 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 			while (iterator.hasNext() && (point = iterator.next()).getExpirationTime() <= time.getTime()) {
 				iterator.remove();
-				expiredPoints.add((String) point.getId());
+				if (!expiredTracePoints.containsKey(point.getMarkerId())) {
+					expiredTracePoints.put(point.getMarkerId(), new ArrayList<String>());
+				}
+				expiredTracePoints.get(point.getMarkerId()).add(point.getTracePointId());
 			}
 		}
-		if (!expiredMapPointIds.isEmpty() || !expiredPoints.isEmpty()) {
-			pushToUiChannel(new ExpirementList(expiredMapPointIds, expiredPoints));
+		if (!expiredMapPointIds.isEmpty() || !expiredTracePoints.isEmpty()) {
+			pushToUiChannel(new ExpirementList(expiredMapPointIds, expiredTracePoints));
 		}
 	}
 
@@ -258,8 +267,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			put("color", color.toString());
 		}
 
-		String getId() {
-			return (String) get("id");
+		Object getId() {
+			return get("id");
 		}
 
 		Long getExpirationTime() {
@@ -268,6 +277,10 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 		void setExpirationTime(long expirationTime) {
 			this.expirationTime = expirationTime;
+		}
+
+		void setTracePointId(String id) {
+			put("tracePointId", id);
 		}
 
 		@Override
@@ -285,50 +298,39 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	 * Trace point
 	 */
 	private static class Point implements Serializable {
-		private Object id;
-		private double lat;
-		private double lng;
+		private Object markerId;
 		private long expirationTime;
+		private String tracePointId;
 
-		public Point(Object id, double lat, double lng) {
-			this.id = id;
-			this.lat = lat;
-			this.lng = lng;
+		public Point(Object id) {
+			this.markerId = id;
 		}
 
-		public void setExpirationTime(long expirationTime) {
+		void setTracePointId(String id) {
+			tracePointId = id;
+		}
+
+		String getTracePointId() {
+			return tracePointId;
+		}
+
+		void setExpirationTime(long expirationTime) {
 			this.expirationTime = expirationTime;
 		}
 
-		private long getExpirationTime() {
+		long getExpirationTime() {
 			return expirationTime;
 		}
 
-		public double getLat() {
-			return lat;
-		}
-
-		public void setLat(double lat) {
-			this.lat = lat;
-		}
-
-		public double getLng() {
-			return lng;
-		}
-
-		public void setLng(double lng) {
-			this.lng = lng;
-		}
-
-		public Object getId() {
-			return id;
+		Object getMarkerId() {
+			return markerId;
 		}
 	}
 
 	private static class ExpirementList extends LinkedHashMap<String, Object> {
-		private ExpirementList(List<String> markerList, List<String> pointList) {
+		private ExpirementList(List<String> markerIdList, Map<Object, List<String>> pointList) {
 			put("t", "d");
-			put("markerList", markerList);
+			put("markerList", markerIdList);
 			put("pointList", pointList);
 		}
 	}
