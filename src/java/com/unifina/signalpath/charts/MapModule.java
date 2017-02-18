@@ -10,20 +10,23 @@ import java.util.List;
 public class MapModule extends ModuleWithUI {
 	public final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
 
-	Input<Object> id = new Input<>(this, "id", "Object");
-	Input<Object> label = new Input<>(this, "label", "Object");
-	TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
-	TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
-	TimeSeriesInput heading = new TimeSeriesInput(this, "heading");		// degrees clockwise ("right-handed down")
-	ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
+	private final Input<Object> id = new Input<>(this, "id", "Object");
+	private final Input<Object> label = new Input<>(this, "label", "Object");
+	private final TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
+	private final TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
+	private final TimeSeriesInput heading = new TimeSeriesInput(this, "heading");		// degrees clockwise ("right-handed down")
+	private final ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
-	boolean drawTrace = false;
-	boolean autoZoom = true;
-	int traceRadius = 2;
-	boolean customMarkerLabel = false;
-	String skin;	// e.g. "default", "cartoDark", "esriDark"
-	boolean directionalMarkers = false;
-	String markerIcon = DEFAULT_MARKER_ICON;
+	private double centerLat = 35;
+	private double centerLng = 35;
+	private int zoom = 2;
+	private boolean drawTrace = false;
+	private boolean autoZoom = true;
+	private int traceRadius = 2;
+	private boolean customMarkerLabel = false;
+	private String skin;	// e.g. "default", "cartoDark", "esriDark"
+	private boolean directionalMarkers = false;
+	private String markerIcon = DEFAULT_MARKER_ICON;
 
 	@Override
 	public void init() {
@@ -82,9 +85,9 @@ public class MapModule extends ModuleWithUI {
 		java.util.Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.addIfMissing(new ModuleOption("centerLat", 35, ModuleOption.OPTION_DOUBLE));
-		options.addIfMissing(new ModuleOption("centerLng", 15, ModuleOption.OPTION_DOUBLE));
-		options.addIfMissing(new ModuleOption("zoom", 2, ModuleOption.OPTION_INTEGER));
+		options.addIfMissing(new ModuleOption("centerLat", centerLat, ModuleOption.OPTION_DOUBLE));
+		options.addIfMissing(new ModuleOption("centerLng", centerLng, ModuleOption.OPTION_DOUBLE));
+		options.addIfMissing(new ModuleOption("zoom", zoom, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("minZoom", 2, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("maxZoom", 18, ModuleOption.OPTION_INTEGER));
 		options.addIfMissing(new ModuleOption("drawTrace", drawTrace, ModuleOption.OPTION_BOOLEAN));
@@ -121,6 +124,18 @@ public class MapModule extends ModuleWithUI {
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);
 
+		if (options.containsKey("centerLat")) {
+			centerLat = options.getOption("centerLat").getDouble();
+		}
+
+		if (options.containsKey("centerLng")) {
+			centerLng = options.getOption("centerLng").getDouble();
+		}
+
+		if (options.containsKey("zoom")) {
+			zoom = options.getOption("zoom").getInt();
+		}
+
 		if (options.containsKey("drawTrace")) {
 			drawTrace = options.getOption("drawTrace").getBoolean();
 		}
@@ -139,6 +154,14 @@ public class MapModule extends ModuleWithUI {
 
 		if (options.containsKey("directionalMarkers")) {
 			directionalMarkers = options.getOption("directionalMarkers").getBoolean();
+		}
+
+		if (options.containsKey("skin")) {
+			skin = options.getOption("skin").getString();
+		}
+
+		if (options.containsKey("markerIcon")) {
+			markerIcon = options.getOption("markerIcon").getString();
 		}
 
 		if (drawTrace) {
