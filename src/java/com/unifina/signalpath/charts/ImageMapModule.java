@@ -38,6 +38,9 @@ public class ImageMapModule extends MapModule {
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);
 		if (options.containsKey("customImageUrl")) {
+			if (options.getOption("customImageUrl").getString().isEmpty()) {
+				throw new RuntimeException("Custom image url cannot be empty!");
+			}
 			customImageUrl = options.getOption("customImageUrl").getString();
 		}
 	}

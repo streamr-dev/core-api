@@ -128,32 +128,33 @@
                     animate: false
                 })
                 var bounds = L.latLngBounds(L.latLng(_this.customImageHeight, 0), L.latLng(0, _this.customImageWidth))
-                L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map).bringToBack()
+                L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map)
+                _this.parent.find(".leaflet-tile-pane").css("z-index", 1000)
             }
         })
     }
 
     StreamrMap.prototype.createTraceLayer = function() {
-        var _this = this
-        this.tracesById = {}
-        var TraceLayer = L.CanvasLayer.extend({
-            initialize: function() {
-                L.CanvasLayer.prototype.initialize.apply(this)
-                this.currentLatLngsById = {}
-            },
-            renderLine: function(id, ctx, latlng, point, color) {
-                var lastLatLng = this.currentLatLngsById[id]
-                if (lastLatLng) {
-                    var lastPoint = _this.map.latLngToContainerPoint(lastLatLng)
+        var _this            = this
+        this.tracesById      = {}
+        this.lastLatLngdById = {}
+        function isInsideCanvas(point, canvas) {
+            return point.x >= 0 && point.x <= canvas.width && point.y >= 0 && point.y <= canvas.height
+        }
+        var TraceLayer       = L.CanvasLayer.extend({
+            renderLine: function(ctx, id, fromlatLng, toLatLng, color) {
+                var canvas = this.getCanvas()
+                var from = _this.map.latLngToContainerPoint(fromlatLng)
+                var to = _this.map.latLngToContainerPoint(toLatLng)
+                if (from.x != to.x || from.y != to.y || isInsideCanvas(from, canvas) || isInsideCanvas(to, canvas) ) {
                     color = color || 'rgba(255,0,0,1)'
                     ctx.strokeStyle = color
                     ctx.lineWidth = _this.options.traceWidth
                     ctx.beginPath()
-                    ctx.moveTo(lastPoint.x, lastPoint.y)
-                    ctx.lineTo(point.x, point.y)
+                    ctx.moveTo(from.x, from.y)
+                    ctx.lineTo(to.x, to.y)
                     ctx.stroke()
                 }
-                this.currentLatLngsById[id] = latlng
             },
             render: function(changesOnly) {
                 var linePointLayer = this
@@ -164,9 +165,9 @@
                 if (changesOnly) {
                     updates = _this.pendingLineUpdates
                 } else {
-                    for (var key in _this.tracesById) {
-                        Array.prototype.push(updates, _this.tracesById[key])
-                    }
+                    _.mapKeys(_this.tracesById, function(t) {
+                        updates = _.union(updates, _.values(t))
+                    })
                     // clear canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                 }
@@ -174,24 +175,43 @@
                 if (!changesOnly) {
                     clearTimeout(_this.traceRedrawTimeout)
                 }
-
-                var i = 0
-                function redrawTrace() {
+                
+                //var offDOMCanvas = linePointLayer.createOffDOMCanvas()
+                //var newCtx = offDOMCanvas.getContext('2d')
+                (function redrawTrace(i) {
                     _this.traceRedrawTimeout = setTimeout(function() {
                         var count = i + TRACE_REDRAW_BATCH_SIZE
+                        if (count < updates.length) {
+                            L.Util.requestAnimFrame(function() {
+                                redrawTrace(count)
+                            })
+                        }
                         while (i < count && i < updates.length) {
-                            var point = linePointLayer._map.latLngToContainerPoint(updates[i].latlng)
-                            linePointLayer.renderLine(updates[i].id, ctx, updates[i].latlng, point, updates[i].color)
+                            linePointLayer.renderLine(ctx, updates[i].id, updates[i].fromLatLng, updates[i].toLatLng, updates[i].color)
                             i++
                         }
-                        if (i < updates.length)
-                            redrawTrace()
+                        //$(canvas).replaceWith(offDOMCanvas)
+                        //linePointLayer._canvas = offDOMCanvas
                     })
-                }
-                redrawTrace()
+                })(0)
 
                 _this.pendingLineUpdates = []
-            }
+            },
+            //createOffDOMCanvas: function() {
+            //    var oldCanvas = this.getCanvas()
+            //    var newCanvas = document.createElement('canvas');
+            //    var context = newCanvas.getContext('2d');
+            //    newCanvas._leaflet_pos = oldCanvas._leaflet_pos
+            //    // set dimensions
+            //    newCanvas.width = oldCanvas.width;
+            //    newCanvas.height = oldCanvas.height;
+            //
+            //    //apply the old canvas to the new one
+            //    context.drawImage(oldCanvas, 0, 0);
+            //
+            //    //return the new canvas
+            //    return newCanvas;
+            //}
         })
 
         return new TraceLayer({
@@ -253,10 +273,11 @@
     
     StreamrMap.prototype.removeTracePoints = function(tracePointListsByMarkerId) {
         for (var markerId in tracePointListsByMarkerId) {
-            var tracePoints = tracePointListsByMarkerId[markerId].reverse()
-            for (var i in tracePoints) {
-                if (this.tracesById[markerId].peek().tracePointId == tracePoints[i]) {
-                    tracePoints.pop()
+            var tracePoints = tracePointListsByMarkerId[markerId]
+            for (var i = 0; i < tracePoints.length; i++) {
+                delete this.tracesById[markerId][tracePoints[i]]
+                if ($.isEmptyObject(this.tracesById[markerId])) {
+                    delete this.lastLatLngdById[markerId]
                 }
             }
         }
@@ -266,14 +287,14 @@
     StreamrMap.prototype.setAutoZoom = function(lat, lng) {
         var _this = this
 
-        this.autoZoomBounds.lat.min = Math.min(lat, _this.autoZoomBounds.lat.min)
-        this.autoZoomBounds.lat.max = Math.max(lat, _this.autoZoomBounds.lat.max)
-        this.autoZoomBounds.lng.min = Math.min(lng, _this.autoZoomBounds.lng.min)
-        this.autoZoomBounds.lng.max = Math.max(lng, _this.autoZoomBounds.lng.max)
+        this.autoZoomBounds.lat.min = Math.min(lat, this.autoZoomBounds.lat.min)
+        this.autoZoomBounds.lat.max = Math.max(lat, this.autoZoomBounds.lat.max)
+        this.autoZoomBounds.lng.min = Math.min(lng, this.autoZoomBounds.lng.min)
+        this.autoZoomBounds.lng.max = Math.max(lng, this.autoZoomBounds.lng.max)
 
         this.lastEvent = [
-            [_this.autoZoomBounds.lat.max, _this.autoZoomBounds.lng.min],
-            [_this.autoZoomBounds.lat.min, _this.autoZoomBounds.lng.max]
+            [this.autoZoomBounds.lat.max, this.autoZoomBounds.lng.min],
+            [this.autoZoomBounds.lat.min, this.autoZoomBounds.lng.max]
         ]
 
         if (this.autoZoomTimeout === undefined) {
@@ -368,16 +389,25 @@
         this.animationFrameRequested = false
     }
 
-    StreamrMap.prototype.addTracePoint = function(id, lat, lng, color) {
+    StreamrMap.prototype.addTracePoint = function(id, lat, lng, color, tracePointId) {
         var latlng = L.latLng(lat,lng)
-        var update = {
-            id: id,
-            latlng: latlng,
-            color: color
+        var lastLatLng = this.lastLatLngdById[id]
+        if (lastLatLng) {
+            var update = {
+                id: id,
+                fromLatLng: latlng,
+                toLatLng: lastLatLng,
+                color: color,
+                tracePointId: tracePointId
+            }
+            this.pendingLineUpdates.push(update)
+            if (this.tracesById[id] === undefined) {
+                this.tracesById[id] = {}
+            }
+            this.tracesById[id][tracePointId] = update
         }
-        this.pendingLineUpdates.push(update)
-        this.tracesById[id] = this.tracesById[id] || []
-        this.tracesById[id].push(update)
+        
+        this.lastLatLngdById[id] = latlng
     }
 
     StreamrMap.prototype.handleMessage = function(d) {
