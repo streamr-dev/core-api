@@ -262,6 +262,7 @@
         var marker = this.markers[id]
         delete this.markers[id]
         delete this.pendingMarkerUpdates[id]
+        delete this.tracesById[id]
         this.map.removeLayer(marker)
     }
     
