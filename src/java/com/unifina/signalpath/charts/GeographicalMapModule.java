@@ -1,9 +1,9 @@
 package com.unifina.signalpath.charts;
 
-import com.unifina.signalpath.*;
-import com.unifina.utils.StreamrColor;
+import com.unifina.signalpath.ModuleOption;
+import com.unifina.signalpath.ModuleOptions;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GeographicalMapModule extends MapModule {
 	private String skin;    // e.g. "default", "cartoDark", "esriDark"
@@ -18,8 +18,8 @@ public class GeographicalMapModule extends MapModule {
 	}
 
 	@Override
-	public java.util.Map<String, Object> getConfiguration() {
-		java.util.Map<String, Object> config = super.getConfiguration();
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
 		options.addIfMissing(ModuleOption.createString("skin", skin)
@@ -31,7 +31,7 @@ public class GeographicalMapModule extends MapModule {
 	}
 
 	@Override
-	protected void onConfiguration(java.util.Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		ModuleOptions options = ModuleOptions.get(config);
 

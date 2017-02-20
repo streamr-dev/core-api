@@ -1,6 +1,9 @@
 package com.unifina.signalpath.charts
 
+import com.unifina.utils.Globals
+import com.unifina.utils.IdGenerator
 import com.unifina.utils.StreamrColor
+import com.unifina.utils.testutils.FakeIdGenerator
 import com.unifina.utils.testutils.ModuleTestHelper
 import spock.lang.Specification
 
@@ -19,7 +22,7 @@ class GeographicalMapModuleSpec extends Specification {
 		longitude: [24.079, 66.999, -21.758D, 1D]*.doubleValue(),
 	]
 
-	void "MapModule pushes correct data to uiChannel"() {
+	void "MapModule pushes correct data to uiChannel (with drawTrace = true)"() {
 		module.configure([
 			uiChannel: [id: "mapPointData"],
 			options: [
@@ -30,16 +33,20 @@ class GeographicalMapModuleSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			mapPointData: [
-				[t: "p", id: "id-1", lat: 60.412D, lng: 24.079D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-2", lat: 59.666D, lng: 66.999D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-1", lat: 30.000D, lng: -21.758D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-3", lat: 0D, lng: 1D, color: "rgb(6, 6, 6)"],
+				[t: "p", id: "id-1", lat: 60.412D, lng: 24.079D, color: "rgb(233, 87, 15)", tracePointId: "id-0"],
+				[t: "p", id: "id-2", lat: 59.666D, lng: 66.999D, color: "rgb(233, 87, 15)", tracePointId: "id-1"],
+				[t: "p", id: "id-1", lat: 30.000D, lng: -21.758D, color: "rgb(233, 87, 15)", tracePointId: "id-2"],
+				[t: "p", id: "id-3", lat: 0D, lng: 1D, color: "rgb(6, 6, 6)", tracePointId: "id-3"],
 			]
 		]
 
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.uiChannelMessages(channelMessages)
+			.overrideGlobals { Globals g ->
+				g.setIdGenerator(new FakeIdGenerator())
+				return g
+			}
 			.test()
 	}
 
@@ -56,16 +63,20 @@ class GeographicalMapModuleSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			mapPointData: [
-				[t: "p", id: "id-1", label: "label", lat: 60.412D, lng: 24.079D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-2", label: "label", lat: 59.666D, lng: 66.999D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-1", label: "label2", lat: 30.000D, lng: -21.758D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-3", label: "label3", lat: 0D, lng: 1D, color: "rgb(6, 6, 6)"],
+				[t: "p", id: "id-1", label: "label", lat: 60.412D, lng: 24.079D, color: "rgb(233, 87, 15)", tracePointId: "id-0"],
+				[t: "p", id: "id-2", label: "label", lat: 59.666D, lng: 66.999D, color: "rgb(233, 87, 15)", tracePointId: "id-1"],
+				[t: "p", id: "id-1", label: "label2", lat: 30.000D, lng: -21.758D, color: "rgb(233, 87, 15)", tracePointId: "id-2"],
+				[t: "p", id: "id-3", label: "label3", lat: 0D, lng: 1D, color: "rgb(6, 6, 6)", tracePointId: "id-3"],
 			]
 		]
 
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.uiChannelMessages(channelMessages)
+			.overrideGlobals { Globals g ->
+				g.setIdGenerator(new FakeIdGenerator())
+				return g
+			}
 			.test()
 	}
 
@@ -113,22 +124,22 @@ class GeographicalMapModuleSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 			mapPointData: [
-				[t: "p", id: "id-1", lat: 1D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-2", lat: 2D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-3", lat: 3D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-4", lat: 4D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "d", markerList: ["id-1"], pointList: []],
-				[t: "p", id: "id-3", lat: 33D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-5", lat: 5D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-6", lat: 6D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "d", markerList: ["id-2", "id-4"], pointList: []],
-				[t: "p", id: "id-6", lat: 66D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-3", lat: 333D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "d", markerList: ["id-5"], pointList: []],
-				[t: "p", id: "id-7", lat: 7D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "p", id: "id-1", lat: 11D, lng: 0D, color: "rgb(233, 87, 15)"],
-				[t: "d", markerList: ["id-6", "id-3"], pointList: []],
-				[t: "d", markerList: ["id-7", "id-1"], pointList: []],
+				[t: "p", id: "id-1", lat: 1D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-0"],
+				[t: "p", id: "id-2", lat: 2D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-1"],
+				[t: "p", id: "id-3", lat: 3D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-2"],
+				[t: "p", id: "id-4", lat: 4D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-3"],
+				[t: "d", markerList: ["id-1"], pointList: [:]],
+				[t: "p", id: "id-3", lat: 33D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-4"],
+				[t: "p", id: "id-5", lat: 5D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-5"],
+				[t: "p", id: "id-6", lat: 6D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-6"],
+				[t: "d", markerList: ["id-2", "id-4"], pointList: [:]],
+				[t: "p", id: "id-6", lat: 66D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-7"],
+				[t: "p", id: "id-3", lat: 333D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-8"],
+				[t: "d", markerList: ["id-5"], pointList: [:]],
+				[t: "p", id: "id-7", lat: 7D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-9"],
+				[t: "p", id: "id-1", lat: 11D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-10"],
+				[t: "d", markerList: ["id-6", "id-3"], pointList: [:]],
+				[t: "d", markerList: ["id-7", "id-1"], pointList: [:]],
 			]
 		]
 
@@ -137,6 +148,10 @@ class GeographicalMapModuleSpec extends Specification {
 			.uiChannelMessages(channelMessages)
 			.ticks(ticks)
 			.extraIterationsAfterInput(3)
+			.overrideGlobals { Globals g ->
+				g.setIdGenerator(new FakeIdGenerator())
+				return g
+			}
 			.test()
 	}
 
@@ -165,27 +180,31 @@ class GeographicalMapModuleSpec extends Specification {
 		Map outputValues = [:]
 		Map channelMessages = [
 				mapPointData: [
-						[t: "p", id: "1", lat: 1D,  lng: 0D, color: "rgb(233, 87, 15)"], // 0
-						[t: "p", id: "2", lat: 2D,  lng: 0D, color: "rgb(233, 87, 15)"], // 1
-						[t: "p", id: "3", lat: 3D,  lng: 0D, color: "rgb(233, 87, 15)"], // 2
-						[t: "p", id: "1", lat: 10D, lng: 0D, color: "rgb(233, 87, 15)"], // 3
-						[t: "d", pointList: ["1"], markerList: []],						 // 4
-						[t: "p", id: "2", lat: 20D, lng: 0D, color: "rgb(233, 87, 15)"], // 4
-						[t: "p", id: "3", lat: 30D, lng: 0D, color: "rgb(233, 87, 15)"], // 5
-						[t: "p", id: "2", lat: 21D, lng: 0D, color: "rgb(233, 87, 15)"], // 6
-						[t: "d", pointList: ["2", "3", "1"], markerList: []],			 // 7
-						[t: "p", id: "3", lat: 31D, lng: 0D, color: "rgb(233, 87, 15)"], // 7
-						[t: "p", id: "1", lat: 11D, lng: 0D, color: "rgb(233, 87, 15)"], // 8
-						[t: "d", pointList: ["2","3","2"], markerList: []],				 // 9
-						[t: "p", id: "2", lat: 22D, lng: 0D, color: "rgb(233, 87, 15)"], // 9
-						[t: "d", pointList: ["3","1"], markerList: []],					 // 10
-						[t: "p", id: "3", lat: 32D, lng: 0D, color: "rgb(233, 87, 15)"]  // 10
+						[t: "p", id: "1", lat: 1D,  lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-0"], // 0 /0s
+						[t: "p", id: "2", lat: 2D,  lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-1"], // 1 /1s
+						[t: "p", id: "3", lat: 3D,  lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-2"], // 2
+						[t: "p", id: "1", lat: 10D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-3"], // 3
+						[t: "d", pointList: ["1": ["id-0"]], markerList: []],						 		   // 4 /2s
+						[t: "p", id: "2", lat: 20D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-4"], // 4
+						[t: "p", id: "3", lat: 30D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-5"], // 5
+						[t: "p", id: "2", lat: 21D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-6"], // 6
+						[t: "d", pointList: ["2": ["id-1"], "3": ["id-2"], "1": ["id-3"]], markerList: []],	   // 7 /3s
+						[t: "p", id: "3", lat: 31D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-7"], // 7
+						[t: "p", id: "1", lat: 11D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-8"], // 8
+						[t: "d", pointList: ["2": ["id-4", "id-6"], "3": ["id-5"]], markerList: []],           // 9 /4s
+						[t: "p", id: "2", lat: 22D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-9"], // 9
+						[t: "d", pointList: ["3": ["id-7"], "1": ["id-8"]], markerList: []],				   // 10 /5s
+						[t: "p", id: "3", lat: 32D, lng: 0D, color: "rgb(233, 87, 15)", tracePointId: "id-10"] // 10 /
 				]
 		]
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 				.uiChannelMessages(channelMessages)
 				.ticks(ticks)
+				.overrideGlobals { Globals g ->
+					g.setIdGenerator(new FakeIdGenerator())
+					return g
+				}
 				.test()
 	}
 }

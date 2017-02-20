@@ -2,7 +2,6 @@ package com.unifina.signalpath.charts;
 
 import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.*;
-import com.unifina.utils.IdGenerator;
 import com.unifina.utils.StreamrColor;
 
 import java.io.Serializable;
@@ -35,7 +34,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private Set<Marker> expiringMarkers = new LinkedHashSet<>();
 
 	private int expiringTimeOfTraceInSecs = 0;
-	private Set<Point> expiringPoints = new LinkedHashSet<>();
+	private List<Point> expiringPoints = new LinkedList<>();
 
 	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
 		this.centerLat = centerLat;
@@ -92,13 +91,12 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		}
 
 		if (drawTrace) {
-			String tracePointId = IdGenerator.get();
+			String tracePointId = getGlobals().generateId();
 			marker.setTracePointId(tracePointId);
 			if (expiringTimeOfTraceInSecs > 0) {
 				Point point = new Point(id.getValue().toString());
 				point.setTracePointId(tracePointId);
 				point.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000));
-				expiringPoints.remove(point);
 				expiringPoints.add(point);
 			}
 		}
@@ -118,8 +116,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	}
 
 	@Override
-	public java.util.Map<String, Object> getConfiguration() {
-		java.util.Map<String, Object> config = super.getConfiguration();
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
 		options.addIfMissing(ModuleOption.createDouble("centerLat", centerLat));
@@ -231,7 +229,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			Iterator<Marker> iterator = expiringMarkers.iterator();
 			Marker marker;
 
-			while (iterator.hasNext() && (marker = iterator.next()).getExpirationTime() <= time.getTime()) {
+			while (iterator.hasNext() && (marker = iterator.next()).isExpired(time)) {
 				iterator.remove();
 				expiredMapPointIds.add(marker.getId().toString());
 			}
@@ -240,7 +238,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			Iterator<Point> iterator = expiringPoints.iterator();
 			Point point;
 
-			while (iterator.hasNext() && (point = iterator.next()).getExpirationTime() <= time.getTime()) {
+			while (iterator.hasNext() && (point = iterator.next()).isExpired(time)) {
 				iterator.remove();
 				if (!expiredTracePoints.containsKey(point.getMarkerId())) {
 					expiredTracePoints.put(point.getMarkerId(), new ArrayList<String>());
@@ -271,16 +269,16 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			return get("id");
 		}
 
-		Long getExpirationTime() {
-			return expirationTime;
-		}
-
 		void setExpirationTime(long expirationTime) {
 			this.expirationTime = expirationTime;
 		}
 
 		void setTracePointId(String id) {
 			put("tracePointId", id);
+		}
+
+		boolean isExpired(Date currentTime) {
+			return expirationTime <= currentTime.getTime();
 		}
 
 		@Override
@@ -318,8 +316,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			this.expirationTime = expirationTime;
 		}
 
-		long getExpirationTime() {
-			return expirationTime;
+		boolean isExpired(Date currentTime) {
+			return expirationTime <= currentTime.getTime();
 		}
 
 		Object getMarkerId() {

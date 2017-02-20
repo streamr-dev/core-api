@@ -26,8 +26,12 @@ public class IdGenerator implements IdentifierGenerator {
 		return Base64.encodeBase64URLSafeString(bytes);
 	}
 
+	public String generate() {
+		return get();
+	}
+
 	@Override
 	public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
-		return get();
+		return generate();
 	}
 }

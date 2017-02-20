@@ -32,7 +32,7 @@ public class ImageMapModule extends MapModule {
 	}
 
 	@Override
-	protected void onConfiguration(java.util.Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		customImageUrl = getGlobals().getBean(LinkGenerator.class).link(singletonMap("uri", DEFAULT_IMAGE_URL));
 
 		super.onConfiguration(config);

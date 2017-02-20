@@ -47,6 +47,7 @@ public class Globals {
 	
 	protected PushChannel uiChannel = null;
 	protected boolean realtime = false;
+	private IdGenerator idGenerator = new IdGenerator();
 
 	/**
 	 * Construct fake environment, e.g., for testing.
@@ -233,6 +234,14 @@ public class Globals {
 
 	public <T> T getBean(Class<T> requiredType) {
 		return grailsApplication.getMainContext().getBean(requiredType);
+	}
+
+	public String generateId() {
+		return idGenerator.generate();
+	}
+
+	public void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
 	}
 
 	/**
