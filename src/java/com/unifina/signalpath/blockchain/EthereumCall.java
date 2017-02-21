@@ -123,7 +123,7 @@ public class EthereumCall extends AbstractHttpModule {
 		addInput(function);
 		chosenFunction = function.getSelected();
 		if (chosenFunction == null) {
-			log.warn("Can't find function" + function.getValue());
+			log.warn("Can't find function " + function.getValue());
 			chosenFunction = function.list.get(0);
 			function.receive(chosenFunction.name);
 		}
