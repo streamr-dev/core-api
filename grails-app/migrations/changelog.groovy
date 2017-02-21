@@ -59,4 +59,5 @@ databaseChangeLog = {
 	include file: 'core/2016-09-29-new-data-pipeline.groovy'
 	include file: 'core/2017-01-20-ethereum-call-module.groovy'
 	include file: 'core/2017-02-08-ethereum-contract-template-paybyuse.groovy'
+	include file: 'core/2017-02-16-ethereum-contract-constant-module.groovy'
 }

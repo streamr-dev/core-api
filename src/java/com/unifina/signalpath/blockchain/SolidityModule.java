@@ -84,6 +84,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 					for (Map param : params) {
 						args.push(param.get("value"));
 					}
+					// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
 					if (constructor.payable) {
 						BigDecimal valueWei = BigDecimal.valueOf(sendEtherParam.getValue()).multiply(BigDecimal.TEN.pow(18));
 						sendWei = valueWei.toBigInteger().toString();

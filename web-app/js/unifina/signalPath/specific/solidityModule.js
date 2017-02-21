@@ -1,11 +1,7 @@
 SignalPath.SolidityModule = function(data,canvas,prot) {
 	prot = prot || {}
 	var pub = SignalPath.CustomModule(data,canvas,prot)
-
-	pub.getContract = prot.getContract = function() {
-		return prot.jsonData.contract
-	}
-
+	
 	var super_compile = prot.compile
 	prot.compile = function(callback) {
 		// Slight hack: set temporary flag in json to communicate command to backend
