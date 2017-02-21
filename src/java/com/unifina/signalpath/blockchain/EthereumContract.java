@@ -1,7 +1,9 @@
 package com.unifina.signalpath.blockchain;
 
+import com.amazonaws.util.json.JSONObject;
 import com.google.gson.JsonArray;
 import com.unifina.utils.MapTraversal;
+import grails.converters.JSON;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
@@ -52,6 +54,11 @@ public class EthereumContract implements Serializable {
 	}
 
 	public static EthereumContract fromMap(Map<String, Object> map) {
-		return new EthereumContract(MapTraversal.getString(map, "address"), new EthereumABI(MapTraversal.getList(map, "abi")));
+		List abiList = null;
+		try {
+			abiList = (List) map.get("abi");
+		} catch (Exception e) {
+		}
+		return new EthereumContract(MapTraversal.getString(map, "address"), new EthereumABI(abiList));
 	}
 }

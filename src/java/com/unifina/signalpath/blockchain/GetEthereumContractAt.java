@@ -37,6 +37,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		String address = addressParam.getValue();
+		String oldAddress = (String)config.get("oldAddress");
 		String abiString = MapTraversal.getString(config, "params[1].value");
 
 		// TODO: check address is valid?
@@ -45,7 +46,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 			addOutput(out);
 
 			EthereumABI abi = null;
-			if (abiString != null) {
+			if (address.equals(oldAddress)) {
 				abi = new EthereumABI(abiString);
 			} else {
 				// ABI param not yet added to UI => query streamr-web3 for known ABI
@@ -76,6 +77,8 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
+
+		config.put("oldAddress", addressParam.getValue());
 
 		if (contract != null) {
 			config.put("contract", contract.toMap());

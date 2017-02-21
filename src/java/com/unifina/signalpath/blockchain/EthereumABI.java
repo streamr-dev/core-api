@@ -27,7 +27,7 @@ public class EthereumABI implements Serializable {
 	}
 
 	public EthereumABI(String abiAsJson) {
-		this(new JsonParser().parse(abiAsJson).getAsJsonArray());
+		this(abiAsJson == null ? null : new JsonParser().parse(abiAsJson).getAsJsonArray());
 	}
 
 	public EthereumABI(JsonArray jsonArray) {
