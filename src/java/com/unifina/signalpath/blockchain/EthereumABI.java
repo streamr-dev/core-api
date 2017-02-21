@@ -23,7 +23,7 @@ public class EthereumABI implements Serializable {
 	private final String json;
 
 	public EthereumABI(List<Map<String, Object>> abiAsMap) {
-		this(new Gson().toJsonTree(abiAsMap).getAsJsonArray());
+		this(abiAsMap == null ? null : new Gson().toJsonTree(abiAsMap).getAsJsonArray());
 	}
 
 	public EthereumABI(String abiAsJson) {
@@ -31,6 +31,11 @@ public class EthereumABI implements Serializable {
 	}
 
 	public EthereumABI(JsonArray jsonArray) {
+		if (jsonArray == null) {
+			this.json = "[]";
+			return;
+		}
+
 		Gson gson = new Gson();
 		this.json = gson.toJson(jsonArray);
 
@@ -95,7 +100,7 @@ public class EthereumABI implements Serializable {
 
 	/** Ethereum contract member function */
 	public static class Function implements Serializable {
-		public String name = "(default)";
+		public String name = "";
 		public List<Slot> inputs = Collections.emptyList();
 		public List<Slot> outputs = Collections.emptyList();
 		public Boolean payable = false;

@@ -23,13 +23,6 @@ import java.util.Map;
  * Send out a call to specified function in Ethereum block chain
  */
 public class EthereumCall extends AbstractHttpModule {
-
-	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
-	private static final Logger log = Logger.getLogger(EthereumCall.class);
-	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 600;
-
-	private transient Gson gson; // not guaranteed thread-safe
-
 	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
 
 	private ListOutput errors = new ListOutput(this, "errors");
@@ -53,6 +46,12 @@ public class EthereumCall extends AbstractHttpModule {
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
 	private TimeSeriesOutput nonce = new TimeSeriesOutput(this, "nonce");
 	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;		// outputs for each event separately
+
+	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
+	private static final Logger log = Logger.getLogger(EthereumCall.class);
+	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 600;
+
+	private transient Gson gson;
 
 	@Override
 	public void init() {
@@ -200,30 +199,41 @@ public class EthereumCall extends AbstractHttpModule {
 		// TODO: source address should be Ethereum account of the current user
 		args.put("source", MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address"));
 		args.put("target", c.getAddress());
-		args.put("function", chosenFunction.name);
 
-		List<JsonPrimitive> argList = new ArrayList<>();
-		for (Input<Object> input : arguments) {
-			String name = input.getName();
-			String value = input.getValue().toString();
-			log.info("  " + name + ": " + value);
-			argList.add(new JsonPrimitive(value));
-		}
-		args.put("arguments", argList);
-		args.put("abi", c.getABI().toList());
+		HttpPost request = null;
+		if (chosenFunction.name.length() > 0) {
+			args.put("function", chosenFunction.name);
 
-		if (!chosenFunction.constant) {
-			if (ether.isConnected()) {
+			List<JsonPrimitive> argList = new ArrayList<>();
+			for (Input<Object> input : arguments) {
+				String name = input.getName();
+				String value = input.getValue().toString();
+				log.info("  " + name + ": " + value);
+				argList.add(new JsonPrimitive(value));
+			}
+			args.put("arguments", argList);
+			args.put("abi", c.getABI().toList());
+
+			if (!chosenFunction.constant && ether.isConnected()) {
 				BigDecimal valueWei = BigDecimal.valueOf(ether.getValue()).multiply(BigDecimal.TEN.pow(18));
 				args.put("value", valueWei.toBigInteger().toString());
 			}
+
+			request = new HttpPost(ETH_SERVER_URL + "/call");
+
+		} else {
+			// fallback function selected: send ether
+			if (!chosenFunction.constant && ether.isConnected()) {
+				BigDecimal valueWei = BigDecimal.valueOf(ether.getValue()).multiply(BigDecimal.TEN.pow(18));
+				args.put("value", valueWei.toBigInteger().toString());
+			} else {
+				args.put("value", "0");
+			}
+			request = new HttpPost(ETH_SERVER_URL + "/send");
 		}
 
 		if (gson == null) { gson = new Gson(); }
 		String jsonString = gson.toJson(args);
-
-		HttpPost request = new HttpPost(ETH_SERVER_URL + "/call");
-
 		try {
 			log.info("Sending function call: " + jsonString);
 			request.setEntity(new StringEntity(jsonString));
@@ -323,7 +333,11 @@ public class EthereumCall extends AbstractHttpModule {
 		protected List<PossibleValue> getPossibleValues() {
 			List<PossibleValue> ret = new ArrayList<>();
 			for (EthereumABI.Function f : list) {
-				ret.add(new PossibleValue(f.name, f.name));
+				if (f.name.length() < 1) {
+					ret.add(new PossibleValue("(default)", ""));	// fallback function
+				} else {
+					ret.add(new PossibleValue(f.name, f.name));
+				}
 			}
 			return ret;
 		}

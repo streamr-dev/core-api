@@ -1,8 +1,11 @@
 package com.unifina.signalpath.blockchain;
 
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.utils.MapTraversal;
+import grails.util.Holders;
 
 import java.util.Map;
 
@@ -16,6 +19,8 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 
 	private EthereumContract contract;
 
+	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
+
 	@Override
 	public void init() {
 		addInput(addressParam);
@@ -26,17 +31,22 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		String address = addressParam.getValue();
-		String abiJson = MapTraversal.getString(config, "params[1].value", "[]");
+		String abiString = MapTraversal.getString(config, "params[1].value", "[]");
 
 		// TODO: check address is valid?
 		if (address.length() > 2) {
-			// TODO: query backend for known ABI
 			addInput(abiParam);
 			addOutput(out);
 
-			EthereumABI abi = new EthereumABI(abiJson);
+			EthereumABI abi = new EthereumABI(abiString);
 			if (abi.getFunctions().size() < 1) {
-				abi = new EthereumABI("[{\"type\":\"fallback\"}]");
+				// TODO: query streamr-web3 for known ABI
+//				try {
+//					Unirest.get(ETH_SERVER_URL + "/contract?at=" + address).asJson().getBody();
+//				} catch (UnirestException e) {
+//
+//				}
+				abi = new EthereumABI("[{\"type\":\"fallback\",\"payable\":true}]");
 			}
 
 			contract = new EthereumContract(address, abi);

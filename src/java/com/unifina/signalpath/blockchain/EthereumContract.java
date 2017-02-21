@@ -1,5 +1,6 @@
 package com.unifina.signalpath.blockchain;
 
+import com.google.gson.JsonArray;
 import com.unifina.utils.MapTraversal;
 
 import java.io.Serializable;
@@ -26,7 +27,7 @@ public class EthereumContract implements Serializable {
 	 * isDeployed() will return false.
      */
 	public EthereumContract(EthereumABI abi) {
-		this.abi = abi;
+		this.abi = abi != null ? abi : new EthereumABI((JsonArray) null);
 	}
 
 	public String getAddress() {
