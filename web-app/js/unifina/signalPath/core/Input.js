@@ -68,7 +68,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		}
 
 		// Initial value. Default null/off. Only valid for TimeSeries type
-		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
+		if (data.canHaveInitialValue) {
 			var iv = new SignalPath.IOSwitch(switchDiv, "ioSwitch initialValue", {
 				getValue: (function(d){
 					return function() { return d.initialValue; };
@@ -79,7 +79,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 						return d.initialValue = value;
 					};
 				})(data),
-				buttonText: function(currentValue) { return "IV" },
+				buttonText: function() { return "IV" },
 				tooltip: 'Initial value',
 				isActiveValue: function(currentValue) {
 					return currentValue != null;
@@ -95,15 +95,14 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 						title: "Initial Value:",
 						callback: function(result) {
 							if (result != null) {
-								iv.setValue(parseFloat(result))
+								iv.setValue(result);
 								iv.update();
 								iv.div.html(iv.buttonText());
 							}
 						},
 						className: 'initial-value-dialog'
 					})
-				}
-				else {
+				} else {
 					iv.setValue(undefined);
 					iv.update();
 					iv.div.html(iv.buttonText());
