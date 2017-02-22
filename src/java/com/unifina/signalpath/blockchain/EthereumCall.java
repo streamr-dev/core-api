@@ -137,7 +137,7 @@ public class EthereumCall extends AbstractHttpModule {
 			addInput(input);
 			arguments.add(input);
 		}
-		if (chosenFunction.inputs.size() == 0) {
+		if (chosenFunction.inputs.size() == 0 && (chosenFunction.constant || !chosenFunction.payable)) {
 			addInput(trigger);
 		}
 
