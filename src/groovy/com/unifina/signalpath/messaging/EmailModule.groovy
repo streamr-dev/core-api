@@ -31,8 +31,8 @@ class EmailModule extends ModuleWithSideEffects {
 
 	@Override
 	public void activateWithSideEffects() {
-		if (isNotTooOften(emailInterval, globals.getTime().getTime(), prevTime)) {
-			prevTime = globals.getTime().getTime()
+		if (isNotTooOften(emailInterval, globals.time.getTime(), prevTime)) {
+			prevTime = globals.time.getTime()
 			emailSent = true
 			String messageTo = globals.getUser().getUsername()
 			def mailService = globals.grailsApplication.getMainContext().getBean("mailService")
@@ -102,7 +102,7 @@ class EmailModule extends ModuleWithSideEffects {
 
 		// Module options
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("inputs", emailInputCount, "int"));
+		options.addIfMissing(new ModuleOption("inputs", emailInputCount, "int"));
 
 		return config;
 	}

@@ -82,7 +82,7 @@ public class EmailModuleSpec extends Specification {
 	void "module should send an email for a realtime datasource"() {
 		initContext()
 		globals.realtime = true
-		
+
 		when: "feedback sent from the feedback page"
 			module.sub.receive("Test subject")
 			module.message.receive("Test message")
@@ -111,11 +111,11 @@ value2: test value
 
 """
 	}
-	
+
 	void "module should send a notification for a non-realtime datasource"() {
 		initContext()
 		globals.realtime = false
-		
+
 		when:
 			module.sub.receive("Test subject")
 			module.message.receive("Test message")
