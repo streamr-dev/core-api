@@ -138,37 +138,28 @@ value2: test value
 
 """), module.parentSignalPath.uiChannelId)
 	}
-	
+
 	void "If trying to send emails too often send notification to warn about it"() {
-		module = new EmailModule(){
-			long myTime
-			
-			public long getTime() {
-				return myTime
-			}
-			
-			public void setTime(long time) {
-				myTime = time
-			}
-		}
-		initContext()
-		globals.realtime = true
-	
+		setup:
+			initContext()
+			globals.realtime = true
+
 		when: "sent two emails very often"
-			module.setTime(0)
+			globals.time = new Date(0)
 			module.sub.receive("Test subject")
 			module.message.receive("Test message")
 			module.getInput("value1").receive(500)
 			module.getInput("value2").receive("test value")
 			module.sendOutput()
-			module.setTime(100)
+			ms.mailSent = false // Clear
+			globals.time = new Date(10000)
 			module.sendOutput()
 		then: "one notification should be sent"
-			!ms.mailSent	
+			!ms.mailSent
 			1 * globals.uiChannel.push(new NotificationMessage("Tried to send emails too often"), module.parentSignalPath.uiChannelId)
-			
-		when: "sent third email after one minute"
-			module.setTime(70000)
+
+		when: "sent third email with a warning after one minute"
+			globals.time = new Date(70000)
 			module.sub.receive("Test subject")
 			module.message.receive("Test message")
 			module.getInput("value1").receive(500)
@@ -177,6 +168,39 @@ value2: test value
 		then: "an email should be sent again"
 			ms.mailSent
 			0 * globals.uiChannel.push(new NotificationMessage("Tried to send emails too often"), module.parentSignalPath.uiChannelId)
+	}
+
+	void "if too emails are sent too frequently, the next one contains a warning about it"() {
+		setup: "two emails sent frequently"
+			initContext()
+			globals.realtime = true
+
+			globals.time = new Date(0)
+			module.sub.receive("Test subject")
+			module.message.receive("Test message")
+			module.getInput("value1").receive(500)
+			module.getInput("value2").receive("test value")
+			module.sendOutput()
+			globals.time = new Date(30000)
+			module.sendOutput()
+
+		when: "third one sent"
+			globals.time = new Date(70000)
+			module.sendOutput()
+
+		then: "email sent and has warning in it"
+			ms.mailSent
+			ms.getBody().contains("WARNING")
+
+		when: "fourth one sent"
+			ms.clear()
+			globals.time = new Date(150000)
+			module.sendOutput()
+
+		then: "email sent but hasn't warning in it anymore"
+			ms.mailSent
+			!ms.getBody().isEmpty()
+			!ms.getBody().contains("WARNING")
 	}
 
 	void "EmailModule can be instantiated without a user"() {

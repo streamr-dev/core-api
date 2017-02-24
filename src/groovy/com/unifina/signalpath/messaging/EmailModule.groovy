@@ -15,9 +15,10 @@ class EmailModule extends ModuleWithSideEffects {
 
 	transient SimpleDateFormat df
 
-	Long prevTime = 0
-	Long emailIntervall = 60000
+	Long prevTime
+	Long emailInterval = 60000
 	boolean emailSent
+	boolean lastEmailBlocked
 
 	@Override
 	public void init() {
@@ -30,7 +31,8 @@ class EmailModule extends ModuleWithSideEffects {
 
 	@Override
 	public void activateWithSideEffects() {
-		if (isNotTooOften(emailIntervall, getTime(), prevTime)) {
+		if (isNotTooOften(emailInterval, globals.getTime().getTime(), prevTime)) {
+			prevTime = globals.getTime().getTime()
 			emailSent = true
 			String messageTo = globals.getUser().getUsername()
 			def mailService = globals.grailsApplication.getMainContext().getBean("mailService")
@@ -41,11 +43,11 @@ class EmailModule extends ModuleWithSideEffects {
 				subject sub.getValue()
 				body messageBody
 			}
-		} else {
-			if (emailSent) {
-				globals.uiChannel?.push(new NotificationMessage("Tried to send emails too often"), parentSignalPath.uiChannelId)
-				emailSent = false
-			}
+			lastEmailBlocked = false
+		} else if (emailSent) {
+			lastEmailBlocked = true
+			globals.uiChannel?.push(new NotificationMessage("Tried to send emails too often"), parentSignalPath.uiChannelId)
+			emailSent = false
 		}
 	}
 
@@ -66,28 +68,23 @@ class EmailModule extends ModuleWithSideEffects {
 			}
 		}
 
-		//		Create body for the email
-		String messageBody = """
-Message:
-${message.getValue()}
-
-Event Timestamp:
-${df.format(globals.time)}
-
-Input Values:
-$inputValues
-"""
+		// Create body for the email
+		String messageBody = ("\n" +
+				"Message:\n" +
+				"${message.getValue()}\n\n" +
+				"Event Timestamp:\n" +
+				"${df.format(globals.time)}\n\n" +
+				"Input Values:\n" +
+				"${inputValues}\n" +
+				(lastEmailBlocked ? "\nWARNING: Some emails between this and the last mail have not been sent because of trying to send too frequently.\n" : "") +
+				"")
 
 		return messageBody
 	}
 
-	public long getTime() {
-		return System.currentTimeMillis()
-	}
+	private Input<Object> createAndAddInput(String name) {
 
-	public Input<Object> createAndAddInput(String name) {
-
-		Input<Object> conn = new Input<Object>(this,name,"Object");
+		Input<Object> conn = new Input<Object>(this,name, "Object");
 
 		conn.setDrivingInput(true);
 
@@ -124,12 +121,16 @@ $inputValues
 		}
 	}
 
-	public boolean isNotTooOften(intervall, time1, time2){
-		return Math.abs(time1 - time2) > intervall
+	private static boolean isNotTooOften(interval, newTime, prevTime){
+		return prevTime == null || newTime - prevTime > interval
 	}
 
 	@Override
 	public void clearState() {
+		prevTime = null
+		emailSent = false
+		emailInputCount = 1
+		lastEmailBlocked = false
 	}
 
 	private def initDf() {
@@ -140,4 +141,8 @@ $inputValues
 		}
 	}
 
+	@Override
+	protected boolean allowSideEffectsInHistoricalMode() {
+		return false
+	}
 }
