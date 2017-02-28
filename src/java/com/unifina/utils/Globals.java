@@ -66,6 +66,7 @@ public class Globals {
 		this.signalPathContext = signalPathContext;
 		this.grailsApplication = grailsApplication;
 		this.user = user;
+		this.userTimeZone = TimeZone.getTimeZone(user.getTimezone());
 		
 		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}

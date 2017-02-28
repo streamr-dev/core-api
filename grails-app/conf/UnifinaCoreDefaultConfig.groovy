@@ -327,12 +327,13 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
  */
 grails {
 	mail {
-		host = "smtp.gmail.com"
+		host = "email-smtp.us-east-1.amazonaws.com"
 		port = 465
-		username = "henri.pihkala@streamr.com"
-		password = "gnqxzdmojlkzlxjy"
+		username = "AKIAIV4PGPKXNAGNDFQQ"
+		password = "AqH4L/VferJlG0KExv0D8pEvJW6LR7LC6Q4VqzVZAbTS"
 		props = ["mail.smtp.auth":"true",
 				 "mail.smtp.socketFactory.port":"465",
+				 "mail.smtp.starttls.enable":"true",
 				 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
 				 "mail.smtp.socketFactory.fallback":"false"]
 	}
