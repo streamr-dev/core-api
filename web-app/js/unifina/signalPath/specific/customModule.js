@@ -80,7 +80,7 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 			
 			editor = CodeMirror(dialog.find(".modal-body")[0], $.extend({},SignalPath.CustomModuleOptions.codeMirrorOptions,{
 				value: prot.jsonData.code,
-				mode:  "groovy"
+				mode:  prot.jsonData.language || 'groovy'
 			}));
 
 			dialog.resizable({
@@ -157,21 +157,25 @@ SignalPath.CustomModule = function(data,canvas,prot) {
 
 	prot.receiveResponse = function(payload) {
 		if (payload.type=="debug" && debug != null) {
-			debugTextArea.append(payload.t+" - "+payload.msg+"<br>");
+			debugTextArea.append(payload.t + " - " + _.escape(payload.msg) + "<br>");
+		} else if (payload.type === "runtimeErrors") {
+            for (var i=0;i< payload.errors.length;i++) {
+                editor.setGutterMarker(payload.errors[i].line-1, "breakpoints", makeMarker("#347"));
+            }
 		}
 	}
 
 	pub.handleError = prot.handleError = function(error) {
 		if (error.type=="compilationErrors") {
 			for (var i=0;i<error.errors.length;i++) {
-				editor.setGutterMarker(error.errors[i].line-1, "breakpoints", makeMarker());
+				editor.setGutterMarker(error.errors[i].line-1, "breakpoints", makeMarker("#822"));
 			}
 		}
 	}
 	
-	function makeMarker() {
+	function makeMarker(color) {
 		var marker = document.createElement("div");
-		marker.style.color = "#822";
+		marker.style.color = color;
 		marker.innerHTML = "&#9679;";
 		return marker;
 	}
