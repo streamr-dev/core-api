@@ -2,15 +2,13 @@ package com.unifina.data;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class StreamrBinaryMessage {
 	private static final byte VERSION = 28; //0x1C
 
 	public static final byte CONTENT_TYPE_STRING = 11; //0x0B
 	public static final byte CONTENT_TYPE_JSON = 27; //0x1B
-
-	private static final Charset utf8 = Charset.forName("UTF-8");
 
 	private final String streamId;
 	private final int partition;
@@ -30,7 +28,7 @@ public class StreamrBinaryMessage {
 			int streamIdLength = bb.get() & 0xFF; // unsigned byte
 			streamIdAsBytes = new byte[streamIdLength];
 			bb.get(streamIdAsBytes);
-			streamId = new String(streamIdAsBytes, utf8);
+			streamId = new String(streamIdAsBytes, StandardCharsets.UTF_8);
 			partition = bb.get() & 0xff; // unsigned byte
 			contentType = bb.get();
 			int contentLength = bb.getInt();
@@ -45,7 +43,7 @@ public class StreamrBinaryMessage {
 	public StreamrBinaryMessage(String streamId, int partition, long timestamp, int ttl, byte contentType, byte[] content) {
 		this.streamId = streamId;
 		this.partition = partition;
-		this.streamIdAsBytes = this.streamId.getBytes(utf8);
+		this.streamIdAsBytes = this.streamId.getBytes(StandardCharsets.UTF_8);
 		this.timestamp = timestamp;
 		this.ttl = ttl;
 		this.contentType = contentType;
@@ -81,6 +79,10 @@ public class StreamrBinaryMessage {
 		bb.putInt(content.length); // 4 bytes
 		bb.put(content); // contentLength bytes
 		return bb.array();
+	}
+
+	public int sizeInBytes() {
+		return 1 + 8 + 4 + 1 + streamIdAsBytes.length + 1 + 1 + 4 + content.length;
 	}
 
 	public String getStreamId() {

@@ -1,12 +1,11 @@
 package com.unifina.signalpath.text;
 
 import com.unifina.signalpath.*;
-import org.apache.commons.collections.list.UnmodifiableList;
-import org.apache.commons.collections.map.UnmodifiableMap;
 import org.codehaus.groovy.grails.web.json.JSONException;
 import org.codehaus.groovy.grails.web.json.JSONTokener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -45,9 +44,9 @@ public class JsonParser extends AbstractSignalPathModule {
 		JSONTokener parser = new JSONTokener(json);
 		Object jsonObject = parser.nextValue();
 		if (jsonObject instanceof Map) {
-			jsonObject = UnmodifiableMap.decorate((Map)jsonObject);
+			jsonObject = Collections.unmodifiableMap((Map) jsonObject);
 		} else if (jsonObject instanceof List) {
-			jsonObject = UnmodifiableList.decorate((List)jsonObject);
+			jsonObject = Collections.unmodifiableList((List) jsonObject);
 		}
 		return jsonObject;
 	}

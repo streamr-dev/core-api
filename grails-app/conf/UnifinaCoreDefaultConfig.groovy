@@ -5,9 +5,11 @@ import com.unifina.data.KafkaPartitioner
  * The application config file can override anything defined here.
  */
 
+def prodBaseUrl = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+
 environments {
 	production {
-		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+		grails.serverURL = prodBaseUrl
 	}
 }
 
@@ -236,7 +238,7 @@ environments {
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
  */
-streamr.ip.address.prefixes = ["192.168.10.", "192.168."]
+streamr.ip.address.prefixes = ["192.168.10.", "192.168.", "10."]
 environments {
 	production {
 		streamr.ip.address.prefixes = []
@@ -249,7 +251,7 @@ environments {
 streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev-data.streamr/api/v1/ws"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "wss://data.streamr.com/api/v1/ws"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
 	}
 }
 
@@ -259,7 +261,7 @@ environments {
 streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com/api/v1"
+		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
@@ -280,8 +282,8 @@ streamr.kafka.dataTopic = "data-dev"
 environments {
 	production {
 		streamr.kafka.dataTopic = "data-prod"
-		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
-		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
+		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "kafka1:9092"
+		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
 	}
 }
 
@@ -290,15 +292,24 @@ environments {
  */
 streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
 streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
-// TODO: set prod config when going to prod
+environments {
+	production {
+		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
+	}
+}
 
 /**
  * Cassandra config
  */
 streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
 streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
-// TODO: set prod config when going to prod
 
+environments {
+	production {
+		streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["cassandra1"])
+		streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_prod"
+	}
+}
 /**
  * Serialization config
  */
@@ -348,12 +359,13 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
  */
 grails {
 	mail {
-		host = "smtp.gmail.com"
+		host = "email-smtp.us-east-1.amazonaws.com"
 		port = 465
-		username = "henri.pihkala@streamr.com"
-		password = "gnqxzdmojlkzlxjy"
+		username = "AKIAIV4PGPKXNAGNDFQQ"
+		password = "AqH4L/VferJlG0KExv0D8pEvJW6LR7LC6Q4VqzVZAbTS"
 		props = ["mail.smtp.auth":"true",
 				 "mail.smtp.socketFactory.port":"465",
+				 "mail.smtp.starttls.enable":"true",
 				 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
 				 "mail.smtp.socketFactory.fallback":"false"]
 	}
@@ -371,7 +383,7 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 /**
  * Signup Configs
  */
-streamr.signup.requireInvite = false
+streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireInvite")) : false)
 
 /**
  * Miscellaneous

@@ -19,7 +19,7 @@ public class Expression extends AbstractSignalPathModule {
 	@Override
 	public void init() {
 		expressionParam.setUpdateOnChange(true);
-		expressionParam.setUnconnectable(true);
+		expressionParam.setCanConnect(false);
 
 		addInput(expressionParam);
 		addOutput(out);
@@ -67,8 +67,8 @@ public class Expression extends AbstractSignalPathModule {
 	}
 
 	// TODO: Replace with com.udojava.evalex.Expression#getUsedVariables() when new release of EvalEx is released.
-	private static List<String> determineVariables(com.udojava.evalex.Expression expression) {
-		List<String> result = new ArrayList<>();
+	private static Iterable<String> determineVariables(com.udojava.evalex.Expression expression) {
+		Set<String> vars = new LinkedHashSet<>();
 		Iterator<String> iterator = expression.getExpressionTokenizer();
 		while (iterator.hasNext()) {
 			String token = iterator.next();
@@ -79,8 +79,8 @@ public class Expression extends AbstractSignalPathModule {
 				|| token.equals(",") || isNumber(token)) {
 				continue;
 			}
-			result.add(token);
+			vars.add(token);
 		}
-		return result;
+		return vars;
 	}
 }

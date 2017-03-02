@@ -65,7 +65,7 @@ class CanvasService {
 		canvas.save(flush: true, failOnError: true)
 	}
 
-	public void start(Canvas canvas, boolean clearSerialization, Map csvOptions = null) {
+	public void start(Canvas canvas, boolean clearSerialization) {
 		if (canvas.state == Canvas.State.RUNNING) {
 			throw new InvalidStateException("Cannot run canvas $canvas.id because it's already running. Stop it first.")
 		}
@@ -75,12 +75,6 @@ class CanvasService {
 		}
 
 		Map signalPathContext = canvas.toMap().settings
-
-		// CSV mode
-		if (csvOptions) {
-			signalPathContext.csv = true
-			signalPathContext.csvOptions = csvOptions
-		}
 
 		try {
 			signalPathService.startLocal(canvas, signalPathContext)

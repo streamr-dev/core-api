@@ -34,16 +34,7 @@ public class ForEach extends AbstractSignalPathModule {
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-
-		LinkedHashMap<String, Map> canvasMapByKey = new LinkedHashMap<>();
-		config.put("canvasesByKey", canvasMapByKey);
-		for (String key : keyToSignalPath.keySet()) {
-			SubSignalPath ssp = keyToSignalPath.get(key);
-			Map<String, Object> subConfig = ssp.getSignalPath().getConfiguration();
-			subConfig.put("state", Canvas.State.RUNNING);
-			canvasMapByKey.put(key, subConfig);
-		}
-
+		config.put("canvasKeys", keyToSignalPath.keySet());
 		return config;
 	}
 
@@ -52,7 +43,7 @@ public class ForEach extends AbstractSignalPathModule {
 		super.onConfiguration(config);
 
 		// Load canvas
-		Canvas canvas = signalPathParameter.getValue();
+		Canvas canvas = signalPathParameter.getCanvas();
 		if (canvas == null) {
 			return;
 		}
@@ -160,7 +151,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
-		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getValue().getJson());
+		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
 		canvasService.resetUiChannels(signalPathMap);
 		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
 		signalPath.setName(signalPath.getName() + " (" + key + ")");
@@ -176,7 +167,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		signalPath.setParentSignalPath(getParentSignalPath());
 
-		Propagator propagator = new Propagator(signalPath.getExportedInputs(), this);
+		Propagator propagator = new Propagator(signalPath.getExportedInputs());
 
 		signalPath.connectionsReady();
 		return new SubSignalPath(signalPath, propagator, key);
@@ -197,8 +188,7 @@ public class ForEach extends AbstractSignalPathModule {
 	public AbstractSignalPathModule resolveRuntimeRequestRecipient(RuntimeRequest request, RuntimeRequest.PathReader path) {
 		if (path.isEmpty()) {
 			return super.resolveRuntimeRequestRecipient(request, path);
-		}
-		else {
+		} else {
 			String key = path.readString("keys");
 			// URLDecode twice, see forEachModule.js
 			try {
@@ -208,8 +198,7 @@ public class ForEach extends AbstractSignalPathModule {
 			SubSignalPath ssp = keyToSignalPath.get(key);
 			if (ssp == null) {
 				throw new IllegalArgumentException("Subcanvas not found: "+key);
-			}
-			else {
+			} else {
 				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
 			}
 		}

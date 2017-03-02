@@ -81,7 +81,7 @@ class CanvasApiController {
 	@StreamrApi
 	def start(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvasService.start(canvas, request.JSON?.clearState ?: false, request.JSON?.csvOptions)
+		canvasService.start(canvas, request.JSON?.clearState ?: false)
 		render canvas.toMap() as JSON
 	}
 
@@ -121,7 +121,7 @@ class CanvasApiController {
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser), local ? true : false)
-		log.info("request: responding with $response")
+		log.debug("request: responding with $response")
 		render response as JSON
 	}
 

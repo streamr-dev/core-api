@@ -73,6 +73,7 @@ var SignalPath = (function () {
 	pub.options = options;
 
 	var isBeingReloaded = false
+	var debugLoopInterval = null
 	
     // TODO: remove if not needed anymore!
     pub.replacedIds = {};
@@ -191,13 +192,17 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
-					module.updateFrom(data);
-					
-					var div = module.getDiv();					
-					setModuleById(module.getHash(), module);
-					module.redraw(); // Just in case
-					if (callback)
-						callback();
+					// Guard against the situation where module has been closed while the update was in flight
+					if (!module.isClosed()) {
+						module.updateFrom(data);
+
+						var div = module.getDiv();
+						setModuleById(module.getHash(), module);
+						module.redraw(); // Just in case
+						if (callback) {
+							callback(data);
+						}
+					}
 				}
 				else {
 					if (data.moduleErrors) {
@@ -389,6 +394,7 @@ var SignalPath = (function () {
 	function saveAs(name, callback) {
 		setName(name)
 		save(function(json) {
+			pub.clear()
 			load(json, function() {
 				setTimeout(callback, 0)
 			})
@@ -740,6 +746,43 @@ var SignalPath = (function () {
 
 	pub.isLoading = function() {
 		return SignalPath.isBeingReloaded;
+	}
+
+	// Whether canvas represents something that cannot be edited but only viewed, e.g., a running sub-canvas.
+	pub.isReadOnly = function() {
+		return runningJson && runningJson.readOnly;
+    }
+
+	pub.toggleDebugMode = function(intervalInMs) {
+		if (debugLoopInterval) {
+			clearInterval(debugLoopInterval)
+			debugLoopInterval = null
+			return false
+		} else {
+			debugLoopInterval = setInterval(function () {
+				if (SignalPath.isRunning() && !SignalPath.isLoading()) {
+					$.ajax({
+						type: 'POST',
+						url: pub.getURL() + "/request",
+						data: JSON.stringify({type: "json"}),
+						contentType: "application/json",
+						dataType: "json",
+						success: function (response) {
+							console.log(response)
+							var outputs = _.pluck(response.json.modules, "outputs")
+							var inputs = _.pluck(response.json.modules, "inputs")
+							var params = _.pluck(response.json.modules, "params")
+							var endpoints = _.flatten(outputs.concat(inputs, params))
+							_.each(endpoints, function (endpoint) {
+								$("#" + endpoint.id).data("spObject").updateState(endpoint.value);
+							})
+
+						}
+					})
+				}
+			}, intervalInMs || 10000)
+			return true
+		}
 	}
 
 	return pub; 

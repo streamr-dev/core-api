@@ -51,16 +51,17 @@ public class MapMessageEventRecipient extends StreamEventRecipient<AbstractSigna
 		for (String name : outputsByName.keySet()) {
 			if (msg.containsKey(name)) {
 				Object val = msg.get(name);
-				
-				// Convert boolean to 1/0
-				// TODO: is this relevant now that there are boolean inputs/outputs?
-				if (val instanceof Boolean)
-					val = (((Boolean)val) ? 1D : 0D);
-				
+
+				// Null values are just not sent
+				if (val==null) {
+					continue;
+				}
+
 				for (Output o : outputsByName.get(name)) {
 					// Convert all numbers to doubles
-					if (o instanceof TimeSeriesOutput)
-						o.send(((Number)val).doubleValue());
+					if (o instanceof TimeSeriesOutput) {
+						o.send(((Number) val).doubleValue());
+					}
 					else o.send(val);
 				}
 			}
