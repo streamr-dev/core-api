@@ -12,3 +12,4 @@ unifina-core*.iml
 out/
 plugin.xml
 hs_err_pid*
+grailsMarkdown-inplacePlugin.iml

@@ -1,37 +1,35 @@
-import com.unifina.controller.core.signalpath.CanvasController
-import com.unifina.kafkaclient.UnifinaKafkaProducer
+import com.unifina.domain.data.Stream
 import com.unifina.service.SerializationService
+import com.unifina.service.StreamService
 import com.unifina.utils.MapTraversal
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import grails.test.mixin.TestFor
+import core.mixins.StreamMixin
 import grails.util.Holders
 import spock.lang.Shared
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@TestFor(CanvasController) // makes grailsApplication available
 class SerializationSpec extends LoginTester1Spec {
 
-	static UnifinaKafkaProducer kafka
-
 	@Shared long serializationIntervalInMillis
+	@Shared Stream testStream
+	@Shared StreamService streamService
 
 	def setupSpec() {
-		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
-
 		// For some reason the annotations don't work so need the below.
 		SerializationSpec.metaClass.mixin(CanvasMixin)
 		SerializationSpec.metaClass.mixin(ConfirmationMixin)
+		SerializationSpec.metaClass.mixin(StreamMixin)
 
 		serializationIntervalInMillis = MapTraversal.getLong(Holders.config, SerializationService.INTERVAL_CONFIG_KEY)
+		streamService = createStreamService()
+
+		testStream = new Stream()
+		testStream.id = "mvGKMdDrTeaij6mmZsQliA"
 	}
 
 	def cleanupSpec() {
-		synchronized(kafka) {
-			kafka.close()
-		}
+		cleanupStreamService(streamService)
 	}
 
 	def "resuming paused live canvas retains modules' states"() {
@@ -67,9 +65,7 @@ class SerializationSpec extends LoginTester1Spec {
 			noNotificationsVisible()
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
-					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
-						"", System.currentTimeMillis(),
-						'{"a":' + i + ', "b": ' + (i * 0.5)  + '}')
+					streamService.sendMessage(testStream, [a: i, b: (i * 0.5)], 30)
 					sleep(150)
 				}
 			}
@@ -90,9 +86,7 @@ class SerializationSpec extends LoginTester1Spec {
 		and: "Data is sent"
 			Thread.start {
 				for (int i = 100; i < 105; ++i) {
-					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
-						"", System.currentTimeMillis(),
-						'{"a":' + i + ', "b": ' + (i * 0.5)  + '}')
+					streamService.sendMessage(testStream, [a: i, b: (i * 0.5)], 30)
 					sleep(150)
 				}
 			}
@@ -108,9 +102,7 @@ class SerializationSpec extends LoginTester1Spec {
 		and: "Data is sent"
 			Thread.start {
 				for (int i = 0; i < 20; ++i) {
-					kafka.sendJSON("mvGKMdDrTeaij6mmZsQliA",
-						"", System.currentTimeMillis(),
-						'{"a":' + i + ', "b": ' + (i * 0.5)  + '}')
+					streamService.sendMessage(testStream, [a: i, b: (i * 0.5)], 30)
 					sleep(150)
 				}
 			}
@@ -122,12 +114,4 @@ class SerializationSpec extends LoginTester1Spec {
 			stopCanvasIfRunning()
 	}
 
-	private def makeKafkaConfiguration() {
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));
-		Properties properties = new Properties();
-		for (String s : kafkaConfig.keySet()) {
-			properties.setProperty(s, kafkaConfig.get(s).toString());
-		}
-		return properties;
-	}
 }

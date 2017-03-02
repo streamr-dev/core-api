@@ -65,8 +65,8 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 
 			// Construction of StreamEventRecipients (represented by a Stream object in the database)
 			if (subscriber instanceof IStreamRequirement && StreamEventRecipient.class.isAssignableFrom(eventRecipientClass)) {
-				Constructor constructor = eventRecipientClass.getConstructor(Globals.class, Stream.class);
-				return (EventRecipientClass) constructor.newInstance(globals, ((IStreamRequirement)subscriber).getStream());
+				Constructor constructor = eventRecipientClass.getConstructor(Globals.class, Stream.class, Set.class);
+				return (EventRecipientClass) constructor.newInstance(globals, ((IStreamRequirement)subscriber).getStream(), ((IStreamRequirement)subscriber).getPartitions());
 			}
 			// Construction of other IEventRecipients (legacy/hardwired)
 			else {
@@ -104,19 +104,20 @@ public abstract class AbstractFeed<ModuleClass, MessageClass extends ITimestampe
 			subscribers.add(subscriber);
 
 			// Create and register the event recipient for this subscription if it doesn't already exist
-			KeyClass key = keyProvider.getSubscriberKey(subscriber);
-			EventRecipientClass recipient = getEventRecipientByKey(key);
+			for (KeyClass key : keyProvider.getSubscriberKeys(subscriber)) {
+				EventRecipientClass recipient = getEventRecipientByKey(key);
 
-			if (recipient == null) {
-				recipient = createEventRecipient(subscriber);
-				eventRecipients.add(recipient);
-				eventRecipientsByKey.put(key, recipient);
-				globals.getDataSource().register(recipient);
-			}
-			
-			// Register the subscription with the event recipient
-			if (recipient instanceof AbstractEventRecipient) {
-				((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
+				if (recipient == null) {
+					recipient = createEventRecipient(subscriber);
+					eventRecipients.add(recipient);
+					eventRecipientsByKey.put(key, recipient);
+					globals.getDataSource().register(recipient);
+				}
+
+				// Register the subscription with the event recipient
+				if (recipient instanceof AbstractEventRecipient) {
+					((AbstractEventRecipient<ModuleClass, MessageClass>)recipient).register(subscriber);
+				}
 			}
 			
 		}

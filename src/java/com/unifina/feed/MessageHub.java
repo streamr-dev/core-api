@@ -47,9 +47,6 @@ public class MessageHub<RawMessageClass, MessageClass, KeyClass> extends Thread 
 		this.cache = cache;
 		this.parser = parser;
 		
-		if (cache!=null)
-			source.setExpectedCounter(cache.getCacheSize()+1);
-		
 		source.setRecipient(this);
 		if (cache!=null)
 			addRecipient(cache);

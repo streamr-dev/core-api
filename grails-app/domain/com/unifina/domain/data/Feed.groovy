@@ -17,25 +17,37 @@ class Feed implements Serializable {
 	String preprocessor
 	
 	String directory
-	
+
+	@Deprecated
 	String cacheClass
 	String cacheConfig
+	@Deprecated
 	String parserClass
+	@Deprecated
 	String messageSourceClass
 	String messageSourceConfig
+	@Deprecated
 	String discoveryUtilClass
 	String discoveryUtilConfig
-	
+
+	@Deprecated
 	String eventRecipientClass
+	@Deprecated
 	String keyProviderClass
+	@Deprecated
 	String streamListenerClass
+	@Deprecated
 	String streamPageTemplate
+	@Deprecated
 	String fieldDetectorClass
+	@Deprecated
 	String dataRangeProviderClass
 	
 	Module module
-	
+
+	@Deprecated
 	Boolean startOnDemand
+	@Deprecated
 	Boolean bundledFeedFiles
 
 	static constraints = {

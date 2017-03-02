@@ -64,7 +64,9 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	
 	@Override
 	public boolean subscribe(ModuleClass subscriber) {
-		hub.subscribe(keyProvider.getSubscriberKey(subscriber), this);
+		for (KeyClass key : keyProvider.getSubscriberKeys(subscriber)) {
+			hub.subscribe(key, this);
+		}
 		return super.subscribe(subscriber);
 	}
 	
@@ -250,8 +252,11 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 	
 	@Override
 	public void stopFeed() throws Exception {
-		for (ModuleClass subscriber : subscribers)
-			hub.unsubscribe(keyProvider.getSubscriberKey(subscriber), this);
+		for (ModuleClass subscriber : subscribers) {
+			for (KeyClass key : keyProvider.getSubscriberKeys(subscriber)) {
+				hub.unsubscribe(key, this);
+			}
+		}
 		
 		hub.removeRecipient(this);
 		log.info("Unsubscribed from hub: "+this);
