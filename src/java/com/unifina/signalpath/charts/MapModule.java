@@ -31,10 +31,10 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private String markerIcon = DEFAULT_MARKER_ICON;
 
 	private int expiringTimeOfMarkerInSecs = 0;
-	private Set<Marker> expiringMarkers = new LinkedHashSet<>();
+	private final Set<ExpiringItem> expiringMarkers = new LinkedHashSet<>();
 
 	private int expiringTimeOfTraceInSecs = 0;
-	private List<Point> expiringPoints = new LinkedList<>();
+	private final List<ExpiringItem> expiringTracePoints = new LinkedList<>();
 
 	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
 		this.centerLat = centerLat;
@@ -85,21 +85,21 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		);
 
 		if (expiringTimeOfMarkerInSecs > 0) {
-			marker.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfMarkerInSecs * 1000));
-			expiringMarkers.remove(marker);
-			expiringMarkers.add(marker);
+			long expireTime = getGlobals().getTime().getTime() + (expiringTimeOfMarkerInSecs * 1000);
+			ExpiringItem expiringMarker = new ExpiringItem(id.getValue(), expireTime);
+			expiringMarkers.remove(expiringMarker);
+			expiringMarkers.add(expiringMarker);
 		}
 
 		if (drawTrace) {
 			String tracePointId = getGlobals().generateId();
-			marker.setTracePointId(tracePointId);
+			marker.put("tracePointId", tracePointId);
 			if (expiringTimeOfTraceInSecs > 0) {
-				Point point = new Point(id.getValue().toString());
-				point.setTracePointId(tracePointId);
-				point.setExpirationTime(getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000));
-				expiringPoints.add(point);
+				long expireTime = getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000);
+				expiringTracePoints.add(new ExpiringItem(tracePointId, expireTime));
 			}
 		}
+
 		if (customMarkerLabel) {
 			marker.put("label", label.getValue());
 		}
@@ -112,7 +112,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	@Override
 	public void clearState() {
 		expiringMarkers.clear();
-		expiringPoints.clear();
+		expiringTracePoints.clear();
 	}
 
 	@Override
@@ -222,28 +222,25 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	@Override
 	public void setTime(Date time) {
-		List<String> expiredMapPointIds = new ArrayList<>();
-		Map<Object, List<String>> expiredTracePoints = new HashMap<>();
+		List<Object> expiredMapPointIds = new ArrayList<>();
+		List<Object> expiredTracePoints = new ArrayList<>();
 
 		if (expiringTimeOfMarkerInSecs > 0) {
-			Iterator<Marker> iterator = expiringMarkers.iterator();
-			Marker marker;
+			Iterator<ExpiringItem> iterator = expiringMarkers.iterator();
+			ExpiringItem marker;
 
 			while (iterator.hasNext() && (marker = iterator.next()).isExpired(time)) {
 				iterator.remove();
-				expiredMapPointIds.add(marker.getId().toString());
+				expiredMapPointIds.add(marker.getId());
 			}
 		}
 		if (expiringTimeOfTraceInSecs > 0) {
-			Iterator<Point> iterator = expiringPoints.iterator();
-			Point point;
+			Iterator<ExpiringItem> iterator = expiringTracePoints.iterator();
+			ExpiringItem tracePoint;
 
-			while (iterator.hasNext() && (point = iterator.next()).isExpired(time)) {
+			while (iterator.hasNext() && (tracePoint = iterator.next()).isExpired(time)) {
+				expiredTracePoints.add(tracePoint.getId());
 				iterator.remove();
-				if (!expiredTracePoints.containsKey(point.getMarkerId())) {
-					expiredTracePoints.put(point.getMarkerId(), new ArrayList<String>());
-				}
-				expiredTracePoints.get(point.getMarkerId()).add(point.getTracePointId());
 			}
 		}
 		if (!expiredMapPointIds.isEmpty() || !expiredTracePoints.isEmpty()) {
@@ -255,8 +252,6 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	 * Marker point
 	 */
 	private static class Marker extends LinkedHashMap<String, Object> {
-		private Long expirationTime;
-
 		private Marker(Object id, Double latitude, Double longitude, StreamrColor color) {
 			put("t", "p");	// type: MapPoint
 			put("id", id.toString());
@@ -264,72 +259,41 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			put("lng", longitude);
 			put("color", color.toString());
 		}
+	}
 
-		Object getId() {
-			return get("id");
-		}
+	private static class ExpiringItem implements Serializable {
+		private final Object id;
+		private final long expirationTime;
 
-		void setExpirationTime(long expirationTime) {
+		private ExpiringItem(Object id, long expirationTime) {
+			this.id = id;
 			this.expirationTime = expirationTime;
 		}
 
-		void setTracePointId(String id) {
-			put("tracePointId", id);
+		private Object getId() {
+			return id;
 		}
 
-		boolean isExpired(Date currentTime) {
+		private boolean isExpired(Date currentTime) {
 			return expirationTime <= currentTime.getTime();
 		}
 
 		@Override
 		public boolean equals(Object o) {
-			return o != null && o instanceof Marker && getId().equals(((Marker) o).getId());
+			return o != null && o instanceof ExpiringItem && getId().equals(((ExpiringItem) o).getId());
 		}
 
 		@Override
 		public int hashCode() {
-			return get("id").hashCode();
-		}
-	}
-
-	/**
-	 * Trace point
-	 */
-	private static class Point implements Serializable {
-		private Object markerId;
-		private long expirationTime;
-		private String tracePointId;
-
-		public Point(Object id) {
-			this.markerId = id;
-		}
-
-		void setTracePointId(String id) {
-			tracePointId = id;
-		}
-
-		String getTracePointId() {
-			return tracePointId;
-		}
-
-		void setExpirationTime(long expirationTime) {
-			this.expirationTime = expirationTime;
-		}
-
-		boolean isExpired(Date currentTime) {
-			return expirationTime <= currentTime.getTime();
-		}
-
-		Object getMarkerId() {
-			return markerId;
+			return getId().hashCode();
 		}
 	}
 
 	private static class ExpirementList extends LinkedHashMap<String, Object> {
-		private ExpirementList(List<String> markerIdList, Map<Object, List<String>> pointList) {
+		private ExpirementList(List<Object> markerIdList, List<Object> pointIdList) {
 			put("t", "d");
 			put("markerList", markerIdList);
-			put("pointList", pointList);
+			put("pointList", pointIdList);
 		}
 	}
 }

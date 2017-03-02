@@ -134,9 +134,9 @@
     }
 
     StreamrMap.prototype.createTraceLayer = function() {
-        var _this            = this
-        this.tracesById      = {}
-        this.lastLatLngsById = {}
+        var _this = this
+        this.traceUpdates = {}
+        this.lastLatLngs = {}
         function isInsideCanvas(point, canvas) {
             return point.x >= 0 && point.x <= canvas.width && point.y >= 0 && point.y <= canvas.height
         }
@@ -169,8 +169,8 @@
                 if (changesOnly) {
                     updates = _this.pendingLineUpdates
                 } else {
-                    _.mapKeys(_this.tracesById, function(t) {
-                        updates = _.union(updates, _.values(t))
+                    _.each(_this.traceUpdates, function(t) {
+                        updates.push(t)
                     })
                     // clear canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -244,7 +244,9 @@
         var marker = this.markers[id]
         delete this.markers[id]
         delete this.pendingMarkerUpdates[id]
-        delete this.tracesById[id]
+        if (this.lastLatLngs) {
+            delete this.lastLatLngs[id]
+        }
         this.map.removeLayer(marker)
     }
     
@@ -254,19 +256,9 @@
         }
     }
     
-    StreamrMap.prototype.removeTracePoints = function(tracePointListsByMarkerId) {
-        for (var markerId in tracePointListsByMarkerId) {
-            var tracePoints = tracePointListsByMarkerId[markerId]
-            for (var i = 0; i < tracePoints.length; i++) {
-                var trace = this.tracesById[markerId]
-                var id = tracePoints[i]
-                if (trace && id) {
-                    delete trace[id]
-                }
-                if (trace && $.isEmptyObject(this.tracesById[markerId])) {
-                    delete this.lastLatLngsById[markerId]
-                }
-            }
+    StreamrMap.prototype.removeTracePoints = function(tracePointIds) {
+        for (var i=0; i < tracePointIds.length; ++i) {
+            delete this.traceUpdates[tracePointIds[i]]
         }
         this.lineLayer.render()
     }
@@ -378,7 +370,7 @@
 
     StreamrMap.prototype.addTracePoint = function(id, lat, lng, color, tracePointId) {
         var latlng = L.latLng(lat,lng)
-        var lastLatLng = this.lastLatLngsById[id]
+        var lastLatLng = this.lastLatLngs[id]
         if (lastLatLng) {
             var update = {
                 id: id,
@@ -388,13 +380,10 @@
                 tracePointId: tracePointId
             }
             this.pendingLineUpdates.push(update)
-            if (this.tracesById[id] === undefined) {
-                this.tracesById[id] = {}
-            }
-            this.tracesById[id][tracePointId] = update
+            this.traceUpdates[tracePointId] = update
         }
         
-        this.lastLatLngsById[id] = latlng
+        this.lastLatLngs[id] = latlng
     }
 
     StreamrMap.prototype.handleMessage = function(d) {
@@ -405,7 +394,7 @@
                 if (d.markerList && d.markerList.length) {
                     this.removeMarkersByIds(d.markerList)
                 }
-                if (d.pointList) {
+                if (d.pointList && d.pointList.length) {
                     this.removeTracePoints(d.pointList)
                 }
             }
@@ -440,8 +429,8 @@
         if(this.lineLayer) {
             var ctx = this.lineLayer.getCanvas().getContext('2d')
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            this.tracesById      = {}
-            this.lastLatLngsById = {}
+            this.traceUpdates = {}
+            this.lastLatLngs = {}
         }
 
         this.autoZoomBounds = this.defaultAutoZoomBounds
