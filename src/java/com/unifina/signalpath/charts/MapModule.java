@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.util.*;
 
 abstract class MapModule extends ModuleWithUI implements ITimeListener {
-	private static final String DEFAULT_MARKER_ICON = "fa fa-4x fa-long-arrow-up";
 
 	private final Input<Object> id = new Input<>(this, "id", "Object");
 	private final Input<Object> label = new Input<>(this, "label", "Object");
@@ -28,13 +27,18 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private boolean customMarkerLabel = false;
 
 	private boolean directionalMarkers = false;
-	private String markerIcon = DEFAULT_MARKER_ICON;
+
+	private String directionalMarkerIcon = "fa fa-4x fa-long-arrow-up";
+	private String nonDirectionalMarkerIcon = "fa fa-map-marker fa-4x";
+	private String markerPosition = "top";
 
 	private int expiringTimeOfMarkerInSecs = 0;
 	private final Set<ExpiringItem> expiringMarkers = new LinkedHashSet<>();
 
 	private int expiringTimeOfTraceInSecs = 0;
 	private final List<ExpiringItem> expiringTracePoints = new LinkedList<>();
+
+	private StreamrColor markerColor = new StreamrColor(233, 91, 21);
 
 	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
 		this.centerLat = centerLat;
@@ -132,8 +136,9 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createBoolean("directionalMarkers", directionalMarkers));
 		options.addIfMissing(ModuleOption.createInt("expiringTimeOfMarkerInSecs", expiringTimeOfMarkerInSecs));
 		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
-		options.addIfMissing(ModuleOption.createString("markerIcon", markerIcon)
-			.addPossibleValue("Default", DEFAULT_MARKER_ICON)
+		options.addIfMissing(ModuleOption.createColor("markerColor", markerColor));
+		options.addIfMissing(ModuleOption.createString("directionalMarkerIcon", directionalMarkerIcon)
+			.addPossibleValue("Default", "fa fa-4x fa-long-arrow-up")
 			.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
 			.addPossibleValue("Short arrow", "fa fa-2x fa-arrow-up")
 			.addPossibleValue("Circled arrow", "fa fa-2x fa-arrow-circle-o-up")
@@ -142,9 +147,14 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			.addPossibleValue("Circled wedge", "fa fa-2x fa-chevron-circle-up")
 			.addPossibleValue("Triangle", "fa fa-4x fa-caret-up")
 			.addPossibleValue("Triangle box", "fa fa-2x fa-caret-square-o-up")
-// 			TODO: Implement rotation logic for these markers (default is 45 deg too much)
-//			.addPossibleValue("Airplane", "fa fa-4x fa-plane")
-//			.addPossibleValue("Rocket", "fa fa-4x fa-rocket")
+		);
+		options.addIfMissing(ModuleOption.createString("nonDirectionalMarkerIcon", nonDirectionalMarkerIcon)
+			.addPossibleValue("Default", "fa fa-map-marker fa-4x")
+			.addPossibleValue("Circle", "fa fa-circle fa-2x")
+		);
+		options.addIfMissing(ModuleOption.createString("markerPosition", markerPosition)
+			.addPossibleValue("Middle", "middle")
+			.addPossibleValue("Top", "top")
 		);
 
 		return config;
@@ -203,8 +213,20 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			expiringTimeOfTraceInSecs = options.getOption("expiringTimeOfTraceInSecs").getInt();
 		}
 
-		if (options.containsKey("markerIcon")) {
-			markerIcon = options.getOption("markerIcon").getString();
+		if (options.containsKey("directionalMarkerIcon")) {
+			directionalMarkerIcon = options.getOption("directionalMarkerIcon").getString();
+		}
+
+		if (options.containsKey("nonDirectionalMarkerIcon")) {
+			nonDirectionalMarkerIcon = options.getOption("nonDirectionalMarkerIcon").getString();
+		}
+
+		if (options.containsKey("markerColor")) {
+			markerColor = options.getOption("markerColor").getColor();
+		}
+
+		if (options.containsKey("markerPosition")) {
+			markerPosition = options.getOption("markerPosition").getString();
 		}
 
 		if (drawTrace) {

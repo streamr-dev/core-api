@@ -1,5 +1,9 @@
 package com.unifina.signalpath;
 
+import com.unifina.domain.data.Stream;
+import com.unifina.domain.signalpath.Module;
+import com.unifina.utils.StreamrColor;
+
 import java.util.*;
 
 public class ModuleOption extends LinkedHashMap<String, Object> {
@@ -7,6 +11,7 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	public static final String OPTION_INTEGER = "int";
 	public static final String OPTION_BOOLEAN = "boolean";
 	public static final String OPTION_DOUBLE = "double";
+	public static final String OPTION_COLOR = "color";
 
 	private String key;
 
@@ -81,6 +86,11 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 		return (o instanceof Boolean) ? (Boolean) o : Boolean.parseBoolean(getString());
 	}
 
+	public StreamrColor getColor() {
+		Object o = getValue();
+		return (o instanceof StreamrColor) ? (StreamrColor) o : StreamrColor.parseRGBString(getString());
+	}
+
 	public static ModuleOption createBoolean(String key, Boolean value) {
 		return new ModuleOption(key, value, OPTION_BOOLEAN);
 	}
@@ -95,5 +105,9 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 
 	public static ModuleOption createString(String key, String value) {
 		return new ModuleOption(key, value, OPTION_STRING);
+	}
+
+	public static ModuleOption createColor(String key, StreamrColor value) {
+		return new ModuleOption(key, value.toString(), OPTION_COLOR);
 	}
 }

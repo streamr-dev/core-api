@@ -4,7 +4,8 @@
     var TRACE_REDRAW_BATCH_SIZE = 10000
 
     // default non-directional marker icon
-    var DEFAULT_MARKER_ICON = "fa fa-map-marker fa-4x"
+    var DEFAULT_DIRECTIONAL_MARKER_ICON = "fa fa-4x fa-long-arrow-up"
+    var DEFAULT_NON_DIRECTIONAL_MARKER_ICON = "fa fa-map-marker fa-4x"
 
     var skins = {
         default: {
@@ -45,7 +46,10 @@
             traceWidth: 2,
             drawTrace: false,
             skin: "default",
-            markerIcon: DEFAULT_MARKER_ICON
+            markerIcon: options.directionalMarkers ?
+				(options.directionalMarkerIcon || DEFAULT_DIRECTIONAL_MARKER_ICON) :
+				(options.nonDirectionalMarkerIcon || DEFAULT_NON_DIRECTIONAL_MARKER_ICON),
+			markerPosition: "middle"
         }, options || {})
 
         this.defaultAutoZoomBounds = {
@@ -285,22 +289,18 @@
     }
 
     StreamrMap.prototype.createMarker = function(id, label, latlng, rotation) {
-        var marker = this.options.directionalMarkers ? L.marker(latlng, {
+        var marker = L.marker(latlng, {
             icon: L.divIcon({
-                iconSize:     [19, 48], // size of the icon
-                iconAnchor:   [10, 10], // point of the icon which will correspond to marker's location
-                popupAnchor:  [0, -41], // point from which the popup should open relative to the iconAnchor,
-                className: 'streamr-map-icon ' + this.options.markerIcon
-            })
-        }) : L.marker(latlng, {
-            icon: L.divIcon({
-                iconSize:     [19, 48], // size of the icon
-                iconAnchor:   [13.5, 43], // point of the icon which will correspond to marker's location
-                popupAnchor:  [0, -41], // point from which the popup should open relative to the iconAnchor,
-                className: 'streamr-map-icon fa fa-map-marker fa-4x'
+                iconSize:     [0, 0],
+                iconAnchor:   [0, 0],
+                popupAnchor:  [0, -41],
+				html: $('<span/>', {
+					class: this.options.markerIcon + ' streamr-map-icon position-' + this.options.markerPosition,
+					style: 'color:' + this.options.markerColor
+				})[0].outerHTML
             })
         })
-        marker.bindPopup("<span>"+label+"</span>", {
+        marker.bindPopup("<span>" + label + "</span>", {
             closeButton: false,
         })
         marker.on("mouseover", function() {
