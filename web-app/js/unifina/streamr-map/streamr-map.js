@@ -176,8 +176,8 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                 }
 
-                if (!changesOnly) {
-                    clearTimeout(_this.traceRedrawTimeout)
+                if (!changesOnly && _this.requestedAnimationFrame) {
+                    L.util.cancelAnimFrame(_this.requestedAnimationFrame)
                 }
                 
                 function redrawTrace(i) {
