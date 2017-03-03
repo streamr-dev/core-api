@@ -177,7 +177,7 @@
                 }
 
                 if (!changesOnly && _this.requestedAnimationFrame) {
-                    L.util.cancelAnimFrame(_this.requestedAnimationFrame)
+                    L.Util.cancelAnimFrame(_this.requestedAnimationFrame)
                 }
                 
                 function redrawTrace(i) {
