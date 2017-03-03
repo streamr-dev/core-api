@@ -20,7 +20,7 @@ public class ImageMapModule extends MapModule {
 
 	@Override
 	public String getWebcomponentName() {
-		return "streamr-image-map";
+		return "streamr-map";
 	}
 
 	@Override

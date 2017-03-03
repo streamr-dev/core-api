@@ -181,7 +181,7 @@
                 }
 
                 if (!changesOnly && _this.requestedAnimationFrame) {
-                    L.util.cancelAnimFrame(_this.requestedAnimationFrame)
+                    L.Util.cancelAnimFrame(_this.requestedAnimationFrame)
                 }
                 
                 function redrawTrace(i) {
@@ -224,6 +224,12 @@
         var lng = attr.lng
         var rotation = attr.dir
         var color = attr.color
+
+        if (this.options.customImageUrl) {
+            lng *= this.customImageWidth
+            lat *= this.customImageHeight
+        }
+
         var latlng = new L.LatLng(lat, lng)
 
         if(this.options.autoZoom && this.untouched) {
