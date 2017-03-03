@@ -220,6 +220,12 @@
         var lng = attr.lng
         var rotation = attr.dir
         var color = attr.color
+
+        if (this.options.customImageUrl) {
+            lng *= this.customImageWidth
+            lat *= this.customImageHeight
+        }
+
         var latlng = new L.LatLng(lat, lng)
 
         if(this.options.autoZoom && this.untouched) {
