@@ -15,3 +15,7 @@
 .map-container .streamr-map-icon.position-top {
     transform: translate(-50%, -100%);
 }
+
+.map-container .streamr-map-icon.position-bottom {
+    transform: translate(-50%, 0);
+}

@@ -155,6 +155,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createString("markerPosition", markerPosition)
 			.addPossibleValue("Middle", "middle")
 			.addPossibleValue("Top", "top")
+			.addPossibleValue("Bottom", "bottom")
 		);
 
 		return config;
