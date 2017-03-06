@@ -14,11 +14,23 @@ SignalPath.MapModule = function (data, canvas, prot) {
         superCreateDiv();
         
         prot.body.css("height", "100%")
-        
+
+        var width = '500px'
+        var height= '400px'
+
+        if (prot.jsonData.layout) {
+            if (prot.jsonData.layout.width) {
+                width = prot.jsonData.layout.width
+            }
+            if (prot.jsonData.layout.height) {
+                height = prot.jsonData.layout.height
+            }
+        }
+
         container = $("<div/>", {
             class: 'map-container',
-            width: prot.jsonData.layout.width || '500px',
-            height: prot.jsonData.layout.height || '400px'
+            width: width,
+            height: height
         })
         prot.body.append(container)
         
