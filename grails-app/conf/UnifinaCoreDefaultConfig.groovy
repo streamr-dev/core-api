@@ -252,7 +252,7 @@ streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.
 streamr.ui.serverPath = System.getProperty("streamr.ui.serverPath") ?: "/api/v1/socket.io"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}"
 	}
 }
 
