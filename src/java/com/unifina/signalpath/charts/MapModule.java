@@ -277,7 +277,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	private static class Marker extends LinkedHashMap<String, Object> {
 		private Marker(Object id, Double latitude, Double longitude, StreamrColor color) {
 			put("t", "p");	// type: MapPoint
-			put("id", id.toString());
+			put("id", id);
 			put("lat", latitude);
 			put("lng", longitude);
 			put("color", color.toString());
