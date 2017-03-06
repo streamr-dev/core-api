@@ -1,3 +1,4 @@
+
 SignalPath.MapModule = function(data, canvas, prot) {
 	prot = prot || {};
 	var pub = SignalPath.UIChannelModule(data, canvas, prot)
@@ -17,22 +18,16 @@ SignalPath.MapModule = function(data, canvas, prot) {
 
 		container = $("<div/>", {
             class: 'map-container',
-            width: '500px',
-            height: '400px'
+            width: prot.jsonData.layout.width || '500px',
+            height: prot.jsonData.layout.height || '400px'
         })
 		prot.body.append(container)
-
-        var mapOptions = _.mapValues(prot.jsonData.options, function(o) {
-            return o.value
-        })
-		map = new StreamrMap(container, mapOptions)
-
-		$(map).on("move", function(e, data) {
-			$.each(data, function(k, v) {
-				if(prot.jsonData.options[k] && prot.jsonData.options[k].value)
-					prot.jsonData.options[k].value = v
-			})
-		})
+		
+		if (!map) {
+			prot.createMap()
+		} else {
+			container.append(map.getParent())
+		}
 
 		prot.initResizable({
 			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
@@ -41,6 +36,20 @@ SignalPath.MapModule = function(data, canvas, prot) {
 		});
 
 		$(SignalPath).on("loaded", updateSize)
+	}
+	
+	prot.createMap = function() {
+		var mapOptions = _.mapValues(prot.jsonData.options, function(o) {
+			return o.value
+		})
+		map = new StreamrMap(container, mapOptions)
+		
+		$(map).on("move", function(e, data) {
+			$.each(data, function(k, v) {
+				if(prot.jsonData.options[k] && prot.jsonData.options[k].value)
+					prot.jsonData.options[k].value = v
+			})
+		})
 	}
     
     prot.getMap = function() {

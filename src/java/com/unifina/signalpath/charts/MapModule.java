@@ -28,8 +28,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	private boolean directionalMarkers = false;
 
-	private String directionalMarkerIcon = "fa fa-4x fa-long-arrow-up";
-	private String nonDirectionalMarkerIcon = "fa fa-map-marker fa-4x";
+	private String directionalMarkerIcon = "defaultDirectional";
+	private String nonDirectionalMarkerIcon = "defaultNonDirectional";
 	private String markerPosition = "top";
 
 	private int expiringTimeOfMarkerInSecs = 0;
@@ -138,19 +138,19 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
 		options.addIfMissing(ModuleOption.createColor("markerColor", markerColor));
 		options.addIfMissing(ModuleOption.createString("directionalMarkerIcon", directionalMarkerIcon)
-			.addPossibleValue("Default", "fa fa-4x fa-long-arrow-up")
-			.addPossibleValue("Long arrow", "fa fa-4x fa-long-arrow-up")
-			.addPossibleValue("Short arrow", "fa fa-2x fa-arrow-up")
-			.addPossibleValue("Circled arrow", "fa fa-2x fa-arrow-circle-o-up")
-			.addPossibleValue("Wedge", "fa fa-3x fa-chevron-up")
-			.addPossibleValue("Double wedge", "fa fa-4x fa-angle-double-up")
-			.addPossibleValue("Circled wedge", "fa fa-2x fa-chevron-circle-up")
-			.addPossibleValue("Triangle", "fa fa-4x fa-caret-up")
-			.addPossibleValue("Triangle box", "fa fa-2x fa-caret-square-o-up")
+			.addPossibleValue("Default", "defaultDirectional")
+			.addPossibleValue("Long arrow", "longArrow")
+			.addPossibleValue("Short arrow", "shortArrow")
+			.addPossibleValue("Circled arrow", "circledArrow")
+			.addPossibleValue("Wedge", "wedge")
+			.addPossibleValue("Double wedge", "doubleWedge")
+			.addPossibleValue("Circled wedge", "circledWedge")
+			.addPossibleValue("Triangle", "triangle")
+			.addPossibleValue("Triangle box", "triangleBox")
 		);
 		options.addIfMissing(ModuleOption.createString("nonDirectionalMarkerIcon", nonDirectionalMarkerIcon)
-			.addPossibleValue("Default", "fa fa-map-marker fa-4x")
-			.addPossibleValue("Circle", "fa fa-circle fa-2x")
+			.addPossibleValue("Default", "defaultNonDirectional")
+			.addPossibleValue("Circle", "circle")
 		);
 		options.addIfMissing(ModuleOption.createString("markerPosition", markerPosition)
 			.addPossibleValue("Middle", "middle")

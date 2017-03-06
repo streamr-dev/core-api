@@ -3,10 +3,6 @@
 
     var TRACE_REDRAW_BATCH_SIZE = 10000
 
-    // default non-directional marker icon
-    var DEFAULT_DIRECTIONAL_MARKER_ICON = "fa fa-4x fa-long-arrow-up"
-    var DEFAULT_NON_DIRECTIONAL_MARKER_ICON = "fa fa-map-marker fa-4x"
-
     var skins = {
         default: {
             layerUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -21,36 +17,58 @@
             layerAttribution: "Esri, HERE, DeLorme, MapmyIndia, © OpenStreetMap contributors, Streamr"
         }
     }
-
-    function StreamrMap(parent, options) {
-
-        var _this = this
-
-        this.parent = $(parent)
-
-        this.untouched = true
-
-        this.markers = {}
-        this.pendingMarkerUpdates = {}
-        this.pendingLineUpdates = []
-
-        this.animationFrameRequested = false
-
-        // Default options
-        this.options = $.extend({}, {
-            centerLat: 35,
-            centerLng: 15,
-            zoom: 2,
-            minZoom: 2,
-            maxZoom: 18,
-            traceWidth: 2,
-            drawTrace: false,
-            skin: "default",
-            markerIcon: options.directionalMarkers ?
-				(options.directionalMarkerIcon || DEFAULT_DIRECTIONAL_MARKER_ICON) :
-				(options.nonDirectionalMarkerIcon || DEFAULT_NON_DIRECTIONAL_MARKER_ICON),
+	
+	var getMarkerIconClass = function (isDirectional, directionalStyle, nonDirectionalStyle) {
+		var directionalStyles    = {
+			"defaultDirectional": "fa fa-4x fa-long-arrow-up",
+			"longArrow": "fa fa-4x fa-long-arrow-up",
+			"shortArrow": "fa fa-2x fa-arrow-up",
+			"circledArrow": "fa fa-2x fa-arrow-circle-o-up",
+			"wedge": "fa fa-3x fa-chevron-up",
+			"doubleWedge": "fa fa-4x fa-angle-double-up",
+			"circledWedge": "fa fa-2x fa-chevron-circle-up",
+			"triangle": "fa fa-4x fa-caret-up",
+			"triangleBox": "fa fa-2x fa-caret-square-o-up"
+		}
+		var nonDirectionalStyles = {
+			"defaultNonDirectional": "fa fa-map-marker fa-4x",
+			"circle": "fa fa-circle fa-2x"
+		}
+		if (isDirectional) {
+			return directionalStyles[directionalStyle] || directionalStyles['defaultDirectional']
+		} else {
+			return nonDirectionalStyles[nonDirectionalStyle] || directionalStyles['defaultNonDirectional']
+		}
+	}
+	
+	
+	function StreamrMap(parent, options) {
+		
+		var _this = this
+		
+		this.parent = $(parent)
+		
+		this.untouched = true
+		
+		this.markers              = {}
+		this.pendingMarkerUpdates = {}
+		this.pendingLineUpdates   = []
+		
+		this.animationFrameRequested = false
+		
+		// Default options
+		this.options = $.extend({}, {
+			centerLat: 35,
+			centerLng: 15,
+			zoom: 2,
+			minZoom: 2,
+			maxZoom: 18,
+			traceWidth: 2,
+			drawTrace: false,
+			skin: "default",
+			markerIcon: getMarkerIconClass(options.directionalMarkers, options.directionalMarkerIcon, options.nonDirectionalMarkerIcon),
 			markerPosition: "middle"
-        }, options || {})
+		}, options || {})
 
         this.defaultAutoZoomBounds = {
             lat: {
@@ -105,6 +123,10 @@
             this.lineLayer = this.createTraceLayer()
         }
     }
+    
+    StreamrMap.prototype.getParent = function() {
+		return this.parent
+	}
     
     StreamrMap.prototype.createMapLayer = function() {
         L.tileLayer(
@@ -300,6 +322,7 @@
                 iconSize:     [0, 0],
                 iconAnchor:   [0, 0],
                 popupAnchor:  [0, -41],
+				className: 'invisible-container',
 				html: $('<span/>', {
 					class: this.options.markerIcon + ' streamr-map-icon position-' + this.options.markerPosition,
 					style: 'color:' + this.options.markerColor
@@ -411,8 +434,9 @@
         this.parent.css("width", width+"px")
         this.parent.css("height", height+"px")
         this.map.invalidateSize()
-        if(this.options.drawTrace)
+        if(this.options.drawTrace) {
             this.lineLayer.redraw()
+		}
     }
 
     StreamrMap.prototype.toJSON = function() {
