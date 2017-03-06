@@ -1,9 +1,9 @@
 
-.map-container .leaflet-div-icon.invisible-container {
+.map-container .invisible-container {
     background: none;
     border: none;
 }
-.map-container .leaflet-div-icon.invisible-container .streamr-map-icon {
+.map-container .invisible-container .streamr-map-icon {
     position: absolute;
     margin-left: 50%;
     margin-top: 50%;
@@ -12,14 +12,14 @@
     line-height: 100%;
 }
 
-.map-container .leaflet-div-icon.invisible-container .streamr-map-icon.position-middle {
+.map-container .streamr-map-icon.position-middle {
     transform: translate(-50%, -50%);
 }
 
-.map-container .leaflet-div-icon.invisible-container .streamr-map-icon.position-top {
+.map-container .streamr-map-icon.position-top {
     transform: translate(-50%, -100%);
 }
 
-.map-container .leaflet-div-icon.invisible-container .streamr-map-icon.position-bottom {
+.map-container .streamr-map-icon.position-bottom {
     transform: translate(-50%, 0);
 }

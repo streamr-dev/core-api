@@ -28,9 +28,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	private boolean directionalMarkers = false;
 
-	private String directionalMarkerIcon = "defaultDirectional";
-	private String nonDirectionalMarkerIcon = "defaultNonDirectional";
-	private String markerPosition = "top";
+	private String directionalMarkerIcon = "arrow";
+	private String markerIcon = "pin";
 
 	private int expiringTimeOfMarkerInSecs = 0;
 	private final Set<ExpiringItem> expiringMarkers = new LinkedHashSet<>();
@@ -138,24 +137,11 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
 		options.addIfMissing(ModuleOption.createColor("markerColor", markerColor));
 		options.addIfMissing(ModuleOption.createString("directionalMarkerIcon", directionalMarkerIcon)
-			.addPossibleValue("Default", "defaultDirectional")
-			.addPossibleValue("Long arrow", "longArrow")
-			.addPossibleValue("Short arrow", "shortArrow")
-			.addPossibleValue("Circled arrow", "circledArrow")
-			.addPossibleValue("Wedge", "wedge")
-			.addPossibleValue("Double wedge", "doubleWedge")
-			.addPossibleValue("Circled wedge", "circledWedge")
-			.addPossibleValue("Triangle", "triangle")
-			.addPossibleValue("Triangle box", "triangleBox")
+			.addPossibleValue("Arrow", "arrow")
 		);
-		options.addIfMissing(ModuleOption.createString("nonDirectionalMarkerIcon", nonDirectionalMarkerIcon)
-			.addPossibleValue("Default", "defaultNonDirectional")
+		options.addIfMissing(ModuleOption.createString("markerIcon", markerIcon)
+			.addPossibleValue("Pin", "pin")
 			.addPossibleValue("Circle", "circle")
-		);
-		options.addIfMissing(ModuleOption.createString("markerPosition", markerPosition)
-			.addPossibleValue("Middle", "middle")
-			.addPossibleValue("Top", "top")
-			.addPossibleValue("Bottom", "bottom")
 		);
 
 		return config;
@@ -218,16 +204,12 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			directionalMarkerIcon = options.getOption("directionalMarkerIcon").getString();
 		}
 
-		if (options.containsKey("nonDirectionalMarkerIcon")) {
-			nonDirectionalMarkerIcon = options.getOption("nonDirectionalMarkerIcon").getString();
+		if (options.containsKey("markerIcon")) {
+			markerIcon = options.getOption("markerIcon").getString();
 		}
 
 		if (options.containsKey("markerColor")) {
 			markerColor = options.getOption("markerColor").getColor();
-		}
-
-		if (options.containsKey("markerPosition")) {
-			markerPosition = options.getOption("markerPosition").getString();
 		}
 
 		if (drawTrace) {

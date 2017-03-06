@@ -17,30 +17,23 @@
             layerAttribution: "Esri, HERE, DeLorme, MapmyIndia, © OpenStreetMap contributors, Streamr"
         }
     }
-	
-	var getMarkerIconClass = function (isDirectional, directionalStyle, nonDirectionalStyle) {
-		var directionalStyles    = {
-			"defaultDirectional": "fa fa-4x fa-long-arrow-up",
-			"longArrow": "fa fa-4x fa-long-arrow-up",
-			"shortArrow": "fa fa-2x fa-arrow-up",
-			"circledArrow": "fa fa-2x fa-arrow-circle-o-up",
-			"wedge": "fa fa-3x fa-chevron-up",
-			"doubleWedge": "fa fa-4x fa-angle-double-up",
-			"circledWedge": "fa fa-2x fa-chevron-circle-up",
-			"triangle": "fa fa-4x fa-caret-up",
-			"triangleBox": "fa fa-2x fa-caret-square-o-up"
-		}
-		var nonDirectionalStyles = {
-			"defaultNonDirectional": "fa fa-map-marker fa-4x",
-			"circle": "fa fa-circle fa-2x"
-		}
+
+    var directionalStyles = {
+        "arrow": "fa fa-2x fa-arrow-up position-middle"
+    }
+
+    var nonDirectionalStyles = {
+        "pin": "fa fa-map-marker fa-4x position-top",
+        "circle": "fa fa-circle fa-2x position-middle"
+    }
+
+	var getMarkerIcon = function (isDirectional, directionalStyle, nonDirectionalStyle) {
 		if (isDirectional) {
-			return directionalStyles[directionalStyle] || directionalStyles['defaultDirectional']
+			return directionalStyles[directionalStyle] || directionalStyles['arrow']
 		} else {
-			return nonDirectionalStyles[nonDirectionalStyle] || directionalStyles['defaultNonDirectional']
+			return nonDirectionalStyles[nonDirectionalStyle] || directionalStyles['pin']
 		}
 	}
-	
 	
 	function StreamrMap(parent, options) {
 		
@@ -66,9 +59,12 @@
 			traceWidth: 2,
 			drawTrace: false,
 			skin: "default",
-			markerIcon: getMarkerIconClass(options.directionalMarkers, options.directionalMarkerIcon, options.nonDirectionalMarkerIcon),
-			markerPosition: "middle"
+            directionalMarkers: false,
+            directionalMarkerIcon: 'arrow',
+            markerIcon: 'pin'
 		}, options || {})
+
+        this.iconClass = getMarkerIcon(this.options.directionalMarkers, this.options.directionalMarkerIcon, this.options.markerIcon)
 
         this.defaultAutoZoomBounds = {
             lat: {
@@ -324,7 +320,7 @@
                 popupAnchor:  [0, -41],
 				className: 'invisible-container',
 				html: $('<span/>', {
-					class: this.options.markerIcon + ' streamr-map-icon position-' + this.options.markerPosition,
+					class: this.iconClass + ' streamr-map-icon',
 					style: 'color:' + this.options.markerColor
 				})[0].outerHTML
             })
