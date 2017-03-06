@@ -22,11 +22,7 @@ SignalPath.MapModule = function (data, canvas, prot) {
         })
         prot.body.append(container)
         
-        if (!map) {
-            prot.createMap()
-        } else {
-            container.append(map.getParent())
-        }
+        prot.createMap()
         
         prot.initResizable({
             minWidth: parseInt(prot.div.css("min-width").replace("px", "")),
