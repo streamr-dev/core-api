@@ -175,6 +175,8 @@
                     var to = _this.map.latLngToContainerPoint(updates[length].toLatLng)
                     if (from.x != to.x || from.y != to.y || isInsideCanvas(from, canvas) || isInsideCanvas(to, canvas) ) {
                         if (ctx.strokeStyle !== updates[length].color) {
+                            ctx.stroke()
+                            ctx.beginPath()
                             ctx.strokeStyle = updates[length].color || 'rgba(255,0,0,1)'
                         }
                         ctx.moveTo(from.x, from.y)
