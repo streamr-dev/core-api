@@ -483,9 +483,11 @@
         this.parent.css("width", width+"px")
         this.parent.css("height", height+"px")
         this.map.invalidateSize()
-        if(this.options.drawTrace) {
-            this.lineLayer.redraw()
-		}
+
+        if (this.options.drawTrace) {
+            // map.invalidateSize() clears lineLayer, so redraw
+            this.lineLayer.render()
+        }
     }
 
     StreamrMap.prototype.toJSON = function() {
