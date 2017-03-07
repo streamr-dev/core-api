@@ -324,12 +324,14 @@
     
     StreamrMap.prototype.removeMarkerById = function(id) {
         var marker = this.markers[id]
-        delete this.markers[id]
-        delete this.pendingMarkerUpdates[id]
-        if (this.lastLatLngs) {
-            delete this.lastLatLngs[id]
+        if (marker) {
+            delete this.markers[id]
+            delete this.pendingMarkerUpdates[id]
+            if (this.lastLatLngs) {
+                delete this.lastLatLngs[id]
+            }
+            this.map.removeLayer(marker)
         }
-        this.map.removeLayer(marker)
     }
     
     StreamrMap.prototype.removeMarkersByIds = function(idList) {
