@@ -151,8 +151,10 @@
                     animate: false
                 })
                 var bounds = L.latLngBounds(L.latLng(_this.customImageHeight, 0), L.latLng(0, _this.customImageWidth))
+
+                // ImageOverlay is added to overlayPane (hard-coded). This can lead to problems when using it as as map base,
+                // because overlayPane (z-index 4) is drawn above the tilePane (z-index 2)
                 L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map)
-                _this.parent.find(".leaflet-tile-pane").css("z-index", 1000)
             }
         })
     }
@@ -164,7 +166,7 @@
         function isInsideCanvas(point, canvas) {
             return point.x >= 0 && point.x <= canvas.width && point.y >= 0 && point.y <= canvas.height
         }
-        var TraceLayer       = L.CanvasLayer.extend({
+        var TraceLayer = L.CanvasLayer.extend({
             renderLines: function(canvas, ctx, updates) {
                 ctx.lineWidth = _this.options.traceWidth
                 ctx.strokeStyle = updates[0] && updates[0].color || 'rgba(255,0,0,1)'
@@ -222,9 +224,30 @@
             }
         })
 
-        return new TraceLayer({
-            zIndexOffset: 10
-        }).addTo(this.map)
+        var traceLayer = new TraceLayer({
+            zIndexOffset: 10 // the trace layer should be above other low-z-index layers in its pane (tile layers in the tilePane)
+        })
+        traceLayer.addTo(this.map)
+
+        /**
+         * CanvasLayer adds the canvas to tilePane, and unfortunately that's hard-coded.
+         * This leads to ordering problems, because at the same time the ImageOverlay
+         * used for ImageMap base image is hard-coded to overlayPane, which is on top
+         * the tilePane. We need a little hack to lift tilePane over the overlayPane.
+         * Below is a summary of what is drawn in which pane, bottom-up.
+         *
+         * Geo map:
+         * overlayPane: empty (zIndex 4 by default - don't draw anything here, it will be hidden below geo tiles)
+         * tilePane: tiles and traces (now zIndex 5, default is 2)
+         * markerPane: markers (zIndex 6 by default)
+         *
+         * Image map:
+         * overlayPane: holds the image layer (zIndex 4 by default)
+         * tilePane: traces (now zIndex 5, default is 2)
+         * markerPane: markers (zIndex 6 by default)
+         */
+        this.map.getPanes().tilePane.style.zIndex = 5
+        return traceLayer
     }
     
     StreamrMap.prototype.getZoom = function() {
