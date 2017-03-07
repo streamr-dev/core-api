@@ -197,9 +197,10 @@
                 if (changesOnly) {
                     updates = _this.pendingLineUpdates
                 } else {
-                    _.each(_this.traceUpdates, function(t) {
-                        updates.push(t)
+                    Object.keys(_this.traceUpdates).forEach(function(key) {
+                        updates.push(_this.traceUpdates[key])
                     })
+
                     // clear canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height)
                 }
@@ -228,6 +229,20 @@
             zIndexOffset: 10 // the trace layer should be above other low-z-index layers in its pane (tile layers in the tilePane)
         })
         traceLayer.addTo(this.map)
+
+        /**
+         * The zoom animation doesn't really seem to work. Let's hack it so that it will hide
+         * the trace layer when animation starts, and re-display it when it ends.
+         * (See leaflet_canvas_layer.js)
+         */
+        this.map.off('zoomanim', traceLayer._animateZoom, traceLayer)
+        this.map.off('zoomend', traceLayer._endZoomAnim, traceLayer)
+        this.map.on('zoomanim', function(e) {
+            traceLayer._canvas.style.display = 'none'
+        }, traceLayer)
+        this.map.on('zoomend', function() {
+            traceLayer._canvas.style.display = 'block';
+        }, traceLayer)
 
         /**
          * CanvasLayer adds the canvas to tilePane, and unfortunately that's hard-coded.
