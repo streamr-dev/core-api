@@ -177,20 +177,21 @@
                 ctx.lineWidth = _this.options.traceWidth
                 ctx.strokeStyle = updates[0] && updates[0].color || 'rgba(255,0,0,1)'
                 ctx.beginPath()
-                var length = updates.length
-                while(length--) {
-                    var from = _this.map.latLngToContainerPoint(updates[length].fromLatLng)
-                    var to = _this.map.latLngToContainerPoint(updates[length].toLatLng)
+
+                updates.forEach(function(update) {
+                    var from = _this.map.latLngToContainerPoint(update.fromLatLng)
+                    var to = _this.map.latLngToContainerPoint(update.toLatLng)
                     if (from.x != to.x || from.y != to.y || isInsideCanvas(from, canvas) || isInsideCanvas(to, canvas) ) {
-                        if (ctx.strokeStyle !== updates[length].color) {
+                        if (ctx.strokeStyle !== update.color) {
                             ctx.stroke()
                             ctx.beginPath()
-                            ctx.strokeStyle = updates[length].color || 'rgba(255,0,0,1)'
+                            ctx.strokeStyle = update.color || 'rgba(255,0,0,1)'
                         }
                         ctx.moveTo(from.x, from.y)
                         ctx.lineTo(to.x, to.y)
                     }
-                }
+                })
+
                 ctx.stroke()
             },
             
