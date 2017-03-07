@@ -46,6 +46,7 @@
 		this.untouched = true
 		
 		this.markers              = {}
+        this.pendingMarkerAdds    = []
 		this.pendingMarkerUpdates = {}
 		this.pendingLineUpdates   = []
 		
@@ -153,8 +154,13 @@
                 var bounds = L.latLngBounds(L.latLng(_this.customImageHeight, 0), L.latLng(0, _this.customImageWidth))
 
                 // ImageOverlay is added to overlayPane (hard-coded). This can lead to problems when using it as as map base,
-                // because overlayPane (z-index 4) is drawn above the tilePane (z-index 2)
+                // because overlayPane (z-index 4) is drawn above the tilePane (z-index 2). See comments in createTraceLayer().
                 L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map)
+
+                _this.pendingMarkerAdds.forEach(function(attr) {
+                    _this.addMarker(attr)
+                })
+                _this.pendingMarkerAdds = []
             }
         })
     }
@@ -285,7 +291,12 @@
         var rotation = attr.dir
         var color = attr.color
 
-        if (this.options.customImageUrl) {
+        // If the image has not yet loaded, we don't know its height & width. Let's
+        // queue the calls and add them later, when the image has loaded.
+        if (this.options.customImageUrl && !(this.customImageHeight && this.customImageWidth)) {
+            this.pendingMarkerAdds.push(attr)
+            return
+        } else if (this.options.customImageUrl) {
             lng *= this.customImageWidth
             lat *= this.customImageHeight
         }
