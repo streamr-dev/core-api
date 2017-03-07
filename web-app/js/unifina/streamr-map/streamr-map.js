@@ -46,7 +46,7 @@
 		this.untouched = true
 		
 		this.markers              = {}
-        this.pendingMarkerAdds    = []
+        this.queuedMessages       = []
 		this.pendingMarkerUpdates = {}
 		this.pendingLineUpdates   = []
 		
@@ -157,10 +157,10 @@
                 // because overlayPane (z-index 4) is drawn above the tilePane (z-index 2). See comments in createTraceLayer().
                 L.imageOverlay(_this.options.customImageUrl, bounds).addTo(_this.map)
 
-                _this.pendingMarkerAdds.forEach(function(attr) {
-                    _this.addMarker(attr)
+                _this.queuedMessages.forEach(function(msg) {
+                    _this.handleMessage(msg)
                 })
-                _this.pendingMarkerAdds = []
+                _this.queuedMessages = []
             }
         })
     }
@@ -292,12 +292,7 @@
         var rotation = attr.dir
         var color = attr.color
 
-        // If the image has not yet loaded, we don't know its height & width. Let's
-        // queue the calls and add them later, when the image has loaded.
-        if (this.options.customImageUrl && !(this.customImageHeight && this.customImageWidth)) {
-            this.pendingMarkerAdds.push(attr)
-            return
-        } else if (this.options.customImageUrl) {
+        if (this.options.customImageUrl) {
             lng *= this.customImageWidth
             lat *= this.customImageHeight
         }
@@ -468,7 +463,10 @@
     }
 
     StreamrMap.prototype.handleMessage = function(d) {
-        if (d.t) {
+        // If the image has not yet loaded, we are not ready to handle any messages. Queue them instead
+        if (this.options.customImageUrl && !(this.customImageHeight && this.customImageWidth)) {
+            this.queuedMessages.push(d)
+        } else if (d.t) {
             if (d.t === "p") {
                 this.addMarker(d)
             } else if (d.t === "d") {
