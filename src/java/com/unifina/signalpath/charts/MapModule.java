@@ -137,7 +137,9 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		options.addIfMissing(ModuleOption.createInt("expiringTimeOfTraceInSecs", expiringTimeOfTraceInSecs));
 		options.addIfMissing(ModuleOption.createColor("markerColor", markerColor));
 		options.addIfMissing(ModuleOption.createString("directionalMarkerIcon", directionalMarkerIcon)
+			.addPossibleValue("Arrowhead", "arrowhead")
 			.addPossibleValue("Arrow", "arrow")
+			.addPossibleValue("Long arrow", "longArrow")
 		);
 		options.addIfMissing(ModuleOption.createString("markerIcon", markerIcon)
 			.addPossibleValue("Pin", "pin")

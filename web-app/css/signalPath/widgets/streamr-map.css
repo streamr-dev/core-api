@@ -23,3 +23,7 @@
 .map-container .streamr-map-icon.position-bottom {
     transform: translate(-50%, 0);
 }
+
+.map-container .streamr-map-icon.position-middle.fa-location-arrow {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}

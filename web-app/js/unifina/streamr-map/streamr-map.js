@@ -19,7 +19,9 @@
     }
 
     var directionalStyles = {
-        "arrow": "fa fa-2x fa-arrow-up position-middle"
+        "arrowhead": "fa fa-2x fa-location-arrow position-middle",
+        "arrow": "fa fa-2x fa-arrow-up position-middle",
+        "longArrow": "fa fa-2x fa-long-arrow-up position-middle",
     }
 
     var nonDirectionalStyles = {
