@@ -95,7 +95,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		}
 
 		if (drawTrace) {
-			String tracePointId = getGlobals().generateId();
+			String tracePointId = getGlobals().getIdGenerator().generate();
 			marker.put("tracePointId", tracePointId);
 			if (expiringTimeOfTraceInSecs > 0) {
 				long expireTime = getGlobals().getTime().getTime() + (expiringTimeOfTraceInSecs * 1000);

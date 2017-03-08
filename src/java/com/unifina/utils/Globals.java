@@ -237,8 +237,8 @@ public class Globals {
 		return grailsApplication.getMainContext().getBean(requiredType);
 	}
 
-	public String generateId() {
-		return idGenerator.generate();
+	public IdGenerator getIdGenerator() {
+		return idGenerator;
 	}
 
 	public void setIdGenerator(IdGenerator idGenerator) {
