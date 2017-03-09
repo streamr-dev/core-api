@@ -8,11 +8,13 @@ import com.unifina.data.StreamrBinaryMessage
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractDataRangeProvider
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
+import com.unifina.task.DelayedDeleteStreamTask
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -42,7 +44,7 @@ class StreamService {
 	Stream findByName(String name) {
 		return Stream.findByName(name)
 	}
-	
+
 	Stream createStream(params, SecUser user) {
 		Stream stream = new Stream(params)
 		stream.id = IdGenerator.get()
@@ -72,11 +74,18 @@ class StreamService {
 		}
 		return stream
 	}
-	
+
 	void deleteStream(Stream stream) {
 		AbstractStreamListener streamListener = instantiateListener(stream)
 		streamListener.beforeDelete(stream)
 		stream.delete(flush:true)
+	}
+
+	void deleteStreamsDelayed(List<Stream> streams, long delayMs=30*60*1000) {
+		Map config = DelayedDeleteStreamTask.getConfig(streams)
+		Task task = new Task(DelayedDeleteStreamTask.class.getName(), (config as JSON).toString(), "stream-delete", UUID.randomUUID().toString())
+		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
+		task.save(flush: true, failOnError: true)
 	}
 
 	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {

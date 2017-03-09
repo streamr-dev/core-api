@@ -1,14 +1,23 @@
 package com.unifina.service
 
 import com.unifina.api.CanvasCommunicationException
-import com.unifina.datasource.*
+import com.unifina.datasource.DataSource
+import com.unifina.datasource.HistoricalDataSource
+import com.unifina.datasource.IStartListener
+import com.unifina.datasource.IStopListener
+import com.unifina.datasource.RealtimeDataSource
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.*
+import com.unifina.signalpath.RuntimeRequest
+import com.unifina.signalpath.RuntimeResponse
+import com.unifina.signalpath.SignalPath
+import com.unifina.signalpath.SignalPathRunner
+import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -34,6 +43,7 @@ class SignalPathService {
 	def grailsApplication
 	def grailsLinkGenerator
 	def serializationService
+	StreamService streamService
 	PermissionService permissionService
 	CanvasService canvasService
 	ApiService apiService
@@ -130,7 +140,7 @@ class SignalPathService {
 			canvas.delete()
 		}
 
-		// Data in uiChannel streams will eventually get cleaned up automatically, since it has a TTL
+		streamService.deleteStreamsDelayed(uiChannelIds.collect { Stream.load(it) })
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
