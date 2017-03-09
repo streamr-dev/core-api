@@ -1,6 +1,7 @@
 package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -22,6 +23,8 @@ class Stream implements Comparable {
 	Date dateCreated
 	Date lastUpdated
 
+	Boolean uiChannel
+
 	static constraints = {
 		name(blank:false)
 		config(nullable:true)
@@ -30,6 +33,7 @@ class Stream implements Comparable {
 		lastHistoricalDay(nullable:true)
 		apiKey(nullable:true)
 		user(nullable:true)
+		uiChannel(nullable:true)
 	}
 	
 	static mapping = {

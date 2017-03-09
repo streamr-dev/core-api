@@ -152,16 +152,8 @@ class CanvasService {
 
 	@CompileStatic
 	void resetUiChannels(Map signalPathMap) {
-		HashMap<String,String> replacements = [:]
 		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
-			if (replacements.containsKey(element.uiChannelData.id)) {
-				element.uiChannelData.id = replacements[element.uiChannelData.id]
-			}
-			else {
-				String newId = IdGenerator.get()
-				replacements[element.uiChannelData.id] = newId
-				element.uiChannelData.id = newId
-			}
+			element.uiChannelData.id = null
 		}
 	}
 

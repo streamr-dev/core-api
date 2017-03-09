@@ -3,7 +3,6 @@ package com.unifina.signalpath
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.push.IHasPushChannel
 import com.unifina.service.SignalPathService
 import com.unifina.utils.Globals
 import grails.util.GrailsUtil
@@ -62,16 +61,6 @@ public class SignalPathRunner extends Thread {
 
 	public List<SignalPath> getSignalPaths() {
 		return signalPaths
-	}
-
-	public Map getModuleChannelMap(int signalPathIndex) {
-		Map result = [:]
-		signalPaths[signalPathIndex].modules.each {
-			if (it instanceof IHasPushChannel) {
-				result.put(it.hash.toString(), it.uiChannelId)
-			}
-		}
-		return result
 	}
 
 	public synchronized void setRunning(boolean running) {

@@ -41,11 +41,15 @@ class StreamService {
 
 	private static final Charset utf8 = Charset.forName("UTF-8")
 
+	Stream getStream(String id) {
+		return Stream.get(id)
+	}
+
 	Stream findByName(String name) {
 		return Stream.findByName(name)
 	}
 
-	Stream createStream(params, SecUser user) {
+	Stream createStream(Map params, SecUser user) {
 		Stream stream = new Stream(params)
 		stream.id = IdGenerator.get()
 		stream.apiKey = IdGenerator.get()

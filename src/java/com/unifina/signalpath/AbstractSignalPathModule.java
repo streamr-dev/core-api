@@ -723,7 +723,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				response.setSuccess(true);
 			} catch (Exception e) {
 				log.error("Error making runtime parameter change!", e);
-				getGlobals().getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
+				parentSignalPath.pushToUiChannel(new ErrorMessage("Parameter change failed!"));
 			}
 		}
 		else if (request.getType().equals("json")) {

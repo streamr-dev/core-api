@@ -11,7 +11,6 @@ import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
@@ -176,7 +175,6 @@ class SignalPathService {
 	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
-		globals.uiChannel = new KafkaPushChannel(canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread

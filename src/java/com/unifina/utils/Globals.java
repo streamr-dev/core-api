@@ -2,7 +2,6 @@ package com.unifina.utils;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
-import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -43,8 +42,7 @@ public class Globals {
 	
 	protected Date startDate = null;
 	protected Date endDate = null;
-	
-	protected PushChannel uiChannel = null;
+
 	protected boolean realtime = false;
 
 	/**
@@ -64,7 +62,6 @@ public class Globals {
 		this.signalPathContext = signalPathContext;
 		this.grailsApplication = grailsApplication;
 		this.user = user;
-		this.userTimeZone = TimeZone.getTimeZone(user.getTimezone());
 		
 		dateFormatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
@@ -179,6 +176,9 @@ public class Globals {
 	}
 	
 	public TimeZone getUserTimeZone() {
+		if (userTimeZone == null) {
+			userTimeZone = TimeZone.getTimeZone(user.getTimezone());
+		}
 		return userTimeZone;
 	}
 	
@@ -195,8 +195,6 @@ public class Globals {
 		for (Class c : dynamicClasses) {
 			GroovySystem.getMetaClassRegistry().removeMetaClass(c);
 		}
-		if (uiChannel!=null)
-			uiChannel.destroy();
 	}
 
 	public void setRealtime(boolean realtime) {
@@ -206,6 +204,10 @@ public class Globals {
 	public boolean isRealtime() {
 		return realtime;
 	}
+
+	public boolean isAdhoc() {
+		return !isRealtime();
+	}
 	
 	public DataSource getDataSource() {
 		return dataSource;
@@ -213,14 +215,6 @@ public class Globals {
 	
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
-	}
-
-	public PushChannel getUiChannel() {
-		return uiChannel;
-	}
-
-	public void setUiChannel(PushChannel uiChannel) {
-		this.uiChannel = uiChannel;
 	}
 
 	public void setGrailsApplication(GrailsApplication grailsApplication) {

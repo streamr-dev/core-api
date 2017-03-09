@@ -1,20 +1,21 @@
 package com.unifina.utils.testutils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-
 import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
+import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
 import groovy.lang.Closure;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 
 /**
@@ -397,21 +398,18 @@ public class ModuleTestHelper {
 	}
 
 	private void validateUiChannelMessages() {
-		FakePushChannel uiChannel = (FakePushChannel) module.getGlobals().getUiChannel();
-		if (uiChannel == null) {
-			throw new TestHelperException("uiChannel: module.globals.uiChannel unexpectedly null", this);
-		}
-
 		for (Map.Entry<String, List<Object>> expectedEntry : uiChannelMessages.entrySet()) {
 			String channel = expectedEntry.getKey();
 			List<Object> expectedMessages = expectedEntry.getValue();
 
-			if (!uiChannel.receivedContentByChannel.containsKey(channel)) {
+			FakeStreamService streamService = (FakeStreamService) module.getGlobals().getGrailsApplication().getMainContext().getBean(StreamService.class);
+
+			if (!streamService.receivedContentByChannel.containsKey(channel)) {
 				throw new TestHelperException(String.format("uiChannel: channel '%s' was never pushed to", channel),
 						this);
 			}
 
-			List<Object> actualMessages = uiChannel.receivedContentByChannel.get(channel);
+			List<Map> actualMessages = streamService.receivedContentByChannel.get(channel);
 			for (int i = 0; i < Math.max(expectedMessages.size(), actualMessages.size()); ++i) {
 
 				if (actualMessages.size() <= i) {
@@ -564,7 +562,6 @@ public class ModuleTestHelper {
 	private void setUpGlobals(AbstractSignalPathModule module) {
 		module.setGlobals(new Globals());
 		module.getGlobals().time = new Date(0);
-		module.getGlobals().setUiChannel(new FakePushChannel());
 		module.setGlobals(overrideGlobalsClosure.call(module.getGlobals()));
 	}
 

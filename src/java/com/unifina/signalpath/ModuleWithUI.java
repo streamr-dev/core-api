@@ -1,50 +1,95 @@
 package com.unifina.signalpath;
 
+import com.unifina.datasource.IStartListener;
+import com.unifina.datasource.IStopListener;
+import com.unifina.domain.data.Stream;
+import com.unifina.service.PermissionService;
+import com.unifina.service.StreamService;
+import com.unifina.utils.MapTraversal;
+import edu.emory.mathcs.backport.java.util.Arrays;
+
+import java.security.AccessControlException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.unifina.push.IHasPushChannel;
-import com.unifina.push.PushChannel;
-import com.unifina.utils.IdGenerator;
-import com.unifina.utils.MapTraversal;
-
-public abstract class ModuleWithUI extends AbstractSignalPathModule implements IHasPushChannel {
+public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	protected String uiChannelId;
 	protected boolean resendAll = false;
 	protected int resendLast = 0;
-	
+
+	private transient Stream stream;
+	private transient StreamService streamService;
+
 	public ModuleWithUI() {
 		super();
 	}
 
-	protected boolean pushToUiChannel(Object data) {
-		PushChannel rc = getGlobals().getUiChannel();
-		if (rc == null) {
-			return false;
-		} else {
-			rc.push(data, uiChannelId);
-			return true;
+	@Override
+	public void initialize() {
+		super.initialize();
+
+		if (getGlobals().isRunContext()) {
+			streamService = getGlobals().getGrailsApplication().getMainContext().getBean(StreamService.class);
+			getGlobals().getDataSource().addStartListener(new IStartListener() {
+				@Override
+				public void onStart() {
+					setupUiChannelStream();
+				}
+			});
+
+			getGlobals().getDataSource().addStopListener(new IStopListener() {
+				@Override
+				public void onStop() {
+					cleanupUiChannelStream();
+				}
+			});
 		}
 	}
 
-	@Override
-	public void connectionsReady() {
-		if (getUiChannelId() == null) {
-			throw new NullPointerException("uiChannelId of moduleWithUi " + getName() + " was unexpectedly null");
+	protected void setupUiChannelStream() {
+		stream = getStreamService().getStream(uiChannelId);
+		if (stream == null) {
+			throw new IllegalStateException("Stream "+uiChannelId+" was not found!");
 		}
-		if (getGlobals() !=null && getGlobals().getUiChannel()!=null) {
-			getGlobals().getUiChannel().addChannel(uiChannelId);
+		if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream)) {
+			throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +
+					" does not have write access to UI Channel Stream " + stream.getId());
 		}
-		super.connectionsReady();
 	}
-	
-	@Override
+
+	protected void cleanupUiChannelStream() {
+		if (getGlobals().isAdhoc()) {
+			getStreamService().deleteStreamsDelayed(Arrays.asList(new Stream[] {getUiChannelStream()}));
+		}
+	}
+
+	private StreamService getStreamService() {
+		if (streamService == null) {
+			streamService = getGlobals().getGrailsApplication().getMainContext().getBean(StreamService.class);
+		}
+		return streamService;
+	}
+
+	public Stream getUiChannelStream() {
+		if (stream == null) {
+			setupUiChannelStream();
+		}
+		return stream;
+	}
+
+	protected void pushToUiChannel(Map msg) {
+		if (stream == null) {
+			setupUiChannelStream();
+		}
+		getStreamService().sendMessage(getUiChannelStream(), msg);
+	}
+
 	public String getUiChannelId() {
 		return uiChannelId;
 	}
-	
-	@Override
+
 	public String getUiChannelName() {
 		return getEffectiveName();
 	}
@@ -73,12 +118,8 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
-		Map uiChannel = getUiChannelMap();
-		
-		if (getWebcomponentName() != null && getGlobals().isRealtime())
-			uiChannel.put("webcomponent", getWebcomponentName());
-		
-		config.put("uiChannel", uiChannel);
+
+		config.put("uiChannel", getUiChannelMap());
 		
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("uiResendAll", resendAll, "boolean"));
@@ -92,8 +133,16 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		super.onConfiguration(config);
 		
 		uiChannelId = MapTraversal.getString(config, "uiChannel.id");
-		if (uiChannelId==null)
-			uiChannelId = IdGenerator.get();
+		if (uiChannelId != null) {
+			// Load existing Stream if it's configured
+			setupUiChannelStream();
+		} else {
+			// Initialize a new UI channel Stream
+			Map<String, Object> params = new LinkedHashMap<>();
+			params.put("name", getUiChannelName());
+			stream = getStreamService().createStream(params, getGlobals().getUser());
+			uiChannelId = stream.getId();
+		}
 		
 		ModuleOptions options = ModuleOptions.get(config);
 		if (options.getOption("uiResendAll")!=null) {
@@ -104,4 +153,5 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule implements I
 		}
 		
 	}
+
 }

@@ -6,6 +6,7 @@ import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.NoOpStreamListener
 import com.unifina.feed.StreamrBinaryMessageKeyProvider
 import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
@@ -15,7 +16,7 @@ import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.Globals
-import com.unifina.utils.testutils.FakePushChannel
+
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -81,6 +82,7 @@ class SendToStreamSpec extends Specification {
 		feed.backtestFeed = CassandraHistoricalFeed.getName()
 		feed.eventRecipientClass = MapMessageEventRecipient.getName()
 		feed.keyProviderClass = StreamrBinaryMessageKeyProvider.getName()
+		feed.streamListenerClass = NoOpStreamListener.getName()
 		feed.timezone = "UTC"
 		feed.save(validate: false, failOnError: true)
 
@@ -97,7 +99,6 @@ class SendToStreamSpec extends Specification {
 		mockStreamService = (MockStreamService) grailsApplication.getMainContext().getBean("streamService")
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
 		globals.realtime = true
-		globals.uiChannel = new FakePushChannel()
 		globals.dataSource = new RealtimeDataSource()
     }
 
