@@ -1,22 +1,14 @@
 package com.unifina.service
 
 import com.unifina.api.CanvasCommunicationException
-import com.unifina.datasource.DataSource
-import com.unifina.datasource.HistoricalDataSource
-import com.unifina.datasource.IStartListener
-import com.unifina.datasource.IStopListener
-import com.unifina.datasource.RealtimeDataSource
+import com.unifina.datasource.*
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
-import com.unifina.signalpath.RuntimeRequest
-import com.unifina.signalpath.RuntimeResponse
-import com.unifina.signalpath.SignalPath
-import com.unifina.signalpath.SignalPathRunner
-import com.unifina.signalpath.UiChannelIterator
+import com.unifina.signalpath.*
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -41,7 +33,6 @@ class SignalPathService {
 	def servletContext
 	def grailsApplication
 	def grailsLinkGenerator
-	def kafkaService
 	def serializationService
 	PermissionService permissionService
 	CanvasService canvasService
@@ -129,7 +120,6 @@ class SignalPathService {
 
 	@Transactional
 	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
-
 		def uiChannelIds = []
 
 		runner.signalPaths.each {
@@ -140,8 +130,7 @@ class SignalPathService {
 			canvas.delete()
 		}
 
-		// TODO: Delete the messages from Cassandra
-		//kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
+		// Data in uiChannel streams will eventually get cleaned up automatically, since it has a TTL
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
