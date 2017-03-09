@@ -27,15 +27,6 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		return (pub.getInitialValue()===null || pub.getInitialValue()===undefined) && super_hasWarning()
 	}
 
-	var super_updateState = pub.updateState;
-	pub.updateState = function(value) {
-        if (value) {
-            super_updateState('"' + value + '"');
-        } else {
-            super_updateState("");
-        }
-    }
-	
 	var super_createSettings = pub.createSettings;
 	pub.createSettings = function(div,data) {
 		super_createSettings(div,data);
