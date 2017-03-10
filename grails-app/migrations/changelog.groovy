@@ -66,4 +66,5 @@ databaseChangeLog = {
 	include file: 'core/2017-03-08-list-to-events-module.groovy'
 	include file: 'core/2017-02-15-update-map-module.groovy'
 	include file: 'core/2017-02-15-add-image-map-module.groovy'
+	include file: 'core/2017-03-10-string-to-number-module.groovy'
 }
