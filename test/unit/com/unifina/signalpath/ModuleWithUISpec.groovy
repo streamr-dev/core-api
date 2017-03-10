@@ -1,8 +1,11 @@
 package com.unifina.signalpath
 
+import com.unifina.datasource.DataSource
+import com.unifina.datasource.IStartListener
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
@@ -19,6 +22,8 @@ import java.security.AccessControlException
 @Mock([Stream, Feed])
 class ModuleWithUISpec extends Specification {
 
+	Stream uiChannel
+	Canvas canvas
 	ModuleWithUI module
 	PermissionService permissionService
 	StreamService streamService
@@ -26,38 +31,20 @@ class ModuleWithUISpec extends Specification {
 	SecUser nonPermitterUser = new SecUser()
 
 	def setup() {
-		module = new ModuleWithUI() {
-			@Override
-			void sendOutput() {
-				
-			}
-			@Override
-			void clearState() {
-				
-			}
-
-			@Override
-			String getUiChannelName() {
-				return "TestModule"
-			}
-
-			@Override
-			String getWebcomponentName() {
-				return "webcomponent-name"
-			}
-		}
-
 		streamService = Mock(StreamService)
-		streamService.getStream("uiChannel-id") >> {
-			Stream s = new Stream()
-			s.id = "uiChannel-id"
-			return s
-		}
+
+		canvas = new Canvas()
+
+		uiChannel = new Stream()
+		uiChannel.name = "TestModule"
+		uiChannel.id = "uiChannel-id"
+		uiChannel.uiChannelCanvas = canvas
+
 		Holders.getApplicationContext().beanFactory.registerSingleton('streamService', streamService)
 
 		permissionService = Mock(PermissionService)
-		permissionService.canWrite(permittedUser, _) >> true
-		permissionService.canWrite(nonPermitterUser, _) >> false
+		permissionService.canWrite(permittedUser, canvas) >> true
+		permissionService.canWrite(nonPermitterUser, canvas) >> false
 		Holders.getApplicationContext().beanFactory.registerSingleton('permissionService', permissionService)
 
 		Feed feed = new Feed()
@@ -71,65 +58,133 @@ class ModuleWithUISpec extends Specification {
 		Holders.getApplicationContext().beanFactory.destroySingleton("permissionService")
 	}
 
-	def "onConfiguration must create an ui channel if an id is not configured"() {
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, permittedUser)
+	private ModuleWithUI createModule(Map config, SecUser user=permittedUser) {
+		module = new ModuleWithUI() {
+			@Override
+			void sendOutput() {
+
+			}
+			@Override
+			void clearState() {
+
+			}
+
+			@Override
+			String getUiChannelName() {
+				return "TestModule"
+			}
+
+			@Override
+			String getWebcomponentName() {
+				return "webcomponent-name"
+			}
+		}
+
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, user)
+		module.globals.setDataSource(Mock(DataSource))
+		module.parentSignalPath = Mock(SignalPath)
+		module.parentSignalPath.getCanvas() >> canvas
 		module.init()
 
+		module.onConfiguration(config)
+
+		return module
+	}
+
+	def "onConfiguration must create an ui channel if an id is not configured"() {
 		when:
-		module.onConfiguration([:])
-		then:
-		1 * streamService.createStream(_, permittedUser) >> {
-			Stream s = new Stream()
-			s.id = "fooid"
-			return s
-		}
-		module.getUiChannelId() == "fooid"
+		createModule([:])
+		then: "config contains the id"
+		module.getUiChannelId() != null
 		module.getConfiguration().uiChannel != null
-		module.getConfiguration().uiChannel.id == "fooid"
+		module.getConfiguration().uiChannel.id != null
 		module.getConfiguration().uiChannel.name == "TestModule"
 		module.getConfiguration().uiChannel.webcomponent == module.webcomponentName
 	}
 
-	def "onConfiguration must get the stream if it exists"() {
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, permittedUser)
-		module.init()
+	def "when the datasource starts, the Stream object is loaded if it exists"() {
+		IStartListener listener
 
 		when:
-		module.onConfiguration([uiChannel:[id:'uiChannel-id']])
+		createModule([uiChannel:[id:'uiChannel-id']])
 		then:
-		module.getUiChannelStream().id == 'uiChannel-id'
+		module.getUiChannelId() == 'uiChannel-id'
+
+		when: "module is initialized"
+		module.connectionsReady()
+		then: "a start listener is registered"
+		1 * module.globals.getDataSource().addStartListener(_) >> {IStartListener l->
+			listener = l
+		}
+
+		when: "start listener is called"
+		listener.onStart()
+		then: "the Stream object is loaded"
+		1 * streamService.getStream("uiChannel-id") >> uiChannel
+		module.getUiChannelStream() == uiChannel
+		and: "a new Stream is not created"
+		0 * streamService.createStream(_, _, _)
 	}
 
-	def "onConfiguration must throw if the defined Stream is not found"() {
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, permittedUser)
-		module.init()
+	def "when the datasource starts, the Stream object is created if it does not exist"() {
+		IStartListener listener
 
 		when:
-		module.onConfiguration([uiChannel:[id:'notfound']])
+		createModule([uiChannel:[id:'nonexistent']])
 		then:
-		thrown(IllegalStateException)
+		module.getUiChannelId() == 'nonexistent'
+
+		when: "module is initialized"
+		module.connectionsReady()
+		then: "a start listener is registered"
+		1 * module.globals.getDataSource().addStartListener(_) >> {IStartListener l->
+			listener = l
+		}
+
+		when: "start listener is called"
+		listener.onStart()
+		then: "the Stream object is created"
+		1 * streamService.createStream([name: uiChannel.name, uiChannel: true, uiChannelCanvas: canvas], permittedUser, "nonexistent") >> uiChannel
 	}
 
-	def "onConfiguration must not allow users to write to streams they don't have write permission to"() {
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, nonPermitterUser)
-		module.init()
+	def "users must not be allowed to write to ui channels for canvases they don't have write permission to"() {
+		IStartListener listener
+		createModule([uiChannel:[id:'uiChannel-id']], nonPermitterUser)
 
 		when:
-		module.onConfiguration([uiChannel:[id:'uiChannel-id']])
-		then:
+		module.connectionsReady()
+		then: "a start listener is registered"
+		1 * module.globals.getDataSource().addStartListener(_) >> {IStartListener l->
+			listener = l
+		}
+
+		when: "start listener is called"
+		listener.onStart()
+		then: "the Stream object is loaded"
+		1 * streamService.getStream("uiChannel-id") >> uiChannel
 		thrown(AccessControlException)
 	}
 
 	def "pushToUiChannel must send the message via streamService"() {
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, permittedUser)
-		module.init()
-		module.onConfiguration([uiChannel:[id:'uiChannel-id']])
-
+		IStartListener listener
+		createModule([uiChannel:[id:'uiChannel-id']])
 		Map msg = [foo: "bar"]
-		
+
 		when:
-			module.pushToUiChannel(msg)
+		module.connectionsReady()
+		then: "a start listener is registered"
+		1 * module.globals.getDataSource().addStartListener(_) >> {IStartListener l->
+			listener = l
+		}
+
+		when: "start listener is called"
+		listener.onStart()
+		then: "the Stream object is loaded"
+		1 * streamService.getStream("uiChannel-id") >> uiChannel
+
+		when:
+		module.pushToUiChannel(msg)
 		then:
-			1 * streamService.sendMessage(module.getUiChannelStream(), msg)
+		1 * streamService.sendMessage(module.getUiChannelStream(), msg)
 	}
 }

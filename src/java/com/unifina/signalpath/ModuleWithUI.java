@@ -5,6 +5,7 @@ import com.unifina.datasource.IStopListener;
 import com.unifina.domain.data.Stream;
 import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
+import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -38,7 +39,6 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 					setupUiChannelStream();
 				}
 			});
-
 			getGlobals().getDataSource().addStopListener(new IStopListener() {
 				@Override
 				public void onStop() {
@@ -51,9 +51,16 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	protected void setupUiChannelStream() {
 		stream = getStreamService().getStream(uiChannelId);
 		if (stream == null) {
-			throw new IllegalStateException("Stream "+uiChannelId+" was not found!");
+			// Initialize a new UI channel Stream
+			Map<String, Object> params = new LinkedHashMap<>();
+			params.put("name", getUiChannelName());
+			params.put("uiChannel", true);
+			params.put("uiChannelCanvas", getTopParentSignalPath().getCanvas());
+			stream = getStreamService().createStream(params, getGlobals().getUser(), uiChannelId);
 		}
-		if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream)) {
+
+		// User must have write permission to related Canvas in order to write to the UI channel
+		if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream.getUiChannelCanvas())) {
 			throw new AccessControlException(this.getName() + ": User " + getGlobals().getUser().getUsername() +
 					" does not have write access to UI Channel Stream " + stream.getId());
 		}
@@ -79,7 +86,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		return stream;
 	}
 
-	protected void pushToUiChannel(Map msg) {
+	public void pushToUiChannel(Map msg) {
 		if (stream == null) {
 			setupUiChannelStream();
 		}
@@ -88,6 +95,10 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 
 	public String getUiChannelId() {
 		return uiChannelId;
+	}
+
+	public void setUiChannelId(String uiChannelId) {
+		this.uiChannelId = uiChannelId;
 	}
 
 	public String getUiChannelName() {
@@ -131,17 +142,11 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		
+
+		// A Stream object will be created or loaded on start using the uiChannelId
 		uiChannelId = MapTraversal.getString(config, "uiChannel.id");
-		if (uiChannelId != null) {
-			// Load existing Stream if it's configured
-			setupUiChannelStream();
-		} else {
-			// Initialize a new UI channel Stream
-			Map<String, Object> params = new LinkedHashMap<>();
-			params.put("name", getUiChannelName());
-			stream = getStreamService().createStream(params, getGlobals().getUser());
-			uiChannelId = stream.getId();
+		if (uiChannelId == null) {
+			uiChannelId = IdGenerator.get();
 		}
 		
 		ModuleOptions options = ModuleOptions.get(config);

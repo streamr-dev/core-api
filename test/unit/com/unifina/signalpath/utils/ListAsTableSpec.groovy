@@ -1,21 +1,31 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpec
+import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class ListAsTableSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class ListAsTableSpec extends UiChannelMockingSpec {
 	ListAsTable module
 
 	RuntimeResponse initResponse = new RuntimeResponse()
 
 	def setup() {
+		mockServicesForUiChannels()
 		module = new ListAsTable()
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 		module.configure([
 			uiChannel: [id: "table"],
 		])
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	def "initial headers are set correctly"() {
@@ -55,7 +65,7 @@ class ListAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 
@@ -87,7 +97,7 @@ class ListAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 
@@ -116,7 +126,7 @@ class ListAsTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

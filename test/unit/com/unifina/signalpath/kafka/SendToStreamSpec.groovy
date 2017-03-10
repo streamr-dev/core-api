@@ -12,11 +12,12 @@ import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
+import com.unifina.service.SerializationService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.utils.ConfigurableStreamModule
 import com.unifina.utils.Globals
-
+import com.unifina.utils.testutils.FakeStreamService
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
@@ -47,21 +48,8 @@ class SendToStreamSpec extends Specification {
 		@Override boolean canShare(SecUser user, resource) { return false }
 	}
 
-	static class MockStreamService extends StreamService {
-		def receivedMessages = [:]
-
-		@Override
-		void sendMessage(Stream stream, Map message, int ttl=0) {
-			if (!receivedMessages.containsKey(stream.id)) {
-				receivedMessages[stream.id] = []
-			}
-			receivedMessages[stream.id] << message
-		}
-		
-	}
-
 	SecUser user
-	MockStreamService mockStreamService
+	FakeStreamService mockStreamService
 	StreamService streamService
 	Globals globals
 	SendToStream module
@@ -69,7 +57,7 @@ class SendToStreamSpec extends Specification {
 
     def setup() {
 		defineBeans {
-			streamService(MockStreamService)
+			streamService(FakeStreamService)
 			feedService(FeedService)
 			permissionService(AllPermissionService)
 		}
@@ -96,7 +84,13 @@ class SendToStreamSpec extends Specification {
 		]]
 		stream.save(validate: false, failOnError: true)
 
-		mockStreamService = (MockStreamService) grailsApplication.getMainContext().getBean("streamService")
+		Stream uiChannel = new Stream()
+		uiChannel.feed = feed
+		uiChannel.id = uiChannel.name = "uiChannel"
+		uiChannel.user = user
+		uiChannel.save(validate: false, failOnError: true)
+
+		mockStreamService = (FakeStreamService) grailsApplication.getMainContext().getBean("streamService")
 		globals = Spy(Globals, constructorArgs: [[:], grailsApplication, user])
 		globals.realtime = true
 		globals.dataSource = new RealtimeDataSource()
@@ -107,6 +101,7 @@ class SendToStreamSpec extends Specification {
 		module.globals = globals
 		module.parentSignalPath = new SignalPath()
 		module.parentSignalPath.setGlobals(globals)
+		module.parentSignalPath.setUiChannelId("uiChannel")
 		module.init()
 		module.configure([
 				params: [
@@ -133,7 +128,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert mockStreamService.receivedMessages == [
+				assert mockStreamService.sentMessagesByChannel == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -141,7 +136,7 @@ class SendToStreamSpec extends Specification {
 						[strIn:"d", numIn:4.0]
 					]
 				]
-				mockStreamService.receivedMessages = [:]
+				mockStreamService.sentMessagesByChannel = [:]
 			}.test()
 	}
 
@@ -203,7 +198,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-				assert mockStreamService.receivedMessages == [
+				assert mockStreamService.sentMessagesByChannel == [
 					"stream-0": [
 						[strIn:"a", numIn:1.0],
 						[strIn:"b", numIn:2.0],
@@ -213,7 +208,7 @@ class SendToStreamSpec extends Specification {
 						[strIn:"d", numIn:4.0],
 					]
 				]
-				mockStreamService.receivedMessages = [:]
+				mockStreamService.sentMessagesByChannel = [:]
 			}.test()
 	}
 
@@ -231,7 +226,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert mockStreamService.receivedMessages == [
+			assert mockStreamService.sentMessagesByChannel == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[strIn: "a", numIn: 2.0],
@@ -240,7 +235,7 @@ class SendToStreamSpec extends Specification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
-			mockStreamService.receivedMessages = [:]
+			mockStreamService.sentMessagesByChannel = [:]
 		}.test()
 	}
 
@@ -258,7 +253,7 @@ class SendToStreamSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.afterEachTestCase {
-			assert mockStreamService.receivedMessages == [
+			assert mockStreamService.sentMessagesByChannel == [
 				"stream-0": [
 					[strIn: "a", numIn: 1.0],
 					[numIn: 2.0],
@@ -267,7 +262,7 @@ class SendToStreamSpec extends Specification {
 					[strIn: "f", numIn: 6.0]
 				]
 			]
-			mockStreamService.receivedMessages = [:]
+			mockStreamService.sentMessagesByChannel = [:]
 		}.test()
 	}
 
@@ -295,8 +290,10 @@ class SendToStreamSpec extends Specification {
 				.beforeEachTestCase {
 					globals.time = new Date()
 				}.afterEachTestCase {
-					// No messages have really been sent to Kafka
-					assert mockStreamService.receivedMessages.isEmpty()
+					// No messages have really been sent to the stream
+					assert mockStreamService.sentMessagesByChannel[stream.id] == null
+					// One notification has been sent to the parentSignalPath ui channel
+					assert mockStreamService.sentMessagesByChannel[module.parentSignalPath.uiChannelId].size() == 1
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {
@@ -313,6 +310,8 @@ class SendToStreamSpec extends Specification {
 
 					// No other events have been inserted
 					assert globals.getDataSource().getEventQueue().isEmpty()
+
+					mockStreamService.sentMessagesByChannel = [:]
 				}.test()
 
 	}

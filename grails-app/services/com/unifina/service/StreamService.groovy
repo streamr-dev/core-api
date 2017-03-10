@@ -49,9 +49,9 @@ class StreamService {
 		return Stream.findByName(name)
 	}
 
-	Stream createStream(Map params, SecUser user) {
+	Stream createStream(Map params, SecUser user, String id = IdGenerator.get()) {
 		Stream stream = new Stream(params)
-		stream.id = IdGenerator.get()
+		stream.id = id
 		stream.apiKey = IdGenerator.get()
 		stream.user = user
 		stream.config = params.config

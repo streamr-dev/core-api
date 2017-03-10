@@ -10,15 +10,15 @@ import java.util.Map;
 
 public class FakeStreamService extends StreamService {
 
-	public Map<String, List<Map>> receivedContentByChannel = new HashMap<>();
+	public Map<String, List<Map>> sentMessagesByChannel = new HashMap<>();
 
 	@Override
 	public void sendMessage(Stream stream, Map message) {
 		String c = stream.getId();
-		if (!receivedContentByChannel.containsKey(c)) {
-			receivedContentByChannel.put(c, new ArrayList<Map>());
+		if (!sentMessagesByChannel.containsKey(c)) {
+			sentMessagesByChannel.put(c, new ArrayList<Map>());
 		}
-		receivedContentByChannel.get(c).add(message);
+		sentMessagesByChannel.get(c).add(message);
 	}
 
 }

@@ -1,45 +1,46 @@
 package com.unifina.signalpath.messaging
 
-import com.unifina.utils.testutils.FakeStreamService
-import com.unifina.utils.testutils.ModuleTestHelper
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
-
+import com.unifina.UiChannelMockingSpec
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.NotificationMessage
 import com.unifina.signalpath.SignalPath
 import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
+import com.unifina.utils.testutils.FakeStreamService
+import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin)
-public class EmailModuleSpec extends Specification {
-	
-	String timeStamp
+public class EmailModuleSpec extends UiChannelMockingSpec {
+
 	EmailModule module
 	MockMailService ms
 	FakeStreamService fakeStreamService
 
 	Globals globals
-	boolean notificationSent = false
 
 	void setup() {
-		
+		mockServicesForUiChannels()
+
 		defineBeans {
 			mailService(MockMailService)
-			streamService(FakeStreamService)
 		}
 		ms = grailsApplication.mainContext.getBean("mailService")
-		fakeStreamService = grailsApplication.mainContext.getBean("streamService")
 		assert ms != null
 		
 		grailsApplication.config.unifina.email.sender = "sender"
 		
 		module = new EmailModule()
 	}
+
+	def cleanup() {
+		cleanupMockBeans()
+	}
 	
 	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
-		globals = new Globals(context, grailsApplication, user)
+		globals = GlobalsFactory.createInstance(context, grailsApplication, user)
 		globals.time = new Date()
 
 		module.globals = globals
@@ -127,8 +128,8 @@ value2: test value
 		then: "email must not be sent"
 			!ms.mailSent
 		then: "notification must be sent"
-			fakeStreamService.receivedContentByChannel[module.parentSignalPath.uiChannelId].size() == 1
-			fakeStreamService.receivedContentByChannel[module.parentSignalPath.uiChannelId][0] instanceof NotificationMessage
+			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId].size() == 1
+			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId][0] instanceof NotificationMessage
 	}
 
 	void "If trying to send emails too often send notification to warn about it"() {
@@ -148,8 +149,8 @@ value2: test value
 			module.sendOutput()
 		then: "one notification should be sent"
 			!ms.mailSent
-			fakeStreamService.receivedContentByChannel[module.parentSignalPath.uiChannelId].size() == 1
-			fakeStreamService.receivedContentByChannel[module.parentSignalPath.uiChannelId][0] instanceof NotificationMessage
+			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId].size() == 1
+			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId][0] instanceof NotificationMessage
 
 		when: "sent third email with a warning after one minute"
 			globals.time = new Date(70000)
@@ -160,7 +161,7 @@ value2: test value
 			module.sendOutput()
 		then: "an email should be sent again, but no new notification is shown"
 			ms.mailSent
-			fakeStreamService.receivedContentByChannel[module.parentSignalPath.uiChannelId].size() == 1
+			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId].size() == 1
 	}
 
 	void "if too emails are sent too frequently, the next one contains a warning about it"() {

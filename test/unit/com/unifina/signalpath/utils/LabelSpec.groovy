@@ -1,16 +1,26 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpec
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class LabelSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class LabelSpec extends UiChannelMockingSpec {
 
 	Label module
 
 	def setup() {
+		mockServicesForUiChannels()
 		module = new Label()
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 		module.configure([uiChannel: [id: "labelChannel"]])
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	void "label sends correct data to uiChannel"() {
@@ -31,7 +41,7 @@ class LabelSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

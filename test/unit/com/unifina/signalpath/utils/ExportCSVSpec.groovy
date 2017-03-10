@@ -1,24 +1,34 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.datasource.DataSource
+import com.unifina.UiChannelMockingSpec
+import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.FakeExportCSVContext
 import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
 
-class ExportCSVSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class ExportCSVSpec extends UiChannelMockingSpec {
 
 	FakeExportCSVContext fakeFileHolder = new FakeExportCSVContext()
 	ExportCSV module
 
 	def setup() {
+		mockServicesForUiChannels()
 		module = new ExportCSV(fakeFileHolder)
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 		module.getInput("input-1")
 		module.getInput("input-2")
 		module.getInput("input-3")
 		module.getInput("input-1").setDisplayName("firstInput")
 		module.getInput("input-2").setDisplayName("secondInput")
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {
@@ -35,7 +45,7 @@ class ExportCSVSpec extends Specification {
 		ModuleTestHelper moduleTestHelper
 		def builder = new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.timeToFurtherPerIteration(60 * 1000)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			// Don't test deserialization, since resuming to write the same csv file will not be possible
 			.serializationModes(new HashSet<>([ModuleTestHelper.SerializationMode.NONE, ModuleTestHelper.SerializationMode.SERIALIZE]))
 			.overrideGlobals { Globals globals ->

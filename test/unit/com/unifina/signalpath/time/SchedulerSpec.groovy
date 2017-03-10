@@ -1,27 +1,36 @@
 package com.unifina.signalpath.time
 
+import com.unifina.UiChannelMockingSpec
+import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 import java.text.SimpleDateFormat
 
-class SchedulerSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class SchedulerSpec extends UiChannelMockingSpec {
 	Scheduler module
 	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 	TimeZone UTC = TimeZone.getTimeZone("UTC")
 
 	def setup() {
+		mockServicesForUiChannels()
 		TimeZone Helsinki = TimeZone.getTimeZone("Europe/Helsinki")
 
 		df.setTimeZone(Helsinki)
 
-		Globals globals = new Globals()
+		Globals globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		globals.userTimeZone = UTC
 
 		module = new Scheduler()
 		module.globals = globals
 		module.init()
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	void "Scheduler works as expected"() {
@@ -61,7 +70,7 @@ class SchedulerSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.overrideGlobals { Globals g ->
 				g.setUserTimeZone(UTC)
 				return g

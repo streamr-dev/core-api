@@ -1,23 +1,31 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpec
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-import java.text.SimpleDateFormat
-
-class EventTableSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class EventTableSpec extends UiChannelMockingSpec {
 
 	def final static format = "yyyy-MM-dd HH:mm:ss.SSS";
 
 	EventTable module
 
 	def setup() {
+		mockServicesForUiChannels()
 		module = new EventTable()
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 		module.configure([
 			uiChannel: [id: "table"],
 			options: [inputs: [value: 3]]
 		])
+	}
+
+	def cleanup() {
+		cleanupMockBeans()
 	}
 
 	void "eventTable sends correct data to uiChannel"() {
@@ -40,7 +48,7 @@ class EventTableSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.timeToFurtherPerIteration(60 * 1000)
 			.test()
 	}

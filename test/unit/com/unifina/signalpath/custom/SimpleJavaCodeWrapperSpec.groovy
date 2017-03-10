@@ -1,5 +1,6 @@
 package com.unifina.signalpath.custom
 
+import com.unifina.domain.security.SecUser
 import com.unifina.service.SerializationService
 import com.unifina.signalpath.ModuleException
 import com.unifina.utils.Globals
@@ -21,7 +22,7 @@ class SimpleJavaCodeWrapperSpec extends Specification {
 		}
 
 		module = new SimpleJavaCodeWrapper()
-		globals = module.globals = GlobalsFactory.createInstance([:], grailsApplication)
+		globals = module.globals = module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 		module.hash = 666
 		module.configure(module.getConfiguration())

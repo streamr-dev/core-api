@@ -24,6 +24,7 @@ class Stream implements Comparable {
 	Date lastUpdated
 
 	Boolean uiChannel
+	Canvas uiChannelCanvas
 
 	static constraints = {
 		name(blank:false)
@@ -34,6 +35,7 @@ class Stream implements Comparable {
 		apiKey(nullable:true)
 		user(nullable:true)
 		uiChannel(nullable:true)
+		uiChannelCanvas(nullable:true)
 	}
 	
 	static mapping = {
