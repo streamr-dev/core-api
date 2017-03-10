@@ -48,7 +48,7 @@ public class StringToNumber extends AbstractSignalPathModule {
 	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		strict = MapTraversal.getBoolean(config, "options.strict.value");
+		strict = MapTraversal.getBoolean(config, "options.strict.value", true);
 	}
 
 	@Override
