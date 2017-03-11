@@ -128,18 +128,8 @@ class SignalPathService {
 	}
 
 	@Transactional
-	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
-		def uiChannelIds = []
-
-		runner.signalPaths.each {
-			Canvas canvas = it.canvas.refresh()
-			UiChannelIterator.over(canvas.toMap()).each {
-				uiChannelIds << it.id
-			}
-			canvas.delete()
-		}
-
-		streamService.deleteStreamsDelayed(uiChannelIds.collect { Stream.load(it) })
+	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
+		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed, signalPath.getUiChannels())
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {

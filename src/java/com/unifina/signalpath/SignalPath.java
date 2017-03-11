@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
 import com.unifina.serialization.SerializationRequest;
@@ -442,6 +443,23 @@ public class SignalPath extends ModuleWithUI {
 			byeMsg.put("_bye", true);
 			pushToUiChannel(byeMsg);
 		}
+	}
+
+	/**
+	 * Traverses the modules in this SignalPath and collects their UI channel Streams.
+	 * If a sub-SignalPath is encountered, it is traversed recursively.
+     */
+	public Set<Stream> getUiChannels() {
+		HashSet<Stream> set = new HashSet<>();
+		set.add(getUiChannelStream());
+		for (AbstractSignalPathModule m : getModules()) {
+			if (m instanceof SignalPath) {
+				set.addAll(((SignalPath)m).getUiChannels());
+			} else if (m instanceof ModuleWithUI) {
+				set.add(getUiChannelStream());
+			}
+		}
+		return set;
 	}
 
 }

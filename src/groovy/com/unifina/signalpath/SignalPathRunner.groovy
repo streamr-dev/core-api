@@ -152,8 +152,12 @@ public class SignalPathRunner extends Thread {
 		signalPaths.each { it.destroy() }
 		globals.destroy()
 
-		if (adhoc)
-			signalPathService.deleteRunningSignalPathReferences(this)
+		if (adhoc) {
+			for (SignalPath sp : getSignalPaths()) {
+				// Delayed-delete the references to allow UI to catch up
+				signalPathService.deleteReferences(sp, true)
+			}
+		}
 		else signalPathService.updateState(getRunnerId(), Canvas.State.STOPPED)
 	}
 

@@ -5,8 +5,8 @@ import com.unifina.domain.security.SecUser
 class Task {
 	Long id
 	
-	boolean available
-	boolean complete
+	boolean available = true
+	boolean complete = false
 	
 	Boolean skip
 		
