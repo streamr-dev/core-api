@@ -48,13 +48,26 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		}
 	}
 
-	protected void setupUiChannelStream() {
+	private void setupUiChannelStream() {
 		stream = getStreamService().getStream(uiChannelId);
+
+		// If not found by id, try to find the Stream by path. This UI channel may be dynamically generated, and the id is not saved in the JSON.
+		if (stream == null && getParentSignalPath() != null && !getParentSignalPath().isRoot()) {
+			stream = getStreamService().getStreamByUiChannelPath(getRuntimePath());
+
+			// The uiChannelId may be replaced by a stream loaded by path from the db
+			if (stream != null) {
+				uiChannelId = stream.getId();
+			}
+		}
+
+		// Else create a new Stream object for this UI channel
 		if (stream == null) {
 			// Initialize a new UI channel Stream
 			Map<String, Object> params = new LinkedHashMap<>();
 			params.put("name", getUiChannelName());
 			params.put("uiChannel", true);
+			params.put("uiChannelPath", getRuntimePath());
 			params.put("uiChannelCanvas", getTopParentSignalPath().getCanvas());
 			stream = getStreamService().createStream(params, getGlobals().getUser(), uiChannelId);
 		}

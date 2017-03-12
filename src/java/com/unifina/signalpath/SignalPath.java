@@ -62,6 +62,10 @@ public class SignalPath extends ModuleWithUI {
 		initFromRepresentation(iData);
 	}
 
+	public boolean isRoot() {
+		return root;
+	}
+
 	// TODO: remove backwards compatibility eventually
 	@Override
 	public Input getInput(String name) {
@@ -433,6 +437,11 @@ public class SignalPath extends ModuleWithUI {
 				return module.resolveRuntimeRequestRecipient(request, path);
 			}
 		}
+	}
+
+	@Override
+	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
+		return super.getRuntimePath(root ? writer.writeCanvasId(getCanvas().getId()) : writer);
 	}
 
 	@Override

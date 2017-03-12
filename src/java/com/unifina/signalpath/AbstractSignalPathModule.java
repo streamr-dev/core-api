@@ -670,6 +670,25 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		return this;
 	}
 
+	/**
+	 * Returns the runtime path that can be used to address this module by eg. RuntimeRequests.
+	 * The default implementation appends /modules/:hash to the parent SignalPath's path.
+	 * If the parent SignalPath is null, null is returned.
+	 *
+	 * The implementation should be in sync with resolveRuntimeRequestRecipient.
+     */
+	public String getRuntimePath() {
+		return getRuntimePath(new RuntimeRequest.PathWriter()).toString();
+	}
+
+	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
+		if (getParentSignalPath()!=null) {
+			return getParentSignalPath().getRuntimePath(writer).writeModuleId(getHash());
+		} else {
+			return writer;
+		}
+	}
+
 	@Override
 	public void receive(FeedEvent event) {
 		if (event.content instanceof RuntimeRequest) {

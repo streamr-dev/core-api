@@ -45,6 +45,10 @@ class StreamService {
 		return Stream.get(id)
 	}
 
+	Stream getStreamByUiChannelPath(String uiChannelPath) {
+		return Stream.findByUiChannelPath(uiChannelPath)
+	}
+
 	Stream findByName(String name) {
 		return Stream.findByName(name)
 	}

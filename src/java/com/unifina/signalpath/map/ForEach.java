@@ -153,8 +153,9 @@ public class ForEach extends AbstractSignalPathModule {
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
 		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
 		canvasService.resetUiChannels(signalPathMap);
-		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
+		SignalPathInsideForEach signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false, SignalPathInsideForEach.class);
 		signalPath.setName(signalPath.getName() + " (" + key + ")");
+		signalPath.link(key, this);
 
 		// Copy parameter default values
 		for (Parameter p : exportedUnconnectedParameters) {
@@ -201,6 +202,15 @@ public class ForEach extends AbstractSignalPathModule {
 			} else {
 				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
 			}
+		}
+	}
+
+	public SignalPath getSignalPathByKey(String key) {
+		SubSignalPath sub = keyToSignalPath.get(key);
+		if (sub == null) {
+			return null;
+		} else {
+			return sub.getSignalPath();
 		}
 	}
 
@@ -251,6 +261,26 @@ public class ForEach extends AbstractSignalPathModule {
 		@Override
 		public boolean isReady() {
 			return true;
+		}
+	}
+
+	public static class SignalPathInsideForEach extends SignalPath {
+
+		ForEach parent;
+		String key;
+
+		public SignalPathInsideForEach(boolean isRoot) {
+			super(isRoot);
+		}
+
+		public void link(String key, ForEach parent) {
+			this.key = key;
+			this.parent = parent;
+		}
+
+		@Override
+		protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
+			return parent.getRuntimePath(writer).write("/keys/"+key);
 		}
 	}
 }

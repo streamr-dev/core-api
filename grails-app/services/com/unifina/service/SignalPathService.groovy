@@ -12,6 +12,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
@@ -48,9 +49,10 @@ class SignalPathService {
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
-	
-	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
-		SignalPath sp = new SignalPath(isRoot)
+
+	@CompileStatic
+	public <T extends SignalPath> T mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot, Class<T> baseClass = SignalPath) {
+		T sp = baseClass.getConstructor(boolean.class).newInstance(isRoot)
 
 		sp.globals = globals
 		sp.init()		
@@ -61,11 +63,12 @@ class SignalPathService {
 
 		return sp
 	}
-	
+
+	@CompileStatic
 	public Map signalPathToMap(SignalPath sp) {
 		return  [
 			name: sp.name,
-			modules: sp.modules.collect { it.getConfiguration() },
+			modules: sp.modules.collect { AbstractSignalPathModule it -> it.getConfiguration() },
 			settings: sp.globals.signalPathContext,
 			hasExports: sp.hasExports(),
 			uiChannel: sp.getUiChannelMap()
@@ -78,6 +81,7 @@ class SignalPathService {
 	 * @param json
 	 * @return
 	 */
+	@CompileStatic
 	public Map reconstruct(Map signalPathMap, Globals globals) {
 		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
 		return signalPathToMap(sp)

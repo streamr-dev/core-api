@@ -83,9 +83,12 @@ class ModuleWithUISpec extends Specification {
 		module.globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
+		module.getParentSignalPath().getRuntimePath(_) >> {RuntimeRequest.PathWriter writer ->
+			return writer.writeCanvasId("id")
+		}
 		module.parentSignalPath.getCanvas() >> canvas
 		module.init()
-
+		module.setHash(1)
 		module.onConfiguration(config)
 
 		return module
@@ -126,6 +129,34 @@ class ModuleWithUISpec extends Specification {
 		0 * streamService.createStream(_, _, _)
 	}
 
+	def "when the datasource starts, the Stream object is loaded by uiChannelPath if the parent SignalPath is not root"() {
+		IStartListener listener
+		uiChannel.id = "stream-loaded-by-uiChannelPath"
+
+		when:
+		createModule([uiChannel:[id:'nonexistent']])
+		then:
+		module.getUiChannelId() == 'nonexistent'
+
+		when: "module is initialized"
+		module.connectionsReady()
+		then: "a start listener is registered"
+		1 * module.globals.getDataSource().addStartListener(_) >> {IStartListener l->
+			listener = l
+		}
+
+		when: "start listener is called"
+		listener.onStart()
+		then: "the Stream object load attempt fails"
+		1 * streamService.getStream("nonexistent") >> null
+		then: "the Stream object is loaded by uiChannelPath"
+		1 * streamService.getStreamByUiChannelPath(_) >> uiChannel
+		module.getUiChannelStream() == uiChannel
+		module.getUiChannelId() == "stream-loaded-by-uiChannelPath"
+		and: "a new Stream is not created"
+		0 * streamService.createStream(_, _, _)
+	}
+
 	def "when the datasource starts, the Stream object is created if it does not exist"() {
 		IStartListener listener
 
@@ -143,8 +174,12 @@ class ModuleWithUISpec extends Specification {
 
 		when: "start listener is called"
 		listener.onStart()
+		then: "the Stream object load attempt fails"
+		1 * streamService.getStream("nonexistent") >> null
+		then: "the Stream object is not found by uiChannelPath"
+		1 * streamService.getStreamByUiChannelPath(_) >> null
 		then: "the Stream object is created"
-		1 * streamService.createStream([name: uiChannel.name, uiChannel: true, uiChannelCanvas: canvas], permittedUser, "nonexistent") >> uiChannel
+		1 * streamService.createStream([name: uiChannel.name, uiChannel: true, uiChannelPath: "/canvases/id/modules/1", uiChannelCanvas: canvas], permittedUser, "nonexistent") >> uiChannel
 	}
 
 	def "users must not be allowed to write to ui channels for canvases they don't have write permission to"() {
