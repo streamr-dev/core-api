@@ -40,8 +40,9 @@ public class TimeSeriesChart extends Chart {
 				it.seriesName = newName;
 			}
 		}
-
-		pushToUiChannel(getInitMessage());
+		if (getGlobals().isRunContext()) {
+			pushToUiChannel(getInitMessage());
+		}
 	}
 	
 	protected InitMessage getInitMessage() {

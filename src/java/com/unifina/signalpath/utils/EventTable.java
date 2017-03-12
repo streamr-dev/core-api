@@ -24,9 +24,11 @@ public class EventTable extends ModuleWithUI {
 	public void initialize() {
 		super.initialize();
 
-		Map<String,Object> hdrMsg = new HashMap<String,Object>();
-		hdrMsg.put("hdr", getHeaderDefinition());
-		pushToUiChannel(hdrMsg);
+		if (getGlobals().isRunContext()) {
+			Map<String, Object> hdrMsg = new HashMap<String, Object>();
+			hdrMsg.put("hdr", getHeaderDefinition());
+			pushToUiChannel(hdrMsg);
+		}
 	}
 
 	@Override
