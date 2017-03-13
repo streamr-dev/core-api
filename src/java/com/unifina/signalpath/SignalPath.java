@@ -38,6 +38,7 @@ public class SignalPath extends ModuleWithUI {
 	private Map<Integer, AbstractSignalPathModule> modulesByHash = new HashMap<>();
 
 	private boolean root = false;
+	private SignalPath cachedRootSignalPath = null;
 
 	public SignalPath() {
 		super();
@@ -169,7 +170,7 @@ public class SignalPath extends ModuleWithUI {
 			if (o != null) {
 				o.connect(ic.input);
 			} else {
-				log.warn("Input " + ic.input.getName() + " could not be connected, because source was not found. SP: " + ic.input.getOwner().getParentSignalPath() + ", TOP: " + ic.input.getOwner().getTopParentSignalPath());
+				log.warn("Input " + ic.input.getName() + " could not be connected, because source was not found. SP: " + ic.input.getOwner().getParentSignalPath() + ", TOP: " + ic.input.getOwner().getRootSignalPath());
 			}
 		}
 
@@ -471,4 +472,18 @@ public class SignalPath extends ModuleWithUI {
 		return set;
 	}
 
+	@Override
+	public SignalPath getRootSignalPath() {
+		if (cachedRootSignalPath == null) {
+			if (this.isRoot()) {
+				cachedRootSignalPath = this;
+			} else if (getParentSignalPath() != null) {
+				cachedRootSignalPath = getParentSignalPath().getRootSignalPath();
+			} else {
+				throw new IllegalStateException("SignalPath is not root, but doesn't have a parent!");
+			}
+		}
+
+		return cachedRootSignalPath;
+	}
 }

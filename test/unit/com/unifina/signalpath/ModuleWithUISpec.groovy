@@ -83,7 +83,8 @@ class ModuleWithUISpec extends Specification {
 		module.globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		module.globals.setDataSource(Mock(DataSource))
 		module.parentSignalPath = Mock(SignalPath)
-		module.getParentSignalPath().getRuntimePath(_) >> {RuntimeRequest.PathWriter writer ->
+		module.parentSignalPath.getRootSignalPath() >> module.parentSignalPath
+		module.parentSignalPath.getRuntimePath(_) >> {RuntimeRequest.PathWriter writer ->
 			return writer.writeCanvasId("id")
 		}
 		module.parentSignalPath.getCanvas() >> canvas

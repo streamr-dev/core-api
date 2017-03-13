@@ -45,4 +45,21 @@ class SignalPathSpec extends BeanMockingSpecification {
 		module.getRuntimePath() == "/canvases/canvasId/modules/5/modules/10"
 	}
 
+	def "getRootSignalPath()"() {
+		SignalPath signalPath
+
+		when: "this is root"
+		signalPath = new SignalPath(true)
+		then:
+		signalPath.getRootSignalPath() == signalPath
+
+
+		when: "has parent"
+		SignalPath top = new SignalPath(true)
+		signalPath = new SignalPath(false)
+		signalPath.setParentSignalPath(top)
+		then:
+		signalPath.getRootSignalPath() == top
+	}
+
 }

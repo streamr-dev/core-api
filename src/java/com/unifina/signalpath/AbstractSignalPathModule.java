@@ -593,22 +593,14 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 	}
 
-	public SignalPath getTopParentSignalPath() {
-		if (parentSignalPath == null) {
+	/**
+	 * Returns the topmost SignalPath in the hierarchy where this module is contained.
+     */
+	public SignalPath getRootSignalPath() {
+		if (parentSignalPath != null) {
+			return parentSignalPath.getRootSignalPath();
+		} else {
 			return null;
-		}
-		// Return cached value
-		else if (cachedTopParentSignalPath != null) {
-			return cachedTopParentSignalPath;
-		}
-		// Establish cached value
-		else {
-			cachedTopParentSignalPath = parentSignalPath;
-			while (cachedTopParentSignalPath.getParentSignalPath() != null) {
-				cachedTopParentSignalPath = cachedTopParentSignalPath.getParentSignalPath();
-			}
-
-			return cachedTopParentSignalPath;
 		}
 	}
 

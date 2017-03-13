@@ -68,7 +68,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 			params.put("name", getUiChannelName());
 			params.put("uiChannel", true);
 			params.put("uiChannelPath", getRuntimePath());
-			params.put("uiChannelCanvas", getTopParentSignalPath().getCanvas());
+			params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
 			stream = getStreamService().createStream(params, getGlobals().getUser(), uiChannelId);
 		}
 

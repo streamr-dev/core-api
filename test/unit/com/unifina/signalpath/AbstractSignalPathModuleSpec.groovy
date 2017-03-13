@@ -161,4 +161,22 @@ class AbstractSignalPathModuleSpec extends Specification {
 		then:
 		response == new RuntimeResponse(true, [request: msg, json: module.configuration])
 	}
+
+	void "getRootSignalPath() returns null for module with no parent"() {
+		module = new Module()
+
+		expect:
+		module.getRootSignalPath() == null
+	}
+
+	void "getRootSignalPath() returns root reported by parent if it has a parent"() {
+		module = new Module()
+		module.setParentSignalPath(mockSignalPath)
+
+		when:
+		SignalPath root = module.getRootSignalPath()
+		then:
+		1 * module.getParentSignalPath().getRootSignalPath() >> mockSignalPath
+		root == mockSignalPath
+	}
 }
