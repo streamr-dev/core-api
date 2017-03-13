@@ -67,11 +67,16 @@ class CanvasService {
 		canvas.save(flush: true, failOnError: true)
 	}
 
+	/**
+	 * Deletes a Canvas along with any resources (DashboardItems, Streams) pointing to it.
+	 * It can be deleted after a delay to allow resource consumers to finish up.
+     */
 	@Transactional
-	public void deleteCanvas(Canvas canvas, SecUser user, boolean delayed = false, Collection<Stream> uiChannels = Stream.findAllByUiChannelCanvas(canvas)) {
+	public void deleteCanvas(Canvas canvas, SecUser user, boolean delayed = false) {
 		if (delayed) {
-			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas, uiChannels), "delete-canvas", user)
+			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas), "delete-canvas", user, 30 * 60 * 1000)
 		} else {
+			Collection<Stream> uiChannels = Stream.findAllByUiChannelCanvas(canvas)
 			uiChannels.each {
 				streamService.deleteStream(it)
 			}

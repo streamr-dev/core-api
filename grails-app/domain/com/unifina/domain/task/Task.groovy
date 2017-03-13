@@ -30,13 +30,14 @@ class Task {
 	
 	Date runAfter
 	
-	public Task(String implementingClass, String config, String category, String taskGroupId, int complexity = 0, SecUser user = null) {
+	public Task(String implementingClass, String config, String category, String taskGroupId, int complexity = 0, SecUser user = null, Date runAfter = null) {
 		this.implementingClass = implementingClass
 		this.config = config
 		this.category = category
 		this.taskGroupId = taskGroupId
 		this.complexity = complexity
 		this.user = user
+		this.runAfter = runAfter
 		
 		available = true
 		complete = false

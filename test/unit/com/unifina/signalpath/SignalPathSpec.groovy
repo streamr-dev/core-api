@@ -20,6 +20,8 @@ class SignalPathSpec extends BeanMockingSpecification {
 		cleanupMockBeans()
 	}
 
+
+
 	def "Runtime path is correctly formed"() {
 		Canvas topCanvas = new Canvas()
 		topCanvas.id = "canvasId"

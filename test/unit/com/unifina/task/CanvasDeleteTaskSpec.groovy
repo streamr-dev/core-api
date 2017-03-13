@@ -13,13 +13,12 @@ import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
 import org.springframework.context.ApplicationContext
 
-@Mock([Canvas, Stream])
+@Mock([Canvas, Stream, Task])
 class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 
 	CanvasService canvasService
 	Canvas canvas
 	SecUser user
-	List<Stream> uiChannels
 
     def setup() {
 		canvasService = mockBean(CanvasService, Mock(CanvasService))
@@ -27,18 +26,6 @@ class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 		canvas = new Canvas().save(validate: false)
 		assert canvas.id != null
 
-		uiChannels = (1..3).collect {
-			Stream s = new Stream()
-			s.id = it.toString()
-			s.name = it.toString()
-			s.uiChannel = true
-			s.uiChannelCanvas = canvas
-			s.save(validate: false)
-			return s
-		}
-		uiChannels.each {
-			assert it.id != null
-		}
 		user = new SecUser()
     }
 
@@ -48,15 +35,15 @@ class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 
 	void "CanvasDeleteTask must call canvasService.deleteCanvas()"() {
 		CanvasDeleteTask task = new CanvasDeleteTask(
-				new Task(user: user),
-				CanvasDeleteTask.getConfig(canvas, uiChannels),
+				new Task(user: user).save(validate: false),
+				CanvasDeleteTask.getConfig(canvas),
 				null)
 
 		when:
 		task.run()
 
 		then:
-		1 * canvasService.deleteCanvas(canvas, user, false, uiChannels)
+		1 * canvasService.deleteCanvas(canvas, user, false)
 	}
 
 }

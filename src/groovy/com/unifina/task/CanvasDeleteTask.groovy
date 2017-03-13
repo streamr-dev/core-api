@@ -1,6 +1,5 @@
 package com.unifina.task
 
-import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
@@ -20,7 +19,11 @@ public class CanvasDeleteTask extends AbstractTask {
 	@Override
 	public boolean run() {
 		Canvas.withTransaction {
-			canvasService.deleteCanvas(Canvas.get(config.canvasId), task.user, false, Stream.findAllByIdInList(config.uiChannelIds))
+			task = task.refresh()
+			canvasService.deleteCanvas(
+					Canvas.get(config.canvasId),
+					task.user,
+					false)
 		}
 		return true
 	}
@@ -30,7 +33,7 @@ public class CanvasDeleteTask extends AbstractTask {
 
 	}
 
-	public static Map<String,Object> getConfig(Canvas canvas, Collection<Stream> uiChannels) {
-		return [canvasId: canvas.id, uiChannelIds: uiChannels.collect {it.id}]
+	public static Map<String,Object> getConfig(Canvas canvas) {
+		return [canvasId: canvas.id]
 	}
 }

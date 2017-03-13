@@ -466,7 +466,7 @@ public class SignalPath extends ModuleWithUI {
 			if (m instanceof SignalPath) {
 				set.addAll(((SignalPath)m).getUiChannels());
 			} else if (m instanceof ModuleWithUI) {
-				set.add(getUiChannelStream());
+				set.add(((ModuleWithUI)m).getUiChannelStream());
 			}
 		}
 		return set;

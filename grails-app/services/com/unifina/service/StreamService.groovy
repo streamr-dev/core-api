@@ -89,13 +89,6 @@ class StreamService {
 		stream.delete(flush:true)
 	}
 
-	void deleteStreamsDelayed(List<Stream> streams, long delayMs=30*60*1000) {
-		Map config = CanvasDeleteTask.getConfig(streams)
-		Task task = new Task(CanvasDeleteTask.class.getName(), (config as JSON).toString(), "stream-delete", UUID.randomUUID().toString())
-		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
-		task.save(flush: true, failOnError: true)
-	}
-
 	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
 		FieldDetector fieldDetector = instantiateDetector(stream)
 		fieldDetector.setFlattenMap(flattenHierarchies)

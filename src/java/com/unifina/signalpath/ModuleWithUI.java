@@ -7,9 +7,9 @@ import com.unifina.service.PermissionService;
 import com.unifina.service.StreamService;
 import com.unifina.utils.IdGenerator;
 import com.unifina.utils.MapTraversal;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 import java.security.AccessControlException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -80,9 +80,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 	}
 
 	protected void cleanupUiChannelStream() {
-		if (getGlobals().isAdhoc()) {
-			getStreamService().deleteStreamsDelayed(Arrays.asList(new Stream[] {getUiChannelStream()}));
-		}
+		// The UI channel streams get deleted along with the canvas, so no need to clean them up explicitly
 	}
 
 	private StreamService getStreamService() {
