@@ -1,6 +1,6 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
@@ -9,7 +9,7 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @Mixin(GrailsUnitTestMixin)
-class ListAsTableSpec extends UiChannelMockingSpec {
+class ListAsTableSpec extends UiChannelMockingSpecification {
 	ListAsTable module
 
 	RuntimeResponse initResponse = new RuntimeResponse()

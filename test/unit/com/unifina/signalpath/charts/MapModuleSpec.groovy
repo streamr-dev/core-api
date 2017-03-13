@@ -1,6 +1,6 @@
 package com.unifina.signalpath.charts
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.StreamrColor
@@ -8,7 +8,7 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @Mixin(GrailsUnitTestMixin)
-public class MapModuleSpec extends UiChannelMockingSpec {
+public class MapModuleSpec extends UiChannelMockingSpecification {
 	MapModule module
 
 	def setup() {

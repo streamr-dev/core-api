@@ -1,13 +1,13 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @Mixin(GrailsUnitTestMixin)
-class LabelSpec extends UiChannelMockingSpec {
+class LabelSpec extends UiChannelMockingSpecification {
 
 	Label module
 

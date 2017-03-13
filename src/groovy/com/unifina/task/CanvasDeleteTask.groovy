@@ -4,6 +4,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
+import grails.util.Holders
 import org.codehaus.groovy.grails.commons.GrailsApplication
 
 public class CanvasDeleteTask extends AbstractTask {
@@ -13,7 +14,7 @@ public class CanvasDeleteTask extends AbstractTask {
 	public CanvasDeleteTask(Task task, Map<String, Object> config,
 							GrailsApplication grailsApplication) {
 		super(task, config, grailsApplication);
-		canvasService = grailsApplication.getMainContext().getBean(CanvasService);
+		canvasService = Holders.getApplicationContext().getBean(CanvasService);
 	}
 
 	@Override

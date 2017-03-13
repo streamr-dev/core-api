@@ -1,16 +1,15 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.FakeExportCSVContext
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
-import spock.lang.Specification
 
 @Mixin(GrailsUnitTestMixin)
-class ExportCSVSpec extends UiChannelMockingSpec {
+class ExportCSVSpec extends UiChannelMockingSpecification {
 
 	FakeExportCSVContext fakeFileHolder = new FakeExportCSVContext()
 	ExportCSV module

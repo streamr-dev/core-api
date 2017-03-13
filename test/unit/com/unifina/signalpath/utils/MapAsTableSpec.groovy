@@ -1,13 +1,13 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @Mixin(GrailsUnitTestMixin)
-class MapAsTableSpec extends UiChannelMockingSpec {
+class MapAsTableSpec extends UiChannelMockingSpecification {
 	MapAsTable module
 
 	def setup() {

@@ -1,27 +1,32 @@
 package com.unifina.signalpath.utils
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
-import com.unifina.utils.GlobalsFactory
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.support.GrailsUnitTestMixin
 
+import java.text.SimpleDateFormat
+
 @Mixin(GrailsUnitTestMixin)
-class EventTableSpec extends UiChannelMockingSpec {
+class EventTableSpec extends UiChannelMockingSpecification {
 
-	def final static format = "yyyy-MM-dd HH:mm:ss.SSS";
-
+	SimpleDateFormat dateFormat
 	EventTable module
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = new EventTable()
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		module.init()
-		module.configure([
-			uiChannel: [id: "table"],
-			options: [inputs: [value: 3]]
-		])
+		module = setupModule(
+				new EventTable(),
+				[
+					uiChannel: [id: "table"],
+					options: [inputs: [value: 3]]
+				],
+				new SignalPath(),
+				mockGlobals([:], new SecUser(timezone: "UTC")))
+
+		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
 	}
 
 	def cleanup() {
@@ -39,10 +44,10 @@ class EventTableSpec extends UiChannelMockingSpec {
 		Map channelMessages = [
 			table: [
 				[hdr: [headers: ["timestamp", "outputForinput1", "outputForinput2", "outputForinput3"]]],
-				[nr: [new Date(0).format(format), "a", "1", null]],
-				[nr: [new Date(60 * 1000).format(format), "b", "2", null]],
-				[nr: [new Date(60 * 1000 * 2).format(format), "c", "3", "hello"]],
-				[nr: [new Date(60 * 1000 * 3).format(format), "d", "4", "world"]],
+				[nr: [dateFormat.format(new Date(0)), "a", "1", null]],
+				[nr: [dateFormat.format(new Date(60 * 1000)), "b", "2", null]],
+				[nr: [dateFormat.format(new Date(60 * 1000 * 2)), "c", "3", "hello"]],
+				[nr: [dateFormat.format(new Date(60 * 1000 * 3)), "d", "4", "world"]],
 			]
 		]
 

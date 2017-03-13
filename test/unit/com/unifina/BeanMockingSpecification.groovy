@@ -1,5 +1,7 @@
 package com.unifina
 
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.util.Holders
 import spock.lang.Specification
 
@@ -7,7 +9,8 @@ import spock.lang.Specification
  * Insert any instance you like as a spring bean, use mockBean(name, instance) in your setup() method.
  * Then in cleanup(), call cleanupMockBeans().
  */
-class BeanMockingSpec extends Specification {
+@TestMixin(GrailsUnitTestMixin)
+class BeanMockingSpecification extends Specification {
 
 	private registeredMockBeans = []
 

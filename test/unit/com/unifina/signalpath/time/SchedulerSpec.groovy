@@ -1,6 +1,6 @@
 package com.unifina.signalpath.time
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
@@ -10,7 +10,7 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 import java.text.SimpleDateFormat
 
 @Mixin(GrailsUnitTestMixin)
-class SchedulerSpec extends UiChannelMockingSpec {
+class SchedulerSpec extends UiChannelMockingSpecification {
 	Scheduler module
 	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 	TimeZone UTC = TimeZone.getTimeZone("UTC")

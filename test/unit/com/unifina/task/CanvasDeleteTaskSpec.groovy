@@ -1,6 +1,6 @@
 package com.unifina.task
 
-import com.unifina.BeanMockingSpec
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
@@ -9,10 +9,12 @@ import com.unifina.service.CanvasService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
+import org.springframework.context.ApplicationContext
 
-@TestMixin(GrailsUnitTestMixin)
 @Mock([Canvas, Stream])
-class CanvasDeleteTaskSpec extends BeanMockingSpec {
+class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 
 	CanvasService canvasService
 	Canvas canvas
@@ -48,7 +50,7 @@ class CanvasDeleteTaskSpec extends BeanMockingSpec {
 		CanvasDeleteTask task = new CanvasDeleteTask(
 				new Task(user: user),
 				CanvasDeleteTask.getConfig(canvas, uiChannels),
-				grailsApplication)
+				null)
 
 		when:
 		task.run()

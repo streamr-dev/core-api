@@ -1,6 +1,6 @@
 package com.unifina.signalpath
 
-import com.unifina.BeanMockingSpec
+import com.unifina.BeanMockingSpecification
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.service.ModuleService
@@ -10,7 +10,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin)
-class SignalPathSpec extends BeanMockingSpec {
+class SignalPathSpec extends BeanMockingSpecification {
 
 	def setup() {
 		mockBean(ModuleService, Mock(ModuleService))

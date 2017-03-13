@@ -1,6 +1,6 @@
 package com.unifina.signalpath.messaging
 
-import com.unifina.UiChannelMockingSpec
+import com.unifina.UiChannelMockingSpecification
 import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.SecUser
 import com.unifina.signalpath.NotificationMessage
@@ -13,7 +13,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
 @TestMixin(GrailsUnitTestMixin)
-public class EmailModuleSpec extends UiChannelMockingSpec {
+public class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	EmailModule module
 	MockMailService ms

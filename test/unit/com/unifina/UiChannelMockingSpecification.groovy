@@ -8,8 +8,11 @@ import com.unifina.service.StreamService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 
+/**
+ * Spec base class with helper functions for testing ModuleWithUI-based modules.
+ */
 @TestMixin(GrailsUnitTestMixin)
-class UiChannelMockingSpec extends BeanMockingSpec {
+class UiChannelMockingSpecification extends ModuleTestingSpecification {
 
 	Map<String, List<Map>> sentMessagesByStreamId = [:]
 
