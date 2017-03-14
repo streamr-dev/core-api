@@ -607,6 +607,17 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		return pub.getURL() ? pub.getURL() + '/request' : undefined
 	}
 
+	pub.setDebugMessages = function(enabled) {
+		if (SignalPath.isRunning()) {
+			var msg = { type: "debugMessages", value: enabled }
+			SignalPath.runtimeRequest(pub.getRuntimeRequestURL(), msg, function (response, err) {
+				if (err) {
+					console.error("Failed to set debug message state: %o", err)
+				}
+			})
+		}
+	}
+
 	// Everything added to the public interface can be accessed from the
 	// protected interface too
 	$.extend(prot,pub);

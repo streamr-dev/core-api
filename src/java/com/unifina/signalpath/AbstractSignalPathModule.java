@@ -67,6 +67,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 	private transient Globals globals;
 
 	private boolean initialized;
+	private boolean debugMessagesEnabled = true;
 
 	private static final Logger log = Logger.getLogger(AbstractSignalPathModule.class);
 
@@ -624,6 +625,22 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		return initPriority;
 	}
 
+	public boolean isDebugMessagesEnabled() {
+		return debugMessagesEnabled;
+	}
+
+	protected void pushDebugMessage(String message) {
+		if (isDebugMessagesEnabled() && getParentSignalPath().isDebugMessagesEnabled()) {
+			getParentSignalPath().pushToUiChannel(new ModuleDebugMessage(message, this));
+		}
+	}
+
+	protected void pushDebugMessage(Endpoint endpoint, String message) {
+		if (isDebugMessagesEnabled() && getParentSignalPath().isDebugMessagesEnabled()) {
+			getParentSignalPath().pushToUiChannel(new ModuleDebugMessage(message, endpoint));
+		}
+	}
+
 	/**
 	 * This method is used to serve requests from the UI to individual modules.
 	 * The default implementation inserts the requests into the global event queue
@@ -697,8 +714,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		// By default all modules support runtime parameter changes, ping requests and json requests
 		if (request.getType().equals("ping")) {
 			response.setSuccess(true);
-		}
-		else if (request.getType().equals("paramChange")) {
+		} else if (request.getType().equals("paramChange")) {
 
 			Parameter param = (Parameter) getInput(request.get("param").toString());
 			try {
@@ -725,9 +741,11 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 				log.error("Error making runtime parameter change!", e);
 				getGlobals().getUiChannel().push(new ErrorMessage("Parameter change failed!"), parentSignalPath.getUiChannelId());
 			}
-		}
-		else if (request.getType().equals("json")) {
+		} else if (request.getType().equals("json")) {
 			response.put("json", this.getConfiguration());
+			response.setSuccess(true);
+		} else if (request.getType().equals("debugMessages")) {
+			debugMessagesEnabled = Boolean.parseBoolean(request.get("value").toString());
 			response.setSuccess(true);
 		}
 	}

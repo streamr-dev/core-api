@@ -250,6 +250,7 @@ modules = {
 	}
 	'canvas-controls' {
 		dependsOn 'signalpath-core, backbone'
+		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-debug-viewer.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
 	}

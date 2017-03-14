@@ -10,7 +10,6 @@ import static org.apache.commons.lang3.math.NumberUtils.isNumber;
 public class Expression extends AbstractSignalPathModule {
 	private final StringParameter expressionParam = new StringParameter(this, "expression", "x+y");
 	private final TimeSeriesOutput out = new TimeSeriesOutput(this, "out");
-	private final StringOutput error = new StringOutput(this, "error");
 
 	transient private com.udojava.evalex.Expression expression;
 	private String expressionAsString;
@@ -23,7 +22,6 @@ public class Expression extends AbstractSignalPathModule {
 
 		addInput(expressionParam);
 		addOutput(out);
-		addOutput(error);
 	}
 
 	@Override
@@ -48,7 +46,7 @@ public class Expression extends AbstractSignalPathModule {
 			double value = expression.eval().doubleValue();
 			out.send(value);
 		} catch (RuntimeException e) {
-			error.send(e.getMessage());
+			pushDebugMessage(e.getMessage());
 		}
 	}
 

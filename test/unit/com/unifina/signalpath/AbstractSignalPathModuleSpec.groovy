@@ -86,12 +86,16 @@ class AbstractSignalPathModuleSpec extends Specification {
 		globals.setUiChannel(uiChannel)
 		globals.init()
 
+		def signalPath = new SignalPath()
+		signalPath.setGlobals(globals)
+
 		module = new Module()
 		module.init()
 		module.setGlobals(globals)
 		module.setName("MyModule")
 		module.setDisplayName("MyModuleDisplayName")
-		module.setParentSignalPath(new SignalPath())
+		module.setParentSignalPath(signalPath)
+		module.setHash(1)
 	}
 
 	@CompileStatic
@@ -128,7 +132,7 @@ class AbstractSignalPathModuleSpec extends Specification {
 		then:
 		response == new RuntimeResponse(true, [request: msg])
 		module.param.value == -123
-		uiChannel.receivedContentByChannel == [:]
+		uiChannel.receivedContentByChannel.isEmpty()
 	}
 
 	void "'paramChange' pushes error to uiChannel if not permitted"() {
@@ -153,9 +157,47 @@ class AbstractSignalPathModuleSpec extends Specification {
 
 		when:
 		Map msg = [type: "json"]
-		def response = sendRuntimeRequest([type: "json"], true)
+		def response = sendRuntimeRequest(msg, true)
 
 		then:
 		response == new RuntimeResponse(true, [request: msg, json: module.configuration])
+	}
+
+	void "supports 'debugMessages' runtime requests"() {
+		setUpModuleWithRuntimeRequestEnv()
+
+		expect:
+		module.debugMessagesEnabled
+
+		when:
+		Map msg = [type: "debugMessages", value: false]
+		def response = sendRuntimeRequest(msg, true)
+
+		then:
+		response == new RuntimeResponse(true, [request: msg])
+
+		and:
+		!module.debugMessagesEnabled
+	}
+
+	void "debug messages are pushed by default"() {
+		setUpModuleWithRuntimeRequestEnv()
+
+		when:
+		module.pushDebugMessage("test")
+
+		then:
+		uiChannel.receivedContentByChannel.values().flatten() == [new ModuleDebugMessage("test", 1)]
+	}
+
+	void "debug messages are not pushed when disabled by runtime request"() {
+		setUpModuleWithRuntimeRequestEnv()
+
+		when:
+		sendRuntimeRequest([type: "debugMessages", value: false], true)
+		module.pushDebugMessage("test")
+
+		then:
+		uiChannel.receivedContentByChannel.isEmpty()
 	}
 }

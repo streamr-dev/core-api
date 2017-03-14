@@ -643,6 +643,9 @@ var SignalPath = (function () {
 			var hash = message.hash;
 			getModuleById(hash).addWarning(message.msg);
 		}
+		else if (message.type=="MD") {
+			$(pub).trigger("moduleDebugMessage", [message])
+		}
 		else if (message.type=="D") {
 			$(pub).trigger("done")
 
