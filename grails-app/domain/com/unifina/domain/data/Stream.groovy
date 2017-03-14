@@ -7,6 +7,7 @@ import groovy.transform.CompileStatic
 
 class Stream implements Comparable {
 	String id
+	Integer partitions = 1
 	String apiKey
 	SecUser user
 
@@ -33,8 +34,8 @@ class Stream implements Comparable {
 	
 	static mapping = {
 		id generator: 'assigned'
-		name index:"name_idx"
-		feed lazy:false
+		name index: "name_idx"
+		feed lazy: false
 		config type: 'text'
 	}
 	
@@ -47,6 +48,7 @@ class Stream implements Comparable {
 	Map toMap() {
 		[
 			id: id,
+			partitions: partitions,
 			apiKey: apiKey,
 			name: name,
 			feed: feed.toMap(),
