@@ -121,7 +121,7 @@ class CanvasApiController {
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser), local ? true : false)
-		log.info("request: responding with $response")
+		log.debug("request: responding with $response")
 		render response as JSON
 	}
 

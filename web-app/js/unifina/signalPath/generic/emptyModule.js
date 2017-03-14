@@ -18,6 +18,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	prot.type = prot.jsonData.type;
 	prot.id = "module_" + prot.hash;
 
+	prot.moduleClosed = false
+
 	var pub = {}
 	var $prot = $(prot)
 
@@ -480,6 +482,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	function close() {
 		$(SignalPath).trigger('moduleBeforeClose', [ prot.jsonData, prot.div ])
 		prot.div.remove();
+		prot.moduleClosed = true
 		pub.onClose();
 	}
 	pub.close = close;
@@ -525,31 +528,42 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 	pub.clearWarnings = clearWarnings
 
 	function updateFrom(data) {
-		// Overwrite jsonData
-		prot.jsonData = data;
-		// But keep the hash
-		prot.jsonData.hash = prot.hash;
-		var classes = prot.div.attr('class')
-		
-		var top = prot.div.css("top");
-		var left = prot.div.css("left");
-		
-		var oldCloseHandler = pub.onClose;
-		pub.onClose = function() {};
-		
-		pub.close();
-		
-		// Recreate the div
-		prot.createDiv()
-		prot.div.css("top", top)
-		prot.div.css("left", left)
-		pub.onClose = oldCloseHandler
-		prot.div.attr('class', classes)
+		// Guard against updating after module has been closed
+		if (!prot.moduleClosed) {
+			prot.updating = true
+			// Overwrite jsonData
+			prot.jsonData = data;
+			// But keep the hash
+			prot.jsonData.hash = prot.hash;
+			var classes = prot.div.attr('class')
 
-		$prot.trigger('updated', data)
+			var top = prot.div.css("top");
+			var left = prot.div.css("left");
+
+			var oldCloseHandler = pub.onClose;
+			pub.onClose = function () {
+			};
+
+			pub.close(); // sets moduleClosed to true, so undo it
+			prot.moduleClosed = false
+
+			// Recreate the div
+			prot.createDiv()
+			prot.div.css("top", top)
+			prot.div.css("left", left)
+			pub.onClose = oldCloseHandler
+			prot.div.attr('class', classes)
+
+			prot.updating = false
+			$prot.trigger('updated', data)
+		}
 	}
 	pub.updateFrom = updateFrom;
-	
+
+	pub.isClosed = function() {
+		return prot.moduleClosed
+	}
+
 	function clone(callback) {
 		var cloneData = jQuery.extend(true, {}, pub.toJSON());
 		prot.prepareCloneData(cloneData);

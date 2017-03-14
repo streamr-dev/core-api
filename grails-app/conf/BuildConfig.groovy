@@ -29,8 +29,8 @@ grails.project.dependency.resolver = "maven" // or ivy
 //	test: false
 //]
 grails.project.fork = [
-    run: [maxMemory: 2048, minMemory: 64, debug: false, maxPerm: 512, forkReserve:false],
-    test: [maxMemory: 1024, minMemory: 64, debug: false, maxPerm: 400, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
+    run: [maxMemory: 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false],
+    test: [maxMemory: 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
 grails.project.dependency.resolution = {

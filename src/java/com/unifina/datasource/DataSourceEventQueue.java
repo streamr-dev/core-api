@@ -9,6 +9,7 @@ import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.StopRequest;
 import com.unifina.utils.Globals;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 public abstract class DataSourceEventQueue implements IEventQueue {
 
@@ -90,7 +91,7 @@ public abstract class DataSourceEventQueue implements IEventQueue {
 		int initialQueueSize = queue.size();
 
 		if (nextDay == null) {
-			DateTime now = new DateTime(lastReportedSec);
+			DateTime now = new DateTime(lastReportedSec, DateTimeZone.UTC);
 			nextDay = now.minusMillis(now.getMillisOfDay()).plusDays(1);
 		}
 

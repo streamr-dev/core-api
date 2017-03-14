@@ -192,13 +192,17 @@ var SignalPath = (function () {
 			dataType: 'json',
 			success: function(data) {
 				if (!data.error) {
-					module.updateFrom(data);
-					
-					var div = module.getDiv();					
-					setModuleById(module.getHash(), module);
-					module.redraw(); // Just in case
-					if (callback)
-						callback();
+					// Guard against the situation where module has been closed while the update was in flight
+					if (!module.isClosed()) {
+						module.updateFrom(data);
+
+						var div = module.getDiv();
+						setModuleById(module.getHash(), module);
+						module.redraw(); // Just in case
+						if (callback) {
+							callback(data);
+						}
+					}
 				}
 				else {
 					if (data.moduleErrors) {
@@ -390,6 +394,7 @@ var SignalPath = (function () {
 	function saveAs(name, callback) {
 		setName(name)
 		save(function(json) {
+			pub.clear()
 			load(json, function() {
 				setTimeout(callback, 0)
 			})
@@ -742,6 +747,11 @@ var SignalPath = (function () {
 	pub.isLoading = function() {
 		return SignalPath.isBeingReloaded;
 	}
+
+	// Whether canvas represents something that cannot be edited but only viewed, e.g., a running sub-canvas.
+	pub.isReadOnly = function() {
+		return runningJson && runningJson.readOnly;
+    }
 
 	pub.toggleDebugMode = function(intervalInMs) {
 		if (debugLoopInterval) {

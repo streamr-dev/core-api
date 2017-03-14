@@ -306,7 +306,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, false, null)
+		1 * canvasService.start(canvas1, false)
 	}
 
 	void "start() must authorize and be able to start a Canvas with clearing enabled"() {
@@ -324,7 +324,7 @@ class CanvasApiControllerSpec extends Specification {
 		response.status == 200
 		response.json?.size() > 0
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		1 * canvasService.start(canvas1, true, null)
+		1 * canvasService.start(canvas1, true)
 	}
 
 	void "start() must not start a canvas if authorization fails"() {
