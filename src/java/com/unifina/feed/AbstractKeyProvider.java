@@ -3,6 +3,8 @@ package com.unifina.feed;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
 
+import java.util.List;
+
 /**
  * Establishes a common key that can be extracted from both the subscriber object
  * as well as the messages. The key will be used to pair these together and to subscribe
@@ -27,7 +29,7 @@ public abstract class AbstractKeyProvider<ModuleClass, MessageClass, KeyClass> {
 	 * @param subscriber
 	 * @return
 	 */
-	public abstract KeyClass getSubscriberKey(ModuleClass subscriber);
+	public abstract List<KeyClass> getSubscriberKeys(ModuleClass subscriber);
 	
 	/**
 	 * Extracts a key from a message that can be used to find the correct 

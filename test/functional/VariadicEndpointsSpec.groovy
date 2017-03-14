@@ -1,38 +1,30 @@
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.utils.MapTraversal
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
-import grails.util.Holders
+import core.mixins.StreamMixin
+import spock.lang.Shared
 
 @Mixin(CanvasMixin)
 @Mixin(ConfirmationMixin)
+@Mixin(StreamMixin)
 class VariadicEndpointsSpec extends LoginTester1Spec {
-	UnifinaKafkaProducer kafka
+
+	@Shared Stream testStream = new Stream(id: "pltRMd8rCfkij4mlZsQkJB")
+	@Shared StreamService streamService
 
 	def setupSpec() {
 		// @Mixin is buggy, use runtime mixins instead
 		this.class.metaClass.mixin(CanvasMixin)
 		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(StreamMixin)
+
+		streamService = createStreamService()
 	}
 
-	def setup() {
-		kafka = new UnifinaKafkaProducer(makeKafkaConfiguration())
-	}
-
-	def cleanup() {
-		synchronized(kafka) {
-			kafka.close()
-		}
-	}
-
-	private def makeKafkaConfiguration() {
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(Holders.config, "unifina.kafka"));
-		Properties properties = new Properties();
-		for (String s : kafkaConfig.keySet()) {
-			properties.setProperty(s, kafkaConfig.get(s).toString());
-		}
-		return properties;
+	def cleanupSpec() {
+		cleanupStreamService(streamService)
 	}
 
 	def "variadic inputs works as expected"() {
@@ -72,7 +64,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 
 		and: "data produced to Kafka"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then:
 		waitFor(30) { $(".modulelabel").text().toDouble() == (33 * 10 + 100 * 2).toDouble() }
@@ -138,7 +130,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 
 		and: "data produced to Kafka"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
  		then:
 		waitFor(30) { $(".modulelabel")[3].text().toDouble() == 0d }
@@ -230,7 +222,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 
 		and: "data produced to Kafka"
-		produceAllDataToKafka()
+		produceAllDataToStream()
 
 		then:
 		waitFor(30) { $(".modulelabel")[0].text().toDouble() == 33d }
@@ -242,20 +234,19 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		stopCanvasIfRunning()
 	}
 
-	private void produceAllDataToKafka() {
-		produceToKafka("key-1", 30)
-		produceToKafka("key-1", 40)
-		produceToKafka("key-2", -50)
-		produceToKafka("key-3", 115)
-		produceToKafka("key-4", 0)
-		produceToKafka("key-2", -15)
-		produceToKafka("key-4", 1)
-		produceToKafka("key-5", 0)
-		produceToKafka("key-4", 33)
+	private void produceAllDataToStream() {
+		produceToStream("key-1", 30)
+		produceToStream("key-1", 40)
+		produceToStream("key-2", -50)
+		produceToStream("key-3", 115)
+		produceToStream("key-4", 0)
+		produceToStream("key-2", -15)
+		produceToStream("key-4", 1)
+		produceToStream("key-5", 0)
+		produceToStream("key-4", 33)
 	}
 
-	private void produceToKafka(String key, Double value) {
-		kafka.sendJSON("pltRMd8rCfkij4mlZsQkJB", "", System.currentTimeMillis(),
-			'{"key":' + key + ', "value": ' + value  + '}')
+	private void produceToStream(String key, Double value) {
+		streamService.sendMessage(testStream, [key: key, value: value], 30)
 	}
 }

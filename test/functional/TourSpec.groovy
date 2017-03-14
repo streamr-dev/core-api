@@ -5,12 +5,15 @@ import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
 import core.pages.*
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@Mixin(TourMixin)
 class TourSpec extends LoginTester1Spec {
 
-	def setup(){
+	def setupSpec() {
+		this.class.metaClass.mixin(CanvasMixin)
+		this.class.metaClass.mixin(ConfirmationMixin)
+		this.class.metaClass.mixin(TourMixin)
+	}
+
+	def setup() {
 		at CanvasPage
 	}
 
