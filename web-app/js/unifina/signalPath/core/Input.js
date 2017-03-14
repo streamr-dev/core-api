@@ -29,15 +29,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		return (pub.getInitialValue()===null || pub.getInitialValue()===undefined) && super_hasWarning()
 	}
 
-	var super_updateState = pub.updateState;
-	pub.updateState = function(value) {
-        if (value) {
-            super_updateState('"' + value + '"');
-        } else {
-            super_updateState("");
-        }
-    }
-	
+	function displayInitialValue(value) {
+		pub.updateState(value ? "(" + value + ")" : "")
+	}
+
 	var super_createSettings = pub.createSettings;
 	pub.createSettings = function(div,data) {
 		super_createSettings(div,data);
@@ -75,7 +70,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				})(data),
 				setValue: (function(d){
 					return function(value) {
-						pub.updateState(value)
+						displayInitialValue(value)
 						return d.initialValue = value;
 					};
 				})(data),
@@ -86,7 +81,7 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 				}
 			});
 
-			pub.updateState(iv.getValue())
+			displayInitialValue(iv.getValue())
 
 			// Override click handler
 			iv.click = function() {
