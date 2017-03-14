@@ -53,7 +53,7 @@ databaseChangeLog = {
 	include file: 'core/2016-08-30-test-fixtures-foreach-subcanvas.groovy'
 	include file: 'core/2016-09-12-format-number-module.groovy'
 	include file: 'core/2016-03-21-random-modules.groovy'
-  include file: 'core/2016-12-08-moving-window-module.groovy'
-  include file: 'core/2016-12-10-export-csv-module.groovy'
-  include file: 'core/2016-12-15-clock-module-update.groovy'
+	include file: 'core/2016-12-08-moving-window-module.groovy'
+	include file: 'core/2016-12-10-export-csv-module.groovy'
+	include file: 'core/2016-12-15-clock-module-update.groovy'
 }
