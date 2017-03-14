@@ -16208,7 +16208,6 @@ body.dashboard-show .titlebar-clickable {
 .streamr-floating-search-bar {
   position: absolute;
   display: inline-block;
-  width: 200px;
   border-radius: 5px;
   transform: translate(-50%, -120%);
   -webkit-box-shadow: 0 0 10px 0 #000;
