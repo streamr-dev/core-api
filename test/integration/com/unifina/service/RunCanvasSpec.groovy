@@ -13,7 +13,7 @@ import spock.util.concurrent.PollingConditions
 import static com.unifina.service.CanvasTestHelper.*
 
 /**
- * Verifies that Canvases can be created, run, fed data through Kafka, and that the fed data be processed.
+ * Verifies that Canvases can be created, run, fed data through StreamService, and that the fed data be processed.
  */
 class RunCanvasSpec extends IntegrationSpec {
 
@@ -21,9 +21,8 @@ class RunCanvasSpec extends IntegrationSpec {
 
 	static final String MODULES_LIST_FILE = "modules.json"
 
-	def canvasService
-	def kafkaService
-	def streamService
+	CanvasService canvasService
+	StreamService streamService
 
 	SecUser user
 	Stream stream
@@ -64,18 +63,20 @@ class RunCanvasSpec extends IntegrationSpec {
 	}
 
 	@Unroll
-	def "start a canvas, send data to it via Kafka, and receive expected processed output values (#round)"(int round) {
+	def "start a canvas, send data to it via StreamService, and receive expected processed output values (#round)"(int round) {
 		def conditions = new PollingConditions()
 		Canvas canvas = canvasService.createNew(saveCanvasCommand, user)
 
 		when:
 		canvasService.start(canvas, true)
 
+		Thread.sleep(2000)
+
 		// Produce data
-		(1..100).each { kafkaService.sendMessage(stream, stream.id, [numero: it, areWeDoneYet: false]) }
+		(1..100).each { streamService.sendMessage(stream, [numero: it, areWeDoneYet: false], 30) }
 
 		// Terminator data package to know when we're done
-		kafkaService.sendMessage(stream, stream.id, [numero: 0, areWeDoneYet: true])
+		streamService.sendMessage(stream, [numero: 0, areWeDoneYet: true], 30)
 
 		// Synchronization: wait for terminator package
 		conditions.within(10) { assert modules(canvasService, canvas)*.outputs[0][1].previousValue == 1.0 }

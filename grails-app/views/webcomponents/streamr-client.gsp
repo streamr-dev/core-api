@@ -9,7 +9,7 @@
 
 
 
-<polymer-element name="streamr-client" attributes="server autoconnect autodisconnect">
+<polymer-element name="streamr-client" attributes="server path autoconnect autodisconnect">
 	<script>
 	(function(){
 		var streamrClient
@@ -20,6 +20,7 @@
 			else if (typeof StreamrClient !== 'undefined' && element.server) {
 				var myOptions = {
 					server: element.server,
+					path: element.path,
 					autoConnect: (element.autoconnect != null ? element.autoconnect : true),
 					autoDisconnect: (element.autodisconnect != null ? element.autodisconnect : true)
 				}

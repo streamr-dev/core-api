@@ -27,15 +27,10 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		return (pub.getInitialValue()===null || pub.getInitialValue()===undefined) && super_hasWarning()
 	}
 
-	var super_updateState = pub.updateState;
-	pub.updateState = function(value) {
-        if (value) {
-            super_updateState('"' + value + '"');
-        } else {
-            super_updateState("");
-        }
-    }
-	
+	function displayInitialValue(value) {
+		pub.updateState(value ? "(" + value + ")" : "")
+	}
+
 	var super_createSettings = pub.createSettings;
 	pub.createSettings = function(div,data) {
 		super_createSettings(div,data);
@@ -66,25 +61,25 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 		}
 
 		// Initial value. Default null/off. Only valid for TimeSeries type
-		if (data.type=="Double" && (data.canHaveInitialValue==null || data.canHaveInitialValue)) {
+		if (data.canHaveInitialValue) {
 			var iv = new SignalPath.IOSwitch(switchDiv, "ioSwitch initialValue", {
 				getValue: (function(d){
 					return function() { return d.initialValue; };
 				})(data),
 				setValue: (function(d){
 					return function(value) {
-						pub.updateState(value)
+						displayInitialValue(value)
 						return d.initialValue = value;
 					};
 				})(data),
-				buttonText: function(currentValue) { return "IV" },
+				buttonText: function() { return "IV" },
 				tooltip: 'Initial value',
 				isActiveValue: function(currentValue) {
 					return currentValue != null;
 				}
 			});
 
-			pub.updateState(iv.getValue())
+			displayInitialValue(iv.getValue())
 
 			// Override click handler
 			iv.click = function() {
@@ -93,15 +88,14 @@ SignalPath.Input = function(json, parentDiv, module, type, pub) {
 						title: "Initial Value:",
 						callback: function(result) {
 							if (result != null) {
-								iv.setValue(parseFloat(result))
+								iv.setValue(result);
 								iv.update();
 								iv.div.html(iv.buttonText());
 							}
 						},
 						className: 'initial-value-dialog'
 					})
-				}
-				else {
+				} else {
 					iv.setValue(undefined);
 					iv.update();
 					iv.div.html(iv.buttonText());

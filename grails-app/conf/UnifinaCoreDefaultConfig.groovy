@@ -1,11 +1,15 @@
+import com.unifina.data.KafkaPartitioner
+
 /*****
  * This config file gets merged with the application config file.
  * The application config file can override anything defined here.
  */
 
+def prodBaseUrl = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+
 environments {
 	production {
-		grails.serverURL = System.getProperty("streamr.url") ?: "https://www.streamr.com"
+		grails.serverURL = prodBaseUrl
 	}
 }
 
@@ -184,6 +188,7 @@ environments {
  */
 cors.url.pattern = '/api/*'
 cors.headers = ['Access-Control-Allow-Origin': '*']
+streamr.apiKey.revokeNotificationStream = "revoked-api-keys"
 
 /**
  * Application properties
@@ -244,40 +249,68 @@ environments {
  * UI update server address
  */
 streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
+streamr.ui.serverPath = System.getProperty("streamr.ui.serverPath") ?: "/api/v1/socket.io"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}"
 	}
 }
 
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr/api/v1"
 environments {
 	production {
-		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "https://data.streamr.com"
+		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
 
 /**
  * Kafka config
  */
-unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9092"
-unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2181"
-unifina.kafka.producer.type = "async"
-unifina.kafka.queue.buffering.max.ms = "100"
-unifina.kafka.retry.backoff.ms = "500"
-unifina.kafka.serializer.class = "kafka.serializer.StringEncoder"
-unifina.kafka.request.required.acks = "0"
-unifina.kafka.group.id = "streamr"
+streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "192.168.10.21:9093"
+streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "192.168.10.21:2182"
+streamr.kafka.producer.type = "async"
+streamr.kafka.queue.buffering.max.ms = "100"
+streamr.kafka.retry.backoff.ms = "500"
+streamr.kafka.value.serializer = org.apache.kafka.common.serialization.ByteArraySerializer.getName()
+streamr.kafka.key.serializer = org.apache.kafka.common.serialization.StringSerializer.getName()
+streamr.kafka.partitioner.class = KafkaPartitioner.class.getName()
+streamr.kafka.request.required.acks = "0"
+streamr.kafka.dataTopic = "data-dev"
+
 environments {
 	production {
-		unifina.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "ip-10-16-207-139.ec2.internal:9092"
-		unifina.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "ip-10-16-207-139.ec2.internal:2181"
+		streamr.kafka.dataTopic = "data-prod"
+		streamr.kafka.bootstrap.servers = System.getProperty("streamr.kafka.bootstrap.servers") ?: "kafka1:9092"
+		streamr.kafka.zookeeper.connect = System.getProperty("streamr.kafka.zookeeper.connect") ?: "zk1:2181"
 	}
 }
 
+/**
+ * Redis config
+ */
+streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["dev.streamr"])
+streamr.redis.password = "AFuPxeVMwBKHV5Hm5SK3PkRZA"
+environments {
+	production {
+		streamr.redis.hosts = (System.getProperty("streamr.redis.hosts") ? Arrays.asList(System.getProperty("streamr.redis.hosts").split(",")) : ["redis1"])
+	}
+}
+
+/**
+ * Cassandra config
+ */
+streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["dev.streamr"])
+streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_dev"
+
+environments {
+	production {
+		streamr.cassandra.hosts = (System.getProperty("streamr.cassandra.hosts") ? Arrays.asList(System.getProperty("streamr.cassandra.hosts").split(",")) : ["cassandra1"])
+		streamr.cassandra.keySpace = System.getProperty("streamr.cassandra.keySpace") ?: "streamr_prod"
+	}
+}
 /**
  * Serialization config
  */
@@ -327,12 +360,13 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
  */
 grails {
 	mail {
-		host = "smtp.gmail.com"
+		host = "email-smtp.us-east-1.amazonaws.com"
 		port = 465
-		username = "henri.pihkala@streamr.com"
-		password = "gnqxzdmojlkzlxjy"
+		username = "AKIAIV4PGPKXNAGNDFQQ"
+		password = "AqH4L/VferJlG0KExv0D8pEvJW6LR7LC6Q4VqzVZAbTS"
 		props = ["mail.smtp.auth":"true",
 				 "mail.smtp.socketFactory.port":"465",
+				 "mail.smtp.starttls.enable":"true",
 				 "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
 				 "mail.smtp.socketFactory.fallback":"false"]
 	}
@@ -350,7 +384,7 @@ unifina.email.shareInvite.subject = "%USER% shared a document with you in Stream
 /**
  * Signup Configs
  */
-streamr.signup.requireInvite = false
+streamr.signup.requireInvite = (System.getProperty("streamr.signup.requireInvite") ? Boolean.parseBoolean(System.getProperty("streamr.signup.requireInvite")) : false)
 
 /**
  * Miscellaneous

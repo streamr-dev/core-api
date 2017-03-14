@@ -57,4 +57,5 @@ databaseChangeLog = {
 	include file: 'core/2016-12-10-export-csv-module.groovy'
 	include file: 'core/2016-12-15-clock-module-update.groovy'
 	include file: 'core/2017-01-17-xor-module.groovy'
+	include file: 'core/2016-09-29-new-data-pipeline.groovy'
 }
