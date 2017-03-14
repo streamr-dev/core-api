@@ -138,23 +138,19 @@ public class Globals {
 			// Use UTC timezone for beginDate and endDate
 			startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
 
-			// Set time to midnight UTC of the current date if nothing specified
-			if (startDate==null) {
-				Calendar cal = new GregorianCalendar();
-				cal.setTime(new Date());
-				cal.set(Calendar.HOUR_OF_DAY,0);
-				cal.set(Calendar.MINUTE,0);
-				cal.set(Calendar.SECOND,0);
-				cal.set(Calendar.MILLISECOND,0);
-				time = cal.getTime();
-			} else {
+			if (isRealtime()) {
+				time = new Date();
+			} else if (startDate!=null) {
 				time = startDate;
+			} else {
+				// As a fallback, set time to midnight today
+				time = TimeOfDayUtil.getMidnight(new Date());
 			}
 
 			// Interpret endDate as one millisecond to the next midnight
 			// Change this if the possibility to enter a time range is added
 			endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
-			if (endDate!=null) {
+			if (endDate != null) {
 				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 			}
 		}
