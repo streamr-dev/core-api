@@ -70,13 +70,11 @@
 				zoom: _this.getZoom()
 			})
 		})
-
-		// From https://github.com/pa7/heatmap.js/issues/120
-		// this.map.on("resize", function() {
-		// 	_this.map.removeLayer(_this.heatmapLayer)
-		// 	_this.heatmapLayer = _this.createHeatmapLayer()
-		// 	_this.syncData()
-		// });
+        
+        this.parent.on('resize', function() {
+            _this.redraw()
+        })
+        
 	}
 
 	StreamrHeatMap.prototype.getZoom = function() {

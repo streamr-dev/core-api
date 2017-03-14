@@ -99,8 +99,12 @@
                 zoom: _this.getZoom()
             })
         })
+    
+        this.parent.on('resize', function() {
+            _this.redraw()
+        })
 
-        if(this.options.drawTrace) {
+        if (this.options.drawTrace) {
             this.lineLayer = this.createLinePointLayer()
         }
     }
@@ -320,8 +324,9 @@
 
     StreamrMap.prototype.redraw = function() {
         this.map.invalidateSize()
-        if(this.lineLayer)
+        if(this.lineLayer) {
             this.lineLayer.redraw()
+        }
     }
 
     StreamrMap.prototype.toJSON = function() {
