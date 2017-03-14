@@ -6,6 +6,8 @@ import com.unifina.service.CanvasService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
+import com.unifina.utils.GlobalsFactory;
+import grails.util.Holders;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -52,7 +54,10 @@ public class ForEach extends AbstractSignalPathModule {
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
 		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
-		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), false);
+
+		// Create a non-run-context Globals for instantiating the temporary SignalPath
+		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getGrailsApplication(), getGlobals().getUser());
+		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, false);
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = tempSignalPath.getExportedInputs();
