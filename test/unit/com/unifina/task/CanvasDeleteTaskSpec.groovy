@@ -7,12 +7,12 @@ import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.task.Task
 import com.unifina.service.CanvasService
 import grails.test.mixin.Mock
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
-import org.springframework.context.ApplicationContext
 
+/**
+ * For some reason this test throws in cleanupSpec due to running
+ * GrailsUnitTestMixin.shutdownApplicationContext multiple times.
+ * Probably related to buggy Mixins.
+ */
 @Mock([Canvas, Stream, Task])
 class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 

@@ -19,7 +19,7 @@ public class CanvasDeleteTask extends AbstractTask {
 	@Override
 	public boolean run() {
 		Canvas.withTransaction {
-			task = task.refresh()
+			task = Task.get(task.id) // re-fetch from db, because instance is stale
 			canvasService.deleteCanvas(
 					Canvas.get(config.canvasId),
 					task.user,
