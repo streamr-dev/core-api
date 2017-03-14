@@ -45,7 +45,7 @@
 		</r:script>
 		<r:script>
 			$(document).ready(function() {
-				$(".delete-canvas-link").each(function(i, el) {
+				$(".delete-button").each(function(i, el) {
 					new ConfirmButton(el, {
 						title: "${ message(code: 'canvas.delete.title') }",
 						message: "${ message(code: 'canvas.delete.confirm') }"
@@ -123,7 +123,7 @@
 											</g:if>
 											<g:if test="${writableCanvases.contains(canvas)}">
 												<li>
-													<span data-id="${canvas.id}" class="delete-canvas-link confirm">
+													<span data-id="${canvas.id}" class="delete-button confirm">
 														<i class="fa fa-trash-o"></i> Delete canvas
 													</span>
 												</li>

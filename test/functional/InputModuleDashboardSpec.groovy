@@ -8,8 +8,9 @@ import pages.*
 
 class InputModuleDashboardSpec extends LoginTester1Spec {
 
-	static String liveCanvasName = "InputModuleDashboardSpec"
-	static String dashboardName = "test" + new Date().getTime()
+	static String canvasTemplate = "InputModuleDashboardSpec"
+	static String canvasName = canvasTemplate + System.currentTimeMillis()
+	static String dashboardName = "InputModuleDashboardSpec" + System.currentTimeMillis()
 
 	def setupSpec() {
 		// @Mixin is buggy, use runtime mixins instead
@@ -24,16 +25,18 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		// Go start the RunningSignalPath related to this spec
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickRow(liveCanvasName)
+		clickRow(canvasTemplate)
 		waitFor { at CanvasPage }
 
+		// Create a copy of the canvas unique for this test
+		saveCanvasAs(canvasName)
+
 		ensureRealtimeTabDisplayed()
-		stopCanvasIfRunning()
 		resetAndStartCanvas(true)
 
 		createDashboard(dashboardName)
 
-		addDashboardItem(liveCanvasName, "Table")
+		addDashboardItem(canvasName, "Table")
 
 		saveDashboard()
 
@@ -69,11 +72,19 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		super.login()
 		deleteDashboard(dashboardName)
 
+		// Stop the canvas
 		to CanvasListPage
 		waitFor { at CanvasListPage }
-		clickRow(liveCanvasName)
+		clickRow(canvasName)
 		waitFor { at CanvasPage }
 		stopCanvasIfRunning()
+
+		// Delete the canvas
+		to CanvasListPage
+		waitFor { at CanvasListPage }
+		clickDeleteButton(canvasName)
+		waitForConfirmation()
+		acceptConfirmation()
 	}
 
 	def cleanup() {
@@ -83,7 +94,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 	void "the button works"() {
 		def button
 		when: "Button added"
-		addDashboardItem(liveCanvasName, "Button")
+		addDashboardItem(canvasName, "Button")
 		button = findDashboardItem("Button").find("button.button-module-button")
 		then: "The name of the button is buttonTest"
 		button.text() == "buttonTest"
@@ -101,7 +112,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		def textField
 		def sendBtn
 		when: "TextField added"
-		addDashboardItem(liveCanvasName, "TextField")
+		addDashboardItem(canvasName, "TextField")
 		textField = findDashboardItem("TextField").find("textarea")
 		sendBtn = findDashboardItem("TextField").find(".btn.send-btn")
 		then: "The text in the textField is textFieldTest"
@@ -119,7 +130,7 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 
 	void "the switcher works"() {
 		def switcher
-		addDashboardItem(liveCanvasName, "Switcher")
+		addDashboardItem(canvasName, "Switcher")
 		switcher = findDashboardItem("Switcher").find("div.switcher div.switcher-inner")
 
 		when: "Switcher clicked"

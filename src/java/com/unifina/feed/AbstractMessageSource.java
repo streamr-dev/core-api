@@ -4,15 +4,11 @@ import com.unifina.domain.data.Feed;
 
 import java.util.Map;
 
-/**
- * Created by henripihkala on 09/02/16.
- */
 public abstract class AbstractMessageSource<RawMessageClass, KeyClass> implements MessageSource<RawMessageClass, KeyClass> {
 
-	private final Feed feed;
-	private final Map<String, Object> config;
+	protected final Feed feed;
+	protected final Map<String, Object> config;
 	protected MessageRecipient<RawMessageClass, KeyClass> recipient;
-	protected long expected = 0;
 
 	public AbstractMessageSource(Feed feed, Map<String,Object> config) {
 		this.feed = feed;
@@ -22,11 +18,6 @@ public abstract class AbstractMessageSource<RawMessageClass, KeyClass> implement
 	@Override
 	public void setRecipient(MessageRecipient<RawMessageClass, KeyClass> recipient) {
 		this.recipient = recipient;
-	}
-
-	@Override
-	public void setExpectedCounter(long expected) {
-		this.expected = expected;
 	}
 
 	/**

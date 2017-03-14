@@ -27,9 +27,16 @@ public abstract class PushChannel {
 		result.addAll(channels);
 		return result;
 	}
-	
+
+	/**
+	 * Pushes a message to the given channel using infinite time-to-live.
+     */
 	public void push(Object content, String channel) {
-		PushChannelMessage msg = new PushChannelMessage(channel, content);
+		push(content, channel, 0);
+	}
+
+	public void push(Object content, String channel, int ttl) {
+		PushChannelMessage msg = new PushChannelMessage(channel, content, ttl);
 		doPush(msg);
 	}
 	
