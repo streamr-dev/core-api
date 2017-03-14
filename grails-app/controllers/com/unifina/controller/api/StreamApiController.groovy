@@ -9,6 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -41,10 +42,16 @@ class StreamApiController {
 	}
 
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def show(String id) {
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
-			render(stream.toMap() as JSON)
+		if (request.apiUser) {
+			getAuthorizedStream(id, Operation.READ) { Stream stream ->
+				render(stream.toMap() as JSON)
+			}
+		} else if (request.apiKey) {
+			getAuthorizedStreamByKey(id, Operation.READ) { Stream stream ->
+				render(stream.toMap() as JSON)
+			}
 		}
 	}
 
@@ -110,6 +117,17 @@ class StreamApiController {
 			throw new NotFoundException("Stream", id)
 		} else if (!permissionService.check(request.apiUser, stream, op)) {
 			throw new NotPermittedException(request.apiUser?.username, "Stream", id, op.id)
+		} else {
+			action.call(stream)
+		}
+	}
+
+	private def getAuthorizedStreamByKey(String id, Operation op, Closure action) {
+		def stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		} else if (!permissionService.checkAnonymousKey(request.apiKey, stream, op)) {
+			throw new NotPermittedException(null, "Stream", id, op.id)
 		} else {
 			action.call(stream)
 		}

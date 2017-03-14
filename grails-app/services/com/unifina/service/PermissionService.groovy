@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
@@ -38,32 +39,59 @@ class PermissionService {
 
 
 	// TODO: does WRITE imply READ?
-	boolean canRead(SecUser user, resource)  { return check(user, resource, Operation.READ) }
-	boolean canWrite(SecUser user, resource) { return check(user, resource, Operation.WRITE) }
-	boolean canShare(SecUser user, resource) { return check(user, resource, Operation.SHARE) }
+	boolean canRead(SecUser user, resource)  {
+		return check(user, resource, Operation.READ)
+	}
+
+	boolean canWrite(SecUser user, resource) {
+		return check(user, resource, Operation.WRITE)
+	}
+
+	boolean canShare(SecUser user, resource) {
+		return check(user, resource, Operation.SHARE)
+	}
+
+	boolean canReadKey(Key key, resource) {
+		if (key && key.user) {
+			return check(key.user, resource, Operation.READ)
+		} else {
+			return checkAnonymousKey(key, resource, Operation.READ)
+		}
+	}
 
 	/**
 	 * @return true if user is allowed to perform given operation to resource
 	 */
-	public boolean check(SecUser user, resource, Operation op) {
-		if (!resource?.id) { return false; }
+	boolean check(SecUser user, resource, Operation op) {
+		if (!resource?.id) {
+			return false
+		}
 
 		Class resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
-		// Make sure we are operating on an instance attached to the session
-		resource = resourceClass.get(resource.id)
+		resource = resourceClass.get(resource.id) // Make sure we are operating on an instance attached to the session
 
-		if (isOwner(user, resource)) { return true; }		// owner has all access
-		return hasPermission(user, resourceClass, resource.id, op)
+		return isOwner(user, resource) || hasPermission(user, resourceClass, resource.id, op)
 	}
 
-	private boolean hasPermission(user, Class resourceClass, resourceId, Operation op) {
+	boolean checkAnonymousKey(Key key, resource, Operation op) {
+		if (!resource?.id) {
+			return false
+		}
+
+		Class resourceClass = HibernateProxyHelper.getClassWithoutInitializingProxy(resource)
+		resource = resourceClass.get(resource.id) // Make sure we are operating on an instance attached to the session
+
+		return hasPermission(key, resourceClass, resource.id, op)
+	}
+
+	private boolean hasPermission(userish, Class resourceClass, resourceId, Operation op) {
 		String idProp = getIdPropertyName(resourceClass)
 		def p = Permission.withCriteria {
 			or {
 				eq "anonymous", true
-				if (isValidUser(user)) {
-					String userProp = getUserPropertyName(user)
-					eq userProp, user
+				if (isValidUser(userish)) {
+					String userProp = getUserPropertyName(userish)
+					eq userProp, userish
 				}
 			}
 			eq "clazz", resourceClass.name
@@ -219,7 +247,9 @@ class PermissionService {
 	public Permission systemGrant(target,
 								  resource,
 								  Operation operation=Operation.READ) {
-		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
+		if (!resource) {
+			throw new IllegalArgumentException("Missing resource!")
+		}
 		String userProp = getUserPropertyName(target)
 
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
@@ -446,6 +476,8 @@ class PermissionService {
 			return "user"
 		} else if (userish instanceof SignupInvite) {
 			return "invite"
+		} else if (userish instanceof Key) {
+			return "key"
 		} else {
 			throw new IllegalArgumentException("Permission holder must be a user or a sign-up-invitation!")
 		}
@@ -453,7 +485,8 @@ class PermissionService {
 
 	/** null is often a valid value (but not a valid user), and means "anonymous Permissions only" */
     private boolean isValidUser(userish) {
-        return userish != null && (userish instanceof SecUser || userish instanceof SignupInvite)
+        return userish != null &&
+			(userish instanceof SecUser || userish instanceof SignupInvite || userish instanceof Key)
     }
 
 	/** ownership (if applicable) is stored in each Resource as "user" attribute */
