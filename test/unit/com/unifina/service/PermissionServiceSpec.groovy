@@ -1,5 +1,6 @@
 package com.unifina.service
 
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SignupInvite
 import spock.lang.Specification
 
@@ -11,8 +12,6 @@ import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.dashboard.Dashboard
-
-import com.unifina.utils.IdGenerator
 import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 
@@ -23,10 +22,11 @@ import java.security.AccessControlException
  */
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(PermissionService)
-@Mock([SecUser, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
+@Mock([SecUser, Key, SignupInvite, Module, ModulePackage, Permission, Dashboard, Canvas])
 class PermissionServiceSpec extends Specification {
 
 	SecUser me, anotherUser, stranger
+	Key myKey, anotherUserKey, anonymousKey
 	SignupInvite invite
 
 	Dashboard dashAllowed, dashRestricted, dashOwned, dashPublic
@@ -39,6 +39,11 @@ class PermissionServiceSpec extends Specification {
 		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret").save(validate:false)
 		stranger = new SecUser(username: "stranger", password: "x", apiKey: "strangeApiKey", apiSecret: "strangeApiSecret").save(validate:false)
 
+		// Keys
+		myKey = new Key(name: "my key", user: me).save(failOnError: true)
+		anotherUserKey = new Key(name: "another user's key", user: anotherUser).save(failOnError: true)
+		anonymousKey = new Key(name: "anonymous key 1").save(failOnError: true)
+
 		// Sign-up invitations can also receive Permissions; they will later be converted to User permissions
 		invite = new SignupInvite(username: "him", code: "sikritCode", sent: true, used: false).save(validate:false)
 
@@ -48,18 +53,20 @@ class PermissionServiceSpec extends Specification {
 		dashOwned = new Dashboard(name:"owned", user:me).save(validate:false)
 		dashPublic = new Dashboard(name:"public", user:anotherUser).save(validate:false)
 
-		def canvas = new Canvas(user: anotherUser).save(validate: false)
+		new Canvas(user: anotherUser).save(validate: false)
 
 		// Set up the Permissions to the allowed resources
 		dashReadPermission = service.grant(anotherUser, dashAllowed, me)
 		dashAnonymousReadPermission = service.grantAnonymousAccess(anotherUser, dashPublic)
+		service.grant(anotherUser, dashAllowed, anonymousKey)
     }
 
 	void "test setup"() {
 		expect:
 		SecUser.count() == 3
+		Key.count() == 3
 		Dashboard.count() == 4
-		Permission.count() == 2
+		Permission.count() == 3
 
 		and: "anotherUser has an invitation"
 		invite.username == anotherUser.username
@@ -80,6 +87,32 @@ class PermissionServiceSpec extends Specification {
 		service.canRead(me, dashOwned)
 	}
 
+	void "access granted through key to permitted Dashboard"() {
+		expect:
+		service.canReadKey(myKey, dashAllowed)
+	}
+
+
+	void "access denied through key to non-permitted Dashboard"() {
+		expect:
+		!service.canReadKey(myKey, dashRestricted)
+	}
+
+	void "access granted through key to own Dashboard"() {
+		expect:
+		service.canReadKey(myKey, dashOwned)
+	}
+
+	void "access granted through anonymous key to permitted Dashboard"() {
+		expect:
+		service.canReadKey(anonymousKey, dashAllowed)
+	}
+
+	void "access denies through anonymous key to non-permitted Dashboard"() {
+		expect:
+		!service.canReadKey(anonymousKey, dashRestricted)
+	}
+
 	void "non-permitted third-parties have no access to resources"() {
 		expect:
 		!service.canRead(stranger, dashAllowed)
@@ -94,18 +127,27 @@ class PermissionServiceSpec extends Specification {
 		!service.canRead(me, null)
 	}
 
+	void "canReadKey returns false on bad inputs"() {
+		expect:
+		!service.canReadKey(null, dashAllowed)
+		!service.canReadKey(myKey, new Dashboard())
+		!service.canReadKey(anonymousKey, new Dashboard())
+		!service.canReadKey(myKey, null)
+	}
+
 	void "getPermissionsTo returns all permissions for the given resource"() {
 		setup:
 		def perm = service.grant(me, dashOwned, stranger, Operation.READ)
 		expect:
 		service.getPermissionsTo(dashOwned).size() == 4
 		service.getPermissionsTo(dashOwned)[0] == perm
-		service.getPermissionsTo(dashAllowed).size() == 4
+		service.getPermissionsTo(dashAllowed).size() == 5
 		service.getPermissionsTo(dashAllowed)[0] == dashReadPermission
 		service.getPermissionsTo(dashRestricted).size() == 3
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
 	}
 
+	// TODO: key-only user / to key
 	void "getSingleUserPermissionsTo returns permissions for single user"() {
 		expect:
 		service.getSingleUserPermissionsTo(dashOwned, me).size() == 3
@@ -126,6 +168,7 @@ class PermissionServiceSpec extends Specification {
 		service.getSingleUserPermissionsTo(dashPublic, null)[0].operation == Operation.READ
 	}
 
+	// TODO: key-only user / to key
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
 		service.get(Dashboard, me) == [dashOwned, dashAllowed]
@@ -133,9 +176,10 @@ class PermissionServiceSpec extends Specification {
 		service.get(Dashboard, stranger) == []
 	}
 
+	// TODO: key-only user / to key
 	void "getAll lists public resources"() {
 		expect:
-		service.getAll(Dashboard, me) == [dashOwned, dashAllowed, dashPublic]
+		service.getAll(Dashboard, me) == [dashOwned, dashPublic, dashAllowed]
 		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted, dashPublic]
 		service.getAll(Dashboard, stranger) == [dashPublic]
 	}

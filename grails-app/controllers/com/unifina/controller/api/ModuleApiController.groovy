@@ -6,6 +6,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -35,7 +36,7 @@ class ModuleApiController {
 		render mods as JSON
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def help(Long id) {
 		getAuthorizedModule(id, Permission.Operation.READ) {Module module ->
 			response.setContentType("application/json")

@@ -5,6 +5,7 @@ import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
@@ -22,7 +23,7 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService])
+@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -172,6 +173,44 @@ class StreamApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		params.id = streamFourId
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
+
+		then:
+		thrown NotPermittedException
+	}
+
+	void "shows a Stream of logged in Key"() {
+		Key key = new Key(name: "anonymous key")
+		key.id = "anonymousKeyKey"
+		key.save(failOnError: true)
+		permissionService.systemGrant(key, Stream.get(streamOneId), Permission.Operation.READ)
+
+		when:
+		request.addHeader("Authorization", "Token anonymousKeyKey")
+		params.id = streamOneId
+		request.method = "GET"
+		request.requestURI = "/api/v1/stream"
+		withFilters([action: "show"]) {
+			controller.show()
+		}
+
+		then:
+		response.status == 200
+		response.json.name == "stream"
+	}
+
+	void "does not show Stream if key not permitted"() {
+		Key key = new Key(name: "anonymous key")
+		key.id = "anonymousKeyKey"
+		key.save(failOnError: true)
+
+		when:
+		request.addHeader("Authorization", "Token anonymousKeyKey")
+		params.id = streamOneId
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: "show"]) {

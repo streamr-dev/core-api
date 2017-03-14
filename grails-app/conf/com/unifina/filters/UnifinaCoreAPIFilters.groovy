@@ -1,17 +1,14 @@
 package com.unifina.filters
 
+import com.unifina.domain.security.SecUser
+import com.unifina.security.AuthenticationResult
+import com.unifina.security.StreamrApi
 import com.unifina.security.TokenAuthenticator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 import java.lang.reflect.Method
-
-import org.apache.log4j.Logger;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-
-import com.unifina.domain.security.SecUser
-import com.unifina.security.StreamrApi
-
 
 /**
  * API methods should use the @StreamrApi annotation and be mapped to /api/* via UnifinaCorePluginUrlMappings.
@@ -27,13 +24,12 @@ class UnifinaCoreAPIFilters {
 	GrailsApplication grailsApplication
 	
 	private Map<String, StreamrApi> apiAnnotationCache = new HashMap<String, StreamrApi>()
-	private static final Logger log = Logger.getLogger(UnifinaCoreAPIFilters.class)
 	
 	@CompileStatic
 	private StreamrApi getApiAnnotation(String controllerName, String actionName) {
 		String key = "$controllerName/$actionName"
 		StreamrApi annotation = apiAnnotationCache.get(key)
-		
+
 		if (!annotation) {
 			// TODO: can be made more performant in Grails 2.4+ via direct access to controller/action instance?
 			def controllerInstance = grailsApplication.getArtefactByLogicalPropertyName("Controller", controllerName)
@@ -41,15 +37,16 @@ class UnifinaCoreAPIFilters {
 			Class controllerClass = this.getClass().getClassLoader().loadClass(controllerInstance.fullName)
 			Method action = controllerClass.getMethod(actionName)
 			annotation = action.getAnnotation(StreamrApi)
-			
-			if (!annotation)
+
+			if (!annotation) {
 				throw new RuntimeException("No @StreamrApi annotation for controller $controllerName action $actionName")
-			else {
+			} else {
 				apiAnnotationCache.put(key, annotation)
 				return annotation
 			}
+		} else {
+			return annotation
 		}
-		else return annotation
 	}
 	
 	def filters = {
@@ -60,7 +57,7 @@ class UnifinaCoreAPIFilters {
 				request.isApiAction = true
 
 				TokenAuthenticator authenticator = new TokenAuthenticator(userService)
-				SecUser user = authenticator.authenticate(request)
+				AuthenticationResult result = authenticator.authenticate(request)
 
 				if (authenticator.lastAuthenticationMalformed()) {
 					render (
@@ -74,11 +71,10 @@ class UnifinaCoreAPIFilters {
 				}
 
 				// Use cookie-based authentication if api key was not present in header.
-				if (!authenticator.apiKeyPresent) {
-					user = springSecurityService.getCurrentUser()
+				if (!authenticator.keyPresent) {
+					result = new AuthenticationResult((SecUser) springSecurityService.getCurrentUser())
 				}
-
-				if (!user && annotation.requiresAuthentication()) {
+				if (!result.guarantees(annotation.authenticationLevel())) {
 					render (
 						status: 401,
 						text: [
@@ -88,7 +84,11 @@ class UnifinaCoreAPIFilters {
 					)
 					return false
 				} else {
-					request.apiUser = user
+					if (result.secUser) {
+						request.apiUser = result.secUser
+					} else {
+						request.apiKey = result.key
+					}
 					return true
 				}
 			}

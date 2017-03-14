@@ -8,8 +8,9 @@ class Permission {
 	/** Permission can be global, that is, let (also) anonymous users execute the operation */
 	Boolean anonymous = false
 
-	/** Permission "belongs to" either a SecUser or (transiently) a SignupInvite. Ignored for anonymous Permissions */
+	/** Permission "belongs to" either a SecUser, Key, or (transiently) a SignupInvite. Ignored for anonymous Permissions */
 	SecUser user
+	Key key
 	SignupInvite invite
 
 	/** full class name of the resource, e.g. "com.unifina.domain.dashboard.Dashboard" */
@@ -41,6 +42,7 @@ class Permission {
 		stringId(nullable: true)
 		longId(nullable: true)
 		user(nullable: true)
+		key(nullable: true)
 		invite(nullable: true)
 	}
 
