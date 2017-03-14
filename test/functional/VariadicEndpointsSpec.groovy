@@ -44,6 +44,9 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 
 		(1..20).each {
 			connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Add", "in$it"))
+			if (it > 2) {
+				renameEndpoint("Add", "value", "in$it") // Rename after auto-rename
+			}
 		}
 
 		[3, 5, 7, 9, 11, 12, 13, 14, 15, 19].each {
@@ -170,11 +173,17 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		connectEndpoints(findOutput("GreaterThan", "A&gt;B"), findInput("Filter", "pass"))
 
 		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Filter", "in1"))
+		renameEndpoint("Filter", "value", "in1") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out1") // Rename after auto-rename
 
 		connectEndpoints(findOutput("Stream", "key"), findInput("TextLength", "text"))
 		connectEndpoints(findOutput("TextLength", "length"), findInputByDisplayName("Filter", "in2"))
+		renameEndpoint("Filter", "length", "in2") // Rename after auto-rename
+		renameEndpoint("Filter", "length", "out2") // Rename after auto-rename
 
 		connectEndpoints(findOutput("Stream", "value"), findInputByDisplayName("Filter", "in3"))
+		renameEndpoint("Filter", "value", "in3") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out3") // Rename after auto-rename
 
 		addAndWaitModule("Label")
 		moveModuleBy("Label", 0, 500, 0, true)
@@ -200,8 +209,16 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		disconnectEndpoint(findInputByDisplayName("Filter", "in2"))
 
 		connectEndpoints(findOutputByDisplayName("TextLength", "length"), findInputByDisplayName("Filter", "in4"))
+		renameEndpoint("Filter", "length", "in4") // Rename after auto-rename
+		renameEndpoint("Filter", "length", "out4") // Rename after auto-rename
+
 		connectEndpoints(findOutputByDisplayName("Stream", "value"), findInputByDisplayName("Filter", "in5"))
+		renameEndpoint("Filter", "value", "in5") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out5") // Rename after auto-rename
+
 		connectEndpoints(findOutputByDisplayName("Stream", "value"), findInputByDisplayName("Filter", "in6"))
+		renameEndpoint("Filter", "value", "in6") // Rename after auto-rename
+		renameEndpoint("Filter", "value", "out6") // Rename after auto-rename
 
 		connectEndpoints(findOutputByDisplayName("Filter", "out5"), findInput("Label", "label", 0))
 		connectEndpoints(findOutputByDisplayName("Filter", "out6"), findInput("Label", "label", 1))
