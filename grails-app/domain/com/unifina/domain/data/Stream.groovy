@@ -23,7 +23,7 @@ class Stream implements Comparable {
 	Date dateCreated
 	Date lastUpdated
 
-	Boolean uiChannel
+	Boolean uiChannel = false
 	String uiChannelPath
 	Canvas uiChannelCanvas
 
@@ -35,7 +35,6 @@ class Stream implements Comparable {
 		lastHistoricalDay(nullable:true)
 		apiKey(nullable:true)
 		user(nullable:true)
-		uiChannel(nullable:true)
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
 	}
@@ -43,6 +42,7 @@ class Stream implements Comparable {
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
+		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
 		feed lazy: false
 		config type: 'text'

@@ -23,9 +23,11 @@ class StreamApiController {
 	@StreamrApi
 	def index() {
 		def criteria = apiService.createListCriteria(params, ["name", "description"], {
+			// Filter by UI channel stream (default: false)
+			eq("uiChannel", params.boolean("uiChannel") ?: false)
 			// Filter by exact name
 			if (params.name) {
-				eq "name", params.name
+				eq("name", params.name)
 			}
 		})
 		def streams = permissionService.get(Stream, request.apiUser, Operation.READ, apiService.isPublicFlagOn(params), criteria)

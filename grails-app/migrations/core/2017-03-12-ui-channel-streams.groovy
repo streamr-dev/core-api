@@ -3,7 +3,9 @@ databaseChangeLog = {
 
 	changeSet(author: "admin (generated)", id: "1489340226120-1") {
 		addColumn(tableName: "stream") {
-			column(name: "ui_channel", type: "bit")
+			column(name: "ui_channel", type: "bit", defaultValueBoolean: false) {
+				constraints(nullable: "false")
+			}
 		}
 	}
 
