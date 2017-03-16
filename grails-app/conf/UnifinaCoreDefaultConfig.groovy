@@ -238,7 +238,7 @@ environments {
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
  */
-streamr.ip.address.prefixes = ["192.168.10.", "192.168.", "10."]
+streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? System.getProperty("streamr.ip.address.prefixes").split(",") : ["192.168.10.", "192.168.", "10."]
 environments {
 	production {
 		streamr.ip.address.prefixes = []

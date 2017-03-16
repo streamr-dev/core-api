@@ -93,4 +93,9 @@ public abstract class ModuleWithSideEffects extends AbstractSignalPathModule {
 		}
 	}
 
+	@Override
+	public void clear() {
+		super.clear();
+		oneTimeNotificationShown = false;
+	}
 }

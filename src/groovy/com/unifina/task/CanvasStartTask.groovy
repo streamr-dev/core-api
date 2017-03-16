@@ -60,7 +60,7 @@ public class CanvasStartTask extends AbstractTask {
 	public void onComplete(boolean taskGroupComplete) {
 		
 	}
-	
+
 	public static Map<String,Object> getConfig(Canvas canvas, boolean forceReset, boolean resetOnFail) {
 		return [id:canvas.id, resetOnFail: resetOnFail, forceReset: forceReset]
 	}

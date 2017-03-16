@@ -8,6 +8,8 @@ import com.unifina.service.CanvasService
 import com.unifina.service.ModuleService
 import com.unifina.service.PermissionService
 import com.unifina.service.SignalPathService
+import com.unifina.signalpath.RuntimeRequest
+import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.simplemath.Divide
 import com.unifina.signalpath.simplemath.Sum
 import com.unifina.utils.Globals
@@ -194,5 +196,29 @@ class ForEachSpec extends Specification {
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
 			.overrideGlobals { globals }
 			.test()
+	}
+
+	def "modules inside ForEach report correct runtime path"() {
+		def command = new SaveCanvasCommand(name: "sub-canvas", modules: modulesJson)
+		def canvas = canvasService.createNew(command, user)
+
+		module.setHash(5)
+		module.setParentSignalPath(Mock(SignalPath))
+		module.getSignalPathByKey()
+
+		module.getInput("canvas").receive(canvas.id)
+		module.configure(module.getConfiguration())
+		module.getInput("key").receive("k1")
+		module.getInput("A").receive(5)
+		module.getInput("B").receive(5)
+		module.sendOutput()
+
+		when:
+		String path = module.getSignalPathByKey("k1").getModules()[0].getRuntimePath()
+		then:
+		1 * module.getParentSignalPath().getRuntimePath(_) >> { RuntimeRequest.PathWriter writer ->
+			return writer.write("parent")
+		}
+		path == "parent/modules/5/keys/k1/modules/0"
 	}
 }

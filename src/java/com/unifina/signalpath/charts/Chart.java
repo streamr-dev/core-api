@@ -11,8 +11,6 @@ import java.util.Map;
 public abstract class Chart extends ModuleWithUI {
 	private boolean timeOfDayFilterEnabled = false;
 	private TimeOfDayUtil todUtil = null;
-	
-	protected boolean hasRc = false;
 	private String dataGrouping = "min/max";
 
 	@Override
@@ -25,7 +23,6 @@ public abstract class Chart extends ModuleWithUI {
 	@Override
 	public void initialize() {
 		super.initialize();
-		hasRc = (getGlobals() !=null && getGlobals().getUiChannel()!=null);
 	}
 	
 	@Override

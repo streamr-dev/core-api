@@ -1,6 +1,7 @@
 package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
@@ -22,6 +23,10 @@ class Stream implements Comparable {
 	Date dateCreated
 	Date lastUpdated
 
+	Boolean uiChannel = false
+	String uiChannelPath
+	Canvas uiChannelCanvas
+
 	static constraints = {
 		name(blank:false)
 		config(nullable:true)
@@ -30,11 +35,15 @@ class Stream implements Comparable {
 		lastHistoricalDay(nullable:true)
 		apiKey(nullable:true)
 		user(nullable:true)
+		uiChannelPath(nullable:true)
+		uiChannelCanvas(nullable:true)
 	}
 	
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
+		uiChannel defaultValue: "false"
+		uiChannelPath index: "ui_channel_path_idx"
 		feed lazy: false
 		config type: 'text'
 	}
@@ -53,7 +62,8 @@ class Stream implements Comparable {
 			name: name,
 			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
-			description: description
+			description: description,
+			uiChannel: uiChannel
 		]
 	}
 

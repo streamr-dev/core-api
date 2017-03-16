@@ -6,18 +6,16 @@ import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.IStartListener
 import com.unifina.datasource.IStopListener
 import com.unifina.datasource.RealtimeDataSource
-import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
-import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -49,38 +47,44 @@ class SignalPathService {
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
-	
-	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
-		SignalPath sp = new SignalPath(isRoot)
 
-		sp.globals = globals
-		sp.init()		
-		sp.configure(signalPathMap)
+	/**
+	 * Creates and configures a root SignalPath instance with the given config and Globals. You
+	 * can pass an optional SignalPath instance to configure if you want (eg. to configure non-root
+	 * SignalPaths or subclasses of SignalPath).
+	 *
+	 * If connectionsReady==true, instance.connectionsReady() is called.
+     */
+	@CompileStatic
+	public SignalPath mapToSignalPath(Map config, boolean connectionsReady, Globals globals, SignalPath instance = new SignalPath(true)) {
+		instance.globals = globals
+		instance.init()
+		instance.configure(config)
 		if (connectionsReady) {
-			sp.connectionsReady()
+			instance.connectionsReady()
 		}
 
-		return sp
+		return instance
 	}
-	
+
+	@CompileStatic
 	public Map signalPathToMap(SignalPath sp) {
 		return  [
 			name: sp.name,
-			modules: sp.modules.collect { it.getConfiguration() },
+			modules: sp.modules.collect { AbstractSignalPathModule it -> it.getConfiguration() },
 			settings: sp.globals.signalPathContext,
 			hasExports: sp.hasExports(),
-			uiChannel: sp.getUiChannelMap()
+			uiChannel: sp.getUiChannel().toMap()
 		]
 	}
 	
 	/**
-	 * Rebuilds a saved representation of a SignalPath along with its context.a
-	 * Potentially modifies the map given as parameter.
-	 * @param json
-	 * @return
+	 * Rebuilds a saved representation of a root SignalPath along with its config.
+	 * Potentially modifies the config given as parameter.
 	 */
-	public Map reconstruct(Map signalPathMap, Globals globals) {
-		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
+	@CompileStatic
+	public Map reconstruct(Map config, Globals globals) {
+		SignalPath sp = mapToSignalPath(config, true, globals, new SignalPath(true))
 		return signalPathToMap(sp)
 	}
 	
@@ -129,18 +133,8 @@ class SignalPathService {
 	}
 
 	@Transactional
-	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
-		def uiChannelIds = []
-
-		runner.signalPaths.each {
-			Canvas canvas = it.canvas.refresh()
-			UiChannelIterator.over(canvas.toMap()).each {
-				uiChannelIds << it.id
-			}
-			canvas.delete()
-		}
-
-		streamService.deleteStreamsDelayed(uiChannelIds.collect { Stream.load(it) })
+	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
+		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -176,7 +170,6 @@ class SignalPathService {
 	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
-		globals.uiChannel = new KafkaPushChannel(canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread
