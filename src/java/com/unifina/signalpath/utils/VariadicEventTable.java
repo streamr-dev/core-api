@@ -1,6 +1,5 @@
 package com.unifina.signalpath.utils;
 
-import com.unifina.push.PushChannel;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.variadic.InputInstantiator;
 import com.unifina.signalpath.variadic.VariadicInput;
@@ -34,38 +33,29 @@ public class VariadicEventTable extends ModuleWithUI {
 	public void initialize() {
 		super.initialize();
 
-		PushChannel rc = null;
-
-		if (getGlobals().getUiChannel() != null) {
-			rc = getGlobals().getUiChannel();
-		}
-
-		if (rc != null) {
+		if (getGlobals().isRunContext()) {
 			Map<String, Object> hdrMsg = new HashMap<String, Object>();
 			hdrMsg.put("hdr", getHeaderDefinition());
-			getGlobals().getUiChannel().push(hdrMsg, uiChannelId);
+			pushToUiChannel(hdrMsg);
 		}
 	}
 
 	@Override
 	public void sendOutput() {
-		PushChannel rc = getGlobals().getUiChannel();
-		if (rc != null) {
-			HashMap<String, Object> msg = new HashMap<String, Object>();
-			ArrayList<Object> nr = new ArrayList<>(2);
-			msg.put("nr", nr);
-			nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
+		HashMap<String, Object> msg = new HashMap<String, Object>();
+		ArrayList<Object> nr = new ArrayList<>(2);
+		msg.put("nr", nr);
+		nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
 
-			for (Input<Object> i : ins.getEndpoints()) {
-				if (i.hasValue() && (!showOnlyNewValues || drivingInputs.contains(i))) {
-					nr.add(i.getValue().toString());
-				} else {
-					nr.add(null);
-				}
+		for (Input<Object> i : ins.getEndpoints()) {
+			if (i.hasValue() && (!showOnlyNewValues || drivingInputs.contains(i))) {
+				nr.add(i.getValue().toString());
+			} else {
+				nr.add(null);
 			}
-
-			rc.push(msg, uiChannelId);
 		}
+
+		pushToUiChannel(msg);
 	}
 
 	@Override

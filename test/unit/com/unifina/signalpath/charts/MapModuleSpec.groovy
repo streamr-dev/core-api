@@ -1,14 +1,20 @@
 package com.unifina.signalpath.charts
 
+import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.StreamrColor
-import com.unifina.utils.testutils.ModuleTestHelper;
-import spock.lang.Specification;
+import com.unifina.utils.testutils.ModuleTestHelper
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-public class MapModuleSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+public class MapModuleSpec extends UiChannelMockingSpecification {
 	MapModule module
 
 	def setup() {
+		mockServicesForUiChannels()
 		module = new MapModule()
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 	}
 
@@ -39,7 +45,7 @@ public class MapModuleSpec extends Specification {
 
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 
@@ -65,7 +71,7 @@ public class MapModuleSpec extends Specification {
 
 		expect:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

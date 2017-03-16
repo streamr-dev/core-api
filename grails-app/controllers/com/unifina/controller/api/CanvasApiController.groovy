@@ -73,7 +73,7 @@ class CanvasApiController {
 	@StreamrApi
 	def delete(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvas.delete(flush: true)
+		canvasService.deleteCanvas(canvas, request.apiUser)
 		response.status = 204
 		render ""
 	}

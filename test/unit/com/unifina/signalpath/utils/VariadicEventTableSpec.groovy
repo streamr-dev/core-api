@@ -1,22 +1,35 @@
 package com.unifina.signalpath.utils
 
+import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.signalpath.SignalPath
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class VariadicEventTableSpec extends Specification {
+import java.text.SimpleDateFormat
 
-	def final static format = "yyyy-MM-dd HH:mm:ss.SSS";
+@TestMixin(GrailsUnitTestMixin)
+class VariadicEventTableSpec extends UiChannelMockingSpecification {
 
+	SimpleDateFormat dateFormat
 	VariadicEventTable module
 
 	def setup() {
-		module = new VariadicEventTable()
-		module.init()
+		mockServicesForUiChannels()
+		module = setupModule(
+				new VariadicEventTable(),
+				[uiChannel: [id: "uiChannel"]],
+				new SignalPath(),
+				mockGlobals([:], new SecUser(timezone: "UTC")))
+
+		// Call getInput to make sure the inputs exist
 		module.getInput("in1")
 		module.getInput("in2")
 		module.getInput("in3")
-		module.getInput("in4")
-		module.configure([uiChannel: [id: "table"]])
+
+		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
 	}
 
 	void "eventTable sends correct data to uiChannel"() {
@@ -28,18 +41,18 @@ class VariadicEventTableSpec extends Specification {
 		]
 		Map outputValues = [:]
 		Map channelMessages = [
-			table: [
+			uiChannel: [
 				[hdr: [headers: ["timestamp", "outputForin1", "outputForin2", "outputForin3"], title: null]],
-				[nr: [new Date(0).format(format), "a", "1", null]],
-				[nr: [new Date(60 * 1000).format(format), "b", "2", null]],
-				[nr: [new Date(60 * 1000 * 2).format(format), "c", "3", "hello"]],
-				[nr: [new Date(60 * 1000 * 3).format(format), "d", "4", "world"]],
+				[nr: [dateFormat.format(new Date(0)), "a", "1", null]],
+				[nr: [dateFormat.format(new Date(60 * 1000)), "b", "2", null]],
+				[nr: [dateFormat.format(new Date(60 * 1000 * 2)), "c", "3", "hello"]],
+				[nr: [dateFormat.format(new Date(60 * 1000 * 3)), "d", "4", "world"]],
 			]
 		]
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.timeToFurtherPerIteration(60 * 1000)
 			.test()
 	}
