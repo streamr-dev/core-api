@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
 
+import com.unifina.data.FeedEvent;
 import com.unifina.data.IEventQueue;
 import com.unifina.data.IEventRecipient;
 import com.unifina.data.IStreamRequirement;

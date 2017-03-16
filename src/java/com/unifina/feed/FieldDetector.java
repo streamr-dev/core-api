@@ -1,8 +1,8 @@
 package com.unifina.feed;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Stream;
-import com.unifina.feed.map.MapMessage;
-import com.unifina.utils.MapTraversal;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 import java.util.ArrayList;
@@ -15,14 +15,9 @@ import java.util.Map;
  */
 public abstract class FieldDetector {
 	protected final GrailsApplication grailsApplication;
-	private boolean flattenMap = false;
 
 	public FieldDetector(GrailsApplication grailsApplication) {
 		this.grailsApplication = grailsApplication;
-	}
-
-	public void setFlattenMap(boolean flattenMap) {
-		this.flattenMap = flattenMap;
 	}
 
 	/**
@@ -30,22 +25,23 @@ public abstract class FieldDetector {
 	 * May return null if the example message couldn't be fetched (Stream is empty for example).
      */
 	public List<Map<String, String>> detectFields(Stream stream) {
-		MapMessage mapMessage = fetchExampleMessage(stream);
-		if (mapMessage == null) {
+		AbstractStreamrMessage msg = fetchExampleMessage(stream);
+		if (msg == null) {
 			return null;
 		}
 
-		Map map = mapMessage.payload;
-
-		if (flattenMap) {
-			map = MapTraversal.flatten(map);
+		// Msg may wrap many events, so get the latest one
+		FeedEvent<AbstractStreamrMessage, IEventRecipient>[] events = msg.toFeedEvents(null);
+		if (events.length == 0) {
+			return null;
 		}
+		msg = events[events.length - 1].content;
 
 		List<Map<String, String>> fields = new ArrayList<>();
-		for (Object key : map.keySet()) {
+		for (String key : msg.keySet()) {
 			Map<String, String> field = new HashMap<>();
-			field.put("name", key.toString());
-			field.put("type", detectType(map.get(key)));
+			field.put("name", key);
+			field.put("type", detectType(msg.get(key)));
 			fields.add(field);
 		}
 		return fields;
@@ -65,5 +61,5 @@ public abstract class FieldDetector {
 		}
 	}
 
-	protected abstract MapMessage fetchExampleMessage(Stream stream);
+	protected abstract AbstractStreamrMessage fetchExampleMessage(Stream stream);
 }

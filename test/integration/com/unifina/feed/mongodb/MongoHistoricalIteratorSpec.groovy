@@ -1,9 +1,7 @@
 package com.unifina.feed.mongodb
 
 import com.unifina.domain.data.Stream
-import com.unifina.feed.map.MapMessage
 import grails.test.spock.IntegrationSpec
-import org.bson.Document
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -92,7 +90,7 @@ class MongoHistoricalIteratorSpec extends IntegrationSpec {
 		when:
 		Date previous = null
 		while (iterator.hasNext()) {
-			MapMessage msg = iterator.next()
+			MongoMessage msg = iterator.next()
 			Date date = msg.payload.getDate("time")
 			if (previous != null && previous.after(date))
 				throw new Exception("Events were not read in order (ascending by timestamp)!")

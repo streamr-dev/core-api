@@ -7,7 +7,7 @@ import com.unifina.utils.Globals;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, StreamrMessage, String> {
+public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStreamRequirement, AbstractStreamrMessage, String> {
 
 	public StreamrBinaryMessageKeyProvider(Globals globals, Feed feed) {
 		super(globals, feed);
@@ -23,7 +23,7 @@ public class StreamrBinaryMessageKeyProvider extends AbstractKeyProvider<IStream
 	}
 
 	@Override
-	public String getMessageKey(StreamrMessage message) {
+	public String getMessageKey(AbstractStreamrMessage message) {
 		return message.getStreamId() + "-" + message.getPartition();
 	}
 

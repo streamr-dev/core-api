@@ -1,14 +1,14 @@
 package com.unifina.feed;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import com.unifina.data.IEventRecipient;
-import org.apache.log4j.Logger;
-
 import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
 import com.unifina.domain.data.Feed;
 import com.unifina.utils.Globals;
+import org.apache.log4j.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 /**
@@ -25,7 +25,7 @@ import com.unifina.utils.Globals;
  * @author Henri
  *
  */
-public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageClass extends ITimestamped, KeyClass, EventRecipientClass extends IEventRecipient>
+public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageClass extends AbstractStreamrMessage, KeyClass, EventRecipientClass extends IEventRecipient>
 		extends AbstractFeed<ModuleClass, MessageClass, KeyClass, EventRecipientClass>
 		implements MessageRecipient<RawMessageClass, KeyClass>, ICatchupFeed {
 	
@@ -176,11 +176,10 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 			throw new IllegalArgumentException("Tried to process messages in invalid order! Counter: "+counter+", expected: "+expected);
 		else {
 			expected++;
-			FeedEvent<MessageClass, EventRecipientClass>[] events = process(msg);
+			FeedEvent<AbstractStreamrMessage, IEventRecipient>[] events = msg.toFeedEvents(getEventRecipientForMessage(msg));
 
-			// TODO: remove debug
 			if (firstRealQueue==null && checkAge) {
-				log.info("First real time message: "+counter+". Events: "+events);
+				log.info("First real time message: "+counter+". Events: "+ Arrays.toString(events));
 				firstRealQueue = counter;
 			}
 
@@ -197,13 +196,6 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 			}
 		}
 	}
-	
-	/**
-	 * This method is guaranteed to be called in correct order without gaps.
-	 * It should convert the feed message to FeedEvent(s).
-	 */
-	protected abstract FeedEvent<MessageClass, EventRecipientClass>[] process(MessageClass msg);
-	
 	
 	@Override
 	public FeedEvent[] getNextEvents() {
@@ -229,7 +221,7 @@ public abstract class AbstractFeedProxy<ModuleClass, RawMessageClass, MessageCla
 				throw new IllegalStateException("Gap in catchup! Counter: "+catchupCounter+", expected: "+expected);
 			else {
 				expected++;
-				result = process(msg);
+				result = msg.toFeedEvents(getEventRecipientForMessage(msg));
 			}
 
 			// Remove overlap in the wait queue

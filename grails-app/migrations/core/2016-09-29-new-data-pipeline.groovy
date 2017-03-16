@@ -25,6 +25,14 @@ databaseChangeLog = {
 		}
 	}
 
+	changeSet(author: "henri", id: "new-data-pipeline-3") {
+		sql("""
+			UPDATE feed SET
+				event_recipient_class = 'com.unifina.feed.StreamrMessageEventRecipient'
+				WHERE `id` in (7, 8, 9);
+		""") // json, mongo, twitter
+	}
+
 	changeSet(author: "henri", id: "new-data-pipeline-test", context: "test") {
 		sql("""
 			INSERT INTO `stream` (`version`, `api_key`, `description`, `feed_id`, `first_historical_day`, `last_historical_day`, `name`, `config`, `user_id`, `id`, `class`, `date_created`, `last_updated`, `partitions`)

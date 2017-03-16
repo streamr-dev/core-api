@@ -3,10 +3,12 @@ package com.unifina.feed.twitter
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.SecUser
+import com.unifina.feed.StreamrMessageEventRecipient
 import com.unifina.utils.GlobalsFactory
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
 import spock.lang.Specification
+import twitter4j.Status
 
 @TestMixin(GrailsUnitTestMixin)
 class TwitterFeedSpec extends Specification {
@@ -14,7 +16,7 @@ class TwitterFeedSpec extends Specification {
 	public static class TestableTwitterFeed extends TwitterFeed {
 		TestableTwitterFeed(a, b) { super(a, b) }
 
-		def subscribe(TwitterEventRecipient er) {
+		def subscribe(StreamrMessageEventRecipient er) {
 			eventRecipients.add(er)
 		}
 	}
@@ -48,7 +50,7 @@ class TwitterFeedSpec extends Specification {
 		eventRecipients = []
 		(1..count).each {
 			String streamId = it.toString()
-			def er = Stub(TwitterEventRecipient) {
+			def er = Stub(StreamrMessageEventRecipient) {
 				getStream() >> Stub(Stream) {
 					getId() >> streamId
 				}
@@ -59,27 +61,15 @@ class TwitterFeedSpec extends Specification {
 	}
 
 	List<TwitterMessage> generateMessages(List<String> targetIds) {
-		return targetIds.collect {
-			String streamId = it
-			new TwitterMessage([
-				timestamp: new Date(),
-				text: "tweet",
-				urls: ["url1", "url2"],
-				username: "tester",
-				name: "TesterDude",
-				language: "Und",
-				followers: 3,
-				streamConfig: Stub(TwitterStreamConfig) {
-					getStreamId() >> streamId
-				}
-			])
+		return targetIds.collect {String streamId ->
+			new TwitterMessage(streamId, 0, new Date(), new Date(), Mock(Status), [])
 		}
 	}
 
 	void "Feed won't send messages when there are no subscribers"() {
 		def events = []
 		generateMessages(["1", "2", "3"]).each {
-			events.addAll(feed.process(it))
+			events.addAll(feed.toFeedEvents(it))
 		}
 		expect:
 		events == []
@@ -90,7 +80,7 @@ class TwitterFeedSpec extends Specification {
 
 		def events = []
 		generateMessages(["1", "2", "3"]).each {
-			events.addAll(feed.process(it))
+			events.addAll(feed.toFeedEvents(it))
 		}
 		expect:
 		events*.recipient == [eventRecipients[0], eventRecipients[1], eventRecipients[2]]
