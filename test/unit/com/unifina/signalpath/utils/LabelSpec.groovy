@@ -19,10 +19,6 @@ class LabelSpec extends UiChannelMockingSpecification {
 		module.configure([uiChannel: [id: "labelChannel"]])
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	void "label sends correct data to uiChannel"() {
 		when:
 		Map inputValues = [

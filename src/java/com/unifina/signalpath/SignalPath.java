@@ -88,6 +88,10 @@ public class SignalPath extends ModuleWithUI {
 			modulesJSON = new ArrayList<>(0);
 		}
 
+		if (modulesJSON.isEmpty()) {
+			return;
+		}
+
 		ModuleService moduleService = getGlobals().getBean(ModuleService.class);
 
 		HashMap<Long, Module> moduleDomainById = new HashMap<>();
@@ -446,30 +450,13 @@ public class SignalPath extends ModuleWithUI {
 	}
 
 	@Override
-	protected void cleanupUiChannelStream() {
-		super.cleanupUiChannelStream();
+	protected void onStop() {
+		super.onStop();
 		if (getGlobals().isAdhoc()) {
 			Map<String, Object> byeMsg = new HashMap<>();
 			byeMsg.put("_bye", true);
 			pushToUiChannel(byeMsg);
 		}
-	}
-
-	/**
-	 * Traverses the modules in this SignalPath and collects their UI channel Streams.
-	 * If a sub-SignalPath is encountered, it is traversed recursively.
-     */
-	public Set<Stream> getUiChannels() {
-		HashSet<Stream> set = new HashSet<>();
-		set.add(getUiChannelStream());
-		for (AbstractSignalPathModule m : getModules()) {
-			if (m instanceof SignalPath) {
-				set.addAll(((SignalPath)m).getUiChannels());
-			} else if (m instanceof ModuleWithUI) {
-				set.add(((ModuleWithUI)m).getUiChannelStream());
-			}
-		}
-		return set;
 	}
 
 	@Override

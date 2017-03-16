@@ -17,7 +17,6 @@ public class EmailModuleSpec extends UiChannelMockingSpecification {
 
 	EmailModule module
 	MockMailService ms
-	FakeStreamService fakeStreamService
 
 	Globals globals
 
@@ -35,10 +34,6 @@ public class EmailModuleSpec extends UiChannelMockingSpecification {
 		module = new EmailModule()
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-	
 	private void initContext(Map context = [:], SecUser user = new SecUser(timezone:"Europe/Helsinki", username: "username")) {
 		globals = GlobalsFactory.createInstance(context, grailsApplication, user)
 		globals.time = new Date()
@@ -48,8 +43,9 @@ public class EmailModuleSpec extends UiChannelMockingSpecification {
 		module.emailInputCount = 2
 		module.configure(module.getConfiguration())
 
-		module.parentSignalPath = new SignalPath()
+		module.parentSignalPath = new SignalPath(true)
 		module.parentSignalPath.globals = globals
+		module.parentSignalPath.configure([uiChannel: [id: "uiChannel"]])
 	}
 
 	void "emailModule sends the correct email"() {
@@ -128,8 +124,8 @@ value2: test value
 		then: "email must not be sent"
 			!ms.mailSent
 		then: "notification must be sent"
-			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId].size() == 1
-			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId][0] instanceof NotificationMessage
+			getSentMessagesByStreamId()[module.parentSignalPath.getUiChannel().getId()].size() == 1
+			getSentMessagesByStreamId()[module.parentSignalPath.getUiChannel().getId()][0] instanceof NotificationMessage
 	}
 
 	void "If trying to send emails too often send notification to warn about it"() {
@@ -149,8 +145,8 @@ value2: test value
 			module.sendOutput()
 		then: "one notification should be sent"
 			!ms.mailSent
-			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId].size() == 1
-			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId][0] instanceof NotificationMessage
+			getSentMessagesByStreamId()[module.parentSignalPath.getUiChannel().getId()].size() == 1
+			getSentMessagesByStreamId()[module.parentSignalPath.getUiChannel().getId()][0] instanceof NotificationMessage
 
 		when: "sent third email with a warning after one minute"
 			globals.time = new Date(70000)
@@ -161,7 +157,7 @@ value2: test value
 			module.sendOutput()
 		then: "an email should be sent again, but no new notification is shown"
 			ms.mailSent
-			getSentMessagesByStreamId()[module.parentSignalPath.uiChannelId].size() == 1
+			getSentMessagesByStreamId()[module.parentSignalPath.getUiChannel().getId()].size() == 1
 	}
 
 	void "if too emails are sent too frequently, the next one contains a warning about it"() {

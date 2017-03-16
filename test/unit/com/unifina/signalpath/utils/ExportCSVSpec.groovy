@@ -26,10 +26,6 @@ class ExportCSVSpec extends UiChannelMockingSpecification {
 		module.getInput("input-2").setDisplayName("secondInput")
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	private boolean testForFileContentAndUiMessages(String s, Map channelMessages) {
 		testForFileContentAndUiMessages([
 				firstInput : ["first", "second", "third"],

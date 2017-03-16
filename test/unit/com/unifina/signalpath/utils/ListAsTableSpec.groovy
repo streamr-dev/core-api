@@ -24,10 +24,6 @@ class ListAsTableSpec extends UiChannelMockingSpecification {
 		])
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	def "initial headers are set correctly"() {
 		when:
 		module.handleRequest(new RuntimeRequest([type: "initRequest"], null, null, null, null, new HashSet<>()), initResponse);

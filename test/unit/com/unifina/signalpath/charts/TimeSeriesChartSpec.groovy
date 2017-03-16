@@ -22,10 +22,6 @@ class TimeSeriesChartSpec extends UiChannelMockingSpecification {
 		])
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	void "timeSeriesChart sends correct data to uiChannel"() {
 		module.init()
 		when:

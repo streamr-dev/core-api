@@ -14,6 +14,20 @@ class BeanMockingSpecification extends Specification {
 
 	private registeredMockBeans = []
 
+	/**
+	 * Slight hack: setup() and cleanup() can't be overridden, but it's great to have
+	 * cleanupMockBeans called automatically. So subclasses should override doCleanup() instead.
+     */
+	def cleanup() {
+		doCleanup()
+		cleanupMockBeans()
+	}
+
+	/**
+	 * Override this instead of cleanup() if you need it
+	 */
+	def doCleanup() {}
+
 	protected <T> T getBean(Class<T> clazz) {
 		Holders.getApplicationContext().getBean(clazz)
 	}

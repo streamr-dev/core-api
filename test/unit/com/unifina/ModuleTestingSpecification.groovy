@@ -15,8 +15,8 @@ import grails.test.mixin.support.GrailsUnitTestMixin
 @TestMixin(GrailsUnitTestMixin)
 class ModuleTestingSpecification extends BeanMockingSpecification {
 	protected <T extends AbstractSignalPathModule> T setupModule(T module, Map moduleConfig = [:], SignalPath parentSignalPath = new SignalPath(), Globals globals = mockGlobals()) {
-		module.init()
 		module.globals = globals
+		module.init()
 		module.configure(moduleConfig)
 		module.setParentSignalPath(parentSignalPath)
 		return module

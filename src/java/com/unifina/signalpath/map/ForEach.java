@@ -57,7 +57,7 @@ public class ForEach extends AbstractSignalPathModule {
 
 		// Create a non-run-context Globals for instantiating the temporary SignalPath
 		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getGrailsApplication(), getGlobals().getUser());
-		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, false);
+		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = tempSignalPath.getExportedInputs();
@@ -158,7 +158,7 @@ public class ForEach extends AbstractSignalPathModule {
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
 		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
 		canvasService.resetUiChannels(signalPathMap);
-		SignalPathInsideForEach signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false, SignalPathInsideForEach.class);
+		SignalPathInsideForEach signalPath = (SignalPathInsideForEach) signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), new SignalPathInsideForEach(false));
 		signalPath.setName(signalPath.getName() + " (" + key + ")");
 		signalPath.link(key, this);
 

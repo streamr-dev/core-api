@@ -30,10 +30,6 @@ class GaugeSpec extends UiChannelMockingSpecification {
 		])
     }
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	void "gauge sends correct data to uiChannel"() {
 		when:
 		Map inputValues = [

@@ -99,7 +99,7 @@ class ModuleWithUISpec extends Specification {
 		when:
 		createModule([:])
 		then: "config contains the id"
-		module.getUiChannelId() != null
+		module.getUiChannel().getId() != null
 		module.getConfiguration().uiChannel != null
 		module.getConfiguration().uiChannel.id != null
 		module.getConfiguration().uiChannel.name == "TestModule"
@@ -112,7 +112,7 @@ class ModuleWithUISpec extends Specification {
 		when:
 		createModule([uiChannel:[id:'uiChannel-id']])
 		then:
-		module.getUiChannelId() == 'uiChannel-id'
+		module.getUiChannel().getId() == 'uiChannel-id'
 
 		when: "module is initialized"
 		module.connectionsReady()
@@ -125,7 +125,7 @@ class ModuleWithUISpec extends Specification {
 		listener.onStart()
 		then: "the Stream object is loaded"
 		1 * streamService.getStream("uiChannel-id") >> uiChannel
-		module.getUiChannelStream() == uiChannel
+		module.getUiChannel().getStream() == uiChannel
 		and: "a new Stream is not created"
 		0 * streamService.createStream(_, _, _)
 	}
@@ -137,7 +137,7 @@ class ModuleWithUISpec extends Specification {
 		when:
 		createModule([uiChannel:[id:'nonexistent']])
 		then:
-		module.getUiChannelId() == 'nonexistent'
+		module.getUiChannel().getId() == 'nonexistent'
 
 		when: "module is initialized"
 		module.connectionsReady()
@@ -152,8 +152,8 @@ class ModuleWithUISpec extends Specification {
 		1 * streamService.getStream("nonexistent") >> null
 		then: "the Stream object is loaded by uiChannelPath"
 		1 * streamService.getStreamByUiChannelPath(_) >> uiChannel
-		module.getUiChannelStream() == uiChannel
-		module.getUiChannelId() == "stream-loaded-by-uiChannelPath"
+		module.getUiChannel().getStream() == uiChannel
+		module.getUiChannel().getId() == "stream-loaded-by-uiChannelPath"
 		and: "a new Stream is not created"
 		0 * streamService.createStream(_, _, _)
 	}
@@ -164,7 +164,7 @@ class ModuleWithUISpec extends Specification {
 		when:
 		createModule([uiChannel:[id:'nonexistent']])
 		then:
-		module.getUiChannelId() == 'nonexistent'
+		module.getUiChannel().getId() == 'nonexistent'
 
 		when: "module is initialized"
 		module.connectionsReady()
@@ -221,6 +221,6 @@ class ModuleWithUISpec extends Specification {
 		when:
 		module.pushToUiChannel(msg)
 		then:
-		1 * streamService.sendMessage(module.getUiChannelStream(), msg)
+		1 * streamService.sendMessage(module.getUiChannel().getStream(), msg)
 	}
 }

@@ -1,5 +1,6 @@
 package com.unifina.signalpath.kafka
 
+import com.unifina.BeanMockingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.HistoricalDataSource
 import com.unifina.datasource.RealtimeDataSource
@@ -12,7 +13,6 @@ import com.unifina.feed.cassandra.CassandraHistoricalFeed
 import com.unifina.feed.map.MapMessageEventRecipient
 import com.unifina.service.FeedService
 import com.unifina.service.PermissionService
-import com.unifina.service.SerializationService
 import com.unifina.service.StreamService
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.utils.ConfigurableStreamModule
@@ -22,13 +22,12 @@ import com.unifina.utils.testutils.ModuleTestHelper
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import spock.lang.Specification
 
 import java.security.AccessControlException
 
 @TestMixin(ControllerUnitTestMixin) // to get JSON converter
 @Mock([SecUser, Stream, Feed])
-class SendToStreamSpec extends Specification {
+class SendToStreamSpec extends BeanMockingSpecification {
 
 	static class AllPermissionService extends PermissionService {
 		@Override boolean canRead(SecUser user, resource) { return true }
@@ -99,9 +98,9 @@ class SendToStreamSpec extends Specification {
 	private void createModule(options = [:]) {
 		module = new SendToStream()
 		module.globals = globals
-		module.parentSignalPath = new SignalPath()
+		module.parentSignalPath = new SignalPath(true)
 		module.parentSignalPath.setGlobals(globals)
-		module.parentSignalPath.setUiChannelId("uiChannel")
+		module.parentSignalPath.configure([uiChannel: [id: "uiChannel"]])
 		module.init()
 		module.configure([
 				params: [
@@ -293,7 +292,7 @@ class SendToStreamSpec extends Specification {
 					// No messages have really been sent to the stream
 					assert mockStreamService.sentMessagesByChannel[stream.id] == null
 					// One notification has been sent to the parentSignalPath ui channel
-					assert mockStreamService.sentMessagesByChannel[module.parentSignalPath.uiChannelId].size() == 1
+					assert mockStreamService.sentMessagesByChannel[module.parentSignalPath.uiChannel.id].size() == 1
 
 					// Correct events have been inserted to event queue
 					for (int i=0; i<inputValues.strIn.size(); i++) {

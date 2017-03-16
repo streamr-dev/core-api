@@ -22,10 +22,6 @@ class HeatmapSpec extends UiChannelMockingSpecification {
 		])
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	void "heatmap sends correct data to uiChannel"() {
 		when:
 		Map inputValues = [

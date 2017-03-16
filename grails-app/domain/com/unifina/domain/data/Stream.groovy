@@ -62,7 +62,8 @@ class Stream implements Comparable {
 			name: name,
 			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
-			description: description
+			description: description,
+			uiChannel: uiChannel
 		]
 	}
 

@@ -20,17 +20,13 @@ class CanvasDeleteTaskSpec extends BeanMockingSpecification {
 	Canvas canvas
 	SecUser user
 
-    def setup() {
+	def setup() {
 		canvasService = mockBean(CanvasService, Mock(CanvasService))
 
 		canvas = new Canvas().save(validate: false)
 		assert canvas.id != null
 
 		user = new SecUser()
-    }
-
-	def cleanup() {
-		cleanupMockBeans()
 	}
 
 	void "CanvasDeleteTask must call canvasService.deleteCanvas()"() {

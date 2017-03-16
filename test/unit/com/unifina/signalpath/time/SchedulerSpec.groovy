@@ -29,10 +29,6 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 		module.init()
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	void "Scheduler works as expected"() {
 		when:
 		module.configure([

@@ -18,10 +18,6 @@ public class MapModuleSpec extends UiChannelMockingSpecification {
 		module.init()
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	Map inputValues = [
 		traceColor: [new StreamrColor(233, 87, 15), null, null, new StreamrColor(6, 6, 6)],
 		id: ["id-1", "id-2", "id-1", "id-3"],

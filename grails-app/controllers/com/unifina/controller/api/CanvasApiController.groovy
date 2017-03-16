@@ -24,14 +24,14 @@ class CanvasApiController {
 	@StreamrApi
 	def index() {
 		def criteria = apiService.createListCriteria(params, ["name"], {
-			// Filter by adhoc (default: false)
-			eq "adhoc", params.boolean("adhoc") ?: false
-
 			// Filter by exact name
 			if (params.name) {
 				eq "name", params.name
 			}
-
+			// Filter by adhoc
+			if (params.adhoc) {
+				eq "adhoc", params.boolean("adhoc")
+			}
 			// Filter by state
 			if (params.state) {
 				eq "state", Canvas.State.fromValue(params.state)

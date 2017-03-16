@@ -32,10 +32,6 @@ class VariadicEventTableSpec extends UiChannelMockingSpecification {
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
 	}
 
-	def cleanup() {
-		cleanupMockBeans()
-	}
-
 	void "eventTable sends correct data to uiChannel"() {
 		when:
 		Map inputValues = [
