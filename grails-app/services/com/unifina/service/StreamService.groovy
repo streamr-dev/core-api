@@ -36,8 +36,6 @@ class StreamService {
 	def grailsApplication
 	KafkaService kafkaService
 	CassandraService cassandraService
-	CanvasService canvasService
-	DashboardService dashboardService
 	PermissionService permissionService
 
 	private final StreamPartitioner partitioner = new StreamPartitioner()
@@ -301,23 +299,22 @@ class StreamService {
 
 	@CompileStatic
 	private boolean isDirectPermissionToStream(SecUser user, Stream stream) {
-		return permissionService.check(user, stream, Permission.Operation.READ)
+		return permissionService.canRead(user, stream)
 	}
 
 
 	@CompileStatic
 	private boolean isDirectPermissionToStream(Key key, Stream stream) {
-		return permissionService.checkAnonymousKey(key, stream, Permission.Operation.READ)
+		return permissionService.canReadKey(key, stream)
 	}
 
 	@CompileStatic
 	private boolean isPermissionToStreamsUiChannelCanvas(SecUser user, Stream stream) {
-		return stream.uiChannel &&
-			stream.uiChannelCanvas &&
-			canvasService.authorizedGetById(stream.uiChannelCanvas.id, user, Permission.Operation.READ) != null
+		return stream.uiChannel && stream.uiChannelCanvas && permissionService.canRead(user, stream.uiChannelCanvas)
 	}
 
 	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
+		def dashboardService = grailsApplication.mainContext.getBean(DashboardService)
 		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
 			Canvas canvas = stream.uiChannelCanvas
 			int moduleId = parseModuleId(stream.uiChannelPath)

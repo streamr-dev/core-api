@@ -31,6 +31,7 @@ class StreamServiceSpec extends Specification {
 	Feed feed
 	KafkaService kafkaService = Stub(KafkaService)
 	FeedFileService feedFileService = new FeedFileService()
+	DashboardService dashboardService = Mock(DashboardService)
 
 	def setup() {
 		feed = new Feed(
@@ -41,6 +42,7 @@ class StreamServiceSpec extends Specification {
 		def applicationContext = Stub(ApplicationContext) {
 			getBean(KafkaService) >> kafkaService
 			getBean(FeedFileService) >> feedFileService
+			getBean(DashboardService) >> dashboardService
 		}
 
 		// Setup grailsApplication
@@ -182,7 +184,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(user, stream, Permission.Operation.READ) >> false
+		1 * service.permissionService.canRead(user, stream) >> false
 		0 * cb._
 	}
 
@@ -201,7 +203,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.checkAnonymousKey(key, stream, Permission.Operation.READ) >> false
+		1 * service.permissionService.canReadKey(key, stream) >> false
 		0 * cb._
 	}
 
@@ -219,7 +221,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
-		1 * service.permissionService.checkAnonymousKey(key, stream, Permission.Operation.READ) >> true
+		1 * service.permissionService.canReadKey(key, stream) >> true
 		1 * cb.call(stream)
 	}
 
@@ -237,14 +239,13 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.check(user, stream, Permission.Operation.READ) >> true
+		1 * service.permissionService.canRead(user, stream) >> true
 		1 * cb.call(stream)
 	}
 
 	void "getReadAuthorizedStream invokes callback if permitted to read (ui channel) stream indirectly through Canvas"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
-		service.canvasService = Mock(CanvasService)
 
 		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
 
@@ -260,15 +261,14 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.check(user, stream, Permission.Operation.READ) >> false
-		1 * service.canvasService.authorizedGetById('1', user, Permission.Operation.READ) >> canvas
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> true
 		1 * cb.call(stream)
 	}
 
 	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read (ui channel) stream indirectly through Canvas"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
-		service.canvasService = Mock(CanvasService)
 
 		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
 
@@ -285,16 +285,14 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(user, stream, Permission.Operation.READ) >> false
-		1 * service.canvasService.authorizedGetById('1', user, Permission.Operation.READ) >> null
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> false
 		0 * cb._
 	}
 
 	void "getReadAuthorizedStream invokes callback if permitted to read (ui channel) stream indirectly through Dashboard"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
-		service.canvasService = Mock(CanvasService)
-		service.dashboardService = Mock(DashboardService)
 
 		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
 
@@ -323,17 +321,15 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
-		1 * service.permissionService.check(user, stream, Permission.Operation.READ) >> false
-		1 * service.canvasService.authorizedGetById('1', user, Permission.Operation.READ) >> null
-		1 * service.dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> dashboardItem
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> false
+		1 * dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> dashboardItem
 		1 * cb.call(stream)
 	}
 
 	void "getReadAuthorizedStream throws NotPermittedException and does not invoke callback, if not permitted to read (ui channel) stream indirectly through Dashboard"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
-		service.canvasService = Mock(CanvasService)
-		service.dashboardService = Mock(DashboardService)
 
 		Canvas canvas = new Canvas(name: "canvas").save(failOnError: true, validate: false)
 
@@ -363,9 +359,9 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", user, null, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.check(user, stream, Permission.Operation.READ) >> false
-		1 * service.canvasService.authorizedGetById('1', user, Permission.Operation.READ) >> null
-		1 * service.dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> null
+		1 * service.permissionService.canRead(user, stream) >> false
+		1 * service.permissionService.canRead(user, canvas) >> false
+		1 * dashboardService.authorizedGetDashboardItem(1, 1, user, Permission.Operation.READ) >> null
 		0 * cb._
 	}
 }
