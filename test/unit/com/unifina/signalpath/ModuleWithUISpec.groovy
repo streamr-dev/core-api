@@ -98,12 +98,15 @@ class ModuleWithUISpec extends Specification {
 	def "onConfiguration must create an ui channel if an id is not configured"() {
 		when:
 		createModule([:])
+
 		then: "config contains the id"
 		module.getUiChannel().getId() != null
 		module.getConfiguration().uiChannel != null
 		module.getConfiguration().uiChannel.id != null
 		module.getConfiguration().uiChannel.name == "TestModule"
 		module.getConfiguration().uiChannel.webcomponent == module.webcomponentName
+		and: "the Stream is not searched for, because the id was just generated and can't exist in the db"
+		0 * streamService.getStream(_)
 	}
 
 	def "when the datasource starts, the Stream object is loaded if it exists"() {
