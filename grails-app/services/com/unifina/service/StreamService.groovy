@@ -2,19 +2,24 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
-import com.unifina.domain.task.Task
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.feed.AbstractDataRangeProvider
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
-import com.unifina.task.CanvasDeleteTask
+import com.unifina.signalpath.RuntimeRequest
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -30,6 +35,9 @@ class StreamService {
 	def grailsApplication
 	KafkaService kafkaService
 	CassandraService cassandraService
+	CanvasService canvasService
+	DashboardService dashboardService
+	PermissionService permissionService
 
 	private final StreamPartitioner partitioner = new StreamPartitioner()
 
@@ -262,4 +270,63 @@ class StreamService {
 		else return null
 	}
 
+	void getReadAuthorizedStream(String id, SecUser user, Key key, Closure action) {
+		def stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		}
+
+		if (key != null) {
+			if (isDirectPermissionToStream(key, stream)) {
+				action.call(stream)
+			} else {
+				throw new NotPermittedException(null, "Stream", id, Permission.Operation.READ.id)
+			}
+		} else {
+			if (isDirectPermissionToStream(user, stream) || isPermissionToStreamsUiChannelCanvas(user, stream) || isPermissionToStreamViaDashboard(user, stream)) {
+				action.call(stream)
+			} else {
+				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
+			}
+		}
+	}
+
+	@CompileStatic
+	private boolean isDirectPermissionToStream(SecUser user, Stream stream) {
+		return permissionService.check(user, stream, Permission.Operation.READ)
+	}
+
+
+	@CompileStatic
+	private boolean isDirectPermissionToStream(Key key, Stream stream) {
+		return permissionService.checkAnonymousKey(key, stream, Permission.Operation.READ)
+	}
+
+	@CompileStatic
+	private boolean isPermissionToStreamsUiChannelCanvas(SecUser user, Stream stream) {
+		return stream.uiChannel &&
+			stream.uiChannelCanvas &&
+			canvasService.authorizedGetById(stream.uiChannelCanvas.id, user, Permission.Operation.READ) != null
+	}
+
+	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
+		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
+			Canvas canvas = stream.uiChannelCanvas
+			int moduleId = parseModuleId(stream.uiChannelPath)
+			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
+			for (DashboardItem item : matchedItems) {
+				if (dashboardService.authorizedGetDashboardItem(item.dashboard.id, item.id, user, Permission.Operation.READ)) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	@CompileStatic
+	private static Integer parseModuleId(String path) {
+		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
+		reader.readCanvasId()
+		return reader.readModuleId()
+	}
 }
