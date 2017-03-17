@@ -2,7 +2,6 @@ package com.unifina.domain.data
 
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
-import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import groovy.transform.CompileStatic
 
@@ -42,9 +41,9 @@ class Stream implements Comparable {
 	static mapping = {
 		id generator: 'assigned'
 		name index: "name_idx"
+		feed lazy: false
 		uiChannel defaultValue: "false"
 		uiChannelPath index: "ui_channel_path_idx"
-		feed lazy: false
 		config type: 'text'
 	}
 	
