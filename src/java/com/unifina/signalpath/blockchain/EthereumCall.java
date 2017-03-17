@@ -23,6 +23,13 @@ import java.util.Map;
  * Send out a call to specified function in Ethereum block chain
  */
 public class EthereumCall extends AbstractHttpModule {
+	public static final String ETH_ADDRESS = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
+	public static final String ETH_PRIVATE_KEY = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.key");
+
+	// TODO: address and privateKey should be Ethereum account of the current user by default
+	private String address = ETH_ADDRESS;
+	private String privateKey = ETH_PRIVATE_KEY;
+
 	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
 
 	private ListOutput errors = new ListOutput(this, "errors");
@@ -70,8 +77,27 @@ public class EthereumCall extends AbstractHttpModule {
 	}
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("address", address, "string"));
+		options.add(new ModuleOption("privateKey", privateKey, "string"));
+
+		return config;
+	}
+
+	@Override
 	public void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
+
+		ModuleOptions options = ModuleOptions.get(config);
+		if (options.getOption("address") != null) {
+			address = options.getOption("address").getString();
+		}
+		if (options.getOption("privateKey") != null) {
+			privateKey = options.getOption("privateKey").getString();
+		}
 
 		// ethereum RPC is JSON only
 		bodyContentType = AbstractHttpModule.BODY_FORMAT_JSON;
@@ -196,8 +222,8 @@ public class EthereumCall extends AbstractHttpModule {
 
 		Map args = new HashMap<>();
 
-		// TODO: source address should be Ethereum account of the current user
-		args.put("source", MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address"));
+		args.put("source", address);
+		args.put("key", privateKey);
 		args.put("target", c.getAddress());
 
 		HttpPost request = null;

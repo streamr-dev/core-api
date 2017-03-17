@@ -20,11 +20,15 @@ import java.util.Stack;
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
 	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
+	public static final String ETH_ADDRESS = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
+	public static final String ETH_PRIVATE_KEY = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.key");
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
 
 	private Output<EthereumContract> contractOutput = null;
 
 	private String code = null;
+	private String address = ETH_ADDRESS;
+	private String privateKey = ETH_PRIVATE_KEY;
 	private EthereumContract contract = null;
 	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
 
@@ -46,6 +50,10 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
+
+		ModuleOptions options = ModuleOptions.get(config);
+		options.add(new ModuleOption("address", address, "string"));
+		options.add(new ModuleOption("privateKey", privateKey, "string"));
 
 		config.put("code", code);
 		if (contract != null) {
@@ -71,6 +79,14 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			contract = EthereumContract.fromMap(MapTraversal.getMap(config, "contract"));
 		}
 
+		ModuleOptions options = ModuleOptions.get(config);
+		if (options.getOption("address") != null) {
+			address = options.getOption("address").getString();
+		}
+		if (options.getOption("privateKey") != null) {
+			privateKey = options.getOption("privateKey").getString();
+		}
+
 		try {
 			if (compileRequested && code != null) {
 				contract = compile(code);
@@ -93,7 +109,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 				}
 
 				// augment with address
-				contract = deploy(code, args, sendWei);
+				contract = deploy(address, privateKey, code, args, sendWei);
 			}
 		} catch (Exception e) {
 			// TODO: currently I got no notification when URL was incorrect
@@ -136,7 +152,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	/** @returns EthereumContract with isDeployed() false */
 	private static EthereumContract compile(String code) throws Exception {
 		String bodyJson = new Gson().toJson(ImmutableMap.of(
-				"code", code
+			"code", code
 		)).toString();
 
 		log.info("compile request: "+bodyJson);
@@ -173,8 +189,10 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	 * @param sendWei String representation of decimal value of wei to send
 	 * @returns EthereumContract that isDeployed()
 	 **/
-	private static EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
+	private static EthereumContract deploy(String address, String privateKey, String code, List<Object> args, String sendWei) throws Exception {
 		String bodyJson = new Gson().toJson(ImmutableMap.of(
+			"source", address,
+			"key", privateKey,
 			"code", code,
 			"args", args,
 			"value", sendWei

@@ -271,6 +271,7 @@ environments {
  */
 streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "http://localhost:3000"
 streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: "0x65078b902ca3455dcefe5c1c2cea4df6053ab50f"
+streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""	// TODO: streamr testnet private key
 environments {
 	production {
 		streamr.ethereum.server = System.getProperty("streamr.ethereum.server") ?: "http://localhost:3000"
