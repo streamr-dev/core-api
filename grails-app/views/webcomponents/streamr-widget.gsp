@@ -7,7 +7,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-widget" attributes="url dashboard resendAll resendLast">
+<polymer-element name="streamr-widget" attributes="url dashboard resendAll resendLast authkey">
 	<template>
 		<streamr-client id="client"></streamr-client>
 		<div id="streamr-widget-container" class="streamr-widget-container"></div>
@@ -44,6 +44,7 @@
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
 								moduleJson.uiChannel.id,
+								_this.authkey,
 								messageHandler,
 								options
 						)
