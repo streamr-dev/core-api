@@ -44,11 +44,6 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 			}
 		});
 	}
-	
-	function getContract() {
-		return prot.jsonData.contract
-	}
-	pub.getContract = getContract
 
 	var superUpdateFrom = pub.updateFrom;
 	function updateFrom(data) {

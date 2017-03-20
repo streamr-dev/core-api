@@ -18,8 +18,17 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 	prot.createModuleFooter = function() {
 		var footer = super_createModuleFooter()
 
+        if (!pub.getContract) { return }
+
 		if (pub.getContract() && pub.getContract().address) {
-			footer.append("<input style='width:100%' value='" + pub.getContract().address +"'>")
+            var $addressField = $("<input style='width:100%' value='" + pub.getContract().address +"'>")
+            $addressField.on("change", function () {
+                var address = $addressField.val()
+                if (address.length === 42 && address.slice(0, 2) === "0x") {
+                    prot.jsonData.contract.address = address
+                }
+            })
+			footer.append($addressField)
 		} else {
 			var deployButton = $("<button class='btn btn-block btn-default btn-sm'>Deploy</button>");
 			deployButton.click(function() {
@@ -33,6 +42,11 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 
 		return footer
 	}
+
+	function getContract() {
+		return prot.jsonData.contract
+	}
+	pub.getContract = getContract
 
 	return pub
 }
