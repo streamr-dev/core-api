@@ -10,6 +10,8 @@ var StreamrNameEditor = Backbone.View.extend({
 
     initialize: function(options) {
         var _this = this
+        
+        this.beforeChange = options.beforeChange
 
         if (!this.el)
             throw "Element (el) is required!"
@@ -17,10 +19,11 @@ var StreamrNameEditor = Backbone.View.extend({
         this.name = options.name
         this.opener = options.opener
 
-        if (this.opener)
+        if (this.opener) {
             this.opener.click(function() {
                 _this.openEditor()
             })
+        }
 
         this.render()
         this.update()
@@ -44,9 +47,24 @@ var StreamrNameEditor = Backbone.View.extend({
     },
 
     changeName: function() {
+        var _this = this
         this.name = this.$editor.find('input').val()
-        this.trigger("changed", this.name)
-        this.update()
+        if (this.beforeChange) {
+            if (this.beforeChange.length > 1) {
+                this.beforeChange(this.name, ready)
+            } else {
+                if (this.beforeChange(this.name)) {
+                    ready()
+                }
+            }
+        } else {
+            ready()
+        }
+        
+        function ready() {
+            _this.trigger("changed", this.name)
+            _this.update()
+        }
     },
 
     openEditor: function() {

@@ -45,32 +45,30 @@ $(function() {
 	$("body").keydown(function(e) {
 		// ctrl + shift + s || cmd + shift + s
 		if (e.shiftKey && (e.ctrlKey || e.metaKey)) {
+			e.preventDefault()
 			if (String.fromCharCode(e.which).toLowerCase() == 's') {
 				saveAsAndAskName()
 			}
 		}
 		// ctrl || cmd
 		else if (e.ctrlKey || e.metaKey) {
+			e.preventDefault()
 			switch (String.fromCharCode(e.which).toLowerCase()) {
 				case 's':
-					e.preventDefault()
-					if (!SignalPath.isSaved())
+					if (!SignalPath.isSaved()) {
 						saveAsAndAskName()
-					else
+					} else {
 						SignalPath.save()
+					}
 					break;
 				case 'o':
-					e.preventDefault();
 					loadBrowser.modal()
-					break;
-				case 'n':
-					e.preventDefault();
-					SignalPath.clear()
 					break;
 			}
 		}
 		// alt + r
 		else if (e.altKey) {
+			e.preventDefault()
 			if (String.fromCharCode(e.which).toLowerCase() == 'r') {
 				if (!SignalPath.isRunning()) {
 					SignalPath.start();
@@ -326,9 +324,13 @@ $(function() {
 		el: $(".name-editor"),
 		signalPath: SignalPath,
 		opener: $(".rename-canvas-button"),
-		name: SignalPath.getName()
-	}).on("changed", function(name) {
-		SignalPath.setName(name)
+		name: SignalPath.getName(),
+		beforeChange: function(name, cb) {
+			var oldName = SignalPath.getName()
+			SignalPath.saveName(name, cb, function(e) {
+				SignalPath.setName(oldName)
+			})
+		}
 	})
 	$(SignalPath).on("saved loaded new", function() {
 		nameEditor.update()
@@ -391,7 +393,8 @@ $(function() {
 			$.ajax("${ createLink(uri:"/api/v1/canvases", absolute: true)}" + '/' + SignalPath.getId(), {
 				method: 'DELETE',
 				success: function() {
-					window.location = "${ createLink(controller: 'canvas', action:'editor')}"
+					Streamr.showSuccess("${ message(code: 'canvas.delete.success') }")
+					SignalPath.clear()
 				},
 				error: function(e, t, msg) {
 					Streamr.showError("${ message(code: 'canvas.delete.error') }", "${ message(code: 'canvas.delete.error.title') }")
@@ -520,7 +523,7 @@ $(function() {
 
 				<sp:moduleAddButton buttonId="addModule" browserId="moduleTree" class="btn-block">
 					<i class="fa fa-plus"></i>
-					<g:message code="signalPath.addModule.label" default="Add Module" />
+					<g:message code="canvas.addModule.label" />
 				</sp:moduleAddButton>
 			</div>
 

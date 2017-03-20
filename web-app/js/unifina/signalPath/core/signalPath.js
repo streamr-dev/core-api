@@ -390,6 +390,12 @@ var SignalPath = (function () {
 		return dirty
 	}
 	pub.isDirty = isDirty
+    
+    function saveName(name, callback, errorCallback) {
+        setName(name)
+        _update(toJSON(), callback, errorCallback)
+    }
+    pub.saveName = saveName
 
 	function saveAs(name, callback) {
 		setName(name)
@@ -449,7 +455,7 @@ var SignalPath = (function () {
 		})
 	}
 
-	function _update(json, callback) {
+	function _update(json, callback, errorCallback) {
 		$.ajax({
 			type: 'PUT',
 			url: options.apiUrl + "/canvases/"+json.id,
@@ -474,6 +480,9 @@ var SignalPath = (function () {
 
 				}
 				handleError(errorThrown)
+                if (errorCallback) {
+                    errorCallback(errorThrown)
+                }
 			}
 		})
 	}
