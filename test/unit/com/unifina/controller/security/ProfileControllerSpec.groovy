@@ -1,12 +1,11 @@
 package com.unifina.controller.security
 
-import com.unifina.service.KafkaService
+import com.unifina.domain.security.SecUser
+import com.unifina.service.StreamService
+import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import spock.lang.Specification
-
-import com.unifina.domain.security.SecUser
-import com.unifina.service.UserService
 
 @TestFor(ProfileController)
 @Mock([SecUser])
@@ -31,7 +30,7 @@ class ProfileControllerSpec extends Specification {
 
 	void setup() {
 		controller.springSecurityService = springSecurityService
-		controller.kafkaService = Mock(KafkaService)
+		controller.streamService = Mock(StreamService)
 		user = new SecUser(id:1, 
 			username:"test@test.test", 
 			name: "Test User",
@@ -136,11 +135,11 @@ class ProfileControllerSpec extends Specification {
 			request.method = "POST"
 			controller.regenerateApiKey()
 		then: "the key has changed"
-			1 * controller.kafkaService.sendMessage("revoked-api-keys", "", [
+			1 * controller.streamService.sendMessage(_, [
 			        action: "revoked",
 					user: 1,
 					key: "test"
-			])
+			], _)
 	}
 	
 }

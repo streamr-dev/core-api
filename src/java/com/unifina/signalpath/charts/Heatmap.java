@@ -37,9 +37,7 @@ public class Heatmap extends ModuleWithUI {
 	
 	@Override
 	public void sendOutput() {
-		if (getGlobals().getUiChannel()!=null) {
-			getGlobals().getUiChannel().push(new HeatPoint(latitude.getValue(), longitude.getValue(), value.getValue()), uiChannelId);
-		}
+		pushToUiChannel(new HeatPoint(latitude.getValue(), longitude.getValue(), value.getValue()));
 	}
 
 	@Override

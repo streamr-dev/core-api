@@ -45,7 +45,7 @@
 		</r:script>
 		<r:script>
 			$(document).ready(function() {
-				$(".delete-canvas-link").each(function(i, el) {
+				$(".delete-button").each(function(i, el) {
 					new ConfirmButton(el, {
 						title: "${ message(code: 'canvas.delete.title') }",
 						message: "${ message(code: 'canvas.delete.confirm') }"
@@ -89,18 +89,14 @@
 					</div>
 				</div>
 			</div>
-
 			<div class="panel-body">
-				<div class="hidden-sm hidden-md hidden-lg">
-					<g:render template="canvasListSearch"/>
-				</div>
 				<ui:table>
 					<ui:thead>
 						<ui:tr>
 							<ui:th><g:message code="canvas.name.label" /></ui:th>
 							<ui:th><g:message code="canvas.state.label" /></ui:th>
 							<ui:th class="hidden-xs"><g:message code="canvas.updated.label" /></ui:th>
-							<ui:th class="button-column"></ui:th>
+							<ui:th class="button-column" />
 						</ui:tr>
 					</ui:thead>
 					<ui:tbody>

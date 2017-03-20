@@ -179,7 +179,7 @@
 					</ul>
 				</div>
 			</ui:breadcrumb>
-			<streamr-client id="client" server="${ serverUrl }" autoconnect="true" autodisconnect="false"></streamr-client>
+			<streamr-client id="client" server="${config.streamr.ui.server}" path=${config.streamr.ui.serverPath} autoconnect="true" autodisconnect="false"></streamr-client>
 			<ul id="dashboard-view"></ul>
 		</div>
 

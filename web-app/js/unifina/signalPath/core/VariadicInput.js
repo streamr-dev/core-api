@@ -5,8 +5,13 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
     pub = pub || {};
     pub = SignalPath.Input(json, parentDiv, module, type, pub);
 
-    var growVariadic = function(div) {
+    var growVariadic = function(div, displayName) {
         if (!SignalPath.isLoading() && !module.moduleClosed) {
+
+            // Set display name
+            if (displayName) {
+                pub.setDisplayName(displayName)
+            }
 
             if (json.variadic.isLast) {
                 var jsonCopy = jQuery.extend(true, {}, json) // deep-copy object
@@ -29,6 +34,10 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
 
                 if (json.variadic.linkedOutput) {
                     var linkedOutput = module.getOutput(json.variadic.linkedOutput)
+                    // Copy name to output
+                    if (displayName) {
+                        linkedOutput.setDisplayName(displayName)
+                    }
                     linkedOutput.div.css("display", "")
                     var newOutput = linkedOutput.makeNewOutput()
                     jsonCopy.variadic.linkedOutput = newOutput.getName()
@@ -55,7 +64,7 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
     pub.setExport = function (div, data, value) {
         super_setExport(div, data, value)
         if (value) {
-            growVariadic(div)
+            growVariadic(div, null)
         } else {
             shrinkVariadic(div)
         }
@@ -71,7 +80,7 @@ SignalPath.VariadicInput = function(json, parentDiv, module, type, pub) {
         }
 
         div.bind("spConnect", function(event, output) {
-            growVariadic(div)
+            growVariadic(div, output.getDisplayName())
         })
 
         div.bind("spDisconnect", function(event, output) {
