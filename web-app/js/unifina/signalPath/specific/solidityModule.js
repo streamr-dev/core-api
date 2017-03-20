@@ -43,10 +43,5 @@ SignalPath.SolidityModule = function(data,canvas,prot) {
 		return footer
 	}
 
-	function getContract() {
-		return prot.jsonData.contract
-	}
-	pub.getContract = getContract
-
 	return pub
 }
