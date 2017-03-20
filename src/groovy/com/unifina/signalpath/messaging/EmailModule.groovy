@@ -46,7 +46,7 @@ class EmailModule extends ModuleWithSideEffects {
 			lastEmailBlocked = false
 		} else if (emailSent) {
 			lastEmailBlocked = true
-			globals.uiChannel?.push(new NotificationMessage("Tried to send emails too often"), parentSignalPath.uiChannelId)
+			parentSignalPath.pushToUiChannel(new NotificationMessage("Tried to send emails too often"))
 			emailSent = false
 		}
 	}

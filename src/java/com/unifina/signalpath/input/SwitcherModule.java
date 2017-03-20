@@ -68,11 +68,9 @@ public class SwitcherModule extends InputModule {
 	}
 
 	private void updateUiState() {
-		if (getGlobals().getUiChannel()!=null) {
-			Map<String,Object> msg = new HashMap<String,Object>();
-			msg.put("switcherValue", value);
-			getGlobals().getUiChannel().push(msg, uiChannelId);
-		}
+		Map<String,Object> msg = new HashMap<String,Object>();
+		msg.put("switcherValue", value);
+		pushToUiChannel(msg);
 	}
 
 	@Override

@@ -26,11 +26,6 @@ public class GlobalsFactory {
 	
 	private static final Logger log = Logger.getLogger(GlobalsFactory.class);
 
-	@Deprecated // A user should always be provided
-	public static Globals createInstance(Map signalPathContext, GrailsApplication grailsApplication) {
-		return new GlobalsFactory().create(signalPathContext, grailsApplication, null);
-	}
-
 	public static Globals createInstance(Map signalPathContext, GrailsApplication grailsApplication, SecUser user) {
 		return new GlobalsFactory().create(signalPathContext, grailsApplication, user);
 	}
