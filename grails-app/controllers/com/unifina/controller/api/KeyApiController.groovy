@@ -56,7 +56,7 @@ class KeyApiController {
 
 		if (user == null) {
 			throw new NotFoundException("User not found", SecUser.class.toString(), saveKeyCommand.username)
-		} else if (!permissionService.canShare(request.apiUser, user)) {
+		} else if (request.apiUser != user) {
 			throw new NotPermittedException(request.apiUser?.username, "User", user.id.toString(), Permission.Operation.SHARE.toString())
 		}
 

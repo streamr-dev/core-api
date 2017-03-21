@@ -91,14 +91,14 @@ class KeyApiControllerSpec extends Specification {
 		thrown(NotFoundException)
 	}
 
-	void "save() throws NotPermittedException if current user does not have share permission on target user"() {
+	void "save() throws NotPermittedException if not logged in as given username"() {
 		setup:
 		new SecUser(
 			username: "user2@user.com",
 			password: "pwd",
 			name: "name",
 			timezone: "Europe/Helsinki",
-			apiKey: "apiKey"
+			apiKey: "differentKey"
 		).save(failOnError: true, validate: true)
 
 		when:
@@ -118,24 +118,13 @@ class KeyApiControllerSpec extends Specification {
 	}
 
 	void "save() creates user-linked key when given username"() {
-		setup:
-		new SecUser(
-			username: "user2@user.com",
-			password: "pwd",
-			name: "name",
-			timezone: "Europe/Helsinki",
-			apiKey: "apiKey"
-		).save(failOnError: true, validate: true)
-
-		permissionService.systemGrant(SecUser.get(1), SecUser.get(2), Permission.Operation.SHARE)
-
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
 		request.requestURI = "/api/v1/keys"
 		request.JSON = [
 			name: "key name",
-			username: "user2@user.com",
+			username: "user@user.com",
 		]
 		withFilters([action: 'save']) {
 			controller.save()
@@ -146,7 +135,7 @@ class KeyApiControllerSpec extends Specification {
 		response.json == [
 		    id: "1",
 			name: "key name",
-			user: 2
+			user: 1
 		]
 	}
 
