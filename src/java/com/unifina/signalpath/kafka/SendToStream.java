@@ -89,8 +89,10 @@ public class SendToStream extends ModuleWithSideEffects {
 		// Find the IEventRecipient for this message
 		IEventRecipient eventRecipient = feed.getEventRecipientForMessage(msg);
 
-		FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
-		getGlobals().getDataSource().getEventQueue().enqueue(event);
+		if (eventRecipient != null) {
+			FeedEvent event = new FeedEvent(msg, globals.time, eventRecipient);
+			getGlobals().getDataSource().getEventQueue().enqueue(event);
+		}
 	}
 
 	@Override

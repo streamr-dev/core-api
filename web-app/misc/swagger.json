@@ -100,6 +100,14 @@
                         "required": false,
                         "type": "boolean",
                         "default": false
+                    },
+                    {
+                        "name": "uiChannel",
+                        "in": "query",
+                        "description": "Filter by whether this stream is an UI channel or not. UI channels are streams used to push updates to visualisation widgets. For the typical list of streams, set this to false.",
+                        "required": false,
+                        "type": "boolean",
+                        "default": false
                     }
                 ],
                 "tags": [
@@ -453,9 +461,10 @@
                     {
                         "name": "adhoc",
                         "in": "query",
-                        "description": "Filter canvases by their adhoc-ness.",
+                        "description": "Filter canvases by their adhoc-ness. Set to false to get the typical list of canvases as seen in the UI.",
                         "required": false,
-                        "type": "boolean"
+                        "type": "boolean",
+                        "default": false
                     },
                     {
                         "name": "max",
@@ -1397,6 +1406,10 @@
                 "apiKey": {
                     "type": "string",
                     "description": "Api key needed to produce data to this stream."
+                },
+                "uiChannel": {
+                    "type": "boolean",
+                    "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets."
                 }
             }
         },
@@ -1504,6 +1517,7 @@
                 },
                 "adhoc": {
                     "type": "boolean"
+                    "description": "adhoc canvases are temporary canvases used for eg. historical runs."
                 },
                 "serialized": {
                     "type": "boolean",

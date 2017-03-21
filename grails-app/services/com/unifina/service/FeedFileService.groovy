@@ -23,7 +23,6 @@ import com.unifina.feed.AbstractFeedPreprocessor
 import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.feed.file.FileStorageAdapter
 import com.unifina.feed.file.RemoteFeedFile
-import com.unifina.task.FeedFilePreprocessTask
 
 class FeedFileService {
 

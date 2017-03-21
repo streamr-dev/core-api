@@ -12,7 +12,7 @@ class MockMailService {
 	public MockMailService() {
 	
 	}
-	
+
 	def sendMail(Closure c) {
 		mailSent = true
 		def delegate = new MailDelegate()

@@ -37,13 +37,12 @@ class StreamController {
 	static defaultAction = "list"
 	
 	def permissionService
-	def feedFileService
-	def kafkaService
 	def streamService
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
 		List<Stream> streams = permissionService.get(Stream, user, {
+			eq("uiChannel", false) // filter out UI channel Streams
 			order("lastUpdated", "desc")
 		})
 		Set<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE).toSet()
