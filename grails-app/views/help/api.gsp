@@ -20,7 +20,6 @@
 <g:render template="api/introduction" />
 <hr>
 <g:render template="api/data-input" />
-
 <hr>
 <g:render template="api/data-output" />
 <hr>
