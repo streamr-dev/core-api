@@ -1,6 +1,7 @@
 package com.unifina.domain.security
 
 import com.unifina.utils.IdGenerator
+import groovy.transform.CompileStatic
 
 /**
  * Key that either
@@ -18,5 +19,14 @@ class Key {
 
 	static mapping = {
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
+	}
+
+	@CompileStatic
+	Map toMap() {
+		return [
+			id: id,
+			name: name,
+			user: user?.id
+		]
 	}
 }
