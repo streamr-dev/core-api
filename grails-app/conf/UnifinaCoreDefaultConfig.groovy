@@ -248,7 +248,7 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev-data.streamr/api/v1/ws"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev.streamr/api/v1/ws"
 environments {
 	production {
 		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
@@ -258,7 +258,7 @@ environments {
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr/api/v1"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.streamr/api/v1"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
