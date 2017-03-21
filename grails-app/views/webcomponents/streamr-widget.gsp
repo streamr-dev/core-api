@@ -98,10 +98,15 @@
 				if (this.cachedModuleJson)
 					callback(this.cachedModuleJson)
 				else {
+					const headers = {}
+					if (this.authkey) {
+						headers['Authorization'] = 'token ' + this.authkey
+					}
 					// Get JSON from the server to initialize options
 					$.ajax({
 						type: 'POST',
 						url: _this.url + '/request',
+						headers: headers,
 						dataType: 'json',
 						contentType: 'application/json; charset=utf-8',
 						data: JSON.stringify({type: 'json'}),
@@ -124,9 +129,16 @@
 			},
 			sendRequest: function(msg, callback) {
 				var _this = this
+
+				const headers = {}
+				if (this.authkey) {
+					headers['Authorization'] = 'token ' + this.authkey
+				}
+
 				$.ajax({
 					type: 'POST',
 					url: _this.url + '/request',
+					headers: headers,
 					data: JSON.stringify(msg),
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
