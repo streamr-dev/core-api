@@ -1,5 +1,7 @@
 package com.unifina.controller.data
 
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.api.ApiException
 import com.unifina.feed.DataRange
@@ -89,7 +91,20 @@ class StreamController {
 
 	def show() {
 		getAuthorizedStream(params.id) { stream, user ->
-			[stream: stream, writable: permissionService.canWrite(user, stream), shareable: permissionService.canShare(user, stream)]
+			boolean writetable = permissionService.canWrite(user, stream)
+			boolean shareable = permissionService.canShare(user, stream)
+
+			List<Key> keys = new ArrayList<>()
+			if (shareable) {
+				List<Permission> permissions = permissionService.getPermissionsTo(stream)
+				for (Permission p : permissions) {
+					if (p.key) {
+						keys.add(p.key)
+					}
+				}
+			}
+
+			[stream: stream, writable: writetable, shareable: shareable, keys: keys]
 		}
 	}
 
