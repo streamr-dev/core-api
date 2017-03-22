@@ -26,15 +26,16 @@ class KeyApiControllerSpec extends Specification {
 
 	def permissionService
 
+	SecUser loggedInUser
+
 	void setup() {
-		SecUser secUser = new SecUser(
+		loggedInUser = new SecUser(
 			username: "user@user.com",
 			password: "pwd",
 			name: "name",
 			timezone: "Europe/Helsinki",
 			apiKey: "apiKey"
-		)
-		secUser.save(failOnError: true, validate: true)
+		).save(failOnError: true, validate: true)
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
 	}
 
@@ -162,7 +163,7 @@ class KeyApiControllerSpec extends Specification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(SecUser.get(1), stream, Permission.Operation.WRITE)
+		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.WRITE)
 
 		when:
 		request.addHeader("Authorization", "Token apiKey")
@@ -186,7 +187,7 @@ class KeyApiControllerSpec extends Specification {
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
-		permissionService.systemGrant(SecUser.get(1), stream, Permission.Operation.SHARE)
+		permissionService.systemGrant(loggedInUser, stream, Permission.Operation.SHARE)
 
 		when:
 		request.addHeader("Authorization", "Token apiKey")
@@ -211,5 +212,107 @@ class KeyApiControllerSpec extends Specification {
 		and:
 		Permission.findByKey(Key.get(1)) != null
 		permissionService.canReadKey(Key.get(1), Stream.get("streamId"))
+	}
+
+	void "delete() throws NotFoundException if given keyId doesn't exist"() {
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/keys/keyId"
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
+
+		then:
+		thrown(NotFoundException)
+	}
+
+	void "delete() throws NotPermittedException if attempting to delete user-linked key as other user"() {
+		setup:
+		SecUser user2 = new SecUser(
+			username: "user2@user.com",
+			password: "pwd",
+			name: "name",
+			timezone: "Europe/Helsinki",
+			apiKey: "differentApiKey"
+		).save(validate: true, failOnError: true)
+
+		new Key(name: "user2's key", user: user2).save(failOnError: true, validate: true)
+
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/keys/1"
+		params.id = "1"
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
+
+		then:
+		thrown(NotPermittedException)
+	}
+
+	void "delete() deletes key if deleting user-linked key as said user"() {
+		new Key(name: "user's key", user: loggedInUser).save(failOnError: true, validate: true)
+
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/keys/1"
+		params.id = "1"
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
+
+		then:
+		response.status == 204
+		Key.get("1") == null
+	}
+
+	void "delete() throws NotPermittedException if attempting to delete anonymous key that is not associated with a Stream that logged in user has share permission on"() {
+		setup:
+		Stream stream = new Stream(name: "stream").save(validate: false, failOnError: true)
+		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.get(Stream, loggedInUser, Permission.Operation.SHARE) >> [stream]
+		permissionService.canReadKey(key, stream) >> false
+
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/keys/1"
+		params.id = "1"
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
+
+		then:
+		thrown(NotPermittedException)
+	}
+
+	void "delete() deletes anonymous key if it is associated with a Stream that logged in user has share permission on"() {
+		setup:
+		Stream stream = new Stream(name: "stream").save(validate: false, failOnError: true)
+		Key key = new Key(name: "anonymous key").save(failOnError: true, validate: true)
+
+		controller.permissionService = permissionService = Stub(PermissionService)
+		permissionService.get(Stream, loggedInUser, Permission.Operation.SHARE) >> [stream]
+		permissionService.canReadKey(key, stream) >> true
+
+		assert Key.get("1") != null
+
+		when:
+		request.addHeader("Authorization", "Token apiKey")
+		request.method = "DELETE"
+		request.requestURI = "/api/v1/keys/1"
+		params.id = "1"
+		withFilters([action: 'delete']) {
+			controller.delete()
+		}
+
+		then:
+		response.status == 204
+		Key.get("1") == null
 	}
 }
