@@ -9,30 +9,29 @@ public class BinaryBetting extends SolidityModule {
 	public String getCodeTemplate() {
 		String streamrAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
 
-		// TODO: should unitCost/recipient be public?
-		//   + These are supplied to constructor, so they show up on canvas already
-		//   - When manipulating from CLI it would be useful (for demo not so important)
 		return  "pragma solidity ^0.4.6;\n" +
 				"\n" +
 				"// Binary bet has two outcomes: zero or one\n" +
 				"contract BinaryBetting {\n" +
-				"    uint8 public OUTCOME_COUNT = 2;\n" +
-				"    uint public MINIMUM_BET = 1 wei;\n" +
+				"    uint8 public constant OUTCOME_COUNT = 2;\n" +
+				"    uint public constant MINIMUM_BET = 1 wei;\n" +
 				"\n" +
-				"    event RoundStarted(uint id, uint closeTime);\n" +
-				"    event RoundCancelled(uint id);\n" +
-				"    event RoundResolved(uint id, uint8 withOutcome);\n" +
-				"    event BetsPlaced(uint id, uint onOutcome0, uint onOutcome1);\n" +
+				"    event Round(uint id);\n" +
+				"    event RoundStarted(uint closeTime);\n" +
+				"    event RoundCancelled();\n" +
+				"    event RoundResolved(uint8 withOutcome);\n" +
+				"    event BetsPlaced(uint onOutcome0, uint onOutcome1);\n" +
+				"    event Error(string message);\n" +
 				"\n" +
 				"    // Betting rounds are limited-time and winners-take-all\n" +
 				"    // Round is either:\n" +
 				"    //   - taking bets (isActive, before closeTime)\n" +
 				"    //   - closed, not taking bets and waiting for resolveRound (isActive, after closeTime)\n" +
 				"    //   - cleared, ether has been distributed (!isActive)\n" +
-				"    mapping(uint => Round) rounds;\n" +
+				"    mapping(uint => BettingRound) rounds;\n" +
 				"    mapping(uint => bool) public roundIsActive;\n" +
 				"\n" +
-				"    struct Round {\n" +
+				"    struct BettingRound {\n" +
 				"        uint closeTime;\n" +
 				"        mapping(uint8 => Bet[]) bets;\n" +
 				"        mapping(uint8 => uint) valueOnOutcome;\n" +
@@ -46,31 +45,38 @@ public class BinaryBetting extends SolidityModule {
 				"    }\n" +
 				"\n" +
 				"    function openRound(uint id, uint closeTime) admin {\n" +
-				"        if (roundIsActive[id]) { throw; }\n" +
-				"        if (closeTime < now) { throw; }\n" +
+				"        if (roundIsActive[id]) { Error(\"Round already started\"); return; }\n" +
+				"        if (closeTime < now) { Error(\"closeTime must be in future\"); return; }\n" +
 				"        \n" +
-				"        rounds[id] = Round(closeTime, 0);\n" +
+				"        rounds[id] = BettingRound(closeTime, 0);\n" +
+				"        for (uint8 i = 0; i < OUTCOME_COUNT; i++) {\n" +
+				"            delete rounds[id].bets[i];\n" +
+				"            rounds[id].valueOnOutcome[i] = 0;\n" +
+				"        }\n" +
 				"        roundIsActive[id] = true;\n" +
-				"        RoundStarted(id, closeTime);\n" +
+				"        Round(id);\n" +
+				"        RoundStarted(closeTime);\n" +
+				"        BetsPlaced(0, 0);\n" +
 				"    }\n" +
 				"\n" +
 				"    function placeBet(uint id, uint8 outcome) payable {\n" +
-				"        if (!roundIsActive[id]) { throw; }\n" +
-				"        if (rounds[id].closeTime < now) { throw; }\n" +
-				"        if (outcome >= OUTCOME_COUNT) { throw; }\n" +
-				"        if (msg.value < MINIMUM_BET) { throw; }\n" +
+				"        if (!roundIsActive[id]) { Error(\"Round not started\"); return; }\n" +
+				"        if (rounds[id].closeTime < now) { Error(\"Round already closed\"); return; }\n" +
+				"        if (outcome >= OUTCOME_COUNT) { Error(\"Bad outcome value, try 0 or 1\"); return; }\n" +
+				"        if (msg.value < MINIMUM_BET) { Error(\"Must send enough ether with transaction\"); return; }\n" +
 				"        \n" +
 				"        var newBet = Bet(msg.sender, msg.value, outcome);\n" +
 				"        rounds[id].bets[outcome].push(newBet);\n" +
 				"        rounds[id].valueOnOutcome[outcome] += msg.value;\n" +
 				"        rounds[id].totalValue += msg.value;\n" +
 				"        \n" +
-				"        BetsPlaced(id, rounds[id].valueOnOutcome[0], rounds[id].valueOnOutcome[1]);\n" +
+				"        Round(id);\n" +
+				"        BetsPlaced(rounds[id].valueOnOutcome[0], rounds[id].valueOnOutcome[1]);\n" +
 				"    }\n" +
 				"\n" +
 				"    function resolveRound(uint id, uint8 correctOutcome) admin {\n" +
-				"        if (!roundIsActive[id]) { throw; }\n" +
-				"        if (correctOutcome >= OUTCOME_COUNT) { throw; }\n" +
+				"        if (!roundIsActive[id]) { Error(\"Round not started\"); return; }\n" +
+				"        if (correctOutcome >= OUTCOME_COUNT) { Error(\"Bad outcome value, try 0 or 1\"); return; }\n" +
 				"        \n" +
 				"        // if there was no \"other side\", cancel the bet instead of dividing the winnings\n" +
 				"        var winnersValue = rounds[id].valueOnOutcome[correctOutcome];\n" +
@@ -88,12 +94,20 @@ public class BinaryBetting extends SolidityModule {
 				"            payouts[bet.account] += share;\n" +
 				"        }\n" +
 				"        \n" +
-				"        RoundResolved(id, correctOutcome);\n" +
+				"        // attempt payout; if it fails, the players can still call withdraw()\n" +
+				"        for (i = 0; i < winners.length; i++) {\n" +
+				"            bet = winners[i];\n" +
+				"            payOut(bet.account);\n" +
+				"        }\n" +
+				"        \n" +
+				"        Round(id);\n" +
+				"        RoundResolved(correctOutcome);\n" +
+				"        BetsPlaced(rounds[id].valueOnOutcome[0], rounds[id].valueOnOutcome[1]);\n" +
 				"    }\n" +
 				"\n" +
 				"    // return all funds\n" +
 				"    function cancelRound(uint id) admin {\n" +
-				"        if (!roundIsActive[id]) { throw; }\n" +
+				"        if (!roundIsActive[id]) { Error(\"Round not started\"); return; }\n" +
 				"        roundIsActive[id] = false;\n" +
 				"        \n" +
 				"        for (uint8 i = 0; i < OUTCOME_COUNT; i++) {\n" +
@@ -103,24 +117,42 @@ public class BinaryBetting extends SolidityModule {
 				"            }\n" +
 				"        }\n" +
 				"        \n" +
-				"        RoundCancelled(id);\n" +
+				"        // attempt payout; if it fails, the players can still call withdraw()\n" +
+				"        for (i = 0; i < OUTCOME_COUNT; i++) {\n" +
+				"            bets = rounds[id].bets[i];\n" +
+				"            for (j = 0; j < bets.length; j++) {\n" +
+				"                payOut(bets[j].account);\n" +
+				"            }\n" +
+				"        }\n" +
+				"        \n" +
+				"        Round(id);\n" +
+				"        RoundCancelled();\n" +
+				"        BetsPlaced(rounds[id].valueOnOutcome[0], rounds[id].valueOnOutcome[1]);\n" +
 				"    }\n" +
 				"\n" +
-				"    // Safe sending: each player can withdraw() their funds separately so they can only mess up themselves\n" +
-				"    //   see https://github.com/ConsenSys/smart-contract-best-practices#favor-pull-over-push-payments\n" +
-				"    mapping(address => uint) payouts;\n" +
+				"    // Backup in case send fails during resolveRound or cancelRound\n" +
 				"    function withdraw() {\n" +
-				"        if (payouts[msg.sender] == 0) { throw; }\n" +
-				"        var payout = payouts[msg.sender];\n" +
-				"        payouts[msg.sender] = 0;\n" +
-				"        if (!msg.sender.send(payout)) {\n" +
-				"            payouts[msg.sender] = payout;\n" +
+				"        payOut(msg.sender);\n" +
+				"    }\n" +
+				"\n" +
+				"    mapping(address => uint) payouts;\n" +
+				"    function payOut(address target) private {\n" +
+				"        if (payouts[target] == 0) { return; }\n" +
+				"        var payout = payouts[target];\n" +
+				"        payouts[target] = 0;\n" +
+				"        if (!target.send(payout)) {\n" +
+				"            payouts[target] = payout;\n" +
 				"        }\n" +
+				"    }\n" +
+				"    \n" +
+				"    function kill() admin {\n" +
+				"        selfdestruct(" + streamrAddress + ");\n" +
 				"    }\n" +
 				"\n" +
 				"    modifier admin {\n" +
-				"        if (msg.sender != " + streamrAddress + ") { throw; }\n" +
-				"        _;\n" +
+				"        if (msg.sender == " + streamrAddress + ") {\n" +
+				"            _;\n" +
+				"        }\n" +
 				"    }\n" +
 				"}\n";
 	}

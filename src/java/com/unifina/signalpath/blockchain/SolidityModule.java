@@ -3,6 +3,8 @@ package com.unifina.signalpath.blockchain;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
 import com.unifina.utils.MapTraversal;
@@ -11,8 +13,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -108,7 +108,6 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 					}
 				}
 
-				// augment with address
 				contract = deploy(address, privateKey, code, args, sendWei);
 			}
 		} catch (Exception e) {
@@ -216,7 +215,12 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			returned = new Gson().fromJson(responseJson, CompileResponse.class);
 		} catch (Exception e) {
 			log.error("Error parsing JSON response from Ethereum backend. Response was: \n "+ responseJson, e);
-			throw e;
+			JsonObject response = new JsonParser().parse(responseJson).getAsJsonObject();
+			if (response.get("error") != null) {
+				throw new RuntimeException(response.get("error").toString());
+			} else {
+				throw e;
+			}
 		}
 
 		if (returned.contracts != null && returned.contracts.size() > 0) {
