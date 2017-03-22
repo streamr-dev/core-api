@@ -9,7 +9,6 @@ import groovy.transform.CompileStatic
 class Stream implements Comparable {
 	String id
 	Integer partitions = 1
-	String apiKey
 	SecUser user
 
 	String name
@@ -33,7 +32,6 @@ class Stream implements Comparable {
 		description(nullable:true)
 		firstHistoricalDay(nullable:true)
 		lastHistoricalDay(nullable:true)
-		apiKey(nullable:true)
 		user(nullable:true)
 		uiChannelPath(nullable:true)
 		uiChannelCanvas(nullable:true)
@@ -58,7 +56,6 @@ class Stream implements Comparable {
 		[
 			id: id,
 			partitions: partitions,
-			apiKey: apiKey,
 			name: name,
 			feed: feed.toMap(),
 			config: config == null || config.empty ? config : JSON.parse(config),
