@@ -46,6 +46,10 @@ class KeyApiController {
 		} else if (!canDeleteKey(key, request.apiUser)) {
 			throw new NotPermittedException(request.apiUser.username, "Key", key.id.toString(), Permission.Operation.SHARE.toString())
 		} else {
+			def query = Permission.where {
+				key == key
+			}
+			query.deleteAll()
 			key.delete(flush: true)
 			response.status = 204
 			render ""

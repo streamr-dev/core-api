@@ -18,6 +18,7 @@ class Key {
 	}
 
 	static mapping = {
+		table '`key`'
 		id generator: IdGenerator.name // Note: doesn't apply in unit tests
 	}
 

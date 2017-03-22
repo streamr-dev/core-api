@@ -30,6 +30,8 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/canvases/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Canvas }
 		"/api/v1/canvases/$canvasId/modules/$moduleId"(controller: "canvasApi", action: "module") // for internal use
 
+		"/api/v1/keys"(resources: "keyApi", excludes: ["create", "edit"])
+
 		"/api/v1/streams"(resources: "streamApi", excludes: ["create", "edit"])
 		"/api/v1/streams/$resourceId/permissions"(resources: "permissionApi", excludes: ["create", "edit", "update"]) { resourceClass = Stream }
 		"/api/v1/streams/$resourceId/permissions/me"(controller: "permissionApi", action: "getOwnPermissions") { resourceClass = Stream }
