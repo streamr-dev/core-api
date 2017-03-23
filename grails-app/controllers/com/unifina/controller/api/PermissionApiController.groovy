@@ -76,7 +76,9 @@ class PermissionApiController {
 
 	@StreamrApi(requiresAuthentication = false)
 	def save() {
-		if (!request.hasProperty("JSON")) { throw new InvalidArgumentsException("JSON body expected") }
+		if (!request.hasProperty("JSON")) {
+			throw new InvalidArgumentsException("JSON body expected")
+		}
 
 		// request.JSON.user is either SecUser.username or SignupInvite.username (possibly of a not yet created SignupInvite)
 		boolean anonymous = request.JSON.anonymous as boolean

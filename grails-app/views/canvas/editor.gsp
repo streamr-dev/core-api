@@ -16,6 +16,7 @@
 		<r:require module="signalpath-theme"/>
 		<r:require module="hotkeys"/>
 		<r:require module="touchpunch"/>
+		<r:require module="sharing-dialog"/>
 		<r:require module="canvas-controls"/>
 
 		<r:script>
@@ -368,6 +369,13 @@ $(function() {
 		}))
 	})
 
+	var shareUrl
+	var shareName
+	$(".share-button").click(function(e) {
+	    e.preventDefault()
+	    sharePopup(shareUrl, shareName)
+	})
+
 	$(SignalPath).on('loaded saved', function(e, json) {
 		nameEditor.update(json)
 		if (!SignalPath.isReadOnly()) {
@@ -375,13 +383,15 @@ $(function() {
 			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
 				var permissions = []
 				_.each(perm, function(permission) {
-					if (permission.id = "${id}") {
+					if (permission.id = SignalPath.getId()) {
 						permissions.push(permission.operation)
 					}
 				})
 				var enabled = ['rename']
 				if (_.contains(permissions, "share")) {
 				    enabled.push('share')
+				    shareUrl = canvasUrl
+				    shareName = SignalPath.getName()
 				}
                 if (_.contains(permissions, "write")) {
 				    enabled.push('delete')
@@ -546,7 +556,9 @@ $(function() {
 			</div>
 
 			<div class="menu-content">
-				<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()"> Share </ui:shareButton>
+				<button id="share-button" class="btn share-button btn-block">
+					<i class='fa fa-user'></i> Share
+				</button>
 			</div>
 
 		</div> <!-- / #main-menu-inner -->
@@ -568,10 +580,12 @@ $(function() {
 				</button>
 				<ul class="dropdown-menu">
 					<li class="share-canvas-button share-button">
-						<ui:shareButton type="link" getName="SignalPath.getName()">Share</ui:shareButton>
+						<a id="share-canvas-button">
+							<i class='fa fa-user'></i> Share
+						</a>
 					</li>
 					<li class="rename-canvas-button">
-						<a>
+						<a id="rename-canvas-button">
 							<i class="fa fa-pencil"></i> Rename
 						</a>
 					</li>
