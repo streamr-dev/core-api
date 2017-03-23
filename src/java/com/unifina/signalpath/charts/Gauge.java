@@ -44,9 +44,7 @@ public class Gauge extends ModuleWithUI {
 			msg.put("v",value.value);
 		}
 
-		if (getGlobals() != null && getGlobals().getUiChannel() != null) {
-			getGlobals().getUiChannel().push(msg, uiChannelId);
-		}
+		pushToUiChannel(msg);
 	}
 
 	@Override

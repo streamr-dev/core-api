@@ -273,7 +273,7 @@ class CanvasApiControllerSpec extends Specification {
 		then:
 		response.status == 204
 		1 * canvasService.authorizedGetById("1", me, Permission.Operation.WRITE) >> canvas1
-		Canvas.get("1") == null
+		1 * canvasService.deleteCanvas(canvas1, me)
 	}
 
 	void "delete() must not delete the canvas if authorization fails"() {
