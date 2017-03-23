@@ -127,7 +127,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		
 	}
 
-	private class UiChannel implements Serializable {
+	public class UiChannel implements Serializable {
 
 		private String id;
 		private final String name;

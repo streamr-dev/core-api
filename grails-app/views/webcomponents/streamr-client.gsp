@@ -9,7 +9,7 @@
 
 
 
-<polymer-element name="streamr-client" attributes="server path autoconnect autodisconnect authkey">
+<polymer-element name="streamr-client" attributes="url authkey autoconnect autodisconnect">
 	<script>
 	(function(){
 		var streamrClient
@@ -17,10 +17,9 @@
 		function createClient(cb, element) {
 			if (streamrClient)
 				cb(streamrClient)
-			else if (typeof StreamrClient !== 'undefined' && element.server) {
+			else if (typeof StreamrClient !== 'undefined' && element.url) {
 				var myOptions = {
-					url: element.server,
-					path: element.path,
+					url: element.url,
 					autoConnect: (element.autoconnect != null ? element.autoconnect : true),
 					autoDisconnect: (element.autodisconnect != null ? element.autodisconnect : true),
 					authKey: element.authkey

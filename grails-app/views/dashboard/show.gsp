@@ -92,8 +92,7 @@
 			</ui:breadcrumb>
 			<streamr-client
 					id="client"
-					server="${config.streamr.ui.server}"
-					path="${config.streamr.ui.serverPath}"
+					url="${config.streamr.ui.server}"
 					autoconnect="true"
 					autodisconnect="false"
 					authkey="${user.apiKey}">
