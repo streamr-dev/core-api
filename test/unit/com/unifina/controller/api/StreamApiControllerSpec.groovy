@@ -11,6 +11,7 @@ import com.unifina.domain.security.SecUser
 import com.unifina.feed.NoOpStreamListener
 import com.unifina.filters.UnifinaCoreAPIFilters
 import com.unifina.service.ApiService
+import com.unifina.service.DashboardService
 import com.unifina.service.PermissionService
 import com.unifina.service.StreamService
 import com.unifina.service.UserService
@@ -23,7 +24,7 @@ import spock.lang.Specification
 
 @TestFor(StreamApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService])
+@Mock([SecUser, Stream, Key, Permission, Feed, UnifinaCoreAPIFilters, UserService, PermissionService, SpringSecurityService, StreamService, ApiService, DashboardService])
 class StreamApiControllerSpec extends Specification {
 
 	Feed feed
@@ -57,8 +58,6 @@ class StreamApiControllerSpec extends Specification {
 		streamThreeId = streamService.createStream([name: "atream", feed: feed], user).id
 		streamFourId = streamService.createStream([name: "otherUserStream", feed: feed], otherUser).id
 
-		// Then moch StreamService
-		streamService = Mock(StreamService)
 		controller.streamService = streamService
 	}
 
@@ -88,7 +87,6 @@ class StreamApiControllerSpec extends Specification {
 		then:
 		response.json.length() == 1
 		response.json[0].id.length() == 22
-		response.json[0].apiKey.length() == 22
 		response.json[0].name == "stream"
 		response.json[0].config == [
 			fields: []
@@ -125,8 +123,11 @@ class StreamApiControllerSpec extends Specification {
 
 	void "save() calls StreamService.createStream() and returns it.toMap()"() {
 		setup:
+		controller.streamService = streamService = Mock(StreamService)
 		def stream = new Stream(feed: new Feed())
 		stream.id = "test-stream"
+
+
 		when:
 		request.addHeader("Authorization", "Token ${user.apiKey}")
 		request.json = [test: "test"]
