@@ -18,8 +18,6 @@ SignalPath.MapModule = function(data,canvas,prot) {
         prot.div.addClass('map-module')
 
 		container = $("<div class='map-container content'></div>")
-		prot.body.width(500)
-		prot.body.height(400)
 		prot.body.append(container)
 
 		var mapOptions = {

@@ -15141,7 +15141,7 @@ button.arrow:after {
 .bootbox-body .modulehelp {
   overflow: auto;
 }
-#canvas .module {
+.streamr-canvas .module {
   min-width: 150px;
   display: -webkit-flex;
   display: -moz-flex;
@@ -15154,7 +15154,7 @@ button.arrow:after {
   -o-flex-direction: column;
   flex-direction: column;
 }
-#canvas .module .dragging-handle {
+.streamr-canvas .module .dragging-handle {
   position: absolute;
   top: 0;
   left: 0;
@@ -15164,7 +15164,7 @@ button.arrow:after {
   color: transparent;
   z-index: 10;
 }
-#canvas .module .moduleheader {
+.streamr-canvas .module .moduleheader {
   width: 100%;
   height: 18px;
   margin-bottom: 5px;
@@ -15174,18 +15174,18 @@ button.arrow:after {
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
 }
-#canvas .module .moduleheader .modulename {
+.streamr-canvas .module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
 }
-#canvas .module .moduleheader .modulebutton {
+.streamr-canvas .module .moduleheader .modulebutton {
   width: 16px;
   text-align: right;
   display: inline;
   vertical-align: top;
   cursor: pointer;
 }
-#canvas .module .modulebody {
+.streamr-canvas .module .modulebody {
   padding: 5px;
   -webkit-flex: 1 0 auto;
   -moz-flex: 1 0 auto;
@@ -15203,22 +15203,22 @@ button.arrow:after {
   -o-flex-direction: column;
   flex-direction: column;
 }
-#canvas .module .modulebody .table th {
+.streamr-canvas .module .modulebody .table th {
   padding-left: 3px;
   padding-right: 3px;
 }
-#canvas .module .modulebody table.paramTable {
+.streamr-canvas .module .modulebody table.paramTable {
   width: 100%;
   padding: 0px;
   border: none;
 }
-#canvas .module .modulebody table.paramTable td {
+.streamr-canvas .module .modulebody table.paramTable td {
   padding-right: 5px;
 }
-#canvas .module .modulebody table.paramTable td input {
+.streamr-canvas .module .modulebody table.paramTable td input {
   width: 50px;
 }
-#canvas .module .modulebody table.ioTable {
+.streamr-canvas .module .modulebody table.ioTable {
   border: none;
   width: 100%;
   padding: 0;
@@ -15228,29 +15228,29 @@ button.arrow:after {
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
 }
-#canvas .module .modulebody table.ioTable td {
+.streamr-canvas .module .modulebody table.ioTable td {
   padding-right: 5px;
 }
-#canvas .module .modulebody table.ioTable td.input {
+.streamr-canvas .module .modulebody table.ioTable td.input {
   text-align: right;
 }
-#canvas .module .modulebody table.ioTable td.output {
+.streamr-canvas .module .modulebody table.ioTable td.output {
   text-align: left;
   padding-left: 10px;
 }
-#canvas .module .modulebody div.endpoint.input {
+.streamr-canvas .module .modulebody div.endpoint.input {
   cursor: pointer;
 }
-#canvas .module .modulebody div.endpoint.input .switchContainer {
+.streamr-canvas .module .modulebody div.endpoint.input .switchContainer {
   float: left;
 }
-#canvas .module .modulebody div.endpoint.output {
+.streamr-canvas .module .modulebody div.endpoint.output {
   cursor: pointer;
 }
-#canvas .module .modulebody div.endpoint .switchContainer {
+.streamr-canvas .module .modulebody div.endpoint .switchContainer {
   float: right;
 }
-#canvas .module .modulebody div.endpoint .switchContainer .ioSwitch {
+.streamr-canvas .module .modulebody div.endpoint .switchContainer .ioSwitch {
   display: inline-block;
   font-size: 7px;
   vertical-align: text-bottom;
@@ -15259,22 +15259,22 @@ button.arrow:after {
   height: 13px;
   cursor: pointer;
 }
-#canvas .module .modulebody div.content {
+.streamr-canvas .module .modulebody div.content {
   -webkit-flex: 1 0 auto;
   -moz-flex: 1 0 auto;
   -ms-flex: 1 0 auto;
   -o-flex: 1 0 auto;
   flex: 1 0 auto;
 }
-#canvas .module .modulebody div.ioname {
+.streamr-canvas .module .modulebody div.ioname {
   display: inline-block;
   max-width: 100px;
   white-space: pre-wrap;
 }
-#canvas .module .modulebody .leaflet-container {
+.streamr-canvas .module .modulebody .leaflet-container {
   width: 100%;
 }
-#canvas .module .modulefooter {
+.streamr-canvas .module .modulefooter {
   width: 100%;
   margin-top: 3px;
   -webkit-flex: 0 0 auto;
@@ -15283,32 +15283,32 @@ button.arrow:after {
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
 }
-#canvas .module .modulefooter .moduleSwitchContainer {
+.streamr-canvas .module .modulefooter .moduleSwitchContainer {
   float: right;
   margin-bottom: -3px;
 }
-#canvas .module .modulefooter .moduleSwitchContainer .moduleSwitch {
+.streamr-canvas .module .modulefooter .moduleSwitchContainer .moduleSwitch {
   font-size: 7px;
   text-align: center;
   cursor: pointer;
   padding: 2px;
 }
-#canvas .module.ui-resizable .modulefooter .moduleSwitchContainer {
+.streamr-canvas .module.ui-resizable .modulefooter .moduleSwitchContainer {
   padding-right: 20px;
 }
-#canvas .module .csvDownload {
+.streamr-canvas .module .csvDownload {
   display: block;
 }
-#canvas .module .csvDownload img {
+.streamr-canvas .module .csvDownload img {
   vertical-align: middle;
 }
-#canvas .module .showOnHover {
+.streamr-canvas .module .showOnHover {
   opacity: 0.0;
 }
-#canvas .module .showOnHover:hover {
+.streamr-canvas .module .showOnHover:hover {
   opacity: 1.0;
 }
-#canvas .module .drag-exclude {
+.streamr-canvas .module .drag-exclude {
   cursor: initial;
 }
 .ui-widget-content.module-help-tooltip {
@@ -15433,6 +15433,8 @@ textarea.comment {
 .module.map-module .modulebody {
   min-width: 350px;
   min-height: 250px;
+  width: 500px;
+  height: 400px;
 }
 .module.map-module .switchContainer {
   left: -85px;
