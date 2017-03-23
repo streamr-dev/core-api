@@ -393,7 +393,10 @@ var SignalPath = (function () {
     
     function saveName(name, callback, errorCallback) {
         setName(name)
-        _update(toJSON(), callback, errorCallback)
+        _update(toJSON(), function(e) {
+            callback(e)
+            Streamr.showSuccess('Canvas renamed successfully')
+        }, errorCallback)
     }
     pub.saveName = saveName
 
@@ -475,14 +478,13 @@ var SignalPath = (function () {
 					var apiError = jqXHR.responseJSON;
 					if (apiError && apiError.message) {
 						handleError(apiError.message)
-						return;
+                        errorCallback && errorCallback(apiError)
+						return
 					}
 
 				}
 				handleError(errorThrown)
-                if (errorCallback) {
-                    errorCallback(errorThrown)
-                }
+                errorCallback && errorCallback(errorThrown)
 			}
 		})
 	}

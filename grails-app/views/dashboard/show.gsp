@@ -17,14 +17,14 @@
 			$(function() {
 				var dashboard
 				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
-				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
 				var sidebar
 				var nameEditor = new StreamrNameEditor({
 					el: $(".name-editor"),
 					opener: $(".rename-dashboard-button")
 				}).on("changed", function(name) {
-					if (dashboard)
+					if (dashboard) {
 						dashboard.set("name", name)
+					}
 				})
 
 				function createDashboard(dbJson) {
@@ -35,8 +35,6 @@
 					dashboard.urlRoot = baseUrl + "api/v1/dashboards/"
 					var dashboardView = new DashboardView({
 						model: dashboard,
-						el: $("#dashboard-view"),
-						baseUrl: baseUrl
 						el: $("#dashboard-view"),
 						baseUrl: baseUrl
 					})
@@ -60,7 +58,7 @@
 						checkPermissions()
 					})
 					$(window).on('beforeunload', function(){
-						if(!dashboard.saved)
+						if (!dashboard.saved)
 							return 'The dashboard has changes which are not saved'
 					})
 					new ConfirmButton("#delete-dashboard-button", {

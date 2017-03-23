@@ -163,10 +163,6 @@ $(function() {
 		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor", id: savedJson.id}))
 	})
 
-	$(SignalPath).on("new", function(event) {
-		setAddressbarUrl(Streamr.createLink({controller: "canvas", action: "editor"}))
-	})
-
 	function setAddressbarUrl(url) {
 		if (window.history && window.history.pushState && window.history.replaceState) {
 			// If we haven't set the current url into history, replace the current state so we know to reload the page on back
@@ -325,29 +321,44 @@ $(function() {
 		el: $(".name-editor"),
 		signalPath: SignalPath,
 		opener: $(".rename-canvas-button"),
-		name: SignalPath.getName(),
-		beforeChange: function(name, cb) {
-			var oldName = SignalPath.getName()
-			SignalPath.saveName(name, cb, function(e) {
-				SignalPath.setName(oldName)
+		name: SignalPath.getName()
+	}).on('changed', function(name) {
+	    var oldName = SignalPath.getName()
+	    if (!SignalPath.isSaved()) {
+			SignalPath.saveAs(name)
+	    } else {
+			SignalPath.saveName(name, function() {}, function() {
+				console.log("error")
+				// calling silent to prevent event loop
+				nameEditor.setName(oldName, {
+					silent: true
+				})
 			})
-		}
+	    }
 	})
-	$(SignalPath).on("saved loaded new", function() {
-		nameEditor.update()
+
+	$(SignalPath).on("saved loaded", function(e, saveData) {
+		nameEditor.update(saveData)
 	})
 
 	$(".streamr-dropdown li.disabled").click(function(e) {
 		e.preventDefault()
 	})
 
-	$(SignalPath).on('new', function(e, json) {
+	$(SignalPath).on('new', function() {
 		$(".share-button").data("url", undefined)
-		$(".share-button").attr("disabled", "disabled")
-		$(".share-button").removeClass("forbidden")
+			.attr("disabled", "disabled")
+			.removeClass("forbidden")
 		$(".delete-canvas-button").addClass("disabled")
-		$(".delete-canvas-button").removeClass("forbidden")
-		$("li.share-canvas-button").addClass("disabled")
+			.removeClass("forbidden")
+			.addClass("disabled")
+	    nameEditor.setName(SignalPath.getName(), {
+	        silent: true
+	    })
+		setAddressbarUrl(Streamr.createLink({
+		    controller: "canvas",
+		    action: "editor"
+		}))
 	})
 
 	$(SignalPath).on('loaded saved', function(e, json) {
@@ -403,8 +414,9 @@ $(function() {
 			})
 		}
 	})
-})
 
+	$(SignalPath).trigger('new') // For event listeners
+})
 
 </r:script>
 

@@ -1,18 +1,9 @@
 
 var StreamrNameEditor = Backbone.View.extend({
-
-    events: {
-        "click": "openEditor",
-        "change input" : "changeName",
-        "blur input" : "changeName",
-        "keyup input" : "keyPressEventHandler"
-    },
-
+    
     initialize: function(options) {
         var _this = this
         
-        this.beforeChange = options.beforeChange
-
         if (!this.el)
             throw "Element (el) is required!"
 
@@ -26,44 +17,50 @@ var StreamrNameEditor = Backbone.View.extend({
         }
 
         this.render()
-        this.update()
     },
 
     render: function() {
+        var _this = this
+        
         this.$name = $("<span class='name'/>")
-        this.$editor = $("" +
-            "<div class='form-inline'>" +
-                "<input type='text' class='form-control name-input'>" +
-            "</div>")
+        this.$input = $("<input/>", {
+            type: 'text',
+            class: 'form-control name-input'
+        })
+        
+        this.$editor = $("<div/>", {
+            class: 'form-inline'
+        }).append(this.$input)
+        
+        this.$el.on('click', function() {
+            _this.openEditor()
+        })
+        
+        this.$input.on('change', function() {
+            _this.setName($(this).val())
+        })
+        
+        this.$input.on('keyup', function(e) {
+            _this.keyPressEventHandler(e)
+        })
 
         this.$el.append(this.$name)
         this.$el.append(this.$editor)
     },
 
-    update: function() {
+    update: function(updateObject) {
+        this.name = typeof updateObject !== 'undefined' && updateObject.name || this.name
         this.$name.text(this.name)
         this.closeEditor()
         this.$editor.find('input').val(this.name)
     },
 
-    changeName: function() {
-        var _this = this
-        this.name = this.$editor.find('input').val()
-        if (this.beforeChange) {
-            if (this.beforeChange.length > 1) {
-                this.beforeChange(this.name, ready)
-            } else {
-                if (this.beforeChange(this.name)) {
-                    ready()
-                }
-            }
-        } else {
-            ready()
-        }
-        
-        function ready() {
-            _this.trigger("changed", this.name)
-            _this.update()
+    setName: function(name, opt) {
+        this.update({
+            name: name
+        })
+        if (!opt || !opt.silent) {
+            this.trigger("changed", this.name)
         }
     },
 
@@ -80,7 +77,7 @@ var StreamrNameEditor = Backbone.View.extend({
         // Enter
         if (event.keyCode == 13){
             e.preventDefault()
-            this.changeName()
+            this.setName(this.$editor.find('input').val())
         // Escape
         } else if (e.keyCode == 27) {
             e.preventDefault()
@@ -91,11 +88,6 @@ var StreamrNameEditor = Backbone.View.extend({
 
     getName: function() {
         return this.name
-    },
-
-    setName: function(name) {
-        this.name = name
-        this.update()
     }
 
 })
