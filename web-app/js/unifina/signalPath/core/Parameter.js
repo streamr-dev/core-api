@@ -35,8 +35,9 @@
 				option.attr("value",val.value);
 				option.append(val.name);
 
-				if (_this.data.value !== undefined && _this.data.value.toString() == val.value)
-					option.attr("selected","selected");
+				if (_this.data.value != null && _this.data.value.toString() == val.value) {
+					option.attr("selected", "selected")
+				}
 
 				select.append(option);
 			});

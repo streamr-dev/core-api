@@ -1,23 +1,15 @@
 package com.unifina.signalpath.charts;
 
+import com.unifina.signalpath.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleOption;
-import com.unifina.signalpath.ModuleOptions;
-import com.unifina.signalpath.RuntimeRequest;
-import com.unifina.signalpath.RuntimeResponse;
-import com.unifina.signalpath.TimeSeriesChartInput;
-import com.unifina.signalpath.TimeSeriesInput;
-import com.unifina.utils.MapTraversal;
 
 public class TimeSeriesChart extends Chart {
 	
 	private int tsInputCount = 10;
 	private boolean barify = false;
-	private boolean overnightBreak = true;
 	
 	@Override
 	public void initialize() {
@@ -48,8 +40,9 @@ public class TimeSeriesChart extends Chart {
 				it.seriesName = newName;
 			}
 		}
-
-		pushToUiChannel(getInitMessage());
+		if (getGlobals().isRunContext()) {
+			pushToUiChannel(getInitMessage());
+		}
 	}
 	
 	protected InitMessage getInitMessage() {
@@ -92,7 +85,6 @@ public class TimeSeriesChart extends Chart {
 		for (Input i : drivingInputs) {
 			TimeSeriesChartInput input = (TimeSeriesChartInput) i;
 			if (!Double.isNaN(input.value)
-					&& hasRc 
 					&& (!barify || getGlobals().time.getTime() - input.previousTime >= 60000L)) {
 				
 					PointMessage msg = new PointMessage(
@@ -100,27 +92,12 @@ public class TimeSeriesChart extends Chart {
 							getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time.getTime()),
 							input.value);
 					
-					getGlobals().getUiChannel().push(msg, uiChannelId);
-					
+					pushToUiChannel(msg);
 					input.previousTime = getGlobals().time.getTime();
 			}
 		}
 	}
-	
-	@Override
-	public void clearState() {
-		super.clearState();
-		
-		if (hasRc && overnightBreak) {
-			for (Input it : getInputs()) {
-				if (it instanceof TimeSeriesChartInput && it.isConnected()) {
-					// Send day break
-					getGlobals().getUiChannel().push(new BreakMessage(((TimeSeriesChartInput)it).seriesIndex), uiChannelId);
-				}
-			}
-		}
-	}
-	
+
 	@Override
 	public Map<String,Object> getConfiguration() {
 		Map<String,Object> config = super.getConfiguration();
@@ -129,7 +106,6 @@ public class TimeSeriesChart extends Chart {
 		
 		ModuleOptions options = ModuleOptions.get(config);
 		options.add(new ModuleOption("inputs", tsInputCount, ModuleOption.OPTION_INTEGER));
-		options.add(new ModuleOption("overnightBreak", overnightBreak, ModuleOption.OPTION_BOOLEAN));
 		
 		return config;
 	}
@@ -145,8 +121,6 @@ public class TimeSeriesChart extends Chart {
 		
 		if (options.getOption("inputs")!=null)
 			tsInputCount = options.getOption("inputs").getInt();
-		if (options.getOption("overnightBreak")!=null)
-			overnightBreak = options.getOption("overnightBreak").getBoolean();
 		
 		// Backwards compatibility
 		if (config.containsKey("params")) {

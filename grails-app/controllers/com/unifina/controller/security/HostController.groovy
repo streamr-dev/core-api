@@ -28,7 +28,7 @@ class HostController {
 
 			// Create start tasks
 			stoppedCanvases.each {
-				canvasService.startRemote(it, false, true)
+				canvasService.startRemote(it, it.user, false, true)
 			}
 
 			render(stoppedCanvases*.toMap() as JSON)

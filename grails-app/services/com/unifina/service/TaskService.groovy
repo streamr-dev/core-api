@@ -24,17 +24,9 @@ class TaskService {
 		return UUID.randomUUID().toString()
 	}
 
-	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, String groupId = IdGenerator.get()) {
-		Task task = new Task()
-		task.available = true
-		task.complete = false
-		task.complexity = 0
-		task.category = category
-		task.config = (config as JSON).toString()
-		task.implementingClass = taskClass.name
-		task.taskGroupId = groupId
+	Task createTask(Class<? extends AbstractTask> taskClass, Map config, String category, SecUser user = null, Long delayMs = 0, String groupId = IdGenerator.get()) {
+		Task task = new Task(taskClass.name, (config as JSON).toString(), category, groupId, 0, user, new Date(System.currentTimeMillis() + delayMs))
 		task.save(failOnError:true)
-
 		return task
 	}
 	

@@ -1,13 +1,10 @@
 package com.unifina.controller.data
 
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.FeedFile
-import com.unifina.domain.data.Stream
 import com.unifina.feed.file.AbstractFeedFileDiscoveryUtil
 import com.unifina.service.FeedFileService
+import grails.plugin.springsecurity.annotation.Secured
 
 @Secured(["ROLE_ADMIN"])
 class FeedFileController {
