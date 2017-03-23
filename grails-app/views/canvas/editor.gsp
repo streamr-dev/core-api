@@ -337,21 +337,28 @@ $(function() {
 	    }
 	})
 
-	$(SignalPath).on("saved loaded", function(e, saveData) {
-		nameEditor.update(saveData)
-	})
-
 	$(".streamr-dropdown li.disabled").click(function(e) {
 		e.preventDefault()
 	})
 
+	function streamrDropDownSetEnabled(buttons) {
+	    var buttonReference = {
+	        'share': '.share-button',
+	        'rename': '.rename-canvas-button',
+	        'delete': '.delete-canvas-button'
+	    }
+	    var list = Array.isArray(buttons) ? buttons : buttons.split(/[ ,]/)
+		for (var btn in buttonReference) {
+	        if (list.indexOf(btn) < 0) {
+	            $(buttonReference[btn]).addClass('disabled').addClass('forbidden').attr('disabled', 'disabled')
+	        } else {
+	            $(buttonReference[btn]).removeClass('disabled').removeClass('forbidden').removeAttr('disabled')
+	        }
+		}
+	}
+
 	$(SignalPath).on('new', function() {
-		$(".share-button").data("url", undefined)
-			.attr("disabled", "disabled")
-			.removeClass("forbidden")
-		$(".delete-canvas-button").addClass("disabled")
-			.removeClass("forbidden")
-			.addClass("disabled")
+	    streamrDropDownSetEnabled('rename')
 	    nameEditor.setName(SignalPath.getName(), {
 	        silent: true
 	    })
@@ -362,6 +369,7 @@ $(function() {
 	})
 
 	$(SignalPath).on('loaded saved', function(e, json) {
+		nameEditor.update(json)
 		if (!SignalPath.isReadOnly()) {
 			var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
 			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
@@ -371,17 +379,14 @@ $(function() {
 						permissions.push(permission.operation)
 					}
 				})
+				var enabled = ['rename']
 				if (_.contains(permissions, "share")) {
-					$("#share-button").data("url", canvasUrl)
-					$("#share-button").removeAttr("disabled")
-				} else {
-					$("#share-button").addClass("forbidden")
+				    enabled.push('share')
 				}
                 if (_.contains(permissions, "write")) {
-                    $(".delete-canvas-button").removeClass("disabled")
-                } else {
-                    $(".delete-canvas-button").addClass("forbidden")
+				    enabled.push('delete')
                 }
+                streamrDropDownSetEnabled(enabled)
 			})
 		}
 	})
@@ -541,7 +546,7 @@ $(function() {
 			</div>
 
 			<div class="menu-content">
-				<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()" disabled="disabled"> Share </ui:shareButton>
+				<ui:shareButton id="share-button" class="btn-block" getName="SignalPath.getName()"> Share </ui:shareButton>
 			</div>
 
 		</div> <!-- / #main-menu-inner -->
@@ -562,7 +567,7 @@ $(function() {
 					<i class="fa fa-cog"></i> <i class="navbar-icon fa fa-caret-down"></i>
 				</button>
 				<ul class="dropdown-menu">
-					<li class="disabled share-canvas-button">
+					<li class="share-canvas-button share-button">
 						<ui:shareButton type="link" getName="SignalPath.getName()">Share</ui:shareButton>
 					</li>
 					<li class="rename-canvas-button">
@@ -570,7 +575,7 @@ $(function() {
 							<i class="fa fa-pencil"></i> Rename
 						</a>
 					</li>
-					<li class="delete-canvas-button disabled">
+					<li class="delete-canvas-button">
 						<a id="delete-canvas-button">
 							<i class="fa fa-trash-o"></i> Delete
 						</a>
@@ -636,7 +641,7 @@ $(function() {
 	%{--</div><!-- /.modal -->--}%
 
 	<ul id="save-dropdown-menu" class="dropdown-menu" role="menu">
-		<li class="disabled"><a href="#" id="saveButton">Save</a></li>
+		<li><a href="#" id="saveButton">Save</a></li>
 		<li><a href="#" id="saveAsButton">Save as..</a></li>
 	</ul>
 	
