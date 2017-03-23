@@ -35,9 +35,9 @@ class PermissionServiceSpec extends Specification {
     def setup() {
 
 		// Users
-		me = new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate:false)
-		anotherUser = new SecUser(username: "him", password: "bar", apiKey: "anotherApiKey", apiSecret: "anotherApiSecret").save(validate:false)
-		stranger = new SecUser(username: "stranger", password: "x", apiKey: "strangeApiKey", apiSecret: "strangeApiSecret").save(validate:false)
+		me = new SecUser(username: "me", password: "foo").save(validate:false)
+		anotherUser = new SecUser(username: "him", password: "bar").save(validate:false)
+		stranger = new SecUser(username: "stranger", password: "x").save(validate:false)
 
 		// Keys
 		myKey = new Key(name: "my key", user: me).save(failOnError: true)

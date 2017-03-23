@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
@@ -87,10 +88,10 @@ class UserService {
 	 * @returns SecUser user, or null if the keys do not match a user.
 	 */
 	SecUser getUserByApiKey(String apiKey) {
-		if (!apiKey) {
-			return null
+		if (apiKey != null && !apiKey.isEmpty()) {
+			return Key.get(apiKey)?.user
 		}
-		return SecUser.findByApiKey(apiKey)
+		return null
 	}
 
 	def passwordValidator = { String password, command ->

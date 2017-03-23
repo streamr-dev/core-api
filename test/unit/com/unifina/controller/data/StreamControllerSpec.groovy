@@ -24,7 +24,7 @@ class StreamControllerSpec extends Specification {
 	void setup() {
 		module = new Module(id: 1).save(validate: false)
 		feed = new Feed(streamListenerClass: NoOpStreamListener.name, module: module).save(validate: false)
-		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey").save(validate:false)
+		user = new SecUser(username: "me", password: "foo").save(validate:false)
 
 		stream = new Stream(name: "dummy", description: "dummy", feed: feed)
 		stream.id = "dummy"

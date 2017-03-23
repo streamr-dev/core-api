@@ -11,8 +11,6 @@ class SecUser {
 	boolean accountLocked
 	boolean passwordExpired
 	
-	String apiKey = generateApiKey()
-	
 	String name
 	String timezone
 
@@ -22,12 +20,10 @@ class SecUser {
 		username blank: false, unique: true, email: true
 		password blank: false
 		name blank: false
-		apiKey nullable:true, unique: true
 	}
 
 	static mapping = {
 		password column: '`password`'
-		apiKey index: 'apiKey_index'
 		permissions cascade: 'all-delete-orphan'
 	}
 
@@ -35,16 +31,15 @@ class SecUser {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
 	}
 
-	public Map toMap() {
+	Key getKey() {
+		Key.findByUser(this)
+	}
+
+	Map toMap() {
 		return [
 			name           : name,
 			username       : username,
-			apiKey         : apiKey,
 			timezone       : timezone,
 		]
-	}
-
-	public static String generateApiKey() {
-		return IdGenerator.get() + IdGenerator.get()
 	}
 }
