@@ -17,7 +17,7 @@ class ClockModuleSpec extends Specification {
     def setup() {
 		globals = new Globals()
 		globals.setUser(new SecUser(timezone:"UTC", username: "username"))
-		globals.init()
+		globals.time = new Date(0)
 		module = new ClockModule()
 		module.globals = globals
 		module.init()
@@ -118,7 +118,7 @@ class ClockModuleSpec extends Specification {
 		module.getOutput("date").getValue() == "2015/07/15 06:32"
 	}
 	
-	void "string output works correctly (not daylight saving)"() {
+	void "string output works correctly (no daylight saving)"() {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
