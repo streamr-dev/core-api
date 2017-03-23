@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -17,7 +18,7 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Feed, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
+@Mock([Feed, Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
@@ -123,7 +124,10 @@ class UserServiceSpec extends Specification {
 
 	void "looking up a user based on correct api key"() {
 		when:
-		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate: false)
+		def createdUser = new SecUser(username: "me", password: "foo").save(validate: false)
+		def key = new Key(user: createdUser, name: "key")
+		key.id = "apiKey"
+		key.save(failOnError: true, validate: true)
 		def user = service.getUserByApiKey("apiKey")
 
 		then:
@@ -132,7 +136,7 @@ class UserServiceSpec extends Specification {
 
 	void "looking up a user with incorrect api key"() {
 		when:
-		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate: false)
+		new SecUser(username: "me", password: "foo").save(validate: false)
 		def user = service.getUserByApiKey("wrong api key")
 
 		then:

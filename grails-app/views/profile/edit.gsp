@@ -92,7 +92,7 @@
 								</label>
 								<g:link class="pull-right" controller="help" action="api">API docs</g:link>
 							</div>
-							<pre>${user.apiKey}</pre>
+							<pre>${key.id}</pre>
 							<div>
 								<button id="regenerateApiKeyButton" type="button" class="btn btn-danger btn-xs">
 									<i class="fa fa-refresh"></i>

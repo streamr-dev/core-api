@@ -1,5 +1,6 @@
 package com.unifina.controller.core.signalpath
 
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.signalpath.Canvas
 import grails.converters.JSON
@@ -50,10 +51,18 @@ class CanvasController {
 	def editor() {
 		def beginDate = new Date()
 		def endDate = new Date()
-
+		def currentUser = SecUser.get(springSecurityService.currentUser.id)
 		def json = request.JSON
 
-		[beginDate:beginDate, endDate:endDate, id:params.id, examples:params.examples, user:SecUser.get(springSecurityService.currentUser.id), json: (json as JSON)?.toString()]
+		[
+			beginDate: beginDate,
+			endDate: endDate,
+			id: params.id,
+			examples: params.examples,
+			user: currentUser,
+			key: currentUser?.getKey(),
+			json: (json as JSON)?.toString()
+		]
 	}
 
 	// Can be accessed anonymously for embedding canvases in iframes (eg. the landing page)

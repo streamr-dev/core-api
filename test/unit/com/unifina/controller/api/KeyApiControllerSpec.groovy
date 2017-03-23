@@ -33,10 +33,13 @@ class KeyApiControllerSpec extends Specification {
 			username: "user@user.com",
 			password: "pwd",
 			name: "name",
-			timezone: "Europe/Helsinki",
-			apiKey: "apiKey"
+			timezone: "Europe/Helsinki"
 		).save(failOnError: true, validate: true)
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
+
+		def key = new Key(name: 'users key', user: loggedInUser)
+		key.id = "apiKey"
+		key.save(failOnError: true, validate: true)
 	}
 
 	void "save() throws ApiException (status code 422) if not given either username or streamId"() {
@@ -98,8 +101,7 @@ class KeyApiControllerSpec extends Specification {
 			username: "user2@user.com",
 			password: "pwd",
 			name: "name",
-			timezone: "Europe/Helsinki",
-			apiKey: "differentKey"
+			timezone: "Europe/Helsinki"
 		).save(failOnError: true, validate: true)
 
 		when:
@@ -233,8 +235,7 @@ class KeyApiControllerSpec extends Specification {
 			username: "user2@user.com",
 			password: "pwd",
 			name: "name",
-			timezone: "Europe/Helsinki",
-			apiKey: "differentApiKey"
+			timezone: "Europe/Helsinki"
 		).save(validate: true, failOnError: true)
 
 		new Key(name: "user2's key", user: user2).save(failOnError: true, validate: true)

@@ -44,12 +44,16 @@ class StreamApiControllerSpec extends Specification {
 		controller.permissionService = permissionService
 		controller.apiService = mainContext.getBean(ApiService)
 
-		user = new SecUser(username: "me", password: "foo", apiKey: "apiKey")
+		user = new SecUser(username: "me", password: "foo")
 		user.save(validate: false)
+
+		Key key = new Key(name: "key", user: user)
+		key.id = "apiKey"
+		key.save(failOnError: true, validate: true)
 
 		feed = new Feed(streamListenerClass: NoOpStreamListener.name, id: 7).save(validate: false)
 
-		def otherUser = new SecUser(username: "other", password: "bar", apiKey: "otherApiKey").save(validate: false)
+		def otherUser = new SecUser(username: "other", password: "bar").save(validate: false)
 
 		// First use real streamService to create the streams
 		streamService = mainContext.getBean(StreamService)
@@ -63,7 +67,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "find all streams of logged in user"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
 		withFilters([action: 'index']) {
@@ -76,7 +80,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "find streams by name of logged in user"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.name = "stream"
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
@@ -98,7 +102,7 @@ class StreamApiControllerSpec extends Specification {
 		when:
 		def name = Stream.get(streamTwoId).name
 		params.name = name
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		request.requestURI = "/api/v1/streams"
 		withFilters(action: "index") {
 			controller.index()
@@ -129,7 +133,7 @@ class StreamApiControllerSpec extends Specification {
 
 
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		request.json = [test: "test"]
 		request.method = 'POST'
 		request.requestURI = '/api/v1/stream/create'
@@ -143,7 +147,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "show a Stream of logged in user"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
@@ -158,7 +162,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "cannot shown non-existent Stream"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = "666-666-666"
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
@@ -172,7 +176,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "cannot show other user's Stream"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamFourId
 		request.method = "GET"
 		request.requestURI = "/api/v1/stream"
@@ -224,7 +228,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "update a Stream of logged in user"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
@@ -245,7 +249,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "updating Stream with invalid mongodb settings raises validation error"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription", config: {mongodb: {host: null}}}'
@@ -260,7 +264,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "cannot update non-existent Stream"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = "666-666-666"
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
@@ -275,7 +279,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "cannot update other user's Stream"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamFourId
 		request.method = "PUT"
 		request.json = '{name: "newName", description: "newDescription"}'
@@ -290,7 +294,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "delete a Stream of logged in user"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamOneId
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
@@ -304,7 +308,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "cannot delete non-existent Stream"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = "666-666-666"
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"
@@ -318,7 +322,7 @@ class StreamApiControllerSpec extends Specification {
 
 	void "cannot delete other user's Stream"() {
 		when:
-		request.addHeader("Authorization", "Token ${user.apiKey}")
+		request.addHeader("Authorization", "Token apiKey")
 		params.id = streamFourId
 		request.method = "DELETE"
 		request.requestURI = "/api/v1/stream"

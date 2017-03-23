@@ -1,6 +1,7 @@
 package com.unifina.controller.security
 
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.service.StreamService
 import grails.converters.JSON
@@ -17,7 +18,8 @@ class ProfileController {
 	static defaultAction = "edit"
 
 	def edit() {
-		[user:SecUser.get(springSecurityService.currentUser.id)]
+		def currentUser = SecUser.get(springSecurityService.currentUser.id)
+		[user: currentUser, key: currentUser?.getKey()]
 	}
 	
 	def update() {
@@ -38,16 +40,23 @@ class ProfileController {
 
 	def regenerateApiKey() {
 		SecUser user = SecUser.get(springSecurityService.currentUser.id)
-		String oldApiKey = user.apiKey
-		user.apiKey = user.generateApiKey()
+		List<Key> oldKeys = Key.findAllByUser(user)
+
+		// Revoke old keys
 		Stream revokeNotificationStream = new Stream()
 		revokeNotificationStream.id = grailsApplication.config.streamr.apiKey.revokeNotificationStream
-		streamService.sendMessage(revokeNotificationStream, [
-		        action: "revoked",
+		for (Key oldKey : oldKeys) {
+			oldKey.delete()
+			streamService.sendMessage(revokeNotificationStream, [
+				action: "revoked",
 				user: user.id,
-				key: oldApiKey
-		], 60)
+				key: oldKey.id
+			], 60)
+		}
+
+		new Key(name: 'Key for ' + user.username, user: user).save(validate: true, failOnError: true, flush: true)
 		log.info("User $user.username regenerated api key!")
+
 		render ([success: true] as JSON)
 	}
 	
