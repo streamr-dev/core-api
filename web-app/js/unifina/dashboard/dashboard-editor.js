@@ -339,15 +339,17 @@ var SidebarView = Backbone.View.extend({
 				_this.setEditMode(true)
 		})
 
-		if (this.dashboard.get("items").models.length)
+		if (this.dashboard.get("items").models.length) {
 			this.setEditMode(options.edit)
-		else this.setEditMode(true)
+        } else {
+		    this.setEditMode(true)
+        }
 
 		this.$el.find(".dashboard-name").change(function () {
 			_this.dashboard.saved = false
 		})
 
-		this.dashboard.on('invalid', function(error) {
+		this.dashboard.on('invalid', function() {
 			Streamr.showError(_this.dashboard.validationError, 'Invalid value')
 		})
 
