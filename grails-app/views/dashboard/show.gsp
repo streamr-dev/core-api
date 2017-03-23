@@ -18,6 +18,23 @@
 				var dashboard
 				var baseUrl = '${ createLink(uri: "/", absolute:true) }'
 				var sidebar
+
+				function streamrDropDownSetEnabled(buttons) {
+					var buttonReference = {
+						'share': '.share-button',
+						'rename': '.rename-dashboard-button',
+						'delete': '.delete-dashboard-button'
+					}
+					var list = Array.isArray(buttons) ? buttons : buttons.split(/[ ,]/)
+					for (var btn in buttonReference) {
+						if (list.indexOf(btn) < 0) {
+							$(buttonReference[btn]).addClass('disabled').addClass('forbidden').attr('disabled', 'disabled')
+						} else {
+							$(buttonReference[btn]).removeClass('disabled').removeClass('forbidden').removeAttr('disabled')
+						}
+					}
+				}
+
 				var nameEditor = new StreamrNameEditor({
 					el: $(".name-editor"),
 					opener: $(".rename-dashboard-button")
@@ -27,7 +44,17 @@
 					}
 				})
 
+				var shareUrl
+				var shareName
+				$(".share-button").click(function(e) {
+					e.preventDefault()
+					if ($(this).data('url')) {
+						sharePopup(shareUrl, shareName)
+					}
+				})
+
 				function createDashboard(dbJson) {
+				    streamrDropDownSetEnabled('rename')
 					document.title = dbJson.name
 					nameEditor.setName(dbJson.name)
 					dashboard = new Dashboard(dbJson)
@@ -81,29 +108,24 @@
 						}
 					})
 				}
-				var checkPermissions = function() {
+
+				function checkPermissions() {
 					if (dashboard && dashboard.get("id")) {
 						$.getJSON("${createLink(uri:"/api/v1/dashboards/")}" + dashboard.get("id") + "/permissions/me", function(permissions) {
+						    var dbUrl = Streamr.createLink({uri: "api/v1/dashboards/" + dashboard.get("id")})
 							permissions = _.map(permissions, function(p) {
 								return p.operation
 							})
-							setTimeout(function() {
-								if (_.contains(permissions, "share")) {
-									$(".share-button").data("url", Streamr.createLink({uri: "api/v1/dashboards/" + dashboard.get("id")}))
-									$(".share-button").attr("name", dashboard.get("name"))
-									$(".share-button").removeAttr("disabled")
-									$("li.share-dashboard-button").removeClass("disabled")
-								} else {
-									$(".share-button").addClass("forbidden")
-								}
-								if (_.contains(permissions, "write")) {
-									$(".delete-dashboard-button").removeClass("disabled")
-									$("#saveButton").removeAttr("disabled")
-								} else {
-									$(".delete-dashboard-button").addClass("forbidden")
-									$("#saveButton").addClass("forbidden")
-								}
-							})
+							var enabled = ['rename']
+							if (_.contains(permissions, "share")) {
+								shareUrl = dbUrl
+				    			shareName = dashboard && dashboard.get('name')
+								enabled.push('share')
+							}
+							if (_.contains(permissions, "write")) {
+								enabled.push('delete')
+						    }
+						    streamrDropDownSetEnabled(enabled)
 						})
 					}
 				}
@@ -161,15 +183,17 @@
 						<i class="fa fa-cog"></i> <i class="navbar-icon fa fa-caret-down"></i>
 					</button>
 					<ul class="dropdown-menu">
-						<li class="disabled share-dashboard-button">
-							<ui:shareButton type="link" getName='dashboard.get(\"name\")'>Share</ui:shareButton>
+						<li class="share-dashboard-button share-button">
+							<a id="share-dashboard-button">
+								<i class="fa fa-user"></i> Share
+							</a>
 						</li>
 						<li class="rename-dashboard-button">
-							<a>
+							<a id="rename-dashboard-button">
 								<i class="fa fa-pencil"></i> Rename
 							</a>
 						</li>
-						<li class="delete-dashboard-button disabled">
+						<li class="delete-dashboard-button">
 							<a id="delete-dashboard-button">
 								<i class="fa fa-trash-o"></i> Delete
 							</a>

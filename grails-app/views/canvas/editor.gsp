@@ -373,7 +373,9 @@ $(function() {
 	var shareName
 	$(".share-button").click(function(e) {
 	    e.preventDefault()
-	    sharePopup(shareUrl, shareName)
+	    if ($(this).data('url')) {
+			sharePopup(shareUrl, shareName)
+		}
 	})
 
 	$(SignalPath).on('loaded saved', function(e, json) {

@@ -1,7 +1,7 @@
 <script id="sidebar-template" type="text/template">
     <div class="menu-content">
-		<button id="saveButton" class='save-button btn btn-block btn-primary' title='Save dashboard' {{ typeof id === 'undefined' ? '' : 'disabled="disabled' }}>
-			<i class="fa fa-save" /> Save
+		<button id="saveButton" class="save-button btn btn-block btn-primary" title="Save dashboard">
+			<i class="fa fa-save"></i> Save
 		</button>
 		<ui:shareButton id="share-button" class="btn-block" getName='\$(this).attr(\"name\")' disabled="disabled">
 			Share
