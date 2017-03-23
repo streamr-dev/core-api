@@ -347,7 +347,7 @@ var SignalPath = (function () {
 
     pub.toJSON = function(settings) {
 		var result = {
-			name: getName(),
+			name: pub.getName(),
 			settings: (settings ? settings : options.settings()),
 			modules: []
 		}
@@ -374,7 +374,7 @@ var SignalPath = (function () {
 	 * Checks if this SignalPath has unsaved changes
 	 */
     pub.isDirty = function() {
-		var currentJson = $.extend(true, {}, savedJson, toJSON())
+		var currentJson = $.extend(true, {}, savedJson, pub.toJSON())
 		var dirty = (JSON.stringify(savedJson) !== JSON.stringify(currentJson))
 		return dirty
 	}
@@ -464,7 +464,7 @@ var SignalPath = (function () {
 			$(pub).add(parentElement).trigger('loaded', [savedJson]);
 
 			// It is important that savedJson is rewritten after the loaded event has been fired, because it may affect canvas settings
-			savedJson = $.extend(true, savedJson, toJSON()) // deep copy
+			savedJson = $.extend(true, savedJson, pub.toJSON()) // deep copy
 		}
 
 		// Fetch from api by id
@@ -542,7 +542,7 @@ var SignalPath = (function () {
     pub.startAdhoc = function(startRequest, callback) {
 		startRequest = startRequest || {}
 		startRequest.clearState = false
-		var json = toJSON()
+		var json = pub.toJSON()
 		json.adhoc = true
 		_create(json, function(createdJson) {
 			runningJson = createdJson
@@ -661,7 +661,7 @@ var SignalPath = (function () {
 			return false
 		} else {
 			debugLoopInterval = setInterval(function () {
-				if (SignalPath.isRunning() && !SignalPath.isLoading()) {
+				if (pub.isRunning() && !pub.isLoading()) {
 					$.ajax({
 						type: 'POST',
 						url: pub.getURL() + "/request",
@@ -701,7 +701,7 @@ var SignalPath = (function () {
     }
 
     function _setSavedJson(data) {
-        savedJson = $.extend(true, {}, toJSON(), data) // Deep copy
+        savedJson = $.extend(true, {}, pub.toJSON(), data) // Deep copy
     }
 
     function _update(json, callback) {
@@ -787,8 +787,6 @@ var SignalPath = (function () {
         $(pub).trigger("error", [message])
         options.errorHandler({msg:message})
     }
-
-
-
+    
 	return pub; 
 }());
