@@ -171,7 +171,7 @@ class DashboardService {
 			throw new NotFoundException(Dashboard.simpleName, id.toString())
 		}
 		if (!permissionService.check(user, dashboard, operation)) {
-			throw new NotPermittedException(user.username, Dashboard.simpleName, id.toString())
+			throw new NotPermittedException(user?.username, Dashboard.simpleName, id.toString())
 		}
 		return dashboard
 	}

@@ -95,7 +95,7 @@
 					url="${config.streamr.ui.server}"
 					autoconnect="true"
 					autodisconnect="false"
-					authkey="${user.apiKey}">
+					authkey="${key.id}">
 			</streamr-client>
 			<ul id="dashboard-view"></ul>
 		</div>

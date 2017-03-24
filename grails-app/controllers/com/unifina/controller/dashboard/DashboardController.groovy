@@ -41,7 +41,8 @@ class DashboardController {
 		return [
 			config: grailsApplication.config,
 			id: params.id,
-			user: springSecurityService.currentUser
+			user: springSecurityService.currentUser,
+			key: springSecurityService.currentUser?.getKey()
 		]
 	}
 }
