@@ -15,7 +15,6 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	private final StringOutput date = new StringOutput(this, "date");
 	private final TimeSeriesOutput ts = new TimeSeriesOutput(this,"timestamp");
 
-	private Date lastTime;
 	private SimpleDateFormat df = null;
 
 	public ClockModule() {
@@ -29,18 +28,14 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	
 	@Override
 	public void clearState() {
-		lastTime = null;
 	}
 	
 	@Override
 	public void setTime(Date time) {
-		if (lastTime == null || tickUnit.getValue().isActivationTime(tickRate.getValue(), time.getTime() - lastTime.getTime())) {
-			if (date.isConnected() && format.hasValue()) {
-				updateDateFormatIfNecessary(format.getValue());
-				date.send(df.format(time));
-			}
+		if (tickUnit.getValue().isActivationTime(tickRate.getValue(), time)) {
+			updateDateFormatIfNecessary(format.getValue());
+			date.send(df.format(time));
 			ts.send(time.getTime());
-			lastTime = time;
 		}
 	}
 
@@ -74,20 +69,24 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 		MINUTE(60 * 1000),
 		HOUR(60 * 60 * 1000),
 		DAY(60 * 60 * 24 * 1000);
-
 		private final int baseRate;
 
 		TimeUnit(int baseRate) {
 			this.baseRate = baseRate;
 		}
 
-		boolean isActivationTime(long tickRate, long timeFromLast) {
-			return timeFromLast >= tickRate * baseRate;
+		boolean isActivationTime(long tickRate, Date date) {
+			long ts = date.getTime() - (date.getTime() % 1000); // Reduce milliseconds just to be sure the modulo works right
+			return ts % (tickRate * getBaseRate()) == 0;
 		}
 
 		@Override
 		public String toString() {
 			return name().toLowerCase();
+		}
+
+		public int getBaseRate() {
+			return baseRate;
 		}
 	}
 

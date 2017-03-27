@@ -64,19 +64,20 @@ class ClockModuleSpec extends Specification {
 			unit: [null, null, null, "MINUTE"] + (1..496).collect { null },
 			rate: (1..120).collect { null } + [6] + (1..379).collect { null }
 		]
+		def s = 1000d
 		Map outputValues = [
 			date:
-				["00:00:00", "00:00:01", "00:00:02", "00:00:03"] +
-					(1..56).collect { "00:00:03" } + ["00:01:00"] +
-					(1..59).collect { "00:01:00" } + ["00:02:00"] +
-					(1..239).collect { "00:02:00" } + ["00:06:00"] +
-					(1..139).collect { "00:06:00" },
+				["00:00:00", "00:00:01", "00:00:02"] +
+					(1..57).collect { "00:00:03" } +
+					(1..60).collect { "00:01:00" } +
+					(1..240).collect { "00:02:00" } +
+					(1..140).collect { "00:06:00" },
 			timestamp:
-				[0d, 1000d, 2000d, 3000d] +
-					(1..56).collect { 3000d } + [60000d] +
-					(1..59).collect { 60000d } + [60000d * 2] +
-					(1..239).collect { 60000d * 2 } + [60000d * 6] +
-					(1..139).collect { 60000d * 6 },
+					([0, 1, 2] +
+					(1..57).collect { 3 } +
+					(1..60).collect { 60 } +
+					(1..240).collect { 120 } +
+					(1..140).collect { 360 }).collect { it.doubleValue() * 1000 },
 		]
 		Map everySecondTick = (0..499).collectEntries { Integer v -> [(v): new Date(v * 1000) ]}
 
@@ -95,7 +96,6 @@ class ClockModuleSpec extends Specification {
 		
 		then: "the time is sent out"
 		module.getOutput("timestamp").getValue() == date.getTime()
-		module.getOutput("date").getValue() == null
 	}
 	
 	void "string output works correctly (daylight saving)"() {
@@ -103,19 +103,18 @@ class ClockModuleSpec extends Specification {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		Date date = df.parse("2015-07-15 09:32:00")
-		module.getOutput("date").connect(new Input<Object>(new ClockModule(), "in", "Object"))
 		module.setTime(date)
 		
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-07-15 06:32:00 UTC"
 		
 		when: "time is set and asked with a format"
-		date = df.parse("2015-07-15 09:32:00")
+		date = df.parse("2015-07-15 10:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.setTime(date)
 		
 		then: "the time is sent out"
-		module.getOutput("date").getValue() == "2015/07/15 06:32"
+		module.getOutput("date").getValue() == "2015/07/15 07:32"
 	}
 	
 	void "string output works correctly (no daylight saving)"() {
@@ -123,18 +122,17 @@ class ClockModuleSpec extends Specification {
 		df.setTimeZone(TimeZone.getTimeZone("Europe/Helsinki"))
 		when: "time is set and asked without giving a format"
 		Date date = df.parse("2015-01-15 09:32:00")
-		module.getOutput("date").connect(new Input<Object>(new ClockModule(), "in", "Object"))
 		module.setTime(date)
 		
 		then: "the time is sent out with the default format"
 		module.getOutput("date").getValue() == "2015-01-15 07:32:00 UTC"
 		
 		when: "time is set and asked with a format"
-		date = df.parse("2015-01-15 09:32:00")
+		date = df.parse("2015-01-15 10:32:00")
 		module.getInput("format").receive("yyyy/MM/dd HH:mm")
 		module.setTime(date)
 		
 		then: "the time is sent out"
-		module.getOutput("date").getValue() == "2015/01/15 07:32"
+		module.getOutput("date").getValue() == "2015/01/15 08:32"
 	}
 }
