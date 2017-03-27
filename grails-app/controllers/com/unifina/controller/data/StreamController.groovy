@@ -99,12 +99,12 @@ class StreamController {
 				List<Permission> permissions = permissionService.getPermissionsTo(stream)
 				for (Permission p : permissions) {
 					if (p.key) {
-						keys.add(p.key)
+						keys.add(p.key.toMap())
 					}
 				}
 			}
-
-			[stream: stream, writable: writetable, shareable: shareable, keys: keys]
+			def jsonKeys = keys as JSON
+			[stream: stream, writable: writetable, shareable: shareable, keys: jsonKeys]
 		}
 	}
 

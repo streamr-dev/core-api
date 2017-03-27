@@ -87,11 +87,11 @@
             this.$accessDescription = this.$(".access-description")
             this.$stateLabel = this.$el.find(".state")
 
-            this.$(".user-delete-button").on("click", function() {
+            this.$el.find(".user-delete-button").on("click", function() {
                 self.model.destroy()
             })
 
-            this.$("li[data-opt]").on("click", function(e) {
+            this.$el.find("li[data-opt]").on("click", function(e) {
                 var selection = e.currentTarget.dataset.opt
                 self.model.setAccess(selection)
                 self.$stateLabel.text(self.model.getAccessDescription())

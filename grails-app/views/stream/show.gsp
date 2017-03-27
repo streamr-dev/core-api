@@ -6,6 +6,7 @@
 		<r:require module="confirm-button"/>
 		<r:require module="bootstrap-datepicker"/>
 		<r:require module="sharing-dialog"/>
+		<r:require module="stream-credentials"/>
 		<r:script>
 			$(function() {
 				new ConfirmButton($("#delete-stream-button"), {
@@ -22,6 +23,13 @@
 							}
 						})
 					}
+				})
+			})
+			$(function() {
+				new StreamrStreamCredentials({
+					el: "#stream-credentials",
+					keys: <g:applyCodec encodeAs="none">${keys}</g:applyCodec>,
+					streamId: '${stream.id}'
 				})
 			})
 		</r:script>
@@ -88,6 +96,7 @@
 			</div>
 			
 			<g:include action="details" id="${stream.id}"/>
+
 
 		</div>
 		
