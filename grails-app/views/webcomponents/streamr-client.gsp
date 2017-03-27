@@ -17,7 +17,7 @@
 		function createClient(cb, element) {
 			if (streamrClient)
 				cb(streamrClient)
-			else if (typeof StreamrClient !== 'undefined' && element.server) {
+			else if (typeof StreamrClient !== 'undefined' && element.url) {
 				var myOptions = {
 					url: element.url,
 					autoConnect: (element.autoconnect != null ? element.autoconnect : true),

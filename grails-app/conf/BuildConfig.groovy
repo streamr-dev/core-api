@@ -71,7 +71,7 @@ grails.project.dependency.resolution = {
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
 		runtime('joda-time:joda-time:2.9.3')
-		compile('com.udojava:EvalEx:1.3')
+		compile('com.udojava:EvalEx:1.6')
 
 		compile('org.apache.kafka:kafka-clients:0.9.0.1')
         compile('com.mashape.unirest:unirest-java:1.3.3')
