@@ -26,7 +26,7 @@
                         });
 
 						<g:if test="${user}">
-                        	addApiKeyAuthorization("${user.apiKey}");
+							addApiKeyAuthorization("${user.key.id}");
 						</g:if>
 
 						// Add bootstrap styling to controls created by swagger
