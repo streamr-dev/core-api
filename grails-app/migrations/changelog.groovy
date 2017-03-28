@@ -63,4 +63,5 @@ databaseChangeLog = {
 	include file: 'core/2017-02-08-ethereum-contract-template-paybyuse.groovy'
 	include file: 'core/2017-02-16-ethereum-contract-constant-module.groovy'
 	include file: 'core/2017-03-16-ethereum-contract-template-binarybetting.groovy'
+	include file: 'core/2017-03-28-ethereum-get-events-module.groovy'
 }
