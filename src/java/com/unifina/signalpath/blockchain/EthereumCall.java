@@ -88,7 +88,7 @@ public class EthereumCall extends AbstractHttpModule {
 	}
 
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
 		ModuleOptions options = ModuleOptions.get(config);

@@ -59,7 +59,7 @@ public class Http extends AbstractHttpModule {
 
 	/** For bodyless verbs, "body" is only a "trigger" */
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
 		if (config.containsKey("inputs")) {

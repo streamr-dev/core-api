@@ -66,7 +66,7 @@ public class SimpleHttp extends AbstractHttpModule {
 	}
 
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 
 		int inputCount = MapTraversal.getInt(config, "options.inputCount.value", 0);

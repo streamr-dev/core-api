@@ -25,10 +25,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Functionality that is common to HTTP modules:
+ * Functionality that is common to modules that make a HTTP request:
  *  - sync/async requests
  *  - body formatting
  *  - SSL
+ *
+ * Crucial benefit over simply doing Unirest.post: not blocking the whole canvas (Streamr thread) while request is pending
  */
 public abstract class AbstractHttpModule extends ModuleWithSideEffects implements IEventRecipient {
 
@@ -100,7 +102,7 @@ public abstract class AbstractHttpModule extends ModuleWithSideEffects implement
 	}
 
 	@Override
-	public void onConfiguration(Map<String, Object> config) {
+	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
 		bodyContentType = MapTraversal.getString(config, "options.bodyContentType.value", AbstractHttpModule.BODY_FORMAT_JSON);
 		trustSelfSigned = MapTraversal.getBoolean(config, "options.trustSelfSigned.value");
