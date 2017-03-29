@@ -2,6 +2,7 @@ package com.unifina.controller.security
 
 import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.service.StreamService
 import grails.converters.JSON
@@ -13,13 +14,24 @@ class ProfileController {
 	def grailsApplication
 	def springSecurityService
 	def userService
-	StreamService streamService
+	def permissionService
+	def streamService
 	
 	static defaultAction = "edit"
 
 	def edit() {
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
-		[user: currentUser, key: currentUser?.getKey()]
+
+		List<Key> keys = new ArrayList<>()
+		List<Permission> permissions = permissionService.getPermissionsTo(currentUser)
+		for (Permission p : permissions) {
+			if (p.key) {
+				keys.add(p.key.toMap())
+			}
+		}
+		def jsonKeys = keys as JSON
+
+		[user: currentUser, keys: jsonKeys]
 	}
 	
 	def update() {

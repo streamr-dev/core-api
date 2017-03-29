@@ -1,12 +1,14 @@
 <html>
     <head>
         <meta name="layout" content="main" />
-        <title><g:message code="stream.show.label" args="[stream.name]"/></title>
+        <title>
+			<g:message code="stream.show.label" args="[stream.name]"/>
+		</title>
         <r:require module="dropzone"/>
 		<r:require module="confirm-button"/>
 		<r:require module="bootstrap-datepicker"/>
 		<r:require module="sharing-dialog"/>
-		<r:require module="stream-credentials"/>
+		<r:require module="streamr-credentials-control"/>
 		<r:script>
 			$(function() {
 				new ConfirmButton($("#delete-stream-button"), {
@@ -24,12 +26,11 @@
 						})
 					}
 				})
-			})
-			$(function() {
-				new StreamrStreamCredentials({
+				new StreamrCredentialsControl({
 					el: "#stream-credentials",
 					keys: <g:applyCodec encodeAs="none">${keys}</g:applyCodec>,
-					streamId: '${stream.id}'
+					streamId: '${stream.id}',
+					showPermissions: true
 				})
 			})
 		</r:script>

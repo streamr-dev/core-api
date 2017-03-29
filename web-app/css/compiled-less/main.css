@@ -15460,28 +15460,6 @@ body.stream-show .history-start-date,
 body.stream-show .history-end-date {
   font-weight: bold;
 }
-body.stream-show .new-auth-key-row {
-  margin-top: 25px;
-  margin-bottom: 15px;
-}
-body.stream-show .new-auth-key-row .input-group-btn > button {
-  height: 34px;
-}
-body.stream-show .stream-credentials {
-  margin-top: 5px;
-}
-body.stream-show .stream-credentials .title-label {
-  padding-bottom: 10px;
-}
-body.stream-show .auth-key-button-row {
-  margin-right: -15px;
-}
-body.stream-show .auth-key-row td {
-  padding-top: 10px;
-}
-body.stream-show .auth-key-row .auth-key-delete-button {
-  margin-left: 5px;
-}
 body.module-list {
   position: relative;
 }
@@ -16249,6 +16227,69 @@ body.dashboard-show .titlebar-clickable {
 }
 .form-inline.search-form .filter-toggle-button:last-of-type {
   margin-right: 7px;
+}
+.credentials-control {
+  margin-top: 5px;
+}
+.credentials-control .title-label {
+  padding-bottom: 10px;
+}
+.credentials-control .new-auth-key-row {
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+.credentials-control .new-auth-key-row .input-group-btn > button {
+  height: 34px;
+}
+.credentials-control .new-auth-key-row .permission-dropdown {
+  border-radius: 0;
+}
+.credentials-control .new-auth-key-row .new-auth-key-button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.credentials-control .auth-key-button-row {
+  margin-right: -15px;
+}
+.credentials-control .auth-key-table thead th.action-header {
+  width: 85px;
+}
+.credentials-control .auth-key-table thead th.key-header {
+  width: 80px;
+  padding-right: 20px;
+}
+.credentials-control .auth-key-table thead th.key-header .visibility-controls {
+  cursor: pointer;
+  font-size: 18px;
+  margin-top: -2px;
+}
+.credentials-control .auth-key-table .auth-key-table-row td {
+  padding-top: 10px;
+}
+.credentials-control .auth-key-table .auth-key-table-row td.key-field {
+  padding-right: 20px;
+}
+.credentials-control .auth-key-table .auth-key-table-row td.key-field span.hidden-key {
+  width: 50px;
+  background-color: #b0b0b0;
+  border-radius: 2px;
+  color: transparent;
+  text-shadow: none;
+}
+.credentials-control .auth-key-table:not(.show-keys) th.key-header .hide-icon {
+  display: none;
+}
+.credentials-control .auth-key-table:not(.show-keys) .auth-key-table-row td.key-field span.visible-key {
+  display: none;
+}
+.credentials-control .auth-key-table.show-keys th.key-header .show-icon {
+  display: none;
+}
+.credentials-control .auth-key-table.show-keys .auth-key-table-row td.key-field span.hidden-key {
+  display: none;
+}
+.credentials-control .auth-key-table .auth-key-delete-button {
+  margin-left: 5px;
 }
 .widget-notifications .notification {
   position: relative;

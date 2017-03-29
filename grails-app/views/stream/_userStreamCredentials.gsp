@@ -3,4 +3,7 @@
 	<span class="stream-id">${stream.id}</span>
 </ui:labeled>
 
-<div id="stream-credentials" class="stream-credentials row"></div>
+<div class="title-label">
+	<label>Auth keys</label>
+</div>
+<div id="stream-credentials" class="credentials-control row"></div>

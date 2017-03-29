@@ -248,9 +248,9 @@ modules = {
 	'streamr-table' {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
-	'stream-credentials' {
+	'streamr-credentials-control' {
 		dependsOn 'backbone, streamr, clipboardjs'
-		resource url:[dir:'js/unifina/stream-credentials', file:'stream-credentials.js', plugin:'unifina-core']
+		resource url:[dir:'js/unifina/streamr-credentials-control', file:'streamr-credentials-control.js', plugin:'unifina-core']
 	}
 	'scrollspy-helper' {
 		resource url:[dir:'js/unifina/scrollspy-helper', file:'scrollspy-helper.js', plugin: 'unifina-core']

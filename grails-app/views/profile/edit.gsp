@@ -5,11 +5,16 @@
 
 	<r:require module="confirm-button"/>
 	<r:require module="moment-timezone"/>
+	<r:require module="streamr-credentials-control"/>
 
 	<r:script>
 		$(document).ready(function() {
 			var tzOpts = moment.tz.names().map(function(tz) {
-				return $('<option '+(tz === "${user.timezone}" ? 'selected': '')+' value="'+tz+'">'+tz+'</option>')
+				return $('<option/>', {
+				    selected: tz === '${user.timezone}',
+				    value: tz,
+				    text: tz
+				})
 			})
 			$("#timezone").append(tzOpts)
 		})
@@ -29,7 +34,7 @@
 			<div class="col-sm-6 col-md-offset-2 col-md-4">
 				<ui:panel title="Profile Settings">
 					<div class="form-group ${hasErrors(bean: user, field: 'username', 'has-error')}">
-						<label for="username" class="control-label">
+						<label class="control-label">
 							<g:message code="secuser.username.label" />
 						</label>
 					    <div>
@@ -38,7 +43,7 @@
 					</div>
 
 					<div class="form-group">
-						<label for="changePassword" class="control-label">
+						<label class="control-label">
 							<g:message code="secuser.password.label" />
 						</label>
 					    <div>
@@ -49,7 +54,7 @@
 					</div>
 
 					<div class="form-group ${hasErrors(bean: user, field: 'name', 'has-error')}">
-						<label for="name" class="control-label">
+						<label class="control-label">
 							<g:message code="secuser.name.label" />
 						</label>
 						<input name="name" type="text" class="form-control input-lg" value="${user.name}" required>
@@ -85,21 +90,10 @@
 						</div>
 					</div>
 					<div class="panel-body">
-						<div class="form-group">
-							<div>
-								<label class="control-label">
-									<g:message code="secuser.apiKey.label" />
-								</label>
-								<g:link class="pull-right" controller="help" action="api">API docs</g:link>
-							</div>
-							<pre>${key.id}</pre>
-							<div>
-								<button id="regenerateApiKeyButton" type="button" class="btn btn-danger btn-xs">
-									<i class="fa fa-refresh"></i>
-									<g:message code="profile.regenerateAPIKeyButton.label" />
-								</button>
-							</div>
+						<div class="title-label">
+							<label>API keys</label>
 						</div>
+						<div id="api-credentials" class="credentials-control row"></div>
 					</div>
 				</div>
 			</div>
@@ -117,17 +111,24 @@
 	</form>
 
 	<r:script>
-		new ConfirmButton("#regenerateApiKeyButton", {
-			title: "${message(code: "profile.regenerateAPIKeyConfirm.title")}",
-			message: "${message(code: "profile.regenerateAPIKeyConfirm.message")}"
-		}, function(result) {
-			if(result) {
-				$.post("${ createLink(action: 'regenerateApiKey') }", {}, function(response) {
-					if(response.success) {
-						location.reload()
-					}
-				})
-			}
+		$(function() {
+			new ConfirmButton("#regenerateApiKeyButton", {
+				title: "${message(code: "profile.regenerateAPIKeyConfirm.title")}",
+				message: "${message(code: "profile.regenerateAPIKeyConfirm.message")}"
+			}, function(result) {
+				if(result) {
+					$.post("${ createLink(action: 'regenerateApiKey') }", {}, function(response) {
+						if(response.success) {
+							location.reload()
+						}
+					})
+				}
+			})
+			new StreamrCredentialsControl({
+				el: "#api-credentials",
+				keys: <g:applyCodec encodeAs="none">${keys}</g:applyCodec>,
+				username: '${user.username}'
+			})
 		})
 	</r:script>
 </body>

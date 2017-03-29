@@ -11,6 +11,9 @@ environments {
 	production {
 		grails.serverURL = prodBaseUrl
 	}
+	development {
+		grails.resources.debug = true
+	}
 }
 
 /**
