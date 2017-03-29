@@ -5,12 +5,16 @@
         '<div class="col-xs-12">' +
             '<table class="auth-key-table col-xs-12">' +
                 '<thead>' +
-                    '<th class="name-header">Name</th>' +
+                    '<th class="name-header">' +
+                        '<span class="title">Name</span>' +
+                    '</th>' +
                     '{[ if (typeof(showPermissions) !== "undefined" && showPermissions) { ]}' +
-                        '<th class="permission-header">Permission</th>' +
+                        '<th class="permission-header">' +
+                            '<span class="title">Permission</span>' +
+                        '</th>' +
                     '{[ } ]}' +
                     '<th class="key-header">' +
-                        'Key ' +
+                        '<span class="title">Key</span>' +
                         '<span class="visibility-controls pull-right">' +
                             '<i class="fa fa-eye show-icon" title="Show keys"/>' +
                             '<i class="fa fa-eye-slash hide-icon" title="Hide keys"/>' +
@@ -29,18 +33,36 @@
             '<td class="permission-field">read</td>' +
         '{[ } ]}' +
         '<td class="key-field">' +
-            '<span class="hidden-key">' +
-                '<span style="visibility:hidden;">{{id}}</span>' +
+            '<span class="key-container">' +
+               '<span class="key">{{id}}</span>' +
             '</span>' +
-            '<span class="visible-key">{{id}}</span>' +
         '</td>' +
         '<td class="action-field"> ' +
-            '<button type="button" class="form-group auth-key-delete-button btn btn-danger pull-right" title="Delete key">' +
-                '<span class="icon fa fa-trash-o"></span>' +
-            '</button>' +
-            '<button type="button" class="form-group copy-to-clipboard btn pull-right" title="Copy key to clipboard" data-clipboard-text="{{id}}">' +
-                '<span class="fa fa-copy"></span>' +
-            '</button>' +
+            '<div class="dropdown pull-right hidden-sm hidden-md hidden-lg">' +
+                '<button class="dashboard-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">' +
+                    '<i class="navbar-icon fa fa-caret-down"></i>' +
+                '</button>' +
+                '<ul class="dropdown-menu pull-right">' +
+                    '<li>' +
+                        '<button type="button" class="form-group copy-to-clipboard btn btn-block pull-right" title="Copy key to clipboard" data-clipboard-text="{{id}}">' +
+                            '<span><i class="fa fa-copy"/> Copy</span>' +
+                        '</button>' +
+                    '</li>' +
+                    '<li>' +
+                        '<button type="button" class="form-group auth-key-delete-button btn btn-block btn-danger pull-right" title="Delete key">' +
+                            '<span><i class="icon fa fa-trash-o"/> Delete</span>' +
+                        '</button>' +
+                    '</li>' +
+                '</ul>' +
+            '</div>' +
+            '<div class="hidden-xs">' +
+                '<button type="button" class="form-group auth-key-delete-button btn btn-danger pull-right" title="Delete key">' +
+                    '<span class="icon fa fa-trash-o"/>' +
+                '</button>' +
+                '<button type="button" class="form-group copy-to-clipboard btn pull-right" title="Copy key to clipboard" data-clipboard-text="{{id}}">' +
+                    '<span class="fa fa-copy"/>' +
+                '</button>' +
+            '</div>' +
         '</td>'
     
     var inputTemplate = '' +
@@ -156,8 +178,7 @@
                 showPermissions: this.showPermissions
             })))
             this.deleteButton = this.$el.find(".auth-key-delete-button")
-            this.clipboardEl = this.$el.find(".copy-to-clipboard")
-            new Clipboard(this.clipboardEl[0])
+            new Clipboard(this.$el[0].getElementsByClassName("copy-to-clipboard"))
                 .on('success', function(e) {
                     Streamr.showSuccess("Key successfully copied to clipboard!")
                 })
