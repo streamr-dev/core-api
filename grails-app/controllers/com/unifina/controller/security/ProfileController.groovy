@@ -22,13 +22,7 @@ class ProfileController {
 	def edit() {
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
 
-		List<Key> keys = new ArrayList<>()
-		List<Permission> permissions = permissionService.getPermissionsTo(currentUser)
-		for (Permission p : permissions) {
-			if (p.key) {
-				keys.add(p.key.toMap())
-			}
-		}
+		List<Key> keys = Key.findAllByUser(currentUser)
 		def jsonKeys = keys as JSON
 
 		[user: currentUser, keys: jsonKeys]
