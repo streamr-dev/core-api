@@ -7,4 +7,5 @@ class SaveKeyCommand {
 	String name
 	String username
 	String streamId
+	String permission
 }

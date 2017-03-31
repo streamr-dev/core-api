@@ -94,12 +94,14 @@ class StreamController {
 			boolean writetable = permissionService.canWrite(user, stream)
 			boolean shareable = permissionService.canShare(user, stream)
 
-			List<Key> keys = new ArrayList<>()
+			List<Map> keys = new ArrayList<>()
 			if (shareable) {
 				List<Permission> permissions = permissionService.getPermissionsTo(stream)
 				for (Permission p : permissions) {
 					if (p.key) {
-						keys.add(p.key.toMap())
+						Map key = p.key.toMap()
+						key["permission"] = p.operation.name().toLowerCase()
+						keys.add(key)
 					}
 				}
 			}

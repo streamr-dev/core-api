@@ -28,14 +28,15 @@ class KeyApiController {
 			throw new ApiException(422, "INVALID_ARGUMENT_COMBINATION", "must provide either username or streamId")
 		}
 
-		Key key
+		Map response
 		if (saveKeyCommand.username) {
-			key = saveUserLinkedKey(saveKeyCommand)
+			response = saveUserLinkedKey(saveKeyCommand).toMap()
 		} else {
-			key = saveAnonymousKeyAndLinkToStream(saveKeyCommand)
+			response = saveAnonymousKeyAndLinkToStream(saveKeyCommand).toMap()
+			response["permission"] = saveKeyCommand.permission
 		}
 
-		render(key.toMap() as JSON)
+		render(response as JSON)
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
@@ -82,7 +83,8 @@ class KeyApiController {
 		key.name = saveKeyCommand.name
 		key.save(failOnError: true, validate: true)
 
-		permissionService.grant(request.apiUser, stream, key, Permission.Operation.READ, false)
+		Permission.Operation operation = Permission.Operation.fromString(saveKeyCommand.permission)
+		permissionService.grant(request.apiUser, stream, key, operation, false)
 		return key
 	}
 

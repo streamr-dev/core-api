@@ -30,7 +30,7 @@
     var keyTemplate = '' +
         '<td class="name-field">{{name}}</td>' +
         '{[ if (typeof(showPermissions) !== "undefined" && showPermissions) { ]}' +
-            '<td class="permission-field">read</td>' +
+            '<td class="permission-field">{{permission}}</td>' +
         '{[ } ]}' +
         '<td class="key-field">' +
             '<span class="key-container">' +
@@ -202,7 +202,7 @@
                 method: 'DELETE'
             }).then(function() {
                 _this.remove()
-            }).catch(function(e) {
+            }).fail(function(e) {
                 Streamr.showError(e.message)
             })
         }
