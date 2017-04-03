@@ -1,6 +1,7 @@
 package com.unifina.signalpath;
 
 import com.unifina.utils.IdGenerator;
+import com.unifina.utils.MapTraversal;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -13,10 +14,10 @@ public abstract class Endpoint<T> implements Serializable {
 	protected String typeName;
 	private String jsClass;
 	private String id = "ep_" + IdGenerator.get();
-	
-	private Map<String,Object> json;
+	private Map<String, Object> variadicConfig;
+
 	private boolean configured = false;
-	private boolean exported = false;
+	private boolean export = false;
 	private boolean canConnect = true;
 	protected List<String> aliases = null;
 	
@@ -24,6 +25,10 @@ public abstract class Endpoint<T> implements Serializable {
 		this.owner = owner;
 		this.name = name;
 		this.typeName = typeName;
+	}
+
+	String getId() {
+		return id;
 	}
 
 	public AbstractSignalPathModule getOwner() {
@@ -42,12 +47,12 @@ public abstract class Endpoint<T> implements Serializable {
 		this.name = name;
 	}
 
-	public boolean isExported() {
-		return exported;
+	public boolean isExport() {
+		return export;
 	}
 
-	public void setExported(boolean exported) {
-		this.exported = exported;
+	public void setExport(boolean export) {
+		this.export = export;
 	}
 
 	public String getDisplayName() {
@@ -91,27 +96,55 @@ public abstract class Endpoint<T> implements Serializable {
 	}
 
 	public Map<String,Object> getConfiguration() {
-		Map<String,Object> map = (json != null ? json : new HashMap<String,Object>());
+		Map<String, Object> map = new LinkedHashMap<>();
 
 		map.put("id", id);
 		map.put("name", name);
-		map.put("longName", owner.getName() + "." + name);
-		map.put("type", getTypeName());
-		map.put("connected", isConnected());
+		map.put("longName", getLongName()); // generated
+		map.put("type", typeName);
+		map.put("connected", isConnected()); // generated
 		map.put("canConnect", canConnect);
-		map.put("export", isExported());
+		map.put("export", export);
 
+		// Avoid writing null keys for efficiency
 		if (displayName != null) {
 			map.put("displayName", displayName);
 		}
 		if (jsClass != null) {
 			map.put("jsClass", jsClass);
 		}
+		if (variadicConfig != null) {
+			map.put("variadic", variadicConfig);
+		}
 		if (getValue() != null) {
 			map.put("value", getValue());
 		}
 
 		return map;
+	}
+
+	public void setConfiguration(Map<String,Object> config) {
+		configured = true;
+
+		if (config.containsKey("id")) {
+			id = MapTraversal.getString(config, "id");
+		}
+		// skip name: already set by constructor
+		// skip longName: it's generated
+		// skip type: already set by constructor
+		// skip connected: it's generated
+		// skip canConnect: read-only
+		if (config.containsKey("export")) {
+			export = MapTraversal.getBoolean(config, "export");
+		}
+		if (config.containsKey("displayName")) {
+			displayName = MapTraversal.getString(config, "displayName");
+		}
+		// skip jsClass: read-only
+		if (config.containsKey("variadic")) {
+			variadicConfig = MapTraversal.getMap(config, "variadic");
+		}
+		// skip value: not supposed to read it from config
 	}
 
 	/**
@@ -122,24 +155,7 @@ public abstract class Endpoint<T> implements Serializable {
 	protected String[] getAcceptedTypes() {
 		return getTypeName().split(" ");
 	}
-	
-	public void setConfiguration(Map<String,Object> config) {
-		json = new LinkedHashMap<>(config);
-		configured = true;
-		
-		if (config.containsKey("displayName")) {
-			displayName = (String) config.get("displayName");
-		}
 
-		if (config.containsKey("id")) {
-			id = config.get("id").toString();
-		}
-
-		if (config.containsKey("export")) {
-			setExported(Boolean.parseBoolean(config.get("export").toString()));
-		}
-	}
-	
 	@Override
 	public String toString() {
 		return owner.getName() + "." + name;

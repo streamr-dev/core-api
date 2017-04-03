@@ -384,7 +384,7 @@ var Scheduler = Backbone.View.extend({
 	Templates["scheduler-footer-template"] = ''+
 		'<div class="setup col-xs-12">'+
 			'<div class="add-rule">'+
-				'<i class="btn add-rule-btn btn-primary fa fa-plus">&nbsp;Add</i>'+
+				'<button class="btn add-rule-btn btn-primary"><i class="fa fa-plus" />&nbsp;Add</button>'+
 			'</div>'+
 			'<div class="default-value">'+
 				'<span>Default value:</span><input type="number" step="any" name="default-value" class="form-control input-default input-sm" value="0"/>'+

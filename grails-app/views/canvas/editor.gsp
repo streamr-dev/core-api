@@ -55,7 +55,7 @@ $(document).ready(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}",
+			url: "${grailsApplication.config.streamr.ui.server}",
 			autoConnect: true,
 			autoDisconnect: true
 		}
@@ -281,21 +281,23 @@ $(document).ready(function() {
 	})
 
 	$(SignalPath).on('loaded saved', function(e, json) {
-		var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
-		$.getJSON(canvasUrl + "/permissions/me", function(perm) {
-			var permissions = []
-			_.each(perm, function(permission) {
-				if (permission.id = "${id}") {
-					permissions.push(permission.operation)
+		if (!SignalPath.isReadOnly()) {
+			var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
+			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
+				var permissions = []
+				_.each(perm, function(permission) {
+					if (permission.id = "${id}") {
+						permissions.push(permission.operation)
+					}
+				})
+				if (_.contains(permissions, "share")) {
+					$("#share-button").data("url", canvasUrl)
+					$("#share-button").removeAttr("disabled")
+				} else {
+					$("#share-button").addClass("forbidden")
 				}
 			})
-			if (_.contains(permissions, "share")) {
-				$("#share-button").data("url", canvasUrl)
-				$("#share-button").removeAttr("disabled")
-			} else {
-				$("#share-button").addClass("forbidden")
-			}
-		})
+		}
 	})
 
 	<g:if test="${id}">

@@ -24,11 +24,9 @@ public class Label extends ModuleWithUI {
 
 	@Override
 	public void sendOutput() {
-		if (getGlobals().getUiChannel()!=null) {
-			Map<String,Object> msg = new HashMap<>();
-			msg.put("value", label.getValue().toString());
-			getGlobals().getUiChannel().push(msg, uiChannelId);
-		}
+		Map<String,Object> msg = new HashMap<>();
+		msg.put("value", label.getValue().toString());
+		pushToUiChannel(msg);
 	}
 
 	@Override

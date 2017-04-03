@@ -73,7 +73,7 @@ class CanvasApiController {
 	@StreamrApi
 	def delete(String id) {
 		Canvas canvas = canvasService.authorizedGetById(id, request.apiUser, Operation.WRITE)
-		canvas.delete(flush: true)
+		canvasService.deleteCanvas(canvas, request.apiUser)
 		response.status = 204
 		render ""
 	}
@@ -121,7 +121,7 @@ class CanvasApiController {
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(signalPathService.buildRuntimeRequest(msg, "canvases/$path", request.apiUser), local ? true : false)
-		log.info("request: responding with $response")
+		log.debug("request: responding with $response")
 		render response as JSON
 	}
 

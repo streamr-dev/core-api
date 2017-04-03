@@ -3,6 +3,7 @@ package com.unifina.signalpath.simplemath;
 import com.unifina.service.SerializationService;
 import com.unifina.signalpath.*;
 
+import java.math.MathContext;
 import java.util.*;
 
 import static org.apache.commons.lang3.math.NumberUtils.isNumber;
@@ -62,25 +63,7 @@ public class Expression extends AbstractSignalPathModule {
 	}
 
 	private void initExpressionAndVariables() throws com.udojava.evalex.Expression.ExpressionException {
-		expression = new com.udojava.evalex.Expression(expressionAsString);
-		variables = determineVariables(expression);
-	}
-
-	// TODO: Replace with com.udojava.evalex.Expression#getUsedVariables() when new release of EvalEx is released.
-	private static List<String> determineVariables(com.udojava.evalex.Expression expression) {
-		List<String> result = new ArrayList<>();
-		Iterator<String> iterator = expression.getExpressionTokenizer();
-		while (iterator.hasNext()) {
-			String token = iterator.next();
-			if (expression.getDeclaredFunctions().contains(token) ||
-				expression.getDeclaredOperators().contains(token) ||
-				expression.getDeclaredVariables().contains(token)
-				|| token.equals("(") || token.equals(")")
-				|| token.equals(",") || isNumber(token)) {
-				continue;
-			}
-			result.add(token);
-		}
-		return result;
+		expression = new com.udojava.evalex.Expression(expressionAsString, MathContext.DECIMAL64);
+		variables = new HashSet<>(expression.getUsedVariables());
 	}
 }

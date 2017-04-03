@@ -42,4 +42,26 @@ class ExpressionSpec extends Specification {
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
+
+	void "CORE-849 Variables used many times only generate one output"() {
+		when:
+		module.getInput("expression").receive("x*x+y*y")
+		module.configure(module.getConfiguration())
+
+		then:
+		module.inputs.size() == 3	// expression, x, y
+	}
+
+	void "CORE-883 can handle large numbers"() {
+		when:
+		module.getInput("expression").receive("x + y")
+		module.configure(module.configuration)
+
+		module.getInput("x").receive(1490357362484)
+		module.getInput("y").receive(360000)
+		module.trySendOutput()
+
+		then:
+		module.getOutput("out").getValue() == 1490357362484d + 360000d
+	}
 }
