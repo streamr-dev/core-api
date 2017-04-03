@@ -471,6 +471,9 @@ class SignalPathService {
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
+		} finally {
+			// Save memory by removing reference to the bytes to get them gc'ed
+			canvas.serialization?.bytes = null
 		}
 	}
 

@@ -10,7 +10,7 @@ databaseChangeLog = {
 			column(name: "version", type: "bigint") {
 				constraints(nullable: "false")
 			}
-			column(name: "bytes", type: "mediumblob") {
+			column(name: "bytes", type: "longblob") {
 				constraints(nullable: "false")
 			}
 			column(name: "date", type: "datetime") {

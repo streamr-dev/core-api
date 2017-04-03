@@ -7,6 +7,6 @@ class Serialization {
 	static belongsTo = [canvas: Canvas]
 
 	static mapping = {
-		bytes sqlType: "mediumblob"
+		bytes sqlType: "longblob"
 	}
 }
