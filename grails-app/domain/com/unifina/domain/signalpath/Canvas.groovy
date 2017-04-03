@@ -44,16 +44,16 @@ class Canvas {
 	String runner
 	String server
 	String requestUrl
-	byte[] serialized
-	Date serializationTime
+
+	Serialization serialization
+
 	static hasMany = [dashboardItems: DashboardItem]
 
 	static constraints = {
 		runner(nullable: true)
 		server(nullable: true)
 		requestUrl(nullable: true)
-		serialized(nullable: true)
-		serializationTime(nullable: true)
+		serialization(nullable: true, unique: true)
 	}
 
 	static mapping = {
@@ -63,12 +63,7 @@ class Canvas {
 		example defaultValue: false
 		adhoc defaultValue: false
 		runner index: 'runner_idx'
-		serialized sqlType: "mediumblob"
 		dashboardItems cascade: 'all-delete-orphan'
-	}
-
-	boolean isNotSerialized() {
-		serialized == null
 	}
 
 	@CompileStatic
@@ -82,7 +77,7 @@ class Canvas {
 			adhoc: adhoc,
 			state: state.toString(),
 			hasExports: hasExports,
-			serialized: !isNotSerialized(),
+			serialized: serialization != null,
 			modules: map?.modules,
 			settings: map?.settings,
 			uiChannel: map?.uiChannel,
