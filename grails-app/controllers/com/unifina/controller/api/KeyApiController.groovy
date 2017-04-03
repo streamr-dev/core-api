@@ -21,21 +21,30 @@ class KeyApiController {
 	PermissionService permissionService
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def save(SaveKeyCommand saveKeyCommand) {
-		if (saveKeyCommand.username != null && saveKeyCommand.streamId != null) {
-			throw new ApiException(422, "INVALID_ARGUMENT_COMBINATION", "cannot provide both username and streamId")
-		} else if (saveKeyCommand.username == null && saveKeyCommand.streamId == null) {
-			throw new ApiException(422, "INVALID_ARGUMENT_COMBINATION", "must provide either username or streamId")
+	def saveUserKey() {
+		Key key = new Key()
+		key.name = params.name
+		key.user = request.apiUser
+		key.save(failOnError: true, validate: true)
+		render(key.toMap() as JSON)
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def saveStreamKey(String id) {
+		Stream stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream not found", Stream.class.toString(), id)
 		}
 
-		Map response
-		if (saveKeyCommand.username) {
-			response = saveUserLinkedKey(saveKeyCommand).toMap()
-		} else {
-			response = saveAnonymousKeyAndLinkToStream(saveKeyCommand).toMap()
-			response["permission"] = saveKeyCommand.permission
-		}
+		Key key = new Key()
+		key.name = params.name
+		key.save(failOnError: true, validate: true)
 
+		Permission.Operation operation = Permission.Operation.fromString(params.permission)
+		permissionService.grant(request.apiUser, stream, key, operation, false)
+
+		Map response = key.toMap()
+		response["permission"] = params.permission
 		render(response as JSON)
 	}
 
@@ -57,7 +66,6 @@ class KeyApiController {
 		}
 	}
 
-
 	@CompileStatic
 	private boolean canDeleteKey(Key key, SecUser currentUser) {
 		if (key.user != null) {
@@ -71,36 +79,5 @@ class KeyApiController {
 			}
 			return false
 		}
-	}
-
-	private Key saveAnonymousKeyAndLinkToStream(SaveKeyCommand saveKeyCommand) {
-		Stream stream = Stream.get(saveKeyCommand.streamId)
-		if (stream == null) {
-			throw new NotFoundException("Stream not found", Stream.class.toString(), saveKeyCommand.streamId)
-		}
-
-		Key key = new Key()
-		key.name = saveKeyCommand.name
-		key.save(failOnError: true, validate: true)
-
-		Permission.Operation operation = Permission.Operation.fromString(saveKeyCommand.permission)
-		permissionService.grant(request.apiUser, stream, key, operation, false)
-		return key
-	}
-
-	private Key saveUserLinkedKey(SaveKeyCommand saveKeyCommand) {
-		SecUser user = SecUser.findByUsername(saveKeyCommand.username)
-
-		if (user == null) {
-			throw new NotFoundException("User not found", SecUser.class.toString(), saveKeyCommand.username)
-		} else if (request.apiUser != user) {
-			throw new NotPermittedException(request.apiUser?.username, "User", user.id.toString(), Permission.Operation.SHARE.toString())
-		}
-
-		Key key = new Key()
-		key.name = saveKeyCommand.name
-		key.user = user
-		key.save(failOnError: true, validate: true)
-		return key
 	}
 }

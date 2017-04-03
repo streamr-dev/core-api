@@ -1,6 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
+    "title": "Streamr API",
     "version": "1.0.0"
   },
   "host": "www.streamr.com",
@@ -39,6 +40,14 @@
     {
       "name": "dashboards",
       "description": "Dashboards and their items"
+    },
+    {
+      "name": "keys",
+      "description": "Keys for authenticating users and resources"
+    },
+    {
+      "name": "users",
+      "description": "User management"
     }
   ],
   "paths": {
@@ -549,6 +558,52 @@
             "description": "New stream permission object that was created",
             "schema": {
               "$ref": "#/definitions/Permission"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/keys": {
+      "post": {
+        "summary": "Create a key",
+        "description": "Creates a key for the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name (human readable) of key.",
+            "required": false,
+            "type": "string"
+          },
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly created Key",
+            "schema": {
+              "$ref": "#/definitions/Key"
             }
           },
           "403": {
@@ -1604,6 +1659,80 @@
           }
         }
       }
+    },
+    "/users/me/keys": {
+      "post": {
+        "summary": "Create a (user-linked) key",
+        "description": "Creates a key that can be used for authenticating the user.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name (human readable) of key.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly created Key",
+            "schema": {
+              "$ref": "#/definitions/Key"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/keys/{id}": {
+      "delete": {
+        "summary": "Delete a key",
+        "description": "Deletes a key by its id.",
+        "tags": [
+          "keys"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key to be deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1961,6 +2090,29 @@
           "type": "string",
           "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
           "example": "read"
+        }
+      }
+    },
+    "Key": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Matti's key"
+        },
+        "user": {
+          "type": "string",
+          "description": "User who the key authenticates if user-linked key",
+          "example": "new.user@gmail.com"
         }
       }
     },
