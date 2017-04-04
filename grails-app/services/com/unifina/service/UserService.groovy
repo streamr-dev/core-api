@@ -83,17 +83,6 @@ class UserService {
 		return packages
 	}
 
-	/**
-	 * Looks up a user based on api key.
-	 * @returns SecUser user, or null if the keys do not match a user.
-	 */
-	SecUser getUserByApiKey(String apiKey) {
-		if (apiKey != null && !apiKey.isEmpty()) {
-			return Key.get(apiKey)?.user
-		}
-		return null
-	}
-
 	def passwordValidator = { String password, command ->
 		// Check password score
 		if (command.pwdStrength < 1) {

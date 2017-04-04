@@ -8,13 +8,8 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
-	private final UserService userService;
 	private boolean lastAuthenticationMalformed = false;
 	private boolean keyPresent = false;
-
-	public TokenAuthenticator(UserService userService) {
-		this.userService = userService;
-	}
 
 	public AuthenticationResult authenticate(HttpServletRequest request) {
 		String key = parseAuthorizationHeader(request.getHeader("Authorization"));
@@ -22,11 +17,6 @@ public class TokenAuthenticator {
 
 		if (!keyPresent) {
 			return null;
-		}
-
-		SecUser user = userService.getUserByApiKey(key);
-		if (user != null) {
-			return new AuthenticationResult(user);
 		}
 
 		Key keyObject = (Key) InvokerHelper.invokeMethod(Key.class, "get", key);

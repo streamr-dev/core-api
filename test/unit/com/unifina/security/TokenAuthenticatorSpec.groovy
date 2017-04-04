@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest
 class TokenAuthenticatorSpec extends Specification {
 
 	UserService userService = Mock(UserService)
-	TokenAuthenticator authenticator = new TokenAuthenticator(userService)
+	TokenAuthenticator authenticator = new TokenAuthenticator()
 
 	def "no authorization string"() {
 		when:
@@ -48,22 +48,6 @@ class TokenAuthenticatorSpec extends Specification {
 		result.getSecUser() == null
 		!authenticator.lastAuthenticationMalformed()
 		authenticator.keyPresent
-		1 * userService.getUserByApiKey("apiKey")
-	}
-
-	def "valid authorization with existent User apiKey"() {
-		when:
-		def result = authenticator.authenticate(Stub(HttpServletRequest) {
-			getHeader(_) >> "token apiKey"
-		})
-
-		then:
-		result != null
-		result.getKey() == null
-		result.getSecUser() != null
-		!authenticator.lastAuthenticationMalformed()
-		authenticator.keyPresent
-		1 * userService.getUserByApiKey("apiKey") >> new SecUser()
 	}
 
 	def "valid authorization with existent user-linked Key"() {
@@ -82,7 +66,6 @@ class TokenAuthenticatorSpec extends Specification {
 		result.getSecUser().is(user)
 		!authenticator.lastAuthenticationMalformed()
 		authenticator.keyPresent
-		1 * userService.getUserByApiKey("1") >> null
 	}
 
 	def "valid authorization with existent anonymous Key"() {
@@ -100,6 +83,5 @@ class TokenAuthenticatorSpec extends Specification {
 		result.getSecUser() == null
 		!authenticator.lastAuthenticationMalformed()
 		authenticator.keyPresent
-		1 * userService.getUserByApiKey("1") >> null
 	}
 }

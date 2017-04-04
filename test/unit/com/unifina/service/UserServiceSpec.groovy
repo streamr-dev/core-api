@@ -122,27 +122,6 @@ class UserServiceSpec extends Specification {
 		thrown RuntimeException
 	}
 
-	void "looking up a user based on correct api key"() {
-		when:
-		def createdUser = new SecUser(username: "me", password: "foo").save(validate: false)
-		def key = new Key(user: createdUser, name: "key")
-		key.id = "apiKey"
-		key.save(failOnError: true, validate: true)
-		def user = service.getUserByApiKey("apiKey")
-
-		then:
-		user.username == "me"
-	}
-
-	void "looking up a user with incorrect api key"() {
-		when:
-		new SecUser(username: "me", password: "foo").save(validate: false)
-		def user = service.getUserByApiKey("wrong api key")
-
-		then:
-		!user
-	}
-
 	void "censoring errors with checkErrors() works properly"() {
 		List checkedErrors
 		service.grailsApplication.config.grails.exceptionresolver.params.exclude = ["password"]

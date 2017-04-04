@@ -17,8 +17,6 @@ import java.lang.reflect.Method
  */
 
 class UnifinaCoreAPIFilters {
-
-	def userService
 	def springSecurityService
 
 	GrailsApplication grailsApplication
@@ -56,7 +54,7 @@ class UnifinaCoreAPIFilters {
 
 				request.isApiAction = true
 
-				TokenAuthenticator authenticator = new TokenAuthenticator(userService)
+				TokenAuthenticator authenticator = new TokenAuthenticator()
 				AuthenticationResult result = authenticator.authenticate(request)
 
 				if (authenticator.lastAuthenticationMalformed()) {
