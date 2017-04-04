@@ -31,6 +31,7 @@ class UserService {
 			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
 		}
 
+		// Users must have at least one API key
 		user.addToKeys(new Key(name: "Default"))
 
 		if (!user.save(flush: true)) {
