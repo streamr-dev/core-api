@@ -117,15 +117,4 @@ class StreamApiController {
 			action.call(stream)
 		}
 	}
-
-	private def getAuthorizedStreamByKey(String id, Operation op, Closure action) {
-		def stream = Stream.get(id)
-		if (stream == null) {
-			throw new NotFoundException("Stream", id)
-		} else if (!permissionService.checkAnonymousKey(request.apiKey, stream, op)) {
-			throw new NotPermittedException(null, "Stream", id, op.id)
-		} else {
-			action.call(stream)
-		}
-	}
 }
