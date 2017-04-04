@@ -4,6 +4,6 @@
 </ui:labeled>
 
 <div class="title-label">
-	<label>Auth keys</label>
+	<label>Anonymous keys</label>
 </div>
 <div id="stream-credentials" class="credentials-control row"></div>

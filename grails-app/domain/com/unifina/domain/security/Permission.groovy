@@ -52,14 +52,26 @@ class Permission {
 	 * @return map to be shown to the API callers
      */
 	public Map toMap() {
-		if (anonymous) [
-			id: id,
-			anonymous: true,
-			operation: operation.id
-		] else [
-			id: id,
-			user: user?.username ?: invite?.username,
-			operation: operation.id
-		]
+		if (anonymous) {
+			return [
+					id: id,
+					anonymous: true,
+					operation: operation.id
+			]
+		} else if (user || invite) {
+			return [
+					id: id,
+					user: user?.username ?: invite?.username,
+					operation: operation.id
+			]
+		} else if (key) {
+			return [
+					id: id,
+					key: key.toMap(),
+					operation: operation.id
+			]
+		} else {
+			throw new IllegalStateException("Invalid Permission! Must relate to one of: anonymous, user, invite, key")
+		}
 	}
 }

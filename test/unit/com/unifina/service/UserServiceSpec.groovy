@@ -73,17 +73,26 @@ class UserServiceSpec extends Specification {
 	}
 
     def "the user is created when called, with default roles if none supplied"() {
-        when:
-        createData()
-        SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+		when:
+		createData()
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
 
-        then:
-        SecUser.count() == 1
+		then:
+		SecUser.count() == 1
 
 		user.getAuthorities().size() == 2
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 		user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
-    }
+	}
+
+	def "default API key is created for user"() {
+		when:
+		createData()
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+
+		then:
+		user.getKeys().size() == 1
+	}
 
 	def "if the roles, feeds and modulePackages are given, it should use them"() {
 		when:

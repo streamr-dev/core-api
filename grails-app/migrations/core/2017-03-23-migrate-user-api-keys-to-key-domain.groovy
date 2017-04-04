@@ -7,8 +7,7 @@ databaseChangeLog = {
 				sql.eachRow("SELECT id, username, api_key FROM sec_user") { row ->
 					def userId = row['id']
 					def keyId = row['api_key']
-					def username = row['username']
-					def name = "Key for " + username
+					def name = "Default"
 					sql.execute('INSERT INTO `key` (id, version, name, user_id) VALUES (?, 0, ?, ?)', keyId, name, userId)
 				}
 			}

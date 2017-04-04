@@ -31,6 +31,8 @@ class UserService {
 			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
 		}
 
+		user.addToKeys(new Key(name: "Default"))
+
 		if (!user.save(flush: true)) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException()

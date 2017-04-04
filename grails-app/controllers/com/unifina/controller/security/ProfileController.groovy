@@ -21,11 +21,7 @@ class ProfileController {
 
 	def edit() {
 		def currentUser = SecUser.get(springSecurityService.currentUser.id)
-
-		List<Key> keys = Key.findAllByUser(currentUser)
-		def jsonKeys = keys*.toMap()
-
-		[user: currentUser, keys: jsonKeys as JSON]
+		[user: currentUser]
 	}
 	
 	def update() {

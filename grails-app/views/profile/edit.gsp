@@ -124,9 +124,10 @@
 					})
 				}
 			})
+
 			new StreamrCredentialsControl({
 				el: "#api-credentials",
-				keys: <g:applyCodec encodeAs="none">${keys}</g:applyCodec>,
+				url: '${createLink(uri: "/api/v1/users/me/keys")}',
 				username: '${user.username}'
 			})
 		})

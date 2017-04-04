@@ -12,7 +12,10 @@ class SecUser {
 	String name
 	String timezone
 
-	static hasMany = [permissions: Permission]
+	Set<Key> keys
+	Set<Permission> permissions
+
+	static hasMany = [permissions: Permission, keys: Key]
 	
 	static constraints = {
 		username blank: false, unique: true, email: true
@@ -27,10 +30,6 @@ class SecUser {
 
 	Set<SecRole> getAuthorities() {
 		SecUserSecRole.findAllBySecUser(this).collect { it.secRole } as Set
-	}
-
-	Key getKey() {
-		Key.findByUser(this)
 	}
 
 	Map toMap() {

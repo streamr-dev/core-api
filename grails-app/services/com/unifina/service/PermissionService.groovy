@@ -59,6 +59,14 @@ class PermissionService {
 		}
 	}
 
+	boolean canWriteKey(Key key, resource) {
+		if (key && key.user) {
+			return check(key.user, resource, Operation.WRITE)
+		} else {
+			return checkAnonymousKey(key, resource, Operation.WRITE)
+		}
+	}
+
 	/**
 	 * @return true if user is allowed to perform given operation to resource
 	 */

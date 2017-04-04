@@ -12,6 +12,9 @@ databaseChangeLog = {
 					sql.execute('INSERT INTO permission (version, clazz, operation, string_id, anonymous, key_id) VALUES (0, "com.unifina.domain.data.Stream", "read", ?, 0, ?)',
 						streamId, keyId
 					)
+					sql.execute('INSERT INTO permission (version, clazz, operation, string_id, anonymous, key_id) VALUES (0, "com.unifina.domain.data.Stream", "write", ?, 0, ?)',
+						streamId, keyId
+					)
 				}
 			}
 		}

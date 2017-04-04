@@ -93,20 +93,7 @@ class StreamController {
 		getAuthorizedStream(params.id) { stream, user ->
 			boolean writetable = permissionService.canWrite(user, stream)
 			boolean shareable = permissionService.canShare(user, stream)
-
-			List<Map> keys = new ArrayList<>()
-			if (shareable) {
-				List<Permission> permissions = permissionService.getPermissionsTo(stream)
-				for (Permission p : permissions) {
-					if (p.key) {
-						Map key = p.key.toMap()
-						key["permission"] = p.operation.name().toLowerCase()
-						keys.add(key)
-					}
-				}
-			}
-			def jsonKeys = keys as JSON
-			[stream: stream, writable: writetable, shareable: shareable, keys: jsonKeys]
+			[stream: stream, writable: writetable, shareable: shareable]
 		}
 	}
 

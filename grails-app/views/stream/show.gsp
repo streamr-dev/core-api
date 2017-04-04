@@ -28,7 +28,7 @@
 				})
 				new StreamrCredentialsControl({
 					el: "#stream-credentials",
-					keys: <g:applyCodec encodeAs="none">${keys}</g:applyCodec>,
+					url: '${createLink(uri: "/api/v1/streams/${stream.id}/keys")}',
 					streamId: '${stream.id}',
 					showPermissions: true
 				})

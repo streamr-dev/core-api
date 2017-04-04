@@ -90,20 +90,27 @@
     var CredentialsControl = Backbone.View.extend({
         template: _.template(listTemplate),
         initialize: function(opts) {
-            this.keys = opts.keys
-            
+            var _this = this
             this.showPermissions = opts.showPermissions
             
             this.streamId = opts.streamId
             this.username = opts.username
-            
+            this.url = opts.url
+
             if (this.username && this.streamId) {
                 throw new Error("Cannot give both streamId and username!")
             } else if (!this.username && !this.streamId) {
                 throw new Error("Must give either streamId or username!")
             }
-            
-            this.render()
+
+            $.getJSON(this.url)
+                .then(function(keys) {
+                    _this.keys = keys
+                    _this.render()
+                })
+                .fail(function(e) {
+                    Streamr.showError(e.message || e.responseJSON.message)
+                })
         },
         render: function() {
             var _this = this
@@ -122,8 +129,7 @@
             this.input = new CreateAuthInput({
                 el: this.inputEl,
                 showPermissions: this.showPermissions,
-                streamId: this.streamId,
-                username: this.username
+                url: this.url
             })
             this.listenTo(this.input, "new", function(key) {
                 _this.addKey(key)
@@ -138,7 +144,8 @@
         addKey: function(key) {
             this.listEl.append(new KeyInList({
                 model: key,
-                showPermissions: this.showPermissions
+                showPermissions: this.showPermissions,
+                url: this.url + '/' + key.get('id')
             }).el)
         },
         showKeys: function() {
@@ -168,7 +175,7 @@
         className: 'auth-key-table-row',
         initialize: function(opts) {
             this.showPermissions = opts.showPermissions
-            
+            this.url = opts.url
             this.render()
         },
         render: function() {
@@ -186,7 +193,7 @@
                     Streamr.showError("Something went wrong when copying key. Please copy key manually.")
                 })
             new ConfirmButton(this.deleteButton, {
-                message: 'Do you really want to revoke and delete auth key ' + this.model.get('name') + '?'
+                message: 'Do you really want to revoke and delete key <strong>' + this.model.get('name') + '</strong>?'
             }, function(res) {
                 if (res) {
                     _this.delete()
@@ -195,15 +202,12 @@
         },
         delete: function() {
             var _this = this
-            var url = Streamr.createLink({
-                uri: 'api/v1/keys/' + this.model.get("id")
-            })
-            $.ajax(url, {
+            $.ajax(this.url, {
                 method: 'DELETE'
             }).then(function() {
                 _this.remove()
             }).fail(function(e) {
-                Streamr.showError(e.message)
+                Streamr.showError(e.message || e.responseJSON.message)
             })
         }
     })
@@ -216,9 +220,7 @@
         },
         initialize: function(opts) {
             this.showPermissions = opts.showPermissions
-            
-            this.streamId = opts.streamId
-            this.username = opts.username
+            this.url = opts.url
             
             this.render()
         },
@@ -250,11 +252,8 @@
             var _this = this
             
             var name = this.nameInput.val() || ""
-            var url = Streamr.createLink({
-                uri: this.username ? 'api/v1/users/me/keys' : 'api/v1/streams/' + this.streamId + '/keys'
-            })
             var permission = this.showPermissions ? this.permissionInput.val() : undefined
-            $.post(url, {
+            $.post(this.url, {
                 name: name,
                 permission: permission
             }).then(function(data) {

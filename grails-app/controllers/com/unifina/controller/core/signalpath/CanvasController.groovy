@@ -60,7 +60,7 @@ class CanvasController {
 			id: params.id,
 			examples: params.examples,
 			user: currentUser,
-			key: currentUser?.getKey(),
+			key: currentUser?.keys?.iterator()?.next(), // any one of the user's keys will do
 			json: (json as JSON)?.toString()
 		]
 	}

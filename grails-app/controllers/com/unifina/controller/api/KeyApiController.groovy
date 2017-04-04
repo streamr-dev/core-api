@@ -1,9 +1,7 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
@@ -12,49 +10,107 @@ import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
-import groovy.transform.CompileStatic
 
 @Secured(["IS_AUTHENTICATED_ANONYMOUSLY"])
 class KeyApiController {
 
 	PermissionService permissionService
 
-	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def saveUserKey() {
-		Key key = new Key()
-		key.name = params.name
-		key.user = request.apiUser
-		key.save(failOnError: true, validate: true)
-		render(key.toMap() as JSON)
+	/**
+	 * Execute a Controller action using a domain class with access control ("resource")
+	 * Checks Permissions for current user first, and blocks the action if access hasn't been granted
+	 * @param action Closure that takes up to one argument: the specified resource
+	 */
+	private useResource(Class resourceClass, resourceId, boolean requireSharePermission=true, Closure action) {
+		if (!resourceClass) { throw new IllegalArgumentException("Missing resource class") }
+		if (!grailsApplication.isDomainClass(resourceClass)) { throw new IllegalArgumentException("${resourceClass.simpleName} is not a domain class!") }
+
+		// SecUser operations are always on self
+		if (resourceClass == SecUser) {
+			action(request.apiUser)
+		} else {
+			def res = resourceClass.get(resourceId)
+
+			if (!res) {
+				throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
+			} else if (requireSharePermission && !permissionService.canShare(request.apiUser, res)) {
+				throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
+			} else {
+				action(res)
+			}
+		}
 	}
 
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def saveStreamKey(String id) {
-		Stream stream = Stream.get(id)
-		if (stream == null) {
-			throw new NotFoundException("Stream not found", Stream.class.toString(), id)
+	def index() {
+		useResource(params.resourceClass, params.resourceId) {res ->
+			if (res instanceof SecUser) {
+				render res.keys*.toMap() as JSON
+			} else {
+				Map permissionsByKey = permissionService.getPermissionsTo(res)
+						.findAll { it.key != null }
+						.groupBy { it.key }
+
+				List keys = permissionsByKey.collect { key, permissions ->
+					Map map = key.toMap()
+					map["permission"] = permissions.find {
+						it.operation == Permission.Operation.WRITE
+					}?.operation?.id ?: Permission.Operation.READ.id
+					return map
+				}
+
+				render keys as JSON
+			}
+		}
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def save() {
+		useResource(params.resourceClass, params.resourceId) {res ->
+			Key key = new Key()
+			key.name = params.name
+			key.user = res instanceof SecUser ? res : null
+			key.save(failOnError: true, validate: true)
+
+			Map response = key.toMap()
+
+			if (params.permission) {
+				Permission.Operation operation = Permission.Operation.fromString(params.permission)
+
+				// Throws if user is not permitted to grant
+				permissionService.grant(request.apiUser, res, key, operation, false)
+
+				// If granting write, grant also read
+				if (operation == Permission.Operation.WRITE) {
+					permissionService.grant(request.apiUser, res, key, Permission.Operation.READ, false)
+				}
+
+				response["permission"] = params.permission
+			}
+
+			render(response as JSON)
+		}
+	}
+
+	@StreamrApi(authenticationLevel = AuthLevel.USER)
+	def delete() {
+		Key key = Key.get(params.id)
+		if (key == null) {
+			throw new NotFoundException(Key.toString(), params.id)
 		}
 
-		Key key = new Key()
-		key.name = params.name
-		key.save(failOnError: true, validate: true)
+		useResource(params.resourceClass, params.resourceId) { res ->
 
-		Permission.Operation operation = Permission.Operation.fromString(params.permission)
-		permissionService.grant(request.apiUser, stream, key, operation, false)
+			// Don't allow deleting the only API key for a user. This is needed internally for directing runtime requests to correct node.
+			// TODO: this restriction can be removed if HTTP sessions are offloaded to a global store, eg. Redis
+			if (res instanceof SecUser && res.keys.size() == 1) {
+				throw new NotPermittedException("The only API key of a user cannot be deleted.")
+			}
 
-		Map response = key.toMap()
-		response["permission"] = params.permission
-		render(response as JSON)
-	}
+			if (res instanceof SecUser) {
+				res.removeFromKeys(key)
+			}
 
-	@StreamrApi(authenticationLevel = AuthLevel.USER)
-	def delete(String id) {
-		Key key = Key.get(id)
-		if (key == null) {
-			throw new NotFoundException(Key.toString(), id)
-		} else if (!canDeleteKey(key, request.apiUser)) {
-			throw new NotPermittedException(request.apiUser.username, "Key", key.id.toString(), Permission.Operation.SHARE.toString())
-		} else {
 			def query = Permission.where {
 				key == key
 			}
@@ -65,18 +121,4 @@ class KeyApiController {
 		}
 	}
 
-	@CompileStatic
-	private boolean canDeleteKey(Key key, SecUser currentUser) {
-		if (key.user != null) {
-			return key.user == currentUser
-		} else {
-			List<Stream> streams = permissionService.get(Stream, currentUser, Permission.Operation.SHARE)
-			for (Stream s : streams) {
-				if (permissionService.canReadKey(key, s)) {
-					return true
-				}
-			}
-			return false
-		}
-	}
 }
