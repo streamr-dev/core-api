@@ -251,13 +251,11 @@
             
             var name = this.nameInput.val() || ""
             var url = Streamr.createLink({
-                uri: 'api/v1/keys/'
+                uri: this.username ? 'api/v1/users/me/keys' : 'api/v1/streams/' + this.streamId + '/keys'
             })
             var permission = this.showPermissions ? this.permissionInput.val() : undefined
             $.post(url, {
                 name: name,
-                streamId: this.streamId,
-                username: this.username,
                 permission: permission
             }).then(function(data) {
                 _this.nameInput.val('')

@@ -1,7 +1,5 @@
 package com.unifina.domain.security
 
-import com.unifina.utils.IdGenerator;
-
 class SecUser {
 	
 	String username
