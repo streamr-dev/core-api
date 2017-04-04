@@ -61,15 +61,12 @@ class ApiService {
 	}
 
 	@CompileStatic
-	Map post(String url, Map body, SecUser user) {
+	Map post(String url, Map body, Key key) {
 		// TODO: Migrate to Streamr API Java client lib when such a thing is made
 		def req = Unirest.post(url)
 
-		if (user) {
-			Key key = user.getKey()
-			if (key) {
-				req.header("Authorization", "token $key.id")
-			}
+		if (key) {
+			req.header("Authorization", "token $key.id")
 		}
 
 		req.header("Content-Type", "application/json")
