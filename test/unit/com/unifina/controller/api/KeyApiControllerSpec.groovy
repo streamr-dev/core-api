@@ -35,102 +35,22 @@ class KeyApiControllerSpec extends Specification {
 			name: "name",
 			timezone: "Europe/Helsinki"
 		).save(failOnError: true, validate: true)
+
+		def userLinkedKey = new Key(name: 'users key', user: loggedInUser)
+		userLinkedKey.id = "apiKey"
+		userLinkedKey.save(failOnError: true, validate: true)
+
 		controller.permissionService = permissionService = grailsApplication.mainContext.getBean(PermissionService)
-
-		def key = new Key(name: 'users key', user: loggedInUser)
-		key.id = "apiKey"
-		key.save(failOnError: true, validate: true)
 	}
 
-	void "save() throws ApiException (status code 422) if not given either username or streamId"() {
+	void "saveUserKey() creates user-linked for logged in user"() {
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
-		}
-
-		then:
-		def e = thrown(ApiException)
-		e.statusCode == 422
-	}
-
-	void "save() throws ApiException (status code 422) if given both username and streamId"() {
-		when:
-		request.addHeader("Authorization", "Token apiKey")
-		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			username: "username",
-			streamId: "streamId"
-		]
-		withFilters([action: 'save']) {
-			controller.save()
-		}
-
-		then:
-		def e = thrown(ApiException)
-		e.statusCode == 422
-	}
-
-	void "save() throws NotFoundException (404) if given username does not exist"() {
-		when:
-		request.addHeader("Authorization", "Token apiKey")
-		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			username: "user2@user.com",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
-		}
-
-		then:
-		thrown(NotFoundException)
-	}
-
-	void "save() throws NotPermittedException if not logged in as given username"() {
-		setup:
-		new SecUser(
-			username: "user2@user.com",
-			password: "pwd",
-			name: "name",
-			timezone: "Europe/Helsinki"
-		).save(failOnError: true, validate: true)
-
-		when:
-		request.addHeader("Authorization", "Token apiKey")
-		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			username: "user2@user.com",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
-		}
-
-		then:
-		thrown(NotPermittedException)
-	}
-
-	void "save() creates user-linked key when given username"() {
-		when:
-		request.addHeader("Authorization", "Token apiKey")
-		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			username: "user@user.com",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
+		request.requestURI = "/api/v1/users/me/keys"
+		params.name = "key name"
+		withFilters([action: 'saveUserKey']) {
+			controller.saveUserKey()
 		}
 
 		then:
@@ -142,26 +62,25 @@ class KeyApiControllerSpec extends Specification {
 		]
 	}
 
-	void "save() throws NotFoundException (404) if given streamId does not exist"() {
+	void "saveStreamKey() throws NotFoundException (404) if given streamId does not exist"() {
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			streamId: "streamId",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
+		request.requestURI = "/api/v1/streams/streamId/keys"
+		params.id = "streamId"
+		params.name = "key name"
+		withFilters([action: 'saveStreamKey']) {
+			controller.saveStreamKey()
 		}
 
 		then:
 		thrown(NotFoundException)
 	}
 
-	void "save() throws AccessControlException if current user does not have share permission on given streamId"() {
+	void "saveStreamKey() throws AccessControlException if current user does not have share permission on given streamId"() {
 		setup:
 		Stream stream = new Stream()
+		params.id = "streamId"
 		stream.id = "streamId"
 		stream.save(validate: false, failOnError: true)
 
@@ -170,20 +89,18 @@ class KeyApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			streamId: "streamId",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
+		request.requestURI = "/api/v1/streams/streamId/keys"
+		params.id = "streamId"
+		params.name = "key name"
+		withFilters([action: 'saveStreamKey']) {
+			controller.saveStreamKey()
 		}
 
 		then:
 		thrown(AccessControlException)
 	}
 
-	void "save() creates anonymous key for Stream when given streamId"() {
+	void "saveStreamKey() creates anonymous key for Stream when given streamId"() {
 		setup:
 		Stream stream = new Stream()
 		stream.id = "streamId"
@@ -194,13 +111,12 @@ class KeyApiControllerSpec extends Specification {
 		when:
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
-		request.requestURI = "/api/v1/keys"
-		request.JSON = [
-			name: "key name",
-			streamId: "streamId",
-		]
-		withFilters([action: 'save']) {
-			controller.save()
+		request.requestURI = "/api/v1/streams/streamId/keys"
+		params.id = "streamId"
+		params.name = "key name"
+		params.permission = "read"
+		withFilters([action: 'saveStreamKey']) {
+			controller.saveStreamKey()
 		}
 
 		then:
@@ -208,7 +124,8 @@ class KeyApiControllerSpec extends Specification {
 		response.json == [
 			id: "1",
 			name: "key name",
-			user: JSONObject.NULL
+			user: JSONObject.NULL,
+			permission: "read"
 		]
 
 		and:
