@@ -98,60 +98,86 @@
 				if (this.cachedModuleJson)
 					callback(this.cachedModuleJson)
 				else {
-					const headers = {}
-					if (this.authkey) {
-						headers['Authorization'] = 'token ' + this.authkey
+					var authKeyPromise
+				    if (this.authkey) {
+						authKeyPromise = Promise.resolve(this.authkey)
+					} else {
+						authKeyPromise = new Promise(function(resolve, reject) {
+							_this.$.client.getClient(function (client) {
+								resolve(client.options.authKey)
+							})
+						})
 					}
-					// Get JSON from the server to initialize options
-					$.ajax({
-						type: 'POST',
-						url: _this.url + '/request',
-						headers: headers,
-						dataType: 'json',
-						contentType: 'application/json; charset=utf-8',
-						data: JSON.stringify({type: 'json'}),
-						success: function(response) {
-							_this.cachedModuleJson = response.json
-							if (callback)
-								callback(response.json)
-						},
-						error: function (xhr) {
-							console.log("Error while communicating with widget: " + xhr.responseText)
-							try {
-								var response = JSON.parse(xhr.responseText)
-								_this.fire('error', response, undefined, false)
-							} catch (err) {
-								_this.fire('error', xhr.responseText, undefined, false)
-							}
+
+				    authKeyPromise.then(function(authKey) {
+						const headers = {}
+						if (authKey) {
+							headers['Authorization'] = 'token ' + authKey
 						}
-					});
+						// Get JSON from the server to initialize options
+						$.ajax({
+							type: 'POST',
+							url: _this.url + '/request',
+							headers: headers,
+							dataType: 'json',
+							contentType: 'application/json; charset=utf-8',
+							data: JSON.stringify({type: 'json'}),
+							success: function(response) {
+								_this.cachedModuleJson = response.json
+								if (callback)
+									callback(response.json)
+							},
+							error: function (xhr) {
+								console.log("Error while communicating with widget: " + xhr.responseText)
+								try {
+									var response = JSON.parse(xhr.responseText)
+									_this.fire('error', response, undefined, false)
+								} catch (err) {
+									_this.fire('error', xhr.responseText, undefined, false)
+								}
+							}
+						});
+					})
 				}
 			},
 			sendRequest: function(msg, callback) {
 				var _this = this
 
-				const headers = {}
+				var authKeyPromise
 				if (this.authkey) {
-					headers['Authorization'] = 'token ' + this.authkey
+					authKeyPromise = Promise.resolve(this.authkey)
+				} else {
+					authKeyPromise = new Promise(function(resolve, reject) {
+						_this.$.client.getClient(function (client) {
+							resolve(client.options.authKey)
+						})
+					})
 				}
 
-				$.ajax({
-					type: 'POST',
-					url: _this.url + '/request',
-					headers: headers,
-					data: JSON.stringify(msg),
-					dataType: 'json',
-					contentType: 'application/json; charset=utf-8',
-					success: callback,
-					error: function(xhr) {
-						console.log("Error while communicating with widget: %s", xhr.responseText)
-						if (xhr.responseJSON)
-							_this.fire('error', xhr.responseJSON, undefined, false)
-						else
-							_this.fire('error', xhr.responseText, undefined, false)
+				authKeyPromise.then(function(authKey) {
+					const headers = {}
+					if (authKey) {
+						headers['Authorization'] = 'token ' + authKey
 					}
 
-				});
+					$.ajax({
+						type: 'POST',
+						url: _this.url + '/request',
+						headers: headers,
+						data: JSON.stringify(msg),
+						dataType: 'json',
+						contentType: 'application/json; charset=utf-8',
+						success: callback,
+						error: function (xhr) {
+							console.log("Error while communicating with widget: %s", xhr.responseText)
+							if (xhr.responseJSON)
+								_this.fire('error', xhr.responseJSON, undefined, false)
+							else
+								_this.fire('error', xhr.responseText, undefined, false)
+						}
+
+					});
+				})
 			},
 			getModuleOptionsWithOverrides: function(moduleJson) {
 				var _this = this
