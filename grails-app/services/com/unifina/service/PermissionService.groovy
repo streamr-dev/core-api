@@ -147,7 +147,7 @@ class PermissionService {
 		}.toList()
 
 		// Generated non-saved "dummy permissions" for owner
-		if (resource.hasProperty("user") && (getAllPermissions || resource.user == user)) {
+		if (resource.hasProperty("user") && (getAllPermissions || resource.user.id == user.id)) {
 			Permission.Operation.enumConstants.each {
 				perms << new Permission(
 					id: null,
