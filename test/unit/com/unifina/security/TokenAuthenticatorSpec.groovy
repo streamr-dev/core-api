@@ -2,7 +2,6 @@ package com.unifina.security
 
 import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
-import com.unifina.service.UserService
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
@@ -10,8 +9,6 @@ import javax.servlet.http.HttpServletRequest
 
 @Mock([Key])
 class TokenAuthenticatorSpec extends Specification {
-
-	UserService userService = Mock(UserService)
 	TokenAuthenticator authenticator = new TokenAuthenticator()
 
 	def "no authorization string"() {
@@ -19,9 +16,11 @@ class TokenAuthenticatorSpec extends Specification {
 		def result = authenticator.authenticate(Stub(HttpServletRequest))
 
 		then:
-		result == null
-		!authenticator.lastAuthenticationMalformed()
-		!authenticator.keyPresent
+		result != null
+		result.key == null
+		result.secUser == null
+		!result.lastAuthenticationMalformed
+		result.keyMissing
 	}
 
 	def "malformed authorization string"() {
@@ -31,9 +30,11 @@ class TokenAuthenticatorSpec extends Specification {
 		})
 
 		then:
-		result == null
-		authenticator.lastAuthenticationMalformed()
-		!authenticator.keyPresent
+		result != null
+		result.key == null
+		result.secUser == null
+		result.lastAuthenticationMalformed
+		!result.keyMissing
 	}
 
 	def "valid authorization string with non-existent apiKey"() {
@@ -46,8 +47,8 @@ class TokenAuthenticatorSpec extends Specification {
 		result != null
 		result.getKey() == null
 		result.getSecUser() == null
-		!authenticator.lastAuthenticationMalformed()
-		authenticator.keyPresent
+		!result.lastAuthenticationMalformed
+		!result.keyMissing
 	}
 
 	def "valid authorization with existent user-linked Key"() {
@@ -64,8 +65,8 @@ class TokenAuthenticatorSpec extends Specification {
 		result != null
 		result.getKey() == null
 		result.getSecUser().is(user)
-		!authenticator.lastAuthenticationMalformed()
-		authenticator.keyPresent
+		!result.lastAuthenticationMalformed
+		!result.keyMissing
 	}
 
 	def "valid authorization with existent anonymous Key"() {
@@ -81,7 +82,7 @@ class TokenAuthenticatorSpec extends Specification {
 		result != null
 		result.getKey().is(key)
 		result.getSecUser() == null
-		!authenticator.lastAuthenticationMalformed()
-		authenticator.keyPresent
+		!result.lastAuthenticationMalformed
+		!result.keyMissing
 	}
 }

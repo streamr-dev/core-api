@@ -57,7 +57,7 @@ class UnifinaCoreAPIFilters {
 				TokenAuthenticator authenticator = new TokenAuthenticator()
 				AuthenticationResult result = authenticator.authenticate(request)
 
-				if (authenticator.lastAuthenticationMalformed()) {
+				if (result.lastAuthenticationMalformed) {
 					render (
 						status: 400,
 						text: [
@@ -69,7 +69,7 @@ class UnifinaCoreAPIFilters {
 				}
 
 				// Use cookie-based authentication if api key was not present in header.
-				if (!authenticator.keyPresent) {
+				if (result.keyMissing) {
 					result = new AuthenticationResult((SecUser) springSecurityService.getCurrentUser())
 				}
 				if (!result.guarantees(annotation.authenticationLevel())) {

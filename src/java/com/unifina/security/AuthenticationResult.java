@@ -6,20 +6,28 @@ import com.unifina.domain.security.SecUser;
 public class AuthenticationResult {
 	private final Key key;
 	private final SecUser secUser;
+	private final boolean keyMissing;
+	private final boolean lastAuthenticationMalformed;
 
-	public AuthenticationResult() {
-		key = null;
-		secUser = null;
+	public AuthenticationResult(boolean keyMissing, boolean lastAuthenticationMalformed) {
+		this.key = null;
+		this.secUser = null;
+		this.keyMissing = keyMissing;
+		this.lastAuthenticationMalformed = lastAuthenticationMalformed;
 	}
 
 	public AuthenticationResult(SecUser secUser) {
 		this.key = null;
 		this.secUser = secUser;
+		this.keyMissing = false;
+		this.lastAuthenticationMalformed = false;
 	}
 
 	public AuthenticationResult(Key key) {
-		this.secUser = key.getUser() != null ? key.getUser() : null;
+		this.secUser = key.getUser();
 		this.key = key.getUser() != null ? null : key;
+		this.keyMissing = false;
+		this.lastAuthenticationMalformed = false;
 	}
 
 	public Key getKey() {
@@ -28,6 +36,14 @@ public class AuthenticationResult {
 
 	public SecUser getSecUser() {
 		return secUser;
+	}
+
+	public boolean isKeyMissing() {
+		return keyMissing;
+	}
+
+	public boolean isLastAuthenticationMalformed() {
+		return lastAuthenticationMalformed;
 	}
 
 	public boolean guarantees(AuthLevel level) {

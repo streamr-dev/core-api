@@ -8,15 +8,17 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
-	private boolean lastAuthenticationMalformed = false;
-	private boolean keyPresent = false;
-
 	public AuthenticationResult authenticate(HttpServletRequest request) {
-		String key = parseAuthorizationHeader(request.getHeader("Authorization"));
-		keyPresent = key != null;
+		String key;
 
-		if (!keyPresent) {
-			return null;
+		try {
+			key = parseAuthorizationHeader(request.getHeader("Authorization"));
+		} catch (AuthenticationMalformedException e) {
+			return new AuthenticationResult(false, true);
+		}
+
+		if (key == null) {
+			return new AuthenticationResult(true, false);
 		}
 
 		Key keyObject = (Key) InvokerHelper.invokeMethod(Key.class, "get", key);
@@ -24,15 +26,7 @@ public class TokenAuthenticator {
 			return new AuthenticationResult(keyObject);
 		}
 
-		return new AuthenticationResult();
-	}
-
-	public boolean lastAuthenticationMalformed() {
-		return lastAuthenticationMalformed;
-	}
-
-	public boolean isKeyPresent() {
-		return keyPresent;
+		return new AuthenticationResult(false, false);
 	}
 
 	/**
@@ -43,12 +37,15 @@ public class TokenAuthenticator {
 		if (s != null && !s.isEmpty()) {
 			String[] parts = s.split("\\s+");
 			if (parts.length == 2 && parts[0].toLowerCase().equals("token")) {
-				lastAuthenticationMalformed = false;
 				return parts[1];
 			} else {
-				lastAuthenticationMalformed = true;
+				throw new AuthenticationMalformedException();
 			}
  		}
 		return null;
 	}
+
+	private static class AuthenticationMalformedException extends RuntimeException {
+	}
+
 }
