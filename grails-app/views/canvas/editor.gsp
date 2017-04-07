@@ -56,6 +56,8 @@ $(document).ready(function() {
 		},
 		connectionOptions: {
 			url: "${grailsApplication.config.streamr.ui.server}",
+			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			authKey: "${key.id}",
 			autoConnect: true,
 			autoDisconnect: true
 		}

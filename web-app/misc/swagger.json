@@ -1,6 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
+    "title": "Streamr API",
     "version": "1.0.0"
   },
   "host": "www.streamr.com",
@@ -39,6 +40,14 @@
     {
       "name": "dashboards",
       "description": "Dashboards and their items"
+    },
+    {
+      "name": "keys",
+      "description": "Keys for authenticating users and resources"
+    },
+    {
+      "name": "users",
+      "description": "User management"
     }
   ],
   "paths": {
@@ -550,6 +559,135 @@
             "schema": {
               "$ref": "#/definitions/Permission"
             }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/keys": {
+      "get": {
+        "summary": "List keys",
+        "description": "List the keys for a given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of keys",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Key"
+              }
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a key",
+        "description": "Creates an API key for the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name (human readable) of key.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly created Key",
+            "schema": {
+              "$ref": "#/definitions/Key"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{streamId}/keys/{id}": {
+      "delete": {
+        "summary": "Delete a key",
+        "description": "Deletes an API key from the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
           },
           "403": {
             "description": "No sharing rights to the stream",
@@ -1604,6 +1742,110 @@
           }
         }
       }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Get the authenticated user",
+        "description": "Returns information on the authenticated user.",
+        "parameters": [],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/keys": {
+      "get": {
+        "summary": "List user's API keys",
+        "description": "List the API keys for the authenticated user.",
+        "parameters": [],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of keys",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Key"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new user API key",
+        "description": "Creates a key that can be used for authenticating the user.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name (human readable) of key.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly created Key",
+            "schema": {
+              "$ref": "#/definitions/Key"
+            }
+          }
+        }
+      }
+    },
+    "/users/me/keys/{id}": {
+      "delete": {
+        "summary": "Delete user API key",
+        "description": "Revoke and delete a user API key. Can only be called by the user.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1961,6 +2203,55 @@
           "type": "string",
           "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
           "example": "read"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "required": ["name", "username", "timezone"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's real name",
+          "example": "John Smith"
+        },
+        "username": {
+          "type": "string",
+          "description": "The username (email address)",
+          "example": "someone@somewhere.com"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "User's timezone setting.",
+          "example": "Europe/Helsinki"
+        }
+      }
+    },
+    "Key": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Matti's key"
+        },
+        "permission": {
+          "type": "string",
+          "description": "Operation permitted by this key to the resource in question.",
+          "example": "read"
+        },
+        "user": {
+          "type": "integer",
+          "description": "User id whom the key authenticates if user-linked key. Null otherwise.",
+          "example": 123
         }
       }
     },

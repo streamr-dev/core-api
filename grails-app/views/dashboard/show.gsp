@@ -98,7 +98,13 @@
 					<g:link elementId="dashboardBreadcrumbName" controller="dashboard" action="show" id="${ id }"></g:link>
 				</li>
 			</ui:breadcrumb>
-			<streamr-client id="client" url="${config.streamr.ui.server}" autoconnect="true" autodisconnect="false"></streamr-client>
+			<streamr-client
+					id="client"
+					url="${config.streamr.ui.server}"
+					autoconnect="true"
+					autodisconnect="false"
+					authkey="${key.id}">
+			</streamr-client>
 			<ul id="dashboard-view"></ul>
 		</div>
 		<div id="main-menu-bg"></div>

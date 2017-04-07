@@ -1,5 +1,5 @@
 (function(exports) {
-
+    
 var Module = Backbone.AssociatedModel.extend({
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
@@ -9,7 +9,7 @@ var Module = Backbone.AssociatedModel.extend({
 var ModuleList = Backbone.Collection.extend({
 	model: Module
 })
-
+    
 var ModuleView = Backbone.View.extend({
 	tagName: "li",
 	className: "module",

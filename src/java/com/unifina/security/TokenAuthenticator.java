@@ -1,32 +1,32 @@
 package com.unifina.security;
 
+import com.unifina.domain.security.Key;
 import com.unifina.domain.security.SecUser;
-import com.unifina.service.PermissionService;
 import com.unifina.service.UserService;
+import org.codehaus.groovy.runtime.InvokerHelper;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class TokenAuthenticator {
-	private final UserService userService;
-	private boolean lastAuthenticationMalformed = false;
-	private boolean apiKeyPresent = false;
+	public AuthenticationResult authenticate(HttpServletRequest request) {
+		String key;
 
-	public TokenAuthenticator(UserService userService) {
-		this.userService = userService;
-	}
+		try {
+			key = parseAuthorizationHeader(request.getHeader("Authorization"));
+		} catch (AuthenticationMalformedException e) {
+			return new AuthenticationResult(false, true);
+		}
 
-	public SecUser authenticate(HttpServletRequest request) {
-		String apiKey = parseAuthorizationHeader(request.getHeader("Authorization"));
-		apiKeyPresent = apiKey != null;
-		return apiKeyPresent ? userService.getUserByApiKey(apiKey) : null;
-	}
+		if (key == null) {
+			return new AuthenticationResult(true, false);
+		}
 
-	public boolean lastAuthenticationMalformed() {
-		return lastAuthenticationMalformed;
-	}
+		Key keyObject = (Key) InvokerHelper.invokeMethod(Key.class, "get", key);
+		if (keyObject != null) {
+			return new AuthenticationResult(keyObject);
+		}
 
-	public boolean isApiKeyPresent() {
-		return apiKeyPresent;
+		return new AuthenticationResult(false, false);
 	}
 
 	/**
@@ -37,12 +37,15 @@ public class TokenAuthenticator {
 		if (s != null && !s.isEmpty()) {
 			String[] parts = s.split("\\s+");
 			if (parts.length == 2 && parts[0].toLowerCase().equals("token")) {
-				lastAuthenticationMalformed = false;
 				return parts[1];
 			} else {
-				lastAuthenticationMalformed = true;
+				throw new AuthenticationMalformedException();
 			}
  		}
 		return null;
 	}
+
+	private static class AuthenticationMalformedException extends RuntimeException {
+	}
+
 }
