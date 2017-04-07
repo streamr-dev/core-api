@@ -8,6 +8,7 @@ import com.unifina.domain.security.SignupInvite
 import org.apache.log4j.Logger
 import org.hibernate.proxy.HibernateProxyHelper
 
+import javax.annotation.Nullable
 import java.security.AccessControlException
 
 /**
@@ -124,7 +125,7 @@ class PermissionService {
 		return getPermissionsList(resource, user, false)
 	}
 
-	private List<Permission> getPermissionsList(resource, SecUser user, boolean getAllPermissions) {
+	private List<Permission> getPermissionsList(resource, @Nullable SecUser user, boolean getAllPermissions) {
 		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
 
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
@@ -147,7 +148,7 @@ class PermissionService {
 		}.toList()
 
 		// Generated non-saved "dummy permissions" for owner
-		if (resource.hasProperty("user") && (getAllPermissions || resource.user.id == user.id)) {
+		if (resource.hasProperty("user") && (getAllPermissions || resource.user.id == user?.id)) {
 			Permission.Operation.enumConstants.each {
 				perms << new Permission(
 					id: null,
