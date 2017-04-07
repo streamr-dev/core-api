@@ -147,25 +147,40 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashRestricted)[0].user == anotherUser
 	}
 
-	// TODO: key-only user / to key
 	void "getSingleUserPermissionsTo returns permissions for single user"() {
 		expect:
-		service.getSingleUserPermissionsTo(dashOwned, me).size() == 3
-		service.getSingleUserPermissionsTo(dashOwned, anotherUser) == []
-		service.getSingleUserPermissionsTo(dashOwned, stranger) == []
-		service.getSingleUserPermissionsTo(dashOwned, null) == []
-		service.getSingleUserPermissionsTo(dashAllowed, me)[0].operation == Operation.READ
-		service.getSingleUserPermissionsTo(dashAllowed, anotherUser).size() == 3
-		service.getSingleUserPermissionsTo(dashAllowed, stranger) == []
-		service.getSingleUserPermissionsTo(dashAllowed, null) == []
-		service.getSingleUserPermissionsTo(dashRestricted, me) == []
-		service.getSingleUserPermissionsTo(dashRestricted, anotherUser).size() == 3
-		service.getSingleUserPermissionsTo(dashRestricted, stranger) == []
-		service.getSingleUserPermissionsTo(dashRestricted, null) == []
-		service.getSingleUserPermissionsTo(dashPublic, me)[0].operation == Operation.READ
-		service.getSingleUserPermissionsTo(dashPublic, anotherUser).size() == 4
-		service.getSingleUserPermissionsTo(dashPublic, stranger)[0].operation == Operation.READ
-		service.getSingleUserPermissionsTo(dashPublic, null)[0].operation == Operation.READ
+		service.getPermissionsTo(dashOwned, me).size() == 3
+		service.getPermissionsTo(dashOwned, anotherUser) == []
+		service.getPermissionsTo(dashOwned, stranger) == []
+		service.getPermissionsTo(dashOwned, null) == []
+		service.getPermissionsTo(dashAllowed, me)[0].operation == Operation.READ
+		service.getPermissionsTo(dashAllowed, anotherUser).size() == 3
+		service.getPermissionsTo(dashAllowed, stranger) == []
+		service.getPermissionsTo(dashAllowed, null) == []
+		service.getPermissionsTo(dashRestricted, me) == []
+		service.getPermissionsTo(dashRestricted, anotherUser).size() == 3
+		service.getPermissionsTo(dashRestricted, stranger) == []
+		service.getPermissionsTo(dashRestricted, null) == []
+		service.getPermissionsTo(dashPublic, me)[0].operation == Operation.READ
+		service.getPermissionsTo(dashPublic, anotherUser).size() == 4
+		service.getPermissionsTo(dashPublic, stranger)[0].operation == Operation.READ
+		service.getPermissionsTo(dashPublic, null)[0].operation == Operation.READ
+	}
+
+	void "getSingleUserPermissionsTo returns permissions for key"() {
+		expect:
+		service.getPermissionsTo(dashOwned, myKey).size() == 3
+		service.getPermissionsTo(dashOwned, anotherUserKey) == []
+		service.getPermissionsTo(dashOwned, anonymousKey) == []
+		service.getPermissionsTo(dashAllowed, myKey)[0].operation == Operation.READ
+		service.getPermissionsTo(dashAllowed, anotherUserKey).size() == 3
+		service.getPermissionsTo(dashAllowed, anonymousKey)[0].operation == Operation.READ
+		service.getPermissionsTo(dashRestricted, myKey) == []
+		service.getPermissionsTo(dashRestricted, anotherUserKey).size() == 3
+		service.getPermissionsTo(dashRestricted, anonymousKey) == []
+		service.getPermissionsTo(dashPublic, myKey)[0].operation == Operation.READ
+		service.getPermissionsTo(dashPublic, anotherUserKey).size() == 4
+		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
 	}
 
 	// TODO: key-only user / to key

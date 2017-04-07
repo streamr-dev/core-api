@@ -94,6 +94,8 @@ class PermissionService {
 	}
 
 	private boolean hasPermission(userish, Class resourceClass, resourceId, Operation op) {
+		userish = getSecUser(userish) ?: userish
+
 		String idProp = getIdPropertyName(resourceClass)
 		def p = Permission.withCriteria {
 			or {
@@ -118,15 +120,17 @@ class PermissionService {
 	}
 
 	/**
-	 * @param user whose permissions are asked, or null for anonymous permissions only
+	 * @param userish (SecUser, Key or Invite) whose permissions are asked, or null for anonymous permissions only
 	 * @return List of all Permissions granted to the user for the resource
 	 */
-	public List<Permission> getSingleUserPermissionsTo(resource, SecUser user) {
-		return getPermissionsList(resource, user, false)
+	public List<Permission> getPermissionsTo(resource, userish) {
+		return getPermissionsList(resource, userish, false)
 	}
 
-	private List<Permission> getPermissionsList(resource, @Nullable SecUser user, boolean getAllPermissions) {
+	private List<Permission> getPermissionsList(resource, @Nullable userish, boolean getAllPermissions) {
 		if (!resource) { throw new IllegalArgumentException("Missing resource!") }
+
+		userish = getSecUser(userish) ?: userish
 
 		// proxy objects have funky class names, e.g. com.unifina.domain.signalpath.ModulePackage_$$_jvst12_1b
 		//   hence, class.name of a proxy object won't match the class.name in database
@@ -139,16 +143,16 @@ class PermissionService {
 			if (!getAllPermissions) {
 				or {
 					eq "anonymous", true
-					if (isValidUser(user)) {
-						String userProp = getUserPropertyName(user)
-						eq userProp, user
+					if (isValidUser(userish)) {
+						String userProp = getUserPropertyName(userish)
+						eq userProp, userish
 					}
 				}
 			}
 		}.toList()
 
 		// Generated non-saved "dummy permissions" for owner
-		if (resource.hasProperty("user") && (getAllPermissions || resource.user.id == user?.id)) {
+		if (hasOwner(resource) && (getAllPermissions || isOwner(userish, resource))) {
 			Permission.Operation.enumConstants.each {
 				perms << new Permission(
 					id: null,
@@ -498,11 +502,27 @@ class PermissionService {
 			(userish instanceof SecUser || userish instanceof SignupInvite || userish instanceof Key)
     }
 
+	/** extracts a SecUser, if represented by the userish **/
+	private SecUser getSecUser(userish) {
+		if (userish instanceof SecUser) {
+			return userish
+		} else if (userish instanceof Key && userish.user) {
+			return userish.user
+		} else {
+			return null
+		}
+	}
+
+	private boolean hasOwner(resource) {
+		return resource?.hasProperty("user") && resource?.user?.id != null
+	}
+
 	/** ownership (if applicable) is stored in each Resource as "user" attribute */
-	private boolean isOwner(SecUser user, resource) {
-		return resource?.hasProperty("user") &&
-			user?.id != null &&
-			resource.user?.id != null &&
-			resource.user.id == user.id
+	private boolean isOwner(userish, resource) {
+		SecUser user = getSecUser(userish)
+
+		return 	user && hasOwner(resource) &&
+				user.id != null &&
+				resource.user.id == user.id
 	}
 }
