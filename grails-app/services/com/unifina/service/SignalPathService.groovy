@@ -447,7 +447,7 @@ class SignalPathService {
 	@Transactional
 	def saveState(SignalPath sp) {
 		long startTime = System.currentTimeMillis()
-		Canvas canvas = sp.canvas
+		Canvas canvas = Canvas.get(sp.canvas.id)
 
 		try {
 			boolean isFirst = canvas.serialization == null

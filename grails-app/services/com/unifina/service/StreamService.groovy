@@ -304,7 +304,7 @@ class StreamService {
 
 	@CompileStatic
 	private boolean isDirectPermissionToStream(Key key, Stream stream) {
-		return permissionService.canReadKey(key, stream)
+		return permissionService.canRead(key, stream)
 	}
 
 	@CompileStatic

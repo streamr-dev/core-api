@@ -203,7 +203,7 @@ class StreamServiceSpec extends Specification {
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
 		thrown(NotPermittedException)
-		1 * service.permissionService.canReadKey(key, stream) >> false
+		1 * service.permissionService.canRead(key, stream) >> false
 		0 * cb._
 	}
 
@@ -221,7 +221,7 @@ class StreamServiceSpec extends Specification {
 		when:
 		service.getReadAuthorizedStream("streamId", null, key, cb)
 		then:
-		1 * service.permissionService.canReadKey(key, stream) >> true
+		1 * service.permissionService.canRead(key, stream) >> true
 		1 * cb.call(stream)
 	}
 

@@ -257,7 +257,7 @@ class PermissionApiControllerSpec extends Specification {
 		response.status == 200
 		response.json*.operation == ownerPermissions*.toMap()*.operation
 
-		1 * permissionService.getSingleUserPermissionsTo(_, me) >> [*ownerPermissions]
+		1 * permissionService.getPermissionsTo(_, me) >> [*ownerPermissions]
 		0 * permissionService._
 	}
 
@@ -274,7 +274,7 @@ class PermissionApiControllerSpec extends Specification {
 		response.status == 200
 		response.json == [[id: 1, operation: "share", user: "me"]]
 
-		1 * permissionService.getSingleUserPermissionsTo(_, me) >> [canvasPermission]
+		1 * permissionService.getPermissionsTo(_, me) >> [canvasPermission]
 		0 * permissionService._
 	}
 }
