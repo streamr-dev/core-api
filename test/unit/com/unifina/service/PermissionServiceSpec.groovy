@@ -1,19 +1,19 @@
 package com.unifina.service
 
+import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Key
-import com.unifina.domain.security.SignupInvite
-import spock.lang.Specification
-
-import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
-
+import com.unifina.domain.security.SecUser
+import com.unifina.domain.security.SignupInvite
+import com.unifina.domain.signalpath.Canvas
 import com.unifina.domain.signalpath.Module
 import com.unifina.domain.signalpath.ModulePackage
-import com.unifina.domain.signalpath.Canvas
-import com.unifina.domain.dashboard.Dashboard
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
+import spock.lang.Specification
 
 import java.security.AccessControlException
 
@@ -89,28 +89,28 @@ class PermissionServiceSpec extends Specification {
 
 	void "access granted through key to permitted Dashboard"() {
 		expect:
-		service.canReadKey(myKey, dashAllowed)
+		service.canRead(myKey, dashAllowed)
 	}
 
 
 	void "access denied through key to non-permitted Dashboard"() {
 		expect:
-		!service.canReadKey(myKey, dashRestricted)
+		!service.canRead(myKey, dashRestricted)
 	}
 
 	void "access granted through key to own Dashboard"() {
 		expect:
-		service.canReadKey(myKey, dashOwned)
+		service.canRead(myKey, dashOwned)
 	}
 
 	void "access granted through anonymous key to permitted Dashboard"() {
 		expect:
-		service.canReadKey(anonymousKey, dashAllowed)
+		service.canRead(anonymousKey, dashAllowed)
 	}
 
 	void "access denies through anonymous key to non-permitted Dashboard"() {
 		expect:
-		!service.canReadKey(anonymousKey, dashRestricted)
+		!service.canRead(anonymousKey, dashRestricted)
 	}
 
 	void "non-permitted third-parties have no access to resources"() {
@@ -127,12 +127,12 @@ class PermissionServiceSpec extends Specification {
 		!service.canRead(me, null)
 	}
 
-	void "canReadKey returns false on bad inputs"() {
+	void "canRead returns false on bad inputs using keys"() {
 		expect:
-		!service.canReadKey(null, dashAllowed)
-		!service.canReadKey(myKey, new Dashboard())
-		!service.canReadKey(anonymousKey, new Dashboard())
-		!service.canReadKey(myKey, null)
+		!service.canRead(null, dashAllowed)
+		!service.canRead(myKey, new Dashboard())
+		!service.canRead(anonymousKey, new Dashboard())
+		!service.canRead(myKey, null)
 	}
 
 	void "getPermissionsTo returns all permissions for the given resource"() {
@@ -183,7 +183,6 @@ class PermissionServiceSpec extends Specification {
 		service.getPermissionsTo(dashPublic, anonymousKey)[0].operation == Operation.READ
 	}
 
-	// TODO: key-only user / to key
 	void "retrieve all readable Dashboards correctly"() {
 		expect:
 		service.get(Dashboard, me) == [dashOwned, dashAllowed]
@@ -191,12 +190,25 @@ class PermissionServiceSpec extends Specification {
 		service.get(Dashboard, stranger) == []
 	}
 
-	// TODO: key-only user / to key
+	void "retrieve all readable Dashboards correctly with keys"() {
+		expect:
+		service.get(Dashboard, myKey) == [dashOwned, dashAllowed]
+		service.get(Dashboard, anotherUserKey) == [dashAllowed, dashRestricted, dashPublic]
+		service.get(Dashboard, anonymousKey) == [dashAllowed]
+	}
+
 	void "getAll lists public resources"() {
 		expect:
 		service.getAll(Dashboard, me) == [dashOwned, dashPublic, dashAllowed]
 		service.getAll(Dashboard, anotherUser) == [dashAllowed, dashRestricted, dashPublic]
 		service.getAll(Dashboard, stranger) == [dashPublic]
+	}
+
+	void "getAll lists public resources with keys"() {
+		expect:
+		service.getAll(Dashboard, myKey) == [dashOwned, dashPublic, dashAllowed]
+		service.getAll(Dashboard, anotherUserKey) == [dashAllowed, dashRestricted, dashPublic]
+		service.getAll(Dashboard, anonymousKey) == [dashPublic, dashAllowed]
 	}
 
 	void "get throws IllegalArgumentException on invalid resource"() {

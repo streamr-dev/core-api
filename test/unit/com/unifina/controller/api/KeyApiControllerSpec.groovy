@@ -132,7 +132,7 @@ class KeyApiControllerSpec extends Specification {
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 1
-		permissionService.canReadKey(Key.get(1), Stream.get(stream.id))
+		permissionService.canRead(Key.get(1), Stream.get(stream.id))
 	}
 
 	void "save() with write permission also creates read permission"() {
@@ -167,8 +167,8 @@ class KeyApiControllerSpec extends Specification {
 
 		and:
 		Permission.findAllByKey(Key.get(1)).size() == 2
-		permissionService.canReadKey(Key.get(1), Stream.get(stream.id))
-		permissionService.canWriteKey(Key.get(1), Stream.get(stream.id))
+		permissionService.canRead(Key.get(1), Stream.get(stream.id))
+		permissionService.canWrite(Key.get(1), Stream.get(stream.id))
 	}
 
 	void "delete() throws NotFoundException if given keyId doesn't exist"() {
@@ -256,7 +256,7 @@ class KeyApiControllerSpec extends Specification {
 
 		controller.permissionService = permissionService = Stub(PermissionService)
 		permissionService.get(Stream, loggedInUser, Permission.Operation.SHARE) >> [stream]
-		permissionService.canReadKey(key, stream) >> false
+		permissionService.canRead(key, stream) >> false
 
 		when:
 		request.addHeader("Authorization", "Token apiKey")
