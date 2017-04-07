@@ -622,13 +622,11 @@ var SignalPath = (function () {
 	function subscribe() {
 		if (isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
-				runningJson.uiChannel.id,
-				null,
-				processMessage,
 				{
-					resend_all: (runningJson.adhoc ? true : undefined),
-					canvas: runningJson.id
-				}
+					stream: runningJson.uiChannel.id,
+					resend_all: (runningJson.adhoc ? true : undefined)
+				},
+				processMessage
 			)
 		}
 	}

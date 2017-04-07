@@ -11,10 +11,8 @@ SignalPath.UIChannelModule = function(data,canvas,prot) {
     prot.subscribe = function(uiChannelIds) {
         uiChannelIds.forEach(function(uiChannelId) {
             subs.push(SignalPath.getConnection().subscribe(
-                uiChannelId,
-                null,
-                prot.receiveResponse,
-                $.extend({}, prot.getUIChannelOptions(), {canvas: SignalPath.getId()})
+                $.extend({}, prot.getUIChannelOptions(), {stream: uiChannelId}),
+                prot.receiveResponse
             ))
         })
     }

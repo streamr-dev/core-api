@@ -40,13 +40,13 @@
 						throw "Module JSON does not have an UI channel: "+JSON.stringify(moduleJson)
 
 					options = options || _this.getResendOptions(moduleJson)
+					options.stream = moduleJson.uiChannel.id
+					options.authKey = _this.authkey
 
 					_this.$.client.getClient(function(client) {
 						_this.sub = client.subscribe(
-								moduleJson.uiChannel.id,
-								_this.authkey,
-								messageHandler,
-								options
+							options,
+							messageHandler
 						)
 					})
 				})
