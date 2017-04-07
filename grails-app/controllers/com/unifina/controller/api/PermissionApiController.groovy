@@ -33,7 +33,7 @@ class PermissionApiController {
 		def res = resourceClass.get(resourceId)
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
-		} else if (requireSharePermission && !permissionService.canShare(request.apiUser, res)) {
+		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {
 			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
@@ -67,7 +67,7 @@ class PermissionApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def getOwnPermissions() {
 		useResource(params.resourceClass, params.resourceId, false) { res ->
-			def perms = permissionService.getPermissionsTo(res, request.apiUser)*.toMap()
+			def perms = permissionService.getPermissionsTo(res, request.apiUser ?: request.apiKey)*.toMap()
 			render(perms as JSON)
 		}
 	}
