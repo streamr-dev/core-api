@@ -19,10 +19,6 @@ databaseChangeLog = {
 	}
 
 	changeSet(author: "eric", id: "migrate-user-api-keys-to-key-domain-3") {
-		dropIndex(indexName: "api_key_uniq_1452618583160", tableName: "sec_user")
-	}
-
-	changeSet(author: "eric", id: "migrate-user-api-keys-to-key-domain-4") {
 		dropColumn(columnName: "api_key", tableName: "sec_user")
 	}
 }
