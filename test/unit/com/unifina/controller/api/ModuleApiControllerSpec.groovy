@@ -1,6 +1,7 @@
 package com.unifina.controller.api
 
 import com.unifina.api.NotPermittedException
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Module
@@ -15,7 +16,7 @@ import spock.lang.Specification
 
 @TestFor(ModuleApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, Module, ModulePackage, UnifinaCoreAPIFilters, UserService])
+@Mock([SecUser, Module, Key, ModulePackage, UnifinaCoreAPIFilters, UserService])
 class ModuleApiControllerSpec extends Specification {
 
 	SecUser me
@@ -23,9 +24,13 @@ class ModuleApiControllerSpec extends Specification {
 	Module module
 
 	void setup() {
-		me = new SecUser(id: 1, apiKey: "myApiKey").save(validate: false)
+		me = new SecUser(id: 1).save(validate: false)
 		modulePackage = new ModulePackage().save(validate: false)
 		module = new Module(modulePackage: modulePackage).save(validate: false)
+
+		def key = new Key(name: "key", user: me)
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
 
 		assert SecUser.count() == 1
 		assert ModulePackage.count() == 1

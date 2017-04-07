@@ -113,7 +113,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		// A Stream object will be created or loaded on start using the uiChannelId
 		String uiChannelId = MapTraversal.getString(config, "uiChannel.id");
 		uiChannel = new UiChannel(
-				uiChannelId == null ? IdGenerator.get() : uiChannelId,
+				uiChannelId == null ? IdGenerator.getShort() : uiChannelId,
 				getEffectiveName(),
 				uiChannelId == null);
 		

@@ -9,6 +9,7 @@ import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.feed.DataRange
 import com.unifina.feed.mongodb.MongoDbConfig
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
@@ -43,9 +44,9 @@ class StreamApiController {
 	}
 
 
-	@StreamrApi
+	@StreamrApi(authenticationLevel = AuthLevel.KEY)
 	def show(String id) {
-		getAuthorizedStream(id, Operation.READ) { Stream stream ->
+		streamService.getReadAuthorizedStream(id, request.apiUser, request.apiKey) { Stream stream ->
 			render(stream.toMap() as JSON)
 		}
 	}

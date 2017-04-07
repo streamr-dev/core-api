@@ -287,7 +287,7 @@ class SignalPathService {
 	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
 		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getOriginalPath() + "/request?local=true")
-		return apiService.post(url, req, req.getUser())
+		return apiService.post(url, req, req.getUser().keys.iterator().next())
 	}
 
 	private SignalPathRunner getLocalRunner(Canvas canvas) {

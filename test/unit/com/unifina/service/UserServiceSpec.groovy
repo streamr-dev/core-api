@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
@@ -17,7 +18,7 @@ import org.springframework.validation.FieldError
 import spock.lang.Specification
 
 @TestFor(UserService)
-@Mock([Feed, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
+@Mock([Feed, Key, SecUser, SecRole, ModulePackage, SecUserSecRole, Module, Permission])
 class UserServiceSpec extends Specification {
 
 	void createData() {
@@ -72,17 +73,26 @@ class UserServiceSpec extends Specification {
 	}
 
     def "the user is created when called, with default roles if none supplied"() {
-        when:
-        createData()
-        SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+		when:
+		createData()
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
 
-        then:
-        SecUser.count() == 1
+		then:
+		SecUser.count() == 1
 
 		user.getAuthorities().size() == 2
 		user.getAuthorities().toArray()[0].authority == "ROLE_USER"
 		user.getAuthorities().toArray()[1].authority == "ROLE_LIVE"
-    }
+	}
+
+	def "default API key is created for user"() {
+		when:
+		createData()
+		SecUser user = service.createUser([username: "test@test.com", name:"test", password: "test", timezone:"Europe/Minsk", enabled:true, accountLocked:false, passwordExpired:false])
+
+		then:
+		user.getKeys().size() == 1
+	}
 
 	def "if the roles, feeds and modulePackages are given, it should use them"() {
 		when:
@@ -119,24 +129,6 @@ class UserServiceSpec extends Specification {
 
 		then:
 		thrown RuntimeException
-	}
-
-	void "looking up a user based on correct api key"() {
-		when:
-		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate: false)
-		def user = service.getUserByApiKey("apiKey")
-
-		then:
-		user.username == "me"
-	}
-
-	void "looking up a user with incorrect api key"() {
-		when:
-		new SecUser(username: "me", password: "foo", apiKey: "apiKey", apiSecret: "apiSecret").save(validate: false)
-		def user = service.getUserByApiKey("wrong api key")
-
-		then:
-		!user
 	}
 
 	void "censoring errors with checkErrors() works properly"() {

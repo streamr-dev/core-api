@@ -39,7 +39,7 @@ class CanvasServiceSpec extends Specification {
 
 		moduleWithUi = new Module(implementingClass: Heatmap.name).save(validate: false)
 
-		me = new SecUser(username: "me@me.com", apiKey: "myKey").save(validate: false)
+		me = new SecUser(username: "me@me.com").save(validate: false)
 
 		myFirstCanvas = new Canvas(
 			name: "my_canvas_1",
@@ -103,7 +103,7 @@ class CanvasServiceSpec extends Specification {
 			state: Canvas.State.STOPPED
 		).save(failOnError: true)
 
-		someoneElse = new SecUser(username: "someone@someone.com", apiKey: "otherKey").save(validate: false)
+		someoneElse = new SecUser(username: "someone@someone.com").save(validate: false)
 
 		canvases << new Canvas(
 			name: "someoneElses_canvas_1",

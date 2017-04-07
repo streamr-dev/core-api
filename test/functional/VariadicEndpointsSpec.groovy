@@ -11,7 +11,7 @@ import spock.lang.Shared
 @Mixin(StreamMixin)
 class VariadicEndpointsSpec extends LoginTester1Spec {
 
-	@Shared Stream testStream = new Stream(id: "pltRMd8rCfkij4mlZsQkJB")
+	@Shared Stream testStream = new Stream()
 	@Shared StreamService streamService
 
 	def setupSpec() {
@@ -21,6 +21,7 @@ class VariadicEndpointsSpec extends LoginTester1Spec {
 		this.class.metaClass.mixin(StreamMixin)
 
 		streamService = createStreamService()
+		testStream.id = "pltRMd8rCfkij4mlZsQkJB"
 	}
 
 	def cleanupSpec() {
