@@ -243,6 +243,21 @@ class StreamServiceSpec extends Specification {
 		1 * cb.call(stream)
 	}
 
+	void "getReadAuthorizedStream invokes callback if permitted to read stream anonymously (for public streams)"() {
+		def cb = Mock(Closure)
+		service.permissionService = Mock(PermissionService)
+
+		Stream stream = new Stream(name: "name")
+		stream.id = "streamId"
+		stream.save(failOnError: true, validate: false)
+
+		when:
+		service.getReadAuthorizedStream("streamId", null, null, cb)
+		then:
+		1 * service.permissionService.canRead(null, stream) >> true
+		1 * cb.call(stream)
+	}
+
 	void "getReadAuthorizedStream invokes callback if permitted to read (ui channel) stream indirectly through Canvas"() {
 		def cb = Mock(Closure)
 		service.permissionService = Mock(PermissionService)
