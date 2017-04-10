@@ -9,6 +9,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -139,11 +140,15 @@ public class Http extends AbstractHttpModule {
 				// entity is null for bodyless response 204, and that's not an error
 				HttpEntity entity = call.response.getEntity();
 				if (entity != null) {
-					String responseString = EntityUtils.toString(entity, "UTF-8");
-					if (responseString.isEmpty()) {
-						call.errors.add("Empty response from server");
+					if (isOctetStream(entity)) {
+						responseData.send(EntityUtils.toByteArray(entity));
 					} else {
-						responseData.send(JsonParser.jsonStringToOutputObject(responseString));
+						String responseString = EntityUtils.toString(entity, "UTF-8");
+						if (responseString.isEmpty()) {
+							call.errors.add("Empty response from server");
+						} else {
+							responseData.send(JsonParser.jsonStringToOutputObject(responseString));
+						}
 					}
 				}
 
@@ -163,5 +168,10 @@ public class Http extends AbstractHttpModule {
 		if (call.errors.size() > 0) {
 			errors.send(call.errors);
 		}
+	}
+
+	private static boolean isOctetStream(HttpEntity entity) {
+		ContentType contentType = ContentType.get(entity);
+		return contentType != null && contentType.getMimeType().equals(ContentType.APPLICATION_OCTET_STREAM.getMimeType());
 	}
 }
