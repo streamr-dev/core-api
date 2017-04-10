@@ -275,6 +275,7 @@ class StreamService {
 		else return null
 	}
 
+	@CompileStatic
 	void getReadAuthorizedStream(String id, SecUser user, Key key, Closure action) {
 		def stream = Stream.get(id)
 		if (stream == null) {

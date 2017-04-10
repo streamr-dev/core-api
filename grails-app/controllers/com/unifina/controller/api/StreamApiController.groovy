@@ -44,7 +44,7 @@ class StreamApiController {
 	}
 
 
-	@StreamrApi(authenticationLevel = AuthLevel.KEY)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		streamService.getReadAuthorizedStream(id, request.apiUser, request.apiKey) { Stream stream ->
 			render(stream.toMap() as JSON)
