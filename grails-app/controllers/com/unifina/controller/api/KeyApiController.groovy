@@ -67,15 +67,16 @@ class KeyApiController {
 	@StreamrApi(authenticationLevel = AuthLevel.USER)
 	def save() {
 		useResource(params.resourceClass, params.resourceId) {res ->
-			Key key = new Key()
-			key.name = params.name
+			Key key = new Key(request.JSON)
 			key.user = res instanceof SecUser ? res : null
 			key.save(failOnError: true, validate: true)
 
 			Map response = key.toMap()
 
-			if (params.permission) {
-				Permission.Operation operation = Permission.Operation.fromString(params.permission)
+			String permission = request.JSON?.permission
+
+			if (permission) {
+				Permission.Operation operation = Permission.Operation.fromString(permission)
 
 				// Throws if user is not permitted to grant
 				permissionService.grant(request.apiUser, res, key, operation, false)
@@ -85,7 +86,7 @@ class KeyApiController {
 					permissionService.grant(request.apiUser, res, key, Permission.Operation.READ, false)
 				}
 
-				response["permission"] = params.permission
+				response["permission"] = permission
 			}
 
 			render(response as JSON)
