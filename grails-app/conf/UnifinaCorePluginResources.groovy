@@ -79,9 +79,6 @@ modules = {
 		dependsOn 'jquery, jquery-migrate'
 		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
 	}
-	"socket-io" {
-		resource url:[dir:'js/socket.io-1.3.7', file:'socket.io-1.3.7.min.js', plugin: 'unifina-core']
-	}
 	hotkeys {
 		dependsOn 'jquery'
 		resource url:[dir:'js/hotkeys', file:'jquery.hotkeys.js', plugin: 'unifina-core']
@@ -214,7 +211,6 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
-		dependsOn 'socket-io'
 		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'streamr-chart' {
