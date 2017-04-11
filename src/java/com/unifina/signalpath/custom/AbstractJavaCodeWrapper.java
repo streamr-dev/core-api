@@ -92,9 +92,9 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 			"java.io.InputStream",
 			"java.io.IOException",
 			"java.io.ByteArrayInputStream",
-			"java.security.spec.KeySpec",
 			"java.security.MessageDigest",
-			"com.google.common.io.ByteStreams"
+			"com.google.common.io.ByteStreams",
+			"java.security.spec.*"
 		});
 	}
 
