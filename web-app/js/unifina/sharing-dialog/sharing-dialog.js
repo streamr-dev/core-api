@@ -84,7 +84,6 @@
             }))
             this.el = this.$el[0]
             this.$userLabel = this.$(".user-label")
-            this.$accessDescription = this.$(".access-description")
             this.$stateLabel = this.$el.find(".state")
 
             this.$el.find(".user-delete-button").on("click", function() {
@@ -103,7 +102,7 @@
 
         render: function() {
             this.$userLabel.text(this.model.get("user"))
-            this.$accessDescription.text(this.model.getAccessDescription())
+            this.$stateLabel.text(this.model.getAccessDescription())
             return this
         },
     })
