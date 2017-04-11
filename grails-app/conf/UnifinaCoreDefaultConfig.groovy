@@ -171,6 +171,11 @@ log4j = {
  }
 
 /**
+ * Tour config
+ */
+streamr.tours.enabled = true
+
+/**
  * Migration config
  */
 grails.plugin.databasemigration.updateOnStart = true

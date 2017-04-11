@@ -67,7 +67,7 @@
     
     var inputTemplate = '' +
         '<div class="input-group">' +
-            '<input type="text" class="new-auth-key-field form-control" placeholder="Enter name" autofocus="" name="name">' +
+            '<input type="text" class="new-auth-key-field form-control" placeholder="Key name" autofocus="" name="name">' +
             '{[ if (typeof(showPermissions) !== "undefined" && showPermissions) { ]}' +
                 '<span class="input-group-btn permission-dropdown">' +
                     '<button type="button" class="btn btn-default dropdown-toggle permission-dropdown-toggle pull-right" data-toggle="dropdown">' +
@@ -164,8 +164,7 @@
     var Key = Backbone.Model.extend({
         defaults: {
             id: undefined,
-            name: '',
-            displayName: ''
+            name: ''
         }
     })
     
@@ -253,9 +252,14 @@
             
             var name = this.nameInput.val() || ""
             var permission = this.showPermissions ? this.permissionInput.val() : undefined
-            $.post(this.url, {
-                name: name,
-                permission: permission
+            $.ajax({
+                type: 'POST',
+                url: this.url,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    name: name,
+                    permission: permission
+                })
             }).then(function(data) {
                 _this.nameInput.val('')
                 

@@ -45,7 +45,9 @@ class KeyApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
 		request.requestURI = "/api/v1/users/me/keys"
-		params.name = "key name"
+		request.JSON = [
+				name: "key name"
+		]
 		params.resourceClass = SecUser
 		withFilters([action: 'save']) {
 			controller.save()
@@ -56,7 +58,7 @@ class KeyApiControllerSpec extends Specification {
 		response.json == [
 		    id: "1",
 			name: "key name",
-			user: 1
+			user: loggedInUser.username
 		]
 	}
 
@@ -65,8 +67,10 @@ class KeyApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
 		request.requestURI = "/api/v1/streams/streamId/keys"
+		request.JSON = [
+				name: "key name"
+		]
 		params.id = "streamId"
-		params.name = "key name"
 		params.resourceClass = Stream
 		withFilters([action: 'save']) {
 			controller.save()
@@ -88,8 +92,10 @@ class KeyApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
 		request.requestURI = "/api/v1/streams/streamId/keys"
+		request.JSON = [
+				name: "key name"
+		]
 		params.id = stream.id
-		params.name = "key name"
 		params.resourceClass = Stream
 		params.resourceId = stream.id
 		withFilters([action: 'save']) {
@@ -112,9 +118,11 @@ class KeyApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
 		request.requestURI = "/api/v1/streams/streamId/keys"
+		request.JSON = [
+				name: "key name",
+				permission: "read"
+		]
 		params.id = stream.id
-		params.name = "key name"
-		params.permission = "read"
 		params.resourceClass = Stream
 		params.resourceId = stream.id
 		withFilters([action: 'save']) {
@@ -147,9 +155,11 @@ class KeyApiControllerSpec extends Specification {
 		request.addHeader("Authorization", "Token apiKey")
 		request.method = "POST"
 		request.requestURI = "/api/v1/streams/streamId/keys"
+		request.JSON = [
+				name: "key name",
+				permission: "write"
+		]
 		params.id = stream.id
-		params.name = "key name"
-		params.permission = "write"
 		params.resourceClass = Stream
 		params.resourceId = stream.id
 		withFilters([action: 'save']) {

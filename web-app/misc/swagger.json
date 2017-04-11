@@ -598,7 +598,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Key"
+                "$ref": "#/definitions/ResourceKey"
               }
             }
           },
@@ -628,11 +628,13 @@
             "type": "string"
           },
           {
-            "name": "name",
-            "in": "query",
-            "description": "Name (human readable) of key.",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "description": "Key to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResourceKeyCreateRequest"
+            }
           }
         ],
         "tags": [
@@ -641,9 +643,9 @@
         ],
         "responses": {
           "200": {
-            "description": "Newly created Key",
+            "description": "The newly created key",
             "schema": {
-              "$ref": "#/definitions/Key"
+              "$ref": "#/definitions/ResourceKey"
             }
           },
           "403": {
@@ -1779,7 +1781,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Key"
+                "$ref": "#/definitions/UserKey"
               }
             }
           }
@@ -1790,11 +1792,13 @@
         "description": "Creates a key that can be used for authenticating the user.",
         "parameters": [
           {
-            "name": "name",
-            "in": "query",
-            "description": "Name (human readable) of key.",
-            "required": false,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "description": "Key to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserKeyCreateRequest"
+            }
           }
         ],
         "tags": [
@@ -1803,9 +1807,9 @@
         ],
         "responses": {
           "200": {
-            "description": "Newly created Key",
+            "description": "Newly created user key",
             "schema": {
-              "$ref": "#/definitions/Key"
+              "$ref": "#/definitions/UserKey"
             }
           }
         }
@@ -2227,11 +2231,20 @@
         }
       }
     },
-    "Key": {
+    "UserKeyCreateRequest": {
       "type": "object",
-      "required": [
-        "id"
-      ],
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Matti's key"
+        }
+      }
+    },
+    "UserKey": {
+      "type": "object",
+      "required": ["id", "name"],
       "properties": {
         "id": {
           "type": "string",
@@ -2241,17 +2254,49 @@
         "name": {
           "type": "string",
           "description": "Human-readable name",
-          "example": "Matti's key"
+          "example": "My app backend key"
+        },
+        "user": {
+          "type": "string",
+          "description": "Username which the key authenticates if user-linked key. Null otherwise.",
+          "example": "some.user@streamr.com"
+        }
+      }
+    },
+    "ResourceKeyCreateRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Key for my app"
         },
         "permission": {
           "type": "string",
           "description": "Operation permitted by this key to the resource in question.",
           "example": "read"
+        }
+      }
+    },
+    "ResourceKey": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
         },
-        "user": {
-          "type": "integer",
-          "description": "User id whom the key authenticates if user-linked key. Null otherwise.",
-          "example": 123
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Key for my public web app"
+        },
+        "permission": {
+          "type": "string",
+          "description": "Operation permitted by this key to the resource in question.",
+          "example": "read"
         }
       }
     },

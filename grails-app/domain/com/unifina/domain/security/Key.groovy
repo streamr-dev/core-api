@@ -27,7 +27,7 @@ class Key {
 		return [
 			id: id,
 			name: name,
-			user: user?.id
+			user: user?.username
 		]
 	}
 }
