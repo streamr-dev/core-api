@@ -37,6 +37,7 @@ public class PackageAccessHelper {
 			"javax.crypto.",
 			"javax.crypto.spec.",
 			"javax.imageio.",
+			"java.security.",
 			"java.security.spec.",
 			"java.io.InputStream",
 			"java.io.IOException",
