@@ -45,12 +45,10 @@ grails.project.dependency.resolution = {
         // Fast local repos first
         grailsHome()
         mavenLocal()
-		
-        // Unifina Nexus server
-        mavenRepo "http://192.168.10.21:8081/content/repositories/central/"
-        mavenRepo "http://192.168.10.21:8081/content/repositories/releases/"
-        mavenRepo "http://192.168.10.21:8081/content/repositories/snapshots/"
-		
+
+		// Maven central
+		mavenRepo "http://repo1.maven.org/maven2/"
+
         // Remote Grails repos
         grailsPlugins()
         grailsCentral()
