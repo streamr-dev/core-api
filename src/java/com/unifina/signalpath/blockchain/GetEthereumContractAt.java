@@ -1,17 +1,14 @@
 package com.unifina.signalpath.blockchain;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
 import com.unifina.signalpath.StringParameter;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
-import org.codehaus.groovy.grails.web.json.JSONObject;
 
 import java.util.Map;
 
@@ -24,6 +21,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	private EthereumContractOutput out = new EthereumContractOutput(this, "contract");
 
 	private EthereumContract contract;
+	private EthereumABI abi;
 
 	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 
@@ -38,7 +36,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		String address = addressParam.getValue();
-		String oldAddress = (String)config.get("oldAddress");
+		String oldAddress = (String) config.get("oldAddress");
 		String abiString = MapTraversal.getString(config, "params[1].value");
 
 		// TODO: check address is valid?
@@ -46,7 +44,6 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 			addInput(abiParam);
 			addOutput(out);
 
-			EthereumABI abi = null;
 			if (address.equals(oldAddress)) {
 				abi = new EthereumABI(abiString);
 			} else {
@@ -90,7 +87,13 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 
 	@Override
 	public void sendOutput() {
+		if (contract != null && !addressParam.getValue().equals(contract.getAddress()) && abi != null) {
+			contract = new EthereumContract(addressParam.getValue(), abi);
+		}
 
+		if (contract != null) {
+			out.send(contract);
+		}
 	}
 
 	@Override

@@ -63,6 +63,9 @@ public class EthereumCall extends AbstractHttpModule {
 	@Override
 	public void init() {
 		addInput(contract);
+		contract.setDrivingInput(false);
+		contract.canToggleDrivingInput = false;
+
 		function.setUpdateOnChange(true);		// update argument inputs
 
 		trigger.canToggleDrivingInput = false;
