@@ -31,6 +31,8 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		addressParam.setUpdateOnChange(true);
 		abiParam.setUpdateOnChange(true);
 		abiParam.setCanConnect(false);
+		addressParam.setDrivingInput(true);
+		addressParam.canToggleDrivingInput = false;
 	}
 
 	@Override
@@ -44,6 +46,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 			addInput(abiParam);
 			addOutput(out);
 
+			// if address didn't change, ABI must've changed so onConfiguration is fired
 			if (address.equals(oldAddress)) {
 				abi = new EthereumABI(abiString);
 			} else {
