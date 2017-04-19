@@ -76,8 +76,8 @@ class HttpSpec extends Specification {
 	def mockGlobals = Stub(Globals) {
 		getDataSource() >> Stub(DataSource) {
 			getEventQueue() >> Stub(DataSourceEventQueue) {
-				enqueue(_) >> { feedEvent ->
-					transaction = feedEvent.content[0]
+				enqueue(_) >> { feedEventList ->
+					transaction = feedEventList[0].content
 				}
 			}
 		}
@@ -122,6 +122,7 @@ class HttpSpec extends Specification {
 			future.completed(mockHttpResponse)
 
 			// simulate AbstractHttpModule.receive, but without propagation
+			// TODO: would be better to actually make the call (can getPropagator be replaced?), to check the whole path
 			if (isAsync) {
 				module.sendOutput(transaction)
 			}
