@@ -39,8 +39,10 @@ class DashboardController {
 
 	def show() {
 		return [
-			serverUrl: grailsApplication.config.streamr.ui.server,
-			id: params.id
+			config: grailsApplication.config,
+			id: params.id,
+			user: springSecurityService.currentUser,
+			key: springSecurityService.currentUser?.keys.iterator().next()
 		]
 	}
 }

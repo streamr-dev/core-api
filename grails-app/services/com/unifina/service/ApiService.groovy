@@ -3,6 +3,7 @@ package com.unifina.service
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import com.unifina.api.ApiException
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.exceptions.UnexpectedApiResponseException
 import grails.converters.JSON
@@ -60,12 +61,13 @@ class ApiService {
 	}
 
 	@CompileStatic
-	Map post(String url, Map body, SecUser user) {
+	Map post(String url, Map body, Key key) {
 		// TODO: Migrate to Streamr API Java client lib when such a thing is made
 		def req = Unirest.post(url)
 
-		if (user)
-			req.header("Authorization", "token $user.apiKey")
+		if (key) {
+			req.header("Authorization", "token $key.id")
+		}
 
 		req.header("Content-Type", "application/json")
 

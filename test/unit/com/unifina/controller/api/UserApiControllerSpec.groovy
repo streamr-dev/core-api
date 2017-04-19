@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecUser
 import com.unifina.service.UserService
 import grails.plugin.springsecurity.SpringSecurityService
@@ -11,7 +12,7 @@ import spock.lang.Specification
 
 @TestFor(UserApiController)
 @Mixin(FiltersUnitTestMixin)
-@Mock([SecUser, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
+@Mock([SecUser, Key, UnifinaCoreAPIFilters, UserService, SpringSecurityService])
 class UserApiControllerSpec extends Specification {
 
 	SecUser me
@@ -21,10 +22,13 @@ class UserApiControllerSpec extends Specification {
 			id: 1,
 			name: "me",
 			username: "me@too.com",
-			apiKey: "myApiKey",
 			enabled: true,
 			timezone: "Europe/Helsinki"
 		).save(validate: false)
+
+		Key key = new Key(name: "key", user: me)
+		key.id = "myApiKey"
+		key.save(failOnError: true, validate: true)
 	}
 
 	void "unauthenticated user gets back 401"() {
@@ -43,7 +47,6 @@ class UserApiControllerSpec extends Specification {
 		then:
 		response.json.name == me.name
 		response.json.username == me.username
-		response.json.apiKey == me.apiKey
 		response.json.timezone == me.timezone
 		!response.json.hasProperty("password")
 		!response.json.hasProperty("id")

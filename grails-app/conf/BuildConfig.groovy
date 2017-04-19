@@ -29,8 +29,8 @@ grails.project.dependency.resolver = "maven" // or ivy
 //	test: false
 //]
 grails.project.fork = [
-    run: [maxMemory: 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false],
-    test: [maxMemory: 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
+    run: [maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false],
+    test: [maxMemory: System.getProperty("maxMemory") ? Integer.parseInt(System.getProperty("maxMemory")) : 4196, minMemory: 256, debug: false, maxPerm: 512, forkReserve:false, daemon:true, jvmArgs: ["-Dwebdriver.chrome.driver="+env["CHROMEDRIVER"]]]
 ]
 
 grails.project.dependency.resolution = {
@@ -45,12 +45,10 @@ grails.project.dependency.resolution = {
         // Fast local repos first
         grailsHome()
         mavenLocal()
-		
-        // Unifina Nexus server
-        mavenRepo "http://192.168.10.21:8081/content/repositories/central/"
-        mavenRepo "http://192.168.10.21:8081/content/repositories/releases/"
-        mavenRepo "http://192.168.10.21:8081/content/repositories/snapshots/"
-		
+
+		// Maven central
+		mavenRepo "http://repo1.maven.org/maven2/"
+
         // Remote Grails repos
         grailsPlugins()
         grailsCentral()
@@ -62,11 +60,7 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         compile('log4j:log4j:1.2.16')
-
-	runtime 'mysql:mysql-connector-java:5.1.20'
-	compile 'org.mongodb:mongodb-driver:3.2.1'
-	compile 'org.postgresql:postgresql:9.4.1208.jre7'
-
+		
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
@@ -74,12 +68,10 @@ grails.project.dependency.resolution = {
         runtime('de.ruedigermoeller:fst:2.43')
 		
         compile('org.atmosphere:atmosphere-runtime:1.0.0.beta5')
+		runtime('joda-time:joda-time:2.9.3')
+		compile('com.udojava:EvalEx:1.6')
 
-
-		compile('com.unifina:kafka-client:0.1.16') {
-            excludes "slf4j-log4j12"
-        }
-		
+		compile('org.apache.kafka:kafka-clients:0.9.0.1')
         compile('com.mashape.unirest:unirest-java:1.3.3')
 
 		// http://www.stringtemplate.org/
@@ -88,21 +80,24 @@ grails.project.dependency.resolution = {
 
         runtime('com.amazonaws:aws-java-sdk:1.7.5')
 
+		runtime('joda-time:joda-time:2.9.3')
+
         test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
         test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
         test "org.gebish:geb-spock:$gebVersion"
 
-		// https://mvnrepository.com/artifact/org.twitter4j/twitter4j-core
-		compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.4'
-		compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '4.0.4'
+		runtime('org.twitter4j:twitter4j-core:4.0.4')
+		runtime('org.twitter4j:twitter4j-stream:4.0.4')
+		runtime('com.twitter:hbc-core:2.2.0') {
+			excludes 'com.google.guava:guava:14.0.1'
+		}
 
-		runtime('com.twitter:hbc-core:2.2.0')
-		
-        runtime('com.github.nkzawa:socket.io-client:0.3.0')
-		runtime('joda-time:joda-time:2.9.3')
-
-		compile('com.udojava:EvalEx:1.3')
+		runtime 'mysql:mysql-connector-java:5.1.20'
+		compile 'org.postgresql:postgresql:9.4.1208.jre7'
+		compile 'org.mongodb:mongodb-driver:3.2.1'
+		compile('biz.paluch.redis:lettuce:3.5.0.Final')
+		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
     }
 
     plugins {

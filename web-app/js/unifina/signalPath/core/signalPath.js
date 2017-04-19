@@ -622,12 +622,11 @@ var SignalPath = (function () {
 	function subscribe() {
 		if (isRunning() && runningJson.uiChannel) {
 			subscription = connection.subscribe(
-				runningJson.uiChannel.id,
-				processMessage,
 				{
-					resend_all: (runningJson.adhoc ? true : undefined),
-					canvas: runningJson.id
-				}
+					stream: runningJson.uiChannel.id,
+					resend_all: (runningJson.adhoc ? true : undefined)
+				},
+				processMessage
 			)
 		}
 	}
@@ -753,6 +752,7 @@ var SignalPath = (function () {
 		return runningJson && runningJson.readOnly;
     }
 
+	pub.DEBUG_STRING_MAX_LENGTH = 30;
 	pub.toggleDebugMode = function(intervalInMs) {
 		if (debugLoopInterval) {
 			clearInterval(debugLoopInterval)
@@ -774,7 +774,9 @@ var SignalPath = (function () {
 							var params = _.pluck(response.json.modules, "params")
 							var endpoints = _.flatten(outputs.concat(inputs, params))
 							_.each(endpoints, function (endpoint) {
-								$("#" + endpoint.id).data("spObject").updateState(endpoint.value);
+								var displayedValue = endpoint.value ?
+									JSON.stringify(endpoint.value).slice(0, pub.DEBUG_STRING_MAX_LENGTH) : "NULL";
+								$("#" + endpoint.id).data("spObject").updateState(displayedValue);
 							})
 
 						}

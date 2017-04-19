@@ -6,7 +6,7 @@
 	<r:require module="confirm-button"/>
 	<r:script>
 		$(document).ready(function() {
-			$(".delete-dashboard-link").each(function(i, el) {
+			$(".delete-button").each(function(i, el) {
 				new ConfirmButton(el, {
 					message: "${ message(code:"dashboard.delete.confirm") }"
 				}, function(result) {
@@ -72,7 +72,7 @@
 												</g:if>
 												<g:if test="${writable.contains(dashboard)}">
 													<li>
-														<span data-id="${dashboard.id}" class="delete-dashboard-link confirm">
+														<span data-id="${dashboard.id}" class="delete-button confirm">
 															<i class="fa fa-trash-o"></i> Delete
 														</span>
 													</li>

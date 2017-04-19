@@ -1,20 +1,20 @@
 package com.unifina.feed;
 
+import com.unifina.data.FeedEvent;
+import com.unifina.data.IEventRecipient;
+import org.apache.log4j.Logger;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
-
-import org.apache.log4j.Logger;
-
-import com.unifina.data.FeedEvent;
-import com.unifina.data.IEventRecipient;
 
 /**
  * A helper class to apply a static recipient and iterator to FeedEvents,
  * whose content is pulled from a separate content iterator.
  * @author Henri
  */
-public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient> implements Iterator<FeedEvent>, Closeable {
+public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipientClass extends IEventRecipient>
+		implements Iterator<FeedEvent<MessageClass, EventRecipientClass>>, Closeable {
 
 	private Iterator<MessageClass> contentIterator;
 	private EventRecipientClass recipient;
@@ -63,4 +63,5 @@ public class FeedEventIterator<MessageClass extends ITimestamped, EventRecipient
 	public EventRecipientClass getRecipient() {
 		return recipient;
 	}
+
 }

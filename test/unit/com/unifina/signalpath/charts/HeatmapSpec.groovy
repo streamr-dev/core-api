@@ -1,14 +1,21 @@
 package com.unifina.signalpath.charts
 
+import com.unifina.UiChannelMockingSpecification
+import com.unifina.domain.security.SecUser
+import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.testutils.ModuleTestHelper
-import spock.lang.Specification
+import grails.test.mixin.support.GrailsUnitTestMixin
 
-class HeatmapSpec extends Specification {
+@Mixin(GrailsUnitTestMixin)
+class HeatmapSpec extends UiChannelMockingSpecification {
 
 	Heatmap module
 
 	def setup() {
+		mockServicesForUiChannels()
+
 		module = new Heatmap()
+		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
 		module.init()
 		module.configure([
 			uiChannel: [id: "heatmap"],
@@ -34,7 +41,7 @@ class HeatmapSpec extends Specification {
 
 		then:
 		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.uiChannelMessages(channelMessages)
+			.uiChannelMessages(channelMessages, getSentMessagesByStreamId())
 			.test()
 	}
 }

@@ -1,14 +1,12 @@
 package com.unifina.controller.api
 
-import com.unifina.api.ApiException
 import com.unifina.api.InvalidArgumentsException
 import com.unifina.api.NotFoundException
 import com.unifina.api.NotPermittedException
-import com.unifina.domain.data.Stream
-import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.security.SignupInvite
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.PermissionService
 import com.unifina.service.SignupCodeService
@@ -35,7 +33,7 @@ class PermissionApiController {
 		def res = resourceClass.get(resourceId)
 		if (!res) {
 			throw new NotFoundException(resourceClass.simpleName, resourceId.toString())
-		} else if (requireSharePermission && !permissionService.canShare(request.apiUser, res)) {
+		} else if (requireSharePermission && !permissionService.canShare(request.apiUser ?: request.apiKey, res)) {
 			throw new NotPermittedException(request?.apiUser?.username, resourceClass.simpleName, resourceId.toString(), "share")
 		} else {
 			action(res)
@@ -58,7 +56,7 @@ class PermissionApiController {
 		}
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def index() {
 		useResource(params.resourceClass, params.resourceId) { res ->
 			def perms = permissionService.getPermissionsTo(res)*.toMap()
@@ -66,15 +64,15 @@ class PermissionApiController {
 		}
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def getOwnPermissions() {
 		useResource(params.resourceClass, params.resourceId, false) { res ->
-			def perms = permissionService.getSingleUserPermissionsTo(res, request.apiUser)*.toMap()
+			def perms = permissionService.getPermissionsTo(res, request.apiUser ?: request.apiKey)*.toMap()
 			render(perms as JSON)
 		}
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def save() {
 		if (!request.hasProperty("JSON")) { throw new InvalidArgumentsException("JSON body expected") }
 
@@ -132,14 +130,14 @@ class PermissionApiController {
 		}
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def show(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
 			render(p.toMap() as JSON)
 		}
 	}
 
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def delete(String id) {
 		usePermission(params.resourceClass, params.resourceId, id as Long) { p, res ->
 			// share-permission has been tested in usePermission (calls useResource)

@@ -1,39 +1,33 @@
-import com.unifina.controller.core.signalpath.CanvasController
-import com.unifina.kafkaclient.UnifinaKafkaProducer
-import com.unifina.utils.MapTraversal
+import com.unifina.domain.data.Stream
+import com.unifina.service.StreamService
 import core.LoginTester1Spec
 import core.mixins.CanvasMixin
 import core.mixins.ConfirmationMixin
+import core.mixins.StreamMixin
 import core.pages.CanvasListPage
 import core.pages.CanvasPage
-import grails.test.mixin.TestFor
+import spock.lang.Shared
 
-@Mixin(CanvasMixin)
-@Mixin(ConfirmationMixin)
-@TestFor(CanvasController) // This makes grailsApplication available
 public class LiveSpec extends LoginTester1Spec {
 
 	static Timer timer
-	static UnifinaKafkaProducer kafka
-	
-	def setupSpec() {
 
+	@Shared StreamService streamService
+
+	def setupSpec() {
 		// For some reason the annotations don't work so need the below.
 		LiveSpec.metaClass.mixin(CanvasMixin)
 		LiveSpec.metaClass.mixin(ConfirmationMixin)
+		LiveSpec.metaClass.mixin(StreamMixin)
 
-		Map<String,Object> kafkaConfig = MapTraversal.flatten((Map) MapTraversal.getMap(grailsApplication.config, "unifina.kafka"));
-		Properties properties = new Properties();
-		for (String s : kafkaConfig.keySet())
-			properties.setProperty(s, kafkaConfig.get(s).toString());
-		
-		kafka = new UnifinaKafkaProducer(properties)
-		
+		final Stream testStream = new Stream()
+		testStream.id = "RUj6iJggS3iEKsUx5C07Ig"
+
+		final StreamService ss = streamService = createStreamService()
+
 		final TimerTask task = new TimerTask() {
 			void run() {
-				synchronized(kafka) {
-					kafka.sendJSON("RUj6iJggS3iEKsUx5C07Ig", "", System.currentTimeMillis(), '{"rand":'+Math.random()+'}')
-				}
+				ss.sendMessage(testStream, [rand: Math.random()], 30)
 			}
 		}
 		
@@ -50,9 +44,7 @@ public class LiveSpec extends LoginTester1Spec {
 
 	def cleanupSpec() {
 		timer.cancel()
-		synchronized(kafka) {
-			kafka.close()
-		}
+		cleanupStreamService(streamService)
 	}
 	
 	def "launching, modifying and deleting live canvas works correctly"() {
@@ -176,6 +168,23 @@ public class LiveSpec extends LoginTester1Spec {
 			runRealtimeButton.click()
 		then: "info alert and stop button must be displayed"
 			waitFor { $(".alert.alert-success").displayed }
+	}
+
+	def "producing realtime data to other streams"() {
+		loadSignalPath("LiveSpec-SendToStream")
+		ensureRealtimeTabDisplayed()
+		stopCanvasIfRunning()
+
+		when:
+		resetAndStartCanvas(true)
+
+		then:
+		waitFor {
+			findModuleOnCanvas("Table", 0).find('.event-table-module-content tbody tr').size() > 0
+		}
+		waitFor {
+			findModuleOnCanvas("Table", 1).find('.event-table-module-content tbody tr').size() > 0
+		}
 	}
 
 }
