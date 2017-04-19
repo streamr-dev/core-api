@@ -65,7 +65,7 @@ public class Http extends AbstractHttpModule {
 
 		if (config.containsKey("inputs")) {
 			// body.setDisplayName won't cut it; it will be re-read from config afterwards
-			for (Map i : (List<Map>) config.get("inputs")) {
+			for (Map i : (List<Map>)config.get("inputs")) {
 				if (i.get("name").equals("body")) {
 					i.put("displayName", verb.hasBody() ? "body" : "trigger");
 				}
