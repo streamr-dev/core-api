@@ -16,26 +16,27 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 	private final Output<Object> out = new Output<>(this, "item", "Object");
 
 	@Override
+	public void init() {
+		super.init();
+		this.propagationSink = true;
+	}
+
+	@Override
 	public void sendOutput() {
 		List inList = in.getValue();
 		if (inList.size() < 1) { return; }
 
-		// send out first item immediately
-		out.send(inList.get(0));
-
-		// enqueue the rest, send out in receive() below
-		for (int i = 1; i < inList.size(); i++) {
-			Packet packet = new Packet();
-			packet.payload = inList.get(i);
-			packet.timestamp = getGlobals().isRealtime() ? new Date() : getGlobals().time;
-			getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(packet, packet.timestamp, this));
+		// enqueue the items, send out in receive() below
+		for (Object item : inList) {
+			QueuedItem queuedItem = new QueuedItem(item, getGlobals().time);
+			getGlobals().getDataSource().getEventQueue().enqueue(new FeedEvent<>(queuedItem, queuedItem.timestamp, this));
 		}
 	}
 
 	@Override
 	public void receive(FeedEvent event) {
-		if (event.content instanceof Packet) {
-			out.send(((Packet)event.content).payload);
+		if (event.content instanceof QueuedItem) {
+			out.send(((QueuedItem)event.content).item);
 			getPropagator().propagate();
 		} else {
 			super.receive(event);
@@ -50,9 +51,14 @@ public class ListToEvents extends AbstractSignalPathModule implements IEventReci
 		return listItemPropagator;
 	}
 
-	private class Packet implements ITimestamped {
-		public Object payload;
+	public static class QueuedItem implements ITimestamped {
+		public Object item;
 		public Date timestamp;
+
+		public QueuedItem(Object item, Date timestamp) {
+			this.item = item;
+			this.timestamp = timestamp;
+		}
 
 		@Override
 		public Date getTimestamp() {
