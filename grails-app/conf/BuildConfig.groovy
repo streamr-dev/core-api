@@ -49,6 +49,9 @@ grails.project.dependency.resolution = {
 		// Maven central
 		mavenRepo "http://repo1.maven.org/maven2/"
 
+		// Ethereum Repository
+		mavenRepo "https://dl.bintray.com/ethereum/maven/"
+
         // Remote Grails repos
         grailsPlugins()
         grailsCentral()
@@ -98,6 +101,12 @@ grails.project.dependency.resolution = {
 		compile 'org.mongodb:mongodb-driver:3.2.1'
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
+		compile('org.ethereum:ethereumj-core:1.4.3-RELEASE') {
+			excludes 'ch.qos.logback:logback-classic:*'
+			excludes 'org.springframework:spring-core:*'
+			excludes 'org.springframework:spring-context:*'
+			excludes 'org.springframework:spring-orm:*'
+		}
     }
 
     plugins {
