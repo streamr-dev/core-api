@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.tools.Diagnostic;
 
+import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.service.SerializationService;
@@ -13,7 +14,7 @@ import org.apache.log4j.Logger;
 
 import com.unifina.security.UserJavaClassLoader;
 
-public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
+public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements ITimeListener {
 
 	transient AbstractCustomModule instance = null;
 	byte[] serializedInstance = null;
@@ -55,6 +56,11 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 	@Override
 	public void sendOutput() {
 		instance.sendOutput();
+	}
+
+	@Override
+	public void setTime(Date time) {
+		instance.setTime(time);
 	}
 
 	@Override

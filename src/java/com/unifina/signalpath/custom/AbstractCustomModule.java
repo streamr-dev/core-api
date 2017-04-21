@@ -5,13 +5,14 @@ import java.security.PrivilegedAction;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.unifina.datasource.ITimeListener;
 import com.unifina.signalpath.Input;
 import com.unifina.signalpath.ModuleWithUI;
 import com.unifina.signalpath.Output;
 import com.unifina.signalpath.SignalPath;
 import com.unifina.utils.Globals;
 
-public abstract class AbstractCustomModule extends ModuleWithUI {
+public abstract class AbstractCustomModule extends ModuleWithUI implements ITimeListener {
 
 	protected transient SimpleDateFormat df = null;
 
@@ -36,6 +37,9 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 			}
 		});
 	}
+
+	@Override
+	public void setTime(Date time) {}
 
 	@Override
 	public void beforeSerialization() {
