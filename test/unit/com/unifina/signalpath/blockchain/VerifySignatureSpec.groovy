@@ -7,11 +7,8 @@ class VerifySignatureSpec extends ModuleTestingSpecification {
 
 	def module = setupModule(new VerifySignature())
 
-	String message = "This is my phone number:\n" +
-		"{authCode}\n" +
-		"---\n" +
-		"Internal note:\n" +
-		"message timestamp {timeStamp}"
+	String message = "Dear Pacifics user,\n" +
+		"in order to track your parcels you need to proof that you own the address below.\n"
 	
 	void "VerifySignature gives the right answer"() {
 		when:
@@ -27,11 +24,11 @@ class VerifySignatureSpec extends ModuleTestingSpecification {
 		]
 		Map outputValues = [
 			address: [
-				"0xe5e5f36ce4eb67aac003439822e1e7537cc0df06",
-				"0xf1ce0402eef3e4e7708afc317e713622d9b48b42",
-				"0xc159216821f707350a5d260583a4c84e50bac3d0",
-				"0xa70ce882255de65301c10e3f827e8efb4e39524a",
-				"0xa70ce882255de65301c10e3f827e8efb4e39524a"
+				"0x39a8d268f379266cb5839e2f7dd60cbfaba2ba2b",
+				"0x23a4c01b0d904a71824bb351ffeeeb3ad07444b0",
+				"0x3ffd6691e2c0d277206729e560be0058fe5909ea",
+				"0x330895627a316ba97cdc9e7afd17abaa1b5c3d25",
+				"0x330895627a316ba97cdc9e7afd17abaa1b5c3d25"
 			],
 			error: [
 			    null,
