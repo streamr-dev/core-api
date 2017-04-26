@@ -52,6 +52,7 @@ public class EthereumCall extends AbstractHttpModule {
 	private TimeSeriesOutput gasPrice = new TimeSeriesOutput(this, "gasPriceWei");
 	private TimeSeriesOutput blockNumber = new TimeSeriesOutput(this, "blockNumber");
 	private TimeSeriesOutput nonce = new TimeSeriesOutput(this, "nonce");
+	private StringOutput txHash = new StringOutput(this, "txHash");
 	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;		// outputs for each event separately
 
 	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
@@ -194,6 +195,7 @@ public class EthereumCall extends AbstractHttpModule {
 			addOutput(gasPrice);
 			addOutput(blockNumber);
 			addOutput(nonce);
+			addOutput(txHash);
 			// TODO: any way to find out which events can be raised from chosenFunction? (probably not...)
 			for (EthereumABI.Event ev : abi.getEvents()) {
 				for (Output<Object> output : eventOutputs.get(ev)) {
@@ -280,6 +282,7 @@ public class EthereumCall extends AbstractHttpModule {
 		public Double gasPrice;
 		public Double blockNumber;
 		public Double nonce;
+		public String txHash;
 	}
 
 	@Override
@@ -313,6 +316,7 @@ public class EthereumCall extends AbstractHttpModule {
 				gasPrice.send(resp.gasPrice);
 				blockNumber.send(resp.blockNumber);
 				nonce.send(resp.nonce);
+				txHash.send(resp.txHash);
 				for (EthereumABI.Event ev : abi.getEvents()) {
 					List<JsonElement> args = resp.events.get(ev.name);
 					List<Output<Object>> evOutputs = eventOutputs.get(ev);
