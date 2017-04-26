@@ -133,6 +133,7 @@ modules = {
 	switcher {
 		resource url:[dir:'js/pixel-admin', file:'switcher.js', plugin:'unifina-core']
 	}
+	// color picker (for search)
 	spectrum {
 		resource url:[dir:'js/spectrum', file:'spectrum.js', plugin:'unifina-core']
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']

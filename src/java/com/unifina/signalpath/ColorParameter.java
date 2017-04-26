@@ -10,11 +10,15 @@ public class ColorParameter extends Parameter<StreamrColor> {
 
 	@Override
 	public StreamrColor parseValue(String rgb) {
-		String[] splitted = rgb.split("\\(|\\, |\\,|\\)");
+		String[] splitted = rgb.split("rgba?\\(|\\, |\\,|\\)");
 		int r = Integer.parseInt(splitted[1]);
 		int g = Integer.parseInt(splitted[2]);
 		int b = Integer.parseInt(splitted[3]);
-		return new StreamrColor(r, g, b);
+		double a = 1.0;
+		if (splitted.length > 4) {
+			a = Double.parseDouble(splitted[4]);
+		}
+		return new StreamrColor(r, g, b, a);
 	}
 
 	@Override
