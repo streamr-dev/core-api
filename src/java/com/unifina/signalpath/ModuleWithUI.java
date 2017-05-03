@@ -190,6 +190,9 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				stream = getStreamService().createStream(params, getGlobals().getUser(), id);
 			}
 
+			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
+			stream.setUiChannelCanvas(getRootSignalPath().getCanvas());
+
 			// User must have write permission to related Canvas in order to write to the UI channel
 			if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream.getUiChannelCanvas())) {
 				throw new AccessControlException(ModuleWithUI.this.getName() + ": User " + getGlobals().getUser().getUsername() +
