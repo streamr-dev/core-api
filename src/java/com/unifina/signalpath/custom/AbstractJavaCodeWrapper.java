@@ -234,6 +234,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 		instance.setHash(hash);
 		instance.setParentSignalPath(parentSignalPath);
 		instance.configure(config);
+		instance.setParentWrapper(this);
 
 		// Validate that anonymous inner classes are not present since they cannot be serialized
 		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
@@ -254,6 +255,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 		// Ensure that there are no links to AbstractCustomModule before serialization so that it not serialized by
 		// virtue of belonging to object graph. Note that <code>instance</code> is already defined as transient.
 		changeOwnerOfEndpoints(null);
+		readyInputs = instance.getReadyInputs(); // TODO: hack, better to store instance state in separate class for serialization
 
 		storedEndpointFields = StoredEndpointFields.clearAndCollect(instance);
 

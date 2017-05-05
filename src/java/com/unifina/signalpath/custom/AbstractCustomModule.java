@@ -6,15 +6,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.unifina.datasource.ITimeListener;
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.Output;
-import com.unifina.signalpath.SignalPath;
+import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 
 public abstract class AbstractCustomModule extends ModuleWithUI implements ITimeListener {
 
 	protected transient SimpleDateFormat df = null;
+	private transient AbstractJavaCodeWrapper parentWrapper;
 
 	protected void debug(Object s) {
 		if (df == null) {
@@ -32,7 +30,7 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-				pushToUiChannel(msg);
+				parentWrapper.pushToUiChannel(msg);
 				return null;
 			}
 		});
@@ -67,7 +65,15 @@ public abstract class AbstractCustomModule extends ModuleWithUI implements ITime
 		this.outputs = new ArrayList<>(outputs);
 		this.outputsByName = new HashMap<>(outputsByName);
 		this.drivingInputs = new HashSet<>(drivingInputs);
-		this.readyInputs = readyInputs;
+		this.readyInputs = new HashSet<>(readyInputs);
 		this.setGlobals(globals);
+	}
+
+	public void setParentWrapper(AbstractJavaCodeWrapper parentWrapper) {
+		this.parentWrapper = parentWrapper;
+	}
+
+	public Set<Input> getReadyInputs() {
+		return readyInputs;
 	}
 }
