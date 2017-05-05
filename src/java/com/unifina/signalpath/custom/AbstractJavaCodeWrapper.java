@@ -22,6 +22,7 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 	String className = null;
 	String fullCode = null;
 	StoredEndpointFields storedEndpointFields = null;
+	StoredCustomModuleState storedCustomModuleState = null;
 	transient UserJavaClassLoader classLoader = null;
 
 	private static final Logger log = Logger.getLogger(AbstractJavaCodeWrapper.class);
@@ -255,8 +256,8 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 		// Ensure that there are no links to AbstractCustomModule before serialization so that it not serialized by
 		// virtue of belonging to object graph. Note that <code>instance</code> is already defined as transient.
 		changeOwnerOfEndpoints(null);
-		readyInputs = instance.getReadyInputs(); // TODO: hack, better to store instance state in separate class for serialization
 
+		storedCustomModuleState = instance.getStoredState();
 		storedEndpointFields = StoredEndpointFields.clearAndCollect(instance);
 
 		// Note: instance.beforeSerialization() invoked indirectly
@@ -289,18 +290,10 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI implements IT
 	 * instance.
 	 */
 	private void restoreInstanceAfterSerialization() {
-		instance.copyStateFromWrapper(parentSignalPath,
-				inputs,
-				inputsByName,
-				outputs,
-				outputsByName,
-				drivingInputs,
-				readyInputs,
-				getGlobals());
-
+		instance.copyStateFromWrapper(storedCustomModuleState, getGlobals());
 		storedEndpointFields.restoreFields(instance);
 		storedEndpointFields = null;
-
+		storedCustomModuleState = null;
 		changeOwnerOfEndpoints(instance);
 	}
 
