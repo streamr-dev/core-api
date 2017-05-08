@@ -205,7 +205,7 @@
                 method: 'DELETE'
             }).then(function() {
                 _this.remove()
-            }).fail(function(e) {
+            }).catch(function(e) {
                 Streamr.showError(e.message || e.responseJSON.message)
             })
         }

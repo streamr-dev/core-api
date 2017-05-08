@@ -1,24 +1,15 @@
 <html>
 <head>
     <meta name="layout" content="main" />
-    <title><g:message code="profile.edit.label"/></title>
+    <title>
+		<g:message code="profile.edit.label"/>
+	</title>
 
 	<r:require module="confirm-button"/>
 	<r:require module="moment-timezone"/>
 	<r:require module="streamr-credentials-control"/>
 
-	<r:script>
-		$(document).ready(function() {
-			var tzOpts = moment.tz.names().map(function(tz) {
-				return $('<option/>', {
-				    selected: tz === '${user.timezone}',
-				    value: tz,
-				    text: tz
-				})
-			})
-			$("#timezone").append(tzOpts)
-		})
-	</r:script>
+	<r:require module="profile-page-webpack-bundle" />
 
 </head>
 <body>
@@ -57,7 +48,7 @@
 						<label class="control-label">
 							<g:message code="secuser.name.label" />
 						</label>
-						<input name="name" type="text" class="form-control input-lg" value="${user.name}" required>
+						<input name="name" type="text" class="form-control" value="${user.name}" required>
 						<g:hasErrors bean="${user}" field="name">
 							<span class="text-danger">
 								<g:renderErrors bean="${user}" field="name" as="list" />
@@ -69,7 +60,7 @@
 						<label for="timezone" class="control-label">
 							<g:message code="secuser.timezone.label"/>
 						</label>
-						<select name="timezone" id="timezone" class="form-control input-lg"></select>
+						<select name="timezone" id="timezone" class="form-control"></select>
 						<g:hasErrors bean="${user}" field="timezone">
 							<span class="text-danger">
 								<g:renderErrors bean="${user}" field="timezone" as="list" />
@@ -94,6 +85,20 @@
 							<label>API keys</label>
 						</div>
 						<div id="api-credentials" class="credentials-control row"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-6 col-md-4">
+				<div class="panel">
+					<div class="panel-heading">
+						<span class="panel-title">${message(code:"profile.credentials.label")}</span>
+						<div class="panel-heading-controls">
+
+						</div>
+					</div>
+					<div class="panel-body">
+						<div id="streamrAccountHandler"></div>
 					</div>
 				</div>
 			</div>
@@ -130,6 +135,15 @@
 				url: '${createLink(uri: "/api/v1/users/me/keys")}',
 				username: '${user.username}'
 			})
+
+			var tzOpts = moment.tz.names().map(function(tz) {
+				return $('<option/>', {
+				    selected: tz === '${user.timezone}',
+				    value: tz,
+				    text: tz
+				})
+			})
+			$("#timezone").append(tzOpts)
 		})
 	</r:script>
 </body>

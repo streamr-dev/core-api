@@ -147,6 +147,10 @@ modules = {
 	clipboardjs {
 		resource url:[dir:'js/clipboardjs', file:'clipboard.js', plugin:'unifina-core']
 	}
+	react {
+		resource url:[dir:'js/react', file:'react.min.js']
+		resource url:[dir:'js/react', file:'react-dom.min.js']
+	}
 
 	/**
 	 * In-house widgets and resources
@@ -258,6 +262,9 @@ modules = {
 	}
 	'confirm-button' {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
+	}
+	'profile-page-webpack-bundle' {
+		resource url:[dir:'js/unifina/webpack-bundles', file:'profilePage-bundle.js', plugin:'unifina-core']
 	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list
