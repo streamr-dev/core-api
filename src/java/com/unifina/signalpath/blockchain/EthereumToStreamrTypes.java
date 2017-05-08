@@ -2,13 +2,18 @@ package com.unifina.signalpath.blockchain;
 
 import com.unifina.signalpath.*;
 
+import java.util.ArrayList;
+
 /**
  * Maps Ethereum types to Streamr types
  * NB: obviously casting e.g. uint256 to Double loses precision (range should be sufficient), so
  * 		this can be a VERY bad idea for e.g. financial transactions! Streamr needs BigInteger support for that.
- * 	Not handled: fixed-size arrays (int[3]), dynamic-size arrays (uint[]), they will be "Object"
  */
 public class EthereumToStreamrTypes {
+
+	private static boolean isArrayType(String type) {
+		return type.endsWith("]");
+	}
 
 	private static boolean isStringType(String type) {
 		return type.equals("address") // 20 bytes
@@ -25,7 +30,9 @@ public class EthereumToStreamrTypes {
 	}
 
 	public static Input asInput(String type, String name, AbstractSignalPathModule owner) {
-		if (isStringType(type)) {
+		if (isArrayType(type)) {
+			return new ListInput(owner, name);
+		} else if (isStringType(type)) {
 			return new StringInput(owner, name);
 		} else if (type.equals("bool")) {
 			return new BooleanInput(owner, name);
@@ -37,7 +44,9 @@ public class EthereumToStreamrTypes {
 	}
 
 	public static Parameter asParameter(String type, String name, AbstractSignalPathModule owner) {
-		if (isStringType(type)) {
+		if (isArrayType(type)) {
+			return new ListParameter(owner, name);
+		} else if (isStringType(type)) {
 			return new StringParameter(owner, name, "");
 		} else if (type.equals("bool")) {
 			return new BooleanParameter(owner, name, true);
@@ -53,7 +62,9 @@ public class EthereumToStreamrTypes {
 	}
 
 	public static Output asOutput(String type, String name, AbstractSignalPathModule owner) {
-		if (isStringType(type)) {
+		if (isArrayType(type)) {
+			return new ListOutput(owner, name);
+		} else if (isStringType(type)) {
 			return new StringOutput(owner, name);
 		} else if (type.equals("bool")) {
 			return new BooleanOutput(owner, name);

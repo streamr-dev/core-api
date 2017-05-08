@@ -220,6 +220,7 @@ public class EthereumCall extends AbstractHttpModule {
 	 */
 	@Override
 	protected HttpRequestBase createRequest() {
+		if (gson == null) { gson = new Gson(); }
 		EthereumContract c = contract.getValue();
 		if (c == null || c.getABI() == null || function.list == null) { throw new RuntimeException("Faulty contract"); }
 		if (chosenFunction == null) { throw new RuntimeException("Need valid function to call"); }
@@ -235,12 +236,12 @@ public class EthereumCall extends AbstractHttpModule {
 		if (chosenFunction.name.length() > 0) {
 			args.put("function", chosenFunction.name);
 
-			List<JsonPrimitive> argList = new ArrayList<>();
+			List<JsonElement> argList = new ArrayList<>();
 			for (Input<Object> input : arguments) {
 				String name = input.getName();
-				String value = input.getValue().toString();
-				log.info("  " + name + ": " + value);
-				argList.add(new JsonPrimitive(value));
+				Object value = input.getValue();
+				log.info("  " + name + ": " + value.toString());
+				argList.add(gson.toJsonTree(value));
 			}
 			args.put("arguments", argList);
 			args.put("abi", c.getABI().toList());
@@ -263,7 +264,6 @@ public class EthereumCall extends AbstractHttpModule {
 			request = new HttpPost(ETH_SERVER_URL + "/send");
 		}
 
-		if (gson == null) { gson = new Gson(); }
 		String jsonString = gson.toJson(args);
 		try {
 			log.info("Sending function call: " + jsonString);
