@@ -8,11 +8,12 @@ import com.unifina.data.StreamrBinaryMessage;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class StreamrBinaryMessageParser implements MessageParser<StreamrBinaryMessage, StreamrMessage> {
 
-	private static Type type = new TypeToken<Map<String, Object>>(){}.getType();
+	private static Type type = new TypeToken<LinkedHashMap<String, Object>>(){}.getType();
 
 	private Gson gson = new GsonBuilder()
 			.serializeNulls()
@@ -23,7 +24,7 @@ public class StreamrBinaryMessageParser implements MessageParser<StreamrBinaryMe
 	public StreamrMessage parse(StreamrBinaryMessage raw) {
 		if (raw.getContentType()==StreamrBinaryMessage.CONTENT_TYPE_JSON) {
 			String s = raw.toString();
-			Map<String, Object> json = gson.fromJson(s, type);
+			LinkedHashMap<String, Object> json = gson.fromJson(s, type);
 			return new StreamrMessage(raw.getStreamId(), raw.getPartition(), new Date(raw.getTimestamp()), new Date(), json);
 		}
 		else throw new RuntimeException("Unknown content type: "+raw.getContentType());
