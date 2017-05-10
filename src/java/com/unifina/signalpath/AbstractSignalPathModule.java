@@ -154,7 +154,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		addInput(input, input.getName());
 	}
 
-	public void addInputsInOrder(Input... inputs) {
+	public void addInputs(Input... inputs) {
 		for (Input input : inputs) {
 			addInput(input);
 		}
@@ -209,7 +209,7 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		}
 	}
 
-	public void addOutputsInOrder(Output... outputs) {
+	public void addOutputs(Output... outputs) {
 		for (Output output : outputs) {
 			addOutput(output);
 		}

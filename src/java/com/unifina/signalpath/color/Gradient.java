@@ -22,7 +22,7 @@ public class Gradient extends AbstractSignalPathModule {
 
 	@Override
 	public void init() {
-		addInputsInOrder(minValue, maxValue, minColor, maxColor, in);
+		addInputs(minValue, maxValue, minColor, maxColor, in);
 		addOutput(out);
 	}
 
