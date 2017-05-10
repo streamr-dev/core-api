@@ -148,6 +148,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superClose = pub.close;
 	function close() {
+		prot.moduleClosed = true
 		disconnect();
 
 		$(prot.div).find("div.input").each(function(i,div) {
@@ -162,6 +163,7 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		});
 		
 		superClose();
+		prot.moduleClosed = false
 	}
 	pub.close = close;
 	

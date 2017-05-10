@@ -222,11 +222,12 @@
 			preferredFormat: "rgb",
 			showInput: true,
 			showButtons: false,
-			hide: function() {
+            showAlpha: true,
+			hide: function(color) {
 				var oldValue = _this.data.value
-				_this.data.value = _this.getValue()
+                _this.data.value = color.toRgbString()
 				if (oldValue !== _this.data.value) {
-					$(_this).trigger('change')
+                    $(_this).trigger('change')
 				}
 			}
 		})

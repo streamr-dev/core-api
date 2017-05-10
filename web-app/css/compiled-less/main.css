@@ -16241,7 +16241,8 @@ body.dashboard-show .titlebar-clickable {
 .credentials-control .new-auth-key-row .input-group-btn > button {
   height: 34px;
 }
-.credentials-control .new-auth-key-row .permission-dropdown {
+.credentials-control .new-auth-key-row .permission-dropdown,
+.credentials-control .new-auth-key-row .permission-dropdown-toggle {
   border-radius: 0;
 }
 .credentials-control .new-auth-key-row .new-auth-key-button {
@@ -16259,47 +16260,12 @@ body.dashboard-show .titlebar-clickable {
 .credentials-control .auth-key-table th:not(:last-child) {
   padding-right: 10px;
 }
-.credentials-control .auth-key-table thead th.key-header {
-  width: 85px;
-  padding-right: 20px;
-}
-.credentials-control .auth-key-table thead th.key-header .visibility-controls {
+.credentials-control .auth-key-table .show-key {
   cursor: pointer;
-  font-size: 18px;
-  margin-top: -4px;
 }
-.credentials-control .auth-key-table tbody .auth-key-table-row td.action-field .dropdown-menu {
-  min-width: 100px;
-  padding: 10px 0 0 0;
-}
-.credentials-control .auth-key-table tbody .auth-key-table-row td.action-field .dropdown-menu li {
-  overflow: auto;
-  padding: 0 10px 10px 10px;
-}
-.credentials-control .auth-key-table tbody .auth-key-table-row td.key-field {
-  padding-right: 20px;
-}
-.credentials-control .auth-key-table tbody .auth-key-table-row td.key-field span {
-  display: block;
-}
-.credentials-control .auth-key-table:not(.show-keys) th.key-header .hide-icon {
-  display: none;
-}
-.credentials-control .auth-key-table:not(.show-keys) td .key-container {
-  background-color: #b0b0b0;
-  border-radius: 2px;
-  color: transparent;
-  text-shadow: none;
-}
-.credentials-control .auth-key-table:not(.show-keys) td .key-container .key {
-  visibility: hidden;
-  word-wrap: normal;
-}
-.credentials-control .auth-key-table.show-keys td .key {
+.credentials-control .auth-key-table td.name-field {
+  max-width: 90px;
   word-wrap: break-word;
-}
-.credentials-control .auth-key-table.show-keys th.key-header .show-icon {
-  display: none;
 }
 .credentials-control .auth-key-table .auth-key-delete-button {
   margin-left: 5px;
