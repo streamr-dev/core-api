@@ -286,15 +286,11 @@ $(document).ready(function() {
 		if (!SignalPath.isReadOnly()) {
 			var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
 			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
-				var permissions = []
-				_.each(perm, function(permission) {
-					if (permission.id = "${id}") {
-						permissions.push(permission.operation)
-					}
+			    var sharePermission = _.find(perm, function(p) {
+				    return p.operation === 'share'
 				})
-				if (_.contains(permissions, "share")) {
-					$("#share-button").data("url", canvasUrl)
-					$("#share-button").removeAttr("disabled")
+				if (sharePermission) {
+					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
 				} else {
 					$("#share-button").addClass("forbidden")
 				}

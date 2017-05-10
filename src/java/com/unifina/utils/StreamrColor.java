@@ -1,6 +1,5 @@
 package com.unifina.utils;
 
-
 import java.awt.Color;
 import java.io.Serializable;
 
@@ -46,6 +45,18 @@ public class StreamrColor implements Serializable {
 	}
 	public double getAlpha() {
 		return alpha;
+	}
+
+	public static StreamrColor parseRGBString(String rgb) {
+		String[] splitted = rgb.split("rgba?\\(|\\, |\\,|\\)");
+		int r = Integer.parseInt(splitted[1]);
+		int g = Integer.parseInt(splitted[2]);
+		int b = Integer.parseInt(splitted[3]);
+		double a = 1.0;
+		if (splitted.length > 4) {
+			a = Double.parseDouble(splitted[4]);
+		}
+		return new StreamrColor(r, g, b, a);
 	}
 
 	@Override

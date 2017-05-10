@@ -19,6 +19,7 @@ public class Globals {
 	private static final Logger log = Logger.getLogger(Globals.class);
 
 	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 	public SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -44,6 +45,7 @@ public class Globals {
 	protected Date endDate = null;
 
 	protected boolean realtime = false;
+	private IdGenerator idGenerator = new IdGenerator();
 
 	/**
 	 * Construct fake environment, e.g., for testing.
@@ -102,6 +104,10 @@ public class Globals {
 		if (System.getSecurityManager()!=null)
 			AccessController.checkPermission(new UserPermission());
 		this.user = user;
+	}
+
+	public Date getTime() {
+		return time;
 	}
 	
 	protected String detectTimeZone() {
@@ -219,6 +225,14 @@ public class Globals {
 
 	public <T> T getBean(Class<T> requiredType) {
 		return grailsApplication.getMainContext().getBean(requiredType);
+	}
+
+	public IdGenerator getIdGenerator() {
+		return idGenerator;
+	}
+
+	public void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
 	}
 
 	/**

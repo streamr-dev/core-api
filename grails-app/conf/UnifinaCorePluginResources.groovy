@@ -128,7 +128,7 @@ modules = {
 		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
 	}
 	mathjax {
-		resource url:'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
+		resource url:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.2.0/MathJax.js?config=TeX-AMS_HTML'
 	}
 	switcher {
 		resource url:[dir:'js/pixel-admin', file:'switcher.js', plugin:'unifina-core']
@@ -299,6 +299,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'imageMapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']

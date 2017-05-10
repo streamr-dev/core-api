@@ -16,15 +16,13 @@ class DelaySpec extends Specification {
 		when:
 		module.getInput("delayEvents").receive(3)
 		Map inputValues = [
-			in: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() },
+			in: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 		]
 		Map outputValues = [
-			out : [null, null, null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].collect { it?.doubleValue() },
+			out : [null, null, null, 1, 2, 3, 4, 5, 6, 7],
 		]
 
 		then:
-		new ModuleTestHelper.Builder(module, inputValues, outputValues)
-			.extraIterationsAfterInput(3)
-			.test()
+		new ModuleTestHelper.Builder(module, inputValues, outputValues).test()
 	}
 }
