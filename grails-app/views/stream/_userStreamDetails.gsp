@@ -1,5 +1,5 @@
 <div class="col-sm-6 col-md-4">
-	<ui:panel title="HTTP API credentials">
+	<ui:panel title="API Credentials">
 		<g:render template="userStreamCredentials" model="[stream:stream]"/>
 	</ui:panel>
 </div>

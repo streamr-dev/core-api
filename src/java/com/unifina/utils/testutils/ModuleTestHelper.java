@@ -1,20 +1,21 @@
 package com.unifina.utils.testutils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.*;
-
 import com.unifina.datasource.ITimeListener;
 import com.unifina.serialization.AnonymousInnerClassDetector;
 import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
+import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
 import groovy.lang.Closure;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
 
 
 /**
@@ -66,8 +67,8 @@ public class ModuleTestHelper {
 		 * Set expected messages that should've been pushed to ui channel at end of input list. (optional)
 		 * Notice that previously set <code>module</code> must be an instance of <code>ModuleWithUI</code>.
 		 */
-		public Builder uiChannelMessages(Map<String, List<Object>> uiChannelMessages) {
-			testHelper.turnOnUiChannelMode(uiChannelMessages);
+		public Builder uiChannelMessages(Map<String, List<Map>> expectedUiChannelMessages, Map<String, List<Map>> sentUiChannelMessages) {
+			testHelper.turnOnUiChannelMode(expectedUiChannelMessages, sentUiChannelMessages);
 			return this;
 		}
 
@@ -209,7 +210,8 @@ public class ModuleTestHelper {
 	private AbstractSignalPathModule module;
 	private Map<String, List<Object>> inputValuesByName;
 	private Map<String, List<Object>> outputValuesByName;
-	private Map<String, List<Object>> uiChannelMessages;
+	private Map<String, List<Map>> expectedUiChannelMessages;
+	private Map<String, List<Map>> sentUiChannelMessages;
 	private Map<Integer, Date> ticks;
 	private int extraIterationsAfterInput = 0;
 	private int skip = 0;
@@ -395,21 +397,16 @@ public class ModuleTestHelper {
 	}
 
 	private void validateUiChannelMessages() {
-		FakePushChannel uiChannel = (FakePushChannel) module.getGlobals().getUiChannel();
-		if (uiChannel == null) {
-			throw new TestHelperException("uiChannel: module.globals.uiChannel unexpectedly null", this);
-		}
-
-		for (Map.Entry<String, List<Object>> expectedEntry : uiChannelMessages.entrySet()) {
+		for (Map.Entry<String, List<Map>> expectedEntry : expectedUiChannelMessages.entrySet()) {
 			String channel = expectedEntry.getKey();
-			List<Object> expectedMessages = expectedEntry.getValue();
+			List<Map> expectedMessages = expectedEntry.getValue();
 
-			if (!uiChannel.receivedContentByChannel.containsKey(channel)) {
+			if (!sentUiChannelMessages.containsKey(channel)) {
 				throw new TestHelperException(String.format("uiChannel: channel '%s' was never pushed to", channel),
 						this);
 			}
 
-			List<Object> actualMessages = uiChannel.receivedContentByChannel.get(channel);
+			List<Map> actualMessages = sentUiChannelMessages.get(channel);
 			for (int i = 0; i < Math.max(expectedMessages.size(), actualMessages.size()); ++i) {
 
 				if (actualMessages.size() <= i) {
@@ -436,11 +433,13 @@ public class ModuleTestHelper {
 					throw new TestHelperException(String.format(msg, i, actual, expected), this);
 				}
 			}
+
+			sentUiChannelMessages.clear();
 		}
 	}
 
 	private boolean isUiChannelMode() {
-		return uiChannelMessages != null;
+		return expectedUiChannelMessages != null;
 	}
 
 	private boolean isTimedMode() {
@@ -463,6 +462,9 @@ public class ModuleTestHelper {
 				ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 				module = (AbstractSignalPathModule) serializer.deserialize(in);
 				module.setGlobals(globalsTempHolder);
+				if (module.getParentSignalPath() != null) {
+					module.getParentSignalPath().setGlobals(globalsTempHolder);
+				}
 				module.afterDeserialization(dummySerializationService);
 				moduleInstanceChanged.call(module);
 			}
@@ -484,9 +486,11 @@ public class ModuleTestHelper {
 		module.connectionsReady();
 	}
 
-	private void turnOnUiChannelMode(Map<String, List<Object>> uiChannelMessages) {
+	private void turnOnUiChannelMode(Map<String, List<Map>> expectedMessages, Map<String, List<Map>> sentUiChannelMessages) {
 		if (module instanceof ModuleWithUI) {
-			this.uiChannelMessages = new HashMap<>(uiChannelMessages);
+			this.expectedUiChannelMessages = new HashMap<>(expectedMessages);
+			// Save reference, as the map doesn't hold anything yet
+			this.sentUiChannelMessages = sentUiChannelMessages;
 		} else {
 			throw new RuntimeException("Module does not extend ModuleWithUI");
 		}
@@ -560,9 +564,10 @@ public class ModuleTestHelper {
 	}
 
 	private void setUpGlobals(AbstractSignalPathModule module) {
-		module.setGlobals(new Globals());
+		if (module.getGlobals() == null) {
+			module.setGlobals(new Globals());
+		}
 		module.getGlobals().time = new Date(0);
-		module.getGlobals().setUiChannel(new FakePushChannel());
 		module.setGlobals(overrideGlobalsClosure.call(module.getGlobals()));
 	}
 

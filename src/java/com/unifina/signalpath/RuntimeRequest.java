@@ -133,4 +133,30 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 
 	}
 
+	public static class PathWriter {
+		private String path = "";
+
+		public PathWriter write(String s) {
+			path += s;
+			return this;
+		}
+
+		public PathWriter writeCanvasId(String id) {
+			return write("/canvases/" + id);
+		}
+
+		public PathWriter writeDashboardId(Long id) {
+			return write("/dashboards/"+id);
+		}
+
+		public PathWriter writeModuleId(Integer id) {
+			return write("/modules/" + id);
+		}
+
+		@Override
+		public String toString() {
+			return path;
+		}
+	}
+
 }

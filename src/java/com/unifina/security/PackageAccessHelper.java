@@ -32,7 +32,20 @@ public class PackageAccessHelper {
 			"org.apache.commons.math3",
 			"org.springsource.loaded.TypeRegistry", // safe?
 			"sun.reflect.SerializationConstructorAccessorImpl", // safe?
-			"org.codehaus.groovy.grails.web.json."
+			"org.codehaus.groovy.grails.web.json.",
+
+			"javax.crypto.",
+			"javax.crypto.spec.",
+			"javax.imageio.",
+			"java.io.InputStream",
+			"java.io.IOException",
+			"java.security.spec.KeySpec",
+			"java.awt.Image",
+			"org.apache.commons.codec.binary.Hex",
+			"org.apache.commons.codec.DecoderException",
+			"java.io.ByteArrayInputStream",
+			"com.google.common.io.ByteStreams",
+			"java.security.MessageDigest"
 	};
 	
 	private static boolean checkMatches(String className, String[] packages) {

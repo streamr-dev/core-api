@@ -1,6 +1,7 @@
 package com.unifina.service
 
 import com.unifina.domain.data.Feed
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.ModulePackage
@@ -29,6 +30,9 @@ class UserService {
 			log.warn(checkErrors(user.errors.getAllErrors()))
 			throw new UserCreationFailedException("Registration user validation failed: " + checkErrors(user.errors.getAllErrors()))
 		}
+
+		// Users must have at least one API key
+		user.addToKeys(new Key(name: "Default"))
 
 		if (!user.save(flush: true)) {
 			log.warn("Failed to save user data: " + checkErrors(user.errors.getAllErrors()))
@@ -80,17 +84,6 @@ class UserService {
 		packages.findAll { !existing.contains(it) }.each { permissionService.systemGrant(user, it) }
 		existing.findAll { !packages.contains(it) }.each { permissionService.systemRevoke(user, it) }
 		return packages
-	}
-
-	/**
-	 * Looks up a user based on api key.
-	 * @returns SecUser user, or null if the keys do not match a user.
-	 */
-	SecUser getUserByApiKey(String apiKey) {
-		if (!apiKey) {
-			return null
-		}
-		return SecUser.findByApiKey(apiKey)
 	}
 
 	def passwordValidator = { String password, command ->

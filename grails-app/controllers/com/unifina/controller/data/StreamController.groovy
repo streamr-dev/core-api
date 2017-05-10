@@ -1,5 +1,7 @@
 package com.unifina.controller.data
 
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.Permission.Operation
 import com.unifina.api.ApiException
 import com.unifina.feed.DataRange
@@ -37,13 +39,12 @@ class StreamController {
 	static defaultAction = "list"
 	
 	def permissionService
-	def feedFileService
-	def kafkaService
 	def streamService
 
 	def list() {
 		SecUser user = springSecurityService.currentUser
 		List<Stream> streams = permissionService.get(Stream, user, {
+			eq("uiChannel", false) // filter out UI channel Streams
 			order("lastUpdated", "desc")
 		})
 		Set<Stream> shareable = permissionService.get(Stream, user, Operation.SHARE).toSet()
@@ -90,7 +91,9 @@ class StreamController {
 
 	def show() {
 		getAuthorizedStream(params.id) { stream, user ->
-			[stream: stream, writable: permissionService.canWrite(user, stream), shareable: permissionService.canShare(user, stream)]
+			boolean writetable = permissionService.canWrite(user, stream)
+			boolean shareable = permissionService.canShare(user, stream)
+			[stream: stream, writable: writetable, shareable: shareable]
 		}
 	}
 

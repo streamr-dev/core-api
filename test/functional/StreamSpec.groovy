@@ -115,6 +115,7 @@ class StreamSpec extends LoginTester1Spec {
 			Stream testStream = new Stream()
 			testStream.id = streamId
 			streamService.sendMessage(testStream, [foo: "bar", "xyz": 45.5], 30)
+			sleep(1000)
 			autodetectButton.click()
 		then: "The fields in the stream must appear and be of correct type"
 			waitFor {

@@ -1,6 +1,5 @@
 package com.unifina.signalpath.utils;
 
-import com.unifina.push.PushChannel;
 import com.unifina.signalpath.*;
 
 import java.util.ArrayList;
@@ -25,36 +24,27 @@ public class EventTable extends ModuleWithUI {
 	public void initialize() {
 		super.initialize();
 
-		PushChannel rc = null;
-
-		if (getGlobals().getUiChannel()!=null) {
-			rc = getGlobals().getUiChannel();
-		}
-		
-		if (rc!=null) {
-			Map<String,Object> hdrMsg = new HashMap<String,Object>();
+		if (getGlobals().isRunContext()) {
+			Map<String, Object> hdrMsg = new HashMap<String, Object>();
 			hdrMsg.put("hdr", getHeaderDefinition());
-			getGlobals().getUiChannel().push(hdrMsg, uiChannelId);
+			pushToUiChannel(hdrMsg);
 		}
 	}
 
 	@Override
 	public void sendOutput() {
-		PushChannel rc = getGlobals().getUiChannel();
-		if (rc != null) {
-			HashMap<String, Object> msg = new HashMap<String, Object>();
-			ArrayList<Object> nr = new ArrayList<>(2);
-			msg.put("nr", nr);
-			nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
+		HashMap<String, Object> msg = new HashMap<String, Object>();
+		ArrayList<Object> nr = new ArrayList<>(2);
+		msg.put("nr", nr);
+		nr.add(getGlobals().dateTimeFormat.format(getGlobals().time));
 
-			for (Input i : getInputs()) {
-				if (i.hasValue())
-					nr.add(i.getValue().toString());
-				else nr.add(null);
-			}
-
-			rc.push(msg, uiChannelId);
+		for (Input i : getInputs()) {
+			if (i.hasValue())
+				nr.add(i.getValue().toString());
+			else nr.add(null);
 		}
+
+		pushToUiChannel(msg);
 	}
 
 	@Override

@@ -3,9 +3,12 @@ package com.unifina.signalpath.map;
 import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.CanvasService;
+import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
+import com.unifina.utils.GlobalsFactory;
+import grails.util.Holders;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -52,7 +55,10 @@ public class ForEach extends AbstractSignalPathModule {
 		// Note that the same map instance must not be reused for many instances, it will produce hell if many modules share the same config map instance
 		Map signalPathMap = (Map) JSON.parse(canvas.getJson());
 		SignalPathService signalPathService = getGlobals().getBean(SignalPathService.class);
-		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, getGlobals(), false);
+
+		// Create a non-run-context Globals for instantiating the temporary SignalPath
+		Globals tempGlobals = GlobalsFactory.createInstance(Collections.emptyMap(), getGlobals().getGrailsApplication(), getGlobals().getUser());
+		SignalPath tempSignalPath = signalPathService.mapToSignalPath(signalPathMap, true, tempGlobals, new SignalPath(false));
 
 		// Find and validate exported endpoints
 		List<Input> exportedInputs = tempSignalPath.getExportedInputs();
@@ -153,8 +159,9 @@ public class ForEach extends AbstractSignalPathModule {
 		// Re-parsing is used here instead of deep-copying an already-parsed map, as that's not easily available
 		Map signalPathMap = (Map) JSON.parse(signalPathParameter.getCanvas().getJson());
 		canvasService.resetUiChannels(signalPathMap);
-		SignalPath signalPath = signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), false);
+		SignalPathInsideForEach signalPath = (SignalPathInsideForEach) signalPathService.mapToSignalPath(signalPathMap, false, getGlobals(), new SignalPathInsideForEach(false));
 		signalPath.setName(signalPath.getName() + " (" + key + ")");
+		signalPath.link(key, this);
 
 		// Copy parameter default values
 		for (Parameter p : exportedUnconnectedParameters) {
@@ -201,6 +208,39 @@ public class ForEach extends AbstractSignalPathModule {
 			} else {
 				return ssp.getSignalPath().resolveRuntimeRequestRecipient(request, path);
 			}
+		}
+	}
+
+	public SignalPath getSignalPathByKey(String key) {
+		SubSignalPath sub = keyToSignalPath.get(key);
+		if (sub == null) {
+			return null;
+		} else {
+			return sub.getSignalPath();
+		}
+	}
+
+	@Override
+	public void beforeSerialization() {
+		super.beforeSerialization();
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().beforeSerialization();
+		}
+	}
+
+	@Override
+	public void afterSerialization() {
+		super.afterSerialization();
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().afterSerialization();
+		}
+	}
+
+	@Override
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().afterDeserialization(serializationService);
 		}
 	}
 
@@ -251,6 +291,26 @@ public class ForEach extends AbstractSignalPathModule {
 		@Override
 		public boolean isReady() {
 			return true;
+		}
+	}
+
+	public static class SignalPathInsideForEach extends SignalPath {
+
+		ForEach parent;
+		String key;
+
+		public SignalPathInsideForEach(boolean isRoot) {
+			super(isRoot);
+		}
+
+		public void link(String key, ForEach parent) {
+			this.key = key;
+			this.parent = parent;
+		}
+
+		@Override
+		protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
+			return parent.getRuntimePath(writer).write("/keys/"+key);
 		}
 	}
 }
