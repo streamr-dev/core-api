@@ -11,8 +11,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	private final Input<Object> id = new Input<>(this, "id", "Object");
 	private final Input<Object> label = new Input<>(this, "label", "Object");
-	private final TimeSeriesInput latitude = new TimeSeriesInput(this, "latitude");
-	private final TimeSeriesInput longitude = new TimeSeriesInput(this, "longitude");
+	private final TimeSeriesInput xInput = new TimeSeriesInput(this, "x");
+	private final TimeSeriesInput yInput = new TimeSeriesInput(this, "y");
 	private final TimeSeriesInput heading = new TimeSeriesInput(this, "heading");		// degrees clockwise ("right-handed down")
 	private final ColorParameter color = new ColorParameter(this, "traceColor", new StreamrColor(233, 87, 15));
 
@@ -39,6 +39,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 
 	private StreamrColor markerColor = new StreamrColor(233, 91, 21);
 
+	private final MapModuleType type;
+
 	MapModule(double centerLat, double centerLng, int minZoom, int maxZoom, int zoom, boolean autoZoom) {
 		this.centerLat = centerLat;
 		this.centerLng = centerLng;
@@ -46,21 +48,29 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		this.maxZoom = maxZoom;
 		this.zoom = zoom;
 		this.autoZoom = autoZoom;
+		this.type = getMapModuleType();
 	}
+
+	abstract protected MapModuleType getMapModuleType();
+	abstract protected Double xToLongitude(Double x);
+	abstract protected Double yToLatitude(Double y);
 
 	@Override
 	public void init() {
 		addInput(id);
-		addInput(latitude);
-		addInput(longitude);
+		xInput.setName(type.xName);
+		yInput.setName(type.yName);
+		addInput(type.isXYOrder() ? xInput : yInput);
+		addInput(type.isXYOrder() ? yInput : xInput);
+
 		this.resendAll = false;
 		this.resendLast = 0;
-		latitude.setDrivingInput(true);
-		latitude.canHaveInitialValue = false;
-		latitude.canBeFeedback = false;
-		longitude.setDrivingInput(true);
-		longitude.canHaveInitialValue = false;
-		longitude.canBeFeedback = false;
+		yInput.setDrivingInput(true);
+		yInput.canHaveInitialValue = false;
+		yInput.canBeFeedback = false;
+		xInput.setDrivingInput(true);
+		xInput.canHaveInitialValue = false;
+		xInput.canBeFeedback = false;
 		id.setDrivingInput(true);
 		id.canBeFeedback = false;
 		id.requiresConnection = false;
@@ -82,8 +92,8 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 	public void sendOutput() {
 		Marker marker = new Marker(
 			id.getValue(),
-			latitude.getValue(),
-			longitude.getValue(),
+			yToLatitude(yInput.getValue()),
+			xToLongitude(xInput.getValue()),
 			color.getValue()
 		);
 
@@ -123,6 +133,7 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
+		// TODO: should rename center options to whatever x/y inputs are named, but this would break js
 		options.addIfMissing(ModuleOption.createDouble("centerLat", centerLat));
 		options.addIfMissing(ModuleOption.createDouble("centerLng", centerLng));
 		options.addIfMissing(ModuleOption.createInt("minZoom", minZoom));
@@ -301,6 +312,23 @@ abstract class MapModule extends ModuleWithUI implements ITimeListener {
 			put("t", "d");
 			put("markerList", markerIdList);
 			put("pointList", pointIdList);
+		}
+	}
+
+	protected static class MapModuleType implements Serializable {
+		public enum XYOrder { XY, YX };
+
+		public String xName, yName;
+		XYOrder order;
+
+		public MapModuleType(String xName, String yName, XYOrder order) {
+			this.xName = xName;
+			this.yName = yName;
+			this.order = order;
+		}
+
+		public boolean isXYOrder() {
+			return order == XYOrder.XY;
 		}
 	}
 }

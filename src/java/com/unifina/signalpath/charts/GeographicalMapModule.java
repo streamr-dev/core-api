@@ -18,6 +18,21 @@ public class GeographicalMapModule extends MapModule {
 	}
 
 	@Override
+	protected MapModuleType getMapModuleType() {
+		return new MapModuleType("longitude", "latitude", MapModuleType.XYOrder.YX);
+	}
+
+	@Override
+	protected Double xToLongitude(Double x) {
+		return x; // map accepts longitude as-is
+	}
+
+	@Override
+	protected Double yToLatitude(Double y) {
+		return y; // map accepts latitude as-is
+	}
+
+	@Override
 	public Map<String, Object> getConfiguration() {
 		Map<String, Object> config = super.getConfiguration();
 
