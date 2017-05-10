@@ -15,10 +15,7 @@ class GaugeSpec extends UiChannelMockingSpecification {
     def setup() {
 		mockServicesForUiChannels()
 
-		module = new Gauge()
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		module.init()
-		module.configure([
+		module = setupModule(new Gauge(), [
 			uiChannel: [id: "gauge"],
 			params: [
 				[name: "min", value: -1],
