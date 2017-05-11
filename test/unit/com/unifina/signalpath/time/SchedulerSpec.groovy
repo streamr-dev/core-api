@@ -20,18 +20,11 @@ class SchedulerSpec extends UiChannelMockingSpecification {
 		TimeZone Helsinki = TimeZone.getTimeZone("Europe/Helsinki")
 
 		df.setTimeZone(Helsinki)
-
-		Globals globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		globals.userTimeZone = UTC
-
-		module = new Scheduler()
-		module.globals = globals
-		module.init()
 	}
 
 	void "Scheduler works as expected"() {
 		when:
-		module.configure([
+		module = setupModule(new Scheduler(), [
 			uiChannel: [id: "schedulerChannel"],
 			schedule: [
 				defaultValue: 100,

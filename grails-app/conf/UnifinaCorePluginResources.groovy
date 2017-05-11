@@ -128,11 +128,12 @@ modules = {
 		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
 	}
 	mathjax {
-		resource url:'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
+		resource url:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.2.0/MathJax.js?config=TeX-AMS_HTML'
 	}
 	switcher {
 		resource url:[dir:'js/pixel-admin', file:'switcher.js', plugin:'unifina-core']
 	}
+	// color picker (for search)
 	spectrum {
 		resource url:[dir:'js/spectrum', file:'spectrum.js', plugin:'unifina-core']
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
@@ -249,7 +250,7 @@ modules = {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
 	'streamr-credentials-control' {
-		dependsOn 'backbone, streamr, clipboardjs'
+		dependsOn 'backbone, streamr, clipboardjs, bootbox'
 		resource url:[dir:'js/unifina/streamr-credentials-control', file:'streamr-credentials-control.js', plugin:'unifina-core']
 	}
 	'scrollspy-helper' {
@@ -305,6 +306,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'imageMapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
 		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
