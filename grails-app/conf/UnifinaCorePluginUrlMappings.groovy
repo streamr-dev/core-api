@@ -1,5 +1,6 @@
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Account
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 
@@ -47,6 +48,8 @@ class UnifinaCorePluginUrlMappings {
 
 		"/api/v1/users/me"(controller: "userApi", action: "getUserInfo")
 		"/api/v1/users/me/keys"(resources: "keyApi", excludes: ["create", "edit", "update"]) { resourceClass = SecUser }
+
+		"/api/v1/accounts"(resources: "accountApi")
 
 		"/api/v1/canvases/($path**)/request"(controller: "canvasApi", action: "runtimeRequest") // for internal use, runtime requests to canvases
 		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards

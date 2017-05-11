@@ -38,6 +38,8 @@
     "eslint-plugin-react": "^7.0.0",
     "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.11.1",
+    "moment": "^2.18.1",
+    "moment-timezone": "^0.5.13",
     "path": "^0.12.7",
     "postcss-color-function": "^3.0.0",
     "postcss-extend": "^1.0.5",

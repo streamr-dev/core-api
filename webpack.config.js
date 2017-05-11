@@ -6,16 +6,16 @@ const WebpackNotifierPlugin = require('webpack-notifier')
 const postcssConfig = require('./postcss.config.js')
 
 const root = path.resolve(__dirname)
-const jsRoot = path.resolve(root, 'web-app', 'js', 'unifina')
 
 const inProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
     entry: {
-        profilePage: path.resolve(jsRoot, 'streamr-account-handler', 'StreamrAccountHandler.jsx')
+        profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js')
     },
     output: {
-        path: path.resolve(jsRoot, 'webpack-bundles'),
+        path: path.resolve(root, 'web-app', 'js', 'unifina', 'webpack-bundles'),
+        publicPath: '/web-app/js/unifina/webpack-bundles/',
         filename: '[name]-bundle.js'
     },
     module: {
@@ -90,8 +90,6 @@ module.exports = {
     ]),
     devtool: !inProduction && 'eval-source-map',
     devServer: !inProduction ? {
-        progress: true,
-        colors: true,
         inline: true
     } : {},
     resolve: {
