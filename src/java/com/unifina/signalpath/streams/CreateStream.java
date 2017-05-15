@@ -19,7 +19,6 @@ public class CreateStream extends AbstractSignalPathModule {
 	private final Set<String> createdStreams = new HashSet<>();
 	private transient StreamService streamService;
 
-
 	@Override
 	public void init() {
 		addInput(fields);
@@ -36,17 +35,16 @@ public class CreateStream extends AbstractSignalPathModule {
 		}
 
 		if (createdStreams.contains(nameInput.getValue())) {
-			created.send(false);
+			sendOutputs(false, null);
 			return;
 		}
 
 		try {
 			Stream s = streamService.createStream(buildParams(), getGlobals().getUser());
-			created.send(true);
-			stream.send(s.getId());
+			sendOutputs(true, s);
 			createdStreams.add(nameInput.getValue());
 		} catch (ValidationException ex) {
-			created.send(false);
+			sendOutputs(false, null);
 		}
 	}
 
@@ -55,7 +53,7 @@ public class CreateStream extends AbstractSignalPathModule {
 		createdStreams.clear();
 	}
 
-	private Map<String, Object> buildParams() {
+	protected Map<String, Object> buildParams() {
 		Map<String, Object> params = new HashMap<>();
 		params.put("name", nameInput.getValue());
 		params.put("description", description.getValue());
@@ -63,6 +61,15 @@ public class CreateStream extends AbstractSignalPathModule {
 		config.put("fields", mapToListOfFieldConfigs(fields.getValue()));
 		params.put("config", config);
 		return params;
+	}
+
+	protected String getStreamName() {
+		return nameInput.getValue();
+	}
+
+	protected void sendOutputs(boolean createdValue, Stream streamValue) {
+		created.send(createdValue);
+		if (streamValue != null) stream.send(streamValue.getId());
 	}
 
 	private static List<Map<String, String>> mapToListOfFieldConfigs(Map<String, String> map) {
