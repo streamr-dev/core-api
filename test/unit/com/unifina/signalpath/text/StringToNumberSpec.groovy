@@ -13,9 +13,6 @@ class StringToNumberSpec extends Specification {
 	}
 
 	def "converts correctly"() {
-		module.configure([
-			options: [strict: [value: true]]
-		])
 		def inputs = [in: ["1", "-0.5", "-1.e3", "-.1e3", "+1e1", "+.e2", ""]]
 		def outputs = [
 			out: [1, -0.5, -1000, -100, 10, 10, 10].collect {it?.doubleValue()},
