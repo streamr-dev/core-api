@@ -448,8 +448,6 @@ public class ModuleTestHelper {
 
 	private void serializeAndDeserializeModule() throws IOException, ClassNotFoundException {
 		if (serializationMode != SerializationMode.NONE) {
-			validateThatModuleDoesNotHaveKnownSerializationIssues();
-
 			// Globals is transient, we need to restore it after deserialization
 			Globals globalsTempHolder = module.getGlobals();
 
@@ -504,21 +502,6 @@ public class ModuleTestHelper {
 			throw new RuntimeException("Module does not implement ITimeListener interface");
 		}
 	}
-
-	private void validateThatModuleDoesNotHaveKnownSerializationIssues() {
-		// Field hiding not allowed
-		HiddenFieldDetector hiddenFieldDetector = new HiddenFieldDetector(module.getClass());
-		if (hiddenFieldDetector.anyHiddenFields()) {
-			throw new TestHelperException(hiddenFieldDetector);
-		}
-
-		// Anonymous inner classes not allowed
-		AnonymousInnerClassDetector anonymousInnerClassDetector = new AnonymousInnerClassDetector();
-		if (anonymousInnerClassDetector.detect(module)) {
-			throw new TestHelperException("Anonymous inner class detected. Not allowed when serializing.", this);
-		}
-	}
-
 
 	// Initialization steps below
 
