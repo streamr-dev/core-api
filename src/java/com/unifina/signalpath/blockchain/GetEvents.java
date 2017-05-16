@@ -5,6 +5,7 @@ import com.google.gson.*;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
@@ -33,10 +34,11 @@ public class GetEvents extends AbstractHttpModule {
 	// event -> [output for each event argument]
 	private Map<EthereumABI.Event, List<Output<Object>>> events;
 
-	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 	private static final Logger log = Logger.getLogger(GetEvents.class);
 
 	private transient Gson gson;
+
+	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 
 	/*
 	@Override
@@ -45,7 +47,19 @@ public class GetEvents extends AbstractHttpModule {
 	*/
 
 	@Override
+	public Map<String, Object> getConfiguration() {
+		Map<String, Object> config = super.getConfiguration();
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions.writeNetworkOption(options);
+
+		return config;
+	}
+
+	@Override
 	protected void onConfiguration(Map<String, Object> config) {
+		super.onConfiguration(config);
+
 		EthereumContract c = contract.getValue();
 		events = new HashMap<>();
 		if (c != null) {
@@ -68,12 +82,15 @@ public class GetEvents extends AbstractHttpModule {
 				events.put(ev, evOutputs);
 			}
 		}
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
 	}
 
 	@Override
 	protected HttpRequestBase createRequest() {
 		EthereumContract c = contract.getValue();
-		String URL = ETH_SERVER_URL + "/events";
+		String URL = ethereumOptions.getServer() + "/events";
 		String body = new Gson().toJson(ImmutableMap.of(
 			"abi", c.getABI(),
 			"address", c.getAddress(),

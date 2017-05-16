@@ -7,8 +7,6 @@ import grails.util.Holders;
 public class PayByUse extends SolidityModule {
 	@Override
 	public String getCodeTemplate() {
-		String streamrAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
-
 		// TODO: should unitCost/recipient be public?
 		//   + These are supplied to constructor, so they show up on canvas already
 		//   - When manipulating from CLI it would be useful (for demo not so important)
@@ -55,7 +53,7 @@ public class PayByUse extends SolidityModule {
 				"    }\n" +
 				"    \n" +
 				"    modifier canvasCommand {\n" +
-				"        if (msg.sender != " + streamrAddress + ") { throw; }\n" +
+				"        if (msg.sender != " + ADDRESS_PLACEHOLDER + ") { throw; }\n" +
 				"        _;\n" +
 				"    }\n" +
 				"    \n" +

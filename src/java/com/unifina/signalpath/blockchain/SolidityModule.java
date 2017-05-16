@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -19,16 +20,13 @@ import java.util.Stack;
 
 public class SolidityModule extends ModuleWithUI implements Pullable<EthereumContract> {
 
-	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
-	public static final String ETH_ADDRESS = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
-	public static final String ETH_PRIVATE_KEY = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.key");
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
+	protected static final String ADDRESS_PLACEHOLDER = "{{ADDRESS}}";
 
 	private Output<EthereumContract> contractOutput = null;
 
+	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 	private String code = null;
-	private String address = ETH_ADDRESS;
-	private String privateKey = ETH_PRIVATE_KEY;
 	private EthereumContract contract = null;
 	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
 
@@ -52,8 +50,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("address", address, "string"));
-		options.add(new ModuleOption("privateKey", privateKey, "string"));
+		ethereumOptions.writeTo(options);
 
 		config.put("code", code);
 		if (contract != null) {
@@ -80,12 +77,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		}
 
 		ModuleOptions options = ModuleOptions.get(config);
-		if (options.getOption("address") != null) {
-			address = options.getOption("address").getString();
-		}
-		if (options.getOption("privateKey") != null) {
-			privateKey = options.getOption("privateKey").getString();
-		}
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
 		try {
 			if (compileRequested && code != null) {
@@ -108,7 +100,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 					}
 				}
 
-				contract = deploy(address, privateKey, code, args, sendWei);
+				contract = deploy(code, args, sendWei);
 			}
 		} catch (Exception e) {
 			// TODO: currently I got no notification when URL was incorrect
@@ -148,15 +140,21 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		}
 	}
 
+	private String replaceDynamicFields(String code) {
+		return code.replace(ADDRESS_PLACEHOLDER, ethereumOptions.getAddress());
+	}
+
 	/** @returns EthereumContract with isDeployed() false */
-	private static EthereumContract compile(String code) throws Exception {
+	private EthereumContract compile(String code) throws Exception {
+		code = replaceDynamicFields(code);
+
 		String bodyJson = new Gson().toJson(ImmutableMap.of(
 			"code", code
 		)).toString();
 
 		log.info("compile request: "+bodyJson);
 
-		String responseJson = Unirest.post(ETH_SERVER_URL + "/compile")
+		String responseJson = Unirest.post(ethereumOptions.getServer() + "/compile")
 				.header("Accept", "application/json")
 				.header("Content-Type", "application/json")
 				.body(bodyJson)
@@ -188,10 +186,12 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	 * @param sendWei String representation of decimal value of wei to send
 	 * @returns EthereumContract that isDeployed()
 	 **/
-	private static EthereumContract deploy(String address, String privateKey, String code, List<Object> args, String sendWei) throws Exception {
+	private EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
+		code = replaceDynamicFields(code);
+
 		String bodyJson = new Gson().toJson(ImmutableMap.of(
-			"source", address,
-			"key", privateKey,
+			"source", ethereumOptions.getAddress(),
+			"key", ethereumOptions.getPrivateKey(),
 			"code", code,
 			"args", args,
 			"value", sendWei
@@ -201,7 +201,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 
 		log.info("deploy request: "+bodyJson);
 
-		String responseJson = Unirest.post(ETH_SERVER_URL + "/deploy")
+		String responseJson = Unirest.post(ethereumOptions.getServer() + "/deploy")
 				.header("Accept", "application/json")
 				.header("Content-Type", "application/json")
 				.body(bodyJson)

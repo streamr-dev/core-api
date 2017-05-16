@@ -6,7 +6,9 @@ import com.google.gson.JsonParser;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.unifina.signalpath.AbstractSignalPathModule;
+import com.unifina.signalpath.ModuleOptions;
 import com.unifina.signalpath.StringParameter;
+import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
 
@@ -16,14 +18,14 @@ import java.util.Map;
  * Get Ethereum contract at given address
  */
 public class GetEthereumContractAt extends AbstractSignalPathModule {
+
 	private StringParameter addressParam = new StringParameter(this, "address", "0x");
 	private StringParameter abiParam = new StringParameter(this, "ABI", "[]");
 	private EthereumContractOutput out = new EthereumContractOutput(this, "contract");
 
 	private EthereumContract contract;
 	private EthereumABI abi;
-
-	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
+	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 
 	@Override
 	public void init() {
@@ -41,6 +43,9 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		String oldAddress = (String) config.get("oldAddress");
 		String abiString = MapTraversal.getString(config, "params[1].value");
 
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
+
 		// TODO: check address is valid?
 		if (address.length() > 2) {
 			addInput(abiParam);
@@ -52,7 +57,7 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 			} else {
 				// ABI param not yet added to UI => query streamr-web3 for known ABI
 				try {
-					String responseString = Unirest.get(ETH_SERVER_URL + "/contract?at=" + address).asString().getBody();
+					String responseString = Unirest.get(ethereumOptions.getServer() + "/contract?at=" + address).asString().getBody();
 					JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
 					if (response.has("abi")) {
 						JsonArray abiArray = response.getAsJsonArray("abi");
@@ -84,6 +89,9 @@ public class GetEthereumContractAt extends AbstractSignalPathModule {
 		if (contract != null) {
 			config.put("contract", contract.toMap());
 		}
+
+		ModuleOptions options = ModuleOptions.get(config);
+		ethereumOptions.writeNetworkOption(options);
 
 		return config;
 	}

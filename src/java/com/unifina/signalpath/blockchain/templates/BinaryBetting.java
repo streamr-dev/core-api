@@ -7,8 +7,6 @@ import grails.util.Holders;
 public class BinaryBetting extends SolidityModule {
 	@Override
 	public String getCodeTemplate() {
-		String streamrAddress = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
-
 		return  "pragma solidity ^0.4.6;\n" +
 				"\n" +
 				"// Binary bet has two outcomes: zero or one\n" +
@@ -146,11 +144,11 @@ public class BinaryBetting extends SolidityModule {
 				"    }\n" +
 				"    \n" +
 				"    function kill() admin {\n" +
-				"        selfdestruct(" + streamrAddress + ");\n" +
+				"        selfdestruct(" + ADDRESS_PLACEHOLDER + ");\n" +
 				"    }\n" +
 				"\n" +
 				"    modifier admin {\n" +
-				"        if (msg.sender == " + streamrAddress + ") {\n" +
+				"        if (msg.sender == " + ADDRESS_PLACEHOLDER + ") {\n" +
 				"            _;\n" +
 				"        }\n" +
 				"    }\n" +

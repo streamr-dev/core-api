@@ -2,6 +2,7 @@ package com.unifina.signalpath.blockchain;
 
 import com.google.gson.*;
 import com.unifina.signalpath.*;
+import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.signalpath.remote.AbstractHttpModule;
 import com.unifina.utils.MapTraversal;
 import grails.util.Holders;
@@ -23,12 +24,8 @@ import java.util.Map;
  * Send out a call to specified function in Ethereum block chain
  */
 public class EthereumCall extends AbstractHttpModule {
-	public static final String ETH_ADDRESS = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.address");
-	public static final String ETH_PRIVATE_KEY = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.key");
 
-	// TODO: address and privateKey should be Ethereum account of the current user by default
-	private String address = ETH_ADDRESS;
-	private String privateKey = ETH_PRIVATE_KEY;
+	EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
 
 	private EthereumContractInput contract = new EthereumContractInput(this, "contract");
 
@@ -55,9 +52,8 @@ public class EthereumCall extends AbstractHttpModule {
 	private StringOutput txHash = new StringOutput(this, "txHash");
 	private Map<EthereumABI.Event, List<Output<Object>>> eventOutputs;		// outputs for each event separately
 
-	public static final String ETH_SERVER_URL = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.server");
 	private static final Logger log = Logger.getLogger(EthereumCall.class);
-	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 600;
+	private static final int ETHEREUM_TRANSACTION_DEFAULT_TIMEOUT_SECONDS = 1800;
 
 	private transient Gson gson;
 
@@ -85,8 +81,7 @@ public class EthereumCall extends AbstractHttpModule {
 		Map<String, Object> config = super.getConfiguration();
 
 		ModuleOptions options = ModuleOptions.get(config);
-		options.add(new ModuleOption("address", address, "string"));
-		options.add(new ModuleOption("privateKey", privateKey, "string"));
+		ethereumOptions.writeTo(options);
 
 		return config;
 	}
@@ -96,12 +91,7 @@ public class EthereumCall extends AbstractHttpModule {
 		super.onConfiguration(config);
 
 		ModuleOptions options = ModuleOptions.get(config);
-		if (options.getOption("address") != null) {
-			address = options.getOption("address").getString();
-		}
-		if (options.getOption("privateKey") != null) {
-			privateKey = options.getOption("privateKey").getString();
-		}
+		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
 		// ethereum RPC is JSON only
 		bodyContentType = AbstractHttpModule.BODY_FORMAT_JSON;
@@ -228,8 +218,8 @@ public class EthereumCall extends AbstractHttpModule {
 
 		Map args = new HashMap<>();
 
-		args.put("source", address);
-		args.put("key", privateKey);
+		args.put("source", ethereumOptions.getAddress());
+		args.put("key", ethereumOptions.getPrivateKey());
 		args.put("target", c.getAddress());
 
 		HttpPost request = null;
@@ -251,7 +241,7 @@ public class EthereumCall extends AbstractHttpModule {
 				args.put("value", valueWei.toBigInteger().toString());
 			}
 
-			request = new HttpPost(ETH_SERVER_URL + "/call");
+			request = new HttpPost(ethereumOptions.getServer() + "/call");
 
 		} else {
 			// fallback function selected: send ether
@@ -261,7 +251,7 @@ public class EthereumCall extends AbstractHttpModule {
 			} else {
 				args.put("value", "0");
 			}
-			request = new HttpPost(ETH_SERVER_URL + "/send");
+			request = new HttpPost(ethereumOptions.getServer() + "/send");
 		}
 
 		String jsonString = gson.toJson(args);
@@ -297,7 +287,9 @@ public class EthereumCall extends AbstractHttpModule {
 			if (responseString.isEmpty()) { throw new RuntimeException("Empty response from server"); }
 
 			JsonObject response = new JsonParser().parse(responseString).getAsJsonObject();
+
 			if (response.get("error") != null) { throw new RuntimeException(response.get("error").toString()); }
+			if (response.get("errors") != null) { throw new RuntimeException(response.get("errors").toString()); }
 
 			if (chosenFunction.constant) {
 				JsonArray resultValues = response.get("results").getAsJsonArray();
