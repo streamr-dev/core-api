@@ -275,8 +275,8 @@ environments {
  * Streamr-web3 Ethereum bridge address
  */
 streamr.ethereum.defaultNetwork = "rinkeby"
-streamr.ethereum.networks = System.getProperty("streamr.ethereum.servers") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
-        ropsten: "http://localhost:3000",
+streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+		ropsten: "http://localhost:3000",
 		rinkeby: "http://localhost:3001"
 ]
 streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
