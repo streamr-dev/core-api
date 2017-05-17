@@ -101,13 +101,15 @@ public class RealtimeDataSource extends DataSource {
 			// Serialization
 			SerializationService serializationService = globals.getBean(SerializationService.class);
 
-			for (final SignalPath signalPath : getSerializableSignalPaths()) {
+			if (serializationService.serializationIntervalInMillis() > 0) {
+				for (final SignalPath signalPath : getSerializableSignalPaths()) {
 					secTimer.scheduleAtFixedRate(new TimerTask() {
 						@Override
 						public void run() {
 							eventQueue.enqueue(SerializationRequest.makeFeedEvent(signalPath));
 						}
-					}, 0, serializationService.serializationIntervalInMillis());
+					}, serializationService.serializationIntervalInMillis(), serializationService.serializationIntervalInMillis());
+				}
 			}
 
 			// This will block indefinitely until the feed is stopped!
