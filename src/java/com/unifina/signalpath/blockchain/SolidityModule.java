@@ -218,6 +218,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 			JsonObject response = new JsonParser().parse(responseJson).getAsJsonObject();
 			if (response.get("error") != null) {
 				throw new RuntimeException(response.get("error").toString());
+			} else if (response.get("errors") != null) {
+				throw new RuntimeException(response.get("errors").toString());
 			} else {
 				throw e;
 			}
