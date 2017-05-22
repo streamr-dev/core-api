@@ -125,24 +125,22 @@ public abstract class Parameter<T> extends Input<T> {
 		super.setConfiguration(config);
 
 		boolean conn = false;
-		if (config.containsKey("connected"))
+		if (config.containsKey("connected")) {
 			conn = Boolean.parseBoolean(config.get("connected").toString());
-		
+		}
  
 		if (config.containsKey("value")) {
-
+			// Check config value type and directly assign if possible
 			T val;
 			Object configValue = config.get("value");
-			if (configValue == null)
+			if (configValue == null) {
 				val = null;
-			else {
-				// Check config value type and directly assign if possible
+			} else {
 				Class typeClass = getTypeClass();
 				if (typeClass.isAssignableFrom(configValue.getClass())) {
 					val = (T) configValue;
-				}
-				// Fallback to parsing
-				else {
+				} else {
+					// Fall back to parsing
 					val = parseValue(configValue.toString());
 				}
 			}
@@ -150,9 +148,8 @@ public abstract class Parameter<T> extends Input<T> {
 			// If unconnected, use the value contained in JSON
 			if (!conn) {
 				receive(val);
-			}
-			// Otherwise use the value in JSON only as backup value, we want to try to use the lazy pull mechanism
-			else {
+			} else {
+				// Otherwise use the value in JSON only as backup value, we want to try to use the lazy pull mechanism
 				value = null;
 				defaultValue = val;
 			}
