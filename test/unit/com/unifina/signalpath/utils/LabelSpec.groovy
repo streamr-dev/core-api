@@ -13,10 +13,7 @@ class LabelSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = new Label()
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		module.init()
-		module.configure([uiChannel: [id: "labelChannel"]])
+		module = setupModule(new Label(), [uiChannel: [id: "labelChannel"]])
 	}
 
 	void "label sends correct data to uiChannel"() {

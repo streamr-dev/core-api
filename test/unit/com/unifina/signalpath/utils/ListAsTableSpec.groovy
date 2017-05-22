@@ -16,10 +16,7 @@ class ListAsTableSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = new ListAsTable()
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		module.init()
-		module.configure([
+		module = setupModule(new ListAsTable(), [
 			uiChannel: [id: "table"],
 		])
 	}
