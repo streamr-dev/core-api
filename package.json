@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "mocha web-app/js/unifina/test --recursive",
-    "compile": "./node_modules/.bin/babel webpack/js/unifina"
+    "compile": "./node_modules/.bin/webpack",
+    "dev": "./node_modules/.bin/webpack-dev-server"
   },
   "author": "",
   "license": "Unifina",
@@ -27,6 +28,7 @@
   },
   "dependencies": {
     "autoprefixer": "^7.0.1",
+    "axios": "^0.16.1",
     "babel-loader": "^7.0.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
@@ -38,15 +40,22 @@
     "eslint-plugin-react": "^7.0.0",
     "extract-text-webpack-plugin": "^2.1.0",
     "file-loader": "^0.11.1",
+    "fuse.js": "^3.0.3",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
     "path": "^0.12.7",
     "postcss-color-function": "^3.0.0",
     "postcss-extend": "^1.0.5",
+    "postcss-loader": "^2.0.5",
     "postcss-nested": "^1.0.1",
     "prop-types": "^15.5.8",
     "react": "latest",
     "react-dom": "^15.5.4",
+    "react-redux": "^5.0.5",
+    "react-select": "^1.0.0-rc.4",
+    "redux": "^3.6.0",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0",
     "style-loader": "^0.17.0",
     "webpack": "^2.5.1",
     "webpack-notifier": "^1.5.0"

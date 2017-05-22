@@ -9,7 +9,7 @@
 	<r:require module="moment-timezone"/>
 	<r:require module="streamr-credentials-control"/>
 
-	<r:require module="profile-page-webpack-bundle" />
+	<r:require module="profile-page-webpack-bundle"/>
 
 </head>
 <body>
@@ -36,21 +36,6 @@
 					})
 				}
 			})
-
-			%{--new StreamrCredentialsControl({--}%
-				%{--el: "#api-credentials",--}%
-				%{--url: '${createLink(uri: "/api/v1/users/me/keys")}',--}%
-				%{--username: '${user.username}'--}%
-			%{--})--}%
-
-			%{--var tzOpts = moment.tz.names().map(function(tz) {--}%
-				%{--return $('<option/>', {--}%
-				    %{--selected: tz === '${user.timezone}',--}%
-				    %{--value: tz,--}%
-				    %{--text: tz--}%
-				%{--})--}%
-			%{--})--}%
-			%{--$("#timezone").append(tzOpts)--}%
 		})
 	</r:script>
 </body>

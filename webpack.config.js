@@ -15,7 +15,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(root, 'web-app', 'js', 'unifina', 'webpack-bundles'),
-        publicPath: '/web-app/js/unifina/webpack-bundles/',
+        publicPath: '/js/unifina/webpack-bundles/',
         filename: '[name]-bundle.js'
     },
     module: {

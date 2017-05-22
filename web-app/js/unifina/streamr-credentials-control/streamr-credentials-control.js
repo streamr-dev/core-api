@@ -2,7 +2,7 @@
 
 	var listTemplate = '' +
 		'<div class="col-xs-12">' +
-			'<table class="auth-key-table col-xs-12">' +
+			'<table class="table">' +
 				'<thead>' +
 					'<th class="name-header">' +
 						'<span class="title">Name</span>' +
@@ -19,8 +19,8 @@
 				'</thead>' +
 				'<tbody></tbody>' +
 			'</table>' +
-		'</div>' +
-		'<div class="create-auth-key new-auth-key-row col-xs-12"></div>'
+            '<div class="create-auth-key new-auth-key-row"></div>' +
+		'</div>'
 
 	var keyTemplate = '' +
 		'<td class="name-field">{{name}}</td>' +
@@ -94,8 +94,8 @@
 			this.$el.append(this.template({
 				showPermissions: this.showPermissions
 			}))
-			this.table = this.$el.find("table.auth-key-table")
-			this.listEl = this.$el.find(".auth-key-table tbody")
+			this.table = this.$el.find("table.table")
+			this.listEl = this.table.find("tbody")
 			this.inputEl = this.$el.find(".create-auth-key")
 			this.showKeysIcon = this.$el.find("thead .show-icon")
 			this.hideKeysIcon = this.$el.find("thead .hide-icon")
@@ -136,7 +136,6 @@
 	var KeyInList = Backbone.View.extend({
 		template: _.template(keyTemplate),
 		tagName: 'tr',
-		className: 'auth-key-table-row',
 		initialize: function (opts) {
 			this.showPermissions = opts.showPermissions
 			this.url = opts.url
@@ -248,179 +247,5 @@
 	})
 
 	exports.StreamrCredentialsControl = CredentialsControl
-
-<<<<<<< HEAD
-            $.getJSON(this.url)
-                .then(function(keys) {
-                    _this.keys = keys
-                    _this.render()
-                })
-                .fail(function(e) {
-                    Streamr.showError(e.message || e.responseJSON.message)
-                })
-        },
-        render: function() {
-            var _this = this
-            
-            this.$el.append(this.template({
-                showPermissions: this.showPermissions
-            }))
-            this.table = this.$el.find("table.auth-key-table")
-            this.listEl = this.$el.find(".auth-key-table tbody")
-            this.inputEl = this.$el.find(".create-auth-key")
-            this.showKeysIcon = this.$el.find("thead .show-icon")
-            this.hideKeysIcon = this.$el.find("thead .hide-icon")
-            for (var i in this.keys) {
-                this.addKey(new Key(this.keys[i]))
-            }
-            this.input = new CreateAuthInput({
-                el: this.inputEl,
-                showPermissions: this.showPermissions,
-                url: this.url
-            })
-            this.listenTo(this.input, "new", function(key) {
-                _this.addKey(key)
-            })
-            this.showKeysIcon.click(function() {
-                _this.showKeys()
-            })
-            this.hideKeysIcon.click(function() {
-                _this.hideKeys()
-            })
-        },
-        addKey: function(key) {
-            this.listEl.append(new KeyInList({
-                model: key,
-                showPermissions: this.showPermissions,
-                url: this.url + '/' + key.get('id')
-            }).el)
-        },
-        showKeys: function() {
-            var _this = this
-            this.table.addClass("show-keys")
-            this.hideKeysTimeout = setTimeout(function() {
-                _this.hideKeys()
-            }, 20000)
-        },
-        hideKeys: function() {
-            clearTimeout(this.hideKeysTimeout)
-            this.table.removeClass("show-keys")
-        }
-    })
-    
-    var Key = Backbone.Model.extend({
-        defaults: {
-            id: undefined,
-            name: ''
-        }
-    })
-    
-    var KeyInList = Backbone.View.extend({
-        template: _.template(keyTemplate),
-        tagName: 'tr',
-        className: 'auth-key-table-row',
-        initialize: function(opts) {
-            this.showPermissions = opts.showPermissions
-            this.url = opts.url
-            this.render()
-        },
-        render: function() {
-            var _this = this
-            
-            this.$el.html(this.template($.extend(this.model.toJSON(), {
-                showPermissions: this.showPermissions
-            })))
-            this.deleteButton = this.$el.find(".auth-key-delete-button")
-            new Clipboard(this.$el[0].getElementsByClassName("copy-to-clipboard"))
-                .on('success', function(e) {
-                    Streamr.showSuccess("Key successfully copied to clipboard!")
-                })
-                .on('error', function(e) {
-                    Streamr.showError("Something went wrong when copying key. Please copy key manually.")
-                })
-            new ConfirmButton(this.deleteButton, {
-                message: 'Do you really want to revoke and delete key <strong>' + this.model.get('name') + '</strong>?'
-            }, function(res) {
-                if (res) {
-                    _this.delete()
-                }
-            })
-        },
-        delete: function() {
-            var _this = this
-            $.ajax(this.url, {
-                method: 'DELETE'
-            }).then(function() {
-                _this.remove()
-            }).catch(function(e) {
-                Streamr.showError(e.message || e.responseJSON.message)
-            })
-        }
-    })
-    
-    var CreateAuthInput = Backbone.View.extend({
-        template: _.template(inputTemplate),
-        events: {
-            "click .new-auth-key-button": "createKey",
-            "keypress input[name=name]": "testEnterAndCreateKey"
-        },
-        initialize: function(opts) {
-            this.showPermissions = opts.showPermissions
-            this.url = opts.url
-            
-            this.render()
-        },
-        render: function() {
-            var _this = this
-            this.$el.append(this.template({
-                showPermissions: this.showPermissions
-            }))
-            this.nameInput = this.$el.find("input[name=name]")
-            this.createButton = this.$el.find(".new-auth-key-button")
-            
-            if (this.showPermissions) {
-                this.permissionDropDown = this.$el.find(".permission-dropdown")
-                this.permissionLabel = this.permissionDropDown.find(".permission-label")
-                this.permissionInput = this.permissionDropDown.find("input[name=permission]")
-                this.permissionDropDown.find("li[data-opt]").on("click", function() {
-                    var selection = $(this).data("opt")
-                    _this.permissionLabel.text("can " + selection)
-                    _this.permissionInput.val(selection)
-                })
-            }
-        },
-        testEnterAndCreateKey: function(e) {
-            if (e.which === 13) {
-                this.createKey()
-            }
-        },
-        createKey: function() {
-            var _this = this
-            
-            var name = this.nameInput.val() || ""
-            var permission = this.showPermissions ? this.permissionInput.val() : undefined
-            $.ajax({
-                type: 'POST',
-                url: this.url,
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    name: name,
-                    permission: permission
-                })
-            }).then(function(data) {
-                _this.nameInput.val('')
-                
-                // To close the suggestion dropdown
-                _this.nameInput.blur()
-                _this.nameInput.focus()
-                
-                _this.trigger("new", new Key(data))
-            })
-        }
-    })
-    
-    exports.StreamrCredentialsControl = CredentialsControl
-    
-=======
->>>>>>> origin/master
+ 
 })(typeof(exports) !== 'undefined' ? exports : window)

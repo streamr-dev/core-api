@@ -16249,25 +16249,23 @@ body.dashboard-show .titlebar-clickable {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-.credentials-control .auth-key-button-row {
-  margin-right: -15px;
-}
-.credentials-control .auth-key-table td,
-.credentials-control .auth-key-table th {
+.credentials-control .table td,
+.credentials-control .table th {
   padding-top: 10px;
 }
-.credentials-control .auth-key-table td:not(:last-child),
-.credentials-control .auth-key-table th:not(:last-child) {
+.credentials-control .table td:not(:last-child),
+.credentials-control .table th:not(:last-child) {
   padding-right: 10px;
 }
-.credentials-control .auth-key-table .show-key {
+.credentials-control .table .show-key {
   cursor: pointer;
 }
-.credentials-control .auth-key-table td.name-field {
+.credentials-control .table td.name-field {
   max-width: 90px;
   word-wrap: break-word;
 }
-.credentials-control .auth-key-table .auth-key-delete-button {
+.credentials-control .table .auth-key-delete-button {
+  margin-right: -8px;
   margin-left: 5px;
 }
 @media (min-width: 768px) {

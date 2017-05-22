@@ -7,9 +7,9 @@ export default class APICredentials extends Component {
         this.apiHandler = new StreamrCredentialsControl({
             el: this.apiHandlerEl,
             url: Streamr.createLink({
-                uri: '/api/v1/users/me/keys'
+                uri: 'api/v1/users/me/keys'
             }),
-            username: Streamr.users
+            username: Streamr.user
         })
     }
     
