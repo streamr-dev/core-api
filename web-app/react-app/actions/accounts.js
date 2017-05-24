@@ -1,4 +1,4 @@
-/* globals Streamr */
+// @flow
 
 import axios from 'axios'
 import parseError from './utils/parseError'
@@ -17,7 +17,11 @@ export const DELETE_ACCOUNT_FAILURE = 'DELETE_ACCOUNT_FAILURE'
 
 const apiUrl = 'api/v1/accounts'
 
-export const getAllAccounts = () => dispatch => {
+declare var Streamr: {
+    createLink: Function
+}
+
+export const getAllAccounts = () => (dispatch: Function) => {
     dispatch(getAllAccountsRequest())
     return axios.get(Streamr.createLink({
         uri: apiUrl
@@ -30,7 +34,11 @@ export const getAllAccounts = () => dispatch => {
         })
 }
 
-export const createAccount = account => dispatch => {
+export const createAccount = (account: {
+    name: string,
+    type: string,
+    json: {}
+}) => (dispatch: Function) => {
     dispatch(createAccountRequest())
     return axios.post(Streamr.createLink({
         uri: apiUrl
@@ -43,7 +51,7 @@ export const createAccount = account => dispatch => {
         })
 }
 
-export const deleteAccount = id => dispatch => {
+export const deleteAccount = (id: string) => (dispatch: Function) => {
     dispatch(deleteAccountRequest(id))
     return axios.delete(Streamr.createLink({
         uri: `${apiUrl}/${id}`

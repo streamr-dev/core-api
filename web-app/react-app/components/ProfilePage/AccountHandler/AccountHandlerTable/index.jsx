@@ -1,19 +1,30 @@
+// @flow
 
 import React from 'react'
-import {func, array} from 'prop-types'
 
 import AccountHandlerTableRow from './AccountHandlerTableRow'
 import {Table} from 'react-bootstrap'
 
-
-const unCamelCase = str => str
+const unCamelCase = (str: string) => str
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
     .replace(/^./, s => s.toUpperCase())
 
 import styles from './accountHandlerTable.pcss'
 
+type Account = {
+    id: string,
+    name: string,
+    json: {}
+}
+
 export default class StreamrAccountHandlerTable extends React.Component {
+    
+    props: {
+        fields: Array<string>,
+        accounts: Array<Account>,
+        onDelete: Function
+    }
     
     render() {
         const items = this.props.accounts || []
@@ -38,9 +49,4 @@ export default class StreamrAccountHandlerTable extends React.Component {
             </Table>
         )
     }
-}
-StreamrAccountHandlerTable.propTypes = {
-    fields: array,
-    accounts: array,
-    onDelete: func,
 }

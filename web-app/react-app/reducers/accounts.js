@@ -1,4 +1,4 @@
-/* globals _ */
+// @flow
 
 import {
     GET_ALL_ACCOUNTS_REQUEST,
@@ -12,11 +12,31 @@ import {
     DELETE_ACCOUNT_FAILURE
 } from '../actions/accounts.js'
 
-const user = (state = {
+declare var _: any
+
+type Account = {
+    name: string,
+    type: string,
+    json: {}
+}
+
+const initialState = {
     list: [],
     error: null,
     fetching: false
-}, action) => {
+}
+
+const user = (state: {
+    list?: Array<Account>,
+    error?: ?string,
+    fetching?: boolean
+} = initialState, action: {
+    type: string,
+    account?: Account,
+    accounts?: Array<Account>,
+    error?: string,
+    id: string
+}) => {
     switch (action.type) {
         case GET_ALL_ACCOUNTS_REQUEST:
         case CREATE_ACCOUNT_REQUEST:
@@ -35,7 +55,7 @@ const user = (state = {
         case CREATE_ACCOUNT_SUCCESS:
             return {
                 ...state,
-                list: [...state.list, action.account],
+                list: [...state.list || [], action.account], //  || [] is because of flowtype which cannot understand default values
                 error: null,
                 fetching: false
             }

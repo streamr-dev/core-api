@@ -1,6 +1,6 @@
-/* globals Streamr */
+// @flow
+
 import React from 'react'
-import {string, array, func} from 'prop-types'
 
 import { connect } from 'react-redux'
 import { getAllAccounts, createAccount, deleteAccount } from '../../../../actions/accounts'
@@ -12,7 +12,27 @@ import StreamrAccountHandlerTable from '../AccountHandlerTable'
 
 import styles from './accountHandlerSegment.pcss'
 
+declare var Streamr: any
+
 class StreamrAccountHandlerSegment extends React.Component {
+    
+    props: {
+        tableFields: Array<string>,
+        inputFields: Array<string>,
+        accounts: Array<{
+            id: string,
+            name: string,
+            json: {}
+        }>,
+        type: string,
+        name: string,
+        className: string,
+        dispatch: Function
+    }
+    
+    onNew: Function
+    onDelete: Function
+    
     constructor(props) {
         super(props)
         
@@ -61,16 +81,6 @@ class StreamrAccountHandlerSegment extends React.Component {
             </div>
         )
     }
-}
-
-StreamrAccountHandlerSegment.propTypes = {
-    tableFields: array,
-    inputFields: array,
-    accounts: array,
-    type: string,
-    name: string,
-    className: string,
-    dispatch: func
 }
 
 const mapStateToProps = ({account}) => ({

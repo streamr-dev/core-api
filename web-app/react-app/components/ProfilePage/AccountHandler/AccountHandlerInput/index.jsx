@@ -1,3 +1,5 @@
+// @flow
+
 import React from 'react'
 import {func, array} from 'prop-types'
 import {FormControl, InputGroup, FormGroup, Button} from 'react-bootstrap'
@@ -12,12 +14,15 @@ const unCamelCase = str => str
 
 export default class StreamrAccountHandlerInput extends React.Component {
     
+    form: HTMLFormElement
+    onSubmit: Function
+    
     constructor() {
         super()
         this.onSubmit = this.onSubmit.bind(this)
     }
     
-    onSubmit(e) {
+    onSubmit(e: Event) {
         e.preventDefault()
         const data = serialize(this.form, {
             hash: true

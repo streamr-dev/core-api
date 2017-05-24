@@ -1,10 +1,16 @@
-/* global Streamr, StreamrCredentialsControl */
+// @flow
+
+declare var Streamr: any
+declare var StreamrCredentialsControl: any
 
 import React, {Component} from 'react'
 
 export default class APICredentials extends Component {
+    
+    apiHandlerEl: HTMLDivElement // Typechecking may not work correctly but without this line it does not work at all
+    
     componentDidMount() {
-        this.apiHandler = new StreamrCredentialsControl({
+        new StreamrCredentialsControl({
             el: this.apiHandlerEl,
             url: Streamr.createLink({
                 uri: 'api/v1/users/me/keys'

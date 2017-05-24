@@ -14,6 +14,8 @@ module.exports = exports = {
     
     global: true,
     
+    parser: 'babel-eslint',
+    
     parserOptions: {
         ecmaVersion: 6,
         sourceType: 'module',
@@ -34,7 +36,8 @@ module.exports = exports = {
     
     plugins: [
         'react',
-        'mocha'
+        'mocha',
+        'flowtype'
     ],
     
     rules: {

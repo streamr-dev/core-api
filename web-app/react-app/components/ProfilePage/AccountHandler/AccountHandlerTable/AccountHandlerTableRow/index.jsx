@@ -1,11 +1,25 @@
-/* global ConfirmButton */
+// @flow
 
 import React from 'react'
-import {func, array, object} from 'prop-types'
 
 import styles from './accountHandlerTableRow.pcss'
 
-export default class StreamrAccountHandlerTable extends React.Component {
+declare var ConfirmButton: any
+
+export default class StreamrAccountHandlerTableRow extends React.Component {
+    
+    props: {
+        fields: Array<string>,
+        onDelete: Function,
+        item: {
+            id: string,
+            name: string,
+            json: {}
+        }
+    }
+    
+    removeButton: HTMLButtonElement
+    
     componentDidMount() {
         new ConfirmButton(this.removeButton, {
             title: 'Are you sure?',
@@ -40,10 +54,4 @@ export default class StreamrAccountHandlerTable extends React.Component {
             </tr>
         )
     }
-}
-StreamrAccountHandlerTable.propTypes = {
-    fields: array,
-    accounts: array,
-    onDelete: func,
-    item: object
 }

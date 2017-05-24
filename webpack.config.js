@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const WriteFilePlugin = require('write-file-webpack-plugin')
-
+const FlowtypePlugin = require('flowtype-loader/plugin')
 
 const postcssConfig = require('./postcss.config.js')
 
@@ -31,6 +31,8 @@ module.exports = {
                     options: {
                         configFile: path.resolve(root, '.eslintrc.js')
                     }
+                }, {
+                    loader: 'flowtype-loader'
                 }]
             },
             {
@@ -87,6 +89,9 @@ module.exports = {
         })
     ] : [
         // Dev plugins
+        new FlowtypePlugin({
+            failOnError: true
+        }),
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
         new WriteFilePlugin()

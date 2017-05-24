@@ -1,0 +1,8 @@
+[ignore]
+
+[include]
+
+[libs]
+
+[options]
+    module.name_mapper='.*\(.p?css\)' -> 'empty/object'
