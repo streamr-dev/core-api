@@ -1,21 +1,24 @@
-/* global ConfirmButton */
 
 import React from 'react'
 import {func, array} from 'prop-types'
 
-import styles from './accountHandlerTable.pcss'
+import AccountHandlerTableRow from './AccountHandlerTableRow'
+import {Table} from 'react-bootstrap'
+
 
 const unCamelCase = str => str
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
     .replace(/^./, s => s.toUpperCase())
 
+import styles from './accountHandlerTable.pcss'
+
 export default class StreamrAccountHandlerTable extends React.Component {
     
     render() {
         const items = this.props.accounts || []
         return (
-            <table className="table">
+            <Table className={styles.accountTable}>
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -29,34 +32,10 @@ export default class StreamrAccountHandlerTable extends React.Component {
                 </thead>
                 <tbody>
                 {items.map(item => (
-                    <tr key={item.id}>
-                        <td>
-                            {item.name}
-                        </td>
-                        {this.props.fields.map(f => (
-                            <td key={f}>
-                                {item.json[f]}
-                            </td>
-                        ))}
-                        <td>
-                            <button
-                                ref={el => {
-                                    new ConfirmButton(el, {}, res => {
-                                        if (res) {
-                                            this.props.onDelete(item.id)
-                                        }
-                                    })
-                                }}
-                                type="button"
-                                className={`form-group account-item-delete-button btn btn-danger pull-right ${styles.deleteButton}`}
-                                title="Delete key">
-                                <span className="icon fa fa-trash-o"/>
-                            </button>
-                        </td>
-                    </tr>
+                    <AccountHandlerTableRow item={item} key={item.id} fields={this.props.fields} onDelete={this.props.onDelete}/>
                 ))}
                 </tbody>
-            </table>
+            </Table>
         )
     }
 }

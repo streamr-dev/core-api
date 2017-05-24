@@ -1,5 +1,26 @@
 
-.accountInput {
+.accountInputGroup {
+  display: flex;
+}
+
+form.accountInputForm {
   margin-top: 15px;
   margin-bottom: 15px;
+
+  input.accountInput {
+    flex: 1;
+  }
+}
+
+.buttonContainer {
+  width: auto;
+  button {
+    height: 34px;
+  }
+}
+
+@media (max-width: 768px) {
+  .buttonContainer {
+    margin-bottom: 10px;
+  }
 }

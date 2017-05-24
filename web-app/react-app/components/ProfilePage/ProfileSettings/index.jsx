@@ -75,8 +75,15 @@ export default class ProfileSettings extends Component {
                 
                         <div className="form-group ">
                             <label htmlFor="timezone" className="control-label">Timezone</label>
-                            <Select options={options} value={this.state.user.timezone} name="timezone" onChange={this.onTimezoneChange}/>
-                
+                            <Select
+                                placeholder="Select timezone"
+                                options={options}
+                                value={this.state.user.timezone}
+                                name="timezone"
+                                onChange={this.onTimezoneChange}
+                                required={true}
+                                clearable={false}
+                            />
                         </div>
                         <div className="form-group">
                             <input type="submit" name="submit" className="save btn btn-lg btn-primary" value="Save" id="submit" />

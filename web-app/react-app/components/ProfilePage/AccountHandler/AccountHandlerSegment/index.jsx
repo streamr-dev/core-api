@@ -1,9 +1,11 @@
-
+/* globals Streamr */
 import React from 'react'
 import {string, array, func} from 'prop-types'
 
 import { connect } from 'react-redux'
 import { getAllAccounts, createAccount, deleteAccount } from '../../../../actions/accounts'
+
+import {Col, ControlLabel} from 'react-bootstrap'
 
 import StreamrAccountHandlerInput from '../AccountHandlerInput'
 import StreamrAccountHandlerTable from '../AccountHandlerTable'
@@ -25,34 +27,45 @@ class StreamrAccountHandlerSegment extends React.Component {
         const name = account.name
         const type = this.props.type
         delete account.name
-        this.props.dispatch(createAccount({
+        return this.props.dispatch(createAccount({
             name,
             type,
             json: account
         }))
+            .then(() => Streamr.showSuccess('Account created successfully!'))
+            .catch(Streamr.showError)
     }
     
     onDelete(id) {
         this.props.dispatch(deleteAccount(id))
+            .then(() => Streamr.showSuccess('Account removed successfully!'))
     }
     
     render() {
         return (
             <div className={this.props.className}>
-                <div className="col-xs-12">
-                    <label className={styles.label}>
+                <Col xs={12}>
+                    <ControlLabel className={styles.label}>
                         {this.props.name}
-                    </label>
-                    <StreamrAccountHandlerTable fields={this.props.fields} accounts={this.props.accounts} onDelete={this.onDelete}/>
-                    <StreamrAccountHandlerInput fields={this.props.fields} onNew={this.onNew}/>
-                </div>
+                    </ControlLabel>
+                    <StreamrAccountHandlerTable
+                        fields={this.props.tableFields}
+                        accounts={this.props.accounts}
+                        onDelete={this.onDelete}
+                    />
+                    <StreamrAccountHandlerInput
+                        fields={this.props.inputFields}
+                        onNew={this.onNew}
+                    />
+                </Col>
             </div>
         )
     }
 }
 
 StreamrAccountHandlerSegment.propTypes = {
-    fields: array,
+    tableFields: array,
+    inputFields: array,
     accounts: array,
     type: string,
     name: string,

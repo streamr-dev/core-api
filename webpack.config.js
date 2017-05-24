@@ -2,6 +2,8 @@ const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
+const WriteFilePlugin = require('write-file-webpack-plugin')
+
 
 const postcssConfig = require('./postcss.config.js')
 
@@ -34,10 +36,7 @@ module.exports = {
             {
                 test: /.jsx?$/,
                 loader: 'babel-loader',
-                exclude: /node_modules/,
-                query: {
-                    presets: ['es2015', 'stage-0', 'react']
-                }
+                exclude: /node_modules/
             },
             {
                 test: /\.(png|woff|woff2|eot|ttf|svg)$/,
@@ -65,6 +64,7 @@ module.exports = {
         ]
     },
     plugins: [
+        // Plugins always in use
         new webpack.LoaderOptionsPlugin({
             test: /\.pcss$/,
             options: {
@@ -73,6 +73,7 @@ module.exports = {
         }),
         new ExtractTextPlugin("[name]-bundle.css")
     ].concat(inProduction ? [
+        // Production plugins
         new webpack.optimize.OccurrenceOrderPlugin(),
         new webpack.DefinePlugin({
             'process.env': {
@@ -85,13 +86,12 @@ module.exports = {
             }
         })
     ] : [
+        // Dev plugins
         new webpack.NoEmitOnErrorsPlugin(),
-        new WebpackNotifierPlugin()
+        new WebpackNotifierPlugin(),
+        new WriteFilePlugin()
     ]),
     devtool: !inProduction && 'eval-source-map',
-    devServer: !inProduction ? {
-        inline: true
-    } : {},
     resolve: {
         extensions: ['.js', '.jsx', '.json']
     }

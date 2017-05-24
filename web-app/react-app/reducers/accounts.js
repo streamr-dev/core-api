@@ -19,6 +19,8 @@ const user = (state = {
 }, action) => {
     switch (action.type) {
         case GET_ALL_ACCOUNTS_REQUEST:
+        case CREATE_ACCOUNT_REQUEST:
+        case DELETE_ACCOUNT_REQUEST:
             return {
                 ...state,
                 fetching: true
@@ -30,12 +32,6 @@ const user = (state = {
                 fetching: false,
                 error: null
             }
-        case CREATE_ACCOUNT_REQUEST:
-            return {
-                ...state,
-                fetching: true,
-                error: null
-            }
         case CREATE_ACCOUNT_SUCCESS:
             return {
                 ...state,
@@ -43,16 +39,12 @@ const user = (state = {
                 error: null,
                 fetching: false
             }
-        case DELETE_ACCOUNT_REQUEST:
-            return {
-                ...state,
-                error: null,
-                fetching: true
-            }
         case DELETE_ACCOUNT_SUCCESS:
             return {
                 ...state,
-                list: _.reject(state.list, account => account.id === action.id)
+                list: _.reject(state.list, account => account.id === action.id),
+                error: null,
+                fetching: false
             }
         case CREATE_ACCOUNT_FAILURE:
         case GET_ALL_ACCOUNTS_FAILURE:

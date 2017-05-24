@@ -1,6 +1,7 @@
-
 import React from 'react'
 import {func, array} from 'prop-types'
+import {FormControl, InputGroup, FormGroup, Button} from 'react-bootstrap'
+import serialize from 'form-serialize'
 
 import styles from './accountHandlerInput.pcss'
 
@@ -13,50 +14,39 @@ export default class StreamrAccountHandlerInput extends React.Component {
     
     constructor() {
         super()
-        this.inputs = {}
+        this.onSubmit = this.onSubmit.bind(this)
+    }
+    
+    onSubmit(e) {
+        e.preventDefault()
+        const data = serialize(this.form, {
+            hash: true
+        })
+        this.props.onNew(data)
+        this.form.reset()
     }
     
     render() {
         return (
-            <form className={`input-group form-inline new-account-item-form ${styles.accountInput}`} ref={i => this.form = i} style={{
-                display: 'flex',
-                width: '100%'
-            }}>
-                {['name', ...this.props.fields].map(field => (
-                    <input
-                        key={field}
-                        type="text"
-                        ref={i => this.inputs[field] = i}
-                        name={field}
-                        className="form-control"
-                        placeholder={unCamelCase(field)}
-                        style={{
-                            flex: '1'
-                        }}
-                    />
-                ))}
-                <span className="input-group-btn" onClick={e => {
-                    e.preventDefault()
-                    let data = {}
-                    for (const input in this.inputs) {
-                        if (!this.inputs[input].value) {
-                            return
-                        }
-                        data[input] = this.inputs[input].value
-                    }
-                    this.form.reset()
-                    this.props.onNew(data, e)
-                }} style={{
-                    width: 'auto',
-                    flex: '0',
-                    display: 'inline-block'
-                }}>
-                    <button className="new-account-item-button btn btn-default" type="button" style={{
-                        height: '100%',
-                    }}>
-                        <span className="icon fa fa-plus"/>
-                    </button>
-                </span>
+            <form className={styles.accountInputForm} ref={i => this.form = i} onSubmit={this.onSubmit}>
+                <FormGroup>
+                    <InputGroup className={styles.accountInputGroup}>
+                        {['name', ...this.props.fields].map(field => (
+                            <FormControl
+                                key={field}
+                                name={field}
+                                type="text"
+                                className={styles.accountInput}
+                                placeholder={unCamelCase(field)}
+                            />
+                        ))}
+                        <InputGroup.Button className={styles.buttonContainer}>
+                            <Button bsStyle="default" type="submit">
+                                <i className="icon fa fa-plus"/>
+                            </Button>
+                        </InputGroup.Button>
+                    </InputGroup>
+                </FormGroup>
             </form>
         )
     }
