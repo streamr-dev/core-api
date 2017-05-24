@@ -16,6 +16,12 @@ export default class StreamrAccountHandler extends React.Component {
                         inputFields={['privateKey']}
                         tableFields={['publicKey']}
                     />
+                    <StreamrAccountHandlerSegment
+                        type="TWITTER"
+                        name="Twitter"
+                        inputFields={['privateKey']}
+                        tableFields={['publicKey']}
+                    />
                 </Row>
             </Panel>
         )

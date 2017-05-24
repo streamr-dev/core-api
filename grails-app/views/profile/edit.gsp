@@ -15,12 +15,15 @@
 <body>
 
 	<div class="row">
-		<div class="col-sm-12 col-md-offset-2 col-md-8">
+		<div class="container">
 			<ui:flashMessage/>
 		</div>
 	</div>
-
-	<div id="profilePageRoot"></div>
+	<div class="row">
+		<div class="container">
+			<div id="profilePageRoot"></div>
+		</div>
+	</div>
 
 	<r:script>
 		$(function() {

@@ -12,13 +12,13 @@ export default class ProfilePage extends Component {
     render() {
         return (
             <Row>
-                <Col sm={6} md={4}>
+                <Col xs={12} sm={6}>
                     <ProfileSettings />
                 </Col>
-                <Col sm={6} md={4}>
+                <Col xs={12} sm={6}>
                     <APICredentials />
                 </Col>
-                <Col sm={6} md={4}>
+                <Col xs={12} sm={6}>
                     <AccountHandler />
                 </Col>
             </Row>

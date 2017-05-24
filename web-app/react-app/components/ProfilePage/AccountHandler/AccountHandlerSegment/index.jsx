@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { connect } from 'react-redux'
-import { getAllAccounts, createAccount, deleteAccount } from '../../../../actions/accounts'
+import { getAccountsByType, createAccount, deleteAccount } from '../../../../actions/accounts'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
@@ -40,7 +40,7 @@ class StreamrAccountHandlerSegment extends React.Component {
         this.onDelete = this.onDelete.bind(this)
     }
     componentDidMount() {
-        this.props.dispatch(getAllAccounts())
+        this.props.dispatch(getAccountsByType(this.props.type))
     }
     
     onNew(account) {
