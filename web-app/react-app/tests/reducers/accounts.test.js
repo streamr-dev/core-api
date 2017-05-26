@@ -3,6 +3,8 @@ import reducer from '../../reducers/accounts'
 import * as actions from '../../actions/accounts'
 import expect from 'expect'
 
+global._ = require('lodash')
+
 describe('todos reducer', () => {
     
     beforeEach(() => {
@@ -26,7 +28,7 @@ describe('todos reducer', () => {
     it('should handle GET_AND_REPLACE_ACCOUNTS', () => {
         expect(
             reducer({}, {
-                actionType: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
+                type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -34,7 +36,7 @@ describe('todos reducer', () => {
         
         expect(
             reducer({}, {
-                actionType: actions.GET_AND_REPLACE_ACCOUNTS_SUCCESS,
+                type: actions.GET_AND_REPLACE_ACCOUNTS_SUCCESS,
                 accounts: [{
                     id: 1,
                     type: 'A'
@@ -68,7 +70,7 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                actionType: actions.GET_AND_REPLACE_ACCOUNTS_FAILURE,
+                type: actions.GET_AND_REPLACE_ACCOUNTS_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({
@@ -81,7 +83,7 @@ describe('todos reducer', () => {
     it('should handle GET_AND_REPLACE_ACCOUNTS', () => {
         expect(
             reducer({}, {
-                actionType: actions.GET_ACCOUNTS_BY_TYPE_REQUEST
+                type: actions.GET_ACCOUNTS_BY_TYPE_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -89,7 +91,7 @@ describe('todos reducer', () => {
     
         expect(
             reducer({}, {
-                actionType: actions.GET_ACCOUNTS_BY_TYPE_SUCCESS,
+                type: actions.GET_ACCOUNTS_BY_TYPE_SUCCESS,
                 accountType: 'B',
                 accounts: [{
                     id: 1
@@ -117,7 +119,7 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                actionType: actions.GET_ACCOUNTS_BY_TYPE_FAILURE,
+                type: actions.GET_ACCOUNTS_BY_TYPE_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({
@@ -130,7 +132,7 @@ describe('todos reducer', () => {
     it('should handle CREATE_ACCOUNT', () => {
         expect(
             reducer({}, {
-                actionType: actions.CREATE_ACCOUNT_REQUEST
+                type: actions.CREATE_ACCOUNT_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -138,15 +140,18 @@ describe('todos reducer', () => {
         
         expect(
             reducer({
-                listByType: {
+                listsByType: {
                     A: [{
-                        id: 1
-                    }, {
-                        id: 2
+                        id: 1,
+                        type: 'A'
+                    }],
+                    B: [{
+                        id: 2,
+                        type: 'B'
                     }]
                 }
             }, {
-                actionType: actions.CREATE_ACCOUNT_SUCCESS,
+                type: actions.CREATE_ACCOUNT_SUCCESS,
                 account: {
                     id: 3,
                     type: 'A'
@@ -154,13 +159,17 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listByType: {
+            listsByType: {
                 A: [{
-                    id: 1
+                    id: 1,
+                    type: 'A'
                 }, {
-                    id: 2
-                }, {
-                    id: 3
+                    id: 3,
+                    type: 'A'
+                }],
+                B: [{
+                    id: 2,
+                    type: 'B'
                 }]
             },
             error: null
@@ -168,7 +177,7 @@ describe('todos reducer', () => {
         
         expect(
             reducer({
-                listByType: {
+                listsByType: {
                     A: [{
                         id: 1
                     }, {
@@ -183,7 +192,7 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listByType: {
+            listsByType: {
                 A: [{
                     id: 1
                 }, {
@@ -199,7 +208,7 @@ describe('todos reducer', () => {
     it('should handle DELETE_ACCOUNT', () => {
         expect(
             reducer({}, {
-                actionType: actions.DELETE_ACCOUNT_REQUEST
+                type: actions.DELETE_ACCOUNT_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -207,7 +216,7 @@ describe('todos reducer', () => {
         
         expect(
             reducer({
-                listByType: {
+                listsByType: {
                     A: [{
                         id: 1
                     }, {
@@ -217,12 +226,12 @@ describe('todos reducer', () => {
                     }]
                 }
             }, {
-                actionType: actions.DELETE_ACCOUNT_SUCCESS,
+                type: actions.DELETE_ACCOUNT_SUCCESS,
                 id: 3
             })
         ).toEqual({
             fetching: false,
-            listByType: {
+            listsByType: {
                 A: [{
                     id: 1
                 }, {
@@ -236,7 +245,7 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                actionType: actions.CREATE_ACCOUNT_FAILURE,
+                type: actions.CREATE_ACCOUNT_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({

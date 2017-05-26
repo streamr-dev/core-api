@@ -31,6 +31,11 @@ type Account = {
     json: {}
 }
 
+type Err = {
+    error: string,
+    code?: string
+}
+
 export const getAndReplaceAccounts = () => (dispatch: Function) => {
     dispatch(getAndReplaceAccountsRequest())
     return axios.get(Streamr.createLink({
@@ -45,11 +50,14 @@ export const getAndReplaceAccounts = () => (dispatch: Function) => {
 }
 
 export const getAccountsByType = (accountType: string) => (dispatch: Function) => {
-    dispatch(getAccountsByTypeRequest(type))
+    dispatch(getAccountsByTypeRequest(accountType))
     return axios.get(Streamr.createLink({
         uri: apiUrl
     }), {
-        accountType
+        params: {
+            
+            type: accountType
+        }
     })
         .then(({data}) => dispatch(getAccountsByTypeSuccess(accountType, data)))
         .catch(res => {
@@ -86,61 +94,61 @@ export const deleteAccount = (id: string) => (dispatch: Function) => {
 }
 
 const getAndReplaceAccountsRequest = () => ({
-    actionType: GET_AND_REPLACE_ACCOUNTS_REQUEST,
-})
-
-const getAndReplaceAccountsSuccess = (accounts: Array<Account>) => ({
-    actionType: GET_AND_REPLACE_ACCOUNTS_SUCCESS,
-    accounts
-})
-
-const getAndReplaceAccountsFailure = (error: string) => ({
-    actionType: GET_AND_REPLACE_ACCOUNTS_FAILURE,
-    error
+    type: GET_AND_REPLACE_ACCOUNTS_REQUEST,
 })
 
 const getAccountsByTypeRequest = (accountType: string) => ({
-    actionType: GET_ACCOUNTS_BY_TYPE_REQUEST,
-    accountType
-})
-
-const getAccountsByTypeSuccess = (accountType: string, accounts: Array<Account>) => ({
-    actionType: GET_ACCOUNTS_BY_TYPE_SUCCESS,
-    accounts,
-    accountType
-})
-
-const getAccountsByTypeFailure = (accountType :string, error: string) => ({
-    actionType: GET_ACCOUNTS_BY_TYPE_FAILURE,
-    error,
+    type: GET_ACCOUNTS_BY_TYPE_REQUEST,
     accountType
 })
 
 const createAccountRequest = () => ({
-    actionType: CREATE_ACCOUNT_REQUEST,
-})
-
-const createAccountSuccess = (account: Account) => ({
-    actionType: CREATE_ACCOUNT_SUCCESS,
-    account
-})
-
-const createAccountFailure = (error: string) => ({
-    actionType: CREATE_ACCOUNT_FAILURE,
-    error
+    type: CREATE_ACCOUNT_REQUEST,
 })
 
 const deleteAccountRequest = (id: string) => ({
-    actionType: DELETE_ACCOUNT_REQUEST,
+    type: DELETE_ACCOUNT_REQUEST,
     id
+})
+
+const getAndReplaceAccountsSuccess = (accounts: Array<Account>) => ({
+    type: GET_AND_REPLACE_ACCOUNTS_SUCCESS,
+    accounts
+})
+
+const getAccountsByTypeSuccess = (accountType: string, accounts: Array<Account>) => ({
+    type: GET_ACCOUNTS_BY_TYPE_SUCCESS,
+    accounts,
+    accountType
+})
+
+const createAccountSuccess = (account: Account) => ({
+    type: CREATE_ACCOUNT_SUCCESS,
+    account
 })
 
 const deleteAccountSuccess = (id: string) => ({
-    actionType: DELETE_ACCOUNT_SUCCESS,
+    type: DELETE_ACCOUNT_SUCCESS,
     id
 })
 
-const deleteAccountFailure = (error: string) => ({
-    actionType: DELETE_ACCOUNT_FAILURE,
+const getAndReplaceAccountsFailure = (error: Err) => ({
+    type: GET_AND_REPLACE_ACCOUNTS_FAILURE,
+    error
+})
+
+const getAccountsByTypeFailure = (accountType: string, error: Err) => ({
+    type: GET_ACCOUNTS_BY_TYPE_FAILURE,
+    error,
+    accountType
+})
+
+const createAccountFailure = (error: Err) => ({
+    type: CREATE_ACCOUNT_FAILURE,
+    error
+})
+
+const deleteAccountFailure = (error: Err) => ({
+    type: DELETE_ACCOUNT_FAILURE,
     error
 })

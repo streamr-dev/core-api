@@ -14,13 +14,7 @@ export default class StreamrAccountHandler extends React.Component {
                         type="ETHEREUM"
                         name="Ethereum"
                         inputFields={['privateKey']}
-                        tableFields={['publicKey']}
-                    />
-                    <StreamrAccountHandlerSegment
-                        type="TWITTER"
-                        name="Twitter"
-                        inputFields={['privateKey']}
-                        tableFields={['publicKey']}
+                        tableFields={['address']}
                     />
                 </Row>
             </Panel>

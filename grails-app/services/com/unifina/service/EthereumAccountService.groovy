@@ -18,7 +18,7 @@ class EthereumAccountService {
 			account.setName(name)
 			account.setJson(([
 					privateKey: privateKey,
-					publicKey : getPublicKey(privateKey)
+					address : getPublicKey(privateKey)
 			] as JSON).toString())
 			account.setUser(user)
 			account.setType(Account.Type.ETHEREUM)

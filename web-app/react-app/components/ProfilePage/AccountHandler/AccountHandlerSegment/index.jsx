@@ -83,8 +83,8 @@ class StreamrAccountHandlerSegment extends React.Component {
     }
 }
 
-const mapStateToProps = ({account}) => ({
-    accounts: account.list,
+const mapStateToProps = ({account}, props) => ({
+    accounts: account.listsByType[props.type] || [],
     error: account.error
 })
 

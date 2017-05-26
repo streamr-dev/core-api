@@ -32,7 +32,7 @@ type State = {
 }
 
 type Action = {
-    actionType: string,
+    type: string,
     accountType?: string,
     account?: Account,
     accounts?: Array<Account>,
@@ -48,7 +48,7 @@ const initialState = {
 
 const user = function(state: State = initialState, action: Action) : State {
     
-    switch (action.actionType) {
+    switch (action.type) {
         case GET_AND_REPLACE_ACCOUNTS_REQUEST:
         case GET_ACCOUNTS_BY_TYPE_REQUEST:
         case CREATE_ACCOUNT_REQUEST:
@@ -64,9 +64,9 @@ const user = function(state: State = initialState, action: Action) : State {
                 fetching: false,
                 error: null
             }
-        case GET_ACCOUNTS_BY_TYPE_SUCCESS:
+        case GET_ACCOUNTS_BY_TYPE_SUCCESS: {
             if (!action.accountType) {
-                throw new Error(`${GET_ACCOUNTS_BY_TYPE_SUCCESS} requires action.actionType`)
+                throw new Error(`${GET_ACCOUNTS_BY_TYPE_SUCCESS} requires action.type`)
             }
             return {
                 ...state,
@@ -77,18 +77,19 @@ const user = function(state: State = initialState, action: Action) : State {
                 error: null,
                 fetching: false
             }
-        case CREATE_ACCOUNT_SUCCESS:
+        }
+        case CREATE_ACCOUNT_SUCCESS: {
             if (!action.account || !action.account.type) {
                 throw new Error(`${GET_ACCOUNTS_BY_TYPE_SUCCESS} requires action.account and action.account.type`)
             }
-            // These are just to make sure flow is happy
+            // These are just to make sure that flow is happy
             const listsByType = state.listsByType || {}
             const existing = listsByType[action.account.type] || []
             
             return {
                 ...state,
                 listsByType: {
-                    ...state.listsByType,
+                    ...listsByType,
                     [action.account.type]: [
                         ...existing,
                         action.account
@@ -97,13 +98,15 @@ const user = function(state: State = initialState, action: Action) : State {
                 error: null,
                 fetching: false
             }
-        case DELETE_ACCOUNT_SUCCESS:
+        }
+        case DELETE_ACCOUNT_SUCCESS: {
             return {
                 ...state,
                 listsByType: _.mapObject(state.listsByType, list => _.reject(list, account => account.id === action.id)),
                 error: null,
                 fetching: false
             }
+        }
         case GET_AND_REPLACE_ACCOUNTS_FAILURE:
         case GET_ACCOUNTS_BY_TYPE_FAILURE:
         case CREATE_ACCOUNT_FAILURE:

@@ -50,8 +50,16 @@ module.exports = {
                 use: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
                     use: [
-                        'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]',
-                        'postcss-loader'
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                modules: true,
+                                importLoaders: 1,
+                                localIdentName: '[name]__[local]__[hash:base64:5]'
+                            }
+                        }, {
+                            loader: 'postcss-loader'
+                        }
                     ]
                 })
             },
@@ -73,7 +81,7 @@ module.exports = {
                 postcss: postcssConfig
             }
         }),
-        new ExtractTextPlugin("[name]-bundle.css")
+        new ExtractTextPlugin('[name]-bundle.css')
     ].concat(inProduction ? [
         // Production plugins
         new webpack.optimize.OccurrenceOrderPlugin(),
@@ -89,9 +97,7 @@ module.exports = {
         })
     ] : [
         // Dev plugins
-        new FlowtypePlugin({
-            failOnError: true
-        }),
+        new FlowtypePlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
         new WriteFilePlugin()

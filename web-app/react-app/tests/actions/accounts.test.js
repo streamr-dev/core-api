@@ -42,9 +42,9 @@ describe('Account actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.GET_ALL_ACCOUNTS_REQUEST
+            type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
         }, {
-            type: actions.GET_ALL_ACCOUNTS_SUCCESS,
+            type: actions.GET_AND_REPLACE_ACCOUNTS_SUCCESS,
             accounts: [{
                 name: 'test',
                 json: '{"moi": "moimoi"}'
@@ -54,7 +54,7 @@ describe('Account actions', () => {
             }]
         }]
         
-        return store.dispatch(actions.getAllAccounts())
+        return store.dispatch(actions.getAndReplaceAccounts())
             .then(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })
@@ -67,13 +67,13 @@ describe('Account actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.GET_ALL_ACCOUNTS_REQUEST
+            type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
         }, {
-            type: actions.GET_ALL_ACCOUNTS_FAILURE,
+            type: actions.GET_AND_REPLACE_ACCOUNTS_FAILURE,
             error: 'test-error'
         }]
         
-        return store.dispatch(actions.getAllAccounts())
+        return store.dispatch(actions.getAndReplaceAccounts())
             .catch(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })

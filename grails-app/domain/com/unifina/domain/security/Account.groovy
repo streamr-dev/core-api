@@ -25,16 +25,7 @@ class Account {
 	}
 
 	enum Type {
-		ETHEREUM("ETHEREUM")
-		String id
-
-		Type(String id) {
-			this.id = id
-		}
-
-		static fromString(String operationId) {
-			return Type.enumConstants.find { it.id == operationId }
-		}
+		ETHEREUM
 	}
 
 	@CompileStatic
@@ -43,7 +34,7 @@ class Account {
 				id  : id,
 				user: user.id,
 				name: name,
-				type: type.id,
+				type: type.toString(),
 				json: (JSONObject) JSON.parse(json)
 		]
 	}

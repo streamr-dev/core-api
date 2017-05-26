@@ -1,5 +1,6 @@
 package com.unifina.controller.api
 
+import com.unifina.api.ApiError
 import com.unifina.api.ApiException
 import com.unifina.domain.security.Account
 import com.unifina.security.StreamrApi
@@ -16,10 +17,21 @@ class AccountApiController {
 
 	@StreamrApi
 	def index() {
+		if (params.type) {
+			try {
+				params.type as Account.Type
+			} catch (IllegalArgumentException e) {
+				throw new ApiException(400, "INVALID_TYPE", "Type $params.type does not exist.")
+			}
+		}
 		def criteria = apiService.createListCriteria(params, ["id"], {
-			// Filter by exact name
+			// Filter by exact id
 			if (params.id) {
 				eq "id", params.id
+			}
+			// Filter by exact type
+			if (params.type) {
+				eq "type", params.type
 			}
 		})
 		def accounts = Account.findAll(criteria)
@@ -32,17 +44,14 @@ class AccountApiController {
 		if (!request.JSON.name) {
 			throw new ApiException(400, "EMPTY_FIELD", "Name can't be empty!")
 		}
-		if (Account.Type.fromString(request.JSON.type) == Account.Type.ETHEREUM) {
+		if (request.JSON.type as Account.Type == Account.Type.ETHEREUM) {
 			try {
 				account = ethereumAccountService.createEthereumAccount(request.apiUser, request.JSON.name, request.JSON.json)
 			} catch (IllegalArgumentException e) {
 				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 			}
 		} else {
-			response.status = 400
-			return render ([
-			        error: "Invalid type: $request.JSON.type"
-			]) as JSON
+			throw new ApiException(400, 'INVALID_TYPE', "Invalid type: $request.JSON.type")
 		}
 
 		render account.toMap() as JSON
