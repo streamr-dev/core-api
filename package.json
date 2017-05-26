@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npm run test-old && npm run test-new",
+    "test": "npm run test-old; npm run test-new",
     "test-old": "mocha web-app/js/unifina/test --recursive",
     "test-new": "node ./node_modules/.bin/jest ./web-app/react-app/tests",
     "build": "./node_modules/.bin/webpack",
@@ -27,7 +27,7 @@
     "jquery": "1.11.1",
     "jquery-ui": "*",
     "jsdom": "8.1.0",
-    "mocha": "^1.21.4",
+    "mocha": "^3.4.2",
     "mustache": "*",
     "underscore": "*",
     "write-file-webpack-plugin": "^4.0.2"
