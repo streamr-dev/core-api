@@ -5,10 +5,10 @@ import thunk from 'redux-thunk'
 import {createStore, applyMiddleware, compose, combineReducers} from 'redux'
 import  { createLogger } from 'redux-logger'
 
-import accountReducer from '../reducers/accounts.js'
+import integrationKeyReducer from '../reducers/integrationKeys.js'
 
 const reducer = combineReducers({
-    account: accountReducer,
+    integrationKey: integrationKeyReducer,
 })
 
 const middleware = [thunk]

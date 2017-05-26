@@ -2,15 +2,15 @@
 import React from 'react'
 import { Panel, Row } from 'react-bootstrap'
 
-import StreamrAccountHandlerSegment from './AccountHandlerSegment'
+import IntegrationKeyHandlerSegment from './IntegrationKeyHandlerSegment'
 
-export default class StreamrAccountHandler extends React.Component {
+export default class IntegrationKeyHandler extends React.Component {
     
     render() {
         return (
-            <Panel header="Accounts">
+            <Panel header="Integration Keys">
                 <Row>
-                    <StreamrAccountHandlerSegment
+                    <IntegrationKeyHandlerSegment
                         type="ETHEREUM"
                         name="Ethereum"
                         inputFields={['privateKey']}

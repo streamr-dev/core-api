@@ -1,7 +1,7 @@
 
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
-import * as actions from '../../actions/accounts'
+import * as actions from '../../actions/integrationKeys'
 import expect from 'expect'
 import moxios from 'moxios'
 
@@ -12,13 +12,13 @@ global.Streamr = {
     createLink: ({uri}) => uri
 }
 
-describe('Account actions', () => {
+describe('IntegrationKey actions', () => {
     let store
     
     beforeEach(() => {
         moxios.install()
         store = mockStore({
-            accounts: [],
+            integrationKeys: [],
             error: null,
             fetching: false
         })
@@ -29,8 +29,8 @@ describe('Account actions', () => {
         store.clearActions()
     })
     
-    it('creates GET_ALL_ACCOUNTS_SUCCESS when fetching accounts has succeeded', () => {
-        moxios.stubRequest('api/v1/accounts', {
+    it('creates GET_ALL_ACCOUNTS_SUCCESS when fetching integrationKeys has succeeded', () => {
+        moxios.stubRequest('api/v1/integrationKeys', {
             status: 200,
             response: [{
                 name: 'test',
@@ -45,7 +45,7 @@ describe('Account actions', () => {
             type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
         }, {
             type: actions.GET_AND_REPLACE_ACCOUNTS_SUCCESS,
-            accounts: [{
+            integrationKeys: [{
                 name: 'test',
                 json: '{"moi": "moimoi"}'
             },{

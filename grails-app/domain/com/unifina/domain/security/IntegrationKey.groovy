@@ -5,12 +5,12 @@ import grails.converters.JSON
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.web.json.JSONObject
 
-class Account {
+class IntegrationKey {
 
 	String id
 	SecUser user
 	String name
-	Type type
+	Service service
 	String json
 
 	Date dateCreated
@@ -24,7 +24,7 @@ class Account {
 	static constraints = {
 	}
 
-	enum Type {
+	enum Service {
 		ETHEREUM
 	}
 
@@ -34,9 +34,9 @@ class Account {
 				id  : id,
 				user: user.id,
 				name: name,
-				type: type.toString(),
+				type: service.toString(),
 				json: (JSONObject) JSON.parse(json)
 		]
 	}
-}
 
+}

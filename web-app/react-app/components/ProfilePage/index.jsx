@@ -6,7 +6,7 @@ import { Row, Col } from 'react-bootstrap'
 
 import ProfileSettings from './ProfileSettings'
 import APICredentials from '../APICredentials'
-import AccountHandler from './AccountHandler'
+import IntegrationKeyHandler from './IntegrationKeyHandler'
 
 export default class ProfilePage extends Component {
     render() {
@@ -19,7 +19,7 @@ export default class ProfilePage extends Component {
                     <APICredentials />
                 </Col>
                 <Col xs={12} sm={6}>
-                    <AccountHandler />
+                    <IntegrationKeyHandler />
                 </Col>
             </Row>
         )

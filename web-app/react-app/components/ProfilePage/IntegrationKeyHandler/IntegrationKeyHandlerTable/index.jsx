@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import AccountHandlerTableRow from './AccountHandlerTableRow'
+import IntegrationKeyHandlerTableRow from './IntegrationKeyHandlerTableRow'
 import {Table} from 'react-bootstrap'
 
 const unCamelCase = (str: string) => str
@@ -10,26 +10,26 @@ const unCamelCase = (str: string) => str
     .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
     .replace(/^./, s => s.toUpperCase())
 
-import styles from './accountHandlerTable.pcss'
+import styles from './integrationKeyHandlerTable.pcss'
 
-type Account = {
+type IntegrationKey = {
     id: string,
     name: string,
     json: {}
 }
 
-export default class StreamrAccountHandlerTable extends React.Component {
+export default class IntegrationKeyHandlerTable extends React.Component {
     
     props: {
         fields: Array<string>,
-        accounts: Array<Account>,
+        integrationKeys: Array<IntegrationKey>,
         onDelete: Function
     }
     
     render() {
-        const items = this.props.accounts || []
+        const items = this.props.integrationKeys || []
         return (
-            <Table className={styles.accountTable}>
+            <Table className={styles.integrationKeyTable}>
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -43,7 +43,7 @@ export default class StreamrAccountHandlerTable extends React.Component {
                 </thead>
                 <tbody>
                 {items.map(item => (
-                    <AccountHandlerTableRow item={item} key={item.id} fields={this.props.fields} onDelete={this.props.onDelete}/>
+                    <IntegrationKeyHandlerTableRow item={item} key={item.id} fields={this.props.fields} onDelete={this.props.onDelete}/>
                 ))}
                 </tbody>
             </Table>

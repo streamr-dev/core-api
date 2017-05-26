@@ -6,8 +6,8 @@ import spock.lang.Specification
 /**
  * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
  */
-@TestFor(EthereumAccountService)
-class EthereumAccountServiceSpec extends Specification {
+@TestFor(AccountService)
+class IntegrationKeyServiceSpec extends Specification {
 
     def setup() {
     }

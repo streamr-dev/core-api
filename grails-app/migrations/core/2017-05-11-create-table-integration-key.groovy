@@ -1,8 +1,8 @@
 package core
 databaseChangeLog = {
 
-	changeSet(author: "aapeli", id: "create-account-table") {
-		createTable(tableName: "account") {
+	changeSet(author: "aapeli", id: "create-account-integration-key") {
+		createTable(tableName: "integration_key") {
 			column(autoIncrement: "true", name: "id", type: "BIGINT") {
 				constraints(nullable: "false", primaryKey: "true")
 			}
@@ -27,16 +27,16 @@ databaseChangeLog = {
 				constraints(nullable: "false")
 			}
 
-			column(name: "type", type: "VARCHAR(255)") {
+			column(name: "service", type: "VARCHAR(255)") {
 				constraints(nullable: "false")
 			}
 		}
 	}
 
-	changeSet(author: "aapeli", id: "create-account-table-2") {
+	changeSet(author: "aapeli", id: "create-account-integration-key-2") {
 		addForeignKeyConstraint(baseColumnNames: "user_id",
-			baseTableName: "account",
-			constraintName: "ACCOUNTUSERFOREIGNKEY",
+			baseTableName: "integration_key",
+			constraintName: "fk_user_integration_key",
 			deferrable: "false",
 			initiallyDeferred: "false",
 			referencedColumnNames: "id",

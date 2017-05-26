@@ -88,7 +88,7 @@ class RegisterController {
         log.info("Logging in "+user.username+" after registering")
         springSecurityService.reauthenticate(user.username)
 
-        flash.message = "Account created!"
+        flash.message = "IntegrationKey created!"
         redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
     }
 

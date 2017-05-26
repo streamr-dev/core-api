@@ -1,6 +1,6 @@
 package com.unifina.service
 
-import com.unifina.domain.security.Account
+import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import grails.converters.JSON
 import org.apache.commons.codec.binary.Hex
@@ -8,20 +8,20 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 
 import org.ethereum.crypto.ECKey
 
-class EthereumAccountService {
+class EthereumIntegrationKeyService {
 
-	Account createEthereumAccount(SecUser user, String name, JSONObject json) {
+	IntegrationKey createEthereumAccount(SecUser user, String name, JSONObject json) {
 		String privateKey = trimPrivateKey(json.get("privateKey"))
 
 		try {
-			Account account = new Account()
+			IntegrationKey account = new IntegrationKey()
 			account.setName(name)
 			account.setJson(([
 					privateKey: privateKey,
 					address : getPublicKey(privateKey)
 			] as JSON).toString())
 			account.setUser(user)
-			account.setType(Account.Type.ETHEREUM)
+			account.setType(IntegrationKey.Service.ETHEREUM)
 			account.save(flush: true, failOnError: true)
 			return account
 		} catch (NumberFormatException e) {

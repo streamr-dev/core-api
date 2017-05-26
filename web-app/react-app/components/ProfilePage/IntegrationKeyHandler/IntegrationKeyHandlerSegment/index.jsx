@@ -3,23 +3,23 @@
 import React from 'react'
 
 import { connect } from 'react-redux'
-import { getAccountsByType, createAccount, deleteAccount } from '../../../../actions/accounts'
+import { getIntegrationKeysByType, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKeys'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
-import StreamrAccountHandlerInput from '../AccountHandlerInput'
-import StreamrAccountHandlerTable from '../AccountHandlerTable'
+import IntegrationKeyHandlerInput from '../IntegrationKeyHandlerInput'
+import IntegrationKeyHandlerTable from '../IntegrationKeyHandlerTable'
 
-import styles from './accountHandlerSegment.pcss'
+import styles from './integrationKeyHandlerSegment.pcss'
 
 declare var Streamr: any
 
-class StreamrAccountHandlerSegment extends React.Component {
+class IntegrationKeyHandlerSegment extends React.Component {
     
     props: {
         tableFields: Array<string>,
         inputFields: Array<string>,
-        accounts: Array<{
+        integrationKeys: Array<{
             id: string,
             name: string,
             json: {}
@@ -40,25 +40,25 @@ class StreamrAccountHandlerSegment extends React.Component {
         this.onDelete = this.onDelete.bind(this)
     }
     componentDidMount() {
-        this.props.dispatch(getAccountsByType(this.props.type))
+        this.props.dispatch(getIntegrationKeysByType(this.props.type))
     }
     
-    onNew(account) {
-        const name = account.name
+    onNew(integrationKey) {
+        const name = integrationKey.name
         const type = this.props.type
-        delete account.name
-        return this.props.dispatch(createAccount({
+        delete integrationKey.name
+        return this.props.dispatch(createIntegrationKey({
             name,
             type,
-            json: account
+            json: integrationKey
         }))
-            .then(() => Streamr.showSuccess('Account created successfully!'))
+            .then(() => Streamr.showSuccess('IntegrationKey created successfully!'))
             .catch(Streamr.showError)
     }
     
     onDelete(id) {
-        this.props.dispatch(deleteAccount(id))
-            .then(() => Streamr.showSuccess('Account removed successfully!'))
+        this.props.dispatch(deleteIntegrationKey(id))
+            .then(() => Streamr.showSuccess('IntegrationKey removed successfully!'))
     }
     
     render() {
@@ -68,12 +68,12 @@ class StreamrAccountHandlerSegment extends React.Component {
                     <ControlLabel className={styles.label}>
                         {this.props.name}
                     </ControlLabel>
-                    <StreamrAccountHandlerTable
+                    <IntegrationKeyHandlerTable
                         fields={this.props.tableFields}
-                        accounts={this.props.accounts}
+                        integrationKeys={this.props.integrationKeys}
                         onDelete={this.onDelete}
                     />
-                    <StreamrAccountHandlerInput
+                    <IntegrationKeyHandlerInput
                         fields={this.props.inputFields}
                         onNew={this.onNew}
                     />
@@ -83,9 +83,9 @@ class StreamrAccountHandlerSegment extends React.Component {
     }
 }
 
-const mapStateToProps = ({account}, props) => ({
-    accounts: account.listsByType[props.type] || [],
-    error: account.error
+const mapStateToProps = ({integrationKey}, props) => ({
+    integrationKeys: integrationKey.listsByType[props.type] || [],
+    error: integrationKey.error
 })
 
-export default connect(mapStateToProps)(StreamrAccountHandlerSegment)
+export default connect(mapStateToProps)(IntegrationKeyHandlerSegment)

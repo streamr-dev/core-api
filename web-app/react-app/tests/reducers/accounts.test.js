@@ -1,6 +1,6 @@
 
-import reducer from '../../reducers/accounts'
-import * as actions from '../../actions/accounts'
+import reducer from '../../reducers/integrationKeys'
+import * as actions from '../../actions/integrationKeys'
 import expect from 'expect'
 
 global._ = require('lodash')
@@ -25,10 +25,10 @@ describe('todos reducer', () => {
         })
     })
     
-    it('should handle GET_AND_REPLACE_ACCOUNTS', () => {
+    it('should handle GET_AND_REPLACE_INTEGRATION_KEYS', () => {
         expect(
             reducer({}, {
-                type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
+                type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -36,8 +36,8 @@ describe('todos reducer', () => {
         
         expect(
             reducer({}, {
-                type: actions.GET_AND_REPLACE_ACCOUNTS_SUCCESS,
-                accounts: [{
+                type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS,
+                integrationKeys: [{
                     id: 1,
                     type: 'A'
                 }, {
@@ -70,7 +70,7 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                type: actions.GET_AND_REPLACE_ACCOUNTS_FAILURE,
+                type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({
@@ -80,10 +80,10 @@ describe('todos reducer', () => {
         })
     })
     
-    it('should handle GET_AND_REPLACE_ACCOUNTS', () => {
+    it('should handle GET_AND_REPLACE_INTEGRATION_KEYS', () => {
         expect(
             reducer({}, {
-                type: actions.GET_ACCOUNTS_BY_TYPE_REQUEST
+                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -91,9 +91,9 @@ describe('todos reducer', () => {
     
         expect(
             reducer({}, {
-                type: actions.GET_ACCOUNTS_BY_TYPE_SUCCESS,
-                accountType: 'B',
-                accounts: [{
+                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,
+                service: 'B',
+                integrationKeys: [{
                     id: 1
                 }, {
                     id: 2
@@ -119,7 +119,7 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                type: actions.GET_ACCOUNTS_BY_TYPE_FAILURE,
+                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({
@@ -129,10 +129,10 @@ describe('todos reducer', () => {
         })
     })
     
-    it('should handle CREATE_ACCOUNT', () => {
+    it('should handle CREATE_INTEGRATION_KEY', () => {
         expect(
             reducer({}, {
-                type: actions.CREATE_ACCOUNT_REQUEST
+                type: actions.CREATE_INTEGRATION_KEY_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -151,8 +151,8 @@ describe('todos reducer', () => {
                     }]
                 }
             }, {
-                type: actions.CREATE_ACCOUNT_SUCCESS,
-                account: {
+                type: actions.CREATE_INTEGRATION_KEY_SUCCESS,
+                integrationKey: {
                     id: 3,
                     type: 'A'
                 }
@@ -187,7 +187,7 @@ describe('todos reducer', () => {
                     }]
                 }
             }, {
-                type: actions.CREATE_ACCOUNT_FAILURE,
+                type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({
@@ -205,10 +205,10 @@ describe('todos reducer', () => {
         })
     })
     
-    it('should handle DELETE_ACCOUNT', () => {
+    it('should handle DELETE_INTEGRATION_KEY', () => {
         expect(
             reducer({}, {
-                type: actions.DELETE_ACCOUNT_REQUEST
+                type: actions.DELETE_INTEGRATION_KEY_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -226,7 +226,7 @@ describe('todos reducer', () => {
                     }]
                 }
             }, {
-                type: actions.DELETE_ACCOUNT_SUCCESS,
+                type: actions.DELETE_INTEGRATION_KEY_SUCCESS,
                 id: 3
             })
         ).toEqual({
@@ -245,7 +245,7 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                type: actions.CREATE_ACCOUNT_FAILURE,
+                type: actions.CREATE_INTEGRATION_KEY_FAILURE,
                 error: 'test-error'
             })
         ).toEqual({

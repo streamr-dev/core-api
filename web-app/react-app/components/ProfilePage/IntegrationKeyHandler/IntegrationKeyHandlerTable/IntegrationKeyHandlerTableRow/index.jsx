@@ -2,11 +2,13 @@
 
 import React from 'react'
 
-import styles from './accountHandlerTableRow.pcss'
+import { FormGroup, Button } from 'react-bootstrap'
+
+import styles from './integrationKeyHandlerTableRow.pcss'
 
 declare var ConfirmButton: any
 
-export default class StreamrAccountHandlerTableRow extends React.Component {
+export default class IntegrationKeyHandlerTableRow extends React.Component {
     
     props: {
         fields: Array<string>,
@@ -23,13 +25,14 @@ export default class StreamrAccountHandlerTableRow extends React.Component {
     componentDidMount() {
         new ConfirmButton(this.removeButton, {
             title: 'Are you sure?',
-            message: `Are you sure you want to remove account ${this.props.item.name}?`
+            message: `Are you sure you want to remove integration key ${this.props.item.name}?`
         }, res => {
             if (res) {
                 this.props.onDelete(this.props.item.id)
             }
         })
     }
+    
     render() {
         const item = this.props.item
         return (
@@ -43,13 +46,16 @@ export default class StreamrAccountHandlerTableRow extends React.Component {
                     </td>
                 ))}
                 <td>
-                    <button
-                        ref={el => this.removeButton = el}
-                        type="button"
-                        className={`form-group account-item-delete-button btn btn-danger pull-right ${styles.deleteButton}`}
-                        title="Delete key">
-                        <span className="icon fa fa-trash-o"/>
-                    </button>
+                    <FormGroup>
+                        <Button
+                            bsStyle="default"
+                            ref={el => this.removeButton = el}
+                            type="button"
+                            className={styles.deleteButton}
+                            title="Delete key">
+                            <span className="icon fa fa-trash-o"/>
+                        </Button>
+                    </FormGroup>
                 </td>
             </tr>
         )
