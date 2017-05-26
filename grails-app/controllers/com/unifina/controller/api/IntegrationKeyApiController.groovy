@@ -20,7 +20,7 @@ class IntegrationKeyApiController {
 			try {
 				params.service as IntegrationKey.Service
 			} catch (IllegalArgumentException e) {
-				throw new ApiException(400, "INVALID_SERVICE", "Service $params.service does not exist.")
+				throw new ApiException(400, "INVALID_SERVICE", "Invalid service: $request.JSON.service")
 			}
 		}
 		def criteria = apiService.createListCriteria(params, ["id"], {
@@ -50,7 +50,7 @@ class IntegrationKeyApiController {
 				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 			}
 		} else {
-			throw new ApiException(400, 'INVALID_SERVICE', "Invalid type: $request.JSON.service")
+			throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
 		}
 
 		render account.toMap() as JSON

@@ -19,7 +19,7 @@ describe('todos reducer', () => {
         expect(
             reducer(undefined, {})
         ).toEqual({
-            listsByType: {},
+            listsByService: {},
             error: null,
             fetching: false
         })
@@ -50,7 +50,7 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listsByType: {
+            listsByService: {
                 A: [{
                     id: 1,
                     type: 'A'
@@ -103,7 +103,7 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listsByType: {
+            listsByService: {
                 B: [{
                     id: 1
                 }, {
@@ -140,7 +140,7 @@ describe('todos reducer', () => {
         
         expect(
             reducer({
-                listsByType: {
+                listsByService: {
                     A: [{
                         id: 1,
                         type: 'A'
@@ -159,7 +159,7 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listsByType: {
+            listsByService: {
                 A: [{
                     id: 1,
                     type: 'A'
@@ -177,7 +177,7 @@ describe('todos reducer', () => {
         
         expect(
             reducer({
-                listsByType: {
+                listsByService: {
                     A: [{
                         id: 1
                     }, {
@@ -192,7 +192,7 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listsByType: {
+            listsByService: {
                 A: [{
                     id: 1
                 }, {
@@ -216,7 +216,7 @@ describe('todos reducer', () => {
         
         expect(
             reducer({
-                listsByType: {
+                listsByService: {
                     A: [{
                         id: 1
                     }, {
@@ -231,7 +231,7 @@ describe('todos reducer', () => {
             })
         ).toEqual({
             fetching: false,
-            listsByType: {
+            listsByService: {
                 A: [{
                     id: 1
                 }, {

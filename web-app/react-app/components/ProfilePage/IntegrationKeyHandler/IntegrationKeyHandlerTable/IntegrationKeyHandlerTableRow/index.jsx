@@ -46,9 +46,9 @@ export default class IntegrationKeyHandlerTableRow extends React.Component {
                     </td>
                 ))}
                 <td>
-                    <FormGroup>
+                    <FormGroup className="pull-right">
                         <Button
-                            bsStyle="default"
+                            bsStyle="danger"
                             ref={el => this.removeButton = el}
                             type="button"
                             className={styles.deleteButton}

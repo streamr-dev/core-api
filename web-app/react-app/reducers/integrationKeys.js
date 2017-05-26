@@ -24,7 +24,7 @@ type IntegrationKey = {
 }
 
 type State = {
-    listsByType?: {
+    listsByService?: {
         [string]: Array<IntegrationKey>
     },
     error?: ?string,
@@ -41,7 +41,7 @@ type Action = {
 }
 
 const initialState = {
-    listsByType: {},
+    listsByService: {},
     error: null,
     fetching: false
 }
@@ -60,7 +60,7 @@ const integrationKey = function(state: State = initialState, action: Action) : S
         case GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS:
             return {
                 ...state,
-                listsByType: _.groupBy(action.integrationKeys, integrationKey => integrationKey.type),
+                listsByService: _.groupBy(action.integrationKeys, integrationKey => integrationKey.type),
                 fetching: false,
                 error: null
             }
@@ -70,8 +70,8 @@ const integrationKey = function(state: State = initialState, action: Action) : S
             }
             return {
                 ...state,
-                listsByType: {
-                    ...state.listsByType,
+                listsByService: {
+                    ...state.listsByService,
                     [action.service]: action.integrationKeys
                 },
                 error: null,
@@ -83,13 +83,13 @@ const integrationKey = function(state: State = initialState, action: Action) : S
                 throw new Error(`${GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS} requires action.integrationKey and action.integrationKey.type`)
             }
             // These are just to make sure that flow is happy
-            const listsByType = state.listsByType || {}
-            const existing = listsByType[action.integrationKey.type] || []
+            const listsByService = state.listsByService || {}
+            const existing = listsByService[action.integrationKey.type] || []
             
             return {
                 ...state,
-                listsByType: {
-                    ...listsByType,
+                listsByService: {
+                    ...listsByService,
                     [action.integrationKey.type]: [
                         ...existing,
                         action.integrationKey
@@ -102,7 +102,7 @@ const integrationKey = function(state: State = initialState, action: Action) : S
         case DELETE_INTEGRATION_KEY_SUCCESS: {
             return {
                 ...state,
-                listsByType: _.mapObject(state.listsByType, list => _.reject(list, integrationKey => integrationKey.id === action.id)),
+                listsByService: _.mapObject(state.listsByService, list => _.reject(list, integrationKey => integrationKey.id === action.id)),
                 error: null,
                 fetching: false
             }

@@ -11,7 +11,7 @@ export default class IntegrationKeyHandler extends React.Component {
             <Panel header="Integration Keys">
                 <Row>
                     <IntegrationKeyHandlerSegment
-                        type="ETHEREUM"
+                        service="ETHEREUM"
                         name="Ethereum"
                         inputFields={['privateKey']}
                         tableFields={['address']}

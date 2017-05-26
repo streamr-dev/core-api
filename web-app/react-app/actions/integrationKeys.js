@@ -27,7 +27,7 @@ declare var Streamr: {
 
 type IntegrationKey = {
     name: string,
-    type: string,
+    service: string,
     json: {}
 }
 
@@ -49,19 +49,19 @@ export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
         })
 }
 
-export const getIntegrationKeysByType = (service: string) => (dispatch: Function) => {
-    dispatch(getIntegrationKeysByTypeRequest(service))
+export const getIntegrationKeysByService = (service: string) => (dispatch: Function) => {
+    dispatch(getIntegrationKeysByServiceRequest(service))
     return axios.get(Streamr.createLink({
         uri: apiUrl
     }), {
         params: {
-            service: service
+            service
         }
     })
-        .then(({data}) => dispatch(getIntegrationKeysByTypeSuccess(service, data)))
+        .then(({data}) => dispatch(getIntegrationKeysByServiceSuccess(service, data)))
         .catch(res => {
             const e = parseError(res)
-            dispatch(getIntegrationKeysByTypeFailure(service, e))
+            dispatch(getIntegrationKeysByServiceFailure(service, e))
             throw e
         })
 }
@@ -96,7 +96,7 @@ const getAndReplaceIntegrationKeysRequest = () => ({
     type: GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST,
 })
 
-const getIntegrationKeysByTypeRequest = (service: string) => ({
+const getIntegrationKeysByServiceRequest = (service: string) => ({
     type: GET_INTEGRATION_KEYS_BY_TYPE_REQUEST,
     service
 })
@@ -115,7 +115,7 @@ const getAndReplaceIntegrationKeysSuccess = (integrationKeys: Array<IntegrationK
     integrationKeys
 })
 
-const getIntegrationKeysByTypeSuccess = (service: string, integrationKeys: Array<IntegrationKey>) => ({
+const getIntegrationKeysByServiceSuccess = (service: string, integrationKeys: Array<IntegrationKey>) => ({
     type: GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,
     integrationKeys,
     service
@@ -136,7 +136,7 @@ const getAndReplaceIntegrationKeysFailure = (error: Err) => ({
     error
 })
 
-const getIntegrationKeysByTypeFailure = (service: string, error: Err) => ({
+const getIntegrationKeysByServiceFailure = (service: string, error: Err) => ({
     type: GET_INTEGRATION_KEYS_BY_TYPE_FAILURE,
     error,
     service

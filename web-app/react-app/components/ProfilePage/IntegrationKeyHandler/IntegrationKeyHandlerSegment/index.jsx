@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { connect } from 'react-redux'
-import { getIntegrationKeysByType, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKeys'
+import { getIntegrationKeysByService, createIntegrationKey, deleteIntegrationKey } from '../../../../actions/integrationKeys'
 
 import {Col, ControlLabel} from 'react-bootstrap'
 
@@ -24,7 +24,7 @@ class IntegrationKeyHandlerSegment extends React.Component {
             name: string,
             json: {}
         }>,
-        type: string,
+        service: string,
         name: string,
         className: string,
         dispatch: Function
@@ -40,20 +40,20 @@ class IntegrationKeyHandlerSegment extends React.Component {
         this.onDelete = this.onDelete.bind(this)
     }
     componentDidMount() {
-        this.props.dispatch(getIntegrationKeysByType(this.props.type))
+        this.props.dispatch(getIntegrationKeysByService(this.props.service))
     }
     
     onNew(integrationKey) {
         const name = integrationKey.name
-        const type = this.props.type
+        const service = this.props.service
         delete integrationKey.name
         return this.props.dispatch(createIntegrationKey({
             name,
-            type,
+            service,
             json: integrationKey
         }))
             .then(() => Streamr.showSuccess('IntegrationKey created successfully!'))
-            .catch(Streamr.showError)
+            .catch(e => Streamr.showError('Error!', e.message))
     }
     
     onDelete(id) {
@@ -84,7 +84,7 @@ class IntegrationKeyHandlerSegment extends React.Component {
 }
 
 const mapStateToProps = ({integrationKey}, props) => ({
-    integrationKeys: integrationKey.listsByType[props.type] || [],
+    integrationKeys: integrationKey.listsByService[props.service] || [],
     error: integrationKey.error
 })
 

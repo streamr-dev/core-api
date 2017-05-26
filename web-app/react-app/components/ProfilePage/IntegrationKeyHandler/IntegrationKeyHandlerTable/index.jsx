@@ -31,20 +31,20 @@ export default class IntegrationKeyHandlerTable extends React.Component {
         return (
             <Table className={styles.integrationKeyTable}>
                 <thead>
-                <tr>
-                    <th>Name</th>
-                    {this.props.fields.map(f => (
-                        <th key={f}>
-                            {unCamelCase(f)}
-                        </th>
-                    ))}
-                    <th/>
-                </tr>
+                    <tr>
+                        <th className={styles.nameHeader}>Name</th>
+                        {this.props.fields.map(f => (
+                            <th key={f}>
+                                {unCamelCase(f)}
+                            </th>
+                        ))}
+                        <th className={styles.actionHeader}/>
+                    </tr>
                 </thead>
                 <tbody>
-                {items.map(item => (
-                    <IntegrationKeyHandlerTableRow item={item} key={item.id} fields={this.props.fields} onDelete={this.props.onDelete}/>
-                ))}
+                    {items.map(item => (
+                        <IntegrationKeyHandlerTableRow item={item} key={item.id} fields={this.props.fields} onDelete={this.props.onDelete}/>
+                    ))}
                 </tbody>
             </Table>
         )
