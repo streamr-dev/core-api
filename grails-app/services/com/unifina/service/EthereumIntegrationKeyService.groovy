@@ -11,7 +11,7 @@ import org.ethereum.crypto.ECKey
 class EthereumIntegrationKeyService {
 
 	IntegrationKey createEthereumAccount(SecUser user, String name, JSONObject json) {
-		String privateKey = trimPrivateKey(json.get("privateKey"))
+		String privateKey = trimPrivateKey((String) json.get("privateKey"))
 
 		try {
 			IntegrationKey account = new IntegrationKey()
@@ -21,7 +21,7 @@ class EthereumIntegrationKeyService {
 					address : getPublicKey(privateKey)
 			] as JSON).toString())
 			account.setUser(user)
-			account.setType(IntegrationKey.Service.ETHEREUM)
+			account.setService(IntegrationKey.Service.ETHEREUM)
 			account.save(flush: true, failOnError: true)
 			return account
 		} catch (NumberFormatException e) {

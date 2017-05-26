@@ -3,7 +3,7 @@ databaseChangeLog = {
 
 	changeSet(author: "aapeli", id: "create-account-integration-key") {
 		createTable(tableName: "integration_key") {
-			column(autoIncrement: "true", name: "id", type: "BIGINT") {
+			column(name: "id", type: "VARCHAR(255)") {
 				constraints(nullable: "false", primaryKey: "true")
 			}
 
