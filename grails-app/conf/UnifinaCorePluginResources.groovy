@@ -264,9 +264,13 @@ modules = {
 	'confirm-button' {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
 	}
+	'webpack-commons-bundle' {
+		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
+	}
 	'profile-page-webpack-bundle' {
-		resource url:[dir:'js/unifina/webpack-bundles', file:'profilePage-bundle.js', plugin:'unifina-core']
-		resource url:[dir:'js/unifina/webpack-bundles', file:'profilePage-bundle.css', plugin:'unifina-core']
+		dependsOn 'webpack-commons-bundle'
+		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.js', plugin: 'unifina-core']
+		resource url: [dir: 'js/unifina/webpack-bundles', file: 'profilePage.bundle.css', plugin: 'unifina-core']
 	}
 	'signalpath-core' {
 		// Easier to merge if dependencies are one-per-row instead of comma-separated list

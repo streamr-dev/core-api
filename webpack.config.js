@@ -18,7 +18,7 @@ module.exports = {
     output: {
         path: path.resolve(root, 'web-app', 'js', 'unifina', 'webpack-bundles'),
         publicPath: '/js/unifina/webpack-bundles/',
-        filename: '[name]-bundle.js'
+        filename: '[name].bundle.js'
     },
     module: {
         rules: [
@@ -81,7 +81,7 @@ module.exports = {
                 postcss: postcssConfig
             }
         }),
-        new ExtractTextPlugin('[name]-bundle.css')
+        new ExtractTextPlugin('[name].bundle.css')
     ].concat(inProduction ? [
         // Production plugins
         new webpack.optimize.OccurrenceOrderPlugin(),
@@ -100,7 +100,8 @@ module.exports = {
         new FlowtypePlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
-        new WriteFilePlugin()
+        new WriteFilePlugin(),
+        new webpack.optimize.CommonsChunkPlugin('commons')
     ]),
     devtool: !inProduction && 'eval-source-map',
     resolve: {
