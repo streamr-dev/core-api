@@ -36,6 +36,7 @@ class ExportCSVFunctionalSpec extends LoginTester1Spec {
 		and: "produce data to stream"
 		String topicId = streamId.text()
 		produceAllDataToStream(topicId, 5)
+		sleep(1000)
 
 		and: "configure stream with autodetect"
 		configureFieldsButton.click()

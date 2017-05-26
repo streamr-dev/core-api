@@ -6,6 +6,7 @@ import com.unifina.api.ValidationException
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.security.AuthLevel
 import com.unifina.security.StreamrApi
 import com.unifina.service.DashboardService
 import com.unifina.service.SignalPathService
@@ -65,7 +66,7 @@ class DashboardApiController {
 	/**
 	 * Handles a runtime requests from dashboard view
 	 */
-	@StreamrApi(requiresAuthentication = false)
+	@StreamrApi(authenticationLevel = AuthLevel.NONE)
 	def runtimeRequest(String path, Boolean local) {
 		def msg = request.JSON
 		Map response = signalPathService.runtimeRequest(dashboardService.buildRuntimeRequest(msg, "dashboards/$path", request.apiUser), local ? true : false)

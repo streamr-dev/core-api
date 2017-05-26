@@ -1,5 +1,5 @@
 (function(exports) {
-
+    
 var Module = Backbone.AssociatedModel.extend({
 	toggle: function () {
 		this.set("checked", !this.get("checked"))
@@ -9,7 +9,7 @@ var Module = Backbone.AssociatedModel.extend({
 var ModuleList = Backbone.Collection.extend({
 	model: Module
 })
-
+    
 var ModuleView = Backbone.View.extend({
 	tagName: "li",
 	className: "module",
@@ -339,12 +339,14 @@ var SidebarView = Backbone.View.extend({
 				_this.setEditMode(true)
 		})
 
-		if (this.dashboard.get("items").models.length)
+		if (this.dashboard.get("items").models.length) {
 			this.setEditMode(options.edit)
-		else this.setEditMode(true)
+        } else {
+		    this.setEditMode(true)
+        }
 
 
-		this.dashboard.on('invalid', function(error) {
+		this.dashboard.on('invalid', function() {
 			Streamr.showError(_this.dashboard.validationError, 'Invalid value')
 		})
 		

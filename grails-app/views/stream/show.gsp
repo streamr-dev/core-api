@@ -1,11 +1,14 @@
 <html>
     <head>
         <meta name="layout" content="main" />
-        <title><g:message code="stream.show.label" args="[stream.name]"/></title>
+        <title>
+			<g:message code="stream.show.label" args="[stream.name]"/>
+		</title>
         <r:require module="dropzone"/>
 		<r:require module="confirm-button"/>
 		<r:require module="bootstrap-datepicker"/>
 		<r:require module="sharing-dialog"/>
+		<r:require module="streamr-credentials-control"/>
 		<r:script>
 			$(function() {
 				new ConfirmButton($("#delete-stream-button"), {
@@ -22,6 +25,12 @@
 							}
 						})
 					}
+				})
+				new StreamrCredentialsControl({
+					el: "#stream-credentials",
+					url: '${createLink(uri: "/api/v1/streams/${stream.id}/keys")}',
+					streamId: '${stream.id}',
+					showPermissions: true
 				})
 			})
 		</r:script>
@@ -96,6 +105,7 @@
 			</div>
 
 			<g:include action="details" id="${stream.id}"/>
+
 
 		</div>
     </body>

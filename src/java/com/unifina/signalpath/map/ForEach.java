@@ -3,6 +3,7 @@ package com.unifina.signalpath.map;
 import com.mongodb.util.JSON;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.service.CanvasService;
+import com.unifina.service.SerializationService;
 import com.unifina.service.SignalPathService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
@@ -216,6 +217,30 @@ public class ForEach extends AbstractSignalPathModule {
 			return null;
 		} else {
 			return sub.getSignalPath();
+		}
+	}
+
+	@Override
+	public void beforeSerialization() {
+		super.beforeSerialization();
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().beforeSerialization();
+		}
+	}
+
+	@Override
+	public void afterSerialization() {
+		super.afterSerialization();
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().afterSerialization();
+		}
+	}
+
+	@Override
+	public void afterDeserialization(SerializationService serializationService) {
+		super.afterDeserialization(serializationService);
+		for (SubSignalPath subSignalPath : keyToSignalPath.values()) {
+			subSignalPath.getSignalPath().afterDeserialization(serializationService);
 		}
 	}
 

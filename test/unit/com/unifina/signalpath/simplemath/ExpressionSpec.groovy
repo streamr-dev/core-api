@@ -51,4 +51,17 @@ class ExpressionSpec extends Specification {
 		then:
 		module.inputs.size() == 3	// expression, x, y
 	}
+
+	void "CORE-883 can handle large numbers"() {
+		when:
+		module.getInput("expression").receive("x + y")
+		module.configure(module.configuration)
+
+		module.getInput("x").receive(1490357362484)
+		module.getInput("y").receive(360000)
+		module.trySendOutput()
+
+		then:
+		module.getOutput("out").getValue() == 1490357362484d + 360000d
+	}
 }

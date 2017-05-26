@@ -105,8 +105,9 @@ $(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}",
+			url: "${grailsApplication.config.streamr.ui.server}",
 			path: "${grailsApplication.config.streamr.ui.serverPath}",
+			authKey: "${key.id}",
 			autoConnect: true,
 			autoDisconnect: true
 		}
@@ -383,17 +384,13 @@ $(function() {
 		if (!SignalPath.isReadOnly()) {
 			var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
 			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
-				var permissions = []
-				_.each(perm, function(permission) {
-					if (permission.id = SignalPath.getId()) {
-						permissions.push(permission.operation)
-					}
+			    var sharePermission = _.find(perm, function(p) {
+				    return p.operation === 'share'
 				})
-				var enabled = ['rename']
-				if (_.contains(permissions, "share")) {
-				    enabled.push('share')
-				    shareUrl = canvasUrl
-				    shareName = SignalPath.getName()
+				if (sharePermission) {
+					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
+				} else {
+					$("#share-button").addClass("forbidden")
 				}
                 if (_.contains(permissions, "write")) {
 				    enabled.push('delete')

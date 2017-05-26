@@ -74,7 +74,15 @@
 					})
 
 					$.getJSON(Streamr.createLink({uri: 'api/v1/canvases'}), {state:'running', adhoc:false, sort:'dateCreated', order:'desc'}, function(canvases) {
-						sidebar = new SidebarView({
+						// Have to remove the id's so we don't confuse Backbone
+					    canvases = _.map(canvases, function(canvas) {
+						    canvas.modules = _.map(canvas.modules, function(module) {
+								delete module.id
+								return module
+						    })
+						    return canvas
+						})
+					    var sidebar = new SidebarView({
 							edit: ${params.edit ? "true" : "undefined"},
 							dashboard: dashboard,
 							canvases: canvases,
@@ -201,7 +209,13 @@
 					</ul>
 				</div>
 			</ui:breadcrumb>
-			<streamr-client id="client" server="${config.streamr.ui.server}" path=${config.streamr.ui.serverPath} autoconnect="true" autodisconnect="false"></streamr-client>
+			<streamr-client
+					id="client"
+					url="${config.streamr.ui.server}"
+					autoconnect="true"
+					autodisconnect="false"
+					authkey="${key.id}">
+			</streamr-client>
 			<ul id="dashboard-view"></ul>
 		</div>
 

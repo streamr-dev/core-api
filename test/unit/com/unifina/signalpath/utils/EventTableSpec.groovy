@@ -21,9 +21,7 @@ class EventTableSpec extends UiChannelMockingSpecification {
 				[
 					uiChannel: [id: "table"],
 					options: [inputs: [value: 3]]
-				],
-				new SignalPath(),
-				mockGlobals([:], new SecUser(timezone: "UTC")))
+				])
 
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))

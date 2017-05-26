@@ -113,7 +113,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		// A Stream object will be created or loaded on start using the uiChannelId
 		String uiChannelId = MapTraversal.getString(config, "uiChannel.id");
 		uiChannel = new UiChannel(
-				uiChannelId == null ? IdGenerator.get() : uiChannelId,
+				uiChannelId == null ? IdGenerator.getShort() : uiChannelId,
 				getEffectiveName(),
 				uiChannelId == null);
 		
@@ -127,7 +127,7 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 		
 	}
 
-	private class UiChannel implements Serializable {
+	public class UiChannel implements Serializable {
 
 		private String id;
 		private final String name;
@@ -189,6 +189,9 @@ public abstract class ModuleWithUI extends AbstractSignalPathModule {
 				params.put("uiChannelCanvas", getRootSignalPath().getCanvas());
 				stream = getStreamService().createStream(params, getGlobals().getUser(), id);
 			}
+
+			// Fix for CORE-893: Guard against excessive memory use by setting stream.uiChannelCanvas to the instance already in memory
+			stream.setUiChannelCanvas(getRootSignalPath().getCanvas());
 
 			// User must have write permission to related Canvas in order to write to the UI channel
 			if (!getGlobals().getGrailsApplication().getMainContext().getBean(PermissionService.class).canWrite(getGlobals().getUser(), stream.getUiChannelCanvas())) {

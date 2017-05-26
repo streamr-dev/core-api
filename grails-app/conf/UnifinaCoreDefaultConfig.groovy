@@ -171,6 +171,11 @@ log4j = {
  }
 
 /**
+ * Tour config
+ */
+streamr.tours.enabled = true
+
+/**
  * Migration config
  */
 grails.plugin.databasemigration.updateOnStart = true
@@ -238,7 +243,7 @@ environments {
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? System.getProperty("streamr.ip.address.prefixes").split(",") : ["192.168.10.", "192.168.", "10."]
+streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10."]
 environments {
 	production {
 		streamr.ip.address.prefixes = []
@@ -248,18 +253,17 @@ environments {
 /**
  * UI update server address
  */
-streamr.ui.server = System.getProperty("streamr.ui.server") ?: "http://dev-data.streamr"
-streamr.ui.serverPath = System.getProperty("streamr.ui.serverPath") ?: "/api/v1/socket.io"
+streamr.ui.server = System.getProperty("streamr.ui.server") ?: "ws://dev.streamr/api/v1/ws"
 environments {
 	production {
-		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}"
+		streamr.ui.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl.replaceFirst("http", "ws")}/api/v1/ws"
 	}
 }
 
 /**
  * HTTP API server address
  */
-streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev-data.streamr/api/v1"
+streamr.http.api.server = System.getProperty("streamr.http.api.server") ?: "http://dev.streamr/api/v1"
 environments {
 	production {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
@@ -314,10 +318,10 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 5 * 60 * 1000
+streamr.serialization.intervalInMillis = System.getProperty("streamr.serialization.intervalInMillis") ? Long.parseLong(System.getProperty("streamr.serialization.intervalInMillis")) : 5 * 60 * 1000
 environments {
 	test {
-		unifina.serialization.intervalInMillis = 1000
+		streamr.serialization.intervalInMillis = 1000
 	}
 }
 

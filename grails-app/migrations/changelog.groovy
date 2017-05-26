@@ -60,4 +60,12 @@ databaseChangeLog = {
 	include file: 'core/2017-01-17-xor-module.groovy'
 	include file: 'core/2016-09-29-new-data-pipeline.groovy'
 	include file: 'core/2017-03-12-ui-channel-streams.groovy'
+	include file: 'core/2017-01-20-separate-serialization-domain-class.groovy'
+	include file: 'core/2017-03-13-add-key-domain-object.groovy'
+	include file: 'core/2017-03-22-migrate-stream-api-keys-to-key-domain.groovy'
+	include file: 'core/2017-03-23-migrate-user-api-keys-to-key-domain.groovy'
+	include file: 'core/2017-03-08-list-to-events-module.groovy'
+	include file: 'core/2017-02-15-update-map-module.groovy'
+	include file: 'core/2017-02-15-add-image-map-module.groovy'
+	include file: 'core/2017-03-10-string-to-number-module.groovy'
 }
