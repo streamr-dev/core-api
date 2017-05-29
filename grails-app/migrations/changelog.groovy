@@ -25,7 +25,7 @@ databaseChangeLog = {
 	include file: 'core/2016-03-29-change-canvas-stream-modules-id.groovy'
 	include file: 'core/2016-03-17-drop-ui-channel.groovy'
 	include file: 'core/2016-02-04-scheduler-module-added.groovy'
-	include file: 'core/2016-03-18-add-http-module.groovy'
+	include file: 'core/2016-03-18-add-http-module.groovy'f
 	include file: 'core/2016-05-09-boolean-modules.groovy'
 	include file: 'core/2016-05-09-stream-date-created-and-last-updated.groovy'
 	include file: 'core/2016-05-20-add-sql-module.groovy'
@@ -66,5 +66,11 @@ databaseChangeLog = {
 	include file: 'core/2017-03-08-list-to-events-module.groovy'
 	include file: 'core/2017-02-15-update-map-module.groovy'
 	include file: 'core/2017-02-15-add-image-map-module.groovy'
+	include file: 'core/2017-01-20-ethereum-call-module.groovy'
+	include file: 'core/2017-02-08-ethereum-contract-template-paybyuse.groovy'
+	include file: 'core/2017-02-16-ethereum-contract-constant-module.groovy'
 	include file: 'core/2017-03-10-string-to-number-module.groovy'
+	include file: 'core/2017-03-16-ethereum-contract-template-binarybetting.groovy'
+	include file: 'core/2017-03-28-ethereum-get-events-module.groovy'
+	include file: 'core/2017-04-20-verify-signature-module.groovy'
 }

@@ -5,15 +5,14 @@ import java.security.PrivilegedAction;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import com.unifina.signalpath.Input;
-import com.unifina.signalpath.ModuleWithUI;
-import com.unifina.signalpath.Output;
-import com.unifina.signalpath.SignalPath;
+import com.unifina.datasource.ITimeListener;
+import com.unifina.signalpath.*;
 import com.unifina.utils.Globals;
 
-public abstract class AbstractCustomModule extends ModuleWithUI {
+public abstract class AbstractCustomModule extends ModuleWithUI implements ITimeListener {
 
 	protected transient SimpleDateFormat df = null;
+	private transient AbstractJavaCodeWrapper parentWrapper;
 
 	protected void debug(Object s) {
 		if (df == null) {
@@ -31,11 +30,14 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		AccessController.doPrivileged(new PrivilegedAction<Void>() {
 			@Override
 			public Void run() {
-				pushToUiChannel(msg);
+				parentWrapper.pushToUiChannel(msg);
 				return null;
 			}
 		});
 	}
+
+	@Override
+	public void setTime(Date time) {}
 
 	@Override
 	public void beforeSerialization() {
@@ -49,21 +51,22 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 		readyInputs = null;
 	}
 
-	public void copyStateFromWrapper(SignalPath parentSignalPath,
-									 ArrayList<Input> inputs,
-									 Map inputsByName,
-									 ArrayList<Output> outputs,
-									 Map outputsByName,
-									 HashSet<Input> drivingInputs,
-									 Set<Input> readyInputs,
-									 Globals globals) {
-		this.parentSignalPath = parentSignalPath;
-		this.inputs = new ArrayList<>(inputs);
-		this.inputsByName = new HashMap<>(inputsByName);
-		this.outputs = new ArrayList<>(outputs);
-		this.outputsByName = new HashMap<>(outputsByName);
-		this.drivingInputs = new HashSet<>(drivingInputs);
-		this.readyInputs = readyInputs;
+	void copyStateFromWrapper(StoredCustomModuleState customModuleState, Globals globals) {
+		this.parentSignalPath = customModuleState.getParentSignalPath();
+		this.inputs = customModuleState.getInputs();
+		this.inputsByName = customModuleState.getInputsByName();
+		this.outputs = customModuleState.getOutputs();
+		this.outputsByName = customModuleState.getOutputsByName();
+		this.drivingInputs = customModuleState.getDrivingInputs();
+		this.readyInputs = customModuleState.getReadyInputs();
 		this.setGlobals(globals);
+	}
+
+	void setParentWrapper(AbstractJavaCodeWrapper parentWrapper) {
+		this.parentWrapper = parentWrapper;
+	}
+
+	StoredCustomModuleState getStoredState() {
+		return new StoredCustomModuleState(parentSignalPath, inputs, inputsByName, outputs, outputsByName, drivingInputs, readyInputs);
 	}
 }

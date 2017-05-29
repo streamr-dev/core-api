@@ -1,3 +1,4 @@
+import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 
 /*****
@@ -173,7 +174,7 @@ log4j = {
 /**
  * Tour config
  */
-streamr.tours.enabled = true
+streamr.tours.enabled = false // TODO: change back to true when landing ethereum
 
 /**
  * Migration config
@@ -269,6 +270,17 @@ environments {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
+
+/**
+ * Streamr-web3 Ethereum bridge address
+ */
+streamr.ethereum.defaultNetwork = "rinkeby"
+streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+		ropsten: "http://localhost:3000",
+		rinkeby: "http://localhost:3001"
+]
+streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
+streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
 
 /**
  * Kafka config
