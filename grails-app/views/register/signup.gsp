@@ -4,10 +4,13 @@
     <title>Sign Up</title>
 
 	<r:script>
-	$(document).ready(function() {
-		$('#username').focus()
-	});
+	function reCaptchaSuccess(response) {
+		$("form[name=signupForm]").submit()
+	}
 	</r:script>
+
+	<!-- reCAPTCHA script-->
+	<script src='https://www.google.com/recaptcha/api.js' async></script>
 </head>
 
 <body class="login-page show-sign-in">
@@ -22,7 +25,8 @@
 			<input type="text" name="username" id="username"
 				class="form-control input-lg"
 				placeholder="Email"
-				value="${user.username}">
+				value="${user.username}"
+				autofocus>
 
 			<g:hasErrors bean="${user}" field="username">
 				<span class="text-danger">
@@ -31,8 +35,25 @@
 			</g:hasErrors>
 		</div>
 
+		%{-- If the captcha is changed, the secret key in RegisterController/signup must be changed (recaptchav2.secret/recaptchainvisible.secret) --}%
+
+		%{-- reCaptcha v2 --}%
+		%{--<div class="g-recaptcha" data-sitekey="${grailsApplication.config.recaptchav2.sitekey}" style="margin: 10px 0;"></div>--}%
+		%{--<button class="btn btn-primary btn-block btn-lg">--}%
+			%{--<g:message code="springSecurity.register.button" />--}%
+		%{--</button>--}%
+
+		%{-- invisible reCaptcha --}%
+
 		<div class="form-actions">
-			<input id="loginButton" type="submit" value="${message(code:'springSecurity.register.button', default: 'Sign up')}" class="btn btn-primary btn-block btn-lg">
+			<button class="g-recaptcha btn btn-primary btn-block btn-lg"
+					data-sitekey="${grailsApplication.config.recaptchainvisible.sitekey}"
+					id="signupButton"
+					type="submit"
+					data-callback="reCaptchaSuccess"
+			>
+				<g:message code="springSecurity.register.button" />
+			</button>
 		</div>
 	</g:form>
 </body>

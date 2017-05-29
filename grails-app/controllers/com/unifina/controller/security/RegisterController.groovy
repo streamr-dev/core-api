@@ -1,6 +1,8 @@
 package com.unifina.controller.security
 
+import com.mashape.unirest.http.Unirest
 import com.unifina.domain.security.RegistrationCode
+import grails.converters.JSON
 import grails.util.Environment
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.annotation.Secured
@@ -86,7 +88,7 @@ class RegisterController {
         log.info("Logging in "+user.username+" after registering")
         springSecurityService.reauthenticate(user.username)
 
-        flash.message = "Account created!"
+        flash.message = "IntegrationKey created!"
         redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
     }
 
@@ -98,6 +100,16 @@ class RegisterController {
             render view: 'signup', model: [ user: cmd ]
             return
         }
+
+		def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
+				.field("secret", grailsApplication.config.recaptchainvisible.secret)
+				.field("response", params."g-recaptcha-response")
+				.asJson()
+		if (response.body.jsonObject.success != true) {
+			flash.error = "Confirming reCaptcha failed for some reason. Please refresh page and refill form."
+			render view: 'signup', model: [ user: cmd ]
+			return
+		}
 
 		SignupInvite invite
 		if (Environment.current == Environment.TEST) {
