@@ -200,14 +200,9 @@
             }
             if (webcomponent !== undefined) {
                 var templateName = '#' + webcomponent + '-template'
-                var template = _.template($(templateName)
-                    .html())
+                var template = _.template($(templateName).html())
                 // Can't use the dashboard item id in the url because it might be unsaved
-                var url = this.baseUrl
-                    + 'api/v1/'
-                    + 'dashboards/' + this.model.get('dashboard')
-                    + '/canvases/' + this.model.get('canvas')
-                    + '/modules/' + this.model.get('module')
+                var url = this.baseUrl + 'api/v1/canvases/' + this.model.get('canvas') + '/modules/' + this.model.get('module')
                 this.$el.find('.widget-content')
                     .append(template({
                         url: url
@@ -428,25 +423,17 @@
         },
         
         setEditMode: function(active) {
-            if (active || active === undefined && !$('body')
-                    .hasClass('mmc')) {
-                $('body')
-                    .addClass('mme')
-                $('body')
-                    .removeClass('mmc')
-                $('body')
-                    .addClass('editing')
+            if (active || active === undefined && !$('body').hasClass('mmc')) {
+                $('body').addClass('mme')
+                $('body').removeClass('mmc')
+                $('body').addClass('editing')
             } else {
-                $('body')
-                    .addClass('mmc')
-                $('body')
-                    .removeClass('mme')
-                $('body')
-                    .removeClass('editing')
+                $('body').addClass('mmc')
+                $('body').removeClass('mme')
+                $('body').removeClass('editing')
             }
             
-            $('body')
-                .trigger('classChange')
+            $('body').trigger('classChange')
             
             _.each(this.dashboard.get('items').models, function(item) {
                 item.trigger('resize')
