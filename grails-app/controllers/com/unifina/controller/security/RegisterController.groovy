@@ -102,7 +102,7 @@ class RegisterController {
         }
 
 		def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
-				.field("secret", grailsApplication.config.recaptchainvisible.secret)
+				.field("secret", grailsApplication.config.recaptchav2.secret)
 				.field("response", params."g-recaptcha-response")
 				.asJson()
 		if (response.body.jsonObject.success != true) {
