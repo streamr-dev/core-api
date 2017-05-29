@@ -13,7 +13,8 @@ const inProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
     entry: {
-        profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js')
+        profilePage: path.resolve(root, 'web-app', 'react-app', 'profilePageMain.js'),
+        dashboardPage: path.resolve(root, 'web-app', 'react-app', 'dashboardPageMain.js')
     },
     output: {
         path: path.resolve(root, 'web-app', 'js', 'unifina', 'webpack-bundles'),
@@ -101,7 +102,10 @@ module.exports = {
         new webpack.NoEmitOnErrorsPlugin(),
         new WebpackNotifierPlugin(),
         new WriteFilePlugin(),
-        new webpack.optimize.CommonsChunkPlugin('commons')
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'commons',
+            minChunks: 2
+        })
     ]),
     devtool: !inProduction && 'eval-source-map',
     resolve: {

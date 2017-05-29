@@ -36,8 +36,16 @@ class DashboardController {
 		redirect(action: "show", id: dashboard.id)
 	}
 
-
 	def show() {
+		return [
+			config: grailsApplication.config,
+			id: params.id,
+			user: springSecurityService.currentUser,
+			key: springSecurityService.currentUser?.keys.iterator().next()
+		]
+	}
+
+	def showNew() {
 		return [
 			config: grailsApplication.config,
 			id: params.id,

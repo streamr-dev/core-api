@@ -13,7 +13,7 @@ import {
     DELETE_INTEGRATION_KEY_REQUEST,
     DELETE_INTEGRATION_KEY_SUCCESS,
     DELETE_INTEGRATION_KEY_FAILURE
-} from '../actions/integrationKeys.js'
+} from '../actions/integrationKey.js'
 
 declare var _: any
 

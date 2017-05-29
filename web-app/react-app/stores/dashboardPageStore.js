@@ -5,10 +5,10 @@ import thunk from 'redux-thunk'
 import {createStore, applyMiddleware, compose, combineReducers} from 'redux'
 import  { createLogger } from 'redux-logger'
 
-import integrationKeyReducer from '../reducers/integrationKey.js'
+import dashboardReducer from '../reducers/dashboard.js'
 
 const reducer = combineReducers({
-    integrationKey: integrationKeyReducer,
+    dashboard: dashboardReducer,
 })
 
 const middleware = [thunk]
