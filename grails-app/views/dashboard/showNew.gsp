@@ -16,7 +16,7 @@
 
 	</head>
 
-	<body class="main-menu-fixed dashboard-show mmc">
+	<body class="main-menu-fixed dashboard-show mme editing">
 		<div id="dashboardPageRoot"></div>
 	</body>
 </html>

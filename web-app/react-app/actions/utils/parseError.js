@@ -1,14 +1,11 @@
 // @flow
 
-type Err = {
-    error: string,
-    code?: string
-}
+import type { ApiError } from '../../types'
 
 export default (res: {
     response?: {
-        data: Err
+        data: ApiError
     }
-}) : Err => (res.response || {}).data || {
+}) : ApiError => (res.response || {}).data || res.message || {
     error: 'Something went wrong'
 }

@@ -1,25 +1,28 @@
 // @flux
 
 import React, {Component} from 'react'
+import {connect} from 'react-redux'
 import {Breadcrumb, BreadcrumbItem} from '../../Breadcrumb'
+
+import DashboardItem from './DashboardItem'
 
 declare var Streamr: {
     createLink: Function
 }
 
-type Dashboard = {
-    id: number,
-    name: string,
-    items: Array<{}>
-}
+import type {Dashboard} from '../../../types/dashboard-types'
 
-export default class Editor extends Component {
+class Editor extends Component {
     
     props: {
         dashboard: Dashboard
     }
     
     render() {
+        const dashboard = this.props.dashboard || {
+            name: '',
+            items: []
+        }
         return (
             <div id="content-wrapper" className="scrollable">
                 <Breadcrumb>
@@ -27,10 +30,18 @@ export default class Editor extends Component {
                         Dashboards
                     </BreadcrumbItem>
                     <BreadcrumbItem href={Streamr.createLink('dashboard', 'show', 1)} active={true}>
-                        moi
+                        {dashboard.name}
                     </BreadcrumbItem>
                 </Breadcrumb>
+                <streamr-client id="client" url="ws://dev.streamr/api/v1/ws" autoconnect="true" autodisconnect="false"/>
+                <div>
+                    {dashboard.items.map(dbItem => (
+                        <DashboardItem key={dbItem.canvas + dbItem.module} item={dbItem} dashboard={dashboard} />
+                    ))}
+                </div>
             </div>
         )
     }
 }
+
+export default connect()(Editor)

@@ -6,9 +6,11 @@ import {createStore, applyMiddleware, compose, combineReducers} from 'redux'
 import  { createLogger } from 'redux-logger'
 
 import dashboardReducer from '../reducers/dashboard.js'
+import canvasReducer from '../reducers/canvas.js'
 
 const reducer = combineReducers({
     dashboard: dashboardReducer,
+    canvas: canvasReducer
 })
 
 const middleware = [thunk]
