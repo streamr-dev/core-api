@@ -1,6 +1,6 @@
 // @flow
 
-type Err = {
+export type Err = {
     error: string,
     code?: string
 }
@@ -9,6 +9,12 @@ export default (res: {
     response?: {
         data: Err
     }
-}) : Err => (res.response || {}).data || {
-    error: 'Something went wrong'
+}) : Err => {
+    if (res.response) {
+        return res.response.data
+    } else {
+        return {
+            error: 'Something went wrong'
+        }
+    }
 }

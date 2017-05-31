@@ -7,15 +7,16 @@ import serialize from 'form-serialize'
 
 import styles from './integrationKeyHandlerInput.pcss'
 
-const unCamelCase = str => str
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
-    .replace(/^./, s => s.toUpperCase())
+import {titleCase} from 'change-case'
 
 export default class IntegrationKeyHandlerInput extends React.Component {
     
     form: HTMLFormElement
     onSubmit: Function
+    props: {
+        fields: Array<string>,
+        onNew: Function
+    }
     
     constructor() {
         super()
@@ -42,7 +43,7 @@ export default class IntegrationKeyHandlerInput extends React.Component {
                                 name={field}
                                 type="text"
                                 className={styles.integrationKeyInput}
-                                placeholder={unCamelCase(field)}
+                                placeholder={titleCase(field)}
                             />
                         ))}
                         <InputGroup.Button className={styles.buttonContainer}>
@@ -55,8 +56,4 @@ export default class IntegrationKeyHandlerInput extends React.Component {
             </form>
         )
     }
-}
-IntegrationKeyHandlerInput.propTypes = {
-    fields: array,
-    onNew: func
 }

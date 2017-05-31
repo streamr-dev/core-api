@@ -10,15 +10,15 @@ import org.ethereum.crypto.ECKey
 
 class EthereumIntegrationKeyService {
 
-	IntegrationKey createEthereumAccount(SecUser user, String name, JSONObject json) {
-		String privateKey = trimPrivateKey((String) json.get("privateKey"))
+	IntegrationKey createEthereumAccount(SecUser user, String name, String privateKey) {
+		privateKey = trimPrivateKey(privateKey)
 
 		try {
 			IntegrationKey account = new IntegrationKey()
 			account.setName(name)
 			account.setJson(([
 					privateKey: privateKey,
-					address : getPublicKey(privateKey)
+					address   : "0x" + getPublicKey(privateKey)
 			] as JSON).toString())
 			account.setUser(user)
 			account.setService(IntegrationKey.Service.ETHEREUM)
@@ -31,7 +31,7 @@ class EthereumIntegrationKeyService {
 
 	private static String trimPrivateKey(String privateKey) {
 		if (privateKey.startsWith("0x")) {
-			privateKey = privateKey.split("0x")[1]
+			privateKey = privateKey.substring(2)
 		}
 		return privateKey
 	}

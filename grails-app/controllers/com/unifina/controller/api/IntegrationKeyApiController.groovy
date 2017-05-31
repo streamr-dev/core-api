@@ -24,6 +24,8 @@ class IntegrationKeyApiController {
 			}
 		}
 		def criteria = apiService.createListCriteria(params, ["id"], {
+			eq "user", request.apiUser
+
 			// Filter by exact id
 			if (params.id) {
 				eq "id", params.id
@@ -45,7 +47,7 @@ class IntegrationKeyApiController {
 		}
 		if (request.JSON.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
 			try {
-				account = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, request.JSON.name, request.JSON.json)
+				account = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, request.JSON.name, (String) request.JSON.json.get("privateKey"))
 			} catch (IllegalArgumentException e) {
 				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 			}
@@ -58,7 +60,7 @@ class IntegrationKeyApiController {
 
 	@StreamrApi
 	def delete(String id) {
-		IntegrationKey account = IntegrationKey.findById(id)
+		IntegrationKey account = IntegrationKey.findByIdAndUser(id, request.apiUser)
 		account.delete(flush: true)
 		response.status = 204
 		render ""
