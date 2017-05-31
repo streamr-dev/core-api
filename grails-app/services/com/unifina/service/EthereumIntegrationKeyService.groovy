@@ -3,6 +3,7 @@ package com.unifina.service
 import com.unifina.domain.security.IntegrationKey
 import com.unifina.domain.security.SecUser
 import grails.converters.JSON
+import groovy.transform.CompileStatic
 import org.apache.commons.codec.binary.Hex
 import org.codehaus.groovy.grails.web.json.JSONObject
 
@@ -29,6 +30,11 @@ class EthereumIntegrationKeyService {
 		}
 	}
 
+	List<IntegrationKey> getAllKeysForUser(SecUser user) {
+		IntegrationKey.findAllByServiceAndUser(IntegrationKey.Service.ETHEREUM, user)
+	}
+
+	@CompileStatic
 	private static String trimPrivateKey(String privateKey) {
 		if (privateKey.startsWith("0x")) {
 			privateKey = privateKey.split("0x")[1]
@@ -36,7 +42,8 @@ class EthereumIntegrationKeyService {
 		return privateKey
 	}
 
-	private String getPublicKey(String privateKey) {
+	@CompileStatic
+	private static String getPublicKey(String privateKey) {
 		BigInteger pk = new BigInteger(privateKey, 16)
 		ECKey key = ECKey.fromPrivate(pk)
 		String publicKey = Hex.encodeHexString(key.getAddress())

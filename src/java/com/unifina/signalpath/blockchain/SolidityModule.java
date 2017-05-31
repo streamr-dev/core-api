@@ -9,7 +9,6 @@ import com.mashape.unirest.http.Unirest;
 import com.unifina.signalpath.*;
 import com.unifina.signalpath.blockchain.templates.EthereumModuleOptions;
 import com.unifina.utils.MapTraversal;
-import grails.util.Holders;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -23,6 +22,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	private static final Logger log = Logger.getLogger(SolidityModule.class);
 	protected static final String ADDRESS_PLACEHOLDER = "{{ADDRESS}}";
 
+	private final EthereumAccountParameter ethereumAccount = new EthereumAccountParameter(this, "ethAccount");
 	private Output<EthereumContract> contractOutput = null;
 
 	private EthereumModuleOptions ethereumOptions = new EthereumModuleOptions();
@@ -141,7 +141,7 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	}
 
 	private String replaceDynamicFields(String code) {
-		return code.replace(ADDRESS_PLACEHOLDER, ethereumOptions.getAddress());
+		return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
 	}
 
 	/** @returns EthereumContract with isDeployed() false */
@@ -190,8 +190,8 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		code = replaceDynamicFields(code);
 
 		String bodyJson = new Gson().toJson(ImmutableMap.of(
-			"source", ethereumOptions.getAddress(),
-			"key", ethereumOptions.getPrivateKey(),
+			"source", ethereumAccount.getAddress(),
+			"key", ethereumAccount.getPrivateKey(),
 			"code", code,
 			"args", args,
 			"value", sendWei
