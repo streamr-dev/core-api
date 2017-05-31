@@ -11,20 +11,14 @@ import java.util.Map;
 public class EthereumModuleOptions implements Serializable {
 
 	private String network;
-	private String address;
-	private String privateKey;
 
 	public EthereumModuleOptions() {
 		// default values
 		network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
-		address = "0x0";
-		privateKey = "0x0";
 	}
 
 	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
-		options.add(new ModuleOption("address", address, "string"));
-		options.add(new ModuleOption("privateKey", privateKey, "string"));
 	}
 
 	public void writeNetworkOption(ModuleOptions options) {
@@ -50,16 +44,7 @@ public class EthereumModuleOptions implements Serializable {
 
 	public static EthereumModuleOptions readFrom(ModuleOptions options) {
 		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
-
 		ethOpts.readNetworkOption(options);
-
-		if (options.getOption("address") != null) {
-			ethOpts.setAddress(options.getOption("address").getString());
-		}
-		if (options.getOption("privateKey") != null) {
-			ethOpts.setPrivateKey(options.getOption("privateKey").getString());
-		}
-
 		return ethOpts;
 	}
 
@@ -69,22 +54,6 @@ public class EthereumModuleOptions implements Serializable {
 
 	public void setNetwork(String network) {
 		this.network = network;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public String getPrivateKey() {
-		return privateKey;
-	}
-
-	public void setPrivateKey(String privateKey) {
-		this.privateKey = privateKey;
 	}
 
 	public String getServer() {
