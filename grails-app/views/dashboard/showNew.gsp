@@ -14,6 +14,12 @@
 
 		<r:require module="dashboard-page-webpack-bundle"/>
 
+		<style>
+			body, #dashboardPageRoot {
+				height: 100%;
+			}
+		</style>
+
 	</head>
 
 	<body class="main-menu-fixed dashboard-show mme editing">

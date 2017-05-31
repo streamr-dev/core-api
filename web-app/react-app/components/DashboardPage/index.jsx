@@ -32,7 +32,9 @@ class DashboardPage extends Component {
     
     render() {
         return (
-            <Row>
+            <Row style={{
+                height: '100%'
+            }}>
                 <Sidebar dashboard={this.props.dashboard}/>
                 <Editor dashboard={this.props.dashboard}/>
             </Row>

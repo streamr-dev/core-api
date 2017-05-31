@@ -12,6 +12,7 @@ import com.unifina.domain.security.Permission.Operation
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.signalpath.RuntimeRequest
+import grails.converters.JSON
 import groovy.transform.CompileStatic
 
 class DashboardService {
@@ -33,7 +34,9 @@ class DashboardService {
 	 */
 	@CompileStatic
 	Dashboard findById(Long id, SecUser user) throws NotFoundException, NotPermittedException {
-		return authorizedGetById(id, user, Permission.Operation.READ)
+		Dashboard dashboard = authorizedGetById(id, user, Permission.Operation.READ)
+		dashboard.layout = JSON.parse(dashboard.layout)
+		return dashboard
 	}
 
 	/**
@@ -50,26 +53,43 @@ class DashboardService {
 		dashboard.delete()
 	}
 
-	/**
-	 * Update Dashboard by id and command, and authorize that user is permitted to do so.
-	 * @param id dashboard id
-	 * @param validCommand a save command that has been validated before
-	 * @param user current user
-	 * @return updated dashboard
-	 * @throws NotFoundException when dashboard was not found.
-	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
-	 */
-	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user)
-		throws NotFoundException, NotPermittedException {
-		def dashboard = authorizedGetById(id, user, Permission.Operation.WRITE)
+/**
+ * Create or update Dashboard by command, and authorize that user is permitted to do so.
+ * @param id dashboard id
+ * @param validCommand a save command that has been validated before
+ * @param user current user
+ * @return updated dashboard
+ * @throws NotFoundException when dashboard was not found.
+ * @throws NotPermittedException when dashboard was found but user not permitted to update it
+ */
+	Dashboard createOrUpdate( SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
+		Dashboard dashboard
+		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
+			dashboard = authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)
+		} else {
+			dashboard = new Dashboard(validCommand.toMap() << [user: user])
+		}
 		dashboard.name = validCommand.name
-		if(validCommand.items != null) {
+		if (validCommand.items != null) {
+			def items = validCommand.items.clone()
 			dashboard.items.clear()
-			validCommand.items.each { DashboardItem item ->
+			items.each { DashboardItem item ->
 				dashboard.addToItems(item)
 			}
 		}
 		dashboard.save(failOnError: true)
+	}
+
+	/**
+	 * Just a mapper for constancy
+	 *
+	 * @param id (unused)
+	 * @param validCommand
+	 * @param user
+	 * @return
+	 */
+	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user) {
+		createOrUpdate(validCommand, user)
 	}
 
 	/**

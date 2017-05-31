@@ -2,72 +2,98 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import FontAwesome from 'react-fontawesome'
+import {Button} from 'react-bootstrap'
 
-import {removeDashboardItem} from '../../../../../actions/dashboard'
+import {removeDashboardItem, updateDashboardItem} from '../../../../../actions/dashboard'
+
+import styles from './dashboardItemTitleRow.pcss'
 
 import type {Dashboard, DashboardItem} from '../../../../../types/dashboard-types'
 
 class DashboardItemTitleRow extends Component {
     onRemove: Function
+    toggleEdit: Function
+    saveName: Function
+    nameInput: HTMLInputElement
     props: {
         item: DashboardItem,
         dashboard: Dashboard,
-        dispatch: Function
+        dispatch: Function,
+        className?: string,
+        dragCancelClassName?: string
+    }
+    state: {
+        editing: boolean
     }
     
     constructor() {
         super()
+        this.state = {
+            editing: false
+        }
         this.onRemove = this.onRemove.bind(this)
+        this.toggleEdit = this.toggleEdit.bind(this)
+        this.saveName = this.saveName.bind(this)
     }
     
     onRemove() {
         this.props.dispatch(removeDashboardItem(this.props.dashboard, this.props.item))
     }
     
+    toggleEdit() {
+        this.setState({
+            editing: !this.state.editing
+        })
+    }
+    
+    saveName({target}) {
+        this.props.dispatch(updateDashboardItem(this.props.dashboard, {
+            ...this.props.item,
+            title: target.value
+        }))
+    }
+    
     render() {
-        const {item} = this.props
+        const {item, dragCancelClassName} = this.props
         return (
-            <div className="title stat-cell bg-dark-gray padding-sm text-s text-semibold">
-                <div className="col-xs-7">
-                    <span className="titlebar">
-                        {item.title}
-                    </span>
-                    {/*<input className="titlebar-edit name-input form-control input-sm" type="text" value="Button" placeholder="Title" name="dashboard-item-name"/>*/}
+            <div className={styles.titleRow}>
+                <div className={styles.title}>
+                    {this.state.editing ? (
+                        <input
+                            className={`titlebar-edit name-input form-control input-sm ${dragCancelClassName || ''}`}
+                            type="text"
+                            placeholder="Title"
+                            name="dashboard-item-name"
+                            value={this.props.item.title}
+                            onChange={this.saveName}
+                            onBlur={this.toggleEdit}
+                        />
+                    ) : (
+                        <span>
+                            {item.title}
+                        </span>
+                    )}
                 </div>
-                <div className="panel-heading-controls text-left">
-                    <button className="edit-btn btn btn-xs btn-outline dark" title="Edit title"><i className="fa fa-edit"/></button>
-                    <button className="close-edit btn btn-xs btn-outline dark" title="Ready"><i className="fa fa-check"/></button>
-                    <div className="btn-group btn-group-xs">
-                        <button data-toggle="dropdown" type="button" className="btn btn-outline dark dropdown-toggle" title="Edit size">
-                            <span className="fa fa-expand"/>
-                            &nbsp;
-                            <span className="fa fa-caret-down"/>
+                <div className={styles.controlContainer}>
+                    <div className={styles.controls}>
+                        <Button
+                            bsSize="xs"
+                            bsStyle="default"
+                            className={`btn-outline dark ${dragCancelClassName || ''}`}
+                            title={this.state.editing ? 'Ready' : 'Edit title'}
+                            onClick={this.toggleEdit}
+                        >
+                            <FontAwesome name={this.state.editing ? 'check' : 'edit'}/>
+                        </Button>
+                        <button
+                            className={`delete-btn btn btn-xs btn-outline dark ${dragCancelClassName || ''}`}
+                            title="Remove"
+                            onClick={this.onRemove}
+                        >
+                            <i className="fa fa-times"/>
                         </button>
-                        <ul className="dropdown-menu pull-right">
-                            <li className="checked">
-                                <a href="#" className="make-small-btn">
-                                    <i className="fa fa-check"/> Small
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="make-medium-btn">
-                                    <i className="fa fa-check"/> Medium
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="make-large-btn">
-                                    <i className="fa fa-check"/> Large
-                                </a>
-                            </li>
-                        </ul>
                     </div>
-                    <button
-                        className="delete-btn btn btn-xs btn-outline dark"
-                        title="Remove"
-                        onClick={this.onRemove}
-                    >
-                        <i className="fa fa-times"/>
-                    </button>
                 </div>
             </div>
         )

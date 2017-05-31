@@ -37,13 +37,14 @@ class ModuleInModuleList extends Component {
     onClick() {
         const dbItem: DashboardItem = {
             id: null,
+            tempId: this.props.canvasId + this.props.module.hash,
             dashboard: this.props.dashboard.id,
             module: this.props.module.hash,
             canvas: this.props.canvasId,
             webcomponent: this.props.module.uiChannel.webcomponent,
             size: 'small',
             ord: 0,
-            name: 'Unknown'
+            title: this.props.module.name
         }
         if (this.props.checked) {
             this.props.dispatch(removeDashboardItem(this.props.dashboard, dbItem))

@@ -118,6 +118,32 @@ export const getMyDashboardPermissions = (id: number) => (dispatch: Function) =>
         })
 }
 
+export const removeDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
+    ...dashboard,
+    items: _.reject(dashboard.items, it => it.canvas === item.canvas && it.module === item.module)
+})
+
+export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
+    ...dashboard,
+    items: [
+        ...dashboard.items,
+        item
+    ]
+})
+
+export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
+    ...dashboard,
+    items: [
+        ...(_.reject(dashboard.items, it => it.canvas === item.canvas && it.module === item.module)),
+        item
+    ]
+})
+
+export const updateDashboard = (dashboard: Dashboard) => ({
+    type: UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
+    dashboard
+})
+
 const getAndReplaceDashboardsRequest = () => ({
     type: GET_AND_REPLACE_DASHBOARDS_REQUEST,
 })
@@ -204,22 +230,4 @@ const deleteDashboardFailure = (error: ApiError) => ({
 const getMyDashboardPermissionsFailure = (error: ApiError) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
     error
-})
-
-export const updateDashboard = (dashboard: Dashboard) => ({
-    type: UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
-    dashboard
-})
-
-export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
-    ...dashboard,
-    items: [
-        ...dashboard.items,
-        item
-    ]
-})
-
-export const removeDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
-    ...dashboard,
-    items: _.reject(dashboard.items, it => item.canvas === it.canvas && it.module === item.module)
 })

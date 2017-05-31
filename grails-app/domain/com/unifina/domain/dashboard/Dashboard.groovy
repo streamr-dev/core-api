@@ -14,6 +14,8 @@ class Dashboard {
 
 	SortedSet<DashboardItem> items
 
+	String layout // JSON
+
 	static hasMany = [items: DashboardItem]
 
 	static constraints = {
@@ -39,6 +41,7 @@ class Dashboard {
 			id: id,
 			name: name,
 			items: items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
+			layout: layout
 		]
 	}
 

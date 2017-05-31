@@ -5,6 +5,7 @@ import grails.validation.Validateable
 
 @Validateable
 class SaveDashboardCommand {
+	String id
 	String name
 	SortedSet<DashboardItem> items
 

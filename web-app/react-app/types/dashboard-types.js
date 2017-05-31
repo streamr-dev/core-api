@@ -26,10 +26,20 @@ export type DashboardReducerAction = {
 
 export type DashboardItem = {
     id: ?number,
+    tempId?: number,
     title: string,
     dashboard: Dashboard.id,
     module: number,
     canvas: Canvas.id,
     size: string,
-    ord: number
+    ord: number,
+    layout?: {
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        static?: boolean,
+        minW?: number,
+        minH?: number
+    }
 }
