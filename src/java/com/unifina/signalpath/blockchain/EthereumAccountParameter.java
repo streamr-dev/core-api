@@ -9,8 +9,7 @@ import com.unifina.signalpath.Parameter;
 import com.unifina.signalpath.PossibleValue;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	EthereumAccountParameter(AbstractSignalPathModule owner, String name) {
@@ -20,13 +19,14 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 
 	@Override
 	public IntegrationKey parseValue(String id) {
-		return (IntegrationKey) InvokerHelper.invokeMethod(IntegrationKey.class, "get", id);
+		return (IntegrationKey) InvokerHelper.invokeStaticMethod(IntegrationKey.class, "findByIdAndService",
+			new Object[]{id, "ETHEREUM"});
 	}
 
 	String getAddress() {
 		if (hasValue()) {
 			checkPermission();
-			return (String) getValue().toMap().get("address");
+			return (String) ((Map) getValue().toMap().get("json")).get("address");
 		}
 		return null;
 	}
@@ -34,7 +34,7 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	String getPrivateKey() {
 		if (hasValue()) {
 			checkPermission();
-			return (String) getValue().toMap().get("privateKey");
+			return (String) ((Map) getValue().toMap().get("json")).get("privateKey");
 		}
 		return null;
 	}
@@ -55,7 +55,11 @@ class EthereumAccountParameter extends Parameter<IntegrationKey> {
 	@Override
 	protected List<PossibleValue> getPossibleValues() {
 		EthereumIntegrationKeyService service = getOwner().getGlobals().getBean(EthereumIntegrationKeyService.class);
-		List<IntegrationKey> integrationKeys = service.getAllKeysForUser(getOwner().getGlobals().getUser());
+		Set<IntegrationKey> integrationKeys = new LinkedHashSet<>(service.getAllKeysForUser(getOwner().getGlobals().getUser()));
+		if (hasValue()) {
+			integrationKeys.add(getValue());
+		}
+
 
 		List<PossibleValue> possibleValues = new ArrayList<>();
 		possibleValues.add(new PossibleValue("(none)", null));
