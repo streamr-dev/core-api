@@ -123,10 +123,6 @@ public class RuntimeRequest extends LinkedHashMap<String, Object> implements ITi
 			return readString("canvases");
 		}
 
-		public Long readDashboardId() {
-			return readLong("dashboards");
-		}
-
 		public Integer readModuleId() {
 			return readInt("modules");
 		}

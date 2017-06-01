@@ -70,76 +70,78 @@
     </head>
     <body class="canvas-list-page">
 		
-	<ui:flashMessage/>
+		<ui:flashMessage/>
 
-	<div class="panel list-panel">
-		<div class="panel-heading">
-			<span class="panel-title"> <g:message
-					code="canvas.list.label" />
-			</span>
-			<div class="panel-heading-controls">
-				<div class="hidden-xs">
-					<g:render template="canvasListSearch"/>
+		<div class="btn-group toolbar">
+			<a id="createButton" class="btn btn-primary" href="${createLink(action:'editor')}">
+				<i class="fa fa-plus"></i> Create Canvas
+			</a>
+		</div>
+
+		<div class="panel list-panel">
+			<div class="panel-heading">
+				<span class="panel-title"> <g:message
+						code="canvas.list.label" />
+				</span>
+				<div class="panel-heading-controls">
+					<div class="hidden-xs">
+						<g:render template="canvasListSearch"/>
+					</div>
 				</div>
 			</div>
-		</div>
-
-		<div class="panel-body">
-			<div class="hidden-sm hidden-md hidden-lg">
-				<g:render template="canvasListSearch"/>
-			</div>
-			<ui:table>
-				<ui:thead>
-					<ui:tr>
-						<ui:th><g:message code="canvas.name.label" /></ui:th>
-						<ui:th><g:message code="canvas.state.label" /></ui:th>
-						<ui:th class="hidden-xs"><g:message code="canvas.updated.label" /></ui:th>
-						<ui:th class="button-column"></ui:th>
-					</ui:tr>
-				</ui:thead>
-				<ui:tbody>
-					<g:each in="${canvases}" var="canvas">
-						<ui:tr link="${createLink(controller:'canvas', action:'editor', id:canvas.id) }" data-id="${canvas.id }">
-							<ui:td>
-								${fieldValue(bean: canvas, field: "name")}
-							</ui:td>
-							<ui:td>
-								<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
-							</ui:td>
-							<ui:td class="hidden-xs">
-								<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
-							</ui:td>
-							<ui:td class="button-column">
-								<g:if test="${writableCanvases.contains(canvas) || shareableCanvases.contains(canvas)}">
-									<div class="dropdown">
-										<button class="canvas-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
-											<i class="navbar-icon fa fa-caret-down"></i>
-										</button>
-										<ul class="dropdown-menu pull-right">
-											<g:if test="${shareableCanvases.contains(canvas)}">
-												<li>
-													<ui:shareButton url="${createLink(uri: "/api/v1/canvases/$canvas.id")}" name="Canvas ${canvas.name}" type="span">Share</ui:shareButton>
-												</li>
-											</g:if>
-											<g:if test="${writableCanvases.contains(canvas)}">
-												<li>
-													<span data-id="${canvas.id}" class="delete-button confirm">
-														<i class="fa fa-trash-o"></i> Delete canvas
-													</span>
-												</li>
-											</g:if>
-										</ul>
-									</div>
-								</g:if>
-							</ui:td>
+			<div class="panel-body">
+				<ui:table>
+					<ui:thead>
+						<ui:tr>
+							<ui:th><g:message code="canvas.name.label" /></ui:th>
+							<ui:th><g:message code="canvas.state.label" /></ui:th>
+							<ui:th class="hidden-xs"><g:message code="canvas.updated.label" /></ui:th>
+							<ui:th class="button-column" />
 						</ui:tr>
-					</g:each>
-				</ui:tbody>
-			</ui:table>
+					</ui:thead>
+					<ui:tbody>
+						<g:each in="${canvases}" var="canvas">
+							<ui:tr link="${createLink(controller:'canvas', action:'editor', id:canvas.id) }" data-id="${canvas.id }">
+								<ui:td>
+									${fieldValue(bean: canvas, field: "name")}
+								</ui:td>
+								<ui:td>
+									<span class="label ${canvas.state == com.unifina.domain.signalpath.Canvas.State.RUNNING ? "label-primary" : "label-default"}">${canvas.state.id.toLowerCase()}</span>
+								</ui:td>
+								<ui:td class="hidden-xs">
+									<g:formatDate date="${canvas.dateCreated}" formatName="default.date.format" timeZone="${user.timezone}" />
+								</ui:td>
+								<ui:td class="button-column">
+									<g:if test="${writableCanvases.contains(canvas) || shareableCanvases.contains(canvas)}">
+										<div class="streamr-dropdown">
+											<button class="canvas-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
+												<i class="navbar-icon fa fa-caret-down"></i>
+											</button>
+											<ul class="dropdown-menu pull-right">
+												<g:if test="${shareableCanvases.contains(canvas)}">
+													<li>
+														<ui:shareButton url="${createLink(uri: "/api/v1/canvases/$canvas.id")}" name="Canvas ${canvas.name}" type="span">Share</ui:shareButton>
+													</li>
+												</g:if>
+												<g:if test="${writableCanvases.contains(canvas)}">
+													<li>
+														<span data-id="${canvas.id}" class="delete-canvas-link confirm">
+															<i class="fa fa-trash-o"></i> Delete canvas
+														</span>
+													</li>
+												</g:if>
+											</ul>
+										</div>
+									</g:if>
+								</ui:td>
+							</ui:tr>
+						</g:each>
+					</ui:tbody>
+				</ui:table>
+			</div>
+			<%-- end panel body --%>
 		</div>
-		<%-- end panel body --%>
-	</div>
-	<%-- end panel --%>
+		<%-- end panel --%>
 
-</body>
+	</body>
 </html>
