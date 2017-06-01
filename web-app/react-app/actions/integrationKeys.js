@@ -25,11 +25,7 @@ declare var Streamr: {
     createLink: Function
 }
 
-type IntegrationKey = {
-    name: string,
-    service: string,
-    json: {}
-}
+import type {IntegrationKey} from '../types/user-types.js'
 
 import type {Err} from './utils/parseError'
 

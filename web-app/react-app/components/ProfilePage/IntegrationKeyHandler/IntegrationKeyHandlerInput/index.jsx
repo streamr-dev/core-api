@@ -1,7 +1,6 @@
 // @flow
 
 import React from 'react'
-import {func, array} from 'prop-types'
 import {FormControl, InputGroup, FormGroup, Button} from 'react-bootstrap'
 import serialize from 'form-serialize'
 

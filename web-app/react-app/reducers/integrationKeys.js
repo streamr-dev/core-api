@@ -17,11 +17,7 @@ import {
 
 declare var _: any
 
-type IntegrationKey = {
-    name: string,
-    type: string,
-    json: {}
-}
+import type {IntegrationKey} from '../types/user-types.js'
 
 type State = {
     listsByService?: {
@@ -46,7 +42,7 @@ const initialState = {
     fetching: false
 }
 
-const integrationKey = function(state: State = initialState, action: Action) : State {
+export default function(state: State = initialState, action: Action) : State {
     
     switch (action.type) {
         case GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST:
@@ -60,7 +56,7 @@ const integrationKey = function(state: State = initialState, action: Action) : S
         case GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS:
             return {
                 ...state,
-                listsByService: _.groupBy(action.integrationKeys, integrationKey => integrationKey.type),
+                listsByService: _.groupBy(action.integrationKeys, integrationKey => integrationKey.service),
                 fetching: false,
                 error: null
             }
@@ -79,18 +75,18 @@ const integrationKey = function(state: State = initialState, action: Action) : S
             }
         }
         case CREATE_INTEGRATION_KEY_SUCCESS: {
-            if (!action.integrationKey || !action.integrationKey.type) {
-                throw new Error(`${GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS} requires action.integrationKey and action.integrationKey.type`)
+            if (!action.integrationKey || !action.integrationKey.service) {
+                throw new Error(`${GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS} requires action.integrationKey and action.integrationKey.service`)
             }
             // These are just to make sure that flow is happy
             const listsByService = state.listsByService || {}
-            const existing = listsByService[action.integrationKey.type] || []
+            const existing = listsByService[action.integrationKey.service] || []
             
             return {
                 ...state,
                 listsByService: {
                     ...listsByService,
-                    [action.integrationKey.type]: [
+                    [action.integrationKey.service]: [
                         ...existing,
                         action.integrationKey
                     ]
@@ -120,5 +116,3 @@ const integrationKey = function(state: State = initialState, action: Action) : S
             return state
     }
 }
-
-export default integrationKey
