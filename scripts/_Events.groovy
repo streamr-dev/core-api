@@ -23,7 +23,7 @@ eventTestPhaseStart = { args ->
 	System.properties["grails.test.phase"] = args
 }
 
-eventCompileStart = { args ->
+eventPackagingEnd = { args ->
 	println "Running webpack build"
 	Runtime runtime = Runtime.getRuntime()
 	Process process = runtime.exec("npm run build")
