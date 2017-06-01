@@ -35,12 +35,20 @@
 			})
 		</r:script>
     </head>
-    <body class="stream-show">
-    	<ui:breadcrumb>
-			<g:render template="/stream/breadcrumbList" model="[stream:stream]"/>
-			<g:render template="/stream/breadcrumbShow" model="[stream:stream, active:true]"/>
+    <body class="stream-show main-menu-fixed">
+		<ui:breadcrumb>
+			<li>
+				<g:link controller="stream" action="list">
+					<g:message code="stream.list.label"/>
+				</g:link>
+			</li>
+			<li class="active">
+				<g:link controller="stream" action="show" id="$stream.id">
+					${ stream.name }
+				</g:link>
+			</li>
 		</ui:breadcrumb>
-	
+
 		<ui:flashMessage/>
 
 		<div class="row">
@@ -82,24 +90,23 @@
 					<div class="panel-body">
 
 						<ui:labeled label="${message(code:"stream.name.label")}">
-					    	${stream.name}
+							${stream.name}
 						</ui:labeled>
-						
+
 						<ui:labeled label="${message(code:"stream.description.label")}">
-						    	${stream.description}
+								${stream.description}
 						</ui:labeled>
-						
+
 						<ui:labeled label="${message(code:"stream.type.label")}">
-						    	${stream.feed.name}
+								${stream.feed.name}
 						</ui:labeled>
 					</div>
 				</div>
 			</div>
-			
+
 			<g:include action="details" id="${stream.id}"/>
 
 
 		</div>
-		
     </body>
 </html>

@@ -53,15 +53,15 @@ class DashboardService {
 		dashboard.delete()
 	}
 
-/**
- * Create or update Dashboard by command, and authorize that user is permitted to do so.
- * @param id dashboard id
- * @param validCommand a save command that has been validated before
- * @param user current user
- * @return updated dashboard
- * @throws NotFoundException when dashboard was not found.
- * @throws NotPermittedException when dashboard was found but user not permitted to update it
- */
+	/**
+	 * Create or update Dashboard by command, and authorize that user is permitted to do so.
+	 * @param id dashboard id
+	 * @param validCommand a save command that has been validated before
+	 * @param user current user
+	 * @return updated dashboard
+	 * @throws NotFoundException when dashboard was not found.
+	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
+	 */
 	Dashboard createOrUpdate( SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
 		Dashboard dashboard
 		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
@@ -197,10 +197,9 @@ class DashboardService {
 	}
 
 	@CompileStatic
-	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
-		Dashboard dashboard = authorizedGetById(pathReader.readDashboardId(), user, Operation.READ)
 		Canvas canvas = Canvas.get(pathReader.readCanvasId());
 		Integer moduleId = pathReader.readModuleId();
 
@@ -208,7 +207,6 @@ class DashboardService {
 		// If yes, then the user is authenticated to view that widget by having access to the Dashboard.
 		// Otherwise, the user must have access to the Canvas itself.
 		DashboardItem item = (DashboardItem) DashboardItem.withCriteria(uniqueResult: true) {
-			eq("dashboard", dashboard)
 			eq("canvas", canvas)
 			eq("module", moduleId)
 		}
@@ -216,11 +214,11 @@ class DashboardService {
 		if (item) {
 			Set<Operation> checkedOperations = new HashSet<>()
 			checkedOperations.add(Operation.READ)
-			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace("dashboards/$dashboard.id/", ""), path, checkedOperations)
+			RuntimeRequest request = new RuntimeRequest(msg, user, canvas, path.replace(/dashboards\/.+\//, ""), path, checkedOperations)
 			return request
 		}
 		else {
-			return signalPathService.buildRuntimeRequest(msg, path.replace("dashboards/$dashboard.id/", ""), path, user)
+			return signalPathService.buildRuntimeRequest(msg, path.replace(path.replace(/dashboards\/.+\//, ""), ""), path, user)
 		}
 	}
 }

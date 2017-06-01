@@ -16,6 +16,7 @@ import spock.lang.Shared
 @Mixin(ConfirmationMixin)
 @Mixin(StreamMixin)
 @TestFor(CanvasController) // for JSON conversion to work
+
 class ExportCSVFunctionalSpec extends LoginTester1Spec {
 
 	@Shared StreamService streamService
@@ -30,11 +31,7 @@ class ExportCSVFunctionalSpec extends LoginTester1Spec {
 
 	void "ExportCSV module produces a file"() {
 		setup: "create stream"
-		to StreamCreatePage
-		def streamName = "ExportCSVFunctionalSpec" + System.currentTimeMillis()
-		name << streamName
-		nextButton.click()
-		waitFor { at StreamShowPage }
+		createStream("ExportCSVFunctionalSpec" + System.currentTimeMillis())
 
 		and: "produce data to stream"
 		String topicId = streamId.text()

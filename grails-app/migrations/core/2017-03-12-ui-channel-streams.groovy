@@ -17,7 +17,7 @@ databaseChangeLog = {
 
 	changeSet(author: "admin (generated)", id: "1489340226120-3") {
 		addColumn(tableName: "stream") {
-			column(name: "ui_channel_path", type: "varchar(1024)")
+			column(name: "ui_channel_path", type: "varchar(20000)")
 		}
 	}
 

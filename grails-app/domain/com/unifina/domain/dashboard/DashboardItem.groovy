@@ -1,6 +1,7 @@
 package com.unifina.domain.dashboard
 
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.utils.IdGenerator
 
 class DashboardItem implements Comparable {
 

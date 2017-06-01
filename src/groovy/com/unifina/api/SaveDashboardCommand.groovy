@@ -6,10 +6,15 @@ import grails.validation.Validateable
 @Validateable
 class SaveDashboardCommand {
 	String id
+
 	String name
 	SortedSet<DashboardItem> items
 
 	static constraints = {
 		name(blank: false)
+	}
+
+	Map toMap() {
+		[name: name, items: items]
 	}
 }
