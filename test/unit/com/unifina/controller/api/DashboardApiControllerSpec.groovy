@@ -195,14 +195,19 @@ class DashboardApiControllerSpec extends Specification {
 		thrown(ValidationException)
 	}
 
-	def "save() creates dashboard"() {
+	def "save() calls dashboardService.create()"() {
+		setup:
+		SortedSet<DashboardItem> items = new TreeSet<DashboardItem>()
+		items.add(new DashboardItem(title: "test1", ord: new Integer(0)))
+		items.add(new DashboardItem(title: "test2", ord: new Integer(1)))
 
-		Long nextId = dashboards.last().id + 1
+		def dashboard = Mock(Dashboard)
 
 		when:
 		request.addHeader("Authorization", "Token myApiKey")
 		request.JSON = [
 			name: "new dashboard",
+			items: items
 		]
 		request.requestURI = "/api/v1/dashboards"
 		withFilters(action: "save") {
@@ -211,12 +216,10 @@ class DashboardApiControllerSpec extends Specification {
 
 		then:
 		response.status == 200
-		response.json == [
-			id: nextId,
-			name: "new dashboard",
-			items: []
-		]
-		Dashboard.findById(nextId) != null
+		1 * dashboardService.create(_, me) >> {
+			dashboard
+		}
+		1 * dashboard.toMap()
 	}
 
 	def "update() throws ValidationException given incomplete json"() {

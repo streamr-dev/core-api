@@ -12,6 +12,8 @@
 			<g:render template="/layouts/topBanner"/>
 	
 	        <g:layoutBody />
+
+			<div id="main-menu-bg"></div>
         
         </div>
 

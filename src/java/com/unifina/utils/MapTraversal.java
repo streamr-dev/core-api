@@ -102,13 +102,20 @@ public class MapTraversal {
 			return ((Number) raw).doubleValue();
 		else return Double.parseDouble(raw.toString());
 	}
-	
-	public static Boolean getBoolean(Map map, String name) {
+
+	public static Boolean getBoolean(Map map, String name, boolean defaultValue) {
 		Object raw = getProperty(map,name);
-		if (raw==null) return false;
-		else if (raw instanceof Boolean)
+		if (raw == null) {
+			return defaultValue;
+		} else if (raw instanceof Boolean) {
 			return (Boolean) raw;
-		else return Boolean.parseBoolean(raw.toString());
+		} else {
+			return Boolean.parseBoolean(raw.toString());
+		}
+	}
+
+	public static Boolean getBoolean(Map map, String name) {
+		return getBoolean(map, name, false);
 	}
 	
 	public static Date getDate(Map map, String name, SimpleDateFormat df) {
