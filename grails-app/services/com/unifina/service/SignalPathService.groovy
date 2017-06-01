@@ -9,6 +9,7 @@ import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
 import com.unifina.signalpath.AbstractSignalPathModule
@@ -176,11 +177,11 @@ class SignalPathService {
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (canvas.isNotSerialized() || canvas.adhoc) {
+		if (canvas.serialization == null || canvas.adhoc) {
 			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
 		} else {
-			SignalPath sp = serializationService.deserialize(canvas.serialized)
+			SignalPath sp = serializationService.deserialize(canvas.serialization.bytes)
 			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 		}
@@ -286,7 +287,7 @@ class SignalPathService {
 	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
 		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getOriginalPath() + "/request?local=true")
-		return apiService.post(url, req, req.getUser())
+		return apiService.post(url, req, req.getUser().keys.iterator().next())
 	}
 
 	private SignalPathRunner getLocalRunner(Canvas canvas) {
@@ -294,7 +295,7 @@ class SignalPathService {
 	}
 
 	@CompileStatic
-	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
@@ -446,26 +447,36 @@ class SignalPathService {
 	@Transactional
 	def saveState(SignalPath sp) {
 		long startTime = System.currentTimeMillis()
-		Canvas canvas = sp.canvas
+		Canvas canvas = Canvas.get(sp.canvas.id)
 
 		try {
-			canvas.serialized = serializationService.serialize(sp)
-			canvas.serializationTime = sp.globals.time
-			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
-				[canvas.serialized, canvas.serializationTime, canvas.id])
+			boolean isFirst = canvas.serialization == null
+			def serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
+
+			serialization.bytes = serializationService.serialize(sp)
+			serialization.date = sp.globals.time
+			serialization.save(failOnError: true, flush: true)
+			canvas.serialization = serialization
+
+			if (isFirst) {
+				Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+			}
 			long timeTaken = System.currentTimeMillis() - startTime
-			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes, processing time: ${timeTaken} ms)")
+			log.info("Canvas " + canvas.id + " serialized (size: ${serialization.bytes.length} bytes, processing time: ${timeTaken} ms)")
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
+		} finally {
+			// Save memory by removing reference to the bytes to get them gc'ed
+			canvas.serialization?.bytes = null
 		}
 	}
 
 	@Transactional
 	def clearState(Canvas canvas) {
-		canvas.serialized = null
-		canvas.serializationTime = null
+		canvas.serialization?.delete()
+		canvas.serialization = null
 		canvas.save(failOnError: true)
-		log.info("Canvas " + canvas.id + " serialized state cleared.")
+		log.info("Canvas $canvas.id serialized state cleared.")
 	}
 }

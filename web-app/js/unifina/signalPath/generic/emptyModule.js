@@ -164,7 +164,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 					var div = prot.createOption(key, prot.jsonData.options[key]);
 					$optionEditor.append(div);
 					// Store reference to the JSON option
-					$(div).data("option",prot.jsonData.options[key]);
+					$(div).data("option", prot.jsonData.options[key]);
 				})
 				
 				bootbox.dialog({
@@ -412,6 +412,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var div = $("<div class='option'></div>");
 		var title = $("<span class='optionTitle'>" + key + "</span>").appendTo(div);
 		var value = $("<span class='optionValue'></span>").appendTo(div);
+		var input
 
 		if (option.possibleValues) {
 			var $select = $("<select>");
@@ -426,11 +427,20 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			});
 			value.append($select);
 		} else if (option.type == "int" || option.type == "double" || option.type == "string") {
-			var input = $("<input type='text'>");
+			input = $("<input type='text'>").appendTo(value);
 			input.attr("value", option.value);
-			value.append(input);
 		} else if (option.type == "boolean") {
 			value.append("<select><option value='true' " + (option.value ? "selected='selected'" : "") + ">true</option><option value='false' " + (!option.value ? "selected='selected'" : "") + ">false</option></select>");
+		} else if (option.type == "color") {
+			input = $("<input type='text' class='parameterInput colorInput form-control'/>").appendTo(value)
+			input.spectrum({
+				preferredFormat: "rgb",
+				showInput: true,
+				showButtons: false
+			})
+			if (option.value) {
+				input.spectrum("set", option.value)
+			}
 		}
 		return div;
 	}
@@ -448,6 +458,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			option.value = inputText;
 		} else if (option.type == "boolean") {
 			option.value = (inputText == "true");
+		} else if (option.type == "color") {
+			option.value = inputText
 		}
 	}
 	prot.updateOption = updateOption;

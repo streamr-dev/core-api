@@ -91,9 +91,6 @@ modules = {
 		dependsOn 'jquery, jquery-migrate'
 		resource url:[dir:'js/atmosphere', file:'jquery.atmosphere.js', plugin: 'unifina-core']
 	}
-	"socket-io" {
-		resource url:[dir:'js/socket.io-1.3.7', file:'socket.io-1.3.7.min.js', plugin: 'unifina-core']
-	}
 	hotkeys {
 		dependsOn 'jquery'
 		resource url:[dir:'js/hotkeys', file:'jquery.hotkeys.js', plugin: 'unifina-core']
@@ -143,11 +140,12 @@ modules = {
 		resource url:[dir:'js/dropzone', file:'dropzone.js', plugin: 'unifina-core']
 	}
 	mathjax {
-		resource url:'https://cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML'
+		resource url:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.2.0/MathJax.js?config=TeX-AMS_HTML'
 	}
 	switcher {
 		resource url:[dir:'js/pixel-admin', file:'switcher.js', plugin:'unifina-core']
 	}
+	// color picker (for search)
 	spectrum {
 		resource url:[dir:'js/spectrum', file:'spectrum.js', plugin:'unifina-core']
 		resource url:[dir:'js/spectrum', file:'spectrum.css', plugin:'unifina-core']
@@ -158,6 +156,9 @@ modules = {
 	'moment-timezone' {
 		dependsOn 'moment'
 		resource url:[dir:'js/moment', file:'moment-timezone-with-data-2010-2020.js', plugin:'unifina-core']
+	}
+	clipboardjs {
+		resource url:[dir:'js/clipboardjs', file:'clipboard.js', plugin:'unifina-core']
 	}
 
 	/**
@@ -172,7 +173,7 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap'
+		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap, name-editor'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
@@ -223,7 +224,6 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
-		dependsOn 'socket-io'
 		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'streamr-chart' {
@@ -256,13 +256,19 @@ modules = {
 	'streamr-table' {
 		resource url:[dir:'js/unifina/streamr-table', file:'streamr-table.js', plugin: 'unifina-core']
 	}
+	'streamr-credentials-control' {
+		dependsOn 'backbone, streamr, clipboardjs, bootbox'
+		resource url:[dir:'js/unifina/streamr-credentials-control', file:'streamr-credentials-control.js', plugin:'unifina-core']
+	}
 	'scrollspy-helper' {
 		resource url:[dir:'js/unifina/scrollspy-helper', file:'scrollspy-helper.js', plugin: 'unifina-core']
 	}
 	'canvas-controls' {
 		dependsOn 'signalpath-core, backbone'
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
+	}
+	'name-editor' {
+		resource url:[dir:'js/unifina/streamr-name-editor', file:'streamr-name-editor.js', plugin: 'unifina-core']
 	}
 	'confirm-button' {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
@@ -292,6 +298,8 @@ modules = {
 		dependsOn 'lodash'
 		dependsOn 'key-value-editor'
 		dependsOn 'list-editor'
+		dependsOn 'confirm-button'
+		dependsOn 'name-editor'
 		dependsOn 'draggabilly'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
@@ -307,6 +315,7 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'chartModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'heatmapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/signalPath/specific', file:'imageMapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']

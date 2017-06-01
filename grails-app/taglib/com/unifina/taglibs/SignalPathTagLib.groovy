@@ -307,17 +307,7 @@ class SignalPathTagLib {
 
 			// save as
 			\$('#saveAsButton').click(function() {
-				bootbox.prompt({
-					title: 'Save As..',
-					callback: function(saveAsName) {
-						if (!saveAsName)
-							return;
-
-						SignalPath.saveAs(saveAsName)
-					},
-					value: SignalPath.getName(),
-					className: 'save-as-name-dialog' 
-				})
+				saveAsAndAskName()
 			})
 
 			

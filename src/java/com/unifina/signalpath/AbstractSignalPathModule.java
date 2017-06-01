@@ -154,6 +154,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 		addInput(input, input.getName());
 	}
 
+	public void addInputs(Input... inputs) {
+		for (Input input : inputs) {
+			addInput(input);
+		}
+	}
+
 	protected void addInput(Input input, String name) {
 		if (inputs.contains(input)) {
 			inputs.remove(input);
@@ -200,6 +206,12 @@ public abstract class AbstractSignalPathModule implements IEventRecipient, IDayL
 
 		for (Object alias : output.getAliases()) {
 			outputsByName.put(alias.toString(), output);
+		}
+	}
+
+	public void addOutputs(Output... outputs) {
+		for (Output output : outputs) {
+			addOutput(output);
 		}
 	}
 

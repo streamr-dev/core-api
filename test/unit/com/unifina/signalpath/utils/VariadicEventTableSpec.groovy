@@ -17,11 +17,7 @@ class VariadicEventTableSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = setupModule(
-				new VariadicEventTable(),
-				[uiChannel: [id: "uiChannel"]],
-				new SignalPath(),
-				mockGlobals([:], new SecUser(timezone: "UTC")))
+		module = setupModule(new VariadicEventTable(), [uiChannel: [id: "uiChannel"]])
 
 		// Call getInput to make sure the inputs exist
 		module.getInput("in1")

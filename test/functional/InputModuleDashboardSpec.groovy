@@ -117,7 +117,9 @@ class InputModuleDashboardSpec extends LoginTester1Spec {
 		sendBtn = findDashboardItem("TextField").find(".btn.send-btn")
 		then: "The text in the textField is textFieldTest"
 		// Geb's own .text() didn't work for some reason
-		js.exec("return \$('streamr-text-field textarea').val()") == "textFieldTest"
+		waitFor {
+			js.exec("return \$('streamr-text-field textarea').val()") == "textFieldTest"
+		}
 
 		when: "Text changed and sendButton clicked"
 		textField << "2"

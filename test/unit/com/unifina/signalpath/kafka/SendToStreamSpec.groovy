@@ -30,21 +30,21 @@ import java.security.AccessControlException
 class SendToStreamSpec extends BeanMockingSpecification {
 
 	static class AllPermissionService extends PermissionService {
-		@Override boolean canRead(SecUser user, resource) { return true }
-		@Override boolean canWrite(SecUser user, resource) { return true }
-		@Override boolean canShare(SecUser user, resource) { return true }
+		@Override boolean canRead(user, resource) { return true }
+		@Override boolean canWrite(user, resource) { return true }
+		@Override boolean canShare(user, resource) { return true }
 	}
 
 	static class ReadPermissionService extends PermissionService {
-		@Override boolean canRead(SecUser user, resource) { return true }
-		@Override boolean canWrite(SecUser user, resource) { return false }
-		@Override boolean canShare(SecUser user, resource) { return false }
+		@Override boolean canRead(user, resource) { return true }
+		@Override boolean canWrite(user, resource) { return false }
+		@Override boolean canShare(user, resource) { return false }
 	}
 
 	static class WritePermissionService extends PermissionService {
-		@Override boolean canRead(SecUser user, resource) { return true }
-		@Override boolean canWrite(SecUser user, resource) { return true }
-		@Override boolean canShare(SecUser user, resource) { return false }
+		@Override boolean canRead(user, resource) { return true }
+		@Override boolean canWrite(user, resource) { return true }
+		@Override boolean canShare(user, resource) { return false }
 	}
 
 	SecUser user

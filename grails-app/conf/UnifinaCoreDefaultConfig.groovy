@@ -171,6 +171,11 @@ log4j = {
  }
 
 /**
+ * Tour config
+ */
+streamr.tours.enabled = true
+
+/**
  * Migration config
  */
 grails.plugin.databasemigration.updateOnStart = true
@@ -238,7 +243,7 @@ environments {
 /**
  * Aid IP address discovery by defining acceptable IP address prefixes (or empty if anything goes)
  */
-streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? System.getProperty("streamr.ip.address.prefixes").split(",") : ["192.168.10.", "192.168.", "10."]
+streamr.ip.address.prefixes = System.getProperty("streamr.ip.address.prefixes") ? Arrays.asList(System.getProperty("streamr.ip.address.prefixes").split(",")) : ["192.168.10.", "192.168.", "10."]
 environments {
 	production {
 		streamr.ip.address.prefixes = []
@@ -313,10 +318,10 @@ environments {
 /**
  * Serialization config
  */
-unifina.serialization.intervalInMillis = 5 * 60 * 1000
+streamr.serialization.intervalInMillis = System.getProperty("streamr.serialization.intervalInMillis") ? Long.parseLong(System.getProperty("streamr.serialization.intervalInMillis")) : 5 * 60 * 1000
 environments {
 	test {
-		unifina.serialization.intervalInMillis = 1000
+		streamr.serialization.intervalInMillis = 1000
 	}
 }
 

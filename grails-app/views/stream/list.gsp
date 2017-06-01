@@ -56,7 +56,7 @@
 							<ui:td class="hidden-xs"><g:formatDate date="${stream.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
 							<ui:td class="button-column">
 								<g:if test="${writable.contains(stream) || shareable.contains(stream)}">
-									<div class="dropdown">
+									<div class="streamr-dropdown">
 										<button class="stream-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
 											<i class="navbar-icon fa fa-caret-down"></i>
 										</button>

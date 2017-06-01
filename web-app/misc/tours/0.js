@@ -8,8 +8,8 @@
 
         .beforeStart(function(cb) {
             SignalPath.clear()
-            $('#beginDate').val('2016-04-11')
-            $('#endDate').val('2016-04-12')
+            $('#beginDate').val('2017-04-09')
+            $('#endDate').val('2017-04-09')
             cb()
         })
 

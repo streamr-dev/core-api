@@ -26,8 +26,6 @@ class DashboardController {
 		return [dashboards:dashboards, shareable:shareable, writable:writable, user:user]
 	}
 
-	def create() {}
-
 	def save() {
 		Dashboard dashboard = new Dashboard()
 		dashboard.name = params.name
@@ -40,7 +38,9 @@ class DashboardController {
 	def show() {
 		return [
 			config: grailsApplication.config,
-			id: params.id
+			id: params.id,
+			user: springSecurityService.currentUser,
+			key: springSecurityService.currentUser?.keys.iterator().next()
 		]
 	}
 }

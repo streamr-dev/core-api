@@ -145,6 +145,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 	
 	var superClose = pub.close;
 	function close() {
+		// TODO: below line was added to fix disconnecting variadics when updating module options, but lead to other problems
+		// prot.moduleClosed = true
 		disconnect();
 
 		$(prot.div).find("div.input").each(function(i,div) {
@@ -159,6 +161,8 @@ SignalPath.GenericModule = function(data, canvas, prot) {
 		});
 		
 		superClose();
+		// TODO: below line was added to fix disconnecting variadics when updating module options, but lead to other problems
+		// prot.moduleClosed = false
 	}
 	pub.close = close;
 	

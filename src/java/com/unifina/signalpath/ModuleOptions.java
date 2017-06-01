@@ -8,30 +8,26 @@ import java.util.Map;
  */
 public class ModuleOptions extends LinkedHashMap<String, Object> {
 	
-	public ModuleOptions() {}
-	
 	public static ModuleOptions get(Map<String, Object> parentConfig) {
-		ModuleOptions mo;
 		if (parentConfig.containsKey("options")) {
 			Map options = (Map) parentConfig.get("options");
-			if (options instanceof ModuleOptions)
+			if (options instanceof ModuleOptions) {
 				return (ModuleOptions) options;
-			else {
-				mo = new ModuleOptions();
+			} else {
+				ModuleOptions mo = new ModuleOptions();
 				mo.putAll(options);
+				parentConfig.put("options", mo);
+				return mo;
 			}
+		} else {
+			ModuleOptions mo = new ModuleOptions();
+			parentConfig.put("options", mo);
+			return mo;
 		}
-		else {
-			mo = new ModuleOptions();
-		}
-		parentConfig.put("options", mo);
-		return mo;
 	}
 	
 	public ModuleOption getOption(String key) {
-		if (this.containsKey(key))
-			return ModuleOption.get(key, (Map)this.get(key), this);
-		else return null;
+		return containsKey(key) ? ModuleOption.get(key, (Map) get(key), this) : null;
 	}
 	
 	public void add(ModuleOption option) {
@@ -39,8 +35,8 @@ public class ModuleOptions extends LinkedHashMap<String, Object> {
 	}
 
 	public void addIfMissing(ModuleOption option) {
-		if (!this.containsKey(option.getKey())) {
-			this.put(option.getKey(), option);
+		if (!containsKey(option.getKey())) {
+			add(option);
 		}
 	}
 	

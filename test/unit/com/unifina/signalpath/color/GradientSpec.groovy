@@ -205,4 +205,35 @@ class GradientSpec extends Specification {
 				.outputValues(outputValues)
 				.test()
 	}
+
+	void "gradient gives right values also with alpha"() {
+		setup:
+		module.configure([
+				params: [
+						[name: "minValue", value: 0],
+						[name: "maxValue", value: 1],
+						[name: "minColor", value: new StreamrColor(255, 255, 255, 0.2)],
+						[name: "maxColor", value: new StreamrColor(0, 0, 0, 1)]
+				]
+		])
+		when:
+		Map inputValues = [
+				in: [0, 0.2, 0.4, 0.6, 0.8, 1.0].collect {it?.doubleValue()},
+		]
+		Map outputValues = [
+				color:[
+						new StreamrColor(255, 255, 255, 0.2),
+						new StreamrColor(204, 204, 204, 0.36),
+						new StreamrColor(153, 153, 153, 0.52),
+						new StreamrColor(102, 102, 102, 0.68),
+						new StreamrColor(51, 51, 51, 0.84),
+						new StreamrColor(0, 0, 0, 1),
+				]
+		]
+
+		then:
+		new ModuleTestHelper.Builder(module, inputValues, outputValues)
+				.outputValues(outputValues)
+				.test()
+	}
 }

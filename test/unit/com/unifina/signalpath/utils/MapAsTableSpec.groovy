@@ -12,10 +12,7 @@ class MapAsTableSpec extends UiChannelMockingSpecification {
 
 	def setup() {
 		mockServicesForUiChannels()
-		module = new MapAsTable()
-		module.globals = GlobalsFactory.createInstance([:], grailsApplication, new SecUser())
-		module.init()
-		module.configure([
+		module = setupModule(new MapAsTable(), [
 			uiChannel: [id: "table"],
 		])
 	}

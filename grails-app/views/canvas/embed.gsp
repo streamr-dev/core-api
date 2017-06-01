@@ -12,7 +12,7 @@
     <r:require module="signalpath-theme"/>
     <r:require module="touchpunch"/>
 
-    <r:script>
+	<r:script>
 
 $(document).ready(function() {
 
@@ -26,20 +26,25 @@ $(document).ready(function() {
 			Streamr.showInfo(data.msg)
 		},
 		connectionOptions: {
-			server: "${grailsApplication.config.streamr.ui.server}",
+			url: "${grailsApplication.config.streamr.ui.server}",
 			path: "${grailsApplication.config.streamr.ui.serverPath}",
 			autoConnect: true,
 			autoDisconnect: true
 		}
 	});
+	<g:if test="${id}">
+		SignalPath.load('${id}')
+	</g:if>
 
-    <g:if test="${id}">
-            SignalPath.load('${id}');
-        </g:if>    $(document).unload(function () {
-        SignalPath.unload()
+	<g:if test="${params.zoom}">
+		SignalPath.setZoom(${params.zoom})
+	</g:if>
+
+	$(document).unload(function () {
+		SignalPath.unload()
     });
 })
-    </r:script>
+	</r:script>
 </head>
 
 <body class="canvas-editor-page main-menu-fixed embedded">

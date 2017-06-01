@@ -14763,6 +14763,9 @@ div.dataTables_scrollFoot table {
 .selected-theme .widget-rating .active a {
   color: #e95b15;
 }
+.selected-theme .dropdown-menu > li.disabled > a:hover {
+  background: none;
+}
 .panel-heading {
   height: 40px;
 }
@@ -15013,6 +15016,15 @@ div.output .switchContainer .ioSwitch {
 }
 ._jsPlumb_endpoint {
   z-index: 10;
+}
+._jsPlumb_endpoint.holdFocus {
+  z-index: 20;
+}
+.connectionHolder._jsPlumb_endpoint {
+  cursor: move;
+}
+._jsPlumb_connector {
+  z-index: 1;
 }
 .ui-menu {
   z-index: 200;
@@ -15674,9 +15686,6 @@ body.embedded #content-wrapper > :not(.embeddable) {
 .panel.list-panel:last-child {
   margin-bottom: 150px;
 }
-#main-menu-inner .menu-content:last-child {
-  margin-bottom: 100px;
-}
 body.canvas-editor-page {
   overflow: hidden;
   height: 100%;
@@ -15705,6 +15714,53 @@ body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:hover,
 body.canvas-editor-page .nav-tabs.run-mode-tabs > li > a:active {
   color: #999;
 }
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li {
+  float: left;
+  width: 50%;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li:first-child > .nav-tab-orange-background {
+  right: 0;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li:first-child > .nav-tab-white-background {
+  left: 0;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li:last-child > .nav-tab-orange-background {
+  left: 0;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li:last-child > .nav-tab-white-background {
+  right: 0;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > .nav-tab-background {
+  position: absolute;
+  width: 0;
+  bottom: 0;
+  height: 100%;
+  border-bottom: 2px solid;
+  transition: width 0.2s ease-in;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > .nav-tab-background + a {
+  border-radius: 0;
+  border: none;
+  margin-bottom: 2px;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > .nav-tab-orange-background {
+  border-bottom-color: #e95b15;
+  width: 0;
+  background-color: #181b1f;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li > .nav-tab-white-background {
+  border-bottom-color: #FFFFFF;
+  width: 100%;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li.active > .nav-tab-orange-background {
+  width: 100%;
+}
+body.canvas-editor-page .nav-tabs.run-mode-tabs > li.active > .nav-tab-white-background {
+  width: 0;
+}
+body.canvas-editor-page #main-menu .nav-tabs.run-mode-tabs li.active > .nav-tab-background + a {
+  background: none;
+}
 body.canvas-editor-page .run-button i.fa {
   margin-right: 5px;
 }
@@ -15713,10 +15769,7 @@ body.canvas-editor-page .run-group button.dropdown-toggle {
   padding-right: 0px;
 }
 body.canvas-editor-page #content-wrapper {
-  padding-top: 38px;
-  padding-left: 0px;
-  padding-right: 0px;
-  padding-bottom: 0px;
+  padding: 38px 0 0;
 }
 body.canvas-editor-page #moduleTree {
   max-height: 300px;
@@ -15725,18 +15778,9 @@ body.canvas-editor-page #moduleTree {
 body.canvas-editor-page #main-menu .twitter-typeahead {
   width: 100%;
 }
-body.canvas-editor-page #canvas-name-editor.editing .canvas-name {
-  display: none;
-}
-body.canvas-editor-page #canvas-name-editor:not(.editing) input,
-body.canvas-editor-page #canvas-name-editor:not(.editing) button {
-  display: none;
-}
-body.canvas-editor-page #canvas-name-editor .canvas-name {
-  cursor: pointer;
-}
 body.canvas-editor-page .breadcrumb {
-  margin-bottom: 0px;
+  margin-bottom: 0;
+  margin-left: 0;
 }
 body.canvas-editor-page #addModule {
   margin-top: 4px;
@@ -16181,27 +16225,6 @@ div.table.clickable-table.table-bordered .thead > .tr > .th:not(:first-child) {
 div.table.clickable-table.table-bordered .tbody > .tr > .td:not(:first-child) {
   border-left: 1px solid #dddddd;
 }
-div.table.clickable-table div.dropdown {
-  text-align: center;
-}
-div.table.clickable-table div.dropdown span.dropdown-toggle {
-  cursor: pointer;
-  font-size: 20px;
-}
-div.table.clickable-table div.dropdown span.dropdown-toggle:hover {
-  color: #000000;
-}
-div.table.clickable-table div.dropdown ul.dropdown-menu > li > span {
-  font-size: 14px;
-  cursor: pointer;
-  margin: 0 -2px;
-  padding: 5px 18px;
-  display: block;
-}
-div.table.clickable-table div.dropdown ul.dropdown-menu > li > span:hover {
-  background-color: #e95b15;
-  color: #FFFFFF;
-}
 .modal-content.flexing {
   display: flex;
   flex-direction: column;
@@ -16549,6 +16572,9 @@ body.dashboard-show.editing .stat-row .titlebar {
 body.dashboard-show.selected-theme #main-menu .navigation .module.checked a {
   color: #e95b15;
 }
+body.dashboard-show #main-menu .navigation {
+  padding-top: 25px;
+}
 body.dashboard-show #main-menu .navigation .module.checked .menu-icon.fa-square,
 body.dashboard-show #main-menu .navigation .module:not(.checked) .menu-icon.fa-check-square {
   display: none;
@@ -16567,8 +16593,254 @@ body.dashboard-show #sidebar-view .canvas-title {
   margin-left: 20px;
   cursor: pointer;
 }
+body.dashboard-show #sidebar-view .canvas-title span {
+  word-break: break-all;
+}
 body.dashboard-show .titlebar-clickable {
   cursor: pointer;
+}
+/** @see sharing-dialog.js */
+.sharing-dialog .modal-body .publish-label {
+  margin-right: 10px;
+}
+.sharing-dialog .modal-body .access-list {
+  padding-top: 25px;
+  padding-bottom: 20px;
+}
+.sharing-dialog .modal-body .user-label {
+  padding-left: 15px;
+  font-weight: bold;
+  word-wrap: break-word;
+}
+.sharing-dialog .modal-body .new-user-field.has-error {
+  color: #ff0000;
+}
+.sharing-dialog .modal-body .new-user-button {
+  height: 34px;
+}
+.sharing-dialog .modal-body .access-row {
+  margin-bottom: 10px;
+}
+.sharing-dialog .modal-body .new-user-row {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.sharing-dialog .modal-body .access-button-row {
+  padding-right: 0;
+}
+.sharing-dialog .modal-body .access-button-row .user-delete-button {
+  margin-left: 5px;
+}
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-open {
+  display: block;
+  background-color: #FFFFFF;
+  z-index: 1000;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 0 0 3px 1px #ccc;
+  -moz-box-shadow: 0 0 3px 1px #ccc;
+  box-shadow: 0 0 3px 1px #ccc;
+}
+.streamr-search-menu .streamr-search-dataset:not(:empty),
+.streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty) {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.streamr-search-menu .streamr-search-dataset:not(:empty):not(:last-child),
+.streamr-search-menu.streamr-search-open .streamr-search-dataset:not(:empty):not(:last-child) {
+  border-bottom: 1px solid #dfdfdf;
+}
+.streamr-search-menu .streamr-search-dataset p,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset p {
+  margin-bottom: 0;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-dataset-header,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-dataset-header {
+  margin-left: 8px;
+  margin-top: 2px;
+  font-weight: bold;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion {
+  cursor: pointer;
+  padding: 5px 18px;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion:hover,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion:hover,
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion.streamr-search-cursor,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion.streamr-search-cursor {
+  background-color: #e95b15;
+}
+.streamr-search-menu .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description,
+.streamr-search-menu.streamr-search-open .streamr-search-dataset .streamr-search-suggestion p.streamr-search-suggestion-description {
+  font-size: 12px;
+}
+.streamr-search-menu,
+.streamr-search-menu.streamr-search-empty {
+  position: absolute;
+  display: none;
+}
+.form-inline.search-form .search-input-group {
+  margin-top: 0;
+}
+.form-inline.search-form .search-input-group .form-control {
+  height: 26px;
+}
+.form-inline.search-form .search-input-group .input-group-btn {
+  height: 26px;
+  vertical-align: top;
+}
+.form-inline.search-form .search-input-group .input-group-btn .btn {
+  height: 26px;
+  padding-top: 3px;
+}
+.form-inline.search-form .filter-toggle-button {
+  display: inline-block;
+  float: left;
+  margin-right: 2px;
+  height: 26px;
+}
+.form-inline.search-form .filter-toggle-button:last-of-type {
+  margin-right: 7px;
+}
+#main-menu-inner {
+  position: relative;
+}
+#main-menu-inner .menu-content:last-child {
+  margin-bottom: 100px;
+}
+.streamr-dropdown {
+  text-align: center;
+  position: relative;
+}
+.streamr-dropdown a.dropdown-toggle,
+.streamr-dropdown span.dropdown-toggle {
+  cursor: pointer;
+  font-size: 20px;
+}
+.streamr-dropdown a.dropdown-toggle:hover,
+.streamr-dropdown span.dropdown-toggle:hover {
+  color: #000000;
+}
+.streamr-dropdown ul.dropdown-menu > li > a,
+.streamr-dropdown ul.dropdown-menu > li > span {
+  font-size: 14px;
+  cursor: pointer;
+  margin: 0 -2px;
+  padding: 5px 18px;
+  display: block;
+}
+.streamr-dropdown ul.dropdown-menu > li > a:hover,
+.streamr-dropdown ul.dropdown-menu > li > span:hover {
+  background-color: #e95b15;
+  color: #FFFFFF;
+}
+.streamr-dropdown ul.dropdown-menu > li.disabled {
+  cursor: not-allowed;
+}
+.streamr-dropdown ul.dropdown-menu > li.disabled > a,
+.streamr-dropdown ul.dropdown-menu > li.disabled > span {
+  color: #999;
+}
+.streamr-dropdown ul.dropdown-menu > li.disabled > a:hover,
+.streamr-dropdown ul.dropdown-menu > li.disabled > span:hover {
+  background: none;
+}
+.breadcrumb .streamr-dropdown {
+  display: inline-block;
+  margin-left: 17px;
+}
+.breadcrumb .streamr-dropdown li,
+.breadcrumb .streamr-dropdown li a {
+  color: initial;
+  font-size: initial;
+  line-height: initial;
+  height: initial;
+}
+.breadcrumb .streamr-dropdown li + li:before {
+  content: none;
+}
+.breadcrumb .streamr-dropdown .dropdown-toggle {
+  margin-top: -1.5px;
+}
+.name-editor input.name-input {
+  height: 22px;
+  font-size: 12px;
+  padding-left: 3px;
+  padding-right: 0;
+  margin-left: -4px;
+  margin-top: -1px;
+}
+.name-editor.editing .name {
+  display: none;
+}
+.name-editor:not(.editing) input {
+  display: none;
+}
+.name-editor .canvas-name {
+  cursor: text;
+}
+.credentials-control {
+  margin-top: 5px;
+}
+.credentials-control .title-label {
+  padding-bottom: 10px;
+}
+.credentials-control .new-auth-key-row {
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+.credentials-control .new-auth-key-row .input-group-btn > button {
+  height: 34px;
+}
+.credentials-control .new-auth-key-row .permission-dropdown,
+.credentials-control .new-auth-key-row .permission-dropdown-toggle {
+  border-radius: 0;
+}
+.credentials-control .new-auth-key-row .new-auth-key-button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.credentials-control .auth-key-button-row {
+  margin-right: -15px;
+}
+.credentials-control .auth-key-table td,
+.credentials-control .auth-key-table th {
+  padding-top: 10px;
+}
+.credentials-control .auth-key-table td:not(:last-child),
+.credentials-control .auth-key-table th:not(:last-child) {
+  padding-right: 10px;
+}
+.credentials-control .auth-key-table .show-key {
+  cursor: pointer;
+}
+.credentials-control .auth-key-table td.name-field {
+  max-width: 90px;
+  word-wrap: break-word;
+}
+.credentials-control .auth-key-table .auth-key-delete-button {
+  margin-left: 5px;
+}
+@media (min-width: 768px) {
+  .credentials-control .auth-key-table tbody .auth-key-table-row th.action-header {
+    width: 100px;
+  }
+  .credentials-control .auth-key-table tbody .auth-key-table-row td.action-field {
+    width: 100px;
+  }
+}
+@media (max-width: 767px) {
+  .credentials-control .auth-key-table:not(.show-keys) tbody .auth-key-table-row td.key-field span {
+    width: 60px;
+  }
+  .credentials-control .auth-key-table.show-keys thead th.permission-header {
+    display: none;
+  }
+  .credentials-control .auth-key-table.show-keys tbody .auth-key-table-row td.permission-field {
+    display: none;
+  }
 }
 .widget-notifications .notification {
   position: relative;
