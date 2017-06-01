@@ -88,7 +88,7 @@ class RegisterController {
         log.info("Logging in "+user.username+" after registering")
         springSecurityService.reauthenticate(user.username)
 
-        flash.message = "IntegrationKey created!"
+        flash.message = "Account created!"
         redirect uri: conf.ui.register.postRegisterUrl ?: defaultTargetUrl
     }
 
@@ -102,7 +102,7 @@ class RegisterController {
         }
 
 		def response = Unirest.post(grailsApplication.config.recaptcha.verifyUrl)
-				.field("secret", grailsApplication.config.recaptchainvisible.secret)
+				.field("secret", grailsApplication.config.recaptchav2.secret)
 				.field("response", params."g-recaptcha-response")
 				.asJson()
 		if (response.body.jsonObject.success != true) {

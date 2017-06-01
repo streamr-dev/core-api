@@ -69,7 +69,7 @@ class ApiService {
 			req.header("Authorization", "token $key.id")
 		}
 
-		req.header("Content-Service", "application/json")
+		req.header("Content-Type", "application/json")
 
 		log.info("request: $body")
 

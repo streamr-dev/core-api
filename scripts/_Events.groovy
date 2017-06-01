@@ -24,7 +24,7 @@ eventTestPhaseStart = { args ->
 }
 
 eventCompileStart = { args ->
-	println "Running webpack compile"
+	println "Running webpack build"
 	Runtime runtime = Runtime.getRuntime()
 	Process process = runtime.exec("npm run build")
 	StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());

@@ -29,8 +29,8 @@ describe('IntegrationKey actions', () => {
         store.clearActions()
     })
     
-    it('creates GET_ALL_ACCOUNTS_SUCCESS when fetching integrationKeys has succeeded', () => {
-        moxios.stubRequest('api/v1/integrationKeys', {
+    it('creates GET_ALL_INTEGRATION_KEYS_SUCCESS when fetching integrationKeys has succeeded', () => {
+        moxios.stubRequest('api/v1/integration_keys', {
             status: 200,
             response: [{
                 name: 'test',
@@ -42,9 +42,9 @@ describe('IntegrationKey actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
+            type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
         }, {
-            type: actions.GET_AND_REPLACE_ACCOUNTS_SUCCESS,
+            type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS,
             integrationKeys: [{
                 name: 'test',
                 json: '{"moi": "moimoi"}'
@@ -54,32 +54,32 @@ describe('IntegrationKey actions', () => {
             }]
         }]
         
-        return store.dispatch(actions.getAndReplaceAccounts())
+        return store.dispatch(actions.getAndReplaceIntegrationKeys())
             .then(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })
     })
     
-    it('creates GET_ALL_ACCOUNTS_FAILURE when fetching accounts has failed', () => {
-        moxios.stubRequest('api/v1/accounts', {
+    it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching IntegrationKeys has failed', () => {
+        moxios.stubRequest('api/v1/integration_keys', {
             status: 500,
             response: new Error('test-error')
         })
         
         const expectedActions = [{
-            type: actions.GET_AND_REPLACE_ACCOUNTS_REQUEST
+            type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST
         }, {
-            type: actions.GET_AND_REPLACE_ACCOUNTS_FAILURE,
-            error: 'test-error'
+            type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
+            error: new Error('test-error')
         }]
         
-        return store.dispatch(actions.getAndReplaceAccounts())
+        return store.dispatch(actions.getAndReplaceIntegrationKeys())
             .catch(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })
     })
     
-    it('creates CREATE_ACCOUNT_SUCCESS when creating account has succeeded', () => {
+    it('creates CREATE_INTEGRATION_KEY_SUCCESS when creating IntegrationKey has succeeded', () => {
         moxios.wait(() => {
             let request = moxios.requests.mostRecent()
             expect(request.config.method).toEqual('post')
@@ -90,16 +90,16 @@ describe('IntegrationKey actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.CREATE_ACCOUNT_REQUEST
+            type: actions.CREATE_INTEGRATION_KEY_REQUEST
         }, {
-            type: actions.CREATE_ACCOUNT_SUCCESS,
-            account: {
+            type: actions.CREATE_INTEGRATION_KEY_SUCCESS,
+            integrationKey: {
                 name: 'test',
                 json: 'moi'
             }
         }]
         
-        return store.dispatch(actions.createAccount({
+        return store.dispatch(actions.createIntegrationKey({
             name: 'test',
             json: 'moi'
         }))
@@ -108,7 +108,7 @@ describe('IntegrationKey actions', () => {
             })
     })
     
-    it('creates CREATE_ACCOUNT_FAILURE when creating account has failed', () => {
+    it('creates CREATE_INTEGRATION_KEY_FAILURE when creating IntegrationKey has failed', () => {
         moxios.wait(() => {
             let request = moxios.requests.mostRecent()
             expect(request.config.method).toEqual('post')
@@ -119,13 +119,13 @@ describe('IntegrationKey actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.CREATE_ACCOUNT_REQUEST
+            type: actions.CREATE_INTEGRATION_KEY_REQUEST
         }, {
-            type: actions.CREATE_ACCOUNT_FAILURE,
-            error: 'test'
+            type: actions.CREATE_INTEGRATION_KEY_FAILURE,
+            error: new Error('test')
         }]
         
-        return store.dispatch(actions.createAccount({
+        return store.dispatch(actions.createIntegrationKey({
             name: 'test',
             json: 'moi'
         }))
@@ -134,7 +134,7 @@ describe('IntegrationKey actions', () => {
             })
     })
     
-    it('creates DELETE_ACCOUNT_SUCCESS when deleting account has succeeded', () => {
+    it('creates DELETE_INTEGRATION_KEY_SUCCESS when deleting IntegrationKey has succeeded', () => {
         moxios.wait(() => {
             let request = moxios.requests.mostRecent()
             expect(request.config.method).toEqual('delete')
@@ -144,20 +144,20 @@ describe('IntegrationKey actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.DELETE_ACCOUNT_REQUEST,
+            type: actions.DELETE_INTEGRATION_KEY_REQUEST,
             id: 'test'
         }, {
-            type: actions.DELETE_ACCOUNT_SUCCESS,
+            type: actions.DELETE_INTEGRATION_KEY_SUCCESS,
             id: 'test'
         }]
         
-        return store.dispatch(actions.deleteAccount('test'))
+        return store.dispatch(actions.deleteIntegrationKey('test'))
             .then(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })
     })
     
-    it('creates DELETE_ACCOUNT_FAILURE when deleting account has failed', () => {
+    it('creates DELETE_INTEGRATION_KEY_FAILURE when deleting IntegrationKey has failed', () => {
         moxios.wait(() => {
             let request = moxios.requests.mostRecent()
             expect(request.config.method).toEqual('delete')
@@ -168,14 +168,14 @@ describe('IntegrationKey actions', () => {
         })
         
         const expectedActions = [{
-            type: actions.DELETE_ACCOUNT_REQUEST,
+            type: actions.DELETE_INTEGRATION_KEY_REQUEST,
             id: 'test'
         }, {
-            type: actions.DELETE_ACCOUNT_FAILURE,
-            error: 'test'
+            type: actions.DELETE_INTEGRATION_KEY_FAILURE,
+            error: new Error('test')
         }]
         
-        return store.dispatch(actions.deleteAccount('test'))
+        return store.dispatch(actions.deleteIntegrationKey('test'))
             .catch(() => {
                 expect(store.getActions()).toEqual(expectedActions)
             })

@@ -39,13 +39,13 @@ describe('todos reducer', () => {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS,
                 integrationKeys: [{
                     id: 1,
-                    type: 'A'
+                    service: 'A'
                 }, {
                     id: 2,
-                    type: 'B'
+                    service: 'B'
                 }, {
                     id: 3,
-                    type: 'B'
+                    service: 'B'
                 }]
             })
         ).toEqual({
@@ -53,14 +53,14 @@ describe('todos reducer', () => {
             listsByService: {
                 A: [{
                     id: 1,
-                    type: 'A'
+                    service: 'A'
                 }],
                 B: [{
                     id: 2,
-                    type: 'B'
+                    service: 'B'
                 }, {
                     id: 3,
-                    type: 'B'
+                    service: 'B'
                 }]
             },
             error: null
@@ -71,19 +71,19 @@ describe('todos reducer', () => {
                 list: ['test']
             }, {
                 type: actions.GET_AND_REPLACE_INTEGRATION_KEYS_FAILURE,
-                error: 'test-error'
+                error: new Error('test-error')
             })
         ).toEqual({
             fetching: false,
             list: ['test'],
-            error: 'test-error'
+            error: new Error('test-error')
         })
     })
     
     it('should handle GET_AND_REPLACE_INTEGRATION_KEYS', () => {
         expect(
             reducer({}, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_REQUEST
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_REQUEST
             })
         ).toEqual({
             fetching: true
@@ -91,7 +91,7 @@ describe('todos reducer', () => {
     
         expect(
             reducer({}, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_SUCCESS,
                 service: 'B',
                 integrationKeys: [{
                     id: 1
@@ -119,13 +119,13 @@ describe('todos reducer', () => {
             reducer({
                 list: ['test']
             }, {
-                type: actions.GET_INTEGRATION_KEYS_BY_TYPE_FAILURE,
-                error: 'test-error'
+                type: actions.GET_INTEGRATION_KEYS_BY_SERVICE_FAILURE,
+                error: new Error('test-error')
             })
         ).toEqual({
             fetching: false,
             list: ['test'],
-            error: 'test-error'
+            error: new Error('test-error')
         })
     })
     
@@ -143,18 +143,18 @@ describe('todos reducer', () => {
                 listsByService: {
                     A: [{
                         id: 1,
-                        type: 'A'
+                        service: 'A'
                     }],
                     B: [{
                         id: 2,
-                        type: 'B'
+                        service: 'B'
                     }]
                 }
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_SUCCESS,
                 integrationKey: {
                     id: 3,
-                    type: 'A'
+                    service: 'A'
                 }
             })
         ).toEqual({
@@ -162,14 +162,14 @@ describe('todos reducer', () => {
             listsByService: {
                 A: [{
                     id: 1,
-                    type: 'A'
+                    service: 'A'
                 }, {
                     id: 3,
-                    type: 'A'
+                    service: 'A'
                 }],
                 B: [{
                     id: 2,
-                    type: 'B'
+                    service: 'B'
                 }]
             },
             error: null
@@ -246,12 +246,12 @@ describe('todos reducer', () => {
                 list: ['test']
             }, {
                 type: actions.CREATE_INTEGRATION_KEY_FAILURE,
-                error: 'test-error'
+                error: new Error('test-error')
             })
         ).toEqual({
             fetching: false,
             list: ['test'],
-            error: 'test-error'
+            error: new Error('test-error')
         })
     })
 })

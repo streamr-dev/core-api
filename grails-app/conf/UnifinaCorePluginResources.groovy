@@ -165,7 +165,7 @@ modules = {
 		resource url:[dir:'js/unifina/tour', file:'tour.js', plugin: 'unifina-core']
 	}
 	'dashboard-editor' {
-		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap'
+		dependsOn 'backbone, backbone-associations, jquery-ui, streamr, confirm-button, bootstrap, name-editor'
 		resource url:[dir:'js/unifina/dashboard', file:'dashboard-editor.js', plugin: 'unifina-core']
 	}
 	'webcomponent-resources' {
@@ -259,7 +259,9 @@ modules = {
 	'canvas-controls' {
 		dependsOn 'signalpath-core, backbone'
 		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-start-button.js', plugin: 'unifina-core']
-		resource url:[dir:'js/unifina/signalPath/controls', file:'canvas-name-editor.js', plugin: 'unifina-core']
+	}
+	'name-editor' {
+		resource url:[dir:'js/unifina/streamr-name-editor', file:'streamr-name-editor.js', plugin: 'unifina-core']
 	}
 	'confirm-button' {
 		resource url:[dir:'js/unifina/confirm-button', file:'confirm-button.js', plugin: 'unifina-core']
@@ -297,6 +299,8 @@ modules = {
 		dependsOn 'lodash'
 		dependsOn 'key-value-editor'
 		dependsOn 'list-editor'
+		dependsOn 'confirm-button'
+		dependsOn 'name-editor'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
