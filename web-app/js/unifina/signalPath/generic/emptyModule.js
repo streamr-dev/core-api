@@ -347,7 +347,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
             minWidth: 200,
             minHeight: 100,
             stop: function(e, ui) {
-                optionsStop(e, ui)
+                optionsStop && optionsStop(e, ui)
                 update(e, ui)
             }
 		}
