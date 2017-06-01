@@ -13,10 +13,6 @@ import type { Canvas, CanvasModule } from '../../../../../../../types/canvas-typ
 
 declare var _: any
 
-// TODO: find a better way
-const id = parseFloat(window.location.href.split('/dashboard/showNew/')[1])
-
-
 class ModuleInModuleList extends Component {
     
     onClick: Function
@@ -67,10 +63,10 @@ class ModuleInModuleList extends Component {
 }
 
 const mapStateToProps = ({dashboard}, ownProps) => {
-    const db = dashboard.dashboardsById[id]
+    const db = dashboard.dashboardsById[dashboard.openDashboard] || {}
     return {
         dashboard: db,
-        checked: _.find(db.items, item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined
+        checked: db ? _.find(db.items, item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false
     }
 }
 

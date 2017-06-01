@@ -7,6 +7,7 @@ class Dashboard {
 
 	SecUser user
 
+	String id
 	String name
 
 	Date dateCreated

@@ -2,7 +2,7 @@
 import type {Canvas} from './canvas-types'
 
 export type Dashboard = {
-    id: number,
+    id: string,
     name: string,
     items: Array<DashboardItem>,
     permissions?: Array<string>
@@ -10,15 +10,16 @@ export type Dashboard = {
 
 export type DashboardReducerState = {
     dashboardsById?: {
-        [number]: Dashboard
+        [Dashboard.id]: Dashboard
     },
+    openDashboard: ?Dashboard.id,
     error?: ?string,
     fetching?: boolean
 }
 
 export type DashboardReducerAction = {
     type: string,
-    id?: number,
+    id?: Dashboard.id,
     dashboard?: Dashboard,
     dashboards?: Array<Dashboard>,
     error?: string

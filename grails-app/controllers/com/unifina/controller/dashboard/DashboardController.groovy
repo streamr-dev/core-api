@@ -1,14 +1,9 @@
 package com.unifina.controller.dashboard
 
-import com.unifina.api.NotPermittedException
 import com.unifina.domain.security.Permission.Operation
-import com.unifina.domain.security.SecUser
-import grails.converters.JSON
-import grails.gorm.DetachedCriteria
 import grails.plugin.springsecurity.annotation.Secured
 
 import com.unifina.domain.dashboard.Dashboard
-import com.unifina.domain.dashboard.DashboardItem
 
 @Secured(["ROLE_USER"])
 class DashboardController {
@@ -34,16 +29,7 @@ class DashboardController {
 		redirect(action: "show", id: dashboard.id)
 	}
 
-	def show() {
-		return [
-			config: grailsApplication.config,
-			id: params.id,
-			user: springSecurityService.currentUser,
-			key: springSecurityService.currentUser?.keys.iterator().next()
-		]
-	}
-
-	def showNew() {
+	def editor() {
 		return [
 			config: grailsApplication.config,
 			id: params.id,

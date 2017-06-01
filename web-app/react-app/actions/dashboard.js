@@ -3,9 +3,8 @@
 import axios from 'axios'
 import parseError from './utils/parseError'
 
-export const CREATE_DASHBOARD_REQUEST = 'CREATE_DASHBOARD_KEY_REQUEST'
-export const CREATE_DASHBOARD_SUCCESS = 'CREATE_DASHBOARD_KEY_SUCCESS'
-export const CREATE_DASHBOARD_FAILURE = 'CREATE_DASHBOARD_KEY_FAILURE'
+export const CREATE_DASHBOARD = 'CREATE_DASHBOARD'
+export const OPEN_DASHBOARD = 'OPEN_DASHBOARD'
 
 export const UPDATE_AND_SAVE_DASHBOARD_REQUEST = 'UPDATE_AND_SAVE_DASHBOARD_REQUEST'
 export const UPDATE_AND_SAVE_DASHBOARD_SUCCESS = 'UPDATE_AND_SAVE_DASHBOARD_SUCCESS'
@@ -51,7 +50,7 @@ export const getAndReplaceDashboards = () => (dispatch: Function) => {
         })
 }
 
-export const getDashboard = (id: number) => (dispatch: Function) => {
+export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
     dispatch(getDashboardRequest(id))
     return axios.get(Streamr.createLink({
         uri: `${apiUrl}/${id}`
@@ -60,19 +59,6 @@ export const getDashboard = (id: number) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
-            throw e
-        })
-}
-
-export const createDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
-    dispatch(createDashboardRequest())
-    return axios.post(Streamr.createLink({
-        uri: apiUrl
-    }), dashboard)
-        .then(({data}) => dispatch(createDashboardSuccess(data)))
-        .catch(res => {
-            const e = parseError(res)
-            dispatch(createDashboardFailure(e))
             throw e
         })
 }
@@ -90,7 +76,7 @@ export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Funct
         })
 }
 
-export const deleteDashboard = (id: number) => (dispatch: Function) => {
+export const deleteDashboard = (id: Dashboard.id) => (dispatch: Function) => {
     dispatch(deleteDashboardRequest(id))
     return axios.delete(Streamr.createLink({
         uri: `${apiUrl}/${id}`
@@ -103,7 +89,7 @@ export const deleteDashboard = (id: number) => (dispatch: Function) => {
         })
 }
 
-export const getMyDashboardPermissions = (id: number) => (dispatch: Function) => {
+export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Function) => {
     dispatch(getMyDashboardPermissionsRequest(id))
     return axios.delete(Streamr.createLink({
         uri: `${apiUrl}/${id}/permissions/me`
@@ -139,6 +125,22 @@ export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) =
     ]
 })
 
+export const newDashboard = (id: Dashboard.id) => createDashboard({
+    id,
+    name: 'Untitled',
+    items: []
+})
+
+export const createDashboard = (dashboard: Dashboard) => ({
+    type: CREATE_DASHBOARD,
+    dashboard
+})
+
+export const openDashboard = (id: Dashboard.id) => ({
+    type: OPEN_DASHBOARD,
+    id
+})
+
 export const updateDashboard = (dashboard: Dashboard) => ({
     type: UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
     dashboard
@@ -148,25 +150,21 @@ const getAndReplaceDashboardsRequest = () => ({
     type: GET_AND_REPLACE_DASHBOARDS_REQUEST,
 })
 
-const getDashboardRequest = (id: number) => ({
+const getDashboardRequest = (id: Dashboard.id) => ({
     type: GET_DASHBOARD_REQUEST,
     id
-})
-
-const createDashboardRequest = () => ({
-    type: CREATE_DASHBOARD_REQUEST,
 })
 
 const updateAndSaveDashboardRequest = () => ({
     type: UPDATE_AND_SAVE_DASHBOARD_REQUEST,
 })
 
-const deleteDashboardRequest = (id: number) => ({
+const deleteDashboardRequest = (id: Dashboard.id) => ({
     type: DELETE_DASHBOARD_REQUEST,
     id
 })
 
-const getMyDashboardPermissionsRequest = (id: number) => ({
+const getMyDashboardPermissionsRequest = (id: Dashboard.id) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_REQUEST,
     id
 })
@@ -181,22 +179,17 @@ const getDashboardSuccess = (dashboard: Dashboard) => ({
     dashboard
 })
 
-const createDashboardSuccess = (dashboard: Dashboard) => ({
-    type: CREATE_DASHBOARD_SUCCESS,
-    dashboard
-})
-
 const updateAndSaveDashboardSuccess = (dashboard: Dashboard) => ({
     type: UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
     dashboard
 })
 
-const deleteDashboardSuccess = (id: number) => ({
+const deleteDashboardSuccess = (id: Dashboard.id) => ({
     type: DELETE_DASHBOARD_SUCCESS,
     id
 })
 
-const getMyDashboardPermissionsSuccess = (id: number, permissions: Array<string>) => ({
+const getMyDashboardPermissionsSuccess = (id: Dashboard.id, permissions: Array<string>) => ({
     type: GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
     id,
     permissions
@@ -209,11 +202,6 @@ const getAndReplaceDashboardsFailure = (error: ApiError) => ({
 
 const getDashboardFailure = (error: ApiError) => ({
     type: GET_DASHBOARD_FAILURE,
-    error
-})
-
-const createDashboardFailure = (error: ApiError) => ({
-    type: CREATE_DASHBOARD_FAILURE,
     error
 })
 

@@ -24,6 +24,10 @@
 
 	<body class="main-menu-fixed dashboard-show mme editing">
 		<div id="dashboardPageRoot"></div>
+
+		<script>
+			const DASHBOARD_ID = '${id}'
+		</script>
 	</body>
 </html>
 

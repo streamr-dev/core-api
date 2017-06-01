@@ -2,32 +2,42 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import uuid from 'uuid'
 
 import {Row} from 'react-bootstrap'
 import Sidebar from './Sidebar/index'
 import Editor from './Editor/index'
 
-import {getDashboard, getMyDashboardPermissions} from '../../actions/dashboard'
+import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from '../../actions/dashboard'
 import {getRunningCanvases} from '../../actions/canvas'
 
 import type { Dashboard } from '../../types/dashboard-types'
 import type { Canvas } from '../../types/canvas-types'
 
-// TODO: find a better way
-const id = parseFloat(window.location.href.split('/dashboard/showNew/')[1])
+declare var DASHBOARD_ID: Dashboard.id
 
 class DashboardPage extends Component {
     
     props: {
         dashboard: Dashboard,
         canvases: Array<Canvas>,
-        dispatch: Function
+        dispatch: Function,
+        error: {
+            message: string
+        },
+        fetching: boolean
     }
     
     componentDidMount() {
-        this.props.dispatch(getDashboard(id))
-        this.props.dispatch(getMyDashboardPermissions(id))
+        const id = DASHBOARD_ID || uuid.v4()
+        if (DASHBOARD_ID) {
+            this.props.dispatch(getDashboard(id))
+            this.props.dispatch(getMyDashboardPermissions(id))
+        } else {
+            this.props.dispatch(newDashboard(id))
+        }
         this.props.dispatch(getRunningCanvases())
+        this.props.dispatch(openDashboard(id))
     }
     
     render() {
@@ -43,7 +53,8 @@ class DashboardPage extends Component {
 }
 
 const mapStateToProps = ({dashboard}) => ({
-    dashboard: dashboard.dashboardsById[id],
+    dashboard: dashboard.dashboardsById[dashboard.openDashboard],
+    fetching: dashboard.fetching,
     error: dashboard.error
 })
 

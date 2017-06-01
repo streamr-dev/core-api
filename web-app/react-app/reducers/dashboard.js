@@ -10,15 +10,14 @@ import {
     UPDATE_AND_SAVE_DASHBOARD_REQUEST,
     UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
     UPDATE_AND_SAVE_DASHBOARD_FAILURE,
-    CREATE_DASHBOARD_REQUEST,
-    CREATE_DASHBOARD_SUCCESS,
-    CREATE_DASHBOARD_FAILURE,
+    CREATE_DASHBOARD,
     DELETE_DASHBOARD_REQUEST,
     DELETE_DASHBOARD_SUCCESS,
     DELETE_DASHBOARD_FAILURE,
     GET_MY_DASHBOARD_PERMISSIONS_REQUEST,
     GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
-    GET_MY_DASHBOARD_PERMISSIONS_FAILURE
+    GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
+    OPEN_DASHBOARD
 } from '../actions/dashboard.js'
 
 declare var _: any
@@ -30,15 +29,20 @@ import type {
 
 const initialState = {
     dashboardsById: {},
+    openDashboard: null,
     error: null,
     fetching: false
 }
 
 const dashboard = function(state: State = initialState, action: Action) : State {
     switch (action.type) {
+        case OPEN_DASHBOARD:
+            return {
+                ...state,
+                openDashboard: action.id
+            }
         case GET_AND_REPLACE_DASHBOARDS_REQUEST:
         case GET_DASHBOARD_REQUEST:
-        case CREATE_DASHBOARD_REQUEST:
         case UPDATE_AND_SAVE_DASHBOARD_REQUEST:
         case DELETE_DASHBOARD_REQUEST:
         case GET_MY_DASHBOARD_PERMISSIONS_REQUEST:
@@ -53,8 +57,8 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 fetching: false,
                 error: null
             }
+        case CREATE_DASHBOARD:
         case GET_DASHBOARD_SUCCESS:
-        case CREATE_DASHBOARD_SUCCESS:
         case UPDATE_AND_SAVE_DASHBOARD_SUCCESS: {
             if (!action.dashboard || !action.dashboard.id) {
                 return state
@@ -106,7 +110,6 @@ const dashboard = function(state: State = initialState, action: Action) : State 
         
         case GET_AND_REPLACE_DASHBOARDS_FAILURE:
         case GET_DASHBOARD_FAILURE:
-        case CREATE_DASHBOARD_FAILURE:
         case UPDATE_AND_SAVE_DASHBOARD_FAILURE:
         case DELETE_DASHBOARD_FAILURE:
         case GET_MY_DASHBOARD_PERMISSIONS_FAILURE:

@@ -23,7 +23,6 @@ import type {Dashboard} from '../../../types/dashboard-types'
 
 class Editor extends Component {
     
-    dashboardContainer: HTMLDivElement
     onLayoutChange: Function
     props: {
         dashboard: Dashboard,
@@ -111,7 +110,7 @@ class Editor extends Component {
                     <BreadcrumbItem href={Streamr.createLink('dashboard', 'list')}>
                         Dashboards
                     </BreadcrumbItem>
-                    <BreadcrumbItem href={Streamr.createLink('dashboard', 'show', 1)} active={true}>
+                    <BreadcrumbItem href={Streamr.createLink('dashboard', 'editor', 1)} active={true}>
                         {dashboard.name}
                     </BreadcrumbItem>
                 </Breadcrumb>
