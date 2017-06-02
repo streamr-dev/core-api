@@ -5,6 +5,7 @@ import com.unifina.utils.IdGenerator
 
 class DashboardItem implements Comparable {
 
+	String id
 	String title
 	Canvas canvas
 	Integer module
@@ -24,6 +25,10 @@ class DashboardItem implements Comparable {
 		return cmp != 0 ? cmp :
 				id != null && obj.id != null ? id.compareTo(obj.id) :
 						title.compareTo(obj.title)
+	}
+
+	static mapping = {
+		id generator: 'assigned'
 	}
 
 	Map toMap() {

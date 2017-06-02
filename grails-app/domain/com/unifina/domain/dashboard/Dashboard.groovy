@@ -20,30 +20,31 @@ class Dashboard {
 	static hasMany = [items: DashboardItem]
 
 	static constraints = {
-		name(nullable:true)
+		name(nullable: true)
+		layout(nullable: true)
 	}
 
 	static mapping = {
 		items cascade: 'all-delete-orphan'
+		id generator: 'assigned'
 	}
 
 	@CompileStatic
 	Map toSummaryMap() {
 		[
-			id: id,
-			name: name,
-			numOfItems: items == null ? 0 : items.size(),
+				id        : id,
+				name      : name,
+				numOfItems: items == null ? 0 : items.size(),
 		]
 	}
 
 	@CompileStatic
 	Map toMap() {
 		[
-			id: id,
-			name: name,
-			items: items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
-			layout: layout
+				id    : id,
+				name  : name,
+				items : items == null ? [] : items.collect { DashboardItem it -> it.toMap() },
+				layout: layout
 		]
 	}
-
 }

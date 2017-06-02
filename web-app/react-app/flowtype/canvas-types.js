@@ -1,7 +1,7 @@
 
 // These are not complete, but I don't need more right now. When we do, we'll fill these
 
-import type {UiChannel} from './index.js'
+import type {UiChannel} from './common-types.js'
 
 export type Canvas = {
     id: string,

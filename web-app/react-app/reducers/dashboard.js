@@ -17,7 +17,8 @@ import {
     GET_MY_DASHBOARD_PERMISSIONS_REQUEST,
     GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
     GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
-    OPEN_DASHBOARD
+    OPEN_DASHBOARD,
+    UPDATE_DASHBOARD
 } from '../actions/dashboard.js'
 
 declare var _: any
@@ -25,13 +26,17 @@ declare var _: any
 import type {
     DashboardReducerState as State,
     DashboardReducerAction as Action
-} from '../types/dashboard-types'
+} from '../flowtype/dashboard-types'
 
 const initialState = {
     dashboardsById: {},
-    openDashboard: null,
+    openDashboard: {
+        id: null,
+        saved: false,
+        new: true
+    },
     error: null,
-    fetching: false
+    fetching: false,
 }
 
 const dashboard = function(state: State = initialState, action: Action) : State {
@@ -39,7 +44,10 @@ const dashboard = function(state: State = initialState, action: Action) : State 
         case OPEN_DASHBOARD:
             return {
                 ...state,
-                openDashboard: action.id
+                openDashboard: {
+                    ...state.openDashboard,
+                    id: action.id
+                }
             }
         case GET_AND_REPLACE_DASHBOARDS_REQUEST:
         case GET_DASHBOARD_REQUEST:
@@ -58,6 +66,27 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 error: null
             }
         case CREATE_DASHBOARD:
+        case UPDATE_DASHBOARD: {
+            if (!action.dashboard || !action.dashboard.id) {
+                return state
+            }
+            return {
+                ...state,
+                dashboardsById: {
+                    ...state.dashboardsById,
+                    [action.dashboard.id]: {
+                        ...state.dashboardsById[action.dashboard.id],
+                        ...action.dashboard
+                    }
+                },
+                openDashboard: {
+                    ...state.openDashboard,
+                    saved: false
+                },
+                error: null,
+                fetching: false
+            }
+        }
         case GET_DASHBOARD_SUCCESS:
         case UPDATE_AND_SAVE_DASHBOARD_SUCCESS: {
             if (!action.dashboard || !action.dashboard.id) {
@@ -71,6 +100,11 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                         ...state.dashboardsById[action.dashboard.id],
                         ...action.dashboard
                     }
+                },
+                openDashboard: {
+                    ...state.openDashboard,
+                    saved: true,
+                    new: false
                 },
                 error: null,
                 fetching: false

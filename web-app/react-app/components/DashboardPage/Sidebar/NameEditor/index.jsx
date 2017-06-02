@@ -7,7 +7,7 @@ import {FormControl} from 'react-bootstrap'
 
 import {updateDashboard} from '../../../../actions/dashboard'
 
-import type {Dashboard} from '../../../../types/dashboard-types'
+import type {Dashboard} from '../../../../flowtype/dashboard-types'
 
 class NameEditor extends Component {
     
@@ -40,7 +40,7 @@ class NameEditor extends Component {
                     type="text"
                     className="dashboard-name title-input"
                     name="dashboard-name"
-                    value={this.props.dashboard ? this.props.dashboard.name : ''}
+                    value={this.props.dashboard && this.props.dashboard.name || ''}
                     onChange={this.onChange}
                 />
             </div>

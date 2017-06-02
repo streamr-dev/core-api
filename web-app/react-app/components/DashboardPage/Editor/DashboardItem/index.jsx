@@ -7,8 +7,9 @@ import path from 'path'
 import TitleRow from './DashboardItemTitleRow'
 
 import styles from './dashboardItem.pcss'
+import './webcomponentStyles.css'
 
-import type {Dashboard, DashboardItem as DBItem} from '../../../../types/dashboard-types'
+import type {Dashboard, DashboardItem as DBItem} from '../../../../flowtype/dashboard-types'
 
 declare var Streamr: {}
 

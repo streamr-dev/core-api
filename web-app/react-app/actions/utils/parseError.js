@@ -1,6 +1,6 @@
 // @flow
 
-import type { ApiError } from '../../types'
+import type { ApiError } from '../../flowtype/common-types'
 
 export default (res: {
     response?: {

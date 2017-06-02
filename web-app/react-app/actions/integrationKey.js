@@ -21,9 +21,7 @@ export const DELETE_INTEGRATION_KEY_FAILURE = 'DELETE_INTEGRATION_KEY_FAILURE'
 
 const apiUrl = 'api/v1/integrationkeys'
 
-declare var Streamr: {
-    createLink: Function
-}
+declare var Streamr: any
 
 type IntegrationKey = {
     name: string,

@@ -2,7 +2,7 @@
 
 import React, {Component} from 'react'
 
-import type { Canvas } from '../../../../../types/canvas-types'
+import type { Canvas } from '../../../../../flowtype/canvas-types'
 import ModuleList from './ModuleList/index'
 
 import styles from './canvasInList.pcss'

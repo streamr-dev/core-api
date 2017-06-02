@@ -9,7 +9,7 @@ import {removeDashboardItem, updateDashboardItem} from '../../../../../actions/d
 
 import styles from './dashboardItemTitleRow.pcss'
 
-import type {Dashboard, DashboardItem} from '../../../../../types/dashboard-types'
+import type {Dashboard, DashboardItem} from '../../../../../flowtype/dashboard-types'
 
 class DashboardItemTitleRow extends Component {
     onRemove: Function

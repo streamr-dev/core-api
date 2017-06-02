@@ -2,19 +2,15 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import uuid from 'uuid'
+import {Helmet} from 'react-helmet'
 
-import {Row} from 'react-bootstrap'
 import Sidebar from './Sidebar/index'
 import Editor from './Editor/index'
 
-import {getDashboard, getMyDashboardPermissions, newDashboard, openDashboard} from '../../actions/dashboard'
-import {getRunningCanvases} from '../../actions/canvas'
+import {openDashboard} from '../../actions/dashboard'
 
-import type { Dashboard } from '../../types/dashboard-types'
-import type { Canvas } from '../../types/canvas-types'
-
-declare var DASHBOARD_ID: Dashboard.id
+import type { Dashboard } from '../../flowtype/dashboard-types'
+import type { Canvas } from '../../flowtype/canvas-types'
 
 class DashboardPage extends Component {
     
@@ -25,37 +21,39 @@ class DashboardPage extends Component {
         error: {
             message: string
         },
-        fetching: boolean
+        fetching: boolean,
+        params: any
     }
     
-    componentDidMount() {
-        const id = DASHBOARD_ID || uuid.v4()
-        if (DASHBOARD_ID) {
-            this.props.dispatch(getDashboard(id))
-            this.props.dispatch(getMyDashboardPermissions(id))
-        } else {
-            this.props.dispatch(newDashboard(id))
-        }
-        this.props.dispatch(getRunningCanvases())
-        this.props.dispatch(openDashboard(id))
+    componentWillReceiveProps(props) {
+        this.props.dispatch(openDashboard(props.params.id))
     }
     
     render() {
         return (
-            <Row style={{
+            <div style={{
                 height: '100%'
             }}>
+                <Helmet>
+                    <title>{this.props.dashboard && this.props.dashboard.name || 'New Dashboard'}</title>
+                </Helmet>
                 <Sidebar dashboard={this.props.dashboard}/>
                 <Editor dashboard={this.props.dashboard}/>
-            </Row>
+            </div>
         )
     }
 }
 
-const mapStateToProps = ({dashboard}) => ({
-    dashboard: dashboard.dashboardsById[dashboard.openDashboard],
-    fetching: dashboard.fetching,
-    error: dashboard.error
-})
+const mapStateToProps = ({dashboard}) => {
+    const db = dashboard.dashboardsById[dashboard.openDashboard.id]
+    return {
+        dashboard: db && {
+            ...db,
+            items: db.items
+        },
+        fetching: dashboard.fetching,
+        error: dashboard.error
+    }
+}
 
 export default connect(mapStateToProps, null)(DashboardPage)

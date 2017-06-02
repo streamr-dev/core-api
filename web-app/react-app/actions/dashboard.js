@@ -5,6 +5,7 @@ import parseError from './utils/parseError'
 
 export const CREATE_DASHBOARD = 'CREATE_DASHBOARD'
 export const OPEN_DASHBOARD = 'OPEN_DASHBOARD'
+export const UPDATE_DASHBOARD = 'UPDATE_DASHBOARD'
 
 export const UPDATE_AND_SAVE_DASHBOARD_REQUEST = 'UPDATE_AND_SAVE_DASHBOARD_REQUEST'
 export const UPDATE_AND_SAVE_DASHBOARD_SUCCESS = 'UPDATE_AND_SAVE_DASHBOARD_SUCCESS'
@@ -28,21 +29,21 @@ export const GET_MY_DASHBOARD_PERMISSIONS_FAILURE = 'GET_MY_DASHBOARD_PERMISSION
 
 const apiUrl = 'api/v1/dashboards'
 
-declare var Streamr: {
-    createLink: Function
-}
+declare var Streamr: any
 
 declare var _: any
 
-import type { ApiError } from '../types'
-import type { Dashboard, DashboardItem } from '../types/dashboard-types'
+import type { ApiError } from '../flowtype/common-types'
+import type { Dashboard, DashboardItem } from '../flowtype/dashboard-types'
 
 export const getAndReplaceDashboards = () => (dispatch: Function) => {
     dispatch(getAndReplaceDashboardsRequest())
     return axios.get(Streamr.createLink({
         uri: apiUrl
     }))
-        .then(({data}) => dispatch(getAndReplaceDashboardsSuccess(data)))
+        .then(({data}) => {
+            dispatch(getAndReplaceDashboardsSuccess(data))
+        })
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceDashboardsFailure(e))
@@ -55,7 +56,10 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
     return axios.get(Streamr.createLink({
         uri: `${apiUrl}/${id}`
     }))
-        .then(({data}) => dispatch(getDashboardSuccess(data)))
+        .then(({data}) => dispatch(getDashboardSuccess({
+            ...data,
+            layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
+        })))
         .catch(res => {
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
@@ -63,12 +67,22 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         })
 }
 
-export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
+export const updateAndSaveDashboard = (dashboard: Dashboard, createNew?: boolean) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
-    return axios.put(Streamr.createLink({
-        uri: `${apiUrl}/${dashboard.id}`
-    }), dashboard)
-        .then(({data}) => dispatch(updateAndSaveDashboardSuccess(data)))
+    return axios({
+        method: createNew ? 'POST' : 'PUT',
+        url: Streamr.createLink({
+            uri: createNew ? apiUrl : `${apiUrl}/${dashboard.id}`
+        }),
+        data: {
+            ...dashboard,
+            layout: JSON.stringify(dashboard.layout)
+        }
+    })
+        .then(({data}) => dispatch(updateAndSaveDashboardSuccess({
+            ...data,
+            layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
+        })))
         .catch(res => {
             const e = parseError(res)
             dispatch(updateAndSaveDashboardFailure(e))
@@ -142,7 +156,7 @@ export const openDashboard = (id: Dashboard.id) => ({
 })
 
 export const updateDashboard = (dashboard: Dashboard) => ({
-    type: UPDATE_AND_SAVE_DASHBOARD_SUCCESS,
+    type: UPDATE_DASHBOARD,
     dashboard
 })
 

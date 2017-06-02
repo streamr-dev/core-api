@@ -4,7 +4,7 @@ import React, {Component} from 'react'
 
 import ModuleInModuleList from './ModuleInModuleList'
 
-import type { Canvas, CanvasModule } from '../../../../../../types/canvas-types'
+import type { Canvas, CanvasModule } from '../../../../../../flowtype/canvas-types'
 
 export default class ModuleList extends Component {
     

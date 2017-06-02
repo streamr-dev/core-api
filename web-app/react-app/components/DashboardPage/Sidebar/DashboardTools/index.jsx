@@ -1,14 +1,14 @@
 // @flow
 
 import React, {Component} from 'react'
+import {any} from 'prop-types'
 import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
-import path from 'path'
 
 import {updateAndSaveDashboard, deleteDashboard} from '../../../../actions/dashboard'
 
-import type { Dashboard } from '../../../../types'
+import type { Dashboard } from '../../../../flowtype/dashboard-types'
 
 declare var ConfirmButton: Function
 declare var Streamr: any
@@ -22,7 +22,15 @@ class DashboardTools extends Component {
     
     props: {
         dashboard: Dashboard,
-        dispatch: Function
+        openDashboard: {
+            new: boolean
+        },
+        dispatch: Function,
+        router: any
+    }
+    
+    static contextTypes = {
+        router: any
     }
     
     constructor() {
@@ -46,8 +54,11 @@ class DashboardTools extends Component {
     }
     
     onSave() {
-        this.props.dispatch(updateAndSaveDashboard(this.props.dashboard))
-            .then(() => Streamr.showSuccess('Dashboard saved!'))
+        this.props.dispatch(updateAndSaveDashboard(this.props.dashboard, this.props.openDashboard.new || false))
+            .then(({dashboard}) => {
+                Streamr.showSuccess('Dashboard saved!')
+                this.context.router.push(`/${dashboard.id}`)
+            })
     }
     
     onShare() {
@@ -56,7 +67,9 @@ class DashboardTools extends Component {
     
     onDelete() {
         this.props.dispatch(deleteDashboard(this.props.dashboard.id))
-            .then(() => window.location = path.resolve(window.location.href, '..'))
+            .then(() => window.location = Streamr.createLink({
+                uri: '/dashboards/list'
+            }))
     }
     
     render() {
@@ -90,4 +103,8 @@ class DashboardTools extends Component {
     }
 }
 
-export default connect()(DashboardTools)
+const mapStateToProps = ({dashboard}) => ({
+    openDashboard: dashboard.openDashboard || {}
+})
+
+export default connect(mapStateToProps)(DashboardTools)

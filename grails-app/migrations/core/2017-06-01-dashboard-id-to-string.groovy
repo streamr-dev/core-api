@@ -24,6 +24,7 @@ EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 ALTER TABLE dashboard MODIFY COLUMN id VARCHAR(255);
+ALTER TABLE dashboard_item MODIFY COLUMN id VARCHAR(255);
 ALTER TABLE dashboard_item MODIFY COLUMN dashboard_id VARCHAR(255);
 
 ALTER TABLE dashboard_item 

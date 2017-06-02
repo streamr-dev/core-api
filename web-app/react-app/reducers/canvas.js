@@ -10,7 +10,7 @@ import {
 import type {
     CanvasReducerState as State,
     CanvasReducerAction as Action
-} from '../types/canvas-types'
+} from '../flowtype/canvas-types'
 
 const initialState = {
     list: [],

@@ -7,9 +7,10 @@ import FontAwesome from 'react-fontawesome'
 import {addDashboardItem, removeDashboardItem} from '../../../../../../../actions/dashboard'
 
 import styles from './moduleInModuleList.pcss'
+import uuid from 'uuid'
 
-import type { Dashboard, DashboardItem } from '../../../../../../../types/dashboard-types'
-import type { Canvas, CanvasModule } from '../../../../../../../types/canvas-types'
+import type { Dashboard, DashboardItem } from '../../../../../../../flowtype/dashboard-types'
+import type { Canvas, CanvasModule } from '../../../../../../../flowtype/canvas-types'
 
 declare var _: any
 
@@ -22,7 +23,8 @@ class ModuleInModuleList extends Component {
         module: CanvasModule,
         canvasId: Canvas.id,
         checked: boolean,
-        dispatch: Function
+        dispatch: Function,
+        id: Dashboard.id
     }
     
     constructor() {
@@ -32,8 +34,7 @@ class ModuleInModuleList extends Component {
     
     onClick() {
         const dbItem: DashboardItem = {
-            id: null,
-            tempId: this.props.canvasId + this.props.module.hash,
+            id: uuid.v4(),
             dashboard: this.props.dashboard.id,
             module: this.props.module.hash,
             canvas: this.props.canvasId,
@@ -63,7 +64,7 @@ class ModuleInModuleList extends Component {
 }
 
 const mapStateToProps = ({dashboard}, ownProps) => {
-    const db = dashboard.dashboardsById[dashboard.openDashboard] || {}
+    const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
     return {
         dashboard: db,
         checked: db ? _.find(db.items, item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false

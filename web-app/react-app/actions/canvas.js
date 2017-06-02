@@ -15,8 +15,8 @@ declare var Streamr: {
     createLink: Function
 }
 
-import type { ApiError } from '../types'
-import type { Canvas } from '../types/canvas-types'
+import type { ApiError } from '../flowtype/common-types'
+import type { Canvas } from '../flowtype/canvas-types'
 
 export const getRunningCanvases = () => (dispatch: Function) => {
     dispatch(getCanvasesRequest())
