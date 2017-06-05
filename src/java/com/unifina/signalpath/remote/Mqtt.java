@@ -29,16 +29,13 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 	private transient MqttClient client;
 
 	@Override
-	protected void onConfiguration(Map<String, Object> config) {
-		super.onConfiguration(config);
-		propagationSink = true;
-	}
-
-	@Override
 	public void init() {
 		super.init();
 		URL.setCanConnect(false);
 		topic.setCanConnect(false);
+
+		// sends output when messages arrive (though shouldn't receive inputs anyway...)
+		propagationSink = true;
 	}
 
 	@Override
@@ -54,10 +51,10 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 	@Override
 	public void onStart() {
 		try {
-			startClient();
+			client = createAndStartClient();
 			client.subscribe(topic.getValue());
 		} catch (Exception e) {
-			log.error(e);
+			throw new RuntimeException("Starting MQTT client failed", e);
 		}
 	}
 
@@ -70,19 +67,20 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		}
 	}
 
-	private void startClient() throws MqttException {
+	protected MqttClient createAndStartClient() throws MqttException {
 		stopClient();
 
 		// TODO: unique clientId?
 		String clientId = "streamrMQTT";
 		String brokerUrl = URL.getValue();
 		if (brokerUrl.startsWith("mqtt:")) { brokerUrl = "tcp:" + brokerUrl.substring(0, 5); }
-		client = new MqttClient(brokerUrl, clientId, new MemoryPersistence());
-		client.setCallback(this);
-		client.connect();
+		MqttClient newClient = new MqttClient(brokerUrl, clientId, new MemoryPersistence());
+		newClient.setCallback(this);
+		newClient.connect();
+		return newClient;
 	}
 
-	private void stopClient() throws MqttException {
+	protected void stopClient() throws MqttException {
 		if (client != null) {
 			client.disconnect();
 			client = null;
