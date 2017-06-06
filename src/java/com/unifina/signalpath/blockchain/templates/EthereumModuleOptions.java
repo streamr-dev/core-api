@@ -13,6 +13,8 @@ public class EthereumModuleOptions implements Serializable {
 	private String network;
 	private String address;
 	private String privateKey;
+	//private Long gasPriceWei = 20_000_000_000L;		// Long.MAX_VALUE wei == 9 ETH
+	private double gasPriceWei = 2e9;
 
 	public EthereumModuleOptions() {
 		// default values
@@ -25,6 +27,25 @@ public class EthereumModuleOptions implements Serializable {
 		writeNetworkOption(options);
 		options.add(new ModuleOption("address", address, "string"));
 		options.add(new ModuleOption("privateKey", privateKey, "string"));
+		options.add(new ModuleOption("gasPriceWei", gasPriceWei, "double"));
+	}
+
+	public static EthereumModuleOptions readFrom(ModuleOptions options) {
+		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
+
+		ethOpts.readNetworkOption(options);
+
+		if (options.getOption("address") != null) {
+			ethOpts.setAddress(options.getOption("address").getString());
+		}
+		if (options.getOption("privateKey") != null) {
+			ethOpts.setPrivateKey(options.getOption("privateKey").getString());
+		}
+		if (options.getOption("gasPriceWei") != null) {
+			ethOpts.setGasPriceWei(options.getOption("gasPriceWei").getDouble());
+		}
+
+		return ethOpts;
 	}
 
 	public void writeNetworkOption(ModuleOptions options) {
@@ -46,21 +67,6 @@ public class EthereumModuleOptions implements Serializable {
 			// Throws if the network was not valid
 			getServer();
 		}
-	}
-
-	public static EthereumModuleOptions readFrom(ModuleOptions options) {
-		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
-
-		ethOpts.readNetworkOption(options);
-
-		if (options.getOption("address") != null) {
-			ethOpts.setAddress(options.getOption("address").getString());
-		}
-		if (options.getOption("privateKey") != null) {
-			ethOpts.setPrivateKey(options.getOption("privateKey").getString());
-		}
-
-		return ethOpts;
 	}
 
 	public String getNetwork() {
@@ -85,6 +91,14 @@ public class EthereumModuleOptions implements Serializable {
 
 	public void setPrivateKey(String privateKey) {
 		this.privateKey = privateKey;
+	}
+
+	public double getGasPriceWei() {
+		return gasPriceWei;
+	}
+
+	public void setGasPriceWei(double gasPriceWei) {
+		this.gasPriceWei = gasPriceWei;
 	}
 
 	public String getServer() {

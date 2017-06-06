@@ -217,9 +217,9 @@ public class EthereumCall extends AbstractHttpModule {
 		if (c.getAddress() == null) { throw new RuntimeException("Contract must be deployed before calling"); }
 
 		Map args = new HashMap<>();
-
 		args.put("source", ethereumOptions.getAddress());
 		args.put("key", ethereumOptions.getPrivateKey());
+		args.put("gasprice", ethereumOptions.getGasPriceWei());
 		args.put("target", c.getAddress());
 
 		HttpPost request = null;

@@ -14,6 +14,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -189,13 +190,14 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	private EthereumContract deploy(String code, List<Object> args, String sendWei) throws Exception {
 		code = replaceDynamicFields(code);
 
-		String bodyJson = new Gson().toJson(ImmutableMap.of(
-			"source", ethereumOptions.getAddress(),
-			"key", ethereumOptions.getPrivateKey(),
-			"code", code,
-			"args", args,
-			"value", sendWei
-		)).toString();
+		Map body = new HashMap<>();
+		body.put("source", ethereumOptions.getAddress());
+		body.put("key", ethereumOptions.getPrivateKey());
+		body.put("gasprice", ethereumOptions.getGasPriceWei());
+		body.put("code", code);
+		body.put("args", args);
+		body.put("value", sendWei);
+		String bodyJson = new Gson().toJson(body);
 
 		Unirest.setTimeouts(10*1000, 10*60*1000); // wait patiently for the next mined block, up to 10 minutes
 
