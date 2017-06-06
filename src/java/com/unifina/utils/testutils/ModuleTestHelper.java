@@ -1,12 +1,9 @@
 package com.unifina.utils.testutils;
 
 import com.unifina.datasource.ITimeListener;
-import com.unifina.serialization.AnonymousInnerClassDetector;
-import com.unifina.serialization.HiddenFieldDetector;
 import com.unifina.serialization.Serializer;
 import com.unifina.serialization.SerializerImpl;
 import com.unifina.service.SerializationService;
-import com.unifina.service.StreamService;
 import com.unifina.signalpath.*;
 import com.unifina.utils.DU;
 import com.unifina.utils.Globals;
@@ -594,10 +591,10 @@ public class ModuleTestHelper {
 			}
 			Collector collector = new Collector();
 			collector.init();
-			collector.attachToModule(output);
+			collector.attachToOutput(output);
 		}
 	}
-	private static class Collector extends AbstractSignalPathModule {
+	public static class Collector extends AbstractSignalPathModule {
 		Input<Object> input = new Input<>(this, "input", "Object");
 
 		@Override
@@ -605,7 +602,7 @@ public class ModuleTestHelper {
 			addInput(input);
 		}
 
-		public void attachToModule(Output<Object> externalOutput) {
+		public void attachToOutput(Output<Object> externalOutput) {
 			externalOutput.connect(input);
 		}
 
