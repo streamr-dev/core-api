@@ -20,12 +20,21 @@ class DashboardItem extends Component {
         dashboard: Dashboard,
         packery: any,
         layout?: DBItem.layout,
-        dragCancelClassName?: string
+        dragCancelClassName?: string,
+        currentLayout: ?{}
     }
     
     componentDidMount() {
     }
-    
+
+    componentWillReceiveProps(props) {
+        if (props.currentLayout) {
+            const event = new Event('Event')
+            event.initEvent('resize', false, true)
+            this.webcomponent.dispatchEvent(event)
+        }
+    }
+
     render() {
         const item = this.props.item || {}
         const WebComponent = item.webcomponent
@@ -37,6 +46,7 @@ class DashboardItem extends Component {
                 <div className={`${styles.body} ${this.props.dragCancelClassName || ''}`}>
                     <div className={styles.wrapper}>
                         <WebComponent
+                            ref={item => this.webcomponent = item}
                             className="streamr-widget non-draggable"
                             url={Streamr.createLink({
                                 uri: path.resolve('api/v1/dashboards', item.dashboard.toString(), 'canvases', item.canvas.toString(), 'modules', item.module.toString())

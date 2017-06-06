@@ -31,6 +31,9 @@ class Editor extends Component {
         dashboard: Dashboard,
         dispatch: Function
     }
+    state: {
+        layoutsByItemId: {}
+    }
     static defaultProps = {
         dashboard: {
             name: '',
@@ -53,9 +56,11 @@ class Editor extends Component {
                 sm: 4,
                 xs: 2,
             },
+            layoutsByItemId: {}
         }
         this.onLayoutChange = this.onLayoutChange.bind(this)
         this.generateLayout = this.generateLayout.bind(this)
+        this.onResize = this.onResize.bind(this)
     }
     
     componentDidMount() {
@@ -85,6 +90,15 @@ class Editor extends Component {
             })
         }))
     }
+
+    onResize(items) {
+        this.setState({
+            layoutsByItemId: {
+                ...this.state.layoutsByItemId,
+                ...(_.groupBy(items, item => item.i))
+            }
+        })
+    }
     
     render() {
         const {dashboard} = this.props
@@ -112,11 +126,11 @@ class Editor extends Component {
                     cols={this.state.cols}
                     draggableCancel={`.${dragCancelClassName}`}
                     onLayoutChange={this.onLayoutChange}
+                    onResize={this.onResize}
                 >
                     {items.map(dbItem => (
-                        <div key={dbItem.id.toString()} data-grid={dbItem.layout || {}}>
-                            <DashboardItem item={dbItem} dashboard={dashboard}
-                                           dragCancelClassName={dragCancelClassName}/>
+                        <div key={dbItem.id.toString()}>
+                            <DashboardItem currentLayout={this.state.layoutsByItemId[dbItem.id]} item={dbItem} dashboard={dashboard} dragCancelClassName={dragCancelClassName}/>
                         </div>
                     ))}
                 </ResponsiveReactGridLayout>

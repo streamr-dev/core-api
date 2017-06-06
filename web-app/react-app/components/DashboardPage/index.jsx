@@ -7,8 +7,6 @@ import {Helmet} from 'react-helmet'
 import Sidebar from './Sidebar/index'
 import Editor from './Editor/index'
 
-import {openDashboard} from '../../actions/dashboard'
-
 import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
 
@@ -23,10 +21,6 @@ class DashboardPage extends Component {
         },
         fetching: boolean,
         params: any
-    }
-    
-    componentWillReceiveProps(props) {
-        this.props.dispatch(openDashboard(props.params.id))
     }
     
     render() {
