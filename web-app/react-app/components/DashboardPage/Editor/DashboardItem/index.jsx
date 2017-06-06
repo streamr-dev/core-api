@@ -37,7 +37,7 @@ class DashboardItem extends Component {
 
     render() {
         const item = this.props.item || {}
-        const WebComponent = item.webcomponent
+        const WebComponent = item.webcomponent || 'div'
         return (
             <div className={styles.dashboardItem}>
                 <div className={styles.header}>

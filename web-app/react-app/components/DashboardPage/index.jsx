@@ -10,6 +10,10 @@ import Editor from './Editor/index'
 import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
 
+declare var Streamr: {
+    showError: () => void
+}
+
 class DashboardPage extends Component {
     
     props: {
@@ -21,6 +25,12 @@ class DashboardPage extends Component {
         },
         fetching: boolean,
         params: any
+    }
+
+    componentWillReceiveProps(props) {
+        if (props.error && props.error !== this.props.error) {
+            Streamr.showError(props.error)
+        }
     }
     
     render() {
