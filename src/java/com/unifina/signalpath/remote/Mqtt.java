@@ -63,7 +63,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 		try {
 			stopClient();
 		} catch (Exception e) {
-			log.error(e);
+			throw new RuntimeException("Stopping MQTT client failed", e);
 		}
 	}
 
