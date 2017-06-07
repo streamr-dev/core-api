@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Grails: unifina-core" type="GrailsRunConfigurationType" factoryName="Grails">
-    <setting name="vmparams" value="-Dgrails.dev.database=core_dev_YOUR_SUFFIX_HERE" />
+    <setting name="vmparams" value="-Dgrails.dev.database=${CORE_DEV_DATABASE}" />
     <setting name="cmdLine" value="run-app" />
     <setting name="passParentEnv" value="true" />
     <setting name="grailsApplicationRoot" value="$PROJECT_DIR$" />
