@@ -17,28 +17,7 @@ import {
 
 declare var _: any
 
-type IntegrationKey = {
-    name: string,
-    type: string,
-    json: {}
-}
-
-type State = {
-    listsByService?: {
-        [string]: Array<IntegrationKey>
-    },
-    error?: ?string,
-    fetching?: boolean
-}
-
-type Action = {
-    type: string,
-    service?: string,
-    integrationKey?: IntegrationKey,
-    integrationKeys?: Array<IntegrationKey>,
-    error?: string,
-    id: string
-}
+import type {State, Action} from '../flowtype/integration-key-types.js'
 
 const initialState = {
     listsByService: {},

@@ -4,6 +4,8 @@ import thunk from 'redux-thunk'
 
 import {createStore, applyMiddleware, compose, combineReducers} from 'redux'
 
+import notificationReducer from '../reducers/notification'
+
 export default (reducers: {}) => {
     const middleware = [thunk]
     let toBeComposed = [applyMiddleware(...middleware)]
@@ -15,7 +17,10 @@ export default (reducers: {}) => {
     }
     
     return createStore(
-        combineReducers(reducers),
+        combineReducers({
+            notifications: notificationReducer,
+            ...reducers
+        }),
         compose.apply(null, toBeComposed)
     )
 }

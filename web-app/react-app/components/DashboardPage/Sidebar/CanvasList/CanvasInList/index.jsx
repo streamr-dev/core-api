@@ -7,8 +7,6 @@ import ModuleList from './ModuleList/index'
 
 import styles from './canvasInList.pcss'
 
-declare var _: any
-
 export default class CanvasInList extends Component {
     
     props: {
@@ -39,7 +37,7 @@ export default class CanvasInList extends Component {
                         {canvas.name}
                     </span>
                     <span className="howmanychecked badge badge-primary">
-                        {_.filter(canvas.modules, 'checked').length || ''}
+                        {(canvas.modules.filter(module => module.checked)).length || ''}
                     </span>
                 </a>
                 <ModuleList modules={canvas.modules} canvasId={canvas.id} />

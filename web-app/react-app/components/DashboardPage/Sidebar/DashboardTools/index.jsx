@@ -56,7 +56,6 @@ class DashboardTools extends Component {
     onSave() {
         this.props.dispatch(updateAndSaveDashboard(this.props.dashboard, this.props.openDashboard.new || false))
             .then(({dashboard}) => {
-                Streamr.showSuccess('Dashboard saved!')
                 this.context.router.push(`/${dashboard.id}`)
             })
     }

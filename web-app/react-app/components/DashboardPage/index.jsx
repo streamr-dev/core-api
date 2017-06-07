@@ -4,6 +4,7 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {Helmet} from 'react-helmet'
 
+import Notifier from '../Notifier'
 import Sidebar from './Sidebar/index'
 import Editor from './Editor/index'
 
@@ -41,6 +42,7 @@ class DashboardPage extends Component {
                 <Helmet>
                     <title>{this.props.dashboard && this.props.dashboard.name || 'New Dashboard'}</title>
                 </Helmet>
+                <Notifier/>
                 <Sidebar dashboard={this.props.dashboard}/>
                 <Editor dashboard={this.props.dashboard}/>
             </div>

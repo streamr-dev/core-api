@@ -9,4 +9,3 @@ export type UiChannel = {
     webcomponent: string,
     name: string
 }
-

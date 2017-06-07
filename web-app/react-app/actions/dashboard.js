@@ -3,6 +3,8 @@
 import axios from 'axios'
 import parseError from './utils/parseError'
 
+import {showSuccess, showError} from './notification'
+
 export const CREATE_DASHBOARD = 'CREATE_DASHBOARD'
 export const OPEN_DASHBOARD = 'OPEN_DASHBOARD'
 export const UPDATE_DASHBOARD = 'UPDATE_DASHBOARD'
@@ -30,8 +32,6 @@ export const GET_MY_DASHBOARD_PERMISSIONS_FAILURE = 'GET_MY_DASHBOARD_PERMISSION
 const apiUrl = 'api/v1/dashboards'
 
 declare var Streamr: any
-
-declare var _: any
 
 import type { ApiError } from '../flowtype/common-types'
 import type { Dashboard, DashboardItem } from '../flowtype/dashboard-types'
@@ -79,13 +79,25 @@ export const updateAndSaveDashboard = (dashboard: Dashboard, createNew?: boolean
             layout: JSON.stringify(dashboard.layout)
         }
     })
-        .then(({data}) => dispatch(updateAndSaveDashboardSuccess({
-            ...data,
-            layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
-        })))
+        .then(({data}) => {
+            dispatch(showSuccess({
+                title: 'Dashboard saved succesfully!'
+            }))
+            
+            return dispatch(updateAndSaveDashboardSuccess({
+                ...data,
+                layout: (typeof data.layout === 'string') ? JSON.parse(data.layout) : data.layout
+            }))
+        })
         .catch(res => {
             const e = parseError(res)
             dispatch(updateAndSaveDashboardFailure(e))
+            
+            dispatch(showError({
+                title: 'Something went wrong!',
+                message: e.error
+            }))
+            
             throw e
         })
 }
@@ -120,7 +132,7 @@ export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Functi
 
 export const removeDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
-    items: _.reject(dashboard.items, it => it.canvas === item.canvas && it.module === item.module)
+    items: dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module)
 })
 
 export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
@@ -134,7 +146,7 @@ export const addDashboardItem = (dashboard: Dashboard, item: DashboardItem) => u
 export const updateDashboardItem = (dashboard: Dashboard, item: DashboardItem) => updateDashboard({
     ...dashboard,
     items: [
-        ...(_.reject(dashboard.items, it => it.canvas === item.canvas && it.module === item.module)),
+        dashboard.items.filter(it => it.canvas !== item.canvas || it.module !== item.module),
         item
     ]
 })

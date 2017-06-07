@@ -12,8 +12,6 @@ import uuid from 'uuid'
 import type { Dashboard, DashboardItem } from '../../../../../../../flowtype/dashboard-types'
 import type { Canvas, CanvasModule } from '../../../../../../../flowtype/canvas-types'
 
-declare var _: any
-
 class ModuleInModuleList extends Component {
     
     onClick: Function
@@ -67,7 +65,7 @@ const mapStateToProps = ({dashboard}, ownProps) => {
     const db = dashboard.dashboardsById[dashboard.openDashboard.id] || {}
     return {
         dashboard: db,
-        checked: db ? _.find(db.items, item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false
+        checked: db && db.items ? db.items.find(item => item.canvas === ownProps.canvasId && item.module === ownProps.module.hash) !== undefined : false
     }
 }
 
