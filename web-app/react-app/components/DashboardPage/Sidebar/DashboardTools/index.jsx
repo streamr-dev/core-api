@@ -6,6 +6,8 @@ import {connect} from 'react-redux'
 import {Button} from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 
+import ShareDialog from '../../../ShareDialog'
+
 import {updateAndSaveDashboard, deleteDashboard} from '../../../../actions/dashboard'
 
 import type { Dashboard } from '../../../../flowtype/dashboard-types'
@@ -17,7 +19,6 @@ class DashboardTools extends Component {
     
     removeButton: HTMLButtonElement
     onSave: Function
-    onShare: Function
     onDelete: Function
     
     props: {
@@ -37,7 +38,6 @@ class DashboardTools extends Component {
         super()
         
         this.onSave = this.onSave.bind(this)
-        this.onShare = this.onShare.bind(this)
         this.onDelete = this.onDelete.bind(this)
     }
     
@@ -60,10 +60,6 @@ class DashboardTools extends Component {
             })
     }
     
-    onShare() {
-    
-    }
-    
     onDelete() {
         this.props.dispatch(deleteDashboard(this.props.dashboard.id))
             .then(() => window.location = Streamr.createLink({
@@ -83,13 +79,14 @@ class DashboardTools extends Component {
                 >
                     Save
                 </Button>
-                <Button
-                    block
-                    className="share-button"
-                    onClick={this.onShare}
-                >
-                    <FontAwesome name="user" />  Share
-                </Button>
+                <ShareDialog>
+                    <Button
+                        block
+                        className="share-button"
+                    >
+                        <FontAwesome name="user" />  Share
+                    </Button>
+                </ShareDialog>
                 <button
                     className="btn btn-default btn-block delete-button"
                     title="Delete dashboard"

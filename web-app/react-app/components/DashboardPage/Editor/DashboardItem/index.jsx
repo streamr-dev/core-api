@@ -24,15 +24,26 @@ class DashboardItem extends Component {
         currentLayout: ?{}
     }
     
+    constructor() {
+        super()
+        this.onResize = this.onResize.bind(this)
+    }
+    
     componentDidMount() {
+        // TODO: why not work?
+        setTimeout(() => this.onResize(), 500)
     }
 
     componentWillReceiveProps(props) {
         if (props.currentLayout) {
-            const event = new Event('Event')
-            event.initEvent('resize', false, true)
-            this.webcomponent.dispatchEvent(event)
+            this.onResize()
         }
+    }
+    
+    onResize() {
+        const event = new Event('Event')
+        event.initEvent('resize', false, true)
+        this.webcomponent.dispatchEvent(event)
     }
 
     render() {

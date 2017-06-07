@@ -317,9 +317,8 @@ StreamrChart.prototype.resize = function(moduleWidth, moduleHeight) {
 
 		if (this.chart)
 			this.chart.setSize(w, h, false)
-	}
-	else if (this.chart) {
-		this.chart.setSize(this.$area.width(), this.$area.height(), false)
+	} else if (this.chart) {
+		this.chart.setSize(this.$area.parent().width(), this.$area.parent().height(), false)
 	}
 }
 

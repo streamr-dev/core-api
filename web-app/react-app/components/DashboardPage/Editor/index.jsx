@@ -64,6 +64,7 @@ class Editor extends Component {
     }
     
     onLayoutChange(layout, allLayouts) {
+        this.onResize(layout)
         this.props.dispatch(updateDashboard({
             ...this.props.dashboard,
             layout: allLayouts
