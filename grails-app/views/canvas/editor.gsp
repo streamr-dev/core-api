@@ -46,16 +46,16 @@ $(function() {
 	$("body").keydown(function(e) {
 		// ctrl + shift + s || cmd + shift + s
 		if (e.shiftKey && (e.ctrlKey || e.metaKey)) {
-			e.preventDefault()
 			if (String.fromCharCode(e.which).toLowerCase() == 's') {
+				e.preventDefault()
 				saveAsAndAskName()
 			}
 		}
 		// ctrl || cmd
 		else if (e.ctrlKey || e.metaKey) {
-			e.preventDefault()
 			switch (String.fromCharCode(e.which).toLowerCase()) {
 				case 's':
+					e.preventDefault()
 					if (!SignalPath.isSaved()) {
 						saveAsAndAskName()
 					} else {
@@ -63,14 +63,15 @@ $(function() {
 					}
 					break;
 				case 'o':
+					e.preventDefault()
 					loadBrowser.modal()
 					break;
 			}
 		}
 		// alt + r
 		else if (e.altKey) {
-			e.preventDefault()
 			if (String.fromCharCode(e.which).toLowerCase() == 'r') {
+				e.preventDefault()
 				if (!SignalPath.isRunning()) {
 					SignalPath.start();
 				} else {
