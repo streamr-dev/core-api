@@ -1,0 +1,28 @@
+
+.ownerRow {
+  height: 30px;
+  display: flex;
+  padding: 0 20px 15px 20px;
+
+  > div {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+
+    &.ownerLabel {
+      flex: 0;
+      padding-right: 10px;
+    }
+    &.owner {
+      flex: 1;
+    }
+    &.readAccessLabel {
+      flex: 1;
+      text-align: right;
+      padding-right: 10px;
+    }
+    &.readAccess {
+      flex: 0;
+    }
+  }
+}

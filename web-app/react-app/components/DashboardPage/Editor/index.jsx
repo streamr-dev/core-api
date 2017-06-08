@@ -124,6 +124,7 @@ class Editor extends Component {
                     draggableCancel={`.${dragCancelClassName}`}
                     onLayoutChange={this.onLayoutChange}
                     onResize={this.onResize}
+                    onResizeEnd={this.onResize}
                 >
                     {items.map(dbItem => (
                         <div key={dbItem.id.toString()}>

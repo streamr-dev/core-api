@@ -10,7 +10,7 @@
 <polymer-element name="streamr-widget" attributes="url dashboard resendAll resendLast authkey">
 	<template>
 		<streamr-client id="client"></streamr-client>
-		<div id="streamr-widget-container" class="streamr-widget-container" style="height: 100%; width: 100%"></div>
+		<div id="streamr-widget-container" class="streamr-widget-container"></div>
 	</template>
 	
 	<script>

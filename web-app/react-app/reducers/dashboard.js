@@ -134,7 +134,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                     ...state.dashboardsById,
                     [action.id]: {
                         ...state.dashboardsById[action.id],
-                        permissions: action.permissions || []
+                        ownPermissions: action.permissions || []
                     }
                 },
                 error: null,

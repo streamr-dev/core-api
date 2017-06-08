@@ -8,7 +8,7 @@
 	<r:layoutResources disposition="defer"/>
 </g:if>
 
-<polymer-element name="streamr-chart" extends="streamr-widget" attributes="rangeDropdown showHideButtons displayTitle">
+<polymer-element name="streamr-chart" extends="streamr-widget" attributes="rangeDropdown showHideButtons displayTitle" style="width:100%;height:100%">
 	<template>
 		<shadow></shadow>
 	</template>
@@ -17,7 +17,10 @@
 		Polymer('streamr-chart',{
 			ready: function() {
 				var _this = this
-				this.bindEvents(_this.$["streamr-widget-container"])
+				this.bindEvents(this.$["streamr-widget-container"])
+
+				this.$["streamr-widget-container"].style.width = '100%'
+				this.$["streamr-widget-container"].style.height = '100%'
 
 				this.getModuleJson(function(json) {
 					var options = _this.getModuleOptionsWithOverrides(json)
