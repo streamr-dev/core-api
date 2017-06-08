@@ -1,0 +1,9 @@
+docs
+grails-app
+out
+node_modules
+src
+test
+scripts
+lib
+web-app
