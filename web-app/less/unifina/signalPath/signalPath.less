@@ -1,10 +1,30 @@
+
 @import "parameters.less";
 
-#canvas {
+body.canvas-editor-page #main-wrapper #content-wrapper {
+    overflow: auto;
+    padding-top: 0;
+    margin-top: 38px;
+
+    .breadcrumb {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      background-color: rgba(246, 246, 246, 0.5);
+      z-index: 100;
+      margin-left: 0;
+
+      li:first-child {
+        padding-left: 0;
+      }
+    }
+}
+
+.streamr-canvas {
 	position: relative;
 	font-size: 12px;
 	overflow: auto;
-	height: 100%;
+	height: ~"calc(100% - 38px)";
 	width: 100%;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -12,114 +32,97 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+
+	.component {
+		position: absolute;
+		padding: 7px;
+		z-index: 5;
+		cursor: move;
+
+		&.holdFocus {
+			z-index: 15;
+		}
+
+		.modulebody {
+			padding: 5px 10px;
+		}
+
+		input {
+			width: 50px;
+		}
+
+		a:link, a:visited, a:hover {
+			text-decoration: none;
+		}
+
+	}
+
+	._jsPlumb_endpoint {
+		z-index: 10;
+
+		&.holdFocus {
+			z-index: 20;
+		}
+
+		&.connectionHolder {
+			cursor: move;
+		}
+	}
+
+	._jsPlumb_connector {
+		z-index: 1;
+	}
+
+	div.tooltip {
+		.tooltip-inner {
+			max-width: 350px;
+			white-space: nowrap;
+
+			.message {
+				background-color: #101020;
+			}
+		}
+
+		.modulehelp-tooltip {
+			width: 350px !important;
+			text-align: left;
+			white-space: normal;
+		}
+	}
 }
 
-.component {
-	position: absolute; 
-	padding: 7px;
-	z-index: 5;
-}
+.bootbox-body {
 
-.component.holdFocus {
-	z-index: 15;
-}
+	.option .optionTitle {
+		width: 100px;
+		display: inline-block;
+	}
 
-.component:hover {
-	cursor:move;
-}
+	.modulehelp {
+		overflow: auto;
 
-.component input {
-	width: 50px;
-}
+		h3 {
+			margin-top: 7px;
+		}
+		table {
+			border: 0;
+			tbody tr td:first-child {
+				font-weight: bolder;
+				width: 100px;
+			}
+		}
+		p {
+			margin-bottom: 1em;
+		}
+		.highlight {
+			font-weight: bolder;
+		}
+		.formula {
+			display: inline-block;
+			font-weight: bolder;
+		}
+	}
 
-.component a:link, a:visited, a:hover {
-    text-decoration: none;
-}
-
-.module {
-	min-width: 150px;
-}
-.moduleheader {
-	width: 100%;
-	height: 18px;
-	display: inline-table;
-	margin-bottom: 5px;
-}
-
-.modulebody {
-	padding: 5px 10px;
-}
-
-.modulefooter {
-	overflow: hidden;
-	width: 100%;
-	margin-top: 3px;
-}
-
-.modulename {
-    display: table-cell;
-	font-weight: bold;
-	font-size: 12px;
-}
-
-.modulebutton {
-	width: 16px;
-	text-align: right;
-	display: table-cell;
-	vertical-align: top;
-	cursor: pointer;
-}
-
-table.paramTable {
-	width: 100%;
-	padding: 0px;
-	border: none;
-}
-
-table.paramTable td {
-	padding-right: 5px;
-}
-
-table.paramTable td input {
-	width: 50px;
-}
-
-table.ioTable td {
-	padding-right: 5px;
-}
-
-table.ioTable {
-	border: none;
-	width: 100%;
-	padding: 0px;
-}
-
-td.input {
-	text-align: right;
-}
-td.output {	
-	text-align: left;
-	padding-left: 10px;
-}
-
-.modulebody .table th {
-	padding-left: 3px;
-	padding-right: 3px;
-}
-
-.parameter {
-
-}
-
-.moduleSwitchContainer {
-	float: right;
-}
-
-.moduleSwitch {
-	font-size: 7px;
-	text-align: center;
-	cursor: pointer;
-	padding: 2px;
 }
 
 .ioname {
@@ -211,18 +214,6 @@ div.output .switchContainer .ioSwitch {
 
 ._jsPlumb_endpoint {
 	z-index:10;
-}
-
-._jsPlumb_endpoint.holdFocus {
-	z-index:20;
-}
-
-.connectionHolder._jsPlumb_endpoint {
-	cursor:move;
-}
-
-._jsPlumb_connector {
-	z-index:1;
 }
 
 .ui-menu {

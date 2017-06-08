@@ -118,8 +118,6 @@ grails.project.dependency.resolution = {
 		compile ":cache-headers:1.1.7"
 		runtime ':database-migration:1.4.0'
         runtime ":spring-security-core:2.0-RC4"
-        runtime ":jquery:1.11.1"
-        runtime ":jquery-ui:1.10.3"
         runtime ":resources:1.2.14"
         runtime ":cached-resources:1.0"
         runtime ":zipped-resources:1.0"

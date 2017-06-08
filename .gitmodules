@@ -19,3 +19,6 @@
 [submodule "web-app/js/webcomponentsjs"]
 	path = web-app/js/webcomponentsjs
 	url = git@github.com:streamr-dev/webcomponentsjs.git
+[submodule "web-app/js/draggabilly"]
+	path = web-app/js/draggabilly
+	url = git@github.com:streamr-dev/draggabilly.git

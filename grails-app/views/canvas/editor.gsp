@@ -6,10 +6,8 @@
 		<title>Canvas</title>
 
 		<r:require module='jstree'/>
-		<r:require module='jquery-ui'/>
 		<r:require module="bootbox"/>
 		<r:require module="bootstrap-contextmenu"/>
-		<r:require module="bootstrap-datepicker"/>
 		<r:require module="slimscroll"/>
 		<r:require module="streamr-search"/>
 		<r:require module="signalpath-browser"/>
@@ -18,6 +16,7 @@
 		<r:require module="touchpunch"/>
 		<r:require module="sharing-dialog"/>
 		<r:require module="canvas-controls"/>
+		<r:require module="bootstrap-datepicker"/>
 
 		<r:script>
 
@@ -385,17 +384,18 @@ $(function() {
 		if (!SignalPath.isReadOnly()) {
 			var canvasUrl = Streamr.createLink({uri: "api/v1/canvases/" + json.id})
 			$.getJSON(canvasUrl + "/permissions/me", function(perm) {
-			    var sharePermission = _.find(perm, function(p) {
-				    return p.operation === 'share'
-				})
-				if (sharePermission) {
+			    var enabled = _.map(perm, function(p) {
+			        return p.operation
+			    })
+				if (enabled.indexOf('share') >= 0) {
 					$("#share-button").data("url", canvasUrl).removeAttr("disabled")
 				} else {
 					$("#share-button").addClass("forbidden")
 				}
-                if (_.contains(permissions, "write")) {
-				    enabled.push('delete')
-                }
+				if (enabled.indexOf('write') >= 0) {
+					enabled.push('delete')
+					enabled.push('rename')
+				}
                 streamrDropDownSetEnabled(enabled)
 			})
 		}
@@ -564,6 +564,7 @@ $(function() {
 		</div> <!-- / #main-menu-inner -->
 	</div> <!-- / #main-menu -->
 
+
 	<div id="content-wrapper">
 		<ui:breadcrumb>
 			<li>
@@ -597,7 +598,8 @@ $(function() {
 				</ul>
 			</div>
 		</ui:breadcrumb>
-		<div id="canvas" class="scrollable embeddable"></div>
+
+		<div id="canvas" class="streamr-canvas scrollable embeddable"></div>
 	</div>
 
 	<div id="main-menu-bg"></div>
