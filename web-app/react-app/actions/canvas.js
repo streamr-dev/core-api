@@ -7,8 +7,6 @@ export const GET_RUNNING_CANVASES_REQUEST = 'GET_RUNNING_CANVASES_REQUEST'
 export const GET_RUNNING_CANVASES_SUCCESS = 'GET_RUNNING_CANVASES_SUCCESS'
 export const GET_RUNNING_CANVASES_FAILURE = 'GET_RUNNING_CANVASES_FAILURE'
 
-export const SET_MODULE_CHECKED = 'SET_MODULE_CHECKED'
-
 const apiUrl = 'api/v1/canvases'
 
 declare var Streamr: {
@@ -30,7 +28,9 @@ export const getRunningCanvases = () => (dispatch: Function) => {
             order: 'desc'
         }
     })
-        .then(({data}) => dispatch(getCanvasesSuccess(data)))
+        .then(({data}) => {
+            dispatch(getCanvasesSuccess(data))
+        })
         .catch(res => {
             const e = parseError(res)
             dispatch(getCanvasesFailure(e))

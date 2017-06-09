@@ -3,8 +3,7 @@
 import {
     GET_RUNNING_CANVASES_REQUEST,
     GET_RUNNING_CANVASES_SUCCESS,
-    GET_RUNNING_CANVASES_FAILURE,
-    SET_MODULE_CHECKED
+    GET_RUNNING_CANVASES_FAILURE
 } from '../actions/canvas.js'
 
 import type {
@@ -38,31 +37,6 @@ export default function(state: State = initialState, action: Action) : State {
                 fetching: false,
                 error: action.error
             }
-        case SET_MODULE_CHECKED: {
-            let canvas = state.list.find(canvas => canvas.id === action.canvasId)
-            let module = canvas.modules.find(module => module.id === action.moduleId)
-            return {
-                ...state,
-                list: [
-                    ...(state.list.filter(c => c.id === canvas.id)),
-                    {
-                        ...canvas,
-                        modules: [
-                            ...(canvas.modules.filter(m => m.id === module.id)),
-                            {
-                                ...module,
-                                checked: action.state
-                            }
-                        ]
-                    }
-                ],
-                fetching: false,
-                error: action.error
-            }
-            
-        }
-        
-        
         default:
             return state
     }

@@ -15,7 +15,6 @@ import type {State, Action} from '../flowtype/permission-types'
 
 const initialState = {
     byTypeAndId: {},
-    statesByTypeAndId: {},
     error: null,
     fetching: false
 }
@@ -33,7 +32,7 @@ export default function(state: State = initialState, action: Action) : State {
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
-                        ...state.byTypeAndId[action.resourceType],
+                        ...(state.byTypeAndId[action.resourceType] || {}),
                         [action.resourceId]: {
                             permissions: action.permissions,
                             saving: false
@@ -46,6 +45,7 @@ export default function(state: State = initialState, action: Action) : State {
         case GET_RESOURCE_PERMISSIONS_FAILURE:
             return {
                 ...state,
+                fetching: false,
                 error: action.error
             }
         case UPDATE_AND_SAVE_RESOURCE_PERMISSION_REQUEST:

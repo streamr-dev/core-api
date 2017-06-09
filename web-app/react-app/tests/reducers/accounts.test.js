@@ -2,13 +2,13 @@
 import reducer from '../../reducers/integrationKey'
 import * as actions from '../../actions/integrationKey'
 import expect from 'expect'
+import _ from 'lodash'
 
-global._ = require('lodash')
 
-describe('todos reducer', () => {
+describe('IntegrationKey reducer', () => {
     
     beforeEach(() => {
-        global._ = require('underscore')
+        global._ = _
     })
     
     afterEach(() => {
@@ -88,7 +88,7 @@ describe('todos reducer', () => {
         ).toEqual({
             fetching: true
         })
-    
+        
         expect(
             reducer({}, {
                 type: actions.GET_INTEGRATION_KEYS_BY_TYPE_SUCCESS,

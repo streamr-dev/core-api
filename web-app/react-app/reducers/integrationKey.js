@@ -81,7 +81,7 @@ const integrationKey = function(state: State = initialState, action: Action) : S
         case DELETE_INTEGRATION_KEY_SUCCESS: {
             return {
                 ...state,
-                listsByService: _.mapObject(state.listsByService, list => _.reject(list, integrationKey => integrationKey.id === action.id)),
+                listsByService: _.mapValues(state.listsByService, list => _.reject(list, integrationKey => integrationKey.id === action.id)),
                 error: null,
                 fetching: false
             }
