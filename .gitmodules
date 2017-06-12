@@ -1,8 +1,4 @@
-[submodule "plugins/streamr-socketio-server"]
-	path = plugins/streamr-socketio-server
-	url = git@github.com:streamr-dev/streamr-socketio-server.git
-	branch = master
-[submodule "web-app/js/unifina/streamr-socketio-client"]
+[submodule "web-app/js/unifina/streamr-client"]
 	path = web-app/js/unifina/streamr-client
 	url = git@github.com:streamr-dev/streamr-client.git
 	branch = master
@@ -12,10 +8,6 @@
 [submodule "web-app/js/swagger-ui"]
 	path = web-app/js/swagger-ui
 	url = git@github.com:streamr-dev/swagger-ui
-[submodule "plugins/streamr-http-api"]
-	path = plugins/streamr-http-api
-	url = git@github.com:streamr-dev/streamr-http-api
-	branch = master
 [submodule "web-app/js/webcomponentsjs"]
 	path = web-app/js/webcomponentsjs
 	url = git@github.com:streamr-dev/webcomponentsjs.git
