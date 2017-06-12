@@ -6,6 +6,10 @@ SignalPath.MapModule = function (data, canvas, prot) {
     
     prot.enableIONameChange = false;
     
+    prot.getMap = function() {
+        return map
+    }
+    
     // Dragging in the chart container or the controls must not move the module
     prot.dragOptions.cancel = ".map-container"
     
@@ -13,11 +17,8 @@ SignalPath.MapModule = function (data, canvas, prot) {
     prot.createDiv     = function () {
         superCreateDiv();
         
-        prot.body.css("height", "100%")
-
-        var width = '500px'
-        var height= '400px'
-
+        prot.div.addClass('map-module')
+        
         if (prot.jsonData.layout) {
             if (prot.jsonData.layout.width) {
                 width = prot.jsonData.layout.width
@@ -26,7 +27,7 @@ SignalPath.MapModule = function (data, canvas, prot) {
                 height = prot.jsonData.layout.height
             }
         }
-
+        
         container = $("<div/>", {
             class: 'map-container',
             width: width,
@@ -49,7 +50,7 @@ SignalPath.MapModule = function (data, canvas, prot) {
         var mapOptions = _.mapValues(prot.jsonData.options, function (o) {
             return o.value
         })
-        map            = new StreamrMap(container, mapOptions)
+        map = new StreamrMap(container, mapOptions)
         
         $(map).on("move", function (e, data) {
             $.each(data, function (k, v) {
@@ -65,9 +66,7 @@ SignalPath.MapModule = function (data, canvas, prot) {
     
     function updateSize() {
         if (map) {
-            var width  = container.parent().width()
-            var height = container.parent().height() - container.parent().find(".ioTable").outerHeight() - 20
-            map.resize(width, height)
+            map.redraw()
         }
     }
     
