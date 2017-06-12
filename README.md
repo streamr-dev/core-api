@@ -20,10 +20,14 @@ This plugin is used in the app-level projects `unifina-trading` and `streamr-web
 
 Please refer to the [Developer onboarding document](https://docs.google.com/document/d/1a14cJYjGBwe8-BXeAz08UvE-qa12KLA6OocnXEq_cKU/edit#)
 
+## React and Redux components
+
+Part of the plugins frontend is made with libraries like React and Redux. Those files must first be compiled into bundle file(s). This happens by running `npm run build` in the root directory.
+
 ## Testing
 
-`grails test-app` will run all tests. To run the core plugin tests, give the command in the `unifina-core` directory.
+`grails test-app` will run all tests in the `unifina-core` directory. The command must be given in root directory.
 
-There are also `mocha` tests for javascript components. Install <a href="https://nodejs.org/">node.js</a>, then do `npm install` in the `unifina-core` directory. Then you can `npm test`.
+There are also `mocha` and `jest` tests for javascript components. Install <a href="https://nodejs.org/">node.js</a>, then do `npm install` in the root directory. Then you can `npm test`.
 
 Functional tests use Geb with <a href="https://code.google.com/p/selenium/wiki/ChromeDriver">chromedriver</a> and Google Chrome. You need to place the `chromedriver` executeble in your `PATH`, and set an environment variable `CHROMEDRIVER` to point to the executable.
