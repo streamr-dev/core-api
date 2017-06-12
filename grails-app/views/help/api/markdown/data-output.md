@@ -9,4 +9,8 @@ The streaming API can be used to control external applications using realtime ev
 
 ## Data Output via HTTP
 
-Events in streams can be queried via HTTP using the following endpoints. Details on these endpoints can be found in the [API Explorer](#api-explorer).
+Events in streams can be queried via HTTP. Details on the endpoints can be found in the [API Explorer](#api-explorer) under the endpoints related to streams.
+
+For example, the following endpoint would return the 5 most recent messages in a stream partition:
+
+`https://www.streamr.com/api/v1/streams/{id}/data/partitions/{partition}/last?count=5`
