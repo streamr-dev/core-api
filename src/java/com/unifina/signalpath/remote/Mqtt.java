@@ -7,6 +7,7 @@ import com.unifina.datasource.IStopListener;
 import com.unifina.feed.ITimestamped;
 import com.unifina.signalpath.*;
 
+import com.unifina.utils.IdGenerator;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -70,14 +71,23 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 	protected MqttClient createAndStartClient() throws MqttException {
 		stopClient();
 
-		// TODO: unique clientId?
-		String clientId = "streamrMQTT";
-		String brokerUrl = URL.getValue();
-		if (brokerUrl.startsWith("mqtt:")) { brokerUrl = "tcp:" + brokerUrl.substring(0, 5); }
+		String brokerUrl = getBrokerUrlFromInput(URL);
+		String clientId = IdGenerator.getShort();
 		MqttClient newClient = new MqttClient(brokerUrl, clientId, new MemoryPersistence());
 		newClient.setCallback(this);
 		newClient.connect();
 		return newClient;
+	}
+
+	/**
+	 * Replace "mqtt:" with "tcp:" which is what the PAHO MQTT library seems to require.
+	 * The client won't recognize "mqtt:" protocol, yet many addresses are published like that
+	 * @see MqttConnectOptions#validateURI
+	 */
+	public static String getBrokerUrlFromInput(Input<String> urlInput) {
+		String brokerUrl = urlInput.getValue();
+		if (brokerUrl.startsWith("mqtt:")) { brokerUrl = "tcp:" + brokerUrl.substring(5); }
+		return brokerUrl;
 	}
 
 	protected void stopClient() throws MqttException {
@@ -129,7 +139,7 @@ public class Mqtt extends AbstractSignalPathModule implements MqttCallback, IEve
 	@Override
 	public void sendOutput() {
 		// "normal" activation time does nothing; only received MQTT messages cause propagation
-		// TODO: maybe change subscribed topic if topic input changed?
+		// TODO: maybe allow topic input and change subscribed topic if topic input is activated?
 	}
 
 	@Override

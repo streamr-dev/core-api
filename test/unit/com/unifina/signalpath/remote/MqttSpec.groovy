@@ -3,6 +3,9 @@ package com.unifina.signalpath.remote
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.DataSource
 import com.unifina.datasource.DataSourceEventQueue
+import com.unifina.signalpath.Input
+import com.unifina.signalpath.StringInput
+import com.unifina.signalpath.StringParameter
 import com.unifina.utils.Globals
 import com.unifina.utils.testutils.ModuleTestHelper
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -66,6 +69,15 @@ class MqttSpec extends Specification {
 
 		then:
 		thrown RuntimeException
+	}
+
+	void "test mqtt protocol is changed to tcp"() {
+		when:
+		Input urlInput = module.getInput("URL")
+		urlInput.receive("mqtt://streamr.com/never/give/up/on/your/streams")
+
+		then:
+		TestableMqtt.getBrokerUrlFromInput(urlInput) == "tcp://streamr.com/never/give/up/on/your/streams"
 	}
 
 }
