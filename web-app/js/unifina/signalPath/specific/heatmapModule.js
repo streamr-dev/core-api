@@ -13,10 +13,12 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 	var superCreateDiv = prot.createDiv;
 	function createDiv() {
 		superCreateDiv();
-
-		prot.body.css("height", "100%")
-		
-		container = $("<div class='heatmap-container' style='width: 500px; height: 400px;'></div>")
+        
+        prot.div.addClass('map-module heatmap-module')
+        
+		container = $("<div class='heatmap-container content'></div>")
+		prot.body.width(500)
+		prot.body.height(400)
 		prot.body.append(container)
 
 		var heatMapOptions = {}
@@ -38,20 +40,17 @@ SignalPath.HeatmapModule = function(data,canvas,prot) {
 		})
 
 		prot.initResizable({
-			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
-			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
+			minWidth: 350,
+			minHeight: 250,
 			stop: updateSize
 		});
 
-		$(SignalPath).on("loaded", updateSize)
 	}
 	prot.createDiv = createDiv;	
 	
 	function updateSize() {
 		if (heatmap) {
-			var width = container.parent().width()
-			var height = container.parent().height() - container.parent().find(".ioTable").outerHeight() - 20
-			heatmap.resize(width, height)
+			heatmap.redraw()
 		}
 	}
 
