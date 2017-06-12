@@ -212,7 +212,7 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
-		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'streamr-chart' {
 		dependsOn 'jquery,highstock'
