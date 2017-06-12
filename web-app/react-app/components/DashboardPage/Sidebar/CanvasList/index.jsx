@@ -1,14 +1,14 @@
 // @flow
 
 import React, {Component} from 'react'
-
+import {connect} from 'react-redux'
 import CanvasInList from './CanvasInList'
 
 import styles from './canvasList.pcss'
 
 import type {Canvas} from '../../../../flowtype/canvas-types'
 
-export default class CanvasList extends Component {
+class CanvasList extends Component {
     
     props: {
         canvases: Array<Canvas>
@@ -27,3 +27,9 @@ export default class CanvasList extends Component {
         )
     }
 }
+
+const mapStateToProps = ({canvas}) => ({
+    canvases: canvas.list
+})
+
+export default connect(mapStateToProps)(CanvasList)

@@ -1,9 +1,9 @@
 // @flow
 
+import React, {Component} from 'react'
+
 declare var Streamr: any
 declare var StreamrCredentialsControl: any
-
-import React, {Component} from 'react'
 
 export default class APICredentials extends Component {
     

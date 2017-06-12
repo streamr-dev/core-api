@@ -47,6 +47,9 @@ export const getAndReplaceDashboards = () => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceDashboardsFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
@@ -63,6 +66,9 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(getDashboardFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
@@ -93,8 +99,7 @@ export const updateAndSaveDashboard = (dashboard: Dashboard, createNew?: boolean
             const e = parseError(res)
             
             dispatch(showError({
-                title: 'Something went wrong!',
-                message: e.error
+                title: e.message
             }))
             dispatch(updateAndSaveDashboardFailure(e))
             
@@ -111,6 +116,9 @@ export const deleteDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(deleteDashboardFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
@@ -124,6 +132,9 @@ export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Functi
         .catch(res => {
             const e = parseError(res)
             dispatch(getMyDashboardPermissionsFailure(id, e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }

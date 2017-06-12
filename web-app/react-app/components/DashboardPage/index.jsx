@@ -11,9 +11,6 @@ import Editor from './Editor/index'
 import type { Dashboard } from '../../flowtype/dashboard-types'
 import type { Canvas } from '../../flowtype/canvas-types'
 
-declare var Streamr: {
-    showError: () => void
-}
 
 class DashboardPage extends Component {
     
@@ -25,13 +22,8 @@ class DashboardPage extends Component {
             message: string
         },
         fetching: boolean,
-        params: any
-    }
-
-    componentWillReceiveProps(props) {
-        if (props.error && props.error !== this.props.error) {
-            Streamr.showError(props.error)
-        }
+        params: any,
+        children: any
     }
     
     render() {
@@ -45,6 +37,7 @@ class DashboardPage extends Component {
                 <Notifier/>
                 <Sidebar dashboard={this.props.dashboard}/>
                 <Editor dashboard={this.props.dashboard}/>
+                {this.props.children}
             </div>
         )
     }

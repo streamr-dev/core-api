@@ -60,7 +60,7 @@ class DashboardItem extends Component {
                             ref={item => this.webcomponent = item}
                             className="streamr-widget non-draggable"
                             url={Streamr.createLink({
-                                uri: path.resolve('api/v1/dashboards', item.dashboard.toString(), 'canvases', item.canvas.toString(), 'modules', item.module.toString())
+                                uri: path.resolve('/api/v1/dashboards', item.dashboard.toString(), 'canvases', item.canvas.toString(), 'modules', item.module.toString())
                             })}
                         />
                     </div>

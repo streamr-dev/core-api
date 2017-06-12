@@ -54,7 +54,7 @@ class DashboardTools extends Component {
     }
     
     onSave() {
-        this.props.dispatch(updateAndSaveDashboard(this.props.dashboard, this.props.openDashboard.new || false))
+        this.props.dispatch(updateAndSaveDashboard(this.props.dashboard))
             .then(({dashboard}) => {
                 this.context.router.push(`/${dashboard.id}`)
             })
@@ -79,7 +79,11 @@ class DashboardTools extends Component {
                 >
                     Save
                 </Button>
-                <ShareDialog>
+                <ShareDialog
+                    resourceType="DASHBOARD"
+                    resourceId={this.props.dashboard.id}
+                    resourceTitle={`Dashboard ${this.props.dashboard.name}`}
+                >
                     <Button
                         block
                         className="share-button"
@@ -100,7 +104,7 @@ class DashboardTools extends Component {
 }
 
 const mapStateToProps = ({dashboard}) => ({
-    openDashboard: dashboard.openDashboard || {}
+    dashboard: dashboard.dashboardsById[dashboard.openDashboard.id] || {}
 })
 
 export default connect(mapStateToProps)(DashboardTools)

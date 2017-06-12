@@ -6,9 +6,12 @@ import {
     GET_RESOURCE_PERMISSIONS_FAILURE,
     ADD_RESOURCE_PERMISSION,
     REMOVE_RESOURCE_PERMISSION,
-    UPDATE_AND_SAVE_RESOURCE_PERMISSION_REQUEST,
-    UPDATE_AND_SAVE_RESOURCE_PERMISSION_SUCCESS,
-    UPDATE_AND_SAVE_RESOURCE_PERMISSION_FAILURE
+    SAVE_ADDED_RESOURCE_PERMISSION_REQUEST,
+    SAVE_ADDED_RESOURCE_PERMISSION_SUCCESS,
+    SAVE_ADDED_RESOURCE_PERMISSION_FAILURE,
+    SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST,
+    SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS,
+    SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE
 } from '../actions/permission.js'
 
 import type {State, Action} from '../flowtype/permission-types'
@@ -19,6 +22,19 @@ const initialState = {
     fetching: false
 }
 
+const modifyPermission = (state, action, attributes) => {
+    return [...(state.byTypeAndId[action.resourceType][action.resourceId])].map(permission => {
+        if ((permission.id != null && permission.id === action.permission.id) || (permission.user === action.permission.user && permission.operation === action.permission.operation)) {
+            return {
+                ...permission,
+                ...attributes
+            }
+        } else {
+            return permission
+        }
+    })
+}
+
 export default function(state: State = initialState, action: Action) : State {
     switch (action.type) {
         case GET_RESOURCE_PERMISSIONS_REQUEST:
@@ -26,6 +42,7 @@ export default function(state: State = initialState, action: Action) : State {
                 ...state,
                 fetching: true
             }
+            
         case GET_RESOURCE_PERMISSIONS_SUCCESS:
             return {
                 ...state,
@@ -33,56 +50,168 @@ export default function(state: State = initialState, action: Action) : State {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...(state.byTypeAndId[action.resourceType] || {}),
-                        [action.resourceId]: {
-                            permissions: action.permissions,
-                            saving: false
-                        }
-                    }
-                },
-                fetching: false,
-                error: null
-            }
-        case GET_RESOURCE_PERMISSIONS_FAILURE:
-            return {
-                ...state,
-                fetching: false,
-                error: action.error
-            }
-        case UPDATE_AND_SAVE_RESOURCE_PERMISSION_REQUEST:
-            return {
-                ...state,
-                byTypeAndId: {
-                    ...state.byTypeAndId,
-                    [action.resourceType]: {
-                        ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: {
-                            ...state.byTypeAndId[action.resourceType][action.resourceId],
-                            saving: true,
+                        [action.resourceId]: action.permissions.map(permission => ({
+                            ...permission,
+                            new: true,
+                            fetching: false,
+                            removed: false,
                             error: null
-                        }
+                        }))
                     }
                 },
                 fetching: false,
                 error: null
             }
             
-        case UPDATE_AND_SAVE_RESOURCE_PERMISSION_FAILURE:
+        case GET_RESOURCE_PERMISSIONS_FAILURE:
+            return {
+                ...state,
+                fetching: false,
+                error: action.error
+            }
+    
+        case ADD_RESOURCE_PERMISSION: {
+            const byResourceType = state.byTypeAndId[action.resourceType] || {}
+            const byResourceId = byResourceType[action.resourceId] || []
             return {
                 ...state,
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
                         ...state.byTypeAndId[action.resourceType],
-                        [action.resourceId]: {
-                            ...state.byTypeAndId[action.resourceType][action.resourceId],
-                            saving: false,
-                            error: action.error
-                        }
+                        [action.resourceId]: [...byResourceId, {
+                            ...action.permission,
+                            new: true,
+                            fetching: false,
+                            removed: false,
+                            error: null
+                        }]
                     }
                 },
                 fetching: false,
                 error: null
             }
+            
+        }
+        
+        case REMOVE_RESOURCE_PERMISSION:
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        ...state.byTypeAndId[action.resourceType],
+                        [action.resourceId]: modifyPermission(state, action, {
+                            removed: true,
+                            fetching: false,
+                            error: null
+                        })
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+    
+        case SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST:
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        ...state.byTypeAndId[action.resourceType],
+                        [action.resourceId]: modifyPermission(state, action, {
+                            fetching: true
+                        })
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+    
+        case SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS: {
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId]
+                            .filter(p => p.id != null && p.id !== action.permission.id)
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+        }
+    
+        case SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE:
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        ...state.byTypeAndId[action.resourceType],
+                        [action.resourceId]: modifyPermission(state, action, {
+                            removed: false,
+                            new: false,
+                            fetching: false,
+                            error: action.permission.error
+                        })
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+        
+        case SAVE_ADDED_RESOURCE_PERMISSION_REQUEST:
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        ...state.byTypeAndId[action.resourceType],
+                        [action.resourceId]: modifyPermission(state, action, {
+                            fetching: true
+                        })
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+    
+        case SAVE_ADDED_RESOURCE_PERMISSION_SUCCESS:
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        ...state.byTypeAndId[action.resourceType],
+                        [action.resourceId]: modifyPermission(state, action, {
+                            fetching: false,
+                            new: false
+                        })
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+    
+        case SAVE_ADDED_RESOURCE_PERMISSION_FAILURE:
+            return {
+                ...state,
+                byTypeAndId: {
+                    ...state.byTypeAndId,
+                    [action.resourceType]: {
+                        ...state.byTypeAndId[action.resourceType],
+                        [action.resourceId]: modifyPermission(state, action, {
+                            fetching: false,
+                            error: action.permission.error
+                        })
+                    }
+                },
+                fetching: false,
+                error: null
+            }
+            
         default:
             return state
     }

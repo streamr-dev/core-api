@@ -48,4 +48,8 @@ class NameEditor extends Component {
     }
 }
 
-export default connect()(NameEditor)
+const mapStateToProps = ({dashboard}) => ({
+    dashboard: dashboard.dashboardsById[dashboard.openDashboard.id]
+})
+
+export default connect(mapStateToProps)(NameEditor)

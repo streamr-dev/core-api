@@ -1,31 +1,28 @@
 // @flow
 
 import React, {Component} from 'react'
-import {connect} from 'react-redux'
 import {Modal, Button} from 'react-bootstrap'
 import ShareDialogContent from './ShareDialogContent'
 
-class ShareDialog extends Component {
+import type {Permission} from '../../flowtype/permission-types'
+
+export default class ShareDialog extends Component {
     openModal: Function
     closeModal: Function
     state: {
-        open: boolean,
-        isPublic: boolean,
-        list: Array<any>
+        open: boolean
     }
     props: {
-        children: any,
+        resourceId: Permission.resourceId,
+        resourceType: Permission.resourceType,
         resourceTitle: string,
-        resourceId: string,
-        resourceType: 'DASHBOARD' | 'CANVAS' | 'STREAM'
+        children?: any
     }
     
     constructor() {
         super()
         this.state = {
-            open: false,
-            isPublic: false,
-            list: []
+            open: false
         }
         this.openModal = this.openModal.bind(this)
         this.closeModal = this.closeModal.bind(this)
@@ -55,16 +52,13 @@ class ShareDialog extends Component {
                 key={Math.random()}
                 show={this.state.open}
                 onHide={this.closeModal}
+                backdrop="static"
             >
                 <Modal.Header closeButton>
                     <Modal.Title>Share {this.props.resourceTitle}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ShareDialogContent isPublic={this.state.isPublic} list={this.state.list} onIsPublicChange={() => this.setState({
-                        isPublic: !this.state.isPublic,
-                    })} onPush={item => this.setState({
-                        list: [...this.state.list, item]
-                    })}/>
+                    <ShareDialogContent resourceTitle={this.props.resourceTitle} resourceType={this.props.resourceType} resourceId={this.props.resourceId} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
@@ -87,5 +81,3 @@ class ShareDialog extends Component {
         }, childsChildren)
     }
 }
-
-export default connect()(ShareDialog)

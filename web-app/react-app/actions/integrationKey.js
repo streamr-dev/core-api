@@ -2,6 +2,7 @@
 
 import axios from 'axios'
 import parseError from './utils/parseError'
+import {showError, showSuccess} from './notification'
 
 export const GET_AND_REPLACE_INTEGRATION_KEYS_REQUEST = 'GET_ALL_INTEGRATION_KEYS_REQUEST'
 export const GET_AND_REPLACE_INTEGRATION_KEYS_SUCCESS = 'GET_ALL_INTEGRATION_KEYS_SUCCESS'
@@ -31,10 +32,18 @@ export const getAndReplaceIntegrationKeys = () => (dispatch: Function) => {
     return axios.get(Streamr.createLink({
         uri: apiUrl
     }))
-        .then(({data}) => dispatch(getAndReplaceIntegrationKeysSuccess(data)))
+        .then(({data}) => {
+            dispatch(getAndReplaceIntegrationKeysSuccess(data))
+            dispatch(showSuccess({
+                message: 'IntegrationKey created successfully!'
+            }))
+        })
         .catch(res => {
             const e = parseError(res)
             dispatch(getAndReplaceIntegrationKeysFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
@@ -52,6 +61,9 @@ export const getIntegrationKeysByService = (service: string) => (dispatch: Funct
         .catch(res => {
             const e = parseError(res)
             dispatch(getIntegrationKeysByServiceFailure(service, e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
@@ -65,6 +77,9 @@ export const createIntegrationKey = (integrationKey: IntegrationKey) => (dispatc
         .catch(res => {
             const e = parseError(res)
             dispatch(createIntegrationKeyFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
@@ -78,6 +93,9 @@ export const deleteIntegrationKey = (id: string) => (dispatch: Function) => {
         .catch(res => {
             const e = parseError(res)
             dispatch(deleteIntegrationKeyFailure(e))
+            dispatch(showError({
+                title: e.message
+            }))
             throw e
         })
 }
