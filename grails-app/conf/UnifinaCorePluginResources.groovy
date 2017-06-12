@@ -1,4 +1,16 @@
 modules = {
+	"jquery" {
+		resource url:[dir:'js/jquery', file:'jquery-1.11.1.min.js'], disposition: 'head'
+	}
+	"jquery-ui" {
+		dependsOn "jquery"
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.min.js']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.min.css']
+		resource url:[dir:'js/jquery-ui', file:'jquery-ui.theme.min.css']
+	}
+	"draggabilly" {
+		resource url:[dir:'js/draggabilly/dist', file:'draggabilly.pkgd.js']
+	}
 	// jquery-migrate can be removed when there are no longer dependencies on pre-1.9 jquery
 	"jquery-migrate" {
 		dependsOn 'jquery'
@@ -216,7 +228,7 @@ modules = {
 		resource url:[dir:'css/signalPath/widgets', file:'loadBrowser.css', plugin: 'unifina-core']
 	}
 	'streamr-client' {
-		resource url:[dir:'js/unifina/streamr-socketio-client', file:'streamr-client.js', plugin: 'unifina-core']
+		resource url:[dir:'js/unifina/streamr-client', file:'streamr-client.js', plugin: 'unifina-core']
 	}
 	'streamr-chart' {
 		dependsOn 'jquery,highstock'
@@ -233,7 +245,6 @@ modules = {
 	'streamr-text-field' {
 		dependsOn 'jquery'
 		resource url:[dir:'js/unifina/streamr-text-field', file:'streamr-text-field.js', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'textFieldModule.css', plugin: 'unifina-core']
 	}
 	'streamr-heatmap' {
 		dependsOn 'jquery, leaflet'
@@ -301,6 +312,7 @@ modules = {
 		dependsOn 'list-editor'
 		dependsOn 'confirm-button'
 		dependsOn 'name-editor'
+		dependsOn 'draggabilly'
 		resource url:[dir:'js/unifina/signalPath/core', file:'signalPath.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'emptyModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/generic', file:'genericModule.js', plugin: 'unifina-core']
@@ -317,17 +329,12 @@ modules = {
 		resource url:[dir:'js/unifina/signalPath/specific', file:'mapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'imageMapModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'inputModule.js', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'switcherModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'buttonModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'chartModule.css', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'eventTable.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'gaugeModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'customModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'solidityModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'ethereumContractInput.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'tableModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'commentModule.js', plugin: 'unifina-core']
-		resource url:[dir:'css/signalPath/modules', file:'commentModule.css', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'labelModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'schedulerModule.js', plugin: 'unifina-core']
 		resource url:[dir:'js/unifina/signalPath/specific', file:'scheduler.js', plugin: 'unifina-core']

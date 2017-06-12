@@ -117,6 +117,10 @@
                 zoom: _this.getZoom()
             })
         })
+    
+        this.parent.on('resize', function() {
+            _this.redraw()
+        })
 
         if (this.options.drawTrace) {
             this.lineLayer = this.createTraceLayer()
@@ -480,9 +484,7 @@
         }
     }
 
-    StreamrMap.prototype.resize = function(width, height) {
-        this.parent.css("width", width+"px")
-        this.parent.css("height", height+"px")
+    StreamrMap.prototype.redraw = function() {
         this.map.invalidateSize()
 
         if (this.options.drawTrace) {
