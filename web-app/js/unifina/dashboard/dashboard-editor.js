@@ -13,8 +13,7 @@
     var ModuleView = Backbone.View.extend({
         tagName: 'li',
         className: 'module',
-        template: _.template($('#module-template')
-            .html()),
+        template: _.template($('#module-template').html()),
         
         events: {
             'click .module-title': 'toggleChecked'
@@ -253,23 +252,19 @@
         
         toggleEdit: function(e) {
             var _this = this
-            _this.editOff = function() {
+            this.editOff = function() {
                 if (this.$el.hasClass('editing')) {
-                    this.model.set('title', this.$el.find('.name-input')
-                        .val())
-                    this.$el.find('.titlebar')
-                        .html(this.model.get('title'))
-                    this.$el.find('.titlebar-clickable')
-                        .html(this.model.get('title'))
+                    this.model.set('title', this.$el.find('.name-input').val())
+                    this.$el.find('.titlebar').html(this.model.get('title'))
+                    this.$el.find('.titlebar-clickable').html(this.model.get('title'))
                     this.$el.removeClass('editing')
                 }
             }
-            _this.editOn = function() {
-                if (!(this.$el.hasClass('editing'))) {
-                    this.$el.addClass('editing')
+            this.editOn = function() {
+                if (!(this.$el.hasClass("editing"))) {
+                    this.$el.addClass("editing")
                     setTimeout(function() {
-                        _this.$el.find('.name-input')
-                            .focus()
+                        _this.$el.find('.name-input').focus()
                     }, 0)
                 }
             }
@@ -278,14 +273,13 @@
                         .hasClass('edit-btn') || $(e.currentTarget)
                         .hasClass('titlebar-clickable')) {
                     _this.editOn()
-                } else if ($(e.currentTarget)
-                        .hasClass('close-edit')) {
+                } else if ($(e.currentTarget).hasClass('close-edit')) {
                     _this.editOff()
                 }
             } else if (e.type == 'focusout' || e.type == 'blur') { //='blur'
-                _this.editOff()
+                this.editOff()
             } else if (e.keyCode == 13) {
-                _this.editOff()
+                this.editOff()
             }
             
         },
@@ -310,14 +304,11 @@
             this.$el.find('.make-' + this.model.get('size') + '-btn')
                 .parent()
                 .removeClass('checked')
-            if ($(e.target)
-                    .hasClass('make-small-btn')) {
+            if ($(e.target).hasClass('make-small-btn')) {
                 this.model.makeSmall()
-            } else if ($(e.target)
-                    .hasClass('make-medium-btn')) {
+            } else if ($(e.target).hasClass('make-medium-btn')) {
                 this.model.makeMedium()
-            } else if ($(e.target)
-                    .hasClass('make-large-btn')) {
+            } else if ($(e.target).hasClass('make-large-btn')) {
                 this.model.makeLarge()
             }
             this.initSize()
@@ -325,7 +316,8 @@
                 .parent()
                 .addClass('checked')
             this.$el.find('.widget-content')
-                .children()[0].dispatchEvent(new Event('resize'))
+                .children()[0]
+                .dispatchEvent(new Event('resize'))
         }
     })
     
@@ -367,8 +359,7 @@
                     _this.dashboard.saved = false
                 })
             this.menuToggle.click(function() {
-                if ($('body')
-                        .hasClass('editing')) {
+                if ($('body').hasClass('editing')) {
                     _this.setEditMode(false)
                 } else {
                     _this.setEditMode(true)
@@ -381,6 +372,10 @@
                 this.setEditMode(true)
             }
             
+            this.$el.find(".dashboard-name")
+                .change(function() {
+                    _this.dashboard.saved = false
+                })
             
             this.dashboard.on('invalid', function() {
                 Streamr.showError(_this.dashboard.validationError, 'Invalid value')
@@ -410,16 +405,61 @@
         render: function() {
             var _this = this
             this.$el.append(this.template(this.dashboard.toJSON()))
-            this.list = this.$el.find('#rsp-list')
-            this.saveButton = this.$el.find('#saveButton')
-            this.shareButton = this.$el.find('#share-button')
+            this.titleInput = this.$el.find("input.dashboard-name.title-input")
+            this.list = this.$el.find("#rsp-list")
+            this.saveButton = this.$el.find("#saveButton")
+            this.shareButton = this.$el.find("#share-button")
+            this.deleteButton = this.$el.find("#deleteDashboardButton")
             _.each(this.canvases.models, function(canvas) {
                 var canvasView = new CanvasView({
                     model: canvas
                 })
                 this.list.append(canvasView.el)
             }, this)
+            new ConfirmButton(this.$el.find("#deleteDashboardButton"), {
+                title: "Are you sure?",
+                message: "Really delete dashboard " + _this.dashboard.get("name") + "?"
+            }, function(response) {
+                if (response) {
+                    Backbone.sync("delete", _this.dashboard, {
+                        success: function() {
+                            // we dont want to accept exiting the page when we have just removed the whole dashboard
+                            $(window)
+                                .off("beforeunload")
+                            Streamr.showSuccess("Dashboard deleted succesfully!", "", 2000)
+                            setTimeout(function() {
+                                window.location = _this.baseUrl + "dashboard/list"
+                            }, 2000)
+                        },
+                        error: function(a, b, c) {
+                            Streamr.showError()
+                        }
+                    })
+                }
+            })
+            this.checkPermissions()
             this.trigger('ready')
+        },
+        
+        checkPermissions: function() {
+            var _this = this
+            $.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(permissions) {
+                permissions = _.map(permissions, function(p) {
+                    return p.operation
+                })
+                if (_.contains(permissions, "share")) {
+                    _this.shareButton.removeAttr("disabled")
+                } else {
+                    _this.shareButton.addClass("forbidden")
+                }
+                if (_.contains(permissions, "write")) {
+                    _this.saveButton.removeAttr("disabled")
+                    _this.deleteButton.removeAttr("disabled")
+                } else {
+                    _this.saveButton.addClass("forbidden")
+                    _this.deleteButton.addClass("forbidden")
+                }
+            })
         },
         
         setEditMode: function(active) {
@@ -463,8 +503,14 @@
             }
         },
         
+        updateTitle: function(e) {
+            var a = this.titleInput.val()
+            this.dashboard.set({name: a})
+        },
+        
         save: function() {
             var _this = this
+            this.updateTitle()
             
             this.dashboard.save({}, {
                 success: function() {
@@ -537,38 +583,30 @@
             }
             _.each(this.model.get('items').models, this.addDashboardItem, this)
             
-            this.model.get('items')
-                .on('add', this.addDashboardItem, this)
-            this.model.get('items')
-                .on('add', this.updateOrders, this)
-            this.model.get('items')
-                .on('remove', this.removeDashboardItem, this)
-            this.model.get('items')
-                .on('remove', this.updateOrders, this)
-            this.model.get('items')
-                .on('orderchange', this.updateOrders, this)
+            this.model.get('items').on('add', this.addDashboardItem, this)
+            this.model.get('items').on('add', this.updateOrders, this)
+            this.model.get('items').on('remove', this.removeDashboardItem, this)
+            this.model.get('items').on('remove', this.updateOrders, this)
+            this.model.get('items').on('orderchange', this.updateOrders, this)
             
             // Pass errors on items onto this view
-            this.model.get('items')
-                .on('error', function(error, itemTitle) {
-                    _this.trigger('error', error, itemTitle)
-                })
+            this.model.get('items').on('error', function(error, itemTitle) {
+                _this.trigger('error', error, itemTitle)
+            })
             
-            $('body')
-                .on('classChange', function() {
-                    //This is called after the classChange
-                    //editing -> !editing
-                    if (!($('body')
-                            .hasClass('editing'))) {
-                        if (!_this.model.saved) {
-                            Streamr.showInfo('The dashboard has changes which are not saved', 'Not saved')
-                        }
-                        _this.disableSortable()
-                        //!editing -> editing
-                    } else {
-                        _this.enableSortable()
+            $('body').on('classChange', function() {
+                //This is called after the classChange
+                //editing -> !editing
+                if (!($('body').hasClass('editing'))) {
+                    if (!_this.model.saved) {
+                        Streamr.showInfo('The dashboard has changes which are not saved', 'Not saved')
                     }
-                })
+                    _this.disableSortable()
+                    //!editing -> editing
+                } else {
+                    _this.enableSortable()
+                }
+            })
         },
         
         addDashboardItem: function(model) {

@@ -22,15 +22,13 @@ SignalPath.TableModule = function(data,canvas,prot) {
 				tableOptions[key] = prot.jsonData.options[key].value
 			})
 		}
-		
-		prot.table = new StreamrTable(prot.body, tableOptions)
-		if (prot.jsonData.options && prot.jsonData.options.maxRows)
-			options = prot.jsonData.options
-
+        
 		if (prot.jsonData.tableConfig && prot.jsonData.tableConfig.headers)
-			headers = prot.jsonData.tableConfig.headers
+			tableOptions.headers = prot.jsonData.tableConfig.headers
+        
+		prot.table = new StreamrTable(prot.body, tableOptions)
 		
-		prot.table.initTable(headers)
+        prot.table.tableContainer.addClass("drag-exclude")
 	}
 
 	function sendInitRequest() {

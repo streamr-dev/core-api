@@ -1,21 +1,16 @@
 <a name="data-output"></a>
 # Data Output
 
-You can get streaming data output via our websocket-based protocol. For easy usage, we offer a [Javascript client](#js-client) that works in the browser as well as [node.js](https://nodejs.org). Clients for other languages are coming soon.
+There are two APIs for requesting data from Streamr into external applications: our websocket-based streaming API, and our RESTful HTTP API.
 
-The data output API can be used to drive external applications using realtime events from Streamr. For example, you could push realtime stock prices into a mobile app, or update player positions in a multiplayer game. Or you could implement a thermostat by controlling warming or cooling based on a temperature measurement.
+The streaming API can be used to control external applications using realtime events from Streamr. For example, you could push realtime stock prices into a mobile app, or update player positions in a multiplayer game. Or you could implement a thermostat by controlling warming or cooling based on a temperature measurement. The streaming API pushes new events to subscribed clients immediately when they become available. For easy usage of the streaming API, we offer a [Javascript client](#js-client) that works in the browser as well as [node.js](https://nodejs.org). Clients for other languages are coming soon.
 
 <g:render template="/help/api/streamr-client" />
 
 ## Data Output via HTTP
 
-Data can also be queried via HTTP using the following endpoints. Details on these endpoints can be found in the [API Explorer](#api-explorer).
+Events in streams can be queried via HTTP. Details on the endpoints can be found in the [API Explorer](#api-explorer) under the endpoints related to streams.
 
-`https://www.streamr.com/api/v1/streams/:id/data/:partition/last/:count`
+For example, the following endpoint would return the 5 most recent messages in a stream partition:
 
-Use this endpoint to query the last `:count` messages from a Stream.
-
-`https://www.streamr.com/api/v1/streams/:id/data/:partition/fromTimestamp/:timestamp`
-`https://www.streamr.com/api/v1/streams/:id/data/:partition/fromTimestamp/:fromTimestamp/toTimestamp/:toTimestamp`
-
-Use the above endpoints to query messages since a timestamp, or within a timestamp range. The timestamps are given in Java/Javascript format, ie. milliseconds since Jan 1st 1970 UTC.
+`https://www.streamr.com/api/v1/streams/{id}/data/partitions/{partition}/last?count=5`
