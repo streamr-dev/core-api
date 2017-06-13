@@ -12,6 +12,9 @@ public class EthereumModuleOptions implements Serializable {
 
 	private String network;
 
+	//private Long gasPriceWei = 20_000_000_000L;		// Long.MAX_VALUE wei == 9 ETH
+	private double gasPriceWei = 20e9; // 20 Gwei
+
 	public EthereumModuleOptions() {
 		// default values
 		network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
@@ -19,6 +22,19 @@ public class EthereumModuleOptions implements Serializable {
 
 	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
+		options.add(new ModuleOption("gasPriceGWei", gasPriceWei/1e9, "double"));
+	}
+
+	public static EthereumModuleOptions readFrom(ModuleOptions options) {
+		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
+
+		ethOpts.readNetworkOption(options);
+
+		if (options.getOption("gasPriceGWei") != null) {
+			ethOpts.setGasPriceWei(options.getOption("gasPriceGWei").getDouble() * 1e9);
+		}
+
+		return ethOpts;
 	}
 
 	public void writeNetworkOption(ModuleOptions options) {
@@ -42,18 +58,20 @@ public class EthereumModuleOptions implements Serializable {
 		}
 	}
 
-	public static EthereumModuleOptions readFrom(ModuleOptions options) {
-		EthereumModuleOptions ethOpts = new EthereumModuleOptions();
-		ethOpts.readNetworkOption(options);
-		return ethOpts;
-	}
-
 	public String getNetwork() {
 		return network;
 	}
 
 	public void setNetwork(String network) {
 		this.network = network;
+	}
+
+	public double getGasPriceWei() {
+		return gasPriceWei;
+	}
+
+	public void setGasPriceWei(double gasPriceWei) {
+		this.gasPriceWei = gasPriceWei;
 	}
 
 	public String getServer() {
