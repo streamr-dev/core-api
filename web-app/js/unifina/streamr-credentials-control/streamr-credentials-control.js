@@ -2,7 +2,7 @@
 
 	var listTemplate = '' +
 		'<div class="col-xs-12">' +
-			'<table class="auth-key-table col-xs-12">' +
+			'<table class="table">' +
 				'<thead>' +
 					'<th class="name-header">' +
 						'<span class="title">Name</span>' +
@@ -19,8 +19,8 @@
 				'</thead>' +
 				'<tbody></tbody>' +
 			'</table>' +
-		'</div>' +
-		'<div class="create-auth-key new-auth-key-row col-xs-12"></div>'
+            '<div class="create-auth-key new-auth-key-row"></div>' +
+		'</div>'
 
 	var keyTemplate = '' +
 		'<td class="name-field">{{name}}</td>' +
@@ -94,8 +94,8 @@
 			this.$el.append(this.template({
 				showPermissions: this.showPermissions
 			}))
-			this.table = this.$el.find("table.auth-key-table")
-			this.listEl = this.$el.find(".auth-key-table tbody")
+			this.table = this.$el.find("table.table")
+			this.listEl = this.table.find("tbody")
 			this.inputEl = this.$el.find(".create-auth-key")
 			this.showKeysIcon = this.$el.find("thead .show-icon")
 			this.hideKeysIcon = this.$el.find("thead .hide-icon")
@@ -136,7 +136,6 @@
 	var KeyInList = Backbone.View.extend({
 		template: _.template(keyTemplate),
 		tagName: 'tr',
-		className: 'auth-key-table-row',
 		initialize: function (opts) {
 			this.showPermissions = opts.showPermissions
 			this.url = opts.url
@@ -248,5 +247,5 @@
 	})
 
 	exports.StreamrCredentialsControl = CredentialsControl
-
+ 
 })(typeof(exports) !== 'undefined' ? exports : window)

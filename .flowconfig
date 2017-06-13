@@ -1,0 +1,8 @@
+[ignore]
+./node_modules/react-
+[include]
+
+[libs]
+
+[options]
+module.name_mapper='.*\(.p?css\)' -> 'empty/object'

@@ -91,6 +91,10 @@ public abstract class Endpoint<T> implements Serializable {
 		this.canConnect = canConnect;
 	}
 
+	public boolean isCanConnect() {
+		return canConnect;
+	}
+
 	public void regenerateId() {
 		id = IdGenerator.get();
 	}

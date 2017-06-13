@@ -1,7 +1,7 @@
 <html>
 	<head>
 	    <meta name="layout" content="login" />
-	    <title><g:message code='spring.security.ui.login.title'/></title>
+	    <title><g:message code='springSecurity.ui.login.title'/></title>
 	    
 		<r:script>
 			$(document).ready(function() {

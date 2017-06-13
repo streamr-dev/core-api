@@ -27,7 +27,7 @@
   "tags": [
     {
       "name": "streams",
-      "description": "Manage your Streams, and insert or read data from them"
+      "description": "Manage Streams, and insert or read data from them"
     },
     {
       "name": "canvases",
@@ -35,7 +35,7 @@
     },
     {
       "name": "permissions",
-      "description": "Read, write and share rights"
+      "description": "Read, write, and share rights"
     },
     {
       "name": "dashboards",
@@ -329,10 +329,10 @@
         }
       }
     },
-    "/streams/{id}/data/{partition}/last/{count}": {
+    "/streams/{id}/data/partitions/{partition}/last": {
       "get": {
-        "summary": "Get most recent events from stream",
-        "description": "Get the N most recent events from a stream",
+        "summary": "Get most recent events from a stream",
+        "description": "Get the N most recent events from a stream.",
         "parameters": [
           {
             "in": "path",
@@ -350,10 +350,10 @@
             "default": 0
           },
           {
-            "in": "path",
+            "in": "query",
             "name": "count",
             "description": "Number of messages to fetch",
-            "required": true,
+            "required": false,
             "type": "integer",
             "default": 1
           }
@@ -365,6 +365,9 @@
           "200": {
             "description": "A list of events"
           },
+          "400": {
+            "description": "Malformed request"
+          },
           "401": {
             "description": "Permission denied"
           },
@@ -380,10 +383,10 @@
         }
       }
     },
-    "/streams/{id}/data/{partition}/fromTimestamp/{fromTimestamp}": {
+    "/streams/{id}/data/partitions/{partition}/range": {
       "get": {
-        "summary": "Get events since a timestamp from the stream",
-        "description": "Get events since a timestamp from the stream",
+        "summary": "Get events between a range from the stream",
+        "description": "Get events between a range from the stream. The range can be defined in terms of offsets or timestamps, but not both at the same time (fromOffset must be used with toOffset, and fromTimestamp with toTimestamp). In the absence of an upper bound, range will span until latest message. Lower bound is always required, i.e., either fromOffset or fromTimestamp must be present in request.",
         "parameters": [
           {
             "in": "path",
@@ -401,67 +404,31 @@
             "default": 0
           },
           {
-            "in": "path",
-            "name": "fromTimestamp",
-            "description": "Timestamp in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
-            "type": "integer"
-          }
-        ],
-        "tags": [
-          "streams"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of events"
-          },
-          "401": {
-            "description": "Permission denied"
-          },
-          "403": {
-            "description": "Authentication failed"
-          },
-          "404": {
-            "description": "Stream not found"
-          },
-          "500": {
-            "description": "Unexpected error"
-          }
-        }
-      }
-    },
-    "/streams/{id}/data/{partition}/fromTimestamp/{fromTimestamp}/toTimestamp/{toTimestamp}": {
-      "get": {
-        "summary": "Get events since a timestamp from the stream",
-        "description": "Get events since a timestamp from the stream",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "description": "ID of the stream",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "partition",
-            "description": "Partition number",
-            "required": true,
-            "type": "integer",
-            "default": 0
-          },
-          {
-            "in": "path",
-            "name": "fromTimestamp",
-            "description": "Begin timestamp in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
+            "in": "query",
+            "name": "fromOffset",
+            "description": "Event offset lower bound",
+            "required": false,
             "type": "integer"
           },
           {
-            "in": "path",
+            "in": "query",
+            "name": "toOffset",
+            "description": "Event offset upper bound",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "fromTimestamp",
+            "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
             "name": "toTimestamp",
-            "description": "End timestamp in milliseconds since Jan 1st 1970 UTC",
-            "required": true,
+            "description": "Timestamp upper bound in milliseconds since Jan 1st 1970 UTC",
+            "required": false,
             "type": "integer"
           }
         ],
@@ -471,6 +438,9 @@
         "responses": {
           "200": {
             "description": "A list of events"
+          },
+          "400": {
+            "description": "Malformed request"
           },
           "401": {
             "description": "Permission denied"

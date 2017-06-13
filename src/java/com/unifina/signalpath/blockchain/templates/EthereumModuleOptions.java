@@ -11,22 +11,17 @@ import java.util.Map;
 public class EthereumModuleOptions implements Serializable {
 
 	private String network;
-	private String address;
-	private String privateKey;
+
 	//private Long gasPriceWei = 20_000_000_000L;		// Long.MAX_VALUE wei == 9 ETH
 	private double gasPriceWei = 2e9;
 
 	public EthereumModuleOptions() {
 		// default values
 		network = MapTraversal.getString(Holders.getConfig(), "streamr.ethereum.defaultNetwork");
-		address = "0x0";
-		privateKey = "0x0";
 	}
 
 	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
-		options.add(new ModuleOption("address", address, "string"));
-		options.add(new ModuleOption("privateKey", privateKey, "string"));
 		options.add(new ModuleOption("gasPriceWei", gasPriceWei, "double"));
 	}
 
@@ -35,12 +30,6 @@ public class EthereumModuleOptions implements Serializable {
 
 		ethOpts.readNetworkOption(options);
 
-		if (options.getOption("address") != null) {
-			ethOpts.setAddress(options.getOption("address").getString());
-		}
-		if (options.getOption("privateKey") != null) {
-			ethOpts.setPrivateKey(options.getOption("privateKey").getString());
-		}
 		if (options.getOption("gasPriceWei") != null) {
 			ethOpts.setGasPriceWei(options.getOption("gasPriceWei").getDouble());
 		}
@@ -75,22 +64,6 @@ public class EthereumModuleOptions implements Serializable {
 
 	public void setNetwork(String network) {
 		this.network = network;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public String getPrivateKey() {
-		return privateKey;
-	}
-
-	public void setPrivateKey(String privateKey) {
-		this.privateKey = privateKey;
 	}
 
 	public double getGasPriceWei() {
