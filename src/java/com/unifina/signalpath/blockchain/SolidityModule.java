@@ -32,6 +32,12 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	private DoubleParameter sendEtherParam = new DoubleParameter(this, "initial ETH", 0.0);
 
 	@Override
+	public void init() {
+		super.init();
+		ethereumAccount.setUpdateOnChange(true);
+	}
+
+	@Override
 	public void sendOutput() {
 
 	}
@@ -64,13 +70,11 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	@Override
 	protected void onConfiguration(Map<String, Object> config) {
 		super.onConfiguration(config);
-		boolean compileRequested = config.containsKey("compile");
 
 		if (config.containsKey("code")) {
 			code = config.get("code").toString();
 		} else {
 			code = getCodeTemplate();
-			compileRequested = true;
 		}
 
 		if (config.containsKey("contract")) {
@@ -81,27 +85,35 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 		ethereumOptions = EthereumModuleOptions.readFrom(options);
 
 		try {
-			if (compileRequested && code != null) {
+			if (config.containsKey("compile") || (code != null && !code.trim().isEmpty() && ethereumAccount.getAddress() != null && (contract == null || !contract.isDeployed()))) {
 				contract = compile(code);
-			} else if (config.containsKey("deploy") && !contract.isDeployed()) {
-				EthereumABI.Function constructor = contract.getABI().getConstructor();
-				String sendWei = "0";
-				Stack<Object> args = new Stack<>();
-
-				if (constructor != null) {
-					List<Map> params = (List)config.get("params");
-					for (Map param : params) {
-						args.push(param.get("value"));
-					}
-					// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
-					if (constructor.payable) {
-						BigDecimal valueWei = BigDecimal.valueOf(sendEtherParam.getValue()).multiply(BigDecimal.TEN.pow(18));
-						sendWei = valueWei.toBigInteger().toString();
-						args.pop();
-					}
+			}
+			if (config.containsKey("deploy")) {
+				// Make sure the contract is compiled
+				if (contract == null) {
+					contract = compile(code);
 				}
 
-				contract = deploy(code, args, sendWei);
+				if (!contract.isDeployed()) {
+					EthereumABI.Function constructor = contract.getABI().getConstructor();
+					String sendWei = "0";
+					Stack<Object> args = new Stack<>();
+
+					if (constructor != null) {
+						List<Map> params = (List) config.get("params");
+						for (Map param : params) {
+							args.push(param.get("value"));
+						}
+						// for payable constructors, sendEtherParam is added in params after the ordinary function arguments
+						if (constructor.payable) {
+							BigDecimal valueWei = BigDecimal.valueOf(sendEtherParam.getValue()).multiply(BigDecimal.TEN.pow(18));
+							sendWei = valueWei.toBigInteger().toString();
+							args.pop();
+						}
+					}
+
+					contract = deploy(code, args, sendWei);
+				}
 			}
 		} catch (Exception e) {
 			// TODO: currently I got no notification when URL was incorrect
@@ -142,6 +154,9 @@ public class SolidityModule extends ModuleWithUI implements Pullable<EthereumCon
 	}
 
 	private String replaceDynamicFields(String code) {
+		if (ethereumAccount.getAddress() == null) {
+			throw new RuntimeException("No Ethereum account is selected. Please select the account you want to use, or if there are none, go to the user profile page to create one.");
+		}
 		return code.replace(ADDRESS_PLACEHOLDER, ethereumAccount.getAddress());
 	}
 
