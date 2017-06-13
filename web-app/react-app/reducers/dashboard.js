@@ -31,9 +31,7 @@ import type {
 const initialState = {
     dashboardsById: {},
     openDashboard: {
-        id: null,
-        saved: false,
-        new: true
+        id: null
     },
     error: null,
     fetching: false
@@ -46,9 +44,7 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 ...state,
                 openDashboard: {
                     ...state.openDashboard,
-                    id: action.id,
-                    saved: true,
-                    new: false
+                    id: action.id
                 }
             }
         case GET_AND_REPLACE_DASHBOARDS_REQUEST:
@@ -76,14 +72,10 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                 dashboardsById: {
                     ...state.dashboardsById,
                     [action.dashboard.id]: {
-                        ...state.dashboardsById[action.dashboard.id],
-                        ...action.dashboard
+                        ...action.dashboard,
+                        new: true,
+                        saved: false
                     }
-                },
-                openDashboard: {
-                    ...state.openDashboard,
-                    new: true,
-                    saved: false
                 },
                 error: null,
                 fetching: false
@@ -99,13 +91,9 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                     ...state.dashboardsById,
                     [action.dashboard.id]: {
                         ...state.dashboardsById[action.dashboard.id],
-                        ...action.dashboard
+                        ...action.dashboard,
+                        saved: false
                     }
-                },
-                openDashboard: {
-                    ...state.openDashboard,
-                    new: false,
-                    saved: false
                 },
                 error: null,
                 fetching: false
@@ -122,13 +110,10 @@ const dashboard = function(state: State = initialState, action: Action) : State 
                     ...state.dashboardsById,
                     [action.dashboard.id]: {
                         ...state.dashboardsById[action.dashboard.id],
-                        ...action.dashboard
+                        ...action.dashboard,
+                        new: false,
+                        saved: true
                     }
-                },
-                openDashboard: {
-                    ...state.openDashboard,
-                    saved: true,
-                    new: false
                 },
                 error: null,
                 fetching: false

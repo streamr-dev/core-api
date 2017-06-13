@@ -21,20 +21,10 @@ class DashboardController {
 		return [dashboards:dashboards, shareable:shareable, writable:writable, user:user]
 	}
 
-	def save() {
-		Dashboard dashboard = new Dashboard()
-		dashboard.name = params.name
-		dashboard.user = springSecurityService.currentUser
-		dashboard.save(flush: true, failOnError: true)
-		redirect(action: "show", id: dashboard.id)
-	}
 
 	def editor() {
 		return [
-			config: grailsApplication.config,
-			id: params.id,
-			user: springSecurityService.currentUser,
-			key: springSecurityService.currentUser?.keys.iterator().next()
+			config: grailsApplication.config
 		]
 	}
 }

@@ -54,6 +54,6 @@ class UnifinaCorePluginUrlMappings {
 		"/api/v1/dashboards/($path**)/request"(controller: "dashboardApi", action: "runtimeRequest") // for internal use, runtime requests to canvases via dashboards
 
 		// Mappings for pages using React Router (the root for the router)
-		"/dashboard/editor/**"(controller: "dashboard", action: "editor")
+		"/dashboard/editor/$id**?"(controller: "dashboard", action: "editor")
 	}
 }

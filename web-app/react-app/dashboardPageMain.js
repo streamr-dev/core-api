@@ -33,12 +33,12 @@ render(
                 if (params.id !== undefined) {
                     id = params.id
                     store.dispatch(getDashboard(id))
+                    store.dispatch(getMyDashboardPermissions(id))
                 } else {
                     id = uuid.v4()
                     store.dispatch(newDashboard(id))
                 }
                 store.dispatch(getRunningCanvases())
-                store.dispatch(getMyDashboardPermissions(id))
                 store.dispatch(openDashboard(id))
             }}>
                 <Route path="share" component={ShareDialog} />

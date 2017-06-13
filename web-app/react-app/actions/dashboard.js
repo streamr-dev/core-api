@@ -73,8 +73,9 @@ export const getDashboard = (id: Dashboard.id) => (dispatch: Function) => {
         })
 }
 
-export const updateAndSaveDashboard = (dashboard: Dashboard, createNew?: boolean) => (dispatch: Function) => {
+export const updateAndSaveDashboard = (dashboard: Dashboard) => (dispatch: Function) => {
     dispatch(updateAndSaveDashboardRequest())
+    const createNew = dashboard.new
     return axios({
         method: createNew ? 'POST' : 'PUT',
         url: Streamr.createLink({

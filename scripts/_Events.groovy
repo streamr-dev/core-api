@@ -23,8 +23,8 @@ eventTestPhaseStart = { args ->
 	System.properties["grails.test.phase"] = args
 }
 
-eventCompileStart = { args ->
-	println "Running webpack compile"
+eventPackagingEnd = { args ->
+	println "Running webpack build"
 	Runtime runtime = Runtime.getRuntime()
 	Process process = runtime.exec("npm run build")
 	StreamGobbler outputGobbler = new StreamGobbler(process.getInputStream());

@@ -2,6 +2,7 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import serialize from 'form-serialize'
 
 import {Row, Col, Button} from 'react-bootstrap'
 import Switcher from 'react-switcher'
@@ -10,18 +11,20 @@ import ShareDialogPermission from './ShareDialogPermission'
 
 import styles from './shareDialogContent.pcss'
 import type {Permission} from '../../../flowtype/permission-types'
-import {getResourcePermissions} from '../../../actions/permission'
+import {getResourcePermissions, addResourcePermission} from '../../../actions/permission'
 
 class ShareDialogContent extends Component {
-    input: HTMLInputElement
+    form: HTMLFormElement
     onAnonymousAccessChange: Function
+    onSubmit: Function
     props: {
         permissions: Array<Permission>,
         resourceType: Permission.resourceType,
         resourceId: Permission.resourceId,
         anonymousAccess: boolean,
-        dispatch: Function,
-        owner: ?string
+        owner: ?string,
+        getResourcePermissions: () => {},
+        addResourcePermission: (permission: Permission) => {}
     }
     
     static defaultProps = {
@@ -29,16 +32,28 @@ class ShareDialogContent extends Component {
     }
     
     componentWillMount() {
-        this.props.dispatch(getResourcePermissions(this.props.resourceType, this.props.resourceId))
+        this.props.getResourcePermissions()
     }
     
     constructor() {
         super()
         
         this.onAnonymousAccessChange = this.onAnonymousAccessChange.bind(this)
+        this.onSubmit = this.onSubmit.bind(this)
     }
     onAnonymousAccessChange() {
-    
+
+    }
+    onSubmit(e) {
+        e.preventDefault()
+        const data = serialize(this.form, {
+            hash: true
+        })
+        this.props.addResourcePermission({
+            user: data.email,
+            operation: 'read'
+        })
+        this.form.reset()
     }
     render() {
         return (
@@ -58,18 +73,19 @@ class ShareDialogContent extends Component {
                     </div>
                 </Col>
                 {this.props.permissions.map(permission => (
-                    <ShareDialogPermission key={permission.id} permission={permission}/>
+                    <ShareDialogPermission key={`${permission.user}${permission.operation}`} permission={permission}/>
                 ))}
                 <Col xs={12}>
-                    <div className="input-group">
-                        <input type="text" className="new-user-field form-control"
-                               placeholder="Enter email address" ref={i => this.input = i}/>
-                        <span className="input-group-btn">
-                            <Button className="new-user-button btn btn-default pull-right">
-                                <span className="icon fa fa-plus"/>
-                            </Button>
-                        </span>
-                    </div>
+                    <form onSubmit={this.onSubmit} ref={form => this.form = form}>
+                        <div className="input-group">
+                            <input type="text" className="new-user-field form-control" placeholder="Enter email address" name="email"/>
+                            <span className="input-group-btn">
+                                <Button type="submit" className="new-user-button btn btn-default pull-right">
+                                    <span className="icon fa fa-plus"/>
+                                </Button>
+                            </span>
+                        </div>
+                    </form>
                 </Col>
             </Row>
         )
@@ -87,4 +103,13 @@ const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     }
 }
 
-export default connect(mapStateToProps)(ShareDialogContent)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    getResourcePermissions() {
+        dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
+    },
+    addResourcePermission(permission) {
+        dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
+    }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(ShareDialogContent)

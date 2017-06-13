@@ -87,6 +87,7 @@ class DashboardTools extends Component {
                     <Button
                         block
                         className="share-button"
+                        disabled={this.props.dashboard.new}
                     >
                         <FontAwesome name="user" />  Share
                     </Button>
@@ -95,6 +96,7 @@ class DashboardTools extends Component {
                     className="btn btn-default btn-block delete-button"
                     title="Delete dashboard"
                     ref={item => this.removeButton = item}
+                    disabled={this.props.dashboard.new ? 'disabled' : ''}
                 >
                     Delete
                 </button>
