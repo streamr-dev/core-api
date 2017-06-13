@@ -13,7 +13,7 @@ public class EthereumModuleOptions implements Serializable {
 	private String network;
 
 	//private Long gasPriceWei = 20_000_000_000L;		// Long.MAX_VALUE wei == 9 ETH
-	private double gasPriceWei = 2e9;
+	private double gasPriceWei = 20e9; // 20 Gwei
 
 	public EthereumModuleOptions() {
 		// default values
@@ -22,7 +22,7 @@ public class EthereumModuleOptions implements Serializable {
 
 	public void writeTo(ModuleOptions options) {
 		writeNetworkOption(options);
-		options.add(new ModuleOption("gasPriceWei", gasPriceWei, "double"));
+		options.add(new ModuleOption("gasPriceGWei", gasPriceWei/1e9, "double"));
 	}
 
 	public static EthereumModuleOptions readFrom(ModuleOptions options) {
@@ -30,8 +30,8 @@ public class EthereumModuleOptions implements Serializable {
 
 		ethOpts.readNetworkOption(options);
 
-		if (options.getOption("gasPriceWei") != null) {
-			ethOpts.setGasPriceWei(options.getOption("gasPriceWei").getDouble());
+		if (options.getOption("gasPriceGWei") != null) {
+			ethOpts.setGasPriceWei(options.getOption("gasPriceGWei").getDouble() * 1e9);
 		}
 
 		return ethOpts;
