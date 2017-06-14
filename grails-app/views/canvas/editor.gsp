@@ -394,6 +394,9 @@ $(function() {
 	<g:elseif test="${json}">
 		SignalPath.loadJSON(${raw(json)})
 	</g:elseif>
+	<g:else>
+		$(SignalPath).trigger('new') // For event listeners
+	</g:else>
 
     $(document).unload(function () {
         SignalPath.unload()
@@ -417,7 +420,6 @@ $(function() {
 		}
 	})
 
-	$(SignalPath).trigger('new') // For event listeners
 })
 
 </r:script>
