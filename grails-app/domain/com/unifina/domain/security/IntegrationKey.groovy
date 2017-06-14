@@ -34,7 +34,7 @@ class IntegrationKey implements Serializable {
 				id  : id,
 				user: user.id,
 				name: name,
-				type: service.toString(),
+				service: service.toString(),
 				json: (JSONObject) JSON.parse(json)
 		]
 	}

@@ -30,7 +30,7 @@ class IntegrationKeyApiController {
 			if (params.id) {
 				eq "id", params.id
 			}
-			// Filter by exact type
+			// Filter by exact service
 			if (params.service) {
 				eq "service", params.service
 			}
@@ -41,13 +41,13 @@ class IntegrationKeyApiController {
 
 	@StreamrApi
 	def save() {
-		IntegrationKey account
+		IntegrationKey key
 		if (!request.JSON.name) {
 			throw new ApiException(400, "EMPTY_FIELD", "Name can't be empty!")
 		}
 		if (request.JSON.service as IntegrationKey.Service == IntegrationKey.Service.ETHEREUM) {
 			try {
-				account = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, request.JSON.name, (String) request.JSON.json.get("privateKey"))
+				key = ethereumIntegrationKeyService.createEthereumAccount(request.apiUser, request.JSON.name, (String) request.JSON.json.get("privateKey"))
 			} catch (IllegalArgumentException e) {
 				throw new ApiException(400, "INVALID_HEX_STRING", e.message)
 			}
@@ -55,7 +55,7 @@ class IntegrationKeyApiController {
 			throw new ApiException(400, 'INVALID_SERVICE', "Invalid service: $request.JSON.service")
 		}
 
-		render account.toMap() as JSON
+		render key.toMap() as JSON
 	}
 
 	@StreamrApi

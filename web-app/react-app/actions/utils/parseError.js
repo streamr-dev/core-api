@@ -8,13 +8,14 @@ export type Err = {
 export default (res: {
     response?: {
         data: Err
-    }
+    },
+    message?: string
 }) : Err => {
     if (res.response) {
         return res.response.data
     } else {
         return {
-            error: 'Something went wrong'
+            error: res.message || 'Something went wrong'
         }
     }
 }
