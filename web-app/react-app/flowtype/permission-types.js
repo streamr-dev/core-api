@@ -10,6 +10,7 @@ export type Operation = 'read' | 'write' | 'share'
 export type Permission = {
     operation: Operation,
     user: User.email,
+    anonymous?: boolean,
     fetching?: boolean,
     new?: boolean,
     removed?: boolean,

@@ -11,7 +11,7 @@ import ShareDialogPermission from './ShareDialogPermission'
 
 import styles from './shareDialogContent.pcss'
 import type {Permission} from '../../../flowtype/permission-types'
-import {getResourcePermissions, addResourcePermission} from '../../../actions/permission'
+import {getResourcePermissions, addResourcePermission, removeResourcePermission} from '../../../actions/permission'
 
 class ShareDialogContent extends Component {
     form: HTMLFormElement
@@ -21,14 +21,11 @@ class ShareDialogContent extends Component {
         permissions: Array<Permission>,
         resourceType: Permission.resourceType,
         resourceId: Permission.resourceId,
-        anonymousAccess: boolean,
+        anonymousPermission: ?Permission,
         owner: ?string,
         getResourcePermissions: () => {},
-        addResourcePermission: (permission: Permission) => {}
-    }
-    
-    static defaultProps = {
-        anonymousAccess: false
+        addPermission: (permission: Permission) => {},
+        removePermission: (permission: Permission) => {}
     }
     
     componentWillMount() {
@@ -42,14 +39,22 @@ class ShareDialogContent extends Component {
         this.onSubmit = this.onSubmit.bind(this)
     }
     onAnonymousAccessChange() {
-
+        const permission = this.props.anonymousPermission || {
+            anonymous: true,
+            operation: 'read'
+        }
+        if (this.props.anonymousPermission) {
+            this.props.removePermission(permission)
+        } else {
+            this.props.addPermission(permission)
+        }
     }
     onSubmit(e) {
         e.preventDefault()
         const data = serialize(this.form, {
             hash: true
         })
-        this.props.addResourcePermission({
+        this.props.addPermission({
             user: data.email,
             operation: 'read'
         })
@@ -69,7 +74,7 @@ class ShareDialogContent extends Component {
                         Public read access
                     </div>
                     <div className={styles.readAccess}>
-                        <Switcher on={this.props.anonymousAccess} onClick={this.onAnonymousAccessChange}/>
+                        <Switcher on={this.props.anonymousPermission !== undefined} onClick={this.onAnonymousAccessChange}/>
                     </div>
                 </Col>
                 {this.props.permissions.map(permission => (
@@ -94,12 +99,12 @@ class ShareDialogContent extends Component {
 
 const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
-    const permissions = byType[ownProps.resourceId] || []
+    const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
     const ownerPermission = permissions.find(it => it.id === null) || {}
     const owner = ownerPermission.user
     return {
         permissions: permissions.filter(p => p.id && !p.anonymous),
-        anonymousAccess: permissions.find(p => p.anonymous),
+        anonymousPermission: permissions.find(p => p.anonymous),
         owner
     }
 }
@@ -108,8 +113,11 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     getResourcePermissions() {
         dispatch(getResourcePermissions(ownProps.resourceType, ownProps.resourceId))
     },
-    addResourcePermission(permission) {
+    addPermission(permission) {
         dispatch(addResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
+    },
+    removePermission(permission) {
+        dispatch(removeResourcePermission(ownProps.resourceType, ownProps.resourceId, permission))
     }
 })
 

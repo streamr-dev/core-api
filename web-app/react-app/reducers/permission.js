@@ -24,7 +24,7 @@ const initialState = {
 
 const modifyPermission = (state, action, attributes) => {
     return [...(state.byTypeAndId[action.resourceType][action.resourceId])].map(permission => {
-        if ((permission.id != null && permission.id === action.permission.id) || (permission.user === action.permission.user && permission.operation === action.permission.operation)) {
+        if ((permission.id != null && permission.id === action.permission.id) || (permission.anonymous === action.permission.anonymous === true) || (permission.user === action.permission.user && permission.operation === action.permission.operation)) {
             return {
                 ...permission,
                 ...attributes
@@ -72,7 +72,9 @@ export default function(state: State = initialState, action: Action) : State {
     
         case ADD_RESOURCE_PERMISSION: {
             const byResourceType = state.byTypeAndId[action.resourceType] || {}
-            const byResourceId = byResourceType[action.resourceId] || []
+            const byResourceId = (byResourceType[action.resourceId] || []).filter(permission => {
+                return (permission.id != null && permission.id !== action.permission.id) || (permission.anonymous && !action.permission.anonymous) || (action.permission.anonymous && !permission.anonymous) || (permission.user !== action.permission.user) || (permission.operation !== action.permission.operation)
+            })
             return {
                 ...state,
                 byTypeAndId: {
