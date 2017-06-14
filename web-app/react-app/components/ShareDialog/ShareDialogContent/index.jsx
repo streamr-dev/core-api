@@ -98,7 +98,8 @@ const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     const ownerPermission = permissions.find(it => it.id === null) || {}
     const owner = ownerPermission.user
     return {
-        permissions: permissions.filter(p => p.id !== null),
+        permissions: permissions.filter(p => p.id && !p.anonymous),
+        anonymousAccess: permissions.find(p => p.anonymous),
         owner
     }
 }

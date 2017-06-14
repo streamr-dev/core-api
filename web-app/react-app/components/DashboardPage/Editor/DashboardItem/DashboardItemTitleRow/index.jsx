@@ -15,7 +15,6 @@ class DashboardItemTitleRow extends Component {
     onRemove: Function
     toggleEdit: Function
     saveName: Function
-    nameInput: HTMLInputElement
     props: {
         item: DashboardItem,
         dashboard: Dashboard,

@@ -129,7 +129,7 @@ export const getMyDashboardPermissions = (id: Dashboard.id) => (dispatch: Functi
     return axios.delete(Streamr.createLink({
         uri: `${apiUrl}/${id}/permissions/me`
     }))
-        .then(res => dispatch(getMyDashboardPermissionsSuccess(id, res.data.map(item => item.operation))))
+        .then(res => dispatch(getMyDashboardPermissionsSuccess(id, res.data.filter(item => !item.id).map(item => item.operation))))
         .catch(res => {
             const e = parseError(res)
             dispatch(getMyDashboardPermissionsFailure(id, e))
@@ -174,7 +174,8 @@ export const createDashboard = (dashboard: Dashboard) => ({
 export const newDashboard = (id: Dashboard.id) => createDashboard({
     id,
     name: 'Untitled Dashboard',
-    items: []
+    items: [],
+    layout: {}
 })
 
 export const openDashboard = (id: Dashboard.id) => ({

@@ -35,7 +35,7 @@ class DashboardService {
 	@CompileStatic
 	Dashboard findById(String id, SecUser user) throws NotFoundException, NotPermittedException {
 		Dashboard dashboard = authorizedGetById(id, user, Permission.Operation.READ)
-		dashboard.layout = JSON.parse(dashboard.layout)
+		dashboard.layout = dashboard.layout ? JSON.parse(dashboard.layout) : ''
 		return dashboard
 	}
 

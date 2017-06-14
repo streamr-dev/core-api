@@ -18,7 +18,6 @@ class DashboardItem extends Component {
     props: {
         item: DBItem,
         dashboard: Dashboard,
-        packery: any,
         layout?: DBItem.layout,
         dragCancelClassName?: string,
         currentLayout: ?{}

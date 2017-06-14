@@ -43,13 +43,18 @@ export default class ShareDialog extends Component {
     render() {
         const Child = React.Children.only(this.props.children)
         // TODO: Better key
-        let childsChildren = React.Children.map(Child.props.children, c => React.isValidElement(c) ? React.cloneElement(c, {
-            key: Math.random()
-        }) : c) || []
+        let i = 0
+        let childsChildren = React.Children.map(Child.props.children, (c, i) => {
+            const el = React.isValidElement(c) ? React.cloneElement(c, {
+                key: i
+            }) : c
+            i++
+            return el
+        }) || []
         childsChildren.push(
             <Modal
-                animation={false}
-                key={Math.random()}
+                //animation={false}
+                key={i}
                 show={this.state.open}
                 onHide={this.closeModal}
                 backdrop="static"

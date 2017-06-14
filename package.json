@@ -70,6 +70,7 @@
     "react": "latest",
     "react-bootstrap": "^0.31.0",
     "react-dom": "^15.5.4",
+    "react-flow-types": "^0.1.1",
     "react-fontawesome": "^1.6.1",
     "react-grid-layout": "^0.14.6",
     "react-helmet": "^5.1.3",

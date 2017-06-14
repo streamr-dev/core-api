@@ -22,7 +22,7 @@ export default class ShareDialogPermission extends Component {
                 <button className="form-group user-delete-button btn btn-danger pull-right">
                     <span className="icon fa fa-trash-o"/>
                 </button>
-                <DropdownButton title="moi">
+                <DropdownButton title="moi" id={`shareDialogPermissionInputDropdown-${Date.now()}`}>
                     <MenuItem eventKey="1" id="1">make read-only</MenuItem>
                     <MenuItem eventKey="2" id="2">make editable</MenuItem>
                     <MenuItem eventKey="3" id="3">make shareable</MenuItem>
