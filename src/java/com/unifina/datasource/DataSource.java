@@ -153,15 +153,25 @@ public abstract class DataSource {
 	protected abstract void doStartFeed() throws Exception;
 	
 	public void stopFeed() {
+		// re-throw if exception happened, but only after all listeners have had chance to clean up
+		Exception stopException = null;
 		try {
 			doStopFeed();
 		} catch (Exception e) {
-			log.error("Exception thrown while stopping feed",e);
-			throw new RuntimeException("Error while stopping feed",e);
+			log.error("Exception thrown while stopping feed", e);
+			stopException = e;
+		}
+		for (IStopListener it : stopListeners) {
+			try {
+				it.onStop();
+			} catch (Exception e) {
+				log.error("Exception thrown while stopping feed", e);
+				stopException = e;
+			}
 		}
 
-		for (IStopListener it : stopListeners) {
-			it.onStop();
+		if (stopException != null) {
+			throw new RuntimeException("Error while stopping feed", stopException);
 		}
 	}
 	
