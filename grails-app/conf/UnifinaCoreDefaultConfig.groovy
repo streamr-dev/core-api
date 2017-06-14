@@ -1,3 +1,4 @@
+import com.google.gson.Gson
 import com.unifina.data.KafkaPartitioner
 
 /*****
@@ -173,7 +174,7 @@ log4j = {
 /**
  * Tour config
  */
-streamr.tours.enabled = true
+streamr.tours.enabled = false // TODO: change back to true when landing ethereum
 
 /**
  * Migration config
@@ -269,6 +270,17 @@ environments {
 		streamr.http.api.server = System.getProperty("streamr.ui.server") ?: "${prodBaseUrl}/api/v1"
 	}
 }
+
+/**
+ * Streamr-web3 Ethereum bridge address
+ */
+streamr.ethereum.defaultNetwork = "rinkeby"
+streamr.ethereum.networks = System.getProperty("streamr.ethereum.networks") ? new Gson().fromJson(System.getProperty("streamr.ethereum.networks")) : [
+		ropsten: "http://localhost:3000",
+		rinkeby: "http://localhost:3001"
+]
+streamr.ethereum.address = System.getProperty("streamr.ethereum.address") ?: ""
+streamr.ethereum.key = System.getProperty("streamr.ethereum.key") ?: ""
 
 /**
  * Kafka config
@@ -384,6 +396,33 @@ unifina.email.welcome.subject = "Welcome to Streamr"
 unifina.email.feedback.recipient = "contact@streamr.com"
 unifina.email.forgotPassword.subject = "Streamr Password Reset"
 unifina.email.shareInvite.subject = "%USER% shared a document with you in Streamr"
+
+/**
+ * Recaptcha config
+ */
+
+recaptcha.verifyUrl = "https://www.google.com/recaptcha/api/siteverify"
+
+environments {
+	production {
+		recaptchav2.sitekey = "6Le3vAkTAAAAAEo4ubtEnosXISPd8_0snV4KEZSe"
+		recaptchainvisible.sitekey = "6Lfish8UAAAAAF-w-HYi_TN_xcbWrFjGNef2Pgdp"
+		recaptchav2.secret = "6Le3vAkTAAAAADZEop2Jdlm8ZrsTX-4-nn2XqC7Z"
+		recaptchainvisible.secret = "6Lfish8UAAAAAE9XaXpFEDX7OjO4rKGFe1HdrSql"
+	}
+	development {
+		recaptchav2.sitekey = "6Le9vAkTAAAAALFIbNo2ftfteJ2aQPgfP-npkZXS"
+		recaptchav2.secret = "6Le9vAkTAAAAADoOwlVedDR15a-uy4mUbudvsg63"
+		recaptchainvisible.sitekey = "6LcNxB4UAAAAAO01yHgAVL6qxwWfOM8PxaKmP9LP"
+		recaptchainvisible.secret = "6LcNxB4UAAAAAMXCPU3sABq20HIbcIJCtMaIFn9o"
+	}
+	test {
+		recaptchav2.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchav2.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+		recaptchainvisible.sitekey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+		recaptchainvisible.secret = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+	}
+}
 
 /**
  * Signup Configs

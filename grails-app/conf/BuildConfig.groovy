@@ -49,6 +49,9 @@ grails.project.dependency.resolution = {
 		// Maven central
 		mavenRepo "http://repo1.maven.org/maven2/"
 
+		// Ethereum Repository
+		mavenRepo "https://dl.bintray.com/ethereum/maven/"
+
         // Remote Grails repos
         grailsPlugins()
         grailsCentral()
@@ -60,7 +63,7 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         compile('log4j:log4j:1.2.16')
-		
+
         runtime('commons-net:commons-net:3.3')
         runtime('org.apache.commons:commons-math3:3.2')
         runtime('commons-codec:commons-codec:1.6')
@@ -98,6 +101,12 @@ grails.project.dependency.resolution = {
 		compile 'org.mongodb:mongodb-driver:3.2.1'
 		compile('biz.paluch.redis:lettuce:3.5.0.Final')
 		compile('com.datastax.cassandra:cassandra-driver-core:3.1.0')
+		compile('org.ethereum:ethereumj-core:1.4.3-RELEASE') {
+			excludes 'ch.qos.logback:logback-classic:*'
+			excludes 'org.springframework:spring-core:*'
+			excludes 'org.springframework:spring-context:*'
+			excludes 'org.springframework:spring-orm:*'
+		}
     }
 
     plugins {
