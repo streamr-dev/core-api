@@ -15176,10 +15176,20 @@ button.arrow:after {
   -ms-flex: 0 0 auto;
   -o-flex: 0 0 auto;
   flex: 0 0 auto;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -o-flex;
+  display: flex;
 }
 .streamr-canvas .module .moduleheader .modulename {
   font-weight: bold;
   font-size: 12px;
+  -webkit-flex: 1 0 auto;
+  -moz-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  -o-flex: 1 0 auto;
+  flex: 1 0 auto;
 }
 .streamr-canvas .module .moduleheader .modulebutton {
   width: 16px;
@@ -15187,6 +15197,11 @@ button.arrow:after {
   display: inline;
   vertical-align: top;
   cursor: pointer;
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  -o-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 .streamr-canvas .module .modulebody {
   padding: 5px;
@@ -15322,9 +15337,6 @@ button.arrow:after {
 }
 .component .modulebody .button-module-button {
   margin-top: 5px;
-}
-#canvas .module.chart {
-  z-index: 4;
 }
 #canvas .module.chart .modulebody {
   min-width: 350px;

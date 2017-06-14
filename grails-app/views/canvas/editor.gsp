@@ -324,20 +324,7 @@ $(function() {
 		signalPath: SignalPath,
 		opener: $(".rename-canvas-button"),
 		name: SignalPath.getName()
-	}).on('changed', function(name) {
-	    var oldName = SignalPath.getName()
-	    if (!SignalPath.isSaved()) {
-			SignalPath.saveAs(name)
-	    } else {
-			SignalPath.saveName(name, function() {}, function() {
-				console.log("error")
-				// calling silent to prevent event loop
-				nameEditor.setName(oldName, {
-					silent: true
-				})
-			})
-	    }
-	})
+	}).on('changed', SignalPath.setName)
 
 	$(".streamr-dropdown li.disabled").click(function(e) {
 		e.preventDefault()
@@ -404,9 +391,12 @@ $(function() {
 	<g:if test="${id}">
 		SignalPath.load('${id}');
 	</g:if>
-	<g:elseif test="${json}">
+	<g:elseif test="${ json && json != "{}" }">
 		SignalPath.loadJSON(${raw(json)})
 	</g:elseif>
+	<g:else>
+		$(SignalPath).trigger('new') // For event listeners
+	</g:else>
 
     $(document).unload(function () {
         SignalPath.unload()
@@ -430,7 +420,6 @@ $(function() {
 		}
 	})
 
-	$(SignalPath).trigger('new') // For event listeners
 })
 
 </r:script>

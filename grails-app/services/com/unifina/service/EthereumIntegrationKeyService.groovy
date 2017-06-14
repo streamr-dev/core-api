@@ -15,16 +15,16 @@ class EthereumIntegrationKeyService {
 		privateKey = trimPrivateKey(privateKey)
 
 		try {
-			IntegrationKey account = new IntegrationKey()
-			account.setName(name)
-			account.setJson(([
+			IntegrationKey key = new IntegrationKey()
+			key.setName(name)
+			key.setJson(([
 					privateKey: privateKey,
 					address   : "0x" + getPublicKey(privateKey)
 			] as JSON).toString())
-			account.setUser(user)
-			account.setService(IntegrationKey.Service.ETHEREUM)
-			account.save(flush: true, failOnError: true)
-			return account
+			key.setUser(user)
+			key.setService(IntegrationKey.Service.ETHEREUM)
+			key.save(flush: true, failOnError: true)
+			return key
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Private key must be a valid hex string!")
 		}
@@ -36,6 +36,7 @@ class EthereumIntegrationKeyService {
 
 	@CompileStatic
 	private static String trimPrivateKey(String privateKey) {
+		privateKey = privateKey.trim()
 		if (privateKey.startsWith("0x")) {
 			privateKey = privateKey.substring(2)
 		}

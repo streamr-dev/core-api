@@ -47,14 +47,13 @@ export default class IntegrationKeyHandlerTableRow extends React.Component {
                 ))}
                 <td>
                     <FormGroup className="pull-right">
-                        <Button
-                            bsStyle="danger"
+                        <button
                             ref={el => this.removeButton = el}
                             type="button"
-                            className={styles.deleteButton}
+                            className={`btn btn-danger ${styles.deleteButton}`}
                             title="Delete key">
                             <span className="icon fa fa-trash-o"/>
-                        </Button>
+                        </button>
                     </FormGroup>
                 </td>
             </tr>
