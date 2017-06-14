@@ -15338,9 +15338,6 @@ button.arrow:after {
 .component .modulebody .button-module-button {
   margin-top: 5px;
 }
-#canvas .module.chart {
-  z-index: 4;
-}
 #canvas .module.chart .modulebody {
   min-width: 350px;
   min-height: 250px;
