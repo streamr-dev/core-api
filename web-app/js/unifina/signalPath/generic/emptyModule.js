@@ -56,18 +56,60 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 		var moduleName = prot.jsonData.displayName || prot.jsonData.name
 		prot.title = $("<span class='modulename'>" + moduleName + "</span>");
 		prot.header.append(prot.title);
-	
-		// Close button
-		var deleteLink = createModuleButton("delete fa-times")
-		deleteLink.click(function() {
-			pub.close();
-		});
-
-		buttons.push(deleteLink);
+        
+        // If there are options, create options editor
+        if (prot.jsonData.options) {
+            var editOptions = createModuleButton("options fa-wrench");
+            
+            editOptions.click(function() {
+                var $optionEditor = $("<div class='optionEditor'></div>");
+                
+                // Create and sort options by key
+                var keys = Object.keys(prot.jsonData.options)
+                keys.sort()
+                
+                // Create options
+                keys.forEach(function(key) {
+                    // Create the option div
+                    var div = prot.createOption(key, prot.jsonData.options[key]);
+                    $optionEditor.append(div);
+                    // Store reference to the JSON option
+                    $(div).data("option", prot.jsonData.options[key]);
+                })
+                
+                bootbox.dialog({
+                    animate: false,
+                    title: 'Options: '+prot.title.text(),
+                    message: $optionEditor,
+                    onEscape: function() { return true },
+                    buttons: {
+                        'Cancel': function() {},
+                        'OK': function() {
+                            $optionEditor.find(".option").each(function(i, div) {
+                                // Get reference to the JSON option
+                                prot.updateOption($(div).data("option"), div)
+                            })
+                            
+                            prot.onOptionsUpdated()
+                        }
+                    }
+                })
+            })
+            buttons.push(editOptions)
+        }
+        
+        if (prot.jsonData.canRefresh) {
+            // If the module can refresh, add a refresh button
+            var refresh = createModuleButton("refresh fa-refresh");
+            
+            refresh.click(function() {
+                SignalPath.updateModule(pub);
+            });
+            buttons.push(refresh);
+        }
 
 		// Help button shows normal help on hover and "extended" help in a dialog on click
 		var helpLink = createModuleButton("help fa-question");
-
 		var tooltipOptions = {
 			animation: false,
 			trigger: 'manual',
@@ -80,7 +122,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			placement: 'auto top',
 			template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner modulehelp-tooltip"></div></div>'
 		}
-
 		var delay=500, tooltipDelayTimer
 		helpLink.mouseenter(function() {
 			tooltipDelayTimer = setTimeout(function() {
@@ -112,7 +153,6 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			clearTimeout(tooltipDelayTimer)
 			helpLink.tooltip('destroy')
 		})
-
 		helpLink.click(function() {
 			prot.getHelp(true, function(helptext) {
 				var bb = bootbox.dialog({
@@ -132,8 +172,14 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 				bb.modal("show")
 			})
 		})
-
 		buttons.push(helpLink);
+	
+		// Close button
+		var deleteLink = createModuleButton("delete fa-times")
+		deleteLink.click(function() {
+			pub.close();
+		})
+		buttons.push(deleteLink)
 
 		prot.body = $("<div class='modulebody'></div>");
 		prot.div.append(prot.body);
@@ -146,63 +192,8 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
             }
         }
         loadPosition(layout);
-		
-		// If there are options, create options editor
-		if (prot.jsonData.options) {
-			var editOptions = createModuleButton("options fa-wrench");
-			
-			editOptions.click(function() {
-				var $optionEditor = $("<div class='optionEditor'></div>");
-				
-				// Create and sort options by key
-				var keys = Object.keys(prot.jsonData.options)
-				keys.sort()
 
-				// Create options
-				keys.forEach(function(key) {
-					// Create the option div
-					var div = prot.createOption(key, prot.jsonData.options[key]);
-					$optionEditor.append(div);
-					// Store reference to the JSON option
-					$(div).data("option", prot.jsonData.options[key]);
-				})
-				
-				bootbox.dialog({
-					animate: false,
-					title: 'Options: '+prot.title.text(),
-					message: $optionEditor,
-					onEscape: function() { return true },
-					buttons: {
-						'Cancel': function() {},
-						'OK': function() {
-							$optionEditor.find(".option").each(function(i, div) {
-								// Get reference to the JSON option
-								prot.updateOption($(div).data("option"), div)
-							})
-
-							prot.onOptionsUpdated()
-						}
-					}
-				})
-			})
-			buttons.push(editOptions)
-		}
-		
-		if (prot.jsonData.canRefresh) {
-			// If the module can refresh, add a refresh button
-			var refresh = createModuleButton("refresh fa-refresh");
-		
-			refresh.click(function() {
-				SignalPath.updateModule(pub);
-			});
-			buttons.push(refresh);
-		}
-
-		prot.moduleButtonContainer = $("<div/>", {
-			class: "modulebutton-container pull-right"
-		})
-		prot.header.append(prot.moduleButtonContainer)
-		prot.moduleButtonContainer.append(buttons.reverse())
+		prot.header.append(buttons)
 
 		// Must add to canvas before setting draggable
 		canvas.append(prot.div);
@@ -233,7 +224,7 @@ SignalPath.EmptyModule = function(data, canvas, prot) {
 			});
 			prot.addFocus(true);
 			event.stopPropagation();
-		});
+		})
         
         prot.div.on("dragEnd", function() {
             prot.redraw()
