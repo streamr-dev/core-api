@@ -74,6 +74,7 @@ databaseChangeLog = {
 	include file: 'core/2017-03-28-ethereum-get-events-module.groovy'
 	include file: 'core/2017-04-20-verify-signature-module.groovy'
 	include file: 'core/2017-05-11-create-table-integration-key.groovy'
+	include file: 'core/2017-05-30-mqtt-module.groovy'
 	include file: 'core/2017-05-31-dashboard-layout-field.groovy'
 	include file: 'core/2017-06-01-dashboard-id-to-string.groovy'
 }
