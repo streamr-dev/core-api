@@ -29,7 +29,7 @@ class CanvasList extends Component {
 }
 
 const mapStateToProps = ({canvas}) => ({
-    canvases: canvas.list
+    canvases: canvas.list || []
 })
 
 export default connect(mapStateToProps)(CanvasList)

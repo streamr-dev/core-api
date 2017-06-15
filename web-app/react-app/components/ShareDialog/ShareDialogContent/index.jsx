@@ -4,7 +4,8 @@ import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import serialize from 'form-serialize'
 
-import {Row, Col, Button} from 'react-bootstrap'
+import {Row, Col, FormGroup, InputGroup, FormControl, Button} from 'react-bootstrap'
+import FontAwesome from 'react-fontawesome'
 import Switcher from 'react-switcher'
 
 import ShareDialogPermission from './ShareDialogPermission'
@@ -12,6 +13,8 @@ import ShareDialogPermission from './ShareDialogPermission'
 import styles from './shareDialogContent.pcss'
 import type {Permission} from '../../../flowtype/permission-types'
 import {getResourcePermissions, addResourcePermission, removeResourcePermission} from '../../../actions/permission'
+
+declare var _: any
 
 class ShareDialogContent extends Component {
     form: HTMLFormElement
@@ -77,19 +80,35 @@ class ShareDialogContent extends Component {
                         <Switcher on={this.props.anonymousPermission !== undefined} onClick={this.onAnonymousAccessChange}/>
                     </div>
                 </Col>
-                {this.props.permissions.map(permission => (
-                    <ShareDialogPermission key={`${permission.user}${permission.operation}`} permission={permission}/>
-                ))}
-                <Col xs={12}>
+                <Row>
+                    <Col xs={12} className={styles.permissionRow}>
+                        {_.chain(this.props.permissions)
+                            .groupBy(p => p.user)
+                            .mapValues(permissions => (
+                                <ShareDialogPermission
+                                    resourceType={this.props.resourceType}
+                                    resourceId={this.props.resourceId}
+                                    key={`${permissions[0].user}`}
+                                    permissions={permissions}
+                                />
+                            ))
+                            .values()
+                            .value()
+                        }
+                    </Col>
+                </Row>
+                <Col xs={12} className={styles.inputRow}>
                     <form onSubmit={this.onSubmit} ref={form => this.form = form}>
-                        <div className="input-group">
-                            <input type="text" className="new-user-field form-control" placeholder="Enter email address" name="email"/>
-                            <span className="input-group-btn">
-                                <Button type="submit" className="new-user-button btn btn-default pull-right">
-                                    <span className="icon fa fa-plus"/>
-                                </Button>
-                            </span>
-                        </div>
+                        <FormGroup>
+                            <InputGroup>
+                                <FormControl type="email" placeholder="Enter email address" name="email" />
+                                <InputGroup.Button>
+                                    <Button className={styles.addButton} type="submit">
+                                        <FontAwesome name="plus" />
+                                    </Button>
+                                </InputGroup.Button>
+                            </InputGroup>
+                        </FormGroup>
                     </form>
                 </Col>
             </Row>
@@ -100,10 +119,10 @@ class ShareDialogContent extends Component {
 const mapStateToProps = ({permission: {byTypeAndId}}, ownProps) => {
     const byType = byTypeAndId[ownProps.resourceType] || {}
     const permissions = (byType[ownProps.resourceId] || []).filter(p => !p.removed)
-    const ownerPermission = permissions.find(it => it.id === null) || {}
+    const ownerPermission = permissions.find(it => it.id === null && !it.new) || {}
     const owner = ownerPermission.user
     return {
-        permissions: permissions.filter(p => p.id && !p.anonymous),
+        permissions: permissions.filter(p => !p.anonymous && (p.id || p.new)),
         anonymousPermission: permissions.find(p => p.anonymous),
         owner
     }

@@ -1,14 +1,19 @@
 // @flow
 
 import React, {Component} from 'react'
+import {connect} from 'react-redux'
 import {Modal, Button} from 'react-bootstrap'
 import ShareDialogContent from './ShareDialogContent'
 
+import {saveUpdatedResourcePermissions} from '../../actions/permission'
+
+import type {ReactChildren} from 'react-flow-types'
 import type {Permission} from '../../flowtype/permission-types'
 
-export default class ShareDialog extends Component {
+class ShareDialog extends Component {
     openModal: Function
     closeModal: Function
+    save: Function
     state: {
         open: boolean
     }
@@ -16,7 +21,8 @@ export default class ShareDialog extends Component {
         resourceId: Permission.resourceId,
         resourceType: Permission.resourceType,
         resourceTitle: string,
-        children?: any
+        children?: ReactChildren,
+        save: Function
     }
     
     constructor() {
@@ -26,6 +32,7 @@ export default class ShareDialog extends Component {
         }
         this.openModal = this.openModal.bind(this)
         this.closeModal = this.closeModal.bind(this)
+        this.save = this.save.bind(this)
     }
     
     openModal() {
@@ -40,11 +47,17 @@ export default class ShareDialog extends Component {
         })
     }
     
+    save() {
+        this.props.save()
+            .then(() => {
+                this.closeModal()
+            })
+    }
+    
     render() {
         const Child = React.Children.only(this.props.children)
-        // TODO: Better key
         let i = 0
-        let childsChildren = React.Children.map(Child.props.children, (c, i) => {
+        let childsChildren = React.Children.map(Child.props.children, c => {
             const el = React.isValidElement(c) ? React.cloneElement(c, {
                 key: i
             }) : c
@@ -53,7 +66,6 @@ export default class ShareDialog extends Component {
         }) || []
         childsChildren.push(
             <Modal
-                //animation={false}
                 key={i}
                 show={this.state.open}
                 onHide={this.closeModal}
@@ -68,7 +80,7 @@ export default class ShareDialog extends Component {
                 <Modal.Footer>
                     <Button
                         bsStyle="primary"
-                        onClick={this.closeModal}
+                        onClick={this.save}
                     >
                         Save
                     </Button>
@@ -86,3 +98,15 @@ export default class ShareDialog extends Component {
         }, childsChildren)
     }
 }
+
+const mapStateToProps = ({permission}, ownProps) => ({
+    permissions: permission.byTypeAndId[ownProps.resourceType] && permission.byTypeAndId[ownProps.resourceType][ownProps.resourceId] || []
+})
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    save() {
+        return dispatch(saveUpdatedResourcePermissions(ownProps.resourceType, ownProps.resourceId))
+    }
+})
+
+export default connect (mapStateToProps, mapDispatchToProps)(ShareDialog)

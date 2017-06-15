@@ -275,6 +275,7 @@ modules = {
 	}
 	'webpack-commons-bundle' {
 		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.js']
+		resource url:[dir:'js/unifina/webpack-bundles', file:'commons.bundle.css']
 	}
 	'profile-page-webpack-bundle' {
 		dependsOn 'webpack-commons-bundle, confirm-button'

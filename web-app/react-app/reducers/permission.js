@@ -23,8 +23,12 @@ const initialState = {
 }
 
 const modifyPermission = (state, action, attributes) => {
-    return [...(state.byTypeAndId[action.resourceType][action.resourceId])].map(permission => {
-        if ((permission.id != null && permission.id === action.permission.id) || (permission.anonymous === action.permission.anonymous === true) || (permission.user === action.permission.user && permission.operation === action.permission.operation)) {
+    const permissions = state.byTypeAndId[action.resourceType][action.resourceId]
+    if (!action.permission) {
+        return permissions
+    }
+    return [...permissions].map(permission => {
+        if ((permission.id != null && permission.id === action.permission.id) || (permission.anonymous === true && action.permission.anonymous === true) || (permission.user === action.permission.user && permission.operation === action.permission.operation)) {
             return {
                 ...permission,
                 ...attributes
@@ -52,7 +56,7 @@ export default function(state: State = initialState, action: Action) : State {
                         ...(state.byTypeAndId[action.resourceType] || {}),
                         [action.resourceId]: action.permissions.map(permission => ({
                             ...permission,
-                            new: true,
+                            new: false,
                             fetching: false,
                             removed: false,
                             error: null
@@ -113,7 +117,7 @@ export default function(state: State = initialState, action: Action) : State {
                 fetching: false,
                 error: null
             }
-    
+            
         case SAVE_REMOVED_RESOURCE_PERMISSION_REQUEST:
             return {
                 ...state,
@@ -136,8 +140,10 @@ export default function(state: State = initialState, action: Action) : State {
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
-                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId]
-                            .filter(p => p.id != null && p.id !== action.permission.id)
+                        [action.resourceId]: modifyPermission(state, action, {
+                            fetching: false,
+                            ...action.permission
+                        })
                     }
                 },
                 fetching: false,

@@ -2,7 +2,7 @@
 .ownerRow {
   height: 30px;
   display: flex;
-  padding: 0 20px 15px 20px;
+  padding: 15px 20px 30px 20px;
 
   > div {
     display: inline-flex;
@@ -24,5 +24,19 @@
     &.readAccess {
       flex: 0;
     }
+  }
+}
+
+.permissionRow {
+  z-index: 2;
+  overflow: visible;
+}
+
+.inputRow {
+  margin-top: 15px;
+  z-index: 1;
+
+  .addButton {
+    height: 34px;
   }
 }

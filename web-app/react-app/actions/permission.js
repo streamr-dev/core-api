@@ -5,7 +5,7 @@ import path from 'path'
 import settle from 'promise-settle'
 import parseError from './utils/parseError'
 
-import {showError} from './notification'
+import {showError, showSuccess} from './notification'
 
 export const GET_RESOURCE_PERMISSIONS_REQUEST = 'GET_RESOURCE_PERMISSIONS_REQUEST'
 export const GET_RESOURCE_PERMISSIONS_SUCCESS = 'GET_RESOURCE_PERMISSIONS_SUCCESS'
@@ -37,6 +37,7 @@ declare var Streamr: {
 
 import type { ApiError } from '../flowtype/common-types'
 import type { Permission } from '../flowtype/permission-types'
+import type { User } from '../flowtype/user-types'
 
 export const getResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => (dispatch: Function) => {
     dispatch(getResourcePermissionsRequest())
@@ -50,6 +51,29 @@ export const getResourcePermissions = (resourceType: Permission.resourceType, re
             dispatch(getResourcePermissionsFailure(e))
             throw e
         })
+}
+
+export const setResourceHighestOperation = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, currentPermissions: Array<Permission>, operation: Permission.operation) => (dispatch: Function) => {
+    const operationsInOrder = ['read', 'write', 'share']
+    const index = operationsInOrder.indexOf(operation)
+    const addOperations = operationsInOrder.slice(0, index + 1)
+    const removeOperations = operationsInOrder.slice(index + 1, operationsInOrder.length)
+    addOperations.forEach(o => {
+        if (!currentPermissions.find(item => item.operation === o)) {
+            dispatch(addResourcePermission(resourceType, resourceId, {
+                user: currentPermissions[0].user,
+                operation
+            }))
+        }
+    })
+    removeOperations.forEach(o => {
+        const permission = currentPermissions.find(item => {
+            return item.operation === o
+        })
+        if (permission) {
+            dispatch(removeResourcePermission(resourceType, resourceId, permission))
+        }
+    })
 }
 
 export const addResourcePermission = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, permission: Permission) => ({
@@ -66,7 +90,20 @@ export const removeResourcePermission = (resourceType: Permission.resourceType, 
     permission
 })
 
-export const saveUpdatedResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, permissions: Array<Permission>) => (dispatch: Function) => {
+export const removeAllResourcePermissionsByUser = (resourceType: Permission.resourceType, resourceId: Permission.resourceId, user: User.email) => (dispatch: Function) => {
+    ['read', 'write', 'share'].forEach(operation => {
+        dispatch(removeResourcePermission(resourceType, resourceId, {
+            user,
+            operation
+        }))
+    })
+    
+}
+
+export const saveUpdatedResourcePermissions = (resourceType: Permission.resourceType, resourceId: Permission.resourceId) => (dispatch: Function, getState: Function) => {
+    const state = getState()
+    const permissions = state.permission.byTypeAndId[resourceType][resourceId]
+
     const addedPermissions = permissions.filter(p => p.new)
     const addPermissions = new Promise(resolve => {
         settle(addedPermissions.map(permission => {
@@ -76,16 +113,18 @@ export const saveUpdatedResourcePermissions = (resourceType: Permission.resource
             }), permission)
         }))
             .then(results => {
-                const fullfilled = results.filter(r => r.isFulfilled()).map(r => r.value())
-                const rejected = results.filter(r => !r.isFulfilled()).map(r => r.reason())
-            
-                fullfilled.forEach(({data}) => dispatch(saveAddedResourcePermissionSuccess(resourceType, resourceId, data)))
-                rejected.forEach((res, i) => dispatch(saveAddedResourcePermissionFailure(resourceType, resourceId, {
-                    ...addedPermissions[i],
-                    error: parseError(res)
-                })))
-            
-                resolve([fullfilled, rejected])
+                results.forEach((res, i) => {
+                    if (!res.isFulfilled()) {
+                        const reason = res.reason()
+                        dispatch(saveAddedResourcePermissionFailure(resourceType, resourceId, {
+                            ...addedPermissions[i],
+                            error: parseError(reason)
+                        }))
+                    } else {
+                        dispatch(saveAddedResourcePermissionSuccess(resourceType, resourceId, removedPermissions[i]))
+                    }
+                })
+                resolve(results)
             })
     })
 
@@ -98,36 +137,45 @@ export const saveUpdatedResourcePermissions = (resourceType: Permission.resource
             }), permission)
         }))
             .then(results => {
-                const fullfilled = results.filter(r => r.isFulfilled()).map(r => r.value())
-                const rejected = results.filter(r => !r.isFulfilled()).map(r => r.reason())
-        
-                fullfilled.forEach((firstParam, i) => dispatch(saveRemovedResourcePermissionSuccess(resourceType, resourceId, removedPermissions[i])))
-                rejected.forEach((res, i) => dispatch(saveRemovedResourcePermissionFailure(resourceType, resourceId, {
-                    ...removedPermissions[i],
-                    error: parseError(res)
-                })))
-        
-                resolve([fullfilled, rejected])
+                results.forEach((res, i) => {
+                    if (!res.isFulfilled()) {
+                        const reason = res.reason()
+                        dispatch(saveRemovedResourcePermissionFailure(resourceType, resourceId, {
+                            ...removedPermissions[i],
+                            error: parseError(reason)
+                        }))
+                    } else {
+                        dispatch(saveRemovedResourcePermissionSuccess(resourceType, resourceId, removedPermissions[i]))
+                    }
+                })
+                resolve(results)
             })
     })
     
-    return Promise.all([addPermissions, removePermissions])
-        .then(([[, addedFailed], [, removedFailed]]) => {
-            let message
-            if (addedFailed.length) {
-                message = 'Something went wrong while adding some of the permission(s)'
-            } else if (removedFailed.length) {
-                message = 'Something went wrong while revoking some of the permission(s)'
-            }
-            if (message) {
-                const e = new Error(message)
-                dispatch(showError({
-                    title: 'Error!',
-                    message
-                }))
-                throw e
-            }
-        })
+    return new Promise((resolve, reject) => {
+        Promise.all([addPermissions, removePermissions])
+            .then(([added, removed]) => {
+                let message
+                if (added.filter(p => !p.isFulFilled).length) {
+                    message = 'Something went wrong while adding some of the permission(s)'
+                } else if (removed.filter(p => !p.isFulFilled).length) {
+                    message = 'Something went wrong while revoking some of the permission(s)'
+                }
+                if (message) {
+                    const e = new Error(message)
+                    dispatch(showError({
+                        title: 'Error!',
+                        message
+                    }))
+                    reject(e)
+                } else {
+                    resolve()
+                    dispatch(showSuccess({
+                        title: 'Permissions saved successfully!'
+                    }))
+                }
+            })
+    })
 }
 
 const getResourcePermissionsRequest = () => ({

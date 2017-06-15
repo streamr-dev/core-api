@@ -5,7 +5,7 @@ import type {User} from './user-types'
 type resourceType = 'DASHBOARD' | 'CANVAS' | 'STREAM'
 type resourceId = string
 
-export type Operation = 'read' | 'write' | 'share'
+type Operation = 'read' | 'write' | 'share'
 
 export type Permission = {
     operation: Operation,
