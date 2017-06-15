@@ -13,15 +13,19 @@ global.Streamr = {
     createLink: ({uri}) => uri
 }
 
+moxios.promiseWait = () => new Promise(resolve => moxios.wait(resolve))
+
 describe('Permission actions', () => {
     let store
 
     beforeEach(() => {
         moxios.install()
         store = mockStore({
-            byTypeAndId: {},
-            error: null,
-            fetching: false
+            permission: {
+                byTypeAndId: {},
+                error: null,
+                fetching: false
+            }
         })
     })
     
@@ -31,41 +35,38 @@ describe('Permission actions', () => {
     })
     
     describe('getApiUrl (tested indirectly)', () => {
-        it('user correct url for dashboard', done => {
+        it('user correct url for dashboard', async done => {
             const id = 'afasdfasdfasgsdfg'
-            moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                assert(request.url.match(`dashboards/${id}/permissions`))
-                done()
-                request.respondWith({
-                    status: 200
-                })
-            })
             store.dispatch(actions.getResourcePermissions('DASHBOARD', id))
-        })
-        it('user correct url for canvas', done => {
-            const id = 'afasdfasdfasgsdfg'
-            moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                assert(request.url.match(`canvases/${id}/permissions`))
-                done()
-                request.respondWith({
-                    status: 200
-                })
+            await moxios.promiseWait()
+            const request = moxios.requests.mostRecent()
+            assert(request.url.match(`dashboards/${id}/permissions`))
+            done()
+            request.respondWith({
+                status: 200
             })
+        })
+        it('user correct url for canvas', async done => {
+            const id = 'afasdfasdfasgsdfg'
             store.dispatch(actions.getResourcePermissions('CANVAS', id))
-        })
-        it('user correct url for stream', done => {
-            const id = 'afasdfasdfasgsdfg'
-            moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                assert(request.url.match(`streams/${id}/permissions`))
-                done()
-                request.respondWith({
-                    status: 200
-                })
+            await moxios.promiseWait()
+            const request = moxios.requests.mostRecent()
+            assert(request.url.match(`canvases/${id}/permissions`))
+            done()
+            request.respondWith({
+                status: 200
             })
+        })
+        it('user correct url for stream', async done => {
+            const id = 'afasdfasdfasgsdfg'
             store.dispatch(actions.getResourcePermissions('STREAM', id))
+            await moxios.promiseWait()
+            let request = moxios.requests.mostRecent()
+            assert(request.url.match(`streams/${id}/permissions`))
+            done()
+            request.respondWith({
+                status: 200
+            })
         })
     })
     
@@ -152,7 +153,7 @@ describe('Permission actions', () => {
     
     describe('saveUpdatedResourcePermissions', () => {
         describe('new permissions', () => {
-            it('should call SAVE on every new permission', done => {
+            it('should call SAVE on every new permission', async done => {
                 const resourceType = 'DASHBOARD'
                 const resourceId = 'asdfasdfasasd'
                 const permissions = [{
@@ -171,16 +172,23 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     new: false
                 }]
-                moxios.wait(() => {
-                    const requests = moxios.requests
-                    assert.equal(requests.at(0).config.method, 'post')
-                    assert.equal(requests.at(1).config.method, 'post')
-                    assert.deepStrictEqual(JSON.parse(requests.at(0).config.data), permissions[0])
-                    assert.deepStrictEqual(JSON.parse(requests.at(1).config.data), permissions[1])
-                    done()
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: permissions
+                            }
+                        }
+                    }
                 })
-    
-                store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId, permissions))
+                store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
+                await moxios.promiseWait()
+                const requests = moxios.requests
+                assert.equal(requests.at(0).config.method, 'post')
+                assert.equal(requests.at(1).config.method, 'post')
+                assert.deepStrictEqual(JSON.parse(requests.at(0).config.data), permissions[0])
+                assert.deepStrictEqual(JSON.parse(requests.at(1).config.data), permissions[1])
+                done()
             })
             it('should create SAVE_ADDED_RESOURCE_PERMISSION_SUCCESS for succeeded permissions', async () => {
                 const resourceType = 'DASHBOARD'
@@ -201,6 +209,15 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     new: false
                 }]
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: permissions
+                            }
+                        }
+                    }
+                })
                 moxios.wait(() => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
@@ -235,8 +252,8 @@ describe('Permission actions', () => {
                     permission: permissions[1]
                 }]
     
-                await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId, permissions))
-                assert.deepStrictEqual(store.getActions(), expectedActions)
+                await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
+                assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
             })
             it('should create SAVE_ADDED_RESOURCE_PERMISSION_FAILURE for failed permissions', async () => {
                 const resourceType = 'DASHBOARD'
@@ -257,6 +274,17 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     new: false
                 }]
+    
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: permissions
+                            }
+                        }
+                    }
+                })
+                
                 moxios.wait(() => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
@@ -298,14 +326,14 @@ describe('Permission actions', () => {
                 }]
     
                 try {
-                    await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId, permissions))
+                    await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 } catch (e) {
                     assert.deepStrictEqual(store.getActions().slice(0,4), expectedActions)
                 }
             })
         })
         describe('removed permissions', () => {
-            it('should call DELETE on every removed permissions', done => {
+            it('should call DELETE on every removed permissions', async done => {
                 const resourceType = 'DASHBOARD'
                 const resourceId = 'asdfasdfasasd'
                 const permissions = [{
@@ -323,16 +351,25 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     removed: true
                 }]
-                moxios.wait(() => {
-                    const requests = moxios.requests
-                    assert.equal(requests.at(0).config.method, 'delete')
-                    assert.equal(requests.at(1).config.method, 'delete')
-                    assert.equal(requests.at(0).url, `/api/v1/dashboards/${resourceId}/permissions/2`)
-                    assert.equal(requests.at(1).url, `/api/v1/dashboards/${resourceId}/permissions/3`)
-                    done()
-                })
     
-                store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId, permissions))
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: permissions
+                            }
+                        }
+                    }
+                })
+                
+                store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
+                await moxios.promiseWait()
+                const requests = moxios.requests
+                assert.equal(requests.at(0).config.method, 'delete')
+                assert.equal(requests.at(1).config.method, 'delete')
+                assert.equal(requests.at(0).url, `/api/v1/dashboards/${resourceId}/permissions/2`)
+                assert.equal(requests.at(1).url, `/api/v1/dashboards/${resourceId}/permissions/3`)
+                done()
             })
             it('should create SAVE_REMOVED_RESOURCE_PERMISSION_SUCCESS for succeeded permissions', async () => {
                 const resourceType = 'DASHBOARD'
@@ -352,6 +389,17 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     removed: true
                 }]
+    
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: permissions
+                            }
+                        }
+                    }
+                })
+                
                 moxios.wait(() => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
@@ -384,8 +432,8 @@ describe('Permission actions', () => {
                     permission: permissions[2]
                 }]
         
-                await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId, permissions))
-                assert.deepStrictEqual(store.getActions(), expectedActions)
+                await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
+                assert.deepStrictEqual(store.getActions().slice(0, 4), expectedActions)
             })
             it('should create SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE for failed permissions', async () => {
                 const resourceType = 'DASHBOARD'
@@ -405,6 +453,17 @@ describe('Permission actions', () => {
                     operation: 'test3',
                     removed: true
                 }]
+    
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: permissions
+                            }
+                        }
+                    }
+                })
+                
                 moxios.wait(() => {
                     const requests = moxios.requests
                     requests.at(0).respondWith({
@@ -446,10 +505,144 @@ describe('Permission actions', () => {
                 }]
                 
                 try {
-                    await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId, permissions))
+                    await store.dispatch(actions.saveUpdatedResourcePermissions(resourceType, resourceId))
                 } catch (e) {
                     assert.deepStrictEqual(store.getActions().slice(0,4), expectedActions)
                 }
+            })
+        })
+    })
+    
+    describe('removeAllResourcePermissionsByUser', () => {
+        it('should call REMOVE on every one of the user\'s permissions', () => {
+            const resourceType = 'DASHBOARD'
+            const resourceId = 'asdfasdfasasd'
+            const user = 'user2'
+            const permissions = [{
+                id: '1',
+                user: 'test',
+                operation: 'test',
+                new: true
+            }, {
+                id: '2',
+                user: 'test',
+                operation: 'test2',
+                new: true
+            }, {
+                id: '3',
+                user: user,
+                operation: 'read',
+                new: false
+            }, {
+                id: '4',
+                user: user,
+                operation: 'write',
+                new: false
+            }]
+            store = mockStore({
+                permission: {
+                    byTypeAndId: {
+                        [resourceType]: {
+                            [resourceId]: permissions
+                        }
+                    }
+                }
+            })
+            const expectedActions = [{
+                type: actions.REMOVE_RESOURCE_PERMISSION,
+                resourceType,
+                resourceId,
+                permission: {
+                    user,
+                    operation: 'read'
+                }
+            }, {
+                type: actions.REMOVE_RESOURCE_PERMISSION,
+                resourceType,
+                resourceId,
+                permission: {
+                    user,
+                    operation: 'write'
+                }
+            }, {
+                type: actions.REMOVE_RESOURCE_PERMISSION,
+                resourceType,
+                resourceId,
+                permission: {
+                    user,
+                    operation: 'share'
+                }
+            }]
+    
+            store.dispatch(actions.removeAllResourcePermissionsByUser(resourceType, resourceId, user))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
+        })
+    })
+    
+    describe('setResourceHighestOperationForUser', () => {
+        const resourceType = 'DASHBOARD'
+        const resourceId = 'asdfasdfasasd'
+        const user = 'test'
+        describe('giving higher operation adds permissions', () => {
+            it('must add read, write and share if called with share', () => {
+                const permissions = [{
+                    user,
+                    operation: 'read'
+                }, {
+                    user,
+                    operation: 'write'
+                }, {
+                    user,
+                    operation: 'share'
+                }]
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: []
+                            }
+                        }
+                    }
+                })
+                const expectedActions = permissions.map(permission => ({
+                    type: actions.ADD_RESOURCE_PERMISSION,
+                    resourceType,
+                    resourceId,
+                    permission
+                }))
+                store.dispatch(actions.setResourceHighestOperationForUser(resourceType, resourceId, 'share', user))
+                assert.deepStrictEqual(store.getActions(), expectedActions)
+            })
+        })
+        describe('giving lower operation removes permissions', () => {
+            it('must add read, write and share if called with share', () => {
+                const currentPermissions = [{
+                    user,
+                    operation: 'read'
+                }, {
+                    user,
+                    operation: 'write'
+                }, {
+                    user,
+                    operation: 'share'
+                }]
+                store = mockStore({
+                    permission: {
+                        byTypeAndId: {
+                            [resourceType]: {
+                                [resourceId]: currentPermissions
+                            }
+                        }
+                    }
+                })
+                const expectedActions = currentPermissions.slice(1,3).map(permission => ({
+                    type: actions.REMOVE_RESOURCE_PERMISSION,
+                    resourceType,
+                    resourceId,
+                    permission
+                }))
+                store.dispatch(actions.setResourceHighestOperationForUser(resourceType, resourceId, 'read', user))
+                assert.deepStrictEqual(store.getActions(), expectedActions)
             })
         })
     })

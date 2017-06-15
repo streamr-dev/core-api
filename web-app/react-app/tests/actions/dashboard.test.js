@@ -1,5 +1,5 @@
 
-import expect from 'expect'
+import assert from 'assert-diff'
 import thunk from 'redux-thunk'
 import configureMockStore from 'redux-mock-store'
 import moxios from 'moxios'
@@ -35,7 +35,7 @@ describe('Dashboard actions', () => {
     })
     
     describe('getAndReplaceDashboards', () => {
-        it('creates GET_AND_REPLACE_DASHBOARDS_SUCCESS when fetching dashboards has succeeded', () => {
+        it('creates GET_AND_REPLACE_DASHBOARDS_SUCCESS when fetching dashboards has succeeded', async () => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 200,
                 response: [{
@@ -60,12 +60,10 @@ describe('Dashboard actions', () => {
                 }]
             }]
             
-            return store.dispatch(actions.getAndReplaceDashboards())
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            await store.dispatch(actions.getAndReplaceDashboards())
+            assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', () => {
+        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
                 response: new Error('test-error')
@@ -77,16 +75,18 @@ describe('Dashboard actions', () => {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
                 error: new Error('test-error')
             }]
-        
-            return store.dispatch(actions.getAndReplaceDashboards())
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+
+            try {
+                await store.dispatch(actions.getAndReplaceDashboards())
+            } catch (e) {
+                
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
     
     describe('getDashboard', () => {
-        it('creates GET_DASHBOARD_SUCCESS when fetching a dashboard has succeeded', () => {
+        it('creates GET_DASHBOARD_SUCCESS when fetching a dashboard has succeeded', async () => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 200,
@@ -113,12 +113,11 @@ describe('Dashboard actions', () => {
                 }
             }]
         
-            return store.dispatch(actions.getDashboard(id))
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            await store.dispatch(actions.getDashboard(id))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
+            
         })
-        it('also accepts layout as a string', () => {
+        it('also accepts layout as a string', async () => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}`, {
                 status: 200,
@@ -145,13 +144,11 @@ describe('Dashboard actions', () => {
                 }
             }]
         
-            return store.dispatch(actions.getDashboard(id))
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            await store.dispatch(actions.getDashboard(id))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
         })
     
-        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', () => {
+        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
             moxios.stubRequest('api/v1/dashboards', {
                 status: 500,
                 response: new Error('test-error')
@@ -164,15 +161,16 @@ describe('Dashboard actions', () => {
                 error: new Error('test-error')
             }]
         
-            return store.dispatch(actions.getAndReplaceDashboards())
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            try {
+                await store.dispatch(actions.getAndReplaceDashboards())
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
     
     describe('updateAndSaveDashboard', () => {
-        it('creates UPDATE_AND_SAVE_DASHBOARD_SUCCESS and CREATE_NOTIFICATION when fetching a dashboard has succeeded', () => {
+        it('creates UPDATE_AND_SAVE_DASHBOARD_SUCCESS and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async () => {
             const id = 'test'
             const db = {
                 id,
@@ -198,15 +196,13 @@ describe('Dashboard actions', () => {
                 dashboard: db
             }]
         
-            return store.dispatch(actions.updateAndSaveDashboard(db))
-                .then(() => {
-                    expect(store.getActions()[0]).toEqual(expectedActions[0])
-                    expect(store.getActions()[1].type).toEqual(expectedActions[1].type)
-                    expect(store.getActions()[1].notification.type).toEqual(expectedActions[1].notification.type)
-                    expect(store.getActions()[2]).toEqual(expectedActions[2])
-                })
+            await store.dispatch(actions.updateAndSaveDashboard(db))
+            assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
+            assert.equal(store.getActions()[1].type, expectedActions[1].type)
+            assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
+            assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
         })
-        it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and CREATE_NOTIFICATION when fetching a dashboard has succeeded', () => {
+        it('creates UPDATE_AND_SAVE_DASHBOARD_FAILURE and CREATE_NOTIFICATION when fetching a dashboard has succeeded', async () => {
             const id = 'test'
             const db = {
                 id,
@@ -232,19 +228,20 @@ describe('Dashboard actions', () => {
                 error: new Error('test')
             }]
         
-            return store.dispatch(actions.updateAndSaveDashboard(db))
-                .catch(() => {
-                    expect(store.getActions()[0]).toEqual(expectedActions[0])
-                    expect(store.getActions()[1].type).toEqual(expectedActions[1].type)
-                    expect(store.getActions()[1].notification.type).toEqual(expectedActions[1].notification.type)
-                    expect(store.getActions()[2]).toEqual(expectedActions[2])
-                })
+            try {
+                await store.dispatch(actions.updateAndSaveDashboard(db))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions()[0], expectedActions[0])
+                assert.equal(store.getActions()[1].type, expectedActions[1].type)
+                assert.equal(store.getActions()[1].notification.type, expectedActions[1].notification.type)
+                assert.deepStrictEqual(store.getActions()[2], expectedActions[2])
+            }
         })
-        it('uses POST request if createNew = true', done => {
+        it('uses POST request if dashboard.new = true', done => {
             moxios.wait(() => {
                 let request = moxios.requests.mostRecent()
-                expect(request.url).toBe('api/v1/dashboards')
-                expect(request.config.method.toLowerCase()).toEqual('post')
+                assert.equal(request.url, 'api/v1/dashboards')
+                assert.equal(request.config.method.toLowerCase(), 'post')
                 done()
                 request.respondWith({
                     status: 200,
@@ -253,15 +250,16 @@ describe('Dashboard actions', () => {
             })
             store.dispatch(actions.updateAndSaveDashboard({
                 id: 'test',
-                layout: 'test'
-            }, true))
+                layout: 'test',
+                new: true
+            }))
         })
-        it('uses PUT request if createNew = false', done => {
+        it('uses PUT request if dashboard.new = false', done => {
             const id = 'test'
             moxios.wait(() => {
                 let request = moxios.requests.mostRecent()
-                expect(request.url).toBe(`api/v1/dashboards/${id}`)
-                expect(request.config.method.toLowerCase()).toEqual('put')
+                assert.equal(request.url, `api/v1/dashboards/${id}`)
+                assert.equal(request.config.method.toLowerCase(), 'put')
                 done()
                 request.respondWith({
                     status: 200,
@@ -270,8 +268,9 @@ describe('Dashboard actions', () => {
             })
             store.dispatch(actions.updateAndSaveDashboard({
                 id,
-                layout: 'test'
-            }, false))
+                layout: 'test',
+                new: false
+            }))
         })
     })
     
@@ -279,7 +278,7 @@ describe('Dashboard actions', () => {
         it('creates DELETE_DASHBOARD_SUCCESS when deleting dashboard has succeeded', () => {
             moxios.wait(() => {
                 let request = moxios.requests.mostRecent()
-                expect(request.config.method).toEqual('delete')
+                assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 200
                 })
@@ -294,15 +293,12 @@ describe('Dashboard actions', () => {
             }]
             
             return store.dispatch(actions.deleteDashboard('test'))
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
         })
         
-        it('creates DELETE_DASHBOARD_FAILURE when deleting dashboard has failed', () => {
+        it('creates DELETE_DASHBOARD_FAILURE when deleting dashboard has failed', async () => {
             moxios.wait(() => {
                 let request = moxios.requests.mostRecent()
-                expect(request.config.method).toEqual('delete')
+                assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
                     response: new Error('test')
@@ -317,15 +313,16 @@ describe('Dashboard actions', () => {
                 error: new Error('test')
             }]
             
-            return store.dispatch(actions.deleteDashboard('test'))
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            try {
+                await store.dispatch(actions.deleteDashboard('test'))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
     
     describe('getMyDashboardPermissions', () => {
-        it('creates GET_MY_DASHBOARD_PERMISSIONS_SUCCESS with the operations when fetching permissions has succeeded', () => {
+        it('creates GET_MY_DASHBOARD_PERMISSIONS_SUCCESS with the operations when fetching permissions has succeeded', async () => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}/permissions/me`, {
                 status: 200,
@@ -345,12 +342,10 @@ describe('Dashboard actions', () => {
                 permissions: ['test', 'test2']
             }]
         
-            return store.dispatch(actions.getMyDashboardPermissions(id))
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            await store.dispatch(actions.getMyDashboardPermissions(id))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
         })
-        it('creates GET_MY_DASHBOARD_PERMISSIONS_FAILURE when fetching permissions has failed', () => {
+        it('creates GET_MY_DASHBOARD_PERMISSIONS_FAILURE when fetching permissions has failed', async () => {
             const id = 'asdfasdfasasd'
             moxios.stubRequest(`api/v1/dashboards/${id}/permissions/me`, {
                 status: 500,
@@ -366,18 +361,19 @@ describe('Dashboard actions', () => {
                 error: new Error('test-error')
             }]
         
-            return store.dispatch(actions.getMyDashboardPermissions(id))
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            try {
+                await store.dispatch(actions.getMyDashboardPermissions(id))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
     
     describe('updateDashboard', () => {
         it('must return correct action', () => {
-            expect(actions.updateDashboard({
+            assert.deepStrictEqual(actions.updateDashboard({
                 id: 'test'
-            })).toEqual({
+            }), {
                 type: actions.UPDATE_DASHBOARD,
                 dashboard: {
                     id: 'test'
@@ -387,7 +383,7 @@ describe('Dashboard actions', () => {
     
         describe('addDashboardItem', () => {
             it('must return correct action', () => {
-                expect(actions.updateDashboardItem({
+                assert.deepStrictEqual(actions.updateDashboardItem({
                     id: 'test',
                     items: [{
                         canvas: 'a',
@@ -398,7 +394,7 @@ describe('Dashboard actions', () => {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'
-                })).toEqual({
+                }), {
                     type: actions.UPDATE_DASHBOARD,
                     dashboard: {
                         id: 'test',
@@ -418,7 +414,7 @@ describe('Dashboard actions', () => {
     
         describe('updateDashboardItem', () => {
             it('must return correct action', () => {
-                expect(actions.updateDashboardItem({
+                assert.deepStrictEqual(actions.updateDashboardItem({
                     id: 'test',
                     items: [{
                         canvas: 'a',
@@ -433,7 +429,7 @@ describe('Dashboard actions', () => {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'
-                })).toEqual({
+                }), {
                     type: actions.UPDATE_DASHBOARD,
                     dashboard: {
                         id: 'test',
@@ -453,7 +449,7 @@ describe('Dashboard actions', () => {
     
         describe('removeDashboardItem', () => {
             it('must return correct action', () => {
-                expect(actions.removeDashboardItem({
+                assert.deepStrictEqual(actions.removeDashboardItem({
                     id: 'test',
                     items: [{
                         canvas: 'a',
@@ -468,7 +464,7 @@ describe('Dashboard actions', () => {
                     canvas: 'b',
                     module: 0,
                     thirdField: 'test'
-                })).toEqual({
+                }), {
                     type: actions.UPDATE_DASHBOARD,
                     dashboard: {
                         id: 'test',
@@ -485,9 +481,9 @@ describe('Dashboard actions', () => {
     
     describe('createDashboard', () => {
         it('must return correct action', () => {
-            expect(actions.createDashboard({
+            assert.deepStrictEqual(actions.createDashboard({
                 id: 'test'
-            })).toEqual({
+            }), {
                 type: actions.CREATE_DASHBOARD,
                 dashboard: {
                     id: 'test'
@@ -497,12 +493,13 @@ describe('Dashboard actions', () => {
         describe('createDashboard', () => {
             const id = 'test'
             it('must return correct action', () => {
-                expect(actions.newDashboard(id)).toEqual({
+                assert.deepStrictEqual(actions.newDashboard(id), {
                     type: actions.CREATE_DASHBOARD,
                     dashboard: {
                         id,
                         name: 'Untitled Dashboard',
-                        items: []
+                        items: [],
+                        layout: {}
                     }
                 })
             })
@@ -512,7 +509,7 @@ describe('Dashboard actions', () => {
     describe('openDashboard', () => {
         const id = 'test'
         it('must return correct action', () => {
-            expect(actions.openDashboard(id)).toEqual({
+            assert.deepStrictEqual(actions.openDashboard(id), {
                 type: actions.OPEN_DASHBOARD,
                 id
             })

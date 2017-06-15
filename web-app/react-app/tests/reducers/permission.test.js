@@ -49,13 +49,13 @@ describe('Permission reducer', () => {
                         testResourceType: {
                             testResourceId: [{
                                 operation: 'test',
-                                new: true,
+                                new: false,
                                 fetching: false,
                                 removed: false,
                                 error: null
                             }, {
                                 operation: 'test2',
-                                new: true,
+                                new: false,
                                 fetching: false,
                                 removed: false,
                                 error: null

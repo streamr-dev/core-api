@@ -6,7 +6,7 @@ import {Button, Col} from 'react-bootstrap'
 import Select from 'react-select'
 import FontAwesome from 'react-fontawesome'
 
-import {setResourceHighestOperation, removeAllResourcePermissionsByUser} from '../../../../actions/permission'
+import {setResourceHighestOperationForUser, removeAllResourcePermissionsByUser} from '../../../../actions/permission'
 
 import 'react-select/dist/react-select.css'
 import styles from './shareDialogPermission.pcss'
@@ -75,7 +75,7 @@ class ShareDialogPermission extends Component {
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
     setResourceHighestOperation(value) {
-        dispatch(setResourceHighestOperation(ownProps.resourceType, ownProps.resourceId, ownProps.permissions, value))
+        dispatch(setResourceHighestOperationForUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user, value))
     },
     remove() {
         dispatch(removeAllResourcePermissionsByUser(ownProps.resourceType, ownProps.resourceId, ownProps.permissions[0].user))
