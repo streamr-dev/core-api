@@ -1,9 +1,6 @@
-docs
-grails-app
+.idea
+.settings
+.slcache
+target
 out
-node_modules
-src
-test
-scripts
-lib
-web-app
+.git
