@@ -73,7 +73,13 @@ public class ModuleOption extends LinkedHashMap<String, Object> {
 	
 	public Integer getInt() {
 		Object o = getValue();
-		return (o instanceof Integer) ? (Integer) o : Integer.parseInt(getString());
+		if (o instanceof Integer) {
+			return (Integer) o;
+		} else if (o instanceof Double) {
+			return getDouble().intValue();
+		} else {
+			return Integer.parseInt(getString());
+		}
 	}
 	
 	public Double getDouble() {
