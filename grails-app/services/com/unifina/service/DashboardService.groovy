@@ -52,14 +52,14 @@ class DashboardService {
 
 	/**
 	 * Create or update Dashboard by command, and authorize that user is permitted to do so.
-	 * @param id dashboard id
+	 *
 	 * @param validCommand a save command that has been validated before
 	 * @param user current user
 	 * @return updated dashboard
 	 * @throws NotFoundException when dashboard was not found.
 	 * @throws NotPermittedException when dashboard was found but user not permitted to update it
 	 */
-	Dashboard createOrUpdate( SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
+	Dashboard createOrUpdate(SaveDashboardCommand validCommand, SecUser user) throws NotFoundException, NotPermittedException {
 		Dashboard dashboard
 		if (validCommand.id && authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)) {
 			dashboard = authorizedGetById(validCommand.id, user, Permission.Operation.WRITE)
@@ -98,6 +98,7 @@ class DashboardService {
 	 * @return
 	 */
 	Dashboard update(Long id, SaveDashboardCommand validCommand, SecUser user) {
+		validCommand.id = id
 		createOrUpdate(validCommand, user)
 	}
 
