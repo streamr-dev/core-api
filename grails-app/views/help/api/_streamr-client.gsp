@@ -1,1 +1,1 @@
-../../../../web-app/js/unifina/streamr-socketio-client/README.md
+../../../../web-app/js/unifina/streamr-client/README.md

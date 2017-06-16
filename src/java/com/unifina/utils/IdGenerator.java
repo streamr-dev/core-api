@@ -16,18 +16,26 @@ public class IdGenerator implements IdentifierGenerator {
 	 * @return
 	 */
 	public static String get() {
+		return getShort() + getShort();
+	}
+
+	public static String getShort() {
 		UUID uuid = UUID.randomUUID();
-		
+
 		byte[] bytes = new byte[16];
 		ByteBuffer bb = ByteBuffer.wrap(bytes);
 		bb.putLong(uuid.getMostSignificantBits());
 		bb.putLong(uuid.getLeastSignificantBits());
-		
+
 		return Base64.encodeBase64URLSafeString(bytes);
+	}
+
+	public String generate() {
+		return get();
 	}
 
 	@Override
 	public Serializable generate(SessionImplementor session, Object object) throws HibernateException {
-		return get();
+		return generate();
 	}
 }

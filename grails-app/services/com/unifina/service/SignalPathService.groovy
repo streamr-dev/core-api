@@ -9,14 +9,14 @@ import com.unifina.datasource.RealtimeDataSource
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.signalpath.Serialization
 import com.unifina.exceptions.CanvasUnreachableException
-import com.unifina.push.KafkaPushChannel
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.AbstractSignalPathModule
 import com.unifina.signalpath.RuntimeRequest
 import com.unifina.signalpath.RuntimeResponse
 import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.SignalPathRunner
-import com.unifina.signalpath.UiChannelIterator
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
 import com.unifina.utils.NetworkInterfaceUtils
@@ -41,45 +41,51 @@ class SignalPathService {
 	def servletContext
 	def grailsApplication
 	def grailsLinkGenerator
-	def kafkaService
 	def serializationService
+	StreamService streamService
 	PermissionService permissionService
 	CanvasService canvasService
 	ApiService apiService
 
 	private static final Logger log = Logger.getLogger(SignalPathService.class)
-	
-	public SignalPath mapToSignalPath(Map signalPathMap, boolean connectionsReady, Globals globals, boolean isRoot) {
-		SignalPath sp = new SignalPath(isRoot)
 
-		sp.globals = globals
-		sp.init()		
-		sp.configure(signalPathMap)
+	/**
+	 * Creates and configures a root SignalPath instance with the given config and Globals. You
+	 * can pass an optional SignalPath instance to configure if you want (eg. to configure non-root
+	 * SignalPaths or subclasses of SignalPath).
+	 *
+	 * If connectionsReady==true, instance.connectionsReady() is called.
+     */
+	@CompileStatic
+	public SignalPath mapToSignalPath(Map config, boolean connectionsReady, Globals globals, SignalPath instance = new SignalPath(true)) {
+		instance.globals = globals
+		instance.init()
+		instance.configure(config)
 		if (connectionsReady) {
-			sp.connectionsReady()
+			instance.connectionsReady()
 		}
 
-		return sp
+		return instance
 	}
-	
+
+	@CompileStatic
 	public Map signalPathToMap(SignalPath sp) {
 		return  [
 			name: sp.name,
-			modules: sp.modules.collect { it.getConfiguration() },
+			modules: sp.modules.collect { AbstractSignalPathModule it -> it.getConfiguration() },
 			settings: sp.globals.signalPathContext,
 			hasExports: sp.hasExports(),
-			uiChannel: sp.getUiChannelMap()
+			uiChannel: sp.getUiChannel().toMap()
 		]
 	}
 	
 	/**
-	 * Rebuilds a saved representation of a SignalPath along with its context.a
-	 * Potentially modifies the map given as parameter.
-	 * @param json
-	 * @return
+	 * Rebuilds a saved representation of a root SignalPath along with its config.
+	 * Potentially modifies the config given as parameter.
 	 */
-	public Map reconstruct(Map signalPathMap, Globals globals) {
-		SignalPath sp = mapToSignalPath(signalPathMap, true, globals, true)
+	@CompileStatic
+	public Map reconstruct(Map config, Globals globals) {
+		SignalPath sp = mapToSignalPath(config, true, globals, new SignalPath(true))
 		return signalPathToMap(sp)
 	}
 	
@@ -120,28 +126,19 @@ class SignalPathService {
 		byte[] unzipped = uncompressBytes(zipped)
 		return new String(unzipped,StandardCharsets.UTF_8)
 	}
-	
+
+	@CompileStatic
 	public DataSource createDataSource(boolean adhoc, Globals globals) {
-		if (adhoc)
+		if (adhoc) {
 			return new HistoricalDataSource(globals)
-		else return new RealtimeDataSource(globals)
+		} else {
+			return new RealtimeDataSource(globals)
+		}
 	}
 
 	@Transactional
-	public void deleteRunningSignalPathReferences(SignalPathRunner runner) {
-
-		def uiChannelIds = []
-
-		runner.signalPaths.each {
-			Canvas canvas = it.canvas.refresh()
-			UiChannelIterator.over(canvas.toMap()).each {
-				uiChannelIds << it.id
-			}
-			canvas.delete()
-		}
-
-		// Delayed-delete the topics in one hour
-		kafkaService.createDeleteTopicTask(uiChannelIds, 60*60*1000)
+	public void deleteReferences(SignalPath signalPath, boolean delayed = false) {
+		canvasService.deleteCanvas(signalPath.canvas, signalPath.getGlobals().getUser(), delayed)
 	}
 	
     def runSignalPaths(List<SignalPath> signalPaths) {
@@ -177,15 +174,14 @@ class SignalPathService {
 	void startLocal(Canvas canvas, Map signalPathContext) throws SerializationException {
 		// Create Globals
 		Globals globals = GlobalsFactory.createInstance(signalPathContext, grailsApplication, canvas.user)
-		globals.uiChannel = new KafkaPushChannel(kafkaService, canvas.adhoc)
 
 		SignalPathRunner runner
 		// Create the runner thread
-		if (canvas.isNotSerialized() || canvas.adhoc) {
+		if (canvas.serialization == null || canvas.adhoc) {
 			runner = new SignalPathRunner([JSON.parse(canvas.json)], globals, canvas.adhoc)
 			log.info("Creating new signalPath connections (canvasId=$canvas.id)")
 		} else {
-			SignalPath sp = serializationService.deserialize(canvas.serialized)
+			SignalPath sp = serializationService.deserialize(canvas.serialization.bytes)
 			runner = new SignalPathRunner(sp, globals, canvas.adhoc)
 			log.info("De-serializing existing signalPath (canvasId=$canvas.id)")
 		}
@@ -291,7 +287,7 @@ class SignalPathService {
 	private Map sendRemoteRequest(RuntimeRequest req) {
 		// Require the request to be local to the receiving server to avoid redirect loops in case of invalid data
 		String url = req.getCanvas().getRequestUrl().replace("canvases/${req.getCanvas().id}", req.getOriginalPath() + "/request?local=true")
-		return apiService.post(url, req, req.getUser())
+		return apiService.post(url, req, req.getUser().keys.iterator().next())
 	}
 
 	private SignalPathRunner getLocalRunner(Canvas canvas) {
@@ -299,7 +295,7 @@ class SignalPathService {
 	}
 
 	@CompileStatic
-	public RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
+	RuntimeRequest buildRuntimeRequest(Map msg, String path, String originalPath = path, SecUser user) {
 		RuntimeRequest.PathReader pathReader = RuntimeRequest.getPathReader(path)
 
 		// All runtime requests require at least read permission
@@ -451,26 +447,36 @@ class SignalPathService {
 	@Transactional
 	def saveState(SignalPath sp) {
 		long startTime = System.currentTimeMillis()
-		Canvas canvas = sp.canvas
+		Canvas canvas = Canvas.get(sp.canvas.id)
 
 		try {
-			canvas.serialized = serializationService.serialize(sp)
-			canvas.serializationTime = sp.globals.time
-			Canvas.executeUpdate("update Canvas c set c.serialized = ?, c.serializationTime = ? where c.id = ?",
-				[canvas.serialized, canvas.serializationTime, canvas.id])
+			boolean isFirst = canvas.serialization == null
+			def serialization = isFirst ? new Serialization(canvas: canvas) : canvas.serialization
+
+			serialization.bytes = serializationService.serialize(sp)
+			serialization.date = sp.globals.time
+			serialization.save(failOnError: true, flush: true)
+			canvas.serialization = serialization
+
+			if (isFirst) {
+				Canvas.executeUpdate("update Canvas c set c.serialization = ? where c.id = ?", [serialization, canvas.id])
+			}
 			long timeTaken = System.currentTimeMillis() - startTime
-			log.info("Canvas " + canvas.id + " serialized (size: ${canvas.serialized.length} bytes, processing time: ${timeTaken} ms)")
+			log.info("Canvas " + canvas.id + " serialized (size: ${serialization.bytes.length} bytes, processing time: ${timeTaken} ms)")
 		} catch (SerializationException ex) {
 			log.error("Serialization of canvas " + canvas.id + " failed.")
 			throw ex
+		} finally {
+			// Save memory by removing reference to the bytes to get them gc'ed
+			canvas.serialization?.bytes = null
 		}
 	}
 
 	@Transactional
 	def clearState(Canvas canvas) {
-		canvas.serialized = null
-		canvas.serializationTime = null
+		canvas.serialization?.delete()
+		canvas.serialization = null
 		canvas.save(failOnError: true)
-		log.info("Canvas " + canvas.id + " serialized state cleared.")
+		log.info("Canvas $canvas.id serialized state cleared.")
 	}
 }

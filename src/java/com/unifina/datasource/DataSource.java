@@ -43,6 +43,7 @@ public abstract class DataSource {
 	protected abstract DataSourceEventQueue initEventQueue();
 	
 	private static final Logger log = Logger.getLogger(DataSource.class);
+	private boolean started = false;
 	
 	public DataSourceEventQueue getEventQueue() {
 		return eventQueue;
@@ -90,9 +91,17 @@ public abstract class DataSource {
 		}
 		return feed;
 	}
-	
+
+	/**
+	 * Adds an IStartListener to this DataSource. Its onStart() method will be called just before
+	 * starting the data flow. If the DataSource is already started, the listener will be called
+	 * immediately.
+     */
 	public void addStartListener(IStartListener startListener) {
 		startListeners.add(startListener);
+		if (isStarted()) {
+			startListener.onStart();
+		}
 	}
 	
 	public void addStopListener(IStopListener stopListener) {
@@ -133,6 +142,7 @@ public abstract class DataSource {
 			startListeners.get(i).onStart();
 
 		try {
+			started = true;
 			doStartFeed();
 		} catch (Exception e) {
 			log.error("Exception thrown while running feed",e);
@@ -143,20 +153,34 @@ public abstract class DataSource {
 	protected abstract void doStartFeed() throws Exception;
 	
 	public void stopFeed() {
+		// re-throw if exception happened, but only after all listeners have had chance to clean up
+		Exception stopException = null;
 		try {
 			doStopFeed();
 		} catch (Exception e) {
-			log.error("Exception thrown while stopping feed",e);
-			throw new RuntimeException("Error while stopping feed",e);
+			log.error("Exception thrown while stopping feed", e);
+			stopException = e;
+		}
+		for (IStopListener it : stopListeners) {
+			try {
+				it.onStop();
+			} catch (Exception e) {
+				log.error("Exception thrown while stopping feed", e);
+				stopException = e;
+			}
 		}
 
-		for (IStopListener it : stopListeners) {
-			it.onStop();
+		if (stopException != null) {
+			throw new RuntimeException("Error while stopping feed", stopException);
 		}
 	}
 	
 	protected abstract void doStopFeed() throws Exception;
-	
+
+	public boolean isStarted() {
+		return started;
+	}
+
 	/**
 	 * Connects a SignalPath to this DataSource. This means connecting to
 	 * all the feeds required by the Modules in the SignalPath and registering
@@ -181,4 +205,5 @@ public abstract class DataSource {
 		}
 		return serializableSps;
 	}
+
 }

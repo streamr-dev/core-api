@@ -6,7 +6,7 @@
 	<r:require module="confirm-button"/>
 	<r:script>
 		$(document).ready(function() {
-			$(".delete-dashboard-link").each(function(i, el) {
+			$(".delete-button").each(function(i, el) {
 				new ConfirmButton(el, {
 					message: "${ message(code:"dashboard.delete.confirm") }"
 				}, function(result) {
@@ -32,8 +32,8 @@
 	<ui:flashMessage/>
 
 	<div class="btn-group toolbar">
-		<a id="createButton" class="btn btn-primary" href="${createLink(action:'create')}">
-			<i class="fa fa-plus"></i> Create a new dashboard
+		<a id="createButton" class="btn btn-primary" href="${createLink(action:'show')}">
+			<i class="fa fa-plus"></i> Create Dashboard
 		</a>        	
 	</div>
 	
@@ -60,7 +60,7 @@
 					            <ui:td class="hidden-xs"><g:formatDate date="${dashboard.lastUpdated}" formatName="default.date.format" timeZone="${user.timezone}" /></ui:td>
 								<ui:td class="button-column">
 									<g:if test="${writable.contains(dashboard) || shareable.contains(dashboard)}">
-										<div class="dropdown">
+										<div class="streamr-dropdown">
 											<button class="dashboard-menu-toggle dropdown-toggle btn btn-sm" data-toggle="dropdown">
 												<i class="navbar-icon fa fa-caret-down"></i>
 											</button>
@@ -72,7 +72,7 @@
 												</g:if>
 												<g:if test="${writable.contains(dashboard)}">
 													<li>
-														<span data-id="${dashboard.id}" class="delete-dashboard-link confirm">
+														<span data-id="${dashboard.id}" class="delete-button confirm">
 															<i class="fa fa-trash-o"></i> Delete
 														</span>
 													</li>

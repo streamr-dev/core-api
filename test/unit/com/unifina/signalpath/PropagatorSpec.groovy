@@ -1,36 +1,26 @@
 package com.unifina.signalpath
 
+import com.unifina.ModuleTestingSpecification
 import com.unifina.data.FeedEvent
 import com.unifina.datasource.DataSource
 import com.unifina.feed.MasterClock
 import com.unifina.signalpath.simplemath.Count
 import com.unifina.signalpath.time.ClockModule
 import com.unifina.utils.Globals
-import com.unifina.utils.GlobalsFactory
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import spock.lang.Specification
 
-class PropagatorSpec extends Specification {
+class PropagatorSpec extends ModuleTestingSpecification {
 
 	Globals globals
 
 	def setup() {
-		def grailsApplication = Mock(GrailsApplication)
-		grailsApplication.getConfig() >> [unifina: [globals: [className: Globals.class.getName()]]]
-		globals = GlobalsFactory.createInstance([:], grailsApplication, null)
+		globals = mockGlobals()
 	}
 
 	def "Propagator should activate interdependent modules in originSet"() {
 		MasterClock masterClock = new MasterClock(globals, Mock(DataSource))
 
-		Count count = new Count()
-		ClockModule clock = new ClockModule()
-
-		[count, clock].each {
-			it.globals = globals
-			it.init()
-			it.configure[:]
-		}
+		Count count = setupModule(new Count())
+		ClockModule clock = setupModule(new ClockModule())
 
 		// Connect
 		clock.getOutput("timestamp").connect(count.getInput("in"))
@@ -52,9 +42,9 @@ class PropagatorSpec extends Specification {
 	def "Propagator should activate interdependent modules in originSet, more complex case with indirect dependencies"() {
 		MasterClock masterClock = new MasterClock(globals, Mock(DataSource))
 
-		Count count = new Count()
-		ClockModule clock = new ClockModule()
-		AbstractSignalPathModule mod = new AbstractSignalPathModule() {
+		Count count = setupModule(new Count())
+		ClockModule clock = setupModule(new ClockModule())
+		AbstractSignalPathModule mod = setupModule(new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 			TimeSeriesOutput output = new TimeSeriesOutput(this, "out")
 			@Override
@@ -63,8 +53,8 @@ class PropagatorSpec extends Specification {
 			}
 			@Override
 			void clearState() {}
-		}
-		AbstractSignalPathModule mod2 = new AbstractSignalPathModule() {
+		})
+		AbstractSignalPathModule mod2 = setupModule(new AbstractSignalPathModule() {
 			TimeSeriesInput input = new TimeSeriesInput(this, "in")
 			TimeSeriesOutput output = new TimeSeriesOutput(this, "out")
 			@Override
@@ -73,13 +63,7 @@ class PropagatorSpec extends Specification {
 			}
 			@Override
 			void clearState() {}
-		}
-
-		[count, clock, mod, mod2].each {
-			it.globals = globals
-			it.init()
-			it.configure[:]
-		}
+		})
 
 		// Connect clock-mod-count-mod2
 		clock.getOutput("timestamp").connect(mod.getInput("in"))

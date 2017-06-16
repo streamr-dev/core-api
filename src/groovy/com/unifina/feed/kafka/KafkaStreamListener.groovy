@@ -31,9 +31,7 @@ public class KafkaStreamListener extends AbstractStreamListener {
 	@Override
 	@CompileStatic
 	public void afterStreamSaved(Stream stream) {
-		if (!stream.hasErrors()) {
-			kafkaService.createTopics([stream.id]);
-		}
+
 	}
 
 	@Override
@@ -43,6 +41,5 @@ public class KafkaStreamListener extends AbstractStreamListener {
 			feedFileService.deleteFile(it)
 		}
 		FeedFile.executeUpdate("delete from FeedFile ff where ff.stream = :stream", [stream: stream])
-		kafkaService.deleteTopics([stream.id])
 	}
 }

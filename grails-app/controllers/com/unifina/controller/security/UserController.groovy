@@ -1,6 +1,7 @@
 package com.unifina.controller.security
 
 import com.unifina.domain.data.Feed
+import com.unifina.domain.security.Key
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecRole
 import com.unifina.domain.security.SecUserSecRole
@@ -218,7 +219,8 @@ class UserController {
     def delete() {
         def user = findById()
         if (!user) return
-        
+
+		Key.executeUpdate("delete from Key k where k.user = ?", [user])
         SecUserSecRole.executeUpdate("delete from SecUserSecRole ss where ss.secUser = ?", [user])
         Permission.executeUpdate("delete from Permission p where p.user = ?", [user])
         SignupInvite.executeUpdate("delete from SignupInvite si where si.username = ?", [user.username])

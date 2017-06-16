@@ -116,7 +116,9 @@ Tour.loadTour = function(tourNumber, cb) {
 
 	//Use jQuery instead of appending script tag to head due to caching issues
 	Tour.list(function(tours) {
-		$.getScript(tours[tourNumber].url)
+		if (tours[tourNumber]) {
+			$.getScript(tours[tourNumber].url)
+		}
 	})
 
 }
