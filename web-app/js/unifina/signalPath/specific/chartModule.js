@@ -15,17 +15,25 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 		if (!prot.jsonData.disableAxisSelection) {
 			prot.div.find("div.input.Double").removeClass("default-context-menu").addClass("chart-context-menu");
 		}
-
+        
+		prot.content = $("<div/>", {
+            class: "content"
+        })
+        prot.body.append(prot.content)
+		
 		initChart()
 		
 		prot.initResizable({
-			minWidth: parseInt(prot.div.css("min-width").replace("px","")),
-			minHeight: parseInt(prot.div.css("min-height").replace("px","")),
+			minWidth: 350,
+			minHeight: 250,
 			stop: function(event,ui) {
-				if (prot.chart)
-					prot.chart.resize(ui.size.width, ui.size.height);
+				//if (prot.chart)
+				//	prot.chart.resize(ui.size.width, ui.size.height);
+                prot.body.trigger("resize")
 			}
 		});
+        prot.body.width(prot.jsonData.layout ? prot.jsonData.layout.width : 500)
+        prot.body.height(prot.jsonData.layout ? prot.jsonData.layout.height : 300)
 	}
 	prot.createDiv = createDiv;	
 	
@@ -72,9 +80,8 @@ SignalPath.ChartModule = function(data,canvas,prot) {
 	prot.getChart = getChart;
 
 	function initChart() {
-		prot.body.find(".ioTable").css("width","0px");
-		prot.chart = new StreamrChart(prot.body, prot.jsonData.options)
-		prot.chart.resize(prot.div.outerWidth(), prot.div.outerHeight())
+		prot.chart = new StreamrChart(prot.content, prot.jsonData.options)
+        prot.chart.$area.addClass("drag-exclude")
 	}
 	
 	function destroyChart() {

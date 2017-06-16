@@ -1,9 +1,9 @@
 package com.unifina.signalpath;
 
 import com.unifina.data.FeedEvent;
+import com.unifina.domain.data.Stream;
 import com.unifina.domain.signalpath.Canvas;
 import com.unifina.domain.signalpath.Module;
-import com.unifina.push.PushChannel;
 import com.unifina.serialization.SerializationRequest;
 import com.unifina.service.CanvasService;
 import com.unifina.service.ModuleService;
@@ -38,6 +38,7 @@ public class SignalPath extends ModuleWithUI {
 	private Map<Integer, AbstractSignalPathModule> modulesByHash = new HashMap<>();
 
 	private boolean root = false;
+	private SignalPath cachedRootSignalPath = null;
 
 	public SignalPath() {
 		super();
@@ -62,6 +63,10 @@ public class SignalPath extends ModuleWithUI {
 		initFromRepresentation(iData);
 	}
 
+	public boolean isRoot() {
+		return root;
+	}
+
 	// TODO: remove backwards compatibility eventually
 	@Override
 	public Input getInput(String name) {
@@ -81,6 +86,10 @@ public class SignalPath extends ModuleWithUI {
 		List<Map> modulesJSON = (List<Map>) iData.get("modules");
 		if (modulesJSON == null) {
 			modulesJSON = new ArrayList<>(0);
+		}
+
+		if (modulesJSON.isEmpty()) {
+			return;
 		}
 
 		ModuleService moduleService = getGlobals().getBean(ModuleService.class);
@@ -165,7 +174,7 @@ public class SignalPath extends ModuleWithUI {
 			if (o != null) {
 				o.connect(ic.input);
 			} else {
-				log.warn("Input " + ic.input.getName() + " could not be connected, because source was not found. SP: " + ic.input.getOwner().getParentSignalPath() + ", TOP: " + ic.input.getOwner().getTopParentSignalPath());
+				log.warn("Input " + ic.input.getName() + " could not be connected, because source was not found. SP: " + ic.input.getOwner().getParentSignalPath() + ", TOP: " + ic.input.getOwner().getRootSignalPath());
 			}
 		}
 
@@ -327,10 +336,7 @@ public class SignalPath extends ModuleWithUI {
 						if (!input.wasReady()) {
 							notReady.append(input.toString());
 							notReady.append("\n");
-
-							if (getGlobals().getUiChannel() != null) {
-								getGlobals().getUiChannel().push(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()), uiChannelId);
-							}
+							pushToUiChannel(new ModuleWarningMessage("Input was never ready: " + input.getEffectiveName(), input.getOwner().getHash()));
 						}
 					}
 					log.debug("Module had non-ready inputs: " + notReady);
@@ -352,10 +358,7 @@ public class SignalPath extends ModuleWithUI {
 	 * Sends a notification to this SignalPath's UI channel.
      */
 	public void showNotification(@NotNull String notification) {
-		PushChannel pushChannel = getGlobals().getUiChannel();
-		if (pushChannel != null) {
-			pushChannel.push(new NotificationMessage(notification), getUiChannelId());
-		}
+		pushToUiChannel(new NotificationMessage(notification));
 	}
 
 	@Override
@@ -441,5 +444,35 @@ public class SignalPath extends ModuleWithUI {
 				return module.resolveRuntimeRequestRecipient(request, path);
 			}
 		}
+	}
+
+	@Override
+	protected RuntimeRequest.PathWriter getRuntimePath(RuntimeRequest.PathWriter writer) {
+		return super.getRuntimePath(root ? writer.writeCanvasId(getCanvas().getId()) : writer);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (getGlobals().isAdhoc()) {
+			Map<String, Object> byeMsg = new HashMap<>();
+			byeMsg.put("_bye", true);
+			pushToUiChannel(byeMsg);
+		}
+	}
+
+	@Override
+	public SignalPath getRootSignalPath() {
+		if (cachedRootSignalPath == null) {
+			if (this.isRoot()) {
+				cachedRootSignalPath = this;
+			} else if (getParentSignalPath() != null) {
+				cachedRootSignalPath = getParentSignalPath().getRootSignalPath();
+			} else {
+				throw new IllegalStateException("SignalPath is not root, but doesn't have a parent!");
+			}
+		}
+
+		return cachedRootSignalPath;
 	}
 }

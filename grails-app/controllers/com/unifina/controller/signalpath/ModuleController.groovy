@@ -133,10 +133,10 @@ class ModuleController {
 	}
 
 	def jsonGetModule() {
-		Globals globals = GlobalsFactory.createInstance([:], grailsApplication)
+		def user = springSecurityService.currentUser
+		Globals globals = GlobalsFactory.createInstance([:], grailsApplication, user)
 		
 		try {
-			def user = springSecurityService.currentUser
 			Module domainObject = Module.get(params.long("id"))
 			if (!permissionService.canRead(user, domainObject.modulePackage)) {
 				throw new Exception("Access denied for user $user.username to requested module")

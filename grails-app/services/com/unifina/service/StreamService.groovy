@@ -2,17 +2,25 @@ package com.unifina.service
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.unifina.api.NotFoundException
+import com.unifina.api.NotPermittedException
 import com.unifina.api.ValidationException
 import com.unifina.data.StreamPartitioner
 import com.unifina.data.StreamrBinaryMessage
+import com.unifina.domain.dashboard.DashboardItem
 import com.unifina.domain.data.Feed
 import com.unifina.domain.data.Stream
+import com.unifina.domain.security.Key
+import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
+import com.unifina.domain.signalpath.Canvas
+import com.unifina.domain.task.Task
 import com.unifina.feed.AbstractDataRangeProvider
 import com.unifina.feed.AbstractStreamListener
 import com.unifina.feed.DataRange
 import com.unifina.feed.FieldDetector
 import com.unifina.feed.redis.StreamrBinaryMessageWithKafkaMetadata
+import com.unifina.signalpath.RuntimeRequest
 import com.unifina.utils.CSVImporter
 import com.unifina.utils.IdGenerator
 import grails.converters.JSON
@@ -28,6 +36,7 @@ class StreamService {
 	def grailsApplication
 	KafkaService kafkaService
 	CassandraService cassandraService
+	PermissionService permissionService
 
 	private final StreamPartitioner partitioner = new StreamPartitioner()
 
@@ -39,14 +48,21 @@ class StreamService {
 
 	private static final Charset utf8 = Charset.forName("UTF-8")
 
+	Stream getStream(String id) {
+		return Stream.get(id)
+	}
+
+	Stream getStreamByUiChannelPath(String uiChannelPath) {
+		return Stream.findByUiChannelPath(uiChannelPath)
+	}
+
 	Stream findByName(String name) {
 		return Stream.findByName(name)
 	}
-	
-	Stream createStream(params, SecUser user) {
+
+	Stream createStream(Map params, SecUser user, String id = IdGenerator.getShort()) {
 		Stream stream = new Stream(params)
-		stream.id = IdGenerator.get()
-		stream.apiKey = IdGenerator.get()
+		stream.id = id
 		stream.user = user
 		stream.config = params.config
 
@@ -72,11 +88,18 @@ class StreamService {
 		}
 		return stream
 	}
-	
+
 	void deleteStream(Stream stream) {
 		AbstractStreamListener streamListener = instantiateListener(stream)
 		streamListener.beforeDelete(stream)
 		stream.delete(flush:true)
+	}
+
+	void deleteStreamsDelayed(List<Stream> streams, long delayMs=30*60*1000) {
+		Map config = DelayedDeleteStreamTask.getConfig(streams)
+		Task task = new Task(DelayedDeleteStreamTask.class.getName(), (config as JSON).toString(), "stream-delete", UUID.randomUUID().toString())
+		task.runAfter = new Date(System.currentTimeMillis() + delayMs)
+		task.save(flush: true, failOnError: true)
 	}
 
 	boolean autodetectFields(Stream stream, boolean flattenHierarchies) {
@@ -252,4 +275,63 @@ class StreamService {
 		else return null
 	}
 
+	@CompileStatic
+	void getReadAuthorizedStream(String id, SecUser user, Key key, Closure action) {
+		def stream = Stream.get(id)
+		if (stream == null) {
+			throw new NotFoundException("Stream", id)
+		}
+
+		if (key != null) {
+			if (isDirectPermissionToStream(key, stream)) {
+				action.call(stream)
+			} else {
+				throw new NotPermittedException(null, "Stream", id, Permission.Operation.READ.id)
+			}
+		} else {
+			if (isDirectPermissionToStream(user, stream) || isPermissionToStreamsUiChannelCanvas(user, stream) || isPermissionToStreamViaDashboard(user, stream)) {
+				action.call(stream)
+			} else {
+				throw new NotPermittedException(user?.username, "Stream", id, Permission.Operation.READ.id)
+			}
+		}
+	}
+
+	@CompileStatic
+	private boolean isDirectPermissionToStream(SecUser user, Stream stream) {
+		return permissionService.canRead(user, stream)
+	}
+
+
+	@CompileStatic
+	private boolean isDirectPermissionToStream(Key key, Stream stream) {
+		return permissionService.canRead(key, stream)
+	}
+
+	@CompileStatic
+	private boolean isPermissionToStreamsUiChannelCanvas(SecUser user, Stream stream) {
+		return stream.uiChannel && stream.uiChannelCanvas && permissionService.canRead(user, stream.uiChannelCanvas)
+	}
+
+	private boolean isPermissionToStreamViaDashboard(SecUser user, Stream stream) {
+		def dashboardService = grailsApplication.mainContext.getBean(DashboardService) // Circular service dependency
+		if (stream.uiChannel && stream.uiChannelCanvas != null && stream.uiChannelPath != null) {
+			Canvas canvas = stream.uiChannelCanvas
+			int moduleId = parseModuleId(stream.uiChannelPath)
+			List<DashboardItem> matchedItems = DashboardItem.findAllByCanvasAndModule(canvas, moduleId)
+			for (DashboardItem item : matchedItems) {
+				if (dashboardService.authorizedGetDashboardItem(item.dashboard.id, item.id, user, Permission.Operation.READ)) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	@CompileStatic
+	private static Integer parseModuleId(String path) {
+		RuntimeRequest.PathReader reader = new RuntimeRequest.PathReader(path.substring(1))
+		reader.readCanvasId()
+		return reader.readModuleId()
+	}
 }

@@ -3,19 +3,20 @@ package com.unifina.service
 import com.unifina.api.*
 import com.unifina.domain.dashboard.Dashboard
 import com.unifina.domain.dashboard.DashboardItem
+import com.unifina.domain.data.Stream
 import com.unifina.domain.security.Permission
 import com.unifina.domain.security.SecUser
 import com.unifina.domain.signalpath.Canvas
 import com.unifina.exceptions.CanvasUnreachableException
 import com.unifina.serialization.SerializationException
+import com.unifina.signalpath.SignalPath
 import com.unifina.signalpath.UiChannelIterator
+import com.unifina.task.CanvasDeleteTask
 import com.unifina.task.CanvasStartTask
 import com.unifina.utils.Globals
 import com.unifina.utils.GlobalsFactory
-import com.unifina.utils.IdGenerator
 import grails.converters.JSON
 import grails.transaction.Transactional
-import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.json.JSONObject
@@ -27,6 +28,7 @@ class CanvasService {
 	TaskService taskService
 	PermissionService permissionService
 	DashboardService dashboardService
+	StreamService streamService
 
 	@CompileStatic
 	public Map reconstruct(Canvas canvas, SecUser user) {
@@ -59,10 +61,26 @@ class CanvasService {
 		canvas.adhoc = command.isAdhoc()
 
 		// clear serialization
-		canvas.serialized = null
-		canvas.serializationTime = null
-
+		canvas.serialization?.delete()
+		canvas.serialization = null
 		canvas.save(flush: true, failOnError: true)
+	}
+
+	/**
+	 * Deletes a Canvas along with any resources (DashboardItems, Streams) pointing to it.
+	 * It can be deleted after a delay to allow resource consumers to finish up.
+     */
+	@Transactional
+	public void deleteCanvas(Canvas canvas, SecUser user, boolean delayed = false) {
+		if (delayed) {
+			taskService.createTask(CanvasDeleteTask, CanvasDeleteTask.getConfig(canvas), "delete-canvas", user, 30 * 60 * 1000)
+		} else {
+			Collection<Stream> uiChannels = Stream.findAllByUiChannelCanvas(canvas)
+			uiChannels.each {
+				streamService.deleteStream(it)
+			}
+			canvas.delete(flush: true)
+		}
 	}
 
 	public void start(Canvas canvas, boolean clearSerialization) {
@@ -84,8 +102,8 @@ class CanvasService {
 		}
 	}
 
-	public void startRemote(Canvas canvas, boolean forceReset=false, boolean resetOnError=true) {
-		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start")
+	public void startRemote(Canvas canvas, SecUser user, boolean forceReset=false, boolean resetOnError=true) {
+		taskService.createTask(CanvasStartTask, CanvasStartTask.getConfig(canvas, forceReset, resetOnError), "canvas-start", user)
 	}
 
 	@Transactional(noRollbackFor=[CanvasUnreachableException])
@@ -152,16 +170,8 @@ class CanvasService {
 
 	@CompileStatic
 	void resetUiChannels(Map signalPathMap) {
-		HashMap<String,String> replacements = [:]
 		UiChannelIterator.over(signalPathMap).each { UiChannelIterator.Element element ->
-			if (replacements.containsKey(element.uiChannelData.id)) {
-				element.uiChannelData.id = replacements[element.uiChannelData.id]
-			}
-			else {
-				String newId = IdGenerator.get()
-				replacements[element.uiChannelData.id] = newId
-				element.uiChannelData.id = newId
-			}
+			element.uiChannelData.id = null
 		}
 	}
 

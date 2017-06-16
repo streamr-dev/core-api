@@ -1,1735 +1,2290 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "version": "1.0.0"
-    },
-    "host": "www.streamr.com",
-    "schemes": [
-        "https"
-    ],
-    "basePath": "/api/v1",
-    "produces": [
-        "application/json"
-    ],
-    "securityDefinitions": {
-        "token": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
-    },
-    "security": [
-        {
-            "token": []
-        }
-    ],
-    "tags": [
-        {
-            "name": "streams",
-            "description": "Manage your Streams"
-        },
-        {
-            "name": "canvases",
-            "description": "Start, stop, and manage Canvases"
-        },
-        {
-            "name": "permissions",
-            "description": "Read, write and share rights"
-        },
-        {
-            "name": "dashboards",
-            "description": "Dashboards and their items"
-        }
-    ],
-    "paths": {
-        "/streams": {
-            "get": {
-                "summary": "List streams",
-                "description": "Lists the streams available to the user.\n",
-                "parameters": [
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "description": "Only return streams that exactly match the given name.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "max",
-                        "in": "query",
-                        "description": "Maximum number of returned results.",
-                        "required": false,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Skip the first (offset) results. Used together with max for paging.",
-                        "required": false,
-                        "type": "integer",
-                        "default": 0
-                    },
-                    {
-                        "name": "sort",
-                        "in": "query",
-                        "description": "Sort the returned results by the given field.",
-                        "required": false,
-                        "type": "string",
-                        "default": "id"
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "description": "Control whether the results are sorted in ascending or descending order.",
-                        "required": false,
-                        "type": "string",
-                        "default": "asc",
-                        "enum": ["asc", "desc"]
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Returns streams that contain the given search term in their name or description.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "public",
-                        "in": "query",
-                        "description": "If true, includes publicly available resources in the results.",
-                        "required": false,
-                        "type": "boolean",
-                        "default": false
-                    }
-                ],
-                "tags": [
-                    "streams"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "An array of streams",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Stream"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Create a new stream",
-                "description": "Creates a new stream.\n",
-                "parameters": [
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "Stream object",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/StreamCreateRequest"
-                        }
-                    }
-                ],
-                "tags": [
-                    "streams"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The stream that was created",
-                        "schema": {
-                            "$ref": "#/definitions/Stream"
-                        }
-                    }
-                }
-            }
-        },
-        "/streams/{id}": {
-            "get": {
-                "summary": "Get stream by id",
-                "description": "Returns a stream by id",
-                "tags": [
-                    "streams"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the stream to be fetched",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/Stream"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "Update a stream",
-                "description": "Updates a stream.",
-                "tags": [
-                    "streams"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the stream to be updated",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "StreamCreateRequest object",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/StreamCreateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a stream",
-                "description": "Deletes a stream by id. This will also delete all data for this stream. Use with caution!",
-                "tags": [
-                    "streams"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the stream to be deleted",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/streams/{uuid}/permissions": {
-            "get": {
-                "summary": "List permissions",
-                "description": "Lists the permissions to given stream.\n Requires 'share' permission or ownership.",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "uuid",
-                        "description": "ID of the stream",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "tags": [
-                    "streams", "permissions"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "An array of permission objects",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Permission"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "No sharing rights to the stream",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Stream wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Grant permission",
-                "description": "Grant a new permission to given stream.\n Requires 'share' permission or ownership.",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "uuid",
-                        "description": "ID of the stream",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "Requested permission (id ignored)",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Permission"
-                        }
-                    }
-                ],
-                "tags": [
-                    "streams", "permissions"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "New stream permission object that was created",
-                        "schema": {
-                            "$ref": "#/definitions/Permission"
-                        }
-                    },
-                    "403": {
-                        "description": "No sharing rights to the stream",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Stream wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/streams/{uuid}/permissions/{pid}": {
-            "get": {
-                "summary": "Get single permission object",
-                "description": "Returns one stream-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
-                "tags": [
-                    "streams", "permissions"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "uuid",
-                        "description": "ID of the stream",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "path",
-                        "name": "pid",
-                        "description": "ID of the permission to be fetched",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/Permission"
-                        }
-                    },
-                    "403": {
-                        "description": "No sharing rights to the stream",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Stream or permission object wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a stream permission",
-                "description": "Deletes a stream permission by id.\n Requires 'share' permission or ownership.",
-                "tags": [
-                    "streams", "permissions"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "uuid",
-                        "description": "ID of the stream",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "path",
-                        "name": "pid",
-                        "description": "ID of the permission to be deleted",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "No sharing rights to the stream",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Stream or permission wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/canvases": {
-            "get": {
-                "summary": "List canvases",
-                "description": "Lists (and optionally filters) canvases in your archive.",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "description": "Filter results by canvas name.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "state",
-                        "in": "query",
-                        "description": "Filter results by canvas state.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "adhoc",
-                        "in": "query",
-                        "description": "Filter canvases by their adhoc-ness.",
-                        "required": false,
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "max",
-                        "in": "query",
-                        "description": "Maximum number of returned results.",
-                        "required": false,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Skip the first (offset) results. Used together with max for paging.",
-                        "required": false,
-                        "type": "integer",
-                        "default": 0
-                    },
-                    {
-                        "name": "sort",
-                        "in": "query",
-                        "description": "Sort the returned results by the given field.",
-                        "required": false,
-                        "type": "string",
-                        "default": "id"
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "description": "Control whether the results are sorted in ascending or descending order.",
-                        "required": false,
-                        "type": "string",
-                        "default": "asc",
-                        "enum": ["asc", "desc"]
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Returns canvases that contain the given search term in their name.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "public",
-                        "in": "query",
-                        "description": "If true, includes publicly available resources in the results.",
-                        "required": false,
-                        "type": "boolean",
-                        "default": false
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "An array of canvases",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Canvas"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Create a canvas",
-                "description": "Creates a new canvas into your archive.",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "Canvas object",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CanvasCreateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The canvas that was created",
-                        "schema": {
-                            "$ref": "#/definitions/Canvas"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to construct Canvas",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/canvases/{id}": {
-            "get": {
-                "summary": "Get canvas by id",
-                "description": "Returns a canvas by id",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas to be fetched",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/Canvas"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to re-construct Canvas",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "Update a canvas.",
-                "description": "Updates a canvas. The *id* field can not be updated.",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas to be updated",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "New canvas details",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CanvasCreateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "Not authorized to update canvas"
-                    },
-                    "404": {
-                        "description": "Canvas not found"
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a canvas",
-                "description": "Deletes a canvas by id",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas to be deleted",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "Not authorized to delete canvas"
-                    },
-                    "404": {
-                        "description": "Canvas not found"
-                    }
-                }
-            }
-        },
-        "/canvases/{id}/start": {
-            "post": {
-                "summary": "Starts a canvas",
-                "description": "Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the live canvas to be started",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "runtime options",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/StartRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/Canvas"
-                        }
-                    },
-                    "403": {
-                        "description": "Not authorized to start canvas"
-                    },
-                    "404": {
-                        "description": "Canvas not found"
-                    },
-                    "500": {
-                        "description": "Canvas already running"
-                    }
-                }
-            }
-        },
-        "/canvases/{id}/stop": {
-            "post": {
-                "summary": "Stop a currently running canvas.",
-                "description": "Stops a canvas that is currently running.",
-                "tags": [
-                    "canvases"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the live canvas to be stopped",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/Canvas"
-                        }
-                    },
-                    "204": {
-                        "description": "Success, and Canvas was set to delete on stop, and thus is was deleted"
-                    },
-                    "403": {
-                        "description": "Not allowed to stop canvas"
-                    },
-                    "404": {
-                        "description": "Canvas not found"
-                    },
-                    "500": {
-                        "description": "Canvas is not running"
-                    }
-                }
-            }
-        },
-        "/canvases/{id}/permissions": {
-            "get": {
-                "summary": "List permissions",
-                "description": "Lists the permissions to given canvas.\n Requires 'share' permission or ownership.",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "tags": [
-                    "canvases", "permissions"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "An array of permission objects",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Permission"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "No sharing rights to the canvas",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Canvas wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Grant permission",
-                "description": "Grant a new permission to given canvas.\n Requires 'share' permission or ownership.",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "Requested permission (id ignored)",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Permission"
-                        }
-                    }
-                ],
-                "tags": [
-                    "canvases", "permissions"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "New canvas permission object that was created",
-                        "schema": {
-                            "$ref": "#/definitions/Permission"
-                        }
-                    },
-                    "403": {
-                        "description": "No sharing rights to the canvas",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Canvas wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/canvases/{id}/permissions/{pid}": {
-            "get": {
-                "summary": "Get single permission object",
-                "description": "Returns one canvas-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
-                "tags": [
-                    "canvases", "permissions"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "path",
-                        "name": "pid",
-                        "description": "ID of the permission to be fetched",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/Permission"
-                        }
-                    },
-                    "403": {
-                        "description": "No sharing rights to the canvas",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Canvas or permission object wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a canvas permission",
-                "description": "Deletes a canvas permission by id.\n Requires 'share' permission or ownership.",
-                "tags": [
-                    "canvases", "permissions"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the canvas",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "path",
-                        "name": "pid",
-                        "description": "ID of the permission to be deleted",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "No sharing rights to the canvas",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Canvas or permission wasn't found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/dashboards": {
-            "get": {
-                "summary": "List dashboards",
-                "description": "Lists your dashboards",
-                "parameters": [
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "description": "Only return dashboards that exactly match the given name.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "max",
-                        "in": "query",
-                        "description": "Maximum number of returned results.",
-                        "required": false,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Skip the first (offset) results. Used together with max for paging.",
-                        "required": false,
-                        "type": "integer",
-                        "default": 0
-                    },
-                    {
-                        "name": "sort",
-                        "in": "query",
-                        "description": "Sort the returned results by the given field.",
-                        "required": false,
-                        "type": "string",
-                        "default": "id"
-                    },
-                    {
-                        "name": "order",
-                        "in": "query",
-                        "description": "Control whether the results are sorted in ascending or descending order.",
-                        "required": false,
-                        "type": "string",
-                        "default": "asc",
-                        "enum": ["asc", "desc"]
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Returns dashboards that contain the given search term in their name.",
-                        "required": false,
-                        "type": "string"
-                    },
-                    {
-                        "name": "public",
-                        "in": "query",
-                        "description": "If true, includes publicly available resources in the results.",
-                        "required": false,
-                        "type": "boolean",
-                        "default": false
-                    }
-                ],
-                "tags": [
-                    "dashboards"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "an array of dashboards",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/DashboardSummary"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Create a Dashboard",
-                "description": "Creates a new empty Dashboard.",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "Dashboard object",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/DashboardSaveRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The Dashboard that was created",
-                        "schema": {
-                            "$ref": "#/definitions/Dashboard"
-                        }
-                    },
-                    "422": {
-                        "description": "Request body did not pass validation",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/dashboards/{id}": {
-            "get": {
-                "summary": "Get Dashboard",
-                "description": "Get Dashboard by id",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard to be fetched",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "succesful operation",
-                        "schema": {
-                            "$ref": "#/definitions/Dashboard"
-                        }
-                    },
-                    "403": {
-                        "description": "Not allowed to access Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "Update a Dashboard",
-                "description": "Updates an existing Dashboard.",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard to be updated",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "New Dashboard details",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/DashboardSaveRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/Dashboard"
-                        }
-                    },
-                    "403": {
-                        "description": "Not allowed to update Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a Dashboard",
-                "description": "Deletes a Dashboard by id",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard to be deleted",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "Not allowed to delete Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/dashboards/{id}/items": {
-            "get": {
-                "summary": "List Items of Dashboard",
-                "description": "Get Items of Dashboard by id",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard whose Items are to be fetched",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "succesful operation",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/DashboardItem"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Not allowed to access Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Create a new Dashboard Item",
-                "description": "Creates a new Dashboard Item associated with a Dashboard.",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the associated Dashboard",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "Dashboard Item",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/SaveDashboardItemRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success ",
-                        "schema": {
-                            "$ref": "#/definitions/DashboardItem"
-                        }
-                    },
-                    "403": {
-                        "description": "Not allowed to add Item to Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "422": {
-                        "description": "Request body did not pass validation",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/dashboards/{dashboardId}/items/{id}": {
-            "get": {
-                "summary": "Get Dashboard Item",
-                "description": "Get Dashboard Item from associated Dashboard",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "dashboardId",
-                        "description": "ID of the Dashboard",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard Item",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "succesful operation",
-                        "schema": {
-                            "$ref": "#/definitions/DashboardItem"
-                        }
-                    },
-                    "403": {
-                        "description": "Not allowed to access Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard or Dashboard Item not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "Update a Dashboard Item",
-                "description": "Updates an existing Dashboard Item associated with a Dashboard",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "dashboardId",
-                        "description": "ID of the Dashboard",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard Item",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "New Dashboard Item details",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/SaveDashboardItemRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "$ref": "#/definitions/DashboardItem"
-                        }
-                    },
-                    "403": {
-                        "description": "Not allowed to update Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard or Dashboard Item not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "422": {
-                        "description": "Request body did not pass validation",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a Dashboard Item",
-                "description": "Deletes a Dashboard Item and disassociates it from its parent Dashboard",
-                "tags": [
-                    "dashboards"
-                ],
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "dashboardId",
-                        "description": "ID of the Dashboard",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "ID of the Dashboard Item",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Success (no content)"
-                    },
-                    "403": {
-                        "description": "Not allowed to delete item from Dashboard",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Dashboard or Dashboard Item not found",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "Stream": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "Unique identifier for this stream."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "Name of this stream.",
-                    "example": "My stream"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "Description of this stream.",
-                    "example": "My stream description"
-                },
-                "config": {
-                    "$ref": "#/definitions/StreamConfig"
-                },
-                "apiKey": {
-                    "type": "string",
-                    "description": "Api key needed to produce data to this stream."
-                }
-            }
-        },
-        "StreamCreateRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Name of this stream.",
-                    "example": "My stream"
-                },
-                "description": {
-                    "type": "string",
-                    "description": "Description of this stream.",
-                    "example": "My stream description"
-                },
-                "config": {
-                    "$ref": "#/definitions/StreamConfig"
-                }
-            }
-        },
-        "StreamConfig": {
-            "type": "object",
-            "properties": {
-                "fields": {
-                    "type": "array",
-                    "default": [],
-                    "description": "An array containing field definitions for this stream.",
-                    "items": {
-                        "$ref": "#/definitions/FieldDefinition"
-                    }
-                }
-            }
-        },
-        "FieldDefinition": {
-            "type": "object",
-            "required": [
-                "name",
-                "type"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "name of the fieldf"
-                },
-                "type": {
-                    "type": "string",
-                    "description": "type of the field",
-                    "enum": [
-                        "number",
-                        "string",
-                        "boolean",
-                        "list",
-                        "map"
-                    ]
-                }
-            }
-        },
-        "Canvas": {
-            "type": "object",
-            "required": [
-                "name",
-                "modules"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "Unique identifier for Canvas"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "My canvas"
-                },
-                "modules": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Module"
-                    }
-                },
-                "settings": {
-                    "$ref": "#/definitions/CanvasSettings"
-                },
-                "created": {
-                    "type": "string",
-                    "description": "when Canvas was created",
-                    "format": "dateTime"
-                },
-                "updated": {
-                    "type": "string",
-                    "description": "when Canvas was last updated",
-                    "format": "dateTime"
-                },
-                "hasExports": {
-                    "type": "boolean",
-                    "description": "whether module uses exported inputs or outputs"
-                },
-                "uiChannel": {
-                    "$ref": "#/definitions/UiChannel"
-                },
-                "state": {
-                    "$ref": "#/definitions/CanvasState"
-                },
-                "adhoc": {
-                    "type": "boolean"
-                },
-                "serialized": {
-                    "type": "boolean",
-                    "description": "indicates whether there exists a serialization of this canvas"
-                }
-            }
-        },
-        "CanvasCreateRequest": {
-            "type": "object",
-            "required": [
-                "name",
-                "modules"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "example": "My canvas"
-                },
-                "modules": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Module"
-                    }
-                },
-                "settings": {
-                    "$ref": "#/definitions/CanvasSettings"
-                }
-            }
-        },
-        "CanvasState": {
-            "type": "string",
-            "enum": [
-                "running",
-                "stopped"
-            ]
-        },
-        "CanvasSettings": {
-            "type": "object",
-            "properties": {
-                "adhoc": {
-                    "type": "boolean",
-                    "description": "set to true for adhoc canvas"
-                },
-                "live": {
-                    "type": "boolean",
-                    "description": "set to true for live canvas (not historical)"
-                },
-                "speed": {
-                    "type": "string"
-                },
-                "beginDate": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "begin date (historical mode) to start feeding from"
-                },
-                "endDate": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "end date (historical mode) to stop feeding at"
-                }
-            }
-        },
-        "DashboardSaveRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "name"
-                }
-            }
-        },
-        "DashboardSummary": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "unique identifier"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name"
-                },
-                "numOfItems": {
-                    "type": "integer",
-                    "description": "number of items contained in Dashboard"
-                }
-            }
-        },
-        "Dashboard": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "unique identifier"
-                },
-                "name": {
-                    "type": "string",
-                    "description": "name"
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DashboardItem"
-                    },
-                    "description": "items contained in Dashboard"
-                }
-            }
-        },
-        "SaveDashboardItemRequest": {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string",
-                    "description": "title of item"
-                },
-                "ord": {
-                    "type": "integer",
-                    "description": "positive integer indicating order within Dashboard"
-                },
-                "size": {
-                    "type": "string",
-                    "description": "size of item on Dashboard",
-                    "enum": ["small", "medium", "large"]
-                },
-                "uiChannelId": {
-                    "type": "string",
-                    "description": "id of the ui channel of this item"
-                }
-            }
-        },
-        "DashboardItem": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "unique identifier of item"
-                },
-                "title": {
-                    "type": "string",
-                    "description": "title of item"
-                },
-                "ord": {
-                    "type": "integer",
-                    "description": "positive integer indicating order within Dashboard"
-                },
-                "size": {
-                    "type": "string",
-                    "description": "size of item on Dashboard",
-                    "enum": ["small", "medium", "large"]
-                },
-                "uiChannelId": {
-                    "type": "string",
-                    "description": "id of the ui channel of this item"
-                }
-            }
-        },
-        "Module": {
-            "type": "object"
-        },
-        "UiChannel": {
-            "type": "object",
-            "required": [
-                "id",
-                "name"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "example": "8YV4urkpTy6ZkrKqO_aDFw"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Notifications"
-                }
-            }
-        },
-        "StartRequest": {
-            "type": "object",
-            "properties": {
-                "clearState": {
-                    "type": "boolean",
-                    "default": false,
-                    "example": true,
-                    "description": "If true, previously saved state will be cleared before starting canvas."
-                }
-            }
-        },
-        "Permission": {
-            "type": "object",
-            "required": [
-                "user",
-                "operation"
-            ],
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "description": "Unique identifier for this permission object",
-                    "example": "3"
-                },
-                "user": {
-                    "type": "string",
-                    "description": "User who was granted the permission",
-                    "example": "new.user@gmail.com"
-                },
-                "operation": {
-                    "type": "string",
-                    "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
-                    "example": "read"
-                }
-            }
-        },
-        "Error": {
-            "type": "object",
-            "required": [
-                "code"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type automatically."
-                },
-                "message": {
-                    "type": "string",
-                    "description": "A human-readable message describing the error."
-                }
-            }
-        }
+  "swagger": "2.0",
+  "info": {
+    "title": "Streamr API",
+    "version": "1.0.0"
+  },
+  "host": "www.streamr.com",
+  "schemes": [
+    "https"
+  ],
+  "basePath": "/api/v1",
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "token": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
+  },
+  "security": [
+    {
+      "token": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "streams",
+      "description": "Manage Streams, and insert or read data from them"
+    },
+    {
+      "name": "canvases",
+      "description": "Start, stop, and manage Canvases"
+    },
+    {
+      "name": "permissions",
+      "description": "Read, write, and share rights"
+    },
+    {
+      "name": "dashboards",
+      "description": "Dashboards and their items"
+    },
+    {
+      "name": "keys",
+      "description": "Keys for authenticating users and resources"
+    },
+    {
+      "name": "users",
+      "description": "User management"
+    }
+  ],
+  "paths": {
+    "/streams": {
+      "get": {
+        "summary": "List streams",
+        "description": "Lists the streams available to the user.\n",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Only return streams that exactly match the given name.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "Maximum number of returned results.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "type": "string",
+            "default": "id"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order.",
+            "required": false,
+            "type": "string",
+            "default": "asc",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Returns streams that contain the given search term in their name or description.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "public",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "uiChannel",
+            "in": "query",
+            "description": "Filter by whether this stream is an UI channel or not. UI channels are streams used to push updates to visualisation widgets. For the typical list of streams, set this to false.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of streams",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Stream"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new stream",
+        "description": "Creates a new stream.\n",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Stream object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StreamCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "The stream that was created",
+            "schema": {
+              "$ref": "#/definitions/Stream"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}": {
+      "get": {
+        "summary": "Get stream by id",
+        "description": "Returns a stream by id",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream to be fetched",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Stream"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a stream",
+        "description": "Updates a stream.",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream to be updated",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "StreamCreateRequest object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StreamCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a stream",
+        "description": "Deletes a stream by id. This will also delete all data for this stream. Use with caution!",
+        "tags": [
+          "streams"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream to be deleted",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/data": {
+      "post": {
+        "summary": "Add new event to stream",
+        "description": "Add a new event to the stream identified by id. Requires a write permission on the stream.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "ttl",
+            "description": "Time-To-Live, in seconds. The event will be deleted after this time has passed. If not given, the event storage period will be the stream default.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "pkey",
+            "description": "For partitioned streams, provides the key to partition by. Can be eg. a customer id to make all events for that customer to go to the same Canvas for processing. If not given, a random partition is selected.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success (the response body is empty)"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "403": {
+            "description": "Authentication failed"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/streams/{id}/data/partitions/{partition}/last": {
+      "get": {
+        "summary": "Get most recent events from a stream",
+        "description": "Get the N most recent events from a stream.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "partition",
+            "description": "Partition number",
+            "required": true,
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "description": "Number of messages to fetch",
+            "required": false,
+            "type": "integer",
+            "default": 1
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of events"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "403": {
+            "description": "Authentication failed"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/streams/{id}/data/partitions/{partition}/range": {
+      "get": {
+        "summary": "Get events between a range from the stream",
+        "description": "Get events between a range from the stream. The range can be defined in terms of offsets or timestamps, but not both at the same time (fromOffset must be used with toOffset, and fromTimestamp with toTimestamp). In the absence of an upper bound, range will span until latest message. Lower bound is always required, i.e., either fromOffset or fromTimestamp must be present in request.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "partition",
+            "description": "Partition number",
+            "required": true,
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "in": "query",
+            "name": "fromOffset",
+            "description": "Event offset lower bound",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "toOffset",
+            "description": "Event offset upper bound",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "fromTimestamp",
+            "description": "Timestamp lower bound in milliseconds since Jan 1st 1970 UTC",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "toTimestamp",
+            "description": "Timestamp upper bound in milliseconds since Jan 1st 1970 UTC",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "tags": [
+          "streams"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of events"
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "401": {
+            "description": "Permission denied"
+          },
+          "403": {
+            "description": "Authentication failed"
+          },
+          "404": {
+            "description": "Stream not found"
+          },
+          "500": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/streams/{id}/permissions": {
+      "get": {
+        "summary": "List permissions",
+        "description": "Lists the permissions to given stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "permissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of permission objects",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Permission"
+              }
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Grant permission",
+        "description": "Grant a new permission to given stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Requested permission (id ignored)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Permission"
+            }
+          }
+        ],
+        "tags": [
+          "streams",
+          "permissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "New stream permission object that was created",
+            "schema": {
+              "$ref": "#/definitions/Permission"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/keys": {
+      "get": {
+        "summary": "List keys",
+        "description": "List the keys for a given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of keys",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResourceKey"
+              }
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a key",
+        "description": "Creates an API key for the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Key to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResourceKeyCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "The newly created key",
+            "schema": {
+              "$ref": "#/definitions/ResourceKey"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{streamId}/keys/{id}": {
+      "delete": {
+        "summary": "Delete a key",
+        "description": "Deletes an API key from the given Stream.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "streamId",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/streams/{id}/permissions/{pid}": {
+      "get": {
+        "summary": "Get single permission object",
+        "description": "Returns one stream-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+        "tags": [
+          "streams",
+          "permissions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "pid",
+            "description": "ID of the permission to be fetched",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Permission"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream or permission object wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a stream permission",
+        "description": "Deletes a stream permission by id.\n Requires 'share' permission or ownership.",
+        "tags": [
+          "streams",
+          "permissions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the stream",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "pid",
+            "description": "ID of the permission to be deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream or permission wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/canvases": {
+      "get": {
+        "summary": "List canvases",
+        "description": "Lists (and optionally filters) canvases in your archive.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter results by canvas name.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Filter results by canvas state.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "adhoc",
+            "in": "query",
+            "description": "Filter canvases by their adhoc-ness. Set to false to get the typical list of canvases as seen in the UI.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "Maximum number of returned results.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "type": "string",
+            "default": "id"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order.",
+            "required": false,
+            "type": "string",
+            "default": "asc",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Returns canvases that contain the given search term in their name.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "public",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of canvases",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Canvas"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a canvas",
+        "description": "Creates a new canvas into your archive.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Canvas object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CanvasCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The canvas that was created",
+            "schema": {
+              "$ref": "#/definitions/Canvas"
+            }
+          },
+          "500": {
+            "description": "Failed to construct Canvas",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/canvases/{id}": {
+      "get": {
+        "summary": "Get canvas by id",
+        "description": "Returns a canvas by id",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas to be fetched",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Canvas"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Failed to re-construct Canvas",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a canvas.",
+        "description": "Updates a canvas. The *id* field can not be updated.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas to be updated",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New canvas details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CanvasCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Not authorized to update canvas"
+          },
+          "404": {
+            "description": "Canvas not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a canvas",
+        "description": "Deletes a canvas by id",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas to be deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Not authorized to delete canvas"
+          },
+          "404": {
+            "description": "Canvas not found"
+          }
+        }
+      }
+    },
+    "/canvases/{id}/start": {
+      "post": {
+        "summary": "Starts a canvas",
+        "description": "Starts a canvas changing its state to 'running', or in the case of adhoc=true, creates a copy of the Canvas with state 'running'.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the live canvas to be started",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "runtime options",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StartRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Canvas"
+            }
+          },
+          "403": {
+            "description": "Not authorized to start canvas"
+          },
+          "404": {
+            "description": "Canvas not found"
+          },
+          "500": {
+            "description": "Canvas already running"
+          }
+        }
+      }
+    },
+    "/canvases/{id}/stop": {
+      "post": {
+        "summary": "Stop a currently running canvas.",
+        "description": "Stops a canvas that is currently running.",
+        "tags": [
+          "canvases"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the live canvas to be stopped",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Canvas"
+            }
+          },
+          "204": {
+            "description": "Success, and Canvas was set to delete on stop, and thus is was deleted"
+          },
+          "403": {
+            "description": "Not allowed to stop canvas"
+          },
+          "404": {
+            "description": "Canvas not found"
+          },
+          "500": {
+            "description": "Canvas is not running"
+          }
+        }
+      }
+    },
+    "/canvases/{id}/permissions": {
+      "get": {
+        "summary": "List permissions",
+        "description": "Lists the permissions to given canvas.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "canvases",
+          "permissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of permission objects",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Permission"
+              }
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the canvas",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Canvas wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Grant permission",
+        "description": "Grant a new permission to given canvas.\n Requires 'share' permission or ownership.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Requested permission (id ignored)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Permission"
+            }
+          }
+        ],
+        "tags": [
+          "canvases",
+          "permissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "New canvas permission object that was created",
+            "schema": {
+              "$ref": "#/definitions/Permission"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the canvas",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Canvas wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/canvases/{id}/permissions/{pid}": {
+      "get": {
+        "summary": "Get single permission object",
+        "description": "Returns one canvas-user-operation relationship object by its unique id. \n Requires 'share' permission or ownership.",
+        "tags": [
+          "canvases",
+          "permissions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "pid",
+            "description": "ID of the permission to be fetched",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Permission"
+            }
+          },
+          "403": {
+            "description": "No sharing rights to the canvas",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Canvas or permission object wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a canvas permission",
+        "description": "Deletes a canvas permission by id.\n Requires 'share' permission or ownership.",
+        "tags": [
+          "canvases",
+          "permissions"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the canvas",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "pid",
+            "description": "ID of the permission to be deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "No sharing rights to the canvas",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Canvas or permission wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/dashboards": {
+      "get": {
+        "summary": "List dashboards",
+        "description": "Lists your dashboards",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Only return dashboards that exactly match the given name.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "Maximum number of returned results.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Skip the first (offset) results. Used together with max for paging.",
+            "required": false,
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort the returned results by the given field.",
+            "required": false,
+            "type": "string",
+            "default": "id"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Control whether the results are sorted in ascending or descending order.",
+            "required": false,
+            "type": "string",
+            "default": "asc",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Returns dashboards that contain the given search term in their name.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "public",
+            "in": "query",
+            "description": "If true, includes publicly available resources in the results.",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        "tags": [
+          "dashboards"
+        ],
+        "responses": {
+          "200": {
+            "description": "an array of dashboards",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DashboardSummary"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a Dashboard",
+        "description": "Creates a new empty Dashboard.",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Dashboard object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardSaveRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Dashboard that was created",
+            "schema": {
+              "$ref": "#/definitions/Dashboard"
+            }
+          },
+          "422": {
+            "description": "Request body did not pass validation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/dashboards/{id}": {
+      "get": {
+        "summary": "Get Dashboard",
+        "description": "Get Dashboard by id",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard to be fetched",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "succesful operation",
+            "schema": {
+              "$ref": "#/definitions/Dashboard"
+            }
+          },
+          "403": {
+            "description": "Not allowed to access Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Dashboard",
+        "description": "Updates an existing Dashboard.",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard to be updated",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New Dashboard details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DashboardSaveRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Dashboard"
+            }
+          },
+          "403": {
+            "description": "Not allowed to update Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a Dashboard",
+        "description": "Deletes a Dashboard by id",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard to be deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Not allowed to delete Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/dashboards/{id}/items": {
+      "get": {
+        "summary": "List Items of Dashboard",
+        "description": "Get Items of Dashboard by id",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard whose Items are to be fetched",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "succesful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DashboardItem"
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed to access Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new Dashboard Item",
+        "description": "Creates a new Dashboard Item associated with a Dashboard.",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the associated Dashboard",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Dashboard Item",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SaveDashboardItemRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success ",
+            "schema": {
+              "$ref": "#/definitions/DashboardItem"
+            }
+          },
+          "403": {
+            "description": "Not allowed to add Item to Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Request body did not pass validation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/dashboards/{dashboardId}/items/{id}": {
+      "get": {
+        "summary": "Get Dashboard Item",
+        "description": "Get Dashboard Item from associated Dashboard",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboardId",
+            "description": "ID of the Dashboard",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard Item",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "succesful operation",
+            "schema": {
+              "$ref": "#/definitions/DashboardItem"
+            }
+          },
+          "403": {
+            "description": "Not allowed to access Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard or Dashboard Item not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Dashboard Item",
+        "description": "Updates an existing Dashboard Item associated with a Dashboard",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboardId",
+            "description": "ID of the Dashboard",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard Item",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New Dashboard Item details",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SaveDashboardItemRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/DashboardItem"
+            }
+          },
+          "403": {
+            "description": "Not allowed to update Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard or Dashboard Item not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "422": {
+            "description": "Request body did not pass validation",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a Dashboard Item",
+        "description": "Deletes a Dashboard Item and disassociates it from its parent Dashboard",
+        "tags": [
+          "dashboards"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboardId",
+            "description": "ID of the Dashboard",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the Dashboard Item",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "Not allowed to delete item from Dashboard",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Dashboard or Dashboard Item not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Get the authenticated user",
+        "description": "Returns information on the authenticated user.",
+        "parameters": [],
+        "tags": [
+          "users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/keys": {
+      "get": {
+        "summary": "List user's API keys",
+        "description": "List the API keys for the authenticated user.",
+        "parameters": [],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of keys",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserKey"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new user API key",
+        "description": "Creates a key that can be used for authenticating the user.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Key to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserKeyCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "users",
+          "keys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly created user key",
+            "schema": {
+              "$ref": "#/definitions/UserKey"
+            }
+          }
+        }
+      }
+    },
+    "/users/me/keys/{id}": {
+      "delete": {
+        "summary": "Delete user API key",
+        "description": "Revoke and delete a user API key. Can only be called by the user.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the key",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "streams",
+          "keys"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success (no content)"
+          },
+          "403": {
+            "description": "No sharing rights to the stream",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Stream wasn't found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Stream": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this stream."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of this stream.",
+          "example": "My stream"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this stream.",
+          "example": "My stream description"
+        },
+        "config": {
+          "$ref": "#/definitions/StreamConfig"
+        },
+        "apiKey": {
+          "type": "string",
+          "description": "Api key needed to produce data to this stream."
+        },
+        "uiChannel": {
+          "type": "boolean",
+          "description": "Indicates whether this stream is an UI channel: a stream used internally to push updates to UI widgets."
+        }
+      }
+    },
+    "StreamCreateRequest": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of this stream.",
+          "example": "My stream"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this stream.",
+          "example": "My stream description"
+        },
+        "config": {
+          "$ref": "#/definitions/StreamConfig"
+        }
+      }
+    },
+    "StreamConfig": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "default": [],
+          "description": "An array containing field definitions for this stream.",
+          "items": {
+            "$ref": "#/definitions/FieldDefinition"
+          }
+        }
+      }
+    },
+    "FieldDefinition": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "name of the fieldf"
+        },
+        "type": {
+          "type": "string",
+          "description": "type of the field",
+          "enum": [
+            "number",
+            "string",
+            "boolean",
+            "list",
+            "map"
+          ]
+        }
+      }
+    },
+    "Canvas": {
+      "type": "object",
+      "required": [
+        "name",
+        "modules"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for Canvas"
+        },
+        "name": {
+          "type": "string",
+          "example": "My canvas"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Module"
+          }
+        },
+        "settings": {
+          "$ref": "#/definitions/CanvasSettings"
+        },
+        "created": {
+          "type": "string",
+          "description": "when Canvas was created",
+          "format": "dateTime"
+        },
+        "updated": {
+          "type": "string",
+          "description": "when Canvas was last updated",
+          "format": "dateTime"
+        },
+        "hasExports": {
+          "type": "boolean",
+          "description": "whether module uses exported inputs or outputs"
+        },
+        "uiChannel": {
+          "$ref": "#/definitions/UiChannel"
+        },
+        "state": {
+          "$ref": "#/definitions/CanvasState"
+        },
+        "adhoc": {
+          "type": "boolean",
+          "description": "adhoc canvases are temporary canvases used for eg. historical runs."
+        },
+        "serialized": {
+          "type": "boolean",
+          "description": "indicates whether there exists a serialization of this canvas"
+        }
+      }
+    },
+    "CanvasCreateRequest": {
+      "type": "object",
+      "required": [
+        "name",
+        "modules"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "My canvas"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Module"
+          }
+        },
+        "settings": {
+          "$ref": "#/definitions/CanvasSettings"
+        }
+      }
+    },
+    "CanvasState": {
+      "type": "string",
+      "enum": [
+        "running",
+        "stopped"
+      ]
+    },
+    "CanvasSettings": {
+      "type": "object",
+      "properties": {
+        "adhoc": {
+          "type": "boolean",
+          "description": "set to true for adhoc canvas"
+        },
+        "live": {
+          "type": "boolean",
+          "description": "set to true for live canvas (not historical)"
+        },
+        "speed": {
+          "type": "string"
+        },
+        "beginDate": {
+          "type": "string",
+          "format": "date",
+          "description": "begin date (historical mode) to start feeding from"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date",
+          "description": "end date (historical mode) to stop feeding at"
+        }
+      }
+    },
+    "DashboardSaveRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "name"
+        }
+      }
+    },
+    "DashboardSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "name"
+        },
+        "numOfItems": {
+          "type": "integer",
+          "description": "number of items contained in Dashboard"
+        }
+      }
+    },
+    "Dashboard": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "name"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DashboardItem"
+          },
+          "description": "items contained in Dashboard"
+        }
+      }
+    },
+    "SaveDashboardItemRequest": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "title of item"
+        },
+        "ord": {
+          "type": "integer",
+          "description": "positive integer indicating order within Dashboard"
+        },
+        "size": {
+          "type": "string",
+          "description": "size of item on Dashboard",
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        "uiChannelId": {
+          "type": "string",
+          "description": "id of the ui channel of this item"
+        }
+      }
+    },
+    "DashboardItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique identifier of item"
+        },
+        "title": {
+          "type": "string",
+          "description": "title of item"
+        },
+        "ord": {
+          "type": "integer",
+          "description": "positive integer indicating order within Dashboard"
+        },
+        "size": {
+          "type": "string",
+          "description": "size of item on Dashboard",
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ]
+        },
+        "uiChannelId": {
+          "type": "string",
+          "description": "id of the ui channel of this item"
+        }
+      }
+    },
+    "Module": {
+      "type": "object"
+    },
+    "UiChannel": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "8YV4urkpTy6ZkrKqO_aDFw"
+        },
+        "name": {
+          "type": "string",
+          "example": "Notifications"
+        }
+      }
+    },
+    "StartRequest": {
+      "type": "object",
+      "properties": {
+        "clearState": {
+          "type": "boolean",
+          "default": false,
+          "example": true,
+          "description": "If true, previously saved state will be cleared before starting canvas."
+        }
+      }
+    },
+    "Permission": {
+      "type": "object",
+      "required": [
+        "user",
+        "operation"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for this permission object",
+          "example": "3"
+        },
+        "user": {
+          "type": "string",
+          "description": "User who was granted the permission",
+          "example": "new.user@gmail.com"
+        },
+        "operation": {
+          "type": "string",
+          "description": "User rights that this permission enables, e.g. 'read', 'write', 'share'",
+          "example": "read"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "required": ["name", "username", "timezone"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's real name",
+          "example": "John Smith"
+        },
+        "username": {
+          "type": "string",
+          "description": "The username (email address)",
+          "example": "someone@somewhere.com"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "User's timezone setting.",
+          "example": "Europe/Helsinki"
+        }
+      }
+    },
+    "UserKeyCreateRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Matti's key"
+        }
+      }
+    },
+    "UserKey": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "My app backend key"
+        },
+        "user": {
+          "type": "string",
+          "description": "Username which the key authenticates if user-linked key. Null otherwise.",
+          "example": "some.user@streamr.com"
+        }
+      }
+    },
+    "ResourceKeyCreateRequest": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Key for my app"
+        },
+        "permission": {
+          "type": "string",
+          "description": "Operation permitted by this key to the resource in question.",
+          "example": "read"
+        }
+      }
+    },
+    "ResourceKey": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of this Key",
+          "example": "FX2vYkh8kNAM"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name",
+          "example": "Key for my public web app"
+        },
+        "permission": {
+          "type": "string",
+          "description": "Operation permitted by this key to the resource in question.",
+          "example": "read"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "code"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Error code (e.g. \"NOT_FOUND\") for recognizing error type automatically."
+        },
+        "message": {
+          "type": "string",
+          "description": "A human-readable message describing the error."
+        }
+      }
+    }
+  }
 }

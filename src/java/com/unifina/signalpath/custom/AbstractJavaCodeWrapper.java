@@ -82,7 +82,19 @@ public abstract class AbstractJavaCodeWrapper extends ModuleWithUI {
 			"java.text.SimpleDateFormat",
 			"java.lang.*",
 			"java.math.*",
-			"java.util.*"
+			"java.util.*",
+			"org.apache.commons.codec.binary.Hex",
+			"org.apache.commons.codec.DecoderException",
+			"javax.crypto.*",
+			"javax.crypto.spec.*",
+			"javax.imageio.ImageIO",
+			"java.awt.*",
+			"java.io.InputStream",
+			"java.io.IOException",
+			"java.io.ByteArrayInputStream",
+			"java.security.spec.KeySpec",
+			"java.security.MessageDigest",
+			"com.google.common.io.ByteStreams"
 		});
 	}
 

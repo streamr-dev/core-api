@@ -16,27 +16,25 @@ public abstract class AbstractCustomModule extends ModuleWithUI {
 	protected transient SimpleDateFormat df = null;
 
 	protected void debug(Object s) {
-		if (getGlobals().getUiChannel()!=null) {
-			if (df == null) {
-				df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-			}
-			String t = null;
-			if (getGlobals().time != null)
-				t = df.format(getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time));
-
-			final HashMap<String, String> msg = new HashMap<>();
-			msg.put("type", "debug");
-			msg.put("msg", s != null ? s.toString() : null);
-			msg.put("t", t);
-
-			AccessController.doPrivileged(new PrivilegedAction<Void>() {
-				@Override
-				public Void run() {
-					getGlobals().getUiChannel().push(msg, uiChannelId);
-					return null;
-				}
-			});
+		if (df == null) {
+			df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		}
+		String t = null;
+		if (getGlobals().time != null)
+			t = df.format(getGlobals().getTzConverter().getFakeLocalTime(getGlobals().time));
+
+		final HashMap<String, String> msg = new HashMap<>();
+		msg.put("type", "debug");
+		msg.put("msg", s != null ? s.toString() : null);
+		msg.put("t", t);
+
+		AccessController.doPrivileged(new PrivilegedAction<Void>() {
+			@Override
+			public Void run() {
+				pushToUiChannel(msg);
+				return null;
+			}
+		});
 	}
 
 	@Override

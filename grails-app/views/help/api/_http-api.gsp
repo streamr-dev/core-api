@@ -1,1 +1,1 @@
-../../../../plugins/streamr-http-api/README.md
+markdown/http-api.md

@@ -2,7 +2,6 @@ package com.unifina.utils;
 
 import com.unifina.datasource.DataSource;
 import com.unifina.domain.security.SecUser;
-import com.unifina.push.PushChannel;
 import com.unifina.security.permission.GrailsApplicationPermission;
 import com.unifina.security.permission.UserPermission;
 import com.unifina.signalpath.AbstractSignalPathModule;
@@ -20,6 +19,7 @@ public class Globals {
 	private static final Logger log = Logger.getLogger(Globals.class);
 
 	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
 	public SimpleDateFormat dateFormatUTC = new SimpleDateFormat("yyyy-MM-dd");
 	public SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 	public SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -43,9 +43,9 @@ public class Globals {
 	
 	protected Date startDate = null;
 	protected Date endDate = null;
-	
-	protected PushChannel uiChannel = null;
+
 	protected boolean realtime = false;
+	private IdGenerator idGenerator = new IdGenerator();
 
 	/**
 	 * Construct fake environment, e.g., for testing.
@@ -105,6 +105,10 @@ public class Globals {
 			AccessController.checkPermission(new UserPermission());
 		this.user = user;
 	}
+
+	public Date getTime() {
+		return time;
+	}
 	
 	protected String detectTimeZone() {
 		String tzString;
@@ -140,23 +144,19 @@ public class Globals {
 			// Use UTC timezone for beginDate and endDate
 			startDate = MapTraversal.getDate(signalPathContext, "beginDate", dateFormatUTC);
 
-			// Set time to midnight UTC of the current date if nothing specified
-			if (startDate==null) {
-				Calendar cal = new GregorianCalendar();
-				cal.setTime(new Date());
-				cal.set(Calendar.HOUR_OF_DAY,0);
-				cal.set(Calendar.MINUTE,0);
-				cal.set(Calendar.SECOND,0);
-				cal.set(Calendar.MILLISECOND,0);
-				time = cal.getTime();
-			} else {
+			if (isRealtime()) {
+				time = new Date();
+			} else if (startDate!=null) {
 				time = startDate;
+			} else {
+				// As a fallback, set time to midnight today
+				time = TimeOfDayUtil.getMidnight(new Date());
 			}
 
 			// Interpret endDate as one millisecond to the next midnight
 			// Change this if the possibility to enter a time range is added
 			endDate = MapTraversal.getDate(signalPathContext, "endDate", dateFormatUTC);
-			if (endDate!=null) {
+			if (endDate != null) {
 				endDate = new Date(TimeOfDayUtil.getMidnight(endDate).getTime() + 24 * 60 * 60 * 1000 - 1);
 			}
 		}
@@ -178,6 +178,9 @@ public class Globals {
 	}
 	
 	public TimeZone getUserTimeZone() {
+		if (userTimeZone == null) {
+			userTimeZone = TimeZone.getTimeZone(user.getTimezone());
+		}
 		return userTimeZone;
 	}
 	
@@ -194,8 +197,6 @@ public class Globals {
 		for (Class c : dynamicClasses) {
 			GroovySystem.getMetaClassRegistry().removeMetaClass(c);
 		}
-		if (uiChannel!=null)
-			uiChannel.destroy();
 	}
 
 	public void setRealtime(boolean realtime) {
@@ -204,6 +205,10 @@ public class Globals {
 
 	public boolean isRealtime() {
 		return realtime;
+	}
+
+	public boolean isAdhoc() {
+		return !isRealtime();
 	}
 	
 	public DataSource getDataSource() {
@@ -214,20 +219,20 @@ public class Globals {
 		this.dataSource = dataSource;
 	}
 
-	public PushChannel getUiChannel() {
-		return uiChannel;
-	}
-
-	public void setUiChannel(PushChannel uiChannel) {
-		this.uiChannel = uiChannel;
-	}
-
 	public void setGrailsApplication(GrailsApplication grailsApplication) {
 		this.grailsApplication = grailsApplication;
 	}
 
 	public <T> T getBean(Class<T> requiredType) {
 		return grailsApplication.getMainContext().getBean(requiredType);
+	}
+
+	public IdGenerator getIdGenerator() {
+		return idGenerator;
+	}
+
+	public void setIdGenerator(IdGenerator idGenerator) {
+		this.idGenerator = idGenerator;
 	}
 
 	/**

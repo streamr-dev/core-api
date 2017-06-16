@@ -426,4 +426,51 @@ class CanvasSpec extends LoginTester1Spec {
 			}
 	}
 
+	void "Canvas can be saved by renaming it with name editor" () {
+		setup:
+			addAndWaitModule "Add"
+		when: "name changed"
+			nameEditorLabel.click()
+			nameEditorInput << "newName" + System.currentTimeMillis()
+			findModuleOnCanvas('Add').click()
+		then: "canvas is saved"
+			waitFor {
+				!driver.currentUrl.endsWith("/canvas/editor")
+				nameEditorLabel.text().startsWith("newName")
+			}
+	}
+
+	void "Canvas can be renamed with name editor" () {
+		def canvasName = 'NewCanvas' + System.currentTimeMillis()
+		setup:
+			addAndWaitModule "Add"
+			saveCanvasAs canvasName
+		when: "name changed and reloaded"
+			nameEditorLabel.click()
+			nameEditorInput << canvasName + "-2"
+			findModuleOnCanvas('Add').click()
+			saveCanvas()
+			driver.navigate().refresh()
+		then: "canvas is saved"
+			waitFor {
+				at CanvasPage
+			}
+			findModuleOnCanvas "Add"
+			nameEditorLabel.text() == canvasName + "-2"
+			println($("title").text())
+		when: "name changed back"
+			nameEditorLabel.click()
+			nameEditorInput << canvasName
+			findModuleOnCanvas('Add').click()
+			saveCanvas()
+			driver.navigate().refresh()
+		then: "canvas is saved"
+			waitFor {
+				at CanvasPage
+			}
+			findModuleOnCanvas "Add"
+			nameEditorLabel.text() == canvasName
+			println($("title").text())
+	}
+
 }
