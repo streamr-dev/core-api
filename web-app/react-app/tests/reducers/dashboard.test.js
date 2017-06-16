@@ -1,7 +1,7 @@
 
 import reducer from '../../reducers/dashboard'
 import * as actions from '../../actions/dashboard'
-import expect from 'expect'
+import assert from 'assert-diff'
 import _ from 'lodash'
 
 describe('Dashboard reducer', () => {
@@ -9,9 +9,7 @@ describe('Dashboard reducer', () => {
     const initialState = {
         dashboardsById: {},
         openDashboard: {
-            id: null,
-            saved: false,
-            new: true
+            id: null
         },
         error: null,
         fetching: false
@@ -26,39 +24,32 @@ describe('Dashboard reducer', () => {
     })
     
     it('should return the initial state', () => {
-        expect(
-            reducer(undefined, {})
-        ).toEqual(initialState)
+        assert.deepStrictEqual(reducer(undefined, {}), initialState)
     })
     
     it('should handle OPEN_DASHBOARD', () => {
-        expect(
-            reducer(initialState, {
-                type: actions.OPEN_DASHBOARD,
-                id: 'test'
-            })
-        ).toEqual({
+        assert.deepStrictEqual(reducer(initialState, {
+            type: actions.OPEN_DASHBOARD,
+            id: 'test'
+        }), {
             ...initialState,
             openDashboard: {
-                id: 'test',
-                saved: true,
-                new: false
+                id: 'test'
             }
         })
     })
     
-    it('should handle GET_AND_REPLACE_DASHBOARDS', () => {
-        expect(
-            reducer(initialState, {
+    describe('GET_AND_REPLACE_DASHBOARDS', () => {
+        it('should handle GET_AND_REPLACE_DASHBOARDS_REQUEST', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_REQUEST
+            }), {
+                ...initialState,
+                fetching: true
             })
-        ).toEqual({
-            ...initialState,
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle GET_AND_REPLACE_DASHBOARDS_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 ...initialState,
                 dashboardsById: {
                     test: 'moi'
@@ -70,44 +61,41 @@ describe('Dashboard reducer', () => {
                 }, {
                     id: 'test2'
                 }]
-            })
-        ).toEqual({
-            ...initialState,
-            dashboardsById: {
-                test: {
-                    id: 'test'
-                },
-                test2: {
-                    id: 'test2'
+            }), {
+                ...initialState,
+                dashboardsById: {
+                    test: {
+                        id: 'test'
+                    },
+                    test2: {
+                        id: 'test2'
+                    }
                 }
-            }
+            })
         })
-    
-    
-        expect(
-            reducer(initialState, {
+        it('should handle GET_AND_REPLACE_DASHBOARDS_FAILURE', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_AND_REPLACE_DASHBOARDS_FAILURE,
                 error: new Error('test')
+            }), {
+                ...initialState,
+                fetching: false,
+                error: new Error('test')
             })
-        ).toEqual({
-            ...initialState,
-            fetching: false,
-            error: new Error('test')
         })
     })
     
-    it('should handle GET_DASHBOARD', () => {
-        expect(
-            reducer(initialState, {
+    describe('GET_DASHBOARD', () => {
+        it('should handle GET_DASHBOARD_REQUEST', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_DASHBOARD_REQUEST
+            }), {
+                ...initialState,
+                fetching: true
             })
-        ).toEqual({
-            ...initialState,
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle GET_DASHBOARD_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 ...initialState,
                 dashboardsById: {
                     test: {
@@ -119,51 +107,48 @@ describe('Dashboard reducer', () => {
                 dashboard: {
                     id: 'test2'
                 }
-            })
-        ).toEqual({
-            ...initialState,
-            dashboardsById: {
-                test: {
-                    id: 'test'
+            }), {
+                ...initialState,
+                dashboardsById: {
+                    test: {
+                        id: 'test'
+                    },
+                    test2: {
+                        id: 'test2',
+                        new: false,
+                        saved: true
+                    }
                 },
-                test2: {
-                    id: 'test2'
-                }
-            },
-            openDashboard: {
-                id: null,
-                saved: true,
-                new: false
-            },
-            error: null,
-            fetching: false
+                openDashboard: {
+                    id: null
+                },
+                error: null,
+                fetching: false
+            })
         })
-        
-        
-        expect(
-            reducer(initialState, {
+        it('should handle GET_DASHBOARD_FAILURE', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_DASHBOARD_FAILURE,
                 error: new Error('test')
+            }), {
+                ...initialState,
+                fetching: false,
+                error: new Error('test')
             })
-        ).toEqual({
-            ...initialState,
-            fetching: false,
-            error: new Error('test')
         })
     })
     
-    it('should handle UPDATE_AND_SAVE_DASHBOARD', () => {
-        expect(
-            reducer(initialState, {
+    describe('UPDATE_AND_SAVE_DASHBOARD', () => {
+        it('should handle UPDATE_AND_SAVE_DASHBOARD_REQUEST', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_REQUEST
+            }), {
+                ...initialState,
+                fetching: true
             })
-        ).toEqual({
-            ...initialState,
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle UPDATE_AND_SAVE_DASHBOARD_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 ...initialState,
                 dashboardsById: {
                     test: {
@@ -175,50 +160,48 @@ describe('Dashboard reducer', () => {
                 dashboard: {
                     id: 'test2'
                 }
-            })
-        ).toEqual({
-            ...initialState,
-            dashboardsById: {
-                test: {
-                    id: 'test'
+            }), {
+                ...initialState,
+                dashboardsById: {
+                    test: {
+                        id: 'test'
+                    },
+                    test2: {
+                        id: 'test2',
+                        saved: true,
+                        new: false
+                    }
                 },
-                test2: {
-                    id: 'test2'
-                }
-            },
-            openDashboard: {
-                id: null,
-                saved: true,
-                new: false
-            },
-            error: null,
-            fetching: false
+                openDashboard: {
+                    id: null
+                },
+                error: null,
+                fetching: false
+            })
         })
-        
-        expect(
-            reducer(initialState, {
+        it('should handle UPDATE_AND_SAVE_DASHBOARD_FAILURE', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.UPDATE_AND_SAVE_DASHBOARD_FAILURE,
                 error: new Error('test')
+            }), {
+                ...initialState,
+                fetching: false,
+                error: new Error('test')
             })
-        ).toEqual({
-            ...initialState,
-            fetching: false,
-            error: new Error('test')
         })
     })
     
-    it('should handle DELETE_DASHBOARD', () => {
-        expect(
-            reducer(initialState, {
+    describe('DELETE_DASHBOARD', () => {
+        it('should handle DELETE_DASHBOARD_REQUEST', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.DELETE_DASHBOARD_REQUEST
+            }), {
+                ...initialState,
+                fetching: true
             })
-        ).toEqual({
-            ...initialState,
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle DELETE_DASHBOARD_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 ...initialState,
                 dashboardsById: {
                     test: {
@@ -231,42 +214,40 @@ describe('Dashboard reducer', () => {
             }, {
                 type: actions.DELETE_DASHBOARD_SUCCESS,
                 id: 'test'
+            }), {
+                ...initialState,
+                dashboardsById: {
+                    test2: {
+                        id: 'test2'
+                    }
+                },
+                error: null,
+                fetching: false
             })
-        ).toEqual({
-            ...initialState,
-            dashboardsById: {
-                test2: {
-                    id: 'test2'
-                }
-            },
-            error: null,
-            fetching: false
         })
-        
-        expect(
-            reducer(initialState, {
+        it('should handle DELETE_DASHBOARD_FAILURE', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.DELETE_DASHBOARD_FAILURE,
                 error: new Error('test')
+            }), {
+                ...initialState,
+                fetching: false,
+                error: new Error('test')
             })
-        ).toEqual({
-            ...initialState,
-            fetching: false,
-            error: new Error('test')
         })
     })
     
-    it('should handle GET_MY_DASHBOARD_PERMISSIONS', () => {
-        expect(
-            reducer(initialState, {
+    describe('GET_MY_DASHBOARD_PERMISSIONS', () => {
+        it('should handle GET_MY_DASHBOARD_PERMISSIONS_REQUEST', () => {
+            assert.deepStrictEqual(reducer(initialState, {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_REQUEST
+            }), {
+                ...initialState,
+                fetching: true
             })
-        ).toEqual({
-            ...initialState,
-            fetching: true
         })
-        
-        expect(
-            reducer({
+        it('should handle GET_MY_DASHBOARD_PERMISSIONS_SUCCESS', () => {
+            assert.deepStrictEqual(reducer({
                 ...initialState,
                 dashboardsById: {
                     test: {
@@ -280,63 +261,59 @@ describe('Dashboard reducer', () => {
                 type: actions.GET_MY_DASHBOARD_PERMISSIONS_SUCCESS,
                 id: 'test',
                 permissions: ['test', 'test2']
-            })
-        ).toEqual({
-            ...initialState,
-            dashboardsById: {
-                test: {
-                    id: 'test',
-                    ownPermissions: ['test', 'test2']
-                },
-                test2: {
-                    id: 'test2'
-                }
-            },
-            error: null,
-            fetching: false
-        })
-        
-        expect(
-            reducer(initialState, {
-                type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
-                error: new Error('test')
-            })
-        ).toEqual({
-            ...initialState,
-            fetching: false,
-            error: new Error('test')
-        })
-    })
-    
-    it('should handle UPDATE_DASHBOARD', () => {
-        expect(
-            reducer({
+            }), {
                 ...initialState,
                 dashboardsById: {
                     test: {
                         id: 'test',
-                        a: 1
+                        ownPermissions: ['test', 'test2']
+                    },
+                    test2: {
+                        id: 'test2'
                     }
-                }
-            }, {
-                type: actions.UPDATE_DASHBOARD,
-                dashboard: {
-                    id: 'test',
-                    a: 2
-                }
+                },
+                error: null,
+                fetching: false
             })
-        ).toEqual({
+        })
+        it('should handle GET_MY_DASHBOARD_PERMISSIONS_FAILURE', () => {
+            assert.deepStrictEqual(reducer(initialState, {
+                type: actions.GET_MY_DASHBOARD_PERMISSIONS_FAILURE,
+                error: new Error('test')
+            }), {
+                ...initialState,
+                fetching: false,
+                error: new Error('test')
+            })
+        })
+    })
+    
+    it('should handle UPDATE_DASHBOARD', () => {
+        assert.deepStrictEqual(reducer({
             ...initialState,
             dashboardsById: {
                 test: {
                     id: 'test',
-                    a: 2
+                    a: 1
+                }
+            }
+        }, {
+            type: actions.UPDATE_DASHBOARD,
+            dashboard: {
+                id: 'test',
+                a: 2
+            }
+        }), {
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'test',
+                    a: 2,
+                    saved: false
                 }
             },
             openDashboard: {
-                id: null,
-                saved: false,
-                new: false
+                id: null
             },
             error: null,
             fetching: false
@@ -344,34 +321,32 @@ describe('Dashboard reducer', () => {
     })
     
     it('should handle CREATE_DASHBOARD', () => {
-        expect(
-            reducer({
-                ...initialState,
-                dashboardsById: {
-                    test: {
-                        id: 'test',
-                        a: 1
-                    }
-                }
-            }, {
-                type: actions.CREATE_DASHBOARD,
-                dashboard: {
-                    id: 'test',
-                    a: 2
-                }
-            })
-        ).toEqual({
+        assert.deepStrictEqual(reducer({
             ...initialState,
             dashboardsById: {
                 test: {
                     id: 'test',
-                    a: 2
+                    a: 1
+                }
+            }
+        }, {
+            type: actions.CREATE_DASHBOARD,
+            dashboard: {
+                id: 'test',
+                a: 2
+            }
+        }), {
+            ...initialState,
+            dashboardsById: {
+                test: {
+                    id: 'test',
+                    a: 2,
+                    saved: false,
+                    new: true
                 }
             },
             openDashboard: {
-                id: null,
-                saved: false,
-                new: true
+                id: null
             },
             error: null,
             fetching: false

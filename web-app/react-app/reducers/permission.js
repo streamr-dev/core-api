@@ -14,7 +14,7 @@ import {
     SAVE_REMOVED_RESOURCE_PERMISSION_FAILURE
 } from '../actions/permission.js'
 
-import type {State, Action} from '../flowtype/permission-types'
+import type {State, Action, Permission} from '../flowtype/permission-types'
 
 const initialState = {
     byTypeAndId: {},
@@ -22,13 +22,19 @@ const initialState = {
     fetching: false
 }
 
-const modifyPermission = (state, action, attributes) => {
+const permEquals = (p1: Permission, p2: Permission) : boolean => {
+    return (p1.id != null && p1.id === p2.id) ||
+        (p1.anonymous === true && p2.anonymous === true) ||
+        (p1.user && p1.operation && p1.user === p2.user && p1.operation === p2.operation)
+}
+
+const modifyPermission = (state, action, attributes) : Array<Permission> => {
     const permissions = state.byTypeAndId[action.resourceType][action.resourceId]
     if (!action.permission) {
         return permissions
     }
     return [...permissions].map(permission => {
-        if ((permission.id != null && permission.id === action.permission.id) || (permission.anonymous === true && action.permission.anonymous === true) || (permission.user === action.permission.user && permission.operation === action.permission.operation)) {
+        if (permEquals(permission, action.permission)) {
             return {
                 ...permission,
                 ...attributes
@@ -76,9 +82,7 @@ export default function(state: State = initialState, action: Action) : State {
     
         case ADD_RESOURCE_PERMISSION: {
             const byResourceType = state.byTypeAndId[action.resourceType] || {}
-            const byResourceId = (byResourceType[action.resourceId] || []).filter(permission => {
-                return (permission.id != null && permission.id !== action.permission.id) || (permission.anonymous && !action.permission.anonymous) || (action.permission.anonymous && !permission.anonymous) || (permission.user !== action.permission.user) || (permission.operation !== action.permission.operation)
-            })
+            const byResourceId = (byResourceType[action.resourceId] || []).filter(permission => !permEquals(permission, action.permission))
             return {
                 ...state,
                 byTypeAndId: {
@@ -140,10 +144,7 @@ export default function(state: State = initialState, action: Action) : State {
                 byTypeAndId: {
                     ...state.byTypeAndId,
                     [action.resourceType]: {
-                        [action.resourceId]: modifyPermission(state, action, {
-                            fetching: false,
-                            ...action.permission
-                        })
+                        [action.resourceId]: state.byTypeAndId[action.resourceType][action.resourceId].filter(permission => !permEquals(permission, action.permission))
                     }
                 },
                 fetching: false,

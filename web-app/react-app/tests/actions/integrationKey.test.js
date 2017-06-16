@@ -2,7 +2,7 @@
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 import * as actions from '../../actions/integrationKey'
-import expect from 'expect'
+import assert from 'assert-diff'
 import moxios from 'moxios'
 
 const middlewares = [ thunk ]
@@ -30,7 +30,7 @@ describe('IntegrationKey actions', () => {
     })
     
     describe('getAndReplaceIntegrationKeys', () => {
-        it('creates GET_ALL_INTEGRATION_KEYS_SUCCESS when fetching integrationKeys has succeeded', () => {
+        it('creates GET_ALL_INTEGRATION_KEYS_SUCCESS when fetching integrationKeys has succeeded', async () => {
             moxios.stubRequest('api/v1/integrationkeys', {
                 status: 200,
                 response: [{
@@ -55,13 +55,11 @@ describe('IntegrationKey actions', () => {
                 }]
             }]
         
-            return store.dispatch(actions.getAndReplaceIntegrationKeys())
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            await store.dispatch(actions.getAndReplaceIntegrationKeys())
+            assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
         })
     
-        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', () => {
+        it('creates GET_ALL_INTEGRATION_KEYS_FAILURE when fetching integration keys has failed', async () => {
             moxios.stubRequest('api/v1/integrationkeys', {
                 status: 500,
                 response: new Error('test-error')
@@ -74,18 +72,19 @@ describe('IntegrationKey actions', () => {
                 error: new Error('test-error')
             }]
         
-            return store.dispatch(actions.getAndReplaceIntegrationKeys())
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            try {
+                await store.dispatch(actions.getAndReplaceIntegrationKeys())
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
     
     describe('createIntegrationKey', () => {
-        it('creates CREATE_INTEGRATION_KEY_SUCCESS when creating integration key has succeeded', () => {
+        it('creates CREATE_INTEGRATION_KEY_SUCCESS when creating integration key has succeeded', async () => {
             moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                expect(request.config.method).toEqual('post')
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'post')
                 request.respondWith({
                     status: 200,
                     response: request.config.data
@@ -102,19 +101,17 @@ describe('IntegrationKey actions', () => {
                 }
             }]
         
-            return store.dispatch(actions.createIntegrationKey({
+            await store.dispatch(actions.createIntegrationKey({
                 name: 'test',
                 json: 'moi'
             }))
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            assert.deepStrictEqual(store.getActions(), expectedActions)
         })
     
-        it('creates CREATE_INTEGRATION_KEY_FAILURE when creating integration key has failed', () => {
+        it('creates CREATE_INTEGRATION_KEY_FAILURE when creating integration key has failed', async () => {
             moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                expect(request.config.method).toEqual('post')
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'post')
                 request.respondWith({
                     status: 500,
                     response: new Error('test')
@@ -128,21 +125,22 @@ describe('IntegrationKey actions', () => {
                 error: new Error('test')
             }]
         
-            return store.dispatch(actions.createIntegrationKey({
-                name: 'test',
-                json: 'moi'
-            }))
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            try {
+                await store.dispatch(actions.createIntegrationKey({
+                    name: 'test',
+                    json: 'moi'
+                }))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
     
     describe('deleteIntegrationKey', () => {
-        it('creates DELETE_INTEGRATION_KEY_SUCCESS when deleting integration key has succeeded', () => {
+        it('creates DELETE_INTEGRATION_KEY_SUCCESS when deleting integration key has succeeded', async () => {
             moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                expect(request.config.method).toEqual('delete')
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 200
                 })
@@ -156,16 +154,14 @@ describe('IntegrationKey actions', () => {
                 id: 'test'
             }]
         
-            return store.dispatch(actions.deleteIntegrationKey('test'))
-                .then(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            await store.dispatch(actions.deleteIntegrationKey('test'))
+            assert.deepStrictEqual(store.getActions(), expectedActions)
         })
     
-        it('creates DELETE_INTEGRATION_KEY_FAILURE when deleting integration key has failed', () => {
+        it('creates DELETE_INTEGRATION_KEY_FAILURE when deleting integration key has failed', async () => {
             moxios.wait(() => {
-                let request = moxios.requests.mostRecent()
-                expect(request.config.method).toEqual('delete')
+                const request = moxios.requests.mostRecent()
+                assert.equal(request.config.method, 'delete')
                 request.respondWith({
                     status: 500,
                     response: new Error('test')
@@ -180,10 +176,11 @@ describe('IntegrationKey actions', () => {
                 error: new Error('test')
             }]
         
-            return store.dispatch(actions.deleteIntegrationKey('test'))
-                .catch(() => {
-                    expect(store.getActions()).toEqual(expectedActions)
-                })
+            try {
+                await store.dispatch(actions.deleteIntegrationKey('test'))
+            } catch (e) {
+                assert.deepStrictEqual(store.getActions().slice(0, 2), expectedActions)
+            }
         })
     })
 })
