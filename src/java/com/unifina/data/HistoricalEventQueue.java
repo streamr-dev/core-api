@@ -68,9 +68,6 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			}
 		}
 		
-		if (queue.isEmpty())
-			return;
-		
 		// Init global time if it has not already been initialized
 		if (globals.time == null) {
 			Date firstDate;
@@ -84,6 +81,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 			
 			globals.time = firstDate;
 		}
+
+		queue.add(new PlaceholderFeedEvent(globals.getStartDate()));
+		queue.add(new PlaceholderFeedEvent(globals.getEndDate()));
 		
 		/**
 		 * Initialize some values
@@ -111,9 +111,9 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		
 		while (!queue.isEmpty() && !abort) {
 			FeedEvent event = queue.poll();
-			
+
 			time = event.timestamp.getTime();
-			
+
 			// Check if a delay is needed
 			if (speed != 0 && time > todBegin && time < todEnd) {
 				realTimeElapsed = System.currentTimeMillis() - realTimeStart;
@@ -178,7 +178,7 @@ public class HistoricalEventQueue extends DataSourceEventQueue {
 		}
 
 		// Handle event
-		event.recipient.receive(event);
+		event.deliverToRecipient();
 		return true;
 	}
 	
