@@ -31,10 +31,8 @@ public class ClockModule extends AbstractSignalPathModule implements ITimeListen
 	
 	@Override
 	public void setTime(Date timestamp) {
-		if (date.isConnected() && format.hasValue()) {
-			updateDateFormatIfNecessary(format.getValue());
-			date.send(df.format(timestamp));
-		}
+		updateDateFormatIfNecessary(format.getValue());
+		date.send(df.format(timestamp));
 		ts.send(timestamp.getTime());
 	}
 

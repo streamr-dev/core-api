@@ -27,7 +27,7 @@ public class MasterClock extends AbstractEventRecipient<ITimeListener, ITimestam
 		}
 	}
 
-	private static boolean isTimeToTick(long epochSec, int tickRateInSec) {
+	public static boolean isTimeToTick(long epochSec, int tickRateInSec) {
 		return tickRateInSec != 0 && epochSec % tickRateInSec == 0;
 	}
 }
