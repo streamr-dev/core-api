@@ -443,7 +443,12 @@
         
         checkPermissions: function() {
             var _this = this
-            $.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", function(permissions) {
+            if (this.dashboard && this.dashboard.id) {
+                $.getJSON(this.baseUrl + "api/v1/dashboards/" + this.dashboard.id + "/permissions/me", callback)
+            } else {
+                callback([])
+            }
+            function callback(permissions) {
                 permissions = _.map(permissions, function(p) {
                     return p.operation
                 })
@@ -459,7 +464,7 @@
                     _this.saveButton.addClass("forbidden")
                     _this.deleteButton.addClass("forbidden")
                 }
-            })
+            }
         },
         
         setEditMode: function(active) {
@@ -503,14 +508,8 @@
             }
         },
         
-        updateTitle: function(e) {
-            var a = this.titleInput.val()
-            this.dashboard.set({name: a})
-        },
-        
         save: function() {
             var _this = this
-            this.updateTitle()
             
             this.dashboard.save({}, {
                 success: function() {
