@@ -15,7 +15,7 @@ class Dashboard {
 
 	SortedSet<DashboardItem> items
 
-	String layout // JSON
+	String layout = "{}" // JSON
 
 	static hasMany = [items: DashboardItem]
 
